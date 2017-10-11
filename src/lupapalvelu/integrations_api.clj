@@ -15,6 +15,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
@@ -27,13 +28,14 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.asianhallinta.core :as ah]
+            [lupapalvelu.ya-extension :as yax]
             [sade.core :refer :all]
             [sade.env :as env]
-            [sade.strings :as ss]
             [sade.http :as http]
+            [sade.municipality :as muni]
+            [sade.strings :as ss]
             [sade.util :as util]
-            [sade.validators :as validators]
-            [lupapalvelu.ya-extension :as yax]))
+            [sade.validators :as validators]))
 
 (defn- has-asianhallinta-operation [{{:keys [primaryOperation]} :application}]
   (when-not (operations/get-operation-metadata (:name primaryOperation) :asianhallinta)
@@ -459,3 +461,17 @@
     (if (.exists f)
       (transferred-file-response (.getName f) (slurp f))
       (resp/status 404 "File Not Found"))))
+
+(defquery current-configuration
+  {:description "Returns current configuration values for specified keys"
+   :feature :matti-json
+   :user-roles #{:anonymous}}
+  [_]
+  (letfn [(key-display-name-mapper-with-loc-prefix [loc-prefix value]
+            (hash-map :key (name value) :displayName (i18n/to-lang-map (str loc-prefix (name value)))))
+          (key-display-name-mapper [value]
+            (key-display-name-mapper-with-loc-prefix nil value))]
+    (ok {:permitTypes    (map key-display-name-mapper (keys (permit/permit-types)))
+         :states         (map key-display-name-mapper states/all-states)
+         :municipalities (map (partial key-display-name-mapper-with-loc-prefix "municipality.") muni/municipality-codes)
+         :operations     (map (partial key-display-name-mapper-with-loc-prefix "operations.") (keys operations/operations))})))
