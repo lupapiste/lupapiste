@@ -33,12 +33,15 @@
 
   IMG_2253.JPG
   JPG-kuva 2.9 MB"
-  [{:keys [filename size type file-id] :as file}  & extra]
-  (let [file-id (or file-id (:fileId file))
+  [{:keys [filename size type file-id fileId] :as file}  & extra]
+  (let [file-id (or file-id fileId)
+        view (if fileId
+               "view-attachment?attachment-id"
+               "view-file?fileId")
         type    (or type (:contentType file))]
     [:div.batch--filedata
     (if file-id
-      [:a.batch--filename {:href   (str "/api/raw/view-file?fileId=" file-id)
+      [:a.batch--filename {:href   (str "/api/raw/" view "=" file-id)
                            :target :_blank} filename]
       [:span.batch--filename filename])
     [:div.batch--fileinfo
@@ -270,8 +273,10 @@
                                ". " (-> type kw-type type-loc)
                                ": " contents)]
            [:td (uploader-info latestVersion)]
-           [:td.td--center [:i.lupicon-remove.primary
-                            {:on-click #(att/delete-with-confirmation attachment)}]]])]])))
+           (when (.ok (js/lupapisteApp.services.attachmentsService.getAuthModel (:id attachment))
+                      "delete-attachment")
+             [:td.td--center [:i.lupicon-remove.primary
+                              {:on-click #(att/delete-with-confirmation attachment)}]])])]])))
 
 
 (rum/defc matti-attachments < rum/reactive
