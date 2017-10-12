@@ -28,7 +28,7 @@
              :email      (.email js/lupapisteApp.models.currentUser)}
             (when company
               {:companyName (:name company)
-               :address (:address1 company)
+               :streetAddress (:address1 company)
                :postalCode (:zip company)
                :city (:po company)})))))
 

@@ -37,7 +37,7 @@
           coords (ss/split point-str #" ")]
       (when (and source-projection (= 2 (count coords)))
         {:location (coordinate/convert source-projection common/to-projection 3 coords)
-         :location-wgs84 (coordinate/convert source-projection :WGS84 3 coords)}))
+         :location-wgs84 (coordinate/convert source-projection :WGS84 5 coords)}))
     (catch Exception e (error e "Coordinate conversion failed for building " building-id))))
 
 (defn- ->list "a as list or nil. a -> [a], [b] -> [b]" [a] (when a (-> a list flatten)))
