@@ -361,9 +361,10 @@
                 check-bulletins-enabled]})
 
 (defcommand update-app-bulletin-op-description
-            {:parameters [id description]
-             :user-roles #{:authority}
-             :pre-checks [(permit/validate-permit-type-is-not permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)
-                          check-bulletins-enabled]}
-            [_]
-            (ok))
+  {:parameters [id description]
+   :user-roles #{:authority}
+   :pre-checks [(permit/validate-permit-type-is-not permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)
+                check-bulletins-enabled]}
+  [command]
+  (action/update-application command {"$set" {:bulletin-op-description description}})
+  (ok))
