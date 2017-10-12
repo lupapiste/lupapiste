@@ -95,19 +95,25 @@
    :documentPrice           0
    :organizationDescription (i18n/supported-langs-map (constantly ""))})
 
+(sc/defschema Scope
+  {:permitType sc/Str
+   :municipality sc/Str
+   :new-application-enabled sc/Bool
+   :inforequest-enabled sc/Bool
+   (sc/optional-key :opening)                (sc/maybe ssc/Timestamp)
+   (sc/optional-key :open-inforequest)       sc/Bool
+   (sc/optional-key :open-inforequest-email) ssc/OptionalEmail
+   (sc/optional-key :caseManagement) {:enabled sc/Bool
+                                      :version sc/Str
+                                      (sc/optional-key :ftpUser) sc/Str}
+   (sc/optional-key :bulletins) {:enabled sc/Bool
+                                 :url sc/Str
+                                 (sc/optional-key :notification-email) sc/Str}})
+
 (sc/defschema Organization
   {:id OrgId
    :name (zipmap i18n/all-languages (repeat sc/Str))
-   :scope [{:permitType sc/Str
-            :municipality sc/Str
-            :new-application-enabled sc/Bool
-            :inforequest-enabled sc/Bool
-            (sc/optional-key :opening) (sc/maybe ssc/Timestamp)
-            (sc/optional-key :open-inforequest) sc/Bool
-            (sc/optional-key :open-inforequest-email) ssc/OptionalEmail
-            (sc/optional-key :caseManagement) {:enabled sc/Bool
-                                               :version sc/Str
-                                               (sc/optional-key :ftpUser) sc/Str}}]
+   :scope [Scope]
 
    (sc/optional-key :allowedAutologinIPs) sc/Any
    (sc/optional-key :app-required-fields-filling-obligatory) sc/Bool
@@ -697,3 +703,10 @@
                    :open-inforequest        open-inforequest
                    :open-inforequest-email  open-inforequest-email
                    :opening                 (when (number? opening) opening)))
+
+(defn bulletins-enabled?
+  [organization permit-type municipality]
+  (let [scopes (cond->> (:scope organization)
+                 permit-type  (filter (comp #{permit-type} :permitType))
+                 municipality (filter (comp #{municipality} :municipality)))]
+    (boolean (some (comp :enabled :bulletins) scopes))))

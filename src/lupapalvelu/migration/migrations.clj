@@ -3430,6 +3430,14 @@
 (defmigration status-to-integration-messages
   {:apply-when (pos? (mongo/count :integration-messages {:status {$exists false}}))}
   (mongo/update-by-query :integration-messages {:status {$exists false}} {$set {:status "done"}}))
+
+(defmigration enable-vantaa-R-bulletins
+  {:apply-when (pos? (mongo/count :organizations {:scope {$elemMatch {:permitType "R" :municipality "092" :bulletins {$exists false}}}}))}
+  (mongo/update-by-query :organizations
+                         {:scope {$elemMatch {:permitType "R" :municipality "092"}}}
+                         {$set {:scope.$.bulletins.enabled true
+                                :scope.$.bulletins.url     "http://julkipano.lupapiste.fi/vantaa"}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
