@@ -138,6 +138,9 @@
       (drop-nth k m)
       (dissoc m k))))
 
+(defn assoc-to-array-map [m & kvs]
+  (apply array-map (concat (apply concat m) kvs)))
+
 (defn select
   "Takes a map and a vector of keys, returns a vector of values from map."
   [m [k & ks]]
