@@ -213,8 +213,12 @@
     ;; Link permit data was found
     (let [find-link-permit-id (fn [{link :link}]
                                 (util/find-first #(not= application-id %) link))
+          link-permit-ids (mapv find-link-permit-id links)
+          app-query (if (= (count link-permit-ids) 1)
+                      {:_id (first link-permit-ids)}
+                      {:_id {$in link-permit-ids}})
           link-applications (->> (mongo/select :applications
-                                               {:_id {$in (mapv find-link-permit-id links)}}
+                                               app-query
                                                {:primaryOperation 1 :permitSubtype 1})
                                  (reduce #(assoc %1 (:id %2) %2) {}))
           our-link-permits (filter #(= (:type ((keyword application-id) %)) "application") links)
