@@ -230,9 +230,9 @@
   key-values. Returns filedata. Typical use case is to add target
   information.
 
-  include?: (attachment -> boolean) True if the attachment is to be
-  included in the attachments list. Sample use case: list only the
-  verdict's attachments."
+  include?: (options attachment -> boolean) True if the attachment is
+  to be included in the attachments list. Sample use case: list only
+  the verdict's attachments."
   (merge MattiComponent
          {;; Matching type groups are listed on the type
           ;; selector. Default all type groups.

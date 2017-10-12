@@ -59,7 +59,9 @@
                                              (apply assoc filedata
                                                     :target {:type :verdict
                                                              :id (:id verdict)}
-                                                    kvs))}}))
+                                                    kvs))
+                     :attachments.include? (fn [_ {target :target :as att}]
+                                             (= (:id target) (:id verdict)))}}))
   (reset! state/references references)
   (reset! state/current-view (if verdict ::verdict ::list)))
 

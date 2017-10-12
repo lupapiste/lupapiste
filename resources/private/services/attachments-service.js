@@ -687,4 +687,16 @@ LUPAPISTE.AttachmentsService = function() {
   hub.subscribe("assignmentService::assignmentCompleted", function() {
     self.queryTagGroupsAndFilters();
   });
+
+  // Convience functions mostly for ClojureScript's benefit
+
+  // Attachmens as plain JS and function properties removed.
+  self.rawAttachments = function() {
+    return _.map( ko.mapping.toJS( self.attachments ),
+                  function( a ) {
+                    return _.omitBy( a, function( v, k ) {
+                      return _.isFunction( v ) || k === "authModel";
+                    } );
+                  } );
+  };
 };

@@ -488,3 +488,103 @@ div.matti-autocomplete {
     }
   }
 }
+
+// Attachments (see also _tables.scss)
+
+.col--vertical div.add-file-div label.btn.batch--add-file {
+  display: inline-block;
+  margin-top: $marginS;
+}
+
+.matti-batch-table {
+  @include no-row-hover;
+  .td-center {
+    text-align: center;
+    > * {
+      vertical-align: middle;
+    }
+  }
+  input {
+    vertical-align: middle;
+  }
+  i.icon-spin.lupicon-refresh {
+    color: $gray153;
+  }
+
+  td.batch--file {
+    max-width: 40em;
+    vertical-align: middle;
+    div.batch--filedata {
+      line-height: 1.1;
+      .batch--filename {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        overflow-x: hidden;
+        display: inline-block;
+      }
+      .batch--fileinfo {
+        white-space: nowrap;
+      }
+    }
+  }
+  td.batch--progress {
+    width: 100%;
+    div {
+      width: 100%;
+      border: solid 1px $orange-darkest;
+      height: 24px;
+      span {
+        height: 22px;
+        background-color: $orange-dark;
+        display: inline-block;
+      }
+    }
+  }
+  td > div.matti-autocomplete {
+    vertical-align: middle;
+  }
+  td.batch--type {
+    min-width: 15em;
+  }
+  td.batch--error {
+    color: $negative;
+    min-width: 20em;
+    width: 100%;
+    white-space: normal;
+    word-break: break-word;
+  }
+  tfoot.batch--buttons {
+    tr {
+      border: none;
+    }
+    td {
+      padding-top: $marginS;
+      padding-left: 0;
+      text-align: right;
+      button {
+        margin-left: $marginM;
+      }
+    }
+  }
+}
+
+table.matti-attachments {
+  width: initial;
+  tr {
+    border: none;
+  }
+  @include no-row-hover;
+  .td--center {
+    text-align: center;
+    > * {
+      vertical-align: middle;
+    }
+  }
+  // .td--full {
+  //   width: 100%;
+  // }
+  span.uploader-info {
+    white-space: nowrap;
+  }
+}

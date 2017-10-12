@@ -115,6 +115,7 @@ lupapisteApp.services.assignmentService = {};
 lupapisteApp.services.assignmentTargetFilterService = {};
 lupapisteApp.services.attachmentsService = {};
 lupapisteApp.services.attachmentsService.attachmentTypes = function() {};
+lupapisteApp.services.attachmentsService.rawAttachments = function() {};
 lupapisteApp.services.attachmentsService.bindAttachments = function() {};
 lupapisteApp.services.attachmentsService.contentsData = function() {};
 lupapisteApp.services.attachmentsService.removeAttachment = function() {};

@@ -634,61 +634,6 @@ select.waste-unit-select {
   tr.metadata {
     border-top: 0;
   }
-
-  // The following td classes are used in Matti
-  td.batch--file {
-    max-width: 20em;
-    vertical-align: middle;
-    div.batch--filedata {
-      line-height: 1.1;
-      .batch--filename {
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        max-width: 20em;
-        overflow-x: hidden;
-        display: inline-block;
-        padding-right: $marginS;
-
-
-      }
-      .batch--fileinfo {
-        white-space: nowrap;
-      }
-    }
-  }
-  td.batch--progress {
-    width: 100%;
-    div {
-      width: 100%;
-      border: solid 1px $orange-darkest;
-      height: 24px;
-      span {
-        height: 22px;
-        background-color: $orange-dark;
-        display: inline-block;
-      }
-    }
-  }
-  td.batch--type {
-    min-width: 15em;
-  }
-  td.batch--error {
-    color: $negative;
-    min-width: 20em;
-    width: 100%;
-    white-space: normal;
-    word-break: break-word;
-
-  }
-  tfoot.batch--buttons {
-    td {
-      padding-top: $marginS;
-      text-align: right;
-      button {
-        margin-left: $marginM;
-      }
-    }
-  }
 }
 
 div.handler-roles-container {

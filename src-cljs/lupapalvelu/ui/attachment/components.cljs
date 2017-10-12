@@ -142,6 +142,16 @@
         :href (str "/api/raw/view-attachment?attachment-id=" (:fileId latest-version))}
     (:filename latest-version)]])
 
+(defn delete-with-confirmation [attachment]
+  (hub/send  "show-dialog"
+             {:ltitle          "attachment.delete.header"
+              :size            "medium"
+              :component       "yes-no-dialog"
+              :componentParams {:ltext (if (or (not-empty (:versions attachment)) (:latestVersion attachment))
+                                         "attachment.delete.message"
+                                         "attachment.delete.message.no-versions")
+                                :yesFn #(js/lupapisteApp.services.attachmentsService.removeAttachment (:id attachment))}}))
+
 (rum/defc delete-attachment-link < {:key-fn #(str "delete-attachment-" (:id %1))}
                                    (rum-util/hubscribe "attachmentsService::remove"
                                                        (fn [state]
@@ -156,17 +166,7 @@
                                                           :attachmentId (-> state :rum/args first :id)})
                                                        (fn [state resp] (let [[_ callback] (-> state :rum/args)] (callback resp))))
   [attachment _]
-  (letfn [(remove-attachment   [_] (.removeAttachment js/lupapisteApp.services.attachmentsService (:id attachment)))
-          (delete-confirmation [_]
-            (hub/send  "show-dialog"
-                       {:ltitle          "attachment.delete.header"
-                        :size            "medium"
-                        :component       "yes-no-dialog"
-                        :componentParams {:ltext (if (or (not-empty (:versions attachment)) (:latestVersion attachment))
-                                                   "attachment.delete.message"
-                                                   "attachment.delete.message.no-versions")
-                                          :yesFn remove-attachment}}))]
-    [:div.inline.right
-     [:a {:on-click delete-confirmation
-          :data-test-id "delete-attachment-link"}
-      (str "[" (js/loc "remove") "]")]]))
+  [:div.inline.right
+   [:a {:on-click #(delete-with-confirmation attachment)
+        :data-test-id "delete-attachment-link"}
+    (str "[" (js/loc "remove") "]")]])

@@ -9,6 +9,7 @@
             [lupapalvelu.ui.matti.path :as path]
             [lupapalvelu.ui.matti.service :as service]
             [lupapalvelu.ui.matti.state :as state]
+            [lupapalvelu.ui.rum-util :as rum-util]
             [rum.core :as rum]
             [sade.shared-util :as util])
   (:import [goog.async Delay]))
@@ -32,15 +33,18 @@
 
   IMG_2253.JPG
   JPG-kuva 2.9 MB"
-  [{:keys [filename size type file-id]}]
-  [:div.batch--filedata
-   (if file-id
-     [:a.batch--filename {:href   (str "/api/raw/view-file?fileId=" file-id)
-          :target :_blank} filename]
-     [:span.batch--filename filename])
-   [:div.batch--fileinfo (if (loc.hasTerm type)
-                     (path/loc type)
-                     type) " " (js/util.sizeString size)]])
+  [{:keys [filename size type file-id] :as file}  & extra]
+  (let [file-id (or file-id (:fileId file))
+        type    (or type (:contentType file))]
+    [:div.batch--filedata
+    (if file-id
+      [:a.batch--filename {:href   (str "/api/raw/view-file?fileId=" file-id)
+                           :target :_blank} filename]
+      [:span.batch--filename filename])
+    [:div.batch--fileinfo
+     (if (loc.hasTerm type)
+       (path/loc type)
+       type) " " (js/util.sizeString size) extra]]))
 
 (defn field-info [fields* {filename :filename}]
   (let [c (rum/cursor-in fields* [(keyword filename)])]
@@ -141,27 +145,31 @@
   (swap! files* (fn [files]
                   (filter #(= (:state %) :success) files)))
 
-  (service/bind-attachments-batch @state/application-id
-                                  (map (fn [{:keys [file-id filename]}]
-                                         (let [filedata-fn (or (path/meta-value options :filedata)
-                                                               assoc)]
-                                           (filedata-fn options
-                                                        ((keyword filename) @fields*)
-                                                        :file-id file-id)))
-                                       @files*)
-                                  (fn [{:keys [done pending result] :as job}]
-                                    (if job
-                                      (do (swap! files* (fn [files]
-                                                          (remove #(util/includes-as-kw? done
-                                                                                         (:file-id %))
-                                                                  files)))
-                                          (when (empty? pending)
-                                            (do (reset! binding?* false)
-                                                (reset! fields* {}))))
-                                      (do
-                                        (reset! binding?* false)
-                                        (hub/send :indicator {:style :negative
-                                                              :message :attachment.bind-failed}))))))
+  (service/bind-attachments-batch
+   @state/application-id
+   (map (fn [{:keys [file-id filename]}]
+          (let [filedata-fn (or (path/meta-value options :filedata)
+                                assoc)]
+            (filedata-fn options
+                         ((keyword filename) @fields*)
+                         :file-id file-id)))
+        @files*)
+   (fn [{:keys [done pending result] :as job}]
+     (letfn [(finalize []
+               (js/lupapisteApp.services.attachmentsService.queryAll)
+               (reset! binding?* false))]
+       (if job
+         (do (swap! files* (fn [files]
+                             (remove #(util/includes-as-kw? done
+                                                            (:file-id %))
+                                     files)))
+             (when (empty? pending)
+               (do (finalize)
+                   (reset! fields* {}))))
+         (do
+           (finalize)
+           (hub/send :indicator {:style :negative
+                                 :message :attachment.bind-failed})))))))
 
 (rum/defc batch-buttons < rum/reactive
   [{:keys [schema files* fields* binding?*] :as options}]
@@ -194,7 +202,7 @@
   (when (-> files* rum/react seq)
     (let [binding? (rum/react binding?*)]
       [:div
-       [:table.attachment-batch-table
+       [:table.matti-batch-table
         [:thead
          [:tr
           [:th [:span (path/loc :attachment.file)]]
@@ -236,9 +244,37 @@
      [:i.lupicon-circle-plus]
      [:span (path/loc :attachment.addFile)]]))
 
+(defn uploader-info [{:keys [user created]}]
+  [:span.uploader-info (:firstName user) " " (:lastName user)
+   [:br]
+   (js/util.finnishDate created)])
+
+(rum/defc attachments-list < rum/reactive
+  (rum-util/hubscribe "attachmentsService::query"
+                      {}
+                      (fn [state*]
+                        (-> state* :rum/react-component rum/request-render)))
+  [{:keys [files*] :as options}]
+  (when (-> files* rum/react empty?)
+    (let [include?    (or (path/meta-value options :include?) identity)
+          attachments (filter (partial include? options)
+                              (js->clj (js/lupapisteApp.services.attachmentsService.rawAttachments)
+                                       :keywordize-keys true))]
+      [:table.matti-attachments
+       [:tbody
+        (for [{:keys [type contents
+                      latestVersion]
+               :as   attachment} attachments]
+          [:tr
+           [:td (fileinfo-link latestVersion
+                               ". " (-> type kw-type type-loc)
+                               ": " contents)]
+           [:td (uploader-info latestVersion)]
+           [:td.td--center [:i.lupicon-remove.primary
+                            {:on-click #(att/delete-with-confirmation attachment)}]]])]])))
 
 
-(rum/defc matti-attachments
+(rum/defc matti-attachments < rum/reactive
   "Displays and supports adding new attachments. This cannot be
   reactive since we want the input-id to remain somewhat constant."
   [{:keys [schema path state] :as options}]
@@ -246,20 +282,17 @@
         fields*   (atom {})
         binding?* (atom false)]
     [:div
-     (when path/enabled?
-       (att/upload-wrapper {:callback  (upload/file-monitors files*)
-                            :dropzone  (:dropzone schema)
-                            :multiple? (:multiple? schema)
-                            :component (fn [{:keys [input input-id]}]
-                                         [:div
-                                          input
-                                          (add-file-label binding?*
-                                                          input-id)])}))
+     (attachments-list (assoc options :files* files*))
      (attachments-batch (assoc options
                               :files*  files*
                               :fields* fields*
                               :binding?* binding?*))
-
-
-    (components/debug-atom files* "Files")
-    (components/debug-atom fields* "Fields")]))
+     (when (path/enabled? options)
+       (att/upload-wrapper {:callback  (upload/file-monitors files*)
+                            :dropzone  (:dropzone schema)
+                            :multiple? (:multiple? schema)
+                            :component (fn [{:keys [input input-id]}]
+                                         [:div.add-file-div
+                                          input
+                                          (add-file-label binding?*
+                                                          input-id)])}))]))
