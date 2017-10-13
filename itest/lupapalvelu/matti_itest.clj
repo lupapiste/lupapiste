@@ -936,30 +936,31 @@
                             verdict-id :id}     verdict
                            {open-verdict :open
                             edit-verdict :edit} (verdict-fn-factory verdict-id)]
-                      data => {:voimassa         ""
-                               :verdict-text     "Verdict text."
-                               :anto             ""
-                               :giver            "lautakunta"
-                               :foremen-included false
-                               :foremen          ["iv-tj" "erityis-tj"]
-                               :verdict-code     "ehdollinen"
-                               :plans-included   false
-                               :plans            [(:id plan)]
-                               :reviews-included false
-                               :reviews          [(:id review)]
+                      data => {:voimassa                ""
+                               :verdict-text            "Verdict text."
+                               :anto                    ""
+                               :giver                   "lautakunta"
+                               :foremen-included        false
+                               :foremen                 ["iv-tj" "erityis-tj"]
+                               :verdict-code            "ehdollinen"
+                               :plans-included          false
+                               :plans                   [(:id plan)]
+                               :reviews-included        false
+                               :reviews                 [(:id review)]
                                :bulletin-op-description ""
-                               :buildings        {op-id          {:description   "Hello world!"
-                                                                  :show-building true
-                                                                  :building-id   "789"
-                                                                  :operation     "sisatila-muutos"
-                                                                  :tag           ""
-                                                                  :paloluokka    ""}
-                                                  op-id-pientalo {:description   "Hen piaoliang!"
-                                                                  :show-building true
-                                                                  :building-id   ""
-                                                                  :operation     "pientalo"
-                                                                  :tag           "Hao"
-                                                                  :paloluokka    ""}}}
+                               :buildings
+                               {op-id {:description   "Hello world!"
+                                       :show-building true
+                                       :building-id   "789"
+                                       :operation     "sisatila-muutos"
+                                       :tag           ""
+                                       :paloluokka    ""}
+                                op-id-pientalo {:description   "Hen piaoliang!"
+                                                :show-building true
+                                                :building-id   ""
+                                                :operation     "pientalo"
+                                                :tag           "Hao"
+                                                :paloluokka    ""}}}
                       (facts "Cannot edit verdict values not in the template"
                         (let [check-fn (fn [kwp value]
                                          (check-error (edit-verdict (util/split-kw-path kwp)
@@ -967,4 +968,37 @@
                                                       kwp :error.invalid-value-path))]
                           (check-fn :julkipano "29.9.2017")
                           (check-fn :buildings.vss-luokka "12")
-                          (check-fn :buildings.kiinteiston-autopaikat 34))))))))))))))
+                          (check-fn :buildings.kiinteiston-autopaikat 34)))
+                      (fact "Publish verdict"
+                        (command sonja :publish-matti-verdict
+                                 :id app-id
+                                 :verdict-id verdict-id) => ok?)
+                      (fact "Editing no longer allowed"
+                        (edit-verdict :verdict-text "New verdict text")
+                        => (err :error.verdict.not-draft))
+                      (fact "Remove pientalo operation"
+                        (command sonja :remove-doc :id app-id :docId doc-id)
+                        => ok?)
+                      (fact "Pientalo info still in the published verdict"
+                        (let [{:keys [published modified
+                                      data]} (:verdict (open-verdict))]
+                          published => pos?
+                          published => modified
+                          (get-in data [:buildings (keyword op-id-pientalo)])
+                          => {:description   "Hen piaoliang!"
+                              :show-building true
+                              :building-id   ""
+                              :operation     "pientalo"
+                              :tag           "Hao"
+                              :paloluokka    ""}))
+                      (fact "No pientalo in a new verdict draft"
+                        (-> (command sonja :new-matti-verdict-draft
+                                     :id app-id
+                                     :template-id template-id)
+                            :verdict :data :buildings)
+                        => {op-id {:description   "Hello world!"
+                                   :show-building true
+                                   :building-id   "789"
+                                   :operation     "sisatila-muutos"
+                                   :tag           ""
+                                   :paloluokka    ""}}))))))))))))

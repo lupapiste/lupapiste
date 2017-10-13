@@ -125,7 +125,7 @@
 
 ;; Verdicts
 
-(defschema Exclusions
+#_(defschema Exclusions
   "Excluded dicts are removed from the verdict dictionary prior to
   validation. Rationale: the verdict should enforce the constraints
   selected in the verdict template."
@@ -140,7 +140,8 @@
           :modified                     ssc/Timestamp
           :data                         sc/Any
           (sc/optional-key :references) MattiPublishedSettings
-          (sc/optional-key :exclusions) Exclusions}))
+          ;;(sc/optional-key :exclusions) Exclusions
+          }))
 
 ;; Schema utils
 

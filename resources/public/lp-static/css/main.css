@@ -18792,6 +18792,10 @@ table.matti-attachments span.uploader-info {
   white-space: nowrap;
 }
 
+span.verdict-published {
+  font-weight: bold;
+}
+
 .order-grid-1 {
   width: 100%;
   color: #333333;

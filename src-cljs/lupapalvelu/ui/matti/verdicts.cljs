@@ -54,7 +54,8 @@
             {:state (:data verdict)
              :info (dissoc verdict :data)
              :_meta {:updated updater
-                     :enabled? (can-edit?)
+                     :enabled? (and (can-edit?)
+                                    (not (:published verdict)))
                      :attachments.filedata (fn [_ filedata & kvs]
                                              (apply assoc filedata
                                                     :target {:type :verdict
@@ -113,14 +114,35 @@
   [options _]
   (verdict-section-header options))
 
-(defn verdict
-  [{:keys [schema state] :as options}]
-  [:div.matti-verdict
-   [:div.matti-grid-2
-    [:div.row.row--tight
-     [:div.col-2.col--right
-      (matti-components/last-saved options)]]]
-   (sections/sections options :verdict)])
+(rum/defc verdict < rum/reactive
+  [{:keys [schema state info] :as options}]
+  (let [published (path/value :published info)]
+    [:div.matti-verdict
+     [:div.matti-grid-2
+      (when (path/enabled? options)
+        [:div.row
+         [:div.col-2.col--right
+          [:button.primary.outline
+           {:on-click (fn []
+                        (hub/send "show-dialog"
+                                  {:ltitle "areyousure"
+                                   :size "medium"
+                                   :component "yes-no-dialog"
+                                   :componentParams {:ltext "verdict.confirmpublish"
+                                                     :yesFn #(service/publish-and-reopen-verdict  @state/application-id
+                                                                                                  (path/value :id info)
+                                                                                                  reset-verdict)}}))}
+           (path/loc :verdict.submit)]]])
+      (if published
+        [:div.row
+         [:div.col-2.col--right
+          [:span.verdict-published
+           (common/loc :matti.verdict-published
+                       (js/util.finnishDate published))]]]
+        [:div.row.row--tight
+         [:div.col-2.col--right
+          (matti-components/last-saved options)]])]
+     (sections/sections options :verdict)]))
 
 (rum/defcs new-verdict < rum/reactive
   (rum/local nil ::template)

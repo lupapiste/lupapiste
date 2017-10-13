@@ -129,6 +129,19 @@
   [command]
   (ok (verdict/edit-verdict command)))
 
+(defcommand publish-matti-verdict
+  {:description      "Publishes verdict.
+TODO: create tasks and PDF, application state change, attachments locking."
+   :feature          :matti
+   :user-roles       #{:authority}
+   :parameters       [id verdict-id]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :pre-checks       [matti-enabled
+                      (verdict-exists :editable?)]
+   :states           states/give-verdict-states}
+  [command]
+  (ok (verdict/publish-verdict command)))
+
 (defquery matti-verdict-tab
   {:description     "Pseudo-query that fails if the Matti verdicts tab
   should not be shown on the UI."

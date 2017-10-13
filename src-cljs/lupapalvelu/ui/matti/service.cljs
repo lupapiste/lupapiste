@@ -175,6 +175,12 @@
                   :path path
                   :value value))
 
+(defn publish-and-reopen-verdict [app-id verdict-id callback]
+  (common/command {:command :publish-matti-verdict
+                   :success #(open-verdict app-id verdict-id callback)}
+                  :id app-id
+                  :verdict-id verdict-id))
+
 ;; Attachments
 
 (defn delete-file [file-id]

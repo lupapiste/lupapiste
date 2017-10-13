@@ -581,10 +581,11 @@ table.matti-attachments {
       vertical-align: middle;
     }
   }
-  // .td--full {
-  //   width: 100%;
-  // }
   span.uploader-info {
     white-space: nowrap;
   }
+}
+
+span.verdict-published {
+  font-weight: bold;
 }
