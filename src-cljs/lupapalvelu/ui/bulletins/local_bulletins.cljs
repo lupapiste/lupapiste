@@ -27,13 +27,14 @@
        [:th (common/loc :bulletin.verdict.verdictGivenAt)]
        [:th (common/loc :bulletin.rectification-period-ends)]]]
       [:tbody
-       (for [{:keys [id address verdictGivenAt appealPeriodStartsAt bulletin-op-description]
-              [{verdictData :data category :category} & _] :matti-verdicts}                bulletins]
+       (for [{:keys [id address verdictGivenAt application-id
+                     appealPeriodStartsAt bulletin-op-description]
+              {verdictData :data category :category} :matti-verdict}  bulletins]
          [:tr
           {:key id}
           [:td (str (:verdict-section verdictData) " "
                     (common/loc (str "matti-" category ".verdict-code." (:verdict-code verdictData))))]
-          [:td id]
+          [:td (or application-id id)]
           [:td address]
           [:td bulletin-op-description]
           [:td (:contact verdictData)]
