@@ -216,3 +216,7 @@
       (when (< officialAt
                (->> bulletin :versions (util/find-first #(= "verdictGiven" (:bulletinState %))) :appealPeriodEndsAt))
         (fail :error.bulletin.official-before-appeal-period)))))
+
+(defn process-verdict-given [{:keys [application]} new-verdicts]
+  (let [{old-verdicts :verdicts} application]
+    (comment "TODO Compare old and new-verdicts, create bulletin(s) for newly-appeared ones")))

@@ -14,6 +14,7 @@
             [sade.xml :as xml]
             [lupapalvelu.action :refer [update-application application->command] :as action]
             [lupapalvelu.application :as application]
+            [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.appeal-common :as appeal-common]
@@ -310,12 +311,14 @@
   "Saves verdict's from valid app-xml to application. Returns (ok) with updated verdicts and tasks"
   [{:keys [application] :as command} app-xml]
   (appeal-common/delete-all command)
-  (let [updates (find-verdicts-from-xml command app-xml)]
+  (let [updates (find-verdicts-from-xml command app-xml)
+        verdicts (get-in updates [$set :verdicts])]
     (when updates
       (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
         (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
+        (bulletins/process-verdict-given command verdicts)
         (t/mark-app-and-attachments-final! (:id application) (:created command))))
-    (ok :verdicts (get-in updates [$set :verdicts])
+    (ok :verdicts verdicts
         :tasks (get-in updates [$set :tasks])
         :state (get-in updates [$set :state] (:state application)))))
 
