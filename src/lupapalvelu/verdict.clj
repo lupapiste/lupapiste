@@ -452,15 +452,7 @@
   [options]
   (mongo/select :applications
                 (missing-verdict-attachments-query options)
-                {:state            true
-                 :municipality     true
-                 :address          true
-                 :permitType       true
-                 :permitSubtype    true
-                 :organization     true
-                 :primaryOperation true
-                 :verdicts         true
-                 :attachments      true}))
+                [:organization :permitType]))
 
 (defn- get-verdicts-from-xml [application organization xml]
   (krysp-reader/->verdicts xml (:permitType application) permit/read-verdict-xml organization))
