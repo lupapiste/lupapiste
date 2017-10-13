@@ -5,7 +5,13 @@
  *
  * You can try out the advanced compilation locally (remember to stop figwheel first)
  *
+ * lein with-profiles uberjar uberjar once
+ *
+ * A "lighter" alternative is
+ *
  * lein with-profiles uberjar cljsbuild once
+ *
+ * but that does not find all the problematic issues.
  */
 var ajax = {};
 
@@ -59,13 +65,14 @@ var notify = {};
 notify.ajaxError = function() {};
 
 var util = {};
-util.showSavedIndicator = function() {};
-util.partyFullName = function() {};
-util.finnishDateAndTime = function() {};
 util.finnishDate = function() {};
-util.toMoment = function() {};
+util.finnishDateAndTime = function() {};
+util.partyFullName = function() {};
 util.prop = {};
 util.prop.toHumanFormat = function() {};
+util.showSavedIndicator = function() {};
+util.sizeString = function() {};
+util.toMoment = function() {};
 
 var sprintf = function() {};
 
@@ -99,40 +106,45 @@ pageutil.openPage = function() {};
 
 var lupapisteApp = {};
 lupapisteApp.services = {};
-lupapisteApp.services.fileUploadService = {};
-lupapisteApp.services.fileUploadService.bindFileInput = function() {};
-lupapisteApp.services.attachmentsService = {};
-lupapisteApp.services.attachmentsService.bindAttachments = function() {};
-lupapisteApp.services.attachmentsService.removeAttachment = function() {};
-lupapisteApp.services.commentService = {};
-lupapisteApp.services.organizationTagsService = {};
-lupapisteApp.services.applicationFiltersService = {};
-lupapisteApp.services.areaFilterService = {};
-lupapisteApp.services.handlerFilterService = {};
-lupapisteApp.services.tagFilterService = {};
-lupapisteApp.services.organizationFilterService = {};
-lupapisteApp.services.operationFilterService = {};
-lupapisteApp.services.publishBulletinService = {};
-lupapisteApp.services.documentDataService = {};
-lupapisteApp.services.sidePanelService = {};
 lupapisteApp.services.accordionService = {};
 lupapisteApp.services.accordionService.attachmentAccordionName = function() {};
-lupapisteApp.services.verdictAppealService = {};
-lupapisteApp.services.scrollService = {};
-lupapisteApp.services.ramService = {};
+lupapisteApp.services.applicationFiltersService = {};
+lupapisteApp.services.areaFilterService = {};
+lupapisteApp.services.assignmentRecipientFilterService = {};
+lupapisteApp.services.assignmentService = {};
+lupapisteApp.services.assignmentTargetFilterService = {};
+lupapisteApp.services.attachmentsService = {};
+lupapisteApp.services.attachmentsService.attachmentTypes = function() {};
+lupapisteApp.services.attachmentsService.bindAttachments = function() {};
+lupapisteApp.services.attachmentsService.contentsData = function() {};
+lupapisteApp.services.attachmentsService.getAuthModel = function() {};
+lupapisteApp.services.attachmentsService.queryAll = function() {};
+lupapisteApp.services.attachmentsService.rawAttachments = function() {};
+lupapisteApp.services.attachmentsService.removeAttachment = function() {};
+lupapisteApp.services.buildingService = {};
 lupapisteApp.services.calendarService = {};
-lupapisteApp.services.sutiService = {};
-lupapisteApp.services.infoService = {};
+lupapisteApp.services.cardService = {};
+lupapisteApp.services.commentService = {};
 lupapisteApp.services.contextService = {};
 lupapisteApp.services.contextService.applicationId = function() {};
-lupapisteApp.services.buildingService = {};
-lupapisteApp.services.assignmentService = {};
-lupapisteApp.services.assignmentRecipientFilterService = {};
-lupapisteApp.services.assignmentTargetFilterService = {};
+lupapisteApp.services.documentDataService = {};
 lupapisteApp.services.eventFilterService = {};
-lupapisteApp.services.inspectionSummaryService = {};
+lupapisteApp.services.fileUploadService = {};
+lupapisteApp.services.fileUploadService.bindFileInput = function() {};
+lupapisteApp.services.handlerFilterService = {};
 lupapisteApp.services.handlerService = {};
-lupapisteApp.services.cardService = {};
+lupapisteApp.services.infoService = {};
+lupapisteApp.services.inspectionSummaryService = {};
+lupapisteApp.services.operationFilterService = {};
+lupapisteApp.services.organizationFilterService = {};
+lupapisteApp.services.organizationTagsService = {};
+lupapisteApp.services.publishBulletinService = {};
+lupapisteApp.services.ramService = {};
+lupapisteApp.services.scrollService = {};
+lupapisteApp.services.sidePanelService = {};
+lupapisteApp.services.sutiService = {};
+lupapisteApp.services.tagFilterService = {};
+lupapisteApp.services.verdictAppealService = {};
 
 lupapisteApp.models = {};
 lupapisteApp.models.application = {};

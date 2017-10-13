@@ -18474,6 +18474,11 @@ span.phrase-text {
 div.matti-autocomplete {
   position: relative;
   display: inline-block;
+  border-collapse: initial;
+}
+
+div.matti-autocomplete .ac--combobox {
+  display: table;
 }
 
 div.matti-autocomplete .ac--selected {
@@ -18484,6 +18489,7 @@ div.matti-autocomplete .ac--selected {
   table-layout: fixed;
   width: 100%;
   overflow-x: hidden;
+  background-color: white;
 }
 
 div.matti-autocomplete .ac--selected span {
@@ -18660,6 +18666,134 @@ div.matti-autocomplete .ac__menu ul.ac__items li.ac--grouped {
 
 .neighbor-states .tabby__row.neighbor > .tabby__cell.property-id {
   white-space: nowrap;
+}
+
+.col--vertical div.add-file-div label.btn.batch--add-file, .col--vertical div.add-file-div .dataTables_paginate label.batch--add-file.paginate_disabled_previous, .dataTables_paginate .col--vertical div.add-file-div label.batch--add-file.paginate_disabled_previous, .col--vertical div.add-file-div .dataTables_paginate label.batch--add-file.paginate_disabled_next, .dataTables_paginate .col--vertical div.add-file-div label.batch--add-file.paginate_disabled_next {
+  display: inline-block;
+  margin-top: 6px;
+}
+
+.matti-batch-table tr:hover {
+  background-color: white;
+}
+
+.matti-batch-table tr:hover:nth-child(even) {
+  background: #f6f6f6;
+}
+
+.matti-batch-table .td-center {
+  text-align: center;
+}
+
+.matti-batch-table .td-center > * {
+  vertical-align: middle;
+}
+
+.matti-batch-table input {
+  vertical-align: middle;
+}
+
+.matti-batch-table i.icon-spin.lupicon-refresh {
+  color: #999999;
+}
+
+.matti-batch-table td.batch--file {
+  max-width: 40em;
+  vertical-align: middle;
+}
+
+.matti-batch-table td.batch--file div.batch--filedata {
+  line-height: 1.1;
+}
+
+.matti-batch-table td.batch--file div.batch--filedata .batch--filename {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  overflow-x: hidden;
+  display: inline-block;
+}
+
+.matti-batch-table td.batch--file div.batch--filedata .batch--fileinfo {
+  white-space: nowrap;
+}
+
+.matti-batch-table td.batch--progress {
+  width: 100%;
+}
+
+.matti-batch-table td.batch--progress div {
+  width: 100%;
+  border: solid 1px #ef7626;
+  height: 24px;
+}
+
+.matti-batch-table td.batch--progress div span {
+  height: 22px;
+  background-color: #f39129;
+  display: inline-block;
+}
+
+.matti-batch-table td > div.matti-autocomplete {
+  vertical-align: middle;
+}
+
+.matti-batch-table td.batch--type {
+  min-width: 15em;
+}
+
+.matti-batch-table td.batch--error {
+  color: #df3215;
+  min-width: 20em;
+  width: 100%;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.matti-batch-table tfoot.batch--buttons tr {
+  border: none;
+}
+
+.matti-batch-table tfoot.batch--buttons td {
+  padding-top: 6px;
+  padding-left: 0;
+  text-align: right;
+}
+
+.matti-batch-table tfoot.batch--buttons td button {
+  margin-left: 12px;
+}
+
+table.matti-attachments {
+  width: initial;
+}
+
+table.matti-attachments tr {
+  border: none;
+}
+
+table.matti-attachments tr:hover {
+  background-color: white;
+}
+
+table.matti-attachments tr:hover:nth-child(even) {
+  background: #f6f6f6;
+}
+
+table.matti-attachments .td--center {
+  text-align: center;
+}
+
+table.matti-attachments .td--center > * {
+  vertical-align: middle;
+}
+
+table.matti-attachments span.uploader-info {
+  white-space: nowrap;
+}
+
+span.verdict-published {
+  font-weight: bold;
 }
 
 .order-grid-1 {

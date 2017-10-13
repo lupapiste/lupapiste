@@ -261,42 +261,9 @@
     }
   };
 
-  // v is unwrapped size value
-  function sizeString( v ) {
-    var result = "";
-    if( _.trim( v ) ) {
-      var value = parseFloat(v);
-      var unit = "B";
-
-      if (value > 1200.0) {
-        value = value / 1024.0;
-        unit = "kB";
-      }
-
-      if (value > 1200.0) {
-        value = value / 1024.0;
-        unit = "MB";
-      }
-      if (value > 1200.0) {
-        value = value / 1024.0;
-        unit = "GB";
-      }
-      if (value > 1200.0) {
-        value = value / 1024.0;
-        unit = "TB"; // Future proof?
-      }
-
-      if (unit !== "B") {
-        value = value.toFixed(1);
-      }
-      result = value + "\u00a0" + unit;
-    }
-    return result;
-  }
-
   ko.bindingHandlers.size = {
     update: function(element, valueAccessor) {
-      $(element).text( sizeString(ko.utils.unwrapObservable(valueAccessor())));
+      $(element).text( util.sizeString(ko.utils.unwrapObservable(valueAccessor())));
     }
   };
 
@@ -324,7 +291,7 @@
       if( v ) {
         var data = ko.mapping.toJS( v );
         $(element).html( attachmentVersionTemplate( _.merge( data, {contentText: loc( data.contentType),
-                                                                    sizeText: sizeString( data.size )})));
+                                                                    sizeText: util.sizeString( data.size )})));
       }
     }
   };
@@ -370,7 +337,7 @@
       if( v ) {
         var data = ko.mapping.toJS( v );
         $(element).html( viewWithDownloadTemplate( _.merge( data, {download: loc("download-file"),
-                                                                   sizeText: sizeString( data.size )})));
+                                                                   sizeText: util.sizeString( data.size )})));
       }
     }
   };
@@ -384,7 +351,7 @@
       if( v ) {
         var data = ko.mapping.toJS( v );
         $(element).html( downloadWithIconTemplate( _.merge( data, {download: loc("download-file"),
-                                                                   sizeText: sizeString( data.size )})));
+                                                                   sizeText: util.sizeString( data.size )})));
       }
     }
   };
@@ -419,7 +386,7 @@
       if( v ) {
         var data = ko.mapping.toJS( v );
         $(element).html( fileTemplate( _.merge( data, {contentText: loc( data.contentType),
-                                                       sizeText: sizeString( data.size )})));
+                                                       sizeText: util.sizeString( data.size )})));
       }
     }
   };
