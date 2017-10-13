@@ -1028,3 +1028,10 @@
        (->> (mapcat :versions @bulletins-derefable)
             (filter bulletins/bulletin-version-date-valid?)
             (some (fn->> :attachments (util/find-by-id attachment-id))))))
+
+(defn validate-not-included-in-published-bulletin [{{attachment-id :attachmentId ignore :ignoreBulletins} :data
+                                                     application :application
+                                                     bulletins :application-bulletins}]
+  (when (and (not ignore)
+             (included-in-published-bulletin? application bulletins attachment-id))
+    (fail :error.attachment-included-in-published-bulletin)))
