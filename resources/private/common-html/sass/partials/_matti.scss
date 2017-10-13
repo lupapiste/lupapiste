@@ -330,6 +330,12 @@ span.phrase-text {
 div.matti-autocomplete {
   position: relative;
   display: inline-block;
+  // Without border-collapse fix, height would be 41px within tables
+  // (e.g., attachment-batch-table)
+  border-collapse: initial;
+  .ac--combobox {
+    display: table;
+  }
   .ac--selected {
     min-height: 40px;
     max-height: 40px;
@@ -338,6 +344,7 @@ div.matti-autocomplete {
     table-layout: fixed;
     width: 100%;
     overflow-x: hidden;
+    background-color: white;
     span {
       font-size: 15px;
       box-sizing: border-box;
@@ -480,4 +487,105 @@ div.matti-autocomplete {
       white-space: nowrap;
     }
   }
+}
+
+// Attachments (see also _tables.scss)
+
+.col--vertical div.add-file-div label.btn.batch--add-file {
+  display: inline-block;
+  margin-top: $marginS;
+}
+
+.matti-batch-table {
+  @include no-row-hover;
+  .td-center {
+    text-align: center;
+    > * {
+      vertical-align: middle;
+    }
+  }
+  input {
+    vertical-align: middle;
+  }
+  i.icon-spin.lupicon-refresh {
+    color: $gray153;
+  }
+
+  td.batch--file {
+    max-width: 40em;
+    vertical-align: middle;
+    div.batch--filedata {
+      line-height: 1.1;
+      .batch--filename {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        overflow-x: hidden;
+        display: inline-block;
+      }
+      .batch--fileinfo {
+        white-space: nowrap;
+      }
+    }
+  }
+  td.batch--progress {
+    width: 100%;
+    div {
+      width: 100%;
+      border: solid 1px $orange-darkest;
+      height: 24px;
+      span {
+        height: 22px;
+        background-color: $orange-dark;
+        display: inline-block;
+      }
+    }
+  }
+  td > div.matti-autocomplete {
+    vertical-align: middle;
+  }
+  td.batch--type {
+    min-width: 15em;
+  }
+  td.batch--error {
+    color: $negative;
+    min-width: 20em;
+    width: 100%;
+    white-space: normal;
+    word-break: break-word;
+  }
+  tfoot.batch--buttons {
+    tr {
+      border: none;
+    }
+    td {
+      padding-top: $marginS;
+      padding-left: 0;
+      text-align: right;
+      button {
+        margin-left: $marginM;
+      }
+    }
+  }
+}
+
+table.matti-attachments {
+  width: initial;
+  tr {
+    border: none;
+  }
+  @include no-row-hover;
+  .td--center {
+    text-align: center;
+    > * {
+      vertical-align: middle;
+    }
+  }
+  span.uploader-info {
+    white-space: nowrap;
+  }
+}
+
+span.verdict-published {
+  font-weight: bold;
 }

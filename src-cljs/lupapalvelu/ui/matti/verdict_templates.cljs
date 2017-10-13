@@ -2,6 +2,7 @@
   (:require [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
+            [lupapalvelu.ui.matti.components :as matti-components]
             [lupapalvelu.ui.matti.layout :as layout]
             [lupapalvelu.ui.matti.path :as path]
             [lupapalvelu.ui.matti.phrases :as phrases]
@@ -76,7 +77,7 @@
       (verdict-template-publish options)]]
     [:div.row.row--tight
      [:div.col-2.col--right
-      (layout/last-saved options)]]]
+      (matti-components/last-saved options)]]]
    (sections/sections options :verdict-template)])
 
 (defn new-template [options]

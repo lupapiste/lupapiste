@@ -5,6 +5,7 @@
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.matti.layout :as layout]
+            [lupapalvelu.ui.matti.components :as matti-components]
             [lupapalvelu.ui.matti.path :as path]
             [lupapalvelu.ui.matti.phrases :as phrases]
             [lupapalvelu.ui.matti.sections :as sections]
@@ -53,7 +54,15 @@
             {:state (:data verdict)
              :info (dissoc verdict :data)
              :_meta {:updated updater
-                     :enabled? (can-edit?)}}))
+                     :enabled? (and (can-edit?)
+                                    (not (:published verdict)))
+                     :attachments.filedata (fn [_ filedata & kvs]
+                                             (apply assoc filedata
+                                                    :target {:type :verdict
+                                                             :id (:id verdict)}
+                                                    kvs))
+                     :attachments.include? (fn [_ {target :target :as att}]
+                                             (= (:id target) (:id verdict)))}}))
   (reset! state/references references)
   (reset! state/current-view (if verdict ::verdict ::list)))
 
@@ -73,6 +82,7 @@
 
 (defn with-back-button [component]
   [:div
+   (lupapalvelu.ui.attachment.components/dropzone)
    [:div.operation-button-row
     [:button.secondary
      {:on-click #(reset-verdict nil)}
@@ -87,9 +97,10 @@
    component])
 
 (rum/defc verdict-section-header < rum/reactive
-  [options]
+  [{:keys [schema] :as options}]
   [:div.matti-grid-1.section-header
-   (when (path/enabled? options)
+   (when (and (not (-> schema :buttons? false?))
+              (path/enabled? options))
      [:div.row.row--tight
       [:div.col-1.col--right
        [:div.verdict-buttons
@@ -103,14 +114,35 @@
   [options _]
   (verdict-section-header options))
 
-(defn verdict
-  [{:keys [schema state] :as options}]
-  [:div.matti-verdict
-   [:div.matti-grid-2
-    [:div.row.row--tight
-     [:div.col-2.col--right
-      (layout/last-saved options)]]]
-   (sections/sections options :verdict)])
+(rum/defc verdict < rum/reactive
+  [{:keys [schema state info] :as options}]
+  (let [published (path/value :published info)]
+    [:div.matti-verdict
+     [:div.matti-grid-2
+      (when (path/enabled? options)
+        [:div.row
+         [:div.col-2.col--right
+          [:button.primary.outline
+           {:on-click (fn []
+                        (hub/send "show-dialog"
+                                  {:ltitle "areyousure"
+                                   :size "medium"
+                                   :component "yes-no-dialog"
+                                   :componentParams {:ltext "verdict.confirmpublish"
+                                                     :yesFn #(service/publish-and-reopen-verdict  @state/application-id
+                                                                                                  (path/value :id info)
+                                                                                                  reset-verdict)}}))}
+           (path/loc :verdict.submit)]]])
+      (if published
+        [:div.row
+         [:div.col-2.col--right
+          [:span.verdict-published
+           (common/loc :matti.verdict-published
+                       (js/util.finnishDate published))]]]
+        [:div.row.row--tight
+         [:div.col-2.col--right
+          (matti-components/last-saved options)]])]
+     (sections/sections options :verdict)]))
 
 (rum/defcs new-verdict < rum/reactive
   (rum/local nil ::template)
@@ -137,7 +169,7 @@
 (rum/defc verdict-list < rum/reactive
   [verdicts app-id]
   [:div
-   [:h1 (common/loc "application.tabVerdict")]
+   [:h2 (common/loc "application.tabVerdict")]
    [:ol
     (map (fn [{:keys [id published modified]}]
            [:li {:key id}
@@ -170,7 +202,7 @@
        ::verdict (let [{dictionary :dictionary :as schema} (get shared/verdict-schemas
                                                                 (shared/permit-type->category (js/lupapisteApp.models.application.permitType)))]
                    (with-back-button (verdict (assoc (state/select-keys state/current-verdict
-                                                                       [:state :info :_meta])
+                                                                        [:state :info :_meta])
                                                      :schema (dissoc schema :dictionary)
                                                      :dictionary dictionary
                                                      :references state/references)))))]))

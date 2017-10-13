@@ -115,8 +115,7 @@
 
   :date-deltas A map with delta information (the units are taken from
   the schema)."
-  (fn [template]
-    (template-category template)))
+  template-category)
 
 (defmethod template-info :default [_] nil)
 
@@ -295,7 +294,7 @@
   (let [{:keys [data category
                 template
                 references]} (command->verdict command)
-        schema               (update (-> category shared/verdict-schemas)
+        schema               (update (category shared/verdict-schemas)
                                      :dictionary
                                      (partial strip-exclusions (:exclusions template)))]
     (if-let [error (schemas/validate-path-value
@@ -394,7 +393,7 @@
                   {:neighbor-states (neighbor-states application)}))]
     (assoc-in verdict [:data] (merge data addons))))
 
-(defn open-verdict [{:keys [application organization] :as command}]
+(defn open-verdict [{:keys [application] :as command}]
   (let [{:keys [data published] :as verdict} (command->verdict command)]
     {:verdict  (assoc (select-keys verdict [:id :modified :published])
                       :data (if published
@@ -402,3 +401,10 @@
                               (:data (enrich-verdict command
                                                      verdict))))
      :references (:references verdict)}))
+
+(defn publish-verdict [{created :created :as command}]
+  (let [verdict (command->verdict command)]
+    (verdict-update command
+                    {$set {:matti-verdicts.$.data (:data (enrich-verdict command
+                                                                         verdict))
+                           :matti-verdicts.$.published created}})))

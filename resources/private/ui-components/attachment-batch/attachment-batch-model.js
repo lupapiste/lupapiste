@@ -1,5 +1,6 @@
-// Parameters:
-// upload: Upload model
+// Parameters [optional]:
+// upload:       Upload model
+// [typeGroups]: Type groups available in the type selector (default all).
 LUPAPISTE.AttachmentBatchModel = function(params) {
   "use strict";
   var self = this;

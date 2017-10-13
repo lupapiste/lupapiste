@@ -602,7 +602,7 @@
     (fail :error.property-in-other-muinicipality)))
 
 (defcommand change-application-state
-  {:description      "Changes application state. The tranistions happen
+  {:description      "Changes application state. The transitions happen
   between post-verdict (excluding verdict given)states. In addition,
   the transition from appealed to a verdict given state is supported."
    :parameters       [id state]
@@ -721,7 +721,8 @@
     (ok :app-links final-results)))
 
 (defn- validate-linking [{app :application :as command}]
-  (let [link-permit-id (ss/trim (get-in command [:data :linkPermitId]))
+  (when app
+    (let [link-permit-id (ss/trim (get-in command [:data :linkPermitId]))
         {:keys [appsLinkingToUs linkPermitData]} (meta-fields/enrich-with-link-permit-data app)
         max-outgoing-link-permits (op/get-primary-operation-metadata app :max-outgoing-link-permits)
         links    (concat appsLinkingToUs linkPermitData)
@@ -731,7 +732,7 @@
       (fail :error.link-permit-already-having-us-as-link-permit)
 
       (and max-outgoing-link-permits (= max-outgoing-link-permits (count linkPermitData)))
-      (fail :error.max-outgoing-link-permits))))
+      (fail :error.max-outgoing-link-permits)))))
 
 (defcommand add-link-permit
   {:parameters       ["id" linkPermitId]

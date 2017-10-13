@@ -129,6 +129,19 @@
   [command]
   (ok (verdict/edit-verdict command)))
 
+(defcommand publish-matti-verdict
+  {:description      "Publishes verdict.
+TODO: create tasks and PDF, application state change, attachments locking."
+   :feature          :matti
+   :user-roles       #{:authority}
+   :parameters       [id verdict-id]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :pre-checks       [matti-enabled
+                      (verdict-exists :editable?)]
+   :states           states/give-verdict-states}
+  [command]
+  (ok (verdict/publish-verdict command)))
+
 (defquery matti-verdict-tab
   {:description     "Pseudo-query that fails if the Matti verdicts tab
   should not be shown on the UI."
@@ -143,12 +156,17 @@
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))
 
-(defn- create-bulletin [application created & [updates]]
-  (let [app-snapshot (bulletins/create-bulletin-snapshot application)
-        app-snapshot (if updates
-                       (merge app-snapshot updates)
-                       app-snapshot)
-        search-fields [:municipality :address :verdicts :matti-verdicts :_applicantIndex
+(defn- create-bulletin [application created verdict-id & [updates]]
+  (let [verdict (util/find-by-id verdict-id (:matti-verdicts application))
+        app-snapshot (-> (bulletins/create-bulletin-snapshot application)
+                         (dissoc :verdicts :matti-verdicts)
+                         (merge
+                           updates
+                           {:application-id (:id application)
+                            :matti-verdict verdict
+                            :bulletin-op-description (-> verdict :data :bulletin-op-description)}))
+        search-fields [:municipality :address :matti-verdict :_applicantIndex
+                       :application-id
                        :bulletinState :applicant :organization :bulletin-op-description]
         search-updates (get-search-fields search-fields app-snapshot)]
     (bulletins/snapshot-updates app-snapshot search-updates created)))
@@ -162,13 +180,12 @@
    :pre-checks       [(verdict-exists :editable?)]
    :states           states/give-verdict-states}
   [{application :application created :created}]
-  (let [verdict (util/find-by-id verdict-id (:matti-verdicts application))
-        today-long (tc/to-long (t/today-at-midnight))
-        updates (create-bulletin application created {:bulletinState :verdictGiven
-                                                      :verdictGivenAt       today-long
-                                                      :appealPeriodStartsAt today-long
-                                                      :appealPeriodEndsAt   (tc/to-long (t/plus (t/today-at-midnight) (t/days 14)))
-                                                      :verdictGivenText ""
-                                                      :bulletin-op-description (-> verdict :data :bulletin-op-description)})]
-    (bulletins/upsert-bulletin-by-id id updates)
+  (let [today-long (tc/to-long (t/today-at-midnight))
+        updates (create-bulletin application created verdict-id
+                                 {:bulletinState :verdictGiven
+                                  :verdictGivenAt       today-long
+                                  :appealPeriodStartsAt today-long
+                                  :appealPeriodEndsAt   (tc/to-long (t/plus (t/today-at-midnight) (t/days 14)))  ;; TODO!!!
+                                  :verdictGivenText ""})]
+    (bulletins/upsert-bulletin-by-id (str id "_" verdict-id) updates)
     (ok)))

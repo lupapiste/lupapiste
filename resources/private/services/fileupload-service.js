@@ -4,30 +4,32 @@ LUPAPISTE.FileuploadService = function() {
 
   self.serviceName = "fileuploadService";
 
-  function prepareDropZone( dropZone ) {
+  function prepareDropZone( dropZone, fileInputId ) {
     return (function () {
-      var latest = 0;
-      if( dropZone ) {
-        var sel = $( dropZone );
-        var clear = function( count ) {
-          if( count === latest ) {
-            sel.removeClass( "drop-zone--highlight");
-            latest = 0;
-          } else {
-            _.delay( clear, 100, latest );
-          }
-        };
+        var latest = 0;
+        if( dropZone ) {
+          var sel = $( dropZone );
+          var clear = function( count ) {
+            if( count === latest ) {
+              sel.removeClass( "drop-zone--highlight");
+              latest = 0;
+            } else {
+              _.delay( clear, 100, latest );
+            }
+          };
 
-        sel.on( "dragover",
-                function()  {
-                  sel.addClass( "drop-zone--highlight");
-                  if( !latest ) {
-                    clear( -1 );
-                  }
-                  latest++;
-                });
-        return sel;
-      }
+          sel.on( "dragover",
+                  function()  {
+                    if( !$("#" + fileInputId).attr( "disabled") ) {
+                      sel.addClass( "drop-zone--highlight");
+                      if( !latest ) {
+                        clear( -1 );
+                      }
+                      latest++;
+                    }
+                  });
+          return sel;
+        }
     })();
   }
 
@@ -75,7 +77,7 @@ LUPAPISTE.FileuploadService = function() {
                 _.defaults( event, {input: fileInputId}));
     }
 
-    var $dropZone = prepareDropZone( options.dropZone );
+    var $dropZone = prepareDropZone( options.dropZone, fileInputId );
     var isAuthenticated = Boolean(util.getIn(lupapisteApp, ["models","currentUser","username"]));
     var apiUrl = isAuthenticated ? "/api/raw/upload-file-authenticated" : "/api/raw/upload-file";
     var formData = [ { name: "__anti-forgery-token", value: $.cookie("anti-csrf-token") } ];
@@ -138,7 +140,7 @@ LUPAPISTE.FileuploadService = function() {
                                            file: _.get(data, "files.0")});
       },
       drop: function(e) {
-        if (!options.dropZone) {
+        if (!options.dropZone ) {
           e.preventDefault();
         }
       }
@@ -158,6 +160,12 @@ LUPAPISTE.FileuploadService = function() {
         conn.abort();
         return false;
       });
+    });
+
+    hubscribe( "toggle-enabled", function( event ) {
+      var $input = $("#" + fileInputId);
+      $input.fileupload( event.enabled ? "enable" : "disable");
+      $input.attr( "disabled", !event.enabled );
     });
 
     return fileInputId;
