@@ -3824,3 +3824,6 @@
 "company.reports.download.report" "en" ""
 "company.reports.download.report" "fi" "Lataa raportti"
 "company.reports.download.report" "sv" ""
+"company.reports.excel.filename" "en" ""
+"company.reports.excel.filename" "fi" "Company_reports"
+"company.reports.excel.filename" "sv" ""

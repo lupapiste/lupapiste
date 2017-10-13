@@ -61,6 +61,13 @@
                    :primaryOperation]
                   {:submitted 1})))
 
+(defn company-applications-between [company-id start-ts end-ts]
+  (mongo/select :applications
+                {:auth.id company-id
+                 :modified {$gte (Long/parseLong start-ts 10)
+                            $lte (Long/parseLong end-ts 10)}
+                 }))
+
 (defn- authority [app]
   (->> app
        :handlers
@@ -179,4 +186,11 @@
                :row-fn parties/foremen-row-fn
                :data (:foremen data)}])]
     (excel/hyperlinks-to-formulas! wb)
+    (excel/xlsx-stream wb)))
+
+(defn company-applications [company-id start-ts end-ts lang]
+  (let [applications (company-applications-between company-id start-ts end-ts)
+        headers ["Id" "Osoite" "Tila" "Muokattu"]
+        row-fn (juxt :id :address :state :modified)
+        wb (excel/create-workbook applications "Permit" headers row-fn)]
     (excel/xlsx-stream wb)))

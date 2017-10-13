@@ -93,8 +93,10 @@
    :parameters        [companyId startTs endTs]
    :input-validators  [(partial action/string-parameters [:startTs :endTs])]
    :user-roles         #{:applicant}}
-  [_]
-  (println "Company-report")
-  (println "companyId ::: " companyId)
-  (println "startTs ::: " startTs)
-  (println "endTs ::: " endTs))
+  [{user :user {lang :lang} :data}]
+  (let [resulting-file-name (str (i18n/localize lang "company.reports.excel.filename")
+                                 "_"
+                                 (util/to-xml-date (now))
+                                 ".xlsx")]
+    (excel-response resulting-file-name
+                    (app-reports/company-applications companyId startTs endTs lang))))
