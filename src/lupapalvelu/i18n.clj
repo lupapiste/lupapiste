@@ -193,11 +193,15 @@
 
 (defn to-lang-map
   "Returns map, where keys are languages."
-  [localize-function]
-  (reduce
-    #(assoc %1 (keyword %2) (localize-function %2))
-    {}
-    supported-langs))
+  [loc-fn-or-key]
+  (letfn [(localize-function [lang]
+            (if (ifn? loc-fn-or-key)
+              (loc-fn-or-key lang)
+              (localize lang loc-fn-or-key)))]
+    (reduce
+      #(assoc %1 (keyword %2) (localize-function %2))
+      {}
+      supported-langs)))
 
 ;;
 ;; Middleware

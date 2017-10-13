@@ -188,10 +188,13 @@
              (localize-and-fill :fi :applications.operation "foo" "bar")
              => "Toimenpide"))
 
-(let [lang-map (to-lang-map #(localize % "error.unknown"))]
+(let [unknown-as-fi "Odottamaton virhe"
+      lang-map (to-lang-map #(localize % "error.unknown"))]
   (fact "to-lang-map"
     lang-map => map?
-    (:fi lang-map) => "Odottamaton virhe"
+    (:fi lang-map) => unknown-as-fi
     (keys lang-map) => supported-langs
     (= lang-map
-       (zipmap supported-langs (map #(localize % "error.unknown") supported-langs))) => true))
+       (zipmap supported-langs (map #(localize % "error.unknown") supported-langs))) => true)
+  (fact "with string"
+    (:fi (to-lang-map "error.unknown")) => unknown-as-fi))

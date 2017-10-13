@@ -274,7 +274,7 @@
         (when-not (map? (:user command))
           (fatalf "no user defined in command '%s' for update-application call, new state was %s" (:action command) new-state))
         (when-not (map? (:user command))
-          (warnf "no user defined in command '%s' for update-application call, new state was %s" (:action command)))))
+          (warnf "no user defined in command '%s' for update-application call, new state was %s" (:action command) new-state))))
 
     (with-application command
       (fn [{:keys [id organization]}]

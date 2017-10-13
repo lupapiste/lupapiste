@@ -15,7 +15,8 @@
       editRolesDialogModel,
       calendarsModel,
       reservationTypesModel,
-      reservationPropertiesModel;
+      reservationPropertiesModel,
+      bulletinsModel;
 
   function toAttachmentData(groupId, attachmentId) {
     return {
@@ -371,6 +372,31 @@
     };
   }
 
+  function BulletinsModel() {
+    var self = this;
+
+    self.data = ko.observableArray();
+
+    self.save = function(setting) {
+      ajax
+        .command("update-organization-bulletin-settings", _.pick(ko.toJS(setting), ["permitType","municipality","notificationEmail"]))
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
+        .call();
+    };
+
+    self.load = function() {
+      ajax.query("user-organization-bulletin-settings")
+        .success(function(data) {
+          self.data(_.map(data["bulletin-settings"], function(setting) {
+            return _.set(setting, "notificationEmail", ko.observable(_.get(setting, ["bulletins", "notification-email"])));
+          }));
+        })
+        .call();
+    };
+
+  }
+
   organizationModel = new LUPAPISTE.OrganizationModel();
   organizationUsers = new LUPAPISTE.OrganizationUserModel(organizationModel);
   editSelectedOperationsModel = new EditSelectedOperationsModel();
@@ -387,6 +413,7 @@
   asianhallintaModel = new AsianhallintaModel();
   linkToVendorBackendModel = new LinkToVendorBackendModel();
   editRolesDialogModel = new LUPAPISTE.EditRolesDialogModel(organizationModel);
+  bulletinsModel = new BulletinsModel();
 
   var usersTableConfig = {
       hideRoleFilter: true,
@@ -451,6 +478,10 @@
     });
   }
 
+  hub.onPageLoad("organization-bulletins", function() {
+    bulletinsModel.load();
+  });
+
   $(function() {
     organizationModel.load();
     $("#navi-toolbar").applyBindings({});
@@ -513,6 +544,11 @@
     $("#archiving").applyBindings({
       organization:        organizationModel,
       authorization:       lupapisteApp.models.globalAuthModel
+    });
+    $("#organization-bulletins").applyBindings({
+      organization:        organizationModel,
+      authorization:       lupapisteApp.models.globalAuthModel,
+      bulletins:           bulletinsModel
     });
 
     // Init the dynamically created dialogs

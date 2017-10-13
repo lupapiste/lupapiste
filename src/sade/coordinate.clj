@@ -58,4 +58,5 @@
 (def known-bad-coordinates
   "Coordinates from KRYSP message that are known to be invalid."
   ; Used by Facta at least in 186-R to mark unknown location
-  #{["2.52E7" "6600000.0"]})
+  #{["2.52E7" "6600000.0"]
+    ["2.42E7" "6600000.0"]})

@@ -798,7 +798,13 @@
                       {:id "753-R"
                        :name (names {:fi "Sipoon rakennusvalvonta"
                                      :sv "Sipoon rakennusvalvonta"})
-                       :scope [{:municipality "753" :permitType "R" :inforequest-enabled true :new-application-enabled true}
+                       :scope [{:municipality "753"
+                                :permitType "R"
+                                :inforequest-enabled true
+                                :new-application-enabled true
+                                :bulletins {:enabled true
+                                            :url "http://localhost:8000/dev/julkipano"
+                                            :notification-email "sonja.sibbo@sipoo.fi"}}
                                {:municipality "753" :permitType "P" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "YM" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "YI" :inforequest-enabled true :new-application-enabled true}

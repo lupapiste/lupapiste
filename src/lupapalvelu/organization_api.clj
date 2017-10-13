@@ -144,21 +144,50 @@
   [{user :user}]
   (ok :organizations (org/get-organizations {:_id {$in (usr/organization-ids-by-roles user #{:archivist :digitizer})}})))
 
+(defn- check-bulletins-enabled [{user-orgs :user-organizations {permit-type :permitType municipality :municipality} :data}]
+  (when-not (org/bulletins-enabled? (first user-orgs) permit-type municipality)
+    (fail :error.bulletins-not-enebled-for-scope)))
+
+(defquery user-organization-bulletin-settings
+  {:user-roles #{:authorityAdmin}
+   :pre-checks [check-bulletins-enabled]}
+  [{user :user user-orgs :user-organizations}]
+  (->> user-orgs first :scope
+       (filter (comp :enabled :bulletins))
+       (map #(select-keys % [:permitType :municipality :bulletins]))
+       (ok :bulletin-settings)))
+
+(defcommand update-organization-bulletin-settings
+  {:user-roles #{:authorityAdmin}
+   :parameters [permitType municipality notificationEmail]
+   :input-validators [permit/permit-type-validator
+                      (partial action/email-validator :notificationEmail)]
+   :pre-checks [check-bulletins-enabled]}
+  [{user :user}]
+  (mongo/update-by-query :organizations
+      {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
+      {$set {:scope.$.bulletins.notification-email notificationEmail}})
+  (ok))
+
 (defcommand update-organization
   {:description "Update organization details."
    :parameters [permitType municipality
                 inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
                 opening]
+   :optional-parameters [bulletinsEnabled bulletinsUrl]
    :input-validators [permit/permit-type-validator]
    :user-roles #{:admin}}
   [_]
   (mongo/update-by-query :organizations
       {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
-      {$set {:scope.$.inforequest-enabled inforequestEnabled
-             :scope.$.new-application-enabled applicationEnabled
-             :scope.$.open-inforequest openInforequestEnabled
-             :scope.$.open-inforequest-email openInforequestEmail
-             :scope.$.opening (when (number? opening) opening)}})
+      {$set (merge {:scope.$.inforequest-enabled inforequestEnabled
+                    :scope.$.new-application-enabled applicationEnabled
+                    :scope.$.open-inforequest openInforequestEnabled
+                    :scope.$.open-inforequest-email openInforequestEmail
+                    :scope.$.opening (when (number? opening) opening)}
+                   (when-not (nil? bulletinsEnabled)
+                     {:scope.$.bulletins.enabled bulletinsEnabled
+                      :scope.$.bulletins.url     (or bulletinsUrl "")}))})
   (ok))
 
 (defn- duplicate-scope-validator [municipality & permit-types]
