@@ -505,3 +505,55 @@
       (attachment-metadata-check att2 app ["op1" "op2"]))
     (fact "Attachment without explicit operation is linked to every operation"
       (attachment-metadata-check att3 app ["op1" "op2" "op3"]))))
+
+(facts included-in-published-bulletin?
+  (fact "attachment is included in bulletins"
+    (included-in-published-bulletin? {:history [{:bulletin-published true}]
+                                      :attachments [{:id ..att-id..}]}
+                                     (delay [{:versions [{:bulletinState "verdictGiven"
+                                                          :appealPeriodStartsAt 0
+                                                          :appealPeriodEndsAt java.lang.Long/MAX_VALUE
+                                                          :attachments [{:id ..att-id..}]}]}])
+                                     ..att-id..)
+    => truthy)
+
+  (fact "application is not published as bulletins"
+    (included-in-published-bulletin? {:history []
+                                      :attachments [{:id ..att-id..}]}
+                                     (delay [{:versions [{:bulletinState "verdictGiven"
+                                                          :appealPeriodStartsAt 0
+                                                          :appealPeriodEndsAt java.lang.Long/MAX_VALUE
+                                                          :attachments [{:id ..att-id..}]}]}])
+                                     ..att-id..)
+    => falsey)
+
+  (fact "appeal period is ended"
+    (included-in-published-bulletin? {:history [{:bulletin-published true}]
+                                      :attachments [{:id ..att-id..}]}
+                                     (delay [{:versions [{:bulletinState "verdictGiven"
+                                                          :appealPeriodStartsAt 0
+                                                          :appealPeriodEndsAt 1
+                                                          :attachments [{:id ..att-id..}]}]}])
+                                     ..att-id..)
+    => falsey)
+
+  (fact "no bulletins"
+    (included-in-published-bulletin? {:history [{:bulletin-published true}]
+                                      :attachments [{:id ..att-id..}]}
+                                     (delay nil)
+                                     ..att-id..)
+    => falsey)
+
+  (fact "multiple bulletins - one bulletin is active"
+    (included-in-published-bulletin? {:history [{:bulletin-published true}]
+                                      :attachments [{:id ..att-id..}]}
+                                     (delay [{:versions [{:bulletinState "verdictGiven"
+                                                          :appealPeriodStartsAt 0
+                                                          :appealPeriodEndsAt 1
+                                                          :attachments [{:id ..att-id..}]}]}
+                                             {:versions [{:bulletinState "verdictGiven"
+                                                          :appealPeriodStartsAt 0
+                                                          :appealPeriodEndsAt java.lang.Long/MAX_VALUE
+                                                          :attachments [{:id ..att-id..}]}]}])
+                                     ..att-id..)
+    => truthy))
