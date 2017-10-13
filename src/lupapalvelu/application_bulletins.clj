@@ -30,7 +30,7 @@
     ;; Otherwise projection does not work properly.
     (array-map :versions {$elemMatch {$or [{:proclamationStartsAt {$gt now} :proclamationEndsAt {$lt now}}
                                            {:appealPeriodStartsAt {$gt now} :appealPeriodEndsAt {$lt now}}
-                                           {:officialAt {$lt now}}]}}
+                                           {:officialAt {$gt now}}]}}
                :versions.bulletinState 1
                :versions.state 1
                :versions.municipality 1
