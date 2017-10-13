@@ -3,7 +3,6 @@
             [clojure.set :refer [intersection union difference]]
             [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
-            [swiss.arrows :refer [-<> -<>>]]
             [schema.core :as sc]
             [sade.core :refer [ok fail fail! now def-]]
             [sade.files :as files]
@@ -46,7 +45,8 @@
 (defn- build-attachment-query-params [{application-id :id} {attachment-id :id latest-version :latestVersion}]
   {:id           application-id
    :attachmentId attachment-id
-   :fileId       (:fileId latest-version)})
+   :fileId       (:fileId latest-version)
+   :ignoreBulletins true})
 
 (defmethod action/allowed-actions-for-category :attachments
   [command]
@@ -119,6 +119,13 @@
                           (= :arkistoitu (keyword (:tila metadata)))))
                    attachments))
     (fail :error.attachment-is-locked)))
+
+(defn- validate-not-included-in-published-bulletin [{{attachment-id :attachmentId ignore :ignoreBulletins} :data
+                                                     application :application
+                                                     bulletins :application-bulletins}]
+  (when (and (not ignore)
+             (att/included-in-published-bulletin? application bulletins attachment-id))
+    (fail :error.attachment-included-in-published-bulletin)))
 
 ;;
 ;; Attachments

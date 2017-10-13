@@ -515,10 +515,16 @@
                           (delay (mongo/select :assignments
                                                {:application.id (:id application)
                                                 :status {$ne "canceled"}})))
+            application-bulletins (delay
+                                   (when application
+                                     (mongo/select :application-bulletins
+                                                   ;; TODO: proper query for all application bulletins
+                                                   {:_id (:id application)})))
             user-organizations (lazy-seq (usr/get-organizations (:user command)))
             company (when-let [company-id (get-in command [:user :company :id])]
                       (delay (mongo/by-id :companies company-id)))
             command (-> {:application application
+                         :application-bulletins application-bulletins
                          :organization organization
                          :user-organizations user-organizations
                          :company company
