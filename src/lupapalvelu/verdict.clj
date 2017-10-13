@@ -452,15 +452,7 @@
   [options]
   (mongo/select :applications
                 (missing-verdict-attachments-query options)
-                {:state            true
-                 :municipality     true
-                 :address          true
-                 :permitType       true
-                 :permitSubtype    true
-                 :organization     true
-                 :primaryOperation true
-                 :verdicts         true
-                 :attachments      true}))
+                [:organization :permitType]))
 
 (defn- get-verdicts-from-xml [application organization xml]
   (krysp-reader/->verdicts xml (:permitType application) permit/read-verdict-xml organization))
@@ -564,11 +556,13 @@
 (defn- store-verdict-updates!
   "Store the updated verdicts to mongo. Return the ones that were
   actually updated."
-  [command updated-verdicts]
-  (action/update-application command
-                             {$set {:verdicts updated-verdicts}})
+  [{:keys [application] :as command} updated-verdicts]
+  (when (not= (:verdicts application) updated-verdicts)
+    (info (str "Updating verdicts for application " (:id application)))
+    (action/update-application command
+                               {$set {:verdicts updated-verdicts}}))
   (->> updated-verdicts
-       (map vector (-> command :application :verdicts))
+       (map vector (:verdicts application))
        (filter (partial apply not=))
        (map (juxt (comp :id first)
                   (comp second
