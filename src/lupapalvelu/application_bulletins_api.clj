@@ -16,7 +16,8 @@
             [monger.operators :refer :all]
             [lupapalvelu.application-search :refer [make-text-query dir]]
             [lupapalvelu.vetuma :as vetuma]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.permit :as permit]
+            [schema.core :as sc]))
 
 (def bulletin-page-size 10)
 
@@ -168,7 +169,7 @@
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))
 
-(defn- create-bulletin [application created & [updates]]
+(sc/defn ^:private create-bulletin [application created & [updates]] :- bulletins/ApplicationBulletin
   (let [app-snapshot (bulletins/create-bulletin-snapshot application)
         app-snapshot (if updates
                        (merge app-snapshot updates)

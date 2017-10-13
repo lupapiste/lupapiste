@@ -10,7 +10,24 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.document.model :as model]))
+            [lupapalvelu.document.model :as model]
+            [schema.core :as sc]
+            [sade.schemas :as ssc]))
+
+(sc/defschema ApplicationBulletin
+  {:id             sc/Str
+   :versions       [sc/Any]
+   :application-id ssc/ApplicationId
+   :address        sc/Str
+   :bulletin-op-description sc/Str
+   :bulletinState  sc/Any
+   :applicant       sc/Str
+   :_applicantIndex sc/Str
+   :municipality    sc/Str
+   :organization    sc/Str
+   :modified        ssc/Timestamp
+   (sc/optional-key :verdict) sc/Any
+   (sc/optional-key :matti-verdict) sc/Any})
 
 (def bulletin-state-seq (sm/state-seq states/bulletin-version-states))
 

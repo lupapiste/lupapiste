@@ -13,7 +13,8 @@
             [sade.util :as util]
             [lupapalvelu.application-bulletins :as bulletins]
             [clj-time.core :as t]
-            [clj-time.coerce :as tc]))
+            [clj-time.coerce :as tc]
+            [schema.core :as sc]))
 
 
 ;; ------------------------------------------
@@ -156,7 +157,7 @@ TODO: create tasks and PDF, application state change, attachments locking."
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))
 
-(defn- create-bulletin [application created verdict-id & [updates]]
+(sc/defn ^:private create-bulletin [application created verdict-id & [updates]] :- bulletins/ApplicationBulletin
   (let [verdict (util/find-by-id verdict-id (:matti-verdicts application))
         app-snapshot (-> (bulletins/create-bulletin-snapshot application)
                          (dissoc :verdicts :matti-verdicts)
