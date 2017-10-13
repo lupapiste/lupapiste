@@ -1,4 +1,4 @@
-(ns lupapalvelu.application-bulletins-itest
+(ns lupapalvelu.application-ymp-bulletins-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.application-bulletins-itest-util :refer :all]
@@ -31,7 +31,7 @@
     (fact "YM permit can be published"
       (query olli :ymp-publish-bulletin-enabled :id (:id ym-app)) => ok?)))
 
-(facts "Publishing bulletins"
+(facts "Publishing YMP bulletins"
   (let [ts-now  (now)
         app (create-and-submit-application pena :operation "jatteen-keraystoiminta"
                                            :propertyId oulu-property-id
