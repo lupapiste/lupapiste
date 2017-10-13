@@ -386,5 +386,17 @@
       </div>
     </div>
   </section>
+  <section class="page container" id="company-reports">
+    <div id="inner-margins">
+      <button class="secondary"
+              data-bind="click: function() { history.go(-1); }"
+              data-test-id="back-button">
+        <i class="lupicon-chevron-start"></i>
+        <span data-bind="ltext: 'back'"></span>
+      </button>
+    </div>
+    <div class="hr"></div>
+    <cljs-company_reports params="{companyId: companyId}"></cljs-company_reports>
+  </section>
 </body>
 </html>

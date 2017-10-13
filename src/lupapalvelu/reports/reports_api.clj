@@ -87,3 +87,14 @@
                       (util/to-long startTs)
                       (util/to-long endTs)
                       lang))))
+
+(defraw company-report
+  {:description "Excel report for company authority"
+   :parameters        [companyId startTs endTs]
+   :input-validators  [(partial action/string-parameters [:startTs :endTs])]
+   :user-roles         #{:applicant}}
+  [_]
+  (println "Company-report")
+  (println "companyId ::: " companyId)
+  (println "startTs ::: " startTs)
+  (println "endTs ::: " endTs))

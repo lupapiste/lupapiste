@@ -474,6 +474,7 @@
     $("#company-content").applyBindings(company);
 //    $("#dialog-company-user-op").applyBindings(companyUserOp);
     $("#dialog-company-new-user").applyBindings(newCompanyUser);
+    $("#company-reports").applyBindings({companyId: pageutil.subPage()});
   });
 
 })();

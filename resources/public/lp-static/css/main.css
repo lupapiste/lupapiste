@@ -12294,6 +12294,11 @@ div.handler-roles-container div.handler-role-warning {
   width: 100%;
 }
 
+table.company-report-table {
+  width: 45%;
+  margin-top: 10px;
+}
+
 /*Tab styles*/
 .tab-wrapper {
   padding: 30px;
