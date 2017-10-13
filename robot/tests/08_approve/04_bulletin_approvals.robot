@@ -35,7 +35,7 @@ Olli adds approved attachment
 
 Olli publishes bulletin
   Approve application ok
-  Open tab  bulletin
+  Open tab  ymp-bulletin
   Publish bulletin
 
 Olli opens bulletin and checks that not icons are visible
