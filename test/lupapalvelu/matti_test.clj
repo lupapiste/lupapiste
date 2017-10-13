@@ -70,7 +70,7 @@
                                                         :rows [[{:dict :date}]]}}]]}}]]}}]})
 
 (facts "Test template is valid"
-  (sc/validate shared/MattiVerdict test-template)
+  (sc/validate shared/MattiVerdictTemplate test-template)
   => test-template)
 
 (defn validate-path-value [path value & [references]]
