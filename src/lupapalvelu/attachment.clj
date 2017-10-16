@@ -938,7 +938,7 @@
   {:arglists '([command])}
   get-target-type)
 
-(defmethod delete-allowed-by-target :default [{:keys [state] :as application}]
+(defmethod delete-allowed-by-target :default [{{:keys [state]} :application}]
   (when (= :sent (keyword state))
     (fail :error.illegal-state)))
 
