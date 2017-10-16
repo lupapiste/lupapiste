@@ -10,8 +10,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.document.model :as model]
-            [clj-time.coerce :as tc]))
+            [lupapalvelu.document.model :as model]))
 
 (def bulletin-state-seq (sm/state-seq states/bulletin-version-states))
 
@@ -24,46 +23,37 @@
 
 ;; Query/Projection fields
 
-(defn versions-elemMatch [now-ts]
-  (let [plus14days (tc/to-long (t/minus (tc/from-long now-ts) (t/days 14)))]
+(defn bulletins-fields []
+  (let [now (now)]
     ;; It is important that this is array map, since versions-elemMatch projection
     ;; must be before versions-fields projection definition in mongo query.
     ;; Otherwise projection does not work properly.
-    {$elemMatch {$or [{:bulletinState :proclaimed
-                       :proclamationStartsAt {$lt now-ts} :proclamationEndsAt {$gt now-ts}}
-                      {:bulletinState :verdictGiven
-                       :appealPeriodStartsAt {$lt now-ts} :appealPeriodEndsAt {$gt now-ts}}
-                      {:bulletinState :final
-                       :officialAt {$lt now-ts $gt plus14days}}]}}))
+    (array-map :versions {$elemMatch {$or [{:proclamationStartsAt {$gt now} :proclamationEndsAt {$lt now}}
+                                           {:appealPeriodStartsAt {$gt now} :appealPeriodEndsAt {$lt now}}
+                                           {:officialAt {$gt now}}]}}
+               :versions.bulletinState 1
+               :versions.state 1
+               :versions.municipality 1
+               :versions.address 1
+               :versions.location 1
+               :versions.primaryOperation 1
+               :versions.propertyId 1
+               :versions.applicant 1
+               :versions.modified 1
+               :versions.proclamationStartsAt 1 :versions.proclamationEndsAt 1
+               :versions.proclamationText 1
+               :versions.verdictGivenAt 1
+               :versions.verdictGivenText 1
+               :versions.appealPeriodStartsAt 1 :versions.appealPeriodEndsAt 1
+               :versions.officialAt 1
+               :versions.matti-verdicts.data 1
+               :versions.matti-verdicts.category 1
+               :modified 1
+               :versions.bulletin-op-description 1)))
 
-(defn bulletins-fields [now-ts]
-  ;; It is important that this is array map, since versions-elemMatch projection
-  ;; must be before versions-fields projection definition in mongo query.
-  ;; Otherwise projection does not work properly.
-  (array-map :versions (versions-elemMatch now-ts)
-             :versions.bulletinState 1
-             :versions.state 1
-             :versions.municipality 1
-             :versions.address 1
-             :versions.location 1
-             :versions.primaryOperation 1
-             :versions.propertyId 1
-             :versions.applicant 1
-             :versions.modified 1
-             :versions.proclamationStartsAt 1 :versions.proclamationEndsAt 1
-             :versions.proclamationText 1
-             :versions.verdictGivenAt 1
-             :versions.verdictGivenText 1
-             :versions.appealPeriodStartsAt 1 :versions.appealPeriodEndsAt 1
-             :versions.officialAt 1
-             :versions.matti-verdicts.data 1
-             :versions.matti-verdicts.category 1
-             :modified 1
-             :versions.bulletin-op-description 1))
-
-(defn bulletin-fields [now-ts]
+(defn bulletin-fields []
   (util/assoc-to-array-map
-   (bulletins-fields now-ts)
+   (bulletins-fields)
    :versions._applicantIndex 1
    :versions.documents 1
    :versions.id 1
@@ -125,7 +115,7 @@
 
 (defn get-bulletin
   ([bulletinId]
-   (get-bulletin bulletinId (bulletin-fields (now))))
+   (get-bulletin bulletinId (bulletin-fields)))
   ([bulletinId projection]
    (mongo/with-id (mongo/by-id :application-bulletins bulletinId projection))))
 
