@@ -3,6 +3,7 @@
 Documentation   Mikko can't approve application
 Resource        ../../common_resource.robot
 Resource        ../common_keywords/approve_helpers.robot
+Resource       ../06_attachments/attachment_resource.robot
 Variables      ../06_attachments/variables.py
 
 *** Test Cases ***
@@ -137,8 +138,23 @@ Building selector keeps its value
   Open accordions  info
   Element should be visible  //section[@data-doc-type='rakennuksen-muuttaminen']//select[@name='buildingId']
   List Selection Should Be  //section[@data-doc-type='rakennuksen-muuttaminen']//select[@name='buildingId']  199887766E
+  Logout
+
+Mikko logs in, sees that attachment can't be deleted
+  # LP-306948
+  Mikko logs in
+  Open application  ${appname}  753-416-25-30
+  Open tab  attachments
+  Element should be disabled  xpath=//table[contains(@class,'attachments-table')]/tbody//tr[@data-test-type='muut.muu']//button[@data-test-icon='delete-button']
+  Element should be disabled  xpath=//table[contains(@class,'attachments-table')]/tbody//tr[@data-test-type='muut.muu']//button[@data-test-icon='delete-button']
+  Open attachment details  muut.muu
+  Wait and click  show-attachment-versions
+  Cannot delete version  1.0
+  Logout
 
 Sonja sees that some completion is needed
+  Sonja logs in
+  Open application  ${appname}  753-416-25-30
   Click enabled by test id  request-for-complement
   Wait Until  Application state should be  complementNeeded
 

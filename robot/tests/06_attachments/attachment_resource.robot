@@ -49,6 +49,16 @@ Remove row
   Scroll and click  ${row} button[data-test-icon=delete-button]
   Confirm yes no dialog
 
+Can delete version
+  [Arguments]  ${version}
+  Wait until  Element should be visible  xpath=//tr[@data-test-id='version-row-${version}']
+  Wait Until  Element should be visible  jquery=tr[data-test-id='version-row-${version}'] td a[data-test-id=delete-version]
+
+Cannot delete version
+  [Arguments]  ${version}
+  Wait until  Element should be visible  xpath=//tr[@data-test-id='version-row-${version}']
+  Wait Until  Element should not be visible  jquery=tr[data-test-id='version-row-${version}'] td a[data-test-id=delete-version]
+
 Delete attachment version
   [Arguments]  ${versionNumber}
   Wait and click  show-attachment-versions

@@ -4,6 +4,7 @@ Documentation  Reject note functionality for documents and attachment versions.
 Suite Setup    Apply minimal fixture now
 Resource       ../../common_resource.robot
 Resource       ../common_keywords/approve_helpers.robot
+Resource       ../06_attachments/attachment_resource.robot
 Variables      ../06_attachments/variables.py
 
 *** Variables ***
@@ -293,14 +294,6 @@ Approval/rejection states not visible to neighbor
 
 
 *** Keywords ***
-
-Can delete version
-  [Arguments]  ${version}
-  Wait Until  Element should be visible  jquery=tr[data-test-id='version-row-${version}'] td a[data-test-id=delete-version]
-
-Cannot delete version
-  [Arguments]  ${version}
-  Wait Until  Element should not be visible  jquery=tr[data-test-id='version-row-${version}'] td a[data-test-id=delete-version]
 
 # Visible selector does not match 0x0 element
 Neutral version

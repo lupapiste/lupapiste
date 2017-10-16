@@ -369,7 +369,9 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles (conj roles/all-authz-writer-roles :foreman)
-   :states      (states/all-states-but (conj states/terminal-states :answered))
+   :states      {:applicant (states/all-states-but states/terminal-states)
+                 :authority (states/all-states-but states/terminal-states)
+                 :oirAuthority states/all-inforequest-states}
    :pre-checks  [app/validate-authority-in-drafts
                  att/foreman-must-be-uploader
                  att/attachment-matches-application
@@ -392,9 +394,9 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId :fileId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles (conj roles/all-authz-writer-roles :foreman)
-   :states      {:applicant    (conj (states/all-states-but states/terminal-states) :answered)
+   :states      {:applicant    (states/all-states-but states/terminal-states)
                  :authority    (states/all-states-but :canceled)
-                 :oirAuthority (states/all-states-but :canceled)}
+                 :oirAuthority states/all-inforequest-states}
    :pre-checks  [app/validate-authority-in-drafts
                  att/foreman-must-be-uploader
                  att/attachment-matches-application
