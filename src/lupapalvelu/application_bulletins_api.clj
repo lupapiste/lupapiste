@@ -20,8 +20,9 @@
 
 (def bulletin-page-size 10)
 
-(defn- make-query [{:keys [searchText municipality organization state]}]
-  (let [queries (filter seq [(when-not (ss/blank? searchText)
+(defn- make-query [{:keys [searchText municipality organization state]} now-ts]
+  (let [queries (filter seq [{:versions (bulletins/versions-elemMatch now-ts)}
+                             (when-not (ss/blank? searchText)
                                (make-text-query (ss/trim searchText)))
                              (when-not (ss/blank? municipality)
                                {:versions.municipality municipality})
@@ -32,8 +33,8 @@
     (when-let [and-query (seq queries)]
       {$and and-query})))
 
-(defn- get-application-bulletins-left [{:keys [page] :as parameters}]
-  (let [query (make-query parameters)
+(defn- get-application-bulletins-left [{:keys [page] :as parameters} now-ts]
+  (let [query (make-query parameters now-ts)
         page (cond
                (string? page) (read-string page)
                :default page)]
@@ -56,14 +57,14 @@
 (defn get-application-bulletins
   "Queries bulletins from mongo. Returns latest versions of bulletins.
    Bulletins which have starting dates in the future will be omitted."
-  [{:keys [page sort] :as parameters}]
-  (let [query (or (make-query parameters) {})
+  [{:keys [page sort] :as parameters} now-ts]
+  (let [query (or (make-query parameters now-ts) {})
         page (cond
                (string? page) (read-string page)
                :default page)
         apps (mongo/with-collection "application-bulletins"
                (query/find query)
-               (query/fields (bulletins/bulletins-fields))
+               (query/fields (bulletins/bulletins-fields now-ts))
                (query/sort (make-sort sort))
                (query/paginate :page page :per-page bulletin-page-size))]
     (->> apps
@@ -86,9 +87,9 @@
                       page-size-validator
                       search-text-validator]
    :user-roles #{:anonymous}}
-  [{data :data}]
-  (ok :data (get-application-bulletins data)
-      :left (get-application-bulletins-left data)))
+  [{data :data now-ts :created}]
+  (ok :data (get-application-bulletins data now-ts)
+      :left (get-application-bulletins-left data now-ts)))
 
 (defquery local-application-bulletins
   {:parameters [searchText organization]
