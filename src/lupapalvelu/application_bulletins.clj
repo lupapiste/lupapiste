@@ -23,44 +23,31 @@
 
 ;; Query/Projection fields
 
-(defn bulletins-fields []
-  (let [now (now)]
-    ;; It is important that this is array map, since versions-elemMatch projection
-    ;; must be before versions-fields projection definition in mongo query.
-    ;; Otherwise projection does not work properly.
-    (array-map :versions {$elemMatch {$or [{:proclamationStartsAt {$gt now} :proclamationEndsAt {$lt now}}
-                                           {:appealPeriodStartsAt {$gt now} :appealPeriodEndsAt {$lt now}}
-                                           {:officialAt {$gt now}}]}}
-               :versions.bulletinState 1
-               :versions.state 1
-               :versions.municipality 1
-               :versions.address 1
-               :versions.location 1
-               :versions.primaryOperation 1
-               :versions.propertyId 1
-               :versions.applicant 1
-               :versions.modified 1
-               :versions.proclamationStartsAt 1 :versions.proclamationEndsAt 1
-               :versions.proclamationText 1
-               :versions.verdictGivenAt 1
-               :versions.verdictGivenText 1
-               :versions.appealPeriodStartsAt 1 :versions.appealPeriodEndsAt 1
-               :versions.officialAt 1
-               :versions.matti-verdicts.data 1
-               :versions.matti-verdicts.category 1
-               :modified 1
-               :versions.bulletin-op-description 1)))
+(def bulletins-fields
+  {:versions {$slice -1} :versions.bulletinState 1
+   :versions.state 1 :versions.municipality 1
+   :versions.address 1 :versions.location 1
+   :versions.primaryOperation 1 :versions.propertyId 1
+   :versions.applicant 1 :versions.modified 1
+   :versions.proclamationEndsAt 1 :versions.proclamationStartsAt 1
+   :versions.proclamationText 1
+   :versions.verdictGivenAt 1 :versions.appealPeriodStartsAt 1
+   :versions.appealPeriodEndsAt 1 :versions.verdictGivenText 1
+   :versions.officialAt 1
+   :versions.matti-verdicts.data 1
+   :versions.matti-verdicts.category 1
+   :modified 1
+   :versions.bulletin-op-description 1})
 
-(defn bulletin-fields []
-  (util/assoc-to-array-map
-   (bulletins-fields)
-   :versions._applicantIndex 1
-   :versions.documents 1
-   :versions.id 1
-   :versions.attachments 1
-   :versions.verdicts 1
-   :versions.tasks 1
-   :bulletinState 1))
+(def bulletin-fields
+  (merge bulletins-fields
+         {:versions._applicantIndex 1
+          :versions.documents 1
+          :versions.id 1
+          :versions.attachments 1
+          :versions.verdicts 1
+          :versions.tasks 1
+          :bulletinState 1}))
 
 ;; Snapshot
 
@@ -115,7 +102,7 @@
 
 (defn get-bulletin
   ([bulletinId]
-   (get-bulletin bulletinId (bulletin-fields)))
+    (get-bulletin bulletinId bulletin-fields))
   ([bulletinId projection]
    (mongo/with-id (mongo/by-id :application-bulletins bulletinId projection))))
 
@@ -179,21 +166,17 @@
     (when-not (< start end)
       (fail :error.startdate-before-enddate))))
 
-(defn bulletin-version-date-valid?
-  "Verify temporal visibility for bulletin version by state"
-  [{state :bulletinState :as bulletin-version}]
-  (let [now (now)]
-    (case (keyword state)
-      :proclaimed   (and (< (:proclamationStartsAt bulletin-version) now)
-                         (> (:proclamationEndsAt bulletin-version) now))
-      :verdictGiven (and (< (:appealPeriodStartsAt bulletin-version) now)
-                         (> (:appealPeriodEndsAt bulletin-version) now))
-      :final        (< (:officialAt bulletin-version) now))))
-
 (defn bulletin-date-valid?
   "Verify that bulletin visibility date is less than current timestamp"
-  [{bulletin-versions :versions}]
-  (some bulletin-version-date-valid? bulletin-versions))
+  [{state :bulletinState :as bulletin-version}]
+  (let [now          (now)
+        proc-start   (:proclamationStartsAt bulletin-version)
+        appeal-start (:appealPeriodStartsAt bulletin-version)
+        final-start  (:officialAt bulletin-version)]
+    (case (keyword state)
+      :proclaimed   (< proc-start now)
+      :verdictGiven (< appeal-start now)
+      :final        (< final-start now))))
 
 (defn verdict-given-bulletin-exists? [app-id]
   (mongo/any? :application-bulletins {:_id app-id :versions {"$elemMatch" {:bulletinState "verdictGiven"}}}))

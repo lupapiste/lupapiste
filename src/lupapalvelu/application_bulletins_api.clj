@@ -63,13 +63,12 @@
                :default page)
         apps (mongo/with-collection "application-bulletins"
                (query/find query)
-               (query/fields (bulletins/bulletins-fields))
+               (query/fields bulletins/bulletins-fields)
                (query/sort (make-sort sort))
                (query/paginate :page page :per-page bulletin-page-size))]
     (->> apps
-         (map #(-> (util/find-first bulletins/bulletin-version-date-valid? (:versions %))
-                   (assoc :id (:_id %))))
-         (filter :state))))
+         (map #(assoc (first (:versions %)) :id (:_id %)))
+         (filter bulletins/bulletin-date-valid?))))
 
 (defn- page-size-validator [{{page :page} :data}]
   (when (> (* page bulletin-page-size) (Integer/MAX_VALUE))
@@ -263,7 +262,7 @@
   {:parameters [bulletinId]
    :input-validators [(partial action/non-blank-parameters [:bulletinId])]
    :user-roles #{:authority :applicant}}
-  (let [bulletin-fields (-> (bulletins/bulletins-fields)
+  (let [bulletin-fields (-> bulletins/bulletins-fields
                             (dissoc :versions)
                             (merge {:comments 1
                                     :versions.id 1
