@@ -892,3 +892,92 @@
       (fact "Not needed can be set after version deletion"
         (command pena :set-attachment-not-needed :id application-id :notNeeded true
                  :attachmentId (:id updated-attachment)) => ok?))))
+
+(facts "approve-application locks attachments"              ; LP-306948
+  (let [application (create-application pena :propertyId sipoo-property-id)
+        application-id (:id application)
+        {attachments :attachments} (query-application pena application-id)
+        att1 (first attachments)]
+    (fact "upload new (valaistussuunnitelma)"
+      (upload-file-and-bind pena application-id {:type  {:type-group "suunnitelmat"
+                                                         :type-id    "valaistussuunnitelma"}
+                                                 :group {:groupType  "operation"
+                                                         :operations [{:id (-> application :primaryOperation :id)}]}}))
+    (fact "upload two files to placeholder (paapiirustus)"
+      (upload-file-and-bind pena application-id {} :attachment-id (:id att1))
+      (upload-file-and-bind pena application-id {} :attachment-id (:id att1)))
+    (command pena :submit-application :id application-id) => ok?
+    (fact "can't delete empty placeholder, as it's bound to operation!"
+      (-> attachments last :versions) => empty?
+      (command pena :delete-attachment :id application-id :attachmentId (-> attachments last :id)) => fail?)
+    (fact "now 5 attachments (4 placeholders 1 user added"
+      (-> (query-application pena application-id) :attachments count) => 5)
+    (fact "Pena adds new version to valaistusuunnitelma"
+      (let [valaistus (util/find-first #(= "valaistussuunnitelma" (get-in % [:type :type-id]))
+                                       (-> (query-application pena application-id) :attachments))]
+        (upload-file-and-bind pena application-id {} :attachment-id (:id valaistus))))
+
+    (fact "allowed actions"
+      (let [attachments (:attachments (query-application pena application-id))
+            asemapiir  (util/find-first #(= "asemapiirros" (get-in % [:type :type-id]))
+                                       attachments)
+            valaistus  (util/find-first #(= "valaistussuunnitelma" (get-in % [:type :type-id]))
+                                        attachments)
+            asema-versions (:versions asemapiir)
+            valaistus-versions (:versions valaistus)]
+        (count asema-versions) => 2
+        (count valaistus-versions) => 2
+      (fact "can't delete bound placeholder attachment"
+        pena =not=> (allowed? :delete-attachment :id application-id :attachmentId (:id asemapiir)))
+      (fact "could delete self added attachment"
+        pena => (allowed? :delete-attachment :id application-id :attachmentId (:id valaistus)))
+      (fact "could delete any added version for both"       ; although placehlder cant be deleted, added version can be naturaly deleted
+        pena => (allowed? :delete-attachment-version :id application-id
+                          :attachmentId (:id asemapiir)
+                          :fileId (:fileId (last asema-versions))
+                          :originalFileId (:originalFileId (last asema-versions)))
+        pena => (allowed? :delete-attachment-version :id application-id
+                          :attachmentId (:id asemapiir)
+                          :fileId (:fileId (first asema-versions))
+                          :originalFileId (:originalFileId (last asema-versions)))
+        pena => (allowed? :delete-attachment-version :id application-id
+                          :attachmentId (:id valaistus)
+                          :fileId (:fileId (last valaistus-versions))
+                          :originalFileId (:originalFileId (last valaistus-versions)))
+        pena => (allowed? :delete-attachment-version :id application-id
+                          :attachmentId (:id valaistus)
+                          :fileId (:fileId (first valaistus-versions))
+                          :originalFileId (:originalFileId (last valaistus-versions))))))
+
+    (command sonja :approve-application :id application-id :lang "fi") => ok?
+    (fact "state is now sent" (:state (query-application pena application-id)) => "sent")
+
+    (fact "allowed actions on :sent state"
+      (let [attachments (:attachments (query-application pena application-id))
+            asemapiir  (util/find-first #(= "asemapiirros" (get-in % [:type :type-id]))
+                                        attachments)
+            valaistus  (util/find-first #(= "valaistussuunnitelma" (get-in % [:type :type-id]))
+                                        attachments)
+            asema-versions (:versions asemapiir)
+            valaistus-versions (:versions valaistus)]
+        (fact "can't delete bound placeholder attachment"
+          pena =not=> (allowed? :delete-attachment :id application-id :attachmentId (:id asemapiir)))
+        (fact "can't delete self added attachment"
+          pena =not=> (allowed? :delete-attachment :id application-id :attachmentId (:id valaistus)))
+        (fact "could not delete any added version"
+          pena =not=> (allowed? :delete-attachment-version :id application-id
+                            :attachmentId (:id asemapiir)
+                            :fileId (:fileId (last asema-versions))
+                            :originalFileId (:originalFileId (last asema-versions)))
+          pena =not=> (allowed? :delete-attachment-version :id application-id
+                            :attachmentId (:id asemapiir)
+                            :fileId (:fileId (first asema-versions))
+                            :originalFileId (:originalFileId (last asema-versions)))
+          pena =not=> (allowed? :delete-attachment-version :id application-id
+                            :attachmentId (:id valaistus)
+                            :fileId (:fileId (last valaistus-versions))
+                            :originalFileId (:originalFileId (last valaistus-versions)))
+          pena =not=> (allowed? :delete-attachment-version :id application-id
+                            :attachmentId (:id valaistus)
+                            :fileId (:fileId (first valaistus-versions))
+                            :originalFileId (:originalFileId (last valaistus-versions))))))))
