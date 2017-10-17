@@ -1,8 +1,6 @@
 (ns lupapalvelu.xml.asianhallinta.ely-test
   (:require [midje.sweet :refer :all]
             [clojure.java.io :as io]
-            [sade.strings :as ss]
-            [sade.schemas :as ssc]
             [sade.xml :as xml]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.integrations.ely :as ely]
