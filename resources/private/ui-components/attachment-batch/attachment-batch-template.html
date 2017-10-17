@@ -189,6 +189,8 @@
 
     <!-- ko if: signingSelected -->
     <div class="batch-password">
+      <!-- below input is to catch Chrome Autofilling username to meaningful input field -->
+      <input type="text" height="0" width="0" style="border: none;opacity:0;height:0;width:0;margin:0;padding:0;" tabindex="-1">
       <label class="batch-required"
              for="batch-password"
              data-bind="ltext: 'signAttachment.verifyPassword'">
