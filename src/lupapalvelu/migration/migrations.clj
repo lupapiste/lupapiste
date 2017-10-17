@@ -3438,6 +3438,16 @@
                          {$set {:scope.$.bulletins.enabled true
                                 :scope.$.bulletins.url     "http://julkipano.lupapiste.fi/vantaa"}}))
 
+(defmigration change-oauth-callback-to-uri
+  {:apply-when (pos? (mongo/count :users {:oauth.callback {$exists true}}))}
+  (doseq [user (mongo/find-maps :users {:oauth.callback {$exists true}})]
+    (let [parts (str/split (get-in user [:oauth :callback :success-url]) #"/")
+          callback-url (str (first parts) "//" (nth parts 2))]
+      (mongo/update-by-id :users
+                          (:_id user)
+                          {$unset {:oauth.callback ""}
+                           $set {:oauth.callback-url callback-url}}))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

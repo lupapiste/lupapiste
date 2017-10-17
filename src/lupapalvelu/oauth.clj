@@ -8,10 +8,17 @@
             [lupapalvelu.templates.base :as bt]
             [lupapalvelu.templates.header :as ht]))
 
-(defn authorization-page-hiccup [client scopes lang user response-type anti-csrf]
+(defn authorization-page-hiccup [client scopes lang user response-type success-url error-url anti-csrf]
   (let [company-id (get-in user [:company :id])
         company (when company-id (company/find-company-by-id company-id))
-        user-name (str (:firstName user) " " (:lastName user))]
+        user-name (str (:firstName user) " " (:lastName user))
+        hidden-fields [["client_id" (get-in client [:oauth :client-id])]
+                       ["scope" (str/join "," scopes)]
+                       ["lang" lang]
+                       ["response_type" response-type]
+                       ["__anti-forgery-token" anti-csrf]
+                       ["success_callback" success-url]
+                       ["error_callback" error-url]]]
     (bt/page-hiccup
       (ht/simple-header lang)
       [:div.oauth
@@ -30,17 +37,14 @@
             [:li (i18n/localize-and-fill lang (str "oauth.scope." s) (:name company))])]]]
        [:div.buttons
         [:form.accept {:method "post" :action "/oauth/authorize"}
-         [:input {:type "hidden" :name "client_id" :value (get-in client [:oauth :client-id])}]
-         [:input {:type "hidden" :name "scope" :value (str/join "," scopes)}]
-         [:input {:type "hidden" :name "lang" :value lang}]
-         [:input {:type "hidden" :name "response_type" :value response-type}]
-         [:input {:type "hidden" :name "__anti-forgery-token" :value anti-csrf}]
+         (for [[i-name i-value] hidden-fields]
+           [:input {:type "hidden" :name i-name :value i-value}])
          [:button.accept.positive {:name "accept" :value "true"}
           [:i.lupicon-check]
           [:span (i18n/localize lang "oauth.button.accept")]]]
         [:form {:method "post" :action "/oauth/authorize"}
-         [:input {:type "hidden" :name "client_id" :value (get-in client [:oauth :client-id])}]
-         [:input {:type "hidden" :name "lang" :value lang}]
+         (for [[i-name i-value] hidden-fields]
+           [:input {:type "hidden" :name i-name :value i-value}])
          [:button.cancel.reject {:name "cancel" :value "true"}
           [:i.lupicon-remove]
           [:span (i18n/localize lang "oauth.button.cancel")]]]]])))

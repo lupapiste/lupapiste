@@ -694,8 +694,7 @@
             :display-name {:fi "Lupapiste kauppa"
                            :sv "Lupapiste butik"
                            :en "Lupapiste store"}
-            :callback {:success-url "http://localhost:8000/success"
-                       :failure-url "http://localhost:8000/failure"}}}
+            :callback-url "http://localhost:8000"}}
 
    ;; Solita admin:  financial / admin
    {:id "financial"
