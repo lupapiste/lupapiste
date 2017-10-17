@@ -9,8 +9,9 @@
             [sade.http :as http]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
-            [sade.util :refer [=as-kw not=as-kw fn->] :as util]
+            [sade.util :refer [=as-kw not=as-kw fn-> fn->>] :as util]
             [lupapalvelu.action :refer [update-application application->command]]
+            [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.archiving-util :as archiving-util]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment.accessibility :as access]
@@ -1020,3 +1021,17 @@
            (->> (:operations group)
                 (map :id)
                 (some (partial ensure-operation-id-exists (:application command)))))))))
+
+(defn included-in-published-bulletin? [{application-history :history} bulletins-derefable attachment-id]
+  (and attachment-id
+       (some :bulletin-published application-history)
+       (->> (mapcat :versions @bulletins-derefable)
+            (filter bulletins/bulletin-version-date-valid?)
+            (some (fn->> :attachments (util/find-by-id attachment-id))))))
+
+(defn validate-not-included-in-published-bulletin [{{attachment-id :attachmentId ignore :ignoreBulletins} :data
+                                                     application :application
+                                                     bulletins :application-bulletins}]
+  (when (and (not ignore)
+             (included-in-published-bulletin? application bulletins attachment-id))
+    (fail :error.attachment-included-in-published-bulletin)))
