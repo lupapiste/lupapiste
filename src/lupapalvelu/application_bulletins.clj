@@ -12,7 +12,8 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.document.model :as model]
             [schema.core :as sc]
-            [sade.schemas :as ssc]))
+            [sade.schemas :as ssc]
+            [clj-time.coerce :as tc]))
 
 (sc/defschema ApplicationBulletin
   {:id             sc/Str
@@ -40,8 +41,21 @@
 
 ;; Query/Projection fields
 
+(defn versions-elemMatch
+  ([now-ts]
+   (versions-elemMatch now-ts (tc/to-long (t/minus (tc/from-long now-ts) (t/days 14)))))
+  ([now-ts officialAt-lowerLimit]
+    {:versions {$elemMatch
+                {$or [{:bulletinState :proclaimed
+                       :proclamationStartsAt {$lt now-ts} :proclamationEndsAt {$gt now-ts}}
+                      {:bulletinState :verdictGiven
+                       :appealPeriodStartsAt {$lt now-ts} :appealPeriodEndsAt {$gt now-ts}}
+                      {:bulletinState :final
+                       :officialAt {$lt now-ts
+                                    $gt officialAt-lowerLimit}}]}}}))
+
 (def bulletins-fields
-  {:versions {$slice -1} :versions.bulletinState 1
+  {:versions.bulletinState 1
    :versions.state 1 :versions.municipality 1
    :versions.address 1 :versions.location 1
    :versions.primaryOperation 1 :versions.propertyId 1
@@ -53,7 +67,7 @@
    :versions.officialAt 1
    :versions.matti-verdict.data 1
    :versions.matti-verdict.category 1
-   :modified 1 :versions.application-id 1
+   :modified 1
    :versions.bulletin-op-description 1})
 
 (def bulletin-fields
@@ -194,6 +208,17 @@
       :proclaimed   (< proc-start now)
       :verdictGiven (< appeal-start now)
       :final        (< final-start now))))
+
+(defn bulletin-version-date-valid?
+  "Verify that bulletin visibility date is less than current timestamp"
+  [{state :bulletinState :as bulletin-version}]
+  (let [now          (now)]
+    (case (keyword state)
+      :proclaimed   (and (< (:proclamationStartsAt bulletin-version) now)
+                         (> (:proclamationEndsAt bulletin-version) now))
+      :verdictGiven (and (< (:appealPeriodStartsAt bulletin-version) now)
+                         (> (:appealPeriodEndsAt bulletin-version) now))
+      :final        (< (:officialAt bulletin-version) now))))
 
 (defn verdict-given-bulletin-exists? [app-id]
   (mongo/any? :application-bulletins {:_id app-id :versions {"$elemMatch" {:bulletinState "verdictGiven"}}}))
