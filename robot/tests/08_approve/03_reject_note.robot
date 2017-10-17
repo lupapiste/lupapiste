@@ -304,7 +304,7 @@ Delete version
   [Arguments]  ${version}
   Click Element  jquery=tr[data-test-id='version-row-${version}'] td a[data-test-id=delete-version]
   Confirm yes no dialog
-  Cannot delete version  ${version}
+  Wait until  Element should not be visible  xpath=//tr[@data-test-id='version-row-${version}']
 
 Attachment approved
   Wait Until  Element should be disabled  test-attachment-approve
