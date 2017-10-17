@@ -1,4 +1,4 @@
-LUPAPISTE.BulletinTabModel = function(params) {
+LUPAPISTE.YmpBulletinTabModel = function(params) {
   "use strict";
   var self = this;
 
