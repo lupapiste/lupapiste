@@ -1396,7 +1396,7 @@
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}]))
 
-(def companies [{:_id "solita"
+(def companies [{:id "solita"
                  :accountType "account5"
                  :customAccountLimit nil
                  :created 1412959886600
@@ -1413,7 +1413,7 @@
                  :process-id "CkaekKfpEymHUG0nn5z4MLxwNm34zIdpAXHqQ3FM"
                  :tags [{:id "7a67a67a67a67a67a67a67a6"
                          :label "Projekti1"}]}
-                {:_id "esimerkki"
+                {:id "esimerkki"
                  :accountType "account5"
                  :customAccountLimit nil
                  :created 1493200035783
