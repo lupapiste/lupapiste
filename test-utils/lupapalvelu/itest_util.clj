@@ -48,7 +48,7 @@
   (some #(when (= (:id %) org-id) %) minimal/organizations))
 
 (defn company-from-minimal-by-id [id]
-  (some #(when (= (:_id %) id) %) minimal/companies))
+  (some #(when (= (:id %) id) %) minimal/companies))
 
 (def kaino       (apikey-for "kaino@solita.fi"))
 (def kaino-id    (id-for "kaino@solita.fi"))
