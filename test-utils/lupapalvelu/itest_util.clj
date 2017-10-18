@@ -526,6 +526,9 @@
 (defn give-verdict [apikey application-id & args]
   (apply give-verdict-with-fn command apikey application-id args))
 
+(defn give-local-verdict [apikey application-id & args]
+  (apply give-verdict-with-fn local-command apikey application-id args))
+
 (defn allowed? [action & args]
   (fn [apikey]
     (let [{:keys [ok actions]} (apply query apikey :allowed-actions args)

@@ -43,10 +43,12 @@
                           "applicant" :versions.applicant
                           "modified" :versions.modified})
 
+(def- default-sort {:versions.modified -1})
+
 (defn- make-sort [{:keys [field asc]}]
   (let [sort-field (sort-field-mapping field)]
     (cond
-      (nil? sort-field) {}
+      (nil? sort-field) default-sort
       (sequential? sort-field) (apply array-map (interleave sort-field (repeat (dir asc))))
       :else (array-map sort-field (dir asc)))))
 
