@@ -989,6 +989,14 @@
                  (states/post-verdict-states (keyword current-state)))
         (fail :error.pre-verdict-attachment)))))
 
+(defn attachment-not-stamped
+  "Pre-check to check that non-authority users can't delete stamped attachments"
+  [{{attachmentId :attachmentId} :data user :user application :application}]
+  (when-not (auth/application-authority? application user)  ; authority can delete
+    (when-let [attachment (get-attachment-info application attachmentId)]
+      (when (-> attachment :latestVersion :stamped)
+        (fail :error.attachment.stamped)))))
+
 (defn validate-group-is-selectable [{application :application}]
   (when (false? (op/get-primary-operation-metadata application :attachment-op-selector))
     (fail :error.illegal-meta-type)))

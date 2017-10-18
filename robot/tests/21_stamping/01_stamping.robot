@@ -158,6 +158,7 @@ Status of stamping is ready
 
 Select all files and start stamping
   Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="stamp-select-all"]
+  Scroll to bottom
   Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="start-stamping"]
   Xpath should match x times  //div[@id="stamping-container"]//span[@data-test-id="attachment-status-text"]  3
   Wait Until  Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Leimaus valmis
@@ -172,6 +173,7 @@ Reset stamping, stamping page should be refreshed
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
 
 Return from stamping to attachments tab
+  Scroll to bottom
   Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="cancel-stamping"]
   Element should be visible  application-attachments-tab
 
@@ -182,16 +184,32 @@ Sonja starts stamping again
   Open stamping page  ${appname2}
 
 No attachments are selected
-  Javascript?  $("div.stampbox-wrapper input:checked").length === 0
+  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
 
 Selection and stamping shows confirmation dialog
-  #Scroll and click  div#stamping-container tr[data-test-id=asuinrakennus] a[data-test-id=attachments-group-select]
   Scroll and click  div#stamping-container tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-select]
+  Scroll to bottom
   Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="start-stamping"]
+  # Prompt about re-stamping
   Deny yes no dialog
   Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="start-stamping"]
   Confirm yes no dialog
   Wait Until  Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Leimaus valmis
+  Logout
+
+Mikko checks status after stamping
+  Mikko logs in
+  Open application  ${appname2}  753-416-25-30
+  Open tab  attachments
+  # Three stamped icons, as uploaded
+  Xpath should match X times  //div[@id='application-attachments-tab']//i[@data-test-icon='stamped-icon']  3
+  # Not able to delete attachments LPK-3335
+  Xpath should match X times  //div[@id='application-attachments-tab']//button[@data-test-icon='delete-button' and @disabled]  3
+  Logout
+
+Frontend errors check
+  There are no frontend errors
+
 
 *** Keywords ***
 
