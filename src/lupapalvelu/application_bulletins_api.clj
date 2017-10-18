@@ -245,7 +245,7 @@
   [command]
   (if-let [bulletin (bulletins/get-bulletin bulletinId)]
     (let [latest-version       (->> bulletin :versions
-                                    (filter bulletins/bulletin-version-date-valid?) last)
+                                    (filter (partial bulletins/bulletin-version-date-valid? (:created command))) last)
           bulletin-version     (assoc latest-version :versionId (:id latest-version)
                                                      :id (:id bulletin))
           append-schema-fn     (fn [{schema-info :schema-info :as doc}]

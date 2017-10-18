@@ -230,7 +230,7 @@
           _ (local-command sonja :move-to-proclaimed
                      :id (:id sipoo-app)
                      :proclamationStartsAt (util/get-timestamp-ago :day 1)
-                     :proclamationEndsAt (util/get-timestamp-from-now :day 1)
+                     :proclamationEndsAt (util/get-timestamp-from-now :day 2)
                      :proclamationText "testi") => ok?
           _ (local-query pena :application-bulletins :page "1"
                         :searchText ""
@@ -288,27 +288,27 @@
             (:id (first data)) => (:id sipoo-app))))
 
       (facts "verdict given bulletin"
-        (let [{vid :verdict-id} (give-local-verdict olli (:id oulu-app) :verdictId "12330-2016")
-              ts-now (util/get-timestamp-ago :day 1)
+        (let [_ (give-local-verdict olli (:id oulu-app) :verdictId "12330-2016")
+              ts (+ 1000 (util/get-timestamp-from-now :day 1))
               resp (local-command olli :move-to-verdict-given
                                  :id (:id oulu-app)
-                                 :verdictGivenAt ts-now
-                                 :appealPeriodStartsAt ts-now
-                                 :appealPeriodEndsAt (+ 1 ts-now)
-                                 :verdictGivenText "foo")
-              bulletin (query-bulletin local-query pena (:id oulu-app))]
+                                 :verdictGivenAt ts
+                                 :appealPeriodStartsAt ts
+                                 :appealPeriodEndsAt (+ 100000 ts)
+                                 :verdictGivenText "foo")]
           (fact "move-to-verdict-given ok"
             resp => ok?)
-          (fact "bulletin state is 'verdictGiven'"
-            (:bulletinState bulletin) => "verdictGiven")
-          (fact "bulletin contains an attachment that is linked to the verdict"
-            (:attachments bulletin) => (has some (contains {:target {:type "verdict" :id vid}})))
-          (fact "State filter in search still works"
-            (:states (local-query pena :application-bulletin-states)) => (just ["proclaimed" "verdictGiven"])
-            (let [{data :data} (local-query pena :application-bulletins :page 1 :searchText "" :municipality nil :state "proclaimed" :sort nil)]
-              (count data) => 1)
-            (let [{data :data} (local-query pena :application-bulletins :page 1 :searchText "" :municipality nil :state "verdictGiven" :sort nil)]
-              (count data) => 1))))
+          (facts "when the verdictGiven bulletin has been published"
+            (let [f (partial local-query-with-timestamp (+ 50000 ts))
+                  bulletin (query-bulletin f pena (:id oulu-app))]
+              (fact "bulletin state is 'verdictGiven'"
+                (:bulletinState bulletin) => "verdictGiven")
+              (fact "State filter in search still works"
+                (into [] (:states (f pena :application-bulletin-states))) => (just ["proclaimed" "verdictGiven"])
+                (let [{data :data} (f pena :application-bulletins :page 1 :searchText "" :municipality nil :state "proclaimed" :sort nil)]
+                  (count data) => 1) ; This is the proclaimed bulletin for sipoo-app
+                (let [{data :data} (f pena :application-bulletins :page 1 :searchText "" :municipality nil :state "verdictGiven" :sort nil)]
+                  (count data) => 1))))))
 
       (facts "Paging"
         (dotimes [_ 20]

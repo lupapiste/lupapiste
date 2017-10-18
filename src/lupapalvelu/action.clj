@@ -27,11 +27,13 @@
 ;; construct command, query and raw
 ;;
 
+(def ^:dynamic *created-timestamp-for-test-actions* nil)
+
 (defn action [name & {:keys [user type data] :or {:user nil :type :action :data {}}}]
   {:action name
    :user user
    :type type
-   :created (now)
+   :created (or *created-timestamp-for-test-actions* (now))
    :data data})
 
 

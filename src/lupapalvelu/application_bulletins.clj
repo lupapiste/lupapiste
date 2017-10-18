@@ -210,15 +210,16 @@
       :final        (< final-start now))))
 
 (defn bulletin-version-date-valid?
-  "Verify that bulletin visibility date is less than current timestamp"
-  [{state :bulletinState :as bulletin-version}]
-  (let [now          (now)]
-    (case (keyword state)
-      :proclaimed   (and (< (:proclamationStartsAt bulletin-version) now)
-                         (> (:proclamationEndsAt bulletin-version) now))
-      :verdictGiven (and (< (:appealPeriodStartsAt bulletin-version) now)
-                         (> (:appealPeriodEndsAt bulletin-version) now))
-      :final        (< (:officialAt bulletin-version) now))))
+  "Verify that bulletin visibility date is valid at the given (or current) point of time"
+  ([bulletin-version]
+   (bulletin-version-date-valid? (now) bulletin-version))
+  ([now {state :bulletinState :as bulletin-version}]
+   (case (keyword state)
+     :proclaimed   (and (< (:proclamationStartsAt bulletin-version) now)
+                        (> (:proclamationEndsAt bulletin-version) now))
+     :verdictGiven (and (< (:appealPeriodStartsAt bulletin-version) now)
+                        (> (:appealPeriodEndsAt bulletin-version) now))
+     :final        (< (:officialAt bulletin-version) now))))
 
 (defn verdict-given-bulletin-exists? [app-id]
   (mongo/any? :application-bulletins {:_id app-id :versions {"$elemMatch" {:bulletinState "verdictGiven"}}}))
