@@ -209,6 +209,17 @@
                                      "company.report.excel.header.attachment.pre"
                                      "company.report.excel.header.attachment.post"]))
 
+(defn- company-foreman-headers [lang]
+  (map (partial i18n/localize lang) ["company.report.excel.header.operation"
+                                     "company.report.excel.header.useractions"
+                                     "company.report.excel.header.attachment.useractions"
+                                     "company.report.excel.header.id"
+                                     "company.report.excel.header.title"
+                                     "company.report.excel.header.organization"
+                                     "company.report.excel.header.applicant"
+                                     "company.report.excel.header.applicant.count"
+                                     "company.report.excel.header.attachment"]))
+
 
 (defn- usage [application]
   (when-let [documents (:documents application)]
@@ -234,14 +245,14 @@
 (defn- building-id [application operation]
   (let [operation-doc (domain/get-document-by-operation application operation)
         tunnus (get-in operation-doc [:data :tunnus :value])
-        valtakunnalinen-numero (get-in operation-doc [:data :valtakunnallinenNumero :value])]
-    (str tunnus "-" valtakunnalinen-numero)))
+        valtakunnallinen-numero (get-in operation-doc [:data :valtakunnallinenNumero :value])]
+    (str tunnus " - " valtakunnallinen-numero)))
 
 (defn- row-data [application operation lang user]
   {:building-id                   (building-id application operation)
    :operation                     (localized-operation lang operation)
    :usage                         (usage application)
-   :required-actions              "required-actions"
+   :required-actions              (count (filter #(= "rejected" (-> % :meta :_approved :value)) (:documents application)))
    :attachment-required-actions   (meta/count-attachments-requiring-action user application)
    :inuse-date                    (inUse application)
    :final-review-date             (final-review-date application)
@@ -251,6 +262,7 @@
    :organization                  (org/get-organization-name (org/get-organization (:organization application)))
    :applicant                     (applicant-name application)
    :applicant-count               (count (domain/get-documents-by-subtype (:documents application) :hakija))
+   :attachments-count             (count (:attachments application))
    :pre-verdict-attachments       (count (filter #(contains? states/pre-verdict-states (keyword (:applicationState %))) (:attachments application)))
    :post-verdict-attachments      (count (filter #(contains? states/post-verdict-states (keyword (:applicationState %))) (:attachments application)))
    :permit-type                   (:permitType application)})
@@ -261,16 +273,23 @@
     (into apps-with-primary-operation apps-with-secondary-operations)))
 
 (defn ^OutputStream company-applications [company-id start-ts end-ts lang user]
-  (let [applications (company-applications-between company-id start-ts end-ts)
-        headers (company-report-headers lang)
+  (let [[foreman-apps applications] ((juxt filter remove)
+                                    foreman/foreman-app?
+                                    (company-applications-between company-id start-ts end-ts))
         permit-types (distinct (map :permitType applications))
-        report-data (report-data-by-operations applications lang user)
+        applications-row-data (report-data-by-operations applications lang user)
+        foreman-app-row-data (report-data-by-operations foreman-apps lang user)
         row-fn (juxt :building-id :operation :usage :required-actions :attachment-required-actions :inuse-date :final-review-date
-                     :review-count :id :title :organization :applicant :applicant-count :pre-verdict-attachments :post-verdict-attachments)
-        final-data (map (fn [permit] {:sheet-name (str permit)
-                                      :header     headers
+                     :reviews-count :id :title :organization :applicant :applicant-count :pre-verdict-attachments :post-verdict-attachments)
+        foreman-row-fn (juxt :operation :required-actions :attachment-required-actions :id :title :organization :applicant :applicant-count :attachments-count)
+        application-data (map (fn [permit] {:sheet-name (str permit)
+                                      :header     (company-report-headers lang)
                                       :row-fn     row-fn
-                                      :data       (filter #(= permit (:permit-type %)) report-data)
+                                      :data       (filter #(= permit (:permit-type %)) applications-row-data)
                                       }) permit-types)
-        wb (excel/create-workbook final-data)]
+        foreman-app-data {:sheet-name (i18n/localize lang "tyonjohtajat")
+                          :header     (company-foreman-headers lang)
+                          :row-fn     foreman-row-fn
+                          :data       foreman-app-row-data}
+        wb (excel/create-workbook (flatten [application-data foreman-app-data]))]
     (excel/xlsx-stream wb)))
