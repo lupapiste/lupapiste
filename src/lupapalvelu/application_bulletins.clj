@@ -1,5 +1,6 @@
 (ns lupapalvelu.application-bulletins
-  (:require [monger.operators :refer :all]
+  (:require [taoensso.timbre :refer [infof]]
+            [monger.operators :refer :all]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
             [clojure.set :refer [difference]]
@@ -13,7 +14,9 @@
             [lupapalvelu.document.model :as model]
             [schema.core :as sc]
             [sade.schemas :as ssc]
-            [clj-time.coerce :as tc]))
+            [clj-time.coerce :as tc]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.permit :as permit]))
 
 (sc/defschema ApplicationBulletin
   {:id             sc/Str
@@ -119,6 +122,19 @@
 (defn snapshot-updates [snapshot search-fields ts]
   {$push {:versions snapshot}
    $set  (merge {:modified ts} search-fields)})
+
+(defn get-search-fields [fields app]
+  (into {} (map #(hash-map % (% app)) fields)))
+
+(sc/defn create-bulletin [application created & [updates]] :- ApplicationBulletin
+  (let [app-snapshot (create-bulletin-snapshot application)
+       app-snapshot (if updates
+                      (merge app-snapshot updates)
+                      app-snapshot)
+       search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
+       search-updates (get-search-fields search-fields app-snapshot)]
+   (snapshot-updates app-snapshot search-updates created)))
+
 
 (defn create-comment [bulletin-id version-id comment contact-info files created]
   (let [id          (mongo/create-id)
@@ -244,14 +260,22 @@
         (fail :error.bulletin.official-before-appeal-period)))))
 
 (defn process-delete-verdict [applicationId verdictId]
-  (println (str "Bulletins for removed verdict " verdictId " need to be cleaned up")))
+  (infof "Bulletins for removed verdict %s need to be cleaned up" verdictId)
+  (mongo/remove :application-bulletins (str applicationId "_" verdictId))
 
-(defn process-check-for-verdicts-result [{{old-verdicts :verdicts applicationId :id :as application} :application} new-verdicts]
-  (let [old-verdict-ids          (map :id (remove :draft old-verdicts))
-        new-verdict-ids          (map :id (remove :draft new-verdicts))
-        removed-verdict-ids      (clojure.set/difference (set old-verdict-ids) (set new-verdict-ids))
-        appeared-verdict-ids     (clojure.set/difference (set new-verdict-ids) (set old-verdict-ids))]
-    (doseq [vid removed-verdict-ids]
-      (process-delete-verdict applicationId vid))
-    (doseq [vid appeared-verdict-ids]
-      (println (str "Processing a new bulletin for verdict " vid)))))
+(defn process-check-for-verdicts-result [{{old-verdicts :verdicts applicationId :id
+                                           :keys [organization permitType municipality] :as application} :application
+                                          created :created}
+                                         new-verdicts]
+  (when (and (not (permit/ymp-permit? application))
+             (org/bulletins-enabled? (org/get-organization organization) permitType municipality))
+    (let [old-verdict-ids          (map :id (remove :draft old-verdicts))
+          new-verdict-ids          (map :id (remove :draft new-verdicts))
+          removed-verdict-ids      (clojure.set/difference (set old-verdict-ids) (set new-verdict-ids))
+          appeared-verdict-ids     (clojure.set/difference (set new-verdict-ids) (set old-verdict-ids))]
+      (doseq [vid removed-verdict-ids]
+        (process-delete-verdict applicationId vid))
+      (doseq [vid appeared-verdict-ids]
+        (infof "Creating a new bulletin for verdict %s" vid)
+        (upsert-bulletin-by-id (str applicationId "_" vid)
+          (create-bulletin (assoc application :verdicts [(util/find-by-id vid new-verdicts)]) created)))))))

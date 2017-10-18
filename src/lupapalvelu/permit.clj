@@ -341,6 +341,10 @@
 (defn is-ya-permit [permit-type]
   (= permit-type (name YA)))
 
+(defn ymp-permit? [{{:keys [permitType]} :application}]
+  (let [ymp-permit-types (set (map name [YI YL YM VVVL MAL]))]
+    (ymp-permit-types permitType)))
+
 (defn is-archiving-project [{{:keys [permitType]} :application}]
   (when-not (= permitType (name ARK))
     (fail :error.unsupported-permit-type)))

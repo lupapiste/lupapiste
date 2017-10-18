@@ -173,18 +173,6 @@
     (bulletins/update-file-metadata bulletin-id (:id comment) files)
     (ok)))
 
-(defn- get-search-fields [fields app]
-  (into {} (map #(hash-map % (% app)) fields)))
-
-(sc/defn ^:private create-bulletin [application created & [updates]] :- bulletins/ApplicationBulletin
-  (let [app-snapshot (bulletins/create-bulletin-snapshot application)
-        app-snapshot (if updates
-                       (merge app-snapshot updates)
-                       app-snapshot)
-        search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
-        search-updates (get-search-fields search-fields app-snapshot)]
-    (bulletins/snapshot-updates app-snapshot search-updates created)))
-
 (defcommand move-to-proclaimed
   {:parameters [id proclamationEndsAt proclamationStartsAt proclamationText]
    :input-validators [(partial action/non-blank-parameters [:id :proclamationText])
@@ -194,7 +182,7 @@
    :states     #{:sent :complementNeeded}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]}
   [{:keys [application created] :as command}]
-  (let [updates (create-bulletin application created {:proclamationEndsAt proclamationEndsAt
+  (let [updates (bulletins/create-bulletin application created {:proclamationEndsAt proclamationEndsAt
                                                       :proclamationStartsAt proclamationStartsAt
                                                       :proclamationText proclamationText})]
     (bulletins/upsert-bulletin-by-id id updates)
@@ -210,7 +198,7 @@
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)
                 bulletins/verdict-bulletin-should-not-exist]}
   [{:keys [application created] :as command}]
-  (let [updates (create-bulletin application created {:verdictGivenAt verdictGivenAt
+  (let [updates (bulletins/create-bulletin application created {:verdictGivenAt verdictGivenAt
                                                       :appealPeriodStartsAt appealPeriodStartsAt
                                                       :appealPeriodEndsAt appealPeriodEndsAt
                                                       :verdictGivenText verdictGivenText})]
@@ -228,7 +216,7 @@
                 bulletins/validate-official-at]}
   [{:keys [application created] :as command}]
   ; Note there is currently no way to move application to final state so we sent bulletin state manuall
-  (let [updates (create-bulletin application created {:officialAt officialAt
+  (let [updates (bulletins/create-bulletin application created {:officialAt officialAt
                                                       :bulletinState :final})]
     (bulletins/upsert-bulletin-by-id id updates)
     (ok)))
