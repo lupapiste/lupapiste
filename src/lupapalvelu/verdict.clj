@@ -316,7 +316,7 @@
     (when updates
       (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
         (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
-        (bulletins/process-verdict-given command verdicts)
+        (bulletins/process-check-for-verdicts-result command verdicts)
         (t/mark-app-and-attachments-final! (:id application) (:created command))))
     (ok :verdicts verdicts
         :tasks (get-in updates [$set :tasks])

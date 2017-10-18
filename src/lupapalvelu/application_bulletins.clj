@@ -243,6 +243,15 @@
                (->> bulletin :versions (util/find-first #(= "verdictGiven" (:bulletinState %))) :appealPeriodEndsAt))
         (fail :error.bulletin.official-before-appeal-period)))))
 
-(defn process-verdict-given [{:keys [application]} new-verdicts]
-  (let [{old-verdicts :verdicts} application]
-    (comment "TODO Compare old and new-verdicts, create bulletin(s) for newly-appeared ones")))
+(defn process-delete-verdict [applicationId verdictId]
+  (println (str "Bulletins for removed verdict " verdictId " need to be cleaned up")))
+
+(defn process-check-for-verdicts-result [{{old-verdicts :verdicts applicationId :id :as application} :application} new-verdicts]
+  (let [old-verdict-ids          (map :id (remove :draft old-verdicts))
+        new-verdict-ids          (map :id (remove :draft new-verdicts))
+        removed-verdict-ids      (clojure.set/difference (set old-verdict-ids) (set new-verdict-ids))
+        appeared-verdict-ids     (clojure.set/difference (set new-verdict-ids) (set old-verdict-ids))]
+    (doseq [vid removed-verdict-ids]
+      (process-delete-verdict applicationId vid))
+    (doseq [vid appeared-verdict-ids]
+      (println (str "Processing a new bulletin for verdict " vid)))))
