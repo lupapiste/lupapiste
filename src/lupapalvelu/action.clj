@@ -286,10 +286,15 @@
           (if return-count? n nil))))))
 
 (defn application->command
-  "Creates a command data structure that is suitable for update-application and with-application functions"
-  [{id :id :as application}]
-  {:data {:id id}
-   :application application})
+  "Creates a command data structure that is suitable for update-application and with-application functions.
+   Optionally takes also a user map."
+  ([application]
+   (application->command application nil))
+  ([{id :id :as application} user]
+   (util/assoc-when
+     {:data {:id id}
+      :application application}
+     :user user)))
 
 (defn without-system-keys [application]
   (into {} (filter (fn [[k v]] (not (.startsWith (name k) "_"))) application)))
