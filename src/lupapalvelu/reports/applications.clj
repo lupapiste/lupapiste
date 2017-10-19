@@ -258,7 +258,7 @@
    :final-review-date             (final-review-date application)
    :reviews-count                 (count (filter #(= "task-katselmus" (-> % :schema-info :name)) (:tasks application)))
    :id                            (:id application)
-   :title                         (:address application)
+   :title                         (:title application)
    :organization                  (org/get-organization-name (org/get-organization (:organization application)))
    :applicant                     (applicant-name application)
    :applicant-count               (count (domain/get-documents-by-subtype (:documents application) :hakija))
