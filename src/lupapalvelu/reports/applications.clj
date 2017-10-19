@@ -69,8 +69,7 @@
   (mongo/select :applications
                 {:auth.id company-id
                  :modified {$gte (Long/parseLong start-ts 10)
-                            $lte (Long/parseLong end-ts 10)}
-                 }))
+                            $lte (Long/parseLong end-ts 10)}}))
 
 (defn- authority [app]
   (->> app

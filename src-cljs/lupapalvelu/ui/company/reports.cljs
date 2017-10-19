@@ -12,7 +12,7 @@
 (defn- download []
   (let [start-ts (tc/to-long (tf/parse common/fi-date-formatter @state/report-start-date))
         end-ts (tc/to-long (tf/parse common/fi-date-formatter @state/report-end-date))
-        url (str "/api/raw/company-report?companyId=" (:company-id @args) "&startTs=" start-ts "&endTs=" end-ts)]
+        url (str "/api/raw/company-report?companyId=startTs=" start-ts "&endTs=" end-ts)]
     (js/window.open url "_self")))
 
 (rum/defc report < rum/reactive
@@ -43,5 +43,5 @@
              (.getElementById js/document (:dom-id @args))))
 
 (defn ^:export start [domId componentParams]
-  (swap! args assoc :dom-id (name domId) :company-id (aget componentParams "companyId"))
+  (swap! args assoc :dom-id (name domId))
   (mount-component))

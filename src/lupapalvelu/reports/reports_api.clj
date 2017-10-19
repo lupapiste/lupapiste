@@ -90,7 +90,7 @@
 
 (defraw company-report
   {:description "Excel report for company authority"
-   :parameters        [companyId startTs endTs]
+   :parameters        [startTs endTs]
    :input-validators  [(partial action/string-parameters [:startTs :endTs])]
    :user-roles         #{:applicant}}
   [{user :user {lang :lang} :data}]

@@ -10,7 +10,3 @@
 
 (def report-start-date (rum/cursor-in component-state [:report :start-date]))
 (def report-end-date (rum/cursor-in component-state [:report :end-date]))
-(def report-start-date-ts )
-
-(defn will-unmount [& _]
-  (reset! component-state empty-component-state))
