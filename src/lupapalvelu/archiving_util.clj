@@ -4,7 +4,8 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [monger.operators :refer :all]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [taoensso.timbre :as timbre]))
 
 (defn metadata-query [md-key]
   (let [tila-key (str md-key ".tila")
@@ -29,11 +30,10 @@
                                    ; Check if the application itself is not yet archived, but needs to be
                                    (when-not archiving-project? attachment-or-app-md)])}
         post-verdict-query {:_id id
-                            ; Look for any attachments that have versions, are not yet arcvhived, but need to be
+                            ; Look for any attachments that have versions, are not yet archived, but need to be
                             $or  (remove
                                    nil?
-                                   [{:archived.completed {$ne nil}}
-                                    {:tosFunction nil}
+                                   [{:tosFunction nil}
                                     {:attachments {$elemMatch (merge {:versions {$gt []}}
                                                                      attachment-or-app-md)}}
                                     ; Check if the application itself is not yet archived, but needs to be
@@ -41,21 +41,24 @@
                                     ; Check if the case file is not yet archived, but needs to be
                                     (when-not archiving-project? (metadata-query "processMetadata"))
                                     ; Check if the application is not in a final state
-                                    {:state {$nin (vec states/archival-final-states)}}])}]
+                                    {:state {$nin (vec states/archival-final-states)}}])}
+        pre-verdict-docs-archived? (zero? (mongo/count :applications pre-verdict-query))
+        post-verdict-docs-archived? (zero? (mongo/count :applications post-verdict-query))]
 
-    (when (zero? (mongo/count :applications pre-verdict-query))
+    (when pre-verdict-docs-archived?
       (action/update-application
         (action/application->command application)
         {$set {:archived.application now}}))
 
-    (when (zero? (mongo/count :applications post-verdict-query))
+    (when post-verdict-docs-archived?
       (action/update-application
         (action/application->command application)
         {$set {:archived.completed now}}))
 
-    (when archiving-project?
+    (when (and archiving-project? post-verdict-docs-archived?)
+      (timbre/info "All documents archived for archiving project" id)
       (action/update-application
-        (action/application->command application)
+        (action/application->command application user)
         {:archived.application {$ne nil}
          :archived.completed   {$ne nil}
          :permitType           :ARK}

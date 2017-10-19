@@ -32,7 +32,8 @@
             [lupapalvelu.permit :as permit])
   (:import [java.io InputStream]))
 
-(defonce upload-threadpool (threads/threadpool 3 "archive-upload-worker"))
+(defonce upload-threadpool (threads/threadpool 6 "archive-upload-worker"))
+(defonce post-archiving-pool (threads/threadpool 1 "mark-archived-worker"))
 
 (def archival-states #{:arkistoidaan :arkistoitu})
 
@@ -94,10 +95,16 @@
     {$set {:modified now
            :processMetadata.tila next-state}}))
 
-(defn- do-post-archival-ops [state-update-fn id application now user]
-  (state-update-fn :arkistoitu application now id)
-  (mark-first-time-archival application now)
-  (mark-application-archived-if-done application now user))
+(defn- do-post-archival-ops
+  "Does the post-archiving stuff in a separate single threaded pool to prevent race-condition with Mongo"
+  [state-update-fn id application now user]
+  (threads/submit
+    post-archiving-pool
+    (state-update-fn :arkistoitu application now id)
+    (info "State for attachment id" id "from application" (:id application) "updated to arkistoitu.")
+    (mark-first-time-archival application now)
+    (mark-application-archived-if-done application now user)
+    (info "Post archiving ops complete for attachment id" id "from application" (:id application))))
 
 (defn- upload-and-set-state
   "Does the actual archiving in a different thread pool"
