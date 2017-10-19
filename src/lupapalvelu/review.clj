@@ -151,7 +151,7 @@
           (recur (remove #{updated-match} from-update)
                  remaining
                  unchanged
-                 (conj added-or-updated updated-match)
+                 (conj added-or-updated (util/assoc-when updated-match :created (:created current)))
                  (conj new-faulty current))
 
           (or (not (tasks/task-is-review? current))
@@ -169,7 +169,7 @@
           (recur (remove #{updated-match} from-update)
                  remaining
                  unchanged
-                 (conj added-or-updated updated-match)
+                 (conj added-or-updated (util/assoc-when updated-match :created (:created current)))
                  new-faulty)
 
           :else
@@ -221,7 +221,7 @@
         buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
-        review-to-task #(tasks/katselmus->task {:state :sent} source {:buildings buildings-summary} %)
+        review-to-task #(tasks/katselmus->task {:state :sent :created created} source {:buildings buildings-summary} %)
         review-tasks (map review-to-task reviews)
         validation-errors (doall (map #(tasks/task-doc-validation (-> % :schema-info :name) %) review-tasks))
         review-tasks (keep-indexed (fn [idx item]

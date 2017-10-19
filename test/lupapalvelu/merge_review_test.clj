@@ -19,7 +19,10 @@
                                                     :rakennuksenSelite "Omakotitalo"}}] )
 
 (def reviews-fixture
-  (map #(tasks/katselmus->task {:state :sent} {:type "background"} {:buildings nil} (assoc % :katselmuksenRakennustieto rakennustieto-fixture))
+  (map #(tasks/katselmus->task {:state :sent :created (+ (sade.core/now) (rand-int 100))}
+                               {:type "background"}
+                               {:buildings nil}
+                               (assoc % :katselmuksenRakennustieto rakennustieto-fixture))
        [{:vaadittuLupaehtonaKytkin false,
          :katselmuksenLaji "rakennuksen paikan merkitseminen",
          :osittainen "pidetty",
@@ -91,11 +94,19 @@
     added-or-updated => empty?))
 
 (fact "review is updated on top of empty review"
-  (let [mutated (-> (into [] reviews-fixture)
-                    (assoc-in [2 :data :katselmus :pitoPvm :value] "13.05.2016"))
+  (let [original-vec (into [] reviews-fixture)
+        mutated (-> original-vec
+                    (assoc-in [2 :data :katselmus :pitoPvm :value] "13.05.2016")
+                    (assoc-in [2 :created] (sade.core/now)))
+        original-ts (get-in original-vec [2 :created])
         [unchanged added-or-updated _] (merge-review-tasks mutated reviews-fixture)]
+    (fact "created timestamp is not changed, if update occured"
+      (-> added-or-updated first :created) => original-ts)
     unchanged => (just (util/drop-nth 2 mutated) :in-any-order)
-    added-or-updated => (just (nth mutated 2))))
+    added-or-updated => (just (assoc (nth mutated 2) :created original-ts))
+    (fact "only change is pitoPvm"
+      (butlast (diff (nth original-vec 2) (first added-or-updated))) => [{:data {:katselmus {:pitoPvm {:value nil}}}}
+                                                                         {:data {:katselmus {:pitoPvm {:value "13.05.2016"}}}}])))
 
 (fact "illegal review type causes failure"
   (let [mutated (-> (into [] reviews-fixture)
