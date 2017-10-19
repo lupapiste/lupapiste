@@ -28,7 +28,7 @@
        [:th (common/loc :bulletin.rectification-period-ends)]]]
       [:tbody
        (for [{:keys [id address verdictGivenAt application-id
-                     appealPeriodStartsAt bulletinOpDescription]
+                     appealPeriodEndsAt bulletinOpDescription]
               {:keys [category code status section contact]} :verdictData}  bulletins]
          [:tr
           {:key id}
@@ -42,7 +42,7 @@
           [:td bulletinOpDescription]
           [:td contact]
           [:td (common/format-timestamp verdictGivenAt)]
-          [:td (common/format-timestamp appealPeriodStartsAt)]])]]))
+          [:td (common/format-timestamp appealPeriodEndsAt)]])]]))
 
 (rum/defc local-bulletins < {:init         init}
   [_]
