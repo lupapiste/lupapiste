@@ -3448,6 +3448,15 @@
                           {$unset {:oauth.callback ""}
                            $set {:oauth.callback-url callback-url}}))))
 
+(defn set-missing-created-timestamp [{ts :created id :id :as task}]
+  (if (nil? ts)
+    (assoc task :created (.getTime (util/object-id-to-date id)))
+    task))
+
+(defmigration created-timestamps-for-backend-reviews
+  {:apply-when (pos? (mongo/count :applications {:tasks.created {$type "null"}}))}
+  (update-applications-array :tasks set-missing-created-timestamp {:tasks.created {$type "null"}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

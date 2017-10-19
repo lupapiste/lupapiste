@@ -44,7 +44,9 @@
       results)))
 
 (defn- validate-tasks [ignored-errors {tasks :tasks :as application}]
-  (let [results (filter seq (map (partial validate-doc ignored-errors application) tasks))]
+  (let [doc-results (map (partial validate-doc ignored-errors application) tasks)
+        created-results (map (fn [t] (when-not (:created t) {:task-id (:id t) :results "No created timestamp"})) tasks)
+        results (filter seq (concat doc-results created-results))]
     (when (seq results)
       results)))
 
