@@ -388,7 +388,7 @@
                                                  :type       :select
                                                  :loc-prefix :matti-r.verdict-code}}
                 :paatosteksti  {:phrase-text {:category :paatosteksti}}
-                :bulletin-op-description {:phrase-text {:category :toimenpide-julkipanoon
+                :bulletinOpDescription {:phrase-text {:category :toimenpide-julkipanoon
                                                         :i18nkey :phrase.category.toimenpide-julkipanoon}}
                 ;; The following keys are whole sections
                 :foremen       (reference-list :settings.foremen {:item-loc-prefix :matti-r.foremen})
@@ -448,7 +448,7 @@
                :loc-prefix  :bulletin
                :grid        {:columns 1
                              :rows [[{:col  1
-                                      :dict :bulletin-op-description}]]}}
+                                      :dict :bulletinOpDescription}]]}}
               (multi-section :foremen)
               (multi-section :reviews)
               (multi-section :plans)
@@ -567,7 +567,7 @@
                                           :type       :select
                                           :loc-prefix :matti-r.verdict-code}}
       :verdict-text     {:phrase-text {:category :paatosteksti}}
-      :bulletin-op-description {:phrase-text {:category :toimenpide-julkipanoon
+      :bulletinOpDescription {:phrase-text {:category :toimenpide-julkipanoon
                                               :i18nkey :phrase.category.toimenpide-julkipanoon}}
       :verdict-text-ref {:reference {:path :verdict-text}}
       :application-id   {:placeholder {:type :application-id}}}
@@ -675,7 +675,7 @@
       :grid        {:columns 1
                     :rows [[{:col  1
                              :id   "toimenpide-julkipanoon"
-                             :dict :bulletin-op-description}]]}}
+                             :dict :bulletinOpDescription}]]}}
      {:id   "requirements"
       :grid {:columns 7
              :rows    (concat (map (fn [dict]

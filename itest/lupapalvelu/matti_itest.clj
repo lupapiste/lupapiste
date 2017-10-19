@@ -947,7 +947,7 @@
                                :plans                   [(:id plan)]
                                :reviews-included        false
                                :reviews                 [(:id review)]
-                               :bulletin-op-description ""
+                               :bulletinOpDescription ""
                                :buildings
                                {op-id {:description   "Hello world!"
                                        :show-building true

@@ -80,7 +80,7 @@
                 (merge {:giver        :giver
                         :verdict-code :verdict-code
                         :verdict-text :paatosteksti
-                        :bulletin-op-description :bulletin-op-description}
+                        :bulletinOpDescription :bulletinOpDescription}
                        (reduce (fn [acc kw]
                                  (assoc acc
                                         kw kw
@@ -175,7 +175,7 @@
 (defn mask-verdict-data [{:keys [user application]} verdict]
   (cond
     (not (auth/application-authority? application user))
-        (util/dissoc-in verdict [:data :bulletin-op-description])
+        (util/dissoc-in verdict [:data :bulletinOpDescription])
     :default verdict))
 
 (defn command->verdict [{:keys [data application] :as command}]

@@ -16,21 +16,23 @@
             [sade.schemas :as ssc]
             [clj-time.coerce :as tc]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.permit :as permit]
+            [sade.strings :as ss]))
 
 (sc/defschema ApplicationBulletin
   {:id             sc/Str
    :versions       [sc/Any]
    :application-id ssc/ApplicationId
    :address        sc/Str
-   :bulletin-op-description sc/Str
+   :bulletinOpDescription sc/Str
    :bulletinState  sc/Any
    :applicant       sc/Str
    :_applicantIndex sc/Str
    :municipality    sc/Str
    :organization    sc/Str
    :modified        ssc/Timestamp
-   (sc/optional-key :verdict) sc/Any
+   :verdictCategory sc/Str
+   (sc/optional-key :verdicts) [sc/Any]
    (sc/optional-key :matti-verdict) sc/Any})
 
 (def bulletin-state-seq (sm/state-seq states/bulletin-version-states))
@@ -68,10 +70,9 @@
    :versions.verdictGivenAt 1 :versions.appealPeriodStartsAt 1
    :versions.appealPeriodEndsAt 1 :versions.verdictGivenText 1
    :versions.officialAt 1
-   :versions.matti-verdict.data 1
-   :versions.matti-verdict.category 1
+   :versions.verdictData 1 :versions.application-id 1
    :modified 1
-   :versions.bulletin-op-description 1})
+   :versions.bulletinOpDescription 1})
 
 (def bulletin-fields
   (merge bulletins-fields
@@ -87,8 +88,8 @@
 
 (def app-snapshot-fields
   [:_applicantIndex :address :applicant :created :documents :location
-   :modified :municipality :organization :permitType
-   :primaryOperation :propertyId :state :verdicts :matti-verdicts :tasks])
+   :modified :municipality :organization :permitType :bulletinOpDescription
+   :primaryOperation :propertyId :state :verdicts :matti-verdict :tasks])
 
 (def attachment-snapshot-fields
   [:id :type :latestVersion :auth :metadata :contents :target])
@@ -96,7 +97,8 @@
 (def remove-party-docs-fn
   (partial remove (fn-> :schema-info :type keyword (= :party))))
 
-(defn create-bulletin-snapshot [application]
+(defn create-bulletin-snapshot [{matti-verdict :matti-verdict [verdict & _] :verdicts permitType :permitType
+                                applicationId :id :as application}]
   (let [app-snapshot (-> application
                          (select-keys app-snapshot-fields)
                          (model/strip-blacklisted-data :bulletin)
@@ -109,13 +111,23 @@
                        app-snapshot
                        [:documents]
                        (partial map #(dissoc % :meta)))
+        verdict-data (cond
+                       matti-verdict   {:section (:verdict-section matti-verdict)
+                                        :code    (:verdict-code matti-verdict)
+                                        :category (:category matti-verdict)}
+                       verdict         {:section  (-> verdict :paatokset first :poytakirjat first :pykala)
+                                        :status   (-> verdict :paatokset first :poytakirjat first :status)
+                                        :contact  (-> verdict :paatokset first :poytakirjat first :paatoksentekija)
+                                        :category (ss/lower-case (name permitType))})
         attachments (->> (:attachments application)
                          (filter #(and (:latestVersion %) (metadata/public-attachment? %)))
                          (map #(select-keys % attachment-snapshot-fields))
                          (map #(update % :latestVersion (fn [v] (select-keys v [:filename :contentType :fileId :size])))))
         app-snapshot (assoc app-snapshot
                        :id (mongo/create-id)
+                       :application-id applicationId
                        :attachments attachments
+                       :verdictData verdict-data
                        :bulletinState (bulletin-state (:state app-snapshot)))]
     app-snapshot))
 
@@ -126,12 +138,13 @@
 (defn get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))
 
-(sc/defn create-bulletin [application created & [updates]] :- ApplicationBulletin
+(sc/defn ^:always-validate create-bulletin [application created & [updates]] :- ApplicationBulletin
   (let [app-snapshot (create-bulletin-snapshot application)
        app-snapshot (if updates
                       (merge app-snapshot updates)
                       app-snapshot)
-       search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
+       search-fields [:municipality :address :verdicts :matti-verdict :_applicantIndex
+                      :bulletinOpDescription :bulletinState :applicant :verdictData]
        search-updates (get-search-fields search-fields app-snapshot)]
    (snapshot-updates app-snapshot search-updates created)))
 
@@ -213,18 +226,6 @@
     (when-not (< start end)
       (fail :error.startdate-before-enddate))))
 
-(defn bulletin-date-valid?
-  "Verify that bulletin visibility date is less than current timestamp"
-  [{state :bulletinState :as bulletin-version}]
-  (let [now          (now)
-        proc-start   (:proclamationStartsAt bulletin-version)
-        appeal-start (:appealPeriodStartsAt bulletin-version)
-        final-start  (:officialAt bulletin-version)]
-    (case (keyword state)
-      :proclaimed   (< proc-start now)
-      :verdictGiven (< appeal-start now)
-      :final        (< final-start now))))
-
 (defn bulletin-version-date-valid?
   "Verify that bulletin visibility date is valid at the given (or current) point of time"
   ([bulletin-version]
@@ -235,7 +236,8 @@
                         (> (:proclamationEndsAt bulletin-version) now))
      :verdictGiven (and (< (:appealPeriodStartsAt bulletin-version) now)
                         (> (:appealPeriodEndsAt bulletin-version) now))
-     :final        (< (:officialAt bulletin-version) now))))
+     :final        (and (< (:officialAt bulletin-version) now)
+                        (> (tc/to-long (t/plus now (t/days 14))))))))
 
 (defn verdict-given-bulletin-exists? [app-id]
   (mongo/any? :application-bulletins {:_id app-id :versions {"$elemMatch" {:bulletinState "verdictGiven"}}}))
@@ -261,7 +263,7 @@
 
 (defn process-delete-verdict [applicationId verdictId]
   (infof "Bulletins for removed verdict %s need to be cleaned up" verdictId)
-  (mongo/remove :application-bulletins (str applicationId "_" verdictId))
+  (mongo/remove :application-bulletins (str applicationId "_" verdictId)))
 
 (defn process-check-for-verdicts-result [{{old-verdicts :verdicts applicationId :id
                                            :keys [organization permitType municipality] :as application} :application
@@ -271,11 +273,15 @@
              (org/bulletins-enabled? (org/get-organization organization) permitType municipality))
     (let [old-verdict-ids          (map :id (remove :draft old-verdicts))
           new-verdict-ids          (map :id (remove :draft new-verdicts))
-          removed-verdict-ids      (clojure.set/difference (set old-verdict-ids) (set new-verdict-ids))
-          appeared-verdict-ids     (clojure.set/difference (set new-verdict-ids) (set old-verdict-ids))]
+          removed-verdict-ids      (clojure.set/difference (set old-verdict-ids) (set new-verdict-ids))]
       (doseq [vid removed-verdict-ids]
         (process-delete-verdict applicationId vid))
-      (doseq [vid appeared-verdict-ids]
-        (infof "Creating a new bulletin for verdict %s" vid)
+      (doseq [{vid :id :as verdict} new-verdicts]
+        (infof "Upserting the bulletin for verdict %s" vid)
         (upsert-bulletin-by-id (str applicationId "_" vid)
-          (create-bulletin (assoc application :verdicts [(util/find-by-id vid new-verdicts)]) created)))))))
+          (create-bulletin (assoc application :state :verdictGiven
+                                              :verdicts [verdict])
+                           created
+                           {:verdictGivenAt (-> verdict :paatokset first :paivamaarat :anto)
+                            :appealPeriodStartsAt (or (-> verdict :paatokset first :paivamaarat :julkipano) (now))
+                            :appealPeriodEndsAt   (or (-> verdict :paatokset first :paivamaarat :viimeinenValitus) (now))}))))))

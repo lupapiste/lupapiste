@@ -165,10 +165,10 @@ TODO: create tasks and PDF, application state change, attachments locking."
                            updates
                            {:application-id (:id application)
                             :matti-verdict verdict
-                            :bulletin-op-description (-> verdict :data :bulletin-op-description)}))
+                            :bulletinOpDescription (-> verdict :data :bulletinOpDescription)}))
         search-fields [:municipality :address :matti-verdict :_applicantIndex
                        :application-id
-                       :bulletinState :applicant :organization :bulletin-op-description]
+                       :bulletinState :applicant :organization :bulletinOpDescription]
         search-updates (get-search-fields search-fields app-snapshot)]
     (bulletins/snapshot-updates app-snapshot search-updates created)))
 

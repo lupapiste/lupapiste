@@ -245,7 +245,7 @@
                                    (update-in [:documents] (partial map append-schema-fn))
                                    (update-in [:attachments] (partial map #(dissoc % :metadata :auth)))
                                    (assoc :stateSeq bulletins/bulletin-state-seq))
-          bulletin-commentable (= (bulletin-can-be-commented command) nil)]
+          bulletin-commentable (= (comment-can-be-added command) nil)]
       (ok :bulletin (merge bulletin {:canComment bulletin-commentable})))
     (fail :error.bulletin.not-found)))
 
