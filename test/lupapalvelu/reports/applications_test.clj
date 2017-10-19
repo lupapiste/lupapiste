@@ -1,7 +1,8 @@
 (ns lupapalvelu.reports.applications-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.reports.applications :refer :all]))
+            [lupapalvelu.reports.applications :refer :all]
+            [lupapalvelu.organization :as organization]))
 
 (testable-privates lupapalvelu.reports.applications row-data)
 
@@ -81,10 +82,14 @@
                                                                                         :attachments-count             3
                                                                                         :pre-verdict-attachments       1
                                                                                         :post-verdict-attachments      2
-                                                                                        :permit-type                   "R"})
+                                                                                        :permit-type                   "R"}
+    (provided
+      (organization/get-organization "753-R" ) => {:name {:fi "Sipoon rakennusvalvonta"}}))
 
   (fact "Every operation should have own data row"
     (let [secondary-operations [{:id "59dcb8ebcfd3a952669de177" :name "kerrostalo-rivitalo" :created 1508327561369}
                                 {:id "59dcb8ebcfd3a952669de179" :name "kerrostalo-rivitalo" :created 1508328561369}]
           application-with-multiple-operations (assoc application :secondaryOperations secondary-operations)]
-      (count (report-data-by-operations [application-with-multiple-operations] :fi {:role :authority})) => 3)))
+      (count (report-data-by-operations [application-with-multiple-operations] :fi {:role :authority})) => 3
+      (provided
+        (organization/get-organization "753-R") => {:name {:fi "Sipoon rakennusvalvonta"}}))))
