@@ -67,7 +67,9 @@ LUPAPISTE.ApplicationBulletinsService = function() {
     ajax.query("bulletin", {bulletinId: bulletinId})
       .success(function(res) {
         if (res.bulletin.id) {
-          if (res.bulletin.verdictData && res.bulletin.verdictData === "ymp") {
+          console.log(res.bulletin);
+          if ((!res.bulletin.category || res.bulletin.category === "ymp") &&
+              pageutil.getPage() !== "ymp-bulletin") {
             pageutil.openPage("ymp-bulletin", res.bulletin.id);
           }
           self.bulletin(res.bulletin);

@@ -91,7 +91,7 @@ LUPAPISTE.ApplicationYmpBulletinModel = function(params) {
   };
 
   self.openTab = function(tab) {
-    pageutil.openPage("bulletin", [self.bulletinId(), tab]);
+    pageutil.openPage("ymp-bulletin", [self.bulletinId(), tab]);
   };
 
   self.scrollToCommenting = function() {
