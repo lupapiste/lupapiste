@@ -27009,11 +27009,11 @@ div.summary-button-bar {
   margin: 0;
 }
 
-#bulletins .application_summary .application_summary_info {
+#bulletins .application_summary .application_summary_info, #local-bulletins .application_summary .application_summary_info {
   width: 80%;
 }
 
-#bulletins .application_summary .bulletin-preamble {
+#bulletins .application_summary .bulletin-preamble, #local-bulletins .application_summary .bulletin-preamble {
   position: relative;
   min-height: 280px;
   padding-left: 320px;
@@ -27021,40 +27021,40 @@ div.summary-button-bar {
   margin-right: 61px;
 }
 
-#bulletins .application_summary .bulletin-preamble .application-map-container, #bulletins .application_summary .bulletin-preamble .application_actions {
+#bulletins .application_summary .bulletin-preamble .application-map-container, #bulletins .application_summary .bulletin-preamble .application_actions, #local-bulletins .application_summary .bulletin-preamble .application-map-container, #local-bulletins .application_summary .bulletin-preamble .application_actions {
   position: absolute;
   top: 0;
   bottom: 0;
 }
 
-#bulletins .application_summary .bulletin-preamble .application-map-container {
+#bulletins .application_summary .bulletin-preamble .application-map-container, #local-bulletins .application_summary .bulletin-preamble .application-map-container {
   left: 0;
   width: 320px;
   margin-bottom: 12px;
 }
 
-#bulletins .application_summary .bulletin-preamble .application_actions {
+#bulletins .application_summary .bulletin-preamble .application_actions, #local-bulletins .application_summary .bulletin-preamble .application_actions {
   right: 0;
 }
 
 @media (max-width: 1166px) {
-  #bulletins .application_summary .bulletin-preamble {
+  #bulletins .application_summary .bulletin-preamble, #local-bulletins .application_summary .bulletin-preamble {
     padding: 0;
   }
-  #bulletins .application_summary .bulletin-preamble .application-map-container, #bulletins .application_summary .bulletin-preamble .application_actions {
+  #bulletins .application_summary .bulletin-preamble .application-map-container, #bulletins .application_summary .bulletin-preamble .application_actions, #local-bulletins .application_summary .bulletin-preamble .application-map-container, #local-bulletins .application_summary .bulletin-preamble .application_actions {
     position: relative;
     width: auto;
     float: left;
   }
-  #bulletins .application_summary .bulletin-preamble .application-map-container {
+  #bulletins .application_summary .bulletin-preamble .application-map-container, #local-bulletins .application_summary .bulletin-preamble .application-map-container {
     float: left;
     margin-left: 24px;
   }
-  #bulletins .application_summary .bulletin-preamble .application_actions {
+  #bulletins .application_summary .bulletin-preamble .application_actions, #local-bulletins .application_summary .bulletin-preamble .application_actions {
     float: right;
     margin-right: 24px;
   }
-  #bulletins .application_summary .bulletin-preamble .application_summary_info {
+  #bulletins .application_summary .bulletin-preamble .application_summary_info, #local-bulletins .application_summary .bulletin-preamble .application_summary_info {
     width: initial;
   }
 }

@@ -8,3 +8,4 @@
 
 (def current-organization (state-cursor :organization))
 (def local-bulletins (state-cursor :local-bulletins))
+(def current-bulletin (state-cursor :current-bulletin))

@@ -13,6 +13,9 @@
                 :organization @state/current-organization :searchText "" :page 1)
   init-state)
 
+(defn open-bulletin [id]
+  (js/pageutil.openPage "bulletin" id))
+
 (rum/defc bulletins-table < rum/reactive
   [_]
   (let [bulletins (rum/react state/local-bulletins)]
@@ -31,7 +34,8 @@
                      appealPeriodEndsAt bulletinOpDescription]
               {:keys [category code status section contact]} :verdictData}  bulletins]
          [:tr
-          {:key id}
+          {:key id
+           :on-click #(open-bulletin id)}
           [:td (str section " "
                     (when (and category code)
                       (common/loc (str "matti-" category ".verdict-code." code)))

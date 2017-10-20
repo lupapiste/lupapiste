@@ -69,7 +69,7 @@
    :versions.proclamationText 1
    :versions.verdictGivenAt 1 :versions.appealPeriodStartsAt 1
    :versions.appealPeriodEndsAt 1 :versions.verdictGivenText 1
-   :versions.officialAt 1
+   :versions.officialAt 1 :versions.category 1
    :versions.verdictData 1 :versions.application-id 1
    :modified 1
    :versions.bulletinOpDescription 1})

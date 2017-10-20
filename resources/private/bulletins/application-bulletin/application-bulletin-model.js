@@ -1,2 +1,0 @@
-LUPAPISTE.ApplicationBulletinModel = function (params) {
-};

@@ -81,6 +81,8 @@ features.enabled = function() {};
 
 var LUPAPISTE = {};
 LUPAPISTE.FileuploadService = function() {};
+LUPAPISTE.config = {};
+LUPAPISTE.config.build = "";
 
 var hub = {};
 hub.send = function() {};
@@ -164,3 +166,6 @@ lupapisteApp.models.applicationAuthModel = {};
 lupapisteApp.models.applicationAuthModel.ok = function() {};
 lupapisteApp.models.globalAuthModel = {};
 lupapisteApp.models.globalAuthModel.ok = function() {};
+
+var window = function() {};
+window.open = function() {};
