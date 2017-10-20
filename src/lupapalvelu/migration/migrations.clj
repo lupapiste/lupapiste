@@ -3457,6 +3457,44 @@
   {:apply-when (pos? (mongo/count :applications {:tasks.created {$type "null"}}))}
   (update-applications-array :tasks set-missing-created-timestamp {:tasks.created {$type "null"}}))
 
+
+(def ^:private bg-id-regex-pattern "^([0-9a-zA-Z]+)-([a-zA-Z]+)$")
+
+(defn- background-id-and-application-suffix
+  "Return a 2-length vector containing the new background id and
+  application suffix, or nil if the id and suffix cannot be obtained"
+  [task]
+  {:post [(or (nil? %) (and (sequential? %) (= (count %) 2)))]}
+  (some->> task :data :muuTunnus :value
+           (re-matches (re-pattern bg-id-regex-pattern))
+           (drop 1)))
+
+(defmigration update-task-background-ids
+  {:apply-when (pos? (mongo/count :applications
+                                  {:tasks {$elemMatch {:data.muuTunnus.value {$regex bg-id-regex-pattern}
+                                                       :data.muuTunnusSovellus {$exists false}}}}))}
+  (update-applications-array
+   :tasks
+   (fn [task]
+     (if-let [[new-bg-id bg-application] (background-id-and-application-suffix task)]
+       (-> task
+           (assoc-in [:data :muuTunnus :value] new-bg-id)
+           (assoc-in [:data :muuTunnusSovellus] {:value bg-application :modified nil}))
+       task))
+   {:tasks {$elemMatch {:data.muuTunnus.value {$regex bg-id-regex-pattern}
+                        :data.muuTunnusSovellus {$exists false}}}}))
+
+(defmigration empty-dash-only-task-background-ids
+  {:apply-when (pos? (mongo/count :applications
+                                  {:tasks.data.muuTunnus.value "-"}))}
+  (update-applications-array
+   :tasks
+   (fn [task]
+     (if (= "-" (-> task :data :muuTunnus :value))
+       (assoc-in task [:data :muuTunnus :value] "")
+       task))
+   {:tasks.data.muuTunnus.value "-"}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
