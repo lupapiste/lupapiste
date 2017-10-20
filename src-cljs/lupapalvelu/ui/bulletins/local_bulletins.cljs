@@ -7,7 +7,7 @@
 
 (defn init
   [init-state props]
-  (reset! state/current-organization "753-R")
+  (reset! state/current-organization (:organization @args))
   (common/query :local-application-bulletins
                 (fn [{:keys [data]}] (reset! state/local-bulletins data))
                 :organization @state/current-organization :searchText "" :page 1)
@@ -69,5 +69,5 @@
              (.getElementById js/document (:dom-id @args))))
 
 (defn ^:export start [domId componentParams]
-  (swap! args assoc :dom-id (name domId))
+  (swap! args assoc :dom-id (name domId) :organization (aget componentParams "organization"))
   (mount-component))
