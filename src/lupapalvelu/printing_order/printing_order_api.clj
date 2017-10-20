@@ -11,7 +11,8 @@
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.printing-order.mylly-client :as mylly]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.roles :as roles]))
 
 (def omitted-attachment-type-groups
   [:hakija :osapuolet :rakennuspaikan_hallinta :paatoksenteko :muutoksenhaku
@@ -75,11 +76,12 @@
                                                         :initator.id (:id user)}))))
 
 (defcommand submit-printing-order
-  {:feature      :printing-order
-   :parameters  [:id order contacts]
-   :states      states/all-application-states
-   :user-roles  #{:applicant}
-   :pre-checks  [pricing-available?]}
+  {:feature          :printing-order
+   :parameters       [:id order contacts]
+   :states           states/all-application-states
+   :user-roles       #{:applicant}
+   :user-authz-roles roles/default-authz-reader-roles
+   :pre-checks       [pricing-available?]}
   [{application :application user :user created-ts :created :as command}]
   (let [prepared-order (processor/prepare-order application order contacts)
         total-size (reduce + (map :size (:files prepared-order)))]

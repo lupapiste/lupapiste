@@ -44,4 +44,24 @@
           (fact "submit"
             (command pena :submit-printing-order :id application-id :order order-amounts :contacts contacts) => ok?
              (Thread/sleep 1000)
-             (:orders (query pena :my-printing-orders)) => (has some (contains {:application application-id :acknowledged? true}))))))))
+             (:orders (query pena :my-printing-orders)) => (has some (contains {:application application-id :acknowledged? true})))))
+
+      (facts "foreman tries to order building plan printouts"
+        (let [{foreman-app-id :id} (command pena :create-foreman-application :id application-id
+                                      :taskId "" :foremanRole "ei tiedossa" :foremanEmail "mikko@example.com")]
+          (fact "mikko has access to the printing order functionality"
+            (query mikko :attachments-for-printing-order :id application-id) => ok?)
+          (fact "foreman places an order"
+            (let [order-amounts {att-id 1}
+                  contacts {:orderer {:firstName "Mikko"
+                                      :lastName "Mestari"
+                                      :streetAddress "PL 109"
+                                      :postalCode "99999"
+                                      :city "Korvatunturi"
+                                      :email "mikko@example.com"}
+                            :payer-same-as-orderer true
+                            :delivery-same-as-orderer true}]
+              (fact "submit"
+                (command mikko :submit-printing-order :id application-id :order order-amounts :contacts contacts) => ok?
+                (Thread/sleep 1000)
+                (:orders (query pena :my-printing-orders)) => (has some (contains {:application application-id :acknowledged? true}))))))))))
