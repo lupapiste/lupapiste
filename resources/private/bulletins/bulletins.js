@@ -19,7 +19,7 @@
         {name: "application-bulletins"},
         {name: "application-bulletins-list"},
         {name: "load-more-application-bulletins"},
-        {name: "application-bulletin"},
+        {name: "application-ymp-bulletin"},
         {name: "bulletins-search"},
         {name: "autocomplete-municipalities"},
         {name: "autocomplete-states"},

@@ -113,12 +113,10 @@
                        (partial map #(dissoc % :meta)))
         verdict-data (cond
                        matti-verdict   {:section (:verdict-section matti-verdict)
-                                        :code    (:verdict-code matti-verdict)
-                                        :category (:category matti-verdict)}
+                                        :code    (:verdict-code matti-verdict)}
                        verdict         {:section  (-> verdict :paatokset first :poytakirjat first :pykala)
                                         :status   (-> verdict :paatokset first :poytakirjat first :status)
-                                        :contact  (-> verdict :paatokset first :poytakirjat first :paatoksentekija)
-                                        :category (ss/lower-case (name permitType))})
+                                        :contact  (-> verdict :paatokset first :poytakirjat first :paatoksentekija)})
         attachments (->> (:attachments application)
                          (filter #(and (:latestVersion %) (metadata/public-attachment? %)))
                          (map #(select-keys % attachment-snapshot-fields))
@@ -128,6 +126,10 @@
                        :application-id applicationId
                        :attachments attachments
                        :verdictData verdict-data
+                       :category (cond
+                                   (permit/ymp-permit? application) "ymp"
+                                   matti-verdict (:category matti-verdict)
+                                   :default (ss/lower-case (name permitType)))
                        :bulletinState (bulletin-state (:state app-snapshot)))]
     app-snapshot))
 
