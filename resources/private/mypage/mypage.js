@@ -220,7 +220,11 @@
     };
 
     self.editCompany = function() {
-      pageutil.openPage("company", self.company.id());
+      pageutil.openPage("company", self.company.id() + "/reports/");
+    };
+
+    self.companyReports = function() {
+      pageutil.openPage("company-reports", self.company.id());
     };
 
     self.saved.subscribe(self.updateUserName);

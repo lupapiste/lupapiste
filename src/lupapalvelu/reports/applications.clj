@@ -10,7 +10,11 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.reports.parties :as parties]
             [lupapalvelu.reports.excel :as excel]
-            [lupapalvelu.foreman :as foreman])
+            [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.application-meta-fields :as meta]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.states :as states])
   (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)
            (org.apache.poi.xssf.usermodel XSSFWorkbook)
            (org.apache.poi.ss.usermodel CellType)))
@@ -60,6 +64,12 @@
                    :documents.data
                    :primaryOperation]
                   {:submitted 1})))
+
+(defn company-applications-between [company-id start-ts end-ts]
+  (mongo/select :applications
+                {:auth.id company-id
+                 :modified {$gte (Long/parseLong start-ts 10)
+                            $lte (Long/parseLong end-ts 10)}}))
 
 (defn- authority [app]
   (->> app
@@ -179,4 +189,106 @@
                :row-fn parties/foremen-row-fn
                :data (:foremen data)}])]
     (excel/hyperlinks-to-formulas! wb)
+    (excel/xlsx-stream wb)))
+
+(defn- company-report-headers [lang]
+  (map (partial i18n/localize lang) ["company.report.excel.header.buildingid"
+                                     "company.report.excel.header.operation"
+                                     "company.report.excel.header.usage"
+                                     "company.report.excel.header.useractions"
+                                     "company.report.excel.header.attachment.useractions"
+                                     "company.report.excel.header.inUse"
+                                     "company.report.excel.header.review"
+                                     "company.report.excel.header.reviews"
+                                     "company.report.excel.header.id"
+                                     "company.report.excel.header.title"
+                                     "company.report.excel.header.organization"
+                                     "company.report.excel.header.applicant"
+                                     "company.report.excel.header.applicant.count"
+                                     "company.report.excel.header.attachment.pre"
+                                     "company.report.excel.header.attachment.post"]))
+
+(defn- company-foreman-headers [lang]
+  (map (partial i18n/localize lang) ["company.report.excel.header.operation"
+                                     "company.report.excel.header.useractions"
+                                     "company.report.excel.header.attachment.useractions"
+                                     "company.report.excel.header.id"
+                                     "company.report.excel.header.title"
+                                     "company.report.excel.header.organization"
+                                     "company.report.excel.header.applicant"
+                                     "company.report.excel.header.applicant.count"
+                                     "company.report.excel.header.attachment"]))
+
+
+(defn- usage [application]
+  (when-let [documents (:documents application)]
+    (let [building-info (domain/get-document-by-name documents "uusiRakennus")]
+      (get-in building-info [:data :kaytto :kayttotarkoitus :value]))))
+
+(defn- inUse [application]
+  (let [state-history (util/find-first #(= "inUse" (:state %)) (:history application))]
+    (util/to-local-date (:ts state-history))))
+
+(defn- final-review-date [application]
+  (let [tasks           (:tasks application)
+        review-tasks    (filter #(= "task-katselmus" (-> % :schema-info :name)) tasks)
+        final-review    (util/find-by-key :taskname "Loppukatselmus" review-tasks)]
+    (get-in final-review [:data :katselmus :pitoPvm :value])))
+
+(defn- applicant-name [application]
+  (when-let [applicant-data (:data (first (domain/get-documents-by-subtype (:documents application) :hakija)))]
+    (if (= (get-in applicant-data [:_selected :value]) "henkilo")
+      (str (get-in applicant-data [:henkilo :henkilotiedot :etunimi :value]) " " (get-in applicant-data [:henkilo :henkilotiedot :sukunimi :value]))
+      (str (get-in applicant-data [:yritys :yritysnimi :value])))))
+
+(defn- building-id [application operation]
+  (let [operation-doc (domain/get-document-by-operation application operation)
+        tunnus (get-in operation-doc [:data :tunnus :value])
+        valtakunnallinen-numero (get-in operation-doc [:data :valtakunnallinenNumero :value])]
+    (str tunnus " - " valtakunnallinen-numero)))
+
+(defn- row-data [application operation lang user]
+  {:building-id                   (building-id application operation)
+   :operation                     (localized-operation lang operation)
+   :usage                         (usage application)
+   :required-actions              (count (filter #(= "rejected" (-> % :meta :_approved :value)) (:documents application)))
+   :attachment-required-actions   (meta/count-attachments-requiring-action user application)
+   :inuse-date                    (inUse application)
+   :final-review-date             (final-review-date application)
+   :reviews-count                 (count (filter #(= "task-katselmus" (-> % :schema-info :name)) (:tasks application)))
+   :id                            (:id application)
+   :title                         (:title application)
+   :organization                  (org/get-organization-name (org/get-organization (:organization application)))
+   :applicant                     (applicant-name application)
+   :applicant-count               (count (domain/get-documents-by-subtype (:documents application) :hakija))
+   :attachments-count             (count (:attachments application))
+   :pre-verdict-attachments       (count (filter #(contains? states/pre-verdict-states (keyword (:applicationState %))) (:attachments application)))
+   :post-verdict-attachments      (count (filter #(contains? states/post-verdict-states (keyword (:applicationState %))) (:attachments application)))
+   :permit-type                   (:permitType application)})
+
+(defn report-data-by-operations [applications lang user]
+  (let [apps-with-primary-operation (map (fn [app] (row-data app (:primaryOperation app) lang user)) applications)
+        apps-with-secondary-operations (flatten (remove empty? (map (fn [app] (map (fn [opp] (row-data app opp lang user)) (:secondaryOperations app))) applications)))]
+    (into apps-with-primary-operation apps-with-secondary-operations)))
+
+(defn ^OutputStream company-applications [company-id start-ts end-ts lang user]
+  (let [[foreman-apps applications] ((juxt filter remove)
+                                    foreman/foreman-app?
+                                    (company-applications-between company-id start-ts end-ts))
+        permit-types (distinct (map :permitType applications))
+        applications-row-data (report-data-by-operations applications lang user)
+        foreman-app-row-data (report-data-by-operations foreman-apps lang user)
+        row-fn (juxt :building-id :operation :usage :required-actions :attachment-required-actions :inuse-date :final-review-date
+                     :reviews-count :id :title :organization :applicant :applicant-count :pre-verdict-attachments :post-verdict-attachments)
+        foreman-row-fn (juxt :operation :required-actions :attachment-required-actions :id :title :organization :applicant :applicant-count :attachments-count)
+        application-data (map (fn [permit] {:sheet-name (str permit)
+                                      :header     (company-report-headers lang)
+                                      :row-fn     row-fn
+                                      :data       (filter #(= permit (:permit-type %)) applications-row-data)
+                                      }) permit-types)
+        foreman-app-data {:sheet-name (i18n/localize lang "tyonjohtajat")
+                          :header     (company-foreman-headers lang)
+                          :row-fn     foreman-row-fn
+                          :data       foreman-app-row-data}
+        wb (excel/create-workbook (flatten [application-data foreman-app-data]))]
     (excel/xlsx-stream wb)))
