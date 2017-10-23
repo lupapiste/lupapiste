@@ -7,6 +7,7 @@
             [sade.strings :as ss]))
 
 (mongo/connect!)
+(println "Requiring review-analyzer...")
 (defn analyze-app [app xml]
   (let [maaraykset (lupapalvelu.xml.krysp.reader/->lupamaaraukset (sade.xml/select xml [:paatostieto :Paatos]))
         reviews    (review-reader/xml->reviews xml true)
@@ -48,7 +49,7 @@
                        "R"
                        [app]))))
 
-(defn run-for-app org [org app]
+(defn run-for-app [org app]
   (let [xml (first (get-xml org app))
         result (analyze-app app xml)
         keyz (keys (dissoc result :id))
