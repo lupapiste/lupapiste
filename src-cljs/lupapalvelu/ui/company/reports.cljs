@@ -12,7 +12,7 @@
 (defn- download []
   (let [start-ts (tc/to-long (tf/parse common/fi-date-formatter @state/report-start-date))
         end-ts (tc/to-long (tf/parse common/fi-date-formatter @state/report-end-date))
-        url (str "/api/raw/company-report?companyId=startTs=" start-ts "&endTs=" end-ts)]
+        url (str "/api/raw/company-report?startTs=" start-ts "&endTs=" end-ts)]
     (js/window.open url "_self")))
 
 (rum/defc report < rum/reactive
@@ -20,7 +20,8 @@
   [:div
    [:h1
     (loc (str "company.reports.title"))]
-   [:span (loc (str "company.reports.help"))]
+   [:div (loc (str "company.reports.help"))]
+   [:div (loc (str "company.reports.note"))]
    [:table.company-report-table
     [:thead
      [:tr
