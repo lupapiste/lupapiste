@@ -18801,6 +18801,18 @@ span.verdict-published {
   font-weight: bold;
 }
 
+div.matti-note {
+  border-left: 4px solid #f39129;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  padding-left: 6px;
+  padding-right: 6px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  background-color: #f6f6f6;
+  display: inline-block;
+}
+
 .order-grid-1 {
   width: 100%;
   color: #333333;

@@ -476,3 +476,4 @@
 "file.upload.failed" "en" "Failed to upload file"
 "file.upload.failed" "fi" "Tiedoston lisääminen epäonnistui."
 "file.upload.failed" "sv" "Uppladdningen av filen misslyckades."
+"matti.no-verdict-templates" "fi" "Ei päätöspohjia. Päätöksen antaminen vaatii aina päätöspohjan."
