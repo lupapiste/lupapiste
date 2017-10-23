@@ -341,9 +341,9 @@
 (defn is-ya-permit [permit-type]
   (= permit-type (name YA)))
 
-(defn ymp-permit? [{{:keys [permitType]} :application}]
+(defn ymp-permit-type? [permit-type]
   (let [ymp-permit-types (set (map name [YI YL YM VVVL MAL]))]
-    (ymp-permit-types permitType)))
+    (ymp-permit-types permit-type)))
 
 (defn is-archiving-project [{{:keys [permitType]} :application}]
   (when-not (= permitType (name ARK))

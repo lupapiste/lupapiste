@@ -134,6 +134,14 @@
     (when-not (= bulletin-version-id latest-version-id)
       (fail :error.invalid-version-id))))
 
+(defn- bulletin-can-be-commented
+  ([{{bulletin-id :bulletinId} :data}]
+   (let [projection {:bulletinState 1 "versions.proclamationStartsAt" 1 "versions.proclamationEndsAt" 1 :versions {$slice -1}}
+         bulletin   (bulletins/get-bulletin bulletin-id projection)]
+     (if-not (and (= (:bulletinState bulletin) "proclaimed")
+                  (bulletins/bulletin-date-in-period? :proclamationStartsAt :proclamationEndsAt (-> bulletin :versions last)))
+       (fail :error.bulletin-not-in-commentable-state)))))
+
 (defn- comment-can-be-added
   [{{bulletin-id :bulletinId bulletin-version-id :bulletinVersionId comment :comment} :data}]
   (if (ss/blank? comment)
@@ -245,7 +253,7 @@
                                    (update-in [:documents] (partial map append-schema-fn))
                                    (update-in [:attachments] (partial map #(dissoc % :metadata :auth)))
                                    (assoc :stateSeq bulletins/bulletin-state-seq))
-          bulletin-commentable (= (comment-can-be-added command) nil)]
+          bulletin-commentable (= (bulletin-can-be-commented command) nil)]
       (ok :bulletin (merge bulletin {:canComment bulletin-commentable})))
     (fail :error.bulletin.not-found)))
 

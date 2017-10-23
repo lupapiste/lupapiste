@@ -16,17 +16,18 @@ Bulletin page should have docgen data
   Open bulletin tab  info
 
   Element should be visible  bulletinDocgen
-  ${sectionCount}=  Get Matching Xpath Count  //div[@id='bulletin-component']//div[@id='bulletinDocgen']/section
+  ${sectionCount}=  Get Matching Xpath Count  //div[@id='ymp-bulletin-component']//div[@id='bulletinDocgen']/section
   Should Be True  ${sectionCount} > 0
 
 State is visible
   Bulletin state is  proclaimed
 
 Map is visible
-  Element should be visible  //div[@id='bulletin-component']//div[@id='bulletin-map']/div
+  Element should be visible  //div[@id='ymp-bulletin-component']//div[@id='bulletin-map']/div
 
 Action buttons are visible
-  Element should be visible  //div[@id='bulletin-component']//div[@data-test-id='bulletin-actions']/button[@data-test-id='comment-bulletin']
+  Debug
+  Element should be visible  //div[@id='ymp-bulletin-component']//div[@data-test-id='bulletin-actions']/button[@data-test-id='comment-bulletin']
 
 Tabs are visible
   Element should be visible  bulletin-tabs

@@ -127,7 +127,7 @@
                        :attachments attachments
                        :verdictData verdict-data
                        :category (cond
-                                   (permit/ymp-permit? application) "ymp"
+                                   (permit/ymp-permit-type? (:permitType application)) "ymp"
                                    matti-verdict (:category matti-verdict)
                                    :default (ss/lower-case (name permitType)))
                        :bulletinState (bulletin-state (:state app-snapshot)))]
@@ -271,7 +271,7 @@
                                            :keys [organization permitType municipality] :as application} :application
                                           created :created}
                                          new-verdicts]
-  (when (and (not (permit/ymp-permit? application))
+  (when (and (not (permit/ymp-permit-type? (:permitType application)))
              (org/bulletins-enabled? (org/get-organization organization) permitType municipality))
     (let [old-verdict-ids          (map :id (remove :draft old-verdicts))
           new-verdict-ids          (map :id (remove :draft new-verdicts))
