@@ -8,7 +8,7 @@
             [sade.xml :refer [get-text select select1 under has-text xml->edn]]))
 
 
-(defn xml->reviews [xml]
+(defn xml->reviews [xml & [strict?]]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
         asiat (enlive/select xml-no-ns common/case-elem-selector)]
     (when (not-empty asiat)
@@ -16,7 +16,10 @@
         (error "Creating application from previous permit. More than one RakennusvalvontaAsia element were received in the xml message. Count:" (count asiat)))
 
       (let [asia (first asiat)
-            katselmukset (map cr/all-of  (select asia [:RakennusvalvontaAsia :katselmustieto :Katselmus]))
+            selector (if strict?
+                       [:RakennusvalvontaAsia :> :katselmustieto :Katselmus]
+                       [:RakennusvalvontaAsia :katselmustieto :Katselmus])
+            katselmukset (map cr/all-of (select asia selector))
             massage (fn [katselmus]
                       (-> katselmus
                           (util/ensure-sequential :muuTunnustieto)
