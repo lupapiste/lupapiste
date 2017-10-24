@@ -212,13 +212,6 @@
 
 (def kuvaus {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width})
 
-(def hankkeen-vaativuus {:name "hankkeenVaativuus" :type :select :sortBy nil :hidden true ;; TODO: remove, LPK-1448
-                         :body [{:name "AA"}
-                                {:name "A"}
-                                {:name "B"}
-                                {:name "C"}
-                                ei-tiedossa]})
-
 (def rahoitus {:name "rahoitus" :type :fundingSelector})
 
 (def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])

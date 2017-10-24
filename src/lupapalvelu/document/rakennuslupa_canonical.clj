@@ -311,7 +311,7 @@
 
 (defn- get-asian-tiedot [documents-by-type]
   (let [maisematyo_documents (:maisematyo documents-by-type)
-        hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents-by-type) (:hankkeen-kuvaus-rakennuslupa documents-by-type) (:hankkeen-kuvaus-minimum documents-by-type) (:aloitusoikeus documents-by-type))
+        hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents-by-type) (:hankkeen-kuvaus-minimum documents-by-type) (:aloitusoikeus documents-by-type))
         asian-tiedot (:data (first hankkeen-kuvaus-doc))
         maisematyo_kuvaukset (for [maisematyo_doc maisematyo_documents]
                                (str "\n\n" (:kuvaus (get-toimenpiteen-kuvaus maisematyo_doc))
@@ -326,9 +326,6 @@
   (if (and (contains? documents-by-type :maisematyo) (empty? toimenpiteet))
       "Uusi maisematy\u00f6hakemus"
       "Uusi hakemus"))
-
-(defn- get-hankkeen-vaativuus [documents-by-type]
-  (get-in documents-by-type [:hankkeen-kuvaus-rakennuslupa 0 :data :hankkeenVaativuus]))
 
 (defn application-to-canonical-operations
   [application]
@@ -361,8 +358,7 @@
                                         "aloitusoikeus" "Uusi aloitusoikeus"
                                         (get-kayttotapaus documents-by-type toimenpiteet)))
                       :asianTiedot (get-asian-tiedot documents-by-type)
-                      :lisatiedot (get-lisatiedot-with-asiakirjat-toimitettu application lang)
-                      :hankkeenVaativuus (get-hankkeen-vaativuus documents-by-type)}
+                      :lisatiedot (get-lisatiedot-with-asiakirjat-toimitettu application lang)}
                  util/not-empty-or-nil?
                  :viitelupatieto (map get-viitelupatieto link-permits)
                  :avainsanaTieto (get-avainsanaTieto application)

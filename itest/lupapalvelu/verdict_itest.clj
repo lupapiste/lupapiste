@@ -372,7 +372,7 @@
         app-id (:id application)
         op1    (:primaryOperation application)
         doc-count (count (:documents application))
-        expected-docs ["uusiRakennus" "hankkeen-kuvaus-rakennuslupa"
+        expected-docs ["uusiRakennus" "hankkeen-kuvaus"
                        "paatoksen-toimitus-rakval" "rakennuspaikka"
                        "rakennusjatesuunnitelma"
                        "hakija-r" "maksaja" "paasuunnittelija" "suunnittelija"]]

@@ -355,9 +355,6 @@
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto]
                  {:tag :rakennustieto :child [rakennus_220]})
       (update-in [:child] mapping-common/update-child-element
-                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
-                 #(update-in % [:child] concat [{:tag :hankkeenVaativuus}]))
-      (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennelmatieto :Rakennelma]
                  #(update-in % [:child] concat [{:tag :kayttotarkoitus}]))
       (update-in [:child] mapping-common/update-child-element

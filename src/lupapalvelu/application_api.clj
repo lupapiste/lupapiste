@@ -316,7 +316,7 @@
 
 (notifications/defemail :organization-housing-office
   {:pred-fn       (fn [command] (let [application (:application command)
-                                      document-data (:data (domain/get-document-by-name application "hankkeen-kuvaus-rakennuslupa"))]
+                                      document-data (:data (domain/get-document-by-name application "hankkeen-kuvaus"))]
                                   (and (some? (:rahoitus document-data))
                                        (true? (get-in document-data [:rahoitus :value])))))
    :recipients-fn (fn [{application :application org :organization}]

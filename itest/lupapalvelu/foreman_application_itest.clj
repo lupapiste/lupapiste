@@ -92,7 +92,7 @@
           (fact "Document data is copied to foreman application"
                 (fact "Hankkeen kuvaus"
                       (let [foreman-hankkeen-kuvaus (domain/get-document-by-name foreman-application "hankkeen-kuvaus-minimum")
-                            app-hankkeen-kuvaus     (domain/get-document-by-name application "hankkeen-kuvaus-rakennuslupa")]
+                            app-hankkeen-kuvaus     (domain/get-document-by-name application "hankkeen-kuvaus")]
 
                         (get-in app-hankkeen-kuvaus [:data :kuvaus :value]) => (get-in foreman-hankkeen-kuvaus [:data :kuvaus :value])))
 
@@ -216,13 +216,12 @@
                                             [:paatostieto] nil
                                             [:lisatiedot] nil
                                             [:liitetieto] nil
-                                            [:asianTiedot] nil
-                                            [:hankkeenVaativuus] nil)]
+                                            [:asianTiedot] nil)]
                            (fact "Paatostieto will be last element"
                                  (let [norm (verdict/verdict-xml-with-foreman-designer-verdicts foreman-application minispec)
                                        elems (-> norm (enlive/select [:RakennusvalvontaAsia :> enlive/any-node]))]
                                    (-> elems last :tag) => :paatostieto))
-                           (for [e [:muistiotieto :lisatiedot :liitetieto :kayttotapaus :asianTiedot :hankkeenVaativuus]
+                           (for [e [:muistiotieto :lisatiedot :liitetieto :kayttotapaus :asianTiedot]
                                  :let [norm (verdict/verdict-xml-with-foreman-designer-verdicts foreman-application minispec)
                                        elems (-> norm (enlive/select [:RakennusvalvontaAsia :> enlive/any-node]))]]
                              (do (fact (str e " is last") (-> elems last :tag) => e)
