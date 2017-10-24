@@ -233,6 +233,9 @@
 (defmethod operation-canonical :hankkeen-kuvaus-minimum [& _]
   nil)
 
+(defmethod operation-canonical :hankkeen-kuvaus [& _] ;; For prev permit applications
+  nil)
+
 (defmethod operation-canonical :maisematyo [& _]
   nil)
 
