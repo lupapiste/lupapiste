@@ -693,3 +693,5 @@
 
 (defn ^java.util.Date object-id-to-date [object-id]
   (-> object-id org.bson.types.ObjectId. bean :time java.util.Date.))
+
+(defalias nil-if-empty shared/nil-if-empty)

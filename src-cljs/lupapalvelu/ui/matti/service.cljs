@@ -177,7 +177,9 @@
 
 (defn publish-and-reopen-verdict [app-id verdict-id callback]
   (common/command {:command :publish-matti-verdict
-                   :success #(open-verdict app-id verdict-id callback)}
+                   :success (fn []
+                              (open-verdict app-id verdict-id callback)
+                              (js/repository.load app-id))}
                   :id app-id
                   :verdict-id verdict-id))
 

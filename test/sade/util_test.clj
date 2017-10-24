@@ -602,3 +602,9 @@
     (edit-distance test-string-3 test-string-2) => 3
     (edit-distance test-string-1 test-string-3) => 4
     (edit-distance test-string-1 test-string-3) => 4))
+
+(fact nil-if-empty
+  (nil-if-empty []) => nil
+  (nil-if-empty nil) => nil
+  (nil-if-empty {}) => nil
+  (nil-if-empty [1]) => [1])

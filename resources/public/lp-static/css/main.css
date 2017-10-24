@@ -18761,7 +18761,7 @@ div.matti-autocomplete .ac__menu ul.ac__items li.ac--grouped {
 
 .matti-batch-table tfoot.batch--buttons td {
   padding-top: 6px;
-  padding-left: 0;
+  padding-right: 0;
   text-align: right;
 }
 

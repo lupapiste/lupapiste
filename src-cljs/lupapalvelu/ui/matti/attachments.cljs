@@ -160,6 +160,7 @@
    (fn [{:keys [done pending result] :as job}]
      (letfn [(finalize []
                (js/lupapisteApp.services.attachmentsService.queryAll)
+               (js/lupapisteApp.services.attachmentsService.refreshAuthModels)
                (reset! binding?* false))]
        (if job
          (do (swap! files* (fn [files]
@@ -257,6 +258,11 @@
                       {}
                       (fn [state*]
                         (-> state* :rum/react-component rum/request-render)))
+  (rum-util/hubscribe "category-auth-model-changed"
+                      {}
+                      (fn [state* event]
+                        (when (.-targetId event)
+                          (-> state* :rum/react-component rum/request-render))))
   [{:keys [files*] :as options}]
   (when (-> files* rum/react empty?)
     (let [include?    (or (path/meta-value options :include?) identity)

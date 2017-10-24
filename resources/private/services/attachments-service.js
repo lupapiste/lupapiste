@@ -699,4 +699,11 @@ LUPAPISTE.AttachmentsService = function() {
                     } );
                   } );
   };
+
+  self.refreshAuthModels = function() {
+    authorization.refreshModelsForCategory(
+      self.authModels(),
+      self.applicationId(),
+      "attachments");
+  };
 };

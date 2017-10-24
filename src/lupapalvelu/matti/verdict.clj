@@ -1,8 +1,12 @@
 (ns lupapalvelu.matti.verdict
   (:require [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-state :as app-state]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.transformations :as transformations]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.inspection-summary :as inspection-summary]
             [lupapalvelu.matti.date :as date]
             [lupapalvelu.matti.schemas :as schemas]
             [lupapalvelu.matti.shared :as shared]
@@ -10,12 +14,13 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as ops]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.state-machine :as sm]
+            [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
-            [swiss.arrows :refer :all]
-            [lupapalvelu.authorization :as auth]))
+            [swiss.arrows :refer :all]))
 
 
 (defn neighbor-states
@@ -402,9 +407,30 @@
                                                      verdict))))
      :references (:references verdict)}))
 
-(defn publish-verdict [{created :created :as command}]
-  (let [verdict (command->verdict command)]
+(defn publish-verdict
+  "Publishing verdict does the following:
+  1. Finalize and publish verdict
+  2. Update application state
+  3. Inspection summaries
+  4. Other document updates (e.g., waste plan -> waste report)
+  5. TODO: Create PDF/A for the verdict"
+  [{:keys [created application user] :as command}]
+  (let [verdict    (command->verdict command)
+        next-state (sm/verdict-given-state application)]
     (verdict-update command
-                    {$set {:matti-verdicts.$.data (:data (enrich-verdict command
-                                                                         verdict))
-                           :matti-verdicts.$.published created}})))
+                    (util/deep-merge
+                     {$set {:matti-verdicts.$.data      (:data (enrich-verdict command
+                                                                               verdict))
+                            :matti-verdicts.$.published created}}
+                     (app-state/state-transition-update next-state
+                                                        created
+                                                        application
+                                                        user)))
+    (inspection-summary/process-verdict-given application)
+    (when-let [doc-updates (util/nil-if-empty (transformations/get-state-transition-updates command
+                                                                                            next-state))]
+      (action/update-application command
+                                 (:mongo-query doc-updates)
+                                 (:mongo-updates doc-updates)))
+    (tiedonohjaus/mark-app-and-attachments-final! (:id application)
+                                                  created)))
