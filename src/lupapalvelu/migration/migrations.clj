@@ -3505,6 +3505,18 @@
                                       (filter #(contains? deleted-task-ids (get-in % [:target :id]))))]]
     (att/delete-attachments! app (map :id task-attachments))))
 
+(defn hankkeen-kuvaus-rakennuslupa->hankkeen-kuvaus [{schema-info :schema-info data :data :as doc}]
+  (cond-> doc
+    (= (get-in doc [:schema-info :name]) "hankkeen-kuvaus-rakennuslupa")
+    (assoc :schema-info (-> schema-info
+                            (assoc  :name "hankkeen-kuvaus")
+                            (dissoc :i18name))
+           :data        (dissoc data :hankkeenVaativuus))))
+
+(defmigration hankkeen-kuvaus-rakennuslupa-depricated
+  {:apply-when (pos? (mongo/count :applications {:documents.schema-info.name "hankkeen-kuvaus-rakennuslupa"}))}
+  (update-applications-array :documents hankkeen-kuvaus-rakennuslupa->hankkeen-kuvaus {:documents.schema-info.name "hankkeen-kuvaus-rakennuslupa"}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
