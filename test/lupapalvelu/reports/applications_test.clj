@@ -37,7 +37,7 @@
                   :permitType          "R"
                   :propertyId          "63844900010004"
                   :schema-version      1
-                  :state               "submitted"
+                  :state               "inUse"
                   :submitted           1508326561369
                   :attachments        [{:applicationState "constructionStarted"
                                         :latestVersion {:version {:major 0 :minor 1}
@@ -76,9 +76,9 @@
                                                                                         :reviews-count                 2
                                                                                         :id                            "LP-753-2017-00001"
                                                                                         :title                         "Application title"
+                                                                                        :state                         "K\u00e4ytt\u00f6\u00f6notettu"
                                                                                         :organization                  "Sipoon rakennusvalvonta"
                                                                                         :applicant                     "Firstname Lastname"
-                                                                                        :applicant-count               1
                                                                                         :attachments-count             3
                                                                                         :pre-verdict-attachments       1
                                                                                         :post-verdict-attachments      2

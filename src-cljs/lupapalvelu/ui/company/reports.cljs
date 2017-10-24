@@ -21,7 +21,6 @@
    [:h1
     (loc (str "company.reports.title"))]
    [:div (loc (str "company.reports.help"))]
-   [:div (loc (str "company.reports.note"))]
    [:table.company-report-table
     [:thead
      [:tr

@@ -202,9 +202,9 @@
                                      "company.report.excel.header.reviews"
                                      "company.report.excel.header.id"
                                      "company.report.excel.header.title"
+                                     "company.report.excel.header.state"
                                      "company.report.excel.header.organization"
                                      "company.report.excel.header.applicant"
-                                     "company.report.excel.header.applicant.count"
                                      "company.report.excel.header.attachment.pre"
                                      "company.report.excel.header.attachment.post"]))
 
@@ -214,9 +214,9 @@
                                      "company.report.excel.header.attachment.useractions"
                                      "company.report.excel.header.id"
                                      "company.report.excel.header.title"
+                                     "company.report.excel.header.state"
                                      "company.report.excel.header.organization"
                                      "company.report.excel.header.applicant"
-                                     "company.report.excel.header.applicant.count"
                                      "company.report.excel.header.attachment"]))
 
 
@@ -258,9 +258,9 @@
    :reviews-count                 (count (filter #(= "task-katselmus" (-> % :schema-info :name)) (:tasks application)))
    :id                            (:id application)
    :title                         (:title application)
+   :state                         (i18n/localize lang (:state application))
    :organization                  (org/get-organization-name (org/get-organization (:organization application)))
    :applicant                     (applicant-name application)
-   :applicant-count               (count (domain/get-documents-by-subtype (:documents application) :hakija))
    :attachments-count             (count (:attachments application))
    :pre-verdict-attachments       (count (filter #(contains? states/pre-verdict-states (keyword (:applicationState %))) (:attachments application)))
    :post-verdict-attachments      (count (filter #(contains? states/post-verdict-states (keyword (:applicationState %))) (:attachments application)))
@@ -279,8 +279,8 @@
         applications-row-data (report-data-by-operations applications lang user)
         foreman-app-row-data (report-data-by-operations foreman-apps lang user)
         row-fn (juxt :building-id :operation :usage :required-actions :attachment-required-actions :inuse-date :final-review-date
-                     :reviews-count :id :title :organization :applicant :applicant-count :pre-verdict-attachments :post-verdict-attachments)
-        foreman-row-fn (juxt :operation :required-actions :attachment-required-actions :id :title :organization :applicant :applicant-count :attachments-count)
+                     :reviews-count :id :title :state :organization :applicant :pre-verdict-attachments :post-verdict-attachments)
+        foreman-row-fn (juxt :operation :required-actions :attachment-required-actions :id :title :state :organization :applicant :attachments-count)
         application-data (map (fn [permit] {:sheet-name (str permit)
                                       :header     (company-report-headers lang)
                                       :row-fn     row-fn
