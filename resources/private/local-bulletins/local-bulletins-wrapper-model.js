@@ -7,7 +7,6 @@ LUPAPISTE.LocalBulletinsWrapperModel = function(params) {
   self.page = ko.observable().extend({
     limited: {values: supportedPages, defaultValue: "local-bulletins"}
   });
-  self.pagePath = ko.observableArray([]);
 
 /*  var vetumaService = params.vetumaService;
   var fileuploadService = params.fileuploadService;
@@ -25,7 +24,6 @@ LUPAPISTE.LocalBulletinsWrapperModel = function(params) {
 
   hub.onPageLoad("local-bulletins", function(e) {
     self.page(e.pageId);
-    self.pagePath(e.pagePath);
     window.lupapisteApp.setTitle("Julkipano");
   });
 
@@ -33,10 +31,8 @@ LUPAPISTE.LocalBulletinsWrapperModel = function(params) {
     console.log("!!!!!!");
     self.bulletinId(_.head(e.pagePath));
     self.page(e.pageId);
-    self.pagePath(e.pagePath);
     window.lupapisteApp.setTitle("!!!Julkipano");
   });
 
   self.page(pageutil.getPage());
-  self.pagePath(pageutil.getPagePath());
 };

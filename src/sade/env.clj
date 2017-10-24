@@ -144,8 +144,13 @@
   (= target-env "TEST"))
 
 (def ^:dynamic *in-dev-macro* false)
+(def ^:dynamic *extra-path* nil)
 
 (defmacro in-dev [& body]
   `(if (dev-mode?)
      (binding [*in-dev-macro* true]
        (do ~@body))))
+
+(defmacro with-extra-path [extra-path & body]
+  `(binding [*extra-path* ~extra-path]
+     (do ~@body)))

@@ -5,8 +5,7 @@
   <script type="text/x-jquery-tmpl" id="local-bulletins-wrapper-template">
     <!-- ko if: page() === "local-bulletins" -->
     <div id="bulletins-component" data-bind="attr: {'id': page()+'-component'},
-                                             component: {name: 'local-bulletins',
-                                                         params: pageParams}"></div>
+                                             component: {name: 'local-bulletins'}"></div>
     <!-- /ko -->
     <!-- ko if: page() === "bulletin" -->
     <div id="bulletins-component" data-bind="attr: {'id': page()+'-component'},

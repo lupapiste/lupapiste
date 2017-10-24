@@ -24,8 +24,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.xml.validator :as validator]
             [lupapalvelu.attachment.conversion :as conversion]
-            [cljs.build.api]
-            #_[figwheel-sidecar.repl-api :as ra]))
+            [cljs.build.api]))
 
 (def themes #{"louhi", "facta"})
 
@@ -100,7 +99,8 @@
                                                {:logoutUrl (str (env/value :host) "/Shibboleth.sso/Logout")})
                                              (when (env/feature? :dummy-ident)
                                                {:logoutUrl (str (env/value :host) "/dev/saml-logout")})]))
-                 :convertableTypes      (conj conversion/libre-conversion-file-types :image/jpeg)}]
+                 :convertableTypes      (conj conversion/libre-conversion-file-types :image/jpeg)
+                 :extraPathInfo         env/*extra-path*}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []

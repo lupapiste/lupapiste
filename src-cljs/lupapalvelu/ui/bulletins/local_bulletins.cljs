@@ -1,7 +1,8 @@
 (ns lupapalvelu.ui.bulletins.local-bulletins
   (:require [rum.core :as rum]
             [lupapalvelu.ui.bulletins.state :as state]
-            [lupapalvelu.ui.common :as common]))
+            [lupapalvelu.ui.common :as common]
+            [lupapalvelu.ui.hub :as hub]))
 
 (defonce args (atom {}))
 
@@ -48,7 +49,8 @@
           [:td (common/format-timestamp verdictGivenAt)]
           [:td (common/format-timestamp appealPeriodEndsAt)]])]]))
 
-(rum/defc local-bulletins < {:init         init}
+(rum/defc local-bulletins < {:init init
+                             :will-unmount #(js/console.log "WILL UNMOUNT")}
   [_]
   [:div
    [:div.full.content.orange-bg
