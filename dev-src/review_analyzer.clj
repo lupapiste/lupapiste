@@ -96,16 +96,20 @@
           line (for [app-review (->> reviews
                                      (filter #(= "background" (get-in % [:source :type]))) ; only those from backend
                                      (filter #(and (> (:created %) gt-ts) (< (:created %) lt-ts)))) ; created in target timeframe
-                     :let [similar (some
+                     :let [review-held (get-in app-review [:data :katselmus :pitoPvm :value])
+                           similar (some
                                      (fn [xml]
                                        (and
                                          (= (get-in app-review [:data :katselmuksenLaji :value])
                                             (:katselmuksenLaji xml))
                                          (= (get-in app-review [:taskname])
                                             (:tarkastuksenTaiKatselmuksenNimi xml))
+                                         (= review-held
+                                            (util/to-local-date (:pitoPvm xml)))
+                                         (= (get-in app-review [:data :katselmus :tila :value])
+                                            (:osittainen xml))
                                          xml))                ; return similar looking review from XML
                                      xmls)
-                           review-held (get-in app-review [:data :katselmus :pitoPvm :value])
                            review-before-app? (and (not (ss/blank? review-held))
                                                    (< (util/to-millis-from-local-date-string review-held)
                                                       submitted-ts))]
