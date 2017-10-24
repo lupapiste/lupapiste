@@ -3801,6 +3801,7 @@
 "welcome.register" "fi" "Rekisteröidy"
 "welcome.register" "sv" "Registrera dig"
 "writer" "en" "Write access"
+"writer" "fi" "Kirjoitusoikeus"
 "writer" "sv" "Skrivrätt"
 "ya-work-time-is-expiring-reminder" "en" "{{address}}, {{municipality}} - is an extension required?"
 "ya-work-time-is-expiring-reminder" "fi" "{{address}}, {{municipality}} - tarvitaanko jatkoaikaa?"
