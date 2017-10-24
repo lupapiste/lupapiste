@@ -3,8 +3,8 @@
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
-            [monger.operators :refer :all]
             [lupapalvelu.user :as usr]
+            [monger.operators :refer :all]
             [taoensso.timbre :as timbre]))
 
 (defn metadata-query [md-key]
@@ -46,11 +46,13 @@
         post-verdict-docs-archived? (zero? (mongo/count :applications post-verdict-query))]
 
     (when pre-verdict-docs-archived?
+      (timbre/info "Setting pre-verdict archiving completed")
       (action/update-application
         (action/application->command application)
         {$set {:archived.application now}}))
 
     (when post-verdict-docs-archived?
+      (timbre/info "Setting post-verdict archiving completed")
       (action/update-application
         (action/application->command application)
         {$set {:archived.completed now}}))
