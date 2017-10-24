@@ -1,6 +1,6 @@
 $bulletin-breakpoint: 1166px;
 
-#bulletins {
+#bulletins, #local-bulletins {
   font-family: $font-body;
   font-weight: 400;
   font-size: 1rem;
@@ -94,6 +94,13 @@ $bulletin-breakpoint: 1166px;
     background-color: $gray238;
   }
 
+  .orange-bg {
+    background-color: $orange-dark;
+    h1,h2,p {
+      color: #fff;
+    }
+  }
+
   .content-center {
     max-width: $application-max-width;
     margin: 0 auto;
@@ -110,6 +117,22 @@ $bulletin-breakpoint: 1166px;
     text-align: center;
     width: 80%;
     margin: 0 auto $grid-margin;
+  }
+
+  .municipal-heading {
+    font-weight: 900;
+    padding-top: $grid-margin-large;
+  }
+
+  .municipal-caption {
+    border: 1px solid;
+    padding: $grid-margin;
+    margin-top: $grid-margin-large;
+    border-color: $orange-dark;
+
+    p:last-child {
+      margin-bottom: auto;
+    }
   }
 
   .autocomplete-component {

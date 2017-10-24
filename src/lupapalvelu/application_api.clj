@@ -316,7 +316,7 @@
 
 (notifications/defemail :organization-housing-office
   {:pred-fn       (fn [command] (let [application (:application command)
-                                      document-data (:data (domain/get-document-by-name application "hankkeen-kuvaus-rakennuslupa"))]
+                                      document-data (:data (domain/get-document-by-name application "hankkeen-kuvaus"))]
                                   (and (some? (:rahoitus document-data))
                                        (true? (get-in document-data [:rahoitus :value])))))
    :recipients-fn (fn [{application :application org :organization}]
@@ -602,7 +602,7 @@
     (fail :error.property-in-other-muinicipality)))
 
 (defcommand change-application-state
-  {:description      "Changes application state. The tranistions happen
+  {:description      "Changes application state. The transitions happen
   between post-verdict (excluding verdict given)states. In addition,
   the transition from appealed to a verdict given state is supported."
    :parameters       [id state]

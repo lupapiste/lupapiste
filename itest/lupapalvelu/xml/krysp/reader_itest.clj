@@ -37,7 +37,7 @@
                               :description nil
                               :created     "1962"
                               :location    [395320.093 6697384.603]
-                              :location-wgs84 [25.1 60.399]})
+                              :location-wgs84 [25.10015 60.39924]})
 
       (fact "second building has correct data"
         (second buildings) => {:propertyId   "75300301050006"
@@ -52,7 +52,7 @@
                                :description  nil
                                :created     "1998"
                                :location    [395403.406 6698547.3]
-                               :location-wgs84 [25.101 60.41]}))))
+                               :location-wgs84 [25.10105 60.4097]}))))
 
 (fact "converting building krysp to lupapiste domain model"
   (let [xml (building-xml local-krysp nil id)]

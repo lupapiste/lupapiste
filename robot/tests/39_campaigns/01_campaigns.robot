@@ -147,7 +147,7 @@ Bob logs in
   Page should contain  /dev/dummy-onnistuu/doc/
 
 Company info page has the registered information
-  Click by test id  company-edit-info
+  Scroll and click test id  company-edit-info
   Test id select is  company-account-select  account15
   # Company info always shows regular price
   Test id select text is  company-account-select  Yritystili 15 (79 €/kk)

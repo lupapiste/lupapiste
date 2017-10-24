@@ -109,7 +109,7 @@
   {:muuTunnus (:tunnus muu-tunnus "")
    :muuTunnusSovellus (:sovellus muu-tunnus "")})
 
-(defn- ->lupamaaraukset [paatos-xml-without-ns]
+(defn ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cr/cleanup)
 

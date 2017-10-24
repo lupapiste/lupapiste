@@ -380,6 +380,7 @@
                  att/attachment-editable-by-application-state
                  att/delete-allowed-by-target
                  att/edit-allowed-by-target
+                 att/attachment-not-stamped
                  ram/ram-status-not-ok
                  ram/ram-not-linked
                  attachment-not-requested-by-authority]}

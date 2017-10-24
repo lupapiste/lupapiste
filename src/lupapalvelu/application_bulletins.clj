@@ -34,7 +34,10 @@
    :versions.verdictGivenAt 1 :versions.appealPeriodStartsAt 1
    :versions.appealPeriodEndsAt 1 :versions.verdictGivenText 1
    :versions.officialAt 1
-   :modified 1})
+   :versions.matti-verdict.data 1
+   :versions.matti-verdict.category 1
+   :modified 1 :versions.application-id 1
+   :versions.bulletin-op-description 1})
 
 (def bulletin-fields
   (merge bulletins-fields
@@ -51,7 +54,7 @@
 (def app-snapshot-fields
   [:_applicantIndex :address :applicant :created :documents :location
    :modified :municipality :organization :permitType
-   :primaryOperation :propertyId :state :verdicts :tasks])
+   :primaryOperation :propertyId :state :verdicts :matti-verdicts :tasks])
 
 (def attachment-snapshot-fields
   [:id :type :latestVersion :auth :metadata :contents :target])

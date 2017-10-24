@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :refer [infof]]
             [sade.core :refer :all]
             [sade.common-reader :as cr]
+            [sade.strings :as ss]
             [sade.util :as util]
             [sade.xml :as xml]
             [lupapalvelu.child-to-attachment :as child-to-attachment]
@@ -38,6 +39,7 @@
         giver (get-in lausunto-vastaus [:Lausunto :Lausunnonantaja])
         statement-required-data (get-required-data! lausunto-vastaus)
         statement-data (-> statement-required-data
+                           (update :status ss/lower-case)
                            (update :given cr/to-timestamp)
                            (util/assoc-when :text text :giver giver))
         attachments (-> (:Liitteet lausunto-vastaus)

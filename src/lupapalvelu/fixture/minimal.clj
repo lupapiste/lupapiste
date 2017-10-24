@@ -144,7 +144,7 @@
     :street "Katuosoite 2 a 4"
     :zip "33456"
     :personId "180495-754N"
-    :personIdSource :identification-service
+    :personIdSource "identification-service"
     :city "Kuopio"
     :private {:password "$2a$10$me2UOXOUfEbseJeLUBde8u2rlqOwHuqxbFT00q70QEvTpskHKol2m"
               :apikey   "e1vshYravGWKA1QXL3NeWMmyzzBJmcgq6IUqKZmh"}}
@@ -533,7 +533,7 @@
     :phone "0505503171"
     :email "teppo@example.com"
     :personId "210281-0002"
-    :personIdSource :identification-service
+    :personIdSource "identification-service"
     :role "applicant"
     :id "5073c0a1c2e6c470aef589a5"
     :allowDirectMarketing true
@@ -547,7 +547,7 @@
    {:role "applicant",
     :email "sven@example.com",
     :personId "070842-559U",
-    :personIdSource :identification-service
+    :personIdSource "identification-service"
     :private {:apikey "bfxLwCerNjNUpmJ2HqZbfxLwCerNjNUpmJ2HqZ",
               :password "$2a$10$i8O320oYo76R6QoV6bh5MunFXeNy.FcS/xqTOKwLnxQOLBg721Ouy"},
     :phone "0505504444",
@@ -568,7 +568,7 @@
     :language "fi"
     :role "applicant"
     :personId "210281-9988" ; = Nordea demo
-    :personIdSource :identification-service
+    :personIdSource "identification-service"
     :firstName "Mikko"
     :lastName "Intonen"
     :email "mikko@example.com"
@@ -593,7 +593,7 @@
     :language "fi"
     :role "applicant"
     :personId "010203-040A"
-    :personIdSource :identification-service
+    :personIdSource "identification-service"
     :firstName "Pena"
     :lastName "Panaani"
     :email "pena@example.com"
@@ -666,7 +666,7 @@
     :firstName "Erkki"
     :lastName "Esimerkki"
     :personId "010203-041B"
-    :personIdSource :identification-service
+    :personIdSource "identification-service"
     :phone "556677"
     :email "erkki@example.com"
     :street "Merkintie 88"
@@ -694,8 +694,7 @@
             :display-name {:fi "Lupapiste kauppa"
                            :sv "Lupapiste butik"
                            :en "Lupapiste store"}
-            :callback {:success-url "http://localhost:8000/success"
-                       :failure-url "http://localhost:8000/failure"}}}
+            :callback-url "http://localhost:8000"}}
 
    ;; Solita admin:  financial / admin
    {:id "financial"
@@ -798,7 +797,13 @@
                       {:id "753-R"
                        :name (names {:fi "Sipoon rakennusvalvonta"
                                      :sv "Sipoon rakennusvalvonta"})
-                       :scope [{:municipality "753" :permitType "R" :inforequest-enabled true :new-application-enabled true}
+                       :scope [{:municipality "753"
+                                :permitType "R"
+                                :inforequest-enabled true
+                                :new-application-enabled true
+                                :bulletins {:enabled true
+                                            :url "http://localhost:8000/dev/julkipano"
+                                            :notification-email "sonja.sibbo@sipoo.fi"}}
                                {:municipality "753" :permitType "P" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "YM" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "YI" :inforequest-enabled true :new-application-enabled true}
@@ -1391,7 +1396,7 @@
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}]))
 
-(def companies [{:_id "solita"
+(def companies [{:id "solita"
                  :accountType "account5"
                  :customAccountLimit nil
                  :created 1412959886600
@@ -1408,7 +1413,7 @@
                  :process-id "CkaekKfpEymHUG0nn5z4MLxwNm34zIdpAXHqQ3FM"
                  :tags [{:id "7a67a67a67a67a67a67a67a6"
                          :label "Projekti1"}]}
-                {:_id "esimerkki"
+                {:id "esimerkki"
                  :accountType "account5"
                  :customAccountLimit nil
                  :created 1493200035783

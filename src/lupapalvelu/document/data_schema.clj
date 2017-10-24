@@ -94,6 +94,9 @@
 (defmethod coerce-subtype :recent-year [elem-schema]
   (data-leaf elem-schema (ssc/min-max-valued-integer-string 1950 2015)))
 
+(defmethod coerce-subtype :zipcode [elem-schema]
+  (data-leaf elem-schema ssc/Zipcode))
+
 (defmethod coerce-type :string [elem-schema]
   (coerce-subtype elem-schema))
 

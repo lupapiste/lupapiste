@@ -30,10 +30,9 @@
                                                       :name "rakennuksen-laajentaminen",
                                                       :accordion-fields schemas/buildingid-accordion-paths},
                                         :data {:valtakunnallinenNumero {:value "bld_123456" }}}
-                                       {:schema-info {:name "hankkeen-kuvaus-rakennuslupa"
+                                       {:schema-info {:name "hankkeen-kuvaus"
                                                       :subtype :hankkeen-kuvaus,}
                                         :data {:kuvaus {:value "Some project description."}
-                                               :hankkeenVaativuus {:value "AA"}
                                                :poikkeamat {:value "Some deviations and reasons for them."}}}]
                 :attachments          [{:id "..attachment-id..",
                                         :groupType "operation",

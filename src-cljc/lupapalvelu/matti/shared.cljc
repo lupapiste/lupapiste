@@ -63,7 +63,7 @@
 
 (def phrase-categories #{:paatosteksti :lupaehdot :naapurit
                          :muutoksenhaku :vakuus :vaativuus
-                         :rakennusoikeus :kaava})
+                         :rakennusoikeus :kaava :toimenpide-julkipanoon})
 
 (def path-type (sc/conditional
                 ;; Joined kw-path (e.g. :one.two.three)
@@ -111,8 +111,7 @@
   value)
 
   Note: :_meta.enabled? is always used as prerequisite."
-  {(sc/optional-key :enabled?)
-  condition-type
+  {(sc/optional-key :enabled?)  condition-type
    (sc/optional-key :disabled?) condition-type})
 
 (defschema MattiVisible
@@ -221,6 +220,35 @@
   after the instantiation can be added. No UI counterpart."
   {sc/Keyword sc/Any})
 
+(defschema MattiAttachments
+  "Support for adding (via batch editor) attachments and viewing
+  attachment list. In addition to schema properties, the component
+  depends on two _meta functions:
+
+  filedata: (options filedata & kvs -> filedata) Receives regular
+  options (state, _meta, schema and other keys), filedata and extra
+  key-values. Returns filedata. Typical use case is to add target
+  information.
+
+  include?: (options attachment -> boolean) True if the attachment is
+  to be included in the attachments list. Sample use case: list only
+  the verdict's attachments."
+  (merge MattiComponent
+         {;; Matching type groups are listed on the type
+          ;; selector. Default all type groups.
+          (sc/optional-key :type-group) sc/Regex
+          ;; Default selection the value is a kw-path
+          ;; type-group.type-id. The value must in the filtered
+          ;; type-groups or it is ignored.
+          (sc/optional-key :default)    sc/Keyword
+          ;; Dropzone is jQuery selector for the dropzone. For the
+          ;; best visual effect the container should include dropzone
+          ;; component. If not given, drag'n'drop is not supported.
+          (sc/optional-key :dropzone)   sc/Str
+          ;; If true, multiple files can be uploaded at the same
+          ;; time. Default false.
+          (sc/optional-key :multiple?)  sc/Bool}))
+
 (defschema SchemaTypes
   {sc/Keyword (sc/conditional
                :docgen         {:docgen (sc/conditional
@@ -234,6 +262,7 @@
                :reference      {:reference MattiReference}
                :placeholder    {:placeholder MattiPlaceholder}
                :keymap         {:keymap KeyMap}
+               :attachments    {:attachments MattiAttachments}
                :repeating      {:repeating (sc/recursive #'SchemaTypes)})})
 
 (defschema Dictionary
@@ -311,7 +340,7 @@
          {:id   keyword-or-string ;; Also title localization key
           :grid MattiGrid}))
 
-(defschema MattiVerdict
+(defschema MattiVerdictTemplate
   (merge Dictionary
          MattiMeta
          {(sc/optional-key :id)       sc/Str
@@ -354,10 +383,13 @@
                 :aloitettava   {:date-delta {:unit :years}}
                 :voimassa      {:date-delta {:unit :years}}
                 :giver         {:docgen "matti-verdict-giver"}
+                :verdict-section  {:docgen "matti-verdict-section"}
                 :verdict-code  {:reference-list {:path       :settings.verdict-code
                                                  :type       :select
                                                  :loc-prefix :matti-r.verdict-code}}
                 :paatosteksti  {:phrase-text {:category :paatosteksti}}
+                :bulletin-op-description {:phrase-text {:category :toimenpide-julkipanoon
+                                                        :i18nkey :phrase.category.toimenpide-julkipanoon}}
                 ;; The following keys are whole sections
                 :foremen       (reference-list :settings.foremen {:item-loc-prefix :matti-r.foremen})
                 :plans         (reference-list :settings.plans {:term {:path       [:plans]
@@ -404,11 +436,19 @@
                                       [{:col  3
                                         :id   :giver
                                         :dict :giver}
+                                       {:col  2
+                                        :id   :section
+                                        :dict :verdict-section}
                                        {:align :full
                                         :col   3
                                         :dict  :verdict-code}]
                                       [{:col  12
                                         :dict :paatosteksti}]]}}
+              {:id          "bulletin"
+               :loc-prefix  :bulletin
+               :grid        {:columns 1
+                             :rows [[{:col  1
+                                      :dict :bulletin-op-description}]]}}
               (multi-section :foremen)
               (multi-section :reviews)
               (multi-section :plans)
@@ -442,7 +482,7 @@
                                                                      :css  [:matti-condition-box]})
                                                                   [:autopaikat :vss-luokka :paloluokka])}}]]}}]})
 
-(sc/validate MattiVerdict default-verdict-template)
+(sc/validate MattiVerdictTemplate default-verdict-template)
 
 (defschema MattiSettings
   (merge Dictionary
@@ -491,6 +531,21 @@
 
 (sc/validate MattiSettings r-settings)
 
+
+(defschema MattiVerdictSection
+  (merge MattiBase
+         {:id   keyword-or-string ;; Also title localization key
+          (sc/optional-key :buttons?) sc/Bool ;; Show edit button? (default true)
+          :grid MattiGrid}))
+
+(defschema MattiVerdict
+  (merge Dictionary
+         MattiMeta
+         {(sc/optional-key :id)       sc/Str
+          (sc/optional-key :modified) sc/Int
+          :sections                   [MattiVerdictSection]}))
+
+
 ;; It is advisable to reuse ids from template when possible. This
 ;; makes localization work automatically.
 (def verdict-schemas
@@ -512,6 +567,8 @@
                                           :type       :select
                                           :loc-prefix :matti-r.verdict-code}}
       :verdict-text     {:phrase-text {:category :paatosteksti}}
+      :bulletin-op-description {:phrase-text {:category :toimenpide-julkipanoon
+                                              :i18nkey :phrase.category.toimenpide-julkipanoon}}
       :verdict-text-ref {:reference {:path :verdict-text}}
       :application-id   {:placeholder {:type :application-id}}}
      (reduce (fn [acc [loc-prefix kw term? separator?]]
@@ -538,26 +595,31 @@
              [[:matti-r.foremen :foremen false false]
               [:matti-plans :plans true false]
               [:matti-reviews :reviews true true]])
-     {:conditions             {:phrase-text {:i18nkey  :phrase.category.lupaehdot
-                                             :category :lupaehdot}}
-      :neighbors              {:phrase-text {:i18nkey  :phrase.category.naapurit
-                                             :category :naapurit}}
-      :neighbor-states        {:placeholder {:type :neighbors}}
-      :collateral             {:phrase-text {:category :vakuus}}
-      :appeal                 {:phrase-text {:category :muutoksenhaku}}
-      :complexity             {:docgen "matti-complexity"}
-      :complexity-text        {:phrase-text {:label?   false
-                                             :category :vaativuus}}
-      :rights                 {:phrase-text {:category :rakennusoikeus}}
-      :purpose                {:phrase-text {:category :kaava}}
-      :buildings              {:repeating {:building-name          {:placeholder {:label? false
-                                                                                  :type :building}}
-                                           :rakennetut-autopaikat  {:docgen "matti-string"}
-                                           :kiinteiston-autopaikat {:docgen "matti-string"}
-                                           :autopaikat-yhteensa    {:docgen "matti-string"}
-                                           :vss-luokka             {:docgen "matti-string"}
-                                           :paloluokka             {:docgen "matti-string"}
-                                           :show-building          {:docgen "required-in-verdict"}}}})
+     {:conditions      {:phrase-text {:i18nkey  :phrase.category.lupaehdot
+                                      :category :lupaehdot}}
+      :neighbors       {:phrase-text {:i18nkey  :phrase.category.naapurit
+                                      :category :naapurit}}
+      :neighbor-states {:placeholder {:type :neighbors}}
+      :collateral      {:phrase-text {:category :vakuus}}
+      :appeal          {:phrase-text {:category :muutoksenhaku}}
+      :complexity      {:docgen "matti-complexity"}
+      :complexity-text {:phrase-text {:label?   false
+                                      :category :vaativuus}}
+      :rights          {:phrase-text {:category :rakennusoikeus}}
+      :purpose         {:phrase-text {:category :kaava}}
+      :buildings       {:repeating {:building-name          {:placeholder {:label? false
+                                                                           :type   :building}}
+                                    :rakennetut-autopaikat  {:docgen "matti-string"}
+                                    :kiinteiston-autopaikat {:docgen "matti-string"}
+                                    :autopaikat-yhteensa    {:docgen "matti-string"}
+                                    :vss-luokka             {:docgen "matti-string"}
+                                    :paloluokka             {:docgen "matti-string"}
+                                    :show-building          {:docgen "required-in-verdict"}}}
+      :attachments     {:attachments {:i18nkey    :application.verdict-attachments
+                                      :type-group #"paatoksenteko"
+                                      :default    :paatoksenteko.paatosote
+                                      :dropzone   "#application-matti-verdict-tab"
+                                      :multiple?  true}}})
     :sections
     [{:id   "matti-dates"
       :grid {:columns 7
@@ -583,15 +645,16 @@
              :rows    [[{:loc-prefix :matti-verdict.giver
                          :hide?      :_meta.editing?
                          :dict       :contact-ref}
-                        {:col   3
+                        {:col   2
                          :show? :_meta.editing?
                          :list  {:items [{:id   :giver
                                           :dict :giver}
                                          {:id    :contact
                                           :show? :_meta.editing?
                                           :dict  :contact}]}}
-                        {:col   2
-                         :hide? :_meta.editing?}
+                        {:col   1
+                         :loc-prefix :matti-verdict.section
+                         :dict  :verdict-section}
                         {:col   2
                          :align :full
                          :dict  :verdict-code}]
@@ -606,6 +669,13 @@
                          :id    "application-id"
                          :hide? :_meta.editing?
                          :dict  :application-id}]]}}
+     {:id          "bulletin"
+      :loc-prefix  :bulletin
+      :show?       :?.bulletin-op-description
+      :grid        {:columns 1
+                    :rows [[{:col  1
+                             :id   "toimenpide-julkipanoon"
+                             :dict :bulletin-op-description}]]}}
      {:id   "requirements"
       :grid {:columns 7
              :rows    (concat (map (fn [dict]
@@ -672,26 +742,31 @@
                           :grid {:columns    6
                                  :loc-prefix :matti-buildings.info
                                  :repeating  :buildings
-                                 :rows       [{:css [:row--tight]
+                                 :rows       [{:css   [:row--tight]
                                                :show? [:OR :_meta.editing? :+.show-building]
-                                               :row [{:col 6
-                                                      :dict :building-name}]}
+                                               :row   [{:col  6
+                                                        :dict :building-name}]}
                                               {:show? [:OR :_meta.editing? :+.show-building]
-                                               :css [:row--indent]
-                                               :row [{:col 5
-                                                      :list {:css :list--sparse
-                                                             :items (map #(hash-map :id %
-                                                                                    :dict %
-                                                                                    :show? (util/kw-path :?+ %)
-                                                                                    :enabled? :-.show-building)
-                                                                         [:rakennetut-autopaikat
-                                                                          :kiinteiston-autopaikat
-                                                                          :autopaikat-yhteensa
-                                                                          :vss-luokka
-                                                                          :paloluokka])}}
-                                                     {:dict  :show-building
-                                                      :show? :_meta.editing?}]}
-                                              ]}}]]}}]}})
+                                               :css   [:row--indent]
+                                               :row   [{:col  5
+                                                        :list {:css   :list--sparse
+                                                               :items (map #(hash-map :id %
+                                                                                      :dict %
+                                                                                      :show? (util/kw-path :?+ %)
+                                                                                      :enabled? :-.show-building)
+                                                                           [:rakennetut-autopaikat
+                                                                            :kiinteiston-autopaikat
+                                                                            :autopaikat-yhteensa
+                                                                            :vss-luokka
+                                                                            :paloluokka])}}
+                                                       {:dict  :show-building
+                                                        :show? :_meta.editing?}]}
+                                              ]}}]]}}
+     {:id       "attachments"
+      :buttons? false
+      :grid     {:columns 7
+                 :rows    [[{:col   6
+                             :dict  :attachments}]]}}]}})
 
 (sc/validate MattiVerdict (:r verdict-schemas))
 

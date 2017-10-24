@@ -432,7 +432,7 @@
     (catch Throwable t
       (errorf "error.integration - Could not read reviews for %s" (:id application)))))
 
-(defn- fetch-reviews-for-organization-permit-type-consecutively [organization permit-type applications]
+(defn fetch-reviews-for-organization-permit-type-consecutively [organization permit-type applications]
   (logging/log-event :info {:run-by "Automatic review checking"
                             :event "Fetch consecutively"
                             :organization-id (:id organization)

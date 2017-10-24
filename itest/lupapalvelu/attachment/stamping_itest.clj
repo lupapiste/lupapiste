@@ -1,6 +1,7 @@
 (ns lupapalvelu.attachment.stamping-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.factlet :refer :all]
             [lupapalvelu.attachment :refer [get-attachment-info]]
             [lupapalvelu.attachment.util :refer [attachment-state]]
             [sade.util :as util]))
@@ -8,11 +9,11 @@
 (apply-remote-minimal)
 
 (facts "Stamping"
-  (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
+  (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
         application-id (:id application)
         attachment (first (:attachments application))
-        _ (upload-attachment sonja application-id attachment true :filename "dev-resources/test-pdf.pdf")
-        application (query-application sonja application-id)
+        _ (upload-attachment pena application-id attachment true :filename "dev-resources/test-pdf.pdf")
+        application (query-application pena application-id)
         comments (:comments application)
         stamp {:id         "123456789012345678901234"
                :name       "Oletusleima"
@@ -57,11 +58,14 @@
     (when-not (= "done" (:status job)) (poll-job sonja :stamp-attachments-job (:id job) (:version job) 25))
 
     (let [attachment (get-attachment-by-id sonja application-id (:id attachment))
-          comments-after (:comments (query-application sonja application-id))]
+          pena-app (query-application pena application-id)
+          comments-after (:comments pena-app)]
 
       (fact "Attachment has stamp and no new comments"
         (get-in attachment [:latestVersion :stamped]) => true
         comments-after => comments)
+      (fact "Pena can't delete attachemnt, as it's bound to application by operation"
+        pena =not=> (allowed? :delete-attachment :id application-id :attachmentId (:id attachment)))
 
       (fact "Attachment has Sonja's stamper auth"
         (get-in attachment [:auth 1 :id]) => sonja-id
@@ -89,6 +93,82 @@
             (let [attachment-after-restamp (get-attachment-by-id sonja application-id (:id attachment))]
               (:latestVersion attachment) =not=> (:latestVersion attachment-after-restamp)
               (get-in attachment [:latestVersion :stamped]) => true)))))))
+
+(facts* "Stamped attachment can't be deleted LPK-3335"
+  (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
+        application-id (:id application)
+        attachment (first (:attachments application))
+        ; upload to placeholder
+        _ (upload-file-and-bind pena application-id {:filename "dev-resources/test-pdf.pdf"} :attachment-id (:id attachment))
+        ; we upload new attachment, as attachment created on app creation can't be deleted
+        _ (upload-file-and-bind pena application-id {:type  {:type-group "suunnitelmat"
+                                                             :type-id    "valaistussuunnitelma"}
+                                                     :group {:groupType  "operation"
+                                                             :operations [{:id (-> application :primaryOperation :id)}]}}) => string?
+        application (query-application pena application-id)
+        new-attachment (util/find-first #(= "valaistussuunnitelma" (get-in % [:type :type-id])) (:attachments application))
+        stamp {:id         "123456789012345678901234"
+               :name       "Oletusleima"
+               :position   {:x 10 :y 200}
+               :background 0
+               :page       :first
+               :qrCode     true
+               :rows       [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
+                            [{:type :backend-id :value "17-0753-R"}]
+                            [{:type :organization :value "Sipoon rakennusvalvonta"}]]}
+        {job :job :as resp} (command
+                              sonja
+                              :stamp-attachments
+                              :id application-id
+                              :timestamp ""
+                              :files [(:id new-attachment)
+                                      (:id attachment)]
+                              :lang "fi"
+                              :stamp stamp)
+        file-id (get-in (:value job) [(-> job :value keys first) :fileId])]
+    new-attachment => truthy
+
+    (fact "stamp is validated against schema"
+      (command
+        sonja
+        :stamp-attachments
+        :id application-id
+        :timestamp ""
+        :files [(:id new-attachment)
+                (:id attachment)]
+        :lang "fi"
+        :stamp (assoc stamp :page "foo")) => (partial expected-failure? :error.illegal-value:schema-validation))
+
+    (fact "not stamped by default"
+      (get-in (get-attachment-info application (:id attachment)) [:latestVersion :stamped]) => falsey
+      (get-in (get-attachment-info application (:id new-attachment)) [:latestVersion :stamped]) => falsey)
+
+    (fact "Attachment state is not ok"
+      (attachment-state (get-attachment-info application (:id attachment))) =not=> :ok
+      (attachment-state (get-attachment-info application (:id new-attachment))) =not=> :ok)
+
+    resp => ok?
+    (fact "Job id is returned" (:id job) => truthy)
+    (fact "FileId is returned" file-id => truthy)
+
+    ; Poll for 5 seconds
+    (when-not (= "done" (:status job)) (poll-job sonja :stamp-attachments-job (:id job) (:version job) 25))
+
+    (let [application (query-application sonja application-id)
+          regular-attachment (get-attachment-info application (:id attachment))
+          new-attachment (get-attachment-info application (:id new-attachment))]
+
+      (fact "Attachments have stamp"
+        (get-in new-attachment [:latestVersion :stamped]) => true
+        (get-in regular-attachment [:latestVersion :stamped]) => true)
+      (fact "Pena can't delete attachemnt, as it's stamped"
+        pena =not=> (allowed? :delete-attachment :id application-id :attachmentId (:id new-attachment)))
+      (fact "Sonja can delete as she is authority"
+        sonja => (allowed? :delete-attachment :id application-id :attachmentId (:id new-attachment)))
+
+      (fact "Attachment state is now ok"
+        (attachment-state new-attachment) => :ok)
+      (fact "New fileid is in response" (get-in new-attachment [:latestVersion :fileId]) =not=> file-id))))
 
 (facts "Stamping copies all signings"
   (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")

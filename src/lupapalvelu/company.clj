@@ -41,7 +41,8 @@
   (let [account-type (some #(if (= (:name %) account-name) %) account-types)]
     (:limit account-type)))
 
-(def Company {:name                          (ssc/min-max-length-string 1 64)
+(def Company {(sc/optional-key :id)          sc/Str
+              :name                          (ssc/min-max-length-string 1 64)
               :y                             ssc/FinnishY
               :accountType                   (apply sc/enum "custom" (map (comp name :name) account-types))
               :customAccountLimit            (sc/maybe sc/Int)

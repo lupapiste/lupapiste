@@ -65,8 +65,9 @@
 
 (defschema Role (apply sc/enum all-roles))
 (defschema OrgId (sc/pred keyword? "Organization ID"))
-(defschema Authz (sc/pred string? "Authz access right"))
-(defschema OrgAuthz {OrgId [Authz]})
+(defschema Authz (sc/either (sc/pred string? "Authz access right")
+                            (sc/pred keyword? "Authz access right")))
+(defschema OrgAuthz {OrgId (sc/either [Authz] #{Authz})})
 (defschema PersonIdSource (sc/enum "identification-service" "user"))
 
 (defschema User
@@ -121,8 +122,7 @@
                                                    :client-secret sc/Str
                                                    :scopes [(sc/enum "read" "pay")]
                                                    :display-name i18n/LocalizationStringMap
-                                                   :callback {:success-url sc/Str
-                                                              :failure-url sc/Str}}})
+                                                   :callback-url ssc/HttpUrl}})
 
 (defschema RegisterUser
                   {:email                            ssc/Email

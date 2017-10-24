@@ -64,10 +64,10 @@ Sonja rejects hankkeen-kuvaus
   Open tab  info
   Wait Until  Element should be visible  //div[@id="application-info-tab"]
   Open accordions  info
-  Reject accordion  hankkeen-kuvaus-rakennuslupa
+  Reject accordion  hankkeen-kuvaus
 
 Sonja approves hankkeen-kuvaus
-  Approve accordion  hankkeen-kuvaus-rakennuslupa
+  Approve accordion  hankkeen-kuvaus
 
 Sonja approves group kaytto
   Group neutral  kaytto
@@ -93,7 +93,7 @@ Mikko logs in and sees correct approval state
   Mikko logs in
   Open application  ${appname}  753-416-25-30
   Open accordions  info
-  Accordion approved  hankkeen-kuvaus-rakennuslupa
+  Accordion approved  hankkeen-kuvaus
   Accordion negated  rakennuksen-muuttaminen
   Group rejected  mitat
   Group rejected  kaytto

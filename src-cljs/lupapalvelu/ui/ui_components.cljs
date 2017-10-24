@@ -3,7 +3,9 @@
             [lupapalvelu.ui.auth-admin.stamp.editor :as stamp-editor]
             [lupapalvelu.ui.matti.verdict-templates :as verdict-templates]
             [lupapalvelu.ui.matti.verdicts :as verdicts]
-            [lupapalvelu.ui.printing-order.composer :as printing-order-composer]))
+            [lupapalvelu.ui.printing-order.composer :as printing-order-composer]
+            [lupapalvelu.ui.bulletins.local-bulletins :as local-bulletins]
+            [lupapalvelu.ui.company.reports :as company-reports]))
 
 (defn reload-hook []
 
@@ -11,7 +13,9 @@
         stamp-editor/mount-component
         verdict-templates/mount-component
         verdicts/mount-component
-        printing-order-composer/mount-component]
+        printing-order-composer/mount-component
+        local-bulletins/mount-component
+        company-reports/mount-component]
 
        (run! (fn [mount-fn]
                (try (mount-fn)

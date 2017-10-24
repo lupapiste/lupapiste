@@ -7,7 +7,8 @@
             [lupapalvelu.action :as action :refer [defraw]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.reports.applications :as app-reports]))
+            [lupapalvelu.reports.applications :as app-reports]
+            [lupapalvelu.company :as com]))
 
 (defn excel-response [filename body]
   (try
@@ -87,3 +88,19 @@
                       (util/to-long startTs)
                       (util/to-long endTs)
                       lang))))
+
+(defraw company-report
+  {:description      "Excel report for company authority"
+   :parameters       [startTs endTs]
+   :input-validators [(partial action/string-parameters [:startTs :endTs])
+                      max-month-window]
+   :user-roles       #{:applicant :authority}
+   :pre-checks       [(com/validate-has-company-role :admin)]}
+  [{user :user {lang :lang} :data}]
+  (let [company (get-in user [:company :id])
+        resulting-file-name (str (i18n/localize lang "company.reports.excel.filename")
+                                 "_"
+                                 (util/to-xml-date (now))
+                                 ".xlsx")]
+    (excel-response resulting-file-name
+                    (app-reports/company-applications company startTs endTs lang user))))

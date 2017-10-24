@@ -63,7 +63,7 @@
                   (assoc (select-keys teppo-user [:firstName :lastName :id]) :email "teppo@example.com" :role "writer" :roleSource "auth")
                   (assoc {:firstName (:name solita-company)
                           :lastName ""
-                          :id (:_id solita-company)} :email nil :role "writer" :roleSource "auth")]
+                          :id (:id solita-company)} :email nil :role "writer" :roleSource "auth")]
                  :in-any-order))
 
       (fact "For Kaino, invited candidates are Pena, Mikko and Teppo, but not Solita (automatically invited)"
@@ -99,7 +99,7 @@
           {copy-app-id :id} (copy-application sonja app-id
                                               :x x :y y
                                               :address "Testitie 1"
-                                              :auth-invites [pena-id (:_id solita-company) teppo-id]
+                                              :auth-invites [pena-id (:id solita-company) teppo-id]
                                               :propertyId property-id) => ok?
                                               copy-app (query-application sonja copy-app-id)]
 

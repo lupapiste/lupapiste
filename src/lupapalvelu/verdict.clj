@@ -283,8 +283,7 @@
                                             {:tag :liite :content attachment}]}]}]
         paatostieto  {:tag :paatostieto :content verdict-xml}
         placeholders #{:paatostieto :muistiotieto :lisatiedot
-                       :liitetieto  :kayttotapaus :asianTiedot
-                       :hankkeenVaativuus}
+                       :liitetieto  :kayttotapaus :asianTiedot}
         [rakval]     (enlive/select xml [:RakennusvalvontaAsia])
         place        (some #(placeholders (:tag %)) (:content rakval))]
     (case place

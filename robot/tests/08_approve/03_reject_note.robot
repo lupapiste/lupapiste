@@ -41,7 +41,7 @@ Sonja logs in
   Open accordions  info
 
 Sonja rejects Hankkeen kuvaus with note
-  Reject with note  hankkeen-kuvaus-rakennuslupa  hankkeen-kuvaus-rakennuslupa  Bad description
+  Reject with note  hankkeen-kuvaus  hankkeen-kuvaus  Bad description
 
 Sonja rejects Rakennuspaikka with note
   Reject with note  rakennuspaikka  rakennuspaikka  Bad place
@@ -171,7 +171,7 @@ Pena logs in
   Open application  ${appname}  ${propertyId}
 
 Pena sees notes for the rejected documents and groups
-  Reject note is  hankkeen-kuvaus-rakennuslupa  Bad description
+  Reject note is  hankkeen-kuvaus  Bad description
   Reject note is  rakennuksen-muuttaminen  Bad operation
   Reject note is  rakennuksen-muuttaminen-kaytto  Bad usage
 
@@ -304,7 +304,7 @@ Delete version
   [Arguments]  ${version}
   Click Element  jquery=tr[data-test-id='version-row-${version}'] td a[data-test-id=delete-version]
   Confirm yes no dialog
-  Cannot delete version  ${version}
+  Wait until  Element should not be visible  xpath=//tr[@data-test-id='version-row-${version}']
 
 Attachment approved
   Wait Until  Element should be disabled  test-attachment-approve

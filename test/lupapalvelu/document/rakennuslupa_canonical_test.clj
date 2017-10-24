@@ -460,8 +460,7 @@
 (def- hankkeen-kuvaus
   (-> hankkeen-kuvaus-minimum
     (assoc-in [:data :poikkeamat] {:value "Ei poikkeamisia"})
-    (assoc-in [:data :hankkeenVaativuus] {:value "A"})
-    (assoc-in [:schema-info :name] "hankkeen-kuvaus-rakennuslupa")))
+    (assoc-in [:schema-info :name] "hankkeen-kuvaus")))
 
 (def- link-permit-data-kuntalupatunnus {:id "123-123-123-123" :type "kuntalupatunnus"})
 (def- link-permit-data-lupapistetunnus {:id "LP-753-2013-00099" :type "lupapistetunnus"})

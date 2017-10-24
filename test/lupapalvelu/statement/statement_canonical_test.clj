@@ -35,7 +35,7 @@
                                             :Pyytaja     (just "Sipoo (Sonja Sibbo)")
                                             :PyyntoPvm   (util/to-xml-date (get statement :requested))
                                             :Maaraaika   (util/to-xml-date (get statement :dueDate))
-                                            :Lausunnonantaja (contains (get-in statement [:person :name]))}))
+                                            :Lausunnonantaja (contains (ss/trim (get-in statement [:person :name])))}))
     (fact :qc "statement response, full data"
       (tc/quick-check
         200

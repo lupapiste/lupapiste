@@ -7,7 +7,7 @@
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.assignment :as assignment]
-            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.accessibility :as attaccess]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.model :as model]
@@ -686,7 +686,7 @@
          {$set {(str linkpermit-id ".apptype") apptype}}))))
 
 (defn- merge-versions [old-versions {:keys [user version] :as new-version}]
-  (let [next-ver (attachment/next-attachment-version (:version (last old-versions)) user)]
+  (let [next-ver (att/next-attachment-version (:version (last old-versions)) user)]
     (concat old-versions [(assoc new-version :version next-ver)])))
 
 (defn- fixed-versions [required-flags-migration-time attachments-backup updated-attachments]
@@ -2337,7 +2337,7 @@
             (if (= (:id task) (:id (:source att)))
               (try
                 (println "   + poistetaan taskiin " (:id task) " linkattu liite " (:id att) " hakemukselta " (:_id failed))
-                (attachment/delete-attachments! failed (:id att))
+                (att/delete-attachments! failed (:id att))
                 (catch Exception e
                   (println "   + Virhe poistettaessa liitetta")))))
           (println " - poistetaan taski " (:id task) " hakemukselta " (:id failed))
@@ -2732,7 +2732,7 @@
 
 (defn- clean-up-attachment-op [attachment]
   (if (sequential? (:op attachment))
-    (update attachment :op #(map attachment/->attachment-operation %))
+    (update attachment :op #(map att/->attachment-operation %))
     attachment))
 
 (defmigration cleanup-attachment-operations-v3
@@ -3431,6 +3431,33 @@
   {:apply-when (pos? (mongo/count :integration-messages {:status {$exists false}}))}
   (mongo/update-by-query :integration-messages {:status {$exists false}} {$set {:status "done"}}))
 
+(defmigration enable-vantaa-R-bulletins
+  {:apply-when (pos? (mongo/count :organizations {:scope {$elemMatch {:permitType "R" :municipality "092" :bulletins {$exists false}}}}))}
+  (mongo/update-by-query :organizations
+                         {:scope {$elemMatch {:permitType "R" :municipality "092"}}}
+                         {$set {:scope.$.bulletins.enabled true
+                                :scope.$.bulletins.url     "http://julkipano.lupapiste.fi/vantaa"}}))
+
+(defmigration change-oauth-callback-to-uri
+  {:apply-when (pos? (mongo/count :users {:oauth.callback {$exists true}}))}
+  (doseq [user (mongo/find-maps :users {:oauth.callback {$exists true}})]
+    (let [parts (str/split (get-in user [:oauth :callback :success-url]) #"/")
+          callback-url (str (first parts) "//" (nth parts 2))]
+      (mongo/update-by-id :users
+                          (:_id user)
+                          {$unset {:oauth.callback ""}
+                           $set {:oauth.callback-url callback-url}}))))
+
+(defn set-missing-created-timestamp [{ts :created id :id :as task}]
+  (if (nil? ts)
+    (assoc task :created (.getTime (util/object-id-to-date id)))
+    task))
+
+(defmigration created-timestamps-for-backend-reviews
+  {:apply-when (pos? (mongo/count :applications {:tasks.created {$type "null"}}))}
+  (update-applications-array :tasks set-missing-created-timestamp {:tasks.created {$type "null"}}))
+
+
 (def ^:private bg-id-regex-pattern "^([0-9a-zA-Z]+)-([a-zA-Z]+)$")
 
 (defn- background-id-and-application-suffix
@@ -3467,6 +3494,29 @@
        (assoc-in task [:data :muuTunnus :value] "")
        task))
    {:tasks.data.muuTunnus.value "-"}))
+
+(def deleted-task-ids                                       ; LP-301431
+  #{"591a877d28e06f222a49019c" "591a877d28e06f222a49019d" "591a877a28e06f222a490108" "591a877a28e06f222a49010a" "591a877a28e06f222a49010b" "591a877a28e06f222a49010d" "591a877a28e06f222a49010e" "591a877a28e06f222a49010f" "591a877a28e06f222a490111" "591a877d28e06f222a4901bc" "591a877e28e06f222a4901ef" "591a877e28e06f222a4901f0" "591a877e28e06f222a4901ee" "591a877e28e06f222a4901e9" "591a877e28e06f222a4901ea" "591a877e28e06f222a4901eb" "591a877e28e06f222a4901ec" "591a878128e06f222a49029a" "591a878128e06f222a49029f" "591a878128e06f222a4902a7" "591a878128e06f222a4902a8" "591a878128e06f222a4902a9" "591a878128e06f222a4902aa" "591a878128e06f222a4902af" "591a878128e06f222a4902b6" "591a878928e06f222a490350" "591a879428e06f222a49036a" "591a879528e06f222a490372" "591a879f28e06f222a4903a2" "591a87b528e06f222a4903e0" "591a87aa28e06f222a4903ac" "591a87b528e06f222a4903ce" "591a87c528e06f222a490497" "591a87c528e06f222a4904ae" "591a87c528e06f222a490498" "591a87c528e06f222a4904a9" "591a87c528e06f222a4904ac" "591a87c228e06f222a49040c" "591a87c228e06f222a49040d" "591a87c228e06f222a49040e" "591a87c228e06f222a49040f" "591a87c228e06f222a490410" "591a87d228e06f222a4905aa" "591a87d228e06f222a4905ab" "591a87d128e06f222a490546" "591a87d128e06f222a490547" "591a87d128e06f222a490545" "591a87d128e06f222a490548" "591a87d128e06f222a490549" "591a87d128e06f222a49054b" "591a87d128e06f222a49054c" "591a87d128e06f222a49054d" "591a87e328e06f222a490646" "591a87e928e06f222a490697" "591a87ef28e06f222a4906f5" "591a87ef28e06f222a4906e9" "591a87f028e06f222a49070d" "591a87f528e06f222a490727" "591a87f628e06f222a49073b" "591a880c28e06f222a4907ae" "591a881e28e06f222a4907d1" "591a882728e06f222a49080e" "591a882e28e06f222a490865" "591a882e28e06f222a49086f" "591a883628e06f222a49088b" "591a884828e06f222a4908d2" "591a884c28e06f222a4908f1" "591a885328e06f222a490905" "591a885928e06f222a490928" "591a885928e06f222a490914" "591a885b28e06f222a490959" "591a886128e06f222a490995" "591a886128e06f222a490996" "591a886028e06f222a490965" "591a886028e06f222a490967" "591a886028e06f222a490981" "591a886028e06f222a490982" "591a886128e06f222a4909ab" "591a886828e06f222a4909bd" "591a886828e06f222a4909c9" "591a886728e06f222a4909b5" "591a887128e06f222a490a4f" "591a886f28e06f222a4909f1" "591a887128e06f222a490a31" "591a887028e06f222a4909fd" "591a887028e06f222a4909fe" "591a887028e06f222a4909ff" "591a887028e06f222a490a00" "591a887128e06f222a490a3b" "591a887728e06f222a490a71" "591a887728e06f222a490a70" "591a887828e06f222a490a97" "591a887f28e06f222a490aa6" "591a887f28e06f222a490aaf" "591a888928e06f222a490ae4" "591a888828e06f222a490ad9" "591a888a28e06f222a490b15" "591a889128e06f222a490b3d" "591a889228e06f222a490b51" "591a889128e06f222a490b21" "591a889928e06f222a490b99" "591a889928e06f222a490b9a" "591a889f28e06f222a490c01" "591a889a28e06f222a490bb5" "591a88a028e06f222a490c4a" "591a88a028e06f222a490c4b" "591a88a628e06f222a490c95" "591a88a628e06f222a490c96" "591a88a628e06f222a490c98" "591a88a628e06f222a490c9b" "591a88ae28e06f222a490cec" "591a88b128e06f222a490d36" "591a88b128e06f222a490d37" "591a88b128e06f222a490d38" "591a88af28e06f222a490cfb" "591a88af28e06f222a490cfa" "591a88af28e06f222a490cfc" "591a88af28e06f222a490d19" "591a88af28e06f222a490d18" "591a88af28e06f222a490d17" "591a88b728e06f222a490d76" "591a88b628e06f222a490d62" "591a88bd28e06f222a490e00" "591a88bd28e06f222a490deb" "591a88bd28e06f222a490dec" "591a88bc28e06f222a490dce" "591a88bc28e06f222a490dcc" "591a88bc28e06f222a490dcd" "591a88bb28e06f222a490dac" "591a88bb28e06f222a490dad" "591a88bb28e06f222a490dab" "591a88bb28e06f222a490d8d" "591a88bb28e06f222a490d8e" "591a877c28e06f222a490185" "591a877d28e06f222a4901bd" "591a878028e06f222a490257" "591a877e28e06f222a4901e7" "591a877e28e06f222a4901e8" "591a877e28e06f222a4901da" "591a878328e06f222a490322" "591a878128e06f222a490299" "591a878128e06f222a4902c5" "591a878828e06f222a490331" "591a878828e06f222a490346" "591a879928e06f222a490382" "591a879a28e06f222a490391" "591a87c328e06f222a49045a" "591a87c328e06f222a490459" "591a87c228e06f222a490419" "591a87d028e06f222a490504" "591a87d028e06f222a4904f4" "591a87da28e06f222a4905dd" "591a87da28e06f222a4905dc" "591a87da28e06f222a4905c5" "591a87e328e06f222a49063c" "591a87e428e06f222a49067e" "591a87e428e06f222a49067d" "591a87e928e06f222a490696" "591a87ea28e06f222a4906cc" "591a87ea28e06f222a4906cb" "591a87f028e06f222a490719" "591a87ef28e06f222a490702" "591a87f628e06f222a490732" "591a880528e06f222a49075c" "591a880b28e06f222a4907a4" "591a882728e06f222a490840" "591a882728e06f222a490827" "591a882d28e06f222a490851" "591a883728e06f222a490899" "591a884128e06f222a4908b2" "591a884828e06f222a4908e1" "591a884728e06f222a4908c4" "591a885928e06f222a490915" "591a886028e06f222a490966" "591a886928e06f222a4909d2" "591a887028e06f222a490a01" "591a887128e06f222a490a3c" "591a887228e06f222a490a5b" "591a887228e06f222a490a5c" "591a887828e06f222a490a85" "591a888928e06f222a490ae5" "591a888928e06f222a490ae2" "591a888928e06f222a490ae3" "591a888a28e06f222a490b0b" "591a889128e06f222a490b3e" "591a889228e06f222a490b6f" "591a889328e06f222a490b79" "591a889228e06f222a490b52" "591a889228e06f222a490b53" "591a889128e06f222a490b22" "591a889128e06f222a490b23" "591a889328e06f222a490b84" "591a889328e06f222a490b83" "591a889928e06f222a490bab" "591a889f28e06f222a490c00" "591a88a028e06f222a490c49" "591a88b728e06f222a490d75" "591a88bd28e06f222a490dff" "591a88bb28e06f222a490da1"})
+
+(defmigration cleanup-deleted-task-attachments              ; LP-301431
+  {:apply-when (pos? (mongo/count :applications {:organization "305-R" :attachments.target.id {$in deleted-task-ids}}))}
+  (doseq [app (mongo/select :applications {:organization "305-R" :attachments.target.id {$in deleted-task-ids}} [:attachments :organization])
+          :let [task-attachments (->> (:attachments app)
+                                      (filter #(contains? deleted-task-ids (get-in % [:target :id]))))]]
+    (att/delete-attachments! app (map :id task-attachments))))
+
+(defn hankkeen-kuvaus-rakennuslupa->hankkeen-kuvaus [{schema-info :schema-info data :data :as doc}]
+  (cond-> doc
+    (= (get-in doc [:schema-info :name]) "hankkeen-kuvaus-rakennuslupa")
+    (assoc :schema-info (-> schema-info
+                            (assoc  :name "hankkeen-kuvaus")
+                            (dissoc :i18name))
+           :data        (dissoc data :hankkeenVaativuus))))
+
+(defmigration hankkeen-kuvaus-rakennuslupa-depricated
+  {:apply-when (pos? (mongo/count :applications {:documents.schema-info.name "hankkeen-kuvaus-rakennuslupa"}))}
+  (update-applications-array :documents hankkeen-kuvaus-rakennuslupa->hankkeen-kuvaus {:documents.schema-info.name "hankkeen-kuvaus-rakennuslupa"}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
