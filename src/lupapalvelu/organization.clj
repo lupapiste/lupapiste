@@ -54,8 +54,8 @@
    :name sc/Str})
 
 (sc/defschema Link
-  {:url  (zipmap i18n/all-languages (repeat ssc/OptionalHttpUrl))
-   :name (zipmap i18n/all-languages (repeat sc/Str))
+  {:url  (i18n/localization-schema ssc/OptionalHttpUrl)
+   :name i18n/LocalizationStringMap
    (sc/optional-key :modified) ssc/Timestamp})
 
 (sc/defschema Server
