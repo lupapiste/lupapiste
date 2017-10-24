@@ -1,6 +1,6 @@
 (ns lupapalvelu.matti.verdict-api
   (:require [clojure.set :as set]
-            [lupapalvelu.action :refer [defquery defcommand] :as action]
+            [lupapalvelu.action :refer [defquery defcommand notify] :as action]
             [lupapalvelu.matti.schemas :as schemas]
             [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.matti.verdict :as verdict]
@@ -138,7 +138,9 @@ TODO: create tasks and PDF, application state change, attachments locking."
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [matti-enabled
                       (verdict-exists :editable?)]
-   :states           states/give-verdict-states}
+   :states           states/give-verdict-states
+   :notified         true
+   :on-success       (notify :application-state-change)}
   [command]
   (ok (verdict/publish-verdict command)))
 

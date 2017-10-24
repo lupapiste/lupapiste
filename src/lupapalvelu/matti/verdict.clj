@@ -2,6 +2,7 @@
   (:require [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.transformations :as transformations]
@@ -413,15 +414,25 @@
   2. Update application state
   3. Inspection summaries
   4. Other document updates (e.g., waste plan -> waste report)
-  5. TODO: Create PDF/A for the verdict"
+  5. Freeze (locked and read-only) verdict attachments and update TOS details
+  6. Create tasks
+  7. TODO: Create PDF/A for the verdict"
   [{:keys [created application user] :as command}]
   (let [verdict    (command->verdict command)
-        next-state (sm/verdict-given-state application)]
+        next-state (sm/verdict-given-state application)
+        att-ids    (->> (:attachments application)
+                        (filter #(= (-> % :target :id) (:id verdict)))
+                        (map :id))]
     (verdict-update command
                     (util/deep-merge
-                     {$set {:matti-verdicts.$.data      (:data (enrich-verdict command
-                                                                               verdict))
-                            :matti-verdicts.$.published created}}
+                     {$set (merge
+                            {:matti-verdicts.$.data      (:data (enrich-verdict command
+                                                                                verdict))
+                             :matti-verdicts.$.published created}
+                            (att/attachment-array-updates (:id application)
+                                                          (comp #{(:id verdict)} :id :target)
+                                                          :readOnly true
+                                                          :locked   true))}
                      (app-state/state-transition-update next-state
                                                         created
                                                         application

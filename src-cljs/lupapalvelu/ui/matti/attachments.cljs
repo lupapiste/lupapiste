@@ -159,8 +159,7 @@
         @files*)
    (fn [{:keys [done pending result] :as job}]
      (letfn [(finalize []
-               (js/lupapisteApp.services.attachmentsService.queryAll)
-               (js/lupapisteApp.services.attachmentsService.refreshAuthModels)
+               (service/refresh-attachments)
                (reset! binding?* false))]
        (if job
          (do (swap! files* (fn [files]
@@ -254,36 +253,26 @@
    (js/util.finnishDate created)])
 
 (rum/defc attachments-list < rum/reactive
-  (rum-util/hubscribe "attachmentsService::query"
+  (rum-util/hubscribe "attachmentsService::changed"
                       {}
-                      (fn [state*]
-                        (-> state* :rum/react-component rum/request-render)))
-  (rum-util/hubscribe "category-auth-model-changed"
-                      {}
-                      (fn [state* event]
-                        (when (.-targetId event)
-                          (-> state* :rum/react-component rum/request-render))))
+                      (util/fn-> :rum/react-component rum/request-render))
   [{:keys [files*] :as options}]
   (when (-> files* rum/react empty?)
     (let [include?    (or (path/meta-value options :include?) identity)
           attachments (filter (partial include? options)
-                              (js->clj (js/lupapisteApp.services.attachmentsService.rawAttachments)
-                                       :keywordize-keys true))]
+                              (service/attachments))]
       [:table.matti-attachments
        [:tbody
-        (for [{:keys [type contents
-                      latestVersion]
+        (for [{:keys [type contents latestVersion can-delete?]
                :as   attachment} attachments]
           [:tr
            [:td (fileinfo-link latestVersion
                                ". " (-> type kw-type type-loc)
                                ": " contents)]
            [:td (uploader-info latestVersion)]
-           (when (.ok (js/lupapisteApp.services.attachmentsService.getAuthModel (:id attachment))
-                      "delete-attachment")
+           (when can-delete?
              [:td.td--center [:i.lupicon-remove.primary
                               {:on-click #(att/delete-with-confirmation attachment)}]])])]])))
-
 
 (rum/defc matti-attachments < rum/reactive
   "Displays and supports adding new attachments. This cannot be
