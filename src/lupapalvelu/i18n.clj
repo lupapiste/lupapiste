@@ -25,6 +25,11 @@
                        [:fi :sv]))
 (def default-lang (first supported-langs))
 
+(def all-languages-with-optional
+  (if (env/feature? :english)
+    [:fi :sv :en]
+    [:fi :sv (sc/optional-key :en)]))
+
 (defn supported-lang? [lang]
   (contains? (set supported-langs) (keyword lang)))
 
@@ -34,7 +39,7 @@
   "Return a map {:a (f :a) :b (f :b) ... } where :a, :b, ... are the supported languages"
   [f]
   (into {} (map (juxt identity f)
-                supported-langs)))
+                all-languages-with-optional)))
 
 (defn localization-schema
   "Return a map {:a value-type :b value-type ... } where :a, :b, ... are the supported languages"
