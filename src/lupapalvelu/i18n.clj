@@ -39,12 +39,15 @@
   "Return a map {:a (f :a) :b (f :b) ... } where :a, :b, ... are the supported languages"
   [f]
   (into {} (map (juxt identity f)
-                all-languages-with-optional)))
+                supported-langs)))
 
 (defn localization-schema
   "Return a map {:a value-type :b value-type ... } where :a, :b, ... are the supported languages"
   [value-type]
   (supported-langs-map (constantly value-type)))
+
+(defn lenient-localization-schema [value-type]
+  (into {} (map #(identity [% value-type]) all-languages-with-optional)))
 
 (sc/defschema EnumSupportedLanguages (apply sc/enum (map name languages)))
 

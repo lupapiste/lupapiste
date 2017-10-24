@@ -54,7 +54,7 @@
    :name sc/Str})
 
 (sc/defschema Link
-  {:url  (i18n/localization-schema ssc/OptionalHttpUrl)
+  {:url  (i18n/lenient-localization-schema ssc/OptionalHttpUrl)
    :name i18n/LocalizationStringMap
    (sc/optional-key :modified) ssc/Timestamp})
 
