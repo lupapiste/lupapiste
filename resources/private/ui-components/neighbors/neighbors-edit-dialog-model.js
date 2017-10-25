@@ -30,9 +30,16 @@ LUPAPISTE.NeighborsEditDialogModel = function(params) {
   self.edit = function() { return self.status(self.statusEdit); };
   self.focusName = function() { $("#neighbors-edit-name").focus(); return self; };
 
+  var propertyId = ko.observable();
+
   self.id = ko.observable();
   self.neighborId = ko.observable();
-  self.propertyId = ko.observable();
+  self.propertyId = ko.pureComputed({
+    read: function() {
+      return util.prop.toHumanFormat(propertyId()) || propertyId();
+    },
+    write: propertyId
+  });
   self.name = ko.observable();
   self.street = ko.observable();
   self.city = ko.observable();
@@ -52,15 +59,15 @@ LUPAPISTE.NeighborsEditDialogModel = function(params) {
     }
   }, self);
 
+  self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId());});
+  self.emailOk = ko.computed(function() { return _.isBlank(self.email()) || util.isValidEmailAddress(self.email()); });
+  self.isSubmitEnabled = ko.pureComputed(function() { return !self.pending() && self.propertyIdOk() && self.emailOk(); });
+
   self.propertyIdCss = ko.computed( function() {
     var blank = _.isBlank( self.propertyId() );
     return {tip: blank,
             warn: !blank && !self.propertyIdOk()};
   });
-
-  self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId());});
-  self.emailOk = ko.computed(function() { return _.isBlank(self.email()) || util.isValidEmailAddress(self.email()); });
-  self.isSubmitEnabled = ko.pureComputed(function() { return !self.pending() && self.propertyIdOk() && self.emailOk(); });
 
   var paramNames = ["id", "neighborId", "name", "street", "city", "zip", "email", "type", "businessID", "nameOfDeceased"];
   function paramValue(paramName) { return self[paramName](); }

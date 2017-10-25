@@ -9,7 +9,7 @@
         </div>
         <form>
           <label data-bind="ltext: 'neighbors.edit.propertyId'" class="form-label" for="neighbors.edit.propertyId"></label>
-          <input data-bind="textInput: propertyId, enable: status() > statusInit, css: propertyIdCss"
+          <input data-bind="value: propertyId, enable: status() > statusInit, css: propertyIdCss"
                  class="form-input text long" type="text" id="neighbors.edit.propertyId" data-test-id="neighbors.edit.propertyId" />
 
           <!-- ko if: type -->
