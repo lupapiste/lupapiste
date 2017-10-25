@@ -41,10 +41,12 @@
         url      (str "/oskari/fullmap.html?" (str/join "&" params))]
     (js/window.open url)))
 
+
 (rum/defc bulletin-preamble < rum/reactive {:init init}
   []
   (let [bulletin (rum/react state/current-bulletin)
         {:keys [address bulletinState primaryOperation propertyId
+                bulletinOpDescription
                 municipality stateSeq _applicantIndex]} bulletin
         current-state-in-stateSeq? ((set stateSeq) bulletinState)]
     [:div.application_summary
@@ -59,22 +61,7 @@
            [:span
             {:data-test-id "bulletin-primary-operation"
              :data-test-primary-operation-id (-> primaryOperation :name)}
-            (common/loc (str "operations." (-> primaryOperation :name)))]]
-
-          [:div.state-indication
-           {:data-test-id "bulletin-state"
-            :data-test-state bulletinState}
-           [:div
-            {:class bulletinState}
-            (when-not current-state-in-stateSeq?
-              [:span
-               {:title (state-title bulletinState)}])
-            (for [state stateSeq]
-              [:span
-               {:key state
-                :title (state-title state)
-                :class (str state "-box")}
-               (state-title state)])]]
+            (or bulletinOpDescription (common/loc (str "operations." (-> primaryOperation :name))))]]
 
           [:div
            [:p (common/loc :application.property)]

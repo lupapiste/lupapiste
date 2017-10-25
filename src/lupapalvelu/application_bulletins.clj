@@ -116,7 +116,8 @@
                                         :code    (:verdict-code matti-verdict)}
                        verdict         {:section  (-> verdict :paatokset first :poytakirjat first :pykala)
                                         :status   (-> verdict :paatokset first :poytakirjat first :status)
-                                        :contact  (-> verdict :paatokset first :poytakirjat first :paatoksentekija)})
+                                        :contact  (-> verdict :paatokset first :poytakirjat first :paatoksentekija)
+                                        :text     (-> verdict :paatokset first :poytakirjat last :paatos)})
         attachments (->> (:attachments application)
                          (filter #(and (:latestVersion %) (metadata/public-attachment? %)))
                          (map #(select-keys % attachment-snapshot-fields))

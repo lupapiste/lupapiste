@@ -28,10 +28,9 @@ LUPAPISTE.LocalBulletinsWrapperModel = function(params) {
   });
 
   hub.onPageLoad("bulletin", function(e) {
-    console.log("!!!!!!");
     self.bulletinId(_.head(e.pagePath));
     self.page(e.pageId);
-    window.lupapisteApp.setTitle("!!!Julkipano");
+    window.lupapisteApp.setTitle("Julkipano");
   });
 
   self.page(pageutil.getPage());
