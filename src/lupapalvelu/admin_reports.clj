@@ -362,6 +362,7 @@
                      [{"$match" match-query}
                       (when filter-query
                         {"$match" filter-query})
+                      {"$project" {:permitType 1 :nbrOfOperations {"$sum" [1 {"$size" "$secondaryOperations"}]}}}
                       {"$group" group-clause}])]
     (collection/aggregate (mongo/get-db) "applications" aggregate)))
 
@@ -371,15 +372,23 @@
        (map #(set/rename-keys % {:_id :permitType}))
        (sort-by (comp - :count))))
 
+(defn prev-permits-per-month-query [month year]
+  (applications-per-month-query month year {:_id "R_prev-permit"
+                                            :countApp {$sum 1}
+                                            :countOp  {$sum "$nbrOfOperations"}}
+    {:primaryOperation.name :aiemmalla-luvalla-hakeminen} :opened))
+
 (defn applications-per-month-per-permit-type [month year]
   (->> (applications-per-month-query month year {:_id "$permitType"
-                                                 :count {$sum 1}} nil :submitted)
+                                                 :countApp {$sum 1}
+                                                 :countOp  {$sum "$nbrOfOperations"}} nil :submitted)
        (map #(set/rename-keys % {:_id :permitType}))
        (sort-by (comp - :count))))
 
 (defn designer-and-foreman-applications-per-month [month year]
   (applications-per-month-query month year
                                 {:_id "$primaryOperation.name"
-                                 :count {$sum 1}}
+                                 :countApp {$sum 1}}
     {:primaryOperation.name {$in [:tyonjohtajan-nimeaminen-v2
                                   :suunnittelijan-nimeaminen]}} :submitted))
+
