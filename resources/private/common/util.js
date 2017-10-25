@@ -41,7 +41,7 @@ var util = (function($) {
   }
 
   var propertyIdDbFormat = /^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$/;
-  var propertyIdHumanFormat = /^([0-9]{1,3})-([0-9]{1,3})-([0-9]{1,4})-([0-9]{1,4})$/;
+  var propertyIdHumanFormat = /^([1-9]{1}[0-9]{0,2})-([1-9]{1}[0-9]{0,2})-([1-9]{1}[0-9]{0,3})-([1-9]{1}[0-9]{0,3})$/;
 
   function isPropertyId(s) {
     return propertyIdDbFormat.test(s) || propertyIdHumanFormat.test(s);
