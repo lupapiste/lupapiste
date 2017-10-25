@@ -30,14 +30,14 @@
                         schemas/get-schema
                         :body
                         (util/find-by-key :name "huoneistot"))
-        huoneistot (vals (into (sorted-map) huoneistot))
-        huoneistot (filter :muutostapa huoneistot)]
+        huoneistot (vals (into (sorted-map) huoneistot))]
     (for [huoneisto huoneistot
           :let      [huoneistonumero (-> huoneisto :huoneistonumero)
                      huoneistoPorras (-> huoneisto :porras)
-                     jakokirjain (-> huoneisto :jakokirjain)]
-          :when     (seq huoneisto)]
-      (merge {:muutostapa       (muutostapa huoneisto schema)
+                     jakokirjain (-> huoneisto :jakokirjain)
+                     muutostapa (muutostapa huoneisto schema)]
+          :when     (and muutostapa (seq huoneisto))]
+      (merge {:muutostapa       muutostapa
               :huoneluku        (-> huoneisto :huoneluku)
               :keittionTyyppi   (-> huoneisto :keittionTyyppi)
               :huoneistoala     (ss/replace (-> huoneisto :huoneistoala) "," ".")
