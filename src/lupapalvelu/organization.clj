@@ -112,7 +112,7 @@
 
 (sc/defschema Organization
   {:id OrgId
-   :name (zipmap i18n/all-languages (repeat sc/Str))
+   :name i18n/LocalizationStringMap
    :scope [Scope]
 
    (sc/optional-key :allowedAutologinIPs) sc/Any
