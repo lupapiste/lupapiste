@@ -31,7 +31,11 @@ LUPAPISTE.CompanyRegistrationService = function() {
       lastName: ko.observable(),
       email: ko.observable(),
       personId: ko.observable(),
-      language: ko.observable( loc.currentLanguage )
+      language: ko.observable( loc.currentLanguage ),
+      contactAddress: ko.observable(),
+      contactZip: ko.observable(),
+      contactPo: ko.observable(),
+      contactCountry: ko.observable()
     };
   }
 
@@ -68,7 +72,8 @@ LUPAPISTE.CompanyRegistrationService = function() {
     y: ko.observable(),
     zip: ko.observable(),
     email: ko.observable(),
-    personId: ko.observable()
+    personId: ko.observable(),
+    contactZip: ko.observable()
   };
 
   function isValidZip( s ) {
@@ -94,6 +99,8 @@ LUPAPISTE.CompanyRegistrationService = function() {
         msg: "error.invalidY"},
     zip: {fun: isValidZip,
           msg: "error.illegal-zip"},
+    contactZip: {fun: isValidZip,
+                  msg: "error.illegal-zip"},
     email: {fun: isValidEmail,
             msg: "error.illegal-email"},
     personId: {fun: util.isValidPersonId,
@@ -180,7 +187,8 @@ LUPAPISTE.CompanyRegistrationService = function() {
                   company: _.pick( reg,
                                    ["accountType", "name", "y", "address1",
                                     "zip", "po", "country", "netbill",
-                                    "pop", "reference", "campaign"]),
+                                    "pop", "reference", "campaign", "contactAddress",
+                                   "contactZip", "contactPo", "contactCountry"]),
                   signer: _.pick( reg,
                                  ["firstName", "lastName", "email",
                                   "personId", "language"])};
