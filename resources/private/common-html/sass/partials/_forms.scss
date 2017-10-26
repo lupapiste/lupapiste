@@ -501,6 +501,10 @@ input.form-input.inline {
   }
   .form-entry.radioGroup {
     min-height: 32px;
+    white-space: nowrap;
+    .form-label-radio {
+      margin-right: $marginL;
+    }
   }
   .form-full-width {
     width: 80%;

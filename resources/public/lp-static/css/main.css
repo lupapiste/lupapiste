@@ -8342,6 +8342,11 @@ input.form-input.inline, input.inline.form-input--inline {
 
 .docgen-content .form-entry.radioGroup {
   min-height: 32px;
+  white-space: nowrap;
+}
+
+.docgen-content .form-entry.radioGroup .form-label-radio {
+  margin-right: 24px;
 }
 
 .docgen-content .form-full-width {
