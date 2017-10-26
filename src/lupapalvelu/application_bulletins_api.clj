@@ -371,3 +371,15 @@
   [command]
   (action/update-application command {"$set" {:bulletinOpDescription description}})
   (ok))
+
+(defquery local-bulletins-page-settings
+  {:parameters [organization]
+   :user-roles #{:anonymous}
+   :input-validators [(partial action/non-blank-parameters [:organization])]}
+  [command]
+  (ok :enabled true
+      :texts {:fi {:heading1 "Vantaan rakennusvalvonta"
+                   :heading2 "Julkipanolista"
+                   :caption ["Rakennuslupajaoston rakennuslupapäätökset annetaan julkipanon jälkeen, jolloin niiden katsotaan tulleen asianosaisten tietoon. Valitusaika on 30 päivää."
+                             "Viranhaltijan päätöksiä tehdään päivittäin. Oikaisuvaatimusaika on 14 päivää päätösten tiedoksiannosta."
+                             "Julkipanolistat ovat virallisesti nähtävissä maankäytön asiakaspalvelussa (Kielotie 13, katutaso) sekä alla olevassa listauksessa."]}}))

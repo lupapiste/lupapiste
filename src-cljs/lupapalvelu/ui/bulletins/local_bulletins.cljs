@@ -2,13 +2,17 @@
   (:require [rum.core :as rum]
             [lupapalvelu.ui.bulletins.state :as state]
             [lupapalvelu.ui.common :as common]
-            [lupapalvelu.ui.hub :as hub]))
+            [lupapalvelu.ui.hub :as hub]
+            [sade.shared-util :as util]))
 
 (defonce args (atom {}))
 
 (defn init
   [init-state props]
   (reset! state/current-organization (:organization @args))
+  (common/query :local-bulletins-page-settings
+                (fn [result] (reset! state/local-bulletins-page-settings (select-keys result [:enabled :texts])))
+                :organization @state/current-organization)
   (common/query :local-application-bulletins
                 (fn [{:keys [data]}] (reset! state/local-bulletins data))
                 :organization @state/current-organization :searchText "" :page 1)
@@ -49,19 +53,25 @@
           [:td (common/format-timestamp verdictGivenAt)]
           [:td (common/format-timestamp appealPeriodEndsAt)]])]]))
 
+(rum/defc heading < rum/reactive
+  [_]
+  (let [lang  (common/get-current-language)
+        texts (get-in (rum/react state/local-bulletins-page-settings) [:texts (keyword lang)])]
+    [:div
+     [:div.full.content.orange-bg
+      [:div.content-center
+       [:h1.slogan.municipal-heading (:heading1 texts)] ; NB: These will be read from db, no need now for localization
+       [:h2.slogan.municipal-heading (:heading2 texts)]]]
+     [:div.full.content
+      [:div.content-center.municipal-caption
+       (for [[idx paragraph] (util/indexed (:caption texts))]
+         [:p {:key idx} paragraph])]]]))
+
 (rum/defc local-bulletins < {:init init
                              :will-unmount #(js/console.log "WILL UNMOUNT")}
   [_]
   [:div
-   [:div.full.content.orange-bg
-    [:div.content-center
-     [:h1.slogan.municipal-heading "Kunnan julkipanolista"] ; NB: These will be read from db, no need now for localization
-     [:h2.slogan.municipal-heading "Kunnan julkipanolista"]]]
-   [:div.full.content
-    [:div.content-center.municipal-caption
-     [:p "Kunnan rakennuslupapäätökset annetaan julkipanon jälkeen, jolloin niiden katsotaan tulleen asianosaisten tietoon. Oikaisuvaatimusaika on 30 päivää."]
-     [:p "Kunnan rakennuslupapäätökset annetaan julkipanon jälkeen, jolloin niiden katsotaan tulleen asianosaisten tietoon."]
-     [:p "Kunnan rakennuslupapäätökset annetaan julkipanon jälkeen, jolloin niiden katsotaan tulleen asianosaisten tietoon."]]]
+   (heading)
    [:div.full.content
     [:div.content-center
      (bulletins-table)]]])

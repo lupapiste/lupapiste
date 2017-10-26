@@ -155,6 +155,7 @@
 
 (defalias find-by-key shared/find-by-key)
 (defalias find-by-id  shared/find-by-id)
+(defalias indexed shared/indexed)
 
 (defn replace-by-id
   "Return col of maps where elements are replaced by item when element :id matches item :id"
@@ -168,14 +169,6 @@
   (shared/filter-map-by-val pred m))
 
 ; From clojure.contrib/seq
-
-(defn indexed
-  "Returns a lazy sequence of [index, item] pairs, where items come
-  from 's' and indexes count up from zero.
-
-  (indexed '(a b c d))  =>  ([0 a] [1 b] [2 c] [3 d])"
-  [s]
-  (map vector (iterate inc 0) s))
 
 (defn positions
   "Returns a lazy sequence containing the positions at which pred
