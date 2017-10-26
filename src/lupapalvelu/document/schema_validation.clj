@@ -335,7 +335,8 @@
    ;; See pdf-export namespace on how the options are used.
    (opt :pdf-options)           {;; Select name that contains :muu option
                                  ;; The group must have :muu string field as well.
-                                 (opt :other-select) sc/Keyword}})
+                                 (opt :other-select) sc/Keyword}
+   (opt :address-type)           sc/Keyword})
 
 (defschema Element
   "Any doc element."

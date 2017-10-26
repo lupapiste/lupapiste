@@ -237,6 +237,7 @@
 (def simple-osoite [{:name "osoite"
                      :type :group
                      :validator :address
+                     :address-type :contact
                      :blacklist [turvakielto]
                      :body [{:name "katu" :type :string :subtype :vrk-address :required true :i18nkey "osoite.katu"}
                             postinumero
