@@ -15,15 +15,16 @@
    :input-validators [(partial action/non-blank-parameters [:applicationId])]
    :user-roles #{:admin}}
   [_]
-  (if-let [application (domain/get-application-no-access-checking applicationId)]
-    {:status 200
-     :body (krysp-fetch/get-application-xml-by-application-id application true)
-     :headers {"Content-Type" "application/xml;charset=UTF-8"
-               "Content-Disposition" (format "attachment;filename=\"%s-%s.xml\"" applicationId (now))
-               "Cache-Control" "no-cache"}}
-    {:status 404
-     :headers {"Content-Type"  "text/plain" "Cache-Control" "no-cache"}
-     :body "Application not found"}))
+  (let [app-id (ss/trim applicationId)]
+    (if-let [application (domain/get-application-no-access-checking app-id)]
+     {:status 200
+      :body (krysp-fetch/get-application-xml-by-application-id application true)
+      :headers {"Content-Type" "application/xml;charset=UTF-8"
+                "Content-Disposition" (format "attachment;filename=\"%s-%s.xml\"" app-id (now))
+                "Cache-Control" "no-cache"}}
+     {:status 404
+      :headers {"Content-Type"  "text/plain" "Cache-Control" "no-cache"}
+      :body (format "Application '%s' not found" app-id)})))
 
 (defraw admin-download-application-xml-with-kuntalupatunnus
   {:parameters [kuntalupatunnus municipality permitType]

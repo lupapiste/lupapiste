@@ -104,7 +104,8 @@
 (facts "Filtering application data"
 
   (facts "normalize-neighbors"
-    (let [neighbors [{:id "1"
+    (let [app {:handlers [{:userId "foo"}]}
+          neighbors [{:id "1"
                       :status [{:state "open"}
                                {:state "response-given"
                                 :vetuma {:name "foo" :userid "123"}}]}
@@ -114,25 +115,39 @@
                                 :vetuma {:name "foo" :userid "123"}}
                                {:state "forgotten"}]}]]
 
-      (normalize-neighbors {:role "authority"} neighbors) => [{:id "1"
-                                                         :status [{:state "open"}
-                                                                  {:state "response-given"
-                                                                   :vetuma {:name "foo", :userid "123"}}]}
-                                                        {:id "2"
-                                                         :status [{:state "open"}
-                                                                  {:state "response-given"
-                                                                   :vetuma {:name "foo", :userid "123"}}
-                                                                  {:state "forgotten"}]}]
+      (fact "Handler sees hetus"
+        (normalize-neighbors app {:id "foo"} neighbors)
+        => [{:id "1"
+             :status [{:state "open"}
+                      {:state "response-given"
+                       :vetuma {:name "foo", :userid "123"}}]}
+            {:id "2"
+             :status [{:state "open"}
+                      {:state "response-given"
+                       :vetuma {:name "foo", :userid "123"}}
+                      {:state "forgotten"}]}])
 
-      (normalize-neighbors {:role "other"} neighbors) => [{:id "1"
-                                                     :status [{:state "open"}
-                                                              {:state "response-given"
-                                                               :vetuma {:name "foo", :userid nil}}]}
-                                                    {:id "2"
-                                                     :status [{:state "open"}
-                                                              {:state "response-given"
-                                                               :vetuma {:name "foo", :userid nil}}
-                                                              {:state "forgotten"}]}]))
+      (fact "Role does not matter for hetu visibility"
+        (normalize-neighbors app {:role "other"} neighbors)
+        => [{:id "1"
+             :status [{:state "open"}
+                      {:state "response-given"
+                       :vetuma {:name "foo"}}]}
+            {:id "2"
+             :status [{:state "open"}
+                      {:state "response-given"
+                       :vetuma {:name "foo"}}
+                      {:state "forgotten"}]}]
+        (normalize-neighbors app {:role "other"} neighbors)
+        => [{:id "1"
+             :status [{:state "open"}
+                      {:state "response-given"
+                       :vetuma {:name "foo"}}]}
+            {:id "2"
+             :status [{:state "open"}
+                      {:state "response-given"
+                       :vetuma {:name "foo"}}
+                      {:state "forgotten"}]}])))
 
   (facts "Comments"
     (let [application {:attachments [{:id 1}
