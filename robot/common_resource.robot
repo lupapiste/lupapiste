@@ -1353,7 +1353,9 @@ Set animations off
 
 Add neighbor
   [Arguments]  ${propertyId}  ${name}  ${email}
-  Click enabled by test id  manager-neighbors-add
+  Wait test id visible  manager-neighbors-add
+  Scroll to bottom
+  Click by test id  manager-neighbors-add
   Wait Until   Element Should Be Visible  xpath=//*[@data-test-id='modal-dialog-content']
   Input text by test id  neighbors.edit.propertyId  ${propertyId}
   Input text by test id  neighbors.edit.name  ${name}

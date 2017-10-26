@@ -157,6 +157,12 @@
 (defn application-role [application user]
   (if (application-authority? application user) :authority :applicant))
 
+(defn application-handler?
+  "True if the user is a handler for the application. Note: a handler is
+  always application-authority."
+  [application user]
+  (boolean (util/find-by-key :userId (:id user) (:handlers application))))
+
 ;;
 ;; Enrich auth array
 ;;
