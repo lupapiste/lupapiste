@@ -185,3 +185,17 @@
                  :firstName "U" :lastName "Ser" :company {:id "company"}}
              (provided (com/find-company-by-id "company")
                        => {:id "company" :name "Company" :y "y" :zip "zip"})))
+
+
+(facts "Company address type"
+  (fact "Building owners uses contact address not depending document type"
+    (company-address-type (schemas/get-schema {:name "uusiRakennus" :version 1}) ["rakennuksenOmistajat" "0" "yritys"])
+      => :contact
+    (company-address-type (schemas/get-schema {:name "purkaminen" :version 1}) ["rakennuksenOmistajat" "0" "yritys"])
+      => :contact)
+  (facts "Applicant uses contact address"
+    (company-address-type (schemas/get-schema {:name "hakija-r" :version 1}) ["yritys"])
+      => :contact)
+  (facts "Payer uses billing address"
+    (company-address-type (schemas/get-schema {:name "maksaja" :version 1}) ["yritys"])
+      => nil))
