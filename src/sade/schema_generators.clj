@@ -44,6 +44,13 @@
 ;; Overwrite default prismatic schema generators
 
 (register-generator sc/Str gen/string-ascii)
+(register-generator sc/Any (gen/recursive-gen #(gen/frequency [[1 (gen/map % %)]
+                                                               [1 (gen/vector %)]
+                                                               [5 %]])
+                                              (gen/one-of [gen/boolean
+                                                           gen/string-ascii
+                                                           gen/double
+                                                           gen/int])))
 
 ;; Custom static schema generators
 
