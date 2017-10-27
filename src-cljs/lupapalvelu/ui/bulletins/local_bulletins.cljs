@@ -11,7 +11,10 @@
   [init-state props]
   (reset! state/current-organization (:organization @args))
   (common/query :local-bulletins-page-settings
-                (fn [result] (reset! state/local-bulletins-page-settings (select-keys result [:enabled :texts])))
+                (fn [{:keys [enabled texts]}]
+                  (when-not enabled
+                    (set! js/window.location "/"))
+                  (reset! state/local-bulletins-page-settings {:texts texts}))
                 :organization @state/current-organization)
   (common/query :local-application-bulletins
                 (fn [{:keys [data]}] (reset! state/local-bulletins data))
@@ -67,8 +70,7 @@
        (for [[idx paragraph] (util/indexed (:caption texts))]
          [:p {:key idx} paragraph])]]]))
 
-(rum/defc local-bulletins < {:init init
-                             :will-unmount #(js/console.log "WILL UNMOUNT")}
+(rum/defc local-bulletins < {:init init}
   [_]
   [:div
    (heading)

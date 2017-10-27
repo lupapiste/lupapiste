@@ -377,9 +377,7 @@
    :user-roles #{:anonymous}
    :input-validators [(partial action/non-blank-parameters [:organization])]}
   [command]
-  (ok :enabled true
-      :texts {:fi {:heading1 "Vantaan rakennusvalvonta"
-                   :heading2 "Julkipanolista"
-                   :caption ["Rakennuslupajaoston rakennuslupapäätökset annetaan julkipanon jälkeen, jolloin niiden katsotaan tulleen asianosaisten tietoon. Valitusaika on 30 päivää."
-                             "Viranhaltijan päätöksiä tehdään päivittäin. Oikaisuvaatimusaika on 14 päivää päätösten tiedoksiannosta."
-                             "Julkipanolistat ovat virallisesti nähtävissä maankäytön asiakaspalvelussa (Kielotie 13, katutaso) sekä alla olevassa listauksessa."]}}))
+  (let [org-data (org/get-organization organization)
+        enabled  (some #(-> % :bulletins :enabled) (:scope org-data))]
+    (ok :enabled enabled
+        :texts (-> org-data :local-bulletins-page-settings :texts))))
