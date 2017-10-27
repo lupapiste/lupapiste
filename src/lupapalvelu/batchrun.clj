@@ -397,10 +397,12 @@
   (fetch-asianhallinta-messages))
 
 (defn orgs-for-review-fetch [& organization-ids]
-  (mongo/select :organizations (merge {:krysp.R.url {$exists true},
-                                          :krysp.R.version {$gte "2.1.5"}}
-                                         (when (seq organization-ids) {:_id {$in organization-ids}}))
-                               {:krysp 1}))
+  (mongo/select :organizations
+                (merge {:krysp.R.url {$exists true},
+                        :krysp.R.version {$gte "2.1.5"}}
+                       (when-not (seq organization-ids) {:automatic-review-fetch-enabled true})
+                       (when (seq organization-ids) {:_id {$in organization-ids}}))
+                {:krysp true}))
 
 (defn- save-reviews-for-application [user application {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id] :as result}]
   (logging/with-logging-context {:applicationId (:id application) :userId (:id user)}

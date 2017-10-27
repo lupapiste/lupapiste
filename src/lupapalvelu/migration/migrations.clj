@@ -3517,6 +3517,12 @@
   {:apply-when (pos? (mongo/count :applications {:documents.schema-info.name "hankkeen-kuvaus-rakennuslupa"}))}
   (update-applications-array :documents hankkeen-kuvaus-rakennuslupa->hankkeen-kuvaus {:documents.schema-info.name "hankkeen-kuvaus-rakennuslupa"}))
 
+(defmigration enable-automatic-review-fetch-for-all-organizations
+  {:apply-when (pos? (mongo/count :organizations {:automatic-review-fetch-enabled {$exists false}}))}
+  (mongo/update-by-query :organizations
+                         {:automatic-review-fetch-enabled {$exists false}}
+                         {$set {:automatic-review-fetch-enabled true}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

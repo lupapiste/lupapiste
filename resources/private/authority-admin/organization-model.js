@@ -48,6 +48,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.assignmentsEnabled = ko.observable(false);
   self.extendedConstructionWasteReportEnabled = ko.observable(false);
   self.validateVerdictGivenDate = ko.observable(true);
+  self.automaticReviewFetchEnabled = ko.observable(true);
   self.tosFunctions = ko.observableArray();
   self.tosFunctionVisible = ko.observable(false);
   self.archivingProjectTosFunction = ko.observable();
@@ -144,6 +145,15 @@ LUPAPISTE.OrganizationModel = function () {
     }
   });
 
+  self.automaticReviewFetchEnabled.subscribe(function(automaticReviewFetchEnabled) {
+    if (self.initialized) {
+      ajax.command("set-organization-review-fetch-enabled", { enabled: automaticReviewFetchEnabled })
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
+        .call();
+    }
+  });
+
   ko.computed(function() {
     var useAttachmentLinks = self.useAttachmentLinksIntegration();
     if (self.initialized) {
@@ -157,6 +167,10 @@ LUPAPISTE.OrganizationModel = function () {
   self.validateVerdictGivenDateVisible = ko.pureComputed(function() {
     var types = self.permitTypes();
     return _.includes(types, "R") || _.includes(types, "P");
+  });
+
+  self.reviewFetchTogglerVisible = ko.pureComputed(function() {
+    return _.includes(self.permitTypes(), "R");
   });
 
   function toAttachments(attachments) {
@@ -312,6 +326,8 @@ LUPAPISTE.OrganizationModel = function () {
     self.multipleOperationsSupported(organization["multiple-operations-supported"] || false);
 
     self.validateVerdictGivenDate(organization["validate-verdict-given-date"] === true);
+
+    self.automaticReviewFetchEnabled(organization["automatic-review-fetch-enabled"] === true);
 
     self.permanentArchiveEnabled(organization["permanent-archive-enabled"] || false);
     self.permanentArchiveInUseSince(new Date(organization["permanent-archive-in-use-since"] || 0));
