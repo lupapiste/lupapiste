@@ -110,7 +110,7 @@
 
 
 
-;; "Lausuntopyynto: Pyyntoon ei ole vastattu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
+;; "Lausuntopyynto: Pyyntoon ei ole vastattu viikon kuluessa ja hakemuksen tila on nakyy viranomaiselle tai hakemys jatetty. Lahetetaan viikoittain uudelleen."
 (defn statement-request-reminder []
   (let [timestamp-now (now)
         timestamp-1-week-ago (util/get-timestamp-ago :week 1)
@@ -196,7 +196,7 @@
             ))))))
 
 
-;; "Naapurin kuuleminen: Kuulemisen tila on "Sahkoposti lahetetty", eika allekirjoitusta ole tehty viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Muistutus lahetetaan kerran."
+;; "Naapurin kuuleminen: Kuulemisen tila on "Sahkoposti lahetetty", eika allekirjoitusta ole tehty viikon kuluessa ja hakemuksen tila on nakyy viranomaiselle tai hakemus jatetty. Muistutus lahetetaan kerran."
 (defn neighbor-reminder []
   (let [timestamp-1-week-ago (util/get-timestamp-ago :week 1)
         apps (mongo/select :applications
@@ -262,7 +262,7 @@
 
 
 
-;; "Hakemus: Hakemuksen tila on luonnos tai valmisteilla, mutta edellisesta paivityksesta on aikaa yli kuukausi ja alle puoli vuotta. Lahetetaan kuukausittain uudelleen."
+;; "Hakemus: Hakemuksen tila on luonnos tai nakyy viranomaiselle, mutta edellisesta paivityksesta on aikaa yli kuukausi ja alle puoli vuotta. Lahetetaan kuukausittain uudelleen."
 (defn application-state-reminder []
   (let [apps (mongo/select :applications
                            {:state {$in ["draft" "open"]}
