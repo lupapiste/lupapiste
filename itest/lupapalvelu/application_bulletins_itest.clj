@@ -9,10 +9,18 @@
 
 (apply-remote-minimal)
 
-(fact "bulletin-op-description"
-  (let [r-app (create-and-submit-application sonja :operation "kerrostalo-rivitalo"
-                                            :propertyId sipoo-property-id
-                                            :x 406898.625 :y 6684125.375
-                                            :address "Hitantine 108")]
+(let [r-app (create-and-submit-application mikko :operation "kerrostalo-rivitalo"
+                                          :propertyId sipoo-property-id
+                                          :x 406898.625 :y 6684125.375
+                                          :address "Hitantine 108")
+      app-id (:id r-app)]
+  (fact "bulletin-op-description"
     (command sonja :update-app-bulletin-op-description :id (:id r-app) :description "Kuvausteksti123") => ok?
-    (-> (get-by-id :applications (:id r-app)) :body :data) => (contains  {:bulletinOpDescription "Kuvausteksti123"})))
+    (-> (get-by-id :applications app-id) :body :data) => (contains  {:bulletinOpDescription "Kuvausteksti123"}))
+  (fact "check for backend verdict"
+    (command sonja :check-for-verdict :id app-id) => ok?
+    (-> (query-application mikko app-id) :verdicts count) => pos?)
+  (fact "Bulletin is created automatically"
+    (let [bulletins (:data (datatables mikko :application-bulletins :municipality sonja-muni :searchText "" :state "" :page 1 :sort ""))]
+      (count bulletins) => 1
+      (-> bulletins first :bulletinState) => "verdictGiven")))
