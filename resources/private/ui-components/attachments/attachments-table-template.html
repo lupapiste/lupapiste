@@ -52,7 +52,7 @@
               <a data-bind="fileLink: latestVersion"></a>
               <!-- ko if: $parent.archiveProblem( latestVersion ) -->
                 <i class="bubble-hover lupicon-circle-info negative" data-test-id="archive-problem-icon">
-                  <span class="bubble-hover-text" data-test-id="archive-problem-text" data-bind="ltext: latestVersion.archivabilityError"></span>                    
+                  <span class="bubble-hover-text" data-test-id="archive-problem-text" data-bind="ltext: latestVersion.archivabilityError"></span>
                 </i>
               <!-- /ko -->
               <div data-bind="downloadWithIcon: latestVersion"></div>
@@ -69,9 +69,10 @@
             <span data-bind="html: loc(['attachmentType', util.getIn($data, ['type','type-group']), util.getIn($data, ['type','type-id']), 'info'])"></span>
           </td>
           <td data-bind="if: !$parent.isNotNeeded( $data ) && $data.authModel.ok('bind-attachment')">
-            <attachment-upload params="id: $data.id,
-                                       type: $data.type,
+            <attachment-upload params="proxy: {type: $data.type,
                                        group: $data.group,
+                                       attachmentId: $data.id,
+                                       },
                                        ltext: 'attachment.addFile',
                                        upload: $component.upload,
                                        template: 'attachment-upload-link-template'"></attachment-upload>

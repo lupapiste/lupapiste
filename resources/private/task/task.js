@@ -56,7 +56,7 @@ var taskPageController = (function() {
     return authorizationModel.ok("review-done") && _.isEmpty(validationErrors());
   });
 
-  var attachmentsModel = {target: ko.observable( {type: "task"} ),
+  var attachmentsModel = {defaults: {target: ko.observable( {type: "task"})},
                           typeGroups: ko.pureComputed( function() {
                             var isKatselmus = String(_.get(task(), "schema-info.name")).indexOf("katselmus") > -1;
                             return isKatselmus ?
@@ -197,7 +197,7 @@ var taskPageController = (function() {
 
     lupapisteApp.setTitle(applicationModel.title());
 
-    attachmentsModel.target({type: "task", id: currentTaskId});
+    attachmentsModel.defaults.target({type: "task", id: currentTaskId});
 
     var t = _.find(application.tasks, function(task) {return task.id === currentTaskId;});
 

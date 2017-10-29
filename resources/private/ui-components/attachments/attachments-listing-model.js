@@ -50,8 +50,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
                                             readOnly: self.disposedPureComputed(function() {
                                               return !self.authModel.ok( "upload-attachment");
                                             }),
-                                            badFileHandler: _.noop,
-                                            batchMode: true} );
+                                            badFileHandler: _.noop} );
 
   // After attachment query
   function afterQuery( params ) {

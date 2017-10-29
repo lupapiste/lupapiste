@@ -66,6 +66,28 @@ Muut lupamaaraykset
   Wait until  Page should contain  Muut lupamääräykset
   Task count is  task-lupamaarays  3
   Task state count is  task-lupamaarays  requires_user_action  3
+  [Teardown]  Logout
+
+Luukas on Rakentaminen tab
+  Luukas logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  tasks
+
+Luukas cannot add attachment to Aloituskokous
+  Open review  0
+  No such test id  upload-button-label
+  Return from review
+
+Luukas cannot add attachment to Valaistussuunnitelma
+  Open task  Valaistussuunnitelma
+  No such test id  upload-button-label
+  Return from review
+  [Teardown]  Logout
+
+Sonja logs in again
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  tasks
 
 Valaistussuunnitelma requires action
   Open task  Valaistussuunnitelma
