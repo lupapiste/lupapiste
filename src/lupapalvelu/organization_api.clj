@@ -713,6 +713,23 @@
        (hash-map $set)
        (org/update-organization org-id)))
 
+(defquery available-backend-systems
+  {:user-roles #{:admin}}
+  (ok :backend-systems org/backend-systems))
+
+(defcommand update-organization-backend-systems
+  {:description "Updates organization backend systems by permit type."
+   :parameters [org-id backend-systems]
+   :user-roles #{:admin}
+   :input-validators [(partial action/map-parameters [:backend-systems])]}
+  [_]
+  (->> (util/map-keys (fn->> name (format "krysp.%s.backend-system"))  backend-systems)
+       (reduce (fn [updates [path system]] (if (contains? org/backend-systems (keyword system))
+                                             (assoc-in updates [$set path] system)
+                                             (assoc-in updates [$unset path] "")))
+               {})
+       (org/update-organization org-id)))
+
 (defcommand save-organization-tags
   {:parameters [tags]
    :input-validators [(partial action/vector-parameter-of :tags map?)]

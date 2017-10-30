@@ -112,7 +112,7 @@
 
 (def permit-types (map keyword (keys (permit/permit-types))))
 
-(def backend-systems [:facta :kuntanet :louhi :locus])
+(def backend-systems #{:facta :kuntanet :louhi :locus :keywinkki :iris :matti})
 
 (sc/defschema KryspConf
   {(sc/optional-key :ftpUser) (sc/maybe sc/Str)
