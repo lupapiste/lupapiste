@@ -248,7 +248,7 @@
           (keys bulletin) => (just [:id :_applicantIndex :address :applicant :attachments :versionId
                                     :bulletinState :documents :location :modified :municipality
                                     :primaryOperation :propertyId :state :stateSeq :canComment
-                                    :verdicts :tasks :application-id :verdictData
+                                    :verdicts :tasks :application-id :verdictData :category
                                     :proclamationText :proclamationEndsAt :proclamationStartsAt] :in-any-order)
           (fact "attachments only contain specified keys and nothing else"
             (map keys (:attachments bulletin)) => (has every? (just [:id :type :latestVersion :contents :target]))
