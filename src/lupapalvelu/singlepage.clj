@@ -105,9 +105,7 @@
       inject-cljs-app
       (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-common")
                                             (assoc-in e [:attrs :src]
-                                                      (str (resource-url :common :js) "?lang=" (name lang)
-                                                           (when (and env/*extra-path* (re-matches #"[a-zA-Z0-9\-]+" env/*extra-path*))
-                                                             (str "&extraPath=" env/*extra-path*)))) e)))
+                                                      (str (resource-url :common :js) "?lang=" (name lang))) e)))
       (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-app") (assoc-in e [:attrs :src] (resource-url component :js)) e)))
       (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e)))
       (enlive/transform [:#buildinfo] (enlive/content buildinfo-summary))
