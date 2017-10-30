@@ -1,4 +1,4 @@
-LUPAPISTE.LocalBulletinsWrapperModel = function(params) {
+LUPAPISTE.LocalBulletinsWrapperModel = function() {
   "use strict";
   var self = this;
 
