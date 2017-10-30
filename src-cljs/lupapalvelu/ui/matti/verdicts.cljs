@@ -87,13 +87,7 @@
     [:button.secondary
      {:on-click #(reset-verdict nil)}
      [:i.lupicon-chevron-left]
-     [:span (common/loc "back")]]
-    [:button.primary
-     {:on-click #(common/command :upsert-matti-verdict-bulletin
-                                 identity
-                                 :id @state/application-id
-                                 :verdict-id (-> @state/current-verdict :info :id))}
-     [:span "Päivitä Julkipanoon"]]]
+     [:span (common/loc "back")]]]
    component])
 
 (rum/defc verdict-section-header < rum/reactive

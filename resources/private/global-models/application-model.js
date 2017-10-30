@@ -73,6 +73,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.metadata = ko.observable();
   self.processMetadata = ko.observable();
   self.kuntalupatunnukset = ko.observable();
+  self.bulletinOpDescription = ko.observable();
 
   // Options
   self.optionMunicipalityHearsNeighbors = ko.observable(false);

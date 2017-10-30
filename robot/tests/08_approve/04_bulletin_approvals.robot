@@ -35,13 +35,13 @@ Olli adds approved attachment
 
 Olli publishes bulletin
   Approve application ok
-  Open tab  bulletin
+  Open tab  ymp-bulletin
   Publish bulletin
 
 Olli opens bulletin and checks that not icons are visible
   Wait until  Click link  jquery=td.actions a[target=_blank]
   Select window  new
-  Wait until  Element should be visible  bulletin-component
+  Wait until  Element should be visible  ymp-bulletin-component
   No icons  info
   No icons  attachments
 

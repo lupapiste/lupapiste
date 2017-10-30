@@ -20,7 +20,8 @@
             [sade.core :refer [ok fail fail! ok?]]
             [sade.strings :as ss]
             [sade.util :as util]
-            [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]))
+            [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
+            [lupapalvelu.application-bulletins :as bulletins]))
 
 ;;
 ;; KRYSP verdicts
@@ -180,6 +181,7 @@
                                                         application
                                                         user)))]
       (update-application command updates)
+      (bulletins/process-delete-verdict id verdictId)
       (attachment/delete-attachments! application (remove nil? (map :id attachments)))
       (appeal-common/delete-by-verdict command verdictId)
       (child-to-attachment/delete-child-attachment application :verdicts verdictId)

@@ -221,7 +221,7 @@
   (when (= :html resource-type)
     {"Content-Language" (name i18n/*lang*)}))
 
-(def- never-cache #{:hashbang})
+(def- never-cache #{:hashbang :local-bulletins})
 
 (def default-lang (name i18n/default-lang))
 
@@ -247,11 +247,12 @@
 (def- unauthorized (resp/status 401 "Unauthorized\r\n"))
 
 ;; CSS & JS
+
 (defpage [:get ["/app/:build/:app.:res-type" :res-type #"(css|js)"]] {build :build app :app res-type :res-type}
   (let [build-number env/build-number]
     (if (= build build-number)
-     (single-resource (keyword res-type) (keyword app) nil unauthorized)
-     (resp/redirect (str "/app/" build-number "/" app "." res-type "?lang=" (name *lang*))))))
+      (single-resource (keyword res-type) (keyword app) nil unauthorized)
+      (resp/redirect (str "/app/" build-number "/" app "." res-type "?lang=" (name *lang*))))))
 
 ;; Single Page App HTML
 (def apps-pattern
@@ -299,11 +300,11 @@
     ; The next call will then be handled by the "true branch" above.
     (single-resource :html (keyword app) theme (save-hashbang-on-client theme))))
 
+; Same as above, but with an extra path.
 (defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang theme :theme}
   (i18n/with-lang lang
     (serve-app app hashbang theme)))
 
-; Same as above, but with an extra path.
 (defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang theme :theme}
   (i18n/with-lang lang
     (serve-app app hashbang theme)))

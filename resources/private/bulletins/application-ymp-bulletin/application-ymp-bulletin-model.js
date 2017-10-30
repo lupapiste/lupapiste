@@ -1,4 +1,4 @@
-LUPAPISTE.ApplicationBulletinModel = function(params) {
+LUPAPISTE.ApplicationYmpBulletinModel = function(params) {
   "use strict";
   var self = this;
   var bulletinService = params.bulletinService;
@@ -91,7 +91,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   };
 
   self.openTab = function(tab) {
-    pageutil.openPage("bulletin", [self.bulletinId(), tab]);
+    pageutil.openPage("ymp-bulletin", [self.bulletinId(), tab]);
   };
 
   self.scrollToCommenting = function() {

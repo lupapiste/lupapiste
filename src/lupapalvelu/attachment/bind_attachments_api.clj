@@ -61,7 +61,8 @@
                          att/attachment-editable-by-application-state
                          (action/some-pre-check att/allowed-only-for-authority-when-application-sent
                                                 (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))
-                         att/foreman-must-be-uploader]
+                         att/foreman-must-be-uploader
+                         att/validate-not-included-in-published-bulletin]
    :input-validators    [(partial action/non-blank-parameters [:id :attachmentId :fileId])]
    :states              {:applicant    (conj (states/all-states-but states/terminal-states) :answered)
                          :authority    (states/all-states-but :canceled)

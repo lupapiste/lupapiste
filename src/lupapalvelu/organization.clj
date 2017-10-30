@@ -170,7 +170,10 @@
    (sc/optional-key :phrases) [Phrase]
    (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}
    (sc/optional-key :matti-enabled)                 sc/Bool
-   (sc/optional-key :multiple-operations-supported) sc/Bool})
+   (sc/optional-key :multiple-operations-supported) sc/Bool
+   (sc/optional-key :local-bulletins-page-settings) {:texts (zipmap i18n/supported-langs (repeat {:heading1 sc/Str
+                                                                                                  :heading2 sc/Str
+                                                                                                  :caption [sc/Str]}))}})
 
 
 (sc/defschema SimpleOrg

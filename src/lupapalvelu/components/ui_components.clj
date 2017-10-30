@@ -24,8 +24,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.xml.validator :as validator]
             [lupapalvelu.attachment.conversion :as conversion]
-            [cljs.build.api]
-            #_[figwheel-sidecar.repl-api :as ra]))
+            [cljs.build.api]))
 
 (def themes #{"louhi", "facta"})
 
@@ -511,21 +510,23 @@
               :js ["neighbor-show.js"]}
 
    :bulletins-common {:depends []
-                      :js ["header.js" "vetuma-service.js"]
-                      :html ["header.html" "footer.html"]}
+                      :js ["header.js" "vetuma-service.js"
+                           "application-bulletin/application-bulletin-model.js"]
+                      :html ["header.html" "footer.html"
+                             "application-bulletin/application-bulletin-template.html"]}
 
    :bulletins {:depends [:bulletins-common :ui-components :map :docgen :services]
                :html ["bulletins.html" "bulletins-template.html"
-                      "application-bulletin/application-bulletin-template.html"
-                      "application-bulletin/bulletin-comment/bulletin-comment-template.html"
-                      "application-bulletin/tabs/attachments/bulletin-attachments-tab-template.html"
-                      "application-bulletin/tabs/attachments/bulletin-attachments-table-template.html"
-                      "application-bulletin/bulletin-comment/bulletin-comment-template.html"
-                      "application-bulletin/tabs/info/bulletin-info-tab-template.html"
-                      "application-bulletin/tabs/verdicts/verdicts-template.html"
-                      "application-bulletin/tabs/verdicts/bulletin-verdicts-tab-template.html"
-                      "application-bulletin/tabs/instructions/bulletin-instructions-tab-template.html"
-                      "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-template.html"
+                      "application-ymp-bulletin/application-ymp-bulletin-template.html"
+                      "application-ymp-bulletin/bulletin-comment/bulletin-comment-template.html"
+                      "application-ymp-bulletin/tabs/attachments/bulletin-attachments-tab-template.html"
+                      "application-ymp-bulletin/tabs/attachments/bulletin-attachments-table-template.html"
+                      "application-ymp-bulletin/bulletin-comment/bulletin-comment-template.html"
+                      "application-ymp-bulletin/tabs/info/bulletin-info-tab-template.html"
+                      "application-ymp-bulletin/tabs/verdicts/verdicts-template.html"
+                      "application-ymp-bulletin/tabs/verdicts/bulletin-verdicts-tab-template.html"
+                      "application-ymp-bulletin/tabs/instructions/bulletin-instructions-tab-template.html"
+                      "application-ymp-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-template.html"
                       "application-bulletins/application-bulletins-template.html"
                       "application-bulletins/application-bulletins-list/application-bulletins-list-template.html"
                       "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-template.html"
@@ -534,12 +535,12 @@
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-states-template.html"]
                :js ["bulletins.js" "bulletins-model.js"
                     "application-bulletins-service.js"
-                    "application-bulletin/application-bulletin-model.js"
-                    "application-bulletin/bulletin-comment/bulletin-comment-model.js"
-                    "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
-                    "application-bulletin/tabs/attachments/bulletin-attachments-tab-model.js"
-                    "application-bulletin/tabs/verdicts/bulletin-verdicts-tab-model.js"
-                    "application-bulletin/tabs/instructions/bulletin-instructions-tab-model.js"
+                    "application-ymp-bulletin/application-ymp-bulletin-model.js"
+                    "application-ymp-bulletin/bulletin-comment/bulletin-comment-model.js"
+                    "application-ymp-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
+                    "application-ymp-bulletin/tabs/attachments/bulletin-attachments-tab-model.js"
+                    "application-ymp-bulletin/tabs/verdicts/bulletin-verdicts-tab-model.js"
+                    "application-ymp-bulletin/tabs/instructions/bulletin-instructions-tab-model.js"
                     "application-bulletins/application-bulletins-model.js"
                     "application-bulletins/application-bulletins-list/application-bulletins-list-model.js"
                     "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-model.js"
@@ -557,8 +558,8 @@
                          :js ["local-bulletins-app.js"]}
 
    :local-bulletins {:depends [:bulletins-common :local-bulletins-app :ui-components :map :docgen :services]
-                     :html ["local-bulletins-template.html"]
-                     :js ["local-bulletins-model.js"]}
+                     :html ["local-bulletins-template.html" "local-bulletins-wrapper-template.html"]
+                     :js ["local-bulletins-model.js" "local-bulletins-wrapper-model.js"]}
    })
 
 ; Make sure all dependencies are resolvable:

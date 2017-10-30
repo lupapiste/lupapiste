@@ -1,4 +1,4 @@
-LUPAPISTE.BulletinVersionsModel = function(params) {
+LUPAPISTE.YmpBulletinVersionsModel = function(params) {
   "use strict";
   var self = this;
 
