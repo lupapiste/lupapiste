@@ -11,6 +11,7 @@
                   :attachments [{:type "test1" :versions [{:id 1} {:id 2}] :latestVersion {:fileId 223 :filename "2.txt"}}
                                 {:type "testi2"}
                                 nil]
+                  :permitType "R"
                   :state :submitted})
 
 (facts "Remove party docs"
