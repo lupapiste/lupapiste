@@ -41,12 +41,6 @@ LUPAPISTE.AttachmentsTableModel = function(params) {
     return pageutil.buildPageHash("attachment", applicationId, attachment.id);
   };
 
-  self.addFile = function(attachment) {
-    hub.send( "add-attachment-file", {attachmentId: attachment.id,
-                                      attachmentType: attachment.typeString(),
-                                      attachmentGroup: attachment.group() });
-  };
-
   self.remove = function(attachment) {
     var yesFn = function() {
       hub.send("track-click", {category:"Attachments", label: "", event: "deleteAttachmentFromListing"});

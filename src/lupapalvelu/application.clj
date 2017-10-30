@@ -192,11 +192,12 @@
     (when (usr/authority? user) {:_attachment_indicator_reset timestamp})))
 
 ; Masking
-(defn- person-id-masker-for-user [user {handlers :handlers :as application}]
+(defn- person-id-masker-for-user [user application]
   (cond
-    (util/find-by-key :userId (:id user) handlers) identity
+    (auth/application-handler? application user)   identity
     (auth/application-authority? application user) model/mask-person-id-ending
-    :else (comp model/mask-person-id-birthday model/mask-person-id-ending)))
+    :else (comp model/mask-person-id-birthday
+                model/mask-person-id-ending)))
 
 (defn with-masked-person-ids [application user]
   (let [mask-person-ids (person-id-masker-for-user user application)]

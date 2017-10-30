@@ -907,7 +907,7 @@ Attachment indicator icon should not be visible
 Assert file latest version
   [Arguments]  ${name}  ${versionNumber}
   Wait Until  Element Should Be Visible  test-attachment-file-name
-  Wait Until Page Contains  ${PNG_TESTFILE_NAME}
+  Wait Until Page Contains  ${name}
   Element Text Should Be  test-attachment-file-name  ${name}
   Element Text Should Be  test-attachment-version  ${versionNumber}
 
@@ -1229,6 +1229,7 @@ Is not authorized party
 
 Fill application person invite bubble
   [Arguments]  ${email}  ${message}
+  Scroll to test id  application-invite-person
   Element should be visible  xpath=//button[@data-test-id='application-invite-person']
   Click by test id  application-invite-person
   Test id disabled  person-invite-bubble-dialog-ok
@@ -1353,7 +1354,9 @@ Set animations off
 
 Add neighbor
   [Arguments]  ${propertyId}  ${name}  ${email}
-  Click enabled by test id  manager-neighbors-add
+  Wait test id visible  manager-neighbors-add
+  Scroll to bottom
+  Click by test id  manager-neighbors-add
   Wait Until   Element Should Be Visible  xpath=//*[@data-test-id='modal-dialog-content']
   Input text by test id  neighbors.edit.propertyId  ${propertyId}
   Input text by test id  neighbors.edit.name  ${name}

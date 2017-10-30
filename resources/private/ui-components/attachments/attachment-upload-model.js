@@ -1,3 +1,20 @@
+// Parameters [optional]:
+//
+// upload: Upload model
+//
+// [template]: Template name. See attachment-upload-template.html for
+// some alternatives (default attachment-upload-button-template).
+//
+// [proxy]: If a proxy object is given, a separate proxy upload model
+// is used (single, no drop-zone). The uploaded file is passed to the
+// original upload model after encriching (merging) them with proxy
+// object. Typical proxy keys are attachmentId, type and group, but
+// there are no restrictions. The values can be observables..
+//
+// [id]: Attachment id. If given and proxy is false, the file is
+// immediately bound. Note: if proxy is gen, id is ignored.
+//
+// [ltext]: Link/button ltext (components have sensible defaults).
 LUPAPISTE.AttachmentUploadModel = function( params ) {
   "use strict";
   var self = this;
@@ -6,60 +23,56 @@ LUPAPISTE.AttachmentUploadModel = function( params ) {
 
   self.componentTemplate = params.template || "attachment-upload-button-template";
 
-  self.id = params.id;
+  var attachmentId = params.id;
   self.ltext = params.ltext;
-
-  if (params.upload && !params.upload.batchMode) {
-    self.upload = params.upload;
-  } else {
-    self.upload = new LUPAPISTE.UploadModel(self, { allowMultiple:false });
-    self.upload.init();
-  }
 
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
   self.bindWaiting = ko.observable();
+  self.upload = params.upload;
 
-  self.waiting = self.disposedComputed(function() {
-    return self.upload.waiting() || self.bindWaiting();
-  });
+  if( params.proxy ) {
+    var upload = self.upload;
+    self.upload = new LUPAPISTE.UploadModel( self,
+                                             {allowMultiple: false,
+                                              readOnly: self.disposedPureComputed(function() {
+                                              return !service.authModel.ok( "bind-attachment");
+                                               }),
+                                              badFileHandler: _.noop} );
+    self.upload.init();
 
-  function enrichFileForBatchTable(file) {
-    file.attachmentId = self.id;
-    file.target = ko.unwrap(params.target);
-    file.type = ko.unwrap(params.type);
-    file.group = ko.unwrap(params.group);
-    return file;
-  }
-
-  if (_.get(params.upload, "batchMode")) {
-    self.disposedSubscribe(self.upload.files, function(files) {
-      if (!_.isEmpty(files)) {
-        var f = _.last(files);
-        var inputId = params.upload.fileInputId;
-        hub.send("fileuploadService::fileAdded", {file: f, input: inputId});
-        hub.send("fileuploadService::filesUploadingProgress", {file: {name: f.filename}, input: inputId, progress: 100, loaded: f.size, size: f.size});
-        hub.send("fileuploadService::filesUploaded", {input: inputId, status: "success", files: [enrichFileForBatchTable(f)]});
+    self.disposedSubscribe( self.upload.files, function( files ) {
+      var file = _.last(files );
+      if( file && !file.attachmentId ) {
+        upload.files.push( _.merge( _.clone( file),
+                                  ko.mapping.toJS( params.proxy )));
       }
     });
-  } else {
+  }
+
+  if( !params.proxy && attachmentId ) {
     self.disposedSubscribe(self.upload.files, function(files) {
       if (!_.isEmpty(files)) {
         var fileId = _.last(files).fileId;
         self.bindWaiting(true);
-        var status = service.bindAttachment( self.id, fileId );
+        var status = service.bindAttachment( attachmentId, fileId );
         var statusSubscription = self.disposedSubscribe(status, function(status) {
           if ( service.pollJobStatusFinished(status) ) {
             self.bindWaiting(false);
             self.upload.clearFile( fileId );
             self.unsubscribe(statusSubscription);
-            self.sendEvent("attachment-upload", "finished", { ok: ko.unwrap(status) === service.JOB_DONE,
-                                                              attachmentId: self.id,
-                                                              id: service.applicationId});
+            self.sendEvent("attachment-upload",
+                           "finished",
+                           { ok: ko.unwrap(status) === service.JOB_DONE,
+                             attachmentId: attachmentId,
+                             id: service.applicationId});
           }
         });
       }
     });
   }
 
+  self.waiting = self.disposedComputed(function() {
+    return self.upload.waiting() || self.bindWaiting();
+  });
 };

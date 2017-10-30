@@ -71,8 +71,7 @@
   (let [user-orgs (user/organization-ids-by-roles user #{:archivist})
         from-ts-by-orgs (map (fn [org] {:org org :ts (organization/earliest-archive-enabled-ts [org])}) user-orgs)
         base-query {$or [{$and [{:state {$in ["verdictGiven" "constructionStarted" "appealed" "inUse" "foremanVerdictGiven" "acknowledged"]}} {:archived.application nil} {:permitType {$ne "YA"}}]}
-                         {$and [{:state {$in ["closed" "extinct" "foremanVerdictGiven" "acknowledged"]}} {:archived.completed nil} {:permitType {$ne "YA"}}]}
-                         {$and [{:state {$in ["closed" "extinct"]}} {:archived.completed nil} {:permitType "YA"}]}]}]
+                         {$and [{:state {$in states/archival-final-states}} {:archived.completed nil}]}]}]
     (if (not (empty? from-ts-by-orgs))
       {$and [base-query
              {$or

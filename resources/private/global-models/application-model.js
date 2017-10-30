@@ -687,6 +687,7 @@ LUPAPISTE.ApplicationModel = function() {
 
 
   self.newOtherAttachment = function() {
+    // TODO: refactor this function away from inforequest.html
     attachment.initFileUpload({
       applicationId: self.id(),
       attachmentId: null,

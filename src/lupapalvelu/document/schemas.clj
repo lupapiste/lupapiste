@@ -212,13 +212,6 @@
 
 (def kuvaus {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width})
 
-(def hankkeen-vaativuus {:name "hankkeenVaativuus" :type :select :sortBy nil :hidden true ;; TODO: remove, LPK-1448
-                         :body [{:name "AA"}
-                                {:name "A"}
-                                {:name "B"}
-                                {:name "C"}
-                                ei-tiedossa]})
-
 (def rahoitus {:name "rahoitus" :type :fundingSelector})
 
 (def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
@@ -1312,17 +1305,6 @@
            :after-update 'lupapalvelu.application-meta-fields/update-project-description-index}
     :body [kuvaus
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width} ; Longest value in Helsinki production data
-           rahoitus]}
-
-   {:info {:name "hankkeen-kuvaus-rakennuslupa" ;; TODO: -> hankkeen-kuvaus, LPK-1448
-           :subtype :hankkeen-kuvaus
-           :i18name "hankkeen-kuvaus"
-           :approvable true
-           :order 1
-           :after-update 'lupapalvelu.application-meta-fields/update-project-description-index}
-    :body [kuvaus
-           hankkeen-vaativuus
-           {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}
            rahoitus]}
 
    {:info {:name "aiemman-luvan-toimenpide"

@@ -54,8 +54,8 @@
    :name sc/Str})
 
 (sc/defschema Link
-  {:url  (zipmap i18n/all-languages (repeat ssc/OptionalHttpUrl))
-   :name (zipmap i18n/all-languages (repeat sc/Str))
+  {:url  (i18n/lenient-localization-schema ssc/OptionalHttpUrl)
+   :name i18n/LocalizationStringMap
    (sc/optional-key :modified) ssc/Timestamp})
 
 (sc/defschema Server
@@ -112,7 +112,7 @@
 
 (sc/defschema Organization
   {:id OrgId
-   :name (zipmap i18n/all-languages (repeat sc/Str))
+   :name i18n/LocalizationStringMap
    :scope [Scope]
 
    (sc/optional-key :allowedAutologinIPs) sc/Any
@@ -152,6 +152,7 @@
                             (sc/optional-key :operations) [sc/Str]}
    (sc/optional-key :tags) [Tag]
    (sc/optional-key :validate-verdict-given-date) sc/Bool
+   (sc/optional-key :automatic-review-fetch-enabled) sc/Bool
    (sc/optional-key :vendor-backend-redirect) {(sc/optional-key :vendor-backend-url-for-backend-id) ssc/OptionalHttpUrl
                                                (sc/optional-key :vendor-backend-url-for-lp-id)      ssc/OptionalHttpUrl}
    (sc/optional-key :use-attachment-links-integration) sc/Bool

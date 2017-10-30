@@ -322,6 +322,8 @@
         (give-local-verdict sonja (:id application) :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?)
       (fact "read verdict"
         read-result => ok?)
+      (fact "tasks have created timestamp"
+        (:added-tasks-with-updated-buildings read-result) => (has every? :created))
       (let [application (domain/get-application-no-access-checking application-id)]
         (review/save-review-updates (assoc (action/application->command application) :user batchrun-user)
                                     (:updates read-result)

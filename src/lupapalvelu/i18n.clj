@@ -25,6 +25,11 @@
                        [:fi :sv]))
 (def default-lang (first supported-langs))
 
+(def all-languages-with-optional
+  (if (env/feature? :english)
+    [:fi :sv :en]
+    [:fi :sv (sc/optional-key :en)]))
+
 (defn supported-lang? [lang]
   (contains? (set supported-langs) (keyword lang)))
 
@@ -40,6 +45,9 @@
   "Return a map {:a value-type :b value-type ... } where :a, :b, ... are the supported languages"
   [value-type]
   (supported-langs-map (constantly value-type)))
+
+(defn lenient-localization-schema [value-type]
+  (into {} (map #(identity [% value-type]) all-languages-with-optional)))
 
 (sc/defschema EnumSupportedLanguages (apply sc/enum (map name languages)))
 

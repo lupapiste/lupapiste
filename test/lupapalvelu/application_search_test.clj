@@ -1,14 +1,15 @@
 (ns lupapalvelu.application-search-test
-   (:require [midje.sweet :refer :all]
-             [midje.util :refer [testable-privates]]
-             [monger.operators :refer [$in]]
-             [lupapalvelu.test-util :refer :all]
-             [lupapalvelu.application-search :refer :all]
-             [lupapalvelu.application-utils :refer [make-area-query]]
-             [lupapalvelu.operations :refer [operation-names]]
-             [lupapalvelu.geojson :as geo]
-             [lupapalvelu.i18n :as i18n]
-             [lupapalvelu.organization :as organization]))
+  (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
+            [monger.operators :refer [$in]]
+            [lupapalvelu.test-util :refer :all]
+            [lupapalvelu.application-search :refer :all]
+            [lupapalvelu.application-utils :refer [make-area-query]]
+            [lupapalvelu.operations :refer [operation-names]]
+            [lupapalvelu.geojson :as geo]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.states :as states]))
 
 (facts "operation-names"
   (operation-names "bil") => ["auto-katos" "kiinteistonmuodostus"]
@@ -181,8 +182,7 @@
     => {"$and"
         [{"$and"
           [{"$or" [{"$and" [{:state {"$in" ["verdictGiven" "constructionStarted" "appealed" "inUse" "foremanVerdictGiven" "acknowledged"]}} {:archived.application nil} {:permitType {"$ne" "YA"}}]}
-                   {"$and" [{:state {"$in" ["closed" "extinct" "foremanVerdictGiven" "acknowledged"]}} {:archived.completed nil} {:permitType {"$ne" "YA"}}]}
-                   {"$and" [{:state {"$in" ["closed" "extinct"]}} {:archived.completed nil} {:permitType "YA"}]}]}
+                   {"$and" [{:state {"$in" states/archival-final-states}} {:archived.completed nil}]}]}
            {"$or"
             [{"$and" [{:organization "091-R"} {"$or" [{:submitted {"$gte" 1451599200000}} {:created {"$gte" 1451599200000}, :submitted nil}]}]}]}]}
          {:primaryOperation.name {"$nin" ["tyonjohtajan-nimeaminen-v2" "aiemmalla-luvalla-hakeminen"]}}]}
@@ -191,15 +191,14 @@
 
   (fact "Archival query with several organizations and archiving starting timestamp"
     (make-query {} {:applicationType "readyForArchival"} {:role "authority" :orgAuthz {:091-R #{:authority :archivist} :092-R #{:authority :archivist}}})
-    =>    {"$and"
-           [{"$and"
-             [{"$or" [{"$and" [{:state {"$in" ["verdictGiven" "constructionStarted" "appealed" "inUse" "foremanVerdictGiven" "acknowledged"]}} {:archived.application nil} {:permitType {"$ne" "YA"}}]}
-                      {"$and" [{:state {"$in" ["closed" "extinct" "foremanVerdictGiven" "acknowledged"]}} {:archived.completed nil} {:permitType {"$ne" "YA"}}]}
-                      {"$and" [{:state {"$in" ["closed" "extinct"]}} {:archived.completed nil} {:permitType "YA"}]}]}
-              {"$or"
-                [{"$and" [{:organization "092-R"} {"$or" [{:submitted {"$gte" 1485900000000}} {:created {"$gte" 1485900000000}, :submitted nil}]}]}
-                 {"$and" [{:organization "091-R"} {"$or" [{:submitted {"$gte" 1451599200000}} {:created {"$gte" 1451599200000}, :submitted nil}]}]}]}]}
-            {:primaryOperation.name {"$nin" ["tyonjohtajan-nimeaminen-v2" "aiemmalla-luvalla-hakeminen"]}}]}
+    => {"$and"
+        [{"$and"
+          [{"$or" [{"$and" [{:state {"$in" ["verdictGiven" "constructionStarted" "appealed" "inUse" "foremanVerdictGiven" "acknowledged"]}} {:archived.application nil} {:permitType {"$ne" "YA"}}]}
+                   {"$and" [{:state {"$in" states/archival-final-states}} {:archived.completed nil}]}]}
+           {"$or"
+            [{"$and" [{:organization "092-R"} {"$or" [{:submitted {"$gte" 1485900000000}} {:created {"$gte" 1485900000000}, :submitted nil}]}]}
+             {"$and" [{:organization "091-R"} {"$or" [{:submitted {"$gte" 1451599200000}} {:created {"$gte" 1451599200000}, :submitted nil}]}]}]}]}
+         {:primaryOperation.name {"$nin" ["tyonjohtajan-nimeaminen-v2" "aiemmalla-luvalla-hakeminen"]}}]}
     (provided
       (organization/earliest-archive-enabled-ts ["091-R"]) => 1451599200000
       (organization/earliest-archive-enabled-ts ["092-R"]) => 1485900000000)))

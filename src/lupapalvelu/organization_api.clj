@@ -468,6 +468,14 @@
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:validate-verdict-given-date enabled}})
   (ok))
 
+(defcommand set-organization-review-fetch-enabled
+  {:parameters [enabled]
+   :user-roles #{:authorityAdmin}
+   :input-validators  [(partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (org/update-organization (usr/authority-admins-organization-id user) {$set {:automatic-review-fetch-enabled enabled}})
+  (ok))
+
 (defcommand set-organization-use-attachment-links-integration
   {:parameters       [enabled]
    :user-roles       #{:authorityAdmin}

@@ -48,7 +48,7 @@ Applicant can upload attachment to target
   Upload with hidden input  tr[data-test-id='target-1'] input[data-test-id='upload-link-input']  ${PNG_TESTFILE_PATH}
   Sleep  1s
   Wait until  Xpath should match x times  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment']  1
-  Wait until  Element text should be  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment'][1]//a  ${PNG_TESTFILE_NAME}
+  Wait until  Element text should be  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment'][1]//a  ${PDF_TESTFILE_NAME}
   Wait until  Element should be visible  //tr[@data-test-id="target-1"]//label[@data-test-id='upload-link']
   # Delete button is visible
   Wait until  Element should be visible  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment'][1]//a[@data-test-id='delete-attachment-link']
@@ -75,7 +75,7 @@ Upload attachment again
 Attachment can be found from attachment listing
   Open tab  attachments
   Wait Until  Xpath Should Match X Times  //div[@id='application-attachments-tab']//tr[@data-test-type='katselmukset_ja_tarkastukset.tarkastusasiakirja']  1
-  Element text should be  //div[@id='application-attachments-tab']//tr[@data-test-type='katselmukset_ja_tarkastukset.tarkastusasiakirja']//td[@data-test-id='file-info']//a  ${PNG_TESTFILE_NAME}
+  Element text should be  //div[@id='application-attachments-tab']//tr[@data-test-type='katselmukset_ja_tarkastukset.tarkastusasiakirja']//td[@data-test-id='file-info']//a  ${PDF_TESTFILE_NAME}
 
 Attachment belongs to operation and is construction time
   Open attachment details  katselmukset_ja_tarkastukset.tarkastusasiakirja
@@ -90,7 +90,7 @@ Mark target as finished
   Wait until  Element should be visible  //tr[@data-test-id="target-2"]//td[contains(@class, 'target-finished')]//i
 
 Attachment can't be added nor deleted
-  Wait until  Element text should be  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment'][1]//a  ${PNG_TESTFILE_NAME}
+  Wait until  Element text should be  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment'][1]//a  ${PDF_TESTFILE_NAME}
   Element should not be visible  //tr[@data-test-id="target-1"]//label[@data-test-id='upload-link']
   Element should not be visible  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment'][1]//a[@data-test-id='delete-attachment-link']
   # Previous target without attachment also doesn't have upload link

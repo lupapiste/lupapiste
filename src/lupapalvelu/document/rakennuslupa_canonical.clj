@@ -30,14 +30,14 @@
                         schemas/get-schema
                         :body
                         (util/find-by-key :name "huoneistot"))
-        huoneistot (vals (into (sorted-map) huoneistot))
-        huoneistot (filter :muutostapa huoneistot)]
+        huoneistot (vals (into (sorted-map) huoneistot))]
     (for [huoneisto huoneistot
           :let      [huoneistonumero (-> huoneisto :huoneistonumero)
                      huoneistoPorras (-> huoneisto :porras)
-                     jakokirjain (-> huoneisto :jakokirjain)]
-          :when     (seq huoneisto)]
-      (merge {:muutostapa       (muutostapa huoneisto schema)
+                     jakokirjain (-> huoneisto :jakokirjain)
+                     muutostapa (muutostapa huoneisto schema)]
+          :when     (and muutostapa (seq huoneisto))]
+      (merge {:muutostapa       muutostapa
               :huoneluku        (-> huoneisto :huoneluku)
               :keittionTyyppi   (-> huoneisto :keittionTyyppi)
               :huoneistoala     (ss/replace (-> huoneisto :huoneistoala) "," ".")
@@ -233,6 +233,9 @@
 (defmethod operation-canonical :hankkeen-kuvaus-minimum [& _]
   nil)
 
+(defmethod operation-canonical :hankkeen-kuvaus [& _] ;; For prev permit applications
+  nil)
+
 (defmethod operation-canonical :maisematyo [& _]
   nil)
 
@@ -308,7 +311,7 @@
 
 (defn- get-asian-tiedot [documents-by-type]
   (let [maisematyo_documents (:maisematyo documents-by-type)
-        hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents-by-type) (:hankkeen-kuvaus-rakennuslupa documents-by-type) (:hankkeen-kuvaus-minimum documents-by-type) (:aloitusoikeus documents-by-type))
+        hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents-by-type) (:hankkeen-kuvaus-minimum documents-by-type) (:aloitusoikeus documents-by-type))
         asian-tiedot (:data (first hankkeen-kuvaus-doc))
         maisematyo_kuvaukset (for [maisematyo_doc maisematyo_documents]
                                (str "\n\n" (:kuvaus (get-toimenpiteen-kuvaus maisematyo_doc))
@@ -323,9 +326,6 @@
   (if (and (contains? documents-by-type :maisematyo) (empty? toimenpiteet))
       "Uusi maisematy\u00f6hakemus"
       "Uusi hakemus"))
-
-(defn- get-hankkeen-vaativuus [documents-by-type]
-  (get-in documents-by-type [:hankkeen-kuvaus-rakennuslupa 0 :data :hankkeenVaativuus]))
 
 (defn application-to-canonical-operations
   [application]
@@ -358,8 +358,7 @@
                                         "aloitusoikeus" "Uusi aloitusoikeus"
                                         (get-kayttotapaus documents-by-type toimenpiteet)))
                       :asianTiedot (get-asian-tiedot documents-by-type)
-                      :lisatiedot (get-lisatiedot-with-asiakirjat-toimitettu application lang)
-                      :hankkeenVaativuus (get-hankkeen-vaativuus documents-by-type)}
+                      :lisatiedot (get-lisatiedot-with-asiakirjat-toimitettu application lang)}
                  util/not-empty-or-nil?
                  :viitelupatieto (map get-viitelupatieto link-permits)
                  :avainsanaTieto (get-avainsanaTieto application)

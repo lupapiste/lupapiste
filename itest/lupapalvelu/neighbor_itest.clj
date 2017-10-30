@@ -196,7 +196,7 @@
         (let [document-types (set (map (comp :name :schema-info) (:documents application)))
               has-doc (fn [doc-schema-name] (document-types doc-schema-name))]
           (fact "has hakija document" "hakija-r" => has-doc)
-          (fact "has hankkeen-kuvaus-rakennuslupa document" "hankkeen-kuvaus-rakennuslupa" => has-doc)
+          (fact "has hankkeen-kuvaus document" "hankkeen-kuvaus" => has-doc)
           (fact "has rakennuspaikka document" "rakennuspaikka" => has-doc)
           (fact "does not have paatoksen-toimitus-rakval document" "paatoksen-toimitus-rakval" =not=> has-doc)
           (fact "does not have rakennusjatesuunnitelma document" "rakennusjatesuunnitelma" =not=> has-doc)

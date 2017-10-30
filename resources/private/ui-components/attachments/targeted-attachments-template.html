@@ -36,12 +36,12 @@
       <i data-bind="ltext: 'no-attachments'"></i>
     </div>
 
-    <attachment-batch params="upload: upload, typeGroups: typeGroups"></attachment-batch>
+    <attachment-batch params="upload: upload,
+                              typeGroups: typeGroups,
+                              defaults: defaults"></attachment-batch>
 
     <attachment-upload params="ltext: 'attachment.add-multiple',
-                               upload: upload,
-                               target: target,
-                               type: type"
+                               upload: upload"
                        data-bind="visible: canAdd"></attachment-upload>
   </div>
 </script>

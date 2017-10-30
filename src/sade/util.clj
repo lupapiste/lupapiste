@@ -683,3 +683,6 @@
         seq)))
 
 (defalias edit-distance shared/edit-distance)
+
+(defn ^java.util.Date object-id-to-date [object-id]
+  (-> object-id org.bson.types.ObjectId. bean :time java.util.Date.))

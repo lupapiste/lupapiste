@@ -14,10 +14,6 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function(params) {
 
   self.upload = params.upload;
 
-  self.newAttachment = function() {
-    hub.send( "add-attachment-file", {} );
-  };
-
   self.requireAttachmentsBubbleVisible = ko.observable(false);
 
   self.attachmentTemplatesAdd = function() {

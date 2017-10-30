@@ -223,6 +223,10 @@
       pageutil.openPage("company", self.company.id());
     };
 
+    self.companyReports = function() {
+      pageutil.openPage("company-reports", self.company.id());
+    };
+
     self.saved.subscribe(self.updateUserName);
 
     self.disable = ko.pureComputed(function() {

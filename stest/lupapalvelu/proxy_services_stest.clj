@@ -219,7 +219,7 @@
                       :pvm "2010-12-08"
                       :tyyppi "Kunnan hyv\u00e4ksym\u00e4"
                       :oikeusvaik "Oikeusvaikutteinen"
-                      :lisatieto ""
+                      :lisatieto "{}"
                       :linkki "http://liiteri.ymparisto.fi/maarays/0912007x.pdf"
                       :type "yleiskaava"}
      (second body) => {:id "0911010"

@@ -50,27 +50,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
                                             readOnly: self.disposedPureComputed(function() {
                                               return !self.authModel.ok( "upload-attachment");
                                             }),
-                                            badFileHandler: _.noop,
-                                            batchMode: true} );
-
-  function addAttachmentFile( params ) {
-    var attachmentId = _.get( params, "attachmentId");
-    var attachmentType = _.get( params, "attachmentType");
-    var attachmentGroup = _.get( params, "attachmentGroup" );
-    attachment.initFileUpload({
-      applicationId: appModel.id(),
-      attachmentId: attachmentId,
-      attachmentType: attachmentType,
-      typeSelector: !attachmentType,
-      group: _.get(attachmentGroup, "groupType"),
-      operationId: _.get(attachmentGroup, "id"),
-      opSelector: attachmentId ? false : lupapisteApp.models.application.primaryOperation()["attachment-op-selector"](),
-      archiveEnabled: self.authModel.ok("permanent-archive-enabled")
-    });
-    LUPAPISTE.ModalDialog.open("#upload-dialog");
-  }
-
-  self.addHubListener( "add-attachment-file", addAttachmentFile );
+                                            badFileHandler: _.noop} );
 
   // After attachment query
   function afterQuery( params ) {

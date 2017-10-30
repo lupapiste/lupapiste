@@ -8342,6 +8342,11 @@ input.form-input.inline, input.inline.form-input--inline {
 
 .docgen-content .form-entry.radioGroup {
   min-height: 32px;
+  white-space: nowrap;
+}
+
+.docgen-content .form-entry.radioGroup .form-label-radio {
+  margin-right: 24px;
 }
 
 .docgen-content .form-full-width {
@@ -10567,6 +10572,14 @@ textarea.grid-style-input.wide {
   display: block;
 }
 
+.task-title {
+  display: inline-block;
+  max-width: 50em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 div.review-done {
   margin: 24px;
 }
@@ -12294,6 +12307,11 @@ div.handler-roles-container div.handler-role-warning {
   width: 100%;
 }
 
+table.company-report-table {
+  width: 45%;
+  margin-top: 10px;
+}
+
 /*Tab styles*/
 .tab-wrapper {
   padding: 30px;
@@ -13141,6 +13159,7 @@ ul.tabs {
 /* } */
 .neighbors-message {
   margin: 12px;
+  white-space: pre-wrap;
 }
 
 #dialog-add-link-permit .combobox {
@@ -23940,6 +23959,7 @@ div.foreman-history-container {
     padding-left: 0;
     padding-right: 0;
     margin-top: 6px;
+    float: none;
   }
 }
 

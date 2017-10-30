@@ -12,7 +12,7 @@
 (facts "Financial authority invitations"
   (let [application-id (create-app-id sonja)
         application (query-application sonja application-id)
-        {doc-id :id} (domain/get-document-by-name application "hankkeen-kuvaus-rakennuslupa")]
+        {doc-id :id} (domain/get-document-by-name application "hankkeen-kuvaus")]
 
     (fact "Financial authority don't see any applications yet"
       (count (get-in (datatables financial-authority :applications-search) [:data :applications])) => 0)

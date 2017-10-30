@@ -1,19 +1,20 @@
 (ns lupapalvelu.domain
-  (:require [clojure.set :refer [difference]]
-            [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
-            [monger.operators :refer :all]
-            [sade.core :refer [unauthorized fail?]]
-            [sade.strings :as ss]
-            [sade.util :as util]
+  (:require [clj-time.coerce :as tc]
+            [clj-time.core :as t]
+            [clojure.set :refer [difference]]
             [lupapalvelu.attachment.accessibility :as attachment-access]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.verdict :as verdict]
-            [clj-time.core :as t]
-            [clj-time.coerce :as tc]))
+            [monger.operators :refer :all]
+            [sade.core :refer [unauthorized fail?]]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]))
 
 ;;
 ;; application mongo querys
@@ -64,18 +65,21 @@
 (defn- only-authority-sees-drafts [user verdicts]
   (only-authority-sees user :draft verdicts))
 
-(defn- normalize-neighbors [user neighbors]
+(defn- normalize-neighbors
+  "Neighbor user ids (hetu) are visible only to the application
+  handlers."
+  [application user neighbors]
   (mapv
-    (fn [neighbor]
-      (-> neighbor
-        (update-in [:status]
-          #(mapv
-             (fn [{vetuma :vetuma :as state}]
-               (if (and vetuma (not (user/authority? user)))
-                 (assoc-in state [:vetuma :userid] nil)
-                 state))
-             %))))
-    neighbors))
+   (fn [neighbor]
+     (update-in neighbor [:status]
+                #(mapv
+                  (fn [state]
+                    (if (auth/application-handler? application
+                                                   user)
+                      state
+                      (util/dissoc-in state [:vetuma :userid])))
+                  %)))
+   neighbors))
 
 (defn- filter-targeted-attachment-comments
   "If comment target type is attachment, check that attachment exists.
@@ -141,7 +145,7 @@
         (update-in [:attachments] (partial remove (partial statement-attachment-hidden-for-user? application user)))
         (update-in [:attachments] (partial only-authority-sees user (partial relates-to-draft-verdict? application)))
         (update-in [:attachments] (partial attachment-access/filter-attachments-for user application))
-        (update-in [:neighbors] (partial normalize-neighbors user))
+        (update-in [:neighbors] (partial normalize-neighbors application user))
         filter-targeted-attachment-comments
         (update-in [:tasks] (partial only-authority-sees user (partial relates-to-draft-verdict? application)))
         (update-in [:company-notes] (partial pick-user-company-notes user))

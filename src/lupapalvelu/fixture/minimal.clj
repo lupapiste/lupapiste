@@ -144,7 +144,7 @@
     :street "Katuosoite 2 a 4"
     :zip "33456"
     :personId "180495-754N"
-    :personIdSource :identification-service
+    :personIdSource "identification-service"
     :city "Kuopio"
     :private {:password "$2a$10$me2UOXOUfEbseJeLUBde8u2rlqOwHuqxbFT00q70QEvTpskHKol2m"
               :apikey   "e1vshYravGWKA1QXL3NeWMmyzzBJmcgq6IUqKZmh"}}
@@ -533,7 +533,7 @@
     :phone "0505503171"
     :email "teppo@example.com"
     :personId "210281-0002"
-    :personIdSource :identification-service
+    :personIdSource "identification-service"
     :role "applicant"
     :id "5073c0a1c2e6c470aef589a5"
     :allowDirectMarketing true
@@ -547,7 +547,7 @@
    {:role "applicant",
     :email "sven@example.com",
     :personId "070842-559U",
-    :personIdSource :identification-service
+    :personIdSource "identification-service"
     :private {:apikey "bfxLwCerNjNUpmJ2HqZbfxLwCerNjNUpmJ2HqZ",
               :password "$2a$10$i8O320oYo76R6QoV6bh5MunFXeNy.FcS/xqTOKwLnxQOLBg721Ouy"},
     :phone "0505504444",
@@ -568,7 +568,7 @@
     :language "fi"
     :role "applicant"
     :personId "210281-9988" ; = Nordea demo
-    :personIdSource :identification-service
+    :personIdSource "identification-service"
     :firstName "Mikko"
     :lastName "Intonen"
     :email "mikko@example.com"
@@ -593,7 +593,7 @@
     :language "fi"
     :role "applicant"
     :personId "010203-040A"
-    :personIdSource :identification-service
+    :personIdSource "identification-service"
     :firstName "Pena"
     :lastName "Panaani"
     :email "pena@example.com"
@@ -666,7 +666,7 @@
     :firstName "Erkki"
     :lastName "Esimerkki"
     :personId "010203-041B"
-    :personIdSource :identification-service
+    :personIdSource "identification-service"
     :phone "556677"
     :email "erkki@example.com"
     :street "Merkintie 88"
@@ -694,8 +694,7 @@
             :display-name {:fi "Lupapiste kauppa"
                            :sv "Lupapiste butik"
                            :en "Lupapiste store"}
-            :callback {:success-url "http://localhost:8000/success"
-                       :failure-url "http://localhost:8000/failure"}}}
+            :callback-url "http://localhost:8000"}}
 
    ;; Solita admin:  financial / admin
    {:id "financial"
@@ -791,6 +790,7 @@
                        :digitizer-tools-enabled true
                        :permanent-archive-in-use-since 1451613600000
                        :earliest-allowed-archiving-date 0
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -933,6 +933,7 @@
                                         [{:type :application-id} {:type :backend-id}]
                                         [{:type :user}]
                                         [{:type :organization}]]}]
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true
                        :matti-enabled true
@@ -999,6 +1000,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1034,6 +1036,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1059,6 +1062,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1103,6 +1107,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1126,6 +1131,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled true
                        :digitizer-tools-enabled true
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1142,6 +1148,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1161,6 +1168,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1186,6 +1194,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1209,6 +1218,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled false
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1255,6 +1265,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported false}
 
@@ -1286,6 +1297,7 @@
                        :earliest-allowed-archiving-date 0
                        :use-attachment-links-integration true
                        :operations-tos-functions {:masto-tms "10 03 00 01"}
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1314,6 +1326,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YI" "YL" "YM" "MAL" "VVVL"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1344,6 +1357,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1369,6 +1383,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1394,10 +1409,11 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}]))
 
-(def companies [{:_id "solita"
+(def companies [{:id "solita"
                  :accountType "account5"
                  :customAccountLimit nil
                  :created 1412959886600
@@ -1414,7 +1430,7 @@
                  :process-id "CkaekKfpEymHUG0nn5z4MLxwNm34zIdpAXHqQ3FM"
                  :tags [{:id "7a67a67a67a67a67a67a67a6"
                          :label "Projekti1"}]}
-                {:_id "esimerkki"
+                {:id "esimerkki"
                  :accountType "account5"
                  :customAccountLimit nil
                  :created 1493200035783

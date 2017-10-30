@@ -1,6 +1,8 @@
 // Parameters [optional]:
 // upload:       Upload model
 // [typeGroups]: Type groups available in the type selector (default all).
+// [defaults]: Default binding values (all optional): target, type,
+// group. Values can be observables.
 LUPAPISTE.AttachmentBatchModel = function(params) {
   "use strict";
   var self = this;
@@ -11,8 +13,9 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   var service = lupapisteApp.services.attachmentsService;
 
-  self.upload = params.upload;
+  self.upload     = params.upload;
   self.typeGroups = params.typeGroups;
+  var defaults    = params.defaults || {};
 
   self.password = ko.observable();
 
@@ -92,8 +95,8 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   }
 
   function newRow(initialType, initialContents, drawingNumber, group, target) {
-    var type = ko.observable(initialType);
-    var grouping = ko.observable(group || {});
+    var type = ko.observable(initialType || ko.unwrap(defaults.type) );
+    var grouping = ko.observable(group || ko.unwrap(defaults.group) || {});
     var contentsValue = ko.observable(initialContents);
     var contentsList = ko.observableArray();
     self.disposedSubscribe( type, function( type ) {
@@ -107,7 +110,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     contentsCell.list = contentsList;
     var row = { disabled: ko.observable(),
                 type: new Cell( type, true ),
-                target: target,
+                target: target || ko.unwrap(defaults.target),
                 contents: contentsCell,
                 drawing: new Cell( ko.observable(drawingNumber)),
                 grouping: new Cell( grouping ),
@@ -314,8 +317,6 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     self.badFiles.removeAll();
     rows( {});
   };
-
-
 
   // Cancel the batch just in case when leaving the application.
   // Without this, something weird happens:

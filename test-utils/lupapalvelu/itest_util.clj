@@ -49,7 +49,7 @@
   (some #(when (= (:id %) org-id) %) minimal/organizations))
 
 (defn company-from-minimal-by-id [id]
-  (some #(when (= (:_id %) id) %) minimal/companies))
+  (some #(when (= (:id %) id) %) minimal/companies))
 
 (def kaino       (apikey-for "kaino@solita.fi"))
 (def kaino-id    (id-for "kaino@solita.fi"))
@@ -817,7 +817,10 @@
         :else (do (Thread/sleep 200)
                   (recur (get-in resp [:job :version]) (inc retries)))))))
 
-(defn upload-file-and-bind [apikey id filedata & {:keys [fails attachment-id]}]
+(defn upload-file-and-bind
+  "Uploads file and then bind using bind-attachments. To upload new file, specify metadata using filedata.
+  If upload to existing attachment, filedata can be empty byt :attachment-id should be defined."
+  [apikey id filedata & {:keys [fails attachment-id]}]
   (let [file-id (get-in (upload-file apikey (or (:filename filedata) "dev-resources/test-attachment.txt")) [:files 0 :fileId])
         data (if attachment-id
                {:attachmentId attachment-id}
