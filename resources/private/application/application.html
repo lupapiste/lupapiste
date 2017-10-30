@@ -932,7 +932,8 @@
                                                               'class': LUPAPISTE.statusIcon(statusName),
                                                               'data-test-state': $data.state,
                                                               'title': loc(['task', statusName, 'title'])}"></i></td>
-                                            <td><a href="#" data-bind="click: openTask, text: displayName"></a></td>
+                                            <td><a href="#" class="task-title"
+                                                   data-bind="click: openTask, text: displayName"></a></td>
                                             <td data-bind="text: util.getIn($data, ['data', 'katselmus', 'pitoPvm', 'value'])"></td>
                                         </tr>
                                     </tbody>
