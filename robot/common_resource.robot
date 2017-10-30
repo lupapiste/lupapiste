@@ -1229,6 +1229,7 @@ Is not authorized party
 
 Fill application person invite bubble
   [Arguments]  ${email}  ${message}
+  Scroll to test id  application-invite-person
   Element should be visible  xpath=//button[@data-test-id='application-invite-person']
   Click by test id  application-invite-person
   Test id disabled  person-invite-bubble-dialog-ok

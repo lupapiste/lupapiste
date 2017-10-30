@@ -1596,6 +1596,14 @@ textarea.grid-style-input.wide {
   display: block;
 }
 
+.task-title {
+  display: inline-block;
+  max-width: 50em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 div.review-done {
   margin: $marginL;
 }
