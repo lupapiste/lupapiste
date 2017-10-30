@@ -112,6 +112,8 @@
 
 (def permit-types (map keyword (keys (permit/permit-types))))
 
+(def backend-systems [:facta :kuntanet :louhi :locus])
+
 (sc/defschema KryspConf
   {(sc/optional-key :ftpUser) (sc/maybe sc/Str)
    (sc/optional-key :url) sc/Str
@@ -119,7 +121,8 @@
    (sc/optional-key :password) sc/Str
    (sc/optional-key :crypto-iv) sc/Str
    (sc/optional-key :version) sc/Str
-   (sc/optional-key :fetch-chunk-size) sc/Int})
+   (sc/optional-key :fetch-chunk-size) sc/Int
+   (sc/optional-key :backend-system) (apply sc/enum backend-systems)})
 
 (sc/defschema KryspOsoitteetConf
   (-> KryspConf

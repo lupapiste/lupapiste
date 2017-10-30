@@ -3523,6 +3523,14 @@
                          {:automatic-review-fetch-enabled {$exists false}}
                          {$set {:automatic-review-fetch-enabled true}}))
 
+(def backend-systems-r (util/read-edn-resource "migrations/backend_systems_r.edn"))
+
+(defmigration set-r-organization-backend-systems
+  (run! #(mongo/update :organizations
+                       {:scope {$elemMatch {:municipality % :permitType "R"}} :krysp.R {$exists true}}
+                       {$set {:krysp.R.backend-system (backend-systems-r %)}})
+        (keys backend-systems-r)))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
