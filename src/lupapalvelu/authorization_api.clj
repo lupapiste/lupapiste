@@ -10,7 +10,7 @@
             [lupapalvelu.action :refer [defquery defcommand defraw update-application notify] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.authorization-messages] ; notification definitions
+            [lupapalvelu.authorization-messages]            ; notification definitions
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.domain :as domain]
@@ -19,7 +19,8 @@
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.company :as company]))
 
 ;;
 ;; Invites
@@ -65,13 +66,17 @@
                      :as command}]
   (let [email (ss/canonize-email email)
         existing-auth (auth/get-auth application (:id (user/get-user-by-email email)))
-        existing-role (keyword (get-in existing-auth [:invite :role] (:role existing-auth)))]
+        existing-role (keyword (get-in existing-auth [:invite :role] (:role existing-auth)))
+        company-missing (company/company-auth-missing application (user/get-user-by-email email))]
     (cond
       (#{:reader :guest} existing-role)
       (fail :invite.already-has-reader-auth :existing-role existing-role)
 
       existing-auth
       (fail :invite.already-has-auth)
+
+      company-missing
+      (fail :invite.company-missing)
 
       :else
       (let [invited (user/get-or-create-user-by-email email inviter)

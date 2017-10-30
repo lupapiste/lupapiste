@@ -63,7 +63,8 @@
               (sc/optional-key :contactAddress)    (sc/maybe (ssc/max-length-string 64))
               (sc/optional-key :contactPo)         (sc/maybe (ssc/max-length-string 64))
               (sc/optional-key :contactZip)        (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
-              (sc/optional-key :contactCountry)    (sc/maybe (ssc/max-length-string 64))})
+              (sc/optional-key :contactCountry)    (sc/maybe (ssc/max-length-string 64))
+              :invitationDenied                    sc/Bool})
 
 (def company-skeleton ; required keys
   {:name nil
@@ -531,3 +532,10 @@
   [{{company :company} :user}]
   (when-not (and company  (not (:submit company)))
     (fail :error.authorized)))
+
+(defn company-auth-missing [application user]
+  (let [user-company-id (get-in user [:company :id])
+        company (find-company-by-id user-company-id)
+        invites-denied (:invitationDenied company)]
+    (when (and user-company-id invites-denied)
+      (empty? (auth/get-auth application user-company-id)))))

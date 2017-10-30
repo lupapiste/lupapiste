@@ -291,7 +291,8 @@
       contactAddress: ko.observable(),
       contactZip:     ko.observable(),
       contactPo:      ko.observable(),
-      contactCountry: ko.observable()
+      contactCountry: ko.observable(),
+      invitationDenied: ko.observable().extend(notRequired)
     });
     this.defaults = {
       name: undefined,
@@ -308,7 +309,8 @@
       contactAddress: undefined,
       contactZip:     undefined,
       contactPo:      undefined,
-      contactCountry: undefined
+      contactCountry: undefined,
+      invitationDenied: false
     };
     this.edit          = ko.observable(false);
     this.saved         = ko.observable(null);
