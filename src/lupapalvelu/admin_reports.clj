@@ -216,19 +216,18 @@
 
 
 (defn- waste-data []
-  (->> (mongo/select :applications
-                    {:documents.schema-info.name {$in waste-schemas}}
-                    {:organization 1 :documents 1})
-      tools/unwrapped
-      (map (fn [{:keys [documents] :as app}]
-             (-<>> documents
-                  (map (fn [{:keys [schema-info data]}]
-                         (when (contains? (set waste-schemas) (:name schema-info))
-                           (assoc {} (:name schema-info) data))))
-                  (filter identity)
-                  (apply merge)
-                  (merge app)
-                  (dissoc <> :documents))))))
+  (map (fn [{:keys [documents] :as app}]
+         (-<>> documents
+               tools/unwrapped
+               (keep (fn [{:keys [schema-info data]}]
+                       (when (contains? (set waste-schemas) (:name schema-info))
+                         (assoc {} (:name schema-info) data))))
+               (apply merge)
+               (merge app)
+               (dissoc <> :documents)))
+       (mongo/select :applications
+                     {:documents.schema-info.name {$in waste-schemas}}
+                     {:organization 1 :documents 1})))
 
 (defn- listify
   "Map list to vector. Maps without proper values omitted."
