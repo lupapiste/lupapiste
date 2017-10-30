@@ -564,7 +564,13 @@
         threads       (mapv (fn [org]
                               (threads/submit
                                threadpool
-                               (fetch-reviews-for-organization eraajo-user (now) org permit-types (filter (comp #{(:id org)} :organization) applications) options)))
+                               (try
+                                 (fetch-reviews-for-organization eraajo-user (now) org permit-types (filter (comp #{(:id org)} :organization) applications) options)
+                                 (catch Throwable t
+                                   (logging/log-event :info {:run-by "Automatic review checking"
+                                                             :event  "Failed to check reviews for organization"
+                                                             :organization-id (:id org)
+                                                             :reason (.getMessage t)})))))
                             organizations)]
     (threads/wait-for-threads threads)))
 
