@@ -268,23 +268,23 @@
   (infof "Bulletins for removed verdict %s need to be cleaned up" verdictId)
   (mongo/remove :application-bulletins (str applicationId "_" verdictId)))
 
-(defn process-check-for-verdicts-result [{{old-verdicts :verdicts applicationId :id
-                                           :keys [organization permitType municipality] :as application} :application
-                                          created :created}
-                                         new-verdicts]
+(defn process-check-for-verdicts-result
+  [{{old-verdicts :verdicts applicationId :id :keys [organization permitType municipality] :as application} :application
+    created :created :as command} new-verdicts]
+  "For (non-YMP) organizations with bulletins enabled, update bulletins to match with verdicts retrieved from backing system"
   (when (and (not (permit/ymp-permit-type? (:permitType application)))
              (org/bulletins-enabled? (org/get-organization organization) permitType municipality))
     (let [old-verdict-ids          (map :id (remove :draft old-verdicts))
           new-verdict-ids          (map :id (remove :draft new-verdicts))
           removed-verdict-ids      (clojure.set/difference (set old-verdict-ids) (set new-verdict-ids))]
-      (doseq [vid removed-verdict-ids]
+      (doseq [vid removed-verdict-ids] ; Delete bulletins related to removed verdicts
         (process-delete-verdict applicationId vid))
       (doseq [{vid :id :as verdict} new-verdicts]
         (infof "Upserting the bulletin for verdict %s" vid)
         (upsert-bulletin-by-id (str applicationId "_" vid)
-          (create-bulletin (assoc application :state :verdictGiven
-                                              :verdicts [verdict])
-                           created
-                           {:verdictGivenAt (-> verdict :paatokset first :paivamaarat :anto)
-                            :appealPeriodStartsAt (or (-> verdict :paatokset first :paivamaarat :julkipano) (now))
-                            :appealPeriodEndsAt   (or (-> verdict :paatokset first :paivamaarat :viimeinenValitus) (now))}))))))
+        (create-bulletin (assoc application :state :verdictGiven
+                                            :verdicts [verdict])
+                         created
+                         {:verdictGivenAt (-> verdict :paatokset first :paivamaarat :anto)
+                          :appealPeriodStartsAt (or (-> verdict :paatokset first :paivamaarat :julkipano) (now))
+                          :appealPeriodEndsAt   (or (-> verdict :paatokset first :paivamaarat :viimeinenValitus) (now))}))))))

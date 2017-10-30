@@ -1,8 +1,7 @@
 (ns lupapalvelu.ui.bulletins.bulletin-preamble
   (:require [rum.core :as rum]
             [lupapalvelu.ui.common :as common]
-            [lupapalvelu.ui.bulletins.state :as state]
-            [clojure.string :as str]))
+            [lupapalvelu.ui.bulletins.state :as state]))
 
 (defonce args (atom {}))
 
@@ -29,26 +28,12 @@
 (defn state-title [state]
   (common/loc (str "bulletin.state." state ".title")))
 
-(defn open-oskari-map [{bulletinId :id [x y] :location municipality :municipality}]
-  (let [features "addPoint=0&addArea=0&addLine=0&addCircle=0&addEllipse=0"
-        params   [(str "build=" js/LUPAPISTE.config.build)
-                  (str "id="  bulletinId)
-                  (str "coord=" x  "_" y)
-                  "zoomLevel=12"
-                  (str "lang="  (js/loc.getCurrentLanguage))
-                  (str "municipality="  municipality)
-                  features]
-        url      (str "/oskari/fullmap.html?" (str/join "&" params))]
-    (js/window.open url)))
-
-
 (rum/defc bulletin-preamble < rum/reactive {:init init}
   []
   (let [bulletin (rum/react state/current-bulletin)
-        {:keys [address bulletinState primaryOperation propertyId
+        {:keys [address primaryOperation propertyId
                 bulletinOpDescription
-                municipality stateSeq _applicantIndex]} bulletin
-        current-state-in-stateSeq? ((set stateSeq) bulletinState)]
+                municipality _applicantIndex]} bulletin]
     [:div.application_summary
      [:div.container
       [:div.bulletin-preamble
@@ -86,7 +71,7 @@
         (when bulletin
           [:div.application-map-actions
            [:a.map-search-button
-            {:on-click #(open-oskari-map bulletin)}
+            {:on-click #(common/open-oskari-map bulletin)}
             (common/loc :map.open)]])]
 
        [:div.application_actions.stacked
