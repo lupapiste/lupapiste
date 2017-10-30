@@ -28,3 +28,9 @@
   #(when (and (= "dummy" (:role %)) (not (:enabled %)) (-> % :private :password))
      (format "Dummy user %s has password" (:username %)))
   :role :private :username :enabled)
+
+(mongocheck :companies
+            (fn [{company-id :_id}]
+              (when (pos? (mongo/count :users {:_id company-id}))
+                (format "Same id in users and companies collection: %s" company-id)))
+            :id)
