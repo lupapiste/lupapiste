@@ -51,7 +51,7 @@ Publish bulletin
   Input text with jQuery  input[name="proclamationEndsAt"]  ${MONTH_FROM_NOW}
   Input text with jQuery  textarea[name="proclamationText"]  foobar
   Wait until  Element should be enabled  //button[@data-test-id='publish-bulletin']
-  Click by test id  publish-bulletin
+  Scroll and click test id  publish-bulletin
 
 Create application and publish bulletin
   [Arguments]  ${address}  ${propertyId}

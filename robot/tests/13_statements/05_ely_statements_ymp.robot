@@ -100,6 +100,7 @@ Open statement, has data
 
 Olli asks for reply
   # For other than R, reply is visible
+  Kill dev-box
   Element should be visible by test id  statement-tab-selector-reply-request
   Click by test id  statement-tab-selector-reply-request
   Wait until  Element should be visible  statement-reply-covering-note
