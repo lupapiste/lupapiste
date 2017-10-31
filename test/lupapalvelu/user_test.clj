@@ -159,7 +159,8 @@
     (municipality-name->system-user-email "muu kunta nimi") => "jarjestelmatunnus.muukuntanimi@lupapiste.fi")
 
   (fact "string with scandics"
-    (municipality-name->system-user-email "pääpåkkölä") => "jarjestelmatunnus.paapakkola@lupapiste.fi")
+    (municipality-name->system-user-email "pääpåkkölä") => "jarjestelmatunnus.paapakkola@lupapiste.fi"
+    (municipality-name->system-user-email "pääpakköööölä") => "jarjestelmatunnus.paapakkoooola@lupapiste.fi")
 
   (fact "string with invalid chars"
     (municipality-name->system-user-email "a0b+c*") => "jarjestelmatunnus.a_b_c_@lupapiste.fi"))

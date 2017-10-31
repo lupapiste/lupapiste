@@ -695,8 +695,8 @@
   (format "jarjestelmatunnus.%s@lupapiste.fi"
           (-> (ss/lower-case name)
               (ss/replace #"\s" "")
-              (ss/replace #"[\u00e4]+" "a")
-              (ss/replace #"[\u00f6]+" "o")
+              (ss/replace #"[\u00e4\u00e5]" "a")
+              (ss/replace #"[\u00f6]" "o")
               (ss/replace system-user-sanization-regexp "_"))))
 
 (defn create-system-user [name email organization-ids]
