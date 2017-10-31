@@ -29,8 +29,8 @@
    :notified   true
    :description "Creates foreman application based on current application. Foreman email can be nil."}
   [{:keys [created user application] :as command}]
-  (when (company/company-auth-missing application (user/get-user-by-email foremanEmail))
-    (fail! :invite.company-missing))
+  (when (company/company-denies-invitations? application (user/get-user-by-email foremanEmail))
+    (fail! :invite.company-denies-invitation))
   (let [foreman-user   (when (v/valid-email? foremanEmail)
                          (user/get-or-create-user-by-email foremanEmail user))
         foreman-app    (-> (foreman/new-foreman-application command)

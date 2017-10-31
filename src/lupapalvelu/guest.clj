@@ -108,8 +108,8 @@
     application                  :application
     :as                          command}]
   (let [email (ss/canonize-email email)]
-    (if (company/company-auth-missing application (usr/get-user-by-email email))
-      (fail :invite.company-missing)
+    (if (company/company-denies-invitations? application (usr/get-user-by-email email))
+      (fail :invite.company-denies-invitation)
       (if (or (util/find-by-key :email email (domain/invites application))
               (auth/has-auth? application (:id (usr/get-user-by-email email))))
         (fail :error.already-has-access)

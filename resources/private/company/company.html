@@ -146,11 +146,15 @@
 
             <br/>
 
-            <h2 data-bind="ltext: 'register.company.form.billing'"></h2>
+            <h2 data-bind="ltext: 'register.company.invitation.denied.title'"></h2>
 
             <div>
-              <input class="form-input checkbox" type="checkbox" id="invitationDeniedSelect" data-bind="checked: model().invitationDenied, enable: edit">
-              <label for="invitationDeniedSelect" data-bind="ltext: 'newRequest.authorizeApplicants'" class="form-label-checkbox"/>
+              <input class="form-input checkbox"
+                     type="checkbox"
+                     id="invitationDeniedSelect"
+                     data-bind="checked: model().invitationDenied, enable: edit"
+                     data-test-id="checkbox-invitations-denied">
+              <label for="invitationDeniedSelect" data-bind="ltext: 'register.company.invitation.denied.label'" class="form-label-checkbox"/>
             </div>
 
             <br/>
