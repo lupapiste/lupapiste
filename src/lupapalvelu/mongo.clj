@@ -446,6 +446,8 @@
   (ensure-index :applications {:applicant 1})                                 ;; For application search
   (ensure-index :applications {:state 1})                                     ;; For application search
   (ensure-index :applications {:authority.lastName 1 :authority.firstName 1}) ;; For application search
+  (ensure-index :applications {:location-wgs84 "2dsphere"})
+  (ensure-index :applications {:drawings.geometry-wgs84 "2dsphere"})
   (ensure-index :activation {:email 1})
   (ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 60 2)}) ; 2 h
   (ensure-index :vetuma {:user.stamp 1})

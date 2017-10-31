@@ -2670,7 +2670,9 @@
                          {$set {:archived.completed (System/currentTimeMillis)}}))
 
 (defn- add-wgs84-coordinates [drawing]
-  (assoc drawing :geometry-wgs84 (draw/wgs84-geometry drawing)))
+  (if-let [geom (draw/wgs84-geometry drawing)]
+    (assoc drawing :geometry-wgs84 geom)
+    (dissoc drawing :geometry-wgs84)))
 
 (defmigration add-wgs84-coordinates-for-drawings
   {:apply-when (pos? (mongo/count :applications
@@ -3530,6 +3532,11 @@
                        {:scope {$elemMatch {:municipality % :permitType "R"}} :krysp.R {$exists true}}
                        {$set {:krysp.R.backend-system (backend-systems-r %)}})
         (keys backend-systems-r)))
+
+(defmigration recalculate-wgs84-coordinates-for-drawings
+  (update-applications-array :drawings
+                             add-wgs84-coordinates
+                             {:drawings.geometry {$exists true, $ne ""}}))
 
 ;;
 ;; ****** NOTE! ******
