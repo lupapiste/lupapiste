@@ -695,15 +695,15 @@
   (format "jarjestelmatunnus.%s@lupapiste.fi"
           (-> (ss/lower-case name)
               (ss/replace #"\s" "")
-              (ss/replace #"[äå]+" "a")
-              (ss/replace #"[ö]+" "o")
+              (ss/replace #"[\u00e4]+" "a")
+              (ss/replace #"[\u00f6]+" "o")
               (ss/replace system-user-sanization-regexp "_"))))
 
 (defn create-system-user [name email organization-ids]
   (->> {:id (mongo/create-id)
         :username email
         :email email
-        :firstName  "Järjestelmätunnus"
+        :firstName  "J\u00e4rjestelm\u00e4tunnus"
         :lastName  name
         :role  :authority
         :enabled true
