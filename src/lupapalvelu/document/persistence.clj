@@ -340,6 +340,13 @@
                                       (company/find-company-users company-id))))
                  :zip)))
 
+(defn company-address-type [schema path-arr]
+  (let [path-document-model (model/find-by-name (:body schema) [(first path-arr)])
+        address-model (if (> (count path-arr) 1)
+                        (model/find-by-name (:body (model/find-by-name (:body path-document-model) [(last path-arr)])) [:osoite])
+                        (model/find-by-name (:body path-document-model) [:osoite]))]
+    (:address-type address-model)))
+
 (defn do-set-company-to-document [application document company-id path user timestamp]
   {:pre [document]}
   (when-not (ss/blank? company-id)
@@ -347,7 +354,8 @@
           schema (schemas/get-schema (:schema-info document))
           company (tools/unwrapped (model/->yritys (company-fields application
                                                                    company-id user)
-                                                   :with-empty-defaults? true))
+                                                   :with-empty-defaults? true
+                                                   :contact-address? (= :contact (company-address-type schema path-arr))))
           model (if (seq path-arr)
                   (assoc-in {} (map keyword path-arr) company)
                   company)

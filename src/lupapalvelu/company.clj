@@ -41,25 +41,29 @@
   (let [account-type (some #(if (= (:name %) account-name) %) account-types)]
     (:limit account-type)))
 
-(def Company {(sc/optional-key :id)          sc/Str
-              :name                          (ssc/min-max-length-string 1 64)
-              :y                             ssc/FinnishY
-              :accountType                   (apply sc/enum "custom" (map (comp name :name) account-types))
-              :customAccountLimit            (sc/maybe sc/Int)
-              (sc/optional-key :reference)   (sc/maybe (ssc/max-length-string 64))
-              :address1                      (sc/maybe (ssc/max-length-string 64))
-              :po                            (sc/maybe (ssc/max-length-string 64))
-              :zip                           (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
-              (sc/optional-key :country)     (sc/maybe (ssc/max-length-string 64))
-              (sc/optional-key :ovt)         (sc/if ss/blank? ssc/BlankStr ssc/FinnishOVTid)
-              (sc/optional-key :netbill)     (sc/maybe sc/Str)
-              (sc/optional-key :pop)         (sc/maybe (apply sc/enum "" (map :name schema/e-invoice-operators)))
-              (sc/optional-key :document)    sc/Str
-              (sc/optional-key :process-id)  sc/Str
-              (sc/optional-key :created)     ssc/Timestamp
-              (sc/optional-key :campaign)    sc/Str
-              (sc/optional-key :locked)      ssc/Timestamp
-              (sc/optional-key :tags)        [{:id ssc/ObjectIdStr :label sc/Str}]})
+(def Company {(sc/optional-key :id)                sc/Str
+              :name                                (ssc/min-max-length-string 1 64)
+              :y                                   ssc/FinnishY
+              :accountType                         (apply sc/enum "custom" (map (comp name :name) account-types))
+              :customAccountLimit                  (sc/maybe sc/Int)
+              (sc/optional-key :reference)         (sc/maybe (ssc/max-length-string 64))
+              :address1                            (sc/maybe (ssc/max-length-string 64))
+              :po                                  (sc/maybe (ssc/max-length-string 64))
+              :zip                                 (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
+              (sc/optional-key :country)           (sc/maybe (ssc/max-length-string 64))
+              (sc/optional-key :ovt)               (sc/if ss/blank? ssc/BlankStr ssc/FinnishOVTid)
+              (sc/optional-key :netbill)           (sc/maybe sc/Str)
+              (sc/optional-key :pop)               (sc/maybe (apply sc/enum "" (map :name schema/e-invoice-operators)))
+              (sc/optional-key :document)          sc/Str
+              (sc/optional-key :process-id)        sc/Str
+              (sc/optional-key :created)           ssc/Timestamp
+              (sc/optional-key :campaign)          sc/Str
+              (sc/optional-key :locked)            ssc/Timestamp
+              (sc/optional-key :tags)              [{:id ssc/ObjectIdStr :label sc/Str}]
+              (sc/optional-key :contactAddress)    (sc/maybe (ssc/max-length-string 64))
+              (sc/optional-key :contactPo)         (sc/maybe (ssc/max-length-string 64))
+              (sc/optional-key :contactZip)        (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
+              (sc/optional-key :contactCountry)    (sc/maybe (ssc/max-length-string 64))})
 
 (def company-skeleton ; required keys
   {:name nil
