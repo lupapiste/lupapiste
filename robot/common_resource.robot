@@ -886,7 +886,7 @@ Open attachment details
   Open tab  attachments
   ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}'] a[data-test-id=open-attachment]:visible
   Wait until  Element should be visible  jquery=${selector}
-  Scroll and click  ${selector}:eq(${nth})
+  Scroll and click link  ${selector}:eq(${nth})
   Wait Until  Element Should Be Visible  jquery=section[id=attachment] a[data-test-id=back-to-application-from-attachment]
 
 Click not needed
@@ -1546,6 +1546,13 @@ Scroll and click
   [Arguments]  ${selector}
   Scroll to  ${selector}
   Click Element  jquery=${selector}
+
+Scroll and click link
+  [Arguments]  ${selector}
+  Scroll to  ${selector}
+  # Just in case
+  Scroll by  40
+  Click Link  jquery=${selector}
 
 Scroll and click input
   [Arguments]  ${selector}

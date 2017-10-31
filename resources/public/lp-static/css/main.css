@@ -6412,6 +6412,10 @@ a.link-btn-inverse:disabled, a.link-btn-inverse.disabled, a.link-btn-inverse.wai
   text-decoration: underline;
 }
 
+.link-btn--link:hover label, .link-btn--link:active label {
+  cursor: pointer;
+}
+
 a.link-btn-julkipano {
   color: #0fa8f7;
   background-color: none;
@@ -23940,14 +23944,14 @@ div.foreman-history-container {
 .attachment-info .col1 {
   display: inline-block;
   padding-right: 12px;
-  width: 49%;
+  width: 60%;
   vertical-align: top;
 }
 
 .attachment-info .col2 {
   display: inline-block;
   padding-left: 12px;
-  width: 49%;
+  width: 40%;
   vertical-align: top;
   float: right;
 }

@@ -436,9 +436,12 @@ a.link-btn-inverse {
 
 .link-btn--link {
   &:hover, &:active {
-             span {
-               text-decoration: underline;
-             }
+    span {
+      text-decoration: underline;
+    }
+    label {
+      cursor: pointer;
+    }
   }
 }
 

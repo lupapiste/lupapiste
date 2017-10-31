@@ -91,8 +91,7 @@
         <div class="attachment-file-versions">
           <div>
             <attachment-upload params="id: id, ltext: 'attachment.addVersion', upload: $component.upload"
-                               data-bind="visible: $data.uploadingAllowed()"></attachment-upload>
-
+                               data-bind="visible: !$data.readOnly()"></attachment-upload>
             <button data-test-id="add-ram-attachment"
                     class="positive"
                     data-bind="click: $data.newRamAttachment,

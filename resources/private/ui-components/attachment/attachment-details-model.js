@@ -13,11 +13,19 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.allowedAttachmentTypes = self.application.allowedAttachmentTypes;
 
   var authModel = self.attachment().authModel; // No need to be computed since does not change for attachment
+
+  self.readOnly = self.disposedComputed( function() {
+    return !authModel.ok("bind-attachment");
+  });
+
   self.upload = new LUPAPISTE.UploadModel(self,
                                           {allowMultiple:false,
                                            dropZone: "section#attachment",
-                                           readOnly: !authModel.ok( "bind-attachment")});
+                                           readOnly: self.readOnly
+                                          });
   self.upload.init();
+
+
 
   var service = lupapisteApp.services.attachmentsService;
 
@@ -151,8 +159,6 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   // Versions - add
   self.addEventListener("attachment-upload", { eventType: "finished", attachmentId: self.id }, util.showSavedIndicator);
-
-  self.uploadingAllowed = function() { return authModel.ok("bind-attachment"); };
 
   // Versions - delete
   self.deleteVersion = function(fileModel) {

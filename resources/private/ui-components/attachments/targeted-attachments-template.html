@@ -42,6 +42,6 @@
 
     <attachment-upload params="ltext: 'attachment.add-multiple',
                                upload: upload"
-                       data-bind="visible: canAdd"></attachment-upload>
+                       data-bind="visible: !upload.readOnly()"></attachment-upload>
   </div>
 </script>

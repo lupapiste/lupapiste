@@ -12,14 +12,18 @@ LUPAPISTE.TargetedAttachmentsModel = function( params ) {
 
   self.defaults = params.defaults;
   self.typeGroups = params.typeGroups;
-  self.canAdd = _.isUndefined( params.canAdd ) || params.canAdd;
+  var canAdd = _.isUndefined( params.canAdd ) || params.canAdd;
 
   var service = lupapisteApp.services.attachmentsService;
+
+  var readOnly = self.disposedComputed( function() {
+    return !(canAdd && service.authModel.ok( "bind-attachment"));
+  });
 
   self.upload = new LUPAPISTE.UploadModel(self,
                                           {allowMultiple:true,
                                            dropZone: "section#" + params.dropZoneSectionId,
-                                           readOnly: !(self.canAdd && service.authModel.ok( "bind-attachment"))});
+                                           readOnly: readOnly});
 
   function dataView( target ) {
     return ko.mapping.toJS( _.pick( ko.unwrap( target ), ["id", "type"]));

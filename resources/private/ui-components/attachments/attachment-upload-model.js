@@ -36,7 +36,7 @@ LUPAPISTE.AttachmentUploadModel = function( params ) {
     self.upload = new LUPAPISTE.UploadModel( self,
                                              {allowMultiple: false,
                                               readOnly: self.disposedPureComputed(function() {
-                                              return !service.authModel.ok( "bind-attachment");
+                                                return !service.authModel.ok( "bind-attachment");
                                                }),
                                               badFileHandler: _.noop} );
     self.upload.init();
