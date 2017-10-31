@@ -110,6 +110,25 @@
                                  :url sc/Str
                                  (sc/optional-key :notification-email) sc/Str}})
 
+(def permit-types (map keyword (keys (permit/permit-types))))
+
+(def backend-systems #{:facta :kuntanet :louhi :locus :keywinkki :iris :matti})
+
+(sc/defschema KryspConf
+  {(sc/optional-key :ftpUser) (sc/maybe sc/Str)
+   (sc/optional-key :url) sc/Str
+   (sc/optional-key :username) sc/Str
+   (sc/optional-key :password) sc/Str
+   (sc/optional-key :crypto-iv) sc/Str
+   (sc/optional-key :version) sc/Str
+   (sc/optional-key :fetch-chunk-size) sc/Int
+   (sc/optional-key :backend-system) (apply sc/enum backend-systems)})
+
+(sc/defschema KryspOsoitteetConf
+  (-> KryspConf
+      (dissoc (sc/optional-key :ftpUser))
+      (assoc  (sc/optional-key :defaultSRS) (sc/maybe sc/Str))))
+
 (sc/defschema Organization
   {:id OrgId
    :name i18n/LocalizationStringMap
@@ -129,7 +148,8 @@
    (sc/optional-key :kopiolaitos-orderer-address) (sc/maybe sc/Str)
    (sc/optional-key :kopiolaitos-orderer-email) (sc/maybe sc/Str)
    (sc/optional-key :kopiolaitos-orderer-phone) (sc/maybe sc/Str)
-   (sc/optional-key :krysp) sc/Any
+   (sc/optional-key :krysp) {(apply sc/enum permit-types) KryspConf
+                             (sc/optional-key :osoitteet) KryspOsoitteetConf}
    (sc/optional-key :links) [Link]
    (sc/optional-key :map-layers) sc/Any
    (sc/optional-key :notifications) {(sc/optional-key :inforequest-notification-emails) [ssc/Email]

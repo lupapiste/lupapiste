@@ -160,6 +160,27 @@
             </div>
           </div>
 
+          <h2>Taustajärjestelmä</h2>
+          <table data-test-id="organization-backend-system-table">
+            <thead>
+              <tr>
+                <th data-bind="ltext: 'application.type'"></th>
+                <th data-bind="ltext: 'admin.organization.backend-system'"></th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: backendSystems">
+              <tr>
+                <td data-bind="text: $data.permitType"></td>
+                <td><select data-bind="options: $parent.availableBackendSystems,
+                                       optionsText: $parent.availableBackendSystemsOptionsText,
+                                       optionsCaption: '-',
+                                       value: $data.backendSystem,
+                                       valueAllowUnset: true" class="form-input"></td>
+              </tr>
+            </tbody>
+          </table>
+          <button data-bind="ltext: 'save',
+                             click: updateBackendSystems" class="btn positive"></button>
 
           <div>
             <h2>Valitse organisaatiolle luotetut autologin IP-osoitteet</h2>

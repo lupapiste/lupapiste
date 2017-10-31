@@ -13,6 +13,8 @@
     self.pending = ko.observable();
     self.earliestArchivingDate = ko.observable();
     self.mattiEnabled = ko.observable(false);
+    self.backendSystems = ko.observableArray();
+    self.availableBackendSystems = ko.observableArray();
 
     self.permitTypes = ko.observableArray([]);
     self.municipalities = ko.observableArray([]);
@@ -150,6 +152,7 @@
           self.calendarsEnabled(result.data["calendars-enabled"]);
           self.threeDMapEnabled( _.get(result, "data.3d-map.enabled"));
           self.threeDMapServerParams.server(_.get( result, "data.3d-map.server"));
+          self.backendSystems(_.map(util.getIn(result, ["data", "krysp"]), function(v,k) { return {permitType: k, backendSystem: v["backend-system"]}; }));
 
           var archiveTs= result.data["earliest-allowed-archiving-date"];
           if (archiveTs && archiveTs > 0) {
@@ -167,7 +170,16 @@
         })
         .call();
 
+      ajax
+        .query("available-backend-systems")
+        .success(function(d) { self.availableBackendSystems(d["backend-systems"]); })
+        .call();
+
       return false;
+    };
+
+    self.availableBackendSystemsOptionsText = function(value) {
+      return loc(["backend-system", value || "unknown"]);
     };
 
     self.convertOpenInforequests = function() {
@@ -215,6 +227,16 @@
             self.organization().name[l](n);
           });
         })
+        .call();
+    };
+
+    self.updateBackendSystems = function() {
+      var backendSystems = _.zipObject(_.map(self.backendSystems(), "permitType"),
+                                       _.map(self.backendSystems(), function(d) {
+                                         return d.backendSystem || "unknown";
+                                       }));
+      ajax.command("update-organization-backend-systems", {"org-id": self.organization().id(),
+                                                           "backend-systems": backendSystems })
         .call();
     };
 
