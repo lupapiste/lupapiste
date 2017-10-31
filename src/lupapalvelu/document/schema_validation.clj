@@ -336,7 +336,7 @@
    (opt :pdf-options)           {;; Select name that contains :muu option
                                  ;; The group must have :muu string field as well.
                                  (opt :other-select) sc/Keyword}
-   (opt :address-type)           sc/Keyword})
+   (opt :address-type)           (sc/enum :contact)})
 
 (defschema Element
   "Any doc element."
