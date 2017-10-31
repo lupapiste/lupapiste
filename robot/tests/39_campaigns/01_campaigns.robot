@@ -103,7 +103,7 @@ Campaign info shown on the registration page
 
 Bob selects account type and fills company info
   Click by test id  account-type-account15
-  Click by test id  register-company-continue
+  Scroll and click test id  register-company-continue
   Input text by test id  register-company-name        Bob Construction
   Input text by test id  register-company-y           6000315-8
   Input text by test id  register-company-firstName   Bob
@@ -113,7 +113,7 @@ Bob selects account type and fills company info
   Input text by test id  register-company-po          City
   Input text by test id  register-company-email       bob@bobconstruction.com
   Input text by test id  register-company-personId    151196-979W
-  Click by test id  register-company-continue
+  Scroll and click test id  register-company-continue
 
 Bob signs the contract
   Toggle toggle  register-company-agree
