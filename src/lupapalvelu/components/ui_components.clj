@@ -99,7 +99,8 @@
                                                {:logoutUrl (str (env/value :host) "/Shibboleth.sso/Logout")})
                                              (when (env/feature? :dummy-ident)
                                                {:logoutUrl (str (env/value :host) "/dev/saml-logout")})]))
-                 :convertableTypes      (conj conversion/libre-conversion-file-types :image/jpeg)}]
+                 :convertableTypes      (conj conversion/libre-conversion-file-types :image/jpeg)
+                 :footerLinkPrefix      (env/value :host)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
