@@ -197,6 +197,63 @@
 
   var restApiUsers = new RestApiUsers();
 
+  function SystemUsers() {
+    var self = this;
+
+    self.municipalityName = ko.observable("");
+    self.organizationIds = ko.observable();
+    self.phase = ko.observable(0);
+    self.userDetailsOk = ko.computed(function() {
+        var municipalityNameOk = !_.isEmpty(self.municipalityName());
+        var organizationIdsOk = self.organizationIds();
+        return organizationIdsOk && municipalityNameOk;
+    });
+
+    self.searching = ko.observable();
+    self.userAdded = ko.observable();
+
+    self.createdUserUsername = ko.observable();
+
+    self.clean = function() {
+      return self
+        .phase(1)
+        .organizationIds("")
+        .municipalityName("")
+        .searching(false)
+        .userAdded(false)
+        .createdUserUsername("");
+    };
+
+    self.dialog = function() {
+      if (!self._dialog) {
+        self._dialog = new LUPAPISTE.Modal("ModalDialogMask", "black");
+        self._dialog.createMask();
+      }
+      return self._dialog;
+    };
+
+    self.addSystemUser = function() {
+      self.clean().dialog().open("#add-system-user-to-organization-dialog");
+    };
+
+    self.next = function() {
+      self.searching(true).phase(2);
+      ajax
+        .command("create-system-user",
+                 {"municipality-name": self.municipalityName(),
+                  "organization-ids": _.split(self.organizationIds(), /[\s,;]+/)})
+        .pending(self.searching)
+        .success(function(r) {
+          self.createdUserUsername(r.username);
+          self.userAdded(true);
+          usersList.redraw();
+        })
+        .call();
+    };
+  }
+
+  var systemUsers = new SystemUsers();
+
   function FinancialHandlerUser() {
     var self = this;
 
@@ -269,6 +326,7 @@
     $("#users").applyBindings({
       authorityAdminUsers: authorityAdminUsers,
       restApiUsers: restApiUsers,
+      systemUsers: systemUsers,
       financialHandlerUser: financialHandlerUser
     });
   });

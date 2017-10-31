@@ -145,6 +145,19 @@
       (ok :user (usr/create-rest-user user-data))
       (fail :email-in-use))))
 
+(defcommand create-system-user
+  {:description "Creates system user for embedded Lupapiste view in Facta. Admin only."
+   :parameters [municipality-name organization-ids]
+   :input-validators [(partial action/string-parameters [:municipality-name])
+                      (partial action/email-validator)
+                      (partial action/vector-parameter-of :organization-ids string?)]
+   :user-roles #{:admin}}
+  [_]
+  (let [email (usr/municipality-name->system-user-email municipality-name)]
+    (if-not (usr/get-user-by-email email)
+      (ok (usr/create-system-user municipality-name email organization-ids))
+      (fail :email-in-use))))
+
 ;;
 ;; ==============================================================================
 ;; Updating user data:
