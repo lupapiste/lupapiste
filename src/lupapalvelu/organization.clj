@@ -122,7 +122,7 @@
    (sc/optional-key :crypto-iv) sc/Str
    (sc/optional-key :version) sc/Str
    (sc/optional-key :fetch-chunk-size) sc/Int
-   (sc/optional-key :backend-system) (apply sc/enum backend-systems)})
+   (sc/optional-key :backend-system) (apply sc/enum (map name backend-systems))})
 
 (sc/defschema KryspOsoitteetConf
   (-> KryspConf
