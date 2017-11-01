@@ -30,7 +30,8 @@
                 <input type="text" class="form-input" data-bind="textInput: $root.application.bulletinOpDescription" id="bulletin-op-description"
                  data-test-id="bulletin-op-description-summaryTab" />
                 <span class="save-indicator" data-bind="saveIndicator: opDescriptionIndicator, label: false"></span>
-                <label style="color: red;" data-bind="visible: _.isEmpty($root.application.bulletinOpDescription()), ltext: 'error.required'" />              </div>
+                <label style="color: red;" data-bind="visible: _.isEmpty($root.application.bulletinOpDescription()), ltext: 'error.required'" />
+              </div>
             </div>
           </div>
           <!-- /ko -->
@@ -85,7 +86,7 @@
             </div>
           </div>
 
-          <!-- ko if: $root.authorization.ok('approve-application') -->
+          <!-- ko if: $root.authorization.ok('approve-application') || $root.authorization.ok('bulletin-will-be-published-for-verdict') -->
           <div data-bind="visible: !_.isEmpty(nonApprovedDesigners())" class="clear" data-test-id="non-approved-designers-list">
             <h2 data-bind="ltext: 'application.designers-not-approved'" class="missing-info-title"></h2>
             <div class="info-line">
