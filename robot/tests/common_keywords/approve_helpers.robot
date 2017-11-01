@@ -5,8 +5,10 @@ Approve application
   Wait Until  Page should contain  Suunnittelijoiden tietoja hyväksymättä
   Wait Until  Element Should Contain  jquery=div[data-test-id="non-approved-designers-list"] li:first  Pääsuunnittelija
   Wait Until  Element Should Contain  jquery=div[data-test-id="non-approved-designers-list"] li:last   Suunnittelija
-  Fill test id  bulletin-op-description-summaryTab  Toimenpideotsikko julkipanoon
-  Wait Until  Element should be visible  xpath=//button[@data-test-id="approve-application-summaryTab"]
+  Wait until  Element should be visible  //div[@id='application-requiredFieldSummary-tab']
+  ${BULLETIN_DESCR_VISIBLE}=  Run Keyword And Return Status  Test id visible  bulletin-op-description-summaryTab
+  Run Keyword If  ${BULLETIN_DESCR_VISIBLE}  Fill test id  bulletin-op-description-summaryTab  Toimenpideotsikko julkipanoon
+  Wait test id visible  approve-application-summaryTab
   Click enabled by test id  approve-application-summaryTab
   # Confirm warning about designers
   Wait until  Application state should be  sent

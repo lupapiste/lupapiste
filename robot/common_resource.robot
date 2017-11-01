@@ -1068,6 +1068,10 @@ Submit application error should be
 
 Approve application no dialogs
   Open tab  requiredFieldSummary
+  Wait until  Element should be visible  //div[@id='application-requiredFieldSummary-tab']
+  ${BULLETIN_DESCR_VISIBLE}=  Run Keyword And Return Status  Test id visible  bulletin-op-description-summaryTab
+  Run Keyword If  ${BULLETIN_DESCR_VISIBLE}  Fill test id  bulletin-op-description-summaryTab  Toimenpideotsikko julkipanoon
+  Wait test id visible  approve-application-summaryTab
   Click enabled by test id  approve-application-summaryTab
   Wait until  Application state should be  sent
 
