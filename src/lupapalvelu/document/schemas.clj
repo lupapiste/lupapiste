@@ -348,7 +348,7 @@
     yhteyshenkilo-without-kytkimet))
 
 (def e-invoice-operators [{:name "BAWCFI22"} ; Basware Oyj
-                          {:name "003714377140"} ; Enfo Zender Oy
+                          {:name "003714377140"} ; Ropo Capital Oy
                           {:name "003708599126"} ; Liaison Technologies Oy
                           {:name "HELSFIHH"} ; Aktia S\u00e4\u00e4st\u00f6pankki Oyj
                           {:name "POPFFI22"} ; Paikallisosuuspankit
