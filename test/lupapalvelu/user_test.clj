@@ -159,8 +159,8 @@
     (municipality-name->system-user-email "muu kunta nimi") => "jarjestelmatunnus.muukuntanimi@lupapiste.fi")
 
   (fact "string with scandics"
-    (municipality-name->system-user-email "pääpåkkölä") => "jarjestelmatunnus.paapakkola@lupapiste.fi"
-    (municipality-name->system-user-email "pääpakköööölä") => "jarjestelmatunnus.paapakkoooola@lupapiste.fi")
+    (municipality-name->system-user-email "p\u00e4\u00e4p\u00e5kk\u00f6l\u00e4") => "jarjestelmatunnus.paapakkola@lupapiste.fi"
+    (municipality-name->system-user-email "p\u00e4\u00e4pakk\u00f6\u00f6\u00f6\u00f6l\u00e4") => "jarjestelmatunnus.paapakkoooola@lupapiste.fi")
 
   (fact "string with invalid chars"
     (municipality-name->system-user-email "a0b+c*") => "jarjestelmatunnus.a_b_c_@lupapiste.fi"))
@@ -172,7 +172,7 @@
     (provided (mongo/insert :users {:id ..id..
                                     :username "tunnus@email.org"
                                     :email "tunnus@email.org"
-                                    :firstName "Järjestelmätunnus"
+                                    :firstName "J\u00e4rjestelm\u00e4tunnus"
                                     :lastName "Kunta"
                                     :role :authority
                                     :enabled true
@@ -185,7 +185,7 @@
     (provided (mongo/insert :users {:id ..id..
                                     :username "tunnus@email.org"
                                     :email "tunnus@email.org"
-                                    :firstName "Järjestelmätunnus"
+                                    :firstName "J\u00e4rjestelm\u00e4tunnus"
                                     :lastName "Kunta"
                                     :role :authority
                                     :enabled true

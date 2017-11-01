@@ -22,6 +22,18 @@
           <div class="clear spacerM"></div>
           <!-- /ko -->
 
+          <!-- ko if: $root.authorization.ok('bulletin-will-be-published-for-verdict') -->
+          <div class="form-grid form-grid--no-border">
+            <div class="row">
+              <div class="col-2">
+                <label for="bulletin-op-description" data-bind="ltext: 'application.bulletinOpDescription.backendVerdicts'" />
+                <input type="text" class="form-input" data-bind="textInput: $root.application.bulletinOpDescription" id="bulletin-op-description" />
+                <span class="save-indicator" data-bind="saveIndicator: opDescriptionIndicator, label: false"></span>
+                <label style="color: red;" data-bind="visible: _.isEmpty($root.application.bulletinOpDescription()), ltext: 'error.required'" />              </div>
+            </div>
+          </div>
+          <!-- /ko -->
+
           <div class="auth-actions stacked inner-margins">
               <button data-bind="click: approveApplication,
                                  visible: $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),

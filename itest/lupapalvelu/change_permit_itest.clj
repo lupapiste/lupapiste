@@ -35,6 +35,7 @@
 
     (generate-documents application apikey)
 
+    (command apikey :update-app-bulletin-op-description :id application-id :description "otsikko julkipanoon") => ok?
     (command apikey :approve-application :id application-id :lang "fi") => ok?
 
     (fact "can not be created based on current R application before verdict has been given"

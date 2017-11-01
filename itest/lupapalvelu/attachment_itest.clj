@@ -949,6 +949,7 @@
                           :fileId (:fileId (first valaistus-versions))
                           :originalFileId (:originalFileId (last valaistus-versions))))))
 
+    (command sonja :update-app-bulletin-op-description :id application-id :description "otsikko julkipanoon") => ok?
     (command sonja :approve-application :id application-id :lang "fi") => ok?
     (fact "state is now sent" (:state (query-application pena application-id)) => "sent")
 

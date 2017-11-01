@@ -159,6 +159,7 @@
                        (comment-application apikey foreman-application-id) => ok?)
 
                  (fact "After approving actual application, foreman can be approved. No need for verdict"
+                       (command sonja :update-app-bulletin-op-description :id application-id :description "otsikko julkipanoon") => ok?
                        (command sonja :approve-application :id application-id :lang "fi") => ok?
                        (command sonja :approve-application :id foreman-application-id :lang "fi") => ok?)
 

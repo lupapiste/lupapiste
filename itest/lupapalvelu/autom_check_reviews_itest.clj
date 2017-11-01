@@ -65,8 +65,10 @@
             application-verdict-given-1    (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 18")
             application-id-verdict-given-1 (:id application-verdict-given-1)
             application-verdict-given-2    (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 19")
-            application-id-verdict-given-2 (:id application-verdict-given-2)
-            ]
+            application-id-verdict-given-2 (:id application-verdict-given-2)]
+
+        (local-command sonja :update-app-bulletin-op-description :id application-id-verdict-given-1 :description "otsikko julkipanoon") => ok?
+        (local-command sonja :update-app-bulletin-op-description :id application-id-verdict-given-2 :description "otsikko julkipanoon") => ok?
 
         (facts "Initial state of reviews before krysp reading is sane"
           (local-command sonja :approve-application :id application-id-verdict-given-1 :lang "fi") => ok?
@@ -170,6 +172,8 @@
             application-verdict-given-2    (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 19")
             application-id-verdict-given-2 (:id application-verdict-given-2)]
 
+        (local-command sonja :update-app-bulletin-op-description :id application-id-verdict-given-1 :description "otsikko julkipanoon") => ok?
+        (local-command sonja :update-app-bulletin-op-description :id application-id-verdict-given-2 :description "otsikko julkipanoon") => ok?
         (local-command sonja :approve-application :id application-id-verdict-given-1 :lang "fi") => ok?
         (local-command sonja :approve-application :id application-id-verdict-given-2 :lang "fi") => ok?
         (count  (:tasks (query-application local-query sonja application-id-verdict-given-1))) => 0
@@ -216,6 +220,9 @@
             application-id-construction  (:id (create-and-submit-local-application pena :propertyId sipoo-property-id :address "construction-started 19"))
             application-id-tj            (:id (create-and-submit-local-application pena :propertyId sipoo-property-id :address "foreman 20" :operation "tyonjohtajan-nimeaminen-v2"))
             application-id-suunnittelija (:id (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "suunnittelija 21" :operation "suunnittelijan-nimeaminen"))]
+
+        (doseq [id [application-id-verdict-given application-id-construction]]
+          (local-command sonja :update-app-bulletin-op-description :id id :description "otsikko julkipanoon") => ok?)
 
 
         (facts "Initial state of applications before krysp reading is sane"
@@ -344,7 +351,7 @@
     (mongo/remove-many :applications {})
     (against-background [(coordinate/convert anything anything anything anything) => nil]
       (let [application-id (:id (create-and-submit-local-application pena :propertyId sipoo-property-id :address "submitted 16"))]
-
+        (local-command sonja :update-app-bulletin-op-description :id application-id :description "otsikko julkipanoon") => ok?
         (facts "Initial state of applications before krysp reading is sane"
           (fact "approve app"          (local-command sonja :approve-application :id application-id :lang "fi") => ok?)
           (fact "give verdict for app" (give-local-verdict sonja application-id :verdictId "verdict-vg" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?)

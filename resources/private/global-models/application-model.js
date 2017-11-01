@@ -197,6 +197,9 @@ LUPAPISTE.ApplicationModel = function() {
   self.calendarNotificationIndicator = ko.observable(0);
   self.calendarNotificationsPending = ko.observableArray([]);
 
+  self.bulletinOpDescription = ko.observable().extend({rateLimit: {timeout: 500, method: "notifyWhenChangesStop"}});
+  self.opDescriptionIndicator = ko.observable().extend({notify: "always"});
+
   self.linkPermitData = ko.observable(null);
   self.appsLinkingToUs = ko.observable(null);
   self.pending = ko.observable(false);

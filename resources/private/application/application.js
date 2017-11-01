@@ -125,6 +125,21 @@
     }
   });
 
+
+  ko.computed(function() {
+    var bulletinOpDescription = applicationModel.bulletinOpDescription();
+    if (!isInitializing) {
+      ajax.command("update-app-bulletin-op-description", {id: currentId, description: bulletinOpDescription})
+        .success(function() {
+          applicationModel.reload();
+          applicationModel.opDescriptionIndicator({type: "saved"});
+        })
+      .error(util.showSavedIndicator)
+      .processing(applicationModel.processing)
+      .call();
+    }
+  });
+
   function initAvailableTosFunctions(organizationId) {
     tosFunctions([]);
     if (authorizationModel.ok("available-tos-functions")) {

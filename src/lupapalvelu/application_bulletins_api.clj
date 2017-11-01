@@ -21,7 +21,8 @@
             [schema.core :as sc]
             [monger.collection :as collection]
             [clj-time.coerce :as tc]
-            [clj-time.core :as t]))
+            [clj-time.core :as t]
+            [lupapalvelu.states :as states]))
 
 (def bulletin-page-size 10)
 
@@ -358,10 +359,19 @@
 
 (defquery bulletin-for-application-verdict-enabled
   {:description ""
-   :parameters [id]
-   :user-roles #{:authority}
-   :pre-checks [(permit/validate-permit-type-is-not permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)
-                check-bulletins-enabled]})
+   :parameters  [id]
+   :user-roles  #{:authority}
+   :states      states/post-sent-states
+   :pre-checks  [(permit/validate-permit-type-is-not permit/YI permit/YL permit/YM permit/VVVL permit/MAL)
+                 check-bulletins-enabled]})
+
+(defquery bulletin-will-be-published-for-verdict
+  {:description ""
+   :parameters  [id]
+   :user-roles  #{:authority}
+   :states      states/pre-verdict-states
+   :pre-checks  [(permit/validate-permit-type-is-not permit/YI permit/YL permit/YM permit/VVVL permit/MAL)
+                 check-bulletins-enabled]})
 
 (defcommand update-app-bulletin-op-description
   {:parameters [id description]
