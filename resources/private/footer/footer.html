@@ -28,6 +28,10 @@
       <div class="footer-box">
         <h3 data-bind="ltext: 'footer.contact'"></h3>
         <ul>
+          <!-- ko if: /^\//.exec(loc('footer.current-issues.href')) -->
+          <li><a target="_blank" data-bind="ltext: 'footer.current-issues.text',
+                                            attr: {href: loc('footer.current-issues.href')}"></a></li>
+          <!-- /ko -->
           <li><a data-bind="attr: { href: loc( 'footer.support.request.href' ) },
                             text: loc( 'footer.support.request.text' )"></a>
         <!-- ko if: lupapisteApp.models.currentUser && lupapisteApp.models.currentUser.isApplicant() && !lupapisteApp.models.currentUser.isCompanyUser() -->
