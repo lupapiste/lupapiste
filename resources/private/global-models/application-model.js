@@ -991,7 +991,8 @@ LUPAPISTE.ApplicationModel = function() {
   self.requiredFieldSummaryButtonKey = ko.pureComputed(function() {
     if (self.isArchivingProject()) {
       return "archivingProject.tabRequiredFieldSummary";
-    } else if (lupapisteApp.models.applicationAuthModel.ok("approve-application")) {
+    } else if (lupapisteApp.models.applicationAuthModel.ok("approve-application") ||
+               lupapisteApp.models.applicationAuthModel.ok("update-app-bulletin-op-description")) {
       return "application.tabRequiredFieldSummary.afterSubmitted";
     } else {
       return "application.tabRequiredFieldSummary";
