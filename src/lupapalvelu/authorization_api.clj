@@ -10,7 +10,7 @@
             [lupapalvelu.action :refer [defquery defcommand defraw update-application notify] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.authorization-messages]            ; notification definitions
+            [lupapalvelu.authorization-messages] ; notification definitions
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.domain :as domain]
