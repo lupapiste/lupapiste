@@ -156,7 +156,7 @@
 "osapuoli.suunnittelija.kuntaRoolikoodi.LVI-suunnittelija" "sv" "VVS-projekterare"
 "osapuoli.suunnittelija.kuntaRoolikoodi.RAK-rakennesuunnittelija" "en" "RAK structural engineer"
 "osapuoli.suunnittelija.kuntaRoolikoodi.RAK-rakennesuunnittelija" "fi" "RAK-rakennesuunnittelija"
-"osapuoli.suunnittelija.kuntaRoolikoodi.RAK-rakennesuunnittelija" "sv" "Ansvarig planerare"
+"osapuoli.suunnittelija.kuntaRoolikoodi.RAK-rakennesuunnittelija" "sv" "Konstruktionsplanerare"
 "osapuoli.suunnittelija.kuntaRoolikoodi.Vaikeiden töiden suunnittelija" "en" "Complexity of difficult work"
 "osapuoli.suunnittelija.kuntaRoolikoodi.Vaikeiden töiden suunnittelija" "fi" "Vaikeiden töiden suunnittelija"
 "osapuoli.suunnittelija.kuntaRoolikoodi.Vaikeiden töiden suunnittelija" "sv" "Planerare av svåra arbeten"
