@@ -146,8 +146,8 @@ Rakennesuunnitelma group is changed
 Close additional controls, rakennesuunnitelma section is changed to archived
   Toggle additional controls  archived-post-groups  attachments.general  erityissuunnitelmat.rakennesuunnitelma
 
-Rakennesuunnitelma is not archivable
-  Attachment archivability error icon is visible  archived-post-groups  attachments.general  erityissuunnitelmat.rakennesuunnitelma
+Rakennesuunnitelma is archivable
+  Attachment is archivable  archived-post-groups  attachments.general  erityissuunnitelmat.rakennesuunnitelma
 
 Rakennesuunnitelma personal data is entered
   Attachment personal data is  archived-post-groups  attachments.general  erityissuunnitelmat.rakennesuunnitelma  Ei sisällä henkilötietoja
