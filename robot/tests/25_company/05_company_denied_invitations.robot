@@ -22,7 +22,7 @@ Company admin invites user to company
   Invite existing dummy user  ${dummy}  Duff3  Dummy3
   Check invitation  0  ${dummy}  Dummy3  Duff3  Käyttäjä  Kyllä
 
-Duff3 user accept invite
+User accept invite
   Accept invitation  dummy3@example.com
   Wait Until  Page Should Contain  Tilisi on liitetty onnistuneesti yrityksen tiliin.
   Click link  Siirry Lupapiste-palveluun
@@ -44,11 +44,11 @@ Oragnization admin adds guest authority
   Add existing authority  ${dummy}  Duff3  Dummy3  Talonvahti
   Logout
 
-Sonja creates application
+Creates application
   Sonja logs in
   Create application the fast way  hakemus  753-416-45-1  kerrostalo-rivitalo
 
-Sonja tries invite Dummy to application
+Company user cant be invited to application
   Open tab  parties
   Click by test id  application-invite-person
   Wait until  Element should be visible  person-invite-email-3
@@ -58,15 +58,44 @@ Sonja tries invite Dummy to application
   Page should contain  ${error_message}
   Click by test id  person-invite-bubble-dialog-cancel
 
-Sonja tries invite Dummy as guest
+Company user cant be invited as guest
   Invite application guest authority  Duff3 Dummy3  ${dummy}  Talonvahti  Hello
   Page should contain  ${error_message}
   Click by test id  guest-bubble-dialog-cancel
 
-Sonja tries invite Dummy as foreman
+Company user cant be invited as foreman
   Open foreman accordions
   Wait until  Click by test id  invite-foreman-button
   Sleep  1s
   Wait until  Input Text  invite-foreman-email  ${dummy}
   Click by test id  application-invite-foreman
   Page should contain  ${error_message}
+  Click by test id  cancel-foreman-dialog
+
+Invites company
+  Invite company to application  Solita Oy
+
+Company user can be invited to application
+  Open tab  parties
+  Click by test id  application-invite-person
+  Wait until  Element should be visible  person-invite-email-3
+  Input Text  person-invite-email-3  ${dummy}
+  Element should be enabled  xpath=//*[@data-test-id='person-invite-bubble-dialog-ok']
+  Click by test id  person-invite-bubble-dialog-ok
+  Wait until  Element should not be visible  xpath=//div[@id='modal-dialog-content']
+  Wait until  Invite count is  2
+  Click by test id  remove-auth-dummy3
+  Confirm yes no dialog
+  Wait until  Invite count is  1
+
+Company user can be invited as guest
+  Invite application guest authority  Duff3 Dummy3  ${dummy}  Talonvahti  Hello
+  Guest table contains  Duff3 Dummy3
+
+Company user can be invited as foreman
+  Open foreman accordions
+  Wait until  Click by test id  invite-foreman-button
+  Sleep  1s
+  Wait until  Input Text  invite-foreman-email  ${dummy}
+  Click by test id  application-invite-foreman
+  Wait until  Click by test id  application-invite-foreman-close-dialog
