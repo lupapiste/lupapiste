@@ -73,7 +73,6 @@ LUPAPISTE.ApplicationModel = function() {
   self.metadata = ko.observable();
   self.processMetadata = ko.observable();
   self.kuntalupatunnukset = ko.observable();
-  self.bulletinOpDescription = ko.observable();
 
   // Options
   self.optionMunicipalityHearsNeighbors = ko.observable(false);
@@ -1001,7 +1000,8 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.requiredFieldSummaryButtonClass = ko.pureComputed(function() {
     if (lupapisteApp.models.applicationAuthModel.ok("approve-application") ||
-      _.includes(["draft", "open"], ko.unwrap(self.state))) {
+        lupapisteApp.models.applicationAuthModel.ok("update-app-bulletin-op-description") ||
+        _.includes(["draft", "open"], ko.unwrap(self.state))) {
       return "link-btn-inverse";
     } else {
       return "link-btn";

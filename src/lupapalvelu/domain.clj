@@ -430,6 +430,7 @@
    :reservations             []
    :warrantyStart            nil ; timestamp
    :warrantyEnd              nil
+   :bulletinOpDescription    nil
    :inspection-summaries     []})
 
 (def operation-skeleton

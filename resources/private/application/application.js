@@ -128,7 +128,7 @@
 
   ko.computed(function() {
     var bulletinOpDescription = applicationModel.bulletinOpDescription();
-    if (!isInitializing) {
+    if (!isInitializing && authorizationModel.ok("update-app-bulletin-op-description")) {
       ajax.command("update-app-bulletin-op-description", {id: currentId, description: bulletinOpDescription})
         .success(function() {
           applicationModel.reload();
@@ -226,6 +226,7 @@
       // Plain data
       applicationModel._js = app;
 
+      applicationModel.bulletinOpDescription(""); //tempfix
       initWarrantyDates(app);
 
       // Update observables
@@ -363,6 +364,7 @@
 
           }, []));
       applicationModel.calendarNotificationIndicator(pendingCalendarNotifications.length);
+      applicationModel.opDescriptionIndicator(null);
 
       subscribeWarrantyDates(app, applicationModel);
 

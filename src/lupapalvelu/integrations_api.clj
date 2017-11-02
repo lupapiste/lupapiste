@@ -91,7 +91,8 @@
 (defn- ensure-bulletin-op-description-is-set-if-needed
   [{{organizationId :organization permit-type :permitType municipality :municipality primaryOperation :primaryOperation
      bulletinOpDescription :bulletinOpDescription :as application} :application}]
-  (when (and (org/bulletins-enabled? (org/get-organization organizationId) permit-type municipality)
+  (when (and organizationId
+             (org/bulletins-enabled? (org/get-organization organizationId) permit-type municipality)
              (not (foreman/foreman-app? application))
              (not (= (:name primaryOperation) "suunnittelijan-nimeaminen"))
              (ss/blank? bulletinOpDescription))
