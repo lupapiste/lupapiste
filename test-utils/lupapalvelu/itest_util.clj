@@ -506,8 +506,8 @@
   "Returns the application map"
   [apikey & args]
   (let [id    (apply create-app-id apikey args)
-        _     (command apikey :update-app-bulletin-op-description :id id :description "otsikko julkipanoon")
         _     (command apikey :submit-application :id id)
+        _     (command apikey :update-app-bulletin-op-description :id id :description "otsikko julkipanoon")
         resp  (command apikey :approve-application :id id :lang "fi")]
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
