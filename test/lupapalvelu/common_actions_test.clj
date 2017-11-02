@@ -156,7 +156,7 @@
                           :foreman-history
                           :reduced-foreman-history
                           :add-application-tags
-                          :get-organization-tags
+                          :application-organization-tags
                           :get-organization-areas
                           :preview-attachment
                           :document

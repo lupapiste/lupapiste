@@ -8,14 +8,6 @@ LUPAPISTE.OrganizationTagsService = function() {
     return _data();
   });
 
-  self.currentApplicationOrganizationTags = ko.pureComputed(function() {
-    var currentOrganization = util.getIn(lupapisteApp, ["models", "application", "organization"]);
-    if (currentOrganization && self.data()) {
-      return util.getIn(self.data(), [currentOrganization, "tags"]);
-    }
-    return [];
-  });
-
   function load(){
     if (lupapisteApp.models.globalAuthModel.ok("get-organization-tags")) {
       ajax.query("get-organization-tags")
@@ -36,4 +28,22 @@ LUPAPISTE.OrganizationTagsService = function() {
     load();
   };
 
+  self.currentApplicationOrganizationTags = ko.observableArray();
+
+  hub.subscribe( "contextService::enter",
+               function( event ) {
+                 if( lupapisteApp.models.applicationAuthModel
+                     .ok( "application-organization-tags")) {
+                   ajax.query( "application-organization-tags",
+                               {id: event.applicationId})
+                   .success( function( res ) {
+                     self.currentApplicationOrganizationTags( res.tags || [] );
+                   })
+                   .call();
+                 }
+               });
+  hub.subscribe( "contextService::leave",
+               function() {
+                 self.currentApplicationOrganizationTags( [] );
+               });
 };

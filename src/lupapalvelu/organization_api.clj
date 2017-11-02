@@ -735,8 +735,7 @@
       (fail :warning.tags.removing-from-applications :applications tag-applications))))
 
 (defquery get-organization-tags
-  {:user-authz-roles #{:statementGiver}
-   :user-roles #{:authorityAdmin :authority}}
+  {:user-roles #{:authorityAdmin :authority}}
   [{{:keys [orgAuthz] :as user} :user}]
   (if (seq orgAuthz)
     (let [organization-tags (mongo/select
@@ -746,6 +745,15 @@
           result (map (juxt :id #(select-keys % [:tags :name])) organization-tags)]
       (ok :tags (into {} result)))
     (ok :tags {})))
+
+(defquery application-organization-tags
+  {:description      "Organization tags for the application. For statement
+  givers, only the organization statement givers are authorized."
+   :user-authz-roles #{:statementGiver}
+   :user-roles       #{:authorityAdmin :authority :applicant}
+   :pre-checks       [org/statement-giver-in-organization]}
+  [{organization :organization}]
+  (ok :tags (:tags @organization)))
 
 (defquery get-organization-areas
   {:user-authz-roles #{:statementGiver}

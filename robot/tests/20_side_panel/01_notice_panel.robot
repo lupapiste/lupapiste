@@ -46,6 +46,19 @@ Sonja can set application urgency to urgent
   Close side panel  notice
   Logout
 
+Luukas can see but not edit notice panel
+  Luukas logs in
+  Open application  ${appname}  ${propertyId}
+  Check status  urgent  true
+  Open side panel  notice
+  Test id autocomplete disabled  autocomplete-application-tags-component
+  Wait until  Element should be disabled  application-authority-urgency
+  Check notice  ylämaa  urgent  ${notice}
+  Test id disabled  application-authority-notice
+  Close side panel  notice
+  [Teardown]  Logout
+
+
 Ronja can see urgent application
   Ronja logs in
   Wait until  Element should be visible  //div[contains(@class, 'urgent')]

@@ -710,3 +710,16 @@
                  permit-type  (filter (comp #{permit-type} :permitType))
                  municipality (filter (comp #{municipality} :municipality)))]
     (boolean (some (comp :enabled :bulletins) scopes))))
+
+(defn statement-giver-in-organization
+  "Pre-check that fails if the user is statementGiver but not defined
+  in the organization."
+  [{:keys [user organization application]}]
+  (when (and application
+             (some #(= {:id   (:id user)
+                        :role "statementGiver"}
+                       (select-keys % [:id :role]))
+                   (:auth application))
+             (not (util/find-by-key :email (:email user)
+                                   (:statementGivers @organization))))
+    (fail :error.not-organization-statement-giver)))

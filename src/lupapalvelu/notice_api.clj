@@ -1,10 +1,12 @@
 (ns lupapalvelu.notice-api
-  (:require [sade.core :refer [ok fail fail!]]
-            [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
-            [lupapalvelu.organization :as org]
+  (:require [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as app]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.states :as states]
-            [monger.operators :refer :all]))
+            [monger.operators :refer :all]
+            [sade.core :refer [ok fail fail!]]
+            [lupapalvelu.roles :as roles]
+            [sade.util :as util]))
 
 (defn validate-urgency [{{urgency :urgency} :data}]
   (when-not (#{"normal" "urgent" "pending"} urgency)
@@ -21,10 +23,11 @@
 
 (defcommand change-urgency
   {:parameters [id urgency]
-   :user-roles #{:authority}
+   :user-roles #{:authority :applicant}
    :states (states/all-states-but [:draft])
    :user-authz-roles #{:statementGiver}
-   :input-validators [validate-urgency]}
+   :input-validators [validate-urgency]
+   :pre-checks [org/statement-giver-in-organization]}
   [command]
   (update-notice-data command {:urgency urgency}))
 
@@ -33,7 +36,8 @@
    :input-validators [(partial action/string-parameters [:authorityNotice])]
    :states (states/all-states-but [:draft])
    :user-authz-roles #{:statementGiver}
-   :user-roles #{:authority}}
+   :user-roles #{:authority :applicant}
+   :pre-checks [org/statement-giver-in-organization]}
   [command]
   (update-notice-data command {:authorityNotice authorityNotice}))
 
@@ -42,7 +46,8 @@
    :states (states/all-states-but [:draft])
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:tags])]
    :user-authz-roles #{:statementGiver}
-   :user-roles #{:authority}}
+   :user-roles #{:authority :applicant}
+   :pre-checks [org/statement-giver-in-organization]}
   [{organization :organization :as command}]
   (let [org-tag-ids (map :id (:tags @organization))]
     (if (every? (set org-tag-ids) tags)
@@ -50,6 +55,12 @@
       (fail :error.unknown-tags))))
 
 (defquery authority-notice
-  {:user-roles #{:authority}
-   :user-authz-roles #{:statementGiver}}
-  (ok))
+  {:description      "Notice is shown to authorities and organization statement givers."
+   :parameters       [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :user-roles       #{:authority :applicant}
+   :user-authz-roles #{:statementGiver}
+   :org-authz-roles  roles/reader-org-authz-roles
+   :states           states/all-but-draft
+   :pre-checks       [org/statement-giver-in-organization]}
+  [_])

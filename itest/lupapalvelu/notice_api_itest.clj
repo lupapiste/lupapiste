@@ -4,6 +4,11 @@
 
 (apply-remote-minimal) ; minimal ensures wanted organization tags exist
 
+(defn application-notice [username id notice]
+  (fact {:midje/description (format "Notice for %s: %s" username notice)}
+    (:authorityNotice (query-application (apikey-for username) id))
+    => notice))
+
 (fact "adding notice"
   (let [{id :id} (create-and-submit-application pena)]
     (fact "user can't set application urgency"
@@ -36,7 +41,7 @@
       (fact "authority can't set tags that are not defined in organization"
         (command sonja :add-application-tags :id id :tags ["foo" "bar"]) => (partial expected-failure? "error.unknown-tags"))
 
-      (let [query (query-application sonja id)
+      (let [query    (query-application sonja id)
             org-tags (get-in query [:organizationMeta :tags])]
         (:tags query) => ["111111111111111111111111" "222222222222222222222222"]
 
@@ -51,4 +56,52 @@
           (command sipoo :save-organization-tags :tags [{:id "123000000000000000000000" :label "foo"}]) => ok?
 
           (fact "only 123 is left as 321 was removed"
-            (:tags (query-application sonja id)) => (just ["123000000000000000000000"])))))))
+            (:tags (query-application sonja id)) => (just ["123000000000000000000000"])))))
+
+    (facts "Statement givers and notice panel"
+      (let [err (just {:ok   false
+                       :text "error.not-organization-statement-giver"})]
+        (fact "Jussi is an organisation statement giver"
+          (command sipoo :create-statement-giver
+                   :email (email-for-key jussi)
+                   :text "Moro"
+                   :name "Jussi") => ok?)
+        (fact "Request statements from Jussi and Teppo"
+          (command sonja :request-for-statement
+                   :id id
+                   :functionCode nil
+                   :selectedPersons [{:email (email-for-key jussi)
+                                      :name  "Jussi" :text "moro"}
+                                     {:email (email-for-key teppo)
+                                      :name  "Teppo" :text "hei"}]) => ok?)
+        (facts "Authority notice pseudo query"
+          (query pena :authority-notice :id id) => fail?
+          (query sonja :authority-notice :id id) => ok?
+          (query luukas :authority-notice :id id) => ok?
+          (query jussi :authority-notice :id id) => ok?
+          (query teppo :authority-notice :id id) => err)
+        (facts "Change urgency"
+          (change-application-urgency jussi id "normal") => ok?
+          (change-application-urgency teppo id "pending") => err)
+        (facts "Add tags"
+          (command jussi :add-application-tags :id id
+                   :tags ["123000000000000000000000"])=> ok?
+          (command teppo :add-application-tags :id id
+                   :tags ["321000000000000000000000"]) => err)
+        (facts "Add authority notice"
+          (add-authority-notice jussi id "Hello world!") => ok?
+          (add-authority-notice teppo id "Foo bar") => err)
+        (facts "Read authority notice"
+          (application-notice "sonja" id "Hello world!")
+          (application-notice "jussi" id "Hello world!")
+          (application-notice "pena" id nil)
+          (application-notice "luukas" id "Hello world!")
+          (application-notice "teppo@example.com" id nil))
+        (facts "Application organization tags"
+          (let [tags (contains {:tags [{:id    "123000000000000000000000"
+                                        :label "foo"}]})]
+            (query sonja :application-organization-tags :id id) => tags
+            (query jussi :application-organization-tags :id id) => tags
+            (query teppo :application-organization-tags :id id) => err
+            (query luukas :application-organization-tags :id id) => fail?
+            (query pena :application-organization-tags :id id) => fail?))))))
