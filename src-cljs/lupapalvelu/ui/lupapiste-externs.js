@@ -169,3 +169,8 @@ lupapisteApp.models.globalAuthModel.ok = function() {};
 
 var window = function() {};
 window.open = function() {};
+
+var gis = {};
+gis.makeMap = function() {};
+gis.makeMap.updateSize = function() {};
+gis.makeMap.updateSize.center = function() {};

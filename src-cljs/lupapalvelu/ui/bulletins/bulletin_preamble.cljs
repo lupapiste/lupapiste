@@ -76,7 +76,7 @@
 
        [:div.application_actions.stacked
         {:data-test-id "bulletin-actions"}
-        [:button.function.julkipano
+        #_[:button.function.julkipano
          {:data-test-id "print-bulletin"}
          [:i.lupicon-print]
          [:span (common/loc :bulletin.pdf)]]]]]]))
