@@ -109,7 +109,7 @@
                                                    :aurinkopaneeliKytkin (true? (-> toimenpide :varusteet :aurinkopaneeliKytkin))
                                                    :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin))
                                                    :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin))
-                                                   :saunoja (-> toimenpide :varusteet :saunoja)
+                                                   :saunoja (-> toimenpide :varusteet :saunoja positive-integer)
                                                    :vaestonsuoja vaestonsuoja}
                                        :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))
                                        :rakennustunnus (get-rakennustunnus toimenpide application info)}
