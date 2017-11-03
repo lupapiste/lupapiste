@@ -707,17 +707,16 @@
                                                                           :secondaryOperations.name {$nin ["ya-jatkoaika"]}
                                                                           :primaryOperation.name {$nin ["ya-jatkoaika"]}})
 
-                              [:permitType :address :propertyId])
+                              [:permitType :address :propertyId :primaryOperation.name])
         ;; add the text to show in the dropdown for selections
-        enriched-results (map
-                           (fn [r] (assoc r :text (str (:address r) ", " (:id r))))
-                           results)
+        enriched-results (map (fn [r] (assoc r :primaryOperation (get-in r [:primaryOperation :name])))
+                              results)
         ;; sort the results
         same-property-id-fn #(= propertyId (:propertyId %))
         with-same-property-id (vec (filter same-property-id-fn enriched-results))
         without-same-property-id (sort-by :text (vec (remove same-property-id-fn enriched-results)))
         organized-results (flatten (conj with-same-property-id without-same-property-id))
-        final-results (map #(select-keys % [:id :text :propertyId]) organized-results)]
+        final-results (map #(select-keys % [:id :address :propertyId :primaryOperation]) organized-results)]
     (ok :app-links final-results)))
 
 (defn- validate-linking [{app :application :as command}]
