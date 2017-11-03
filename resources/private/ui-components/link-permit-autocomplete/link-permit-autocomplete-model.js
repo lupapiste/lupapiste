@@ -1,4 +1,4 @@
-// Link permit selector 
+// Link permit selector
 // Parameters:
 //   list: all possible link-permits (from
 //         app-matches-for-link-permits)
@@ -6,7 +6,7 @@
 LUPAPISTE.LinkPermitAutocompleteModel = function( params ) {
   "use strict";
   var self = this;
-  
+
   ko.utils.extend( self, new LUPAPISTE.EnableComponentModel( params ));
 
   self.sameProperty = ko.observable();
@@ -14,7 +14,9 @@ LUPAPISTE.LinkPermitAutocompleteModel = function( params ) {
   self.query = ko.observable( "" );
 
   self.list = self.disposedPureComputed( function() {
-    var items = ko.unwrap( params.list );
+    var items = _.map(ko.unwrap( params.list ), function(item) {
+      return _.set(item, "text", [item.address, item.id, loc(["operations", item.primaryOperation])].join(", "));
+    });
     return self.sameProperty()
          ? _.filter( items, {propertyId: lupapisteApp.models
                                          .application.propertyId()})
