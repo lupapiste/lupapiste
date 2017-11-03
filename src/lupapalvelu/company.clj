@@ -537,6 +537,4 @@
   (let [user-company-id (get-in user [:company :id])
         company (find-company-by-id user-company-id)
         invites-denied (:invitationDenied company)]
-    (if (and user-company-id invites-denied)
-      (empty? (auth/get-auth application user-company-id))
-      false)))
+    (and invites-denied (empty? (auth/get-auth application user-company-id)))))
