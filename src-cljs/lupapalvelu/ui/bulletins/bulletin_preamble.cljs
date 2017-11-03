@@ -1,12 +1,14 @@
 (ns lupapalvelu.ui.bulletins.bulletin-preamble
   (:require [rum.core :as rum]
             [lupapalvelu.ui.common :as common]
-            [lupapalvelu.ui.bulletins.state :as state]))
+            [lupapalvelu.ui.bulletins.state :as state]
+            [lupapalvelu.ui.bulletins.bulletin-verdict-data :as verdict-data]))
 
 (defonce args (atom {}))
 
 (defn bulletin-loaded [{:keys [bulletin]}]
   (let [[x y] (:location  bulletin)]
+    (js/console.log "bulletin loaded")
     (reset! state/current-bulletin bulletin)
     (swap! args assoc :map  (-> js/gis
                                 (.makeMap "bulletin-map")
@@ -34,52 +36,51 @@
         {:keys [address primaryOperation propertyId
                 bulletinOpDescription
                 municipality _applicantIndex]} bulletin]
-    [:div.application_summary
-     [:div.container
-      [:div.bulletin-preamble
-       (when bulletin
-         [:div.application_summary_info
-          [:h4
-           {:data-test-id "bulletin-address"}
-           address]
-          [:h5
-           [:span
-            {:data-test-id "bulletin-primary-operation"
-             :data-test-primary-operation-id (-> primaryOperation :name)}
-            (or bulletinOpDescription (common/loc (str "operations." (-> primaryOperation :name))))]]
-
-          [:div
-           [:p (common/loc :application.property)]
-           [:span.application_summary_text
-            (js/util.prop.toHumanFormat propertyId)]]
-
-          [:div
-           [:p (common/loc :application.municipality)]
-           [:span.application_summary_text
-            (common/loc (str "municipality." municipality))]]
-
-          [:div
-           [:p (str (common/loc :bulletin.applicants) ":")]
-           [:ul
-            (for [applicant _applicantIndex]
-              [:li {:key applicant} applicant])]]])
-
-       [:div.application-map-container
-        [:div#bulletin-map.map.map-large
-         {:style {:width  "320px"
-                  :height "280px"}}]
+    [:div
+     [:div.application_summary
+      [:div.container
+       [:div.bulletin-preamble
         (when bulletin
-          [:div.application-map-actions
-           [:a.map-search-button
-            {:on-click #(common/open-oskari-map bulletin)}
-            (common/loc :map.open)]])]
+          [:div.application_summary_info
+           [:h4
+            {:data-test-id "bulletin-address"}
+            address]
+           [:h5
+            [:span
+             {:data-test-id "bulletin-primary-operation"
+              :data-test-primary-operation-id (-> primaryOperation :name)}
+             (or bulletinOpDescription (common/loc (str "operations." (-> primaryOperation :name))))]]
 
-       [:div.application_actions.stacked
-        {:data-test-id "bulletin-actions"}
-        #_[:button.function.julkipano
-         {:data-test-id "print-bulletin"}
-         [:i.lupicon-print]
-         [:span (common/loc :bulletin.pdf)]]]]]]))
+           [:div
+            [:p (common/loc :application.property)]
+            [:span.application_summary_text
+             (js/util.prop.toHumanFormat propertyId)]]
+
+           [:div
+            [:p (common/loc :application.municipality)]
+            [:span.application_summary_text
+             (common/loc (str "municipality." municipality))]]
+
+           [:div
+            [:p (str (common/loc :bulletin.applicants) ":")]
+            [:ul
+             (for [applicant _applicantIndex]
+               [:li {:key applicant} applicant])]]])
+
+        [:div.application-map-container
+         [:div#bulletin-map.map.map-large
+          {:style {:width  "320px"
+                   :height "280px"}}]
+         (when bulletin
+           [:div.application-map-actions
+            [:a.map-search-button
+             {:on-click #(common/open-oskari-map bulletin)}
+             (common/loc :map.open)]])]
+        [:div.application_actions.stacked
+         {:data-test-id "bulletin-actions"}
+         #_[:button.function.julkipano {:data-test-id "print-bulletin"} [:i.lupicon-print [:span (common/loc :bulletin.pdf)]]]
+         ]]]]
+     (verdict-data/verdict-data bulletin)]))
 
 (defn mount-component []
   (rum/mount (bulletin-preamble)

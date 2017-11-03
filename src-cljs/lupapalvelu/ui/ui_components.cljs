@@ -6,7 +6,6 @@
             [lupapalvelu.ui.printing-order.composer :as printing-order-composer]
             [lupapalvelu.ui.bulletins.bulletin-preamble :as bulletin-preamble]
             [lupapalvelu.ui.bulletins.local-bulletins :as local-bulletins]
-            [lupapalvelu.ui.bulletins.bulletin-verdict-data :as bulletin-verdict-data]
             [lupapalvelu.ui.company.reports :as company-reports]))
 
 (defn reload-hook []
@@ -18,7 +17,6 @@
         printing-order-composer/mount-component
         local-bulletins/mount-component
         bulletin-preamble/mount-component
-        bulletin-verdict-data/mount-component
         company-reports/mount-component]
 
        (run! (fn [mount-fn]
