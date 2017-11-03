@@ -11,7 +11,7 @@ Default Tags    company
 
 *** Variables ***
 
-${error_message}    Kyseinen henkil\u00f6 kuuluu yritykseen jolla ei ole viel\u00e4 valtuutuksia hankkeelle. Valtuuta ensin yritys hankkeelle.
+${error_message}    Kyseinen henkil\u00f6 kuuluu yritykseen, jolla ei ole viel\u00e4 valtuutuksia hankkeelle. Valtuuta ensin yritys hankkeelle.
 ${dummy}            dummy3@example.com
 
 *** Test Cases ***
