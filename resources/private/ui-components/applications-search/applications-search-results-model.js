@@ -30,7 +30,29 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
     self.dataProvider.skip(0);
   });
 
-  self.columns = [
+  self.basicColumns = [
+    util.createSortableColumn("first",   "applications.indicators", {colspan: lupapisteApp.models.currentUser.isAuthority() ? "5" : "4",
+      sortable: false,
+      currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("second",  "applications.type",       {sortField: "type",
+      currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("third",   "applications.location",   {sortField: "location",
+      currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("fourth",  "applications.operation",  {sortable: false,
+      currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("fifth",   "applications.applicant",  {sortField: "applicant",
+      currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("sixth",   "applications.submitted",  {sortField: "submitted",
+      currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("seventh", "applications.updated",    {sortField: "modified",
+      currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("eight",   "applications.status",     {sortField: "state",
+      currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("ninth",   "application.handlers",  {sortField: "handler",
+      currentSort: self.dataProvider.sort})
+  ];
+
+  self.columns = ko.observableArray([
     util.createSortableColumn("first",   "applications.indicators", {colspan: lupapisteApp.models.currentUser.isAuthority() ? "5" : "4",
                                                                      sortable: false,
                                                                      currentSort: self.dataProvider.sort}),
@@ -50,7 +72,18 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
                                                                      currentSort: self.dataProvider.sort}),
     util.createSortableColumn("ninth",   "application.handlers",  {sortField: "handler",
                                                                    currentSort: self.dataProvider.sort})
-  ];
+  ]);
+
+  ko.computed(function() {
+    if (self.selectedTab() === "construction") {
+      //self.columns.push(util.createSortableColumn("sixth",   "applications.verdictGiven",  {sortField: "submitted", currentSort: self.dataProvider.sort}));
+      self.columns.splice(5, 1, util.createSortableColumn("sixth",   "applications.verdictGiven",  {sortField: "submitted", currentSort: self.dataProvider.sort}))
+    } else {
+      //self.columns.push(util.createSortableColumn("sixth",   "applications.submitted",  {sortField: "submitted", currentSort: self.dataProvider.sort}));
+      self.columns.splice(5, 1, util.createSortableColumn("sixth",   "applications.submitted",  {sortField: "submitted", currentSort: self.dataProvider.sort}))
+      self.columns()
+    }
+  });
 
   // Scroll support.
   hub.send( "scrollService::setName", {name: "search-results"});
