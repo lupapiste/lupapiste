@@ -27,8 +27,9 @@
 
 (defn- valid-linestring [coordinates]
   ;; LineString must have at least two points
-  (when (second coordinates)
-    coordinates))
+  (if (second coordinates)
+    coordinates
+    (throw (IllegalArgumentException. "LineString does not have at least two points"))))
 
 (defn- convert-geometry [^Geometry geometry]
   (->> (.getCoordinates geometry)
