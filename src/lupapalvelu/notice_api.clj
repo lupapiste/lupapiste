@@ -2,10 +2,10 @@
   (:require [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail!]]
-            [lupapalvelu.roles :as roles]
             [sade.util :as util]))
 
 (defn validate-urgency [{{urgency :urgency} :data}]

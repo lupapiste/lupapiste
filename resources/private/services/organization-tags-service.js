@@ -32,18 +32,16 @@ LUPAPISTE.OrganizationTagsService = function() {
 
   hub.subscribe( "contextService::enter",
                function( event ) {
-                 if( lupapisteApp.models.applicationAuthModel
-                     .ok( "application-organization-tags")) {
-                   ajax.query( "application-organization-tags",
-                               {id: event.applicationId})
-                   .success( function( res ) {
-                     self.currentApplicationOrganizationTags( res.tags || [] );
-                   })
-                   .call();
-                 }
+                 ajax.query( "application-organization-tags",
+                             {id: event.applicationId})
+                 .success( function( res ) {
+                   self.currentApplicationOrganizationTags( res.tags || [] );
+                 })
+                 .error( _.noop )
+                 .call();
                });
   hub.subscribe( "contextService::leave",
-               function() {
-                 self.currentApplicationOrganizationTags( [] );
-               });
+                 function() {
+                   self.currentApplicationOrganizationTags( [] );
+                 });
 };

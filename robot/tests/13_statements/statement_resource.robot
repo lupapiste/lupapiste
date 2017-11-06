@@ -54,6 +54,7 @@ Invite 'manual' statement giver
   Wait until  Element should be enabled  xpath=//*[@data-test-id='statement-giver-checkbox-${index}']
   Select Checkbox  statement-giver-checkbox-${index}
   # Send button comes enabled only when all fields have content and some user is selected.
+  Scroll to test id  add-statement-giver
   Wait until  Element should be enabled  xpath=//*[@data-test-id='add-statement-giver']
   Click element  xpath=//*[@data-test-id='add-statement-giver']
   Element should be visible  xpath=//*[@data-test-id='add-statement-giver']

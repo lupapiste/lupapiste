@@ -104,4 +104,27 @@
             (query jussi :application-organization-tags :id id) => tags
             (query teppo :application-organization-tags :id id) => err
             (query luukas :application-organization-tags :id id) => fail?
-            (query pena :application-organization-tags :id id) => fail?))))))
+            (query pena :application-organization-tags :id id) => fail?))))
+    (facts "Guests and notice panel"
+      (fact "Add Veikko as a guest authority"
+        (command sipoo :update-guest-authority-organization
+                 :description "Vexi"
+                 :email "veikko.viranomainen@tampere.fi"
+                 :firstName "Veikko"
+                 :lastName "Viranomainen"))
+      (fact "Sonja adds Veikko as a guest authority to application"
+        (command sonja :invite-guest :id id
+                 :role "guestAuthority"
+                 :email "veikko.viranomainen@tampere.fi"
+                 :text "Invitation!") => ok?)
+      (fact "Veikko cannot do notice queries"
+        (query veikko :authority-notice :id id) => fail?
+        (query veikko :application-organization-tags :id id) => fail?)
+      (fact "Pena invites Mikko as a guest to application"
+        (command sonja :invite-guest :id id
+                 :role "guest"
+                 :email "mikko.intonen@example.com"
+                 :text "Invitation!") => ok?)
+      (fact "Mikko cannot do notice queries"
+        (query mikko :authority-notice :id id) => fail?
+        (query mikko :application-organization-tags :id id) => fail?))))
