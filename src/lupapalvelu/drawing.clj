@@ -8,12 +8,19 @@
 (defn- get-pos [coordinates]
   (mapv (fn [c] [(-> c .x) (-> c .y)]) coordinates))
 
+(defn- coordinates-to-close?
+  "Check for coordinates that have same x or y and really close x' or y'"
+  [[x1 y1] [x2 y2]]
+  (and (or (= x1 x2) (= y1 y2))
+       (< (Math/abs (- x1 x2)) 0.3)
+       (< (Math/abs (- y1 y2)) 0.3)))
+
 (defn- filter-coord-duplicates [coordinates]
   (reduce
     (fn [coords c]
-      (if-not (= (last coords) c)
-        (concat coords [c])
-        coords))
+      (if (or (= (last coords) c) (coordinates-to-close? (last coords) c))
+        (concat (doall (drop-last coords)) [c]) ; Replace the last coordinate to keep the ring correct
+        (concat coords [c])))
     []
     coordinates))
 
