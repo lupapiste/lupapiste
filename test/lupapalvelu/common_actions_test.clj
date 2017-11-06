@@ -156,7 +156,7 @@
                           :foreman-history
                           :reduced-foreman-history
                           :add-application-tags
-                          :get-organization-tags
+                          :application-organization-tags
                           :get-organization-areas
                           :preview-attachment
                           :document
@@ -227,7 +227,7 @@
                            :reduced-foreman-history :foreman-history :foreman-applications
                            :get-building-info-from-wfs :mark-seen :info-links :organization-links
                            :mark-seen-organization-links :pdfa-casefile :suti-application-data :suti-application-products
-                           :redirect-to-3d-map :ya-extensions
+                           :redirect-to-3d-map :ya-extensions :authority-notice
                            :ram-linked-attachments :attachment-groups :attachments :attachment :attachments-filters :attachments-tag-groups
                            :application-organization-archive-enabled
                            ;; matti

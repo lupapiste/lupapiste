@@ -5,6 +5,7 @@ Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        statement_resource.robot
+Resource        ../20_side_panel/notice_resource.robot
 Variables       ../06_attachments/variables.py
 
 *** Test Cases ***
@@ -94,14 +95,16 @@ Sonja adds five statement givers to application
 
   # Invite a new statement giver that is not on the ready-populated list that authority admin has added in his admin view.
   Invite 'manual' statement giver  6  Erikoislausuja  Vainamoinen  vainamoinen@example.com  05.06.2018
-  Statement count is  6
+  # Invite existing non-authority as a statement giver
+  Invite 'manual' statement giver  7  Pena  Pena  pena@example.com  08.06.2018
+  Statement count is  7
   Positive indicator should not be visible
 
 Sonja can delete statement
   Element should be visible by test id  delete-statement-5
   Scroll and click test id  delete-statement-5
   Confirm yes no dialog
-  Wait until  Statement count is  5
+  Wait until  Statement count is  6
   Wait Until  Title Should Be  ${appname} - Lupapiste
 
 Sonja can't give statement to Ronjas statement nor see the draft
@@ -204,7 +207,11 @@ Statement can export application as PDF
 
 Statements are visible for Veikko
   Open tab  statement
-  Statement count is  5
+  Statement count is  6
+
+Veikko can can edit notice
+  Check status  normal
+  Edit notice  ullakko  urgent  Hello world!
 
 Veikko cannot delete statement requests
   Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-1']
@@ -218,6 +225,7 @@ Veikko from Tampere can give statement (and attach something to it as well)
   Wait test id visible  statement-attachments-table
   Select From List By Value  statement-type-select  ehdollinen
   Wait until  Element Should Be Enabled  statement-submit
+  Scroll to  \#statement-submit
   Click Element  statement-submit
   Confirm yes no dialog
   Statement status is  Ehdollinen  veikko.viranomainen@tampere.fi
@@ -233,6 +241,12 @@ There is no possibility to delete the generated statement pdf attachment
   Wait until  Element should be visible  jquery=div#application-attachments-tab tr[data-test-type='ennakkoluvat_ja_lausunnot.lausunto']
   Element should not be visible  jquery=div#application-attachments-tab tr[data-test-type='ennakkoluvat_ja_lausunnot.lausunto'] span[data-test-icon="delete-button"]
   Logout
+
+Pena logs in but does not see notice
+  Pena logs in
+  Open application  ${appname}  ${appPropertyId}
+  Wait until  Element should not be visible  //div[@id='side-panel']//button[@id='open-notice-side-panel']
+  [Teardown]  Logout
 
 Mikko logs in and submits application
   Mikko logs in
