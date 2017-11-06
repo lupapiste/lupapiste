@@ -11,19 +11,35 @@
    :height 0,
    :length 150})
 
-(facts "Should create wgs84 geometry block from map drawing data"
-  (fact (wgs84-geometry drawing) => {:type "LineString"
-                                     :coordinates [[25.26441 60.37108]
-                                                   [25.26395 60.37142]
-                                                   [25.26322 60.37193]
-                                                   [25.26294 60.37198]
-                                                   [25.26161 60.37123]]}))
+(def valid-polygon "POLYGON((395338 6707330,395319 6707252,395462 6707259,395451 6707347,395451 6707393,395338 6707330))")
 
-(facts "Should handle NaN in coordinates"
-  (fact (wgs84-geometry (assoc drawing :geometry "POLYGON(NaN NaN, NaN NaN")) => nil))
+(def invalid-polygon "POLYGON((395338 6707330,395319 6707252,395462 6707259,395451 6707347,395451 6707393))")
 
-(facts "Should handle empty geometry"
-  (fact (wgs84-geometry (assoc drawing :geometry "")) => nil))
+(fact "Should create wgs84 geometry block from map drawing data"
+  (wgs84-geometry drawing) => {:type "LineString"
+                               :coordinates [[25.264406676091 60.371084504513]
+                                             [25.263953569417 60.371419866642]
+                                             [25.26321904251 60.371931171836]
+                                             [25.262944317452 60.37198147111]
+                                             [25.26160610776 60.371227564596]]})
 
-(facts "Should handle nil geometry"
-  (fact (wgs84-geometry (assoc drawing :geometry nil)) => nil))
+(fact "Should handle NaN in coordinates"
+  (wgs84-geometry (assoc drawing :geometry "POLYGON(NaN NaN, NaN NaN")) => nil)
+
+(fact "Should handle empty geometry"
+  (wgs84-geometry (assoc drawing :geometry "")) => nil)
+
+(fact "Should handle nil geometry"
+  (wgs84-geometry (assoc drawing :geometry nil)) => nil)
+
+(fact "Should handle valid polygon"
+  (wgs84-geometry (assoc drawing :geometry valid-polygon)) => {:type "Polygon"
+                                                               :coordinates [[[25.09525837049 60.488495242537]
+                                                                              [25.094953876678 60.487790364259]
+                                                                              [25.097550912364 60.487890298721]
+                                                                              [25.097304587279 60.488677125947]
+                                                                              [25.097280399964 60.489089913559]
+                                                                              [25.09525837049 60.488495242537]]]})
+
+(fact "Should return nil for invalid polygon"
+  (wgs84-geometry (assoc drawing :geometry invalid-polygon)) => nil)

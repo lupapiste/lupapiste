@@ -2,7 +2,8 @@
   (:require [sade.coordinate :as coord]
             [sade.strings :as sstr]
             [cljts.io :as jts]
-            [cljts.geom :as geom])
+            [cljts.geom :as geom]
+            [taoensso.timbre :as timbre])
   (:import [com.vividsolutions.jts.geom Polygon]))
 
 (defn- get-pos [coordinates]
@@ -12,14 +13,14 @@
   (try
      (get-pos (.getCoordinates (-> drawing :geometry jts/read-wkt-str)))
     (catch Exception e
-      (println "Invalid geometry, message is: " (:geometry drawing) (.getMessage e))
+      (timbre/warn "Invalid geometry, message is: " (:geometry drawing) (.getMessage e))
       nil)))
 
 (defn- parse-type [drawing]
   (try
     (first (re-seq #"[^(]+" (:geometry drawing)))
     (catch Exception e
-      (println "Invalid geometry, message is: " (:geometry drawing) (.getMessage e))
+      (timbre/warn "Invalid geometry, message is: " (:geometry drawing) (.getMessage e))
       nil)))
 
 (defn- wkt-type->geojson-type [wkt-type]
@@ -38,7 +39,7 @@
           polygon (geom/polygon linear-ring [])]
       (.isValid ^Polygon polygon))
     (catch Exception e
-      (println e "Polygon validation error"))))
+      (timbre/warn e "Polygon validation error"))))
 
 (defn- filter-coord-duplicates [coordinates]
   (reduce
@@ -49,7 +50,9 @@
     []
     coordinates))
 
-(defn wgs84-geometry [drawing]
+(defn wgs84-geometry
+  "Converts WKT drawing to a valid GeoJSON object. Returns nil if the drawing can't be converted to valid GeoJSON."
+  [drawing]
   (let [geojson-type (-> (parse-type drawing) wkt-type->geojson-type)
         is-polygon? (= "Polygon" geojson-type)
         coordinates (-> (parse-geometry drawing)

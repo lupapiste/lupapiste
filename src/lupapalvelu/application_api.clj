@@ -385,9 +385,13 @@
    :pre-checks       [app/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (when (sequential? drawings)
-    (update-application command
-                        {$set {:modified created
-                               :drawings (map (fn [drawing] (assoc drawing :geometry-wgs84 (draw/wgs84-geometry drawing))) drawings)}})))
+    (let [drawings-with-geojson (map #(assoc % :geometry-wgs84 (draw/wgs84-geometry %)) drawings)]
+      (if (every? :geometry-wgs84 drawings-with-geojson)
+        (update-application command
+                            {$set {:modified created
+                                   :drawings drawings-with-geojson}})
+        ; We don't accept invalid GeoJSON, as then the data would not be archived nor searchable by document search
+        (fail :error.invalid-drawing)))))
 
 (defn- make-marker-contents [id lang {:keys [location] :as app}]
   (merge
