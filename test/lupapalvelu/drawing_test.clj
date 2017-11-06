@@ -15,6 +15,10 @@
 
 (def invalid-polygon "POLYGON((395338 6707330,395319 6707252,395462 6707259,395451 6707347,395451 6707393))")
 
+(def multipolygon "MULTIPOLYGON(((395338 6707330,395319 6707252,395462 6707259,395451 6707347,395451 6707393,395338 6707330)),((395338 6707330,395319 6707252,395462 6707259,395451 6707347,395451 6707393,395338 6707330)))")
+
+(def point "POINT(395338 6707330)")
+
 (fact "Should create wgs84 geometry block from map drawing data"
   (wgs84-geometry drawing) => {:type "LineString"
                                :coordinates [[25.264406676091 60.371084504513]
@@ -43,3 +47,22 @@
 
 (fact "Should return nil for invalid polygon"
   (wgs84-geometry (assoc drawing :geometry invalid-polygon)) => nil)
+
+(fact "Should handle multipolygon"
+  (wgs84-geometry (assoc drawing :geometry multipolygon)) => {:type "MultiPolygon",
+                                                              :coordinates [[[[25.09525837049 60.488495242537]
+                                                                              [25.094953876678 60.487790364259]
+                                                                              [25.097550912364 60.487890298721]
+                                                                              [25.097304587279 60.488677125947]
+                                                                              [25.097280399964 60.489089913559]
+                                                                              [25.09525837049 60.488495242537]]]
+                                                                            [[[25.09525837049 60.488495242537]
+                                                                              [25.094953876678 60.487790364259]
+                                                                              [25.097550912364 60.487890298721]
+                                                                              [25.097304587279 60.488677125947]
+                                                                              [25.097280399964 60.489089913559]
+                                                                              [25.09525837049 60.488495242537]]]]})
+
+(fact "Should handle a single point"
+  (wgs84-geometry (assoc drawing :geometry point)) => {:type "Point",
+                                                       :coordinates [25.09525837049 60.488495242537]})
