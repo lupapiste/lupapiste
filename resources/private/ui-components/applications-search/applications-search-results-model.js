@@ -8,13 +8,19 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
   self.dataProvider = params.dataProvider;
   self.data = ko.pureComputed(function() {
     return _.map(self.dataProvider.results(), function(item) {
-      item.kuntalupatunnus = util.getIn(item, ["verdicts", 0, "kuntalupatunnus"]);
+      var verdict = util.getIn(item, ["verdicts"]).length;
+      console.log(verdict);
+      item.kuntalupatunnus = util.getIn(item, ["verdicts", verdict, "kuntalupatunnus"]);
+      item.verdictDate = util.getIn(item, ["verdicts", verdict, "paatokset", 0, "paivamaarat", "anto"]);
+      item.searchType = self.dataProvider.searchResultType();
       if (item.foremanRole) {
         item.foremanRoleI18nkey = "osapuoli.tyonjohtaja.kuntaRoolikoodi." + item.foremanRole;
       }
+      console.log(item);
       return item;
     });
   });
+
   self.gotResults = params.gotResults;
 
   self.selectedTab = self.dataProvider.searchResultType;
@@ -29,28 +35,6 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
     ko.mapping.toJS(self.dataProvider.sort);
     self.dataProvider.skip(0);
   });
-
-  self.basicColumns = [
-    util.createSortableColumn("first",   "applications.indicators", {colspan: lupapisteApp.models.currentUser.isAuthority() ? "5" : "4",
-      sortable: false,
-      currentSort: self.dataProvider.sort}),
-    util.createSortableColumn("second",  "applications.type",       {sortField: "type",
-      currentSort: self.dataProvider.sort}),
-    util.createSortableColumn("third",   "applications.location",   {sortField: "location",
-      currentSort: self.dataProvider.sort}),
-    util.createSortableColumn("fourth",  "applications.operation",  {sortable: false,
-      currentSort: self.dataProvider.sort}),
-    util.createSortableColumn("fifth",   "applications.applicant",  {sortField: "applicant",
-      currentSort: self.dataProvider.sort}),
-    util.createSortableColumn("sixth",   "applications.submitted",  {sortField: "submitted",
-      currentSort: self.dataProvider.sort}),
-    util.createSortableColumn("seventh", "applications.updated",    {sortField: "modified",
-      currentSort: self.dataProvider.sort}),
-    util.createSortableColumn("eight",   "applications.status",     {sortField: "state",
-      currentSort: self.dataProvider.sort}),
-    util.createSortableColumn("ninth",   "application.handlers",  {sortField: "handler",
-      currentSort: self.dataProvider.sort})
-  ];
 
   self.columns = ko.observableArray([
     util.createSortableColumn("first",   "applications.indicators", {colspan: lupapisteApp.models.currentUser.isAuthority() ? "5" : "4",
@@ -76,12 +60,9 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
 
   ko.computed(function() {
     if (self.selectedTab() === "construction") {
-      //self.columns.push(util.createSortableColumn("sixth",   "applications.verdictGiven",  {sortField: "submitted", currentSort: self.dataProvider.sort}));
-      self.columns.splice(5, 1, util.createSortableColumn("sixth",   "applications.verdictGiven",  {sortField: "submitted", currentSort: self.dataProvider.sort}))
+      self.columns.splice(5, 1, util.createSortableColumn("sixth",   "applications.verdictGiven",  {sortField: "submitted", currentSort: self.dataProvider.sort}));
     } else {
-      //self.columns.push(util.createSortableColumn("sixth",   "applications.submitted",  {sortField: "submitted", currentSort: self.dataProvider.sort}));
-      self.columns.splice(5, 1, util.createSortableColumn("sixth",   "applications.submitted",  {sortField: "submitted", currentSort: self.dataProvider.sort}))
-      self.columns()
+      self.columns.splice(5, 1, util.createSortableColumn("sixth",   "applications.submitted",  {sortField: "submitted", currentSort: self.dataProvider.sort}));
     }
   });
 
