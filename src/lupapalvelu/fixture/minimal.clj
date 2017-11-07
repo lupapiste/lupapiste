@@ -939,7 +939,19 @@
                        :matti-enabled true
                        :docstore-info (assoc org/default-docstore-info
                                         :docStoreInUse true
-                                        :documentPrice 314)}
+                                        :documentPrice 314)
+
+                       :local-bulletins-page-settings
+                       {:texts
+                        {:fi {:heading1 "Sipoo",
+                              :heading2 "Sipoo R julkipanot",
+                              :caption ["Tervetuloa"
+                                        "Viranhaltijan päätöksiä tehdään päivittäin. Oikaisuvaatimusaika on 14 päivää päätösten tiedoksiannosta."
+                                        "Listat ovat nähtävillä kunnan virastossa"]},
+                         :sv {:heading1 "Sibbo",
+                              :heading2 "Sibbo julkipano",
+                              :caption ["Bygglovssektionens beslut om bygglov meddelas efter den offentliga delgivningen då de anses ha kommit till vederbörandes kännedom. Besvärstiden är 30 dagar."
+                                        "Tjänsteinnehavarbeslut fattas dagligen. Besvärstiden är 14 dagar från det att besluten kungjorts."]}}}}
 
                       ;; Sipoo YA
                       ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.

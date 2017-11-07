@@ -3538,6 +3538,23 @@
                              add-wgs84-coordinates
                              {:drawings.geometry {$exists true, $ne ""}}))
 
+(defmigration bulletins-text-vantaa
+  {:apply-when (pos? (mongo/count :organizations {:_id "092-R" :local-bulletins-page-settings {$exists false}}))}
+  (mongo/update-by-query :organizations
+                         {:_id "092-R" :local-bulletins-page-settings {$exists false}}
+                         {$set
+                          {:local-bulletins-page-settings
+                           {:texts {:fi {:heading1 "Vantaan kaupunki",
+                                         :heading2 "Rakennusvalvonnan julkipanot",
+                                         :caption ["Rakennuslupajaoston rakennuslupapäätökset annetaan julkipanon jälkeen, jolloin niiden katsotaan tulleen asianosaisten tietoon. Valitusaika on 30 päivää."
+                                                   "Viranhaltijan päätöksiä tehdään päivittäin. Oikaisuvaatimusaika on 14 päivää päätösten tiedoksiannosta."
+                                                   "Julkipanolistat ovat virallisesti nähtävissä maankäytön asiakaspalvelussa (Kielotie 13, katutaso) sekä alla olevassa listauksessa."]},
+                                    :sv {:heading1 "Vanda stad",
+                                         :heading2 "Offentlig delgivning av beslut om bygglov",
+                                         :caption ["Bygglovssektionens beslut om bygglov meddelas efter den offentliga delgivningen då de anses ha kommit till vederbörandes kännedom. Besvärstiden är 30 dagar."
+                                                   "Tjänsteinnehavarbeslut fattas dagligen. Besvärstiden är 14 dagar från det att besluten kungjorts."
+                                                   "Förteckningarna finns offentligt fraπmlagda på anslagstavlan i byggnadstillsynens entréhall och på listan som finns nedanför."]}}}}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
