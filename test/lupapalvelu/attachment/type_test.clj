@@ -103,3 +103,10 @@
                                   (some #{(select-keys atype [:type-id :type-group])})))
                   (is (contains? types-coll atype))
                   (is (not (contains? types-coll atype))))))
+
+(fact "resolve-type"
+  (let [paatosote {:type-group :paatoksenteko, :type-id :paatosote}]
+    (resolve-type "R" "paatosote") => paatosote
+    (resolve-type :R :paatosote) => paatosote
+    (resolve-type "YA" :paatosote) => {:type-group :muut, :type-id :paatosote}
+    (resolve-type "R" "lasdkjflaskjdflakjsdf") => {}))

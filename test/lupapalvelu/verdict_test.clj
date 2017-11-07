@@ -1,22 +1,21 @@
 (ns lupapalvelu.verdict-test
-  (:require [midje.sweet :refer :all]
-           [midje.util :refer [testable-privates]]
-           [lupapalvelu.itest-util :refer [expected-failure? ->xml]]
-           [lupapalvelu.action :as action]
-           [lupapalvelu.application :as application]
-           [lupapalvelu.application-meta-fields :as meta-fields]
-           [lupapalvelu.domain :as domain]
-           [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-           [lupapalvelu.verdict :refer :all]
-           [lupapalvelu.permit :as permit]
-           [lupapalvelu.organization :as organization]
-           [sade.common-reader :as cr]
-           [sade.core :refer [now]]
-           [sade.xml :as xml]
-           [sade.util :as util])
-  (:import [java.nio.charset StandardCharsets]))
+  (:require [lupapalvelu.action :as action]
+            [lupapalvelu.application :as application]
+            [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.itest-util :refer [expected-failure? ->xml]]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.verdict :refer :all]
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
+            [sade.common-reader :as cr]
+            [sade.core :refer [now]]
+            [sade.util :as util]
+            [sade.xml :as xml]))
 
-(testable-privates lupapalvelu.verdict get-verdicts-with-attachments content-disposition-filename verdict-in-application-without-attachment? matching-poytakirja)
+(testable-privates lupapalvelu.verdict get-verdicts-with-attachments verdict-in-application-without-attachment? matching-poytakirja)
 
 (facts "Verdicts parsing"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/verdict-r-no-verdicts.xml"))]
@@ -119,22 +118,6 @@
     (fact "paatostieto is injected before lisatiedot"
           (keys (cr/all-of xml [:RakennusvalvontaAsia])) => (just [:paatostieto :lisatiedot :asianTiedot]))))
 
-(facts verdict-attachment-type
-  (fact "R"
-    (verdict-attachment-type {:permitType "R"}) => {:type-group "paatoksenteko" :type-id "paatosote"})
-  (fact "P"
-    (verdict-attachment-type {:permitType "P"}) => {:type-group "paatoksenteko" :type-id "paatosote"})
-  (fact "YA"
-    (verdict-attachment-type {:permitType "YA"}) => {:type-group "muut" :type-id "paatosote"})
-  (fact "YI"
-    (verdict-attachment-type {:permitType "YI"}) => {:type-group "muut" :type-id "paatosote"})
-  (fact "VVVL"
-    (verdict-attachment-type {:permitType "VVVL"}) => {:type-group "muut" :type-id "paatosote"})
-  (fact "R - with type"
-    (verdict-attachment-type {:permitType "R"} anything) => {:type-group "paatoksenteko" :type-id anything})
-  (fact "YA - with type"
-    (verdict-attachment-type {:permitType "YA"} anything) => {:type-group "muut" :type-id anything}))
-
 (facts "Section requirement for verdicts"
        (let [org        {:section {:operations ["pool" "house"]
                                    :enabled    true}}
@@ -175,19 +158,6 @@
          (fact "Section not required for the operation"
                (validate-section-requirement pool no-xml1 {:section {:operations ["sauna" "house"]
                                                                      :enabled    true}}) => nil)))
-
-(facts "Content-Disposition and string encoding"
-       (fact "No header"
-             (content-disposition-filename {:headers {}}) => nil?)
-       (fact "No decoding"
-             (content-disposition-filename {:headers {"content-disposition" "attachment; filename=P\u00e4\u00e4t\u00f6sote.txt"}})
-             => "P\u00e4\u00e4t\u00f6sote.txt")
-       (fact "Encoding: Microsoft-IIS/7.5"
-             (content-disposition-filename {:headers {"content-disposition" (String. (.getBytes  "attachment; filename=\"P\u00e4\u00e4t\u00f6sote.txt\""
-                                                                                                 StandardCharsets/UTF_8)
-                                                                                     StandardCharsets/ISO_8859_1)
-                                                      "server"              "Microsoft-IIS/7.5"}})
-             => "P\u00e4\u00e4t\u00f6sote.txt"))
 
 (facts "updating verdict paatosote attachments"
 
