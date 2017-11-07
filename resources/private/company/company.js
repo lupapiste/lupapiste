@@ -478,7 +478,7 @@
         .success(util.showSavedIndicator)
         .call();
       return true;
-    }
+    };
   }
 
   var company = new Company();
