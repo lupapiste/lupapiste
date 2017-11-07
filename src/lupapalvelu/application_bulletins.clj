@@ -282,7 +282,7 @@
       (doseq [{vid :id :as verdict} new-verdicts]
         (infof "Upserting the bulletin for verdict %s" vid)
         (upsert-bulletin-by-id (str applicationId "_" vid)
-        (create-bulletin (assoc application :state :verdictGiven
+          (create-bulletin (assoc application :state :verdictGiven
                                             :verdicts [verdict])
                          created
                          {:verdictGivenAt (-> verdict :paatokset first :paivamaarat :anto)

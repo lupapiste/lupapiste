@@ -376,7 +376,7 @@
 (defcommand update-app-bulletin-op-description
   {:parameters [id description]
    :user-roles #{:authority}
-   :states     #{:submitted :complementNeeded}
+   :states     #{:submitted :sent :complementNeeded}
    :pre-checks [(permit/validate-permit-type-is-not permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)
                 check-bulletins-enabled]}
   [command]
