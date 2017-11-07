@@ -8,19 +8,18 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
   self.dataProvider = params.dataProvider;
   self.data = ko.pureComputed(function() {
     return _.map(self.dataProvider.results(), function(item) {
-      var verdict = util.getIn(item, ["verdicts"]).length;
-      console.log(verdict);
-      item.kuntalupatunnus = util.getIn(item, ["verdicts", verdict, "kuntalupatunnus"]);
-      item.verdictDate = util.getIn(item, ["verdicts", verdict, "paatokset", 0, "paivamaarat", "anto"]);
+      var verdictCount = util.getIn(item, ["verdicts"]).length;
+      if (verdictCount > 0) {
+        item.kuntalupatunnus = util.getIn(item, ["verdicts", verdictCount - 1, "kuntalupatunnus"]);
+        item.verdictDate = util.getIn(item, ["verdicts", verdictCount - 1, "paatokset", 0, "paivamaarat", "anto"]);
+      }
       item.searchType = self.dataProvider.searchResultType();
       if (item.foremanRole) {
         item.foremanRoleI18nkey = "osapuoli.tyonjohtaja.kuntaRoolikoodi." + item.foremanRole;
       }
-      console.log(item);
       return item;
     });
   });
-
   self.gotResults = params.gotResults;
 
   self.selectedTab = self.dataProvider.searchResultType;
