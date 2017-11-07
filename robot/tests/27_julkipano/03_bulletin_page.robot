@@ -26,7 +26,6 @@ Map is visible
   Element should be visible  //div[@id='ymp-bulletin-component']//div[@id='bulletin-map']/div
 
 Action buttons are visible
-  Debug
   Element should be visible  //div[@id='ymp-bulletin-component']//div[@data-test-id='bulletin-actions']/button[@data-test-id='comment-bulletin']
 
 Tabs are visible
