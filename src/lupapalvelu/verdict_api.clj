@@ -15,6 +15,7 @@
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.user :as usr]
             [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.verdict-review-util :as verdict-review-util]
             [lupapalvelu.ya :as ya]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! ok?]]
@@ -36,7 +37,7 @@
    :states           states/all-states
    :user-roles       #{:authority}}
   [{:keys [application]}]
-  (ok :attachmentType (verdict/verdict-attachment-type application)))
+  (ok :attachmentType (verdict-review-util/verdict-attachment-type application)))
 
 (defcommand check-for-verdict
   {:description "Fetches verdicts from municipality backend system.

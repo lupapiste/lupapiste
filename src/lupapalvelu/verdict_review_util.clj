@@ -1,29 +1,43 @@
 (ns lupapalvelu.verdict-review-util
-  (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
-            [pandect.core :as pandect]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mime :as mime]
+            [pandect.core :as pandect]
             [sade.common-reader :refer [to-timestamp]]
             [sade.files :as files]
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.attachment :as attachment])
+            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]])
   (:import (java.net URL)
            (java.nio.charset StandardCharsets)))
 
 (defn verdict-attachment-type
+  "Function name is anachronistic. Currently also review attachment
+  types are supported."
   ([application] (verdict-attachment-type application "paatosote"))
-  ([{permit-type :permitType :as application} type]
-   (if (#{:P :R :ARK} (keyword permit-type))
-     {:type-group "paatoksenteko" :type-id type}
-     {:type-group "muut" :type-id type})))
+  ([{permit-type :permitType :as application} type-id]
+   (let [resolved (reduce-kv (fn [acc k v]
+                               (assoc acc k (name v)))
+                             {}
+                             (att-type/resolve-type permit-type type-id))]
+     (cond
+       (seq resolved)
+       resolved
+
+       (util/includes-as-kw? [:R :P :ARK] permit-type)
+       {:type-group "paatoksenteko" :type-id type-id}
+
+       :else
+       {:type-group "muut" :type-id type-id}))))
 
 (defn- attachment-type-from-krysp-type [type]
   (case (ss/lower-case type)
-    "paatosote" "paatosote"
-    "lupaehto" "muu"
+    "paatosote"                                "paatosote"
+    "katselmuksen_tai_tarkastuksen_poytakirja" "katselmuksen_tai_tarkastuksen_poytakirja"
+    "lupaehto"                                 "muu"
     "paatos"))
 
 (defn- content-disposition-filename

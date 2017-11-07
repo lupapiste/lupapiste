@@ -131,32 +131,6 @@
 (defn verdict-tab-action? [{action-name :action}]
   (boolean (#{:publish-verdict :check-for-verdict :process-ah-verdict :fetch-verdicts} (keyword action-name))))
 
-(defn verdict-attachment-type
-  ([application] (verdict-attachment-type application "paatosote"))
-  ([{permit-type :permitType :as application} type]
-   (if (#{:P :R :ARK} (keyword permit-type))
-     {:type-group "paatoksenteko" :type-id type}
-     {:type-group "muut" :type-id type})))
-
-(defn- attachment-type-from-krysp-type [type]
-  (case (ss/lower-case type)
-    "paatosote" "paatosote"
-    "lupaehto" "muu"
-    "paatos"))
-
-(defn- content-disposition-filename
-  "Extracts the filename from the Content-Disposition header of the
-  given respones. Decodes string according to the Server information."
-  [{headers :headers}]
-  (when-let [raw-filename (some->> (get headers "content-disposition")
-                                    (re-find #".*filename=\"?([^\"]+)")
-                                    last)]
-    (case (some-> (get headers "server") ss/trim ss/lower-case)
-      "microsoft-iis/7.5" (-> raw-filename
-                              (.getBytes StandardCharsets/ISO_8859_1)
-                              (String. StandardCharsets/UTF_8))
-      raw-filename)))
-
 (defn- get-poytakirja!
   "Fetches the verdict attachments listed in the verdict xml. If the
   fetch is successful, uploads and attaches them to the
