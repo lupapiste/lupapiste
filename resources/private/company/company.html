@@ -146,19 +146,6 @@
 
             <br/>
 
-            <h2 data-bind="ltext: 'register.company.invitation.denied.title'"></h2>
-
-            <div>
-              <input class="form-input checkbox"
-                     type="checkbox"
-                     id="invitationDeniedSelect"
-                     data-bind="checked: model().invitationDenied, enable: edit"
-                     data-test-id="checkbox-invitations-denied">
-              <label for="invitationDeniedSelect" data-bind="ltext: 'register.company.invitation.denied.label'" class="form-label-checkbox"/>
-            </div>
-
-            <br/>
-
             <div>
               <button data-bind="enable: canStartEdit, click: startEdit, ltext: 'edit'" type="button" class="btn btn-primary" data-test-id="company-details-edit"></button>
               <button data-bind="enable: canSubmit, click: submit" type="submit" class="btn btn-primary" data-test-id="company-details-save">
@@ -176,6 +163,22 @@
         <!-- =================== -->
 
         <div data-bind="if: tabs.visible('users')">
+
+          <h2 data-bind="ltext: 'register.company.invitation.denied.title'"></h2>
+
+          <div>
+            <input class="form-input checkbox"
+                   type="checkbox"
+                   id="invitationDeniedSelect"
+                   data-bind="checked: info.model().invitationDenied,
+                              enable: true,
+                              click: setDenied"
+                   data-test-id="checkbox-invitations-denied">
+            <label for="invitationDeniedSelect" data-bind="ltext: 'register.company.invitation.denied.label'" class="form-label-checkbox"/>
+            <span class="save-indicator" data-bind="saveIndicator: indicator"></span>
+          </div>
+
+          <br/>
 
           <span data-bind="text: loc('company.users.count',
                                       invitations().length + users().length,

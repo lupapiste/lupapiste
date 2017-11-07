@@ -32,11 +32,8 @@ User accept invite
 
 Company admin denies company user invitations
   Kaino logs in
-  Open company details
-  Wait Until  Element should be disabled  //div[@id='company-content']//button[@data-test-id='company-details-save']
-  Click enabled by test id  company-details-edit
+  Open company user listing
   Click enabled by test id  checkbox-invitations-denied
-  Click enabled by test id  company-details-save
   Logout
 
 Oragnization admin adds guest authority

@@ -394,6 +394,7 @@
     self.invitations = ko.observableArray([]);
     self.info        = new CompanyInfo(self);
     self.tabs        = new TabsModel(self.id);
+    self.indicator   = ko.observable(false).extend({notify: "always"});
 
     // Rewind history until we are no longer on the company page (or
     // we give up).
@@ -469,6 +470,15 @@
                                                  lyesTitle: "yes",
                                                  lnoTitle: "cancel"} });
     };
+
+    self.setDenied = function () {
+      ajax
+        .command("company-update", {company: self.id(), updates: {invitationDenied: this.info.model().invitationDenied()}})
+        .pending(self.pending)
+        .success(util.showSavedIndicator)
+        .call();
+      return true;
+    }
   }
 
   var company = new Company();
