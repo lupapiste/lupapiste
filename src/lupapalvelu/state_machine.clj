@@ -62,5 +62,13 @@
         (conj path state)
         (recur (first (graph state)) (conj path state))))))
 
-(defn application-state-seq [application]
-  (state-seq (state-graph application)))
+(defn application-state-seq
+  "State sequence of the application. The possible loops are removed, for example:
+  [:draft :open :submitted :sent :finished :appealed :finished]
+  -> [:draft :open :submitted :sent :finished]"
+  [application]
+  (loop [result []
+         [x & xs] (state-seq (state-graph application))]
+    (if (or (nil? xs) (util/includes-as-kw? xs x))
+      (conj result x)
+      (recur (conj result x) xs))))
