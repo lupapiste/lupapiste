@@ -28,6 +28,7 @@
     (give-verdict apikey verdict-given-application-ya-id) => ok?
     ;; R app
     (generate-documents verdict-given-application-r apikey)
+    (command apikey :update-app-bulletin-op-description :id verdict-given-application-r-id :description "otsikko julkipanoon") => ok?
     (command apikey :approve-application :id verdict-given-application-r-id :lang "fi") => ok?
     (give-verdict apikey verdict-given-application-r-id) => ok?
     ;; Jatkoaika permit can be applied only for YA type of applications

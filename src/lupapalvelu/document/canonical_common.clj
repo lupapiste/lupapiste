@@ -76,6 +76,11 @@
 (defn empty-strings-to-nil [v]
   (when-not (and (string? v) (ss/blank? v)) v))
 
+(defn positive-integer
+  "Returns nil if value cannot be converted to postive integer, else returns value itself."
+  [v]
+  (when (pos? (util/->int v)) v))
+
 (defn documents-by-type-without-blanks
   "Converts blank strings to nils and groups documents by schema name"
   [{documents :documents}]

@@ -19,7 +19,10 @@ Sonja prepares the application
 
 Sonja submits the application and gives it a verdict
   Submit application
-  Element should be visible  xpath=//button[@data-test-id="approve-application-summaryTab"]
+  Wait until  Element should be visible  //div[@id='application-requiredFieldSummary-tab']
+  ${BULLETIN_DESCR_VISIBLE}=  Run Keyword And Return Status  Test id visible  bulletin-op-description-summaryTab
+  Run Keyword If  ${BULLETIN_DESCR_VISIBLE}  Fill test id  bulletin-op-description-summaryTab  Toimenpideotsikko julkipanoon
+  Wait until  Element should be visible  xpath=//button[@data-test-id="approve-application-summaryTab"]
   Element should not be visible  xpath=//*[@data-test-id='change-permit-create-btn']
   Open tab  verdict
   Fetch verdict

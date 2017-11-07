@@ -159,18 +159,26 @@
                                 <span data-bind="ltext: 'caseFile.tab'"></span>
                               </a></li>
 
-                          <li data-bind="if: !_.isEmpty($root.application.id()) && $root.authorization.ok('inspection-summaries-for-application'),
-                                         css: {'active': $parent.selectedTabName() === 'inspectionSummaries'}">
-                            <a data-bind="click: changeTab" href="#" data-target="inspectionSummaries" data-test-id="application-open-inspectionSummaries-tab" class="link-btn">
-                              <span data-bind="ltext: 'inspectionSummaries.tab'"></span>
-                            </a>
-                          </li>
+                            <li data-bind="if: !_.isEmpty($root.application.id()) && $root.authorization.ok('inspection-summaries-for-application'),
+                                           css: {'active': $parent.selectedTabName() === 'inspectionSummaries'}">
+                              <a data-bind="click: changeTab" href="#" data-target="inspectionSummaries" data-test-id="application-open-inspectionSummaries-tab" class="link-btn">
+                                <span data-bind="ltext: 'inspectionSummaries.tab'"></span>
+                              </a>
+                            </li>
 
-                            <li data-bind="if: $root.authorization.ok('publish-bulletin-enabled'),
-                                           css: {'active': $parent.selectedTabName() === 'bulletin'}">
-                                <a data-bind="click: changeTab" href="#" data-target="bulletin" data-test-id="application-open-bulletin-tab" class="link-btn">
-                                  <span data-bind="ltext: 'bulletin'"></span>
-                                </a></li>
+                            <li data-bind="if: $root.authorization.ok('bulletin-for-application-verdict-enabled'),
+                                             css: {'active': $parent.selectedTabName() === 'bulletin'}">
+                              <a data-bind="click: changeTab" href="#" data-target="bulletin" data-test-id="application-open-bulletin-tab" class="link-btn">
+                                <span data-bind="ltext: 'bulletin'"></span>
+                              </a>
+                            </li>
+
+                            <li data-bind="if: $root.authorization.ok('ymp-publish-bulletin-enabled'),
+                                           css: {'active': $parent.selectedTabName() === 'ymp-bulletin'}">
+                              <a data-bind="click: changeTab" href="#" data-target="ymp-bulletin" data-test-id="application-open-ymp-bulletin-tab" class="link-btn">
+                                <span data-bind="ltext: 'bulletin'"></span>
+                              </a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -442,10 +450,10 @@
                   </div>
                   <!-- /ko -->
 
-                    <!-- Bulletin tab -->
-                    <!-- ko if: selectedTabName() === 'bulletin' && $root.authorization.ok('publish-bulletin-enabled') -->
-                    <div id="application-bulletin-tab" data-bind="with: application" class="tab-content">
-                        <div data-bind="component: {name: 'bulletin-tab',
+                    <!-- YMP Bulletin tab -->
+                    <!-- ko if: selectedTabName() === 'ymp-bulletin' && $root.authorization.ok('ymp-publish-bulletin-enabled') -->
+                    <div id="application-ymp-bulletin-tab" data-bind="with: application" class="tab-content">
+                        <div data-bind="component: {name: 'ymp-bulletin-tab',
                                                     params: {appId: id,
                                                              appState: state,
                                                              authModel: $root.authorization,
@@ -455,7 +463,17 @@
                     <!-- /ko -->
                     <!-- / Bulletin tab -->
 
-                    <script type="text/x-jquery-tmpl" id="verdicts-template">
+                  <!-- Generic Bulletin tab -->
+                  <!-- ko if: selectedTabName() === 'bulletin' && $root.authorization.ok('bulletin-for-application-verdict-enabled') -->
+                  <div id="application-bulletin-tab" data-bind="with: application" class="tab-content">
+                    <div data-bind="component: {name: 'generic-bulletin-tab',
+                                                params: {appId: id}}"></div>
+                  </div>
+
+                  <!-- /ko -->
+                  <!-- / Bulletin tab -->
+
+                  <script type="text/x-jquery-tmpl" id="verdicts-template">
                       <div class="application_section" data-bind="foreach: $root.verdictModel.verdicts">
 
                           <h2 class="application_section_header">
@@ -932,7 +950,8 @@
                                                               'class': LUPAPISTE.statusIcon(statusName),
                                                               'data-test-state': $data.state,
                                                               'title': loc(['task', statusName, 'title'])}"></i></td>
-                                            <td><a href="#" data-bind="click: openTask, text: displayName"></a></td>
+                                            <td><a href="#" class="task-title"
+                                                   data-bind="click: openTask, text: displayName"></a></td>
                                             <td data-bind="text: util.getIn($data, ['data', 'katselmus', 'pitoPvm', 'value'])"></td>
                                         </tr>
                                     </tbody>

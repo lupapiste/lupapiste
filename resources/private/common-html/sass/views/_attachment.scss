@@ -108,7 +108,7 @@ $previewHeight: 500px;
   .col1 {
     display: inline-block;
     padding-right: $marginM;
-    width: 49%;
+    width: 60%;
     vertical-align: top;
 
   }
@@ -116,7 +116,7 @@ $previewHeight: 500px;
   .col2 {
     display: inline-block;
     padding-left: $marginM;
-    width: 49%;
+    width: 40%;
     vertical-align: top;
     float: right;
   }
@@ -127,6 +127,7 @@ $previewHeight: 500px;
       padding-left: 0;
       padding-right: 0;
       margin-top: $marginS;
+      float: none;
     }
   }
 

@@ -4,12 +4,11 @@ Muistutus: {{statement-request-created}} sinulta on
 pyydetty lausuntoa lupahakemukseen osoitteessa {{address}},
 {{municipality}}.
 
-Lupaa haetaan toimenpiteelle {{operation}}. Lausunnolle asetettu
-määräaika {{due-date}} on umpeutunut.
+Lupaa haetaan toimenpiteelle {{operation}}. Lausunnolle on asetettu
+määräaika {{due-date}}.
 
-Määräajan umpeutumisesta huolimatta pääset vielä hetken ajan antamaan
-lausunnon klikkaamalla alla olevaa linkkiä. Jos linkki ei toimi,
-kopioi osoite ja liitä se selaimen osoiteriville.
+Pääset antamaan lausunnon klikkaamalla alla olevaa linkkiä. Jos linkki
+ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
 
 {{link}}
 

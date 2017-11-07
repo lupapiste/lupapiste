@@ -74,6 +74,20 @@
         :length height
         :pd-image-x-object pd-image-x-object}])))
 
+(defn- read-png-image [^ImageReader reader ^File png-file ^PDDocument doc]
+  (let [image (.read reader 0)
+        pd-image-x-object (LosslessFactory/createFromImage doc image)
+        width (.getWidth pd-image-x-object)
+        height (.getHeight pd-image-x-object)
+        metadata (.getImageMetadata reader 0)
+        tree ^IIOMetadataNode (.getAsTree metadata IIOMetadataFormatImpl/standardMetadataFormatName)
+        dimension ^IIOMetadataNode (-> tree (.getElementsByTagName "Dimension") (.item 0))]
+    [{:width-ppi (or (pixels-per-inch dimension "HorizontalPixelSize") 72.0)
+      :length-ppi (or (pixels-per-inch dimension "VerticalPixelSize") 72.0)
+      :width width
+      :length height
+      :pd-image-x-object pd-image-x-object}]))
+
 (defn- read-images [^File file image-format ^PDDocument doc]
   {:post [(sequential? %)]}
   (with-open [in (FileImageInputStream. file)]
@@ -82,7 +96,8 @@
       (.setInput reader in false false)
       (case image-format
         :jpeg (read-jpeg-image reader file doc)
-        :tiff (doall (read-tiff-images reader doc))))))
+        :tiff (doall (read-tiff-images reader doc))
+        :png (read-png-image reader file doc)))))
 
 (defn- set-metadata-to-pdf! [^PDDocument doc pdf-title]
   (with-open [xmp-os (ByteArrayOutputStream.)

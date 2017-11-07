@@ -2,7 +2,8 @@
   (:require [clojure.string :as s]
             [cljs-time.format :as tf]
             [cljs-time.coerce :as tc]
-            [cljs-time.core :as t]))
+            [cljs-time.core :as t]
+            [clojure.string :as str]))
 
 (defn get-current-language []
   (.getCurrentLanguage js/loc))
@@ -98,3 +99,15 @@
 
 (defn empty-label []
   [:label nbsp])
+
+(defn open-oskari-map [{id :id [x y] :location municipality :municipality}]
+  (let [features "addPoint=0&addArea=0&addLine=0&addCircle=0&addEllipse=0"
+        params   [(str "build=" js/LUPAPISTE.config.build)
+                  (str "id="  id)
+                  (str "coord=" x  "_" y)
+                  "zoomLevel=12"
+                  (str "lang="  (js/loc.getCurrentLanguage))
+                  (str "municipality="  municipality)
+                  features]
+        url      (str "/oskari/fullmap.html?" (str/join "&" params))]
+    (js/window.open url)))

@@ -46,7 +46,7 @@ footer {
 
   .lupapiste-brand {
     .footer-box {
-      @include nav-link($link: $blue, $hover: white);
+      @include nav-link($link: $orange, $hover: white);
       color: $blue;
       a {
         vertical-align: middle;

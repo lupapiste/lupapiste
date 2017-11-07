@@ -237,6 +237,7 @@
 (def simple-osoite [{:name "osoite"
                      :type :group
                      :validator :address
+                     :address-type :contact
                      :blacklist [turvakielto]
                      :body [{:name "katu" :type :string :subtype :vrk-address :required true :i18nkey "osoite.katu"}
                             postinumero
@@ -767,7 +768,7 @@
                        {:name "koneellinenilmastointiKytkin" :type :checkbox :i18nkey "koneellinenilmastointiKytkin"}
                        {:name "lamminvesiKytkin" :type :checkbox :i18nkey "lamminvesiKytkin"}
                        {:name "aurinkopaneeliKytkin" :type :checkbox :i18nkey "aurinkopaneeliKytkin"}
-                       {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size :s :unit :kpl :i18nkey "saunoja"}
+                       {:name "saunoja" :type :string :subtype :number :min 0 :max 99 :size :s :unit :kpl :i18nkey "saunoja"} ; max value is resricted by vrk validators
                        {:name "vaestonsuoja" :type :string :subtype :number :min 0 :max 99999 :size :s :unit :hengelle :i18nkey "vaestonsuoja"}
                        {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox :i18nkey "liitettyJatevesijarjestelmaanKytkin"}]})
 

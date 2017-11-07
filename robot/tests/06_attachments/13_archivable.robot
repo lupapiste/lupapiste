@@ -63,9 +63,9 @@ Pena adds PDF attachment that becomes archivable
   # There will be archive error if pdf2pdf is not installed locally
   No archive error  ennakkoluvat_ja_lausunnot.johtokartta
 
-Pena adds PNG attachment that is not archivable
+Pena adds PNG attachment and it is now archivable
   Upload attachment  ${PNG_TESTFILE_PATH}  Suunnittelutarveratkaisu  Plan  ${EMPTY}
-  Archive error   ennakkoluvat_ja_lausunnot.suunnittelutarveratkaisu  ${invalid}
+  No archive error   ennakkoluvat_ja_lausunnot.suunnittelutarveratkaisu
   [Teardown]  Logout
 
 # --------------------

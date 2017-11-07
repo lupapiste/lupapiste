@@ -268,6 +268,8 @@
                  count) => 1)))
 
       (fact "Approve application"
+        (if (#{"kerrostalo-rivitalo" "aloitusoikeus"} operation-name )
+          (command sonja :update-app-bulletin-op-description :id application-id :description "otsikko julkipanoon") => ok?)
         (let [resp (command sonja :approve-application :id application-id :lang "fi")]
           resp => ok?
           (:integrationAvailable resp) => true))
@@ -318,6 +320,7 @@
              application-id (:id application)
              first-attachment (get-in application [:attachments 0])]
             (:sent first-attachment) => nil
+            (command sonja :update-app-bulletin-op-description :id application-id :description "otsikko julkipanoon") => ok?
             (command sonja :approve-application :id application-id :lang "fi") => ok?
 
             (let [application (query-application sonja application-id) => truthy]
@@ -464,6 +467,7 @@
 
        (command sonja :update-doc :id application-id :doc paasuunnittelija :updates [["henkilotiedot.etunimi" "etu"]]) => ok?
 
+       (command sonja :update-app-bulletin-op-description :id application-id :description "otsikko julkipanoon") => ok?
        (command sonja :approve-application :id application-id :lang "fi") => ok?
 
        (final-xml-validation "approved designers are tranferred"

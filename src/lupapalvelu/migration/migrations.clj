@@ -2670,7 +2670,9 @@
                          {$set {:archived.completed (System/currentTimeMillis)}}))
 
 (defn- add-wgs84-coordinates [drawing]
-  (assoc drawing :geometry-wgs84 (draw/wgs84-geometry drawing)))
+  (if-let [geom (draw/wgs84-geometry drawing)]
+    (assoc drawing :geometry-wgs84 geom)
+    (dissoc drawing :geometry-wgs84)))
 
 (defmigration add-wgs84-coordinates-for-drawings
   {:apply-when (pos? (mongo/count :applications
@@ -3516,6 +3518,25 @@
 (defmigration hankkeen-kuvaus-rakennuslupa-depricated
   {:apply-when (pos? (mongo/count :applications {:documents.schema-info.name "hankkeen-kuvaus-rakennuslupa"}))}
   (update-applications-array :documents hankkeen-kuvaus-rakennuslupa->hankkeen-kuvaus {:documents.schema-info.name "hankkeen-kuvaus-rakennuslupa"}))
+
+(defmigration enable-automatic-review-fetch-for-all-organizations
+  {:apply-when (pos? (mongo/count :organizations {:automatic-review-fetch-enabled {$exists false}}))}
+  (mongo/update-by-query :organizations
+                         {:automatic-review-fetch-enabled {$exists false}}
+                         {$set {:automatic-review-fetch-enabled true}}))
+
+(def backend-systems-r (util/read-edn-resource "migrations/backend_systems_r.edn"))
+
+(defmigration set-r-organization-backend-systems
+  (run! #(mongo/update :organizations
+                       {:scope {$elemMatch {:municipality % :permitType "R"}} :krysp.R {$exists true}}
+                       {$set {:krysp.R.backend-system (backend-systems-r %)}})
+        (keys backend-systems-r)))
+
+(defmigration recalculate-wgs84-coordinates-for-drawings
+  (update-applications-array :drawings
+                             add-wgs84-coordinates
+                             {:drawings.geometry {$exists true, $ne ""}}))
 
 ;;
 ;; ****** NOTE! ******

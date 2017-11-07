@@ -35,7 +35,8 @@
             [sade.municipality :as muni]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.validators :as validators]))
+            [sade.validators :as validators]
+            [lupapalvelu.foreman :as foreman]))
 
 (defn- has-asianhallinta-operation [{{:keys [primaryOperation]} :application}]
   (when-not (operations/get-operation-metadata (:name primaryOperation) :asianhallinta)
@@ -87,9 +88,20 @@
       handlers
       (conj handlers (user/create-handler nil general-id user)))))
 
+(defn- ensure-bulletin-op-description-is-set-if-needed
+  [{{organizationId :organization permit-type :permitType municipality :municipality primaryOperation :primaryOperation
+     bulletinOpDescription :bulletinOpDescription :as application} :application}]
+  (when (and organizationId
+             (org/bulletins-enabled? (org/get-organization organizationId) permit-type municipality)
+             (not (foreman/foreman-app? application))
+             (not (= (:name primaryOperation) "suunnittelijan-nimeaminen"))
+             (ss/blank? bulletinOpDescription))
+    (fail :error.invalid-value)))
+
 (defcommand approve-application
   {:parameters       [id lang]
-   :pre-checks       [temporary-approve-prechecks]
+   :pre-checks       [temporary-approve-prechecks
+                      ensure-bulletin-op-description-is-set-if-needed]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles       #{:authority}
    :notified         true

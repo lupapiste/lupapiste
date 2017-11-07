@@ -4,6 +4,7 @@
             [lupapalvelu.ui.matti.verdict-templates :as verdict-templates]
             [lupapalvelu.ui.matti.verdicts :as verdicts]
             [lupapalvelu.ui.printing-order.composer :as printing-order-composer]
+            [lupapalvelu.ui.bulletins.bulletin-preamble :as bulletin-preamble]
             [lupapalvelu.ui.bulletins.local-bulletins :as local-bulletins]
             [lupapalvelu.ui.company.reports :as company-reports]))
 
@@ -15,6 +16,7 @@
         verdicts/mount-component
         printing-order-composer/mount-component
         local-bulletins/mount-component
+        bulletin-preamble/mount-component
         company-reports/mount-component]
 
        (run! (fn [mount-fn]

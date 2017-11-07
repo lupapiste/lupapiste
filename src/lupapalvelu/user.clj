@@ -684,6 +684,34 @@
     {:username (:username user)
      :password pw}))
 
+(def ^:private system-user-sanization-regexp
+  (->> (range 97 123)
+       (map char)
+       (apply str)
+       (format "[^%s-]+")
+       re-pattern))
+
+(defn municipality-name->system-user-email [name]
+  (format "jarjestelmatunnus.%s@lupapiste.fi"
+          (-> (ss/lower-case name)
+              (ss/replace #"\s" "")
+              (ss/replace #"[\u00e4\u00e5]" "a")
+              (ss/replace #"[\u00f6]" "o")
+              (ss/replace system-user-sanization-regexp "_"))))
+
+(defn create-system-user [name email organization-ids]
+  (->> {:id (mongo/create-id)
+        :username email
+        :email email
+        :firstName  "J\u00e4rjestelm\u00e4tunnus"
+        :lastName  name
+        :role  :authority
+        :enabled true
+        :orgAuthz  (zipmap organization-ids (repeat ["reader"]))
+        :language :fi}
+       (mongo/insert :users))
+  {:username email})
+
 (defn get-or-create-user-by-email [email current-user]
   (let [email (ss/canonize-email email)]
     (or

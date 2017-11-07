@@ -116,3 +116,25 @@
                              {:firstName "first-name" :lastName "last-name" :general true}
                              {:firstName "other-first-name-2" :lastName "other-last-name-2"}]})
     => {:henkilo {:nimi {:etunimi "first-name", :sukunimi "last-name"}}}))
+
+(facts positive-integer
+  (fact "positive integer string"
+    (positive-integer "1") => "1")
+
+  (fact "positive integer long"
+    (positive-integer 1000) => 1000)
+
+  (fact "positive integer keyword"
+    (positive-integer :9) => :9)
+
+  (fact "negative integer string"
+    (positive-integer "-1") => nil)
+
+  (fact "negative integer long"
+    (positive-integer -1) => nil)
+
+  (fact "0 as string"
+    (positive-integer "0") => nil)
+
+  (fact "nil"
+    (positive-integer nil) => nil))

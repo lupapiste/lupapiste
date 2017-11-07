@@ -1,17 +1,28 @@
 (ns lupapalvelu.ui.bulletins.local-bulletins
   (:require [rum.core :as rum]
             [lupapalvelu.ui.bulletins.state :as state]
-            [lupapalvelu.ui.common :as common]))
+            [lupapalvelu.ui.common :as common]
+            [lupapalvelu.ui.hub :as hub]
+            [sade.shared-util :as util]))
 
 (defonce args (atom {}))
 
 (defn init
   [init-state props]
-  (reset! state/current-organization "753-R")
+  (reset! state/current-organization (:organization @args))
+  (common/query :local-bulletins-page-settings
+                (fn [{:keys [enabled texts]}]
+                  (when-not enabled
+                    (set! js/window.location "/"))
+                  (reset! state/local-bulletins-page-settings {:texts texts}))
+                :organization @state/current-organization)
   (common/query :local-application-bulletins
                 (fn [{:keys [data]}] (reset! state/local-bulletins data))
                 :organization @state/current-organization :searchText "" :page 1)
   init-state)
+
+(defn open-bulletin [id]
+  (js/pageutil.openPage "bulletin" id))
 
 (rum/defc bulletins-table < rum/reactive
   [_]
@@ -28,31 +39,41 @@
        [:th (common/loc :bulletin.rectification-period-ends)]]]
       [:tbody
        (for [{:keys [id address verdictGivenAt application-id
-                     appealPeriodStartsAt bulletin-op-description]
-              {verdictData :data category :category} :matti-verdict}  bulletins]
+                     appealPeriodEndsAt bulletinOpDescription]
+              {:keys [category code status section contact]} :verdictData}  bulletins]
          [:tr
-          {:key id}
-          [:td (str (:verdict-section verdictData) " "
-                    (common/loc (str "matti-" category ".verdict-code." (:verdict-code verdictData))))]
+          {:key id
+           :on-click #(open-bulletin id)}
+          [:td (str section " "
+                    (when (and category code)
+                      (common/loc (str "matti-" category ".verdict-code." code)))
+                    (when status
+                      (common/loc (str "verdict.status." status))))]
           [:td (or application-id id)]
           [:td address]
-          [:td bulletin-op-description]
-          [:td (:contact verdictData)]
+          [:td bulletinOpDescription]
+          [:td contact]
           [:td (common/format-timestamp verdictGivenAt)]
-          [:td (common/format-timestamp appealPeriodStartsAt)]])]]))
+          [:td (common/format-timestamp appealPeriodEndsAt)]])]]))
 
-(rum/defc local-bulletins < {:init         init}
+(rum/defc heading < rum/reactive
+  [_]
+  (let [lang  (common/get-current-language)
+        texts (get-in (rum/react state/local-bulletins-page-settings) [:texts (keyword lang)])]
+    [:div
+     [:div.full.content.orange-bg
+      [:div.content-center
+       [:h1.slogan.municipal-heading (:heading1 texts)] ; NB: These will be read from db, no need now for localization
+       [:h2.slogan.municipal-heading (:heading2 texts)]]]
+     [:div.full.content
+      [:div.content-center.municipal-caption
+       (for [[idx paragraph] (util/indexed (:caption texts))]
+         [:p {:key idx} paragraph])]]]))
+
+(rum/defc local-bulletins < {:init init}
   [_]
   [:div
-   [:div.full.content.orange-bg
-    [:div.content-center
-     [:h1.slogan.municipal-heading "Kunnan julkipanolista"] ; NB: These will be read from db, no need now for localization
-     [:h2.slogan.municipal-heading "Kunnan julkipanolista"]]]
-   [:div.full.content
-    [:div.content-center.municipal-caption
-     [:p "Kunnan rakennuslupapäätökset annetaan julkipanon jälkeen, jolloin niiden katsotaan tulleen asianosaisten tietoon. Oikaisuvaatimusaika on 30 päivää."]
-     [:p "Kunnan rakennuslupapäätökset annetaan julkipanon jälkeen, jolloin niiden katsotaan tulleen asianosaisten tietoon."]
-     [:p "Kunnan rakennuslupapäätökset annetaan julkipanon jälkeen, jolloin niiden katsotaan tulleen asianosaisten tietoon."]]]
+   (heading)
    [:div.full.content
     [:div.content-center
      (bulletins-table)]]])
@@ -62,5 +83,5 @@
              (.getElementById js/document (:dom-id @args))))
 
 (defn ^:export start [domId componentParams]
-  (swap! args assoc :dom-id (name domId))
+  (swap! args assoc :dom-id (name domId) :organization (aget componentParams "organization"))
   (mount-component))

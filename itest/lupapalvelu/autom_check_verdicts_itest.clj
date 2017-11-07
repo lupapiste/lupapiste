@@ -39,6 +39,9 @@
           application-verdict-given     (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 19")
           application-id-verdict-given  (:id application-verdict-given)]
 
+      (local-command sonja :update-app-bulletin-op-description :id application-id-sent :description "otsikko julkipanoon") => ok?
+      (local-command sonja :update-app-bulletin-op-description :id application-id-verdict-given :description "otsikko julkipanoon") => ok?
+
       (local-command sonja :approve-application :id application-id-sent :lang "fi") => ok?
       (local-command sonja :approve-application :id application-id-verdict-given :lang "fi") => ok?
       (give-local-verdict sonja application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?

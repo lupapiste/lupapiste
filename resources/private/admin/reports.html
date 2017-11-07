@@ -65,28 +65,36 @@
                 <thead>
                   <tr>
                     <th>Lupatyyppi</th>
-                    <th>Lukum&auml;&auml;r&auml;</th>
+                    <th>Hakemukset lkm</th>
+                    <th>Toimenpiteet lkm</th>
                   </tr>
                 </thead>
                 <tbody data-bind="foreach: results">
                   <tr>
                     <td>
+                      <!-- ko if: $data._id === 'R_prev-permit' -->
+                      <span data-bind="ltext: 'operations.aiemmalla-luvalla-hakeminen'"></span>
+                      <!-- /ko -->
+                      <!-- ko ifnot: $data._id === 'R_prev-permit' -->
                       <span data-bind="ltext: $data.permitType"></span>
+                      <!-- /ko -->
                       <!-- ko foreach: $data.operations -->
                       <p>
                         <i>
-                          - <span data-bind="ltext: 'operations.' + $data._id"></span>: <span data-bind="text: $data.count"></span> kpl
+                          - <span data-bind="ltext: 'operations.' + $data._id"></span>: <span data-bind="text: $data.countApp"></span> kpl
                         </i>
                       </p>
                       <!-- /ko -->
                     </td>
-                    <td style="vertical-align: top"><span data-bind="text: $data.count"></span></td>
+                    <td style="vertical-align: top"><span data-bind="text: $data.countApp"></span></td>
+                    <td style="vertical-align: top"><span data-bind="text: $data.countOp"></span></td>
                   </tr>
                 </tbody>
                 <tfoot>
                   <tr>
                     <th>Yhteens&auml;</th>
-                    <th><span data-bind="text: totalCount"></span></th>
+                    <th><span data-bind="text: totalCountApp"></span></th>
+                    <th><span data-bind="text: totalCountOp"></span></th>
                   </tr>
                 </tfoot>
               </table>

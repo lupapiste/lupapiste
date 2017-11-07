@@ -54,7 +54,7 @@ Applicant cannot create foreman applications before verdict is given
   Element should not be visible  xpath=//div[@data-test-id="invite-foreman-button-info"]
 
 Applicant sets his info to the applicant document
-  Click by test id  hakija-r_append_btn
+  Scroll and click test id  hakija-r_append_btn
   Wait until  Select From List  xpath=(//section[@data-doc-type="hakija-r"])[2]//div[@data-select-one-of="henkilo"]//select[@data-test-id="henkilo.userId"]  Panaani Pena
   Wait Until  Textfield Value Should Be  xpath=(//section[@data-doc-type="hakija-r"])[2]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Pena
   Logout
@@ -69,9 +69,9 @@ Sonja can invite foremen to application
   Element should not be visible  xpath=//div[@data-test-id="invite-foreman-authority-info"]
 
 Sonja invites foreman Teppo to application
-  Click by test id  invite-foreman-button
+  Scroll and click test id  invite-foreman-button
   Input Text  invite-foreman-email  teppo@example.com
-  Click by test id  application-invite-foreman
+  Scroll and click test id  application-invite-foreman
   Wait until  Click by test id  application-invite-foreman-close-dialog
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
   ${foremanAppId} =  Get Text  xpath=//section[@id='application']//span[@data-test-id='application-id']
@@ -228,7 +228,7 @@ Applicant invites foreman Mikko to application
   Open project application
   Open tab  parties
   Open foreman accordions
-  Click by test id  invite-foreman-button
+  Scroll and click test id  invite-foreman-button
   Input Text  invite-foreman-email  mikko@example.com
   Click by test id  application-invite-foreman
   Wait until  Click by test id  application-invite-foreman-close-dialog

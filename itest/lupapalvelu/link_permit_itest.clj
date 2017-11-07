@@ -128,9 +128,15 @@
 
     (fact "Application matches for dropdown selection contents do not include the applications that have a link-permit relation to the current application"
       (let [matches-resp (query apikey :app-matches-for-link-permits :id test-application-id) => ok?
-            matches (:app-links matches-resp)]
+            matches (:app-links matches-resp)
+            first-match (first matches)]
         (count matches) => 3
-        (-> matches first :id) => approved-application-id))
+        (fact "id"
+          (:id first-match) => approved-application-id)
+        (fact "address"
+          (:address first-match) => (:address approved-application))
+        (fact "primaryOperation"
+          (:primaryOperation first-match) => (get-in approved-application [:primaryOperation :name]))))
 
     (facts "YA"
       (fact "Sijoitussopimus is insert as linked agreement ot tyolupa application"

@@ -17,6 +17,7 @@
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
+            [lupapalvelu.action :refer [*created-timestamp-for-test-actions*]]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.document.tools :as tools]
@@ -506,6 +507,7 @@
   [apikey & args]
   (let [id    (apply create-app-id apikey args)
         _     (command apikey :submit-application :id id)
+        _     (command apikey :update-app-bulletin-op-description :id id :description "otsikko julkipanoon")
         resp  (command apikey :approve-application :id id :lang "fi")]
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
@@ -577,6 +579,10 @@
 
 (defn local-query [apikey query-name & args]
   (apply execute-local apikey api-common/execute-query query-name args))
+
+(defn local-query-with-timestamp [ts apikey query-name & args]
+  (binding [*created-timestamp-for-test-actions* ts]
+    (apply execute-local apikey api-common/execute-query query-name args)))
 
 (defn create-local-app
   "Runs the create-application command locally, returns reply map. Use ok? to check it."

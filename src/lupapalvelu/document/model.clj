@@ -647,25 +647,26 @@
       tools/wrapped)))
 
 (defn ->yritys [{:keys [firstName lastName email phone address1 zip po
-                        turvakieltokytkin name y netbill ovt pop allowDirectMarketing]}
-                & {:keys [with-empty-defaults?]}]
+                        turvakieltokytkin name y netbill ovt pop allowDirectMarketing
+                        contactAddress contactZip contactPo]}
+                & {:keys [with-empty-defaults? contact-address?]}]
   {:pre [(good-flag? turvakieltokytkin) (good-flag? allowDirectMarketing)]}
   (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
     (->
-      {:yritysnimi                                    (wrap name)
-       :liikeJaYhteisoTunnus                          (wrap y)
-       :osoite {:katu                                 (wrap address1)
-                :postinumero                          (wrap zip)
-                :postitoimipaikannimi                 (wrap po)}
-       :yhteyshenkilo {:henkilotiedot {:etunimi       (wrap firstName)
-                                       :sukunimi      (wrap lastName)
-                                       :turvakieltoKytkin (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
-                       :yhteystiedot {:email          (wrap email)
-                                      :puhelin        (wrap phone)}
-                       :kytkimet {:suoramarkkinointilupa (when (or allowDirectMarketing with-empty-defaults?) (boolean allowDirectMarketing))}}
-       :verkkolaskutustieto {:ovtTunnus               (wrap ovt)
-                             :verkkolaskuTunnus       (wrap netbill)
-                             :valittajaTunnus         (wrap pop)}}
+      {:yritysnimi           (wrap name)
+       :liikeJaYhteisoTunnus (wrap y)
+       :osoite               {:katu                 (wrap (if (and contact-address? (not (empty? contactAddress))) contactAddress address1))
+                              :postinumero          (wrap (if (and contact-address? (not (empty? contactZip))) contactZip zip))
+                              :postitoimipaikannimi (wrap (if (and contact-address? (not (empty? contactPo))) contactPo po))}
+       :yhteyshenkilo        {:henkilotiedot {:etunimi           (wrap firstName)
+                                              :sukunimi          (wrap lastName)
+                                              :turvakieltoKytkin (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
+                              :yhteystiedot  {:email   (wrap email)
+                                              :puhelin (wrap phone)}
+                              :kytkimet      {:suoramarkkinointilupa (when (or allowDirectMarketing with-empty-defaults?) (boolean allowDirectMarketing))}}
+       :verkkolaskutustieto  {:ovtTunnus         (wrap ovt)
+                              :verkkolaskuTunnus (wrap netbill)
+                              :valittajaTunnus   (wrap pop)}}
       util/strip-nils
       util/strip-empty-maps
       tools/wrapped)))

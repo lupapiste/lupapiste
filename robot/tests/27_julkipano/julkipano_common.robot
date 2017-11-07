@@ -42,7 +42,7 @@ Load more bulletins
   Wait until  Element should not be visible  //span[@data-test-id='bulletins-left'][contains(text(), '${initallyBulletinsLeft}')]
 
 Publish bulletin
-  Open tab  bulletin
+  Open tab  ymp-bulletin
   ${TODAY_DD_MM_YYYY} =  Convert Date  ${CURRENT_DATETIME}  %d.%m.%Y
   ${MONTH_FROM_NOW} =    Add time to date  ${CURRENT_DATETIME}  30 days  %d.%m.%Y
   Wait until  Element should be visible  //button[@data-test-id='publish-bulletin']
@@ -51,12 +51,12 @@ Publish bulletin
   Input text with jQuery  input[name="proclamationEndsAt"]  ${MONTH_FROM_NOW}
   Input text with jQuery  textarea[name="proclamationText"]  foobar
   Wait until  Element should be enabled  //button[@data-test-id='publish-bulletin']
-  Click by test id  publish-bulletin
+  Scroll and click test id  publish-bulletin
 
 Create application and publish bulletin
   [Arguments]  ${address}  ${propertyId}
   Create application with state  ${address}  ${propertyId}  lannan-varastointi  sent
-  Open tab  bulletin
+  Open tab  ymp-bulletin
   ${TODAY_DD_MM_YYYY} =  Convert Date  ${CURRENT_DATETIME}  %d.%m.%Y
   ${MONTH_FROM_NOW} =    Add time to date  ${CURRENT_DATETIME}  30 days  %d.%m.%Y
   Wait until  Element should be visible  //button[@data-test-id='publish-bulletin']
@@ -79,11 +79,11 @@ Open bulletin by index
   ${address}=  Get text  //table[@id='application-bulletins-list']//tr[${idx}]/td[3]
   ${address}=  Convert to upper case  ${address}
   Click element  //table[@id='application-bulletins-list']/tbody/tr[${idx}]
-  Wait until  Element text should be  //div[@id='bulletin-component']//*[@data-test-id='bulletin-address']  ${address}
+  Wait until  Element text should be  //div[@id='ymp-bulletin-component']//*[@data-test-id='bulletin-address']  ${address}
 
 Bulletin state is
   [Arguments]  ${state}
-  ${elemStateVal}=  Get Element Attribute  //div[@id='bulletin-component']//div[@data-test-id='bulletin-state']@data-test-state
+  ${elemStateVal}=  Get Element Attribute  //div[@id='ymp-bulletin-component']//div[@data-test-id='bulletin-state']@data-test-state
   Should Be Equal As Strings  ${state}  ${elemStateVal}
 
 Create application with attachment and publish it as bulletin
@@ -117,18 +117,18 @@ Create sent application
   Create application with state  ${address}  ${propertyId}  koeluontoinen-toiminta  sent
 
 Bulletin shows as proclaimed
-  Open tab  bulletin
+  Open tab  ymp-bulletin
   Wait until  Element Text Should Be  xpath=//p[@data-test-id='bulletin-state-paragraph']  Hakemuksen tila Julkipano-sivustolla: Kuulutettavana
 
 Bulletin not proclaimed but can be moved to verdict given
-  Open tab  bulletin
+  Open tab  ymp-bulletin
   Wait until  Element should not be visible  xpath=//p[@data-test-id='bulletin-state-paragraph']
   Wait until  Element should not be visible  xpath=//table[@data-test-id='bulletin-versions-table']
   Element should be visible  xpath=//div[@data-test-id='move-to-verdict-given-fields']
   Element text should be  xpath=//div[@data-test-id='move-to-verdict-given-fields']/p  Hakemus julkaistaan seuraavaksi tilaan: Päätös annettu
 
 Bulletin shows as proclaimed and can be moved to verdict given
-  Open tab  bulletin
+  Open tab  ymp-bulletin
   Wait until  Element Text Should Be  xpath=//p[@data-test-id='bulletin-state-paragraph']  Hakemuksen tila Julkipano-sivustolla: Kuulutettavana  Hakemus julkaistaan seuraavaksi tilaan: Päätös annettu
 
 Move bulletin to verdict given
@@ -143,7 +143,7 @@ Move bulletin to verdict given
   Click by test id  publish-bulletin
 
 Bulletin shows as verdict given and ce be moved to final
-  Open tab  bulletin
+  Open tab  ymp-bulletin
   Wait until  Element Text Should Be  xpath=//p[@data-test-id='bulletin-state-paragraph']  Hakemuksen tila Julkipano-sivustolla: Päätös annettu  Hakemus julkaistaan seuraavaksi tilaan: Lainvoimainen
 
 Bulletin verdict detail list should have rows

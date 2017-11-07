@@ -125,6 +125,21 @@
     }
   });
 
+
+  ko.computed(function() {
+    var bulletinOpDescription = applicationModel.bulletinOpDescription();
+    if (!isInitializing && authorizationModel.ok("update-app-bulletin-op-description")) {
+      ajax.command("update-app-bulletin-op-description", {id: currentId, description: bulletinOpDescription})
+        .success(function() {
+          applicationModel.reload();
+          applicationModel.opDescriptionIndicator({type: "saved"});
+        })
+      .error(util.showSavedIndicator)
+      .processing(applicationModel.processing)
+      .call();
+    }
+  });
+
   function initAvailableTosFunctions(organizationId) {
     tosFunctions([]);
     if (authorizationModel.ok("available-tos-functions")) {
@@ -211,6 +226,7 @@
       // Plain data
       applicationModel._js = app;
 
+      applicationModel.bulletinOpDescription(""); //tempfix
       initWarrantyDates(app);
 
       // Update observables
@@ -348,6 +364,7 @@
 
           }, []));
       applicationModel.calendarNotificationIndicator(pendingCalendarNotifications.length);
+      applicationModel.opDescriptionIndicator(null);
 
       subscribeWarrantyDates(app, applicationModel);
 

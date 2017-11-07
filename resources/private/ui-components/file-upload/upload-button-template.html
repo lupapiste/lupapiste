@@ -7,7 +7,7 @@
   <label data-bind="attr: {'for': labelFor,
                     'class': options.buttonClass},
                     css: {waiting: waiting},
-                    visible: !upload.readOnly,
+                    visible: !ko.unwrap(upload.readOnly),
                     testId: options.testId + '-label'">
     <i data-bind="attr: {'class': options.buttonIcon}"></i>
     <i class="wait spin lupicon-refresh"></i>

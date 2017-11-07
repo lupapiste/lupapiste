@@ -2,13 +2,17 @@
   "use strict";
   window.lupapisteApp = new LUPAPISTE.App({startPage: "local-bulletins",
                                            allowAnonymous: true,
-                                           showUserMenu: false});
+                                           showUserMenu: false,
+                                           componentPages: ["bulletin"]});
+
   $(function() {
       lupapisteApp.domReady();
       lupapisteApp.setTitle("Julkipano");
 
       var components = [
-          {name: "local-bulletins"}];
+          {name: "local-bulletins-wrapper"},
+          {name: "local-bulletins"},
+          {name: "application-bulletin"}];
 
       ko.registerLupapisteComponents(components);
 

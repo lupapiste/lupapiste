@@ -385,9 +385,13 @@
    :pre-checks       [app/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (when (sequential? drawings)
-    (update-application command
-                        {$set {:modified created
-                               :drawings (map (fn [drawing] (assoc drawing :geometry-wgs84 (draw/wgs84-geometry drawing))) drawings)}})))
+    (let [drawings-with-geojson (map #(assoc % :geometry-wgs84 (draw/wgs84-geometry %)) drawings)]
+      (if (every? :geometry-wgs84 drawings-with-geojson)
+        (update-application command
+                            {$set {:modified created
+                                   :drawings drawings-with-geojson}})
+        ; We don't accept invalid GeoJSON, as then the data would not be archived nor searchable by document search
+        (fail :error.invalid-drawing)))))
 
 (defn- make-marker-contents [id lang {:keys [location] :as app}]
   (merge
@@ -707,17 +711,16 @@
                                                                           :secondaryOperations.name {$nin ["ya-jatkoaika"]}
                                                                           :primaryOperation.name {$nin ["ya-jatkoaika"]}})
 
-                              [:permitType :address :propertyId])
+                              [:permitType :address :propertyId :primaryOperation.name])
         ;; add the text to show in the dropdown for selections
-        enriched-results (map
-                           (fn [r] (assoc r :text (str (:address r) ", " (:id r))))
-                           results)
+        enriched-results (map (fn [r] (assoc r :primaryOperation (get-in r [:primaryOperation :name])))
+                              results)
         ;; sort the results
         same-property-id-fn #(= propertyId (:propertyId %))
         with-same-property-id (vec (filter same-property-id-fn enriched-results))
         without-same-property-id (sort-by :text (vec (remove same-property-id-fn enriched-results)))
         organized-results (flatten (conj with-same-property-id without-same-property-id))
-        final-results (map #(select-keys % [:id :text :propertyId]) organized-results)]
+        final-results (map #(select-keys % [:id :address :propertyId :primaryOperation]) organized-results)]
     (ok :app-links final-results)))
 
 (defn- validate-linking [{app :application :as command}]

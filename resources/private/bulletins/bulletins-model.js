@@ -2,7 +2,7 @@ LUPAPISTE.BulletinsModel = function(params) {
   "use strict";
   var self = this;
 
-  var supportedPages = ["bulletins", "bulletin"];
+  var supportedPages = ["bulletins", "bulletin", "ymp-bulletin"];
 
   self.page = ko.observable().extend({
     limited: {values: supportedPages, defaultValue: "bulletins"}
@@ -31,12 +31,14 @@ LUPAPISTE.BulletinsModel = function(params) {
     hub.send("bulletinService::fetchBulletins");
   });
 
-  hub.onPageLoad("bulletin", function(e) {
-    self.bulletinId(_.head(e.pagePath));
-    self.page(e.pageId);
-    self.pagePath(e.pagePath);
-    window.lupapisteApp.setTitle("Julkipano");
-    hub.send("bulletinService::fetchBulletin", {id: self.bulletinId()});
+  _.forEach(["bulletin", "ymp-bulletin"], function(pageName) {
+    hub.onPageLoad(pageName, function(e) {
+      self.bulletinId(_.head(e.pagePath));
+      self.page(e.pageId);
+      self.pagePath(e.pagePath);
+      window.lupapisteApp.setTitle("Julkipano");
+      hub.send("bulletinService::fetchBulletin", {id: self.bulletinId()});
+    });
   });
 
   self.page(pageutil.getPage());

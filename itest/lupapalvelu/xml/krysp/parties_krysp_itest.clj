@@ -81,6 +81,7 @@
     (command pena :submit-application :id application-id) => ok?
     (command sonja :approve-doc :id application-id :doc (:id pre-verdict-suunnittelija1) :path nil :collection "documents") => ok?
     (command sonja :approve-doc :id application-id :doc (:doc pre-verdict-suunnittelija2) :path nil :collection "documents") => ok?
+    (command sonja :update-app-bulletin-op-description :id application-id :description "otsikko julkipanoon") => ok?
     (command sonja :approve-application :id application-id :lang "fi") => ok?
 
     (let [application (query-application sonja application-id)

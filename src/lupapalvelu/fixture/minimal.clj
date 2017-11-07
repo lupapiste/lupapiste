@@ -790,6 +790,7 @@
                        :digitizer-tools-enabled true
                        :permanent-archive-in-use-since 1451613600000
                        :earliest-allowed-archiving-date 0
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -932,6 +933,7 @@
                                         [{:type :application-id} {:type :backend-id}]
                                         [{:type :user}]
                                         [{:type :organization}]]}]
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true
                        :matti-enabled true
@@ -998,6 +1000,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1033,6 +1036,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1058,6 +1062,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1102,6 +1107,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1125,6 +1131,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled true
                        :digitizer-tools-enabled true
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1141,6 +1148,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1160,6 +1168,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1185,6 +1194,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1208,6 +1218,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled false
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1254,6 +1265,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported false}
 
@@ -1285,6 +1297,7 @@
                        :earliest-allowed-archiving-date 0
                        :use-attachment-links-integration true
                        :operations-tos-functions {:masto-tms "10 03 00 01"}
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1313,6 +1326,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YI" "YL" "YM" "MAL" "VVVL"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1343,6 +1357,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1368,6 +1383,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1393,6 +1409,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}]))
 

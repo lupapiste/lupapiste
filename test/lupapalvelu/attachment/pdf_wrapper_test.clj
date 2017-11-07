@@ -12,15 +12,16 @@
   (let [jpeg-file (io/file "dev-resources/cake.jpg")
         color-tiff-file (io/file "dev-resources/cake-lzw.tif")
         bw-tiff-file (io/file "dev-resources/drawing.tif")
-        files [[:jpeg jpeg-file] [:tiff color-tiff-file] [:tiff bw-tiff-file]]
+        png-file (io/file "dev-resources/cake.png")
+        files [[:jpeg jpeg-file] [:tiff color-tiff-file] [:tiff bw-tiff-file] [:png png-file]]
         use-pdf2pdf? (and (pdf2pdf-executable) (pdf2pdf-key))]
 
     (doseq [[file-format file] files]
       (files/with-temp-file target-file
         (wrap! file-format file target-file "test")
 
-        (fact "Original image and PDF file sizes should be within 20 %"
-          (< (- (.length target-file) (.length file)) (* 0.2 (.length file))) => true)
+        (fact "Original image and PDF file sizes should be within 35 %"
+          (< (- (.length target-file) (.length file)) (* 0.35 (.length file))) => true)
 
         (when use-pdf2pdf?
           (against-background [(#'lupapalvelu.pdf.pdfa-conversion/store-converted-page-count anything anything) => nil]

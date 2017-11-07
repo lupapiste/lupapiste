@@ -468,6 +468,14 @@
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:validate-verdict-given-date enabled}})
   (ok))
 
+(defcommand set-organization-review-fetch-enabled
+  {:parameters [enabled]
+   :user-roles #{:authorityAdmin}
+   :input-validators  [(partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (org/update-organization (usr/authority-admins-organization-id user) {$set {:automatic-review-fetch-enabled enabled}})
+  (ok))
+
 (defcommand set-organization-use-attachment-links-integration
   {:parameters       [enabled]
    :user-roles       #{:authorityAdmin}
@@ -703,6 +711,23 @@
   [_]
   (->> (util/map-keys (fn->> clojure.core/name (str "name.")) name)
        (hash-map $set)
+       (org/update-organization org-id)))
+
+(defquery available-backend-systems
+  {:user-roles #{:admin}}
+  (ok :backend-systems org/backend-systems))
+
+(defcommand update-organization-backend-systems
+  {:description "Updates organization backend systems by permit type."
+   :parameters [org-id backend-systems]
+   :user-roles #{:admin}
+   :input-validators [(partial action/map-parameters [:backend-systems])]}
+  [_]
+  (->> (util/map-keys (fn->> name (format "krysp.%s.backend-system"))  backend-systems)
+       (reduce (fn [updates [path system]] (if (contains? org/backend-systems (keyword system))
+                                             (assoc-in updates [$set path] system)
+                                             (assoc-in updates [$unset path] "")))
+               {})
        (org/update-organization org-id)))
 
 (defcommand save-organization-tags

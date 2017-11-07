@@ -412,6 +412,7 @@
 (facts "Users need approver role to approve applications"
   (let [application    (create-and-submit-application mikko :municipality sonja-muni)
         application-id (:id application)]
+    (command sonja :update-app-bulletin-op-description :id application-id :description "otsikko julkipanoon") => ok?
 
     (fact "Applicant cannot approve application"
       (command mikko :approve-application :id application-id :lang "fi") => unauthorized?)
@@ -432,6 +433,7 @@
         application-id (:id application)
         redirect-url   "http://www.taustajarjestelma.fi/servlet/kohde?kohde=rakennuslupatunnus&lupatunnus="]
 
+    (command sonja :update-app-bulletin-op-description :id application-id :description "otsikko julkipanoon") => ok?
     (command sonja :approve-application :id application-id :lang "fi")
 
     (-> (query-application sonja application-id) :history last :state) => "sent"

@@ -279,15 +279,20 @@
     this.model = ko.validatedObservable({
       accountType:  ko.observable().extend(required),
       customAccountLimit: ko.observable(),
-      name:         ko.observable().extend(required),
-      y:            ko.observable(),
-      reference:    ko.observable().extend(notRequired),
-      address1:     ko.observable().extend(required),
-      po:           ko.observable().extend(required),
-      zip:          ko.observable().extend({required: true, number: true, maxLength: 5}),
-      country:      ko.observable().extend(notRequired),
-      netbill:      ko.observable().extend(notRequired),
-      pop:          ko.observable().extend(notRequired)
+      name:           ko.observable().extend(required),
+      y:              ko.observable(),
+      reference:      ko.observable().extend(notRequired),
+      address1:       ko.observable().extend(required),
+      po:             ko.observable().extend(required),
+      zip:            ko.observable().extend({required: true, number: true, maxLength: 5}),
+      country:        ko.observable().extend(notRequired),
+      netbill:        ko.observable().extend(notRequired),
+      pop:            ko.observable().extend(notRequired),
+      contactAddress: ko.observable(),
+      contactZip:     ko.observable(),
+      contactPo:      ko.observable(),
+      contactCountry: ko.observable(),
+      invitationDenied: ko.observable().extend(notRequired)
     });
     this.defaults = {
       name: undefined,
@@ -300,7 +305,12 @@
       netbill: undefined,
       pop: undefined,
       accountType: undefined,
-      customAccountLimit: undefined
+      customAccountLimit: undefined,
+      contactAddress: undefined,
+      contactZip:     undefined,
+      contactPo:      undefined,
+      contactCountry: undefined,
+      invitationDenied: false
     };
     this.edit          = ko.observable(false);
     this.saved         = ko.observable(null);
