@@ -142,7 +142,7 @@
     if (!isInitializing && authorizationModel.ok("update-app-bulletin-op-description")) {
       ajax.command("update-app-bulletin-op-description", {id: currentId, description: bulletinOpDescription})
         .success(function() {
-          applicationModel.reload();
+          authorizationModel.refresh({id: currentId});
           applicationModel.opDescriptionIndicator({type: "saved"});
         })
       .error(util.showSavedIndicator)
