@@ -380,7 +380,7 @@
           (check-sent-reminder-email
             (-> statement-matching-duedate-passed :person :email)
             "Lupapiste: Naapurikuja 3, Sipoo - muistutus er\u00e4\u00e4ntyv\u00e4st\u00e4 lausuntopyynn\u00f6st\u00e4"
-            ["Muistutus" "sinulta on pyydetty lausuntoa" "Lausunnolle asetettu m\u00e4\u00e4r\u00e4aika"]
+            ["Muistutus" "sinulta on pyydetty lausuntoa" "Lausunnolle on asetettu m\u00e4\u00e4r\u00e4aika"]
             (:id reminder-application) "authority"))))
 
     (fact "the \"duedate-reminder-sent\" timestamp already exists but is over 1 week old -> reminder is sent"
@@ -402,7 +402,7 @@
         (check-sent-reminder-email
           (-> statement-matching-duedate-passed :person :email)
           "Lupapiste: Naapurikuja 3, Sipoo - muistutus er\u00e4\u00e4ntyv\u00e4st\u00e4 lausuntopyynn\u00f6st\u00e4"
-          ["Muistutus" "sinulta on pyydetty lausuntoa" "Lausunnolle asetettu m\u00e4\u00e4r\u00e4aika"]
+          ["Muistutus" "sinulta on pyydetty lausuntoa" "Lausunnolle on asetettu m\u00e4\u00e4r\u00e4aika"]
           (:id reminder-application) "authority")))
 
     (fact "a fresh \"duedate-reminder-sent\" timestamp already exists -> no reminder is sent"
