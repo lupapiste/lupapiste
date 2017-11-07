@@ -951,7 +951,11 @@
                          :sv {:heading1 "Sibbo",
                               :heading2 "Sibbo julkipano",
                               :caption ["Bygglovssektionens beslut om bygglov meddelas efter den offentliga delgivningen d\u00e5 de anses ha kommit till vederb\u00f6randes k\u00e4nnedom. Besv\u00e4rstiden \u00e4r 30 dagar."
-                                        "Tj\u00e4nsteinnehavarbeslut fattas dagligen. Besv\u00e4rstiden \u00e4r 14 dagar fr\u00e5n det att besluten kungjorts."]}}}}
+                                        "Tj\u00e4nsteinnehavarbeslut fattas dagligen. Besv\u00e4rstiden \u00e4r 14 dagar fr\u00e5n det att besluten kungjorts."]}
+                         :en {:heading1 "Sipoo",
+                              :heading2 "Sipoo bulletins",
+                              :caption ["Here is a list of bulletins"
+                                        "Check them out!"]}}}}
 
                       ;; Sipoo YA
                       ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.
