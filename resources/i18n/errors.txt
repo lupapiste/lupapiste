@@ -915,4 +915,4 @@
 "permanent-archive-disabled" "sv" "Kommunens PDF/A-konvertering var inte i bruk när filen lades till."
 "error.invalid-drawing" "fi" "Piirretty kartta-alue on virheellinen. Tarkista, että piirretyn alueen viivat eivät leikkaa toisiaan."
 "error.invalid-drawing" "en" "A map drawing is invalid. Please check that the lines of a drawing do not intersect each other."
-"error.invalid-drawing" "sv" ""
+"error.invalid-drawing" "sv" "Det området ritats ut på kartan är felaktigt. Var vänlig och kontrollera att de strecken på det utritade området inte skär varandra."
