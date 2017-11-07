@@ -946,12 +946,12 @@
                         {:fi {:heading1 "Sipoo",
                               :heading2 "Sipoo R julkipanot",
                               :caption ["Tervetuloa"
-                                        "Viranhaltijan päätöksiä tehdään päivittäin. Oikaisuvaatimusaika on 14 päivää päätösten tiedoksiannosta."
-                                        "Listat ovat nähtävillä kunnan virastossa"]},
+                                        "Viranhaltijan p\u00e4\u00e4t\u00f6ksi\u00e4 tehd\u00e4\u00e4n p\u00e4ivitt\u00e4in. Oikaisuvaatimusaika on 14 p\u00e4iv\u00e4\u00e4 p\u00e4\u00e4t\u00f6sten tiedoksiannosta."
+                                        "Listat ovat n\u00e4ht\u00e4vill\u00e4 kunnan virastossa"]},
                          :sv {:heading1 "Sibbo",
                               :heading2 "Sibbo julkipano",
-                              :caption ["Bygglovssektionens beslut om bygglov meddelas efter den offentliga delgivningen då de anses ha kommit till vederbörandes kännedom. Besvärstiden är 30 dagar."
-                                        "Tjänsteinnehavarbeslut fattas dagligen. Besvärstiden är 14 dagar från det att besluten kungjorts."]}}}}
+                              :caption ["Bygglovssektionens beslut om bygglov meddelas efter den offentliga delgivningen d\u00e5 de anses ha kommit till vederb\u00f6randes k\u00e4nnedom. Besv\u00e4rstiden \u00e4r 30 dagar."
+                                        "Tj\u00e4nsteinnehavarbeslut fattas dagligen. Besv\u00e4rstiden \u00e4r 14 dagar fr\u00e5n det att besluten kungjorts."]}}}}
 
                       ;; Sipoo YA
                       ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.

@@ -3546,14 +3546,14 @@
                           {:local-bulletins-page-settings
                            {:texts {:fi {:heading1 "Vantaan kaupunki",
                                          :heading2 "Rakennusvalvonnan julkipanot",
-                                         :caption ["Rakennuslupajaoston rakennuslupapäätökset annetaan julkipanon jälkeen, jolloin niiden katsotaan tulleen asianosaisten tietoon. Valitusaika on 30 päivää."
-                                                   "Viranhaltijan päätöksiä tehdään päivittäin. Oikaisuvaatimusaika on 14 päivää päätösten tiedoksiannosta."
-                                                   "Julkipanolistat ovat virallisesti nähtävissä maankäytön asiakaspalvelussa (Kielotie 13, katutaso) sekä alla olevassa listauksessa."]},
+                                         :caption ["Rakennuslupajaoston rakennuslupap\u00e4\u00e4t\u00f6kset annetaan julkipanon j\u00e4lkeen, jolloin niiden katsotaan tulleen asianosaisten tietoon. Valitusaika on 30 p\u00e4iv\u00e4\u00e4."
+                                                   "Viranhaltijan p\u00e4\u00e4t\u00f6ksi\u00e4 tehd\u00e4\u00e4n p\u00e4ivitt\u00e4in. Oikaisuvaatimusaika on 14 p\u00e4iv\u00e4\u00e4 p\u00e4\u00e4t\u00f6sten tiedoksiannosta."
+                                                   "Julkipanolistat ovat virallisesti n\u00e4ht\u00e4viss\u00e4 maank\u00e4yt\u00f6n asiakaspalvelussa (Kielotie 13, katutaso) sek\u00e4 alla olevassa listauksessa."]},
                                     :sv {:heading1 "Vanda stad",
                                          :heading2 "Offentlig delgivning av beslut om bygglov",
-                                         :caption ["Bygglovssektionens beslut om bygglov meddelas efter den offentliga delgivningen då de anses ha kommit till vederbörandes kännedom. Besvärstiden är 30 dagar."
-                                                   "Tjänsteinnehavarbeslut fattas dagligen. Besvärstiden är 14 dagar från det att besluten kungjorts."
-                                                   "Förteckningarna finns offentligt fraπmlagda på anslagstavlan i byggnadstillsynens entréhall och på listan som finns nedanför."]}}}}}))
+                                         :caption ["Bygglovssektionens beslut om bygglov meddelas efter den offentliga delgivningen d\u00e5 de anses ha kommit till vederb\u00f6randes k\u00e4nnedom. Besv\u00e4rstiden \u00e4r 30 dagar."
+                                                   "Tj\u00e4nsteinnehavarbeslut fattas dagligen. Besv\u00e4rstiden \u00e4r 14 dagar fr\u00e5n det att besluten kungjorts."
+                                                   "F\u00f6rteckningarna finns offentligt fra\u03c0mlagda p\u00e5 anslagstavlan i byggnadstillsynens entr\u00e9hall och p\u00e5 listan som finns nedanf\u00f6r."]}}}}}))
 
 ;;
 ;; ****** NOTE! ******
