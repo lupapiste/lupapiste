@@ -237,6 +237,9 @@
       // Sensible empty default values for those properties not received from the backend.
       var app = _.merge( LUPAPISTE.EmptyApplicationModel(), applicationDetails.application);
 
+      // Clear state sequence before reinitializing to prevent localization errors wrt. missing archiving project states
+      applicationModel.stateSeq([]);
+
       // Plain data
       applicationModel._js = app;
 
