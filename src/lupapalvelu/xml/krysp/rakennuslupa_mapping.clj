@@ -402,42 +402,38 @@
   (and (= type-group "katselmukset_ja_tarkastukset")
     (#{"katselmuksen_tai_tarkastuksen_poytakirja" "aloituskokouksen_poytakirja"} type-id)))
 
-(defn- save-katselmus-xml
-  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
-  [application lang output-dir task user krysp-version begin-of-link attachment-target]
-  (let [target-pred #(= attachment-target (:target %))
+(defmethod permit/review-krysp-mapper :R [application review user lang krysp-version begin-of-link]
+  (let [target-pred #(= {:type "task" :id (:id review)} (:target %))
         attachments (filter target-pred  (:attachments application))
         poytakirja  (some #(when (katselmus-pk? (:type %)) %) attachments)
         attachments-wo-pk (filter #(not= (:id %) (:id poytakirja)) attachments)
-        canonical-attachments (when attachment-target (attachments-canon/get-attachments-as-canonical
-                                                        {:attachments attachments-wo-pk :title (:title application)}
-                                                        begin-of-link (every-pred target-pred attachments-canon/no-statements-no-verdicts)))
+        canonical-attachments (when {:type "task" :id (:id review)}
+                                (attachments-canon/get-attachments-as-canonical
+                                  {:attachments attachments-wo-pk :title (:title application)}
+                                  begin-of-link (every-pred target-pred attachments-canon/no-statements-no-verdicts)))
         canonical-pk-liite (first (attachments-canon/get-attachments-as-canonical
-                                     {:attachments [poytakirja] :title (:title application)}
-                                     begin-of-link (every-pred target-pred attachments-canon/no-statements-no-verdicts)))
+                                    {:attachments [poytakirja] :title (:title application)}
+                                    begin-of-link (every-pred target-pred attachments-canon/no-statements-no-verdicts)))
         canonical-pk (:Liite canonical-pk-liite)
 
         all-canonical-attachments (seq (filter identity (conj canonical-attachments canonical-pk-liite)))
 
-        canonical-without-attachments (canonical/katselmus-canonical application lang task user)
+        canonical-without-attachments (canonical/katselmus-canonical application lang review user)
         canonical (-> canonical-without-attachments
-                    (#(if (seq canonical-attachments)
-                      (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] canonical-attachments)
-                      %))
-                    (#(if poytakirja
-                        (-> %
-                            (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
-                            (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :liitetieto :Liite] canonical-pk))
-                       %)))
+                      (#(if (seq canonical-attachments)
+                          (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] canonical-attachments)
+                          %))
+                      (#(if poytakirja
+                          (-> %
+                              (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
+                              (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :liitetieto :Liite] canonical-pk))
+                          %)))
 
         xml (element-to-xml canonical (get-rakennuslupa-mapping krysp-version))
 
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
-
-    (writer/write-to-disk application attachments-for-write xml krysp-version output-dir nil nil "review")))
-
-(defmethod permit/review-krysp-mapper :R [application review user lang krysp-version output-dir begin-of-link]
-  (save-katselmus-xml application lang output-dir review user krysp-version begin-of-link {:type "task" :id (:id review)}))
+    {:xml xml
+     :attachments attachments-for-write}))
 
 (defn save-aloitusilmoitus-as-krysp [application lang output-dir started {:keys [index localShortId nationalId propertyId] :as building} user krysp-version]
   (let [task {:taskname "Aloitusilmoitus"

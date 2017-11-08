@@ -197,7 +197,7 @@
 
 (defmulti review-krysp-mapper
   "Maps reviews (katselmus) into KRYSP XML and saves the XML to disk."
-  {:arglists '([application review user lang krysp-version output-dir begin-of-link])}
+  {:arglists '([application review user lang krysp-version begin-of-link])}
   (fn [{permit-type :permitType} & _]
     (keyword permit-type)))
 

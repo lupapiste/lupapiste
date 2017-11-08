@@ -141,9 +141,11 @@
       (let [krysp-version (resolve-krysp-version organization permit-type)
             output-dir    (resolve-output-directory organization permit-type)
             begin-of-link (get-begin-of-link permit-type (:use-attachment-links-integration organization))
-            filtered-app  (remove-unsupported-attachments application)]
-        (or (permit/review-krysp-mapper filtered-app task user lang krysp-version output-dir begin-of-link)
-            (fail! :error.unknown))))))
+            filtered-app  (remove-unsupported-attachments application)
+            mapping-result (permit/review-krysp-mapper filtered-app task user lang krysp-version begin-of-link)]
+        (if-some [{:keys [xml attachments]} mapping-result]
+          (writer/write-to-disk application attachments xml krysp-version output-dir nil nil "review")
+          (fail! :error.unknown))))))
 
 
 (defn save-unsent-attachments-as-krysp
