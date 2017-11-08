@@ -433,7 +433,7 @@
    :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
    :user-authz-roles roles/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
-  (att/output-attachment-preview! attachment-id (partial att/get-attachment-file-as! user)))
+  (att/output-attachment attachment-id false #(att/get-attachment-file-as! user :preview %)))
 
 (defraw "view-attachment"
   {:parameters       [:attachment-id]  ; Note that this is actually file id

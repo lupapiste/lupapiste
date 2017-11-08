@@ -17,6 +17,7 @@
             [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.attachment.metadata :as metadata]
+            [lupapalvelu.attachment.onkalo-client :as oc]
             [lupapalvelu.attachment.preview :as preview]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.tag-groups :as att-tag-groups]
@@ -33,7 +34,8 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.tiedonohjaus :as tos]
-            [lupapalvelu.user :as usr])
+            [lupapalvelu.user :as usr]
+            [me.raynes.fs :as fs])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File InputStream]))
 
@@ -110,6 +112,7 @@
   {:version                              VersionNumber
    :fileId                               ssc/ObjectIdStr             ;; fileId in GridFS
    :originalFileId                       ssc/ObjectIdStr             ;; fileId of the unrotated/unconverted file
+   (sc/optional-key :onkaloFileId)       AttachmentId                ;; id in Onkalo, if archived. Should equal attachment id.
    :created                              ssc/Timestamp
    ;; Timestamp for the latest "non-versioning" operation (e.g.,
    ;; rotation, pdf/a conversion). Thus, modified can be present only
@@ -641,27 +644,47 @@
                {:attachments.$.auth []}))})
     (infof "3/3 deleted meta-data of file %s of attachment" file-id attachment-id)))
 
+(defn- get-file-by-file-id [application file-id user preview?]
+  "Returns the attachment file from Mongo or Onkalo. Does not check authorization if the user argument is nil."
+  (when-let [{:keys [filename onkaloFileId contentType] :as version} (->> (:attachments application)
+                          (some (fn [{:keys [versions]}]
+                                  (some #(when (= file-id (:fileId %)) %) versions))))]
+    (when (or (not user) (access/can-access-attachment-file? user file-id application))
+      (if onkaloFileId
+        (merge
+          (oc/get-file (:organization application) onkaloFileId preview?)
+          {:filename    (if preview?
+                          (str (fs/name filename) ".jpg")
+                          filename)
+           :fileId      (:fileId version)
+           :application (:id application)})
+        (if preview?
+          (or (mongo/download (str file-id "-preview"))
+              ;; Generate preview if not previously done. It's async, so it can't be returned in this request.
+              (preview/create-preview! file-id filename contentType application mongo/*db-name*))
+          (mongo/download file-id))))))
+
 (defn get-attachment-file-as!
   "Returns the attachment file if user has access to application and the attachment, otherwise nil."
-  [user file-id]
-  (when-let [attachment-file (mongo/download file-id)]
-    (when-let [application (and (:application attachment-file) (get-application-as (:application attachment-file) user :include-canceled-apps? true))]
-      (when (and (seq application) (access/can-access-attachment-file? user file-id application)) attachment-file))))
+  ([user file-id]
+   (get-attachment-file-as! user false file-id))
+  ([user preview? file-id]
+   (when-let [application (get-application-as {:attachments.versions.fileId file-id} user :include-canceled-apps? true)]
+     (get-file-by-file-id application file-id user preview?))))
 
 (defn get-attachment-file!
   "Returns the attachment file without access checking, otherwise nil."
   [file-id]
-  (when-let [attachment-file (mongo/download file-id)]
-    (when-let [application (and (:application attachment-file) (get-application-no-access-checking (:application attachment-file)))]
-      (when (seq application) attachment-file))))
+  (when-let [application (get-application-no-access-checking {:attachments.versions.fileId file-id})]
+    (get-file-by-file-id application file-id nil false)))
 
 (defn get-attachment-latest-version-file
   "Returns the file for the latest attachment version if user has access to application and the attachment, otherwise nil."
   [user attachment-id]
   (let [application (get-application-as {:attachments.id attachment-id} user :include-canceled-apps? true)
         file-id (attachment-latest-file-id application attachment-id)]
-    (when (and application file-id (access/can-access-attachment-file? user file-id application))
-      (mongo/download file-id))))
+    (when (and application file-id)
+      (get-file-by-file-id application file-id user false))))
 
 (def- not-found {:status 404
                  :headers {"Content-Type" "text/plain"}
@@ -670,9 +693,11 @@
 (defn- attachment-200-response [attachment filename]
   {:status 200
    :body ((:content attachment))
-   :headers {"Content-Type" (:contentType attachment)
-             "Content-Length" (str (:size attachment))
-             "Content-Disposition" (format "filename=\"%s\"" filename)}})
+   :headers (merge
+              {"Content-Type" (:contentType attachment)
+               "Content-Disposition" (format "filename=\"%s\"" filename)}
+              (when (:size attachment)
+                {"Content-Length" (str (:size attachment))}))})
 
 (defn output-attachment
   ([attachment download?]
