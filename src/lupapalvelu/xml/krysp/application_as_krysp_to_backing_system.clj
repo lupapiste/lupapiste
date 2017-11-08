@@ -1,4 +1,5 @@
 (ns lupapalvelu.xml.krysp.application-as-krysp-to-backing-system
+  "Convert application to KuntaGML and send it to configured backing system"
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [clojure.java.io :as io]
             [swiss.arrows :refer :all]
@@ -7,25 +8,26 @@
             [sade.env :as env]
             [sade.core :refer [fail!]]
             [sade.util :as util]
-            [lupapalvelu.organization :as org]
+            [lupapiste-commons.attachment-types :as attachment-types]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.parties-canonical]
             [lupapalvelu.document.tools :as doc-tools]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.states :as states]
             ;; Make sure all the mappers are registered
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
             [lupapalvelu.xml.krysp.poikkeamis-mapping]
-            [lupapalvelu.xml.krysp.yleiset-alueet-mapping :as ya-mapping]
+            [lupapalvelu.xml.krysp.yleiset-alueet-mapping]
             [lupapalvelu.xml.krysp.ymparistolupa-mapping]
             [lupapalvelu.xml.krysp.maa-aines-mapping]
             [lupapalvelu.xml.krysp.maankayton-muutos-mapping]
             [lupapalvelu.xml.krysp.kiinteistotoimitus-mapping]
-            [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :as yi-mapping]
-            [lupapalvelu.xml.krysp.vesihuolto-mapping :as vh-mapping]
-            [lupapiste-commons.attachment-types :as attachment-types]))
+            [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping]
+            [lupapalvelu.xml.krysp.vesihuolto-mapping]
+            [lupapalvelu.xml.disk-writer :as writer]))
 
 (defn- get-begin-of-link [permit-type use-http-links?]
   {:pre  [permit-type]
@@ -102,9 +104,20 @@
                            remove-non-approved-designers)
         filtered-submitted-app (->> submitted-application
                                     remove-unsupported-attachments
-                                    (filter-attachments-by-state current-state))]
-    (or (permit/application-krysp-mapper filtered-app lang filtered-submitted-app krysp-version output-dir begin-of-link)
-        (fail! :error.unknown))))
+                                    (filter-attachments-by-state current-state))
+        mapping-result (permit/application-krysp-mapper filtered-app lang filtered-submitted-app krysp-version output-dir begin-of-link)]
+    (if (map? mapping-result) ; if write wasn't done in mapper, do it here, this is bleeding edge behaviour
+      (if-let [{:keys [xml attachments]} mapping-result]
+        (writer/write-to-disk
+          application
+          attachments
+          xml
+          krysp-version
+          output-dir
+          submitted-application
+          lang)
+        (fail! :error.unknown))
+      (or mapping-result (fail! :error.unknown)))))
 
 (defn save-parties-as-krysp
   "Send application's parties (currently only designers) to municipality backend. Returns sent party document ids."
