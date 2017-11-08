@@ -1144,7 +1144,7 @@
 "applications.submitted" "en" "Submitted"
 "applications.submitted" "fi" "Jätetty"
 "applications.submitted" "sv" "Lämnad"
-"applications.verdictGiven" "en" "Decision given"
+"applications.verdictGiven" "en" "Verdict given"
 "applications.verdictGiven" "fi" "Päätös annettu"
 "applications.verdictGiven" "sv" "Beslut givet"
 "applications.title" "en" "My Projects"

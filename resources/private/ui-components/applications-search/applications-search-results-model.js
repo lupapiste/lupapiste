@@ -57,6 +57,11 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
                                                                    currentSort: self.dataProvider.sort})
   ]);
 
+  /*
+   *  Changing column title between Submitted and Verdict Given depending on opened tab.
+   *  On construction tab verdict given date is shown on search result table. Submitted date
+   *  is shown on all other tabs.
+   */
   ko.computed(function() {
     if (self.selectedTab() === "construction") {
       self.columns.splice(5, 1, util.createSortableColumn("sixth",   "applications.verdictGiven",  {sortField: "submitted", currentSort: self.dataProvider.sort}));
