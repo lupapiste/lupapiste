@@ -3,8 +3,6 @@
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.permit :as permit]
             [sade.core :refer :all]
-            [sade.util :as util]
-            [sade.strings :as ss]
             [lupapalvelu.document.attachments-canonical :as attachments-canon]
             [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.rakennuslupa-canonical :as canonical]
@@ -551,7 +549,7 @@
   (element-to-xml (map-enums canonical krysp-version) (get-rakennuslupa-mapping krysp-version)))
 
 (defmethod permit/application-krysp-mapper :R
-  [application lang _ krysp-version _ begin-of-link]
+  [application lang krysp-version begin-of-link]
   (let [canonical-without-attachments  (canonical/application-to-canonical application lang)
         statement-given-ids (common/statements-ids-with-status
                               (get-in canonical-without-attachments

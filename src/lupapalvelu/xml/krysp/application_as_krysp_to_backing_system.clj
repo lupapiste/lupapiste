@@ -105,19 +105,17 @@
         filtered-submitted-app (->> submitted-application
                                     remove-unsupported-attachments
                                     (filter-attachments-by-state current-state))
-        mapping-result (permit/application-krysp-mapper filtered-app lang filtered-submitted-app krysp-version output-dir begin-of-link)]
-    (if (map? mapping-result) ; if write wasn't done in mapper, do it here, this is bleeding edge behaviour
-      (if-let [{:keys [xml attachments]} mapping-result]
-        (writer/write-to-disk
-          application
-          attachments
-          xml
-          krysp-version
-          output-dir
-          submitted-application
-          lang)
-        (fail! :error.unknown))
-      (or mapping-result (fail! :error.unknown)))))
+        mapping-result (permit/application-krysp-mapper filtered-app lang krysp-version begin-of-link)]
+    (if-some [{:keys [xml attachments]} mapping-result]
+      (writer/write-to-disk
+        application
+        attachments
+        xml
+        krysp-version
+        output-dir
+        filtered-submitted-app
+        lang)
+      (fail! :error.unknown))))
 
 (defn save-parties-as-krysp
   "Send application's parties (currently only designers) to municipality backend. Returns sent party document ids."

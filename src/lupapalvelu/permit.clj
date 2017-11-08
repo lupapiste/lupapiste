@@ -184,8 +184,9 @@
   (get-metadata permit-type :sftp-directory))
 
 (defmulti application-krysp-mapper
-  "Maps application into KRYSP XML and saves the XML to disk."
-  {:arglists '([application lang submitted-application krysp-version output-dir begin-of-link])}
+  "Maps application into KRYSP XML and provides attachments data to caller.
+  Returns a map with 'xml' and 'attachments' keys."
+  {:arglists '([application lang krysp-version begin-of-link])}
   (fn [{permit-type :permitType} & _]
     (keyword permit-type)))
 
