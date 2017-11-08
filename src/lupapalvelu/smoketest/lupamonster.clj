@@ -30,7 +30,7 @@
     (mongo/disconnect!))
 
   (mongo/connect!)
-  (println "Smoketest starting in target-env: " env/target-env))
+  (println "Smoketest starting in target-env: " env/target-env)
   (let [started-from-cli (find-ns 'lupapalvelu.main)
         results (apply execute-tests args)
         all-ok  (reduce
