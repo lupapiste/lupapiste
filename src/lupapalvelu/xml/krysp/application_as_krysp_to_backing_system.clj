@@ -127,9 +127,13 @@
                           remove-non-approved-designers
                           remove-pre-verdict-designers
                           remove-disabled-documents)
-        write-result (permit/parties-krysp-mapper filtered-app :suunnittelija lang krysp-version output-dir)]
-    (if write-result
-      (map :id (domain/get-documents-by-subtype (:documents filtered-app) :suunnittelija))
+        mapped-data (permit/parties-krysp-mapper filtered-app :suunnittelija lang krysp-version)]
+    (if (map? mapped-data)
+      (do
+        (->> mapped-data
+             (run! (fn [[id xml]]
+                     (writer/write-to-disk application nil xml krysp-version output-dir nil nil id))))
+        (keys mapped-data))
       (fail! :error.unknown))))
 
 (defn save-review-as-krysp
@@ -144,7 +148,6 @@
         (if-some [{:keys [xml attachments]} mapping-result]
           (writer/write-to-disk application attachments xml krysp-version (resolve-output-directory organization permit-type) nil nil "review")
           (fail! :error.unknown))))))
-
 
 (defn save-unsent-attachments-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
