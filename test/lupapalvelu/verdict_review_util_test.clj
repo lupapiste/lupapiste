@@ -5,7 +5,7 @@
   (:import [java.nio.charset StandardCharsets]))
 
 (testable-privates lupapalvelu.verdict-review-util
-                   attachment-type-from-krysp-type content-disposition-filename)
+                   content-disposition-filename)
 
 (facts verdict-attachment-type
   (fact "R"
@@ -28,12 +28,69 @@
         :type-id    "katselmuksen_tai_tarkastuksen_poytakirja"}))
 
 (facts attachment-type-from-krysp-type
-  (attachment-type-from-krysp-type "Paatosote") => "paatosote"
-  (attachment-type-from-krysp-type "katselmuksen_tai_tarkastuksen_poytakirja")
-  => "katselmuksen_tai_tarkastuksen_poytakirja"
-  (attachment-type-from-krysp-type "LUPAEHTO") => "muu"
-  (attachment-type-from-krysp-type "ldskfjalsdkjf") => "paatos"
-  (attachment-type-from-krysp-type nil) => "paatos")
+  (facts "verdict target"
+    (fact "Paatos"
+      (attachment-type-from-krysp-type {:type "verdict"} "Paatosote") => "paatosote")
+
+    (fact "katselmuksen_tai_tarkastuksen_poytakirja"
+      (attachment-type-from-krysp-type {:type "verdict"} "katselmuksen_tai_tarkastuksen_poytakirja")  => "paatos")
+
+    (fact "LUPAEHTO"
+      (attachment-type-from-krysp-type {:type "verdict"} "LUPAEHTO") => "muu")
+
+    (fact "P\u00e4\u00e4t\u00f6sote"
+      (attachment-type-from-krysp-type {:type "verdict"} "P\u00e4\u00e4t\u00f6sote") => "paatosote")
+
+    (fact "ldskfjalsdkjf"
+      (attachment-type-from-krysp-type {:type "verdict"} "ldskfjalsdkjf") => "paatos")
+
+    (fact "nil"
+      (attachment-type-from-krysp-type {:type "verdict"} nil) => "paatos"))
+
+  (facts "task target"
+
+    (fact "Paatos"
+      (attachment-type-from-krysp-type {:type "task"} "Paatosote") => "katselmuksen_tai_tarkastuksen_poytakirja")
+
+    (fact "katselmuksen_tai_tarkastuksen_poytakirja"
+      (attachment-type-from-krysp-type {:type "task"} "katselmuksen_tai_tarkastuksen_poytakirja")  => "katselmuksen_tai_tarkastuksen_poytakirja")
+
+    (fact "katselmuksen_tai_tarkastuksen_p\u00f6yt\u00e4kirja"
+      (attachment-type-from-krysp-type {:type "task"} "katselmuksen_tai_tarkastuksen_p\u00f6yt\u00e4kirja")  => "katselmuksen_tai_tarkastuksen_poytakirja")
+
+    (fact "Katselmuksen_tai_tarkastuksen_p\u00e6yt\u00c4kirja"
+      (attachment-type-from-krysp-type {:type "task"} "Katselmuksen_tai_tarkastuksen_p\u00e6yt\u00c4kirja")  => "katselmuksen_tai_tarkastuksen_poytakirja")
+
+    (fact "tarkastusasiakirjan_yhteeveto"
+      (attachment-type-from-krysp-type {:type "task"} "tarkastusasiakirjan_yhteeveto")  => "tarkastusasiakirjan_yhteeveto")
+
+    (fact "tarkastusasiakirja"
+      (attachment-type-from-krysp-type {:type "task"} "tarkastusasiakirja")  => "tarkastusasiakirja")
+
+    (fact "aloituskokouksen_poytakirja"
+      (attachment-type-from-krysp-type {:type "task"} "aloituskokouksen_poytakirja")  => "aloituskokouksen_poytakirja")
+
+    (fact "ldskfjalsdkjf"
+      (attachment-type-from-krysp-type {:type "task"} "ldskfjalsdkjf") => "katselmuksen_tai_tarkastuksen_poytakirja")
+
+    (fact "nil"
+      (attachment-type-from-krysp-type {:type "task"} nil) => "katselmuksen_tai_tarkastuksen_poytakirja"))
+
+
+  (facts "unknown target"
+
+    (fact "Paatos"
+      (attachment-type-from-krysp-type {:type "statement"} "Paatosote") => "muu")
+
+    (fact "katselmuksen_tai_tarkastuksen_poytakirja"
+      (attachment-type-from-krysp-type {:type nil} "katselmuksen_tai_tarkastuksen_poytakirja")  => "muu")
+
+    (fact "ldskfjalsdkjf"
+      (attachment-type-from-krysp-type {:type ""} "ldskfjalsdkjf") => "muu")
+
+    (fact "nil"
+      (attachment-type-from-krysp-type {:type "foo"} nil) => "muu")))
+
 
 (facts "Content-Disposition and string encoding"
        (fact "No header"

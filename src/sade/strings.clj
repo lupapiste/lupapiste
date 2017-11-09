@@ -117,6 +117,11 @@
 (defn ascii? [s]
   (not (nil? (re-matches ascii-pattern s))))
 
+(defn scandics->ascii [s]
+  (when s
+    (s/escape s {(char 228) "a", (char 229) "a", (char 246) "o"
+                 (char 196) "A", (char 197) "A", (char 214) "O"})))
+
 (defn substring [^String s  ^Integer start ^Integer end]
   (StringUtils/substring s start end))
 
