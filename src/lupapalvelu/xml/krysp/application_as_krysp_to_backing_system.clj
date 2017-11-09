@@ -30,10 +30,11 @@
             [lupapalvelu.xml.validator :as validator]
             [clojure.data.xml :as data-xml]))
 
-(defn- get-begin-of-link [permit-type use-http-links?]
+(defn- get-begin-of-link [permit-type org]
   {:pre  [permit-type]
    :post [%]}
-  (if use-http-links?
+  (if (or (get-in org [:krysp (keyword permit-type) :http])
+          (:use-attachment-links-integration org))
     (str (env/value :host) "/api/raw/")
     (str (env/value :fileserver-address) (permit/get-sftp-directory permit-type) "/")))
 
@@ -97,7 +98,7 @@
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
   (let [permit-type   (permit/permit-type application)
         krysp-version (resolve-krysp-version organization permit-type)
-        begin-of-link (get-begin-of-link permit-type (:use-attachment-links-integration organization))
+        begin-of-link (get-begin-of-link permit-type organization)
         filtered-app  (->> application
                            remove-unsupported-attachments
                            (filter-attachments-by-state current-state)
@@ -140,7 +141,7 @@
   (let [permit-type (permit/permit-type application)]
     (when (org/krysp-integration? organization permit-type)
       (let [krysp-version (resolve-krysp-version organization permit-type)
-            begin-of-link (get-begin-of-link permit-type (:use-attachment-links-integration organization))
+            begin-of-link (get-begin-of-link permit-type organization)
             filtered-app  (remove-unsupported-attachments application)
             mapping-result (permit/review-krysp-mapper filtered-app task user lang krysp-version begin-of-link)]
         (if-some [{:keys [xml attachments]} mapping-result]
@@ -154,7 +155,7 @@
   [application lang organization]
   (let [permit-type   (permit/permit-type application)
         krysp-version (resolve-krysp-version organization permit-type)
-        begin-of-link (get-begin-of-link permit-type (:use-attachment-links-integration organization))
+        begin-of-link (get-begin-of-link permit-type organization)
         filtered-app  (remove-unsupported-attachments application)]
     (assert (= permit/R permit-type)
       (str "Sending unsent attachments to backing system is not supported for " (name permit-type) " type of permits."))
