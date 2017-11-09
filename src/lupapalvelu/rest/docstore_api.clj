@@ -14,9 +14,9 @@
 (sc/defschema OrganizationDocstoreInfo
   (assoc org/DocStoreInfo
          :id org/OrgId
-         :name i18n/LocalizationStringMap
+         :name (i18n/lenient-localization-schema sc/Str)
          :municipalities [{:id   sc/Str
-                           :name i18n/LocalizationStringMap}]))
+                           :name (i18n/lenient-localization-schema sc/Str)}]))
 
 (sc/defschema OrganizationResponse
   (assoc ApiResponse :data OrganizationDocstoreInfo))
