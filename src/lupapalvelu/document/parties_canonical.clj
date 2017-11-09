@@ -6,7 +6,6 @@
             [lupapalvelu.document.rakennuslupa-canonical :as rl-canonical]
             [lupapalvelu.document.tools :as doc-tools]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.disk-writer :as writer]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]))
 
 (defmulti party-canonical-info

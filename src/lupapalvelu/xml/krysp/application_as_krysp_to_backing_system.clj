@@ -14,7 +14,6 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.parties-canonical]
             [lupapalvelu.document.tools :as doc-tools]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as org]
             [lupapalvelu.states :as states]
             ;; Make sure all the mappers are registered

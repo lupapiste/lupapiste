@@ -6,8 +6,7 @@
             [lupapalvelu.document.attachments-canonical :as attachments-canon]
             [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.rakennuslupa-canonical :as canonical]
-            [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.xml.disk-writer :as writer]))
+            [lupapalvelu.xml.emit :refer [element-to-xml]]))
 
 ;RakVal
 
