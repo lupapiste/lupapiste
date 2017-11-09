@@ -366,7 +366,7 @@
 ;;
 
 (defcommand delete-attachment
-  {:description "Delete attachment with all it's versions. Does not
+  {:description "Delete attachment and its versions. Does not
   delete comments. Non-atomic operation: first deletes files, then
   updates document."
    :parameters  [id attachmentId]
@@ -386,6 +386,7 @@
                  att/delete-allowed-by-target
                  att/edit-allowed-by-target
                  att/attachment-not-stamped
+                 att/attachment-approval-check
                  ram/ram-status-not-ok
                  ram/ram-not-linked
                  attachment-not-requested-by-authority
