@@ -70,7 +70,7 @@
                                                                                      :type-id "pohjapiirustus"}} true) => truthy
         (fact "Applicant cannot delete base attachment"
           (command pena :delete-attachment :id application-id :attachmentId (:id base))
-          => (partial expected-failure? :error.ram-linked))
+          => fail?)
         (fact "Applicant cannot delete base attachment version"
           (command pena :delete-attachment-version :id application-id :attachmentId (:id base)
                    :fileId (-> base :latestVersion :fileId) :originalFileId (-> base :latestVersion :originalFileId))
@@ -94,7 +94,7 @@
           (command sonja :delete-attachment-version :id application-id :attachmentId ram-id
                    :fileId fileId :originalFileId originalFileId) => (partial expected-failure? :error.ram-approved))
         (fact "Pena cannot delete approved RAM"
-          (command pena :delete-attachment :id application-id :attachmentId ram-id) => (partial expected-failure? :error.ram-approved))
+          (command pena :delete-attachment :id application-id :attachmentId ram-id) => fail?)
         (fact "Pena cannot delete approved RAM version"
           (command pena :delete-attachment-version :id application-id :attachmentId ram-id
                    :fileId fileId :originalFileId originalFileId) => (partial expected-failure? :error.ram-approved))
@@ -103,8 +103,10 @@
         (fact "Pena cannot delete rejected RAM version"
           (command pena :delete-attachment-version :id application-id :attachmentId ram-id
                    :fileId fileId :originalFileId originalFileId) => (partial expected-failure? :error.unauthorized))
-        (fact "Pena can delete rejected RAM"
-          (command pena :delete-attachment :id application-id :attachmentId ram-id) => ok?)
+        (fact "Pena cannot delete rejected RAM"
+          (command pena :delete-attachment :id application-id :attachmentId ram-id) => fail?)
+        (fact "Sonja can delete RAM"
+          (command sonja :delete-attachment :id application-id :attachmentId ram-id) => ok?)
         (let [base (latest-attachment)]
           (fact "Pena again creates RAM attachment"
             (command pena :create-ram-attachment :id application-id :attachmentId (:id base)) => ok?)
