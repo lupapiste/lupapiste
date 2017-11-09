@@ -55,7 +55,7 @@
 
 (sc/defschema Link
   {:url  (i18n/lenient-localization-schema ssc/OptionalHttpUrl)
-   :name i18n/LocalizationStringMap
+   :name (i18n/lenient-localization-schema sc/Str)
    (sc/optional-key :modified) ssc/Timestamp})
 
 (sc/defschema Server
@@ -88,7 +88,7 @@
 (sc/defschema DocStoreInfo
   {:docStoreInUse           sc/Bool
    :documentPrice           sssc/Nat
-   :organizationDescription i18n/LocalizationStringMap})
+   :organizationDescription (i18n/lenient-localization-schema sc/Str)})
 
 (def default-docstore-info
   {:docStoreInUse           false
@@ -131,7 +131,7 @@
 
 (sc/defschema Organization
   {:id OrgId
-   :name i18n/LocalizationStringMap
+   :name (i18n/lenient-localization-schema sc/Str)
    :scope [Scope]
 
    (sc/optional-key :allowedAutologinIPs) sc/Any

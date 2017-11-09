@@ -26,9 +26,7 @@
 (def default-lang (first supported-langs))
 
 (def all-languages-with-optional
-  (if (env/feature? :english)
-    [:fi :sv :en]
-    [:fi :sv (sc/optional-key :en)]))
+  [:fi :sv (sc/optional-key :en)])
 
 (defn supported-lang? [lang]
   (contains? (set supported-langs) (keyword lang)))
@@ -47,16 +45,9 @@
   (supported-langs-map (constantly value-type)))
 
 (defn lenient-localization-schema [value-type]
-  (into {} (map #(identity [% value-type]) all-languages-with-optional)))
+  (zipmap all-languages-with-optional (repeat value-type)))
 
 (sc/defschema EnumSupportedLanguages (apply sc/enum (map name languages)))
-
-;; The languages are hard coded (with English optional) to avoid failing smoketests
-(sc/defschema LocalizationStringMap
-  {:fi                   sc/Str
-   :sv                   sc/Str
-   (sc/optional-key :en) sc/Str})
-
 
 ;;
 ;; Loading translations from files
