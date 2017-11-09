@@ -436,8 +436,7 @@
      :attachments attachments-for-write}))
 
 (defn save-unsent-attachments-as-krysp
-  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
-  [application lang krysp-version output-dir begin-of-link]
+  [application lang krysp-version begin-of-link]
   (let [canonical-without-attachments (canonical/unsent-attachments-to-canonical application lang)
 
         attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
@@ -447,8 +446,8 @@
 
         xml (element-to-xml canonical (get-rakennuslupa-mapping krysp-version))
         attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonical)]
-
-    (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
+    {:xml xml
+     :attachments attachments-for-write}))
 
 (defn- patevyysvaatimusluokka212 [luokka]
   (if (and luokka (not (#{"AA" "ei tiedossa"} luokka)))

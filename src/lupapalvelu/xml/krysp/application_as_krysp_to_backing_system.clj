@@ -96,7 +96,6 @@
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
   (let [permit-type   (permit/permit-type application)
         krysp-version (resolve-krysp-version organization permit-type)
-        output-dir    (resolve-output-directory organization permit-type)
         begin-of-link (get-begin-of-link permit-type (:use-attachment-links-integration organization))
         filtered-app  (->> application
                            remove-unsupported-attachments
@@ -112,7 +111,7 @@
         attachments
         xml
         krysp-version
-        output-dir
+        (resolve-output-directory organization permit-type)
         filtered-submitted-app
         lang)
       (fail! :error.unknown))))
@@ -139,12 +138,11 @@
   (let [permit-type (permit/permit-type application)]
     (when (org/krysp-integration? organization permit-type)
       (let [krysp-version (resolve-krysp-version organization permit-type)
-            output-dir    (resolve-output-directory organization permit-type)
             begin-of-link (get-begin-of-link permit-type (:use-attachment-links-integration organization))
             filtered-app  (remove-unsupported-attachments application)
             mapping-result (permit/review-krysp-mapper filtered-app task user lang krysp-version begin-of-link)]
         (if-some [{:keys [xml attachments]} mapping-result]
-          (writer/write-to-disk application attachments xml krysp-version output-dir nil nil "review")
+          (writer/write-to-disk application attachments xml krysp-version (resolve-output-directory organization permit-type) nil nil "review")
           (fail! :error.unknown))))))
 
 
@@ -153,12 +151,13 @@
   [application lang organization]
   (let [permit-type   (permit/permit-type application)
         krysp-version (resolve-krysp-version organization permit-type)
-        output-dir    (resolve-output-directory organization permit-type)
         begin-of-link (get-begin-of-link permit-type (:use-attachment-links-integration organization))
         filtered-app  (remove-unsupported-attachments application)]
     (assert (= permit/R permit-type)
       (str "Sending unsent attachments to backing system is not supported for " (name permit-type) " type of permits."))
-    (rl-mapping/save-unsent-attachments-as-krysp filtered-app lang krysp-version output-dir begin-of-link)))
+    (if-some [{:keys [xml attachments]} (rl-mapping/save-unsent-attachments-as-krysp filtered-app lang krysp-version begin-of-link)]
+      (writer/write-to-disk application attachments xml krysp-version (resolve-output-directory organization permit-type))
+      (fail! :error.unknown))))
 
 (defn krysp-xml-files
   "Returns list of file paths that have XML extension and match the
