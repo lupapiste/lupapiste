@@ -1,15 +1,18 @@
 (ns lupapalvelu.xml.asianhallinta.asianhallinta-mapping
   (:require [taoensso.timbre :refer [infof]]
+            [lupapalvelu.application :refer [get-operations]]
             [lupapalvelu.document.asianhallinta-canonical :as canonical]
             [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.integrations.statement-canonical :refer [statement-as-canonical]]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.asianhallinta.mapping-common :as ah]
             [lupapalvelu.xml.emit :as emit]
             [lupapalvelu.xml.disk-writer :as writer]
             [lupapalvelu.xml.krysp.mapping-common :as common]
-            [lupapalvelu.application :refer [get-operations]]
+            [lupapalvelu.xml.validator :as validator]
             [sade.core :refer [def-]]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [clojure.data.xml :as data-xml]))
 
 (def uusi-asia
   {:tag :UusiAsia
@@ -121,22 +124,25 @@
                                 (canonical/get-current-application-pdf application begin-of-link))
         canonical-with-attachments (assoc-in canonical [:UusiAsia :Liitteet :Liite] attachments-with-pdfs)
         mapping (get-uusi-asia-mapping ah-version)
-
-        xml (emit/element-to-xml canonical-with-attachments mapping)
+        xml-s (-> (emit/element-to-xml canonical-with-attachments mapping)
+                  (data-xml/emit-str))
         attachments (attachments-for-write (:attachments application))]
-    (writer/write-to-disk application attachments xml (str "ah-" ah-version) output-dir submitted-application lang)))
+    (-> (validator/validate-integration-message! xml-s (permit/permit-type application) (str "ah-" ah-version))
+        (writer/write-to-disk application attachments output-dir submitted-application lang))))
 
 (defn taydennys-asiaan-from-application
   "Construct AsiaanTaydennys XML message. Writes XML and attachmets to disk (ouput-dir)"
-  [application attachments lang ah-version begin-of-link output-dir]
+  [application attachments _ ah-version begin-of-link output-dir]
   (let [canonical (canonical/application-to-asianhallinta-taydennys-asiaan-canonical application)
         attachments (enrich-attachments-with-operation-data attachments (get-operations application))
         attachments-canonical (canonical/get-attachments-as-canonical attachments begin-of-link)
         canonical-with-attachments (assoc-in canonical [:TaydennysAsiaan :Liitteet :Liite] attachments-canonical)
         mapping (get-taydennys-asiaan-mapping ah-version)
-        xml (emit/element-to-xml canonical-with-attachments mapping)
+        xml-s (-> (emit/element-to-xml canonical-with-attachments mapping)
+                  (data-xml/emit-str))
         attachments (attachments-for-write attachments)]
-    (writer/write-to-disk application attachments xml (str "ah-" ah-version) output-dir nil nil "taydennys")))
+    (-> (validator/validate-integration-message! xml-s (permit/permit-type application) (str "ah-" ah-version))
+        (writer/write-to-disk application attachments output-dir nil nil "taydennys"))))
 
 (defn- create-statement-request-canonical
   [user application statement lang]
@@ -168,9 +174,11 @@
         canonical-with-attachments (assoc-in canonical [:UusiAsia :Liitteet :Liite] attachments-with-pdfs)
         mapping (-> (get-uusi-asia-mapping version)
                     (assoc-in [:attr :messageId] message-id))
-        xml (emit/element-to-xml canonical-with-attachments mapping)
+        xml-s (-> (emit/element-to-xml canonical-with-attachments mapping)
+                  (data-xml/emit-str))
         attachments (attachments-for-write (:attachments application) #(not= "verdict" (-> % :target :type)))
-        saved-attachment-ids (writer/write-to-disk application attachments xml (str "ah-" version) output-dir submitted-application lang "statement_request")]
+        saved-attachment-ids (-> (validator/validate-integration-message! xml-s (permit/permit-type application) (str "ah-" version))
+                                 (writer/write-to-disk application attachments output-dir submitted-application lang "statement_request"))]
     (messages/save (assoc integration-message-data :attachmentsCount (count saved-attachment-ids)))
     (infof "ELY statement-request written, messageId: %s, attachments (excl generated PDFs): %d" message-id (count saved-attachment-ids))
     saved-attachment-ids))

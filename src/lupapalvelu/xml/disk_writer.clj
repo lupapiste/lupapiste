@@ -1,14 +1,11 @@
 (ns lupapalvelu.xml.disk-writer
   (:require [taoensso.timbre :as timbre :refer [info error]]
             [me.raynes.fs :as fs]
-            [clojure.data.xml :as data-xml]
             [clojure.java.io :as io]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.pdf.pdf-export :as pdf-export]
-            [lupapalvelu.xml.validator :as validator]))
+            [lupapalvelu.pdf.pdf-export :as pdf-export]))
 
 (defn get-file-name-on-server [file-id file-name]
   (str file-id "_" (ss/encode-filename file-name)))
@@ -47,23 +44,16 @@
     (fs/chmod "+rw" current-file)))
 
 (defn write-to-disk
-  "Writes XML string to disk and copies attachments from database. XML is validated before writing.
+  "Writes XML string to disk and copies attachments from database. XML should be validated before calling this function.
    Returns a sequence of attachment fileIds that were written to disk."
-  [application attachments xml schema-version output-dir & [submitted-application lang file-suffix]]
+  [xml-s application attachments output-dir & [submitted-application lang file-suffix]]
   {:pre [(string? output-dir)]
    :post [%]}
-
   (let [file-name  (if file-suffix
                      (str output-dir "/" (:id application) "_" (now) "_" file-suffix)
                      (str output-dir "/" (:id application) "_" (now)))
         tempfile   (io/file (str file-name ".tmp"))
-        outfile    (io/file (str file-name ".xml"))
-        xml-s      (data-xml/emit-str xml)]
-
-    (try
-      (validator/validate xml-s (permit/permit-type application) schema-version)
-      (catch org.xml.sax.SAXParseException e
-        (fail! :error.integration.create-message :details (.getMessage e))))
+        outfile    (io/file (str file-name ".xml"))]
 
     (fs/mkdirs output-dir)
 
