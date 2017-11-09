@@ -19,6 +19,22 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   self.skip             = ko.observable(0);
   self.searchResultType = ko.observable(params.searchResultType);
 
+  self.state            = ko.pureComputed(function () {
+   if (self.searchResultType() === "automatic") {
+     return "created";
+   } else {
+     return self.searchResultType();
+   }
+  });
+
+  self.trigger          = ko.pureComputed(function() {
+    if (self.searchResultType() === "automatic") {
+      return "not-user-created";
+    } else {
+      return "user-created";
+    }
+  });
+
   self.assignmentsCount = ko.observable(0); // Count of open assignments received by the current user.
 
   self.pending = ko.observable(false);
@@ -87,7 +103,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
 
     return {
       searchText: self.searchFieldDelayed(),
-      state: self.searchResultType(),
+      state: self.state(),
       recipient: recipientSearchCond(lupapisteApp.services.assignmentRecipientFilterService.selected(), myid),
       operation: _.map(lupapisteApp.services.operationFilterService.selected(), "id"),
       limit: self.limit(),
@@ -95,7 +111,8 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
       createdDate: {start: searchStartDateInMillis, end: searchEndDateInMillis},
       targetType: _.map(lupapisteApp.services.assignmentTargetFilterService.selected(), "id"),
       sort: ko.mapping.toJS(self.sort),
-      skip: self.skip()
+      skip: self.skip(),
+      trigger: self.trigger()
     };
   });
 
