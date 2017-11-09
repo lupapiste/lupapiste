@@ -33,12 +33,29 @@
        :else
        {:type-group "muut" :type-id type-id}))))
 
-(defn- attachment-type-from-krysp-type [type]
-  (case (ss/lower-case type)
-    "paatosote"                                "paatosote"
-    "katselmuksen_tai_tarkastuksen_poytakirja" "katselmuksen_tai_tarkastuksen_poytakirja"
-    "lupaehto"                                 "muu"
+(defmulti attachment-type-from-krysp-type
+  (fn [{target-type :type} _] (keyword target-type)))
+
+(defmethod attachment-type-from-krysp-type :default [{target-type :type} _]
+  (errorf "Unknown krysp attachment target type: %s" target-type)
+  "muu")
+
+(defmethod attachment-type-from-krysp-type :verdict [_ type]
+  (case (-> type ss/lower-case ss/scandics->ascii)
+    "paatosote"  "paatosote"
+    "lupaehto"   "muu"
     "paatos"))
+
+(def task-attachment-types (set (->> (mapcat val att-type/attachment-types-by-permit-type)
+                                     (filter (comp #{:katselmukset_ja_tarkastukset} :type-group))
+                                     (map (comp name :type-id)))))
+
+(defmethod attachment-type-from-krysp-type :task [_ type]
+  (-> type
+      ss/lower-case
+      ss/scandics->ascii
+      task-attachment-types
+      (or "katselmuksen_tai_tarkastuksen_poytakirja")))
 
 (defn- content-disposition-filename
   "Extracts the filename from the Content-Disposition header of the
@@ -87,7 +104,7 @@
                     content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                     urlhash         (pandect/sha1 (.toString java-url))
                     attachment-id      urlhash
-                    attachment-type    (verdict-attachment-type application (attachment-type-from-krysp-type type))
+                    attachment-type    (verdict-attachment-type application (attachment-type-from-krysp-type target type))
                     contents           (or description (if (= type "lupaehto") "Lupaehto"))
                     target             (assoc target :urlHash pk-urlhash)
                     ;; Reload application from DB, attachments have changed
