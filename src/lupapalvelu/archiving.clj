@@ -73,13 +73,18 @@
     {$set {:archived.initial now}}))
 
 (defn- set-attachment-state [next-state application now id]
-  (action/update-application
-    (action/application->command application)
-    {:attachments {$elemMatch {:id id :metadata.tila {$ne :arkistoitu}}}}
-    {$set {:modified now
-           :attachments.$.modified now
-           :attachments.$.metadata.tila next-state
-           :attachments.$.readOnly (contains? archival-states next-state)}}))
+  (let [fresh-application (domain/get-application-no-access-checking (:id application))
+        attachment (first (filter #(= id (:id %)) (:attachments fresh-application)))
+        last-version-index (dec (count (:versions attachment)))]
+    (action/update-application
+      (action/application->command fresh-application)
+      {:attachments {$elemMatch {:id id :metadata.tila {$ne :arkistoitu}}}}
+      {$set {:modified now
+             :attachments.$.modified now
+             :attachments.$.metadata.tila next-state
+             :attachments.$.readOnly (contains? archival-states next-state)
+             :attachments.$.latestVersion.onkaloFileId id
+             (str "attachments.$.versions." last-version-index ".onkaloFileId") id}})))
 
 (defn- set-application-state [next-state application now _]
   (action/update-application
