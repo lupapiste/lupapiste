@@ -435,17 +435,6 @@
     {:xml xml
      :attachments attachments-for-write}))
 
-(defn save-aloitusilmoitus-as-krysp [application lang output-dir started {:keys [index localShortId nationalId propertyId] :as building} user krysp-version]
-  (let [task {:taskname "Aloitusilmoitus"
-              :data {:katselmus {:pitoPvm started}
-                     :katselmuksenLaji "Aloitusilmoitus"
-                     :rakennus {:0 {:tila {:tila "ei tiedossa"}
-                                    :rakennus {:jarjestysnumero index
-                                               :kiinttun propertyId
-                                               :rakennusnro localShortId
-                                               :valtakunnallinenNumero nationalId}}}}}]
-    (save-katselmus-xml application lang output-dir task user krysp-version nil nil)))
-
 (defn save-unsent-attachments-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application lang krysp-version output-dir begin-of-link]

@@ -160,17 +160,6 @@
       (str "Sending unsent attachments to backing system is not supported for " (name permit-type) " type of permits."))
     (rl-mapping/save-unsent-attachments-as-krysp filtered-app lang krysp-version output-dir begin-of-link)))
 
-(defn save-aloitusilmoitus-as-krysp
-  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
-  [application lang organization timestamp building user]
-  (let [permit-type   (permit/permit-type application)
-        krysp-version (resolve-krysp-version organization permit-type)
-        output-dir    (resolve-output-directory organization permit-type)
-        filtered-app  (remove-unsupported-attachments application)]
-    (assert (= permit/R permit-type)
-      (str "Sending aloitusilmoitus to backing system is not supported for " (name permit-type) " type of permits."))
-    (rl-mapping/save-aloitusilmoitus-as-krysp filtered-app lang output-dir timestamp building user krysp-version)))
-
 (defn krysp-xml-files
   "Returns list of file paths that have XML extension and match the
   given application."
