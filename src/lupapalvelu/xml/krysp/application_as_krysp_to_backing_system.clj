@@ -124,15 +124,15 @@
                           remove-pre-verdict-designers
                           remove-disabled-documents)
         mapped-data (permit/parties-krysp-mapper filtered-app :suunnittelija lang krysp-version)]
-    (if (map? mapped-data)
-      (do
-        (->> mapped-data
-             (run! (fn [[id xml]]
-                     (-> (data-xml/emit-str xml)
-                         (validator/validate-integration-message! permit-type krysp-version)
-                         (writer/write-to-disk application nil output-dir nil nil id)))))
-        (keys mapped-data))
-      (fail! :error.unknown))))
+    (when-not (map? mapped-data)
+      (fail! :error.unknown))
+    (run!
+      (fn [[id xml]]
+        (-> (data-xml/emit-str xml)
+            (validator/validate-integration-message! permit-type krysp-version)
+            (writer/write-to-disk application nil output-dir nil nil id)))
+      mapped-data)
+    (keys mapped-data)))
 
 (defn save-review-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
