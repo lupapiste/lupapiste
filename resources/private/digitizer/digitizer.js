@@ -81,6 +81,10 @@
       return false;
     };
 
+    self.createWoLocation = function () {
+      console.log("do something");
+    };
+
     var zoomLevelEnum = {
       "540": 9,
       "550": 7,

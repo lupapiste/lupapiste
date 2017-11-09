@@ -24888,6 +24888,26 @@ body.authority-admin .header-menu {
   vertical-align: middle;
 }
 
+table.default-digitalization-location {
+  width: auto;
+  margin-top: 10px;
+}
+
+table.default-digitalization-location th {
+  min-height: 25px;
+  height: 25px;
+}
+
+table.default-digitalization-location td {
+  min-height: 40px;
+  height: 40px;
+}
+
+.form-input-location {
+  padding: 2px 2px 2px 2px;
+  height: 40px;
+}
+
 #neighbor-show .pending {
   width: 100%;
   height: 100px;

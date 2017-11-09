@@ -239,6 +239,28 @@ LUPAPISTE.OrganizationModel = function () {
     }
   });
 
+  self.defaultDigitalizationLocationX = ko.observable("");
+  ko.computed(function() {
+    var x = self.defaultDigitalizationLocationX();
+    if (self.initialized) {
+      ajax.command("set-default-digitalization-location-x", {x: x})
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
+        .call();
+    }
+  });
+
+  self.defaultDigitalizationLocationY = ko.observable("");
+  ko.computed(function() {
+    var y = self.defaultDigitalizationLocationY();
+    if (self.initialized) {
+      ajax.command("set-default-digitalization-location-y", {y: y})
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
+        .call();
+    }
+  });
+
   function setTosFunctionForOperation(operationId, functionCode) {
     var cmd = functionCode !== null ? "set-tos-function-for-operation" : "remove-tos-function-from-operation";
     var data = {operation: operationId};
@@ -359,6 +381,9 @@ LUPAPISTE.OrganizationModel = function () {
     self.neighborOrderEmails(util.getIn(organization, ["notifications", "neighbor-order-emails"], []).join("; "));
     self.submitNotificationEmails(util.getIn(organization, ["notifications", "submit-notification-emails"], []).join("; "));
     self.infoRequestNotificationEmails(util.getIn(organization, ["notifications", "inforequest-notification-emails"], []).join("; "));
+
+    self.defaultDigitalizationLocationX(util.getIn(organization, ["default-digitalization-location", "x"], []));
+    self.defaultDigitalizationLocationY(util.getIn(organization, ["default-digitalization-location", "y"], []));
 
     _.forOwn(operationsAttachmentsPerPermitType, function(value, permitType) {
       var operationsAttachments = _(value)

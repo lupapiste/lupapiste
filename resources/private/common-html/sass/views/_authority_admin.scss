@@ -325,3 +325,23 @@ $navi-sidebar-bp: 1800px;
     vertical-align: middle;
   }
 }
+
+table.default-digitalization-location {
+  width: auto;
+  margin-top: 10px;
+
+  th {
+    min-height: 25px;
+    height: 25px;
+  }
+
+  td {
+    min-height: 40px;
+    height: 40px;
+  }
+}
+
+.form-input-location {
+  padding: 2px 2px 2px 2px;
+  height: 40px;
+}
