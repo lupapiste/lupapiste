@@ -171,14 +171,21 @@
       rakennuspaikka-exists?                             (:rakennuspaikka app-info)
       (pp/enough-location-info-from-parameters? command) (select-keys data [:x :y :address :propertyId]))))
 
+(defn default-location [organizationId]
+  (let [organization (org/get-organization organizationId)]
+  {:x (get-in organization [:default-digitalization-location :x])
+   :y (get-in organization [:default-digitalization-location :y])
+   :address "Sijainti puuttuu"
+   :propertyId (apply str (concat (first (split-at 3 organizationId)) "-00-00-00"))}))
+
 (defn fetch-or-create-archiving-project!
-  [{{:keys [organizationId kuntalupatunnus createAnyway createWithoutBuildings]} :data :as command}]
+  [{{:keys [organizationId kuntalupatunnus createAnyway createWithoutBuildings createWithDefaultLocation]} :data :as command}]
   (let [operation         :archiving-project
         permit-type       "R"                                ; No support for other permit types currently
         dummy-application {:id "" :permitType permit-type :organization organizationId}
         xml               (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
         app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-        {:keys [propertyId] :as location-info} (get-location-info command app-info)
+        {:keys [propertyId] :as location-info} (if createWithDefaultLocation (default-location organizationId) (get-location-info command app-info))
         organization      (when propertyId
                             (organization/resolve-organization (p/municipality-id-by-property-id propertyId) permit-type))
         building-xml      (if app-info xml (fetch-building-xml organizationId permit-type propertyId))
@@ -187,21 +194,23 @@
         organizations-match?  (= organizationId (:id organization))]
     (cond
       (and (empty? app-info)
-           (not createAnyway))           (fail :error.no-previous-permit-found-from-backend :permitNotFound true)
-      (not location-info)                (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
-      (not (:propertyId location-info))  (fail :error.previous-permit-no-propertyid)
-      (not organizations-match?)         (fail :error.previous-permit-found-from-backend-is-of-different-organization)
+           (not createAnyway))              (fail :error.no-previous-permit-found-from-backend :permitNotFound true)
+      (not location-info)                   (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
+      (and (not (:propertyId location-info))
+           (not createWithDefaultLocation)) (fail :error.previous-permit-no-propertyid)
+      (and (not organizations-match?)
+           (not createWithDefaultLocation)) (fail :error.previous-permit-found-from-backend-is-of-different-organization)
       (and (empty? bldgs-and-structs)
-           (not createWithoutBuildings)) (fail :error.no-buildings-found-from-backend :buildingsNotFound true)
-      :else                              (let [{id :id} (create-archiving-project-application! command
-                                                                                               operation
-                                                                                               bldgs-and-structs
-                                                                                               app-info
-                                                                                               location-info
-                                                                                               permit-type
-                                                                                               building-xml
-                                                                                               kuntalupatunnus)]
-                                           (ok :id id)))))
+           (not createWithoutBuildings))    (fail :error.no-buildings-found-from-backend :buildingsNotFound true)
+      :else                                 (let [{id :id} (create-archiving-project-application! command
+                                                                                                  operation
+                                                                                                  bldgs-and-structs
+                                                                                                  app-info
+                                                                                                  location-info
+                                                                                                  permit-type
+                                                                                                  building-xml
+                                                                                                  kuntalupatunnus)]
+                                            (ok :id id)))))
 
 (defn update-verdicts [{:keys [application] :as command} verdicts]
   (let [current-verdicts (:verdicts application)
