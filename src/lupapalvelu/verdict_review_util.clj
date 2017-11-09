@@ -33,7 +33,7 @@
        :else
        {:type-group "muut" :type-id type-id}))))
 
-(defn- attachment-type-from-krysp-type [type]
+(defn attachment-type-from-krysp-type [type]
   (case (ss/lower-case type)
     "paatosote"                                "paatosote"
     "katselmuksen_tai_tarkastuksen_poytakirja" "katselmuksen_tai_tarkastuksen_poytakirja"
@@ -101,23 +101,23 @@
                 ;; Copy content to a temp file to keep the content close at hand
                 ;; during upload and conversion processing.
                 (io/copy in temp-file)
-                (attachment/upload-and-attach! {:application current-application :user user}
-                                               {:attachment-id attachment-id
-                                                :attachment-type attachment-type
-                                                :contents contents
-                                                :target target
-                                                :required false
-                                                :read-only true
-                                                :locked true
-                                                :created (or (if (string? attachment-time)
-                                                               (to-timestamp attachment-time)
-                                                               attachment-time)
-                                                             timestamp)
-                                                :state :ok
-                                                :set-app-modified? set-app-modified?}
-                                               {:filename filename
-                                                :size content-length
-                                                :content temp-file}))
+                (when (attachment/upload-and-attach! {:application current-application :user user}
+                                                     {:attachment-id attachment-id
+                                                      :attachment-type attachment-type
+                                                      :contents contents
+                                                      :target target
+                                                      :required false
+                                                      :read-only true
+                                                      :locked true
+                                                      :created (or (if (string? attachment-time)
+                                                                     (to-timestamp attachment-time)
+                                                                     attachment-time)
+                                                                   timestamp)
+                                                      :state :ok
+                                                      :set-app-modified? set-app-modified?}
+                                                     {:filename filename
+                                                      :size content-length
+                                                      :content temp-file})))
               (error (str (:status resp) " - unable to download " url ": " resp))))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
     (do

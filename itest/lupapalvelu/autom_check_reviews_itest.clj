@@ -30,7 +30,8 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as app-from-krysp]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.review :as review])
+            [lupapalvelu.review :as review]
+            [lupapalvelu.organization :as organization])
   (:import [org.xml.sax SAXParseException]))
 
 (def db-name (str "test_autom-check-reviews-itest_" (now)))

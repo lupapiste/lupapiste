@@ -40,7 +40,10 @@
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.inspection-summary :as inspection-summary])
+            [lupapalvelu.inspection-summary :as inspection-summary]
+            [clj-time.coerce :as time-coerce]
+            [clj-time.core :as time]
+            [lupapalvelu.assignment :as assignment])
   (:import [java.net URL]
            [java.nio.charset StandardCharsets]))
 
@@ -131,6 +134,19 @@
 (defn verdict-tab-action? [{action-name :action}]
   (boolean (#{:publish-verdict :check-for-verdict :process-ah-verdict :fetch-verdicts} (keyword action-name))))
 
+(defn- verdict-info-for-assignments [{:keys [user application attachment-id type]}]
+  (let [application (domain/get-application-as (:id application) user)
+        trigger-type (clojure.string/join "." (verdict-review-util/verdict-attachment-type
+                                                application
+                                                (verdict-review-util/attachment-type-from-krysp-type type)))
+        targets [{:id attachment-id :trigger-type trigger-type}]]
+    {:user             user
+     :organization     (organization/get-organization (:organization application))
+     :application      application
+     :targets          [{:id attachment-id :trigger-type trigger-type}]
+     :assignment-group "attachments"
+     :timestamp        (time-coerce/to-long (time/now))}))
+
 (defn- get-poytakirja!
   "Fetches the verdict attachments listed in the verdict xml. If the
   fetch is successful, uploads and attaches them to the
@@ -139,9 +155,21 @@
 
   At least outlier verdicts (KT) poytakirja can have multiple
   attachments. On the other hand, traditional (e.g., R) verdict
-  poytakirja can only have one attachment."
+  poytakirja can only have one attachment.
+
+  Also runs assignment triggers."
   [application user timestamp verdict-id pk & options]
-  (apply verdict-review-util/get-poytakirja! application user timestamp {:type "verdict" :id verdict-id} pk options))
+  (let [type "verdict"
+        gpk (fn [] (apply verdict-review-util/get-poytakirja! application user timestamp {:type type :id verdict-id} pk options))
+        pk (gpk)]
+    (when (:urlHash pk)
+      (try
+        ((assignment/run-assignment-triggers verdict-info-for-assignments)
+          {:user user :application application :attachment-id (:urlHash pk) :type type})
+        (catch Exception e
+          (error "could not create assignment automatically for fetched attachment "
+                 (:id application) ": "(.getMessage e)))))
+    pk))
 
 (defn- verdict-attachments [application user timestamp verdict]
   {:pre [application]}

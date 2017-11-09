@@ -13,7 +13,11 @@
             [lupapalvelu.document.tools :as tools]
             [sade.strings :as ss]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.verdict-review-util :as verdict-review-util]))
+            [lupapalvelu.verdict-review-util :as verdict-review-util]
+            [lupapalvelu.assignment :as assignment]
+            [lupapalvelu.organization :as organization]
+            [clj-time.coerce :as time-coerce]
+            [clj-time.core :as time]))
 
 (defn- empty-review-task? [t]
   (let [katselmus-data (-> t :data :katselmus)
@@ -216,7 +220,6 @@
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
   [user created application app-xml & [overwrite-background-reviews?]]
-
   (let [reviews (vec (reviews-preprocessed app-xml))
         buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
@@ -274,6 +277,14 @@
         :attachments-by-task-id attachments-by-task-id
         :added-tasks-with-updated-buildings added-tasks-with-updated-buildings)))
 
+(defn- review-info-for-assignments [{:keys [user application attachment-id]}]
+  {:user             user
+   :organization     (organization/get-organization (:organization application))
+   :application      (domain/get-application-as (:id application) user)
+   :targets          [{:id attachment-id :trigger-type "katselmukset_ja_tarkastukset.katselmuksen_tai_tarkastuksen_poytakirja"}]
+   :assignment-group "attachments"
+   :timestamp        (time-coerce/to-long (time/now))})
+
 (defn save-review-updates [{user :user  application :application :as command} updates added-tasks-with-updated-buildings attachments-by-task-id]
   (let [update-result (pos? (update-application command {:modified (:modified application)} updates :return-count? true))
         updated-application (domain/get-application-no-access-checking (:id application))] ;; TODO: mongo projection
@@ -282,7 +293,16 @@
         (let [attachments (get attachments-by-task-id id)]
           (if-not (empty? attachments)
             (doseq [att attachments]
-              (verdict-review-util/get-poytakirja! application user (now) {:type "task" :id id} att))
+              (let [pk (verdict-review-util/get-poytakirja! application user (now) {:type "task" :id id} att)]
+                (when (:urlHash pk)
+                  ((try
+                     ((assignment/run-assignment-triggers review-info-for-assignments)
+                       {:user          user
+                        :application   application
+                        :attachment-id (:urlHash pk)})
+                     (catch Exception e
+                       (error "could not create assignment automatically for fetched attachment "
+                              (:id application) ": "(.getMessage e))))))))
             (tasks/generate-task-pdfa updated-application added-task (:user command) "fi")))))
     (cond-> {:ok update-result}
       (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))

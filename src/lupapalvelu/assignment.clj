@@ -116,7 +116,8 @@
    :sort {:asc sc/Bool
           :field sc/Str}
    :skip   sc/Int
-   :limit  sc/Int})
+   :limit  sc/Int
+   :trigger (sc/maybe sc/Str)})
 
 (sc/defschema AssignmentsSearchResponse
   {:userTotalCount sc/Int
@@ -202,14 +203,15 @@
                :targetType nil
                :skip   0
                :limit  100
-               :sort   {:asc true :field "created"}})))
+               :sort   {:asc true :field "created"}
+               :trigger nil})))
 
 (defn- make-query 
     "Returns query parameters in two parts:
    - pre-lookup: query conditions that can be executed directly against the assignments collection itself
    - post-lookup: conditions that need data fetched via the assignments->applications lookup stage in aggregation query
                   (basically the ones that are targeted to the :applicationDetails subdocument"
-  [{:keys [searchText recipient operation area createdDate targetType]} user]
+  [{:keys [searchText recipient operation area createdDate targetType trigger]} user]
   {:pre-lookup (filter seq
                        [{:application.organization {$in (usr/organization-ids-by-roles user #{:authority :digitizer})}}
                         (when-not (empty? recipient)
@@ -219,6 +221,9 @@
                                                 "$lt"  (or (:end createdDate) (tc/to-long (t/now)))}})
                         (when-not (empty? targetType)
                           {:targets.group {$in targetType}})
+                        (if (= trigger "user-created")
+                          {:trigger "user-created"}
+                          {:trigger {"$ne" "user-created"}})
                         {:status {$ne "canceled"}}])
   :post-lookup (filter seq
                        [(when-not (ss/blank? searchText)

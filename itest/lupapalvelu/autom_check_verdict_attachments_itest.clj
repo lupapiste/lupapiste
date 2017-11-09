@@ -66,6 +66,7 @@
                  (application-verdict-url-hashes application) => (has every? nil?))
 
            (let [batchrun-result (check-verdict-attachments)
+                 _ (println batchrun-result)
                  updated-application (query-application sonja app-id)
                  url-hashes (->> (application-verdict-url-hashes updated-application)
                                  (filter string?))]
