@@ -820,7 +820,7 @@
 
 (defn upload-file-and-bind
   "Uploads file and then bind using bind-attachments. To upload new file, specify metadata using filedata.
-  If upload to existing attachment, filedata can be empty byt :attachment-id should be defined."
+  If upload to existing attachment, filedata can be empty but :attachment-id should be defined."
   [apikey id filedata & {:keys [fails attachment-id]}]
   (let [file-id (get-in (upload-file apikey (or (:filename filedata) "dev-resources/test-attachment.txt")) [:files 0 :fileId])
         data (if attachment-id
