@@ -110,7 +110,9 @@
                            remove-unsupported-attachments
                            (filter-attachments-by-state current-state))
         output-fn      (if http-conf
-                         (fn [xml _] (krysp-http/POST xml http-conf))
+                         (fn [xml attachments]
+                           (krysp-http/POST xml http-conf)
+                           (->> attachments (map :fileId) (remove nil?)))
                          #(writer/write-to-disk %1 application %2 (resolve-output-directory organization permit-type) submitted-app lang))
         mapping-result (permit/application-krysp-mapper filtered-app lang krysp-version begin-of-link)]
     (if-some [{:keys [xml attachments]} mapping-result]
@@ -157,7 +159,9 @@
             begin-of-link (get-begin-of-link permit-type organization)
             filtered-app  (remove-unsupported-attachments application)
             output-fn     (if http-conf
-                            (fn [xml _] (krysp-http/POST xml http-conf))
+                            (fn [xml attachments]
+                              (krysp-http/POST xml http-conf)
+                              (->> attachments (map :fileId) (remove nil?)))
                             #(writer/write-to-disk %1 application %2 (resolve-output-directory organization permit-type) nil nil "review"))
             mapping-result (permit/review-krysp-mapper filtered-app task user lang krysp-version begin-of-link)]
         (if-some [{:keys [xml attachments]} mapping-result]
@@ -176,7 +180,9 @@
         begin-of-link (get-begin-of-link permit-type organization)
         filtered-app  (remove-unsupported-attachments application)
         output-fn     (if http-conf
-                        (fn [xml _] (krysp-http/POST xml http-conf))
+                        (fn [xml attachments]
+                          (krysp-http/POST xml http-conf)
+                          (->> attachments (map :fileId) (remove nil?)))
                         #(writer/write-to-disk %1 application %2 (resolve-output-directory organization permit-type)))]
     (assert (= permit/R permit-type)
       (str "Sending unsent attachments to backing system is not supported for " (name permit-type) " type of permits."))
