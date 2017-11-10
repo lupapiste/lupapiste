@@ -175,7 +175,10 @@
               <div>
                 <span class="attachment-label-header-item" id="test-attachment-file-name">
                   <!-- TODO: download via service -->
-                  <a data-bind="text: $data.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId}, click: function() {hub.send('track-click', {category:'Attachments', label: '', event:'downloadLatestVersion'});return true;}"></a>
+                  <a data-bind="text: $data.filename,
+                                attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId},
+                                click: function() {hub.send('track-click',
+                                {category:'Attachments', label: '', event:'downloadLatestVersion'});return true;}"></a>
                 </span>
                 <span class="attachment-label-header-item">
                   <span data-bind="ltext: 'attachment.version'">Versio</span>

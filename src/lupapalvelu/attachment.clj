@@ -110,8 +110,8 @@
 (defschema Version
   "Attachment version"
   {:version                              VersionNumber
-   :fileId                               ssc/ObjectIdStr             ;; fileId in GridFS
-   :originalFileId                       ssc/ObjectIdStr             ;; fileId of the unrotated/unconverted file
+   :fileId                               (sc/maybe ssc/ObjectIdStr)  ;; fileId in GridFS, nil if the file has been deleted when archived
+   :originalFileId                       (sc/maybe ssc/ObjectIdStr)  ;; fileId of the unrotated/unconverted file
    (sc/optional-key :onkaloFileId)       AttachmentId                ;; id in Onkalo, if archived. Should equal attachment id.
    :created                              ssc/Timestamp
    ;; Timestamp for the latest "non-versioning" operation (e.g.,
@@ -419,6 +419,27 @@
 (defn delete-attachment-file-and-preview! [file-id]
   (mongo/delete-file-by-id file-id)
   (mongo/delete-file-by-id (str file-id "-preview")))
+
+(defn delete-archived-attachments-files-from-mongo! [application {:keys [metadata latestVersion versions id]}]
+  {:pre [(= :arkistoitu (keyword (:tila metadata)))
+         (every? :onkaloFileId [latestVersion (last versions)])]}
+  (->> versions
+       (map-indexed
+         (fn [idx {:keys [fileId originalFileId]}]
+           (delete-attachment-file-and-preview! fileId)
+           (delete-attachment-file-and-preview! originalFileId)
+           (let [version-path (str "attachments.$.versions." idx)]
+             (update-application
+               (application->command application)
+               {:attachments.id id}
+               {$set {(str version-path ".fileId") nil
+                      (str version-path ".originalFileId") nil}}))))
+       dorun)
+  (update-application
+    (application->command application)
+    {:attachments.id id}
+    {$set {:attachments.$.latestVersion.fileId nil
+           :attachments.$.latestVersion.originalFileId nil}}))
 
 (defn next-attachment-version [{:keys [major minor] :or {major 0 minor 0}} user]
   (if (usr/authority? user)
