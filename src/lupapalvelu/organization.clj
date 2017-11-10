@@ -372,9 +372,12 @@
       (fail :error.organization-not-found))))
 
 (defn krysp-integration? [organization permit-type]
-  (let [mandatory-keys [:url :version :ftpUser]]
-    (when-let [krysp (select-keys (get-in organization [:krysp (keyword permit-type)]) mandatory-keys)]
-     (and (= (count krysp) (count mandatory-keys)) (not-any? ss/blank? (vals krysp))))))
+  (if-let [{:keys [version ftpUser http]} (get-in organization [:krysp (keyword permit-type)])]
+    (boolean
+      (and (ss/not-blank? version)
+           (or (ss/not-blank? ftpUser)
+               (and http (ss/not-blank? (:url http))))))
+    false))
 
 (defn allowed-roles-in-organization [organization]
   {:pre [(map? organization)]}
