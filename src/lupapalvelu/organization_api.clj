@@ -974,7 +974,7 @@
 
 (defcommand update-docstore-info
   {:description      "Updates organization's document store information"
-   :parameters       [org-id docStoreInUse documentPrice organizationDescription]
+   :parameters       [org-id docStoreInUse docTerminalInUse documentPrice organizationDescription]
    :user-roles       #{:admin}
    :input-validators [(partial boolean-parameters [:docStoreInUse])
                       (partial number-parameters [:documentPrice])
@@ -986,6 +986,7 @@
   (mongo/update-by-query :organizations
       {:_id org-id}
       {$set {:docstore-info {:docStoreInUse docStoreInUse
+                             :docTerminalInUse docTerminalInUse
                              :documentPrice documentPrice
                              :organizationDescription organizationDescription}}})
   (ok))
