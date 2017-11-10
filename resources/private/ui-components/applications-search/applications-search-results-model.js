@@ -6,15 +6,6 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
 
   self.dataProvider = params.dataProvider;
-  self.data = ko.pureComputed(function() {
-    return _.map(self.dataProvider.results(), function(item) {
-      item.kuntalupatunnus = util.getIn(item, ["verdicts", 0, "kuntalupatunnus"]);
-      if (item.foremanRole) {
-        item.foremanRoleI18nkey = "osapuoli.tyonjohtaja.kuntaRoolikoodi." + item.foremanRole;
-      }
-      return item;
-    });
-  });
   self.gotResults = params.gotResults;
 
   self.selectedTab = self.dataProvider.searchResultType;
@@ -30,7 +21,7 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
     self.dataProvider.skip(0);
   });
 
-  self.columns = [
+  self.columns = ko.observableArray([
     util.createSortableColumn("first",   "applications.indicators", {colspan: lupapisteApp.models.currentUser.isAuthority() ? "5" : "4",
                                                                      sortable: false,
                                                                      currentSort: self.dataProvider.sort}),
@@ -50,7 +41,36 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
                                                                      currentSort: self.dataProvider.sort}),
     util.createSortableColumn("ninth",   "application.handlers",  {sortField: "handler",
                                                                    currentSort: self.dataProvider.sort})
-  ];
+  ]);
+
+  /*
+   *  Changing column title between Submitted and Verdict Given depending on opened tab.
+   *  On construction tab verdict given date is shown on search result table. Submitted date
+   *  is shown on all other tabs.
+   */
+  function changeTitle() {
+    if (self.selectedTab() === "construction") {
+      self.columns.splice(5, 1, util.createSortableColumn("sixth",   "applications.verdictGiven",  {sortField: "submitted", currentSort: self.dataProvider.sort}));
+    } else {
+      self.columns.splice(5, 1, util.createSortableColumn("sixth",   "applications.submitted",  {sortField: "submitted", currentSort: self.dataProvider.sort}));
+    }
+  }
+
+  self.data = ko.pureComputed(function() {
+    changeTitle();
+    return _.map(self.dataProvider.results(), function(item) {
+      var verdictCount = util.getIn(item, ["verdicts"]).length;
+      if (verdictCount > 0) {
+        item.kuntalupatunnus = util.getIn(item, ["verdicts", verdictCount - 1, "kuntalupatunnus"]);
+        item.verdictDate = util.getIn(item, ["verdicts", verdictCount - 1, "paatokset", 0, "paivamaarat", "anto"]);
+      }
+      item.searchType = self.dataProvider.searchResultType();
+      if (item.foremanRole) {
+        item.foremanRoleI18nkey = "osapuoli.tyonjohtaja.kuntaRoolikoodi." + item.foremanRole;
+      }
+      return item;
+    });
+  });
 
   // Scroll support.
   hub.send( "scrollService::setName", {name: "search-results"});
