@@ -1,28 +1,13 @@
 (ns lupapalvelu.organization-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+  (:require [camel-snake-kebab.core :as csk]
             [clojure.core.memoize :as memo]
             [clojure.set :as set]
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
-            [schema.core :as sc]
-            [monger.operators :refer :all]
-            [noir.core :refer [defpage]]
-            [noir.response :as resp]
-            [noir.request :as request]
-            [camel-snake-kebab.core :as csk]
-            [me.raynes.fs :as fs]
-            [slingshot.slingshot :refer [try+]]
-            [sade.core :refer [ok fail fail! now unauthorized]]
-            [sade.env :as env]
-            [sade.municipality :as muni]
-            [sade.property :as p]
-            [sade.strings :as ss]
-            [sade.util :refer [fn->>] :as util]
-            [sade.validators :as v]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters supported-localization-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.stamps :as stamps]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mime :as mime]
@@ -35,7 +20,23 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.waste-ads :as waste-ads]
             [lupapalvelu.wfs :as wfs]
-            [sade.shared-schemas :as sssc]))
+            [me.raynes.fs :as fs]
+            [monger.operators :refer :all]
+            [noir.core :refer [defpage]]
+            [noir.request :as request]
+            [noir.response :as resp]
+            [sade.core :refer [ok fail fail! now unauthorized]]
+            [sade.env :as env]
+            [sade.municipality :as muni]
+            [sade.property :as p]
+            [sade.shared-schemas :as sssc]
+            [sade.strings :as ss]
+            [sade.util :refer [fn->>] :as util]
+            [sade.validators :as v]
+            [schema.core :as sc]
+            [slingshot.slingshot :refer [try+]]
+            [swiss.arrows :refer :all]
+            [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]))
 ;;
 ;; local api
 ;;
@@ -116,12 +117,20 @@
                         (update-in [:suti :server] select-keys [:url :username]))
         :attachmentTypes (organization-attachments organization))))
 
-(defquery all-attachment-types-by-user
-  {:description "Lists all attachment types of users permit type"
+(defquery organization-attachment-types
+  {:description "Combined list of attachment types for every organization scope."
    :user-roles #{:authorityAdmin}}
-   [{user :user}]
-   (let [attachment-types (att-type/get-all-attachment-types-for-permit-type :R)]
-   (ok :attachmentTypes attachment-types)))
+  [{:keys [user user-organizations]}]
+  (-<>> (usr/authority-admins-organization-id user)
+        (util/find-by-id <> user-organizations)
+        :scope
+        (map (util/fn->> :permitType
+                         keyword
+                         att-type/get-all-attachment-types-for-permit-type))
+        flatten
+        (map #(select-keys % [:type-group :type-id]))
+        distinct
+        (ok :attachmentTypes)))
 
 (defquery organization-name-by-user
   {:description "Lists organization names for all languages."
