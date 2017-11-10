@@ -641,6 +641,11 @@
       (when (= typeName "yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa")
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/verdict-ya.xml"))))))
 
+  (defpage [:post "/dev/krysp/receiver"] [{xml :body}]
+    (if (ss/starts-with xml "<?xml")
+      (resp/status 200 "OK")
+      (resp/status 400 "Not XML")))
+
   (defpage [:get "/dev/private-krysp"] []
     (let [request (request/ring-request)
           [u p] (http/decode-basic-auth request)]

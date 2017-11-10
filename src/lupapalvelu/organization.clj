@@ -114,6 +114,13 @@
 
 (def backend-systems #{:facta :kuntanet :louhi :locus :keywinkki :iris :matti})
 
+(sc/defschema KryspHttpConf
+  {:url (sc/maybe sc/Str)
+   (sc/optional-key :auth-type) (sc/enum "basic" "x-header")
+   (sc/optional-key :username)  sc/Str
+   (sc/optional-key :password)  sc/Str
+   (sc/optional-key :headers)   [{:key sc/Str :value sc/Str}]})
+
 (sc/defschema KryspConf
   {(sc/optional-key :ftpUser) (sc/maybe sc/Str)
    (sc/optional-key :url) sc/Str
@@ -122,6 +129,7 @@
    (sc/optional-key :crypto-iv) sc/Str
    (sc/optional-key :version) sc/Str
    (sc/optional-key :fetch-chunk-size) sc/Int
+   (sc/optional-key :http) KryspHttpConf
    (sc/optional-key :backend-system) (apply sc/enum (map name backend-systems))})
 
 (sc/defschema KryspOsoitteetConf
