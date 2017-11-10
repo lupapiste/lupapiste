@@ -57,16 +57,15 @@
       :asianTiedot {:Asiantiedot {:rakennusvalvontaasianKuvaus (party-krysp-description party-doc)}}
       :lisatiedot (rl-canonical/get-lisatiedot-with-asiakirjat-toimitettu application lang)}}}})
 
-(defn- doc-to-canonical
-  "Reducer function which associates document-id with xml model as value"
-  [application lang krysp-version docs party-doc]
-  (assoc docs
-         (:id party-doc)
-         (-> (party-doc-to-canonical application lang party-doc)
-             (rl-mapping/rakennuslupa-element-to-xml krysp-version))))
+(defn- doc-to-canonical-fn
+  "Returns reducer function which associates document-id with xml model as value"
+  [application lang krysp-version]
+  (fn [docs party-doc]
+    (assoc docs (:id party-doc) (-> (party-doc-to-canonical application lang party-doc)
+                                    (rl-mapping/rakennuslupa-element-to-xml krysp-version)))))
 
 (defmethod permit/parties-krysp-mapper :R [application doc-subtype lang krysp-version]
   (let [application (doc-tools/unwrapped application)]
     (->> (domain/get-documents-by-subtype (:documents application) doc-subtype)
          (walk/postwalk canonical-common/empty-strings-to-nil)
-         (reduce (partial doc-to-canonical application lang krysp-version) {}))))
+         (reduce (doc-to-canonical-fn application lang krysp-version) {}))))
