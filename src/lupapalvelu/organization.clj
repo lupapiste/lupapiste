@@ -87,11 +87,13 @@
 
 (sc/defschema DocStoreInfo
   {:docStoreInUse           sc/Bool
+   :docTerminalInUse        sc/Bool
    :documentPrice           sssc/Nat
    :organizationDescription (i18n/lenient-localization-schema sc/Str)})
 
 (def default-docstore-info
   {:docStoreInUse           false
+   :docTerminalInUse        false
    :documentPrice           0
    :organizationDescription (i18n/supported-langs-map (constantly ""))})
 

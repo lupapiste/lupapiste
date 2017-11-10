@@ -25,11 +25,11 @@
 
 (def all-docstore-orgs
   (->> (filter :docstore-info minimal/organizations)
-       (map (fn [{:keys [docstore-info scope] :as org}]
-              (-> (merge docstore-info (select-keys org [:id :name :municipalities]))
-                  (assoc :municipalities (->> scope
-                                              (map api/municipality-info)
-                                              (distinct))))))))
+       (mapv (fn [{:keys [docstore-info scope] :as org}]
+               (-> (merge docstore-info (select-keys org [:id :name :municipalities]))
+                   (assoc :municipalities (->> scope
+                                               (map api/municipality-info)
+                                               (distinct))))))))
 
 (def default-sipoo-docstore-info
   (first (filter #(= "753-R" (:id %)) all-docstore-orgs)))

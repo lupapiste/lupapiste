@@ -3574,7 +3574,12 @@
                                  attachment))
                              bad-review-attachments-query))
 
-
+(defmigration add-docterminal-use-info
+  {:apply-when (pos? (mongo/count :organizations {:docstore-info.docTerminalInUse {$exists false}}))}
+  (mongo/update :organizations
+                {:docstore-info.docTerminalInUse {$exists false}}
+                {$set {:docstore-info.docTerminalInUse false}}
+                :multi true))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

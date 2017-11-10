@@ -938,8 +938,9 @@
                        :multiple-operations-supported true
                        :matti-enabled true
                        :docstore-info (assoc org/default-docstore-info
-                                        :docStoreInUse true
-                                        :documentPrice 314)
+                                             :docStoreInUse true
+                                             :docTerminalInUse true
+                                             :documentPrice 314)
 
                        :local-bulletins-page-settings
                        {:texts
