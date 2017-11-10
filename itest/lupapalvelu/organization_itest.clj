@@ -254,6 +254,54 @@
                first
                :description) => "ely v3"))))
 
+(facts "Organization attachment types"
+  (facts "753-R: R P YM YI YL MAL VVVL KT MM"
+    (let [types (:attachmentTypes (query sipoo :organization-attachment-types))]
+      (fact "R P attachment: ote_kiinteistorekisteristerista"
+        types => (contains {:type-group "rakennuspaikka"
+                            :type-id "ote_kiinteistorekisteristerista"}))
+      (fact "YM attachment: selvitys_ymparistonsuojelutoimista"
+        types => (contains {:type-group "koeluontoinen_toiminta"
+                            :type-id "selvitys_ymparistonsuojelutoimista"}))
+      (fact "YI VVVL attachment: kartta-melun-ja-tarinan-leviamisesta"
+        types => (contains {:type-group "kartat"
+                            :type-id "kartta-melun-ja-tarinan-leviamisesta"}))
+      (fact "YL attachment: paastot_ilmaan"
+        types => (contains {:type-group "ymparistokuormitus"
+                            :type-id "paastot_ilmaan"}))
+      (fact "MAL attachment: ottamisalueen_omistus_hallintaoikeus"
+        types => (contains {:type-group "hakija"
+                            :type-id "ottamisalueen_omistus_hallintaoikeus"}))
+      (fact "KT MM attachment: tilusvaihtosopimus"
+        types => (contains {:type-group "kiinteiston_hallinta"
+                            :type-id "tilusvaihtosopimus"}))
+      (fact "No YA attachment: valokuva"
+        types =not=> (contains {:type-group "yleiset-alueet"
+                                :type-id "valokuva"}))))
+  (facts "753-YA: YA"
+    (let [types (:attachmentTypes (query sipoo-ya :organization-attachment-types))]
+      (fact "No R P attachment: ote_kiinteistorekisteristerista"
+        types =not=> (contains {:type-group "rakennuspaikka"
+                                :type-id "ote_kiinteistorekisteristerista"}))
+      (fact "No YM attachment: selvitys_ymparistonsuojelutoimista"
+        types =not=> (contains {:type-group "koeluontoinen_toiminta"
+                                :type-id "selvitys_ymparistonsuojelutoimista"}))
+      (fact "No YI VVVL attachment: kartta-melun-ja-tarinan-leviamisesta"
+        types =not=> (contains {:type-group "kartat"
+                                :type-id "kartta-melun-ja-tarinan-leviamisesta"}))
+      (fact "No YL attachment: paastot_ilmaan"
+        types =not=> (contains {:type-group "ymparistokuormitus"
+                                :type-id "paastot_ilmaan"}))
+      (fact "No MAL attachment: ottamisalueen_omistus_hallintaoikeus"
+        types =not=> (contains {:type-group "hakija"
+                                :type-id "ottamisalueen_omistus_hallintaoikeus"}))
+      (fact "No KT MM attachment: tilusvaihtosopimus"
+        types =not> (contains {:type-group "kiinteiston_hallinta"
+                               :type-id "tilusvaihtosopimus"}))
+      (fact "YA attachment: valokuva"
+        types => (contains {:type-group "yleiset-alueet"
+                            :type-id "valokuva"})))))
+
 (facts "Selected operations"
 
   (fact "For an organization which has no selected operations, all operations are returned"
