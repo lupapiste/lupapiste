@@ -1437,7 +1437,7 @@
 "invite.already-has-reader-auth" "fi" "Kyseinen henkilö on jo kutsuttu lukuoikeudella."
 "invite.already-has-reader-auth" "sv" "Personen i fråga har redan bjudits in med läsrätt."
 "invite.company-denies-invitation" "en" "The person in question is working in a company that is not yet authorised to the project. Please authorise the company first to the project."
-"invite.company-denies-invitation" "fi" "Kyseinen henkilö kuuluu yritykseen, jolla ei ole vielä valtuutuksia hankkeelle. Valtuuta ensin yritys hankkeelle."
+"invite.company-denies-invitation" "fi" "Kyseinen henkilö kuuluu yritykseen, jolla on Lupapisteessä Yritystili. Valtuuta ensin yritys hankkeelle."
 "invite.company-denies-invitation" "sv" "Personen i fråga jobbar i företaget som inte ännu har befullmäktigats till projektet. Var vänlig och befullmäktiga först företaget till projektet."
 "invite.default-text" "en" "Hi! You are invited to participate in preparing an application in Lupapiste."
 "invite.default-text" "fi" "Hei! Sinut on kutsuttu osallistumaan lupahakemuksen tekemiseen Lupapisteessä."

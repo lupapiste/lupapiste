@@ -171,7 +171,7 @@
                    type="checkbox"
                    id="invitationDeniedSelect"
                    data-bind="checked: info.model().invitationDenied,
-                              enable: true,
+                              enable: isAdmin(),
                               click: setDenied"
                    data-test-id="checkbox-invitations-denied">
             <label for="invitationDeniedSelect" data-bind="ltext: 'register.company.invitation.denied.label'" class="form-label-checkbox"/>
