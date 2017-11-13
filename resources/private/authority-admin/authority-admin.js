@@ -16,7 +16,8 @@
       calendarsModel,
       reservationTypesModel,
       reservationPropertiesModel,
-      bulletinsModel;
+      bulletinsModel,
+      docterminalModel;
 
   function toAttachmentData(groupId, attachmentId) {
     return {
@@ -367,7 +368,7 @@
           self.vendorBackendUrlForBackendId(config["vendor-backend-url-for-backend-id"] || "");
           self.vendorBackendUrlForLpId(config["vendor-backend-url-for-lp-id"] || "");
           self.subscribe();
-        })
+zo        })
         .call();
     };
   }
@@ -397,6 +398,28 @@
 
   }
 
+  function DocterminalModel() {
+    var self = this;
+    self.data = ko.observableArray();
+
+    self.save = function (setting) {};
+
+    self.load = function () {
+      ajax.query("docterminal-attachment-types")
+        .success(function(data) {
+          self.data(_.map(data["attachment-types"], function(group) {
+            return [group[0],
+                    _.map(group[1], function(attachmentType) {
+                      return {type: attachmentType.type,
+                              enabled: ko.observable(attachmentType.enabled)};
+                    })];
+          }));
+        })
+        .call();
+    };
+
+  }
+
   organizationModel = new LUPAPISTE.OrganizationModel();
   organizationUsers = new LUPAPISTE.OrganizationUserModel(organizationModel);
   editSelectedOperationsModel = new EditSelectedOperationsModel();
@@ -414,6 +437,7 @@
   linkToVendorBackendModel = new LinkToVendorBackendModel();
   editRolesDialogModel = new LUPAPISTE.EditRolesDialogModel(organizationModel);
   bulletinsModel = new BulletinsModel();
+  docterminalModel = new DocterminalModel();
 
   var usersTableConfig = {
       hideRoleFilter: true,
@@ -480,6 +504,10 @@
 
   hub.onPageLoad("organization-bulletins", function() {
     bulletinsModel.load();
+  });
+
+  hub.onPageLoad("organization-terminal-settings", function() {
+    docterminalModel.load();
   });
 
   $(function() {
@@ -549,6 +577,11 @@
       organization:        organizationModel,
       authorization:       lupapisteApp.models.globalAuthModel,
       bulletins:           bulletinsModel
+    });
+    $("#organization-terminal-settings").applyBindings({
+      organization:        organizationModel,
+      authorization:       lupapisteApp.models.globalAuthModel,
+      attachmentTypes:     docterminalModel
     });
 
     // Init the dynamically created dialogs

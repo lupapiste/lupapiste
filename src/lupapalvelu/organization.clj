@@ -757,7 +757,11 @@
 
 ;; Allowed archive terminal attachment types for organization
 
-(defn- type-info [organization group type]
+(defn get-docstore-info-for-organization! [org-id]
+  (-> (get-organization org-id [:docstore-info])
+      :docstore-info))
+
+(defn- type-info [docstore-info group type]
   (let [attachment-type  (if group
                            (->> [group type]
                                 (map name)
@@ -765,20 +769,22 @@
                                 keyword)
                            type)]
     {:type attachment-type
-     :enabled (-> organization
-                  :docstore-info
+     :enabled (-> docstore-info
                   :allowedTerminalAttachmentTypes
                   (get attachment-type false))}))
 
-(defn- populate-attachment-structure-for [organization]
+(defn- populate-attachment-structure [docstore-info]
   (fn [[group types]]
     [group
-     (mapv (partial type-info organization group)
+     (mapv (partial type-info docstore-info group)
            types)]))
 
-(defn allowed-docterminal-attachment-types [organization]
-  (->> (concat attachment-types/Rakennusluvat-v2
-               [nil archive-schema/document-types])
-       (partition 2)
-       (map (populate-attachment-structure-for organization))
-       vec))
+(defn allowed-docterminal-attachment-types [org-id]
+  (let [populate-fn (-> org-id
+                        get-docstore-info-for-organization!
+                        populate-attachment-structure)]
+    (->> (concat attachment-types/Rakennusluvat-v2
+                [nil archive-schema/document-types])
+        (partition 2)
+        (map populate-fn)
+        vec)))

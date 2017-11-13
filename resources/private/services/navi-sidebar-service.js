@@ -58,7 +58,12 @@ LUPAPISTE.NaviSidebarService = function() {
                      {icon: "lupicon-megaphone",
                       page: "organization-bulletins",
                       loc: "auth-admin.bulletin-settings",
-                      showIf: authOk( "user-organization-bulletin-settings")}],
+                      showIf: authOk( "user-organization-bulletin-settings")},
+                     {icon: "lupicon-megaphone", // TODO
+                      page: "organization-terminal-settings",
+                      loc:  "auth-admin.terminal-settings",
+                      showIf: function() { return true; } // TODO
+                     }],
     admin: [{icon: "lupicon-download",
              page: "admin",
              loc: "admin.xml"},

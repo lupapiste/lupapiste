@@ -994,8 +994,18 @@
   [{user :user created :created}]
   (mongo/update-by-query :organizations
       {:_id org-id}
-      {$set {:docstore-info {:docStoreInUse docStoreInUse
-                             :docTerminalInUse docTerminalInUse
-                             :documentPrice documentPrice
-                             :organizationDescription organizationDescription}}})
+      {$set {:docstore-info.docStoreInUse docStoreInUse
+             :docstore-info.docTerminalInUse docTerminalInUse
+             :docstore-info.documentPrice documentPrice
+             :docstore-info.organizationDescription organizationDescription}})
   (ok))
+
+(defquery docterminal-attachment-types
+  {:description "Returns the allowed docterminal attachment types in a structure
+                 that can be easily displayed in the client"
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (->> user
+       usr/authority-admins-organization-id
+       org/allowed-docterminal-attachment-types
+       (ok :attachment-types)))
