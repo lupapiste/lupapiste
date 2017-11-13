@@ -665,25 +665,31 @@
                {:attachments.$.auth []}))})
     (infof "3/3 deleted meta-data of file %s of attachment" file-id attachment-id)))
 
+(defn- get-attachment-version-file [application attachment {:keys [fileId onkaloFileId filename contentType]} user preview?]
+  (when (or (not user) (access/can-access-attachment? user application attachment))
+    (if onkaloFileId
+      (merge
+        (oc/get-file (:organization application) onkaloFileId preview?)
+        {:filename    (if preview?
+                        (str (fs/name filename) ".jpg")
+                        filename)
+         :application (:id application)})
+      (if preview?
+        (or (mongo/download (str fileId "-preview"))
+            ;; Generate preview if not previously done. It's async, so it can't be returned in this request.
+            (preview/create-preview! fileId filename contentType application mongo/*db-name*))
+        (mongo/download fileId)))))
+
 (defn- get-file-by-file-id [application file-id user preview?]
   "Returns the attachment file from Mongo or Onkalo. Does not check authorization if the user argument is nil."
-  (when-let [{:keys [filename onkaloFileId contentType] :as version} (->> (:attachments application)
-                          (some (fn [{:keys [versions]}]
-                                  (some #(when (= file-id (:fileId %)) %) versions))))]
-    (when (or (not user) (access/can-access-attachment-file? user file-id application))
-      (if onkaloFileId
-        (merge
-          (oc/get-file (:organization application) onkaloFileId preview?)
-          {:filename    (if preview?
-                          (str (fs/name filename) ".jpg")
-                          filename)
-           :fileId      (:fileId version)
-           :application (:id application)})
-        (if preview?
-          (or (mongo/download (str file-id "-preview"))
-              ;; Generate preview if not previously done. It's async, so it can't be returned in this request.
-              (preview/create-preview! file-id filename contentType application mongo/*db-name*))
-          (mongo/download file-id))))))
+  (let [attachment (->> (:attachments application)
+                        (filter (fn [{:keys [versions]}]
+                                  (some #(= file-id (:fileId %)) versions)))
+                        first)
+        version (->> (:versions attachment)
+                     (some #(when (= file-id (:fileId %)) %)))]
+    (when version
+      (get-attachment-version-file application attachment version user preview?))))
 
 (defn get-attachment-file-as!
   "Returns the attachment file if user has access to application and the attachment, otherwise nil."
@@ -701,11 +707,13 @@
 
 (defn get-attachment-latest-version-file
   "Returns the file for the latest attachment version if user has access to application and the attachment, otherwise nil."
-  [user attachment-id]
+  [user attachment-id preview?]
   (let [application (get-application-as {:attachments.id attachment-id} user :include-canceled-apps? true)
-        file-id (attachment-latest-file-id application attachment-id)]
-    (when (and application file-id)
-      (get-file-by-file-id application file-id user false))))
+        {:keys [latestVersion] :as attachment} (->> (:attachments application)
+                                                    (filter #(= attachment-id (:id %)))
+                                                    first)]
+    (when (seq latestVersion)
+      (get-attachment-version-file application attachment latestVersion user preview?))))
 
 (def- not-found {:status 404
                  :headers {"Content-Type" "text/plain"}

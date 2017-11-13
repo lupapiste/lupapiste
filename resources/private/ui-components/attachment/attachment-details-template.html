@@ -137,7 +137,11 @@
                   </td>
                   <td>
                     <!-- TODO: download via service -->
-                    <a data-bind="text: $data.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId}, click: function() {hub.send('track-click', {category:'Attachments', label: '', event:'downloadVersion'});return true;}"></a>
+                    <span data-bind="text: $data.filename, visible: !$data.fileId">
+                    <a data-bind="text: $data.filename,
+                                  visible: $data.fileId,
+                                  attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId},
+                                  click: function() {hub.send('track-click', {category:'Attachments', label: '', event:'downloadVersion'});return true;}"></a>
                   </td>
                   <td data-bind="version: $data.version"></td>
                   <td data-bind="dateString: $data.created"></td>
@@ -176,7 +180,7 @@
                 <span class="attachment-label-header-item" id="test-attachment-file-name">
                   <!-- TODO: download via service -->
                   <a data-bind="text: $data.filename,
-                                attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId},
+                                attr: {href: '/api/raw/latest-attachment-version?download=true&attachment-id=' + $parent.id},
                                 click: function() {hub.send('track-click',
                                 {category:'Attachments', label: '', event:'downloadLatestVersion'});return true;}"></a>
                 </span>
@@ -352,8 +356,8 @@
           <div class="file-preview-image"
                data-bind="if: $data.previewIs('image')">
             <div class="file-preview-content">
-              <a data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + $data.attachment().latestVersion.fileId}">
-                <img data-bind="attr: {src: '/api/raw/view-attachment?attachment-id=' + $data.attachment().latestVersion.fileId}"
+              <a data-bind="attr: {href: '/api/raw/latest-attachment-version?attachment-id=' + $data.attachment().id}">
+                <img data-bind="attr: {src: '/api/raw/latest-attachment-version?attachment-id=' + $data.attachment().id}"
                      src="/lp-static/img/ajax-loader.gif" alt=""/>
               </a>
             </div>
