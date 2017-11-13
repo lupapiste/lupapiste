@@ -20,6 +20,8 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.wfs :as wfs]
+            [lupapiste-commons.archive-metadata-schema :as archive-schema]
+            [lupapiste-commons.attachment-types :as attachment-types]
             [me.raynes.fs :as fs]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail!]]
@@ -86,15 +88,17 @@
   (sc/pred string?))
 
 (sc/defschema DocStoreInfo
-  {:docStoreInUse           sc/Bool
-   :docTerminalInUse        sc/Bool
-   :documentPrice           sssc/Nat
-   :organizationDescription (i18n/lenient-localization-schema sc/Str)})
+  {:docStoreInUse                  sc/Bool
+   :docTerminalInUse               sc/Bool
+   :allowedTerminalAttachmentTypes {sc/Keyword sc/Bool}
+   :documentPrice                  sssc/Nat
+   :organizationDescription        (i18n/lenient-localization-schema sc/Str)})
 
 (def default-docstore-info
-  {:docStoreInUse           false
-   :docTerminalInUse        false
-   :documentPrice           0
+  {:docStoreInUse                  false
+   :docTerminalInUse               false
+   :allowedTerminalAttachmentTypes {}
+   :documentPrice                  0
    :organizationDescription (i18n/supported-langs-map (constantly ""))})
 
 (sc/defschema Scope
@@ -749,3 +753,32 @@
              (not (util/find-by-key :email (:email user)
                                    (:statementGivers @organization))))
     (fail :error.not-organization-statement-giver)))
+
+
+;; Allowed archive terminal attachment types for organization
+
+(defn- type-info [organization group type]
+  (let [attachment-type  (if group
+                           (->> [group type]
+                                (map name)
+                                (s/join ".")
+                                keyword)
+                           type)]
+    {:type attachment-type
+     :enabled (-> organization
+                  :docstore-info
+                  :allowedTerminalAttachmentTypes
+                  (get attachment-type false))}))
+
+(defn- populate-attachment-structure-for [organization]
+  (fn [[group types]]
+    [group
+     (mapv (partial type-info organization group)
+           types)]))
+
+(defn allowed-docterminal-attachment-types [organization]
+  (->> (concat attachment-types/Rakennusluvat-v2
+               [nil archive-schema/document-types])
+       (partition 2)
+       (map (populate-attachment-structure-for organization))
+       vec))
