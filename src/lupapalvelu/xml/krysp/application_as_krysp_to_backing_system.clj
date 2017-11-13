@@ -1,6 +1,6 @@
 (ns lupapalvelu.xml.krysp.application-as-krysp-to-backing-system
   "Convert application to KuntaGML and send it to configured backing system"
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof warn error fatal]]
             [clojure.java.io :as io]
             [swiss.arrows :refer :all]
             [sade.xml :as xml]
@@ -57,6 +57,11 @@
       (error (str "KRYSP version not found for organization " (:id organization) ", permit-type " permit-type))
       (fail! :error.integration.krysp-version-missing))))
 
+(defn- http-conf
+  "Returns outgoing HTTP conf for organization"
+  [org permit-type]
+  (get-in org [:krysp (keyword permit-type) :http]))
+
 (defn- remove-unsupported-attachments [application]
   (->> (remove
          (fn [{{:keys [type-group type-id]} :type}]
@@ -99,8 +104,6 @@
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
   (let [permit-type   (permit/permit-type application)
         krysp-version (resolve-krysp-version organization permit-type)
-        krysp-scope   (get-in organization [:krysp (keyword permit-type)])
-        http-conf     (get krysp-scope :http)
         begin-of-link (get-begin-of-link permit-type organization)
         filtered-app  (->> application
                            remove-unsupported-attachments
@@ -109,11 +112,14 @@
         submitted-app (->> submitted-application
                            remove-unsupported-attachments
                            (filter-attachments-by-state current-state))
-        output-fn      (if http-conf
-                         (fn [xml attachments]
-                           (krysp-http/POST xml http-conf)
-                           (->> attachments (map :fileId) (remove nil?)))
-                         #(writer/write-to-disk %1 application %2 (resolve-output-directory organization permit-type) submitted-app lang))
+        output-dir    (resolve-output-directory organization permit-type)
+
+        output-fn     (if-some [http-conf (http-conf organization permit-type)]
+                        (fn [xml attachments]
+                          (krysp-http/POST xml http-conf)
+                          (->> attachments (map :fileId) (remove nil?)))
+                        #(writer/write-to-disk %1 application %2 output-dir submitted-app lang))
+
         mapping-result (permit/application-krysp-mapper filtered-app lang krysp-version begin-of-link)]
     (if-some [{:keys [xml attachments]} mapping-result]
       (-> (data-xml/emit-str xml)
@@ -126,15 +132,14 @@
   [application lang organization]
   (let [permit-type   (permit/permit-type application)
         krysp-version (resolve-krysp-version organization permit-type)
-        krysp-scope   (get-in organization [:krysp (keyword permit-type)])
-        http-conf     (get krysp-scope :http)
         output-dir    (resolve-output-directory organization permit-type)
         filtered-app  (-> application
                           (dissoc :attachments)            ; attachments not needed
                           remove-non-approved-designers
                           remove-pre-verdict-designers
                           remove-disabled-documents)
-        output-fn      (if http-conf
+
+        output-fn      (if-some [http-conf (http-conf organization permit-type)]
                          (fn [xml _] (krysp-http/POST xml http-conf))
                          #(writer/write-to-disk %1 application nil output-dir nil nil %2))
         mapped-data (permit/parties-krysp-mapper filtered-app :suunnittelija lang krysp-version)]
@@ -154,15 +159,15 @@
   (let [permit-type (permit/permit-type application)]
     (when (org/krysp-integration? organization permit-type)
       (let [krysp-version (resolve-krysp-version organization permit-type)
-            krysp-scope   (get-in organization [:krysp (keyword permit-type)])
-            http-conf     (get krysp-scope :http)
             begin-of-link (get-begin-of-link permit-type organization)
             filtered-app  (remove-unsupported-attachments application)
-            output-fn     (if http-conf
+            output-dir    (resolve-output-directory organization permit-type)
+
+            output-fn     (if-some [http-conf (http-conf organization permit-type)]
                             (fn [xml attachments]
                               (krysp-http/POST xml http-conf)
                               (->> attachments (map :fileId) (remove nil?)))
-                            #(writer/write-to-disk %1 application %2 (resolve-output-directory organization permit-type) nil nil "review"))
+                            #(writer/write-to-disk %1 application %2 output-dir nil nil "review"))
             mapping-result (permit/review-krysp-mapper filtered-app task user lang krysp-version begin-of-link)]
         (if-some [{:keys [xml attachments]} mapping-result]
           (-> (data-xml/emit-str xml)
@@ -175,18 +180,16 @@
   [application lang organization]
   (let [permit-type   (permit/permit-type application)
         krysp-version (resolve-krysp-version organization permit-type)
-        krysp-scope   (get-in organization [:krysp (keyword permit-type)])
-        http-conf     (get krysp-scope :http)
         begin-of-link (get-begin-of-link permit-type organization)
         filtered-app  (remove-unsupported-attachments application)
-        output-fn     (if http-conf
+
+        output-fn     (if-some [http-conf (http-conf organization permit-type)]
                         (fn [xml attachments]
                           (krysp-http/POST xml http-conf)
                           (->> attachments (map :fileId) (remove nil?)))
-                        #(writer/write-to-disk %1 application %2 (resolve-output-directory organization permit-type)))]
-    (assert (= permit/R permit-type)
-      (str "Sending unsent attachments to backing system is not supported for " (name permit-type) " type of permits."))
-    (if-some [{:keys [xml attachments]} (rl-mapping/save-unsent-attachments-as-krysp filtered-app lang krysp-version begin-of-link)]
+                        #(writer/write-to-disk %1 application %2 (resolve-output-directory organization permit-type)))
+        mapping-result (rl-mapping/save-unsent-attachments-as-krysp filtered-app lang krysp-version begin-of-link)]
+    (if-some [{:keys [xml attachments]} mapping-result]
       (-> (data-xml/emit-str xml)
           (validator/validate-integration-message! permit-type krysp-version)
           (output-fn attachments))
