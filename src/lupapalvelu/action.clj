@@ -568,6 +568,13 @@
       (do
         (warnf "%s -> proxy fail: %s" (:action command) resp)
         (fail :error.unknown)))
+    (catch [:type :schema.core/error] {:keys [schema value error]}
+      (errorf "schema.core error processing action: %s, error: '%s' with schema containing keys: %s"
+              (:action command)
+              (pr-str error)
+              (pr-str (map pr-str (take 5 (keys schema)))))
+      (when execute? (log/log-event :error (masked command)))
+      (fail :error.illegal-value:schema-validation))
     (catch Object e
       (do
         (error e "exception while processing action:" (:action command) (class e) (str e))
