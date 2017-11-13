@@ -280,6 +280,21 @@
       (verdict-xml-with-foreman-designer-verdicts application xml)
       app-xml)))
 
+(defn- delete-deprecated-verdict-attachments!
+  "Verdict attachment is deprecated if its target verdict no longer
+  exists."
+  [app-id]
+  (let [{:keys [verdicts
+                attachments]
+         :as   application} (domain/get-application-no-access-checking app-id)
+        verdict-ids         (set (map :id verdicts))]
+    (->> attachments
+         (filter (fn [{target :target}]
+                   (and (util/=as-kw (:type target) :verdict)
+                        (not (contains? verdict-ids (:id target))))))
+         (map :id)
+         (attachment/delete-attachments! application))))
+
 (defn- save-verdicts-from-xml
   "Saves verdict's from valid app-xml to application. Returns (ok) with updated verdicts and tasks"
   [{:keys [application] :as command} app-xml]
@@ -289,6 +304,7 @@
     (when updates
       (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
         (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
+        (delete-deprecated-verdict-attachments! (:id application))
         (bulletins/process-check-for-verdicts-result command verdicts)
         (t/mark-app-and-attachments-final! (:id application) (:created command))))
     (ok :verdicts verdicts
