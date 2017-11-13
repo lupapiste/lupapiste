@@ -110,6 +110,9 @@
                     ;; Reload application from DB, attachments have changed
                     ;; if verdict has several attachments.
                     current-application (domain/get-application-as (:id application) user)]]
+          (when (= content-length 0)
+            (errorf "attachment link %s in poytakirja refers to an empty file, %s-id: %s"
+                    (.toString java-url) target-type verdict-id))
           ;; If the attachment-id, i.e., hash of the URL matches
           ;; any old attachment, a new version will be added
           (files/with-temp-file temp-file
