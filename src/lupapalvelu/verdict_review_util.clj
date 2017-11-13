@@ -110,35 +110,36 @@
                     ;; Reload application from DB, attachments have changed
                     ;; if verdict has several attachments.
                     current-application (domain/get-application-as (:id application) user)]]
-          (when (= content-length 0)
-            (errorf "attachment link %s in poytakirja refers to an empty file, %s-id: %s"
-                    (.toString java-url) target-type verdict-id))
-          ;; If the attachment-id, i.e., hash of the URL matches
-          ;; any old attachment, a new version will be added
-          (files/with-temp-file temp-file
-            (if (= 200 (:status resp))
-              (with-open [in (:body resp)]
-                ;; Copy content to a temp file to keep the content close at hand
-                ;; during upload and conversion processing.
-                (io/copy in temp-file)
-                (attachment/upload-and-attach! {:application current-application :user user}
-                                               {:attachment-id attachment-id
-                                                :attachment-type attachment-type
-                                                :contents contents
-                                                :target target
-                                                :required false
-                                                :read-only true
-                                                :locked true
-                                                :created (or (if (string? attachment-time)
-                                                               (to-timestamp attachment-time)
-                                                               attachment-time)
-                                                             timestamp)
-                                                :state :ok
-                                                :set-app-modified? set-app-modified?}
-                                               {:filename filename
-                                                :size content-length
-                                                :content temp-file}))
-              (error (str (:status resp) " - unable to download " url ": " resp))))))
+          (do
+            ;; If the attachment-id, i.e., hash of the URL matches
+            ;; any old attachment, a new version will be added
+            (when (= content-length 0)
+              (errorf "attachment link %s in poytakirja refers to an empty file, %s-id: %s"
+                      (.toString java-url) target-type verdict-id))
+            (files/with-temp-file temp-file
+              (if (= 200 (:status resp))
+                (with-open [in (:body resp)]
+                  ;; Copy content to a temp file to keep the content close at hand
+                  ;; during upload and conversion processing.
+                  (io/copy in temp-file)
+                  (attachment/upload-and-attach! {:application current-application :user user}
+                                                 {:attachment-id attachment-id
+                                                  :attachment-type attachment-type
+                                                  :contents contents
+                                                  :target target
+                                                  :required false
+                                                  :read-only true
+                                                  :locked true
+                                                  :created (or (if (string? attachment-time)
+                                                                 (to-timestamp attachment-time)
+                                                                 attachment-time)
+                                                               timestamp)
+                                                  :state :ok
+                                                  :set-app-modified? set-app-modified?}
+                                                 {:filename filename
+                                                  :size content-length
+                                                  :content temp-file}))
+                (error (str (:status resp) " - unable to download " url ": " resp)))))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
     (do
       (warnf "no attachments ('liite' elements) in poytakirja, %s-id: %s" target-type verdict-id)
