@@ -7,6 +7,7 @@
             [clj-time.local :as local]
             [cheshire.core :as json]
             [me.raynes.fs :as fs]
+            [ring.util.request :as ring-request]
             [ring.util.response :refer [resource-response]]
             [ring.util.io :as ring-io]
             [ring.middleware.content-type :refer [content-type-response]]
@@ -46,6 +47,7 @@
             [lupapalvelu.ident.dummy]
             [lupapalvelu.ident.suomifi]
             [lupapalvelu.idf.idf-api :as idf-api]
+            [lupapalvelu.integrations.messages :as imessages]
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.proxy-services :as proxy-services]
@@ -54,8 +56,7 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
-            [lupapalvelu.ya-extension :as yax]
-            )
+            [lupapalvelu.ya-extension :as yax])
   (:import (java.io OutputStreamWriter BufferedWriter)
            (java.nio.charset StandardCharsets)))
 
@@ -641,10 +642,21 @@
       (when (= typeName "yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa")
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/verdict-ya.xml"))))))
 
-  (defpage [:post "/dev/krysp/receiver"] [{xml :body}]
-    (if (ss/starts-with xml "<?xml")
-      (resp/status 200 "OK")
-      (resp/status 400 "Not XML")))
+  (defpage [:post "/dev/krysp/receiver"] []
+    (let [body-str (ring-request/body-string (request/ring-request))]
+      (if (ss/starts-with body-str "<?xml")
+        (do
+          (imessages/save {:id                            (mongo/create-id)
+                           :direction                     "in"
+                           :messageType                   "KuntaGML"
+                           :transferType                  "http"
+                           :format                        "xml"
+                           :created                       (now)
+                           :status                         "received"
+                           :application {:id (re-find #"L[PX]-\d{3}-\d{4}-\d{5}" body-str)}
+                           :data body-str})
+          (resp/status 200 "OK"))
+        (resp/status 400 "Not XML"))))
 
   (defpage [:get "/dev/private-krysp"] []
     (let [request (request/ring-request)

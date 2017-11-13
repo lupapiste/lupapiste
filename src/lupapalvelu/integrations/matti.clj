@@ -119,7 +119,7 @@
             msg (util/assoc-when
                   {:id message-id :direction "out"
                    :status "published" :messageType "state-change"
-                   :partner "matti" :format "json"
+                   :partner "matti" :format "json" :transferType "http"
                    :created (or (:created command) (now))
                    :application (-> (select-keys app [:id :organization])
                                     (assoc :state (name new-state)))

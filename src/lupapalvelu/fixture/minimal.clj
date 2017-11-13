@@ -71,7 +71,7 @@
     :enabled true
     :language "fi"
     :role "authority"
-    :orgAuthz {:837-R #{:authority}}
+    :orgAuthz {:837-R #{:authority :approver}}
     :firstName "Veikko"
     :lastName "Viranomainen"
     :phone "03121991"

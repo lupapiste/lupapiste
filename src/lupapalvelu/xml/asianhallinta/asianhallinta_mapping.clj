@@ -161,6 +161,7 @@
                                     :output-dir  (:output-dir message-config) :format "xml"
                                     :partner     (get-in statement [:external :partner])
                                     :messageType "ah-statement-request" :created created
+                                    :transferType "sftp"
                                     :application (select-keys application [:id :organization :state])
                                     :target      {:id (:id statement) :type "statement"}
                                     :initator    (select-keys user [:id :username])
