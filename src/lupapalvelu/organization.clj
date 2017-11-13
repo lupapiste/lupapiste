@@ -10,8 +10,6 @@
            [org.opengis.feature.simple SimpleFeature])
 
   (:require [cheshire.core :as json]
-            [clojure.string :as s]
-            [clojure.walk :as walk]
             [clojure.walk :refer [keywordize-keys]]
             [lupapalvelu.attachment.stamp-schema :as stmp]
             [lupapalvelu.geojson :as geo]
@@ -20,7 +18,6 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.wfs :as wfs]
-            [me.raynes.fs :as fs]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail!]]
             [sade.crypt :as crypt]
@@ -248,13 +245,13 @@
 (defn get-organization
   ([id] (get-organization id {}))
   ([id projection]
-   {:pre [(not (s/blank? id))]}
+   {:pre [(not (ss/blank? id))]}
    (->> (mongo/by-id :organizations id projection)
         remove-sensitive-data
         with-scope-defaults)))
 
 (defn update-organization [id changes]
-  {:pre [(not (s/blank? id))]}
+  {:pre [(not (ss/blank? id))]}
   (mongo/update-by-id :organizations id changes))
 
 (defn get-organization-attachments-for-operation [organization {operation-name :name}]
@@ -268,7 +265,7 @@
 
 (defn encode-credentials
   [username password]
-  (when-not (s/blank? username)
+  (when-not (ss/blank? username)
     (let [crypto-iv        (crypt/make-iv-128)
           crypted-password (crypt/encrypt-aes-string password (env/value :backing-system :crypto-key) crypto-iv)
           crypto-iv-s      (-> crypto-iv crypt/base64-encode crypt/bytes->str)]
@@ -280,16 +277,18 @@
   [password crypto-iv]
   (crypt/decrypt-aes-string password (env/value :backing-system :crypto-key) crypto-iv))
 
+(defn get-credentials
+  [{:keys [username password]} crypto-iv]
+  (when (and username crypto-iv password)
+    [username (decode-credentials password crypto-iv)]))
+
 (defn resolve-krysp-wfs
   "Returns a map containing :url and :version information for municipality's KRYSP WFS"
   ([organization permit-type]
    (let [krysp-config (get-in organization [:krysp (keyword permit-type)])
-         crypto-iv    (:crypto-iv krysp-config)
-         password     (when-let [password (and crypto-iv (:password krysp-config))]
-                        (decode-credentials password crypto-iv))
-         username     (:username krysp-config)]
-     (when-not (s/blank? (:url krysp-config))
-       (->> (when username {:credentials [username password]})
+         creds        (get-credentials krysp-config (:crypto-iv krysp-config))]
+     (when-not (ss/blank? (:url krysp-config))
+       (->> (when (first creds) {:credentials creds})
             (merge (select-keys krysp-config [:url :version])))))))
 
 (defn get-krysp-wfs

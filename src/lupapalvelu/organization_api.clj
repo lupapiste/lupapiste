@@ -641,6 +641,34 @@
       (org/set-krysp-endpoint organization-id url username password permitType version)
       (fail :auth-admin.legacyNotResponding))))
 
+(defcommand set-kuntagml-http-endpoint
+  {:description         "Admin can configure KuntaGML sending as HTTP, instead of SFTP"
+   :parameters          [url organization permitType]
+   :optional-parameters [auth-type username password headers]
+   :user-roles          #{:admin}
+   :input-validators    [(partial validate-optional-url :url)
+                         permit/permit-type-validator
+                         (action/valid-db-key :permitType)
+                         (fn [{:keys [data] :as command}]
+                           (when (seq (:headers data))
+                             (action/vector-parameters-with-map-items-with-required-keys
+                               [:headers]
+                               [:key :value]
+                               command)))]
+   :pre-checks          [(fn [{:keys [data]}]
+                           (when-not (pos? (mongo/count :organizations {:_id (:organization data)}))
+                             (fail :error.unknown-organization)))]}
+  [{data :data user :user}]
+  (let [url     (-> data :url ss/trim)
+        updates (->> (when username
+                       (org/encode-credentials username password))
+                     (merge {:url url} (select-keys data [:headers :auth-type]))
+                     (util/strip-nils)
+                     (map (fn [[k v]] [(str "krysp." permitType ".http." (name k)) v]))
+                     (into {})
+                     (hash-map $set))]
+    (mongo/update-by-id :organizations organization updates)))
+
 (defcommand set-kopiolaitos-info
   {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress kopiolaitosOrdererPhone kopiolaitosOrdererEmail]
    :user-roles #{:authorityAdmin}

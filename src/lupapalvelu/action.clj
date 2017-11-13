@@ -220,6 +220,13 @@
                             (partial sc/check schema)
                             "error.illegal-value:schema-validation"))
 
+(defn valid-db-key
+  "Input-validator to check that given parameter is valid db key"
+  [param]
+  (fn [{:keys [data]}]
+    (when-not (mongo/valid-key? (get data param))
+      (fail :error.invalid-db-key))))
+
 (defn- localization? [mode maybe-localization]
   (and (map? maybe-localization)
        (case mode
