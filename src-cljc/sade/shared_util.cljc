@@ -91,13 +91,6 @@
                     (if (= j length-of-b)
                       1 (inc j))))))))))
 
-(defn nil-if-empty
-  "Nil if the given collection is empty. Otherwise returns coll. This is
-  useful for example with when-let."
-  [coll]
-  (when-not (empty? coll)
-    coll))
-
 ;; ---------------------------------------------
 ;; The following are not aliased in sade.util.
 ;; ---------------------------------------------
