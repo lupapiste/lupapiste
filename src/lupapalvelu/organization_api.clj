@@ -662,12 +662,12 @@
   (let [url     (-> data :url ss/trim)
         updates (->> (when username
                        (org/encode-credentials username password))
-                     (merge {:url url} (select-keys data [:headers :auth-type]))
+                     (merge {:url url :lol 1} (select-keys data [:headers :auth-type]))
                      (util/strip-nils)
+                     org/krysp-http-conf-validator
                      (map (fn [[k v]] [(str "krysp." permitType ".http." (name k)) v]))
-                     (into {})
-                     (hash-map $set))]
-    (mongo/update-by-id :organizations organization updates)))
+                     (into {}))]
+    (mongo/update-by-id :organizations organization {$set updates})))
 
 (defcommand set-kopiolaitos-info
   {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress kopiolaitosOrdererPhone kopiolaitosOrdererEmail]

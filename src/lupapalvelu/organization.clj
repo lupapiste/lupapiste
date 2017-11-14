@@ -111,12 +111,17 @@
 
 (def backend-systems #{:facta :kuntanet :louhi :locus :keywinkki :iris :matti})
 
+(sc/defschema AuthTypeEnum (sc/enum "basic" "x-header"))
+
 (sc/defschema KryspHttpConf
   {:url (sc/maybe sc/Str)
-   (sc/optional-key :auth-type) (sc/enum "basic" "x-header")
+   (sc/optional-key :auth-type) AuthTypeEnum
    (sc/optional-key :username)  sc/Str
    (sc/optional-key :password)  sc/Str
+   (sc/optional-key :crypto-iv) sc/Str
    (sc/optional-key :headers)   [{:key sc/Str :value sc/Str}]})
+
+(def krysp-http-conf-validator (sc/validator KryspHttpConf))
 
 (sc/defschema KryspConf
   {(sc/optional-key :ftpUser) (sc/maybe sc/Str)
@@ -278,7 +283,7 @@
   (crypt/decrypt-aes-string password (env/value :backing-system :crypto-key) crypto-iv))
 
 (defn get-credentials
-  [{:keys [username password]} crypto-iv]
+  [{:keys [username password crypto-iv]}]
   (when (and username crypto-iv password)
     [username (decode-credentials password crypto-iv)]))
 
@@ -286,7 +291,7 @@
   "Returns a map containing :url and :version information for municipality's KRYSP WFS"
   ([organization permit-type]
    (let [krysp-config (get-in organization [:krysp (keyword permit-type)])
-         creds        (get-credentials krysp-config (:crypto-iv krysp-config))]
+         creds        (get-credentials krysp-config)]
      (when-not (ss/blank? (:url krysp-config))
        (->> (when (first creds) {:credentials creds})
             (merge (select-keys krysp-config [:url :version])))))))
