@@ -1,21 +1,22 @@
 (ns lupapalvelu.application-from-prev-permit-itest
-  (:require [midje.sweet :refer :all]
-            [clojure.java.io :as io]
-            [sade.core :refer [def- now]]
-            [sade.util :as util]
-            [sade.xml :as xml]
-            [lupapalvelu.mongo :as mongo]
+  (:require [clojure.java.io :as io]
             [lupapalvelu.application-api] ; require local endpoints
-            [lupapalvelu.prev-permit-api :refer :all]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.factlet :refer :all]
             [lupapalvelu.fixture.core :as fixture]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.itest-util :as iutil]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.prev-permit-api :refer :all]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.itest-util :as iutil]))
+            [midje.sweet :refer :all]
+            [net.cgrand.enlive-html :as enlive]
+            [sade.core :refer [def- now]]
+            [sade.util :as util]
+            [sade.xml :as xml]))
 
 (def local-db-name (str "test_app-from-prev-permit-itest_" (now)))
 
@@ -23,11 +24,15 @@
 (mongo/with-db local-db-name (fixture/apply-fixture "minimal"))
 
 (def example-kuntalupatunnus "14-0241-R 3")
+(def bad-hetu-kuntalupatunnus "14-0241-R 4")
 (def example-LP-tunnus "LP-186-2014-00290")
 
 
 (def example-xml (xml/parse (slurp (io/resource "krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml"))))
 (def example-app-info (krysp-reader/get-app-info-from-message example-xml example-kuntalupatunnus))
+(def bad-hetu-xml (enlive/at example-xml
+                             [:yht:henkilotunnus] (enlive/content "012345-678Z")
+                             [:rakval:luvanTunnisteTiedot :yht:kuntalupatunnus] (enlive/content bad-hetu-kuntalupatunnus)))
 
 (defn- create-app-from-prev-permit [apikey & args]
   (let [args (->> args
@@ -52,7 +57,8 @@
      (krysp-fetch/get-application-xml-by-application-id anything) => example-xml)
 
     (fact "missing parameters"
-      (create-app-from-prev-permit raktark-jarvenpaa :organizationId "") => (partial expected-failure? "error.missing-parameters"))
+      (create-app-from-prev-permit raktark-jarvenpaa :organizationId "")
+      => (partial expected-failure? "error.missing-parameters"))
 
     ;; 1: hakijalla ei ole oiketta noutaa aiempaa lupaa
 
@@ -237,11 +243,11 @@
 
 (facts "Application from kuntalupatunnus via rest API"      ; DOES NOT USE LOCAL QUERIES
   (let [rest-address (str (server-address) "/rest/get-lp-id-from-previous-permit")
-        params  {:query-params {"kuntalupatunnus" example-kuntalupatunnus}
-                 :basic-auth   ["jarvenpaa-backend" "jarvenpaa"]}]
+        params       {:query-params {"kuntalupatunnus" example-kuntalupatunnus}
+                      :basic-auth   ["jarvenpaa-backend" "jarvenpaa"]}]
     (against-background [(before :facts (apply-remote-minimal))]
                         (fact "should create new LP application if kuntalupatunnus doesn't match existing app"
-                          (let [response (http-get rest-address params)
+                          (let [response  (http-get rest-address params)
                                 resp-body (:body (iutil/decode-response response))]
                             response => http200?
                             resp-body => ok?
@@ -268,3 +274,16 @@
                             response => http200?
                             resp-body => ok?
                             (keyword (:text resp-body)) => :created-new-application)))))
+(fact "bad hetus"
+  (let [rest-address (str (server-address) "/rest/get-lp-id-from-previous-permit")
+        response     (http-get rest-address
+                               {:query-params {"kuntalupatunnus" bad-hetu-kuntalupatunnus}
+                                :basic-auth   ["jarvenpaa-backend" "jarvenpaa"]})
+        resp-body    (:body (iutil/decode-response response))]
+    response => http200?
+    resp-body => fail?
+    (keyword (:text resp-body)) => :error.illegal-hetu)
+  (against-background
+   (before :facts (apply-remote-minimal))
+   (krysp-fetch/get-application-xml-by-backend-id anything anything) => bad-hetu-xml
+   (krysp-fetch/get-application-xml-by-application-id anything) => bad-hetu-xml))

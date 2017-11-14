@@ -90,6 +90,7 @@
                   <yht:sukunimi>Panaani</yht:sukunimi>
                 </yht:nimi>
                 <yht:sahkopostiosoite>pena@example.com</yht:sahkopostiosoite>
+                <yht:henkilotunnus>120929-993H</yht:henkilotunnus>
               </yht:henkilo>
             </yht:Osapuoli>
           </yht:osapuolitieto>
