@@ -23,7 +23,8 @@
    :hystrix/fallback-fn (constantly nil)}
   [file-id filename content-type application-id & [db-name]]
   (try
-    (when (commons-preview/converter content-type)
+    (when (and (mongo/file-metadata {:_id file-id})
+               (commons-preview/converter content-type))
       (let [preview-file-id (str file-id "-preview")
             preview-filename (str (fs/name filename) ".jpg")]
         (mongo/with-db (or db-name mongo/default-db-name)

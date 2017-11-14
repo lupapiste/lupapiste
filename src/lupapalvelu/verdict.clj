@@ -287,13 +287,14 @@
   (let [{:keys [verdicts
                 attachments]
          :as   application} (domain/get-application-no-access-checking app-id)
-        verdict-ids         (set (map :id verdicts))]
-    (->> attachments
-         (filter (fn [{target :target}]
-                   (and (util/=as-kw (:type target) :verdict)
-                        (not (contains? verdict-ids (:id target))))))
-         (map :id)
-         (attachment/delete-attachments! application))))
+        verdict-ids         (set (map :id verdicts))
+        deprecated-ids      (->> attachments
+                                 (filter (fn [{target :target}]
+                                           (and (util/=as-kw (:type target) :verdict)
+                                                (not (contains? verdict-ids (:id target))))))
+                                 (map :id))]
+    (when (seq deprecated-ids)
+      (attachment/delete-attachments! application deprecated-ids))))
 
 (defn- save-verdicts-from-xml
   "Saves verdict's from valid app-xml to application. Returns (ok) with updated verdicts and tasks"
