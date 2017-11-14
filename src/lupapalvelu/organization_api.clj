@@ -4,7 +4,7 @@
             [clojure.set :as set]
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters supported-localization-parameters] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters supported-localization-parameters parameters-matching-schema] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.stamps :as stamps]
             [lupapalvelu.attachment.type :as att-type]
@@ -1023,7 +1023,9 @@
                  the archive document terminal application."
    :parameters [attachmentType enabled]
    :pre-checks [check-docterminal-enabled]
-   :input-validators [(partial string-parameters [:attachmentType]) ;; TODO proper enum schema
+   :input-validators [(partial parameters-matching-schema [:attachmentType]
+                               (sc/cond-pre (sc/enum "all")
+                                            org/DocTerminalAttachmentType))
                       (partial boolean-parameters [:enabled])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]

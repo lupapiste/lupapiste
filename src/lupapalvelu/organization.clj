@@ -87,10 +87,32 @@
 (sc/defschema OrgId
   (sc/pred string?))
 
+
+;; Allowed archive terminal attachment types for organization
+
+(defn- type-string [[group types]]
+  (if group
+    [group (mapv #(->> [group %] (map name) (s/join ".")) types)]
+    [group types]))
+
+(def allowed-attachments-by-group
+  (->> (concat attachment-types/Rakennusluvat-v2
+               [nil (map name archive-schema/document-types)])
+       (partition 2)
+       (mapv type-string)))
+
+(def allowed-attachments
+  (->>  allowed-attachments-by-group
+        (mapcat second)
+        vec))
+
+(sc/defschema DocTerminalAttachmentType
+  (apply sc/enum allowed-attachments))
+
 (sc/defschema DocStoreInfo
   {:docStoreInUse                  sc/Bool
    :docTerminalInUse               sc/Bool
-   :allowedTerminalAttachmentTypes [sc/Str]
+   :allowedTerminalAttachmentTypes [DocTerminalAttachmentType]
    :documentPrice                  sssc/Nat
    :organizationDescription        (i18n/lenient-localization-schema sc/Str)})
 
@@ -754,28 +776,9 @@
                                    (:statementGivers @organization))))
     (fail :error.not-organization-statement-giver)))
 
-
-;; Allowed archive terminal attachment types for organization
-
 (defn get-docstore-info-for-organization! [org-id]
   (-> (get-organization org-id [:docstore-info])
       :docstore-info))
-
-(defn- type-string [[group types]]
-  (if group
-    [group (mapv #(->> [group %] (map name) (s/join ".")) types)]
-    [group types]))
-
-(def allowed-attachments-by-group
-  (->> (concat attachment-types/Rakennusluvat-v2
-               [nil (map name archive-schema/document-types)])
-       (partition 2)
-       (mapv type-string)))
-
-(def allowed-attachments
-  (->>  allowed-attachments-by-group
-        (mapcat second)
-        vec))
 
 (defn- type-info [allowed-set attachment-type]
   {:type attachment-type
