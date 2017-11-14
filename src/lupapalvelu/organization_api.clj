@@ -1009,3 +1009,15 @@
        usr/authority-admins-organization-id
        org/allowed-docterminal-attachment-types
        (ok :attachment-types)))
+
+(defcommand set-docterminal-attachment-type
+  {:description "Allows or disallows showing the given attachment type in
+                 the archive document terminal application."
+   :parameters [attachmentType enabled]
+   :input-validators [(partial string-parameters [:attachmentType]) ;; TODO proper enum schema
+                      (partial boolean-parameters [:enabled])]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (-> user
+      usr/authority-admins-organization-id
+      (org/set-allowed-docterminal-attachment-type attachmentType enabled)))

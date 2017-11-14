@@ -400,9 +400,28 @@ zo        })
 
   function DocterminalModel() {
     var self = this;
+    ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel);
+
     self.data = ko.observableArray();
 
-    self.save = function (setting) {};
+    function attachSave(typeEntry) {
+      var clicked = false; // Prevent save when computed is run first time
+      self.disposedComputed(function() {
+        var enabled = typeEntry.enabled();
+        if (clicked) {
+          console.log( typeEntry.type + " " + enabled);
+          ajax
+            .command("set-docterminal-attachment-type",
+                     {attachmentType: typeEntry.type,
+                      enabled: typeEntry.enabled()})
+            .success(util.showSavedIndicator)
+            .error(util.showSavedIndicator)
+            .call();
+        } else {
+          clicked = true;
+        }
+      });
+    }
 
     self.load = function () {
       ajax.query("docterminal-attachment-types")
@@ -410,8 +429,11 @@ zo        })
           self.data(_.map(data["attachment-types"], function(group) {
             return [group[0],
                     _.map(group[1], function(attachmentType) {
-                      return {type: attachmentType.type,
-                              enabled: ko.observable(attachmentType.enabled)};
+                      var typeEnabled = ko.observable(attachmentType.enabled);
+                      var typeEntry = {type: attachmentType.type,
+                                       enabled: typeEnabled};
+                      attachSave(typeEntry);
+                      return typeEntry;
                     })];
           }));
         })
