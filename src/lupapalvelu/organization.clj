@@ -20,6 +20,8 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.wfs :as wfs]
+            [lupapiste-commons.archive-metadata-schema :as archive-schema]
+            [lupapiste-commons.attachment-types :as attachment-types]
             [me.raynes.fs :as fs]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail!]]
@@ -85,16 +87,40 @@
 (sc/defschema OrgId
   (sc/pred string?))
 
+
+;; Allowed archive terminal attachment types for organization
+
+(defn- type-string [[group types]]
+  (if group
+    [group (mapv #(->> [group %] (map name) (s/join ".")) types)]
+    [group types]))
+
+(def allowed-attachments-by-group
+  (->> (concat attachment-types/Rakennusluvat-v2
+               [nil (map name archive-schema/document-types)])
+       (partition 2)
+       (mapv type-string)))
+
+(def allowed-attachments
+  (->>  allowed-attachments-by-group
+        (mapcat second)
+        vec))
+
+(sc/defschema DocTerminalAttachmentType
+  (apply sc/enum allowed-attachments))
+
 (sc/defschema DocStoreInfo
-  {:docStoreInUse           sc/Bool
-   :docTerminalInUse        sc/Bool
-   :documentPrice           sssc/Nat
-   :organizationDescription (i18n/lenient-localization-schema sc/Str)})
+  {:docStoreInUse                  sc/Bool
+   :docTerminalInUse               sc/Bool
+   :allowedTerminalAttachmentTypes [DocTerminalAttachmentType]
+   :documentPrice                  sssc/Nat
+   :organizationDescription        (i18n/lenient-localization-schema sc/Str)})
 
 (def default-docstore-info
-  {:docStoreInUse           false
-   :docTerminalInUse        false
-   :documentPrice           0
+  {:docStoreInUse                  false
+   :docTerminalInUse               false
+   :allowedTerminalAttachmentTypes []
+   :documentPrice                  0
    :organizationDescription (i18n/supported-langs-map (constantly ""))})
 
 (sc/defschema Scope
@@ -749,3 +775,46 @@
              (not (util/find-by-key :email (:email user)
                                    (:statementGivers @organization))))
     (fail :error.not-organization-statement-giver)))
+
+(defn get-docstore-info-for-organization! [org-id]
+  (-> (get-organization org-id [:docstore-info])
+      :docstore-info))
+
+(defn- type-info [allowed-set attachment-type]
+  {:type attachment-type
+   :enabled (boolean (allowed-set attachment-type))})
+
+(defn- populate-attachment-structure [docstore-info]
+  (fn [[group types]]
+    [group
+     (mapv (partial type-info
+                    (set (:allowedTerminalAttachmentTypes docstore-info)))
+           types)]))
+
+(defn- allowed-docterminal-attachment-types-for-organization
+  "Returns a structure that contains all possible docterminal attachment types
+  grouped by the attachment groups.
+
+  [[<group name> [{:type <attachment type>
+                   :enabled <is the type enabled for organization?>}
+                  ...]
+   ...]
+   [<group name> [...]]]"
+  [organization-docstore-info]
+  (->> allowed-attachments-by-group
+       (mapv (populate-attachment-structure organization-docstore-info))))
+
+(defn allowed-docterminal-attachment-types [org-id]
+  (-> org-id
+      get-docstore-info-for-organization!
+      allowed-docterminal-attachment-types-for-organization))
+
+(defn set-allowed-docterminal-attachment-type
+  [org-id attachment-type allowed?]
+  (if (= attachment-type "all")
+    (if allowed?
+      (update-organization org-id {$set {:docstore-info.allowedTerminalAttachmentTypes allowed-attachments}})
+      (update-organization org-id {$set {:docstore-info.allowedTerminalAttachmentTypes []}}))
+    (if allowed?
+     (update-organization org-id {$addToSet {:docstore-info.allowedTerminalAttachmentTypes attachment-type}})
+     (update-organization org-id {$pull {:docstore-info.allowedTerminalAttachmentTypes attachment-type}}))))

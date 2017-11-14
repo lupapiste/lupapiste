@@ -4,7 +4,7 @@
             [clojure.set :as set]
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters supported-localization-parameters] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters supported-localization-parameters parameters-matching-schema] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.stamps :as stamps]
             [lupapalvelu.attachment.type :as att-type]
@@ -994,8 +994,41 @@
   [{user :user created :created}]
   (mongo/update-by-query :organizations
       {:_id org-id}
-      {$set {:docstore-info {:docStoreInUse docStoreInUse
-                             :docTerminalInUse docTerminalInUse
-                             :documentPrice documentPrice
-                             :organizationDescription organizationDescription}}})
+      {$set {:docstore-info.docStoreInUse docStoreInUse
+             :docstore-info.docTerminalInUse docTerminalInUse
+             :docstore-info.documentPrice documentPrice
+             :docstore-info.organizationDescription organizationDescription}})
   (ok))
+
+(defquery docterminal-attachment-types
+  {:description "Returns the allowed docterminal attachment types in a structure
+                 that can be easily displayed in the client"
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (->> user
+       usr/authority-admins-organization-id
+       org/allowed-docterminal-attachment-types
+       (ok :attachment-types)))
+
+(defn- check-docterminal-enabled [{user :user}]
+  (when-not (-> user
+                usr/authority-admins-organization-id
+                org/get-docstore-info-for-organization!
+                :docTerminalInUse)
+    (fail :error.docterminal-not-enabled)))
+
+
+(defcommand set-docterminal-attachment-type
+  {:description "Allows or disallows showing the given attachment type in
+                 the archive document terminal application."
+   :parameters [attachmentType enabled]
+   :pre-checks [check-docterminal-enabled]
+   :input-validators [(partial parameters-matching-schema [:attachmentType]
+                               (sc/cond-pre (sc/enum "all")
+                                            org/DocTerminalAttachmentType))
+                      (partial boolean-parameters [:enabled])]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (-> user
+      usr/authority-admins-organization-id
+      (org/set-allowed-docterminal-attachment-type attachmentType enabled)))

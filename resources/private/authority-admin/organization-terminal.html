@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="organization-terminal-settings">
+      <navi-sidebar></navi-sidebar>
+      <div class="container container--authority-admin docterminal-settings"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+        <h2 data-bind="ltext: 'auth-admin.docterminal.title'"></h2>
+        <p data-bind="ltext: 'auth-admin.docterminal.allowed-document-types.instructions'"></p>
+
+        <a data-bind="ltext: $root.attachmentTypes.toggleSelectText,
+                      click: $root.attachmentTypes.toggleAll"></a>
+        <!-- ko foreach: {data: $root.attachmentTypes.data} -->
+        <table class="admin-settings docterminal-settings">
+          <thead>
+            <tr>
+              <th data-bind="ltext: $data[0] ? 'attachmentType.' + $data[0] + '._group_label' :
+                             'auth-admin.docterminal.allowed-document-types.general'"></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: {data: $data[1]}">
+            <tr>
+              <td>
+                <toggle params="value: $data.enabled,
+                                ltext: 'attachmentType.' + $data.type,
+                                prefix: 'checkbox'">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- /ko -->
+        <a data-bind="ltext: $root.attachmentTypes.toggleSelectText,
+                      click: $root.attachmentTypes.toggleAll"></a>
+      </section>
+    </section>
+  </body>
+</html>

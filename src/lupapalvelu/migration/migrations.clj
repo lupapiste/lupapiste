@@ -3580,6 +3580,14 @@
                 {:docstore-info.docTerminalInUse {$exists false}}
                 {$set {:docstore-info.docTerminalInUse false}}
                 :multi true))
+
+(defmigration add-docterminal-allowed-attachment-types
+  {:apply-when (pos? (mongo/count :organizations {:docstore-info.allowedTerminalAttachmentTypes {$exists false}}))}
+  (mongo/update :organizations
+                {:docstore-info.allowedTerminalAttachmentTypes {$exists false}}
+                {$set {:docstore-info.allowedTerminalAttachmentTypes []}}
+                :multi true))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

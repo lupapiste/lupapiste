@@ -12,11 +12,12 @@
             [lupapalvelu.permit :as permit]))
 
 (sc/defschema OrganizationDocstoreInfo
-  (assoc org/DocStoreInfo
-         :id org/OrgId
-         :name (i18n/lenient-localization-schema sc/Str)
-         :municipalities [{:id   sc/Str
-                           :name (i18n/lenient-localization-schema sc/Str)}]))
+  (-> org/DocStoreInfo
+      (dissoc :allowedTerminalAttachmentTypes)
+      (assoc :id org/OrgId
+             :name (i18n/lenient-localization-schema sc/Str)
+             :municipalities [{:id   sc/Str
+                               :name (i18n/lenient-localization-schema sc/Str)}])))
 
 (sc/defschema OrganizationResponse
   (assoc ApiResponse :data OrganizationDocstoreInfo))
@@ -33,12 +34,13 @@
 
 (defn- make-docstore-info [organization]
   (let [{:keys [id docstore-info name scope]} organization]
-    (assoc docstore-info
-           :id             id
-           :name           name
-           :municipalities (->> scope
-                                (map municipality-info)
-                                (distinct)))))
+    (-> docstore-info
+        (dissoc :allowedTerminalAttachmentTypes)
+        (assoc :id             id
+               :name           name
+               :municipalities (->> scope
+                                    (map municipality-info)
+                                    (distinct))))))
 
 (defn get-docstore-infos
   ([]
@@ -77,4 +79,3 @@
   (let [query (cond-> (get status-query status {})
                       (not (str/blank? permit-type)) (assoc :scope.permitType permit-type))]
     {:ok true :data (get-docstore-infos query)}))
-
