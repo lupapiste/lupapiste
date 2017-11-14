@@ -757,25 +757,35 @@
 
 ;; Allowed archive terminal attachment types for organization
 
+(defn- type-string [[group types]]
+  (if group
+    [group (mapv #(->> [group %] (map name) (s/join ".")) types)]
+    [group types]))
+
+(def allowed-attachments-by-group
+  (->> (concat attachment-types/Rakennusluvat-v2
+               [nil (map name archive-schema/document-types)])
+       (partition 2)
+       (mapv type-string)))
+
+(def allowed-attachments
+  (->>  allowed-attachments-by-group
+        (mapcat second)
+        vec))
+
 (defn get-docstore-info-for-organization! [org-id]
   (-> (get-organization org-id [:docstore-info])
       :docstore-info))
 
-(defn- type-info [allowed-set group type]
-  (let [attachment-type  (if group
-                           (->> [group type]
-                                (map name)
-                                (s/join "."))
-                           type)]
-    {:type attachment-type
-     :enabled (boolean (allowed-set attachment-type))}))
+(defn- type-info [allowed-set attachment-type]
+  {:type attachment-type
+   :enabled (boolean (allowed-set attachment-type))})
 
 (defn- populate-attachment-structure [docstore-info]
   (fn [[group types]]
     [group
      (mapv (partial type-info
-                    (set (:allowedTerminalAttachmentTypes docstore-info))
-                    group)
+                    (set (:allowedTerminalAttachmentTypes docstore-info)))
            types)]))
 
 (defn- allowed-docterminal-attachment-types-for-organization
@@ -787,12 +797,9 @@
                   ...]
    ...]
    [<group name> [...]]]"
-  [organization]
-  (->> (concat attachment-types/Rakennusluvat-v2
-               [nil (map name archive-schema/document-types)])
-       (partition 2)
-       (map (populate-attachment-structure organization))
-       vec))
+  [organization-docstore-info]
+  (->> allowed-attachments-by-group
+       (mapv (populate-attachment-structure organization-docstore-info))))
 
 (defn allowed-docterminal-attachment-types [org-id]
   (-> org-id
@@ -801,6 +808,10 @@
 
 (defn set-allowed-docterminal-attachment-type
   [org-id attachment-type allowed?]
-  (if allowed?
-    (update-organization org-id {$addToSet {:docstore-info.allowedTerminalAttachmentTypes attachment-type}})
-    (update-organization org-id {$pull {:docstore-info.allowedTerminalAttachmentTypes attachment-type}})))
+  (if (= attachment-type "all")
+    (if allowed?
+      (update-organization org-id {$set {:docstore-info.allowedTerminalAttachmentTypes allowed-attachments}})
+      (update-organization org-id {$set {:docstore-info.allowedTerminalAttachmentTypes []}}))
+    (if allowed?
+     (update-organization org-id {$addToSet {:docstore-info.allowedTerminalAttachmentTypes attachment-type}})
+     (update-organization org-id {$pull {:docstore-info.allowedTerminalAttachmentTypes attachment-type}}))))

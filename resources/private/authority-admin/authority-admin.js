@@ -404,6 +404,21 @@ zo        })
 
     self.data = ko.observableArray();
 
+    self.numberEnabled = ko.pureComputed(function() {
+      console.log("calculating enabled");
+      var groups = self.data();
+      return _.sumBy(groups, function(group) {
+        return _.sumBy(group[1], function(typeEntry) {
+          console.log(typeEntry.enabled());
+          return typeEntry.enabled() ? 1 : 0;
+        });
+      });
+    });
+
+    self.toggleSelectText = ko.pureComputed(function() {
+      return self.numberEnabled() === 0 ? "select-all" : "select-none";
+    });
+
     function attachSave(typeEntry) {
       var clicked = false; // Prevent save when computed is run first time
       self.disposedComputed(function() {
@@ -440,6 +455,16 @@ zo        })
         .call();
     };
 
+    self.toggleAll = function() {
+      console.log("numberEnabled == " + self.numberEnabled());
+      var enableAll = self.numberEnabled() === 0;
+      ajax
+        .command("set-docterminal-attachment-type",
+                 {attachmentType: "all", enabled: enableAll})
+        .success(function(data) { self.load(); util.showSavedIndicator(data); })
+        .error(util.showSavedIndicator)
+        .call();
+    };
   }
 
   organizationModel = new LUPAPISTE.OrganizationModel();
