@@ -5,7 +5,7 @@
 
 (apply-remote-minimal)
 
-(facts "Sending KuntaGML via HTTP"                          ; Tampere is configured to use HTTP krysp
+(facts "Sending KuntaGML via HTTP"                          ; Tampere is configured to use HTTP krysp in minimal
   (let [application-id (create-app-id pena
                                       :x 329072
                                       :y 6823200
