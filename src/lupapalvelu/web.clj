@@ -642,21 +642,25 @@
       (when (= typeName "yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa")
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/verdict-ya.xml"))))))
 
+  (defn krysp-endpoint-authentication
+    [request]
+    (let [[u p] (http/decode-basic-auth request)]
+      (debug (str u " requesting krysp receiver endpoint"))
+      (and (= u "kuntagml") (= p "kryspi"))))
+
   (defpage [:post "/dev/krysp/receiver"] []
-    (let [body-str (ring-request/body-string (request/ring-request))]
-      (if (ss/starts-with body-str "<?xml")
-        (do
-          (imessages/save {:id                            (mongo/create-id)
-                           :direction                     "in"
-                           :messageType                   "KuntaGML"
-                           :transferType                  "http"
-                           :format                        "xml"
-                           :created                       (now)
-                           :status                         "received"
-                           :application {:id (re-find #"L[PX]-\d{3}-\d{4}-\d{5}" body-str)}
-                           :data body-str})
-          (resp/status 200 "OK"))
-        (resp/status 400 "Not XML"))))
+    (let [request (request/ring-request)]
+      (if (krysp-endpoint-authentication request)
+        (let [body-str (ring-request/body-string request)]
+          (if (ss/starts-with body-str "<?xml")
+            (do
+              (imessages/save {:id (mongo/create-id) :direction  "in" :messageType "KuntaGML"
+                               :transferType "http" :format "xml" :created (now)
+                               :status "received" :data body-str
+                               :application {:id (re-find #"L[PX]-\d{3}-\d{4}-\d{5}" body-str)}})
+              (resp/status 200 "OK"))
+            (resp/status 400 "Not XML")))
+        basic-401)))
 
   (defpage [:get "/dev/private-krysp"] []
     (let [request (request/ring-request)
