@@ -1172,6 +1172,7 @@
     (get-docstore-info "753-R")
     => {:docStoreInUse true
         :docTerminalInUse false
+        :allowedTerminalAttachmentTypes []
         :documentPrice 100
         :organizationDescription {:fi "Kuvaus" :sv "Beskrivning" :en "Description"}})
 
@@ -1182,6 +1183,31 @@
   (fact "can't set decimal document price"
     (update-docstore-info "753-R" true true 1.0 "Description")
     => (partial expected-failure? :error.illegal-number)))
+
+(facts set-docterminal-attachment-type
+  (fact "only authority admin can call"
+    (command sonja :set-docterminal-attachment-type :attachmentType "osapuolet.cv" :enabled false)
+    => (partial expected-failure? :error.unauthorized))
+
+  (fact "cannot set nonsense types"
+    (command sipoo :set-docterminal-attachment-type :attachmentType "foo" :enabled true)
+    => (partial expected-failure? :error.illegal-value:schema-validation))
+
+  (fact "cannot set unless docterminal is enabled"
+    (command sipoo :set-docterminal-attachment-type :attachmentType "osapuolet.cv" :enabled true)
+    => (partial expected-failure? :error.docterminal-not-enabled))
+
+  (fact "calling with proper type adds type to organization's docstore-info"
+    (update-docstore-info "753-R" true true 100 {:fi "Kuvaus" :sv "Beskrivning" :en "Description"}) => ok?
+
+    (command sipoo :set-docterminal-attachment-type :attachmentType "osapuolet.cv" :enabled true) => ok?
+    (-> "753-R" get-docstore-info :allowedTerminalAttachmentTypes) => ["osapuolet.cv"]
+
+    (command sipoo :set-docterminal-attachment-type :attachmentType "all" :enabled true) => ok?
+    (-> "753-R" get-docstore-info :allowedTerminalAttachmentTypes) => local-org-api/allowed-attachments
+
+    (command sipoo :set-docterminal-attachment-type :attachmentType "all" :enabled false) => ok?
+    (-> "753-R" get-docstore-info :allowedTerminalAttachmentTypes) => []))
 
 (fact "organizations bulletin settings"
   (facts "query setting"
