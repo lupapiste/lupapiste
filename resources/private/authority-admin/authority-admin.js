@@ -368,7 +368,7 @@
           self.vendorBackendUrlForBackendId(config["vendor-backend-url-for-backend-id"] || "");
           self.vendorBackendUrlForLpId(config["vendor-backend-url-for-lp-id"] || "");
           self.subscribe();
-zo        })
+        })
         .call();
     };
   }
@@ -400,16 +400,14 @@ zo        })
 
   function DocterminalModel() {
     var self = this;
-    ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel);
+    ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
     self.data = ko.observableArray();
 
     self.numberEnabled = ko.pureComputed(function() {
-      console.log("calculating enabled");
       var groups = self.data();
       return _.sumBy(groups, function(group) {
         return _.sumBy(group[1], function(typeEntry) {
-          console.log(typeEntry.enabled());
           return typeEntry.enabled() ? 1 : 0;
         });
       });
@@ -424,11 +422,10 @@ zo        })
       self.disposedComputed(function() {
         var enabled = typeEntry.enabled();
         if (clicked) {
-          console.log( typeEntry.type + " " + enabled);
           ajax
             .command("set-docterminal-attachment-type",
                      {attachmentType: typeEntry.type,
-                      enabled: typeEntry.enabled()})
+                      enabled: enabled})
             .success(util.showSavedIndicator)
             .error(util.showSavedIndicator)
             .call();
@@ -456,7 +453,6 @@ zo        })
     };
 
     self.toggleAll = function() {
-      console.log("numberEnabled == " + self.numberEnabled());
       var enableAll = self.numberEnabled() === 0;
       ajax
         .command("set-docterminal-attachment-type",
