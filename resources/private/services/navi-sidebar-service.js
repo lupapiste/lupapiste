@@ -59,11 +59,10 @@ LUPAPISTE.NaviSidebarService = function() {
                       page: "organization-bulletins",
                       loc: "auth-admin.bulletin-settings",
                       showIf: authOk( "user-organization-bulletin-settings")},
-                     {icon: "lupicon-megaphone", // TODO
+                     {icon: "lupicon-archives",
                       page: "organization-terminal-settings",
-                      loc:  "auth-admin.terminal-settings",
-                      showIf: function() { return true; } // TODO
-                     }],
+                      loc:  "auth-admin.docterminal.title",
+                      showIf: authOk("set-docterminal-attachment-type")}],
     admin: [{icon: "lupicon-download",
              page: "admin",
              loc: "admin.xml"},

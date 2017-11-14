@@ -5,8 +5,8 @@
       <navi-sidebar></navi-sidebar>
       <div class="container container--authority-admin docterminal-settings"
            data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
-        <h2 data-bind="ltext: 'auth-admin.terminal-allowed-document-types.title'"></h2>
-        <p data-bind="ltext: 'auth-admin.terminal-allowed-document-types.instructions'"></p>
+        <h2 data-bind="ltext: 'auth-admin.docterminal.title'"></h2>
+        <p data-bind="ltext: 'auth-admin.docterminal.allowed-document-types.instructions'"></p>
 
         <a data-bind="ltext: $root.attachmentTypes.toggleSelectText,
                       click: $root.attachmentTypes.toggleAll"></a>
@@ -14,7 +14,8 @@
         <table class="admin-settings docterminal-settings">
           <thead>
             <tr>
-              <th data-bind="text: $data[0]"></th>
+              <th data-bind="ltext: $data[0] ? 'attachmentType.' + $data[0] + '._group_label' :
+                             'auth-admin.docterminal.allowed-document-types.general'"></th>
             </tr>
           </thead>
           <tbody data-bind="foreach: {data: $data[1]}">

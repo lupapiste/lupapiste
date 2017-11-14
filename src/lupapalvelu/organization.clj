@@ -757,6 +757,10 @@
 
 ;; Allowed archive terminal attachment types for organization
 
+(defn get-docstore-info-for-organization! [org-id]
+  (-> (get-organization org-id [:docstore-info])
+      :docstore-info))
+
 (defn- type-string [[group types]]
   (if group
     [group (mapv #(->> [group %] (map name) (s/join ".")) types)]
@@ -772,10 +776,6 @@
   (->>  allowed-attachments-by-group
         (mapcat second)
         vec))
-
-(defn get-docstore-info-for-organization! [org-id]
-  (-> (get-organization org-id [:docstore-info])
-      :docstore-info))
 
 (defn- type-info [allowed-set attachment-type]
   {:type attachment-type
