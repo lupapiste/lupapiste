@@ -426,15 +426,6 @@
 ;; Download
 ;;
 
-(defraw "preview-attachment"
-  {:parameters       [:attachment-id]  ; Note that this is actually file id
-   :categories       #{:attachments}
-   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
-   :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
-   :user-authz-roles roles/all-authz-roles}
-  [{{:keys [attachment-id]} :data user :user}]
-  (att/output-attachment attachment-id false #(att/get-attachment-file-as! user :preview %)))
-
 (defraw "view-attachment"
   {:parameters       [:attachment-id]  ; Note that this is actually file id
    :categories       #{:attachments}
@@ -494,7 +485,7 @@
       {:status 200
         :headers {"Content-Type" "application/octet-stream"
                   "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-        :body (files/temp-file-input-stream (att/get-all-attachments! attachments application lang))})
+        :body (files/temp-file-input-stream (att/get-all-attachments! attachments application user lang))})
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
@@ -513,7 +504,7 @@
       {:status 200
        :headers {"Content-Type" "application/octet-stream"
                  "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-       :body (att/get-attachments-for-user! user atts)}))
+       :body (att/get-attachments-for-user! user application atts)}))
 
 ;;
 ;; Upload

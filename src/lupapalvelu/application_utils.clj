@@ -5,7 +5,9 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.user :as usr]
-            [monger.operators :refer :all]))
+            [monger.operators :refer :all]
+            [lupapalvelu.document.model :as model]
+            [lupapalvelu.authorization :as auth]))
 
 
 (defn operation-description
@@ -55,3 +57,15 @@
                      :location-wgs84)]
      (when (seq filtered-features)
        {$or (map (fn [feature] {target-kw {$geoWithin {"$geometry" (:geometry feature)}}}) filtered-features)}))))
+
+; Masking
+(defn- person-id-masker-for-user [user application]
+  (cond
+    (auth/application-handler? application user) identity
+    (auth/application-authority? application user) model/mask-person-id-ending
+    :else (comp model/mask-person-id-birthday
+                model/mask-person-id-ending)))
+
+(defn with-masked-person-ids [application user]
+  (let [mask-person-ids (person-id-masker-for-user user application)]
+    (update-in application [:documents] (partial map mask-person-ids))))
