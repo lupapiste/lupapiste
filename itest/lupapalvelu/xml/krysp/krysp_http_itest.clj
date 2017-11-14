@@ -1,6 +1,7 @@
 (ns lupapalvelu.xml.krysp.krysp-http-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [sade.core :refer [now]]
             [sade.strings :as ss]))
 
 (apply-remote-minimal)
@@ -11,7 +12,8 @@
                                       :y 6823200
                                       :propertyId "83712103620001"
                                       :address "Pub Harald")
-        application (query-application pena application-id)]
+        application (query-application pena application-id)
+        ts (now)]
     (generate-documents application pena)
     (command pena :submit-application :id application-id) => ok?
 
@@ -21,17 +23,33 @@
         (:integrationAvailable resp) => true))
 
     (let [msgs (integration-messages application-id :test-db-name test-db-name)
-          krysp-message (first msgs)]
-      (fact "message is saved to integration-messages"
-        (count msgs) => 1
-        (:messageType krysp-message) => "KuntaGML"
-        (ss/starts-with (:data krysp-message) "<?xml") => truthy
-        (ss/contains? (:data krysp-message) "Pub Harald") => true))
+          sent-message (first msgs)
+          received-message (second msgs)]
+      (facts "integration-messages"
+        (count msgs) => 2
+        (fact "sent message is saved"
+          (:messageType sent-message) => "KuntaGML"
+          (:direction sent-message) => "out"
+          (fact "after success, message is acknowledged"
+            (> (:acknowledged sent-message) ts) => true
+            (:status sent-message) => "done"))
+        (fact "received message is saved (dummy receiver)"
+          (:messageType received-message) => "KuntaGML"
+          (:direction received-message) => "in"
+          (ss/starts-with (:data received-message) "<?xml") => truthy
+          (ss/contains? (:data received-message) "Pub Harald") => true)))
 
     (fact "Sending fails without proper http endpoint"
-      (command admin :set-kuntagml-http-endpoint :url "http://invalid" :organization "837-R" :permitType "R") => ok?
-
       (command veikko :request-for-complement :id application-id) => ok?
-
-      (command veikko :approve-application :id application-id :lang "fi") => fail?)))
+      (command admin :set-kuntagml-http-endpoint :url "http://invalid" :organization "837-R" :permitType "R") => ok?
+      (command veikko :approve-application :id application-id :lang "fi") => fail?
+      (command admin :set-kuntagml-http-endpoint :partner "matti"
+               :url (str (server-address) "/dev/krysp/receiver") :organization "837-R" :permitType "R"
+               :username "kuntagml" :password "invalid") => ok?
+      (command veikko :approve-application :id application-id :lang "fi") => fail?)
+    (fact "updating correct creds makes integration work again"
+      (command admin :set-kuntagml-http-endpoint
+               :url (str (server-address) "/dev/krysp/receiver") :organization "837-R" :permitType "R"
+               :username "kuntagml" :password "kryspi" :partner "matti") => ok?
+      (command veikko :approve-application :id application-id :lang "fi") => ok?)))
 

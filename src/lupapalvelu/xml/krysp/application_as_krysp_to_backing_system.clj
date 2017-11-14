@@ -99,10 +99,11 @@
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
-  [application lang submitted-application organization & {:keys [current-state]}]
-  {:pre [(map? application) lang (map? submitted-application) (map? organization)]}
+  [{:keys [application organization user]} lang submitted-application & {:keys [current-state]}]
+  {:pre [(map? application) lang (map? submitted-application) (or (map? organization) (delay? organization))]}
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
-  (let [permit-type   (permit/permit-type application)
+  (let [organization  (if (delay? organization) @organization organization)
+        permit-type   (permit/permit-type application)
         krysp-version (resolve-krysp-version organization permit-type)
         begin-of-link (get-begin-of-link permit-type organization)
         filtered-app  (->> application
@@ -116,7 +117,7 @@
 
         output-fn     (if-some [http-conf (http-conf organization permit-type)]
                         (fn [xml attachments]
-                          (krysp-http/POST xml http-conf)
+                          (krysp-http/send-xml application user xml http-conf)
                           (->> attachments (map :fileId) (remove nil?)))
                         #(writer/write-to-disk %1 application %2 output-dir submitted-app lang))
 

@@ -70,13 +70,13 @@
       transfer
       (assoc transfer (:data-key data-map) (:data data-map)))))
 
-(defn- do-approve [application organization created id current-state lang do-rest-fn]
-  (if (org/krysp-integration? organization (permit/permit-type application))
+(defn- do-approve [{:keys [application organization created] :as command} id current-state lang do-rest-fn]
+  (if (org/krysp-integration? @organization (permit/permit-type application))
     (or
       (app/validate-link-permits application)
       (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
             sent-file-ids   (let [submitted-application (mongo/by-id :submitted-applications id)]
-                              (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization :current-state current-state))
+                              (mapping-to-krysp/save-application-as-krysp command lang submitted-application :current-state current-state))
             attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created) {})]
         (do-rest-fn attachments-updates)))
     ;; Integration details not defined for the organization -> let the approve command pass
@@ -123,7 +123,7 @@
         indicator-updates (app/mark-indicators-seen-updates application user created)
         transfer (get-transfer-item :exported-to-backing-system {:created created :user user})
         do-update (fn [attachments-updates]
-                    (update-application command
+                    (update-application (assoc command :application application)
                       mongo-query
                       (util/deep-merge
                         {$push {:transfers transfer}}
@@ -135,7 +135,7 @@
                         (app-state/state-transition-update next-state created application user)))
                     (ok :integrationAvailable (not (nil? attachments-updates))))]
 
-    (do-approve application @organization created id current-state lang do-update)))
+    (do-approve (assoc command :application application) id current-state lang do-update)))
 
 (defn- application-already-exported [type]
   (fn [{application :application}]

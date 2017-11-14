@@ -14,6 +14,7 @@
             [lupapalvelu.attachment.stamp-schema :as stmp]
             [lupapalvelu.geojson :as geo]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.matti.schemas :refer [MattiSavedVerdictTemplates Phrase]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
@@ -114,11 +115,12 @@
 (sc/defschema AuthTypeEnum (sc/enum "basic" "x-header"))
 
 (sc/defschema KryspHttpConf
-  {:url (sc/maybe sc/Str)
+  {:url                         (sc/maybe sc/Str)
    (sc/optional-key :auth-type) AuthTypeEnum
    (sc/optional-key :username)  sc/Str
    (sc/optional-key :password)  sc/Str
    (sc/optional-key :crypto-iv) sc/Str
+   (sc/optional-key :partner)   (apply sc/enum messages/partners)
    (sc/optional-key :headers)   [{:key sc/Str :value sc/Str}]})
 
 (def krysp-http-conf-validator (sc/validator KryspHttpConf))

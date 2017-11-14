@@ -135,4 +135,5 @@
                                          "X-Vault"    (env/value :matti :rest :vault)}
                       :body             (clj-http/json-encode outgoing-data)
                       :throw-exceptions true})
+          (messages/mark-acknowledged-and-return message-id (now))
           (infof "MATTI JSON sent to state-change endpoint successfully"))))))

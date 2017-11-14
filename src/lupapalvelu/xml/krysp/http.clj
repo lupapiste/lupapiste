@@ -1,12 +1,15 @@
 (ns lupapalvelu.xml.krysp.http
   (:require [clj-http.cookies :as cookies]
+            [monger.operators :refer :all]
             [sade.http :as http]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.schema-utils :as ssu]
             [sade.strings :as ss]
+            [sade.util :as util]
             [schema.core :as sc]
             [lupapalvelu.cookie :as lupa-cookies]
+            [lupapalvelu.integrations.messages :as imessages]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]))
 
@@ -48,3 +51,15 @@
           (with-krysp-defaults)
           (update :headers merge (create-headers (:headers http-conf)))
           (wrap-authentication http-conf)))))
+
+(sc/defn send-xml
+  [application user xml :- sc/Str http-conf :- org/KryspHttpConf]
+  (let [message-id (mongo/create-id)]
+    (imessages/save (util/strip-nils
+                      {:id message-id :direction "out" :messageType "KuntaGML"
+                       :partner             (:partner http-conf)
+                       :transferType        "http" :format "xml" :created (now)
+                       :status              "processing" :initator (select-keys user [:id :username])
+                       :application         (select-keys application [:id :organization])}))
+    (POST xml http-conf)
+    (imessages/update-message message-id {$set {:acknowledged (now) :status "done"}})))

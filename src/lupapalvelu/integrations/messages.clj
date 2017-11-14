@@ -48,3 +48,9 @@
    (mongo/with-id (mongo/update-one-and-return :integration-messages
                                                {:_id message-id}
                                                {$set (merge {:acknowledged timestamp} updates)}))))
+
+(defn update-message
+  ([message-id updates]
+    (update-message message-id updates WriteConcern/ACKNOWLEDGED))
+  ([message-id updates write-concern]
+    (mongo/update-by-id :integration-messages message-id updates :write-concern write-concern)))

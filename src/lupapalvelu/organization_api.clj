@@ -35,7 +35,8 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.waste-ads :as waste-ads]
             [lupapalvelu.wfs :as wfs]
-            [sade.shared-schemas :as sssc]))
+            [sade.shared-schemas :as sssc]
+            [sade.schema-utils :as ssu]))
 ;;
 ;; local api
 ;;
@@ -644,9 +645,13 @@
 (defcommand set-kuntagml-http-endpoint
   {:description         "Admin can configure KuntaGML sending as HTTP, instead of SFTP"
    :parameters          [url organization permitType]
-   :optional-parameters [auth-type username password headers]
+   :optional-parameters [auth-type username password partner headers]
    :user-roles          #{:admin}
    :input-validators    [(partial validate-optional-url :url)
+                         (fn [{:keys [data]}]
+                           (when (and (ss/not-blank? (:partner data))
+                                      (sc/check (ssu/get org/KryspHttpConf :partner) (:partner data)))
+                             (fail :error.illegal-value:schema-validation)))
                          permit/permit-type-validator
                          (action/valid-db-key :permitType)
                          (fn [{:keys [data] :as command}]
