@@ -27,6 +27,7 @@
   (->> (filter :docstore-info minimal/organizations)
        (mapv (fn [{:keys [docstore-info scope] :as org}]
                (-> (merge docstore-info (select-keys org [:id :name :municipalities]))
+                   (dissoc :allowedTerminalAttachmentTypes)
                    (assoc :municipalities (->> scope
                                                (map api/municipality-info)
                                                (distinct))))))))
