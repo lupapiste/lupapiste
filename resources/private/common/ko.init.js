@@ -277,21 +277,21 @@
     }
   };
 
-  var attachmentVersionTemplate =
-        _.template( "<a href='/api/raw/download-attachment?attachment-id"
-                    + "=<%- fileId %>'><%- filename %></a><br>"
+  var latestVersionTemplate =
+        _.template( "<a href='/api/raw/latest-attachment-version?download=true&attachment-id"
+                    + "=<%- attachmentId %>'><%- filename %></a><br>"
                     + "<i class='fileinfo'><%- contentText %> <%- sizeText %></i>");
 
   // Fills the target element with:
-  // <a href="attachment file download url">filename</a><br>
+  // <a href="attachment latest version file download url">filename</a><br>
   // <i>localized content type size string</i>
-  ko.bindingHandlers.attachmentVersion = {
+  ko.bindingHandlers.latestVersionDownload = {
     update: function( element, valueAccessor) {
       var v = ko.utils.unwrapObservable( valueAccessor());
       if( v ) {
         var data = ko.mapping.toJS( v );
-        $(element).html( attachmentVersionTemplate( _.merge( data, {contentText: loc( data.contentType),
-                                                                    sizeText: util.sizeString( data.size )})));
+        $(element).html( latestVersionTemplate( _.merge( data, {contentText: loc( data.contentType),
+                                                                sizeText: util.sizeString( data.size )})));
       }
     }
   };

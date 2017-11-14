@@ -16,7 +16,10 @@
       <tr>
         <td data-bind="html: $parent.typeHtml( $data ),
                        attr: {'data-test-id': 'ram-link-type-' + $index()}"></td>
-        <td data-bind="attachmentVersion: $data.latestVersion,
+        <td data-bind="latestVersionDownload: {id: id,
+                                               filename: latestVersion.filename,
+                                               contentType: latestVersion.contentType,
+                                               size: latestVersion.size},
                        attr: {'data-test-id': 'ram-link-file-' + $index()}"></td>
         <td data-bind="dateTimeString: _.get( $data, 'latestVersion.created' )"></td>
         <td data-bind="firstLastName: _.get( $data, 'latestVersion.user', ''),
