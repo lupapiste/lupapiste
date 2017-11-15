@@ -23,6 +23,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.building :as building]
+            [lupapalvelu.i18n :as i18n]
             [monger.operators :refer :all]
             [sade.strings :as ss]))
 
@@ -126,11 +127,11 @@
       rakennuspaikka-exists?                             (:rakennuspaikka app-info)
       (pp/enough-location-info-from-parameters? command) (select-keys data [:x :y :address :propertyId]))))
 
-(defn default-location [organizationId]
+(defn default-location [organizationId lang]
   (let [organization (org/get-organization organizationId)]
   {:x (get-in organization [:default-digitalization-location :x])
    :y (get-in organization [:default-digitalization-location :y])
-   :address "Sijainti puuttuu"
+   :address (i18n/localize lang "digitizer.location.missing")
    :propertyId (apply str (concat (first (split-at 3 organizationId)) "-00-00-00"))}))
 
 (defn fetch-or-create-archiving-project!
@@ -140,7 +141,7 @@
         dummy-application {:id "" :permitType permit-type :organization organizationId}
         xml               (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
         app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-        {:keys [propertyId] :as location-info} (if createWithDefaultLocation (default-location organizationId) (get-location-info command app-info))
+        {:keys [propertyId] :as location-info} (if createWithDefaultLocation (default-location organizationId (get-in command [:user :language])) (get-location-info command app-info))
         organization      (when propertyId
                             (organization/resolve-organization (p/municipality-id-by-property-id propertyId) permit-type))
         building-xml      (if app-info xml (application/fetch-building-xml organizationId permit-type propertyId))

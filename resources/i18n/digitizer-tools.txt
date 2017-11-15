@@ -97,3 +97,6 @@
 "create.without.location" "en" ""
 "create.without.location" "fi" "Jatka ilman sijaintia"
 "create.without.location" "sv" ""
+"digitizer.location.missing" "en" ""
+"digitizer.location.missing" "fi" "Sijainti puuttuu"
+"digitizer.location.missing" "sv" ""
