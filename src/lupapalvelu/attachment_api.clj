@@ -480,12 +480,12 @@
    :org-authz-roles roles/reader-org-authz-roles}
   [{:keys [application user lang]}]
   (if application
-    (let [attachments (:attachments application)
-          application (app/with-masked-person-ids application user)]
-      {:status 200
-        :headers {"Content-Type" "application/octet-stream"
-                  "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-        :body (files/temp-file-input-stream (att/get-all-attachments! attachments application user lang))})
+    {:status 200
+     :headers {"Content-Type" "application/octet-stream"
+               "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
+     :body (-> (:attachments application)
+               (att/get-all-attachments! application user lang)
+               (files/temp-file-input-stream))}
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))

@@ -59,7 +59,7 @@
        {$or (map (fn [feature] {target-kw {$geoWithin {"$geometry" (:geometry feature)}}}) filtered-features)}))))
 
 ; Masking
-(defn- person-id-masker-for-user [user application]
+(defn person-id-masker-for-user [user application]
   (cond
     (auth/application-handler? application user) identity
     (auth/application-authority? application user) model/mask-person-id-ending

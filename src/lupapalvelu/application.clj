@@ -34,7 +34,8 @@
             [sade.env :as env]
             [sade.property :as prop]
             [sade.util :as util :refer [merge-in]]
-            [sade.coordinate :as coord]))
+            [sade.coordinate :as coord]
+            [lupapalvelu.application-utils :as app-utils]))
 
 
 (defn get-operations [application]
@@ -253,7 +254,7 @@
 (defn process-document-or-task [user application doc]
   (->> (validate application doc)
        (populate-operation-info (get-operations application))
-       ((person-id-masker-for-user user application))
+       ((app-utils/person-id-masker-for-user user application))
        (enrich-single-doc-disabled-flag user)))
 
 (defn- process-documents-and-tasks [user application]

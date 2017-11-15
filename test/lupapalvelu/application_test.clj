@@ -371,34 +371,6 @@
 
 )
 
-
-(facts person-id-masker-for-user
-  (fact "handler authority - no masking"
-    ((person-id-masker-for-user {:id ..id.. :role :authority} {:handlers [{:userId ..id..}]}) {:schema-info {:name "maksaja"}
-                                                                                               :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
-    => {:schema-info {:name "maksaja"}
-        :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
-
-  (fact "non handler authority"
-    ((person-id-masker-for-user {:id ..id.. :role :authority :orgAuthz {:org-id #{:authority}}} {:organization "org-id" :handlers [{:userId ..other-id..}]})
-     {:schema-info {:name "maksaja"}
-      :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
-    => {:schema-info {:name "maksaja"}
-        :data {:henkilo {:henkilotiedot {:hetu {:value "010101-****"}}}}})
-
-  (fact "authority in different organization"
-    ((person-id-masker-for-user {:id ..id.. :role :authority :orgAuthz {:another-org-id #{:authority}}} {:organization "org-id" :handlers [{:userId ..other-id..}]})
-     {:schema-info {:name "maksaja"}
-      :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
-    => {:schema-info {:name "maksaja"}
-        :data {:henkilo {:henkilotiedot {:hetu {:value "******-****"}}}}})
-
-  (fact "non authority user"
-    ((person-id-masker-for-user {:id ..id.. :role :authority} {:handlers [{:userId ..other-id..}]}) {:schema-info {:name "maksaja"}
-                                                                                                     :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
-    => {:schema-info {:name "maksaja"}
-        :data {:henkilo {:henkilotiedot {:hetu {:value "******-****"}}}}}))
-
 (facts "Validate digging permits linked agreement"
   (fact "Linked agreement have to be post verdict state"
     (validate-link-agreements-state {:state "submitted"}) => {:ok false, :text "error.link-permit-app-not-in-post-verdict-state"}
