@@ -28,7 +28,7 @@
       (facts "integration-messages"
         (count msgs) => 2
         (fact "sent message is saved"
-          (:messageType sent-message) => "KuntaGML"
+          (:messageType sent-message) => "KuntaGML application"
           (:direction sent-message) => "out"
           (fact "after success, message is acknowledged"
             (> (:acknowledged sent-message) ts) => true
