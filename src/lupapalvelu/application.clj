@@ -729,6 +729,34 @@
                               (:propertyId application))]
           (doc/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))
 
+(defn schema-datas [{:keys [rakennusvalvontaasianKuvaus]} buildings]
+  (map
+    (fn [{:keys [data]}]
+      (remove empty? (conj [[[:valtakunnallinenNumero] (:valtakunnallinenNumero data)]
+                            [[:kaytto :kayttotarkoitus] (get-in data [:kaytto :kayttotarkoitus])]]
+                           (when-not (or (ss/blank? (:rakennusnro data))
+                                         (= "000" (:rakennusnro data)))
+                             [[:tunnus] (:rakennusnro data)])
+                           (when-not (ss/blank? rakennusvalvontaasianKuvaus)
+                             [[:kuvaus] rakennusvalvontaasianKuvaus]))))
+    buildings))
+
+(defn document-data->op-document [{:keys [schema-version] :as application} data]
+  (let [op (make-op :archiving-project (now))
+        doc (doc-persistence/new-doc application (schemas/get-schema schema-version "archiving-project") (now))
+        doc (assoc-in doc [:schema-info :op] op)
+        doc-updates (model/map2updates [] data)]
+    (model/apply-updates doc doc-updates)))
+
+(defn fetch-building-xml [organization permit-type property-id]
+  (when (and organization permit-type property-id)
+    (when-let [{url :url credentials :credentials} (org/get-krysp-wfs {:_id organization} permit-type)]
+      (building-reader/building-xml url credentials property-id))))
+
+(defn buildings-for-documents [xml]
+  (->> (building-reader/->buildings xml)
+       (map #(-> {:data %}))))
+
 (defn update-buildings-array! [xml application]
   (let [doc-buildings (building/building-ids application)
         buildings (building-reader/->buildings-summary xml)
@@ -746,37 +774,12 @@
                           (:id application)
                           {$set {:buildings updated-buildings}}))))
 
-(defn fetch-building-xml [organization property-id]
-  (when (and organization property-id)
-    (when-let [{url :url credentials :credentials} (org/get-krysp-wfs {:_id organization} "R")]
-      (building-reader/building-xml url credentials property-id))))
-
-(defn buildings-for-documents [xml]
-  (->> (building-reader/->buildings xml)
-       (map #(-> {:data %}))))
-
-(defn- schema-datas [buildings]
-  (map
-    (fn [{:keys [data]}]
-      (remove empty? (conj [[[:valtakunnallinenNumero] (:valtakunnallinenNumero data)]
-                            [[:kaytto :kayttotarkoitus] (get-in data [:kaytto :kayttotarkoitus])]]
-                           (when-not (or (ss/blank? (:rakennusnro data))
-                                         (= "000" (:rakennusnro data)))
-                             [[:tunnus] (:rakennusnro data)]))))
-    buildings))
-
-(defn document-data->op-document [{:keys [schema-version] :as application} data]
-  (let [op (make-op :archiving-project (now))
-        doc (doc-persistence/new-doc application (schemas/get-schema schema-version "archiving-project") (now))
-        doc (assoc-in doc [:schema-info :op] op)
-        doc-updates (model/map2updates [] data)]
-    (model/apply-updates doc doc-updates)))
 
 (defn fetch-buildings [{:keys [application] :as command} propertyId]
-  (let [building-xml              (fetch-building-xml (:organization application) propertyId)
+  (let [building-xml              (fetch-building-xml (:organization application) "R" propertyId)
         old-building-docs         (domain/get-documents-by-name application "archiving-project")
         buildings-and-structures  (buildings-for-documents building-xml)
-        document-datas            (schema-datas buildings-and-structures)
+        document-datas            (schema-datas nil buildings-and-structures)
         structure-descriptions    (map :description buildings-and-structures)
         building-docs             (map (partial document-data->op-document application) document-datas)
         primary-operation         (assoc (-> (first building-docs) :schema-info :op) :description (first structure-descriptions))

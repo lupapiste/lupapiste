@@ -83,55 +83,10 @@
                                     created
                                     manual-schema-datas))))
 
-(defn- schema-datas [{:keys [rakennusvalvontaasianKuvaus]} buildings]
-  (map
-    (fn [{:keys [data]}]
-      (remove empty? (conj [[[:valtakunnallinenNumero] (:valtakunnallinenNumero data)]
-                            [[:kaytto :kayttotarkoitus] (get-in data [:kaytto :kayttotarkoitus])]]
-                           (when-not (or (ss/blank? (:rakennusnro data))
-                                         (= "000" (:rakennusnro data)))
-                             [[:tunnus] (:rakennusnro data)])
-                           (when-not (ss/blank? rakennusvalvontaasianKuvaus)
-                             [[:kuvaus] rakennusvalvontaasianKuvaus]))))
-    buildings))
-
-(defn document-data->op-document [{:keys [schema-version] :as application} data]
-  (let [op (app/make-op :archiving-project (now))
-        doc (doc-persistence/new-doc application (schemas/get-schema schema-version "archiving-project") (now))
-        doc (assoc-in doc [:schema-info :op] op)
-        doc-updates (lupapalvelu.document.model/map2updates [] data)]
-    (lupapalvelu.document.model/apply-updates doc doc-updates)))
-
-(defn fetch-building-xml [organization permit-type property-id]
-  (when (and organization permit-type property-id)
-    (when-let [{url :url credentials :credentials} (org/get-krysp-wfs {:_id organization} permit-type)]
-      (building-reader/building-xml url credentials property-id))))
-
-(defn buildings-for-documents [xml]
-  (->> (building-reader/->buildings xml)
-       (map #(-> {:data %}))))
-
-(defn update-buildings-array! [xml application]
-  (let [doc-buildings (building/building-ids application)
-        buildings (building-reader/->buildings-summary xml)
-        find-op-id (fn [nid]
-                     (->> (filter #(= (:national-id %) nid) doc-buildings)
-                          first
-                          :operation-id))
-        updated-buildings (map
-                            (fn [{:keys [nationalId] :as bldg}]
-                              (-> (select-keys bldg [:localShortId :buildingId :localId :nationalId :location-wgs84 :location])
-                                  (assoc :operationId (find-op-id nationalId))))
-                            buildings)]
-    (when (seq updated-buildings)
-      (mongo/update-by-id :applications
-                          (:id application)
-                          {$set {:buildings updated-buildings}}))))
-
 (defn create-archiving-project-application!
   [command operation buildings-and-structures app-info location-info permit-type building-xml backend-id]
   (let [{:keys [hakijat]} app-info
-        document-datas (schema-datas app-info buildings-and-structures)
+        document-datas (application/schema-datas app-info buildings-and-structures)
         manual-schema-datas {"archiving-project" (first document-datas)}
         command (update-in command [:data] merge
                            {:operation operation :infoRequest false :messages []}
@@ -142,7 +97,7 @@
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
         ;; make secondaryOperations for buildings other than the first one in case there are many
-        other-building-docs (map (partial document-data->op-document created-application) (rest document-datas))
+        other-building-docs (map (partial application/document-data->op-document created-application) (rest document-datas))
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
 
         created-application (update-in created-application [:documents] concat other-building-docs)
@@ -161,7 +116,7 @@
 
     (let [fetched-application (mongo/by-id :applications (:id created-application))]
       (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
-      (update-buildings-array! building-xml fetched-application)
+      (application/update-buildings-array! building-xml fetched-application)
       fetched-application)))
 
 (defn get-location-info [{data :data :as command} app-info]
@@ -188,9 +143,9 @@
         {:keys [propertyId] :as location-info} (if createWithDefaultLocation (default-location organizationId) (get-location-info command app-info))
         organization      (when propertyId
                             (organization/resolve-organization (p/municipality-id-by-property-id propertyId) permit-type))
-        building-xml      (if app-info xml (fetch-building-xml organizationId permit-type propertyId))
+        building-xml      (if app-info xml (application/fetch-building-xml organizationId permit-type propertyId))
         bldgs-and-structs (or (when app-info (building-reader/->buildings-and-structures xml))
-                              (buildings-for-documents building-xml))
+                              (application/buildings-for-documents building-xml))
         organizations-match?  (= organizationId (:id organization))]
     (cond
       (and (empty? app-info)
