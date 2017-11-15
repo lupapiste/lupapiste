@@ -4,11 +4,12 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as org]
             [lupapalvelu.i18n :as i18n]
-            [sade.core :refer :all]))
+            [sade.core :refer :all]
+            [sade.env :as env]))
 
 (def- local-krysp "http://localhost:8000/dev/krysp")
 (def- local-3d-map "http://localhost:8000/dev/3dmap")
-(def- local-krysp-receiver "http://localhost:8000/dev/krysp/receiver")
+(def- local-krysp-receiver (str (env/server-address) "/dev/krysp/receiver"))
 
 (def users
   [;; Solita admin:  admin / admin
