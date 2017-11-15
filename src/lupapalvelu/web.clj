@@ -645,7 +645,10 @@
   (defn krysp-endpoint-authentication
     [request]
     (let [[u p] (http/decode-basic-auth request)]
-      (debug (str u " requesting krysp receiver endpoint"))
+      (debug (str
+               u
+               " requesting krysp receiver endpoint, db cookie being: "
+               (get-in request [:cookies "test_db_name" :value])))
       (and (= u "kuntagml") (= p "kryspi"))))
 
   (defpage [:post "/dev/krysp/receiver"] []
