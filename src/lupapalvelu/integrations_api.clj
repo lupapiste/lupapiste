@@ -177,9 +177,10 @@
                                             (> (-> % :versions last :created) (:sent %)))
                                           (not (#{"verdict" "statement"} (-> % :target :type)))
                                           (some #{(:id %)} attachmentIds))
-                                        all-attachments)]
+                                        all-attachments)
+        command (assoc-in command [:application :attachments] attachments-wo-sent-timestamp)]
     (if (pos? (count attachments-wo-sent-timestamp))
-      (let [sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp (assoc application :attachments attachments-wo-sent-timestamp) lang @organization)
+      (let [sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp command lang)
             data-argument (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)
             attachments-data {:data-key :attachments
                               :data (map :id attachments-wo-sent-timestamp)}
@@ -198,7 +199,7 @@
                 (application-already-exported :exported-to-backing-system)]
    :states     states/post-verdict-states}
   [{:keys [application organization] :as command}]
-  (let [sent-document-ids (mapping-to-krysp/save-parties-as-krysp application lang @organization)
+  (let [sent-document-ids (mapping-to-krysp/save-parties-as-krysp command lang)
         transfer-item     (get-transfer-item :parties-to-backing-system command {:data-key :party-documents
                                                                                  :data sent-document-ids})]
     (update-application command {$push {:transfers transfer-item}})
