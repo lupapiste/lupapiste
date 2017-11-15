@@ -786,7 +786,7 @@
         secondary-ops             (mapv #(assoc (-> %1 :schema-info :op) :description %2) (rest building-docs) (rest structure-descriptions))
         application               (update-in application [:documents] concat building-docs)
         command                   (util/deep-merge command (action/application->command application))]
-  (action/update-application command {$pull {:documents {:id {$in (map :id old-building-docs)}}}})
+  (mapv #(doc-persistence/remove! command (:id %) "documents") old-building-docs)
   (action/update-application command {$set  {:primaryOperation    primary-operation
                                              :secondaryOperations secondary-ops}
                                       $push {:documents {$each building-docs}}})
