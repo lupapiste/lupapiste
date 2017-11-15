@@ -19,12 +19,9 @@
     {:content-type "text/xml;charset=UTF-8"}
     options
     (when env/dev-mode?
-      (let [db-name mongo/*db-name*
-            c (lupa-cookies/->lupa-cookie "test_db_name" db-name)]
-        (println "--- created cookie for db:" db-name "with domain: " (.getDomain c))
-        {:cookie-store
-         (doto (cookies/cookie-store)
-           (cookies/add-cookie c))}))))
+      {:cookie-store
+       (doto (cookies/cookie-store)
+         (cookies/add-cookie (lupa-cookies/->lupa-cookie "test_db_name" mongo/*db-name*)))})))
 
 (sc/defn wrap-authentication [options http-conf :- org/KryspHttpConf]
   (if-not (:auth-type http-conf)
@@ -47,15 +44,13 @@
   ([xml :- sc/Str http-conf :- org/KryspHttpConf]
     (POST xml http-conf nil))
   ([xml :- sc/Str http-conf :- org/KryspHttpConf options :- {sc/Keyword sc/Any}]
-    (let [opts (-> options
-                   (assoc :body xml)
-                   (with-krysp-defaults)
-                   (update :headers merge (create-headers (:headers http-conf)))
-                   (wrap-authentication http-conf))]
-      (println "--- options for krysp http are" (pr-str opts))
-      (http/post
-        (:url http-conf)
-        opts))))
+    (http/post
+      (:url http-conf)
+      (-> options
+          (assoc :body xml)
+          (with-krysp-defaults)
+          (update :headers merge (create-headers (:headers http-conf)))
+          (wrap-authentication http-conf)))))
 
 (sc/defn send-xml
   [application user xml :- sc/Str http-conf :- org/KryspHttpConf]
