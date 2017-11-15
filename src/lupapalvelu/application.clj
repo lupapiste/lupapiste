@@ -13,10 +13,12 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.building :as building]
             [lupapalvelu.company :as com]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
@@ -30,11 +32,13 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
+            [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.property :as prop]
             [sade.util :as util :refer [merge-in]]
-            [sade.coordinate :as coord]))
+            [sade.coordinate :as coord]
+            [sade.strings :as ss]))
 
 
 (defn get-operations [application]
@@ -724,3 +728,63 @@
                               (get-in rakennuspaikka [:data :kiinteisto :kiinteistoTunnus :value])
                               (:propertyId application))]
           (doc/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))
+
+(defn update-buildings-array! [xml application]
+  (let [doc-buildings (building/building-ids application)
+        buildings (building-reader/->buildings-summary xml)
+        find-op-id (fn [nid]
+                     (->> (filter #(= (:national-id %) nid) doc-buildings)
+                          first
+                          :operation-id))
+        updated-buildings (map
+                            (fn [{:keys [nationalId] :as bldg}]
+                              (-> (select-keys bldg [:localShortId :buildingId :localId :nationalId :location-wgs84 :location])
+                                  (assoc :operationId (find-op-id nationalId))))
+                            buildings)]
+    (when (seq updated-buildings)
+      (mongo/update-by-id :applications
+                          (:id application)
+                          {$set {:buildings updated-buildings}}))))
+
+(defn fetch-building-xml [organization property-id]
+  (when (and organization property-id)
+    (when-let [{url :url credentials :credentials} (org/get-krysp-wfs {:_id organization} "R")]
+      (building-reader/building-xml url credentials property-id))))
+
+(defn buildings-for-documents [xml]
+  (->> (building-reader/->buildings xml)
+       (map #(-> {:data %}))))
+
+(defn- schema-datas [buildings]
+  (map
+    (fn [{:keys [data]}]
+      (remove empty? (conj [[[:valtakunnallinenNumero] (:valtakunnallinenNumero data)]
+                            [[:kaytto :kayttotarkoitus] (get-in data [:kaytto :kayttotarkoitus])]]
+                           (when-not (or (ss/blank? (:rakennusnro data))
+                                         (= "000" (:rakennusnro data)))
+                             [[:tunnus] (:rakennusnro data)]))))
+    buildings))
+
+(defn document-data->op-document [{:keys [schema-version] :as application} data]
+  (let [op (make-op :archiving-project (now))
+        doc (doc-persistence/new-doc application (schemas/get-schema schema-version "archiving-project") (now))
+        doc (assoc-in doc [:schema-info :op] op)
+        doc-updates (model/map2updates [] data)]
+    (model/apply-updates doc doc-updates)))
+
+(defn fetch-buildings [{:keys [application] :as command} propertyId]
+  (let [building-xml              (fetch-building-xml (:organization application) propertyId)
+        old-building-docs         (domain/get-documents-by-name application "archiving-project")
+        buildings-and-structures  (buildings-for-documents building-xml)
+        document-datas            (schema-datas buildings-and-structures)
+        structure-descriptions    (map :description buildings-and-structures)
+        building-docs             (map (partial document-data->op-document application) document-datas)
+        primary-operation         (assoc (-> (first building-docs) :schema-info :op) :description (first structure-descriptions))
+        secondary-ops             (mapv #(assoc (-> %1 :schema-info :op) :description %2) (rest building-docs) (rest structure-descriptions))
+        application               (update-in application [:documents] concat building-docs)
+        command                   (util/deep-merge command (action/application->command application))]
+  (action/update-application command {$pull {:documents {:id {$in (map :id old-building-docs)}}}})
+  (action/update-application command {$set  {:primaryOperation    primary-operation
+                                             :secondaryOperations secondary-ops}
+                                      $push {:documents {$each building-docs}}})
+  (update-buildings-array! building-xml (mongo/by-id :applications (:id application)))))
