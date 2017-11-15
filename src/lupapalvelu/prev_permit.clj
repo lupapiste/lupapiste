@@ -6,7 +6,6 @@
             [lupapalvelu.authorization-api :as authorization]
             [lupapalvelu.document.model :as doc-model]
             [lupapalvelu.document.persistence :as doc-persistence]
-            [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
@@ -22,7 +21,6 @@
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [monger.operators :refer :all]
-            [net.cgrand.enlive-html :as enlive]
             [sade.core :refer :all]
             [sade.property :as p]
             [sade.strings :as ss]
@@ -81,8 +79,32 @@
         :valittajaTunnus (get-in applicant [:yritys :verkkolaskutustieto :Verkkolaskutus :valittajaTunnus])
         (tools/default-values element)))))
 
+(defn sanitize-document
+  "Validates document replaces erroneous (:err) values with blanks."
+  [application document]
+  (reduce (fn [doc {:keys [path result]}]
+            (cond-> doc
+              (= (first result) :err) (assoc-in doc (cons :data path) "")))
+          document
+          (doc-model/validate application document)))
+
+(defn sanitize-updates
+  "Removes updates that would invalidate document. The updates are
+  transfroms and applied to the document before validation."
+  [application document updates]
+  (let [bad-paths (->> (doc-model/validate
+                        application
+                        (doc-model/apply-updates
+                         document
+                         (doc-persistence/transform document updates)))
+                       (filter #(= (first (:result %)) :err))
+                       (map :path)
+                       set)]
+    (remove (util/fn->> first (contains? bad-paths))
+            updates)))
+
 (defn applicant->applicant-doc [applicant]
-  (let [schema         (schema/get-schema 1 "hakija-r")
+  (let [schema         (schemas/get-schema 1 "hakija-r")
         default-values (tools/create-document-data schema tools/default-values)
         document       {:id          (mongo/create-id)
                         :created     (now)
@@ -92,7 +114,7 @@
     (assoc-in document [:data unset-type] (unset-type default-values))))
 
 (defn designer->designer-doc [designer schema-name]
-  (let [schema         (schema/get-schema 1 schema-name)
+  (let [schema         (schemas/get-schema 1 schema-name)
         default-values (tools/create-document-data schema tools/default-values)
         document       {:id          (mongo/create-id)
                         :created     (now)
@@ -102,8 +124,7 @@
     (assoc-in document [:data unset-type] (unset-type default-values))))
 
 (defn osapuoli->osapuoli-doc [maksaja schema-name]
-  (println "---------------------- maksaja schema-name:" schema-name)
-  (let [schema         (schema/get-schema 1 schema-name)
+  (let [schema         (schemas/get-schema 1 schema-name)
         default-values (tools/create-document-data schema tools/default-values)
         document       {:id          (mongo/create-id)
                         :created     (now)
@@ -195,8 +216,15 @@
                                             :zip (get-in postiosoite [:postinumero])
                                             :po (get-in postiosoite [:postitoimipaikannimi])
                                             :turvakieltokytkin (:turvakieltoKytkin applicant)}))]
-
-                (doc-persistence/set-subject-to-document application document user-info (name applicant-type) created)))))))))
+                 (as-> (doc-persistence/document-subject-updates document
+                                                                 user-info
+                                                                 (name applicant-type)) $
+                   (sanitize-updates application document $)
+                   (doc-persistence/persist-model-updates application
+                                                          "documents"
+                                                          document
+                                                          $
+                                                          created))))))))))
 
 (defn document-data->op-document [{:keys [schema-version] :as application} data]
   (let [op (app/make-op "aiemmalla-luvalla-hakeminen" (now))
@@ -279,11 +307,6 @@
         (info "Prev permit application creation, rakennuspaikkatieto information incomplete:\n " (:rakennuspaikka app-info) "\n"))
       location-info)))
 
-(defn every-hetu-is-valid? [xml]
-  (>pprint {:hetus (enlive/select xml [:henkilotunnus enlive/content])})
-  (every? (comp validators/valid-hetu? ss/trim)
-          (enlive/select xml [:henkilotunnus enlive/content])))
-
 (defn fetch-prev-application! [{{:keys [organizationId kuntalupatunnus authorizeApplicants]} :data :as command}]
   (let [operation             "aiemmalla-luvalla-hakeminen"
         permit-type           (operations/permit-type-of-operation operation)
@@ -301,7 +324,6 @@
       (not location-info)               (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
       (not (:propertyId location-info)) (fail :error.previous-permit-no-propertyid)
       (not organizations-match?)        (fail :error.previous-permit-found-from-backend-is-of-different-organization)
-      (not (every-hetu-is-valid? xml))  (fail :error.illegal-hetu)
       validation-result                 validation-result
       :else                             (let [{id :id} (do-create-application-from-previous-permit command
                                                                                                    operation
