@@ -30,6 +30,7 @@
             [sade.municipality :as muni]
             [sade.property :as p]
             [sade.shared-schemas :as sssc]
+            [sade.schema-utils :as ssu]
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]
             [sade.validators :as v]
@@ -649,6 +650,38 @@
     (if (or (s/blank? url) (wfs/wfs-is-alive? url username password))
       (org/set-krysp-endpoint organization-id url username password permitType version)
       (fail :auth-admin.legacyNotResponding))))
+
+(defcommand set-kuntagml-http-endpoint
+  {:description         "Admin can configure KuntaGML sending as HTTP, instead of SFTP"
+   :parameters          [url organization permitType]
+   :optional-parameters [auth-type username password partner headers]
+   :user-roles          #{:admin}
+   :input-validators    [(partial validate-optional-url :url)
+                         (fn [{:keys [data]}]
+                           (when (and (ss/not-blank? (:partner data))
+                                      (sc/check (ssu/get org/KryspHttpConf :partner) (:partner data)))
+                             (fail :error.illegal-value:schema-validation)))
+                         permit/permit-type-validator
+                         (action/valid-db-key :permitType)
+                         (fn [{:keys [data] :as command}]
+                           (when (seq (:headers data))
+                             (action/vector-parameters-with-map-items-with-required-keys
+                               [:headers]
+                               [:key :value]
+                               command)))]
+   :pre-checks          [(fn [{:keys [data]}]
+                           (when-not (pos? (mongo/count :organizations {:_id (:organization data)}))
+                             (fail :error.unknown-organization)))]}
+  [{data :data user :user}]
+  (let [url     (-> data :url ss/trim)
+        updates (->> (when username
+                       (org/encode-credentials username password))
+                     (merge {:url url} (select-keys data [:headers :auth-type]))
+                     (util/strip-nils)
+                     org/krysp-http-conf-validator
+                     (map (fn [[k v]] [(str "krysp." permitType ".http." (name k)) v]))
+                     (into {}))]
+    (mongo/update-by-id :organizations organization {$set updates})))
 
 (defcommand set-kopiolaitos-info
   {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress kopiolaitosOrdererPhone kopiolaitosOrdererEmail]

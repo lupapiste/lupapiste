@@ -16,10 +16,10 @@
 ;;
 
 (defn- save-as-krysp-if-possible
-  [application organization lang app-updates]
-  (if (organization/krysp-integration? organization (permit/permit-type application))
-    (let [krysp-app (app/post-process-app-for-krysp (merge application app-updates) organization)]
-      (mapping-to-krysp/save-application-as-krysp krysp-app lang krysp-app organization)
+  [{:keys [application organization] :as cmd} lang app-updates]
+  (if (organization/krysp-integration? @organization (permit/permit-type application))
+    (let [krysp-app (app/post-process-app-for-krysp (merge application app-updates) @organization)]
+      (mapping-to-krysp/save-application-as-krysp (assoc cmd :application krysp-app) lang krysp-app)
       true)
     false))
 
@@ -36,7 +36,7 @@
   (let [timestamp   (util/to-millis-from-local-date-string startedTimestampStr)
         app-updates {:startedBy (select-keys user [:id :firstName :lastName])
                      :started   timestamp}
-        krysp?      (save-as-krysp-if-possible application @organization lang app-updates)]
+        krysp?      (save-as-krysp-if-possible command lang app-updates)]
     (update-application command (util/deep-merge
                                  (app-state/state-transition-update :constructionStarted created application user)
                                  {$set app-updates}))
@@ -56,7 +56,7 @@
                      :closed   timestamp
                      :closedBy (select-keys user [:id :firstName :lastName])
                      :state    :closed}
-        krysp?      (save-as-krysp-if-possible orig-app @org lang app-updates)]
+        krysp?      (save-as-krysp-if-possible command lang app-updates)]
 
     (update-application command (util/deep-merge
                                   (app-state/state-transition-update :closed created orig-app user)

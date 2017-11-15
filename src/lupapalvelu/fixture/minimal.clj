@@ -3,12 +3,12 @@
             [lupapalvelu.fixture.core :refer :all]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.i18n :as i18n]
             [sade.core :refer :all]))
 
 (def- local-krysp "http://localhost:8000/dev/krysp")
 (def- local-3d-map "http://localhost:8000/dev/3dmap")
+(def- local-krysp-receiver "http://localhost:8000/dev/krysp/receiver")
 
 (def users
   [;; Solita admin:  admin / admin
@@ -70,7 +70,7 @@
     :enabled true
     :language "fi"
     :role "authority"
-    :orgAuthz {:837-R #{:authority}}
+    :orgAuthz {:837-R #{:authority :approver}}
     :firstName "Veikko"
     :lastName "Viranomainen"
     :phone "03121991"
@@ -1041,7 +1041,13 @@
                                                                            [:hakija :ote_kauppa_ja_yhdistysrekisterista]
                                                                            [:pelastusviranomaiselle_esitettavat_suunnitelmat :vaestonsuojasuunnitelma]
                                                                            [:suunnitelmat :valaistussuunnitelma]]}
-                       :krysp {:R {:url local-krysp :version "2.1.4" :ftpUser "dev_tampere"}}
+                       :krysp {:R {:url local-krysp :version "2.2.2"
+                                   :http (merge
+                                           {:auth-type "basic"
+                                            :partner "matti"
+                                            :url local-krysp-receiver
+                                            :headers [{:key "x-vault" :value "vaultti"}]}
+                                           (org/encode-credentials "kuntagml" "kryspi"))}}
                        :handler-roles [{:id "abba1111111111111111a837"
                                         :name {:fi "K\u00e4sittelij\u00e4"
                                                :sv "Handl\u00e4ggare"

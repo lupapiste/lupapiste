@@ -1,9 +1,7 @@
 (ns lupapalvelu.xml.krysp.kiinteistotoimitus-mapping
-  (:require [clojure.walk :as walk]
-            [lupapalvelu.document.kiinteistotoimitus-canonical :refer [kiinteistotoimitus-canonical]]
+  (:require [lupapalvelu.document.kiinteistotoimitus-canonical :refer [kiinteistotoimitus-canonical]]
             [lupapalvelu.document.attachments-canonical :as attachments-canon]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.disk-writer :as writer]
             [lupapalvelu.xml.emit :as emit]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]))
 
@@ -128,10 +126,8 @@
         (assoc-in canon [:Kiinteistotoimitus :featureMembers] attached))
       canon)))
 
-(defn save-application-as-krysp
-  "Sends application to municipality backend. Returns a sequence of
-  attachment file IDs that were sent."
-  [application lang submitted-application krysp-version output-dir begin-of-link]
+(defmethod permit/application-krysp-mapper :KT
+  [application lang krysp-version begin-of-link]
   (let [canonical-without-attachments (kiinteistotoimitus-canonical application lang)
         attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
         canonical (bind-attachments canonical-without-attachments
@@ -139,14 +135,5 @@
         mapping (get-mapping krysp-version)
         xml (emit/element-to-xml canonical mapping)
         attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonical)]
-    (writer/write-to-disk
-      application
-      attachments-for-write
-      xml
-      krysp-version
-      output-dir
-      submitted-application
-      lang)))
-
-(defmethod permit/application-krysp-mapper :KT [application lang submitted-application krysp-version output-dir begin-of-link]
-  (save-application-as-krysp application lang submitted-application krysp-version output-dir begin-of-link))
+    {:xml xml
+     :attachments attachments-for-write}))
