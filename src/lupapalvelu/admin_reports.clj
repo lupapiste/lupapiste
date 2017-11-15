@@ -1,19 +1,19 @@
 (ns lupapalvelu.admin-reports
-  (:require [clj-time.local :as local]
+  (:require [clj-time.coerce :as tc]
+            [clj-time.core :as t]
+            [clj-time.local :as local]
             [clojure.set :refer [intersection]]
+            [clojure.set :as set]
             [dk.ative.docjure.spreadsheet :as xls]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer :all]
             [lupapalvelu.i18n :refer [localize]]
+            [lupapalvelu.mongo :as mongo]
+            [monger.collection :as collection]
+            [monger.operators :refer :all]
+            [ring.util.io :as ring-io]
             [sade.strings :as ss]
             [sade.util :as util]
-            [swiss.arrows :refer :all]
-            [monger.collection :as collection]
-            [clj-time.core :as t]
-            [clj-time.coerce :as tc]
-            [clojure.set :as set])
-  (:import [java.io ByteArrayOutputStream ByteArrayInputStream]))
+            [swiss.arrows :refer :all]))
 
 (defn string->keyword
   "String to trimmed lowercase keyword."
@@ -52,9 +52,9 @@
      :headers {"Content-Type" "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                "Content-Disposition" (format "attachment; filename=\"%s\"" filename)
                "Cache-Control" "no-cache"}
-     :body (with-open [out (ByteArrayOutputStream.)]
-             (xls/save-workbook! out (workbook sheets))
-             (ByteArrayInputStream. (.toByteArray out)))}))
+     :body (ring-io/piped-input-stream
+            (fn [out]
+              (xls/save-workbook! out (workbook sheets))))}))
 
 ;; -------------------------------
 ;; User report
@@ -217,16 +217,15 @@
 
 (defn- waste-data []
   (map (fn [{:keys [documents] :as app}]
-         (-<>> documents
-               tools/unwrapped
-               (keep (fn [{:keys [schema-info data]}]
-                       (when (contains? (set waste-schemas) (:name schema-info))
-                         (assoc {} (:name schema-info) data))))
-               (apply merge)
-               (merge app)
-               (dissoc <> :documents)))
+         (->> documents
+              (filter #(contains? (set waste-schemas)
+                                  (-> % :schema-info :name)))
+              (reduce (fn [acc {:keys [schema-info data]}]
+                        (assoc acc (:name schema-info) (tools/unwrapped data)))
+                      (dissoc app :documents))))
        (mongo/select :applications
-                     {:documents.schema-info.name {$in waste-schemas}}
+                     {:documents.schema-info.name {$in waste-schemas}
+                      :permitType "R"}
                      {:organization 1 :documents 1})))
 
 (defn- listify

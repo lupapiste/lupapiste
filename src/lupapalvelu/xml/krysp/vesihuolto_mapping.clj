@@ -5,8 +5,7 @@
     [lupapalvelu.permit :as permit]
     [lupapalvelu.document.attachments-canonical :as attachments-canon]
     [lupapalvelu.document.canonical-common :as common]
-    [lupapalvelu.document.vesihuolto-canonical :as vesihuolto-canonical]
-    [lupapalvelu.xml.disk-writer :as writer]))
+    [lupapalvelu.document.vesihuolto-canonical :as vesihuolto-canonical]))
 
 (def vesihuolto-to-krysp_213
   {:tag :Vesihuoltolaki :ns "ymv"
@@ -90,10 +89,8 @@
 (defn vesihuolto-element-to-xml [canonical krysp-version]
   (element-to-xml (common-map-enums canonical krysp-version) (get-mapping krysp-version)))
 
-(defn save-application-as-krysp
-  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
-   3rd parameter (submitted-application) is not used on VVVL applications."
-  [application lang submitted-application krysp-version output-dir begin-of-link]
+(defmethod permit/application-krysp-mapper :VVVL
+  [application lang krysp-version begin-of-link]
   (let [krysp-polku-lausuntoon [:Vesihuoltolaki :vapautukset :Vapautus :lausuntotieto]
         canonical-without-attachments  (vesihuolto-canonical/vapautus-canonical application lang)
         statement-given-ids (common/statements-ids-with-status
@@ -108,15 +105,5 @@
         xml (vesihuolto-element-to-xml canonical krysp-version)
         all-canonical-attachments (concat attachments-canonical (attachments-canon/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
-
-    (writer/write-to-disk
-      application
-      attachments-for-write
-      xml
-      krysp-version
-      output-dir
-      submitted-application
-      lang)))
-
-(defmethod permit/application-krysp-mapper :VVVL [application lang submitted-application krysp-version output-dir begin-of-link]
-  (save-application-as-krysp application lang submitted-application krysp-version output-dir begin-of-link))
+    {:xml xml
+     :attachments attachments-for-write}))

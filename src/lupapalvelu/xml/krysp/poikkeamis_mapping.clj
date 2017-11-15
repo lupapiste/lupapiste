@@ -4,8 +4,7 @@
             [lupapalvelu.document.attachments-canonical :as attachments-canon]
             [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.poikkeamis-canonical :refer [poikkeus-application-to-canonical]]
-            [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.xml.disk-writer :as writer]))
+            [lupapalvelu.xml.emit :refer [element-to-xml]]))
 
 (def kerrosalatieto {:tag :kerrosalatieto :child [{:tag :kerrosala :child [{:tag :pintaAla}
                                                   {:tag :paakayttotarkoitusKoodi}]}]})
@@ -151,9 +150,8 @@
 (defn- common-map-enums [canonical krysp-path krysp-version]
   (update-in canonical (conj krysp-path :lausuntotieto) mapping-common/lausuntotieto-map-enum :P krysp-version))
 
-(defn save-application-as-krysp
-  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
-  [application lang submitted-application krysp-version output-dir begin-of-link]
+(defmethod permit/application-krysp-mapper :P
+  [application lang krysp-version begin-of-link]
   (let [subtype    (keyword (:permitSubtype application))
         krysp-path (condp = subtype
                       permit/poikkeamislupa [:Popast :poikkeamisasiatieto :Poikkeamisasia]
@@ -173,15 +171,5 @@
         xml (element-to-xml (common-map-enums canonical krysp-path krysp-version) (get-mapping krysp-version))
         all-canonical-attachments (concat attachments-canonical (attachments-canon/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
-
-    (writer/write-to-disk
-      application
-      attachments-for-write
-      xml
-      krysp-version
-      output-dir
-      submitted-application
-      lang)))
-
-(defmethod permit/application-krysp-mapper :P [application lang submitted-application krysp-version output-dir begin-of-link]
-  (save-application-as-krysp application lang submitted-application krysp-version output-dir begin-of-link))
+    {:xml xml
+     :attachments attachments-for-write}))

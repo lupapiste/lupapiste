@@ -3574,6 +3574,19 @@
                                  attachment))
                              bad-review-attachments-query))
 
+(defmigration add-docterminal-use-info
+  {:apply-when (pos? (mongo/count :organizations {:docstore-info.docTerminalInUse {$exists false}}))}
+  (mongo/update :organizations
+                {:docstore-info.docTerminalInUse {$exists false}}
+                {$set {:docstore-info.docTerminalInUse false}}
+                :multi true))
+
+(defmigration add-docterminal-allowed-attachment-types
+  {:apply-when (pos? (mongo/count :organizations {:docstore-info.allowedTerminalAttachmentTypes {$exists false}}))}
+  (mongo/update :organizations
+                {:docstore-info.allowedTerminalAttachmentTypes {$exists false}}
+                {$set {:docstore-info.allowedTerminalAttachmentTypes []}}
+                :multi true))
 
 ;;
 ;; ****** NOTE! ******

@@ -1,6 +1,5 @@
 (ns lupapalvelu.verdict-itest
-  (:require [midje.sweet :refer :all]
-            [clj-time.coerce :as coerce]
+  (:require [clj-time.coerce :as coerce]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.factlet :refer :all]
@@ -8,6 +7,7 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libreclient]
+            [midje.sweet :refer :all]
             [sade.core :refer [now]]
             [sade.util :as util]))
 
@@ -434,3 +434,27 @@
          (fact "Disable section requirement for Sipoo"
                (command sipoo :section-toggle-enabled :flag false) => ok?
                (command sonja :check-for-verdict :id kt-id) => ok?)))
+
+(defn verdict-files [app-id]
+  (->> (query-application sonja app-id)
+       :attachments
+       (filter #(-> % :target :type (= "verdict")))
+       (map #(-> % :latestVersion :filename))))
+
+(facts "Delete deprecated verdict attachments"
+  (let [{app-id :id} (create-and-submit-application pena
+                                                    :operation "poikkeamis"
+                                                    :propertyId sipoo-property-id)]
+    (fact "Sonja fetches verdict"
+      (command sonja :check-for-verdict :id app-id) => ok?)
+    (let [files (verdict-files app-id)]
+      (fact "There is only one verdict attachment"
+        files => ["sample-attachment.pdf"]))
+    (fact "Sonja fetches verdict with the attachment changed"
+      (override-krysp-xml sipoo "753-R" :P [{:selector [:yht:poytakirja :yht:linkkiliitteeseen ]
+                                             :value    "http://localhost:8000/dev/sample-verdict.pdf"}])
+      (command sonja :check-for-verdict :id app-id) => ok?)
+    (let [files (verdict-files app-id)]
+      (fact "There is still only one verdict attachment"
+        files => ["sample-verdict.pdf"])))
+  (against-background (after :facts (remove-krysp-xml-overrides sipoo "753-R" :P))))

@@ -1,8 +1,6 @@
 (ns lupapalvelu.xml.krysp.maankayton-muutos-mapping
-  (:require [clojure.string :as str]
-            [lupapalvelu.document.maankayton-muutos-canonical :as maankayton-muutos-canonical]
+  (:require [lupapalvelu.document.maankayton-muutos-canonical :as maankayton-muutos-canonical]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.disk-writer :as writer]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.xml.emit :as emit]
             [lupapalvelu.document.attachments-canonical :as attachments-canon]))
@@ -58,10 +56,8 @@
     "1.0.3" (->mapping-103 muutos)
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
-(defn save-application-as-krysp
-  "Sends application to municipality backend. Returns a sequence of
-  attachment file IDs that ware sent."
-  [application lang submitted-application krysp-version output-dir begin-of-link]
+(defmethod permit/application-krysp-mapper :MM
+  [application lang krysp-version begin-of-link]
   (let [canonical-without-attachments  (maankayton-muutos-canonical/maankayton-muutos-canonical application lang)
         attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
         muutos (-> canonical-without-attachments :Maankaytonmuutos :maankayttomuutosTieto first key)
@@ -72,15 +68,5 @@
         mapping (get-mapping krysp-version muutos)
         xml (emit/element-to-xml canonical mapping)
         attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonical)]
-
-    (writer/write-to-disk
-      application
-      attachments-for-write
-      xml
-      krysp-version
-      output-dir
-      submitted-application
-      lang)))
-
-(defmethod permit/application-krysp-mapper :MM [application lang submitted-application krysp-version output-dir begin-of-link]
-  (save-application-as-krysp application lang submitted-application krysp-version output-dir begin-of-link))
+    {:xml xml
+     :attachments attachments-for-write}))
