@@ -90,7 +90,7 @@
 
 (defn- type-string [[group types]]
   (if group
-    [group (mapv #(->> [group %] (map name) (s/join ".")) types)]
+    [group (mapv #(->> [group %] (map name) (ss/join ".")) types)]
     [group types]))
 
 (def allowed-attachments-by-group
