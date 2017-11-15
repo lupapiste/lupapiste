@@ -11,6 +11,8 @@
             [clojure.string :as str]
             [lupapalvelu.permit :as permit]))
 
+;; Schema definitions
+
 (sc/defschema OrganizationDocstoreInfo
   (-> org/DocStoreInfo
       (dissoc :allowedTerminalAttachmentTypes)
@@ -25,6 +27,17 @@
 (sc/defschema OrganizationsResponse
   (assoc ApiResponse :data [OrganizationDocstoreInfo]))
 
+(sc/defschema OrganizationDocterminalAllowedAttachmentTypesInfo
+  {:id org/OrgId
+   :municipalities [sc/Str]
+   :allowedTerminalAttachmentTypes [org/DocTerminalAttachmentType]})
+
+(sc/defschema AllowedAttachmentTypesResponse
+  (assoc ApiResponse :data [OrganizationDocterminalAllowedAttachmentTypesInfo]))
+
+
+;; Docstore info
+
 (defn- municipality-name [municipality-code]
   (i18n/supported-langs-map #(i18n/localize % (str "municipality." municipality-code))))
 
@@ -32,15 +45,14 @@
   {:id         municipality
    :name       (municipality-name municipality)})
 
-(defn- make-docstore-info [organization]
-  (let [{:keys [id docstore-info name scope]} organization]
-    (-> docstore-info
-        (dissoc :allowedTerminalAttachmentTypes)
-        (assoc :id             id
-               :name           name
-               :municipalities (->> scope
-                                    (map municipality-info)
-                                    (distinct))))))
+(defn- make-docstore-info [{:keys [id docstore-info name scope]}]
+  (-> docstore-info
+      (dissoc :allowedTerminalAttachmentTypes)
+      (assoc :id             id
+             :name           name
+             :municipalities (->> scope
+                                  (map municipality-info)
+                                  (distinct)))))
 
 (defn get-docstore-infos
   ([]
@@ -79,3 +91,26 @@
   (let [query (cond-> (get status-query status {})
                       (not (str/blank? permit-type)) (assoc :scope.permitType permit-type))]
     {:ok true :data (get-docstore-infos query)}))
+
+
+;; Allowed attachment types for docterminal
+
+(defn- make-attachment-type-info [{:keys [id docstore-info scope]}]
+  (-> docstore-info
+      (select-keys [:allowedTerminalAttachmentTypes])
+      (assoc :id             id
+             :municipalities (->> scope
+                                  (map :municipality)
+                                  (distinct)))))
+
+(defn get-attachment-type-infos []
+  (->> (org/get-organizations {:docstore-info.docTerminalInUse true}
+                              [:docstore-info :scope])
+       (map make-attachment-type-info)))
+
+(defendpoint-for usr/docstore-user? "/rest/docstore/allowed-attachment-types" false
+  {:summary     ""
+   :description ""
+   :parameters  []
+   :returns     AllowedAttachmentTypesResponse}
+  {:ok true :data (get-attachment-type-infos)})

@@ -12,6 +12,8 @@
 
 (def organization-address (str (server-address) "/rest/docstore/organization"))
 
+(def allowed-types-address (str (server-address) "/rest/docstore/allowed-attachment-types"))
+
 (def docstore-user-basic-auth ["docstore" "basicauth"])
 
 (defn- api-call [address params]
@@ -79,6 +81,19 @@
     (fact "organizations - invalid status"
      (-> (docstore-api-call organizations-address {:status "zorblax"} true))
      => http400?))
+
+  (facts "allowed-attachment-types"
+    (fact "only returns organizations that have enabled docterminal"
+      (let [resp-data (-> (docstore-api-call allowed-types-address {}) :body :data)]
+        (count resp-data) => 1
+        (-> resp-data first :id) => "753-R"))
+
+    (fact "lists the allowed attachment types for the organization"
+      (-> (docstore-api-call allowed-types-address {}) :body :data first :allowedTerminalAttachmentTypes)
+      => []
+      (command sipoo :set-docterminal-attachment-type :attachmentType "osapuolet.cv" :enabled true) => ok?
+      (-> (docstore-api-call allowed-types-address {}) :body :data first :allowedTerminalAttachmentTypes)
+      => ["osapuolet.cv"]))
 
   (fact "Docstore user cannot access other REST endpoints"
         (api-call (str (server-address) "/rest/submitted-applications")
