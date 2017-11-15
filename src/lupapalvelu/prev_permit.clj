@@ -84,7 +84,8 @@
   [application document]
   (reduce (fn [doc {:keys [path result]}]
             (cond-> doc
-              (= (first result) :err) (assoc-in doc (cons :data path) "")))
+              (= (first result) :err) (assoc-in (cons :data path)
+                                                {:value ""})))
           document
           (doc-model/validate application document)))
 
@@ -103,34 +104,16 @@
     (remove (util/fn->> first (contains? bad-paths))
             updates)))
 
-(defn applicant->applicant-doc [applicant]
-  (let [schema         (schemas/get-schema 1 "hakija-r")
-        default-values (tools/create-document-data schema tools/default-values)
-        document       {:id          (mongo/create-id)
-                        :created     (now)
-                        :schema-info (:info schema)
-                        :data        (tools/create-document-data schema (partial applicant-field-values applicant))}
-        unset-type     (if (contains? applicant :henkilo) :yritys :henkilo)]
-    (assoc-in document [:data unset-type] (unset-type default-values))))
-
-(defn designer->designer-doc [designer schema-name]
+(defn- party->party-doc [party schema-name]
   (let [schema         (schemas/get-schema 1 schema-name)
         default-values (tools/create-document-data schema tools/default-values)
-        document       {:id          (mongo/create-id)
-                        :created     (now)
-                        :schema-info (:info schema)
-                        :data        (tools/create-document-data schema (partial applicant-field-values designer))}
-        unset-type     (if (contains? designer :henkilo) :yritys :henkilo)]
-    (assoc-in document [:data unset-type] (unset-type default-values))))
-
-(defn osapuoli->osapuoli-doc [maksaja schema-name]
-  (let [schema         (schemas/get-schema 1 schema-name)
-        default-values (tools/create-document-data schema tools/default-values)
-        document       {:id          (mongo/create-id)
-                        :created     (now)
-                        :schema-info (:info schema)
-                        :data        (tools/create-document-data schema (partial applicant-field-values maksaja))}
-        unset-type     (if (contains? maksaja :henkilo) :yritys :henkilo)]
+        document       (sanitize-document {}
+                                          {:id          (mongo/create-id)
+                                           :created     (now)
+                                           :schema-info (:info schema)
+                                           :data        (tools/create-document-data schema
+                                                                                    (partial applicant-field-values party))})
+        unset-type     (if (contains? party :henkilo) :yritys :henkilo)]
     (assoc-in document [:data unset-type] (unset-type default-values))))
 
 
@@ -145,12 +128,12 @@
     (= koodi "Hakijan asiamies")                      "asiamies"))
 
 (defn osapuoli->party-document [party]
-  (if-let [schema-name (osapuoli-kuntaRoolikoodi->doc-schema (:kuntaRooliKoodi party))]
-    (osapuoli->osapuoli-doc party schema-name)))
+  (when-let [schema-name (osapuoli-kuntaRoolikoodi->doc-schema (:kuntaRooliKoodi party))]
+    (party->party-doc party schema-name)))
 
 (defn suunnittelija->party-document [party]
-  (if-let [schema-name (suunnittelijaRoolikoodi->doc-schema (:suunnittelijaRoolikoodi party))]
-    (designer->designer-doc party schema-name)))
+  (when-let [schema-name (suunnittelijaRoolikoodi->doc-schema (:suunnittelijaRoolikoodi party))]
+    (party->party-doc party schema-name)))
 
 (defn- invite-applicants [{:keys [lang user created application] :as command} applicants authorize-applicants]
 
@@ -391,7 +374,7 @@
             (if (seq app-info)
               (let [dummy-command         (action/application->command application)
                     old-applicants        (filter #(= (get-in % [:schema-info :name]) "hakija-r") documents)
-                    new-applicants        (map applicant->applicant-doc (:hakijat app-info))]
+                    new-applicants        (map #(party->party-doc % "hakija-r") (:hakijat app-info))]
 
                 ; remove old applicants from application & create applicant doc for each
                 (action/update-application dummy-command {$pull {:documents {:id {$in (map :id old-applicants)}}}})
