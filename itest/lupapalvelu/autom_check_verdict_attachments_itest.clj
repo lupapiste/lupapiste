@@ -5,9 +5,11 @@
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.assignment-itest :refer [query-trigger-assignments]]
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer [now]]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [lupapalvelu.organization :as organization]))
 
 (defn check-verdict-attachments []
   (-> (http-get (str (server-address) "/dev/batchrun-invoke?batchrun=check-verdict-attachments") {})
@@ -35,15 +37,25 @@
                          (-> attachment :target :id)
                          (-> attachment :target :urlHash)))
 
-(apply-remote-minimal)
 (mongo/with-db test-db-name
   (mongo/connect!)
+  (fixture/apply-fixture "minimal")
   (mongo/remove-many :organizations {})
   (mongo/remove-many :applications {}))
 
 (mongo/with-db test-db-name
   (let [krysp-url (str (server-address) "/dev/krysp")
-        organizations (map (fn [org] (update-in org [:krysp] #(assoc-in % [:R :url] krysp-url))) minimal/organizations)]
+        verdict-assignment-trigger (organization/create-trigger
+                                     nil
+                                     ["paatoksenteko.paatos"]
+                                     {:id "abba1111111111111111acdc"
+                                      :name {:fi "Käsittelijä" :sv "Handläggare" :en "Handler"}} "verdict-test-trigger")
+        organizations (map (fn [org] (update-in org [:krysp] #(assoc-in % [:R :url] krysp-url))) minimal/organizations)
+        organizations (map
+                        (fn [org] (if (= "753-R" (:id org))
+                                    (update-in org [:assignment-triggers] conj verdict-assignment-trigger)
+                                    org))
+                        organizations)]
     (dorun (map (partial mongo/insert :organizations) organizations))))
 
 (facts "Updating application's verdict attachments"
@@ -66,7 +78,6 @@
                  (application-verdict-url-hashes application) => (has every? nil?))
 
            (let [batchrun-result (check-verdict-attachments)
-                 _ (println batchrun-result)
                  updated-application (query-application sonja app-id)
                  url-hashes (->> (application-verdict-url-hashes updated-application)
                                  (filter string?))]
@@ -100,7 +111,37 @@
                    (count verdict-attachments) => 2
                    (map (partial attachment-targets-correct-verdict? updated-application)
                         verdict-attachments)
-                   => (has every? true?))))
+                   => (has every? true?))
+
+                 (facts "attachments and assignments"
+                       (mongo/with-db test-db-name
+                         (let [verdict-trigger (-> (mongo/by-id :organizations "753-R")
+                                                   :assignment-triggers
+                                                   ((fn [map-coll] (filter #(= "verdict-test-trigger" (:description %)) map-coll)))
+                                                   (first))
+                               assignments (query-trigger-assignments sonja (:id verdict-trigger))]
+
+                           (fact "one attachment creates one assignment"
+                                 (count assignments) => 1)
+
+                           (fact "new attachment created new assignment"
+                                 (-> assignments (first) :application :id) => app-id)
+
+                           (fact "assignment came from the correct trigger"
+                                 (:trigger (first assignments)) => (:id verdict-trigger))
+
+                           (fact "completing assignment"
+                                 (complete-assignment sonja (-> assignments (first) :id)) => ok?)
+
+                           (facts "running fetch-verdict-attachments does not trigger if attachment is not updated"
+                                 (let [new-batchrun-result (check-verdict-attachments)
+                                       current-assignments (query-trigger-assignments sonja (:id verdict-trigger))
+                                       assignment-state-coll (->> assignments (first) :states (map :type))]
+                                   (fact "no new assignments"
+                                         (count current-assignments) => 1)
+
+                                   (fact "only one completed assignment"
+                                         ((set assignment-state-coll) "completed") => truthy))))))))
 
              (fact ":modified timestamp has not changed"
                    (:modified application) => (:modified updated-application))

@@ -10,7 +10,12 @@
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
-            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]])
+            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
+            [lupapalvelu.attachment :as attachment]
+            [clj-time.core :as time]
+            [clj-time.coerce :as time-coerce]
+            [lupapalvelu.assignment :as assignment]
+            [lupapalvelu.organization :as org])
   (:import (java.net URL)
            (java.nio.charset StandardCharsets)))
 

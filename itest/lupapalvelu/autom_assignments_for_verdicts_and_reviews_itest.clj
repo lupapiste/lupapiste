@@ -1,6 +1,7 @@
 (ns lupapalvelu.autom-assignments-for-verdicts-and-reviews-itest
   (:require [clojure.test :refer :all]
             [lupapalvelu.mongo :as mongo]
+            [monger.operators :refer [$set]]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.itest-util :refer :all]
             [midje.sweet :refer :all]
@@ -8,11 +9,15 @@
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.batchrun :as batchrun]
+            [sade.http :as http]
             [sade.xml :as sxml]
             [sade.strings :as ss]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [schema.core :as sc])
+  (:import (java.net URL)))
 
-(def db-name (str "autom-assignments-for-verdicts-and-reviews-itest_" (now)))3
+(def db-name (str "test_autom-assignments-for-verd-and-rev-itest_" (now)))
 
 (defn check-verdict-attachments []
   (-> (http-get (str (server-address) "/dev/batchrun-invoke?batchrun=check-verdict-attachments") {})
@@ -23,21 +28,8 @@
   (-> (slingshot.support/make-context ex-map (str "throw+: " ex-map) nil (slingshot.support/stack-trace))
       (slingshot.support/wrap)))
 
-(mongo/connect!)
-(mongo/with-db db-name
-  (fixture/apply-fixture "minimal")
-  (mongo/remove-many :organizations {})
-  (mongo/remove-many :applications {}))
-
 (defn get-assignments []
   (mongo/select :assignments {}))
-
-(def review-assignment-trigger
-  (organization/create-trigger
-    nil
-    ["katselmukset_ja_tarkastukset.katselmuksen_tai_tarkastuksen_poytakirja"]
-    {:id   "abba1111111111111111acdc"
-     :name {:fi "Käsittelijä" :sv "Handläggare" :en "Handler"}} "review-test-trigger"))
 
 (def verdict-assignment-trigger
   (organization/create-trigger
@@ -46,56 +38,60 @@
     {:id "abba1111111111111111acdc"
      :name {:fi "Käsittelijä" :sv "Handläggare" :en "Handler"}} "verdict-test-trigger"))
 
+(mongo/connect!)
 (mongo/with-db db-name
+  (fixture/apply-fixture "minimal")
   (mongo/remove-many :assignments {})
-  (mongo/remove-many :applications {})
+  (mongo/remove-many :organizations {})
+  (mongo/remove-many :applications  {})
   (let [krysp-url (str (server-address) "/dev/krysp")
         organizations (map (fn [org] (update-in org [:krysp] #(assoc-in % [:R :url] krysp-url))) minimal/organizations)
-        assignment-triggers ()
-        organizations (map
-                       (fn [org] (if (= "753-R" (:id org))
-                                   (update-in org [:assignment-triggers] conj review-assignment-trigger verdict-assignment-trigger)
-                                   org))
-                       organizations)]
+        organizations (map (fn [org] (if (= "753-R" (:id org))
+                                       (-> (update-in org [:assignment-triggers] conj review-assignment-trigger)
+                                           (update-in [:assignment-triggers] conj verdict-assignment-trigger))
+                                       org))
+                           organizations)]
    (dorun (map (partial mongo/insert :organizations) organizations))))
 
 (facts "Verdict attachments trigger automatic assignments"
-  (mongo/with-db test-db-name
+  (mongo/with-db db-name
     (mongo/remove-many :assignments {})
     (mongo/remove-many :applications {})
-    (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 18")
-          app-id (:id application)
-          assignments (get-assignments)]
+      (let [application (create-and-submit-local-application mikko :propertyId sipoo-property-id :address "Paatoskuja 18")
+           app-id (:id application)
+           assignments (get-assignments)]
 
-      (fact "verdict trigger ok"
-            (->> (mongo/by-id :organizations "753-R")
-                 :assignment-triggers
-                 ((fn [c] (println c) c))
-                 (filter #(= "verdict-test-trigger" (:description %)))
-                 ((fn [c] (println c) c))
-                 (count))
-            => 1)
+        (fact "verdict trigger ok"
+          (let [sipoo                     (mongo/by-id :organizations "753-R")
+                sipoo-triggers            (:assignment-triggers sipoo)
+                verdict-filtered-triggers (filter #(= "verdict-test-trigger" (:description %)) sipoo-triggers)]
+           (count verdict-filtered-triggers))
+          => 1)
 
-      (fact "no assignments"
-            (count (map :id assignments)) => 0)
+        (fact "no assignments"
+          (count (map :id assignments)) => 0)
 
-      (fact "verdict without attachments is fetched"
-        (override-krysp-xml sipoo "753-R" :R [{:selector [:yht:liite] :value ""}]) => ok?
-        (command sonja :check-for-verdict :id app-id) => ok?
-        (remove-krysp-xml-overrides sipoo "753-R" :R) => ok?)
+        (fact "application sent"
+          (mongo/update-by-id :applications app-id {"$set" {:state "sent"}})
+          (:state (query-application local-query sonja app-id)) => "sent")
 
-      (let [batchrun-result (check-verdict-attachments)
-            _ (println batchrun-result)
-            assignments (get-assignments)]
-        (fact "one attachment creates one assignment"
-              (count (map :id assignments)) => 1)
+        (fact "batchrun creates assignments"
+          (let [batchrun-result (batchrun/fetch-verdicts)
+                assignments (get-assignments)]
+            (fact "one attachment creates one assignment"
+                 (count (map :id assignments)) => 1)
 
-        (fact "new attachment created new assignment"
-              (-> assignments (first) :application :id) => app-id)
+            (fact "new attachment created new assignment"
+                 (-> assignments (first) :application :id) => app-id)
 
-        (fact "assignment came from the correct trigger"
-              (:trigger (first assignments)) => (:id verdict-assignment-trigger))))))
-(comment
+            (fact "assignment came from the correct trigger"
+                 (:trigger (first assignments)) => (:id verdict-assignment-trigger))) => truthy
+
+      (provided (permit/fetch-xml-from-krysp anything anything anything anything anything anything)
+             => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
+                    (ss/replace #"LP-186-2014-90009" app-id)
+                    (sxml/parse-string "utf-8")))))))
+
 (facts "Automatic checking for reviews trigger automatic assignments"
   (mongo/with-db db-name
     (mongo/remove-many :applications {})
@@ -103,65 +99,49 @@
 
       (let [application-id-submitted (:id (create-and-submit-local-application pena :propertyId sipoo-property-id :address "Hakemusjätettie 15"))]
 
-        (fact "review trigger ok"
-              (->> (mongo/by-id :organizations "753-R")
-                   :assignment-triggers
-                   (filter #(= "review-test-trigger" (:description %)))
-                   (count))
-              => 1)
+        (fact "attachment trigger ok"
+          (->> (mongo/by-id :organizations "753-R")
+               :assignment-triggers
+               (filter #(= "verdict-test-trigger" (:description %)))
+               (count))
+          => 1)
 
         (fact "initially zero assignments"
-              (count (get-assignments)) => 0)
+          (count (get-assignments)) => 0)
 
         (fact "verdict to application"
-              (give-local-verdict sonja application-id-submitted :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?)
+          (give-local-verdict sonja application-id-submitted :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?)
 
         (fact "first batchrun creates assignments"
-              (let [poll-result (batchrun/poll-verdicts-for-reviews)
-                    assignments (get-assignments)]
+          (against-background
+            (krysp-reader/rakval-application-xml anything anything [application-id-submitted] :application-id anything)
+            => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
+                   (ss/replace #"LP-186-2014-90009" application-id-submitted)
+                   (sxml/parse-string "utf-8")))
+          (let [poll-result (batchrun/poll-verdicts-for-reviews)
+                assignments (get-assignments)]
 
-                (fact "attachments trigger assignments"
-                      (count (map :id (get-assignments))) => 1)
+            (fact "attachments trigger assignments"
+              (count (map :id (get-assignments))) => 1)
 
-                (fact "assignment is not user-created"
-                      (-> (get-assignments) (first) :trigger) => (:id review-assignment-trigger))) => truthy
-
-              (provided (krysp-reader/rakval-application-xml anything anything [application-id-submitted] :application-id anything)
-                        => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
-                               (ss/replace #"LP-186-2014-90009" application-id-submitted)
-                               (sxml/parse-string "utf-8"))))
+            (fact "assignment is not user-created"
+              (-> (get-assignments) (first) :trigger) => (:id verdict-assignment-trigger))))
 
         (fact "batchrun does not change assignments if there is no changed attachments"
-              (let [old-assignments (get-assignments)
-                    poll-result (batchrun/poll-verdicts-for-reviews)
-                    assignments (get-assignments)]
+          (against-background
+            (krysp-reader/rakval-application-xml anything anything [application-id-submitted] :application-id anything)
+            => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
+                   (ss/replace #"LP-186-2014-90009" application-id-submitted)
+                   (sxml/parse-string "utf-8")))
+          (let [old-assignments (get-assignments)
+                poll-result (batchrun/poll-verdicts-for-reviews)
+                assignments (get-assignments)]
 
-                (fact "no new assignments"
-                      (count (map :id (get-assignments))) => 1)
+            (fact "no new assignments"
+              (count old-assignments) => (count assignments))
 
-                (fact "assignments do not change"
-                      (first old-assignments) => (first assignments))) => truthy
+            (fact "all assignments are valid"
+              assignments => (has every? (partial sc/validate lupapalvelu.assignment/Assignment)))
 
-              (provided (krysp-reader/rakval-application-xml anything anything [application-id-submitted] :application-id anything)
-                        => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
-                               (ss/replace #"LP-186-2014-90009" application-id-submitted)
-                               (sxml/parse-string "utf-8"))))
-
-        (fact "new assignment with updated attachment when old assignment is completed"
-              (let [old-assignments (get-assignments)
-                    _ (complete-assignment sonja (:id application-id-submitted))
-                    poll-result (batchrun/poll-verdicts-for-reviews)
-                    assignments (get-assignments)]
-
-                (fact "no new assignments"
-                      (count (map :id assignments)) => 1)
-
-                (fact "batchrun does not create new assignments if attachment has completed assignments"
-                      (= (-> old-assignments :targets (first) :id) (-> assignments :targets (first) :id)) => true)) => truthy
-
-              (provided (krysp-reader/rakval-application-xml anything anything [application-id-submitted] :application-id anything)
-                        => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
-                               (ss/replace #"LP-186-2014-90009" application-id-submitted)
-                               (ss/replace #"<rakval:pitoPvm>2011-11-11Z</rakval:pitoPvm>"
-                                           " <rakval:pitoPvm>2011-11-12Z</rakval:pitoPvm>")
-                               (sxml/parse-string "utf-8"))))))))
+            (fact "assignments do not change"
+              (first old-assignments) => (first assignments)))))))

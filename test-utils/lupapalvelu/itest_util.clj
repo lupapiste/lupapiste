@@ -31,7 +31,8 @@
             [lupapalvelu.user :as u]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.server]
-            [ring.util.codec :as codec])
+            [ring.util.codec :as codec]
+            [lupapalvelu.user :as usr])
   (:import org.apache.http.client.CookieStore
            org.apache.http.cookie.Cookie
            java.io.FileNotFoundException))
@@ -500,6 +501,7 @@
   (let [id    (apply create-app-id apikey args)
         resp  (command apikey :submit-application :id id)]
     (fact "Submit OK" resp => ok?)
+    (println (query-application apikey id))
     (query-application apikey id)))
 
 (defn create-and-send-application
@@ -566,7 +568,7 @@
 ;; API for local operations
 
 (defn make-local-request [apikey]
-  {:scheme "http", :user (find-user-from-minimal-by-apikey apikey)})
+  {:scheme "http", :user (usr/session-summary (find-user-from-minimal-by-apikey apikey))})
 
 (defn- execute-local [apikey web-fn action & args]
   (let [params (->arg-map args)]

@@ -17,7 +17,8 @@
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.organization :as organization]
             [clj-time.coerce :as time-coerce]
-            [clj-time.core :as time]))
+            [clj-time.core :as time]
+            [clojure.string :as str]))
 
 (defn- empty-review-task? [t]
   (let [katselmus-data (-> t :data :katselmus)
@@ -277,13 +278,18 @@
         :attachments-by-task-id attachments-by-task-id
         :added-tasks-with-updated-buildings added-tasks-with-updated-buildings)))
 
-(defn- review-info-for-assignments [{:keys [user application attachment-id]}]
+(defn- review-target-trigger [application type]
+  (str/join "." (vals (verdict-review-util/verdict-attachment-type
+                        application
+                        (verdict-review-util/attachment-type-from-krysp-type type)))))
+
+(defn- review-info-for-assignments [{:keys [user application attachment-id type]}]
   {:user             user
    :organization     (organization/get-organization (:organization application))
    :application      (domain/get-application-as (:id application) user)
-   :targets          [{:id attachment-id :trigger-type "katselmukset_ja_tarkastukset.katselmuksen_tai_tarkastuksen_poytakirja"}]
+   :targets          [{:id attachment-id :trigger-type (review-target-trigger application type)}]
    :assignment-group "attachments"
-   :timestamp        (time-coerce/to-long (time/now))})
+   :timestamp        (now)})
 
 (defn save-review-updates [{user :user  application :application :as command} updates added-tasks-with-updated-buildings attachments-by-task-id]
   (let [update-result (pos? (update-application command {:modified (:modified application)} updates :return-count? true))
@@ -295,14 +301,15 @@
             (doseq [att attachments]
               (let [pk (verdict-review-util/get-poytakirja! application user (now) {:type "task" :id id} att)]
                 (when (:urlHash pk)
-                  ((try
-                     ((assignment/run-assignment-triggers review-info-for-assignments)
-                       {:user          user
-                        :application   application
-                        :attachment-id (:urlHash pk)})
-                     (catch Exception e
-                       (error "could not create assignment automatically for fetched attachment "
-                              (:id application) ": "(.getMessage e))))))))
+                  (try
+                    ((assignment/run-assignment-triggers review-info-for-assignments)
+                      {:user          user
+                       :application   application
+                       :attachment-id (:urlHash pk)
+                       :type (-> att :liite :tyyppi)})
+                    (catch Exception e
+                      (error "could not create assignment automatically for fetched attachment "
+                             (:id application) ": "(.getMessage e)))))))
             (tasks/generate-task-pdfa updated-application added-task (:user command) "fi")))))
     (cond-> {:ok update-result}
       (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))

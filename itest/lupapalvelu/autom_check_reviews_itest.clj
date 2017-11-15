@@ -48,7 +48,17 @@
 
 (mongo/with-db db-name
   (let [krysp-url (str (server-address) "/dev/krysp")
-        organizations (map (fn [org] (update-in org [:krysp] #(assoc-in % [:R :url] krysp-url))) minimal/organizations)]
+        review-assignment-trigger (organization/create-trigger
+                                     nil
+                                     ["katselmukset_ja_tarkastukset.katselmuksen_tai_tarkastuksen_poytakirja"]
+                                     {:id "abba1111111111111111acdc"
+                                      :name {:fi "Käsittelijä" :sv "Handläggare" :en "Handler"}} "review-test-trigger")
+        organizations (map (fn [org] (update-in org [:krysp] #(assoc-in % [:R :url] krysp-url))) minimal/organizations)
+        organizations (map
+                        (fn [org] (if (= "753-R" (:id org))
+                                    (update-in org [:assignment-triggers] conj review-assignment-trigger)
+                                    org))
+                        organizations)]
     (dorun (map (partial mongo/insert :organizations) organizations))))
 
 (defn  query-tasks [user application-id]
@@ -56,6 +66,7 @@
 
 (defn count-reviews [user app-id] (count (filter task-is-review? (query-tasks user app-id))))
 
+(comment
 (facts "Automatic checking for reviews"
   (mongo/with-db db-name
     (mongo/remove-many :applications {})
@@ -91,7 +102,6 @@
               (:state application-verdict-given-1) => "verdictGiven")
             (fact "application state - verdictGiven 2"
               (:state application-verdict-given-2) => "verdictGiven")) => truthy
-
           (fact "tasks for verdictGiven 1"
             (count (:tasks application-verdict-given-1)) => 0)
           (fact "tasks for verdictGiven 2"
@@ -462,3 +472,100 @@
                    (ss/replace #"LP-186-2014-90009" application-id)
                    (ss/replace #"aloituskokouksessa" "aloituskoKKouksessa") ;; <- NOTE!
                    (sxml/parse-string "utf-8"))))))))
+
+)
+(facts "Automatic checking for reviews trigger automatic assignments"
+  (mongo/with-db db-name
+    (mongo/remove-many :applications {})
+    (mongo/remove-many :assignments {})
+
+    (let [trigger (-> (mongo/by-id :organizations "753-R")
+                      :assignment-triggers
+                      ((fn [map-coll] (filter #(= "review-test-trigger" (:description %)) map-coll)))
+                      (first))
+          get-assignments (fn [] (mongo/select :assignments {}))
+          application-id-submitted (:id (create-and-submit-local-application pena :propertyId sipoo-property-id :address "Hakemusjätettie 15"))]
+
+      (fact "trigger ok"
+        (:description trigger) => "review-test-trigger")
+
+      (fact "initially zero assignments"
+            (count (get-assignments)) => 0)
+
+      (fact "verdict to application"
+            (give-local-verdict sonja application-id-submitted :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?)
+
+      (fact "first batchrun creates assignments"
+        (let [poll-result (batchrun/poll-verdicts-for-reviews)
+              assignments (get-assignments)]
+
+          (fact "attachments trigger assignments"
+                (count (get-assignments)) => 1)
+
+          (fact "assignment is not user-created"
+                (-> (get-assignments) (first) :trigger) => (:id trigger))) => truthy
+
+        (provided (krysp-reader/rakval-application-xml anything anything [application-id-submitted] :application-id anything)
+                  => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
+                         (ss/replace #"LP-186-2014-90009" application-id-submitted)
+                         (sxml/parse-string "utf-8"))))
+
+      (fact "batchrun does not change assignments if there is no changed attachments"
+        (let [old-assignments (get-assignments)
+              poll-result (batchrun/poll-verdicts-for-reviews)
+              assignments (get-assignments)]
+
+          (fact "no new assignments"
+                (count (get-assignments)) => 1)
+
+          (fact "assignments do not change"
+                (first old-assignments) => (first assignments))) => truthy
+
+        (provided (krysp-reader/rakval-application-xml anything anything [application-id-submitted] :application-id anything)
+                  => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
+                         (ss/replace #"LP-186-2014-90009" application-id-submitted)
+                         (sxml/parse-string "utf-8"))))
+
+      (fact "batchrun updates assignment if application status changes"
+        (let [old-assignments (get-assignments)
+              poll-result (batchrun/poll-verdicts-for-reviews)
+              assignments (get-assignments)]
+
+          (fact "only one assignment"
+            (count assignments) => 1)
+
+          (fact "only one state"
+            (count (-> assignments (first) :states)) => 1)
+          ;; tee testeistä järkevämpiä tee testeistä järkevämpiätee testeistä järkevämpiätee testeistä järkevämpiätee testeistä järkevämpiä
+          (fact "assignment in created status"
+            (-> assignments (first) :states :type) => "created")
+
+          (fact "updated assignment is updated"
+            (> (-> assignments (first) :states :timestamp)
+               (-> old-assignments (first) :states :timestamp)) => true)) => truthy
+
+        (provided (krysp-reader/rakval-application-xml anything anything [application-id-submitted] :application-id anything)
+                  => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
+                         (ss/replace #"LP-186-2014-90009" application-id-submitted)
+                         (ss/replace #"<yht:muokkausHetki>2014-09-17T09:37:06Z</yht:muokkausHetki>"
+                                      "<yht:muokkausHetki>2014-09-20T09:37:06Z</yht:muokkausHetki>")
+                         (sxml/parse-string "utf-8"))))
+
+      (fact "batchrun does nothing to completed assignments that have not changed"
+        (let [old-assignments (get-assignments)
+              _ (complete-assignment sonja (:id application-id-submitted))
+              poll-result (batchrun/poll-verdicts-for-reviews)
+              assignments (get-assignments)]
+
+          (fact "no new assignments"
+            (count assignments) => 1)
+
+          (fact "batchrun does not create new assignments if attachment has completed assignments"
+            (= (-> old-assignments :targets (first) :id) (-> assignments :targets (first) :id)) => true)) => truthy
+
+        (provided (krysp-reader/rakval-application-xml anything anything [application-id-submitted] :application-id anything)
+                   => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
+                          (ss/replace #"LP-186-2014-90009" application-id-submitted)
+                          (ss/replace #"<yht:muokkausHetki>2014-09-17T09:37:06Z</yht:muokkausHetki>"
+                                       "<yht:muokkausHetki>2014-09-20T09:37:06Z</yht:muokkausHetki>")
+                          (sxml/parse-string "utf-8")))))))

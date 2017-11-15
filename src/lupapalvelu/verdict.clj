@@ -136,9 +136,9 @@
 
 (defn- verdict-info-for-assignments [{:keys [user application attachment-id type]}]
   (let [application (domain/get-application-as (:id application) user)
-        trigger-type (clojure.string/join "." (verdict-review-util/verdict-attachment-type
-                                                application
-                                                (verdict-review-util/attachment-type-from-krysp-type type)))
+        trigger-type (clojure.string/join "." (vals (verdict-review-util/verdict-attachment-type
+                                                      application
+                                                      (verdict-review-util/attachment-type-from-krysp-type type))))
         targets [{:id attachment-id :trigger-type trigger-type}]]
     {:user             user
      :organization     (organization/get-organization (:organization application))
@@ -160,8 +160,7 @@
   Also runs assignment triggers."
   [application user timestamp verdict-id pk & options]
   (let [type "verdict"
-        gpk (fn [] (apply verdict-review-util/get-poytakirja! application user timestamp {:type type :id verdict-id} pk options))
-        pk (gpk)]
+        pk (apply verdict-review-util/get-poytakirja! application user timestamp {:type type :id verdict-id} pk options)]
     (when (:urlHash pk)
       (try
         ((assignment/run-assignment-triggers verdict-info-for-assignments)
