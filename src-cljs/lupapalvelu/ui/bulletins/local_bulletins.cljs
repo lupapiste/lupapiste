@@ -10,7 +10,7 @@
 (defn init
   [init-state props]
   (reset! state/current-organization (:organization @args))
-  (reset! state/local-bulletins-query {:page 1 :left 0 :pending? false})
+  (reset! state/local-bulletins-query {:page 1 :left -1 :pending? false})
   (common/query :local-bulletins-page-settings
                 (fn [{:keys [enabled texts]}]
                   (when-not enabled
@@ -72,7 +72,7 @@
   [_]
   (let [{:keys [left pending?]} (rum/react state/local-bulletins-query)]
     (when (nat-int? left)
-      [:button.bulletin
+      [:button.bulletin.orange-bg
        {:on-click load-more-bulletins
         :class [(when pending? "waiting")]}
        [:i.lupicon-circle-plus]
