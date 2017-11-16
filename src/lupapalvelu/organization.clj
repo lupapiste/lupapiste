@@ -121,8 +121,11 @@
    :documentPrice                  0
    :organizationDescription (i18n/supported-langs-map (constantly ""))})
 
+(sc/defschema PermitType
+  (apply sc/enum (keys (permit/permit-types))))
+
 (sc/defschema Scope
-  {:permitType sc/Str
+  {:permitType PermitType
    :municipality sc/Str
    :new-application-enabled sc/Bool
    :inforequest-enabled sc/Bool
