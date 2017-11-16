@@ -13,13 +13,17 @@
 
 ;; Schema definitions
 
+(sc/defschema OrganizationMunicipalityInfo
+  {:id sc/Str
+   :name (i18n/lenient-localization-schema sc/Str)
+   :permitType sc/Str})
+
 (sc/defschema OrganizationDocstoreInfo
   (-> org/DocStoreInfo
       (dissoc :allowedTerminalAttachmentTypes)
       (assoc :id org/OrgId
              :name (i18n/lenient-localization-schema sc/Str)
-             :municipalities [{:id   sc/Str
-                               :name (i18n/lenient-localization-schema sc/Str)}])))
+             :municipalities [OrganizationMunicipalityInfo])))
 
 (sc/defschema OrganizationResponse
   (assoc ApiResponse :data OrganizationDocstoreInfo))
@@ -29,7 +33,7 @@
 
 (sc/defschema OrganizationDocterminalAllowedAttachmentTypesInfo
   {:id org/OrgId
-   :municipalities [sc/Str]
+   :municipalities [OrganizationMunicipalityInfo]
    :allowedTerminalAttachmentTypes [org/DocTerminalAttachmentType]})
 
 (sc/defschema AllowedAttachmentTypesResponse
@@ -41,9 +45,10 @@
 (defn- municipality-name [municipality-code]
   (i18n/supported-langs-map #(i18n/localize % (str "municipality." municipality-code))))
 
-(defn municipality-info [{:keys [municipality]}]
+(defn municipality-info [{:keys [municipality permitType]}]
   {:id         municipality
-   :name       (municipality-name municipality)})
+   :name       (municipality-name municipality)
+   :permitType permitType})
 
 (defn- make-docstore-info [{:keys [id docstore-info name scope]}]
   (-> docstore-info
@@ -100,7 +105,7 @@
       (select-keys [:allowedTerminalAttachmentTypes])
       (assoc :id             id
              :municipalities (->> scope
-                                  (map :municipality)
+                                  (map municipality-info)
                                   (distinct)))))
 
 (defn get-attachment-type-infos []
