@@ -53,10 +53,10 @@
           (wrap-authentication http-conf)))))
 
 (sc/defn send-xml
-  [application user xml :- sc/Str http-conf :- org/KryspHttpConf]
+  [application user type :- sc/Str xml :- sc/Str http-conf :- org/KryspHttpConf]
   (let [message-id (mongo/create-id)]
     (imessages/save (util/strip-nils
-                      {:id message-id :direction "out" :messageType "KuntaGML"
+                      {:id message-id :direction "out" :messageType type
                        :partner             (:partner http-conf)
                        :transferType        "http" :format "xml" :created (now)
                        :status              "processing" :initator (select-keys user [:id :username])
