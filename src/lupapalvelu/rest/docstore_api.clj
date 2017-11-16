@@ -16,7 +16,7 @@
 (sc/defschema OrganizationMunicipalityInfo
   {:id sc/Str
    :name (i18n/lenient-localization-schema sc/Str)
-   :permitType sc/Str})
+   :permitType org/PermitType})
 
 (sc/defschema OrganizationDocstoreInfo
   (-> org/DocStoreInfo
@@ -57,7 +57,7 @@
              :name           name
              :municipalities (->> scope
                                   (map municipality-info)
-                                  (distinct)))))
+                                  distinct))))
 
 (defn get-docstore-infos
   ([]
