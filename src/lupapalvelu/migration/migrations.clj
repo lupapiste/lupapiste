@@ -3574,6 +3574,41 @@
                                  attachment))
                              bad-review-attachments-query))
 
+(defn review-muutunnus-equality-fields [task]
+  (when-let [muu-tunnus (get-in task [:data :muuTunnus :value])]
+    (->> [muu-tunnus
+          (get-in task [:data :muuTunnusSovellus :value])
+          (get-in task [:state])]
+         (remove util/empty-or-nil?))))
+
+(defn get-duplicate-task-ids-by [equality-fields-getter {tasks :tasks}]
+  (-> (reduce (fn [{processed :processed :as result} task]
+                (if-let [fields (equality-fields-getter task)]
+                  (if (processed fields)
+                    (update result :duplicate-task-ids conj (:id task))
+                    (update result :processed conj fields))
+                  result))
+              {:duplicate-task-ids #{} :found-fields #{}}
+              tasks)
+      :duplicate-task-ids))
+
+(defn cleanup-task-attachments-for-removed-tasks! [{attachments :attachments :as app} deleted-task-ids]
+  (->> attachments
+       (filter (fn->> :target :id (contains? deleted-task-ids)))
+       (map :id)
+       (att/delete-attachments! app)))
+
+(defn remove-tasks-by-ids! [{app-id :id} task-ids]
+  (mongo/update :applications {:_id app-id} {$pull {:tasks {:id {$in task-ids}}}}))
+
+(defmigration remove-duplicate-task-ids-by-muutunnus
+  (->> (mongo/select :applications {:tasks.data.muuTunnus.value {$exists true}} [:tasks :attachments])
+       (reduce (fn [counter app]
+                 (let [duplicate-task-ids (get-duplicate-task-ids-by review-muutunnus-equality-fields app)]
+                   (remove-tasks-by-ids! app duplicate-task-ids)
+                   (cleanup-task-attachments-for-removed-tasks! app duplicate-task-ids)
+                   (cond-> counter (not-empty duplicate-task-ids) inc)))
+               0)))
 
 ;;
 ;; ****** NOTE! ******
