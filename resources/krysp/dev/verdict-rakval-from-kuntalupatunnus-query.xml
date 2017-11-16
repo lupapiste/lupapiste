@@ -90,7 +90,8 @@
                   <yht:sukunimi>Panaani</yht:sukunimi>
                 </yht:nimi>
                 <yht:sahkopostiosoite>pena@example.com</yht:sahkopostiosoite>
-                <yht:henkilotunnus>120929-993H</yht:henkilotunnus>
+                <!-- bad hetu: correct identifier is H -->
+                <yht:henkilotunnus>120929-993Z</yht:henkilotunnus>
               </yht:henkilo>
             </yht:Osapuoli>
           </yht:osapuolitieto>
@@ -128,7 +129,7 @@
                   <yht:osoitenimi>
                     <yht:teksti>Kotituvantie 7</yht:teksti>
                   </yht:osoitenimi>
-                  <yht:postinumero>13500</yht:postinumero>
+                  <yht:postinumero>1350039483948</yht:postinumero>
                   <yht:postitoimipaikannimi>HÄMEENLINNA</yht:postitoimipaikannimi>
                 </yht:osoite>
                 <yht:sahkopostiosoite>mikko@example.com</yht:sahkopostiosoite>
