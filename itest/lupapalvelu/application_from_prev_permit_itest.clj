@@ -11,7 +11,6 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [midje.sweet :refer :all]
-            [net.cgrand.enlive-html :as enlive]
             [sade.core :refer [def- now]]
             [sade.util :as util]
             [sade.xml :as xml]))
@@ -22,15 +21,11 @@
 (mongo/with-db local-db-name (fixture/apply-fixture "minimal"))
 
 (def example-kuntalupatunnus "14-0241-R 3")
-#_(def bad-hetu-kuntalupatunnus "14-0241-R 4")
 (def example-LP-tunnus "LP-186-2014-00290")
 
 
 (def example-xml (xml/parse (slurp (io/resource "krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml"))))
 (def example-app-info (krysp-reader/get-app-info-from-message example-xml example-kuntalupatunnus))
-#_(def bad-hetu-xml (enlive/at example-xml
-                             [:yht:henkilotunnus] (enlive/content "012345-678Z")
-                             [:rakval:luvanTunnisteTiedot :yht:kuntalupatunnus] (enlive/content bad-hetu-kuntalupatunnus)))
 
 (defn- create-app-from-prev-permit [apikey & args]
   (let [args (->> args
@@ -270,16 +265,3 @@
                             response => http200?
                             resp-body => ok?
                             (keyword (:text resp-body)) => :created-new-application)))))
-#_(fact "bad hetus"
-  (let [rest-address (str (server-address) "/rest/get-lp-id-from-previous-permit")
-        response     (http-get rest-address
-                               {:query-params {"kuntalupatunnus" bad-hetu-kuntalupatunnus}
-                                :basic-auth   ["jarvenpaa-backend" "jarvenpaa"]})
-        resp-body    (:body (decode-response response))]
-    response => http200?
-    resp-body => fail?
-    (keyword (:text resp-body)) => :error.illegal-hetu)
-  (against-background
-   (before :facts (apply-remote-minimal))
-   (krysp-fetch/get-application-xml-by-backend-id anything anything) => bad-hetu-xml
-   (krysp-fetch/get-application-xml-by-application-id anything) => bad-hetu-xml))
