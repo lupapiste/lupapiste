@@ -23839,6 +23839,15 @@ div.foreman-history-container {
   z-index: 1;
 }
 
+form.previous-permit-form {
+  max-width: 50%;
+}
+
+form.previous-permit-form div.previous-permit-form__entry,
+form.previous-permit-form div.help-box {
+  margin-bottom: 12px;
+}
+
 /* attachments */
 #attachment.container {
   padding-right: 0;
@@ -24886,6 +24895,14 @@ body.authority-admin .header-menu {
   display: inline-block;
   width: 20em;
   vertical-align: middle;
+}
+
+.docterminal-settings .checkbox-wrapper {
+  border: none;
+}
+
+.docterminal-settings table {
+  margin-bottom: 0;
 }
 
 #neighbor-show .pending {

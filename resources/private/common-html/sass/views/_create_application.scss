@@ -282,3 +282,11 @@
     }
   }
 }
+
+form.previous-permit-form {
+  max-width: 50%;
+  div.previous-permit-form__entry,
+  div.help-box {
+    margin-bottom: $marginM;
+  }
+}
