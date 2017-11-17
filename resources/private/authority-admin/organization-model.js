@@ -240,21 +240,12 @@ LUPAPISTE.OrganizationModel = function () {
   });
 
   self.defaultDigitalizationLocationX = ko.observable("");
-  ko.computed(function() {
-    var x = self.defaultDigitalizationLocationX();
-    if (self.initialized) {
-      ajax.command("set-default-digitalization-location-x", {x: x})
-        .success(util.showSavedIndicator)
-        .error(util.showSavedIndicator)
-        .call();
-    }
-  });
-
   self.defaultDigitalizationLocationY = ko.observable("");
   ko.computed(function() {
+    var x = self.defaultDigitalizationLocationX();
     var y = self.defaultDigitalizationLocationY();
     if (self.initialized) {
-      ajax.command("set-default-digitalization-location-y", {y: y})
+      ajax.command("set-default-digitalization-location", {x: x, y: y})
         .success(util.showSavedIndicator)
         .error(util.showSavedIndicator)
         .call();

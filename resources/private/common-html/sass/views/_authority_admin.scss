@@ -318,7 +318,7 @@ $navi-sidebar-bp: 1800px;
   padding-left: $icon-pad;
 }
 
- .users-search {
+.users-search {
   input.textinput {
     display: inline-block;
     width: 20em;
@@ -326,22 +326,15 @@ $navi-sidebar-bp: 1800px;
   }
 }
 
-table.default-digitalization-location {
-  width: auto;
-  margin-top: 10px;
-
-  th {
-    min-height: 25px;
-    height: 25px;
+.docterminal-settings {
+  .checkbox-wrapper {
+    border: none;
   }
-
-  td {
-    min-height: 40px;
-    height: 40px;
+  table {
+    margin-bottom: 0;
   }
 }
 
-.form-input-location {
-  padding: 2px 2px 2px 2px;
-  height: 40px;
+table.default-digitalization-location {
+  width: auto;
 }
