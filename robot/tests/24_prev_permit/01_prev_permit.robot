@@ -31,7 +31,7 @@ Järvenpää authority logs in and sees the Nouda lupa button
 
 Open 'prev permit' create page and check the fields
   Go to prev permit page and fill the kuntalupatunnus
-  Select Checkbox  xpath=//input[@data-test-id='test-authorise-applicants']
+  Toggle selected  authorize-applicants
 
 Click create button
   Click button  prev-permit-create-button
@@ -62,12 +62,14 @@ The same application is opened, new one is not created
   ${newApplicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
   Should Be Equal As Strings  ${newApplicationid}  ${applicationid}
 
-Cancel the created application and re-fetch application
+Cancel the created application and re-fetch application without inviting applications
   Change application state  appealed
   Cancel current application as authority
   Go to page  applications
 
   Go to prev permit page and fill the kuntalupatunnus
+  Toggle toggle  authorize-applicants
+  Toggle not selected  authorize-applicants
   Click button  prev-permit-create-button
 
 A new application is opened, still with same property id
@@ -78,6 +80,10 @@ A new application is opened, still with same property id
   ${newApplicationid} =  Get Text  xpath=//section[@id='application']//span[@data-test-id='application-id']
   Should Not Be Equal As Strings  ${newApplicationid}  ${applicationid}
 
+No invites
+  Open tab  parties
+  Invite count is  0
+  [Teardown]  Logout
 
 
 *** Keywords ***

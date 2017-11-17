@@ -1,32 +1,32 @@
 (ns lupapalvelu.prev-permit
-  (:require [taoensso.timbre :refer [debug info]]
-            [monger.operators :refer :all]
-            [sade.core :refer :all]
-            [sade.strings :as ss]
-            [sade.util :as util]
-            [sade.property :as p]
-            [lupapalvelu.action :as action]
+  (:require [lupapalvelu.action :as action]
             [lupapalvelu.application :as application]
+            [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.authorization-api :as authorization]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.model :as doc-model]
             [lupapalvelu.document.persistence :as doc-persistence]
-            [lupapalvelu.document.schemas :as schema]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.review :as review]
+            [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.application :as app]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
-            [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.review :as review]
-            [lupapalvelu.user :as user]))
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [monger.operators :refer :all]
+            [sade.core :refer :all]
+            [sade.property :as p]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [sade.validators :as validators]
+            [taoensso.timbre :refer [debug info]]))
 
 (def building-fields
   (->> schemas/rakennuksen-tiedot (map (comp keyword :name)) (concat [:rakennuksenOmistajat :valtakunnallinenNumero])))
@@ -79,34 +79,41 @@
         :valittajaTunnus (get-in applicant [:yritys :verkkolaskutustieto :Verkkolaskutus :valittajaTunnus])
         (tools/default-values element)))))
 
-(defn applicant->applicant-doc [applicant]
-  (let [schema         (schema/get-schema 1 "hakija-r")
-        default-values (tools/create-document-data schema tools/default-values)
-        document       {:id          (mongo/create-id)
-                        :created     (now)
-                        :schema-info (:info schema)
-                        :data        (tools/create-document-data schema (partial applicant-field-values applicant))}
-        unset-type     (if (contains? applicant :henkilo) :yritys :henkilo)]
-    (assoc-in document [:data unset-type] (unset-type default-values))))
+(defn sanitize-document
+  "Validates document replaces erroneous (:err) values with blanks."
+  [application document]
+  (reduce (fn [doc {:keys [path result]}]
+            (cond-> doc
+              (= (first result) :err) (assoc-in (cons :data path)
+                                                {:value ""})))
+          document
+          (doc-model/validate application document)))
 
-(defn designer->designer-doc [designer schema-name]
-  (let [schema         (schema/get-schema 1 schema-name)
-        default-values (tools/create-document-data schema tools/default-values)
-        document       {:id          (mongo/create-id)
-                        :created     (now)
-                        :schema-info (:info schema)
-                        :data        (tools/create-document-data schema (partial applicant-field-values designer))}
-        unset-type     (if (contains? designer :henkilo) :yritys :henkilo)]
-    (assoc-in document [:data unset-type] (unset-type default-values))))
+(defn sanitize-updates
+  "Removes updates that would invalidate document. The updates are
+  transfroms and applied to the document before validation."
+  [application document updates]
+  (let [bad-paths (->> (doc-model/validate
+                        application
+                        (doc-model/apply-updates
+                         document
+                         (doc-persistence/transform document updates)))
+                       (filter #(= (first (:result %)) :err))
+                       (map :path)
+                       set)]
+    (remove (util/fn->> first (contains? bad-paths))
+            updates)))
 
-(defn osapuoli->osapuoli-doc [maksaja schema-name]
-  (let [schema         (schema/get-schema 1 schema-name)
+(defn- party->party-doc [party schema-name]
+  (let [schema         (schemas/get-schema 1 schema-name)
         default-values (tools/create-document-data schema tools/default-values)
-        document       {:id          (mongo/create-id)
-                        :created     (now)
-                        :schema-info (:info schema)
-                        :data        (tools/create-document-data schema (partial applicant-field-values maksaja))}
-        unset-type     (if (contains? maksaja :henkilo) :yritys :henkilo)]
+        document       (sanitize-document {}
+                                          {:id          (mongo/create-id)
+                                           :created     (now)
+                                           :schema-info (:info schema)
+                                           :data        (tools/create-document-data schema
+                                                                                    (partial applicant-field-values party))})
+        unset-type     (if (contains? party :henkilo) :yritys :henkilo)]
     (assoc-in document [:data unset-type] (unset-type default-values))))
 
 
@@ -121,12 +128,12 @@
     (= koodi "Hakijan asiamies")                      "asiamies"))
 
 (defn osapuoli->party-document [party]
-  (if-let [schema-name (osapuoli-kuntaRoolikoodi->doc-schema (:kuntaRooliKoodi party))]
-    (osapuoli->osapuoli-doc party schema-name)))
+  (when-let [schema-name (osapuoli-kuntaRoolikoodi->doc-schema (:kuntaRooliKoodi party))]
+    (party->party-doc party schema-name)))
 
 (defn suunnittelija->party-document [party]
-  (if-let [schema-name (suunnittelijaRoolikoodi->doc-schema (:suunnittelijaRoolikoodi party))]
-    (designer->designer-doc party schema-name)))
+  (when-let [schema-name (suunnittelijaRoolikoodi->doc-schema (:suunnittelijaRoolikoodi party))]
+    (party->party-doc party schema-name)))
 
 (defn- invite-applicants [{:keys [lang user created application] :as command} applicants authorize-applicants]
 
@@ -192,8 +199,15 @@
                                             :zip (get-in postiosoite [:postinumero])
                                             :po (get-in postiosoite [:postitoimipaikannimi])
                                             :turvakieltokytkin (:turvakieltoKytkin applicant)}))]
-
-                (doc-persistence/set-subject-to-document application document user-info (name applicant-type) created)))))))))
+                 (as-> (doc-persistence/document-subject-updates document
+                                                                 user-info
+                                                                 (name applicant-type)) $
+                   (sanitize-updates application document $)
+                   (doc-persistence/persist-model-updates application
+                                                          "documents"
+                                                          document
+                                                          $
+                                                          created))))))))))
 
 (defn document-data->op-document [{:keys [schema-version] :as application} data]
   (let [op (app/make-op "aiemmalla-luvalla-hakeminen" (now))
@@ -277,27 +291,32 @@
       location-info)))
 
 (defn fetch-prev-application! [{{:keys [organizationId kuntalupatunnus authorizeApplicants]} :data :as command}]
-  (let [operation         "aiemmalla-luvalla-hakeminen"
-        permit-type       (operations/permit-type-of-operation operation)
-        dummy-application {:id "" :permitType permit-type :organization organizationId}
-        xml               (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
-        app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-        location-info     (get-location-info command app-info)
-        organization      (when (:propertyId location-info)
-                            (organization/resolve-organization (p/municipality-id-by-property-id (:propertyId location-info)) permit-type))
-        validation-result (permit/validate-verdict-xml permit-type xml organization)
+  (let [operation             "aiemmalla-luvalla-hakeminen"
+        permit-type           (operations/permit-type-of-operation operation)
+        dummy-application     {:id "" :permitType permit-type :organization organizationId}
+        xml                   (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
+        app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
+        location-info         (get-location-info command app-info)
+        organization          (when (:propertyId location-info)
+                                (organization/resolve-organization (p/municipality-id-by-property-id (:propertyId location-info)) permit-type))
+        validation-result     (permit/validate-verdict-xml permit-type xml organization)
         organizations-match?  (= organizationId (:id organization))
         no-proper-applicants? (not-any? get-applicant-type (:hakijat app-info))]
     (cond
-      (empty? app-info)            (fail :error.no-previous-permit-found-from-backend)
-      (not location-info)          (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
+      (empty? app-info)                 (fail :error.no-previous-permit-found-from-backend)
+      (not location-info)               (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
       (not (:propertyId location-info)) (fail :error.previous-permit-no-propertyid)
-      (not organizations-match?)   (fail :error.previous-permit-found-from-backend-is-of-different-organization)
-      validation-result            validation-result
-      :else                        (let [{id :id} (do-create-application-from-previous-permit command operation xml app-info location-info authorizeApplicants)]
-                                     (if no-proper-applicants?
-                                       (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
-                                       (ok :id id))))))
+      (not organizations-match?)        (fail :error.previous-permit-found-from-backend-is-of-different-organization)
+      validation-result                 validation-result
+      :else                             (let [{id :id} (do-create-application-from-previous-permit command
+                                                                                                   operation
+                                                                                                   xml
+                                                                                                   app-info
+                                                                                                   location-info
+                                                                                                   authorizeApplicants)]
+                                          (if no-proper-applicants?
+                                            (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
+                                            (ok :id id))))))
 
 
 (def fix-prev-permit-counter (atom 0))
@@ -355,7 +374,7 @@
             (if (seq app-info)
               (let [dummy-command         (action/application->command application)
                     old-applicants        (filter #(= (get-in % [:schema-info :name]) "hakija-r") documents)
-                    new-applicants        (map applicant->applicant-doc (:hakijat app-info))]
+                    new-applicants        (map #(party->party-doc % "hakija-r") (:hakijat app-info))]
 
                 ; remove old applicants from application & create applicant doc for each
                 (action/update-application dummy-command {$pull {:documents {:id {$in (map :id old-applicants)}}}})
