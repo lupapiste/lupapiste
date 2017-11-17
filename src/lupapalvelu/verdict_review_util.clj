@@ -1,5 +1,6 @@
 (ns lupapalvelu.verdict-review-util
   (:require [clojure.java.io :as io]
+            [clojure.string :as string]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.domain :as domain]
@@ -11,11 +12,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
-            [lupapalvelu.attachment :as attachment]
-            [clj-time.core :as time]
-            [clj-time.coerce :as time-coerce]
-            [lupapalvelu.assignment :as assignment]
-            [lupapalvelu.organization :as org])
+            [lupapalvelu.attachment :as attachment])
   (:import (java.net URL)
            (java.nio.charset StandardCharsets)))
 
@@ -61,6 +58,11 @@
       ss/scandics->ascii
       task-attachment-types
       (or "katselmuksen_tai_tarkastuksen_poytakirja")))
+
+(defn org-assignment-trigger-target [application type]
+  (string/join "." (vals (verdict-attachment-type
+                        application
+                        (attachment-type-from-krysp-type type)))))
 
 (defn- content-disposition-filename
   "Extracts the filename from the Content-Disposition header of the

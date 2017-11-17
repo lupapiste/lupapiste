@@ -24,10 +24,6 @@
       decode-response
       :body))
 
-(defn- slingshot-exception [ex-map]
-  (-> (slingshot.support/make-context ex-map (str "throw+: " ex-map) nil (slingshot.support/stack-trace))
-      (slingshot.support/wrap)))
-
 (defn get-assignments []
   (mongo/select :assignments {}))
 
@@ -47,8 +43,7 @@
   (let [krysp-url (str (server-address) "/dev/krysp")
         organizations (map (fn [org] (update-in org [:krysp] #(assoc-in % [:R :url] krysp-url))) minimal/organizations)
         organizations (map (fn [org] (if (= "753-R" (:id org))
-                                       (-> (update-in org [:assignment-triggers] conj review-assignment-trigger)
-                                           (update-in [:assignment-triggers] conj verdict-assignment-trigger))
+                                       (update-in [:assignment-triggers] conj verdict-assignment-trigger)
                                        org))
                            organizations)]
    (dorun (map (partial mongo/insert :organizations) organizations))))

@@ -19,7 +19,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   self.skip             = ko.observable(0);
   self.searchResultType = ko.observable(params.searchResultType);
 
-  self.state            = ko.pureComputed(function () {
+  self.state            = ko.pureComputed(function () {
    if (self.searchResultType() === "automatic") {
      return "created";
    } else {
@@ -30,7 +30,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   self.trigger          = ko.pureComputed(function() {
     if (self.searchResultType() === "automatic") {
       return "not-user-created";
-    } else if (self.state() === "all") {
+    } else if (self.state() === "all" || self.state() === "completed") {
       return "";
     } else {
       return "user-created";

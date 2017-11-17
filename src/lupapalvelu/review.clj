@@ -16,8 +16,6 @@
             [lupapalvelu.verdict-review-util :as verdict-review-util]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.organization :as organization]
-            [clj-time.coerce :as time-coerce]
-            [clj-time.core :as time]
             [clojure.string :as str]))
 
 (defn- empty-review-task? [t]
@@ -221,6 +219,7 @@
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
   [user created application app-xml & [overwrite-background-reviews?]]
+
   (let [reviews (vec (reviews-preprocessed app-xml))
         buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
@@ -278,18 +277,29 @@
         :attachments-by-task-id attachments-by-task-id
         :added-tasks-with-updated-buildings added-tasks-with-updated-buildings)))
 
-(defn- review-target-trigger [application type]
-  (str/join "." (vals (verdict-review-util/verdict-attachment-type
-                        application
-                        (verdict-review-util/attachment-type-from-krysp-type type)))))
-
 (defn- review-info-for-assignments [{:keys [user application attachment-id type]}]
-  {:user             user
-   :organization     (organization/get-organization (:organization application))
-   :application      (domain/get-application-as (:id application) user)
-   :targets          [{:id attachment-id :trigger-type (review-target-trigger application type)}]
-   :assignment-group "attachments"
-   :timestamp        (now)})
+  (let [targets [{:id attachment-id
+                  :trigger-type (verdict-review-util/org-assignment-trigger-target application type)}]]
+    {:user             user
+     :organization     (organization/get-organization (:organization application))
+     :application      (domain/get-application-as (:id application) user)
+     :targets          targets
+     :assignment-group "attachments"
+     :timestamp        (now)}))
+
+(defn- run-assignment-triggers-for-reviews
+  "Runs assignment triggers for reviews. Is run when save-review-updates receives urlhash as a sign
+  that the review attachment was successfully uploaded to database"
+  [user application attachment-id type]
+  (try
+    ((assignment/run-assignment-triggers review-info-for-assignments)
+      {:user          user
+       :application   application
+       :attachment-id attachment-id
+       :type          type})
+    (catch Exception e
+      (error "could not create assignment automatically for fetched attachment "
+             (:id application) ": "(.getMessage e)))))
 
 (defn save-review-updates [{user :user  application :application :as command} updates added-tasks-with-updated-buildings attachments-by-task-id]
   (let [update-result (pos? (update-application command {:modified (:modified application)} updates :return-count? true))
@@ -301,15 +311,7 @@
             (doseq [att attachments]
               (let [pk (verdict-review-util/get-poytakirja! application user (now) {:type "task" :id id} att)]
                 (when (:urlHash pk)
-                  (try
-                    ((assignment/run-assignment-triggers review-info-for-assignments)
-                      {:user          user
-                       :application   application
-                       :attachment-id (:urlHash pk)
-                       :type (-> att :liite :tyyppi)})
-                    (catch Exception e
-                      (error "could not create assignment automatically for fetched attachment "
-                             (:id application) ": "(.getMessage e)))))))
+                  (run-assignment-triggers-for-reviews user application (:urlHash pk) (-> att :liite :tyyppi)))))
             (tasks/generate-task-pdfa updated-application added-task (:user command) "fi")))))
     (cond-> {:ok update-result}
       (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))
