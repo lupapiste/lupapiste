@@ -1,5 +1,6 @@
 (ns lupapalvelu.xml.krysp.http
-  (:require [clj-http.cookies :as cookies]
+  (:require [taoensso.timbre :refer [infof]]
+            [clj-http.cookies :as cookies]
             [monger.operators :refer :all]
             [sade.http :as http]
             [sade.core :refer :all]
@@ -64,9 +65,10 @@
   (let [message-id (mongo/create-id)]
     (imessages/save (util/strip-nils
                       {:id message-id :direction "out" :messageType (str "KuntaGML " (name type))
-                       :partner             (:partner http-conf)
+                       :partner             (:partner http-conf) :data xml ; TODO where should we put these KuntaGML payloads ?!
                        :transferType        "http" :format "xml" :created (now)
                        :status              "processing" :initator (select-keys user [:id :username])
                        :application         (select-keys application [:id :organization])}))
     (POST type xml http-conf)
+    (infof "KuntaGML (type: %s) sent via HTTP successfully to partner %s" (name type) (:partner http-conf))
     (imessages/update-message message-id {$set {:acknowledged (now) :status "done"}})))
