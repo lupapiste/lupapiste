@@ -18,7 +18,7 @@
   (merge
     {:content-type "text/xml;charset=UTF-8"}
     options
-    (when env/dev-mode?
+    (env/in-dev
       {:cookie-store
        (doto (cookies/cookie-store)
          (cookies/add-cookie (lupa-cookies/->lupa-cookie "test_db_name" mongo/*db-name*)))})))

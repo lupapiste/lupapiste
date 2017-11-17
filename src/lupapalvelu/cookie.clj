@@ -2,8 +2,8 @@
   (:require [sade.env :as env])
   (:import org.apache.http.cookie.Cookie))
 
-(defn ->lupa-cookie [name value]
-  (env/in-dev
+(env/in-dev
+  (defn ->lupa-cookie [name value]
     (proxy [Cookie] []
       (getName [] name)
       (getValue [] value)
