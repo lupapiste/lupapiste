@@ -14,6 +14,7 @@ LUPAPISTE.VetumaService = function() {
     vetuma.getUser(function(resp) { // onFound
       ko.mapping.fromJS(_.pick(resp, RELEVANT_USER_FIELDS), self.userInfo);
       self.authenticated(true);
+      hub.send("vetumaService::authStatusChanged", true);
     }, function() { // onNotFound
       if(params.errorType) {
         var errorMsgLockey = ["bulletins", "vetuma", params.errorType].join(".");
@@ -21,12 +22,14 @@ LUPAPISTE.VetumaService = function() {
                                 style: "negative" });
       }
       self.authenticated(false);
-    });  
+      hub.send("vetumaService::authStatusChanged", false);
+    });
   });
 
   hub.subscribe("vetumaService::logoutRequested", function() {
     vetuma.logoutUser(function() { // onSuccess
       self.authenticated(false);
+      hub.send("vetumaService::authStatusChanged", false);
       util.identLogoutRedirectBulletins();
     });
   });
