@@ -319,8 +319,16 @@
     (do-set-user-to-document application document-id user-id path timestamp true))
   ([application document-id user-id path timestamp set-empty-values?]
     {:pre [application document-id timestamp]}
-    (if-let [document (domain/get-document-by-id application document-id)]
-      (when-not (ss/blank? user-id)
+   (if-let [{data :data :as document} (domain/get-document-by-id application
+                                                                 document-id)]
+      (if (ss/blank? user-id)
+        (let [user-id-path (cond->> [:userId]
+                             (:henkilo data) (cons :henkilo))]
+          (persist-model-updates application
+                                "documents"
+                                document
+                                [[user-id-path ""]]
+                                timestamp))
         (let [company-auth (auth/auth-via-company application user-id)
               company      (when company-auth
                              (company/find-company-by-id (:id company-auth)))]
