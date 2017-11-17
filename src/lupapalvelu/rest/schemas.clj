@@ -1,7 +1,8 @@
 (ns lupapalvelu.rest.schemas
   (:require [schema.core :as sc]
             [ring.swagger.json-schema :as rjs]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [sade.schemas :as ssc]))
 
 (defn- field [schema desc]
   (rjs/field schema {:description desc}))
@@ -155,3 +156,12 @@
 
 (sc/defschema OrganizationId
   (field sc/Str "Organisaation tunnus"))
+
+(sc/defschema ApplicationId
+  (field sc/Str "LP-tunnus"))
+
+(sc/defschema DocumentId
+  (field ssc/ObjectIdStr "Dokumentin tunnus"))
+
+(sc/defschema VtjPrt
+  (field ssc/Rakennustunnus "Pysyv\u00e4 rakennustunnus"))

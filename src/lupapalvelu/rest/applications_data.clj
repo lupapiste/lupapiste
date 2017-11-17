@@ -76,3 +76,6 @@
   (->> organization
        query-applications
        process-applications))
+
+(defn update-vtj-prt [application document-id vtj-prt]
+  nil)

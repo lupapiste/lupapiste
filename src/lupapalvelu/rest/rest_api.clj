@@ -8,15 +8,16 @@
             [ring.swagger.ui :as ui]
             [schema.core :as sc]
             [sade.core :refer [fail]]
+            [sade.env :as env]
             [sade.util :as util]
             [lupapalvelu.action :as action]
             [lupapalvelu.api-common :refer :all]
             [lupapalvelu.autologin :as autologin]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.rest.schemas :refer :all]
             [lupapalvelu.rest.applications-data :as applications-data]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.oauth :refer [user-for-access-token]]
-            [sade.env :as env]))
+            [lupapalvelu.oauth :refer [user-for-access-token]]))
 
 (defonce endpoints (atom {}))
 
@@ -93,6 +94,15 @@
    (only) by comparing the token given in Authorization header (Bearer token) to issued OAuth access tokens.
    The scopes requested at authorization time must include the one defined in endpoint metadata."
   `(defendpoint-for usr/rest-user? ~path true ~@content))
+
+(defendpoint [:post "/rest/application/:application-id/update-vtj-prt"]
+  {:parameters       [:application-id ApplicationId
+                      :document       DocumentId
+                      :vtj-prt        VtjPrt]}
+  (let [{org-id :organization :as app} (domain/get-application-as application-id user)]
+    (if (usr/user-is-authority-in-organization? user org-id)
+      (applications-data/update-vtj-prt app document vtj-prt)
+      (resp/status 404 "Not found"))))
 
 (defendpoint "/rest/submitted-applications"
   {:summary          "Organisaation kaikki j\u00e4tetyt hakemukset."
