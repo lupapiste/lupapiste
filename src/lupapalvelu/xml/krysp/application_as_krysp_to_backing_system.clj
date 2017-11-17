@@ -6,7 +6,7 @@
             [sade.xml :as xml]
             [sade.common-reader :refer [strip-xml-namespaces]]
             [sade.env :as env]
-            [sade.core :refer [fail!]]
+            [sade.core :refer :all]
             [sade.util :as util]
             [lupapiste-commons.attachment-types :as attachment-types]
             [lupapalvelu.permit :as permit]
@@ -61,6 +61,12 @@
   "Returns outgoing HTTP conf for organization"
   [org permit-type]
   (get-in org [:krysp (keyword permit-type) :http]))
+
+(defn http-not-allowed
+  "Pre-check that fails, if http IS configured (thus sftp is OK)"
+  [{:keys [organization application]}]
+  (when (http-conf @organization (:permitType application))
+    (fail :error.integration.krysp-http)))
 
 (defn- remove-unsupported-attachments [application]
   (->> (remove

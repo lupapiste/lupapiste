@@ -163,7 +163,8 @@
    :user-roles #{:authority}
    :pre-checks [(permit/validate-permit-type-is permit/R)
                 (application-already-exported :exported-to-backing-system)
-                has-unsent-attachments]
+                has-unsent-attachments
+                mapping-to-krysp/http-not-allowed]
    :states     (conj states/post-verdict-states :sent)
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user organization] :as command}]
@@ -196,7 +197,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles #{:authority}
    :pre-checks [(permit/validate-permit-type-is permit/R)
-                (application-already-exported :exported-to-backing-system)]
+                (application-already-exported :exported-to-backing-system)
+                mapping-to-krysp/http-not-allowed]
    :states     states/post-verdict-states}
   [{:keys [application organization] :as command}]
   (let [sent-document-ids (mapping-to-krysp/save-parties-as-krysp command lang)
