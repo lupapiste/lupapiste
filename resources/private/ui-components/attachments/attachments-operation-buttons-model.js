@@ -13,6 +13,7 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function(params) {
   var attachments = service.attachments;
 
   self.upload = params.upload;
+  self.processing = appModel.processing;
 
   self.requireAttachmentsBubbleVisible = ko.observable(false);
 
