@@ -39,13 +39,20 @@
       (map (comp ss/lower-case :key) headers)
       (map :value headers))))
 
+(sc/defn ^:always-validate create-url [type :- (apply sc/enum org/endpoint-types) http-conf :- org/KryspHttpConf]
+  (-> (ss/join "/" [(:url http-conf) (get-in http-conf [:path type])])
+      (ss/replace #"/+$" "")))
+
 (sc/defn POST
   "HTTP POST given XML string to endpoint defined in http-conf."
-  ([xml :- sc/Str http-conf :- org/KryspHttpConf]
-    (POST xml http-conf nil))
-  ([xml :- sc/Str http-conf :- org/KryspHttpConf options :- {sc/Keyword sc/Any}]
+  ([type :- (apply sc/enum org/endpoint-types) xml :- sc/Str http-conf :- org/KryspHttpConf]
+    (POST type xml http-conf nil))
+  ([type :- (apply sc/enum org/endpoint-types)
+    xml :- sc/Str
+    http-conf :- org/KryspHttpConf
+    options :- {sc/Keyword sc/Any}]
     (http/post
-      (:url http-conf)
+      (create-url type http-conf)
       (-> options
           (assoc :body xml)
           (with-krysp-defaults)
@@ -53,13 +60,13 @@
           (wrap-authentication http-conf)))))
 
 (sc/defn send-xml
-  [application user type :- sc/Str xml :- sc/Str http-conf :- org/KryspHttpConf]
+  [application user type :- (apply sc/enum org/endpoint-types) xml :- sc/Str http-conf :- org/KryspHttpConf]
   (let [message-id (mongo/create-id)]
     (imessages/save (util/strip-nils
-                      {:id message-id :direction "out" :messageType type
+                      {:id message-id :direction "out" :messageType (str "KuntaGML " (name type))
                        :partner             (:partner http-conf)
                        :transferType        "http" :format "xml" :created (now)
                        :status              "processing" :initator (select-keys user [:id :username])
                        :application         (select-keys application [:id :organization])}))
-    (POST xml http-conf)
+    (POST type xml http-conf)
     (imessages/update-message message-id {$set {:acknowledged (now) :status "done"}})))

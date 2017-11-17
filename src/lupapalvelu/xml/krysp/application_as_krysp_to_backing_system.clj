@@ -117,7 +117,7 @@
 
         output-fn     (if-some [http-conf (http-conf organization permit-type)]
                         (fn [xml attachments]
-                          (krysp-http/send-xml application user "KuntaGML application" xml http-conf)
+                          (krysp-http/send-xml application user :application xml http-conf)
                           (->> attachments (map :fileId) (remove nil?)))
                         #(writer/write-to-disk %1 application %2 output-dir submitted-app lang))
 
@@ -141,7 +141,7 @@
                           remove-disabled-documents)
 
         output-fn      (if-some [http-conf (http-conf @organization permit-type)]
-                         (fn [xml _] (krysp-http/send-xml application user "KuntaGML parties" xml http-conf))
+                         (fn [xml _] (krysp-http/send-xml application user :parties xml http-conf))
                          #(writer/write-to-disk %1 application nil output-dir nil nil %2))
         mapped-data (permit/parties-krysp-mapper filtered-app :suunnittelija lang krysp-version)]
     (when-not (map? mapped-data)
@@ -166,7 +166,7 @@
 
             output-fn     (if-some [http-conf (http-conf @organization permit-type)]
                             (fn [xml attachments]
-                              (krysp-http/send-xml application user "KuntaGML review" xml http-conf)
+                              (krysp-http/send-xml application user :review xml http-conf)
                               (->> attachments (map :fileId) (remove nil?)))
                             #(writer/write-to-disk %1 application %2 output-dir nil nil "review"))
             mapping-result (permit/review-krysp-mapper filtered-app task user lang krysp-version begin-of-link)]
@@ -186,7 +186,7 @@
 
         output-fn     (if-some [http-conf (http-conf @organization permit-type)]
                         (fn [xml attachments]
-                          (krysp-http/send-xml application user "KuntaGML attachments" xml http-conf)
+                          (krysp-http/send-xml application user :attachments xml http-conf)
                           (->> attachments (map :fileId) (remove nil?)))
                         #(writer/write-to-disk %1 application %2 (resolve-output-directory @organization permit-type)))
         mapping-result (rl-mapping/save-unsent-attachments-as-krysp filtered-app lang krysp-version begin-of-link)]

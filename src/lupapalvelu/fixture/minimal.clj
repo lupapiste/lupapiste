@@ -1046,6 +1046,8 @@
                                    :http (merge
                                            {:auth-type "basic"
                                             :partner "matti"
+                                            :path {:application "hakemus-path"
+                                                   :review  "katselmus-path"}
                                             :url local-krysp-receiver
                                             :headers [{:key "x-vault" :value "vaultti"}]}
                                            (org/encode-credentials "kuntagml" "kryspi"))}}

@@ -8,7 +8,8 @@
             [sade.schema-utils :as ssu]
             [lupapalvelu.xml.krysp.http :refer :all]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.test-util :refer [passing-quick-check]]))
+            [lupapalvelu.test-util :refer [passing-quick-check]])
+  (:import (clojure.lang ExceptionInfo)))
 
 (def conf-with-auth-type
   (prop/for-all [krysp-conf (gen/no-shrink (ssg/generator org/KryspHttpConf))
@@ -51,3 +52,17 @@
             (keys result) => (has every? string?)
             (vals result) => (has every? string?)))))
     :max-size 40) => passing-quick-check)
+
+(facts "create-url"
+  (fact "type validated"
+    (create-url :lol {:url "http://testi.fi" :path {:verdict "testi"}}) => (throws ExceptionInfo))
+  (fact "verdict path joined"
+    (create-url :application {:url "http://testi.fi" :path {:application "testi"}}) => "http://testi.fi/testi")
+  (fact "slash is stripped"
+    (create-url :application {:url "http://testi.fi" :path {:application "testi/"}}) => "http://testi.fi/testi")
+  (fact "url alone OK"
+    (create-url :application {:url "http://testi.fi"}) => "http://testi.fi")
+  (fact "url alone also stripped slashes"
+    (create-url :application {:url "http://testi.fi///"}) => "http://testi.fi")
+  (fact "correct path is selected"
+    (create-url :review {:url "http://testi.fi" :path {:application "testi/" :review "katselmus"}}) => "http://testi.fi/katselmus"))

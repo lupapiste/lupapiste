@@ -34,7 +34,8 @@
             (> (:acknowledged sent-message) ts) => true
             (:status sent-message) => "done"))
         (fact "received message is saved (dummy receiver)"
-          (:messageType received-message) => "KuntaGML"
+          ; 'hakemus-path' below is deduced in web.clj as :path, which is actually defined in organization in minimal fixture
+          (:messageType received-message) => "KuntaGML hakemus-path"
           (:direction received-message) => "in"
           (ss/starts-with (:data received-message) "<?xml") => truthy
           (ss/contains? (:data received-message) "Pub Harald") => true)))

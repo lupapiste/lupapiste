@@ -654,13 +654,17 @@
 (defcommand set-kuntagml-http-endpoint
   {:description         "Admin can configure KuntaGML sending as HTTP, instead of SFTP"
    :parameters          [url organization permitType]
-   :optional-parameters [auth-type username password partner headers]
+   :optional-parameters [auth-type username password partner headers path]
    :user-roles          #{:admin}
    :input-validators    [(partial validate-optional-url :url)
                          (fn [{:keys [data]}]
                            (when (and (ss/not-blank? (:partner data))
                                       (sc/check (ssu/get org/KryspHttpConf :partner) (:partner data)))
-                             (fail :error.illegal-value:schema-validation)))
+                             (fail :error.illegal-value:schema-validation :data :partner)))
+                         (fn [{:keys [data]}]
+                           (when (and (ss/not-blank? (:path data))
+                                      (sc/check (ssu/get org/KryspHttpConf :path) (:path data)))
+                             (fail :error.illegal-value:schema-validation :data :path)))
                          permit/permit-type-validator
                          (action/valid-db-key :permitType)
                          (fn [{:keys [data] :as command}]

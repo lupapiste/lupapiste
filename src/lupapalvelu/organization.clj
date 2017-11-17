@@ -145,8 +145,11 @@
 
 (sc/defschema AuthTypeEnum (sc/enum "basic" "x-header"))
 
+(def endpoint-types #{:application :review :attachments :parties})
+
 (sc/defschema KryspHttpConf
   {:url                         (sc/maybe sc/Str)
+   (sc/optional-key :path)      {(apply sc/enum endpoint-types) (sc/maybe sc/Str)}
    (sc/optional-key :auth-type) AuthTypeEnum
    (sc/optional-key :username)  sc/Str
    (sc/optional-key :password)  sc/Str

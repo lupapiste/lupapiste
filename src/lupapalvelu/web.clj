@@ -651,13 +651,13 @@
                (get-in request [:cookies "test_db_name" :value])))
       (and (= u "kuntagml") (= p "kryspi"))))
 
-  (defpage [:post "/dev/krysp/receiver"] []
+  (defpage [:post "/dev/krysp/receiver/:path"] {path :path}
     (let [request (request/ring-request)]
       (if (krysp-endpoint-authentication request)
         (let [body-str (ring-request/body-string request)]
           (if (ss/starts-with body-str "<?xml")
             (do
-              (imessages/save {:id (mongo/create-id) :direction  "in" :messageType "KuntaGML"
+              (imessages/save {:id (mongo/create-id) :direction  "in" :messageType (str "KuntaGML " path)
                                :transferType "http" :format "xml" :created (now)
                                :status "received" :data body-str
                                :application {:id (re-find #"L[PX]-\d{3}-\d{4}-\d{5}" body-str)}})
