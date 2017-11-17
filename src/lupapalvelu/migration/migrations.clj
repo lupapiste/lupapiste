@@ -3555,6 +3555,39 @@
                                                    "Tj\u00e4nsteinnehavarbeslut fattas dagligen. Besv\u00e4rstiden \u00e4r 14 dagar fr\u00e5n det att besluten kungjorts."
                                                    "F\u00f6rteckningarna finns offentligt fra\u03c0mlagda p\u00e5 anslagstavlan i byggnadstillsynens entr\u00e9hall och p\u00e5 listan som finns nedanf\u00f6r."]}}}}}))
 
+
+(def bad-review-attachments-query {:attachments {$elemMatch {$and [{:target.type "task"}
+                                                                   {:type.type-id "paatos"}
+                                                                   {:latestVersion.user.username "eraajo@lupapiste.fi"}]}}})
+
+;; Old fetched review attachments had a wrong type (paatos).
+(defmigration katselmuspoytakirja-type-fix
+  {:apply-when (pos? (mongo/count :applications bad-review-attachments-query))}
+  (update-applications-array :attachments
+                             (fn [{:keys [target type latestVersion] :as attachment}]
+                               (if (and (= (:type target) "task")
+                                        (= (:type-id type) "paatos")
+                                        (= (get-in latestVersion [:user :username]) "eraajo@lupapiste.fi"))
+                                 (assoc attachment
+                                        :type {:type-group "katselmukset_ja_tarkastukset"
+                                               :type-id    "katselmuksen_tai_tarkastuksen_poytakirja"})
+                                 attachment))
+                             bad-review-attachments-query))
+
+(defmigration add-docterminal-use-info
+  {:apply-when (pos? (mongo/count :organizations {:docstore-info.docTerminalInUse {$exists false}}))}
+  (mongo/update :organizations
+                {:docstore-info.docTerminalInUse {$exists false}}
+                {$set {:docstore-info.docTerminalInUse false}}
+                :multi true))
+
+(defmigration add-docterminal-allowed-attachment-types
+  {:apply-when (pos? (mongo/count :organizations {:docstore-info.allowedTerminalAttachmentTypes {$exists false}}))}
+  (mongo/update :organizations
+                {:docstore-info.allowedTerminalAttachmentTypes {$exists false}}
+                {$set {:docstore-info.allowedTerminalAttachmentTypes []}}
+                :multi true))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

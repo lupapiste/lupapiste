@@ -11,7 +11,8 @@
             [lupapalvelu.roles :as roles]
             [lupapalvelu.server]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as user])
+            [lupapalvelu.user :as user]
+            [schema.core :as sc])
   (:import [org.apache.commons.io.output NullWriter]))
 
 (defn returns [])
@@ -237,6 +238,11 @@
     (against-background (get-actions) => {:failing {:handler (fn [_] (throw (RuntimeException. "kosh"))) :user-roles #{:anonymous}}})
     (binding [*err* (NullWriter.)]
       (execute {:action "failing"})) => {:ok false :text "error.unknown"})
+
+   (fact "schema exception"
+     (against-background (get-actions) => {:failing {:handler (fn [_] (sc/validate sc/Str 1)) :user-roles #{:anonymous}}})
+     (binding [*err* (NullWriter.)]
+       (execute {:action "failing"})) => {:ok false :text "error.illegal-value:schema-validation"})
 
   (facts "non-blank-parameters"
     (non-blank-parameters nil {}) => nil

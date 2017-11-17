@@ -33,7 +33,11 @@
               <label data-bind="ltext: 'organization.docstore.enabled'" for="docstore-enabled"></label>
               <input data-bind="checked: docstoreEnabled" id="docstore-enabled" type="checkbox"/>
             </div>
-            <!-- ko if: docstoreEnabled -->
+            <div>
+              <label data-bind="ltext: 'organization.docterminal.enabled'" for="docterminal-enabled"></label>
+              <input data-bind="checked: docterminalEnabled" id="docterminal-enabled" type="checkbox"/>
+            </div>
+            <!-- ko if: docstoreEnabled() || docterminalEnabled() -->
             <div data-test-id="docstore-enabled-settings">
               <label data-bind="ltext: 'organization.docstore.price'"
                      for="docstore-price"></label>

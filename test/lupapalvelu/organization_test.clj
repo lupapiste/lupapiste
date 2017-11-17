@@ -6,19 +6,40 @@
 
 (facts
  (let [organization {:operations-attachments {:kikka [["type-group-1" "type-id-123"]]}
-                     :krysp {:good {:url "http://example.com" :ftpUser "user" :version "1.0.0"}
-                             :bad1 {:ftpUser "user" :version "1.0.0"}
+                     :krysp {:good1 {:url "http://example.com" :ftpUser "user" :version "1.0.0"}
+                             :good2 {:ftpUser "user" :version "1.0.0"}
+                             :bad1 {:ftpUser "user" :version ""}
                              :bad2 {:version "1.0.0"}
-                             :bad3 {}}}
+                             :bad3 {}
+                             :http-good1 {:version "1.0.0" :http {:url "foo"}}
+                             :http-good2 {:version "1.0.0" :http {:url "foo" :nonsense "ok"}}
+                             :http-good3 {:version "1.0.0" :ftpUser "" :http {:url "foo" :nonsense "ok"}}
+                             :http-bad1 {:http {:url "foo"}}
+                             :http-bad2 {:version "1.0.0" :http {:url ""}}
+                             :http-bad3 {:version "1.0.0" :ftpUser "" :http {:url "" :nonsense "ok"}}
+                             }}
        valid-op     {:name "kikka"}
        invalid-op   {:name "kukka"}]
    (get-organization-attachments-for-operation organization valid-op) => [["type-group-1" "type-id-123"]]
    (get-organization-attachments-for-operation organization invalid-op) => nil
-   (fact "KRYSP integration defined"
-         (krysp-integration? organization :good) => true?
-         (krysp-integration? organization :bad1) => falsey
-         (krysp-integration? organization :bad2) => falsey
-         (krysp-integration? organization :bad3) => falsey)))
+   (fact "KRYSP integration defined either FTP or HTTP"                        ; none of the required can't be blank
+     (krysp-integration? organization :good1) => true?
+     (krysp-integration? organization :good2) => true?
+     (fact "version can't be blank"
+       (krysp-integration? organization :bad1) => false?)
+     (fact "ftp user required"
+       (krysp-integration? organization :bad2) => false?)
+     (krysp-integration? organization :bad3) => false?
+     (krysp-integration? organization :http-good1) => true?
+     (krysp-integration? organization :http-good2) => true?
+     (fact "blank ftpUser ok if http defined"
+       (krysp-integration? organization :http-good2) => true?)
+     (fact "version needed"
+       (krysp-integration? organization :http-bad1) => false?)
+     (fact "http url needed"
+       (krysp-integration? organization :http-bad2) => false?)
+     (fact "ftpUser and http.url blanks"
+       (krysp-integration? organization :http-bad3) => false?))))
 
 (facts upsert-handler-role!
   (fact "update existing"

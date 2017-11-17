@@ -943,6 +943,18 @@
   (when (= :sent (keyword state))
     (fail :error.illegal-state)))
 
+(defn attachment-approval-check
+  "Pre-check that fails if any of the attachment's versions is
+  approved/rejected and the user is not authority."
+  [{:keys [user data application]}]
+  (when application
+    (let [{att-id :attachmentId} data
+          {versions :versions}   (get-attachment-info application att-id)]
+      (when-not (every? #(can-delete-version? user application att-id
+                                              (:fileId %))
+                        versions)
+        (fail :error.unauthorized)))))
+
 (defn attachment-is-needed [{{:keys [attachmentId]} :data application :application}]
   (when (and attachmentId (:notNeeded (get-attachment-info application attachmentId)))
     (fail :error.attachment.not-needed)))

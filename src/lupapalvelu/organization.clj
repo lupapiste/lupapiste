@@ -10,17 +10,17 @@
            [org.opengis.feature.simple SimpleFeature])
 
   (:require [cheshire.core :as json]
-            [clojure.string :as s]
-            [clojure.walk :as walk]
             [clojure.walk :refer [keywordize-keys]]
             [lupapalvelu.attachment.stamp-schema :as stmp]
             [lupapalvelu.geojson :as geo]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.matti.schemas :refer [MattiSavedVerdictTemplates Phrase]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.wfs :as wfs]
-            [me.raynes.fs :as fs]
+            [lupapiste-commons.archive-metadata-schema :as archive-schema]
+            [lupapiste-commons.attachment-types :as attachment-types]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail!]]
             [sade.crypt :as crypt]
@@ -55,7 +55,7 @@
 
 (sc/defschema Link
   {:url  (i18n/lenient-localization-schema ssc/OptionalHttpUrl)
-   :name i18n/LocalizationStringMap
+   :name (i18n/lenient-localization-schema sc/Str)
    (sc/optional-key :modified) ssc/Timestamp})
 
 (sc/defschema Server
@@ -85,18 +85,47 @@
 (sc/defschema OrgId
   (sc/pred string?))
 
+
+;; Allowed archive terminal attachment types for organization
+
+(defn- type-string [[group types]]
+  (if group
+    [group (mapv #(->> [group %] (map name) (ss/join ".")) types)]
+    [group types]))
+
+(def allowed-attachments-by-group
+  (->> (concat attachment-types/Rakennusluvat-v2
+               [nil (map name archive-schema/document-types)])
+       (partition 2)
+       (mapv type-string)))
+
+(def allowed-attachments
+  (->>  allowed-attachments-by-group
+        (mapcat second)
+        vec))
+
+(sc/defschema DocTerminalAttachmentType
+  (apply sc/enum allowed-attachments))
+
 (sc/defschema DocStoreInfo
-  {:docStoreInUse           sc/Bool
-   :documentPrice           sssc/Nat
-   :organizationDescription i18n/LocalizationStringMap})
+  {:docStoreInUse                  sc/Bool
+   :docTerminalInUse               sc/Bool
+   :allowedTerminalAttachmentTypes [DocTerminalAttachmentType]
+   :documentPrice                  sssc/Nat
+   :organizationDescription        (i18n/lenient-localization-schema sc/Str)})
 
 (def default-docstore-info
-  {:docStoreInUse           false
-   :documentPrice           0
+  {:docStoreInUse                  false
+   :docTerminalInUse               false
+   :allowedTerminalAttachmentTypes []
+   :documentPrice                  0
    :organizationDescription (i18n/supported-langs-map (constantly ""))})
 
+(sc/defschema PermitType
+  (apply sc/enum (keys (permit/permit-types))))
+
 (sc/defschema Scope
-  {:permitType sc/Str
+  {:permitType PermitType
    :municipality sc/Str
    :new-application-enabled sc/Bool
    :inforequest-enabled sc/Bool
@@ -114,6 +143,22 @@
 
 (def backend-systems #{:facta :kuntanet :louhi :locus :keywinkki :iris :matti})
 
+(sc/defschema AuthTypeEnum (sc/enum "basic" "x-header"))
+
+(def endpoint-types #{:application :review :attachments :parties})
+
+(sc/defschema KryspHttpConf
+  {:url                         (sc/maybe sc/Str)
+   (sc/optional-key :path)      {(apply sc/enum endpoint-types) (sc/maybe sc/Str)}
+   (sc/optional-key :auth-type) AuthTypeEnum
+   (sc/optional-key :username)  sc/Str
+   (sc/optional-key :password)  sc/Str
+   (sc/optional-key :crypto-iv) sc/Str
+   (sc/optional-key :partner)   (apply sc/enum messages/partners)
+   (sc/optional-key :headers)   [{:key sc/Str :value sc/Str}]})
+
+(def krysp-http-conf-validator (sc/validator KryspHttpConf))
+
 (sc/defschema KryspConf
   {(sc/optional-key :ftpUser) (sc/maybe sc/Str)
    (sc/optional-key :url) sc/Str
@@ -122,6 +167,7 @@
    (sc/optional-key :crypto-iv) sc/Str
    (sc/optional-key :version) sc/Str
    (sc/optional-key :fetch-chunk-size) sc/Int
+   (sc/optional-key :http) KryspHttpConf
    (sc/optional-key :backend-system) (apply sc/enum (map name backend-systems))})
 
 (sc/defschema KryspOsoitteetConf
@@ -131,7 +177,7 @@
 
 (sc/defschema Organization
   {:id OrgId
-   :name i18n/LocalizationStringMap
+   :name (i18n/lenient-localization-schema sc/Str)
    :scope [Scope]
 
    (sc/optional-key :allowedAutologinIPs) sc/Any
@@ -191,9 +237,9 @@
    (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}
    (sc/optional-key :matti-enabled)                 sc/Bool
    (sc/optional-key :multiple-operations-supported) sc/Bool
-   (sc/optional-key :local-bulletins-page-settings) {:texts (zipmap i18n/supported-langs (repeat {:heading1 sc/Str
-                                                                                                  :heading2 sc/Str
-                                                                                                  :caption [sc/Str]}))}})
+   (sc/optional-key :local-bulletins-page-settings) {:texts (i18n/lenient-localization-schema {:heading1 sc/Str
+                                                                                               :heading2 sc/Str
+                                                                                               :caption [sc/Str]})}})
 
 
 (sc/defschema SimpleOrg
@@ -240,13 +286,13 @@
 (defn get-organization
   ([id] (get-organization id {}))
   ([id projection]
-   {:pre [(not (s/blank? id))]}
+   {:pre [(not (ss/blank? id))]}
    (->> (mongo/by-id :organizations id projection)
         remove-sensitive-data
         with-scope-defaults)))
 
 (defn update-organization [id changes]
-  {:pre [(not (s/blank? id))]}
+  {:pre [(not (ss/blank? id))]}
   (mongo/update-by-id :organizations id changes))
 
 (defn get-organization-attachments-for-operation [organization {operation-name :name}]
@@ -260,7 +306,7 @@
 
 (defn encode-credentials
   [username password]
-  (when-not (s/blank? username)
+  (when-not (ss/blank? username)
     (let [crypto-iv        (crypt/make-iv-128)
           crypted-password (crypt/encrypt-aes-string password (env/value :backing-system :crypto-key) crypto-iv)
           crypto-iv-s      (-> crypto-iv crypt/base64-encode crypt/bytes->str)]
@@ -272,16 +318,18 @@
   [password crypto-iv]
   (crypt/decrypt-aes-string password (env/value :backing-system :crypto-key) crypto-iv))
 
+(defn get-credentials
+  [{:keys [username password crypto-iv]}]
+  (when (and username crypto-iv password)
+    [username (decode-credentials password crypto-iv)]))
+
 (defn resolve-krysp-wfs
   "Returns a map containing :url and :version information for municipality's KRYSP WFS"
   ([organization permit-type]
    (let [krysp-config (get-in organization [:krysp (keyword permit-type)])
-         crypto-iv    (:crypto-iv krysp-config)
-         password     (when-let [password (and crypto-iv (:password krysp-config))]
-                        (decode-credentials password crypto-iv))
-         username     (:username krysp-config)]
-     (when-not (s/blank? (:url krysp-config))
-       (->> (when username {:credentials [username password]})
+         creds        (get-credentials krysp-config)]
+     (when-not (ss/blank? (:url krysp-config))
+       (->> (when (first creds) {:credentials creds})
             (merge (select-keys krysp-config [:url :version])))))))
 
 (defn get-krysp-wfs
@@ -364,9 +412,12 @@
       (fail :error.organization-not-found))))
 
 (defn krysp-integration? [organization permit-type]
-  (let [mandatory-keys [:url :version :ftpUser]]
-    (when-let [krysp (select-keys (get-in organization [:krysp (keyword permit-type)]) mandatory-keys)]
-     (and (= (count krysp) (count mandatory-keys)) (not-any? ss/blank? (vals krysp))))))
+  (if-let [{:keys [version ftpUser http]} (get-in organization [:krysp (keyword permit-type)])]
+    (boolean
+      (and (ss/not-blank? version)
+           (or (ss/not-blank? ftpUser)
+               (and http (ss/not-blank? (:url http))))))
+    false))
 
 (defn allowed-roles-in-organization [organization]
   {:pre [(map? organization)]}
@@ -747,3 +798,46 @@
              (not (util/find-by-key :email (:email user)
                                    (:statementGivers @organization))))
     (fail :error.not-organization-statement-giver)))
+
+(defn get-docstore-info-for-organization! [org-id]
+  (-> (get-organization org-id [:docstore-info])
+      :docstore-info))
+
+(defn- type-info [allowed-set attachment-type]
+  {:type attachment-type
+   :enabled (boolean (allowed-set attachment-type))})
+
+(defn- populate-attachment-structure [docstore-info]
+  (fn [[group types]]
+    [group
+     (mapv (partial type-info
+                    (set (:allowedTerminalAttachmentTypes docstore-info)))
+           types)]))
+
+(defn- allowed-docterminal-attachment-types-for-organization
+  "Returns a structure that contains all possible docterminal attachment types
+  grouped by the attachment groups.
+
+  [[<group name> [{:type <attachment type>
+                   :enabled <is the type enabled for organization?>}
+                  ...]
+   ...]
+   [<group name> [...]]]"
+  [organization-docstore-info]
+  (->> allowed-attachments-by-group
+       (mapv (populate-attachment-structure organization-docstore-info))))
+
+(defn allowed-docterminal-attachment-types [org-id]
+  (-> org-id
+      get-docstore-info-for-organization!
+      allowed-docterminal-attachment-types-for-organization))
+
+(defn set-allowed-docterminal-attachment-type
+  [org-id attachment-type allowed?]
+  (if (= attachment-type "all")
+    (if allowed?
+      (update-organization org-id {$set {:docstore-info.allowedTerminalAttachmentTypes allowed-attachments}})
+      (update-organization org-id {$set {:docstore-info.allowedTerminalAttachmentTypes []}}))
+    (if allowed?
+     (update-organization org-id {$addToSet {:docstore-info.allowedTerminalAttachmentTypes attachment-type}})
+     (update-organization org-id {$pull {:docstore-info.allowedTerminalAttachmentTypes attachment-type}}))))

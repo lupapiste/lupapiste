@@ -128,7 +128,7 @@
 "company.user.op.admin.true" "fi" "Käyttäjäksi"
 "company.user.op.admin.true" "sv" "Som användare"
 "company.user.op.admin.true.message" "en" "Are you sure you want to remove the maintenance rights <b>{0}</b> from user?"
-"company.user.op.admin.true.message" "fi" "Oletko varma että haluat poistaa käyttäjältä <b>{0}</b> ylläpito oikeudet?"
+"company.user.op.admin.true.message" "fi" "Oletko varma että haluat poistaa käyttäjältä <b>{0}</b> ylläpito-oikeudet?"
 "company.user.op.admin.true.message" "sv" "Är du säker på att du vill ta bort adminstratörsrättigheterna från användaren <b>{0}</b>?"
 "company.user.op.admin.true.title" "en" "Removing maintenance rights"
 "company.user.op.admin.true.title" "fi" "Ylläpito-oikeuksien poistaminen"

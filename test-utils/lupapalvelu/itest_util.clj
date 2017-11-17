@@ -19,22 +19,20 @@
             [sade.util :as util]
             [lupapalvelu.action :refer [*created-timestamp-for-test-actions*]]
             [lupapalvelu.attachment :as att]
+            [lupapalvelu.cookie :as c]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.document-api]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.api-common :as api-common]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as u]
-            [lupapalvelu.organization :as organization]
             [lupapalvelu.server]
             [ring.util.codec :as codec]
             [lupapalvelu.user :as usr])
   (:import org.apache.http.client.CookieStore
-           org.apache.http.cookie.Cookie
            java.io.FileNotFoundException))
 
 (defn find-user-from-minimal [username] (some #(when (= (:username %) username) %) minimal/users))
@@ -111,12 +109,12 @@
 (def jarvenpaa-general-handler-id "abba11111111111111111186")
 
 
-(defn server-address [] (System/getProperty "target_server" (or (env/value :host) "http://localhost:8000")))
+(defn server-address [] (env/server-address))
 
 ;; use in place of server-address to use loopback interface over configured hostname in testing, eg autologin
 (defn target-server-or-localhost-address [] (System/getProperty "target_server" "http://localhost:8000"))
 
-(def dev-env? (= (s/upper-case env/target-env) "DEV"))
+(def dev-env? env/dev-env?)
 
 (def get-files-from-sftp-server? dev-env?)
 
@@ -134,16 +132,6 @@
 
 (defonce test-db-name (str "test_" (now)))
 
-(defn ->cookie [name value]
-  (proxy [Cookie] []
-    (getName [] name)
-    (getValue [] value)
-    (getDomain [] (get (re-matches #"(http(s)?://)([a-z0-9-\.]+)(:\d+)?" (server-address)) 3))
-    (getPath [] "/")
-    (isSecure [] false)
-    (getVersion [] 2)
-    (isExpired [_] false)))
-
 (defn ->cookie-store [store]
   (proxy [CookieStore] []
     (getCookies []       (or (vals @store) []))
@@ -151,7 +139,7 @@
     (clear []            (reset! store {}))
     (clearExpired [])))
 
-(def test-db-cookie (->cookie "test_db_name" test-db-name))
+(def test-db-cookie (c/->lupa-cookie "test_db_name" test-db-name))
 
 (defn get-anti-csrf [store-atom]
   (-> (get @store-atom "anti-csrf-token") .getValue codec/url-decode))
@@ -160,8 +148,8 @@
   (let [store (atom {})
         cookies (or (:cookie-store options) (->cookie-store store))]
     (.addCookie cookies (if (:test-db-name options)
-                          (->cookie "test_db_name"
-                                    (:test-db-name options))
+                          (c/->lupa-cookie "test_db_name"
+                                           (:test-db-name options))
                           test-db-cookie))
     (verb url (assoc options :cookie-store cookies))))
 
@@ -822,7 +810,7 @@
 
 (defn upload-file-and-bind
   "Uploads file and then bind using bind-attachments. To upload new file, specify metadata using filedata.
-  If upload to existing attachment, filedata can be empty byt :attachment-id should be defined."
+  If upload to existing attachment, filedata can be empty but :attachment-id should be defined."
   [apikey id filedata & {:keys [fails attachment-id]}]
   (let [file-id (get-in (upload-file apikey (or (:filename filedata) "dev-resources/test-attachment.txt")) [:files 0 :fileId])
         data (if attachment-id

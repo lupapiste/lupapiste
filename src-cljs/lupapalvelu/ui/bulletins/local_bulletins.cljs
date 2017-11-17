@@ -10,6 +10,7 @@
 (defn init
   [init-state props]
   (reset! state/current-organization (:organization @args))
+  (reset! state/local-bulletins-query {:page 1 :left -1 :pending? false})
   (common/query :local-bulletins-page-settings
                 (fn [{:keys [enabled texts]}]
                   (when-not enabled
@@ -17,9 +18,20 @@
                   (reset! state/local-bulletins-page-settings {:texts texts}))
                 :organization @state/current-organization)
   (common/query :local-application-bulletins
-                (fn [{:keys [data]}] (reset! state/local-bulletins data))
-                :organization @state/current-organization :searchText "" :page 1)
+                (fn [{:keys [data left]}]
+                  (reset! state/local-bulletins data)
+                  (swap! state/local-bulletins-query assoc :left left))
+                :organization @state/current-organization :searchText "" :page (:page @state/local-bulletins-query))
   init-state)
+
+(defn load-more-bulletins []
+  (swap! state/local-bulletins-query update :page inc)
+  (swap! state/local-bulletins-query assoc :pending? true)
+  (common/query :local-application-bulletins
+                (fn [{:keys [data left]}]
+                  (swap! state/local-bulletins concat data)
+                  (swap! state/local-bulletins-query assoc :pending? false :left left))
+                :organization @state/current-organization :searchText "" :page (:page @state/local-bulletins-query)))
 
 (defn open-bulletin [id]
   (js/pageutil.openPage "bulletin" id))
@@ -56,6 +68,18 @@
           [:td (common/format-timestamp verdictGivenAt)]
           [:td (common/format-timestamp appealPeriodEndsAt)]])]]))
 
+(rum/defc load-more-button < rum/reactive
+  [_]
+  (let [{:keys [left pending?]} (rum/react state/local-bulletins-query)]
+    (when (nat-int? left)
+      [:button.bulletin.orange-bg
+       {:on-click load-more-bulletins
+        :class [(when pending? "waiting")]}
+       [:i.lupicon-circle-plus]
+       [:i.wait.spin.lupicon-refresh]
+       [:span (common/loc :bulletin.search.button)]
+       [:span (str left " " (common/loc :unit.kpl))]])))
+
 (rum/defc heading < rum/reactive
   [_]
   (let [lang  (common/get-current-language)
@@ -76,7 +100,9 @@
    (heading)
    [:div.full.content
     [:div.content-center
-     (bulletins-table)]]])
+     (bulletins-table)]
+    [:div.search-button-wrapper
+     (load-more-button)]]])
 
 (defn mount-component []
   (rum/mount (local-bulletins)

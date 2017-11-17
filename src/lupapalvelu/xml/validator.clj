@@ -2,8 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace tracef debug debugf info warn warnf error errorf fatal]]
             [sade.strings :as s]
             [sade.core :refer :all]
-            [clojure.java.io :as io]
-            [sade.env :as env])
+            [clojure.java.io :as io])
   (:import [java.io InputStream Reader StringReader]
            [javax.xml.transform.stream StreamSource]
            [javax.xml.validation SchemaFactory]
@@ -275,3 +274,12 @@
       (catch Exception e
         (debugf "Validation error with permit-type %s, schema-version %s: %s" permit-type schema-version (.getMessage e))
         (throw e)))))
+
+(defn validate-integration-message!
+  "Validates xml-string. Returns xml-string if valid. Throws using sade.core/fail! if validation failed."
+  [xml-string permit-type krysp-version]
+  (try
+    (validate xml-string permit-type krysp-version)
+    xml-string
+    (catch org.xml.sax.SAXParseException e
+      (fail! :error.integration.create-message :details (.getMessage e)))))

@@ -318,10 +318,19 @@ $navi-sidebar-bp: 1800px;
   padding-left: $icon-pad;
 }
 
- .users-search {
+.users-search {
   input.textinput {
     display: inline-block;
     width: 20em;
     vertical-align: middle;
+  }
+}
+
+.docterminal-settings {
+  .checkbox-wrapper {
+    border: none;
+  }
+  table {
+    margin-bottom: 0;
   }
 }
