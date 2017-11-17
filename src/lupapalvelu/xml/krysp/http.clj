@@ -23,7 +23,7 @@
        (doto (cookies/cookie-store)
          (cookies/add-cookie (lupa-cookies/->lupa-cookie "test_db_name" mongo/*db-name*)))})))
 
-(sc/defn wrap-authentication [options http-conf :- org/KryspHttpConf]
+(sc/defn ^:always-validate wrap-authentication [options http-conf :- org/KryspHttpConf]
   (if-not (:auth-type http-conf)
     options
     (let [creds (org/get-credentials http-conf)]
@@ -33,7 +33,7 @@
                        (update :headers assoc "x-username" (first creds))
                        (update :headers assoc "x-password" (second creds)))))))
 
-(sc/defn create-headers [headers :- (ssu/get org/KryspHttpConf :headers)]
+(sc/defn ^:always-validate create-headers [headers :- (ssu/get org/KryspHttpConf :headers)]
   (when (seq headers)
     (zipmap
       (map (comp ss/lower-case :key) headers)
@@ -43,14 +43,14 @@
   (-> (ss/join "/" [(:url http-conf) (get-in http-conf [:path type])])
       (ss/replace #"/+$" "")))
 
-(sc/defn POST
+(sc/defn ^:always-validate POST
   "HTTP POST given XML string to endpoint defined in http-conf."
   ([type :- (apply sc/enum org/endpoint-types) xml :- sc/Str http-conf :- org/KryspHttpConf]
     (POST type xml http-conf nil))
   ([type :- (apply sc/enum org/endpoint-types)
     xml :- sc/Str
     http-conf :- org/KryspHttpConf
-    options :- {sc/Keyword sc/Any}]
+    options :- (sc/maybe {sc/Keyword sc/Any})]
     (http/post
       (create-url type http-conf)
       (-> options
@@ -59,7 +59,7 @@
           (update :headers merge (create-headers (:headers http-conf)))
           (wrap-authentication http-conf)))))
 
-(sc/defn send-xml
+(sc/defn ^:always-validate send-xml
   [application user type :- (apply sc/enum org/endpoint-types) xml :- sc/Str http-conf :- org/KryspHttpConf]
   (let [message-id (mongo/create-id)]
     (imessages/save (util/strip-nils
