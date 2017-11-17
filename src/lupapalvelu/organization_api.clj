@@ -687,6 +687,17 @@
                      (into {}))]
     (mongo/update-by-id :organizations organization {$set updates})))
 
+(defcommand delete-kuntagml-http-endpoint
+  {:description "Remove HTTP config for permit-type"
+   :parameters  [organization permitType]
+   :user-roles   #{:admin}
+   :input-validators [permit/permit-type-validator]
+   :pre-checks  [(fn [{:keys [data]}]
+                  (when-not (pos? (mongo/count :organizations {:_id (:organization data)}))
+                    (fail :error.unknown-organization)))]}
+  [_]
+  (mongo/update-by-id :organizations organization {$unset {(str "krysp." permitType ".http") 1}}))
+
 (defcommand set-kopiolaitos-info
   {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress kopiolaitosOrdererPhone kopiolaitosOrdererEmail]
    :user-roles #{:authorityAdmin}
