@@ -79,7 +79,7 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function(params) {
   self.hasFiles = function() {
     return _.some( service.attachments(),
                    _.ary( _.partialRight( util.getIn,
-                                          ["latestVersion", "fileId"] ),
+                                          ["latestVersion", "filename"] ),
                           1));
   };
 
