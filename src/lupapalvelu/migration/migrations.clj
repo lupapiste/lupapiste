@@ -3579,7 +3579,8 @@
     (->> [muu-tunnus
           (get-in task [:data :muuTunnusSovellus :value])
           (get-in task [:state])]
-         (remove util/empty-or-nil?))))
+         (remove util/empty-or-nil?)
+         not-empty)))
 
 (defn get-duplicate-task-ids-by [equality-fields-getter {tasks :tasks}]
   (-> (reduce (fn [{processed :processed :as result} task]
@@ -3588,7 +3589,7 @@
                     (update result :duplicate-task-ids conj (:id task))
                     (update result :processed conj fields))
                   result))
-              {:duplicate-task-ids #{} :found-fields #{}}
+              {:duplicate-task-ids #{} :processed #{}}
               tasks)
       :duplicate-task-ids))
 
@@ -3602,7 +3603,7 @@
   (mongo/update :applications {:_id app-id} {$pull {:tasks {:id {$in task-ids}}}}))
 
 (defmigration remove-duplicate-task-ids-by-muutunnus
-  (->> (mongo/select :applications {:tasks.data.muuTunnus.value {$exists true}} [:tasks :attachments])
+  (->> (mongo/select :applications {:permitType "R" :tasks.data.muuTunnus.value {$exists true}} [:tasks :attachments])
        (reduce (fn [counter app]
                  (let [duplicate-task-ids (get-duplicate-task-ids-by review-muutunnus-equality-fields app)]
                    (remove-tasks-by-ids! app duplicate-task-ids)
