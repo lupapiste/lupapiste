@@ -44,7 +44,8 @@
                                (param-schema-map))}
         oauth-scope (keyword (:oauth-scope meta-data))
         retval-schema (get meta-data :returns)
-        [method path-string]  (if (string? path) [:get path] path)]
+        [method path-string]  (if (string? path) [:get path] path)
+        response-data (gensym "response-data")]
 
     `(do
        ~(when register-endpoint?
@@ -59,7 +60,7 @@
                            `(user-for-access-token (request/ring-request))
                            `(or (basic-authentication (request/ring-request))
                                 (autologin/autologin  (request/ring-request))))
-                 response-data# (delay ~@content)]
+                 ~response-data (delay ~@content)]
              (cond
                (not ~'user)
                basic-401
@@ -72,16 +73,18 @@
                (not (valid-inputs? request# ~params))
                (resp/status 400 (resp/json (fail :error.input-validation-error)))
 
-               (action/response? @response-data#)
-               @response-data#
+               (action/response? @~response-data)
+               @~response-data
 
                :else
-               (try
-                 (sc/validate ~retval-schema @response-data#)
-                 (resp/status 200 (resp/json @response-data#))
-                 (catch Exception e#
-                   (errorf "Possible schema error or other failure in %s: %s" ~path e#)
-                   (resp/status 500 "Unknown server error")))))))))
+               ~(if retval-schema
+                  `(try
+                    (sc/validate ~retval-schema @~response-data)
+                    (resp/status 200 (resp/json @~response-data))
+                    (catch Exception e#
+                      (errorf "Possible schema error or other failure in %s: %s" ~path e#)
+                      (resp/status 500 "Unknown server error")))
+                  `(resp/status 200 {}))))))))
 
 (defmacro defendpoint [path & content]
   "Defines a plain JSON endpoint which can be accessed with basic authentication or autologin.
