@@ -109,6 +109,26 @@ Foreman accepts invite to project application
   Wait until  Confirm yes no dialog
   Logout
 
+Solita is invited to the foreman application
+  User logs in  kaino@solita.fi  kaino123  Kaino Solita
+  Wait test id visible  accept-invite-button
+  Element Should Contain  xpath=//div[@class='invitation'][1]//h3  Yritysvaltuutus: ${appname}, Sipoo, Työnjohtajan nimeäminen
+
+Solita opens the foreman application and dismisses invitation dialog
+  Scroll and click test id  open-application-button
+  Wait test id visible  yes-no-dialog
+  Deny yes no dialog
+
+Solita accepts invitation via sidebar button
+  Click visible test id  accept-invite-button
+  No such test id  accept-invite-button
+
+Solita returns to applications and the invitation is gone
+  Click link  jquery=div.nav-top div.header-box a[title=Hankkeet]
+  Applications page should be open
+  No such test id  accept-invite-button
+  [Teardown]  Logout
+
 Applicant returns to project application
   Pena logs in
   Open project application

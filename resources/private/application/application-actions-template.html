@@ -142,7 +142,8 @@
        <!-- /ko -->
        <!-- ko if: hasCompanyInvites -->
             <button class="positive"
-                    data-bind="click: approveInvite, enable: $root.authorization.ok('approve-invite')"
+                    data-bind="click: _.partial(approveInvite, 'company'),
+                               enable: $root.authorization.ok('approve-invite')"
                     data-test-id="accept-invite-button">
                 <span data-bind="ltext: 'applications.approveCompanyInvite'"></span>
             </button>
