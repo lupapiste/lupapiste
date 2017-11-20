@@ -287,11 +287,13 @@
   // <i>localized content type size string</i>
   ko.bindingHandlers.latestVersionDownload = {
     update: function( element, valueAccessor) {
-      var v = ko.utils.unwrapObservable( valueAccessor());
-      if( v ) {
-        var data = ko.mapping.toJS( v );
+      var attachmentId = util.getIn(valueAccessor(), ["attachmentId"]);
+      var version = util.getIn(valueAccessor(), ["version"]);
+      if( attachmentId && version ) {
+        var data = ko.mapping.toJS( version );
         $(element).html( latestVersionTemplate( _.merge( data, {contentText: loc( data.contentType),
-                                                                sizeText: util.sizeString( data.size )})));
+                                                                sizeText: util.sizeString( data.size ),
+                                                                attachmentId: attachmentId})));
       }
     }
   };
