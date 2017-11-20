@@ -76,11 +76,10 @@
 (defn- remove-mongo-files
   "Remove actual attachment files from MongoDB after archiving. Only for ARK / archiving projects now."
   [app-id attachment-id]
-  (when-not (= app-id attachment-id)
-    (when-let [application (domain/get-application-no-access-checking app-id)]
-      (when (= permit/ARK (:permitType application))
-        (when-let [attachment (first (filter #(= attachment-id (:id %)) (:attachments application)))]
-          (att/delete-archived-attachments-files-from-mongo! application attachment))))))
+  (when-let [application (domain/get-application-no-access-checking app-id)]
+    (when (= permit/ARK (:permitType application))
+      (when-let [attachment (first (filter #(= attachment-id (:id %)) (:attachments application)))]
+        (att/delete-archived-attachments-files-from-mongo! application attachment)))))
 
 (defn- set-attachment-state [next-state application now id]
   (let [fresh-application (domain/get-application-no-access-checking (:id application))
@@ -94,7 +93,9 @@
              :attachments.$.metadata.tila next-state
              :attachments.$.readOnly (contains? archival-states next-state)
              :attachments.$.latestVersion.onkaloFileId id
-             (str "attachments.$.versions." last-version-index ".onkaloFileId") id}})))
+             (str "attachments.$.versions." last-version-index ".onkaloFileId") id}})
+    (when (= :arkistoitu next-state)
+      (remove-mongo-files (:id application) id))))
 
 (defn- set-application-state [next-state application now _]
   (action/update-application
@@ -117,7 +118,6 @@
     post-archiving-pool
     (state-update-fn :arkistoitu application now id)
     (info "State for attachment id" id "from application" (:id application) "updated to arkistoitu.")
-    (remove-mongo-files (:id application) id)
     (mark-first-time-archival application now)
     (mark-application-archived-if-done application now user)
     (info "Post archiving ops complete for attachment id" id "from application" (:id application))))
