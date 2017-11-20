@@ -277,21 +277,21 @@
     }
   };
 
-  var attachmentVersionTemplate =
-        _.template( "<a href='/api/raw/download-attachment?attachment-id"
-                    + "=<%- fileId %>'><%- filename %></a><br>"
+  var latestVersionTemplate =
+        _.template( "<a href='/api/raw/latest-attachment-version?download=true&attachment-id"
+                    + "=<%- attachmentId %>'><%- filename %></a><br>"
                     + "<i class='fileinfo'><%- contentText %> <%- sizeText %></i>");
 
   // Fills the target element with:
-  // <a href="attachment file download url">filename</a><br>
+  // <a href="attachment latest version file download url">filename</a><br>
   // <i>localized content type size string</i>
-  ko.bindingHandlers.attachmentVersion = {
+  ko.bindingHandlers.latestVersionDownload = {
     update: function( element, valueAccessor) {
       var v = ko.utils.unwrapObservable( valueAccessor());
       if( v ) {
         var data = ko.mapping.toJS( v );
-        $(element).html( attachmentVersionTemplate( _.merge( data, {contentText: loc( data.contentType),
-                                                                    sizeText: util.sizeString( data.size )})));
+        $(element).html( latestVersionTemplate( _.merge( data, {contentText: loc( data.contentType),
+                                                                sizeText: util.sizeString( data.size )})));
       }
     }
   };
@@ -309,8 +309,8 @@
   };
 
   var downloadWithIcon = "<div class='download'>"
-                       + "<a href='/api/raw/download-attachment?attachment-id"
-                       + "=<%- fileId %>'>"
+                       + "<a href='/api/raw/latest-attachment-version?download=true&attachment-id"
+                       + "=<%- attachmentId %>'>"
                        + "<i class='lupicon-download btn-small'></i>"
                        + "<span><%- download %></span></a> (<%- sizeText %>)"
                        + "</div>";
@@ -318,15 +318,15 @@
   var viewWithDownloadTemplate =
         _.template(
           "<div class='view-with-download'><a target='_blank' "
-            +"href='/api/raw/view-attachment?attachment-id"
-            + "=<%- fileId %>'><%- filename %></a><br>"
+            +"href='/api/raw/latest-attachment-version?attachment-id"
+            + "=<%- attachmentId %>'><%- filename %></a><br>"
             + downloadWithIcon
             + "</div>");
 
   // Fills the target element with:
-  // <a href="attachment file view url" target="_blank">filename</a><br>
+  // <a href="attachment latest version file view url" target="_blank">filename</a><br>
   // <div class="download">
-  //   <a href="attachment file download url">
+  //   <a href="attachment latest version file download url">
   //     <i class="lupicon-download btn-small"></i>
   //     <span>Download file localization</span>
   //   </a>
@@ -356,16 +356,16 @@
     }
   };
 
-  // Fills the A element with file view attributes and content.
+  // Fills the A element with file view attributes and content. Links to the latest attachment version.
   // Note: works _only_ with A elements.
-  // Value must contain fileid and filename properties.
+  // Value must contain attachmentId and filename properties.
   ko.bindingHandlers.fileLink = {
     update: function( element, valueAccessor) {
       var v = ko.utils.unwrapObservable( valueAccessor());
       if( v ) {
         var data = ko.mapping.toJS( v );
         $(element).attr( {target: "_blank",
-                          href: "/api/raw/view-attachment?attachment-id=" + data.fileId });
+                          href: "/api/raw/latest-attachment-version?attachment-id=" + data.attachmentId});
         $(element).text( data.filename );
       }
     }

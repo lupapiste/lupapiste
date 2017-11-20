@@ -95,7 +95,7 @@
               <td class="attachment-file-info">
                 <span data-bind="if: $data.latestVersion">
                   <a href="#" data-bind="text: latestVersion.filename,
-                                         attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.latestVersion.fileId,
+                                         attr: {href: '/api/raw/latest-attachment-version?download=true&attachment-id=' + $data.id,
                                                 title: loc('download')},
                                          click: function() {return true;},
                                          clickBubble: false"></a>

@@ -54,8 +54,8 @@
     :verdictAttachment
     :nonVerdictAttachment))
 
-(defn- tag-by-file-status [{{file-id :fileId} :latestVersion :as attachment}]
-  (when file-id
+(defn- tag-by-file-status [{{:keys [fileId onkaloFileId]} :latestVersion :as attachment}]
+  (when (or fileId onkaloFileId)
     :hasFile))
 
 (def op-id-prefix "op-id-")

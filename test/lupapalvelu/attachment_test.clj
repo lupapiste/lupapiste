@@ -19,7 +19,9 @@
             [clojure.test :refer [is]]
             [schema.core :as sc]
             [sade.schemas :as ssc]
-            [sade.schema-generators :as ssg]))
+            [sade.schema-generators :as ssg]
+            [lupapalvelu.attachment.onkalo-client :as oc]
+            [lupapalvelu.action :as action]))
 
 (testable-privates lupapalvelu.attachment
                    attachment-file-ids
@@ -557,3 +559,81 @@
                                                           :attachments [{:id ..att-id..}]}]}])
                                      ..att-id..)
     => truthy))
+
+(facts "about linking files to Onkalo"
+  (let [user {:id "foo"}
+        file-id "12345"
+        original-file-id "67890"
+        onkalo-file-id "abcdef"
+        version (merge (ssg/generate Version)
+                       {:user user
+                        :fileId file-id
+                        :originalFileId original-file-id
+                        :onkaloFileId onkalo-file-id})
+        {:keys [id] :as attachment} (merge (ssg/generate Attachment)
+                                           {:versions [version]
+                                            :latestVersion version
+                                            :metadata {:nakyvyys :julkinen
+                                                       :tila :arkistoitu}
+                                            :auth [{:role "uploader"
+                                                    :id "foo"}]})
+        application {:id "LP-XXX-2017-00001"
+                     :attachments [attachment]
+                     :organization "186-R"
+                     :auth [{:role "owner"
+                             :id "foo"}]}]
+    (against-background
+      [(mongo/download file-id) => {:contents :from-mongo}
+       (mongo/download (str file-id "-preview")) => {:contents :from-mongo-preview}
+       (oc/get-file "186-R" onkalo-file-id false) => {:contents :from-onkalo}
+       (oc/get-file "186-R" onkalo-file-id true) => {:contents :from-onkalo-preview}]
+
+      (fact "file is normally downloaded from MongoDB"
+        (:contents (get-attachment-latest-version-file user id false application)) => :from-mongo
+        (:contents (get-attachment-latest-version-file user id true application)) => :from-mongo-preview)
+
+      (fact "file is downloaded from Onkalo if not in MongoDB"
+        (let [v2 (assoc version :fileId nil :originalFileId nil)
+              att2 (assoc attachment :version [v2]
+                                     :latestVersion v2)
+              app2 (assoc application :attachments [att2])]
+          (:contents (get-attachment-latest-version-file user id false app2)) => :from-onkalo
+          (:contents (get-attachment-latest-version-file user id true app2)) => :from-onkalo-preview)))
+
+    (let [file-id-2 "foobar"
+          original-file-id-2 "foobar2"
+          v2 (merge (ssg/generate Version)
+                    {:user user
+                     :fileId file-id-2
+                     :originalFileId original-file-id-2})
+          att2 (merge attachment
+                      {:versions [v2 version]})
+          app2 (assoc application :attachments [att2])]
+
+      (against-background
+        [(mongo/delete-file-by-id file-id) => true
+         (mongo/delete-file-by-id original-file-id) => true
+         (mongo/delete-file-by-id (str file-id "-preview")) => true
+         (mongo/delete-file-by-id (str original-file-id "-preview")) => true
+         (mongo/delete-file-by-id file-id-2) => true
+         (mongo/delete-file-by-id original-file-id-2) => true
+         (mongo/delete-file-by-id (str file-id-2 "-preview")) => true
+         (mongo/delete-file-by-id (str original-file-id-2 "-preview")) => true
+         (action/update-application
+           (action/application->command app2)
+           {:attachments.id id}
+           {$set {"attachments.$.versions.0.fileId" nil
+                  "attachments.$.versions.0.originalFileId" nil}}) => nil
+         (action/update-application
+           (action/application->command app2)
+           {:attachments.id id}
+           {$set {"attachments.$.versions.1.fileId" nil
+                  "attachments.$.versions.1.originalFileId" nil}}) => nil
+         (action/update-application
+           (action/application->command app2)
+           {:attachments.id id}
+           {$set {:attachments.$.latestVersion.fileId nil
+                  :attachments.$.latestVersion.originalFileId nil}}) => :application-updated]
+
+        (fact "archived attachments can be deleted from MongoDB"
+          (delete-archived-attachments-files-from-mongo! app2 att2) => :application-updated)))))

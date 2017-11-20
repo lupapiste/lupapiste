@@ -1,10 +1,8 @@
 (ns lupapalvelu.pdf.pdf-export-api
   (:require [taoensso.timbre :as timbre :refer [info]]
             [ring.util.response :as response]
-            [clojure.java.io :as io]
             [sade.files :as files]
             [lupapalvelu.action :as action :refer [defraw]]
-            [lupapalvelu.application :as a]
             [lupapalvelu.application-bulletins-api :as bulletins-api]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.mongo :as mongo]
@@ -12,7 +10,8 @@
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.application-utils :as app-utils]))
 
 (defn ok [body]
   {:status  200
@@ -33,7 +32,7 @@
    :pre-checks       [permit/is-not-archiving-project]}
   [{:keys [user application lang]}]
   (if application
-    (ok (-> application (a/with-masked-person-ids user) (pdf-export/generate lang)))
+    (ok (-> application (app-utils/with-masked-person-ids user) (pdf-export/generate lang)))
     not-found))
 
 (defraw submitted-application-pdf-export
@@ -44,7 +43,7 @@
    :states           states/all-states}
   [{:keys [user application lang]}]
   (if-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-    (ok (-> submitted-application (a/with-masked-person-ids user) (pdf-export/generate lang)))
+    (ok (-> submitted-application (app-utils/with-masked-person-ids user) (pdf-export/generate lang)))
     not-found))
 
 (defraw bulletin-pdf-export
@@ -54,7 +53,7 @@
    :states     states/all-states}
   [{:keys [lang user]}]
   (if-let [bulletin (bulletins/get-bulletin bulletinId {})]
-    (ok (-> (last (:versions bulletin)) (a/with-masked-person-ids user) (pdf-export/generate lang)))
+    (ok (-> (last (:versions bulletin)) (app-utils/with-masked-person-ids user) (pdf-export/generate lang)))
     not-found))
 
 (defraw pdfa-casefile

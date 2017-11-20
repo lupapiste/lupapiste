@@ -3588,6 +3588,38 @@
                 {$set {:docstore-info.allowedTerminalAttachmentTypes []}}
                 :multi true))
 
+(def missing-onkalo-file-id-query
+  {:attachments {$elemMatch {:metadata.tila :arkistoitu
+                             :latestVersion.onkaloFileId {$exists false}}}})
+
+(defmigration add-onkalo-file-id-to-attachments
+  {:apply-when (pos? (mongo/count :applications missing-onkalo-file-id-query))}
+  (update-applications-array :attachments
+                             (fn [{:keys [id latestVersion versions metadata] :as attachment}]
+                               (if (and (= :arkistoitu (keyword (:tila metadata)))
+                                        (not (:onkaloFileId latestVersion)))
+                                 (let [lv (-> (last versions)
+                                              (assoc :onkaloFileId id))]
+                                   (-> (assoc-in attachment [:latestVersion :onkaloFileId] id)
+                                       (assoc :versions (-> (drop-last versions)
+                                                            (concat [lv])))))
+                                 attachment))
+                             missing-onkalo-file-id-query))
+
+(def archiving-project-file-query
+  {:permitType "ARK"
+   :attachments {$elemMatch {:metadata.tila :arkistoitu
+                             :latestVersion.fileId {$type "string"}}}})
+
+(defmigration remove-archived-archiving-project-files
+  {:apply-when (pos? (mongo/count :applications archiving-project-file-query))}
+  (doseq [app (mongo/select :applications archiving-project-file-query [:_id :attachments :permitType])]
+    (doseq [{:keys [metadata latestVersion] :as attachment} (:attachments app)]
+      (when (and (= "ARK" (:permitType app))
+                 (= :arkistoitu (keyword (:tila metadata)))
+                 (:onkaloFileId latestVersion))
+        (att/delete-archived-attachments-files-from-mongo! app attachment)))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
