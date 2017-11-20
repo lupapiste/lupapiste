@@ -80,11 +80,13 @@
        process-applications))
 
 (defn- vtj-prt-updates [application document-id vtj-prt]
-  (let [operation-id (-> (util/find-by-id document-id (:documents application))
-                         (get-in [:schema-info :op :id]))]
-    {$set (merge
-           (building/document-buildingid-updates-for-operation application vtj-prt operation-id)
-           (building/buildings-array-buildingid-updates-for-operation application vtj-prt operation-id))}))
+  (when-let [operation-id (-> (util/find-by-id document-id (:documents application))
+                              (get-in [:schema-info :op :id]))]
+    (util/assoc-when-pred
+        nil not-empty
+        $set (merge
+              (building/document-buildingid-updates-for-operation application vtj-prt operation-id)
+              (building/buildings-array-buildingid-updates-for-operation application vtj-prt operation-id)))))
 
 (defn update-vtj-prt! [application document-id vtj-prt]
   (->> (vtj-prt-updates application document-id vtj-prt)
