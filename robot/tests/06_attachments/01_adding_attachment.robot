@@ -376,15 +376,19 @@ Approve-button should be disabled
   [Tags]  attachments
   Wait until  Element should be disabled  test-attachment-approve
 
+Sign attachment button should be visible
+  [Tags]  attachments
+  Element should be visible  jquery=button[data-test-id='signLatestAttachmentVersion']
+
 Attachment state should be ok
   [Tags]  attachments
   Scroll and click test id  back-to-application-from-attachment
   Tab should be visible  attachments
   Wait Until  Attachment state should be  rakennuspaikka.ote_alueen_peruskartasta  ok
 
-Sign attachments button should not be visible
+Sign attachments button should be visible
   [Tags]  attachments
-  No such test id  sign-attachments
+  Element should be visible  jquery=button[data-test-id='sign-attachments']
 
 Sonja adds an attachment for Mikko to sign (LPK-517)
   [Tags]  attachments

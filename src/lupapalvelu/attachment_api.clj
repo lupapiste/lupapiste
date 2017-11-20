@@ -710,8 +710,7 @@
   if the user is allowed to sign and there are signable
   attachments."
    :user-roles  #{:applicant :authority}
-   :pre-checks  [domain/validate-owner-or-write-access
-                 (fn [{application :application}]
+   :pre-checks  [(fn [{application :application}]
                    (when-not (pos? (count (:attachments application)))
                      (fail :application.attachmentsEmpty)))
                  app/validate-authority-in-drafts
@@ -736,8 +735,7 @@
    :input-validators [(partial action/non-blank-parameters [:password])
                       (partial action/vector-parameters-with-non-blank-items [:attachmentIds])]
    :states           (states/all-application-states-but states/terminal-states)
-   :pre-checks       [domain/validate-owner-or-write-access
-                      (app/allow-roles-only-in-operations [:foreman] [:tyonjohtajan-nimeaminen-v2])
+   :pre-checks       [(app/allow-roles-only-in-operations [:foreman] [:tyonjohtajan-nimeaminen-v2])
                       app/validate-authority-in-drafts
                       permit/is-not-archiving-project]
    :user-roles       #{:applicant :authority}
