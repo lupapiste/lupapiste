@@ -666,6 +666,20 @@
                {:attachments.$.auth []}))})
     (infof "3/3 deleted meta-data of file %s of attachment" file-id attachment-id)))
 
+(defn get-attachment-file-as!
+  "Returns the attachment file if user has access to application and the attachment, otherwise nil."
+  [user file-id]
+  (when-let [attachment-file (mongo/download file-id)]
+    (when-let [application (and (:application attachment-file) (get-application-as (:application attachment-file) user :include-canceled-apps? true))]
+      (when (and (seq application) (access/can-access-attachment-file? user file-id application)) attachment-file))))
+
+(defn get-attachment-file!
+  "Returns the attachment file without access checking, otherwise nil."
+  [file-id]
+  (when-let [attachment-file (mongo/download file-id)]
+    (when-let [application (and (:application attachment-file) (get-application-no-access-checking (:application attachment-file)))]
+      (when (seq application) attachment-file))))
+
 (defn- get-attachment-version-file [application attachment {:keys [fileId onkaloFileId filename contentType]} user preview?]
   (when (or (not user) (access/can-access-attachment? user application attachment))
     (cond
@@ -673,7 +687,7 @@
       (if preview?
         (or (mongo/download (str fileId "-preview"))
             ;; Generate preview if not previously done. It's async, so it can't be returned in this request.
-            (preview/create-preview! fileId filename contentType application mongo/*db-name*))
+            (preview/generate-preview-and-return-placeholder! (:id application) fileId filename contentType))
         (mongo/download fileId))
 
       onkaloFileId
@@ -686,30 +700,6 @@
 
       :else
       (error "Attachment" (:id attachment) "has a version with neither fileId nor onkaloFileId"))))
-
-(defn- get-file-by-file-id
-  "Returns the attachment file from Mongo. Does not check authorization if the user argument is nil."
-  [application file-id user]
-  (let [attachment (->> (:attachments application)
-                        (filter (fn [{:keys [versions]}]
-                                  (some #(= file-id (:fileId %)) versions)))
-                        first)
-        version (->> (:versions attachment)
-                     (some #(when (= file-id (:fileId %)) %)))]
-    (when version
-      (get-attachment-version-file application attachment version user false))))
-
-(defn get-attachment-file-as!
-  "Returns the attachment file if user has access to application and the attachment, otherwise nil."
-  [user file-id]
-  (when-let [application (get-application-as {:attachments.versions.fileId file-id} user :include-canceled-apps? true)]
-    (get-file-by-file-id application file-id user)))
-
-(defn get-attachment-file!
-  "Returns the attachment file without access checking, otherwise nil."
-  [file-id]
-  (when-let [application (get-application-no-access-checking {:attachments.versions.fileId file-id})]
-    (get-file-by-file-id application file-id nil)))
 
 (defn get-attachment-latest-version-file
   "Returns the file for the latest attachment version if user has access to application and the attachment, otherwise nil.
@@ -756,17 +746,6 @@
             :headers
             http/no-cache-headers)
     not-found))
-
-(defn output-attachment-preview!
-  "Outputs attachment preview creating it if is it does not already exist"
-  [file-id attachment-fn]
-  (let [preview-id (str file-id "-preview")]
-    (if-let [{:keys [filename contentType application]} (attachment-fn file-id)]
-      (do
-        (when (zero? (mongo/count :fs.files {:_id preview-id}))
-          (preview/create-preview! file-id filename contentType application mongo/*db-name*))
-        (output-attachment preview-id false attachment-fn))
-      not-found)))
 
 (defn cleanup-temp-file [conversion-result]
   (if (and (:content conversion-result) (not (instance? InputStream (:content conversion-result))))
@@ -837,7 +816,7 @@
    If application-pdf-lang is provided, application and submitted application PDFs are included.
    Callers responsibility is to delete the returned file when done with it!"
   ([attachments application user]
-    (get-all-attachments! attachments application user))
+    (get-all-attachments! attachments application user nil))
   ([attachments application user application-pdf-lang]
    (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")] ; Must be deleted by caller!
      (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
