@@ -291,6 +291,7 @@
     ;; company-auth can be nil if company is locked
     (when-let [company-auth (company/company->auth company)]
       (assoc company-auth
+             :company-role "admin"
              :role "reader"
              :invite {:user {:id company-id}
                       :inviter (usr/summary inviter)

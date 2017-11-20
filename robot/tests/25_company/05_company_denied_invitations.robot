@@ -22,7 +22,7 @@ Company admin invites user to company
   Invite existing dummy user  ${dummy}  Duff3  Dummy3
   Check invitation  0  ${dummy}  Dummy3  Duff3  Käyttäjä  Kyllä
 
-User accept invite
+User accepts invite
   Accept invitation  dummy3@example.com
   Wait Until  Page Should Contain  Tilisi on liitetty onnistuneesti yrityksen tiliin.
   Click link  Siirry Lupapiste-palveluun
