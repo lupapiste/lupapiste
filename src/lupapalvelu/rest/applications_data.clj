@@ -7,6 +7,8 @@
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical-operations]]
             [schema.core :as sc]
             [taoensso.timbre :as timbre :refer [warnf]]
+            [lupapalvelu.action :as action]
+            [lupapalvelu.building :as building]
             [lupapalvelu.rest.schemas :refer [HakemusTiedot]]))
 
 (defn- transform-operation [operation]
@@ -77,5 +79,13 @@
        query-applications
        process-applications))
 
-(defn update-vtj-prt [application document-id vtj-prt]
-  nil)
+(defn- vtj-prt-updates [application document-id vtj-prt]
+  (let [operation-id (-> (util/find-by-id document-id (:documents application))
+                         (get-in [:schema-info :op :id]))]
+    {$set (merge
+           (building/document-buildingid-updates-for-operation application vtj-prt operation-id)
+           (building/buildings-array-buildingid-updates-for-operation application vtj-prt operation-id))}))
+
+(defn update-vtj-prt! [application document-id vtj-prt]
+  (->> (vtj-prt-updates application document-id vtj-prt)
+       (action/update-application (action/application->command application))))
