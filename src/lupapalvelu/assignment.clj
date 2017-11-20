@@ -221,8 +221,9 @@
                                                 "$lt"  (or (:end createdDate) (tc/to-long (t/now)))}})
                         (when-not (empty? targetType)
                           {:targets.group {$in targetType}})
-                        (if (= trigger "user-created")
-                          {:trigger "user-created"}
+                        (case trigger
+                          "user-created" {:trigger "user-created"}
+                          "any" nil
                           {:trigger {"$ne" "user-created"}})
                         {:status {$ne "canceled"}}])
   :post-lookup (filter seq

@@ -30,8 +30,8 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   self.trigger          = ko.pureComputed(function() {
     if (self.searchResultType() === "automatic") {
       return "not-user-created";
-    } else if (self.state() === "all" || self.state() === "completed") {
-      return "";
+    } else if (self.searchResultType() === "all" || self.searchResultType() === "completed") {
+      return "any";
     } else {
       return "user-created";
     }
