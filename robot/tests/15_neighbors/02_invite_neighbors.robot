@@ -68,6 +68,12 @@ Sonja checks that property id and email validation works
   Test id has class  neighbors.edit.email  warn
   Test id disabled  modal-dialog-submit-button
 
+Property Ids with maaraala are supported
+  Input text by test id  neighbors.edit.propertyId  753-416-25-22M12345
+  Test id has class  neighbors.edit.propertyId  warn
+  Input text by test id  neighbors.edit.propertyId  753-416-25-22M1234
+  Test id does not have class  neighbors.edit.propertyId  warn
+
 Sonja corrects the email address of neighbor c
   Input text by test id  neighbors.edit.email  c@example.com
   Click by test id  modal-dialog-submit-button
