@@ -152,8 +152,7 @@
             doc-updates (generate-remove-invalid-user-from-docs-updates updated-app)]
         (update-application command
           (merge
-            {$pull {:auth {$and [{:username username}, {:type {$ne :owner}}]}}
-             $set  {:modified (:created command)}}
+            {$pull {:auth {$and [{:username username}, {:type {$ne :owner}}]}}}
             (when (seq doc-updates) {$unset doc-updates})))))))
 
 (defcommand decline-invitation
