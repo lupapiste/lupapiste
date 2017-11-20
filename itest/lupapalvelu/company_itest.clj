@@ -449,6 +449,7 @@
     (fact "Activate"
       (when-let [body (get-in email [:body :plain])]
         (-> (re-find  #".+/app/security/activate/([a-zA-Z0-9]+)" body)
+            first
             (http-get {:follow-redirects false})) => http302?))
     (fact "Can NOT log in yet"
       (login "foo@example.com" "foofoo123" params) => ok?)
