@@ -230,17 +230,17 @@
   (fact "new entry, no existing handlers"
     (handler-upsert-updates {:id ..new-id.. :info ..info..} [] ..created.. ..user..) =>
     {$push {:history {:handler {:id ..new-id.. :info ..info.., :new-entry true}, :ts ..created.., :user {}}},
-     $set {:handlers.0 {:id ..new-id.. :info ..info..}, :modified ..created..}})
+     $set {:handlers.0 {:id ..new-id.. :info ..info..}}})
 
   (fact "new entry, one existing handler"
     (handler-upsert-updates {:id ..new-id..} [{:id ..id..}] ..created.. ..user..) =>
     {$push {:history {:handler {:id ..new-id.., :new-entry true}, :ts ..created.., :user {}}},
-     $set {:handlers.1 {:id ..new-id..}, :modified ..created..}})
+     $set {:handlers.1 {:id ..new-id..}}})
 
   (fact "update existing handler"
     (handler-upsert-updates {:id ..id-1..} [{:id ..id-0..} {:id ..id-1..} {:id ..id-2..}] ..created.. ..user..) =>
     {$push {:history {:handler {:id ..id-1..}, :ts ..created.., :user {}}},
-     $set {:handlers.1 {:id ..id-1..}, :modified ..created..}}))
+     $set {:handlers.1 {:id ..id-1..}}}))
 
 (facts multioperation-attachment-updates
   (fact "multioperation attachment update with op array"
