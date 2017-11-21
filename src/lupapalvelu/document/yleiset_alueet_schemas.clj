@@ -37,7 +37,7 @@
      :operationsPath ["yleisten-alueiden-luvat" "sijoituslupa"]}))
 
 (def tyomaasta-vastaava
-  (-> ya-party
+  (-> ya-party-tyomaasta-vastaava
       (schema-body-without-element-by-name "turvakieltoKytkin")
       (schema-body-without-element-by-name "hetu")))
 

@@ -42,6 +42,7 @@ var util = (function($) {
 
   var propertyIdDbFormat = /^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$/;
   var propertyIdHumanFormat = /^([1-9]{1}[0-9]{0,2})-([0-9]{0,3})-([0-9]{1,4})-([0-9]{1,4})$/;
+  var maaraalaFormat = /^M[0-9]{1,4}$/;
 
   function isPropertyId(s) {
     return propertyIdDbFormat.test(s) || propertyIdHumanFormat.test(s);
@@ -66,6 +67,66 @@ var util = (function($) {
     return _.join( _.map(_.zip([3, 3, 4, 4], id.split("-")), zp), "");
   }
 
+  // Undefined is allowed
+  function checkMaaraalaNumber( s ) {
+    return _.isUndefined( s )
+    || ( maaraalaFormat.test( "M" + s )
+      &&  _.inRange( _.parseInt( s), 1, 10000 ));
+  }
+
+  // Maarala can be missing. We allow also shorter M numbers.
+  function isPropertyIdWithMaaraalaInDbFormat( s ) {
+    var parts = _.split( _.trim(s), "M" );
+    return isPropertyIdInDbFormat( parts[0] )
+        && ( _.size( parts ) === 1
+          || checkMaaraalaNumber( parts[1] ));
+  }
+
+  function isPropertyIdWithMaaraalaInHumanFormat( s ) {
+    var parts = _.split( _.trim(s), "M" );
+    return propertyIdHumanFormat.test( parts[0] )
+        && ( _.size( parts ) === 1
+          || checkMaaraalaNumber( parts[1] ));
+  }
+
+  function isPropertyIdWithMaaraala( s ) {
+    return isPropertyIdWithMaaraalaInDbFormat( s )
+        || isPropertyIdWithMaaraalaInHumanFormat( s );
+  }
+
+  function propertyIdWithMaaralaToHumanFormat( id ) {
+    id = _.trim( id );
+    if( isPropertyIdWithMaaraalaInHumanFormat( id ) ) {
+      return id;
+    }
+    var parts = _.split( id, "M" );
+    var propId = propertyIdToHumanFormat( parts[0] );
+    if( _.size( parts ) === 1 ) {
+      return propId;
+    }
+    if( checkMaaraalaNumber( parts[1])) {
+      return sprintf( "%sM%s", propId, _.parseInt( parts[1]));
+    }
+    // Invalid id
+    return id;
+  }
+
+  function propertyIdWithMaaralaToDbFormat( id ) {
+    id = _.trim( id );
+    if( isPropertyIdWithMaaraalaInDbFormat( id ) ) {
+      return id;
+    }
+    var parts = _.split( id, "M" );
+    var propId = propertyIdToDbFormat( parts[0] );
+    if( _.size( parts ) === 1 ) {
+      return propId;
+    }
+    if( checkMaaraalaNumber( parts[1])) {
+      return sprintf( "%sM%04d", propId, _.parseInt( parts[1]));
+    }
+    // Invalid id
+    return id;
+  }
 
   function buildingName(building) {
     var buildingObj = (typeof building.index === "function") ? ko.mapping.toJS(building) : building;
@@ -537,7 +598,12 @@ var util = (function($) {
       isPropertyId:           isPropertyId,
       isPropertyIdInDbFormat: isPropertyIdInDbFormat,
       toHumanFormat:          propertyIdToHumanFormat,
-      toDbFormat:             propertyIdToDbFormat
+      toDbFormat:             propertyIdToDbFormat,
+      isPropertyIdWithMaaraala: isPropertyIdWithMaaraala,
+      isPropertyIdWithMaaraalaInDbFormat: isPropertyIdWithMaaraalaInDbFormat,
+      isPropertyIdWithMaaraalaInHumanFormat: isPropertyIdWithMaaraalaInHumanFormat,
+      withMaaraalaToDbFormat: propertyIdWithMaaralaToDbFormat,
+      withMaaraalaToHumanFormat: propertyIdWithMaaralaToHumanFormat
     },
     buildingName: buildingName,
     constantly:   function(value) { return function() { return value; }; },

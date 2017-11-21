@@ -1143,10 +1143,11 @@
                         :opening nil,
                         :permitType "P"}])))
 
-(defn update-docstore-info [org-id docStoreInUse documentPrice organizationDescription]
+(defn update-docstore-info [org-id docStoreInUse docTerminalInUse documentPrice organizationDescription]
   (command admin :update-docstore-info
            :org-id org-id
            :docStoreInUse docStoreInUse
+           :docTerminalInUse docTerminalInUse
            :documentPrice documentPrice
            :organizationDescription organizationDescription))
 
@@ -1160,26 +1161,53 @@
 
   (fact "calling does not change other organization data"
     (let [org (:data (query admin :organization-by-id :organizationId "753-R"))]
-      (update-docstore-info "753-R" true 100 (i18n/supported-langs-map (constantly "Description"))) => ok?
+      (update-docstore-info "753-R" true false 100 (i18n/supported-langs-map (constantly "Description"))) => ok?
       (dissoc org :docstore-info)
       => (-> (query admin :organization-by-id :organizationId "753-R")
              :data
              (dissoc :docstore-info))))
 
   (fact "calling updates organization's docstore info"
-    (update-docstore-info "753-R" true 100 {:fi "Kuvaus" :sv "Beskrivning" :en "Description"}) => ok?
+    (update-docstore-info "753-R" true false 100 {:fi "Kuvaus" :sv "Beskrivning" :en "Description"}) => ok?
     (get-docstore-info "753-R")
     => {:docStoreInUse true
+        :docTerminalInUse false
+        :allowedTerminalAttachmentTypes []
         :documentPrice 100
         :organizationDescription {:fi "Kuvaus" :sv "Beskrivning" :en "Description"}})
 
   (fact "can't set negative document price"
-    (update-docstore-info "753-R" true -100 "Description")
+    (update-docstore-info "753-R" true false -100 "Description")
     => (partial expected-failure? :error.illegal-number))
 
   (fact "can't set decimal document price"
-    (update-docstore-info "753-R" true 1.0 "Description")
+    (update-docstore-info "753-R" true true 1.0 "Description")
     => (partial expected-failure? :error.illegal-number)))
+
+(facts set-docterminal-attachment-type
+  (fact "only authority admin can call"
+    (command sonja :set-docterminal-attachment-type :attachmentType "osapuolet.cv" :enabled false)
+    => (partial expected-failure? :error.unauthorized))
+
+  (fact "cannot set nonsense types"
+    (command sipoo :set-docterminal-attachment-type :attachmentType "foo" :enabled true)
+    => (partial expected-failure? :error.illegal-value:schema-validation))
+
+  (fact "cannot set unless docterminal is enabled"
+    (command sipoo :set-docterminal-attachment-type :attachmentType "osapuolet.cv" :enabled true)
+    => (partial expected-failure? :error.docterminal-not-enabled))
+
+  (fact "calling with proper type adds type to organization's docstore-info"
+    (update-docstore-info "753-R" true true 100 {:fi "Kuvaus" :sv "Beskrivning" :en "Description"}) => ok?
+
+    (command sipoo :set-docterminal-attachment-type :attachmentType "osapuolet.cv" :enabled true) => ok?
+    (-> "753-R" get-docstore-info :allowedTerminalAttachmentTypes) => ["osapuolet.cv"]
+
+    (command sipoo :set-docterminal-attachment-type :attachmentType "all" :enabled true) => ok?
+    (-> "753-R" get-docstore-info :allowedTerminalAttachmentTypes) => local-org-api/allowed-attachments
+
+    (command sipoo :set-docterminal-attachment-type :attachmentType "all" :enabled false) => ok?
+    (-> "753-R" get-docstore-info :allowedTerminalAttachmentTypes) => []))
 
 (fact "organizations bulletin settings"
   (facts "query setting"

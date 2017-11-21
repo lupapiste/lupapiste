@@ -5,7 +5,8 @@
             [lupapalvelu.smoketest.application-smoke-tests]
             [lupapalvelu.smoketest.assignment-smoke-tests]
             [lupapalvelu.smoketest.organization-smoke-tests]
-            [lupapalvelu.smoketest.user-smoke-tests]))
+            [lupapalvelu.smoketest.user-smoke-tests]
+            [sade.env :as env]))
 
 (defmonster mongochecks
   (let [results (mongocheck/execute-checks (mongo/get-db))]
@@ -29,7 +30,7 @@
     (mongo/disconnect!))
 
   (mongo/connect!)
-
+  (println "Smoketest starting in target-env: " env/target-env)
   (let [started-from-cli (find-ns 'lupapalvelu.main)
         results (apply execute-tests args)
         all-ok  (reduce

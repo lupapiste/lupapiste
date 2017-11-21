@@ -3,12 +3,13 @@
             [lupapalvelu.fixture.core :refer :all]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.i18n :as i18n]
-            [sade.core :refer :all]))
+            [sade.core :refer :all]
+            [sade.env :as env]))
 
 (def- local-krysp "http://localhost:8000/dev/krysp")
 (def- local-3d-map "http://localhost:8000/dev/3dmap")
+(def- local-krysp-receiver (str (env/server-address) "/dev/krysp/receiver"))
 
 (def users
   [;; Solita admin:  admin / admin
@@ -70,7 +71,7 @@
     :enabled true
     :language "fi"
     :role "authority"
-    :orgAuthz {:837-R #{:authority}}
+    :orgAuthz {:837-R #{:authority :approver}}
     :firstName "Veikko"
     :lastName "Viranomainen"
     :phone "03121991"
@@ -607,7 +608,7 @@
 
    ;; Dummy Hakijat
 
-   ;; Dummy hakija 1: pena / pena
+   ;; Dummy hakija 1: dummy / pena
    {:id  "51112424c26b7342d92acf3c"
     :enabled  false
     :language "fi"
@@ -618,7 +619,7 @@
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"
               :apikey "602cb9e58426c613c8b85abe"} ; Dummy user has apikey, should not actually happen
     :role "applicant"}
-   ;; Dummy hakija 2: pena / pena
+   ;; Dummy hakija 2: dummy2 / pena
    {:id  "51112424c26b7342d92acf3d"
     :enabled  false
     :language "fi"
@@ -628,7 +629,7 @@
     :email  "dummy2@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
     :role "applicant"}
-   ;; Dummy hakija 3: pena / pena
+   ;; Dummy hakija 3: dummy3 / pena
    {:id  "51112424c26b7342d92acf3e"
     :enabled  false
     :language "fi"
@@ -938,8 +939,9 @@
                        :multiple-operations-supported true
                        :matti-enabled true
                        :docstore-info (assoc org/default-docstore-info
-                                        :docStoreInUse true
-                                        :documentPrice 314)
+                                             :docStoreInUse true
+                                             :docTerminalInUse true
+                                             :documentPrice 314)
 
                        :local-bulletins-page-settings
                        {:texts
@@ -1040,7 +1042,15 @@
                                                                            [:hakija :ote_kauppa_ja_yhdistysrekisterista]
                                                                            [:pelastusviranomaiselle_esitettavat_suunnitelmat :vaestonsuojasuunnitelma]
                                                                            [:suunnitelmat :valaistussuunnitelma]]}
-                       :krysp {:R {:url local-krysp :version "2.1.4" :ftpUser "dev_tampere"}}
+                       :krysp {:R {:url local-krysp :version "2.2.2"
+                                   :http (merge
+                                           {:auth-type "basic"
+                                            :partner "matti"
+                                            :path {:application "hakemus-path"
+                                                   :review  "katselmus-path"}
+                                            :url local-krysp-receiver
+                                            :headers [{:key "x-vault" :value "vaultti"}]}
+                                           (org/encode-credentials "kuntagml" "kryspi"))}}
                        :handler-roles [{:id "abba1111111111111111a837"
                                         :name {:fi "K\u00e4sittelij\u00e4"
                                                :sv "Handl\u00e4ggare"

@@ -12,11 +12,13 @@
             [sade.util :refer [=as-kw not=as-kw fn-> fn->>] :as util]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.application-bulletins :as bulletins]
+            [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.archiving-util :as archiving-util]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.attachment.metadata :as metadata]
+            [lupapalvelu.attachment.onkalo-client :as oc]
             [lupapalvelu.attachment.preview :as preview]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.tag-groups :as att-tag-groups]
@@ -33,7 +35,8 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.tiedonohjaus :as tos]
-            [lupapalvelu.user :as usr])
+            [lupapalvelu.user :as usr]
+            [me.raynes.fs :as fs])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File InputStream]))
 
@@ -108,8 +111,9 @@
 (defschema Version
   "Attachment version"
   {:version                              VersionNumber
-   :fileId                               ssc/ObjectIdStr             ;; fileId in GridFS
-   :originalFileId                       ssc/ObjectIdStr             ;; fileId of the unrotated/unconverted file
+   :fileId                               (sc/maybe ssc/ObjectIdStr)  ;; fileId in GridFS, nil if the file has been deleted when archived
+   :originalFileId                       (sc/maybe ssc/ObjectIdStr)  ;; fileId of the unrotated/unconverted file
+   (sc/optional-key :onkaloFileId)       AttachmentId                ;; id in Onkalo, if archived. Should equal attachment id.
    :created                              ssc/Timestamp
    ;; Timestamp for the latest "non-versioning" operation (e.g.,
    ;; rotation, pdf/a conversion). Thus, modified can be present only
@@ -417,6 +421,27 @@
   (mongo/delete-file-by-id file-id)
   (mongo/delete-file-by-id (str file-id "-preview")))
 
+(defn delete-archived-attachments-files-from-mongo! [application {:keys [metadata latestVersion versions id]}]
+  {:pre [(= :arkistoitu (keyword (:tila metadata)))
+         (every? :onkaloFileId [latestVersion (last versions)])]}
+  (->> versions
+       (map-indexed
+         (fn [idx {:keys [fileId originalFileId]}]
+           (delete-attachment-file-and-preview! fileId)
+           (delete-attachment-file-and-preview! originalFileId)
+           (let [version-path (str "attachments.$.versions." idx)]
+             (update-application
+               (application->command application)
+               {:attachments.id id}
+               {$set {(str version-path ".fileId") nil
+                      (str version-path ".originalFileId") nil}}))))
+       dorun)
+  (update-application
+    (application->command application)
+    {:attachments.id id}
+    {$set {:attachments.$.latestVersion.fileId nil
+           :attachments.$.latestVersion.originalFileId nil}}))
+
 (defn next-attachment-version [{:keys [major minor] :or {major 0 minor 0}} user]
   (if (usr/authority? user)
     {:major major, :minor (inc minor)}
@@ -655,13 +680,39 @@
     (when-let [application (and (:application attachment-file) (get-application-no-access-checking (:application attachment-file)))]
       (when (seq application) attachment-file))))
 
+(defn- get-attachment-version-file [application attachment {:keys [fileId onkaloFileId filename contentType]} user preview?]
+  (when (or (not user) (access/can-access-attachment? user application attachment))
+    (cond
+      fileId
+      (if preview?
+        (or (mongo/download (str fileId "-preview"))
+            ;; Generate preview if not previously done. It's async, so it can't be returned in this request.
+            (preview/generate-preview-and-return-placeholder! (:id application) fileId filename contentType))
+        (mongo/download fileId))
+
+      onkaloFileId
+      (merge
+        (oc/get-file (:organization application) onkaloFileId preview?)
+        {:filename    (if preview?
+                        (str (fs/name filename) ".jpg")
+                        filename)
+         :application (:id application)})
+
+      :else
+      (error "Attachment" (:id attachment) "has a version with neither fileId nor onkaloFileId"))))
+
 (defn get-attachment-latest-version-file
-  "Returns the file for the latest attachment version if user has access to application and the attachment, otherwise nil."
-  [user attachment-id]
-  (let [application (get-application-as {:attachments.id attachment-id} user :include-canceled-apps? true)
-        file-id (attachment-latest-file-id application attachment-id)]
-    (when (and application file-id (access/can-access-attachment-file? user file-id application))
-      (mongo/download file-id))))
+  "Returns the file for the latest attachment version if user has access to application and the attachment, otherwise nil.
+   Optionally uses the provided application to save on db overhead."
+  ([user attachment-id preview?]
+    (->> (get-application-as {:attachments.id attachment-id} user :include-canceled-apps? true)
+         (get-attachment-latest-version-file user attachment-id preview?)))
+  ([user attachment-id preview? application]
+   (let [{:keys [latestVersion] :as attachment} (->> (:attachments application)
+                                                     (filter #(= attachment-id (:id %)))
+                                                     first)]
+     (when (seq latestVersion)
+       (get-attachment-version-file application attachment latestVersion user preview?)))))
 
 (def- not-found {:status 404
                  :headers {"Content-Type" "text/plain"}
@@ -670,9 +721,11 @@
 (defn- attachment-200-response [attachment filename]
   {:status 200
    :body ((:content attachment))
-   :headers {"Content-Type" (:contentType attachment)
-             "Content-Length" (str (:size attachment))
-             "Content-Disposition" (format "filename=\"%s\"" filename)}})
+   :headers (merge
+              {"Content-Type" (:contentType attachment)
+               "Content-Disposition" (format "filename=\"%s\"" filename)}
+              (when (:size attachment)
+                {"Content-Length" (str (:size attachment))}))})
 
 (defn output-attachment
   ([attachment download?]
@@ -693,17 +746,6 @@
             :headers
             http/no-cache-headers)
     not-found))
-
-(defn output-attachment-preview!
-  "Outputs attachment preview creating it if is it does not already exist"
-  [file-id attachment-fn]
-  (let [preview-id (str file-id "-preview")]
-    (if-let [{:keys [filename contentType application]} (attachment-fn file-id)]
-      (do
-        (when (zero? (mongo/count :fs.files {:_id preview-id}))
-          (preview/create-preview! file-id filename contentType application mongo/*db-name*))
-        (output-attachment preview-id false attachment-fn))
-      not-found)))
 
 (defn cleanup-temp-file [conversion-result]
   (if (and (:content conversion-result) (not (instance? InputStream (:content conversion-result))))
@@ -763,51 +805,45 @@
     (io/copy in zip)
     (.closeEntry zip)))
 
-(defn- append-gridfs-file! [zip {:keys [filename fileId]}]
-  (when fileId
-    (if-let [content (:content (mongo/download fileId))]
+(defn- append-attachments-to-zip! [zip user attachments application filename-prefix]
+  (doseq [{:keys [id]} attachments]
+    (when-let [{:keys [content filename]} (get-attachment-latest-version-file user id false application)]
       (with-open [in (content)]
-        (append-stream zip (str fileId "_" filename) in))
-      (errorf "File '%s' not found in GridFS. Try manually: db.fs.files.find({_id: '%s'})" filename fileId))))
+        (append-stream zip (str filename-prefix id "_" filename) in)))))
 
 (defn ^java.io.File get-all-attachments!
   "Returns attachments as zip file.
-   If application and lang, application and submitted application PDF are included.
+   If application-pdf-lang is provided, application and submitted application PDFs are included.
    Callers responsibility is to delete the returned file when done with it!"
-  [attachments & [application lang]]
-  (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")] ; Must be deleted by caller!
-    (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
-    (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
-      ; Add all attachments:
-      (doseq [attachment attachments]
-        (append-gridfs-file! zip (-> attachment :versions last)))
-
-      (when (and application lang)
-        ; Add submitted PDF, if exists:
-        (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-          (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted") (pdf-export/generate submitted-application lang)))
-        ; Add current PDF:
-        (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (pdf-export/generate application lang)))
-      (.finish zip))
-    (debugf "Size of the temporary zip file: %d" (.length temp-file))
-    temp-file))
-
-(defn- maybe-append-gridfs-file!
-  "Download and add the attachment file if user can access the application"
-  [zip user {:keys [filename fileId]}]
-  (when fileId
-    (when-let [file (get-attachment-file-as! user fileId)]
-      (with-open [in ((:content file))]
-        (append-stream zip (str (:application file) "_" fileId "_" filename) in)))))
+  ([attachments application user]
+    (get-all-attachments! attachments application user nil))
+  ([attachments application user application-pdf-lang]
+   (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")] ; Must be deleted by caller!
+     (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
+     (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
+       ; Add all attachments:
+       (append-attachments-to-zip! zip user attachments application nil)
+       (when application-pdf-lang
+         ; Add submitted PDF, if exists:
+         (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
+           (->> (-> (app-utils/with-masked-person-ids submitted-application user)
+                    (pdf-export/generate application-pdf-lang))
+                (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted"))))
+         ; Add current PDF:
+         (->> (-> (app-utils/with-masked-person-ids application user)
+                  (pdf-export/generate application-pdf-lang))
+              (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current"))))
+       (.finish zip))
+     (debugf "Size of the temporary zip file: %d" (.length temp-file))
+     temp-file)))
 
 (defn ^java.io.InputStream get-attachments-for-user!
   "Returns the latest corresponding attachment files readable by the user as an input stream of a self-destructing ZIP file"
-  [user attachments]
+  [user application attachments]
   (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")] ; deleted via temp-file-input-stream
     (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
     (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
-      (doseq [attachment attachments]
-        (maybe-append-gridfs-file! zip user (-> attachment :versions last)))
+      (append-attachments-to-zip! zip user attachments application (str (:id application) "_"))
       (.finish zip))
     (debugf "Size of the temporary zip file: %d" (.length temp-file))
     (files/temp-file-input-stream temp-file)))
@@ -942,6 +978,18 @@
 (defmethod delete-allowed-by-target :default [{{:keys [state]} :application}]
   (when (= :sent (keyword state))
     (fail :error.illegal-state)))
+
+(defn attachment-approval-check
+  "Pre-check that fails if any of the attachment's versions is
+  approved/rejected and the user is not authority."
+  [{:keys [user data application]}]
+  (when application
+    (let [{att-id :attachmentId} data
+          {versions :versions}   (get-attachment-info application att-id)]
+      (when-not (every? #(can-delete-version? user application att-id
+                                              (:fileId %))
+                        versions)
+        (fail :error.unauthorized)))))
 
 (defn attachment-is-needed [{{:keys [attachmentId]} :data application :application}]
   (when (and attachmentId (:notNeeded (get-attachment-info application attachmentId)))

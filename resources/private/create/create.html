@@ -119,45 +119,53 @@
   <section class="page" id="create-page-prev-permit">
     <div class="container">
       <h1 data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></h1>
-      <div>
-        <label data-bind="ltext: 'prev-permit-label-kuntalupatunnus'" class="form-label" for="prev-permit-kuntalupatunnus"></label>
-        <input data-bind="textInput: kuntalupatunnusFromPrevPermit"
-               id="prev-permit-kuntalupatunnus" data-test-id="test-prev-permit-kuntalupatunnus"
-               type="text" class="form-input text" autofocus="autofocus" />
-      </div>
+      <form class="previous-permit-form">
+        <div class="help-box"
+             data-bind="ltext: 'previous-permit-cleanup-note'">
+        </div>
+        <div class="previous-permit-form__entry">
+          <label data-bind="ltext: 'prev-permit-label-kuntalupatunnus'" class="form-label" for="prev-permit-kuntalupatunnus"></label><br>
+          <input data-bind="textInput: kuntalupatunnusFromPrevPermit"
+                 id="prev-permit-kuntalupatunnus" data-test-id="test-prev-permit-kuntalupatunnus"
+                 type="text" class="grid-style-input--wide" autofocus="autofocus" />
+        </div>
+        <div class="previous-permit-form__entry">
+          <toggle params="value: authorizeApplicants,
+                          prefix: 'blockbox',
+                          ltext: 'newRequest.authorizeApplicants',
+                          testId: 'authorize-applicants'"></toggle>
+        </div>
+        <div class="previous-permit-form__entry"
+             data-bind="visible: !needMorePrevPermitInfo()">
+          <label data-bind="ltext: 'prev-permit-label-organization'" class="form-label" for="prev-permit-organization-select"></label><br>
+          <select id="prev-permit-organization-select" data-test-id="test-prev-permit-organization-select"
+                  class="dropdown dropdown--full-width"
+                  data-bind="options: organizationOptions,
+                             optionsText: function(org) { return util.getIn(org, ['name', loc.getCurrentLanguage()]) || org.name.fi; },
+                             optionsValue: 'id',
+                             value: selectedPrevPermitOrganization,
+                             optionsCaption: loc('choose')">
+          </select>
+        </div>
 
-      <div>
-        <input id="authorizeApplicants" data-test-id="test-authorise-applicants" type="checkbox" data-bind="checked: authorizeApplicants" class="form-input checkbox"/>
-        <label for="authorizeApplicants" data-bind="ltext: 'newRequest.authorizeApplicants'" class="form-label-checkbox"/>
-      </div>
-
-      <div data-bind="visible: !needMorePrevPermitInfo()">
-        <label data-bind="ltext: 'prev-permit-label-organization'" class="form-label" for="prev-permit-organization-select"></label>
-        <select id="prev-permit-organization-select" data-test-id="test-prev-permit-organization-select"
-                class="form-select form-input combobox"
-                data-bind="options: organizationOptions,
-                           optionsText: function(org) { return util.getIn(org, ['name', loc.getCurrentLanguage()]) || org.name.fi; },
-                           optionsValue: 'id',
-                           value: selectedPrevPermitOrganization,
-                           optionsCaption: loc('choose')">
-        </select>
-      </div>
-
-      <div data-bind="visible: needMorePrevPermitInfo">
-        <p class="more-prev-app-info-needed-desc" data-bind="ltext:'more-prev-app-info-needed-desc'"></p>
-        <label data-bind="ltext: 'prev-permit-label-address'" class="form-label" for="prev-permit-address-search"></label>
-        <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}"
-               id="prev-permit-address-search" type="text" class="form-input text" autofocus="autofocus" />
-      </div><br>
-      <button data-bind="click: createApplicationWithPrevPermit,
-                         enable: creatingAppWithPrevPermitOk,
-                         css: {waiting: pending}"
-              data-test-id="test-prev-permit-create-button" id="prev-permit-create-button" class="btn btn-primary">
+        <div class="previous-permit-form__entry"
+             data-bind="visible: needMorePrevPermitInfo">
+          <p class="more-prev-app-info-needed-desc" data-bind="ltext:'more-prev-app-info-needed-desc'"></p>
+          <label data-bind="ltext: 'prev-permit-label-address'" class="form-label" for="prev-permit-address-search"></label>
+          <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}"
+                 id="prev-permit-address-search" type="text" class="grid-style-input--wide" autofocus="autofocus" />
+        </div>
+        <button data-bind="click: createApplicationWithPrevPermit,
+                           enable: creatingAppWithPrevPermitOk,
+                           css: {waiting: pending}"
+                type="submit"
+                data-test-id="test-prev-permit-create-button" id="prev-permit-create-button" class="positive">
           <i class="lupicon-search"></i>
           <i class="wait spin lupicon-refresh"></i>
 
           <span data-bind="ltext: 'newRequest.newApplicationWithPrevPermit'"></span>
-      </button>
+        </button>
+      </form>
     </div>
 
   </section>

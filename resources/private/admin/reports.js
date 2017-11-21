@@ -13,6 +13,7 @@
                     arg: "professional"},
                    {value: ko.observable(), label: "Suoramarkkinointilupa",
                     arg: "allow"}];
+    self.emails = ko.observable();
 
     self.link = ko.pureComputed( function() {
       return "/api/raw/user-report?"
@@ -22,6 +23,19 @@
              })
              .join( "&");
     });
+
+    ajax.query( "company-unsubscribed-emails")
+    .success( function( res ) {
+      self.emails( _.join( res.emails, "\n"));
+    })
+    .call();
+
+    self.upsert = function() {
+      ajax.command( "upsert-company-unsubscribed", {emails: self.emails()})
+      .success( util.showSavedIndicator )
+      .error( util.showSavedIndicator)
+      .call();
+    };
   }
 
   function ApplicationsReport() {

@@ -6,9 +6,7 @@
             [lupapalvelu.document.attachments-canonical :as attachments-canon]
             [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.yleiset-alueet-canonical :as ya-canonical]
-            [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.xml.disk-writer :as writer]))
+            [lupapalvelu.xml.emit :refer [element-to-xml]]))
 
 ;; Tags changed in "yritys-child-modified":
 ;; :kayntiosoite -> :kayntiosoitetieto
@@ -276,7 +274,7 @@
     (element-to-xml canon mapping)))
 
 (defn- do-save-as-krysp
-  [application lang submitted-application lupa-name-key krysp-version canonical-without-attachments output-dir begin-of-link]
+  [application lang lupa-name-key krysp-version canonical-without-attachments begin-of-link]
   (let [attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
         statement-given-ids (common/statements-ids-with-status
                               (get-in canonical-without-attachments
@@ -293,64 +291,55 @@
         xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)
         all-canonical-attachments (concat attachments-canonical (attachments-canon/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
-    (writer/write-to-disk
-      application
-      attachments-for-write
-      xml
-      krysp-version
-      output-dir
-      submitted-application
-      lang)))
+    {:xml xml
+     :attachments attachments-for-write}))
 
 (defn save-jatkoaika-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
-  [application lang _ krysp-version output-dir begin-of-link]
+  [application lang krysp-version begin-of-link]
   (let [lupa-name-key (common/ya-operation-type-to-schema-name-key
                         (or (-> application :linkPermitData first :operation keyword)
                             :ya-katulupa-vesi-ja-viemarityot))
         canonical-without-attachments (ya-canonical/jatkoaika-to-canonical application lang)]
-    (do-save-as-krysp application lang nil lupa-name-key krysp-version canonical-without-attachments output-dir begin-of-link)))
+    (do-save-as-krysp application lang lupa-name-key krysp-version canonical-without-attachments begin-of-link)))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
    3rd parameter (submitted-application) is not used on YA applications."
-  [application lang submitted-application krysp-version output-dir begin-of-link]
+  [application lang krysp-version begin-of-link]
   (let [lupa-name-key (common/ya-operation-type-to-schema-name-key
                         (-> application :primaryOperation :name keyword))
         canonical-without-attachments (ya-canonical/application-to-canonical application lang)]
-    (do-save-as-krysp application lang submitted-application lupa-name-key krysp-version canonical-without-attachments output-dir begin-of-link)))
+    (do-save-as-krysp application lang lupa-name-key krysp-version canonical-without-attachments begin-of-link)))
 
-(defmethod permit/application-krysp-mapper :YA [application lang submitted-application krysp-version output-dir begin-of-link]
+(defmethod permit/application-krysp-mapper :YA
+  [application lang krysp-version begin-of-link]
   (if (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
-    (save-jatkoaika-as-krysp application lang submitted-application krysp-version output-dir begin-of-link)
-    (save-application-as-krysp application lang submitted-application krysp-version output-dir begin-of-link)))
+    (save-jatkoaika-as-krysp application lang krysp-version begin-of-link)
+    (save-application-as-krysp application lang krysp-version begin-of-link)))
 
-(defn save-katselmus-as-krysp
-  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
-  [application katselmus user lang krysp-version output-dir begin-of-link]
-  (let [lupa-name-key (common/ya-operation-type-to-schema-name-key
-                        (-> application :primaryOperation :name keyword))
-        attachment-target {:type "task" :id (:id katselmus)}
-        target-pred  #(= attachment-target (:target %))
+(defmethod permit/review-krysp-mapper :YA
+  [application review user lang krysp-version begin-of-link]
+  ((let [lupa-name-key (common/ya-operation-type-to-schema-name-key
+                         (-> application :primaryOperation :name keyword))
+         attachment-target {:type "task" :id (:id review)}
+         target-pred  #(= attachment-target (:target %))
 
-        attachments (filter target-pred (:attachments application))
-        canonical-attachments (when attachment-target (attachments-canon/get-attachments-as-canonical
-                                                        {:attachments attachments :title (:title application)}
-                                                        begin-of-link
-                                                        (every-pred target-pred attachments-canon/no-statements-no-verdicts)))
+         attachments (filter target-pred (:attachments application))
+         canonical-attachments (when attachment-target (attachments-canon/get-attachments-as-canonical
+                                                         {:attachments attachments :title (:title application)}
+                                                         begin-of-link
+                                                         (every-pred target-pred attachments-canon/no-statements-no-verdicts)))
 
-        all-canonical-attachments (seq (filter identity canonical-attachments))
+         all-canonical-attachments (seq (filter identity canonical-attachments))
 
-        canonical-without-attachments (ya-canonical/katselmus-canonical application katselmus lang user)
-        canonical (-> canonical-without-attachments
-                    (#(if (seq canonical-attachments)
-                      (assoc-in % [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto] canonical-attachments)
-                      %)))
+         canonical-without-attachments (ya-canonical/katselmus-canonical application review lang user)
+         canonical (-> canonical-without-attachments
+                       (#(if (seq canonical-attachments)
+                           (assoc-in % [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto] canonical-attachments)
+                           %)))
 
-        xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)
-        attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
-
-    (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
-
-(defmethod permit/review-krysp-mapper :YA [application review user lang krysp-version output-dir begin-of-link]
-  (save-katselmus-as-krysp application review user lang krysp-version output-dir begin-of-link))
+         xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)
+         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
+     {:xml xml
+      :attachments attachments-for-write})))

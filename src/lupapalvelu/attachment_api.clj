@@ -366,7 +366,7 @@
 ;;
 
 (defcommand delete-attachment
-  {:description "Delete attachment with all it's versions. Does not
+  {:description "Delete attachment and its versions. Does not
   delete comments. Non-atomic operation: first deletes files, then
   updates document."
    :parameters  [id attachmentId]
@@ -386,6 +386,7 @@
                  att/delete-allowed-by-target
                  att/edit-allowed-by-target
                  att/attachment-not-stamped
+                 att/attachment-approval-check
                  ram/ram-status-not-ok
                  ram/ram-not-linked
                  attachment-not-requested-by-authority
@@ -425,15 +426,6 @@
 ;; Download
 ;;
 
-(defraw "preview-attachment"
-  {:parameters       [:attachment-id]  ; Note that this is actually file id
-   :categories       #{:attachments}
-   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
-   :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
-   :user-authz-roles roles/all-authz-roles}
-  [{{:keys [attachment-id]} :data user :user}]
-  (att/output-attachment-preview! attachment-id (partial att/get-attachment-file-as! user)))
-
 (defraw "view-attachment"
   {:parameters       [:attachment-id]  ; Note that this is actually file id
    :categories       #{:attachments}
@@ -463,14 +455,14 @@
   (att/output-attachment attachment-id true (partial att/get-attachment-file-as! user)))
 
 (defraw "latest-attachment-version"
-  {:parameters       [:attachment-id]  ; Note that this is actually file id
+  {:parameters       [:attachment-id]
    :categories       #{:attachments}
-   :optional-parameters [:download]
+   :optional-parameters [:download :preview]
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
    :user-authz-roles roles/all-authz-roles}
-  [{{:keys [attachment-id download]} :data user :user}]
-  (att/output-attachment (att/get-attachment-latest-version-file user attachment-id) (= download "true")))
+  [{{:keys [attachment-id download preview]} :data user :user}]
+  (att/output-attachment (att/get-attachment-latest-version-file user attachment-id (= preview "true")) (= download "true")))
 
 (defraw "download-bulletin-attachment"
   {:parameters       [attachment-id]  ; Note that this is actually file id
@@ -488,12 +480,12 @@
    :org-authz-roles roles/reader-org-authz-roles}
   [{:keys [application user lang]}]
   (if application
-    (let [attachments (:attachments application)
-          application (app/with-masked-person-ids application user)]
-      {:status 200
-        :headers {"Content-Type" "application/octet-stream"
-                  "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-        :body (files/temp-file-input-stream (att/get-all-attachments! attachments application lang))})
+    {:status 200
+     :headers {"Content-Type" "application/octet-stream"
+               "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
+     :body (-> (:attachments application)
+               (att/get-all-attachments! application user lang)
+               (files/temp-file-input-stream))}
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
@@ -512,7 +504,7 @@
       {:status 200
        :headers {"Content-Type" "application/octet-stream"
                  "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-       :body (att/get-attachments-for-user! user atts)}))
+       :body (att/get-attachments-for-user! user application atts)}))
 
 ;;
 ;; Upload

@@ -220,6 +220,13 @@
                             (partial sc/check schema)
                             "error.illegal-value:schema-validation"))
 
+(defn valid-db-key
+  "Input-validator to check that given parameter is valid db key"
+  [param]
+  (fn [{:keys [data]}]
+    (when-not (mongo/valid-key? (get data param))
+      (fail :error.invalid-db-key))))
+
 (defn- localization? [mode maybe-localization]
   (and (map? maybe-localization)
        (case mode
@@ -561,6 +568,15 @@
       (do
         (warnf "%s -> proxy fail: %s" (:action command) resp)
         (fail :error.unknown)))
+    (catch [:type :schema.core/error] {:keys [schema value error]}
+      (errorf "schema.core error processing action: %s, error: '%s' with schema (containing keys): %s"
+              (:action command)
+              (pr-str error)
+              (pr-str (if (map? schema)
+                        (map pr-str (take 5 (keys schema)))
+                        schema)))
+      (when execute? (log/log-event :error (masked command)))
+      (fail :error.illegal-value:schema-validation))
     (catch Object e
       (do
         (error e "exception while processing action:" (:action command) (class e) (str e))

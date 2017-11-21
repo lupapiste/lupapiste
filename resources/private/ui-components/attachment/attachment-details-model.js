@@ -250,8 +250,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.rotationAllowed = function() { return authModel.ok("rotate-pdf"); };
 
   self.previewUrl = self.disposedComputed(function() {
-    var fileId = util.getIn(self.attachment(), ["latestVersion", "fileId"]);
-    return "/api/raw/view-attachment?attachment-id=" + fileId;
+    return "/api/raw/latest-attachment-version?attachment-id=" + self.id;
   });
 
   self.isArchived = self.disposedComputed(function() {

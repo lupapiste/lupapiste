@@ -747,7 +747,7 @@
                       permit/is-not-archiving-project]
    :input-validators [(partial action/non-blank-parameters [:linkPermitId])
                       (fn [{data :data}] (when (= (:id data) (ss/trim (:linkPermitId data))) (fail :error.link-permit-self-reference)))
-                      (fn [{data :data}] (when-not (mongo/valid-key? (:linkPermitId data)) (fail :error.invalid-db-key)))]}
+                      (action/valid-db-key :linkPermitId)]}
   [{application :application}]
   (app/do-add-link-permit application (ss/trim linkPermitId))
   (ok))

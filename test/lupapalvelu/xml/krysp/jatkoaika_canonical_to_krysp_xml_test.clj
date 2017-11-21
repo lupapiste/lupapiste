@@ -42,8 +42,12 @@
 
     ;; Alla oleva tekee jo validoinnin,
     ;; mutta annetaan olla tuossa alla viela tuo validointi, jottei joku tule ja riko olemassa olevaa validointia.
-    (mapping-to-krysp/save-application-as-krysp jatkoaika-application "fi" jatkoaika-application {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.1.2"}}})
-    (mapping-to-krysp/save-application-as-krysp jatkoaika-application "fi" jatkoaika-application {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.1.3"}}})
+    (mapping-to-krysp/save-application-as-krysp
+      {:application jatkoaika-application :organization {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.1.2"}}}}
+      "fi" jatkoaika-application)
+    (mapping-to-krysp/save-application-as-krysp
+      {:application jatkoaika-application :organization {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.1.3"}}}}
+      "fi" jatkoaika-application)
 
     (validator/validate xml-212s (:permitType jatkoaika-application) "2.1.2")
     (validator/validate xml-213s (:permitType jatkoaika-application) "2.1.3")

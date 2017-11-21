@@ -260,12 +260,15 @@
         (update-application (application->command app)
           {$set {:work-time-expiring-reminder-sent (now)}})))))
 
-
-
-;; "Hakemus: Hakemuksen tila on luonnos tai nakyy viranomaiselle, mutta edellisesta paivityksesta on aikaa yli kuukausi ja alle puoli vuotta. Lahetetaan kuukausittain uudelleen."
-(defn application-state-reminder []
+(defn application-state-reminder
+  "Hakemus: Hakemuksen tila on luonnos tai nakyy viranomaiselle, mutta
+  edellisesta paivityksesta on aikaa yli kuukausi ja alle puoli
+  vuotta. Lahetetaan kuukausittain uudelleen. Ei laheteta
+  digitoiduille luville."
+  []
   (let [apps (mongo/select :applications
                            {:state {$in ["draft" "open"]}
+                            :permitType {$ne "ARK"}
                             $and [{:modified (older-than (util/get-timestamp-ago :month 1))}
                                   {:modified (newer-than (util/get-timestamp-ago :month 6))}]
                             $or [{:reminder-sent {$exists false}}

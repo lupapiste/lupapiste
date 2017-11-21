@@ -392,16 +392,20 @@
                                                 verkkolaskutustieto)}))
 
 (defn- henkilo-yritys-select-group
-  [& {:keys [default henkilo-body yritys-body] :or {default "henkilo" henkilo-body henkilo yritys-body yritys}}]
+  [& {:keys [default henkilo-body yritys-body exclude-companies?]
+      :or {default "henkilo" henkilo-body henkilo yritys-body yritys exclude-companies? true}}]
   (body
     {:name select-one-of-key :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}] :default default}
-    {:name "henkilo" :type :group :body (update-in-body henkilo-body
-                                                        ["userId"]
-                                                        :excludeCompanies (constantly true))}
+    {:name "henkilo" :type :group :body (cond-> henkilo-body
+                                          exclude-companies? (update-in-body
+                                                              ["userId"]
+                                                              :excludeCompanies (constantly true)))}
     {:name "yritys" :type :group :body yritys-body}))
 
 (def party (henkilo-yritys-select-group))
 (def ya-party (henkilo-yritys-select-group :default "yritys"))
+(def ya-party-tyomaasta-vastaava (henkilo-yritys-select-group :default "yritys"
+                                                              :exclude-companies? false))
 (def building-parties (henkilo-yritys-select-group
                         :henkilo-body henkilo-with-required-hetu
                         :yritys-body yritys-without-kytkimet))
@@ -904,7 +908,8 @@
 (def kayttotarkotuksen-muutos "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos")
 
 (def muutostyonlaji [{:name "perusparannuskytkin" :type :checkbox}
-                     {:name "rakennustietojaEimuutetaKytkin" :type :checkbox}
+                     {:name "rakennustietojaEimuutetaKytkin" :type :checkbox
+                      :whitelist {:roles [:authority] :otherwise :hidden}}
                      {:name "muutostyolaji" :type :select :sortBy :displayname :required true :i18nkey "muutostyolaji"
                       :body
                       [{:name perustusten-korjaus}

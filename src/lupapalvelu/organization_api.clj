@@ -4,7 +4,7 @@
             [clojure.set :as set]
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters supported-localization-parameters] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters supported-localization-parameters parameters-matching-schema] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.stamps :as stamps]
             [lupapalvelu.attachment.type :as att-type]
@@ -30,6 +30,7 @@
             [sade.municipality :as muni]
             [sade.property :as p]
             [sade.shared-schemas :as sssc]
+            [sade.schema-utils :as ssu]
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]
             [sade.validators :as v]
@@ -650,6 +651,53 @@
       (org/set-krysp-endpoint organization-id url username password permitType version)
       (fail :auth-admin.legacyNotResponding))))
 
+(defcommand set-kuntagml-http-endpoint
+  {:description         "Admin can configure KuntaGML sending as HTTP, instead of SFTP"
+   :parameters          [url organization permitType]
+   :optional-parameters [auth-type username password partner headers path]
+   :user-roles          #{:admin}
+   :input-validators    [(partial validate-optional-url :url)
+                         (fn [{:keys [data]}]
+                           (when (and (ss/not-blank? (:partner data))
+                                      (sc/check (ssu/get org/KryspHttpConf :partner) (:partner data)))
+                             (fail :error.illegal-value:schema-validation :data :partner)))
+                         (fn [{:keys [data]}]
+                           (when (and (ss/not-blank? (:path data))
+                                      (sc/check (ssu/get org/KryspHttpConf :path) (:path data)))
+                             (fail :error.illegal-value:schema-validation :data :path)))
+                         permit/permit-type-validator
+                         (action/valid-db-key :permitType)
+                         (fn [{:keys [data] :as command}]
+                           (when (seq (:headers data))
+                             (action/vector-parameters-with-map-items-with-required-keys
+                               [:headers]
+                               [:key :value]
+                               command)))]
+   :pre-checks          [(fn [{:keys [data]}]
+                           (when-not (pos? (mongo/count :organizations {:_id (:organization data)}))
+                             (fail :error.unknown-organization)))]}
+  [{data :data user :user}]
+  (let [url     (-> data :url ss/trim)
+        updates (->> (when username
+                       (org/encode-credentials username password))
+                     (merge {:url url} (select-keys data [:headers :auth-type]))
+                     (util/strip-nils)
+                     org/krysp-http-conf-validator
+                     (map (fn [[k v]] [(str "krysp." permitType ".http." (name k)) v]))
+                     (into {}))]
+    (mongo/update-by-id :organizations organization {$set updates})))
+
+(defcommand delete-kuntagml-http-endpoint
+  {:description "Remove HTTP config for permit-type"
+   :parameters  [organization permitType]
+   :user-roles   #{:admin}
+   :input-validators [permit/permit-type-validator]
+   :pre-checks  [(fn [{:keys [data]}]
+                  (when-not (pos? (mongo/count :organizations {:_id (:organization data)}))
+                    (fail :error.unknown-organization)))]}
+  [_]
+  (mongo/update-by-id :organizations organization {$unset {(str "krysp." permitType ".http") 1}}))
+
 (defcommand set-kopiolaitos-info
   {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress kopiolaitosOrdererPhone kopiolaitosOrdererEmail]
    :user-roles #{:authorityAdmin}
@@ -983,7 +1031,7 @@
 
 (defcommand update-docstore-info
   {:description      "Updates organization's document store information"
-   :parameters       [org-id docStoreInUse documentPrice organizationDescription]
+   :parameters       [org-id docStoreInUse docTerminalInUse documentPrice organizationDescription]
    :user-roles       #{:admin}
    :input-validators [(partial boolean-parameters [:docStoreInUse])
                       (partial number-parameters [:documentPrice])
@@ -994,7 +1042,41 @@
   [{user :user created :created}]
   (mongo/update-by-query :organizations
       {:_id org-id}
-      {$set {:docstore-info {:docStoreInUse docStoreInUse
-                             :documentPrice documentPrice
-                             :organizationDescription organizationDescription}}})
+      {$set {:docstore-info.docStoreInUse docStoreInUse
+             :docstore-info.docTerminalInUse docTerminalInUse
+             :docstore-info.documentPrice documentPrice
+             :docstore-info.organizationDescription organizationDescription}})
   (ok))
+
+(defquery docterminal-attachment-types
+  {:description "Returns the allowed docterminal attachment types in a structure
+                 that can be easily displayed in the client"
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (->> user
+       usr/authority-admins-organization-id
+       org/allowed-docterminal-attachment-types
+       (ok :attachment-types)))
+
+(defn- check-docterminal-enabled [{user :user}]
+  (when-not (-> user
+                usr/authority-admins-organization-id
+                org/get-docstore-info-for-organization!
+                :docTerminalInUse)
+    (fail :error.docterminal-not-enabled)))
+
+
+(defcommand set-docterminal-attachment-type
+  {:description "Allows or disallows showing the given attachment type in
+                 the archive document terminal application."
+   :parameters [attachmentType enabled]
+   :pre-checks [check-docterminal-enabled]
+   :input-validators [(partial parameters-matching-schema [:attachmentType]
+                               (sc/cond-pre (sc/enum "all")
+                                            org/DocTerminalAttachmentType))
+                      (partial boolean-parameters [:enabled])]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (-> user
+      usr/authority-admins-organization-id
+      (org/set-allowed-docterminal-attachment-type attachmentType enabled)))

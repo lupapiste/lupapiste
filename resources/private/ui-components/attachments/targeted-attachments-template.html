@@ -16,7 +16,7 @@
           <tr data-bind="with: $data.latestVersion">
             <td data-bind="attachmentType: $parent"></td>
             <td>
-              <a data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
+              <a data-bind="text: filename, attr: {href: '/api/raw/latest-attachment-version?attachment-id=' + ko.unwrap($parent.id)}"></a><br/>
               <i data-bind="ltext: contentType"></i>
               <i data-bind="size: size"></i>
             </td>

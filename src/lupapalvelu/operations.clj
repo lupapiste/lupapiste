@@ -1034,7 +1034,7 @@
    :jatkoaika                   {:schema "hankkeen-kuvaus-minimum"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required ["maksaja"]       ;; TODO: Tuleeko talle myos "rakennusjatesuunnitelma"?
+                                 :required ["maksaja" "paatoksen-toimitus-rakval"]  ;; TODO: Tuleeko talle myos "rakennusjatesuunnitelma"?
                                  :attachments []
                                  :add-operation-allowed false
                                  :copying-allowed false
@@ -1072,7 +1072,7 @@
    :raktyo-aloit-loppuunsaat   {:schema "hankkeen-kuvaus-minimum"
                                 :permit-type permit/R
                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                :required ["maksaja"]        ;; TODO: Tuleeko talle myos "rakennusjatesuunnitelma"?
+                                :required ["maksaja" "paatoksen-toimitus-rakval"] ;; TODO: Tuleeko talle myos "rakennusjatesuunnitelma"?
                                 :attachments []
                                 :add-operation-allowed false
                                 :copying-allowed true

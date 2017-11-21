@@ -158,7 +158,6 @@
                           :add-application-tags
                           :application-organization-tags
                           :get-organization-areas
-                          :preview-attachment
                           :document
                           :mark-seen
                           :pdfa-casefile
