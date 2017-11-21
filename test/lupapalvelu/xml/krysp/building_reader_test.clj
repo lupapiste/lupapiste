@@ -5,8 +5,27 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
+            [net.cgrand.enlive-html :as enlive]
             [sade.xml :as xml]
             [sade.common-reader :as scr]))
+
+(facts "get-non-zero-integer"
+  (fact "nil -> nil"
+    (get-non-zero-integer-text [{:tag :foo :content [nil]}] :foo) => nil)
+  (fact "blank -> nil"
+    (get-non-zero-integer-text [{:tag :foo :content [""]}] :foo) => nil
+    (get-non-zero-integer-text [{:tag :foo :content ["  "]}] :foo) => nil)
+  (fact "Not a number -> nil"
+    (get-non-zero-integer-text [{:tag :foo :content ["bah"]}] :foo) => nil)
+  (fact "4.1 -> 4"
+    (get-non-zero-integer-text [{:tag :foo :content ["4.1"]}] :foo) => "4")
+  (fact "4.9 -> 4"
+    (get-non-zero-integer-text [{:tag :foo :content ["4.9"]}] :foo) => "4")
+  (fact "0 -> nil"
+    (get-non-zero-integer-text [{:tag :foo :content ["0"]}] :foo) => nil
+    (get-non-zero-integer-text [{:tag :foo :content ["0.0"]}] :foo) => nil)
+  (fact "-4.9 -> -4 Not a realistic scenario"
+    (get-non-zero-integer-text [{:tag :foo :content ["-4.9"]}] :foo) => "-4"))
 
 (facts "pysyva-rakennustunnus"
   (fact (pysyva-rakennustunnus nil) => nil)
@@ -220,3 +239,19 @@
                            :kerrosala                      ""
                            :rakennusoikeudellinenKerrosala "" ;; Not in schema
                            }))))
+
+(facts "Strip decimals from some fields"
+  (let [selector  [:rakval:valmisRakennustieto enlive/first-of-type]
+        xml       (enlive/at (xml/parse "dev-resources/krysp/building-2.2.0.xml")
+                             [selector :rakval:tilavuus] (enlive/content  "8992.5")
+                             [selector :rakval:kokonaisala] (enlive/content  "224.9")
+                             [selector :rakval:kellarinpinta-ala] (enlive/content  "88.2")
+                             [selector :rakval:kerrosala] (enlive/content  "200.4")
+                             [selector :rakval:rakennusoikeudellinenKerrosala] (enlive/content  "199.3"))
+        buildings (->buildings-summary xml)
+        mitat     (->> buildings first :buildingId (->rakennuksen-tiedot xml) :mitat)]
+    mitat => (contains {:tilavuus                       "8992"
+                        :kokonaisala                    "224"
+                        :kellarinpinta-ala              "88"
+                        :kerrosala                      "200"
+                        :rakennusoikeudellinenKerrosala "199"})))
