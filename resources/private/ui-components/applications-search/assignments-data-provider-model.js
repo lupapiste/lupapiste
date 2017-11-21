@@ -20,21 +20,16 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   self.searchResultType = ko.observable(params.searchResultType);
 
   self.state            = ko.pureComputed(function () {
-   if (self.searchResultType() === "automatic") {
-     return "created";
-   } else {
-     return self.searchResultType();
-   }
+      return self.searchResultType() === "automatic" ? "created" : self.searchResultType();
   });
 
   self.trigger          = ko.pureComputed(function() {
-    if (self.searchResultType() === "automatic") {
-      return "not-user-created";
-    } else if (self.searchResultType() === "all" || self.searchResultType() === "completed") {
-      return "any";
-    } else {
-      return "user-created";
-    }
+      switch (self.searchResultType()) {
+          case "automatic": return "not-user-created";
+          case "all":       return "any";
+          case "completed": return "any";
+          default:          return "user-created";
+      }
   });
 
   self.assignmentsCount = ko.observable(0); // Count of open assignments received by the current user.
