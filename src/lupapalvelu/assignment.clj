@@ -117,7 +117,7 @@
           :field sc/Str}
    :skip   sc/Int
    :limit  sc/Int
-   :trigger (sc/maybe sc/Str)})
+   :trigger (sc/optional-key sc/Str)})
 
 (sc/defschema AssignmentsSearchResponse
   {:userTotalCount sc/Int
