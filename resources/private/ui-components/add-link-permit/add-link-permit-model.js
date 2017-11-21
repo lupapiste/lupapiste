@@ -1,12 +1,10 @@
-LUPAPISTE.AddLinkPermitModel = function() {
+LUPAPISTE.AddLinkPermitModel = function(params) {
   "use strict";
   var self = this;
 
   var lpRegex = /^\s*LP-\d{3}-\d{4}-\d{5}\s*$/;
 
-  self.dialogSelector = "#dialog-add-link-permit";
-
-  self.appId = 0;
+  self.appId = lupapisteApp.services.contextService.applicationId;
   self.propertyId = ko.observable("");
   self.kuntalupatunnus = ko.observable("");
   self.selectedLinkPermit = ko.observable("");
@@ -40,27 +38,26 @@ LUPAPISTE.AddLinkPermitModel = function() {
     return false;
   };
 
-  self.reset = function(app) {
-    self.appId = app.id();
-    self.propertyId(app.propertyId());
+  ko.computed(function() {
+    self.propertyId(lupapisteApp.models.application.propertyId());
     self.selectedLinkPermit("");
     self.kuntalupatunnus("");
     self.errorMessage(null);
     self.processing(false);
     self.pending(false);
 
-    getAppMatchesForLinkPermitsSelect(app.id());
-  };
+    getAppMatchesForLinkPermitsSelect(self.appId());
+  });
 
   self.onSuccess = function() {
     self.errorMessage(null);
-    repository.load(self.appId);
-    LUPAPISTE.ModalDialog.close();
+    repository.load(self.appId());
+    self.back();
   };
 
   self.addLinkPermit = function() {
     var lupatunnus = util.getIn(self.selectedLinkPermit, ["id"]) || self.kuntalupatunnus();
-    var params = {id: self.appId, linkPermitId: lupatunnus};
+    var params = {id: self.appId(), linkPermitId: lupatunnus};
     ajax.command("add-link-permit", params)
       .processing(self.processing)
       .pending(self.pending)
@@ -79,51 +76,10 @@ LUPAPISTE.AddLinkPermitModel = function() {
       })
       .error(self.onError)
       .call();
-    return false;
   };
 
-
-  // Permit link removal
-  //
-
-  self.removeAppId = null;
-  self.removeLinkPermitId = null;
-
-  self.doRemove = function() {
-    ajax.command("remove-link-permit-by-app-id", {id: self.removeAppId, linkPermitId: self.removeLinkPermitId})
-      .processing(self.processing)
-      .pending(self.pending)
-      .success(function() {
-        self.errorMessage(null);
-        self.selectedLinkPermit("");
-        self.kuntalupatunnus("");
-        repository.load(self.removeAppId);
-      })
-      .complete(function() {
-        self.removeAppId = null;
-        self.removeLinkPermitId = null;
-      })
-      .error(self.onError)
-      .call();
-    return false;
+  self.back = function() {
+    hub.send(  "cardService::select", {deck: "summary",
+                                       card: "info"});
   };
-
-  self.removeSelectedLinkPermit = function(appId, linkPermitId) {
-    self.removeAppId = appId;
-    self.removeLinkPermitId = linkPermitId;
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-        loc("linkPermit.remove.header"),
-        loc("linkPermit.remove.message", linkPermitId),
-        {title: loc("yes"), fn: self.doRemove},
-        {title: loc("no")}
-      );
-  };
-
-  //Open the dialog
-
-  self.openAddLinkPermitDialog = function(app) {
-    self.reset(app);
-    LUPAPISTE.ModalDialog.open(self.dialogSelector);
-  };
-
 };

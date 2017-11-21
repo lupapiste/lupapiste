@@ -32,10 +32,10 @@ Sonja prepares the application to whom the link permit will be added
   Create application the fast way  ${baseApp}  ${propertyid}  kerrostalo-rivitalo
 
 Sonja adds a link permit (lupapistetunnus type) via the link permit dialog
-  Open link permit dialog
+  Open link permit card
 
   # Empty selection is the first item
-  jQuery should match X times  link-permit-autocomplete li  3
+  jQuery should match X times  link-permit-autocomplete li  2
 
   Select from autocomplete by test id  link-permit-select  ${appname}, ${linkPermitAppId}
   Autocomplete selection by test id is  link-permit-select  ${appname}, ${linkPermitAppId}
@@ -45,25 +45,25 @@ Sonja adds a link permit (lupapistetunnus type) via the link permit dialog
   Element should not be visible  xpath=//span[@data-test-id="test-application-link-permit-kuntalupatunnus"]
 
 Go back to link permit dialog to verify that the just selected permit has disappeared from dropdown selection
-  Open link permit dialog
-  jQuery should match X times  link-permit-autocomplete li  2
+  Open link permit card
+  jQuery should match X times  link-permit-autocomplete li  1
 
 Enforcing property id constraint removes outside application from the list
   Click label by test id  link-permit-same-property-label  
-  jQuery should match X times  link-permit-autocomplete li  1
+  jQuery should match X times  link-permit-autocomplete li  2
   Click label by test id  link-permit-same-property-label  
-  Click by test id  button-link-permit-dialog-cancel
+  Click by test id  add-link-permit-back
 
 Sonja removes link permit
   Wait Until  Element should be visible  xpath=//a[@data-test-id="test-remove-link-permit"]
   Click by test id  test-remove-link-permit
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait until  Element should not be visible  xpath=//a[@data-test-id="test-application-link-permit-lupapistetunnus"]
   Element should not be visible  xpath=//span[@data-test-id="test-application-link-permit-kuntalupatunnus"]
 
 Sonja adds the link permit (kuntalupatunnus type) in the dialog
-  Open link permit dialog
-  Xpath Should Match X Times  //div[@data-test-id="link-permit-select"]//li  3
+  Open link permit card
+  Xpath Should Match X Times  //div[@data-test-id="link-permit-select"]//li  2
   Element should be visible  xpath=//input[@data-test-id="application-kuntalupatunnus-for-link-permit"]
 
   Input text  xpath=//input[@data-test-id="application-kuntalupatunnus-for-link-permit"]  123-456-abc-def
@@ -78,7 +78,7 @@ Sonja adds the link permit (kuntalupatunnus type) in the dialog
 
 *** Keywords ***
 
-Open link permit dialog
+Open link permit card
   Click enabled by test id  application-add-link-permit-btn
-  Wait until  Element should be visible  dialog-add-link-permit
+  Wait until  test id visible  add-link-permit-card
   Wait test id visible  link-permit-select

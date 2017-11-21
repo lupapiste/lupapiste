@@ -126,7 +126,7 @@
           <span data-bind="ltext: 'operations.' + $data.operation()"></span>
         </a>
         <a data-bind="visible: $root.authorization.ok('remove-link-permit-by-app-id'),
-                      click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
+                      click: $root.application.removeSelectedLinkPermit.bind($data)"
            data-test-id="test-remove-link-permit"
            href="#" class="remove-link-permit link-btn">
           <i class="lupicon-remove"></i>
@@ -139,7 +139,7 @@
               class="link-permit-item">
         </span>
         <a data-bind="visible: $root.authorization.ok('remove-link-permit-by-app-id'),
-                      click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
+                      click: $root.application.removeSelectedLinkPermit.bind($data)"
            data-test-id="test-remove-link-permit"
            href="#" class="remove-link-permit link-btn">
           <i class="lupicon-remove"></i>
