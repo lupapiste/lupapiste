@@ -61,7 +61,10 @@
                            `(user-for-access-token (request/ring-request))
                            `(or (basic-authentication (request/ring-request))
                                 (autologin/autologin  (request/ring-request))))
-                 ~response-data (delay ~@content)]
+                 ~response-data (delay (try ~@content
+                                            (catch Exception e#
+                                              (error e#)
+                                              (resp/status 500))))]
              (cond
                (not ~'user)
                basic-401
