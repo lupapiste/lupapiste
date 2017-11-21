@@ -57,6 +57,35 @@
               (xls/save-workbook! out (workbook sheets))))}))
 
 ;; -------------------------------
+;; Company unsubscribed
+;; -------------------------------
+
+(defn company-unsubscribed-emails []
+  (:emails (mongo/select-one :admin-config {:_id "unsubscribed"})))
+
+(defn upsert-company-unsubscribed
+  "Emails is a string where addresses are separated by whitespace."
+  [emails]
+  (mongo/update-by-id :admin-config
+                      "unsubscribed"
+                      {:emails (-<> emails
+                                   ss/lower-case
+                                   ss/trim
+                                   (ss/split #"[\s,]+")
+                                   (remove ss/blank? <>)
+                                   sort)}
+                      :upsert true))
+
+(defn users-spam-flags
+  "Assocs :spam property to every user. Spam is false if the user's
+  email is included in the company-unsubscribed-emails."
+  [users]
+  (let [emails (set (company-unsubscribed-emails))]
+    (map (fn [{email :email :as user}]
+           (assoc user :spam (not (contains? emails (ss/lower-case email)))))
+         users)))
+
+;; -------------------------------
 ;; User report
 ;; -------------------------------
 
@@ -87,7 +116,7 @@
           (mongo/select :companies {} {:y 1 :name 1 :locked 1})))
 
 (defn- user-report-data [company allow professional]
-  (let [users (user-list company allow professional)]
+  (let [users (users-spam-flags (user-list company allow professional))]
     (if (not= company :no)
       (let [companies (company-map)]
         (map #(let [{:keys [id role]} (:company %)]
@@ -120,6 +149,7 @@
                  :city                 "Kunta"
                  :architect            "Ammattilainen"
                  :allowDirectMarketing "Suoramarkkinointilupa"
+                 :spam                 "Spam"
                  :company.name         {:header "Yritystili"
                                         :path   [:company :name]}
                  :company.y            {:header "Y-tunnus"
@@ -142,7 +172,7 @@
 (defn user-report [company allow professional]
   (let [data    (user-report-data company allow professional)
         columns (concat [:lastName :firstName :email :phone :companyName
-                         :street :zip :city :architect :allowDirectMarketing]
+                         :street :zip :city :architect :allowDirectMarketing :spam]
                         (when-not (= company :no)
                           [:company.name :company.y
                            :company.role :company.locked]))

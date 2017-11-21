@@ -1,10 +1,9 @@
 (ns lupapalvelu.admin-reports-api
   "Dynamic excel reports. Accessible via Reports tab in the admin
   admin UI."
-  (:require [lupapalvelu.action :refer [defraw defquery]]
-            [sade.core :refer :all]
+  (:require [lupapalvelu.action :refer [defraw defquery defcommand] :as action]
             [lupapalvelu.admin-reports :as reps]
-            [lupapalvelu.action :as action]
+            [sade.core :refer :all]
             [sade.util :as util]))
 
 (defraw user-report
@@ -15,6 +14,23 @@
    :user-roles #{:admin}}
   [_]
   (apply reps/user-report (map reps/string->keyword [company allow professional])))
+
+(defcommand upsert-company-unsubscribed
+  {:description      "Email addresses that do not wish to receive company
+  email (Spam column value false in the excel). The parameter is a
+  string where the email addresses are separated by whitespace."
+   :parameters       [emails]
+   :input-validators [(partial action/string-parameters [:emails])]
+   :user-roles       #{:admin}}
+  [_]
+  (reps/upsert-company-unsubscribed emails))
+
+(defquery company-unsubscribed-emails
+  {:description "Email addresses that do not wish to receive company
+  email."
+   :user-roles  #{:admin}}
+  [_]
+  (ok :emails (reps/company-unsubscribed-emails)))
 
 (defraw waste-report
   {:description "Waste report. Includes both regular and extended."
