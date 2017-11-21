@@ -710,6 +710,7 @@
   if the user is allowed to sign and there are signable
   attachments."
    :user-roles  #{:applicant :authority}
+   :user-authz-roles roles/signing-user-authz-roles
    :pre-checks  [(fn [{application :application}]
                    (when-not (pos? (count (:attachments application)))
                      (fail :application.attachmentsEmpty)))
@@ -739,7 +740,7 @@
                       app/validate-authority-in-drafts
                       permit/is-not-archiving-project]
    :user-roles       #{:applicant :authority}
-   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)}
+   :user-authz-roles roles/signing-user-authz-roles}
   [{application :application u :user :as command}]
   (when (seq attachmentIds)
     (if (usr/get-user-with-password (:username u) password)
