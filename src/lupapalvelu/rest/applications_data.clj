@@ -89,5 +89,6 @@
               (building/buildings-array-buildingid-updates-for-operation application vtj-prt operation-id)))))
 
 (defn update-vtj-prt! [application document-id vtj-prt]
-  (->> (vtj-prt-updates application document-id vtj-prt)
-       (action/update-application (action/application->command application))))
+  (when-let [updates (vtj-prt-updates application document-id vtj-prt)]
+    (action/update-application (action/application->command application) updates)
+    true))

@@ -103,8 +103,9 @@
                       :document       DocumentId
                       :vtj-prt        VtjPrt]}
   (let [{org-id :organization :as app} (domain/get-application-as application-id user)]
-    (if (usr/user-is-authority-in-organization? user org-id)
-      (applications-data/update-vtj-prt! app document vtj-prt)
+    (if (and (usr/user-is-authority-in-organization? user org-id)
+             (applications-data/update-vtj-prt! app document vtj-prt))
+      (resp/status 200 {})
       (resp/status 404 "Not found"))))
 
 (defendpoint "/rest/submitted-applications"
