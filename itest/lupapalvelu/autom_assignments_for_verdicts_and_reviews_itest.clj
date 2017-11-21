@@ -14,7 +14,8 @@
             [sade.strings :as ss]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [schema.core :as sc])
+            [schema.core :as sc]
+            [lupapalvelu.permit :as permit])
   (:import (java.net URL)))
 
 (def db-name (str "test_autom-assignments-for-verd-and-rev-itest_" (now)))
@@ -30,9 +31,16 @@
 (def verdict-assignment-trigger
   (organization/create-trigger
     nil
-    ["paatoksenteko.paatos"]
+    ["paatoksenteko.paatosote"]
     {:id "abba1111111111111111acdc"
      :name {:fi "Käsittelijä" :sv "Handläggare" :en "Handler"}} "verdict-test-trigger"))
+
+(def review-assignment-trigger
+  (organization/create-trigger
+    nil
+    ["katselmukset_ja_tarkastukset.katselmuksen_tai_tarkastuksen_poytakirja"]
+    {:id "abba1111111111111111acdc"
+     :name {:fi "Käsittelijä" :sv "Handläggare" :en "Handler"}} "review-test-trigger"))
 
 (mongo/connect!)
 (mongo/with-db db-name
@@ -43,7 +51,7 @@
   (let [krysp-url (str (server-address) "/dev/krysp")
         organizations (map (fn [org] (update-in org [:krysp] #(assoc-in % [:R :url] krysp-url))) minimal/organizations)
         organizations (map (fn [org] (if (= "753-R" (:id org))
-                                       (update-in [:assignment-triggers] conj verdict-assignment-trigger)
+                                       (update-in org [:assignment-triggers] conj verdict-assignment-trigger review-assignment-trigger)
                                        org))
                            organizations)]
    (dorun (map (partial mongo/insert :organizations) organizations))))
@@ -64,7 +72,7 @@
           => 1)
 
         (fact "no assignments"
-          (count (map :id assignments)) => 0)
+          (count assignments) => 0)
 
         (fact "application sent"
           (mongo/update-by-id :applications app-id {"$set" {:state "sent"}})
@@ -74,7 +82,7 @@
           (let [batchrun-result (batchrun/fetch-verdicts)
                 assignments (get-assignments)]
             (fact "one attachment creates one assignment"
-                 (count (map :id assignments)) => 1)
+                 (count assignments) => 1)
 
             (fact "new attachment created new assignment"
                  (-> assignments (first) :application :id) => app-id)
@@ -94,10 +102,10 @@
 
       (let [application-id-submitted (:id (create-and-submit-local-application pena :propertyId sipoo-property-id :address "Hakemusjätettie 15"))]
 
-        (fact "attachment trigger ok"
+        (fact "review trigger ok"
           (->> (mongo/by-id :organizations "753-R")
                :assignment-triggers
-               (filter #(= "verdict-test-trigger" (:description %)))
+               (filter #(= "review-test-trigger" (:description %)))
                (count))
           => 1)
 
@@ -117,12 +125,12 @@
                 assignments (get-assignments)]
 
             (fact "attachments trigger assignments"
-              (count (map :id (get-assignments))) => 1)
+              (count assignments) => 1)
 
             (fact "assignment is not user-created"
-              (-> (get-assignments) (first) :trigger) => (:id verdict-assignment-trigger))))
+              (-> (get-assignments) (first) :trigger) => (:id review-assignment-trigger))))
 
-        (fact "batchrun does not change assignments if there is no changed attachments"
+        (fact "batchrun does not change assignments if there are no changed attachments"
           (against-background
             (krysp-reader/rakval-application-xml anything anything [application-id-submitted] :application-id anything)
             => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
