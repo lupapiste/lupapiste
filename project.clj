@@ -130,6 +130,8 @@
                  [org.geotools/gt-referencing "18.1"]
                  [org.geotools/gt-epsg-wkt "18.1"]
 
+                 [clamq/clamq-activemq "0.4"]
+
                  ;; Lupapiste libraries
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.60"]

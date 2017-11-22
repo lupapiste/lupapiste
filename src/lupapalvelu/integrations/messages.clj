@@ -15,7 +15,7 @@
   {:id                            ssc/ObjectIdStr
    :direction                     (sc/enum "in" "out")
    :messageType                   sc/Str
-   (sc/optional-key :transferType) (sc/enum "http" "sftp")
+   (sc/optional-key :transferType) (sc/enum "http" "sftp" "jms")
    (sc/optional-key :partner)     (apply sc/enum partners)
    :format                        (sc/enum "xml" "json")
    :created                       ssc/Timestamp

@@ -11,6 +11,7 @@
             [sade.security-headers :as headers]
             [sade.dummy-email-server]
             [sade.util :as util]
+            [lupapalvelu.integrations.activemq :as activemq]
             [lupapalvelu.actions-api]
             [lupapalvelu.admin-api]
             [lupapalvelu.appeal-api]
@@ -234,6 +235,7 @@
   (stop-jetty!)
   (stop-jmx-server!)
   (stop-nrepl!)
+  (activemq/close-all!)
   (mongo/disconnect!))
 
 (defn -main [& _]

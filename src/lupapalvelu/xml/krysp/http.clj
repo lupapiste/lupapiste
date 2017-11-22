@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :refer [infof]]
             [clj-http.cookies :as cookies]
             [monger.operators :refer :all]
+            [clojure.tools.reader.edn :as edn]
             [sade.http :as http]
             [sade.core :refer :all]
             [sade.env :as env]
@@ -10,6 +11,7 @@
             [sade.util :as util]
             [schema.core :as sc]
             [lupapalvelu.cookie :as lupa-cookies]
+            [lupapalvelu.integrations.activemq :as activemq]
             [lupapalvelu.integrations.messages :as imessages]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]))
@@ -60,6 +62,27 @@
           (update :headers merge (create-headers (:headers http-conf)))
           (wrap-authentication http-conf)))))
 
+(defn message-handler
+  [payload]
+  (let [{:keys [url xml http-conf]} (edn/read-string payload)]
+    (http/post
+      url
+      (-> (with-krysp-defaults {:body xml})
+          (update :headers merge (create-headers (:headers http-conf)))
+          (wrap-authentication http-conf)))))
+
+(def kuntagml-consumer
+  (activemq/register-consumer
+    "application.kuntagml.http"
+    message-handler))
+
+(sc/defn ^:always-validate send-xml-jms
+  [type :- (apply sc/enum org/endpoint-types) xml :- sc/Str http-conf :- org/KryspHttpConf]
+  (let [url (create-url type http-conf)]
+    (activemq/send-jms-message
+      "application.kuntagml.http"
+      (prn-str {:url url :xml xml :http-conf http-conf}))))
+
 (sc/defn ^:always-validate send-xml
   [application user type :- (apply sc/enum org/endpoint-types) xml :- sc/Str http-conf :- org/KryspHttpConf]
   (let [message-id (mongo/create-id)]
@@ -69,6 +92,8 @@
                        :transferType        "http" :format "xml" :created (now)
                        :status              "processing" :initator (select-keys user [:id :username])
                        :application         (select-keys application [:id :organization])}))
-    (POST type xml http-conf)
+    (if (env/feature? :jms-kuntagml)
+      (send-xml-jms type xml http-conf)
+      (POST type xml http-conf))
     (infof "KuntaGML (type: %s) sent via HTTP successfully to partner %s" (name type) (:partner http-conf))
     (imessages/update-message message-id {$set {:acknowledged (now) :status "done"}})))
