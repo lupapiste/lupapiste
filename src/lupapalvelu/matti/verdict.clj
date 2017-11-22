@@ -21,6 +21,7 @@
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
+            [schema.core :as sc]
             [swiss.arrows :refer :all]))
 
 
@@ -170,8 +171,10 @@
                         :modified created)]
     (action/update-application command
                                {$push {:matti-verdicts
-                                       (util/assoc-when draft
-                                                        :category (:category template))}})
+                                       (sc/validate
+                                        schemas/MattiVerdict
+                                        (util/assoc-when draft
+                                                         :category (:category template)))}})
     {:verdict  (enrich-verdict command draft)
      :references (:references draft)}))
 

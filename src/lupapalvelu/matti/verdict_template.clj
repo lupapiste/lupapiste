@@ -13,7 +13,8 @@
             [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.strings :as ss]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [schema.core :as sc]))
 
 (defn command->organization
   "User-organizations is not available for input-validators."
@@ -39,8 +40,9 @@
      (mongo/update-by-id :organizations
                          org-id
                          {$push {:verdict-templates.templates
-                                 (merge data
-                                        {:deleted false})}})
+                                 (sc/validate schemas/MattiSavedTemplate
+                                              (assoc data
+                                                     :deleted false))}})
      data))
   ([org-id timestamp lang category]
    (new-verdict-template org-id timestamp lang category {}
@@ -150,10 +152,11 @@
     (template-update organization
                      template-id
                      {$set {:verdict-templates.templates.$.published
-                             {:published timestamp
-                              :data      (:draft template)
-                              :settings (published-settings organization
-                                                            (:category template))}}})))
+                            {:published timestamp
+                             :data      (:draft template)
+                             :settings (sc/validate schemas/MattiPublishedSettings
+                                                    (published-settings organization
+                                                                        (:category template)))}}})))
 
 (defn set-name [organization template-id timestamp name]
   (template-update organization

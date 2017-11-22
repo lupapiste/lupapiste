@@ -77,13 +77,13 @@
    :draft    sc/Any})
 
 (defschema MattiPublishedSettings
-  {:verdict [(apply sc/enum (map name (keys shared/verdict-code-map)))]
-   :foremen [(apply sc/enum (map name shared/foreman-codes))]
-   :reviews [{:id   ssc/ObjectIdStr
-              :name MattiName
-              :type review-type}]
-   :plans   [{:id   ssc/ObjectIdStr
-              :name MattiName}]})
+  {:verdict-code [(apply sc/enum (map name (keys shared/verdict-code-map)))]
+   :foremen      [(apply sc/enum (map name shared/foreman-codes))]
+   :reviews      [{:id   ssc/ObjectIdStr
+                   :name MattiName
+                   :type review-type}]
+   :plans        [{:id   ssc/ObjectIdStr
+                   :name MattiName}]})
 
 (defschema MattiSavedTemplate
   (merge MattiCategory
@@ -140,6 +140,7 @@
           :modified                     ssc/Timestamp
           :data                         sc/Any
           (sc/optional-key :references) MattiPublishedSettings
+          :template                     sc/Any
           ;;(sc/optional-key :exclusions) Exclusions
           }))
 
