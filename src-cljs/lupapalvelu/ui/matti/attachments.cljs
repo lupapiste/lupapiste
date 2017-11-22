@@ -255,7 +255,10 @@
 (rum/defc attachments-list < rum/reactive
   (rum-util/hubscribe "attachmentsService::changed"
                       {}
-                      (util/fn-> :rum/react-component rum/request-render))
+                      (fn [state]
+                        (-> state
+                            :rum/react-component
+                            rum/request-render)))
   [{:keys [files*] :as options}]
   (when (-> files* rum/react empty?)
     (let [include?    (or (path/meta-value options :include?) identity)

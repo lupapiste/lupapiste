@@ -410,14 +410,15 @@
 
 (defn publish-verdict
   "Publishing verdict does the following:
-  1. Finalize and publish verdict
-  2. Update application state
-  3. Inspection summaries
-  4. Other document updates (e.g., waste plan -> waste report)
-  5. Freeze (locked and read-only) verdict attachments and update TOS details
-  6. TODO: Create tasks
-  7. TODO: Create PDF/A for the verdict
-  8. TODO: Generate KuntaGML"
+   1. Finalize and publish verdict
+   2. Update application state
+   3. Inspection summaries
+   4. Other document updates (e.g., waste plan -> waste report)
+   5. Freeze (locked and read-only) verdict attachments and update TOS details
+   6. TODO: Create tasks
+   7. TODO: Create PDF/A for the verdict
+   8. TODO: Generate KuntaGML
+  10. TODO: Assignments?"
   [{:keys [created application user] :as command}]
   (let [verdict    (command->verdict command)
         next-state (sm/verdict-given-state application)
@@ -439,7 +440,7 @@
                                                         application
                                                         user)))
     (inspection-summary/process-verdict-given application)
-    (when-let [doc-updates (util/not-empty (transformations/get-state-transition-updates command
+    (when-let [doc-updates (not-empty (transformations/get-state-transition-updates command
                                                                                          next-state))]
       (action/update-application command
                                  (:mongo-query doc-updates)

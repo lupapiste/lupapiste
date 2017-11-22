@@ -15,7 +15,7 @@ LUPAPISTE.NeighborsEditDialogModel = function(params) {
            .status(self.statusInit)
            .id(lupapisteApp.models.application.id())
            .neighborId(neighbor.id)
-           .propertyId(util.prop.withMaaraalaToHumanFormat( neighbor.propertyId ))
+           .propertyId(util.prop.toHumanFormat( neighbor.propertyId ))
            .name(owner.name)
            .street(address.street)
            .city(address.city)
@@ -36,7 +36,7 @@ LUPAPISTE.NeighborsEditDialogModel = function(params) {
   self.neighborId = ko.observable();
   self.propertyId = ko.pureComputed({
     read: function() {
-      return util.prop.withMaaraalaToHumanFormat(propertyId()) || propertyId();
+      return util.prop.toHumanFormat(propertyId()) || propertyId();
     },
     write: propertyId
   });
