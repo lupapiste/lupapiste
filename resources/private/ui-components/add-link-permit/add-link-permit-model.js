@@ -2,6 +2,8 @@ LUPAPISTE.AddLinkPermitModel = function(params) {
   "use strict";
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
+
   var lpRegex = /^\s*LP-\d{3}-\d{4}-\d{5}\s*$/;
 
   self.appId = lupapisteApp.services.contextService.applicationId;
@@ -13,7 +15,7 @@ LUPAPISTE.AddLinkPermitModel = function(params) {
   self.processing = ko.observable();
   self.pending = ko.observable();
 
-  self.ok = ko.computed(function() {
+  self.ok = self.disposedComputed(function() {
     // XOR in javascript
     var onlyOtherSelected = (self.kuntalupatunnus() || self.selectedLinkPermit()) &&
                             !(self.kuntalupatunnus() && self.selectedLinkPermit());
@@ -38,7 +40,7 @@ LUPAPISTE.AddLinkPermitModel = function(params) {
     return false;
   };
 
-  ko.computed(function() {
+  self.disposedComputed(function() {
     self.propertyId(lupapisteApp.models.application.propertyId());
     self.selectedLinkPermit("");
     self.kuntalupatunnus("");
