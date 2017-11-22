@@ -15,8 +15,8 @@ LUPAPISTE.ApprovalModel = function(params) {
     var text = null;
     if(approval && approval.user && approval.timestamp) {
       text = loc(["document", self.isApproved() ? APPROVED : REJECTED]);
-      text += " (" + approval.user.lastName + " "
-      + approval.user.firstName
+      text += " (" + approval.user.firstName + " "
+      + approval.user.lastName
       + " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
     }
     return text;

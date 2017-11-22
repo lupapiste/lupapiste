@@ -8584,6 +8584,10 @@ div.sticky {
   display: inline-block;
 }
 
+.form-approval-status.stamped {
+  display: inline-block;
+}
+
 .is-status > .like-btn, .is-status > a.link-btn, .is-status > a.link-btn-inverse, .is-status > a.link-btn-julkipano {
   min-height: 40px;
   max-height: 40px;
@@ -8609,6 +8613,10 @@ div.sticky {
 
 .is-status > .like-btn .approved, .is-status > a.link-btn .approved, .is-status > a.link-btn-inverse .approved, .is-status > a.link-btn-julkipano .approved {
   padding-right: 10px;
+}
+
+.is-status > .like-btn .lupicon-circle-stamp, .is-status > a.link-btn .lupicon-circle-stamp, .is-status > a.link-btn-inverse .lupicon-circle-stamp, .is-status > a.link-btn-julkipano .lupicon-circle-stamp {
+  color: #46b02d;
 }
 
 .reject-edits {
