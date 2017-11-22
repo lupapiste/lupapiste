@@ -203,7 +203,8 @@ jQuery(document).ready(function() {
     {name: "date-editor"},
     {name: "mark-review-faulty-dialog"},
     {name: "backend-id-manager"},
-    {name: "generic-bulletin-tab"}
+    {name: "generic-bulletin-tab"},
+    {name: "add-link-permit"}
 ];
 
   ko.registerLupapisteComponents(components);

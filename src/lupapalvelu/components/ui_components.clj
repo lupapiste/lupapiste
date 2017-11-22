@@ -329,15 +329,14 @@
 
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker
                             :signing :invites :verdict-attachment-prints :calendar-view :printing-order]
-                  :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
+                  :js ["map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
                        "add-party.js" "archival-summary.js" "case-file.js"
                        "create-digging-permit.js"
                        "parties-model.js"
                        "application.js"
                        "backend-id-manager.js"]
-                  :html ["add-link-permit.html"
-                         "application.html" "inforequest.html" "add-operation.html" "change-location.html"
+                  :html ["application.html" "inforequest.html" "add-operation.html" "change-location.html"
                          "foreman-template.html" "archival-summary-template.html"
                          "required-fields-summary-tab-template.html" "parties-tab-template.html"
                          "case-file-template.html" "create-digging-permit.html"

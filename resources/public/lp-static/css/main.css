@@ -23000,6 +23000,10 @@ span.icon_clear:before {
   padding-bottom: 1em;
 }
 
+.edit-handlers-container h1 {
+  margin-top: 12px;
+}
+
 #application-tasks-tab i.lupicon-circle-check,
 #application-tasks-tab i.lupicon-circle-pen,
 #application-tasks-tab i.lupicon-circle-arrow-up,
