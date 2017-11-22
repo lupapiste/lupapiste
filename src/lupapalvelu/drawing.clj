@@ -1,28 +1,72 @@
 (ns lupapalvelu.drawing
   (:require [sade.coordinate :as coord]
-            [sade.strings :as sstr]
-            [cljts.io :as jts]))
+            [cljts.io :as jts]
+            [cljts.geom :as geom]
+            [taoensso.timbre :as timbre])
+  (:import [com.vividsolutions.jts.geom Polygon Geometry GeometryCollection]))
 
 (defn- get-pos [coordinates]
   (mapv (fn [c] [(-> c .x) (-> c .y)]) coordinates))
 
-(defn- parse-geometry [drawing]
+(defn- coordinates-to-close?
+  "Check for coordinates that have same x or y and really close x' or y'"
+  [[x1 y1] [x2 y2]]
+  (and (or (= x1 x2) (= y1 y2))
+       (< (Math/abs (- x1 x2)) 0.3)
+       (< (Math/abs (- y1 y2)) 0.3)))
+
+(defn- filter-coord-duplicates [coordinates]
+  (reduce
+    (fn [coords c]
+      (if (or (= (last coords) c) (coordinates-to-close? (last coords) c))
+        (concat (doall (drop-last coords)) [c]) ; Replace the last coordinate to keep the ring correct
+        (concat coords [c])))
+    []
+    coordinates))
+
+(defn- valid-polygon [coordinates]
+  (let [c-objs (map (fn [coord] (geom/c (first coord) (second coord))) coordinates)
+        linear-ring (geom/linear-ring c-objs)
+        polygon (geom/polygon linear-ring [])]
+    (if (.isValid ^Polygon polygon)
+      coordinates
+      (throw (IllegalArgumentException. "Invalid polygon")))))
+
+(defn- valid-linestring [coordinates]
+  ;; LineString must have at least two points
+  (if (second coordinates)
+    coordinates
+    (throw (IllegalArgumentException. "LineString does not have at least two points"))))
+
+(defn- convert-geometry [^Geometry geometry]
+  (->> (.getCoordinates geometry)
+       get-pos
+       filter-coord-duplicates
+       (mapv (fn [c] (coord/convert "EPSG:3067" "WGS84" 12 c)))))
+
+(defn- parse-wkt-drawing [drawing]
   (try
-     (get-pos (.getCoordinates (-> drawing :geometry jts/read-wkt-str)))
+    (let [parsed-wkt (-> drawing :geometry jts/read-wkt-str)
+          geometry-type (.getGeometryType ^Geometry parsed-wkt)
+          converted-coordinates (if (instance? GeometryCollection parsed-wkt)
+                                  (->> (range (.getNumGeometries ^GeometryCollection parsed-wkt))
+                                       (map #(.getGeometryN ^GeometryCollection parsed-wkt %))
+                                       (map convert-geometry))
+                                  (convert-geometry parsed-wkt))]
+      (when (seq converted-coordinates)
+        {:type geometry-type
+         :coordinates (case geometry-type
+                        "MultiPolygon" (->> (mapv valid-polygon converted-coordinates)
+                                            (mapv vector))
+                        "Polygon" (-> (valid-polygon converted-coordinates) vector)
+                        "LineString" (valid-linestring converted-coordinates)
+                        "Point" (first converted-coordinates)
+                        converted-coordinates)}))
     (catch Exception e
-      (println "Invalid geometry, message is: " (:geometry drawing) (.getMessage e))
+      (timbre/warn "Invalid geometry:" (:geometry drawing) "(" (.getMessage e) ")")
       nil)))
 
-(defn- parse-type [drawing]
-  (try
-    (first (re-seq #"[^(]+" (:geometry drawing)))
-    (catch Exception e
-      (println "Invalid geometry, message is: " (:geometry drawing) (.getMessage e))
-      nil)))
-
-(defn wgs84-geometry [drawing]
-  (let [type (parse-type drawing)
-        coordinates (parse-geometry drawing)]
-    (if (and (some? type) (some? coordinates))
-      {:type (if (= type "LINESTRING") "LineString" (sstr/capitalize type))
-       :coordinates (mapv (fn [c] (coord/convert "EPSG:3067" "WGS84" 5 c)) coordinates)})))
+(defn wgs84-geometry
+  "Converts a WKT drawing to a valid GeoJSON object. Returns nil if the drawing can't be converted to valid GeoJSON."
+  [drawing]
+  (parse-wkt-drawing drawing))

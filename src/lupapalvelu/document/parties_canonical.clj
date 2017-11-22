@@ -6,7 +6,6 @@
             [lupapalvelu.document.rakennuslupa-canonical :as rl-canonical]
             [lupapalvelu.document.tools :as doc-tools]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.disk-writer :as writer]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]))
 
 (defmulti party-canonical-info
@@ -58,15 +57,15 @@
       :asianTiedot {:Asiantiedot {:rakennusvalvontaasianKuvaus (party-krysp-description party-doc)}}
       :lisatiedot (rl-canonical/get-lisatiedot-with-asiakirjat-toimitettu application lang)}}}})
 
-(defn- write-party-krysp [application lang krysp-version output-dir {doc-id :id :as party-doc}]
-  (as-> party-doc $
-    (party-doc-to-canonical application lang $)
-    (rl-mapping/rakennuslupa-element-to-xml $ krysp-version)
-    (writer/write-to-disk application nil $ krysp-version output-dir nil nil doc-id)))
+(defn- doc-to-canonical-fn
+  "Returns reducer function which associates document-id with xml model as value"
+  [application lang krysp-version]
+  (fn [docs party-doc]
+    (assoc docs (:id party-doc) (-> (party-doc-to-canonical application lang party-doc)
+                                    (rl-mapping/rakennuslupa-element-to-xml krysp-version)))))
 
-(defmethod permit/parties-krysp-mapper :R [application doc-subtype lang krysp-version output-dir]
+(defmethod permit/parties-krysp-mapper :R [application doc-subtype lang krysp-version]
   (let [application (doc-tools/unwrapped application)]
     (->> (domain/get-documents-by-subtype (:documents application) doc-subtype)
          (walk/postwalk canonical-common/empty-strings-to-nil)
-         (run! (partial write-party-krysp application lang krysp-version output-dir)))
-    true))
+         (reduce (doc-to-canonical-fn application lang krysp-version) {}))))

@@ -115,6 +115,9 @@
 (defmethod convert-file :image/jpeg [application filedata]
   (convert-image :jpeg application filedata))
 
+(defmethod convert-file :image/png [application filedata]
+  (convert-image :png application filedata))
+
 (defmethod convert-file :default [_ {:keys [content filename] :as filedata}]
   (if (libreoffice-conversion-required? filedata)
     (->libre-pdfa! filename content)

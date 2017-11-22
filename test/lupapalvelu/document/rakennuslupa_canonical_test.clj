@@ -1,25 +1,25 @@
 (ns lupapalvelu.document.rakennuslupa-canonical-test
-  (:require [lupapalvelu.document.canonical-test-common :as ctc]
+  (:require [clj-time.core :refer [date-time]]
+            [clojure.data.xml :refer :all]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.document.canonical-common :refer :all]
+            [lupapalvelu.document.canonical-test-common :as ctc]
+            [lupapalvelu.document.data-schema :as doc-data-schema]
             [lupapalvelu.document.rakennuslupa-canonical :refer :all]
+            [lupapalvelu.document.schemas :as doc-schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.factlet :as fl]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.xml.emit :refer :all]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer :all]
-            [lupapalvelu.operations :as op]
-            [lupapalvelu.document.schemas :as doc-schemas]
-            [lupapalvelu.document.data-schema :as doc-data-schema]
-            [lupapalvelu.factlet :as fl]
-            [lupapalvelu.attachment :as att]
-            [schema.core :as sc]
-            [sade.core :refer :all]
-            [sade.strings :as ss]
-            [sade.schema-generators :as ssg]
-            [sade.util :as util]
-            [clojure.data.xml :refer :all]
-            [clj-time.core :refer [date-time]]
             [midje.sweet :refer :all]
-            [midje.util :refer [testable-privates]]))
+            [midje.util :refer [testable-privates]]
+            [sade.core :refer :all]
+            [sade.schema-generators :as ssg]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [schema.core :as sc]))
 
 (facts "Date format"
   (fact (util/to-xml-date (.getMillis (date-time 2012 1 14))) => "2012-01-14")
@@ -997,7 +997,23 @@
     (fact "h2 huoneistotunnus" (:huoneistotunnus h1) => truthy)
     (fact "h2 huoneistotunnus: porras" (-> h1 :huoneistotunnus :porras) => "A")
     (fact "h2 huoneistotunnus: huoneistonumero" (-> h1 :huoneistotunnus :huoneistonumero) => "001")
-    (fact "h2 huoneistotunnus: jakokirjain" (-> h1 :huoneistotunnus :jakokirjain) => "a")))
+    (fact "h2 huoneistotunnus: jakokirjain" (-> h1 :huoneistotunnus :jakokirjain) => "a")
+
+    (facts "Muutostapa can be missing"
+      (let [first-missing (-> uusi-rakennus
+                              (get-in [:data :huoneistot])
+                              (util/dissoc-in [:0 :muutostapa])
+                              tools/unwrapped)]
+        (fact "Muutostapa missing"
+          (get-in first-missing [:0 :muutostapa]) => nil
+          (get-in first-missing [:1 :muutostapa]) => "muutos")
+
+        (fact "Missing muutostapa filtered for rakennuksen-muuttaminen"
+          (map :muutostapa (get-huoneisto-data first-missing "rakennuksen-muuttaminen"))
+          => ["muutos"])
+        (fact "Missing muutostapa is also lis\u00e4ys for uusiRakennus"
+                    (map :muutostapa (get-huoneisto-data first-missing "uusiRakennus"))
+          => ["lis\u00e4ys" "lis\u00e4ys"])))))
 
 (facts "Muutostapa for old buildings"
   (let [huoneistot (get-huoneisto-data (-> uusi-rakennus

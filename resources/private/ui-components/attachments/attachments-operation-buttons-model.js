@@ -13,10 +13,7 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function(params) {
   var attachments = service.attachments;
 
   self.upload = params.upload;
-
-  self.newAttachment = function() {
-    hub.send( "add-attachment-file", {} );
-  };
+  self.processing = appModel.processing;
 
   self.requireAttachmentsBubbleVisible = ko.observable(false);
 
@@ -83,7 +80,7 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function(params) {
   self.hasFiles = function() {
     return _.some( service.attachments(),
                    _.ary( _.partialRight( util.getIn,
-                                          ["latestVersion", "fileId"] ),
+                                          ["latestVersion", "filename"] ),
                           1));
   };
 

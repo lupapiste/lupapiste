@@ -18,6 +18,9 @@
                   data-bind="click: restApiUsers.addRestUser,
                              ltext: 'add.rest-api-user'"></button>
           <button class="btn-primary"
+                  data-bind="click: systemUsers.addSystemUser,
+                             ltext: 'add.system-user'"></button>
+          <button class="btn-primary"
                   data-bind="click: financialHandlerUser.addFinancialHandlerUser,
                              ltext: 'admin.add-financial-handler'"
                   data-test-id="add-financial-user"></button>
@@ -119,6 +122,43 @@
                     <div data-bind="text: createdUserUsername"></div>
                     <div data-bind="ltext: 'admin.add-rest-user.dialog.password'"></div>
                     <pre href="#" data-bind="text: createdPw"></pre>
+                  </p>
+                </div>
+                <button data-bind="enable: !searching(), ltext: 'ok'" class="positive btn-dialog close"></button>
+              </div>
+            </div>
+          </div>
+          <div id="add-system-user-to-organization-dialog" class="window autosized">
+            <div class="dialog-header">
+              <p data-bind="ltext: 'admin.system-user.dialog.title'"></p>
+              <p class="dialog-close close lupicon-remove"></p>
+            </div>
+            <div class="dialog-content" data-bind="with: systemUsers">
+              <div data-bind="visible: phase() === 1">
+                <form>
+                  <div>
+                    <label data-bind="ltext: 'userinfo.municipalityname'" class="form-label" for="admin.system-user.add.municipalityName"></label>
+                    <input class="form-input" data-bind="textInput: municipalityName"
+                           id="admin.system-user.add.municipalityName" type="text"/>
+                  </div>
+
+                  <div>
+                    <label data-bind="ltext: 'admin.add-dialog.organization-ids'" class="form-label" for="admin.system-user.add.organizationIds"></label>
+                    <input class="form-input" data-bind="textInput: organizationIds"
+                           id="admin.system-user.add.organizationIds" type="text"/>
+                  </div>
+
+                  <button data-bind="click: next, enable: userDetailsOk, ltext: 'admin.add-dialog.continue'"
+                          class="positive btn-dialog"></button>
+                </form>
+              </div>
+              <div data-bind="visible: phase() === 2">
+                <h2 data-bind="visible: searching, ltext: 'admin.add-dialog.searching'"></h2>
+                <div data-bind="visible: userAdded">
+                  <h2 data-bind="ltext: 'admin.add-rest-user.dialog.userAdded'"></h2>
+                  <p>
+                    <div data-bind="ltext: 'admin.add-rest-user.dialog.username'"></div>
+                    <div data-bind="text: createdUserUsername"></div>
                   </p>
                 </div>
                 <button data-bind="enable: !searching(), ltext: 'ok'" class="positive btn-dialog close"></button>

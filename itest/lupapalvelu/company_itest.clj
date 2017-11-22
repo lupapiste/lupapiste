@@ -432,8 +432,7 @@
                                           :street "Testikatu 3" :zip    "33500"
                                           :city "Tre" :phone "123"
                                           :allowDirectMarketing false :rakentajafi false})
-        email (last-email)
-        activate-url (first (re-find  #".+/app/security/activate/([a-zA-Z0-9]+)" (get-in email [:body :plain])))]
+        email (last-email)]
     (fact "Before registering was disalbed"
       (:enabled old-details) => false)
     (fact "Vetuma data OK"
@@ -445,8 +444,13 @@
       (:subject email) => "Lupapiste: Tervetuloa Lupapisteeseen!")
     (fact "Can NOT log in before activation"
       (login "foo@example.com" "foofoo" params) => (partial expected-failure? :error.login))
+    (fact "Email body exists"
+      (get-in email [:body :plain]) => truthy)
     (fact "Activate"
-      (http-get activate-url {:follow-redirects false}) => http302?)
+      (when-let [body (get-in email [:body :plain])]
+        (-> (re-find  #".+/app/security/activate/([a-zA-Z0-9]+)" body)
+            first
+            (http-get {:follow-redirects false})) => http302?))
     (fact "Can NOT log in yet"
       (login "foo@example.com" "foofoo123" params) => ok?)
     (fact "Is enabled"

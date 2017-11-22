@@ -79,6 +79,7 @@
               <th data-bind="ltext: 'organization.openinforequest.email'"></th>
               <th data-bind="ltext: 'organization.krysp.ftp-user'"></th>
               <th>Palvelu avataan</th>
+              <th data-bind="ltext: 'admin.organization.backend-system'"></th>
             </tr>
           </thead>
           <tbody data-bind="foreach: { data: organizationsModel.organizations, as: 'organization' }">
@@ -109,6 +110,7 @@
               <td data-bind="text: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.municipality + '-' + $data.permitType}"></td>
               <td data-bind="text: util.getIn(organization, ['krysp', $data.permitType, 'ftpUser']), attr: {'data-test-id': 'krysp-ftpUser-' + $data.municipality + '-' + $data.permitType}"></td>
               <td data-bind="dateString: $data['opening']"></td>
+              <td data-bind="ltext: 'backend-system.' + util.getIn(organization, ['krysp', $data['permitType'], 'backend-system'], 'unknown')"></td>
             </tr>
             <!-- /ko -->
           </tbody>

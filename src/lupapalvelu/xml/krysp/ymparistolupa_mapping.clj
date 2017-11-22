@@ -1,14 +1,11 @@
 (ns lupapalvelu.xml.krysp.ymparistolupa-mapping
-  (:require [clojure.walk :as walk]
-            [sade.util :as util]
-            [sade.core :refer [now]]
+  (:require [sade.core :refer [now]]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.attachments-canonical :as attachments-canon]
             [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.ymparistolupa-canonical :as ymparistolupa-canonical]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.xml.disk-writer :as writer]))
+            [lupapalvelu.xml.emit :refer [element-to-xml]]))
 
 (def toiminta-aika-children [{:tag :alkuHetki} ; time
                              {:tag :loppuHetki} ; time
@@ -128,10 +125,8 @@
 (defn ymparistolupa-element-to-xml [canonical krysp-version]
   (element-to-xml (common-map-enums canonical krysp-version) (get-mapping krysp-version)))
 
-(defn save-application-as-krysp
-  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
-   3rd parameter (submitted-application) is not used on YL applications."
-  [application lang submitted-application krysp-version output-dir begin-of-link]
+(defmethod permit/application-krysp-mapper :YL
+  [application lang krysp-version begin-of-link]
   (let [krysp-polku-lausuntoon [:Ymparistoluvat :ymparistolupatieto :Ymparistolupa :lausuntotieto]
         canonical-without-attachments  (ymparistolupa-canonical/ymparistolupa-canonical application lang)
         statement-given-ids (common/statements-ids-with-status
@@ -146,15 +141,5 @@
         xml (ymparistolupa-element-to-xml canonical krysp-version)
         all-canonical-attachments (concat attachments-canonical (attachments-canon/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
-
-    (writer/write-to-disk
-      application
-      attachments-for-write
-      xml
-      krysp-version
-      output-dir
-      submitted-application
-      lang)))
-
-(defmethod permit/application-krysp-mapper :YL [application lang submitted-application krysp-version output-dir begin-of-link]
-  (save-application-as-krysp application lang submitted-application krysp-version output-dir begin-of-link))
+    {:xml xml
+     :attachments attachments-for-write}))

@@ -119,7 +119,7 @@
             msg (util/assoc-when
                   {:id message-id :direction "out"
                    :status "published" :messageType "state-change"
-                   :partner "matti" :format "json"
+                   :partner "matti" :format "json" :transferType "http"
                    :created (or (:created command) (now))
                    :application (-> (select-keys app [:id :organization])
                                     (assoc :state (name new-state)))
@@ -135,4 +135,5 @@
                                          "X-Vault"    (env/value :matti :rest :vault)}
                       :body             (clj-http/json-encode outgoing-data)
                       :throw-exceptions true})
+          (messages/mark-acknowledged-and-return message-id (now))
           (infof "MATTI JSON sent to state-change endpoint successfully"))))))

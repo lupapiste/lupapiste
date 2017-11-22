@@ -116,6 +116,36 @@
               <span data-bind="component: {name: 'invoice-operator-selector', params: {selected: model().pop, enabled: edit}}"></span>
             </div>
 
+            <h2 data-bind="ltext: 'register.company.form.contact'"></h2>
+
+            <div class="form-entry">
+              <label class="form-label tip" data-bind="ltext: 'register.company.form.contactAddress'"></label>
+              <input class="form-input text" data-bind="textInput: model().contactAddress, enable: edit" type="text" maxlength="64"
+                     data-test-id="edit-company-contactAddress">
+            </div>
+
+            <div class="form-entry">
+              <label class="form-label tip" data-bind="ltext: 'register.company.form.contactZip'"></label>
+              <input class="form-input text" data-bind="textInput: model().contactZip, enable: edit" type="text" maxlength="5"
+                     data-test-id="edit-company-contactZip">
+            </div>
+
+            <br/>
+
+            <div class="form-entry">
+              <label class="form-label tip" data-bind="ltext: 'register.company.form.contactPo'"></label>
+              <input class="form-input text" data-bind="textInput: model().contactPo, enable: edit" type="text" maxlength="64"
+                     data-test-id="edit-company-contactPo">
+            </div>
+
+            <div class="form-entry">
+              <label class="form-label" data-bind="ltext: 'register.company.form.contactCountry'"></label>
+              <input class="form-input text" data-bind="textInput: model().contactCountry, enable: edit" type="text" maxlength="64"
+                     data-test-id="edit-company-contactCountry">
+            </div>
+
+            <br/>
+
             <div>
               <button data-bind="enable: canStartEdit, click: startEdit, ltext: 'edit'" type="button" class="btn btn-primary" data-test-id="company-details-edit"></button>
               <button data-bind="enable: canSubmit, click: submit" type="submit" class="btn btn-primary" data-test-id="company-details-save">
@@ -133,6 +163,22 @@
         <!-- =================== -->
 
         <div data-bind="if: tabs.visible('users')">
+
+          <h2 data-bind="ltext: 'register.company.invitation.denied.title'"></h2>
+
+          <div>
+            <input class="form-input checkbox"
+                   type="checkbox"
+                   id="invitationDeniedSelect"
+                   data-bind="checked: info.model().invitationDenied,
+                              enable: isAdmin(),
+                              click: setDenied"
+                   data-test-id="checkbox-invitations-denied">
+            <label for="invitationDeniedSelect" data-bind="ltext: 'register.company.invitation.denied.label'" class="form-label-checkbox"/>
+            <span class="save-indicator" data-bind="saveIndicator: indicator"></span>
+          </div>
+
+          <br/>
 
           <span data-bind="text: loc('company.users.count',
                                       invitations().length + users().length,

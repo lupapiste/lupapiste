@@ -5,16 +5,16 @@
 //  [files]: Observable array.
 //  [allowMultiple]: Whether multiple files can be uploaded at the
 //  same time (false).
-//  [readOnly]: If true only the file listing is shown (false).
+//  [readOnly]: If true only the file listing is shown. If it is
+//  observable, the upload is enabled accordingly. This is useful for
+//  example, when the auth model is initialized belatedly (default
+//  false).
 //  [dropZone]: Dropzone selector as string (default null, no
 //  dropzone). The dropzone highlight is done with drop-zone
 //  component.
 //  [badFileHandler]. Function to be called on bad files (size,
 //  type). If not given, errors are displayed with indicators. Event
 //  argument contains (localized) message and file.
-//  [batchMode]. Operating on batch upload mode (true/false),
-//  uploaded files are handed over to a higher level (batch) upload
-//  model to be bound to their contexts.
 //  [errorHandler]. Function to be called on server errors. If not
 //  given, the errors are displayed with indicators. The event
 //  argument contains generic localized message.
@@ -40,7 +40,6 @@ LUPAPISTE.UploadModel = function( owner, params ) {
   self.waiting = ko.observable();
   self.readOnly = params.readOnly;
   self.allowMultiple = params.allowMultiple;
-  self.batchMode = params.batchMode;
 
   self.batchListHidden = self.disposedPureComputed(_.flow(self.files, _.isEmpty));
 
@@ -92,6 +91,12 @@ LUPAPISTE.UploadModel = function( owner, params ) {
       self.waiting( event.state !== "finished" );
     });
     self.listenService( "badFile", params.badFileHandler || indicatorError);
+
+    if( ko.isObservable( self.readOnly )) {
+      self.disposedComputed( function() {
+        self.setEnabled( !self.readOnly());
+      });
+    }
   }
 
   // Removes file from files but not from server.
@@ -109,7 +114,10 @@ LUPAPISTE.UploadModel = function( owner, params ) {
     notifyService( "removeFile", {attachmentId: data.fileId});
   };
 
-
+  // Toggle enabled/disabled
+  self.setEnabled = function( enabled ) {
+    notifyService( "toggle-enabled", {enabled: enabled} );
+  };
 
 
   self.cancel = function() {
@@ -122,7 +130,8 @@ LUPAPISTE.UploadModel = function( owner, params ) {
   };
 
   self.init = function() {
-    if( !ko.unwrap(self.readOnly) ) {
+    var alwaysReadOnly = !ko.isObservable( self.readOnly) && self.readOnly;
+    if( !alwaysReadOnly ) {
       // Trick to ensure that rendering is done before binding.
       _.defer(bindToService );
     }

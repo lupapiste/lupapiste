@@ -27,9 +27,12 @@
 
     <button class="ghost"
             data-bind="click: $data.copyUserAttachments,
-                       visible: $data.canCopyUserAttachments()"
+                       visible: $data.canCopyUserAttachments(),
+                       disable: $data.processing,
+                       css: {'waiting': $data.processing}"
             data-test-id="copy-user-attachments">
       <i class="lupicon-circle-plus"></i>
+      <i class="wait spin lupicon-refresh"></i>
       <span data-bind="ltext: 'application.attachmentsCopyOwn'"></span>
     </button>
     <button class="ghost"

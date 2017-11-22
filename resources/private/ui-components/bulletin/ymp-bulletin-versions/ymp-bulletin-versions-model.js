@@ -1,4 +1,4 @@
-LUPAPISTE.BulletinVersionsModel = function(params) {
+LUPAPISTE.YmpBulletinVersionsModel = function(params) {
   "use strict";
   var self = this;
 
@@ -35,5 +35,5 @@ LUPAPISTE.BulletinVersionsModel = function(params) {
     bulletin.edit(!bulletin.edit());
   };
 
-  self.bulletinUrl = self.disposedPureComputed(function() { return "/app/" + loc.getCurrentLanguage() + "/bulletins#!/bulletin/" + util.getIn(self, ["bulletin", "id"]); });
+  self.bulletinUrl = self.disposedPureComputed(function() { return "/app/" + loc.getCurrentLanguage() + "/bulletins#!/ymp-bulletin/" + util.getIn(self, ["bulletin", "id"]); });
 };

@@ -1,15 +1,16 @@
 (ns lupapalvelu.attachment.type
   (:refer-clojure :exclude [contains?])
-  (:require [lupapiste-commons.attachment-types :as attachment-types]
-            [lupapalvelu.i18n :as i18n]
+  (:require [lupapalvelu.i18n :as i18n]
             [lupapalvelu.operations :as op]
+            [lupapiste-commons.attachment-types :as attachment-types]
             [sade.core :refer :all]
             [sade.env :as env]
-            [sade.util :refer [fn-> fn->>] :as util]
-            [sade.strings :as ss]
             [sade.schemas :as ssc]
+            [sade.strings :as ss]
+            [sade.strings :as str]
+            [sade.util :refer [fn-> fn->>] :as util]
             [schema.core :refer [defschema] :as sc]
-            [sade.strings :as str]))
+            [swiss.arrows :refer :all]))
 
 (defschema AttachmentType
   {:type-id                    sc/Keyword
@@ -177,6 +178,14 @@
   (get type-grouping
        (-> (select-keys type [:type-group :type-id])
            (util/convert-values keyword))))
+
+(defn resolve-type
+  "Resolves :type-group and :type-id from given permit-type and
+  type-id. Arguments can be either keywords or strings."
+  [permit-type type-id]
+  (-<>> (attachment-types-by-permit-type (keyword permit-type))
+        (util/find-by-key :type-id (keyword type-id))
+        (select-keys <> [:type-group :type-id])))
 
 (def localisation-to-attachment-type-map
   (memoize

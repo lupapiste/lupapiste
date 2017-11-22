@@ -4,7 +4,7 @@
   window.lupapisteApp = new LUPAPISTE.App({startPage: "bulletins",
                                            allowAnonymous: true,
                                            showUserMenu: false,
-                                           componentPages: ["bulletin"]});
+                                           componentPages: ["bulletin", "ymp-bulletin"]});
 
   window.lupapisteApp.services.documentDataService = new LUPAPISTE.DocumentDataService({
     readOnly: true
@@ -20,6 +20,7 @@
         {name: "application-bulletins-list"},
         {name: "load-more-application-bulletins"},
         {name: "application-bulletin"},
+        {name: "application-ymp-bulletin"},
         {name: "bulletins-search"},
         {name: "autocomplete-municipalities"},
         {name: "autocomplete-states"},

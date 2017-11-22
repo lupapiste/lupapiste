@@ -9,6 +9,7 @@
             [lupapalvelu.roles :as roles]
             [lupapalvelu.user :as usr]  ;; usr works better with code completion.
             [lupapalvelu.user-utils :as uu]
+            [lupapalvelu.company :as company]
             [monger.operators :refer :all]
             [sade.core :refer [fail ok]]
             [sade.strings :as ss]
@@ -107,17 +108,19 @@
     application                  :application
     :as                          command}]
   (let [email (ss/canonize-email email)]
-    (if (or (util/find-by-key :email email (domain/invites application))
-            (auth/has-auth? application (:id (usr/get-user-by-email email))))
-      (fail :error.already-has-access)
-      (let [guest (usr/get-or-create-user-by-email email user)
-            auth  (usr/user-in-role guest (keyword role))
-            err   (action/update-application command
-                                             {$push {:auth     (assoc auth :inviter (:id user))}
+    (if (company/company-denies-invitations? application (usr/get-user-by-email email))
+      (fail :invite.company-denies-invitation)
+      (if (or (util/find-by-key :email email (domain/invites application))
+              (auth/has-auth? application (:id (usr/get-user-by-email email))))
+        (fail :error.already-has-access)
+        (let [guest (usr/get-or-create-user-by-email email user)
+              auth (usr/user-in-role guest (keyword role))
+              err (action/update-application command
+                                             {$push {:auth (assoc auth :inviter (:id user))}
                                               $set  {:modified timestamp}})]
-        (when-not err
-          (notifications/notify! :guest-invite (assoc command :recipients [guest])))
-        (or err (ok))))))
+          (when-not err
+            (notifications/notify! :guest-invite (assoc command :recipients [guest])))
+          (or err (ok)))))))
 
 (defn- guest-authority-description-map
   "email description map"

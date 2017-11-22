@@ -1,30 +1,61 @@
 (ns lupapalvelu.verdict-review-util
-  (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
-            [pandect.core :as pandect]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mime :as mime]
+            [pandect.core :as pandect]
             [sade.common-reader :refer [to-timestamp]]
             [sade.files :as files]
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.attachment :as attachment])
+            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]])
   (:import (java.net URL)
            (java.nio.charset StandardCharsets)))
 
 (defn verdict-attachment-type
+  "Function name is anachronistic. Currently also review attachment
+  types are supported."
   ([application] (verdict-attachment-type application "paatosote"))
-  ([{permit-type :permitType :as application} type]
-   (if (#{:P :R :ARK} (keyword permit-type))
-     {:type-group "paatoksenteko" :type-id type}
-     {:type-group "muut" :type-id type})))
+  ([{permit-type :permitType :as application} type-id]
+   (let [resolved (reduce-kv (fn [acc k v]
+                               (assoc acc k (name v)))
+                             {}
+                             (att-type/resolve-type permit-type type-id))]
+     (cond
+       (seq resolved)
+       resolved
 
-(defn- attachment-type-from-krysp-type [type]
-  (case (ss/lower-case type)
-    "paatosote" "paatosote"
-    "lupaehto" "muu"
+       (util/includes-as-kw? [:R :P :ARK] permit-type)
+       {:type-group "paatoksenteko" :type-id type-id}
+
+       :else
+       {:type-group "muut" :type-id type-id}))))
+
+(defmulti attachment-type-from-krysp-type
+  (fn [{target-type :type} _] (keyword target-type)))
+
+(defmethod attachment-type-from-krysp-type :default [{target-type :type} _]
+  (errorf "Unknown krysp attachment target type: %s" target-type)
+  "muu")
+
+(defmethod attachment-type-from-krysp-type :verdict [_ type]
+  (case (-> type ss/lower-case ss/scandics->ascii)
+    "paatosote"  "paatosote"
+    "lupaehto"   "muu"
     "paatos"))
+
+(def task-attachment-types (set (->> (mapcat val att-type/attachment-types-by-permit-type)
+                                     (filter (comp #{:katselmukset_ja_tarkastukset} :type-group))
+                                     (map (comp name :type-id)))))
+
+(defmethod attachment-type-from-krysp-type :task [_ type]
+  (-> type
+      ss/lower-case
+      ss/scandics->ascii
+      task-attachment-types
+      (or "katselmuksen_tai_tarkastuksen_poytakirja")))
 
 (defn- content-disposition-filename
   "Extracts the filename from the Content-Disposition header of the
@@ -73,38 +104,42 @@
                     content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                     urlhash         (pandect/sha1 (.toString java-url))
                     attachment-id      urlhash
-                    attachment-type    (verdict-attachment-type application (attachment-type-from-krysp-type type))
+                    attachment-type    (verdict-attachment-type application (attachment-type-from-krysp-type target type))
                     contents           (or description (if (= type "lupaehto") "Lupaehto"))
                     target             (assoc target :urlHash pk-urlhash)
                     ;; Reload application from DB, attachments have changed
                     ;; if verdict has several attachments.
                     current-application (domain/get-application-as (:id application) user)]]
-          ;; If the attachment-id, i.e., hash of the URL matches
-          ;; any old attachment, a new version will be added
-          (files/with-temp-file temp-file
-            (if (= 200 (:status resp))
-              (with-open [in (:body resp)]
-                ;; Copy content to a temp file to keep the content close at hand
-                ;; during upload and conversion processing.
-                (io/copy in temp-file)
-                (attachment/upload-and-attach! {:application current-application :user user}
-                                               {:attachment-id attachment-id
-                                                :attachment-type attachment-type
-                                                :contents contents
-                                                :target target
-                                                :required false
-                                                :read-only true
-                                                :locked true
-                                                :created (or (if (string? attachment-time)
-                                                               (to-timestamp attachment-time)
-                                                               attachment-time)
-                                                             timestamp)
-                                                :state :ok
-                                                :set-app-modified? set-app-modified?}
-                                               {:filename filename
-                                                :size content-length
-                                                :content temp-file}))
-              (error (str (:status resp) " - unable to download " url ": " resp))))))
+          (do
+            ;; If the attachment-id, i.e., hash of the URL matches
+            ;; any old attachment, a new version will be added
+            (when (= content-length 0)
+              (errorf "attachment link %s in poytakirja refers to an empty file, %s-id: %s"
+                      (.toString java-url) target-type verdict-id))
+            (files/with-temp-file temp-file
+              (if (= 200 (:status resp))
+                (with-open [in (:body resp)]
+                  ;; Copy content to a temp file to keep the content close at hand
+                  ;; during upload and conversion processing.
+                  (io/copy in temp-file)
+                  (attachment/upload-and-attach! {:application current-application :user user}
+                                                 {:attachment-id attachment-id
+                                                  :attachment-type attachment-type
+                                                  :contents contents
+                                                  :target target
+                                                  :required false
+                                                  :read-only true
+                                                  :locked true
+                                                  :created (or (if (string? attachment-time)
+                                                                 (to-timestamp attachment-time)
+                                                                 attachment-time)
+                                                               timestamp)
+                                                  :state :ok
+                                                  :set-app-modified? set-app-modified?}
+                                                 {:filename filename
+                                                  :size content-length
+                                                  :content temp-file}))
+                (error (str (:status resp) " - unable to download " url ": " resp)))))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
     (do
       (warnf "no attachments ('liite' elements) in poytakirja, %s-id: %s" target-type verdict-id)

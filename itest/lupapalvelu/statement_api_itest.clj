@@ -237,6 +237,7 @@
                :modify-id modify-id
                :status "puollettu" :text "I will approve" :lang "fi"))
     (fact "Sonja approves application"
+      (command sonja :update-app-bulletin-op-description :id application-id :description "otsikko julkipanoon") => ok?
       (command sonja :approve-application :id application-id :lang "fi") => ok?)
     (fact "Application state is sent"
       (->> application-id (query-application sonja) :state keyword) => :sent)

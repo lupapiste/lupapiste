@@ -13,6 +13,7 @@
                     arg: "professional"},
                    {value: ko.observable(), label: "Suoramarkkinointilupa",
                     arg: "allow"}];
+    self.emails = ko.observable();
 
     self.link = ko.pureComputed( function() {
       return "/api/raw/user-report?"
@@ -22,6 +23,19 @@
              })
              .join( "&");
     });
+
+    ajax.query( "company-unsubscribed-emails")
+    .success( function( res ) {
+      self.emails( _.join( res.emails, "\n"));
+    })
+    .call();
+
+    self.upsert = function() {
+      ajax.command( "upsert-company-unsubscribed", {emails: self.emails()})
+      .success( util.showSavedIndicator )
+      .error( util.showSavedIndicator)
+      .call();
+    };
   }
 
   function ApplicationsReport() {
@@ -32,11 +46,13 @@
     self.monthValue = ko.observable();
     self.yearValue = ko.observable();
     self.results = ko.observableArray();
-    self.totalCount = ko.observable();
+    self.totalCountApp = ko.observable();
+    self.totalCountOp = ko.observable();
 
     self.reset = function() {
       self.results([]);
-      self.totalCount();
+      self.totalCountApp();
+      self.totalCountOp();
       self.monthValue(self.monthInput());
       self.yearValue(self.yearInput());
     };
@@ -46,7 +62,8 @@
       ajax.query("applications-per-month-report", {month: self.monthInput(), year: self.yearInput()})
       .success(function(res) {
         self.results(res.applications);
-        self.totalCount(_.sumBy(res.applications, "count"));
+        self.totalCountApp(_.sumBy(res.applications, "countApp"));
+        self.totalCountOp(_.sumBy(res.applications, "countOp"));
       })
       .call();
     };

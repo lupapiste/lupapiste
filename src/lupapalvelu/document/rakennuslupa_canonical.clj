@@ -30,14 +30,14 @@
                         schemas/get-schema
                         :body
                         (util/find-by-key :name "huoneistot"))
-        huoneistot (vals (into (sorted-map) huoneistot))
-        huoneistot (filter :muutostapa huoneistot)]
+        huoneistot (vals (into (sorted-map) huoneistot))]
     (for [huoneisto huoneistot
           :let      [huoneistonumero (-> huoneisto :huoneistonumero)
                      huoneistoPorras (-> huoneisto :porras)
-                     jakokirjain (-> huoneisto :jakokirjain)]
-          :when     (seq huoneisto)]
-      (merge {:muutostapa       (muutostapa huoneisto schema)
+                     jakokirjain (-> huoneisto :jakokirjain)
+                     muutostapa (muutostapa huoneisto schema)]
+          :when     (and muutostapa (seq huoneisto))]
+      (merge {:muutostapa       muutostapa
               :huoneluku        (-> huoneisto :huoneluku)
               :keittionTyyppi   (-> huoneisto :keittionTyyppi)
               :huoneistoala     (ss/replace (-> huoneisto :huoneistoala) "," ".")
@@ -109,7 +109,7 @@
                                                    :aurinkopaneeliKytkin (true? (-> toimenpide :varusteet :aurinkopaneeliKytkin))
                                                    :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin))
                                                    :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin))
-                                                   :saunoja (-> toimenpide :varusteet :saunoja)
+                                                   :saunoja (-> toimenpide :varusteet :saunoja positive-integer)
                                                    :vaestonsuoja vaestonsuoja}
                                        :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))
                                        :rakennustunnus (get-rakennustunnus toimenpide application info)}

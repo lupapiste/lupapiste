@@ -2670,7 +2670,9 @@
                          {$set {:archived.completed (System/currentTimeMillis)}}))
 
 (defn- add-wgs84-coordinates [drawing]
-  (assoc drawing :geometry-wgs84 (draw/wgs84-geometry drawing)))
+  (if-let [geom (draw/wgs84-geometry drawing)]
+    (assoc drawing :geometry-wgs84 geom)
+    (dissoc drawing :geometry-wgs84)))
 
 (defmigration add-wgs84-coordinates-for-drawings
   {:apply-when (pos? (mongo/count :applications
@@ -3516,6 +3518,107 @@
 (defmigration hankkeen-kuvaus-rakennuslupa-depricated
   {:apply-when (pos? (mongo/count :applications {:documents.schema-info.name "hankkeen-kuvaus-rakennuslupa"}))}
   (update-applications-array :documents hankkeen-kuvaus-rakennuslupa->hankkeen-kuvaus {:documents.schema-info.name "hankkeen-kuvaus-rakennuslupa"}))
+
+(defmigration enable-automatic-review-fetch-for-all-organizations
+  {:apply-when (pos? (mongo/count :organizations {:automatic-review-fetch-enabled {$exists false}}))}
+  (mongo/update-by-query :organizations
+                         {:automatic-review-fetch-enabled {$exists false}}
+                         {$set {:automatic-review-fetch-enabled true}}))
+
+(def backend-systems-r (util/read-edn-resource "migrations/backend_systems_r.edn"))
+
+(defmigration set-r-organization-backend-systems
+  (run! #(mongo/update :organizations
+                       {:scope {$elemMatch {:municipality % :permitType "R"}} :krysp.R {$exists true}}
+                       {$set {:krysp.R.backend-system (backend-systems-r %)}})
+        (keys backend-systems-r)))
+
+(defmigration recalculate-wgs84-coordinates-for-drawings
+  (update-applications-array :drawings
+                             add-wgs84-coordinates
+                             {:drawings.geometry {$exists true, $ne ""}}))
+
+(defmigration bulletins-text-vantaa
+  {:apply-when (pos? (mongo/count :organizations {:_id "092-R" :local-bulletins-page-settings {$exists false}}))}
+  (mongo/update-by-query :organizations
+                         {:_id "092-R" :local-bulletins-page-settings {$exists false}}
+                         {$set
+                          {:local-bulletins-page-settings
+                           {:texts {:fi {:heading1 "Vantaan kaupunki",
+                                         :heading2 "Rakennusvalvonnan julkipanot",
+                                         :caption ["Rakennuslupajaoston rakennuslupap\u00e4\u00e4t\u00f6kset annetaan julkipanon j\u00e4lkeen, jolloin niiden katsotaan tulleen asianosaisten tietoon. Valitusaika on 30 p\u00e4iv\u00e4\u00e4."
+                                                   "Viranhaltijan p\u00e4\u00e4t\u00f6ksi\u00e4 tehd\u00e4\u00e4n p\u00e4ivitt\u00e4in. Oikaisuvaatimusaika on 14 p\u00e4iv\u00e4\u00e4 p\u00e4\u00e4t\u00f6sten tiedoksiannosta."
+                                                   "Julkipanolistat ovat virallisesti n\u00e4ht\u00e4viss\u00e4 maank\u00e4yt\u00f6n asiakaspalvelussa (Kielotie 13, katutaso) sek\u00e4 alla olevassa listauksessa."]},
+                                    :sv {:heading1 "Vanda stad",
+                                         :heading2 "Offentlig delgivning av beslut om bygglov",
+                                         :caption ["Bygglovssektionens beslut om bygglov meddelas efter den offentliga delgivningen d\u00e5 de anses ha kommit till vederb\u00f6randes k\u00e4nnedom. Besv\u00e4rstiden \u00e4r 30 dagar."
+                                                   "Tj\u00e4nsteinnehavarbeslut fattas dagligen. Besv\u00e4rstiden \u00e4r 14 dagar fr\u00e5n det att besluten kungjorts."
+                                                   "F\u00f6rteckningarna finns offentligt fra\u03c0mlagda p\u00e5 anslagstavlan i byggnadstillsynens entr\u00e9hall och p\u00e5 listan som finns nedanf\u00f6r."]}}}}}))
+
+
+(def bad-review-attachments-query {:attachments {$elemMatch {$and [{:target.type "task"}
+                                                                   {:type.type-id "paatos"}
+                                                                   {:latestVersion.user.username "eraajo@lupapiste.fi"}]}}})
+
+;; Old fetched review attachments had a wrong type (paatos).
+(defmigration katselmuspoytakirja-type-fix
+  {:apply-when (pos? (mongo/count :applications bad-review-attachments-query))}
+  (update-applications-array :attachments
+                             (fn [{:keys [target type latestVersion] :as attachment}]
+                               (if (and (= (:type target) "task")
+                                        (= (:type-id type) "paatos")
+                                        (= (get-in latestVersion [:user :username]) "eraajo@lupapiste.fi"))
+                                 (assoc attachment
+                                        :type {:type-group "katselmukset_ja_tarkastukset"
+                                               :type-id    "katselmuksen_tai_tarkastuksen_poytakirja"})
+                                 attachment))
+                             bad-review-attachments-query))
+
+(defmigration add-docterminal-use-info
+  {:apply-when (pos? (mongo/count :organizations {:docstore-info.docTerminalInUse {$exists false}}))}
+  (mongo/update :organizations
+                {:docstore-info.docTerminalInUse {$exists false}}
+                {$set {:docstore-info.docTerminalInUse false}}
+                :multi true))
+
+(defmigration add-docterminal-allowed-attachment-types
+  {:apply-when (pos? (mongo/count :organizations {:docstore-info.allowedTerminalAttachmentTypes {$exists false}}))}
+  (mongo/update :organizations
+                {:docstore-info.allowedTerminalAttachmentTypes {$exists false}}
+                {$set {:docstore-info.allowedTerminalAttachmentTypes []}}
+                :multi true))
+
+(def missing-onkalo-file-id-query
+  {:attachments {$elemMatch {:metadata.tila :arkistoitu
+                             :latestVersion.onkaloFileId {$exists false}}}})
+
+(defmigration add-onkalo-file-id-to-attachments
+  {:apply-when (pos? (mongo/count :applications missing-onkalo-file-id-query))}
+  (update-applications-array :attachments
+                             (fn [{:keys [id latestVersion versions metadata] :as attachment}]
+                               (if (and (= :arkistoitu (keyword (:tila metadata)))
+                                        (not (:onkaloFileId latestVersion)))
+                                 (let [lv (-> (last versions)
+                                              (assoc :onkaloFileId id))]
+                                   (-> (assoc-in attachment [:latestVersion :onkaloFileId] id)
+                                       (assoc :versions (-> (drop-last versions)
+                                                            (concat [lv])))))
+                                 attachment))
+                             missing-onkalo-file-id-query))
+
+(def archiving-project-file-query
+  {:permitType "ARK"
+   :attachments {$elemMatch {:metadata.tila :arkistoitu
+                             :latestVersion.fileId {$type "string"}}}})
+
+(defmigration remove-archived-archiving-project-files
+  {:apply-when (pos? (mongo/count :applications archiving-project-file-query))}
+  (doseq [app (mongo/select :applications archiving-project-file-query [:_id :attachments :permitType])]
+    (doseq [{:keys [metadata latestVersion] :as attachment} (:attachments app)]
+      (when (and (= "ARK" (:permitType app))
+                 (= :arkistoitu (keyword (:tila metadata)))
+                 (:onkaloFileId latestVersion))
+        (att/delete-archived-attachments-files-from-mongo! app attachment)))))
 
 ;;
 ;; ****** NOTE! ******

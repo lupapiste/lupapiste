@@ -3,12 +3,13 @@
             [lupapalvelu.fixture.core :refer :all]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.i18n :as i18n]
-            [sade.core :refer :all]))
+            [sade.core :refer :all]
+            [sade.env :as env]))
 
 (def- local-krysp "http://localhost:8000/dev/krysp")
 (def- local-3d-map "http://localhost:8000/dev/3dmap")
+(def- local-krysp-receiver (str (env/server-address) "/dev/krysp/receiver"))
 
 (def users
   [;; Solita admin:  admin / admin
@@ -70,7 +71,7 @@
     :enabled true
     :language "fi"
     :role "authority"
-    :orgAuthz {:837-R #{:authority}}
+    :orgAuthz {:837-R #{:authority :approver}}
     :firstName "Veikko"
     :lastName "Viranomainen"
     :phone "03121991"
@@ -607,7 +608,7 @@
 
    ;; Dummy Hakijat
 
-   ;; Dummy hakija 1: pena / pena
+   ;; Dummy hakija 1: dummy / pena
    {:id  "51112424c26b7342d92acf3c"
     :enabled  false
     :language "fi"
@@ -618,7 +619,7 @@
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"
               :apikey "602cb9e58426c613c8b85abe"} ; Dummy user has apikey, should not actually happen
     :role "applicant"}
-   ;; Dummy hakija 2: pena / pena
+   ;; Dummy hakija 2: dummy2 / pena
    {:id  "51112424c26b7342d92acf3d"
     :enabled  false
     :language "fi"
@@ -628,7 +629,7 @@
     :email  "dummy2@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
     :role "applicant"}
-   ;; Dummy hakija 3: pena / pena
+   ;; Dummy hakija 3: dummy3 / pena
    {:id  "51112424c26b7342d92acf3e"
     :enabled  false
     :language "fi"
@@ -790,6 +791,7 @@
                        :digitizer-tools-enabled true
                        :permanent-archive-in-use-since 1451613600000
                        :earliest-allowed-archiving-date 0
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -932,12 +934,27 @@
                                         [{:type :application-id} {:type :backend-id}]
                                         [{:type :user}]
                                         [{:type :organization}]]}]
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true
                        :matti-enabled true
                        :docstore-info (assoc org/default-docstore-info
-                                        :docStoreInUse true
-                                        :documentPrice 314)}
+                                             :docStoreInUse true
+                                             :docTerminalInUse true
+                                             :documentPrice 314)
+
+                       :local-bulletins-page-settings
+                       {:texts
+                        (names
+                          {:fi {:heading1 "Sipoo",
+                                :heading2 "Sipoo R julkipanot",
+                                :caption ["Tervetuloa"
+                                          "Viranhaltijan p\u00e4\u00e4t\u00f6ksi\u00e4 tehd\u00e4\u00e4n p\u00e4ivitt\u00e4in. Oikaisuvaatimusaika on 14 p\u00e4iv\u00e4\u00e4 p\u00e4\u00e4t\u00f6sten tiedoksiannosta."
+                                          "Listat ovat n\u00e4ht\u00e4vill\u00e4 kunnan virastossa"]},
+                           :sv {:heading1 "Sibbo",
+                                :heading2 "Sibbo julkipano",
+                                :caption ["Bygglovssektionens beslut om bygglov meddelas efter den offentliga delgivningen d\u00e5 de anses ha kommit till vederb\u00f6randes k\u00e4nnedom. Besv\u00e4rstiden \u00e4r 30 dagar."
+                                          "Tj\u00e4nsteinnehavarbeslut fattas dagligen. Besv\u00e4rstiden \u00e4r 14 dagar fr\u00e5n det att besluten kungjorts."]}})}}
 
                       ;; Sipoo YA
                       ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.
@@ -998,6 +1015,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1024,7 +1042,15 @@
                                                                            [:hakija :ote_kauppa_ja_yhdistysrekisterista]
                                                                            [:pelastusviranomaiselle_esitettavat_suunnitelmat :vaestonsuojasuunnitelma]
                                                                            [:suunnitelmat :valaistussuunnitelma]]}
-                       :krysp {:R {:url local-krysp :version "2.1.4" :ftpUser "dev_tampere"}}
+                       :krysp {:R {:url local-krysp :version "2.2.2"
+                                   :http (merge
+                                           {:auth-type "basic"
+                                            :partner "matti"
+                                            :path {:application "hakemus-path"
+                                                   :review  "katselmus-path"}
+                                            :url local-krysp-receiver
+                                            :headers [{:key "x-vault" :value "vaultti"}]}
+                                           (org/encode-credentials "kuntagml" "kryspi"))}}
                        :handler-roles [{:id "abba1111111111111111a837"
                                         :name {:fi "K\u00e4sittelij\u00e4"
                                                :sv "Handl\u00e4ggare"
@@ -1033,6 +1059,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1058,6 +1085,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1102,6 +1130,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1125,6 +1154,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled true
                        :digitizer-tools-enabled true
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1141,6 +1171,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1160,6 +1191,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1185,6 +1217,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1208,6 +1241,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled false
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1254,6 +1288,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported false}
 
@@ -1285,6 +1320,7 @@
                        :earliest-allowed-archiving-date 0
                        :use-attachment-links-integration true
                        :operations-tos-functions {:masto-tms "10 03 00 01"}
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1313,6 +1349,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YI" "YL" "YM" "MAL" "VVVL"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1343,6 +1380,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1368,6 +1406,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -1393,6 +1432,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}]))
 

@@ -16,7 +16,7 @@
           <tr data-bind="with: $data.latestVersion">
             <td data-bind="attachmentType: $parent"></td>
             <td>
-              <a data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
+              <a data-bind="text: filename, attr: {href: '/api/raw/latest-attachment-version?attachment-id=' + ko.unwrap($parent.id)}"></a><br/>
               <i data-bind="ltext: contentType"></i>
               <i data-bind="size: size"></i>
             </td>
@@ -36,12 +36,12 @@
       <i data-bind="ltext: 'no-attachments'"></i>
     </div>
 
-    <attachment-batch params="upload: upload, typeGroups: typeGroups"></attachment-batch>
+    <attachment-batch params="upload: upload,
+                              typeGroups: typeGroups,
+                              defaults: defaults"></attachment-batch>
 
     <attachment-upload params="ltext: 'attachment.add-multiple',
-                               upload: upload,
-                               target: target,
-                               type: type"
-                       data-bind="visible: canAdd"></attachment-upload>
+                               upload: upload"
+                       data-bind="visible: !upload.readOnly()"></attachment-upload>
   </div>
 </script>

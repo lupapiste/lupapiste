@@ -15,12 +15,14 @@
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.user :as usr]
             [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.verdict-review-util :as verdict-review-util]
             [lupapalvelu.ya :as ya]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! ok?]]
             [sade.strings :as ss]
             [sade.util :as util]
-            [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]))
+            [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
+            [lupapalvelu.application-bulletins :as bulletins]))
 
 ;;
 ;; KRYSP verdicts
@@ -35,24 +37,26 @@
    :states           states/all-states
    :user-roles       #{:authority}}
   [{:keys [application]}]
-  (ok :attachmentType (verdict/verdict-attachment-type application)))
+  (ok :attachmentType (verdict-review-util/verdict-attachment-type application)))
 
 (defcommand check-for-verdict
   {:description "Fetches verdicts from municipality backend system.
-                 If the command is run more than once, existing verdicts are
-                 replaced by the new ones."
-   :parameters [:id]
-   :states     (conj states/give-verdict-states :constructionStarted) ; states reviewed 2015-10-12
-   :user-roles #{:authority}
-   :notified   true
-   :pre-checks [application-has-verdict-given-state]
-   :on-success (notify :application-state-change)}
+  If the command is run more than once, existing verdicts are replaced
+  by the new ones. After successful fetching and update, deprecated
+  attachments are deleted."
+   :parameters  [:id]
+   :states      (conj states/give-verdict-states :constructionStarted) ; states reviewed 2015-10-12
+   :user-roles  #{:authority}
+   :notified    true
+   :pre-checks  [application-has-verdict-given-state]
+   :on-success  (notify :application-state-change)}
   [{app :application :as command}]
   (let [result (verdict/do-check-for-verdict command)]
     (cond
       (nil? result) (fail :info.no-verdicts-found-from-backend)
-      (ok? result) (ok :verdictCount (count (:verdicts result)) :taskCount (count (:tasks result)))
-      :else result)))
+      (ok? result)  (ok :verdictCount (count (:verdicts result))
+                        :taskCount (count (:tasks result)))
+      :else         result)))
 
 ;;
 ;; Manual verdicts
@@ -180,6 +184,7 @@
                                                         application
                                                         user)))]
       (update-application command updates)
+      (bulletins/process-delete-verdict id verdictId)
       (attachment/delete-attachments! application (remove nil? (map :id attachments)))
       (appeal-common/delete-by-verdict command verdictId)
       (child-to-attachment/delete-child-attachment application :verdicts verdictId)

@@ -141,7 +141,7 @@
               <!-- ko if: $data.latestVersion && latestVersion.filename -->
               <tr data-bind="with: latestVersion">
                 <td>
-                    <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
+                    <a href="#" data-bind="text: filename, attr: {href: '/api/raw/latest-attachment-version?attachment-id=' + $parent.id}"></a><br/>
                     <i data-bind="ltext: contentType"></i>
                     <i data-bind="size: size"></i>
                 </td>

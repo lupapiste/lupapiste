@@ -1,4 +1,4 @@
-<script class="ko-template" type="x-jquery/tmpl"
+<script class="ko-template" type="text/x-jquery/tmpl"
         id="info-link-template">
 
   <!-- ko if: editorView -->
@@ -25,7 +25,7 @@
         <a class="link-btn"
            target="_blank"
            data-bind="attr: {href: link().url}">
-          <span class="info-link-text" 
+          <span class="info-link-text"
                 data-bind="text: link().text"></span>
           <i class="lupicon-circle-star"
              data-bind="visible: link().isNew"></i>
@@ -103,7 +103,7 @@
          data-bind="visible: link().isNew"></i>
     </a>
   </div>
-  <!-- /ko -->  
+  <!-- /ko -->
 </script>
 
- 
+

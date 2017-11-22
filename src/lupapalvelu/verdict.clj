@@ -14,6 +14,7 @@
             [sade.xml :as xml]
             [lupapalvelu.action :refer [update-application application->command] :as action]
             [lupapalvelu.application :as application]
+            [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.appeal-common :as appeal-common]
@@ -129,32 +130,6 @@
 
 (defn verdict-tab-action? [{action-name :action}]
   (boolean (#{:publish-verdict :check-for-verdict :process-ah-verdict :fetch-verdicts} (keyword action-name))))
-
-(defn verdict-attachment-type
-  ([application] (verdict-attachment-type application "paatosote"))
-  ([{permit-type :permitType :as application} type]
-   (if (#{:P :R :ARK} (keyword permit-type))
-     {:type-group "paatoksenteko" :type-id type}
-     {:type-group "muut" :type-id type})))
-
-(defn- attachment-type-from-krysp-type [type]
-  (case (ss/lower-case type)
-    "paatosote" "paatosote"
-    "lupaehto" "muu"
-    "paatos"))
-
-(defn- content-disposition-filename
-  "Extracts the filename from the Content-Disposition header of the
-  given respones. Decodes string according to the Server information."
-  [{headers :headers}]
-  (when-let [raw-filename (some->> (get headers "content-disposition")
-                                    (re-find #".*filename=\"?([^\"]+)")
-                                    last)]
-    (case (some-> (get headers "server") ss/trim ss/lower-case)
-      "microsoft-iis/7.5" (-> raw-filename
-                              (.getBytes StandardCharsets/ISO_8859_1)
-                              (String. StandardCharsets/UTF_8))
-      raw-filename)))
 
 (defn- get-poytakirja!
   "Fetches the verdict attachments listed in the verdict xml. If the
@@ -305,16 +280,35 @@
       (verdict-xml-with-foreman-designer-verdicts application xml)
       app-xml)))
 
+(defn- delete-deprecated-verdict-attachments!
+  "Verdict attachment is deprecated if its target verdict no longer
+  exists."
+  [app-id]
+  (let [{:keys [verdicts
+                attachments]
+         :as   application} (domain/get-application-no-access-checking app-id)
+        verdict-ids         (set (map :id verdicts))
+        deprecated-ids      (->> attachments
+                                 (filter (fn [{target :target}]
+                                           (and (util/=as-kw (:type target) :verdict)
+                                                (not (contains? verdict-ids (:id target))))))
+                                 (map :id))]
+    (when (seq deprecated-ids)
+      (attachment/delete-attachments! application deprecated-ids))))
+
 (defn- save-verdicts-from-xml
   "Saves verdict's from valid app-xml to application. Returns (ok) with updated verdicts and tasks"
   [{:keys [application] :as command} app-xml]
   (appeal-common/delete-all command)
-  (let [updates (find-verdicts-from-xml command app-xml)]
+  (let [updates (find-verdicts-from-xml command app-xml)
+        verdicts (get-in updates [$set :verdicts])]
     (when updates
       (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
         (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
+        (delete-deprecated-verdict-attachments! (:id application))
+        (bulletins/process-check-for-verdicts-result command verdicts)
         (t/mark-app-and-attachments-final! (:id application) (:created command))))
-    (ok :verdicts (get-in updates [$set :verdicts])
+    (ok :verdicts verdicts
         :tasks (get-in updates [$set :tasks])
         :state (get-in updates [$set :state] (:state application)))))
 

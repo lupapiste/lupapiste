@@ -43,7 +43,7 @@ Mikko adds txt attachment without comment
 Mikko opens attachment details
   [Tags]  attachments
   Open attachment details  muut.muu
-  Assert file latest version  ${PNG_TESTFILE_NAME}  1.0
+  Assert file latest version  ${PDF_TESTFILE_NAME}  1.0
   Title Should Be  ${appname} - Lupapiste
 
 Mikko can change related operation
@@ -86,7 +86,7 @@ Mikko sees that his attachment is grouped by "Muun rakennuksen rakentaminen - Ta
 
 Mikko opens attachment and sees that attachment label metadata is set
   Open attachment details  muut.muu
-  Assert file latest version  ${PNG_TESTFILE_NAME}  1.0
+  Assert file latest version  ${PDF_TESTFILE_NAME}  1.0
   Page should contain  Muun rakennuksen rakentaminen
   Textfield value should be  xpath=//input[@data-test-id='attachment-drawing-number']  piir1.0
   Textfield Value Should Be  xpath=//input[@data-test-id='attachment-contents-input']  PuuCee
@@ -103,7 +103,7 @@ Authority opens attachment details
   Open application  ${appname}  ${propertyid}
   Open tab  attachments
   Open attachment details  muut.muu
-  Assert file latest version  ${PNG_TESTFILE_NAME}  1.0
+  Assert file latest version  ${PDF_TESTFILE_NAME}  1.0
 
 Open archive metadata editor
   Click enabled by test id  show-attachment-tos-metadata

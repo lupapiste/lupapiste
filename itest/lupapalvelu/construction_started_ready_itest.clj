@@ -70,6 +70,7 @@
 (fact* "Application cannot be set to Started state if it is not an YA type of application."
   (let [application    (create-and-submit-application sonja :propertyId sipoo-property-id :address "Paatoskuja 11") => truthy
         application-id (:id application)
+        _              (command sonja :update-app-bulletin-op-description :id application-id :description "otsikko julkipanoon") => ok?
         _              (command sonja :approve-application :id application-id :lang "fi") => ok?
         _              (give-verdict sonja application-id) => ok?
         application    (query-application sonja application-id) => truthy

@@ -89,11 +89,11 @@
     (upload-attachment pena application-id (first attachments) true)
 
     (let [{:keys [attachments]} (query-application veikko application-id)
-          att (first attachments)]
+          att                   (first attachments)]
 
       (fact "After new version upload the attachment is no longer approved/rejected"
-            (let [{:keys [approvals latestVersion]} att
-                  approved (get approvals (keyword (:fileId latestVersion)))]
+        (let [{:keys [approvals latestVersion]} att
+              approved                          (get approvals (keyword (:fileId latestVersion)))]
               (:state approved) => "requires_authority_action"))
 
       (fact "Veikko rejects attachment"
@@ -104,7 +104,7 @@
 
       (fact "Veikko sets reject note again"
             (reject-attachment-note application-id (first attachments) "Mei wenti.")
-            (let [{:keys [attachments]} (query-application veikko application-id)
+            (let [{:keys [attachments]}  (query-application veikko application-id)
                   {approvals :approvals} (first attachments)]
               (count approvals) => 2
               (map :note (vals approvals)) => ["Bu hao!" "Mei wenti."]))
@@ -115,31 +115,57 @@
       (fact "Delete version"
             (delete-latest-version veikko application-id att true))
 
-      (let [{:keys [attachments]} (query-application veikko application-id)
-            att (first attachments)
+      (let [{:keys [attachments]}             (query-application veikko application-id)
+            att                               (first attachments)
             {:keys [approvals latestVersion]} att
-            approved (get approvals (keyword (:fileId latestVersion)))]
+            approved                          (get approvals (keyword (:fileId latestVersion)))]
 
         (fact "After the latest version was deleted the previous version is popped"
-              approved =contains=> {:state "requires_user_action"
-                                    :note "Bu hao!"}
-              (let [{approvals :approvals} att]
+          approved =contains=> {:state "requires_user_action"
+                                :note  "Bu hao!"}
+          (let [{approvals :approvals} att]
                 (count approvals) => 1
                 (-> approvals vals first :note) => "Bu hao!"))))
 
     (fact "Rotating does not affect approval status"
-          (let [{attachment-id :id :as attachment} (last-attachment application-id)
-                _ (upload-attachment veikko application-id attachment true
-                                     :filename "dev-resources/test-pdf.pdf")
-                {attachment-id :id :as attachment} (last-attachment application-id)
-                _  (latest-approval veikko application-id attachment) => {:state "requires_authority_action"}
-                _ (reject-attachment application-id attachment)
-                _ (reject-attachment-note application-id attachment "Chabuduo")
-                approval (latest-approval veikko application-id attachment-id)]
+      (let [{attachment-id :id :as attachment} (last-attachment application-id)
+            _                                  (upload-attachment veikko application-id attachment true
+                                                                  :filename "dev-resources/test-pdf.pdf")
+            {attachment-id :id :as attachment} (last-attachment application-id)
+            _                                  (latest-approval veikko application-id attachment) => {:state "requires_authority_action"}
+            _                                  (reject-attachment application-id attachment)
+            _                                  (reject-attachment-note application-id attachment "Chabuduo")
+            approval                           (latest-approval veikko application-id attachment-id)]
             (command veikko :rotate-pdf :id application-id :attachmentId attachment-id :rotation 180) => ok?
             (let [{:keys [approvals latestVersion]} (get-attachment-by-id veikko
                                                                           application-id
                                                                           attachment-id)]
               (get approvals (-> latestVersion :originalFileId keyword))
               => approval
-              (not= (:originalFileId latestVersion) (:fileId latestVersion)) => true)))))
+              (not= (:originalFileId latestVersion) (:fileId latestVersion)) => true)))
+    (facts "Approval and attachment deletion"
+      (let [file-id          (upload-file-and-bind pena application-id
+                                                   {:type     {:type-group "ennakkoluvat_ja_lausunnot"
+                                                               :type-id    "ennakkoneuvottelumuistio"}
+                                                    :contents "Hello"})
+            {att-id :id
+             :as    attachment} (last-attachment application-id)]
+        (fact "Veikko approves attachment"
+          (approve-attachment application-id attachment))
+        (fact "Pena cannot delete approved attachment"
+          (command pena :delete-attachment :id application-id
+                   :attachmentId att-id) => fail?)
+        (fact "Veikko rejects attachment"
+          (reject-attachment application-id attachment))
+        (fact "Pena cannot delete rejected attachment"
+          (command pena :delete-attachment :id application-id
+                   :attachmentId att-id) => fail?)
+        (fact "Pena adds new version"
+          (upload-file-and-bind pena application-id
+                                {} :attachment-id att-id))
+        (fact "Pena still cannot delete the attachment"
+          (command pena :delete-attachment :id application-id
+                   :attachmentId att-id) => fail?)
+        (fact "Veikko can delete the attachment"
+          (command veikko :delete-attachment :id application-id
+                   :attachmentId att-id) => ok?)))))

@@ -1,4 +1,4 @@
-(ns lupapalvelu.xml.krysp.vesihuolto-canonical-to-krysp-xml
+(ns lupapalvelu.xml.krysp.vesihuolto-canonical-to-krysp-xml-test
   (:require [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
             [lupapalvelu.document.vesihuolto-canonical :refer [vapautus-canonical]]
             [lupapalvelu.document.vesihuolto-canonical-test :refer [vapautus-vesijohdosta-ja-viemarista-hakemus]]

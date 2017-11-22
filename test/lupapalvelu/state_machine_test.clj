@@ -61,4 +61,5 @@
 
   (application-state-seq {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}}) => [:draft :open :submitted :sent :foremanVerdictGiven :canceled]
   (application-state-seq {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
-              :permitSubtype "tyonjohtaja-ilmoitus"}) => [:draft :open :submitted :acknowledged])
+                          :permitSubtype "tyonjohtaja-ilmoitus"}) => [:draft :open :submitted :acknowledged]
+  (application-state-seq {:primaryOperation {:name "ya-jatkoaika"}}) => [:draft :open :submitted :sent :finished])

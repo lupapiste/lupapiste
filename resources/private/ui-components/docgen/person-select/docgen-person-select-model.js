@@ -54,9 +54,10 @@ LUPAPISTE.DocgenPersonSelectModel = function( params ) {
 
   if (self.authModel.ok("set-user-to-document")) {
     self.disposedSubscribe(self.selectValue, function(value) {
-      if (value !== self.value() && !_.isEmpty(value)) {
+      if (value !== self.value()) {
         var selectedUser = _.find(self.personOptions(), ["id", value]);
-        if (self.isDesignerDocument && selectedUser.notPersonallyAuthorized) {
+        if (selectedUser && self.isDesignerDocument
+                         && selectedUser.notPersonallyAuthorized) {
           $("#invite-document-name").val(self.schemaName).change();
           $("#invite-document-path").val(self.myNs).change();
           $("#invite-document-id").val(self.documentId).change();
@@ -64,7 +65,7 @@ LUPAPISTE.DocgenPersonSelectModel = function( params ) {
           $("#invite-text").val(loc("comment.placeholder")).change();
           LUPAPISTE.ModalDialog.open("#dialog-valtuutus-yrityskayttaja-suunnittelijaksi");
         } else {
-          self.doSetUserToDocument(value);
+          self.doSetUserToDocument(value || "");
         }
       }
     });

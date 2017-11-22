@@ -81,6 +81,7 @@
     (command pena :submit-application :id application-id) => ok?
     (command sonja :approve-doc :id application-id :doc (:id pre-verdict-suunnittelija1) :path nil :collection "documents") => ok?
     (command sonja :approve-doc :id application-id :doc (:doc pre-verdict-suunnittelija2) :path nil :collection "documents") => ok?
+    (command sonja :update-app-bulletin-op-description :id application-id :description "otsikko julkipanoon") => ok?
     (command sonja :approve-application :id application-id :lang "fi") => ok?
 
     (let [application (query-application sonja application-id)
@@ -173,4 +174,9 @@
               (xml/get-text (first first-designer-elements) [:henkilo :etunimi]) => "Post1")
             (fact "Post3 in KRSYP message"
               (count second-designer-elements) => 1
-              (xml/get-text (first second-designer-elements) [:henkilo :etunimi]) => "Post3")))))))
+              (xml/get-text (first second-designer-elements) [:henkilo :etunimi]) => "Post3"))
+          (command admin :set-kuntagml-http-endpoint :partner "matti"
+                   :url (str (server-address) "/dev/krysp/receiver") :organization "753-R" :permitType "R"
+                   :username "kuntagml" :password "kryspi") => ok?
+          (command sonja :parties-as-krysp :id application-id :lang "fi") => (partial expected-failure? :error.integration.krysp-http)
+          (command admin :delete-kuntagml-http-endpoint :organization "753-R" :permitType "R") => ok?)))))

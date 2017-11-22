@@ -179,7 +179,7 @@ nav {
     }
 
     .header-box {
-      @include nav-link($link: $blue, $hover: white);
+      @include nav-link($link: $orange, $hover: white);
     }
     #header-user-menu {
       display: inline-block;
@@ -202,16 +202,16 @@ nav {
       }
     }
     .language-closed {
-      @include language-select( $link: $blue );
+      @include language-select( $link: $orange );
     }
     .language-open {
-      @include language-select( $link: white, $hover: $blue, $bg: $language-bg );
+      @include language-select( $link: white, $hover: $orange, $bg: $language-bg );
     }
 
     .nav-bottom {
       ul {
         li {
-          @include nav-link($link: white, $hover: $blue);
+          @include nav-link($link: white, $hover: $orange);
         }
       }
     }

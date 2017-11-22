@@ -43,7 +43,10 @@ Edit YA katselmus
 
 Open review
   [Arguments]  ${index}
+  Wait until  Element should be visible  jquery=div.review-tasks
+  Scroll to  tr[data-test-index=${index}]
   Wait until  Click element  jquery=tr[data-test-index=${index}] td[data-test-column=requirement] a
+  Wait test id visible  back-to-application-from-task
 
 Return from review
   Scroll and click test id  back-to-application-from-task

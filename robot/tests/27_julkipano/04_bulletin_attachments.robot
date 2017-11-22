@@ -9,7 +9,7 @@ Variables        ../21_stamping/variables.py
 *** Test Cases ***
 
 Create bulletin with attachment
-  As Olli
+  Olli logs in  False
   Create application with attachment and publish it as bulletin
   Logout
 

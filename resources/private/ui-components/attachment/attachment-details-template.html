@@ -91,8 +91,7 @@
         <div class="attachment-file-versions">
           <div>
             <attachment-upload params="id: id, ltext: 'attachment.addVersion', upload: $component.upload"
-                               data-bind="visible: $data.uploadingAllowed()"></attachment-upload>
-
+                               data-bind="visible: !$data.readOnly()"></attachment-upload>
             <button data-test-id="add-ram-attachment"
                     class="positive"
                     data-bind="click: $data.newRamAttachment,
@@ -138,7 +137,11 @@
                   </td>
                   <td>
                     <!-- TODO: download via service -->
-                    <a data-bind="text: $data.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId}, click: function() {hub.send('track-click', {category:'Attachments', label: '', event:'downloadVersion'});return true;}"></a>
+                    <span data-bind="text: $data.filename, visible: !$data.fileId">
+                    <a data-bind="text: $data.filename,
+                                  visible: $data.fileId,
+                                  attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId},
+                                  click: function() {hub.send('track-click', {category:'Attachments', label: '', event:'downloadVersion'});return true;}"></a>
                   </td>
                   <td data-bind="version: $data.version"></td>
                   <td data-bind="dateString: $data.created"></td>
@@ -176,7 +179,10 @@
               <div>
                 <span class="attachment-label-header-item" id="test-attachment-file-name">
                   <!-- TODO: download via service -->
-                  <a data-bind="text: $data.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId}, click: function() {hub.send('track-click', {category:'Attachments', label: '', event:'downloadLatestVersion'});return true;}"></a>
+                  <a data-bind="text: $data.filename,
+                                attr: {href: '/api/raw/latest-attachment-version?download=true&attachment-id=' + $parent.id},
+                                click: function() {hub.send('track-click',
+                                {category:'Attachments', label: '', event:'downloadLatestVersion'});return true;}"></a>
                 </span>
                 <span class="attachment-label-header-item">
                   <span data-bind="ltext: 'attachment.version'">Versio</span>
@@ -350,8 +356,8 @@
           <div class="file-preview-image"
                data-bind="if: $data.previewIs('image')">
             <div class="file-preview-content">
-              <a data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + $data.attachment().latestVersion.fileId}">
-                <img data-bind="attr: {src: '/api/raw/view-attachment?attachment-id=' + $data.attachment().latestVersion.fileId}"
+              <a data-bind="attr: {href: '/api/raw/latest-attachment-version?attachment-id=' + $data.attachment().id}">
+                <img data-bind="attr: {src: '/api/raw/latest-attachment-version?attachment-id=' + $data.attachment().id}"
                      src="/lp-static/img/ajax-loader.gif" alt=""/>
               </a>
             </div>

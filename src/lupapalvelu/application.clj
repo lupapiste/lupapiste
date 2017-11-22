@@ -34,7 +34,8 @@
             [sade.env :as env]
             [sade.property :as prop]
             [sade.util :as util :refer [merge-in]]
-            [sade.coordinate :as coord]))
+            [sade.coordinate :as coord]
+            [lupapalvelu.application-utils :as app-utils]))
 
 
 (defn get-operations [application]
@@ -191,18 +192,6 @@
     (when (usr/authority? user) (model/mark-approval-indicators-seen-update application timestamp))
     (when (usr/authority? user) {:_attachment_indicator_reset timestamp})))
 
-; Masking
-(defn- person-id-masker-for-user [user {handlers :handlers :as application}]
-  (cond
-    (util/find-by-key :userId (:id user) handlers) identity
-    (auth/application-authority? application user) model/mask-person-id-ending
-    :else (comp model/mask-person-id-birthday model/mask-person-id-ending)))
-
-(defn with-masked-person-ids [application user]
-  (let [mask-person-ids (person-id-masker-for-user user application)]
-    (update-in application [:documents] (partial map mask-person-ids))))
-
-
 ; whitelist-action
 (defn- prefix-with [prefix coll]
   (conj (seq coll) prefix))
@@ -265,7 +254,7 @@
 (defn process-document-or-task [user application doc]
   (->> (validate application doc)
        (populate-operation-info (get-operations application))
-       ((person-id-masker-for-user user application))
+       ((app-utils/person-id-masker-for-user user application))
        (enrich-single-doc-disabled-flag user)))
 
 (defn- process-documents-and-tasks [user application]
@@ -711,7 +700,7 @@
 
 (defn handler-upsert-updates [handler handlers created user]
   (let [ind (util/position-by-id (:id handler) handlers)]
-    {$set  (merge {:modified created} {(util/kw-path :handlers (or ind (count handlers))) handler})
+    {$set  {(util/kw-path :handlers (or ind (count handlers))) handler}
      $push {:history (handler-history-entry (util/assoc-when handler :new-entry (nil? ind)) created user)}}))
 
 (defn autofill-rakennuspaikka [application time & [force?]]

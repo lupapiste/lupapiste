@@ -1,15 +1,17 @@
 # Hej {{user.firstName}},
 
-vi vill p&aring;minna dig om ett utl&aring;tande om en tillst&aring;ndsans&ouml;kan p&aring; adressen {{address}}, {{municipality}}. Beg&auml;ran om utl&aring;tande gjordes {{statement-request-created}}. Tillst&aring;ndet s&ouml;ks f&ouml;r &aring;tg&auml;rden {{operation}}. Tidsfristen f&ouml;r utl&aring;tandet {{due-date}} har g&aring;tt ut.
+Vi vill påminna dig om ett utlåtande om en tillståndsansökan på adressen {{address}}, {{municipality}}.
 
-Trots att tidsfristen g&aring;tt ut har du &auml;nnu en kort tid p&aring; dig att ge ditt utl&aring;tande genom att klicka p&aring; l&auml;nken nedan. Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
+Tillståndet söks för åtgärden {{operation}}. Tidsfristen för utlåtandet är {{due-date}}.
+
+Du kan ge ditt utlåtande genom att klicka på länken nedan. Om länken inte fungerar, kopiera adressen och klistra in den i webbläsarens adressfält.
 
 {{link}}
 
-Den som bett om utl&aring;tandet skickar f&ouml;ljande h&auml;lsningar:
+Den som bett om utlåtandet skickar följande hälsningar:
 
 {{message}}
 
-H&auml;lsningar,
+Hälsningar,
 
 {{lupapiste.link}}

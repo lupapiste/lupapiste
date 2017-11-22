@@ -105,4 +105,28 @@
       </div>
     </div>
   </div>
+    <div class="form-grid">
+    <div class="row">
+      <h3 class="col-4"
+          data-bind="ltext: 'register.company.form.contact'"></h3>
+    </div>
+    <div class="row">
+      <div class="col-1">
+        <div data-bind="component: {name: 'form-cell',
+                        params: field('contactAddress')}"></div>
+      </div>
+      <div class="col-1">
+        <div data-bind="component: {name: 'form-cell',
+                        params: field('contactZip')}"></div>
+      </div>
+      <div class="col-1">
+        <div data-bind="component: {name: 'form-cell',
+                        params: field('contactPo')}"></div>
+      </div>
+      <div class="col-1">
+        <div data-bind="component: {name: 'form-cell',
+                        params: field('contactCountry')}"></div>
+      </div>
+    </div>
+  </div>
 </script>

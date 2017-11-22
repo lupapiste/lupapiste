@@ -33,18 +33,12 @@ LUPAPISTE.AttachmentsTableModel = function(params) {
   };
 
   self.hasFile = function(attachment) {
-    return _.get(ko.utils.unwrapObservable(attachment), "latestVersion.fileId");
+    return _.get(ko.utils.unwrapObservable(attachment), "latestVersion");
   };
 
   self.buildHash = function(attachment) {
     var applicationId = lupapisteApp.models.application._js.id;
     return pageutil.buildPageHash("attachment", applicationId, attachment.id);
-  };
-
-  self.addFile = function(attachment) {
-    hub.send( "add-attachment-file", {attachmentId: attachment.id,
-                                      attachmentType: attachment.typeString(),
-                                      attachmentGroup: attachment.group() });
   };
 
   self.remove = function(attachment) {

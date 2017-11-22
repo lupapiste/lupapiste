@@ -35,7 +35,8 @@
             [sade.municipality :as muni]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.validators :as validators]))
+            [sade.validators :as validators]
+            [lupapalvelu.foreman :as foreman]))
 
 (defn- has-asianhallinta-operation [{{:keys [primaryOperation]} :application}]
   (when-not (operations/get-operation-metadata (:name primaryOperation) :asianhallinta)
@@ -69,13 +70,13 @@
       transfer
       (assoc transfer (:data-key data-map) (:data data-map)))))
 
-(defn- do-approve [application organization created id current-state lang do-rest-fn]
-  (if (org/krysp-integration? organization (permit/permit-type application))
+(defn- do-approve [{:keys [application organization created] :as command} id current-state lang do-rest-fn]
+  (if (org/krysp-integration? @organization (permit/permit-type application))
     (or
       (app/validate-link-permits application)
       (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
             sent-file-ids   (let [submitted-application (mongo/by-id :submitted-applications id)]
-                              (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization :current-state current-state))
+                              (mapping-to-krysp/save-application-as-krysp command lang submitted-application :current-state current-state))
             attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created) {})]
         (do-rest-fn attachments-updates)))
     ;; Integration details not defined for the organization -> let the approve command pass
@@ -87,9 +88,20 @@
       handlers
       (conj handlers (user/create-handler nil general-id user)))))
 
+(defn- ensure-bulletin-op-description-is-set-if-needed
+  [{{organizationId :organization permit-type :permitType municipality :municipality primaryOperation :primaryOperation
+     bulletinOpDescription :bulletinOpDescription :as application} :application}]
+  (when (and organizationId
+             (org/bulletins-enabled? (org/get-organization organizationId) permit-type municipality)
+             (not (foreman/foreman-app? application))
+             (not (= (:name primaryOperation) "suunnittelijan-nimeaminen"))
+             (ss/blank? bulletinOpDescription))
+    (fail :error.invalid-value)))
+
 (defcommand approve-application
   {:parameters       [id lang]
-   :pre-checks       [temporary-approve-prechecks]
+   :pre-checks       [temporary-approve-prechecks
+                      ensure-bulletin-op-description-is-set-if-needed]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles       #{:authority}
    :notified         true
@@ -111,7 +123,7 @@
         indicator-updates (app/mark-indicators-seen-updates application user created)
         transfer (get-transfer-item :exported-to-backing-system {:created created :user user})
         do-update (fn [attachments-updates]
-                    (update-application command
+                    (update-application (assoc command :application application)
                       mongo-query
                       (util/deep-merge
                         {$push {:transfers transfer}}
@@ -123,7 +135,7 @@
                         (app-state/state-transition-update next-state created application user)))
                     (ok :integrationAvailable (not (nil? attachments-updates))))]
 
-    (do-approve application @organization created id current-state lang do-update)))
+    (do-approve (assoc command :application application) id current-state lang do-update)))
 
 (defn- application-already-exported [type]
   (fn [{application :application}]
@@ -151,7 +163,8 @@
    :user-roles #{:authority}
    :pre-checks [(permit/validate-permit-type-is permit/R)
                 (application-already-exported :exported-to-backing-system)
-                has-unsent-attachments]
+                has-unsent-attachments
+                mapping-to-krysp/http-not-allowed]
    :states     (conj states/post-verdict-states :sent)
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user organization] :as command}]
@@ -165,9 +178,10 @@
                                             (> (-> % :versions last :created) (:sent %)))
                                           (not (#{"verdict" "statement"} (-> % :target :type)))
                                           (some #{(:id %)} attachmentIds))
-                                        all-attachments)]
+                                        all-attachments)
+        command (assoc-in command [:application :attachments] attachments-wo-sent-timestamp)]
     (if (pos? (count attachments-wo-sent-timestamp))
-      (let [sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp (assoc application :attachments attachments-wo-sent-timestamp) lang @organization)
+      (let [sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp command lang)
             data-argument (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)
             attachments-data {:data-key :attachments
                               :data (map :id attachments-wo-sent-timestamp)}
@@ -183,10 +197,11 @@
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles #{:authority}
    :pre-checks [(permit/validate-permit-type-is permit/R)
-                (application-already-exported :exported-to-backing-system)]
+                (application-already-exported :exported-to-backing-system)
+                mapping-to-krysp/http-not-allowed]
    :states     states/post-verdict-states}
   [{:keys [application organization] :as command}]
-  (let [sent-document-ids (mapping-to-krysp/save-parties-as-krysp application lang @organization)
+  (let [sent-document-ids (mapping-to-krysp/save-parties-as-krysp command lang)
         transfer-item     (get-transfer-item :parties-to-backing-system command {:data-key :party-documents
                                                                                  :data sent-document-ids})]
     (update-application command {$push {:transfers transfer-item}})

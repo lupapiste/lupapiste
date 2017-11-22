@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation  Rakentamisen aikaiset muutokset (RAM)
+Suite Setup    Apply minimal fixture now
 Suite Teardown  Logout
 Resource       ../../common_resource.robot
 Resource       attachment_resource.robot
@@ -117,10 +118,10 @@ Mikko opens RAM attachment and sees RAM links but cannot delete the attachment
   Delete disallowed  False
   Element should be visible by test id  add-ram-attachment
 
-Mikko adds new file version and thus resetting approval state
+Mikko adds new file version but still cannot delete the attachment
   Add attachment version  ${PNG_TESTFILE_PATH}
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
-  Delete allowed  False
+  Delete disallowed
   No such test id  add-ram-attachment
 
 Mikko follows RAM link and cannot delete the base attachment either

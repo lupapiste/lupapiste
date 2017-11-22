@@ -237,6 +237,7 @@
 (def simple-osoite [{:name "osoite"
                      :type :group
                      :validator :address
+                     :address-type :contact
                      :blacklist [turvakielto]
                      :body [{:name "katu" :type :string :subtype :vrk-address :required true :i18nkey "osoite.katu"}
                             postinumero
@@ -348,7 +349,7 @@
     yhteyshenkilo-without-kytkimet))
 
 (def e-invoice-operators [{:name "BAWCFI22"} ; Basware Oyj
-                          {:name "003714377140"} ; Enfo Zender Oy
+                          {:name "003714377140"} ; Ropo Capital Oy
                           {:name "003708599126"} ; Liaison Technologies Oy
                           {:name "HELSFIHH"} ; Aktia S\u00e4\u00e4st\u00f6pankki Oyj
                           {:name "POPFFI22"} ; Paikallisosuuspankit
@@ -391,16 +392,20 @@
                                                 verkkolaskutustieto)}))
 
 (defn- henkilo-yritys-select-group
-  [& {:keys [default henkilo-body yritys-body] :or {default "henkilo" henkilo-body henkilo yritys-body yritys}}]
+  [& {:keys [default henkilo-body yritys-body exclude-companies?]
+      :or {default "henkilo" henkilo-body henkilo yritys-body yritys exclude-companies? true}}]
   (body
     {:name select-one-of-key :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}] :default default}
-    {:name "henkilo" :type :group :body (update-in-body henkilo-body
-                                                        ["userId"]
-                                                        :excludeCompanies (constantly true))}
+    {:name "henkilo" :type :group :body (cond-> henkilo-body
+                                          exclude-companies? (update-in-body
+                                                              ["userId"]
+                                                              :excludeCompanies (constantly true)))}
     {:name "yritys" :type :group :body yritys-body}))
 
 (def party (henkilo-yritys-select-group))
 (def ya-party (henkilo-yritys-select-group :default "yritys"))
+(def ya-party-tyomaasta-vastaava (henkilo-yritys-select-group :default "yritys"
+                                                              :exclude-companies? false))
 (def building-parties (henkilo-yritys-select-group
                         :henkilo-body henkilo-with-required-hetu
                         :yritys-body yritys-without-kytkimet))
@@ -767,7 +772,7 @@
                        {:name "koneellinenilmastointiKytkin" :type :checkbox :i18nkey "koneellinenilmastointiKytkin"}
                        {:name "lamminvesiKytkin" :type :checkbox :i18nkey "lamminvesiKytkin"}
                        {:name "aurinkopaneeliKytkin" :type :checkbox :i18nkey "aurinkopaneeliKytkin"}
-                       {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size :s :unit :kpl :i18nkey "saunoja"}
+                       {:name "saunoja" :type :string :subtype :number :min 0 :max 99 :size :s :unit :kpl :i18nkey "saunoja"} ; max value is resricted by vrk validators
                        {:name "vaestonsuoja" :type :string :subtype :number :min 0 :max 99999 :size :s :unit :hengelle :i18nkey "vaestonsuoja"}
                        {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox :i18nkey "liitettyJatevesijarjestelmaanKytkin"}]})
 
@@ -903,7 +908,8 @@
 (def kayttotarkotuksen-muutos "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos")
 
 (def muutostyonlaji [{:name "perusparannuskytkin" :type :checkbox}
-                     {:name "rakennustietojaEimuutetaKytkin" :type :checkbox}
+                     {:name "rakennustietojaEimuutetaKytkin" :type :checkbox
+                      :whitelist {:roles [:authority] :otherwise :hidden}}
                      {:name "muutostyolaji" :type :select :sortBy :displayname :required true :i18nkey "muutostyolaji"
                       :body
                       [{:name perustusten-korjaus}

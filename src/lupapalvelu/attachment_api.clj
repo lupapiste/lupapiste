@@ -3,7 +3,6 @@
             [clojure.set :refer [intersection union difference]]
             [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
-            [swiss.arrows :refer [-<> -<>>]]
             [schema.core :as sc]
             [sade.core :refer [ok fail fail! now def-]]
             [sade.files :as files]
@@ -46,7 +45,8 @@
 (defn- build-attachment-query-params [{application-id :id} {attachment-id :id latest-version :latestVersion}]
   {:id           application-id
    :attachmentId attachment-id
-   :fileId       (:fileId latest-version)})
+   :fileId       (:fileId latest-version)
+   :ignoreBulletins true})
 
 (defmethod action/allowed-actions-for-category :attachments
   [command]
@@ -227,7 +227,8 @@
                 att/attachment-not-readOnly
                 att/attachment-matches-application
                 (action/some-pre-check att/allowed-only-for-authority-when-application-sent
-                                       (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))]
+                                       (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))
+                att/validate-not-included-in-published-bulletin]
    :on-success [(assignment/run-assignment-triggers on-set-attachment-type-success)]}
   [{:keys [application user created] :as command}]
 
@@ -284,7 +285,8 @@
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks  [has-versions
                  app/validate-authority-in-drafts
-                 att/attachment-matches-application]}
+                 att/attachment-matches-application
+                 att/validate-not-included-in-published-bulletin]}
   [command]
   (att/set-attachment-state! command fileId :ok))
 
@@ -297,7 +299,8 @@
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks  [has-versions
                  app/validate-authority-in-drafts
-                 att/attachment-matches-application]}
+                 att/attachment-matches-application
+                 att/validate-not-included-in-published-bulletin]}
   [command]
   (att/set-attachment-state! command fileId :requires_user_action))
 
@@ -310,7 +313,8 @@
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks  [has-versions
                  app/validate-authority-in-drafts
-                 att/attachment-matches-application]}
+                 att/attachment-matches-application
+                 att/validate-not-included-in-published-bulletin]}
   [command]
   (att/set-attachment-reject-note! command fileId note))
 
@@ -344,7 +348,8 @@
                       att/foreman-must-be-uploader
                       ram/ram-not-linked
                       ram/attachment-status-ok
-                      ram/attachment-type-allows-ram]
+                      ram/attachment-type-allows-ram
+                      att/validate-not-included-in-published-bulletin]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :notified         true
    :user-roles       #{:applicant :authority :oirAuthority}
@@ -361,7 +366,7 @@
 ;;
 
 (defcommand delete-attachment
-  {:description "Delete attachment with all it's versions. Does not
+  {:description "Delete attachment and its versions. Does not
   delete comments. Non-atomic operation: first deletes files, then
   updates document."
    :parameters  [id attachmentId]
@@ -381,9 +386,11 @@
                  att/delete-allowed-by-target
                  att/edit-allowed-by-target
                  att/attachment-not-stamped
+                 att/attachment-approval-check
                  ram/ram-status-not-ok
                  ram/ram-not-linked
-                 attachment-not-requested-by-authority]}
+                 attachment-not-requested-by-authority
+                 att/validate-not-included-in-published-bulletin]}
   [{:keys [application user]}]
   (att/delete-attachments! application [attachmentId])
   (ok))
@@ -406,7 +413,8 @@
                  att/delete-allowed-by-target
                  att/edit-allowed-by-target
                  ram/ram-status-not-ok
-                 ram/ram-not-linked]}
+                 ram/ram-not-linked
+                 att/validate-not-included-in-published-bulletin]}
   [{:keys [application user]}]
   (cond
     (not (and (att/file-id-in-application? application attachmentId fileId)
@@ -417,15 +425,6 @@
 ;;
 ;; Download
 ;;
-
-(defraw "preview-attachment"
-  {:parameters       [:attachment-id]  ; Note that this is actually file id
-   :categories       #{:attachments}
-   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
-   :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
-   :user-authz-roles roles/all-authz-roles}
-  [{{:keys [attachment-id]} :data user :user}]
-  (att/output-attachment-preview! attachment-id (partial att/get-attachment-file-as! user)))
 
 (defraw "view-attachment"
   {:parameters       [:attachment-id]  ; Note that this is actually file id
@@ -456,14 +455,14 @@
   (att/output-attachment attachment-id true (partial att/get-attachment-file-as! user)))
 
 (defraw "latest-attachment-version"
-  {:parameters       [:attachment-id]  ; Note that this is actually file id
+  {:parameters       [:attachment-id]
    :categories       #{:attachments}
-   :optional-parameters [:download]
+   :optional-parameters [:download :preview]
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
    :user-authz-roles roles/all-authz-roles}
-  [{{:keys [attachment-id download]} :data user :user}]
-  (att/output-attachment (att/get-attachment-latest-version-file user attachment-id) (= download "true")))
+  [{{:keys [attachment-id download preview]} :data user :user}]
+  (att/output-attachment (att/get-attachment-latest-version-file user attachment-id (= preview "true")) (= download "true")))
 
 (defraw "download-bulletin-attachment"
   {:parameters       [attachment-id]  ; Note that this is actually file id
@@ -481,12 +480,12 @@
    :org-authz-roles roles/reader-org-authz-roles}
   [{:keys [application user lang]}]
   (if application
-    (let [attachments (:attachments application)
-          application (app/with-masked-person-ids application user)]
-      {:status 200
-        :headers {"Content-Type" "application/octet-stream"
-                  "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-        :body (files/temp-file-input-stream (att/get-all-attachments! attachments application lang))})
+    {:status 200
+     :headers {"Content-Type" "application/octet-stream"
+               "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
+     :body (-> (:attachments application)
+               (att/get-all-attachments! application user lang)
+               (files/temp-file-input-stream))}
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
@@ -505,7 +504,7 @@
       {:status 200
        :headers {"Content-Type" "application/octet-stream"
                  "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-       :body (att/get-attachments-for-user! user atts)}))
+       :body (att/get-attachments-for-user! user application atts)}))
 
 ;;
 ;; Upload
@@ -571,7 +570,8 @@
                  att/attachment-editable-by-application-state
                  (mime-validator "application/pdf")
                  app/validate-authority-in-drafts
-                 att/attachment-matches-application]
+                 att/attachment-matches-application
+                 att/validate-not-included-in-published-bulletin]
    :states      {:applicant (conj (states/all-states-but states/terminal-states) :answered)
                  :authority (states/all-states-but :canceled)}
    :description "Rotate PDF by -90, 90 or 180 degrees (clockwise). Replaces old file, doesn't create new version. Uploader is not changed."}
@@ -812,7 +812,8 @@
                         (when (seq (intersection (set selectedAttachmentIds) (set unSelectedAttachmentIds)))
                           (error "setting verdict attachments, overlapping ids in: " selectedAttachmentIds unSelectedAttachmentIds)
                           (fail :error.select-verdict-attachments.overlapping-ids)))]
-   :pre-checks [any-attachment-has-version]}
+   :pre-checks [any-attachment-has-version
+                att/validate-not-included-in-published-bulletin]}
   [{:keys [application created] :as command}]
   (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
         updates-fn      (fn [ids k v] (mongo/generate-array-updates :attachments all-attachments #((set ids) (:id %)) k v))]
@@ -855,7 +856,8 @@
                       has-versions
                       access/has-attachment-auth
                       att/attachment-not-readOnly
-                      att/attachment-matches-application]
+                      att/attachment-matches-application
+                      att/validate-not-included-in-published-bulletin]
    :states           (lupapalvelu.states/all-application-states-but lupapalvelu.states/terminal-states)}
   [command]
   (update-application command

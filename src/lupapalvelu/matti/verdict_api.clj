@@ -13,7 +13,8 @@
             [sade.util :as util]
             [lupapalvelu.application-bulletins :as bulletins]
             [clj-time.core :as t]
-            [clj-time.coerce :as tc]))
+            [clj-time.coerce :as tc]
+            [schema.core :as sc]))
 
 
 ;; ------------------------------------------

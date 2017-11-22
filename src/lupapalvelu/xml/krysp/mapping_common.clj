@@ -96,9 +96,9 @@
         domain (schema-domain common-version)
         ns-name (permit/get-metadata permit-type :wfs-krysp-ns-name)]
     (str
-     (paikkatietopalvelu domain "yhteiset" common-version)
-     "\nhttp://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd\n"
-     (paikkatietopalvelu domain ns-name ns-version))))
+     (paikkatietopalvelu domain "yhteiset" common-version) " "
+     "http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd"
+     " " (paikkatietopalvelu domain ns-name ns-version))))
 
 (defn common-namespaces
   ([permit-type ns-version]

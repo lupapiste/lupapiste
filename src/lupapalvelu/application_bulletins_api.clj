@@ -16,7 +16,13 @@
             [monger.operators :refer :all]
             [lupapalvelu.application-search :refer [make-text-query dir]]
             [lupapalvelu.vetuma :as vetuma]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.organization :as org]
+            [schema.core :as sc]
+            [monger.collection :as collection]
+            [clj-time.coerce :as tc]
+            [clj-time.core :as t]
+            [lupapalvelu.states :as states]))
 
 (def bulletin-page-size 10)
 
@@ -28,47 +34,56 @@
                              (when-not (ss/blank? organization)
                                {:versions.organization organization})
                              (when-not (ss/blank? state)
-                               {:bulletinState state})])]
+                               {:versions.bulletinState state})])]
     (when-let [and-query (seq queries)]
       {$and and-query})))
 
-(defn- get-application-bulletins-left [{:keys [page] :as parameters}]
-  (let [query (make-query parameters)
-        page (cond
-               (string? page) (read-string page)
-               :default page)]
-    (- (mongo/count :application-bulletins query)
-       (* page bulletin-page-size))))
+(def- sort-field-mapping {"bulletinState" :versions.bulletinState
+                          "municipality" :versions.municipality
+                          "address" :versions.address
+                          "applicant" :versions.applicant
+                          "modified" :versions.modified})
 
-(def- sort-field-mapping {"bulletinState" :bulletinState
-                          "municipality" :municipality
-                          "address" :address
-                          "applicant" :applicant
-                          "modified" :modified})
+(def- default-sort {:versions.modified -1})
 
 (defn- make-sort [{:keys [field asc]}]
   (let [sort-field (sort-field-mapping field)]
     (cond
-      (nil? sort-field) {}
+      (nil? sort-field) default-sort
       (sequential? sort-field) (apply array-map (interleave sort-field (repeat (dir asc))))
       :else (array-map sort-field (dir asc)))))
 
 (defn get-application-bulletins
   "Queries bulletins from mongo. Returns latest versions of bulletins.
    Bulletins which have starting dates in the future will be omitted."
-  [{:keys [page sort] :as parameters}]
-  (let [query (or (make-query parameters) {})
+  [{:keys [page sort] :as parameters} now-ts]
+  (let [officialAt-lowerLimit (tc/to-long (t/minus (tc/from-long now-ts) (t/days 14)))
+        query (or (make-query parameters) {})
         page (cond
                (string? page) (read-string page)
                :default page)
-        apps (mongo/with-collection "application-bulletins"
-               (query/find query)
-               (query/fields bulletins/bulletins-fields)
-               (query/sort (make-sort sort))
-               (query/paginate :page page :per-page bulletin-page-size))]
-    (->> apps
-         (map #(assoc (first (:versions %)) :id (:_id %)))
-         (filter bulletins/bulletin-date-valid?))))
+        apps (collection/aggregate (mongo/get-db) "application-bulletins"
+               [{"$match" (bulletins/versions-elemMatch now-ts officialAt-lowerLimit)}
+                {"$unwind" {:path "$versions"}}
+                {"$match" {$or [{:versions.bulletinState :proclaimed
+                                 :versions.proclamationStartsAt {$lt now-ts} :versions.proclamationEndsAt {$gt now-ts}}
+                                {:versions.bulletinState :verdictGiven
+                                 :versions.appealPeriodStartsAt {$lt now-ts} :versions.appealPeriodEndsAt {$gt now-ts}}
+                                {:versions.bulletinState :final
+                                 :versions.officialAt {$lt now-ts
+                                                       $gt officialAt-lowerLimit}}]}}
+                {"$group" {:_id "$_id"
+                           :versions {"$last" "$$ROOT.versions"},
+                           :modified {"$last" "$$ROOT.modified"},
+                           :address {"$last" "$$ROOT.address"},
+                           :_applicantIndex {"$last" "$$ROOT._applicantIndex"}}}
+                {"$match" query}
+                {"$project" bulletins/bulletins-fields}
+                {"$sort" (make-sort sort)}])
+        apps (map #(assoc (:versions %) :id (:_id %)) apps)
+        skip (* (dec page) bulletin-page-size)]
+    {:left (- (count apps) skip bulletin-page-size)
+     :data (->> apps (drop skip) (take bulletin-page-size))}))
 
 (defn- page-size-validator [{{page :page} :data}]
   (when (> (* page bulletin-page-size) (Integer/MAX_VALUE))
@@ -85,17 +100,19 @@
                       page-size-validator
                       search-text-validator]
    :user-roles #{:anonymous}}
-  [{data :data}]
-  (ok :data (get-application-bulletins data)
-      :left (get-application-bulletins-left data)))
+  [{data :data now-ts :created}]
+  (let [{:keys [data left]} (get-application-bulletins data now-ts)]
+    (ok :data data
+        :left left)))
 
 (defquery local-application-bulletins
   {:parameters [searchText organization]
    :input-validators [search-text-validator]
    :user-roles #{:anonymous}}
-  [{data :data}]
-  (ok :data (get-application-bulletins data)
-      :left (get-application-bulletins-left data)))
+  [{data :data now-ts :created}]
+  (let [{:keys [data left]} (get-application-bulletins data now-ts)]
+    (ok :data data
+        :left left)))
 
 (defquery application-bulletin-municipalities
   {:description "List of distinct municipalities of application bulletins"
@@ -114,15 +131,23 @@
     (ok :states states)))
 
 (defn- bulletin-version-is-latest [bulletin bulletin-version-id]
-  (let [latest-version-id (:id (last (:versions bulletin)))]
+  (let [latest-version-id (:id (last (filter bulletins/bulletin-version-date-valid? (:versions bulletin))))]
     (when-not (= bulletin-version-id latest-version-id)
       (fail :error.invalid-version-id))))
+
+(defn- bulletin-can-be-commented
+  ([{{bulletin-id :bulletinId} :data}]
+   (let [projection {:bulletinState 1 "versions.proclamationStartsAt" 1 "versions.proclamationEndsAt" 1 :versions {$slice -1}}
+         bulletin   (bulletins/get-bulletin bulletin-id projection)]
+     (if-not (and (= (:bulletinState bulletin) "proclaimed")
+                  (bulletins/bulletin-date-in-period? :proclamationStartsAt :proclamationEndsAt (-> bulletin :versions last)))
+       (fail :error.bulletin-not-in-commentable-state)))))
 
 (defn- comment-can-be-added
   [{{bulletin-id :bulletinId bulletin-version-id :bulletinVersionId comment :comment} :data}]
   (if (ss/blank? comment)
     (fail :error.empty-comment)
-    (let [projection {:bulletinState 1 :versions {$slice -1} "versions.id" 1}
+    (let [projection {:bulletinState 1 :versions 1}
           bulletin (bulletins/get-bulletin bulletin-id projection)]
       (if-not bulletin
         (fail :error.invalid-bulletin-id)
@@ -136,21 +161,13 @@
     (when-not (every? true? files-found)
       (fail :error.invalid-files-attached-to-comment))))
 
-(defn- bulletin-can-be-commented
-  ([{{bulletin-id :bulletinId} :data}]
-   (let [projection {:bulletinState 1 "versions.proclamationStartsAt" 1 "versions.proclamationEndsAt" 1 :versions {$slice -1}}
-         bulletin   (bulletins/get-bulletin bulletin-id projection)]
-     (if-not (and (= (:bulletinState bulletin) "proclaimed")
-                  (bulletins/bulletin-date-in-period? :proclamationStartsAt :proclamationEndsAt (-> bulletin :versions last)))
-       (fail :error.bulletin-not-in-commentable-state)))))
-
 (def delivery-address-fields #{:firstName :lastName :street :zip :city})
 
 (defcommand add-bulletin-comment
   {:description      "Add comment to bulletin"
-   :pre-checks       [bulletin-can-be-commented
+   :pre-checks       [comment-can-be-added
                       vetuma/session-pre-check]
-   :input-validators [comment-can-be-added referenced-file-can-be-attached]
+   :input-validators [referenced-file-can-be-attached]
    :user-roles       #{:anonymous}}
   [{{files :files bulletin-id :bulletinId comment :comment bulletin-version-id :bulletinVersionId
      email :email emailPreferred :emailPreferred otherReceiver :otherReceiver :as data} :data created :created :as action}]
@@ -165,18 +182,6 @@
     (bulletins/update-file-metadata bulletin-id (:id comment) files)
     (ok)))
 
-(defn- get-search-fields [fields app]
-  (into {} (map #(hash-map % (% app)) fields)))
-
-(defn- create-bulletin [application created & [updates]]
-  (let [app-snapshot (bulletins/create-bulletin-snapshot application)
-        app-snapshot (if updates
-                       (merge app-snapshot updates)
-                       app-snapshot)
-        search-fields [:municipality :address :verdicts :_applicantIndex :bulletinState :applicant]
-        search-updates (get-search-fields search-fields app-snapshot)]
-    (bulletins/snapshot-updates app-snapshot search-updates created)))
-
 (defcommand move-to-proclaimed
   {:parameters [id proclamationEndsAt proclamationStartsAt proclamationText]
    :input-validators [(partial action/non-blank-parameters [:id :proclamationText])
@@ -186,7 +191,7 @@
    :states     #{:sent :complementNeeded}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]}
   [{:keys [application created] :as command}]
-  (let [updates (create-bulletin application created {:proclamationEndsAt proclamationEndsAt
+  (let [updates (bulletins/create-bulletin application created {:proclamationEndsAt proclamationEndsAt
                                                       :proclamationStartsAt proclamationStartsAt
                                                       :proclamationText proclamationText})]
     (bulletins/upsert-bulletin-by-id id updates)
@@ -202,7 +207,7 @@
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)
                 bulletins/verdict-bulletin-should-not-exist]}
   [{:keys [application created] :as command}]
-  (let [updates (create-bulletin application created {:verdictGivenAt verdictGivenAt
+  (let [updates (bulletins/create-bulletin application created {:verdictGivenAt verdictGivenAt
                                                       :appealPeriodStartsAt appealPeriodStartsAt
                                                       :appealPeriodEndsAt appealPeriodEndsAt
                                                       :verdictGivenText verdictGivenText})]
@@ -220,7 +225,7 @@
                 bulletins/validate-official-at]}
   [{:keys [application created] :as command}]
   ; Note there is currently no way to move application to final state so we sent bulletin state manuall
-  (let [updates (create-bulletin application created {:officialAt officialAt
+  (let [updates (bulletins/create-bulletin application created {:officialAt officialAt
                                                       :bulletinState :final})]
     (bulletins/upsert-bulletin-by-id id updates)
     (ok)))
@@ -236,12 +241,12 @@
    :user-roles #{:anonymous}}
   [command]
   (if-let [bulletin (bulletins/get-bulletin bulletinId)]
-    (let [latest-version       (-> bulletin :versions first)
+    (let [latest-version       (->> bulletin :versions
+                                    (filter (partial bulletins/bulletin-version-date-valid? (:created command))) last)
           bulletin-version     (assoc latest-version :versionId (:id latest-version)
                                                      :id (:id bulletin))
           append-schema-fn     (fn [{schema-info :schema-info :as doc}]
                                  (assoc doc :schema (schemas/get-schema schema-info)))
-          remove-meta-fn       (fn [doc] (dissoc doc :meta))
           bulletin             (-> bulletin-version
                                    (domain/filter-application-content-for {})
                                    ; unset keys (with empty values) set by filter-application-content-for
@@ -342,7 +347,48 @@
   (attachment/output-attachment attachmentId true
                                             (partial bulletins/get-bulletin-comment-attachment-file-as user)))
 
-(defquery "publish-bulletin-enabled"
-  {:parameters [id]
+(defquery ymp-publish-bulletin-enabled
+  {:description "Bulletin implementation for YMP permit types enabled"
+   :parameters [id]
    :user-roles #{:authority :applicant}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]})
+
+(defn- check-bulletins-enabled [{organization :organization {permit-type :permitType municipality :municipality} :application}]
+  (when-not (and organization (org/bulletins-enabled? @organization permit-type municipality))
+    (fail :error.bulletins-not-enebled-for-scope)))
+
+(defquery bulletin-for-application-verdict-enabled
+  {:description ""
+   :parameters  [id]
+   :user-roles  #{:authority}
+   :states      states/post-sent-states
+   :pre-checks  [(permit/validate-permit-type-is-not permit/YI permit/YL permit/YM permit/VVVL permit/MAL)
+                 check-bulletins-enabled]})
+
+(defquery bulletin-will-be-published-for-verdict
+  {:description ""
+   :parameters  [id]
+   :user-roles  #{:authority}
+   :states      #{:submitted :complementNeeded}
+   :pre-checks  [(permit/validate-permit-type-is-not permit/YI permit/YL permit/YM permit/VVVL permit/MAL)
+                 check-bulletins-enabled]})
+
+(defcommand update-app-bulletin-op-description
+  {:parameters [id description]
+   :user-roles #{:authority}
+   :states     #{:submitted :sent :complementNeeded}
+   :pre-checks [(permit/validate-permit-type-is-not permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)
+                check-bulletins-enabled]}
+  [command]
+  (action/update-application command {"$set" {:bulletinOpDescription description}})
+  (ok))
+
+(defquery local-bulletins-page-settings
+  {:parameters [organization]
+   :user-roles #{:anonymous}
+   :input-validators [(partial action/non-blank-parameters [:organization])]}
+  [command]
+  (let [org-data (org/get-organization organization)
+        enabled  (some #(-> % :bulletins :enabled) (:scope org-data))]
+    (ok :enabled enabled
+        :texts (-> org-data :local-bulletins-page-settings :texts))))

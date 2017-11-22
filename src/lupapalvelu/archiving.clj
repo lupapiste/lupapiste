@@ -20,6 +20,7 @@
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.attachment.util :as att-util]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.action :as action]
             [lupapalvelu.archiving-util :refer [metadata-query mark-application-archived-if-done]]
             [lupapalvelu.application-meta-fields :as amf]
@@ -72,14 +73,29 @@
      :archived.completed nil}
     {$set {:archived.initial now}}))
 
+(defn- remove-mongo-files
+  "Remove actual attachment files from MongoDB after archiving. Only for ARK / archiving projects now."
+  [app-id attachment-id]
+  (when-let [application (domain/get-application-no-access-checking app-id)]
+    (when (= permit/ARK (:permitType application))
+      (when-let [attachment (first (filter #(= attachment-id (:id %)) (:attachments application)))]
+        (att/delete-archived-attachments-files-from-mongo! application attachment)))))
+
 (defn- set-attachment-state [next-state application now id]
-  (action/update-application
-    (action/application->command application)
-    {:attachments {$elemMatch {:id id :metadata.tila {$ne :arkistoitu}}}}
-    {$set {:modified now
-           :attachments.$.modified now
-           :attachments.$.metadata.tila next-state
-           :attachments.$.readOnly (contains? archival-states next-state)}}))
+  (let [fresh-application (domain/get-application-no-access-checking (:id application))
+        attachment (first (filter #(= id (:id %)) (:attachments fresh-application)))
+        last-version-index (dec (count (:versions attachment)))]
+    (action/update-application
+      (action/application->command fresh-application)
+      {:attachments {$elemMatch {:id id :metadata.tila {$ne :arkistoitu}}}}
+      {$set {:modified now
+             :attachments.$.modified now
+             :attachments.$.metadata.tila next-state
+             :attachments.$.readOnly (contains? archival-states next-state)
+             :attachments.$.latestVersion.onkaloFileId id
+             (str "attachments.$.versions." last-version-index ".onkaloFileId") id}})
+    (when (= :arkistoitu next-state)
+      (remove-mongo-files (:id application) id))))
 
 (defn- set-application-state [next-state application now _]
   (action/update-application

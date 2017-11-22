@@ -27,11 +27,13 @@
 ;; construct command, query and raw
 ;;
 
+(def ^:dynamic *created-timestamp-for-test-actions* nil)
+
 (defn action [name & {:keys [user type data] :or {:user nil :type :action :data {}}}]
   {:action name
    :user user
    :type type
-   :created (now)
+   :created (or *created-timestamp-for-test-actions* (now))
    :data data})
 
 
@@ -217,6 +219,13 @@
   (filter-params-of-command params command
                             (partial sc/check schema)
                             "error.illegal-value:schema-validation"))
+
+(defn valid-db-key
+  "Input-validator to check that given parameter is valid db key"
+  [param]
+  (fn [{:keys [data]}]
+    (when-not (mongo/valid-key? (get data param))
+      (fail :error.invalid-db-key))))
 
 (defn- localization? [mode maybe-localization]
   (and (map? maybe-localization)
@@ -520,10 +529,16 @@
                           (delay (mongo/select :assignments
                                                {:application.id (:id application)
                                                 :status {$ne "canceled"}})))
+            application-bulletins (delay
+                                   (when application
+                                     (mongo/select :application-bulletins
+                                                   ;; TODO: proper query for all application bulletins
+                                                   {:_id (:id application)})))
             user-organizations (lazy-seq (usr/get-organizations (:user command)))
             company (when-let [company-id (get-in command [:user :company :id])]
                       (delay (mongo/by-id :companies company-id)))
             command (-> {:application application
+                         :application-bulletins application-bulletins
                          :organization organization
                          :user-organizations user-organizations
                          :company company
@@ -553,6 +568,15 @@
       (do
         (warnf "%s -> proxy fail: %s" (:action command) resp)
         (fail :error.unknown)))
+    (catch [:type :schema.core/error] {:keys [schema value error]}
+      (errorf "schema.core error processing action: %s, error: '%s' with schema (containing keys): %s"
+              (:action command)
+              (pr-str error)
+              (pr-str (if (map? schema)
+                        (map pr-str (take 5 (keys schema)))
+                        schema)))
+      (when execute? (log/log-event :error (masked command)))
+      (fail :error.illegal-value:schema-validation))
     (catch Object e
       (do
         (error e "exception while processing action:" (:action command) (class e) (str e))

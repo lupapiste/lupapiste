@@ -29,6 +29,7 @@
     (fact "submitting generates message again"
       (command pena :submit-application :id app-id) => ok?
       (check-count-and-last-state app-id 2 "submitted"))
+    (command sonja :update-app-bulletin-op-description :id app-id :description "otsikko julkipanoon") => ok?
     (fact "sent generates message"
       (command sonja :approve-application :id app-id :lang "fi") => ok?
       (check-count-and-last-state app-id 3 "sent"))

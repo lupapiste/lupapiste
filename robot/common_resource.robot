@@ -886,7 +886,7 @@ Open attachment details
   Open tab  attachments
   ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}'] a[data-test-id=open-attachment]:visible
   Wait until  Element should be visible  jquery=${selector}
-  Scroll and click  ${selector}:eq(${nth})
+  Scroll and click link  ${selector}:eq(${nth})
   Wait Until  Element Should Be Visible  jquery=section[id=attachment] a[data-test-id=back-to-application-from-attachment]
 
 Click not needed
@@ -907,7 +907,7 @@ Attachment indicator icon should not be visible
 Assert file latest version
   [Arguments]  ${name}  ${versionNumber}
   Wait Until  Element Should Be Visible  test-attachment-file-name
-  Wait Until Page Contains  ${PNG_TESTFILE_NAME}
+  Wait Until Page Contains  ${name}
   Element Text Should Be  test-attachment-file-name  ${name}
   Element Text Should Be  test-attachment-version  ${versionNumber}
 
@@ -1068,6 +1068,10 @@ Submit application error should be
 
 Approve application no dialogs
   Open tab  requiredFieldSummary
+  Wait until  Element should be visible  //div[@id='application-requiredFieldSummary-tab']
+  ${BULLETIN_DESCR_VISIBLE}=  Run Keyword And Return Status  Test id visible  bulletin-op-description-summaryTab
+  Run Keyword If  ${BULLETIN_DESCR_VISIBLE}  Fill test id  bulletin-op-description-summaryTab  Toimenpideotsikko julkipanoon
+  Wait test id visible  approve-application-summaryTab
   Click enabled by test id  approve-application-summaryTab
   Wait until  Application state should be  sent
 
@@ -1229,6 +1233,7 @@ Is not authorized party
 
 Fill application person invite bubble
   [Arguments]  ${email}  ${message}
+  Scroll to test id  application-invite-person
   Element should be visible  xpath=//button[@data-test-id='application-invite-person']
   Click by test id  application-invite-person
   Test id disabled  person-invite-bubble-dialog-ok
@@ -1353,7 +1358,9 @@ Set animations off
 
 Add neighbor
   [Arguments]  ${propertyId}  ${name}  ${email}
-  Click enabled by test id  manager-neighbors-add
+  Wait test id visible  manager-neighbors-add
+  Scroll to bottom
+  Click by test id  manager-neighbors-add
   Wait Until   Element Should Be Visible  xpath=//*[@data-test-id='modal-dialog-content']
   Input text by test id  neighbors.edit.propertyId  ${propertyId}
   Input text by test id  neighbors.edit.name  ${name}
@@ -1543,6 +1550,13 @@ Scroll and click
   [Arguments]  ${selector}
   Scroll to  ${selector}
   Click Element  jquery=${selector}
+
+Scroll and click link
+  [Arguments]  ${selector}
+  Scroll to  ${selector}
+  # Just in case
+  Scroll by  40
+  Click Link  jquery=${selector}
 
 Scroll and click input
   [Arguments]  ${selector}

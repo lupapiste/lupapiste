@@ -19,7 +19,7 @@ LUPAPISTE.StateIconsModel = function( params ) {
   }
 
   function hasFile(attachment) {
-    return _.get(attachment, "latestVersion.fileId");
+    return _.get(attachment, "latestVersion.filename");
   }
 
   function canVouch(attachment) {
@@ -63,11 +63,11 @@ LUPAPISTE.StateIconsModel = function( params ) {
   }
 
   function notPublic(attachment) {
-    return _.get( attachment, "metadata.nakyvyys", "julkinen") !== "julkinen";
+    return util.getIn(attachment, ["metadata", "nakyvyys"], "julkinen") !== "julkinen";
   }
 
   function archived(attachment) {
-    return _.get( attachment, "metadata.tila") === "arkistoitu";
+    return util.getIn(attachment, ["metadata", "tila"]) === "arkistoitu";
   }
 
   function signer(attachment) {

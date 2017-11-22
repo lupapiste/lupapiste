@@ -182,3 +182,25 @@
            (com/company-not-already-invited {:data {:company-id "foo"}
                                              :application {:auth [{:id "hei"} {:invite {:user {:id "foobar"}}}]}})
            => nil)))
+
+(facts "Company allow invitations"
+  (let [denying-company {:id "denied" :name "Company Oy" :y  "2341528-4" :created 1 :accountType "account5"
+                         :address1 "katu" :zip  "33100"  :po "Tampere" :invitationDenied true}
+        allowing-company {:id "allow" :name "Another Company" :y  "2341528-4" :created 1 :accountType "account5"
+                          :address1 "katu" :zip  "33100"  :po "Tampere" :invitationDenied false}
+        app-with-auths-1 {:id "LP-123" :auth [{:id "denied" :y "2341528-4" :name "Company Oy"}]}
+        app-with-auths-2 {:id "LP-456" :auth [{:id "allow" :y "2341528-4" :name "Another Company"}]}]
+    (against-background [(com/find-company-by-id "denied") => denying-company
+                         (com/find-company-by-id "allow") => allowing-company]
+
+     (fact "Company has authorization for application and user invitation is denied"
+       (com/company-denies-invitations? app-with-auths-1 {:company {:id "denied"}}) => false)
+
+     (fact "Company has authorization for application and allows invitations"
+       (com/company-denies-invitations? app-with-auths-2 {:company {:id "allow"}}) => false)
+
+     (fact "Company doesnt have authorization for application, but allows user invitations"
+       (com/company-denies-invitations? app-with-auths-1 {:company {:id "allow"}}) => false)
+
+     (fact "Company doesnt have authorization for application and user invitation is denied"
+       (com/company-denies-invitations? app-with-auths-2 {:company {:id "denied"}}) => true))))

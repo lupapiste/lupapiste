@@ -1,19 +1,19 @@
 (ns lupapalvelu.admin-reports
-  (:require [clj-time.local :as local]
+  (:require [clj-time.coerce :as tc]
+            [clj-time.core :as t]
+            [clj-time.local :as local]
             [clojure.set :refer [intersection]]
+            [clojure.set :as set]
             [dk.ative.docjure.spreadsheet :as xls]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer :all]
             [lupapalvelu.i18n :refer [localize]]
+            [lupapalvelu.mongo :as mongo]
+            [monger.collection :as collection]
+            [monger.operators :refer :all]
+            [ring.util.io :as ring-io]
             [sade.strings :as ss]
             [sade.util :as util]
-            [swiss.arrows :refer :all]
-            [monger.collection :as collection]
-            [clj-time.core :as t]
-            [clj-time.coerce :as tc]
-            [clojure.set :as set])
-  (:import [java.io ByteArrayOutputStream ByteArrayInputStream]))
+            [swiss.arrows :refer :all]))
 
 (defn string->keyword
   "String to trimmed lowercase keyword."
@@ -52,9 +52,38 @@
      :headers {"Content-Type" "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                "Content-Disposition" (format "attachment; filename=\"%s\"" filename)
                "Cache-Control" "no-cache"}
-     :body (with-open [out (ByteArrayOutputStream.)]
-             (xls/save-workbook! out (workbook sheets))
-             (ByteArrayInputStream. (.toByteArray out)))}))
+     :body (ring-io/piped-input-stream
+            (fn [out]
+              (xls/save-workbook! out (workbook sheets))))}))
+
+;; -------------------------------
+;; Company unsubscribed
+;; -------------------------------
+
+(defn company-unsubscribed-emails []
+  (:emails (mongo/select-one :admin-config {:_id "unsubscribed"})))
+
+(defn upsert-company-unsubscribed
+  "Emails is a string where addresses are separated by whitespace."
+  [emails]
+  (mongo/update-by-id :admin-config
+                      "unsubscribed"
+                      {:emails (-<> emails
+                                   ss/lower-case
+                                   ss/trim
+                                   (ss/split #"[\s,]+")
+                                   (remove ss/blank? <>)
+                                   sort)}
+                      :upsert true))
+
+(defn users-spam-flags
+  "Assocs :spam property to every user. Spam is false if the user's
+  email is included in the company-unsubscribed-emails."
+  [users]
+  (let [emails (set (company-unsubscribed-emails))]
+    (map (fn [{email :email :as user}]
+           (assoc user :spam (not (contains? emails (ss/lower-case email)))))
+         users)))
 
 ;; -------------------------------
 ;; User report
@@ -87,7 +116,7 @@
           (mongo/select :companies {} {:y 1 :name 1 :locked 1})))
 
 (defn- user-report-data [company allow professional]
-  (let [users (user-list company allow professional)]
+  (let [users (users-spam-flags (user-list company allow professional))]
     (if (not= company :no)
       (let [companies (company-map)]
         (map #(let [{:keys [id role]} (:company %)]
@@ -120,6 +149,7 @@
                  :city                 "Kunta"
                  :architect            "Ammattilainen"
                  :allowDirectMarketing "Suoramarkkinointilupa"
+                 :spam                 "Spam"
                  :company.name         {:header "Yritystili"
                                         :path   [:company :name]}
                  :company.y            {:header "Y-tunnus"
@@ -142,7 +172,7 @@
 (defn user-report [company allow professional]
   (let [data    (user-report-data company allow professional)
         columns (concat [:lastName :firstName :email :phone :companyName
-                         :street :zip :city :architect :allowDirectMarketing]
+                         :street :zip :city :architect :allowDirectMarketing :spam]
                         (when-not (= company :no)
                           [:company.name :company.y
                            :company.role :company.locked]))
@@ -216,19 +246,17 @@
 
 
 (defn- waste-data []
-  (->> (mongo/select :applications
-                    {:documents.schema-info.name {$in waste-schemas}}
-                    {:organization 1 :documents 1})
-      tools/unwrapped
-      (map (fn [{:keys [documents] :as app}]
-             (-<>> documents
-                  (map (fn [{:keys [schema-info data]}]
-                         (when (contains? (set waste-schemas) (:name schema-info))
-                           (assoc {} (:name schema-info) data))))
-                  (filter identity)
-                  (apply merge)
-                  (merge app)
-                  (dissoc <> :documents))))))
+  (map (fn [{:keys [documents] :as app}]
+         (->> documents
+              (filter #(contains? (set waste-schemas)
+                                  (-> % :schema-info :name)))
+              (reduce (fn [acc {:keys [schema-info data]}]
+                        (assoc acc (:name schema-info) (tools/unwrapped data)))
+                      (dissoc app :documents))))
+       (mongo/select :applications
+                     {:documents.schema-info.name {$in waste-schemas}
+                      :permitType "R"}
+                     {:organization 1 :documents 1})))
 
 (defn- listify
   "Map list to vector. Maps without proper values omitted."
@@ -362,24 +390,33 @@
                      [{"$match" match-query}
                       (when filter-query
                         {"$match" filter-query})
+                      {"$project" {:primaryOperation 1 :permitType 1 :nbrOfOperations {"$sum" [1 {"$size" "$secondaryOperations"}]}}}
                       {"$group" group-clause}])]
     (collection/aggregate (mongo/get-db) "applications" aggregate)))
 
 (defn archiving-projects-per-month-query [month year]
   (->> (applications-per-month-query month year {:_id "$permitType"
-                                                 :count {$sum 1}} {:permitType "ARK"} :opened)
+                                                 :countApp {$sum 1}
+                                                 :countOp  {$sum "$nbrOfOperations"}} {:permitType "ARK"} :opened)
        (map #(set/rename-keys % {:_id :permitType}))
-       (sort-by (comp - :count))))
+       (sort-by (comp - :countApp))))
+
+(defn prev-permits-per-month-query [month year]
+  (applications-per-month-query month year {:_id "R_prev-permit"
+                                            :countApp {$sum 1}
+                                            :countOp  {$sum "$nbrOfOperations"}}
+    {:primaryOperation.name :aiemmalla-luvalla-hakeminen} :opened))
 
 (defn applications-per-month-per-permit-type [month year]
   (->> (applications-per-month-query month year {:_id "$permitType"
-                                                 :count {$sum 1}} nil :submitted)
+                                                 :countApp {$sum 1}
+                                                 :countOp  {$sum "$nbrOfOperations"}} nil :submitted)
        (map #(set/rename-keys % {:_id :permitType}))
-       (sort-by (comp - :count))))
+       (sort-by (comp - :countApp))))
 
 (defn designer-and-foreman-applications-per-month [month year]
   (applications-per-month-query month year
                                 {:_id "$primaryOperation.name"
-                                 :count {$sum 1}}
+                                 :countApp {$sum 1}}
     {:primaryOperation.name {$in [:tyonjohtajan-nimeaminen-v2
                                   :suunnittelijan-nimeaminen]}} :submitted))

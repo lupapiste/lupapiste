@@ -284,7 +284,7 @@ $bulletin-breakpoint: 1166px;
   }
 }
 
-#application-bulletin-tab {
+#application-ymp-bulletin-tab {
   .bulletin-state {
     font-weight: bold;
   }
@@ -302,7 +302,7 @@ $bulletin-breakpoint: 1166px;
   }
 }
 
-#bulletins .application_summary {
+#bulletins .application_summary, #local-bulletins .application_summary {
   .application_summary_info {
     width: 80%;
   }

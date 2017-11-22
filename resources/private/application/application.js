@@ -63,6 +63,19 @@
 
   var accordian = function(data, event) { accordion.toggle(event); };
 
+  var subscriptions = [];
+
+  function addFieldSubscription(observableField, callback) {
+    subscriptions.push(observableField.subscribe(callback));
+  }
+
+  function unsubscribeFieldSubscriptions() {
+    _.forEach(subscriptions, function(subscription) {
+      subscription.dispose();
+    });
+    subscriptions = [];
+  }
+
   function updateWindowTitle(newTitle) {
     lupapisteApp.setTitle(newTitle || util.getIn(applicationModel, ["_js", "title"]));
   }
@@ -124,6 +137,19 @@
       .call();
     }
   });
+
+  function saveBulletinOpDescription(bulletinOpDescription) {
+    if (!isInitializing && authorizationModel.ok("update-app-bulletin-op-description")) {
+      ajax.command("update-app-bulletin-op-description", {id: currentId, description: bulletinOpDescription})
+        .success(function() {
+          authorizationModel.refresh({id: currentId});
+          applicationModel.opDescriptionIndicator({type: "saved"});
+        })
+      .error(util.showSavedIndicator)
+      .processing(applicationModel.processing)
+      .call();
+    }
+  }
 
   function initAvailableTosFunctions(organizationId) {
     tosFunctions([]);
@@ -204,9 +230,15 @@
   function showApplication(applicationDetails, lightLoad) {
     isInitializing = true;
 
+    unsubscribeFieldSubscriptions();
+
     authorizationModel.refreshWithCallback({id: applicationDetails.application.id}, function() {
+
       // Sensible empty default values for those properties not received from the backend.
       var app = _.merge( LUPAPISTE.EmptyApplicationModel(), applicationDetails.application);
+
+      // Clear state sequence before reinitializing to prevent localization errors wrt. missing archiving project states
+      applicationModel.stateSeq([]);
 
       // Plain data
       applicationModel._js = app;
@@ -217,6 +249,8 @@
       var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
       ko.mapping.fromJS(app, mappingOptions, applicationModel);
       applicationModel.stateChanged(false);
+
+      addFieldSubscription(applicationModel.bulletinOpDescription, saveBulletinOpDescription);
 
       // Invite
       inviteModel.setApplicationId(app.id);
@@ -348,6 +382,7 @@
 
           }, []));
       applicationModel.calendarNotificationIndicator(pendingCalendarNotifications.length);
+      applicationModel.opDescriptionIndicator(null);
 
       subscribeWarrantyDates(app, applicationModel);
 

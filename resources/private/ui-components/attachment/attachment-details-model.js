@@ -12,11 +12,23 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.applicationTitle = self.application.title;
   self.allowedAttachmentTypes = self.application.allowedAttachmentTypes;
 
-  self.upload = new LUPAPISTE.UploadModel(self, {allowMultiple:false, dropZone: "section#attachment"});
+  var authModel = self.attachment().authModel; // No need to be computed since does not change for attachment
+
+  self.readOnly = self.disposedComputed( function() {
+    return !authModel.ok("bind-attachment");
+  });
+
+  self.upload = new LUPAPISTE.UploadModel(self,
+                                          {allowMultiple:false,
+                                           dropZone: "section#attachment",
+                                           readOnly: self.readOnly
+                                          });
   self.upload.init();
 
+
+
   var service = lupapisteApp.services.attachmentsService;
-  var authModel = self.attachment().authModel; // No need to be computed since does not change for attachment
+
 
   var filterSet = service.getFilters( "attachments-listing" );
 
@@ -148,8 +160,6 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   // Versions - add
   self.addEventListener("attachment-upload", { eventType: "finished", attachmentId: self.id }, util.showSavedIndicator);
 
-  self.uploadingAllowed = function() { return authModel.ok("bind-attachment"); };
-
   // Versions - delete
   self.deleteVersion = function(fileModel) {
     var fileId = fileModel.fileId;
@@ -240,8 +250,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.rotationAllowed = function() { return authModel.ok("rotate-pdf"); };
 
   self.previewUrl = self.disposedComputed(function() {
-    var fileId = util.getIn(self.attachment(), ["latestVersion", "fileId"]);
-    return "/api/raw/view-attachment?attachment-id=" + fileId;
+    return "/api/raw/latest-attachment-version?attachment-id=" + self.id;
   });
 
   self.isArchived = self.disposedComputed(function() {

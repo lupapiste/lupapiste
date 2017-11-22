@@ -326,8 +326,9 @@
               </td>
               <td class="attachment-file-info view-with-download">
                 <!-- ko if: $data.latestVersion -->
-                  <a data-bind="fileLink: latestVersion, click: _.constant(true), clickBubble: false"></a>
-                  <div data-bind="downloadWithIcon: latestVersion, click: _.constant(true), clickBubble: false"></div>
+                  <a data-bind="fileLink: {attachmentId: $data.id, filename: latestVersion.filename}, click: _.constant(true), clickBubble: false"></a>
+                  <div data-bind="downloadWithIcon: {attachmentId: $data.id, filename: latestVersion.filename, size: latestVersion.size},
+                                  click: _.constant(true), clickBubble: false"></div>
                 <!-- /ko -->
                 <!-- ko ifnot: $data.latestVersion -->
                 <a data-bind="ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>

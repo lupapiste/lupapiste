@@ -111,9 +111,9 @@ jQuery(document).ready(function() {
     {name: "move-to-proclaimed"},
     {name: "move-to-verdict-given"},
     {name: "move-to-final"},
-    {name: "bulletin-versions"},
-    {name: "bulletin-tab"},
-    {name: "bulletin-comments"},
+    {name: "ymp-bulletin-versions"},
+    {name: "ymp-bulletin-tab"},
+    {name: "ymp-bulletin-comments"},
     {name: "infinite-scroll"},
     {name: "statements-tab"},
     {name: "statements-table"},
@@ -202,7 +202,8 @@ jQuery(document).ready(function() {
     {name: "campaign-editor"},
     {name: "date-editor"},
     {name: "mark-review-faulty-dialog"},
-    {name: "backend-id-manager"}
+    {name: "backend-id-manager"},
+    {name: "generic-bulletin-tab"}
 ];
 
   ko.registerLupapisteComponents(components);

@@ -1,28 +1,13 @@
 (ns lupapalvelu.organization-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+  (:require [camel-snake-kebab.core :as csk]
             [clojure.core.memoize :as memo]
             [clojure.set :as set]
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
-            [schema.core :as sc]
-            [monger.operators :refer :all]
-            [noir.core :refer [defpage]]
-            [noir.response :as resp]
-            [noir.request :as request]
-            [camel-snake-kebab.core :as csk]
-            [me.raynes.fs :as fs]
-            [slingshot.slingshot :refer [try+]]
-            [sade.core :refer [ok fail fail! now unauthorized]]
-            [sade.env :as env]
-            [sade.municipality :as muni]
-            [sade.property :as p]
-            [sade.strings :as ss]
-            [sade.util :refer [fn->>] :as util]
-            [sade.validators :as v]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters supported-localization-parameters] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters supported-localization-parameters parameters-matching-schema] :as action]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.stamps :as stamps]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mime :as mime]
@@ -35,7 +20,24 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.waste-ads :as waste-ads]
             [lupapalvelu.wfs :as wfs]
-            [sade.shared-schemas :as sssc]))
+            [me.raynes.fs :as fs]
+            [monger.operators :refer :all]
+            [noir.core :refer [defpage]]
+            [noir.request :as request]
+            [noir.response :as resp]
+            [sade.core :refer [ok fail fail! now unauthorized]]
+            [sade.env :as env]
+            [sade.municipality :as muni]
+            [sade.property :as p]
+            [sade.shared-schemas :as sssc]
+            [sade.schema-utils :as ssu]
+            [sade.strings :as ss]
+            [sade.util :refer [fn->>] :as util]
+            [sade.validators :as v]
+            [schema.core :as sc]
+            [slingshot.slingshot :refer [try+]]
+            [swiss.arrows :refer :all]
+            [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]))
 ;;
 ;; local api
 ;;
@@ -116,12 +118,20 @@
                         (update-in [:suti :server] select-keys [:url :username]))
         :attachmentTypes (organization-attachments organization))))
 
-(defquery all-attachment-types-by-user
-  {:description "Lists all attachment types of users permit type"
+(defquery organization-attachment-types
+  {:description "Combined list of attachment types for every organization scope."
    :user-roles #{:authorityAdmin}}
-   [{user :user}]
-   (let [attachment-types (att-type/get-all-attachment-types-for-permit-type :R)]
-   (ok :attachmentTypes attachment-types)))
+  [{:keys [user user-organizations]}]
+  (-<>> (usr/authority-admins-organization-id user)
+        (util/find-by-id <> user-organizations)
+        :scope
+        (map (util/fn->> :permitType
+                         keyword
+                         att-type/get-all-attachment-types-for-permit-type))
+        flatten
+        (map #(select-keys % [:type-group :type-id]))
+        distinct
+        (ok :attachmentTypes)))
 
 (defquery organization-name-by-user
   {:description "Lists organization names for all languages."
@@ -468,6 +478,14 @@
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:validate-verdict-given-date enabled}})
   (ok))
 
+(defcommand set-organization-review-fetch-enabled
+  {:parameters [enabled]
+   :user-roles #{:authorityAdmin}
+   :input-validators  [(partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (org/update-organization (usr/authority-admins-organization-id user) {$set {:automatic-review-fetch-enabled enabled}})
+  (ok))
+
 (defcommand set-organization-use-attachment-links-integration
   {:parameters       [enabled]
    :user-roles       #{:authorityAdmin}
@@ -633,6 +651,53 @@
       (org/set-krysp-endpoint organization-id url username password permitType version)
       (fail :auth-admin.legacyNotResponding))))
 
+(defcommand set-kuntagml-http-endpoint
+  {:description         "Admin can configure KuntaGML sending as HTTP, instead of SFTP"
+   :parameters          [url organization permitType]
+   :optional-parameters [auth-type username password partner headers path]
+   :user-roles          #{:admin}
+   :input-validators    [(partial validate-optional-url :url)
+                         (fn [{:keys [data]}]
+                           (when (and (ss/not-blank? (:partner data))
+                                      (sc/check (ssu/get org/KryspHttpConf :partner) (:partner data)))
+                             (fail :error.illegal-value:schema-validation :data :partner)))
+                         (fn [{:keys [data]}]
+                           (when (and (ss/not-blank? (:path data))
+                                      (sc/check (ssu/get org/KryspHttpConf :path) (:path data)))
+                             (fail :error.illegal-value:schema-validation :data :path)))
+                         permit/permit-type-validator
+                         (action/valid-db-key :permitType)
+                         (fn [{:keys [data] :as command}]
+                           (when (seq (:headers data))
+                             (action/vector-parameters-with-map-items-with-required-keys
+                               [:headers]
+                               [:key :value]
+                               command)))]
+   :pre-checks          [(fn [{:keys [data]}]
+                           (when-not (pos? (mongo/count :organizations {:_id (:organization data)}))
+                             (fail :error.unknown-organization)))]}
+  [{data :data user :user}]
+  (let [url     (-> data :url ss/trim)
+        updates (->> (when username
+                       (org/encode-credentials username password))
+                     (merge {:url url} (select-keys data [:headers :auth-type]))
+                     (util/strip-nils)
+                     org/krysp-http-conf-validator
+                     (map (fn [[k v]] [(str "krysp." permitType ".http." (name k)) v]))
+                     (into {}))]
+    (mongo/update-by-id :organizations organization {$set updates})))
+
+(defcommand delete-kuntagml-http-endpoint
+  {:description "Remove HTTP config for permit-type"
+   :parameters  [organization permitType]
+   :user-roles   #{:admin}
+   :input-validators [permit/permit-type-validator]
+   :pre-checks  [(fn [{:keys [data]}]
+                  (when-not (pos? (mongo/count :organizations {:_id (:organization data)}))
+                    (fail :error.unknown-organization)))]}
+  [_]
+  (mongo/update-by-id :organizations organization {$unset {(str "krysp." permitType ".http") 1}}))
+
 (defcommand set-kopiolaitos-info
   {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress kopiolaitosOrdererPhone kopiolaitosOrdererEmail]
    :user-roles #{:authorityAdmin}
@@ -705,6 +770,23 @@
        (hash-map $set)
        (org/update-organization org-id)))
 
+(defquery available-backend-systems
+  {:user-roles #{:admin}}
+  (ok :backend-systems org/backend-systems))
+
+(defcommand update-organization-backend-systems
+  {:description "Updates organization backend systems by permit type."
+   :parameters [org-id backend-systems]
+   :user-roles #{:admin}
+   :input-validators [(partial action/map-parameters [:backend-systems])]}
+  [_]
+  (->> (util/map-keys (fn->> name (format "krysp.%s.backend-system"))  backend-systems)
+       (reduce (fn [updates [path system]] (if (contains? org/backend-systems (keyword system))
+                                             (assoc-in updates [$set path] system)
+                                             (assoc-in updates [$unset path] "")))
+               {})
+       (org/update-organization org-id)))
+
 (defcommand save-organization-tags
   {:parameters [tags]
    :input-validators [(partial action/vector-parameter-of :tags map?)]
@@ -735,8 +817,7 @@
       (fail :warning.tags.removing-from-applications :applications tag-applications))))
 
 (defquery get-organization-tags
-  {:user-authz-roles #{:statementGiver}
-   :user-roles #{:authorityAdmin :authority}}
+  {:user-roles #{:authorityAdmin :authority}}
   [{{:keys [orgAuthz] :as user} :user}]
   (if (seq orgAuthz)
     (let [organization-tags (mongo/select
@@ -746,6 +827,15 @@
           result (map (juxt :id #(select-keys % [:tags :name])) organization-tags)]
       (ok :tags (into {} result)))
     (ok :tags {})))
+
+(defquery application-organization-tags
+  {:description      "Organization tags for the application. For statement
+  givers, only the organization statement givers are authorized."
+   :user-authz-roles #{:statementGiver}
+   :user-roles       #{:authorityAdmin :authority :applicant}
+   :pre-checks       [org/statement-giver-in-organization]}
+  [{organization :organization}]
+  (ok :tags (:tags @organization)))
 
 (defquery get-organization-areas
   {:user-authz-roles #{:statementGiver}
@@ -941,7 +1031,7 @@
 
 (defcommand update-docstore-info
   {:description      "Updates organization's document store information"
-   :parameters       [org-id docStoreInUse documentPrice organizationDescription]
+   :parameters       [org-id docStoreInUse docTerminalInUse documentPrice organizationDescription]
    :user-roles       #{:admin}
    :input-validators [(partial boolean-parameters [:docStoreInUse])
                       (partial number-parameters [:documentPrice])
@@ -952,7 +1042,41 @@
   [{user :user created :created}]
   (mongo/update-by-query :organizations
       {:_id org-id}
-      {$set {:docstore-info {:docStoreInUse docStoreInUse
-                             :documentPrice documentPrice
-                             :organizationDescription organizationDescription}}})
+      {$set {:docstore-info.docStoreInUse docStoreInUse
+             :docstore-info.docTerminalInUse docTerminalInUse
+             :docstore-info.documentPrice documentPrice
+             :docstore-info.organizationDescription organizationDescription}})
   (ok))
+
+(defquery docterminal-attachment-types
+  {:description "Returns the allowed docterminal attachment types in a structure
+                 that can be easily displayed in the client"
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (->> user
+       usr/authority-admins-organization-id
+       org/allowed-docterminal-attachment-types
+       (ok :attachment-types)))
+
+(defn- check-docterminal-enabled [{user :user}]
+  (when-not (-> user
+                usr/authority-admins-organization-id
+                org/get-docstore-info-for-organization!
+                :docTerminalInUse)
+    (fail :error.docterminal-not-enabled)))
+
+
+(defcommand set-docterminal-attachment-type
+  {:description "Allows or disallows showing the given attachment type in
+                 the archive document terminal application."
+   :parameters [attachmentType enabled]
+   :pre-checks [check-docterminal-enabled]
+   :input-validators [(partial parameters-matching-schema [:attachmentType]
+                               (sc/cond-pre (sc/enum "all")
+                                            org/DocTerminalAttachmentType))
+                      (partial boolean-parameters [:enabled])]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (-> user
+      usr/authority-admins-organization-id
+      (org/set-allowed-docterminal-attachment-type attachmentType enabled)))

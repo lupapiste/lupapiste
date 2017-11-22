@@ -111,7 +111,7 @@
   (transform-trimmed-value transform (trim-value value)))
 
 
-(defn- transform
+(defn transform
   "Processes model updates with the schema-defined transforms if defined."
   [document updates]
   (let [doc-schema (model/get-document-schema document)]
@@ -302,15 +302,21 @@
                                set-empty-values?  (not (ss/blank? v))))))]
     (filterv include-update (tools/path-vals model))))
 
+(defn document-subject-updates
+  ([document subject path]
+   (document-subject-updates document subject path true))
+  ([document subject path set-empty-values?]
+   (let [path-arr (if-not (ss/blank? path) (ss/split path #"\.") [])
+         schema   (schemas/get-schema (:schema-info document))]
+     (subject->updates subject path-arr schema set-empty-values?))))
+
 (defn set-subject-to-document
   ([application document subject path timestamp]
     (set-subject-to-document application document subject path timestamp true))
   ([application document subject path timestamp set-empty-values?]
     {:pre [(map? document) (map? subject) (util/boolean? set-empty-values?)]}
     (when (seq subject)
-      (let [path-arr (if-not (ss/blank? path) (ss/split path #"\.") [])
-            schema   (schemas/get-schema (:schema-info document))
-            updates  (subject->updates subject path-arr schema set-empty-values?)]
+      (let [updates (document-subject-updates document subject path set-empty-values?)]
         (debugf "merging user %s with best effort into %s %s: %s" (:email subject) (get-in document [:schema-info :name]) (:id document) updates)
         (persist-model-updates application "documents" document updates timestamp)))))
 
@@ -319,8 +325,16 @@
     (do-set-user-to-document application document-id user-id path timestamp true))
   ([application document-id user-id path timestamp set-empty-values?]
     {:pre [application document-id timestamp]}
-    (if-let [document (domain/get-document-by-id application document-id)]
-      (when-not (ss/blank? user-id)
+   (if-let [{data :data :as document} (domain/get-document-by-id application
+                                                                 document-id)]
+      (if (ss/blank? user-id)
+        (let [user-id-path (cond->> [:userId]
+                             (:henkilo data) (cons :henkilo))]
+          (persist-model-updates application
+                                "documents"
+                                document
+                                [[user-id-path ""]]
+                                timestamp))
         (let [company-auth (auth/auth-via-company application user-id)
               company      (when company-auth
                              (company/find-company-by-id (:id company-auth)))]
@@ -340,6 +354,13 @@
                                       (company/find-company-users company-id))))
                  :zip)))
 
+(defn company-address-type [schema path-arr]
+  (let [path-document-model (model/find-by-name (:body schema) [(first path-arr)])
+        address-model (if (> (count path-arr) 1)
+                        (model/find-by-name (:body (model/find-by-name (:body path-document-model) [(last path-arr)])) [:osoite])
+                        (model/find-by-name (:body path-document-model) [:osoite]))]
+    (:address-type address-model)))
+
 (defn do-set-company-to-document [application document company-id path user timestamp]
   {:pre [document]}
   (when-not (ss/blank? company-id)
@@ -347,7 +368,8 @@
           schema (schemas/get-schema (:schema-info document))
           company (tools/unwrapped (model/->yritys (company-fields application
                                                                    company-id user)
-                                                   :with-empty-defaults? true))
+                                                   :with-empty-defaults? true
+                                                   :contact-address? (= :contact (company-address-type schema path-arr))))
           model (if (seq path-arr)
                   (assoc-in {} (map keyword path-arr) company)
                   company)

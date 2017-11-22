@@ -196,6 +196,9 @@ LUPAPISTE.ApplicationModel = function() {
   self.calendarNotificationIndicator = ko.observable(0);
   self.calendarNotificationsPending = ko.observableArray([]);
 
+  self.bulletinOpDescription = ko.observable().extend({rateLimit: {timeout: 500, method: "notifyWhenChangesStop"}});
+  self.opDescriptionIndicator = ko.observable().extend({notify: "always"});
+
   self.linkPermitData = ko.observable(null);
   self.appsLinkingToUs = ko.observable(null);
   self.pending = ko.observable(false);
@@ -686,6 +689,7 @@ LUPAPISTE.ApplicationModel = function() {
 
 
   self.newOtherAttachment = function() {
+    // TODO: refactor this function away from inforequest.html
     attachment.initFileUpload({
       applicationId: self.id(),
       attachmentId: null,
@@ -986,7 +990,8 @@ LUPAPISTE.ApplicationModel = function() {
   self.requiredFieldSummaryButtonKey = ko.pureComputed(function() {
     if (self.isArchivingProject()) {
       return "archivingProject.tabRequiredFieldSummary";
-    } else if (lupapisteApp.models.applicationAuthModel.ok("approve-application")) {
+    } else if (lupapisteApp.models.applicationAuthModel.ok("approve-application") ||
+               lupapisteApp.models.applicationAuthModel.ok("update-app-bulletin-op-description")) {
       return "application.tabRequiredFieldSummary.afterSubmitted";
     } else {
       return "application.tabRequiredFieldSummary";
@@ -995,7 +1000,8 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.requiredFieldSummaryButtonClass = ko.pureComputed(function() {
     if (lupapisteApp.models.applicationAuthModel.ok("approve-application") ||
-      _.includes(["draft", "open"], ko.unwrap(self.state))) {
+        lupapisteApp.models.applicationAuthModel.ok("update-app-bulletin-op-description") ||
+        _.includes(["draft", "open"], ko.unwrap(self.state))) {
       return "link-btn-inverse";
     } else {
       return "link-btn";
