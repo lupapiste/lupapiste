@@ -226,6 +226,15 @@
                                                        group: attachment().group } }"></div>
               </div>
 
+              <!-- ko if: $component.showBackendId -->
+              <div class="attachment-info-field">
+                <label data-bind="ltext: 'digitizer.backendId'"></label>
+                <div data-bind="component: { name: 'attachment-backendid-autocomplete',
+                                params: { selected: attachment().backendId,
+                                          disabled: false} }"></div>
+              </div>
+              <!-- /ko -->
+
               <div class="attachment-details-toggles">
                 <div class="attachment-info-field"
                      data-bind="if: $data.setConstructionTimeVisible()">

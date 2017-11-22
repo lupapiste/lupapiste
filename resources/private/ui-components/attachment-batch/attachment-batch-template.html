@@ -15,6 +15,7 @@
         <th><span data-bind="ltext:'attachment.drawing-number'"></span></th>
         <th><span data-bind="ltext:'attachment.label.operation'"></span></th>
         <!-- ko if: $component.showResell -->
+        <th><span data-bind="ltext:'digitizer.backendId'"></span></th>
         <th class="td-center" data-bind="ltext:'digitizer.resellCheckbox'"></th>
         <!-- /ko -->
         <!-- ko if: showSign -->
@@ -103,6 +104,24 @@
           </div>
         </td>
         <!-- ko if: $component.showResell -->
+        <td>
+          <div class="fill-pin"
+               data-bind="event: $parent.fillEvents( $data, 'backendIds'),
+                          testId: 'batch-backendid-' + $index()">
+            <div data-bind="component: { name: 'attachment-backendid-autocomplete',
+                                         params: { selected: $parent.cell( $data, 'backendid').value,
+                                                   disabled: false} }"
+                 class="attachment-batch-grouping"></div>
+            <icon-button params="click: $parent.filler( 'backendid', $data, 'number'),
+                                 buttonClass: 'function',
+                                 ltext: 'attachment.batch-copy-down',
+                                 icon: 'arrow-down',
+                                 right: true"
+                         data-bind="visible: $parent.canFillDown( 'backendid', $data),
+                                    testId: 'fill-backendid-' + $index()"
+                         class="fill-down"></icon-button>
+          </div>
+        </td>
         <td class="td-center">
           <toggle params="value: $parent.cell( $data, 'disableResell' ).value,
                           disable: $parent.rowDisabled( $data ),

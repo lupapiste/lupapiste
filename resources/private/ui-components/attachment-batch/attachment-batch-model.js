@@ -38,7 +38,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   self.colspan = self.disposedPureComputed(function() {
     var span = 5;
     if (self.showResell()) {
-      span = span + 1;
+      span = span + 2;
     }
     if (self.showSign()) {
       span = span + 1;
@@ -94,9 +94,10 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                    });
   }
 
-  function newRow(initialType, initialContents, drawingNumber, group, target) {
+  function newRow(initialType, initialContents, drawingNumber, group, backendId, target) {
     var type = ko.observable(initialType || ko.unwrap(defaults.type) );
     var grouping = ko.observable(group || ko.unwrap(defaults.group) || {});
+    var backendId = ko.observable(backendId || ko.unwrap(service.getDefaultBackendId()) || {});
     var contentsValue = ko.observable(initialContents);
     var contentsList = ko.observableArray();
     self.disposedSubscribe( type, function( type ) {
@@ -114,6 +115,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                 contents: contentsCell,
                 drawing: new Cell( ko.observable(drawingNumber)),
                 grouping: new Cell( grouping ),
+                backendid: new Cell ( backendId ),
                 sign: new Cell( ko.observable()),
                 construction: new Cell( ko.observable() ),
                 disableResell: new Cell( ko.observable() )
@@ -307,7 +309,8 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                drawingNumber: data.drawing.value(),
                sign: data.sign.value(),
                constructionTime: data.construction.value(),
-               disableResell: data.disableResell.value()
+               disableResell: data.disableResell.value(),
+               backendId: data.backendid.value()
       };
     }), self.password() );
 

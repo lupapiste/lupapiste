@@ -31,7 +31,8 @@
    (sc/optional-key :drawingNumber)    sc/Str
    (sc/optional-key :sign)             sc/Bool
    (sc/optional-key :constructionTime) sc/Bool
-   (sc/optional-key :disableResell)    sc/Bool})
+   (sc/optional-key :disableResell)    sc/Bool
+   (sc/optional-key :backendId)        (sc/maybe sc/Str)})
 
 (sc/defschema BindableFile (sc/if :attachmentId NewVersion NewAttachment))
 
@@ -46,10 +47,11 @@
         automatic-ok-enabled  (org/get-organization-auto-ok (:organization application))
         placeholder-id        (or attachmentId
                                (att/get-empty-attachment-placeholder-id (:attachments application) type (set exclude-ids)))
+        _ (println "KEYS:::::" filedata)
         attachment            (or
                                 (att/get-attachment-info application placeholder-id)
                                 (att/create-attachment! application
-                                                      (assoc (select-keys filedata [:group :contents :target :source :disableResell])
+                                                      (assoc (select-keys filedata [:group :contents :target :source :disableResell :backendId])
                                                               :requested-by-authority (boolean (auth/application-authority? application user))
                                                         :created         created
                                                         :attachment-type type)))

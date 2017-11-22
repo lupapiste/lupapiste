@@ -166,7 +166,8 @@
    (sc/optional-key :size)               (apply sc/enum attachment-sizes)
    :auth                                 [AttachmentAuthUser]
    (sc/optional-key :metadata)           {sc/Keyword sc/Any}
-   (sc/optional-key :approvals)          VersionApprovals})
+   (sc/optional-key :approvals)          VersionApprovals
+   (sc/optional-key :backendId)          (sc/maybe sc/Str)})
 
 ;;
 ;; Utils
@@ -276,7 +277,7 @@
       {:op updated-op :groupType (when updated-op :operation)})))
 
 (defn make-attachment
-  [created target required? requested-by-authority? locked? application-state group attachment-type metadata & [attachment-id contents read-only? source]]
+  [created target required? requested-by-authority? locked? application-state group attachment-type metadata & [attachment-id contents read-only? source backend-id]]
   {:pre  [(sc/validate att-type/AttachmentType attachment-type) (keyword? application-state) (or (nil? target) (sc/validate Target target))]
    :post [(sc/validate Attachment %)]}
   (cond-> {:id (if (ss/blank? attachment-id) (mongo/create-id) attachment-id)
@@ -298,7 +299,8 @@
            :versions []
            ;:approvals {}
            :auth []
-           :contents contents}
+           :contents contents
+           :backendId backend-id}
           (:groupType group) (assoc :groupType (group-type-coercer (:groupType group)))
           (map? source) (assoc :source source)
           (seq metadata) (assoc :metadata metadata)))
@@ -339,7 +341,7 @@
 (defn create-attachment-data
   "Returns the attachment data model as map. This attachment data can be pushed to mongo (no versions included)."
   [application {:keys [attachment-id attachment-type group created target locked required requested-by-authority
-                       contents read-only source disableResell]
+                       contents read-only source disableResell backendId]
                 :or {required false locked false requested-by-authority false} :as options}]
   {:pre [(required-options-check options)]}
   (let [metadata (default-tos-metadata-for-attachment-type attachment-type application disableResell)]
@@ -355,7 +357,8 @@
                      attachment-id
                      contents
                      read-only
-                     source)))
+                     source
+                     backendId)))
 
 (defn create-attachment!
   "Creates attachment data and $pushes attachment to application. Updates TOS process metadata retention period, if needed"
