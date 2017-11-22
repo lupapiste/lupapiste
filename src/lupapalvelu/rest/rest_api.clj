@@ -64,7 +64,7 @@
                  ~response-data (delay (try ~@content
                                             (catch Exception e#
                                               (error e#)
-                                              (resp/status 500))))]
+                                              (resp/status 500 "Unknown server error"))))]
              (cond
                (not ~'user)
                basic-401
