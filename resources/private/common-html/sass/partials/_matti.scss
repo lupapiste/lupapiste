@@ -560,7 +560,7 @@ div.matti-autocomplete {
     }
     td {
       padding-top: $marginS;
-      padding-left: 0;
+      padding-right: 0;
       text-align: right;
       button {
         margin-left: $marginM;
@@ -588,4 +588,16 @@ table.matti-attachments {
 
 span.verdict-published {
   font-weight: bold;
+}
+
+div.matti-note {
+  border-left: 4px solid $orange-dark;
+  margin-top: $marginS;
+  margin-bottom: $marginS;
+  padding-left: $marginS;
+  padding-right: $marginS;
+  padding-top: $marginS;
+  padding-bottom: $marginS;
+  background-color: $gray246;
+  display: inline-block;
 }

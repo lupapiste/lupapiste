@@ -48,14 +48,17 @@
                         (path/value path state)
                         (update-changes-and-errors options)))
 
+(defn- can-edit-verdict? [{published :published}]
+  (and (can-edit?)
+       (not published)))
+
 (defn reset-verdict [{:keys [verdict references]}]
   (reset! state/current-verdict
           (when verdict
             {:state (:data verdict)
              :info (dissoc verdict :data)
              :_meta {:updated updater
-                     :enabled? (and (can-edit?)
-                                    (not (:published verdict)))
+                     :enabled? (can-edit-verdict? verdict)
                      :attachments.filedata (fn [_ filedata & kvs]
                                              (apply assoc filedata
                                                     :target {:type :verdict
@@ -141,37 +144,42 @@
 (rum/defcs new-verdict < rum/reactive
   (rum/local nil ::template)
   [{template* ::template}]
-  (let [items (map #(set/rename-keys % {:id :value :name :text})
-                   (rum/react state/template-list))]
-    (when-not (rum/react template*)
-      (common/reset-if-needed! template*
-                               (:value (or (util/find-by-key :default? true items)
-                                           (first items)))))
-    [:div.matti-grid-6
-     [:div.row
-      (layout/vertical {:label :matti-verdict-template
-                        :align :full}
-                       (components/dropdown template*
-                            {:items items}))
-      (layout/vertical [:button.positive
-                        {:on-click #(service/new-verdict-draft @state/application-id
-                                                               @template*
-                                                               reset-verdict)}
-                        [:i.lupicon-circle-plus]
-                        [:span (common/loc :application.verdict.add)]])]]))
+  (let [templates (rum/react state/template-list)]
+
+    (if (empty? templates)
+      [:div.matti-note (path/loc :matti.no-verdict-templates)]
+      (let [items (map #(set/rename-keys % {:id :value :name :text})
+                       templates)]
+        (when-not (rum/react template*)
+          (common/reset-if-needed! template*
+                                   (:value (or (util/find-by-key :default? true items)
+                                               (first items)))))
+        [:div.matti-grid-6
+         [:div.row
+          (layout/vertical {:label :matti-verdict-template
+                            :align :full}
+                           (components/dropdown template*
+                                                {:items items}))
+          (layout/vertical [:button.positive
+                            {:on-click #(service/new-verdict-draft @state/application-id
+                                                                   @template*
+                                                                   reset-verdict)}
+                            [:i.lupicon-circle-plus]
+                            [:span (common/loc :application.verdict.add)]])]]))))
+
 
 (rum/defc verdict-list < rum/reactive
   [verdicts app-id]
   [:div
    [:h2 (common/loc "application.tabVerdict")]
    [:ol
-    (map (fn [{:keys [id published modified]}]
+    (map (fn [{:keys [id published modified] :as verdict}]
            [:li {:key id}
             [:a {:on-click #(service/open-verdict app-id id reset-verdict)}
              (js/sprintf "Published: %s, Modified: %s"
                          (js/util.finnishDate published)
                          (js/util.finnishDateAndTime modified))]
-            (when (can-edit?)
+            (when (can-edit-verdict? verdict)
               [:i.lupicon-remove.primary {:on-click #(service/delete-verdict app-id id reset-verdict)}])])
          verdicts)]
    (when (state/auth? :new-matti-verdict-draft)

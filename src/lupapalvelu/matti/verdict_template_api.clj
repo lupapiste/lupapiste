@@ -307,6 +307,7 @@
                                created
                                review-id
                                data)
+  ;; The organization has changed.
   (ok :review (template/review (usr/authority-admins-organization user)
                                review-id)
       :modified created))
@@ -358,6 +359,7 @@
                              created
                              plan-id
                              data)
+  ;; The organization has changed.
   (ok :plan (template/plan (usr/authority-admins-organization user)
                            plan-id)
       :modified created))

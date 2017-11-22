@@ -597,13 +597,12 @@ var util = (function($) {
     prop: {
       isPropertyId:           isPropertyId,
       isPropertyIdInDbFormat: isPropertyIdInDbFormat,
-      toHumanFormat:          propertyIdToHumanFormat,
+      toHumanFormat:          propertyIdWithMaaralaToHumanFormat,
       toDbFormat:             propertyIdToDbFormat,
       isPropertyIdWithMaaraala: isPropertyIdWithMaaraala,
       isPropertyIdWithMaaraalaInDbFormat: isPropertyIdWithMaaraalaInDbFormat,
       isPropertyIdWithMaaraalaInHumanFormat: isPropertyIdWithMaaraalaInHumanFormat,
-      withMaaraalaToDbFormat: propertyIdWithMaaralaToDbFormat,
-      withMaaraalaToHumanFormat: propertyIdWithMaaralaToHumanFormat
+      withMaaraalaToDbFormat: propertyIdWithMaaralaToDbFormat
     },
     buildingName: buildingName,
     constantly:   function(value) { return function() { return value; }; },

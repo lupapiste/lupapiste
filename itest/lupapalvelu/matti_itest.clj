@@ -561,6 +561,25 @@
                          :default? false
                          :name "Uusi nimi"})] :in-any-order)))))
 
+(defn add-verdict-attachment
+  "Adds attachment to the verdict. Contents is mainly for logging. Returns attachment id."
+  [app-id verdict-id contents]
+  (let [file-id               (upload-file-and-bind sonja
+                                                    app-id
+                                                    {:contents contents
+                                                     :target   {:type "verdict"
+                                                                :id   verdict-id}
+                                                     :type     {:type-group "paatoksenteko"
+                                                                :type-id    "paatosote"}})
+        {:keys [attachments]} (query-application sonja app-id)
+        {attachment-id :id}   (util/find-first (fn [{:keys [target latestVersion]}]
+                                                 (and (= target {:type "verdict" :id verdict-id})
+                                                      (= (:originalFileId latestVersion) file-id)))
+                                               attachments)]
+    (fact {:midje/description (str "New attachment to verdict: " contents)}
+      attachment-id => truthy)
+    attachment-id))
+
 (facts "Verdicts"
   (let [{template-id :id} (init-verdict-template sipoo :r)
         plan              (-> (query sipoo :verdict-template-plans :category "r")
@@ -969,36 +988,30 @@
                           (check-fn :julkipano "29.9.2017")
                           (check-fn :buildings.vss-luokka "12")
                           (check-fn :buildings.kiinteiston-autopaikat 34)))
-                      (fact "Publish verdict"
-                        (command sonja :publish-matti-verdict
-                                 :id app-id
-                                 :verdict-id verdict-id) => ok?)
+                      (facts "Add attachment to verdict draft"
+                        (let [attachment-id (add-verdict-attachment app-id verdict-id "Paatosote")]
+                          (fact "Attachment can be deleted"
+                            (command sonja :delete-attachment :id app-id
+                                     :attachmentId attachment-id)=> ok?)))
+                      (fact "No attachments"
+                        (query-application sonja app-id)
+                        => (contains {:attachments []}))
+                      (facts "Add attachment to verdict draft again"
+                        (let [attachment-id (add-verdict-attachment app-id verdict-id "Otepaatos")]
+                          (fact "Publish verdict"
+                            (command sonja :publish-matti-verdict
+                                     :id app-id
+                                     :verdict-id verdict-id) => ok?)
+                          (fact "Attachment can no longer be deleted"
+                            (command sonja :delete-attachment :id app-id
+                                     :attachmentId attachment-id)
+                            => fail?)))
                       (fact "Editing no longer allowed"
                         (edit-verdict :verdict-text "New verdict text")
                         => (err :error.verdict.not-draft))
-                      (fact "Remove pientalo operation"
-                        (command sonja :remove-doc :id app-id :docId doc-id)
-                        => ok?)
-                      (fact "Pientalo info still in the published verdict"
-                        (let [{:keys [published modified
-                                      data]} (:verdict (open-verdict))]
-                          published => pos?
-                          published => modified
-                          (get-in data [:buildings (keyword op-id-pientalo)])
-                          => {:description   "Hen piaoliang!"
-                              :show-building true
-                              :building-id   ""
-                              :operation     "pientalo"
-                              :tag           "Hao"
-                              :paloluokka    ""}))
-                      (fact "No pientalo in a new verdict draft"
-                        (-> (command sonja :new-matti-verdict-draft
-                                     :id app-id
-                                     :template-id template-id)
-                            :verdict :data :buildings)
-                        => {op-id {:description   "Hello world!"
-                                   :show-building true
-                                   :building-id   "789"
-                                   :operation     "sisatila-muutos"
-                                   :tag           ""
-                                   :paloluokka    ""}}))))))))))))
+                      (fact "Published verdict cannot be deleted"
+                        (command sonja :delete-matti-verdict :id app-id
+                                 :verdict-id verdict-id) => fail?)
+                      (fact "Application state is verdictGiven"
+                        (:state (query-application sonja app-id))
+                        => "verdictGiven"))))))))))))

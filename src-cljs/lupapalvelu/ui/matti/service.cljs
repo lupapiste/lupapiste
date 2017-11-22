@@ -2,6 +2,7 @@
   (:require [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.matti.state :as state]
+            [lupapalvelu.ui.authorization :as auth]
             [sade.shared-util :as util]))
 
 (defn fetch-schemas
@@ -177,7 +178,9 @@
 
 (defn publish-and-reopen-verdict [app-id verdict-id callback]
   (common/command {:command :publish-matti-verdict
-                   :success #(open-verdict app-id verdict-id callback)}
+                   :success (fn []
+                              (open-verdict app-id verdict-id callback)
+                              (js/repository.load app-id))}
                   :id app-id
                   :verdict-id verdict-id))
 
@@ -241,3 +244,13 @@
                                               :type-id type-id}})))
                            filedatas)
                       (partial batch-job status-fn))))
+
+;; Co-operation with the AttachmentsService
+
+(defn attachments []
+  (js->clj (js/lupapisteApp.services.attachmentsService.rawAttachments)
+           :keywordize-keys true))
+
+(defn refresh-attachments []
+  (js/lupapisteApp.services.attachmentsService.queryAll)
+  (js/lupapisteApp.services.attachmentsService.refreshAuthModels))

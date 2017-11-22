@@ -1,6 +1,6 @@
 (ns lupapalvelu.matti.verdict-api
   (:require [clojure.set :as set]
-            [lupapalvelu.action :refer [defquery defcommand] :as action]
+            [lupapalvelu.action :refer [defquery defcommand notify] :as action]
             [lupapalvelu.matti.schemas :as schemas]
             [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.matti.verdict :as verdict]
@@ -139,7 +139,9 @@ TODO: create tasks and PDF, application state change, attachments locking."
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [matti-enabled
                       (verdict-exists :editable?)]
-   :states           states/give-verdict-states}
+   :states           states/give-verdict-states
+   :notified         true
+   :on-success       (notify :application-state-change)}
   [command]
   (ok (verdict/publish-verdict command)))
 
@@ -156,3 +158,37 @@ TODO: create tasks and PDF, application state change, attachments locking."
 
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))
+
+(defn- create-bulletin [application created verdict-id & [updates]]
+  (let [verdict (util/find-by-id verdict-id (:matti-verdicts application))
+        app-snapshot (-> (bulletins/create-bulletin-snapshot application)
+                         (dissoc :verdicts :matti-verdicts)
+                         (merge
+                           updates
+                           {:application-id (:id application)
+                            :matti-verdict verdict
+                            :bulletin-op-description (-> verdict :data :bulletin-op-description)}))
+        search-fields [:municipality :address :matti-verdict :_applicantIndex
+                       :application-id
+                       :bulletinState :applicant :organization :bulletin-op-description]
+        search-updates (get-search-fields search-fields app-snapshot)]
+    (bulletins/snapshot-updates app-snapshot search-updates created)))
+
+(defcommand upsert-matti-verdict-bulletin
+  {:description      ""
+   :feature          :matti
+   :user-roles       #{:authority}
+   :parameters       [id verdict-id]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :pre-checks       [(verdict-exists :editable?)]
+   :states           states/give-verdict-states}
+  [{application :application created :created}]
+  (let [today-long (tc/to-long (t/today-at-midnight))
+        updates (create-bulletin application created verdict-id
+                                 {:bulletinState :verdictGiven
+                                  :verdictGivenAt       today-long
+                                  :appealPeriodStartsAt today-long
+                                  :appealPeriodEndsAt   (tc/to-long (t/plus (t/today-at-midnight) (t/days 14)))  ;; TODO!!!
+                                  :verdictGivenText ""})]
+    (bulletins/upsert-bulletin-by-id (str id "_" verdict-id) updates)
+    (ok)))

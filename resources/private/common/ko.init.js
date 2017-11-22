@@ -413,7 +413,7 @@
   ko.bindingHandlers.propertyId = {
     update: function(element, valueAccessor) {
       var v = ko.utils.unwrapObservable(valueAccessor()),
-          f = util.prop.withMaaraalaToHumanFormat(v);
+          f = util.prop.toHumanFormat(v);
       $(element).text(f ? f : "");
     }
   };
