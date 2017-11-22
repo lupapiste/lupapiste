@@ -240,7 +240,7 @@
      :verdictGiven (and (< (:appealPeriodStartsAt bulletin-version) now)
                         (> (:appealPeriodEndsAt bulletin-version) now))
      :final        (and (< (:officialAt bulletin-version) now)
-                        (> (tc/to-long (t/plus now (t/days 14))))))))
+                        (> (tc/to-long (t/plus (tc/from-long now) (t/days 14))))))))
 
 (defn verdict-given-bulletin-exists? [app-id]
   (mongo/any? :application-bulletins {:_id app-id :versions {"$elemMatch" {:bulletinState "verdictGiven"}}}))
