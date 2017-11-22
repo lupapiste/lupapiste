@@ -132,10 +132,16 @@
 (def empty-building-ids {:valtakunnallinenNumero ""
                          :rakennusnro ""})
 
-(defn get-non-zero-text [xml key]
-  (let [text (get-text xml key)]
-    (when (not= (ss/trim text) "0")
-      text)))
+(defn get-non-zero-integer-text
+  "Parses text as number, strips decimals and returns the result as
+  string if non-zero"
+  [xml key]
+  (let [n (some->> (get-text xml key)
+                   util/->double
+                   int)]
+    (when (and (integer? n)
+               (not (zero? n)))
+      (str n))))
 
 (defn ->rakennuksen-tiedot
   ([xml building-id]
@@ -178,12 +184,12 @@
                      :rakentajaTyyppi               (get-text rakennus :rakentajaTyyppi)}
             :luokitus {:energialuokka               (get-text rakennus :energialuokka)
                        :paloluokka                  (get-text rakennus :paloluokka)}
-            :mitat {:kellarinpinta-ala              (get-non-zero-text rakennus :kellarinpinta-ala)
-                    :kerrosala                      (get-non-zero-text rakennus :kerrosala)
-                    :rakennusoikeudellinenKerrosala (get-non-zero-text rakennus :rakennusoikeudellinenKerrosala)
+            :mitat {:kellarinpinta-ala              (get-non-zero-integer-text rakennus :kellarinpinta-ala)
+                    :kerrosala                      (get-non-zero-integer-text rakennus :kerrosala)
+                    :rakennusoikeudellinenKerrosala (get-non-zero-integer-text rakennus :rakennusoikeudellinenKerrosala)
                     :kerrosluku                     (get-text rakennus :kerrosluku)
-                    :kokonaisala                    (get-non-zero-text rakennus :kokonaisala)
-                    :tilavuus                       (get-non-zero-text rakennus :tilavuus)}
+                    :kokonaisala                    (get-non-zero-integer-text rakennus :kokonaisala)
+                    :tilavuus                       (get-non-zero-integer-text rakennus :tilavuus)}
             :rakenne {:julkisivu                    (get-text rakennus :julkisivumateriaali)
                       :kantavaRakennusaine          (get-text rakennus :rakennusaine)
                       :rakentamistapa               (get-text rakennus :rakentamistapa)}
