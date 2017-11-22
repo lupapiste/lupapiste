@@ -63,6 +63,10 @@
                               card: 'edit-handlers'">
                           <edit-handlers></edit-handlers>
                 </card>
+                <card params="deck: 'summary',
+                              card: 'add-link-permit'">
+                  <add-link-permit></add-link-permit>
+                </card>
                     <!-- Tabs: -->
                     <div class="tabs-container"
                          data-bind="with: application,
@@ -231,7 +235,7 @@
                             <div data-bind="if: $root.authorization.ok('link-permit-required')">
                               <div class="help-box margins-m">
                                 <p data-bind="ltext: 'help.AddPermit'"></p>
-                                <button data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog,
+                                <button data-bind="click: $root.openAddLinkPermitDialog,
                                                    enable: $root.authorization.ok('link-permit-required'),
                                                    visible: $root.authorization.ok('add-link-permit')"
                                         class="positive">
