@@ -381,8 +381,11 @@
               #(update % :child conj {:tag :rakennustietojaEimuutetaKytkin}))
       (update :child mapping-common/update-child-element
               [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lisatiedot :Lisatiedot]
-              #(update % :child conj {:tag :asiakirjatToimitettuPvm}))))
-
+              #(update % :child conj {:tag :asiakirjatToimitettuPvm}))
+      (update :child mapping-common/update-child-element
+              [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
+              #(update % :child mapping-common/merge-into-coll-after-tag :lausuntotieto
+                       [{:tag :paatostieto :child [mapping-common/paatokset_218]}]))))
 
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}
