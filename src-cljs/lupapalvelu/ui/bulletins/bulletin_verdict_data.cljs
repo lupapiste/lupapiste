@@ -25,10 +25,11 @@
        [:pre.wrapped_text (-> bulletin :verdictData :text)]]]]))
 
 (rum/defc init-identification-link [bulletin]
-  [:div.container
-   [:a.btn.btn-primary
-    {:href (str "/dev/saml-login?success=/app/fi/bulletins%23!/bulletin/" (:id bulletin) "/success")}
-    (common/loc :register.action)]])
-;;     <a class="btn btn-primary"
-;; data-bind="ltext: 'register.action', attr: {href: href, id: id}, visible: visible"
-;; data-test-id="vetuma-init"></a>
+  (let [pathname (aget js/window.location "pathname")
+        search (aget js/window.location "search")
+        hash (aget js/window.location "hash")
+        action-url (str "/dev/saml-login?success=" (js/escape (str pathname search hash "/success")))]
+    [:div.container
+     [:a.btn.btn-primary
+      {:href action-url}
+      (common/loc :register.action)]]))

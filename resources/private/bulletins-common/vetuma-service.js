@@ -22,14 +22,12 @@ LUPAPISTE.VetumaService = function() {
                                 style: "negative" });
       }
       self.authenticated(false);
-      hub.send("vetumaService::authStatusChanged", false);
     });
   });
 
   hub.subscribe("vetumaService::logoutRequested", function() {
     vetuma.logoutUser(function() { // onSuccess
       self.authenticated(false);
-      hub.send("vetumaService::authStatusChanged", false);
       util.identLogoutRedirectBulletins();
     });
   });
