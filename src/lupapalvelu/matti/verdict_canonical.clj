@@ -41,7 +41,7 @@
    :rakennusoikeudellinenKerrosala nil
    :vaaditutKatselmukset (map (partial vaadittu-katselmus-canoical lang verdict) (:reviews data))
    :maaraystieto [(maarays-canonical lang verdict)]
-   :vaadittuErityissuunnitelmatieto [(map (partial vaadittu-erityissuunnitelma-canonical lang verdict) (:plans data))]
+   :vaadittuErityissuunnitelmatieto (map (partial vaadittu-erityissuunnitelma-canonical lang verdict) (:plans data))
    :vaadittuTyonjohtajatieto (map vaadittu-tyonjohtaja-canonical (:foremen data))})
 
 (defn- paivamaarat-type-canonical [lang {data :data :as verdict}]
@@ -70,4 +70,4 @@
 (defn verdict-canonical [application lang verdict]
   {:Paatos {:lupamaaraykset (lupamaaraykset-type-canonical lang verdict)
             :paivamaarat (paivamaarat-type-canonical lang verdict)
-            :poytakirjat [(paatospoytakirja-type-canonical lang verdict)]}})
+            :poytakirja [(paatospoytakirja-type-canonical lang verdict)]}})
