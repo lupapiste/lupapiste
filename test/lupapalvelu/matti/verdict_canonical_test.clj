@@ -9,13 +9,13 @@
                      :bulletin-op-description "julkipano - teksti"
                      :purpose "k\u00e4ytt\u00f6tarkoitus"
                      :verdict-text "p\u00e4\u00e4t\u00f6s - teksti"
-                     :anto "27.11.2017"
+                     :anto "20.11.2017"
                      :giver "viranhaltija"
                      :complexity "small"
                      :plans ["5a156ddf0e40adc8ee064464"
                              "6a156ddf0e40adc8ee064464"]
                      :aloitettava "23.11.2022"
-                     :valitus "27.11.2017"
+                     :valitus "27.12.2017"
                      :foremen ["erityis-tj"
                                "iv-tj"
                                "vastaava-tj"
@@ -165,8 +165,8 @@
         :lainvoimainenPvm "2017-11-27"
         :voimassaHetkiPvm "2023-11-23"
         :raukeamisPvm nil
-        :antoPvm "2017-11-27"
-        :viimeinenValitusPvm "2017-11-27"
+        :antoPvm "2017-11-20"
+        :viimeinenValitusPvm "2017-12-27"
         :julkipanoPvm "2017-11-24"})
 
   (fact "undefined fields defaults to nil"

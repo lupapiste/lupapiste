@@ -1,0 +1,97 @@
+(ns lupapalvelu.xml.krysp.verdict-mapping-test
+  (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
+            [clojure.data.xml :as data-xml]
+            [sade.xml :as xml]
+            [sade.common-reader :as cr]
+            [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa]]
+            [lupapalvelu.matti.verdict-canonical-test :refer [verdict]]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.xml.validator :as validator]))
+
+(def xml (:xml (permit/verdict-krysp-mapper application-rakennuslupa verdict {} "fi" "2.2.2" "BEGIN_OF_LINK")))
+(def xml_s (data-xml/indent-str xml))
+(def lp-xml (cr/strip-xml-namespaces (xml/parse xml_s)))
+
+(facts verdict-krysp-mapper
+  (fact "2.2.2: xml exist" xml => truthy)
+
+  (fact (validator/validate xml_s :R "2.2.2") => nil)
+
+  (fact "xml contains app id"
+    (xml/get-text lp-xml [:luvanTunnisteTiedot :LupaTunnus :MuuTunnus :tunnus])
+    => (:id application-rakennuslupa))
+
+  (facts "lupamaaraykset"
+    (fact "autopaikkojarakennettu"
+      (xml/get-text lp-xml [:paatostieto :lupamaaraykset :autopaikkojaRakennettu]) => "1")
+
+    (fact "autopaikkojakiinteistolla"
+      (xml/get-text lp-xml [:paatostieto :lupamaaraykset :autopaikkojaKiinteistolla]) => "2")
+
+    (facts "katselmus"
+      (fact "katselmuksen laji - times two"
+        (map :content (xml/select lp-xml :paatostieto :lupamaaraykset :vaaditutKatselmukset :katselmuksenLaji))
+        => [["muu katselmus"]
+            ["rakennuksen paikan merkitseminen"]])
+
+      (fact "tarkastuksentaikatselmuksennimi - times two"
+        (map :content (xml/select lp-xml :paatostieto :lupamaaraykset :vaaditutKatselmukset :tarkastuksenTaiKatselmuksenNimi))
+        => [["Katselmus"]
+            ["Katselmus2"]]))
+
+    (facts "maaraystieto"
+      (fact "sisalto"
+        (xml/get-text lp-xml [:paatostieto :lupamaaraykset :maaraystieto :sisalto]) => "muut lupaehdot - teksti")
+
+      (fact "maarayspvm"
+        (xml/get-text lp-xml [:paatostieto :lupamaaraykset :maaraystieto :maaraysPvm]) => "2017-11-23"))
+
+    (facts "vaadittuerityissuunnitelmatieto"
+      (fact "vaadittuerityissuunnitelma - times two"
+        (map :content (xml/select lp-xml :paatostieto :lupamaaraykset :vaadittuErityissuunnitelmatieto :vaadittuErityissuunnitelma))
+        => [["Suunnitelmat"]
+            ["Suunnitelmat2"]]))
+
+    (facts "vaadittutyonjohtajatieto"
+      (fact "vaadittutyonjohtaja - times four"
+        (map :content (xml/select lp-xml :paatostieto :lupamaaraykset :vaadittuTyonjohtajatieto :tyonjohtajaRooliKoodi))
+        => [["erityisalojen työnjohtaja"]
+            ["IV-työnjohtaja"]
+            ["vastaava työnjohtaja"]
+            ["KVV-työnjohtaja"]])))
+
+  (facts "paivamaarat"
+    (fact "aloitettavapvm"
+      (xml/get-text lp-xml [:paatostieto :paivamaarat :aloitettavaPvm]) => "2022-11-23")
+
+    (fact "lainvoimainenpvm"
+      (xml/get-text lp-xml [:paatostieto :paivamaarat :lainvoimainenPvm]) => "2017-11-27")
+
+    (fact "voimassahetkipvm"
+      (xml/get-text lp-xml [:paatostieto :paivamaarat :voimassaHetkiPvm]) => "2023-11-23")
+
+    (fact "antopvm"
+      (xml/get-text lp-xml [:paatostieto :paivamaarat :antoPvm]) => "2017-11-20")
+
+    (fact "viimeinenvalituspvm"
+      (xml/get-text lp-xml [:paatostieto :paivamaarat :viimeinenValitusPvm]) => "2017-12-27")
+
+    (fact "julkipano"
+      (xml/get-text lp-xml [:paatostieto :paivamaarat :julkipanoPvm]) => "2017-11-24"))
+
+  (facts "poytakirja"
+    (fact "paatos"
+      (xml/get-text lp-xml [:paatostieto :poytakirja :paatos]) => "päätös - teksti")
+
+    (fact "paatoskoodi"
+      (xml/get-text lp-xml [:paatostieto :poytakirja :paatoskoodi]) => "myönnetty")
+
+    (fact "paatoksentekija"
+      (xml/get-text lp-xml [:paatostieto :poytakirja :paatoksentekija]) => "Pate Paattaja (Viranhaltija)")
+
+    (fact "paatospvm"
+      (xml/get-text lp-xml [:paatostieto :poytakirja :paatospvm]) => "2017-11-23")
+
+    (fact "pykala"
+      (xml/get-text lp-xml [:paatostieto :poytakirja :pykala]) => "99")))
