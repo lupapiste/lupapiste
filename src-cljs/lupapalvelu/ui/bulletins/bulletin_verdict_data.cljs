@@ -1,6 +1,7 @@
 (ns lupapalvelu.ui.bulletins.bulletin-verdict-data
   (:require [rum.core :as rum]
-            [lupapalvelu.ui.common :as common]))
+            [lupapalvelu.ui.common :as common]
+            [lupapalvelu.ui.util :as util]))
 
 (rum/defc verdict-data [bulletin]
   (when bulletin
@@ -23,6 +24,36 @@
         [:span.value  (common/format-timestamp (:appealPeriodEndsAt bulletin))]]]
       [:div.spacerL
        [:pre.wrapped_text (-> bulletin :verdictData :text)]]]]))
+
+
+(rum/defc detailed-verdict-data [bulletin]
+  (when-let [verdict (first (:verdicts bulletin))]
+    [:div.container
+     (for [paatos (:paatokset verdict)]
+      ^{:key (util/unique-elem-id "verdict-")}
+      [:div.verdict-content
+       [:h3
+        [:span (common/loc :application.verdict.title)]]
+       [:div.spacerL
+        [:div.key-value-pair
+         {:style {:width "80%"}}
+         [:label (common/loc :verdict.id)]
+         [:span.value  (:kuntalupatunnus verdict)]]
+        [:div.key-value-pair
+         {:style {:width "80%"}}
+         [:label (common/loc :verdict.anto)]
+         [:span.value  (common/format-timestamp (:verdictGivenAt bulletin))]]
+        [:div.key-value-pair
+         {:style {:width "80%"}}
+         [:label (common/loc :verdict.muutoksenhaku.paattyy)]
+         [:span.value  (common/format-timestamp (:appealPeriodEndsAt bulletin))]]]
+       [:div.spacerL
+        [:h4 (common/loc :verdict.lupamaaraukset)]
+        [:div.accordion-content-part.spacerM 11]
+        [:h4 (common/loc :verdict.poytakirjat)]
+        [:div.accordion-content-part.spacerM 1234]
+        [:h4 (common/loc :application.attachments.paapiirustus)]
+        [:div.accordion-content-part.spacerM 1234435]]])]))
 
 (rum/defc init-identification-link [bulletin]
   (let [pathname (aget js/window.location "pathname")

@@ -80,9 +80,11 @@
          {:data-test-id "bulletin-actions"}
          #_[:button.function.julkipano {:data-test-id "print-bulletin"} [:i.lupicon-print [:span (common/loc :bulletin.pdf)]]]
          ]]]]
-     (verdict-data/verdict-data bulletin)
-     (when-not ((:authenticated @args))
-       (verdict-data/init-identification-link bulletin))]))
+     (if ((:authenticated @args))
+       (verdict-data/detailed-verdict-data bulletin)
+       [:div
+        (verdict-data/verdict-data bulletin)
+        (verdict-data/init-identification-link bulletin)])]))
 
 (defn mount-component []
   (rum/mount (bulletin-preamble)
