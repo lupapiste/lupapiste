@@ -4,7 +4,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.matti.shared :as matti-shared]))
 
-(defn- vaadittu-katselmus-canoical [lang {{reviews :reviews} :references :as verdict} review-id]
+(defn- vaadittu-katselmus-canonical [lang {{reviews :reviews} :references :as verdict} review-id]
   (let [review (util/find-by-id review-id reviews)]
     {:Katselmus {:katselmuksenLaji (matti-shared/review-type-map (or (keyword (:type review)) :ei-tiedossa))
                  :tarkastuksenTaiKatselmuksenNimi (get-in review [:name (keyword lang)])
@@ -40,7 +40,7 @@
    :kerrosala nil
    :kokonaisala nil
    :rakennusoikeudellinenKerrosala nil
-   :vaaditutKatselmukset (map (partial vaadittu-katselmus-canoical lang verdict) (:reviews data))
+   :vaaditutKatselmukset (map (partial vaadittu-katselmus-canonical lang verdict) (:reviews data))
    :maaraystieto [(maarays-canonical lang verdict)]
    :vaadittuErityissuunnitelmatieto (map (partial vaadittu-erityissuunnitelma-canonical lang verdict) (:plans data))
    :vaadittuTyonjohtajatieto (map vaadittu-tyonjohtaja-canonical (:foremen data))})
