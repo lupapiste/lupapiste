@@ -1,17 +1,18 @@
 (ns lupapalvelu.matti.verdict-canonical
   (:require [sade.util :as util]
             [sade.strings :as ss]
-            [lupapalvelu.i18n :as i18n]))
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.matti.shared :as matti-shared]))
 
 (defn- vaadittu-katselmus-canoical [lang {{reviews :reviews} :references :as verdict} review-id]
   (let [review (util/find-by-id review-id reviews)]
-    {:Katselmus {:katselmuksenLaji (:type review)
+    {:Katselmus {:katselmuksenLaji (matti-shared/review-type-map (or (keyword (:type review)) :ei-tiedossa))
                  :tarkastuksenTaiKatselmuksenNimi (get-in review [:name (keyword lang)])
                  :muuTunnustieto [#_{:MuuTunnus "yht:MuuTunnusType"}]}})) ; TODO: find out if reviews should be initialized and pass id here
 
 (defn- maarays-canonical [lang {data :data :as verdict}]
   {:Maarays {:sisalto (:conditions data)
-             :maaraysPvm (:verdict-date data) ; TODO: is this ok?
+             :maaraysPvm (util/to-xml-date-from-string (:verdict-date data)) ; TODO: is this ok?
              :toteutusHetki nil}}) ; TODO: should this be empty
 
 (defn- vaadittu-erityissuunnitelma-canonical [lang {{plans :plans} :references :as verdict} plan-id]
@@ -61,9 +62,9 @@
 
 (defn- paatospoytakirja-type-canonical [lang {data :data :as verdict}]
   {:paatos (:verdict-text data)
-   :paatoskoodi (:verdict-code data)
+   :paatoskoodi (matti-shared/verdict-code-map (or (keyword (:verdict-code data)) :ei-tiedossa))
    :paatoksentekija (paatoksentekija lang verdict)
-   :paatospvm (:verdict-date data)
+   :paatospvm (util/to-xml-date-from-string (:verdict-date data))
    :pykala (:verdict-section data)
    :liite nil #_"yht:RakennusvalvontaLiiteType"}) ; TODO: add attachments
 
