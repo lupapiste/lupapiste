@@ -243,7 +243,7 @@
 
 (defn toimituksen-tiedot [{:keys [title municipality address]} lang]
   {:aineistonnimi (or title address "Lupapiste KuntaGML")
-   :aineistotoimittaja (env/value :technical-contact)
+   :aineistotoimittaja (env/value :aineistotoimittaja)
    :tila toimituksenTiedot-tila
    :toimitusPvm (util/to-xml-date (now))
    :kuntakoodi municipality
