@@ -20,21 +20,15 @@
 
 (rum/defc matti-date-delta < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
-  (let [enabled-path (path/extend path :enabled)]
-    [:div.matti-date-delta
-     (when (show-label? schema wrap-label?)
-       [:div.delta-label (path/loc options)])
-     [:div.delta-editor
-      (docgen/docgen-checkbox (assoc options
-                                     :path enabled-path
-                                     :schema (assoc schema :label false)))
-      "+"
-      (docgen/text-edit (assoc options :path (path/extend path :delta))
-                        :input.grid-style-input
-                        {:type "number"
-                         :disabled (or (not (path/react enabled-path state))
-                                       (path/disabled? options))})
-      (common/loc (str "matti-date-delta." (-> schema :unit name)))]]))
+  [:div.matti-date-delta
+   (when (show-label? schema wrap-label?)
+     [:div.delta-label (path/loc options)])
+   [:div.delta-editor
+    (docgen/text-edit (assoc options :path (path/extend path :delta))
+                      :input.grid-style-input
+                      {:type "number"
+                       :disabled (path/disabled? options)})
+    (common/loc (str "matti-date-delta." (-> schema :unit name)))]])
 
 
 (rum/defc matti-multi-select < rum/reactive
@@ -43,16 +37,16 @@
    (when (show-label? schema wrap-label?)
      [:h4.matti-label (path/loc options)])
    (let [state (path/state path state)
-         items (->> (:items schema)
-                    (map (fn [item]
-                           (if (:value item)
-                             item
-                             (let [item (keyword item)]
-                               {:value item
-                                :text  (if-let [item-loc (:item-loc-prefix schema)]
-                                         (path/loc [item-loc item])
-                                         (path/loc options item))}))))
-                    (sort-by :text))]
+         items (cond->> (map (fn [item]
+                               (if (:value item)
+                                 item
+                                 (let [item (keyword item)]
+                                   {:value item
+                                    :text  (if-let [item-loc (:item-loc-prefix schema)]
+                                             (path/loc [item-loc item])
+                                             (path/loc options item))})))
+                             (:items schema))
+                 (not (-> schema :sort? false? )) (sort-by :text))]
 
      (for [{:keys [value text]} items
            :let                 [item-id (path/unique-id "multi")

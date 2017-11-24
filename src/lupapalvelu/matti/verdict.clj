@@ -78,9 +78,6 @@
 (defn- kw-format [& xs]
   (keyword (apply format (map ss/->plain-string xs))))
 
-(def date-deltas [:julkipano :anto :valitus :lainvoimainen
-                  :aloitettava :voimassa])
-
 (defmethod initial-draft :r
   [{snapshot :published} application]
   {:data       (data-draft
@@ -97,11 +94,11 @@
                                [:foremen :plans :reviews])
                        (reduce (fn [acc kw]
                                  (assoc acc
-                                        kw  {:fn        #(when (some-> % kw :enabled)
+                                        kw  {:fn        #(when (util/includes-as-kw? (:verdict-dates %) kw)
                                                            "")
                                              :skip-nil? true}))
                                {}
-                               date-deltas)
+                               shared/verdict-dates)
                        (reduce (fn [acc k]
                                  (merge acc (map-unremoved-section (:data snapshot) k)))
                                {}
@@ -118,10 +115,7 @@
 
   :exclusions A map where each key matches a verdict dictionary
   key. Value is either true (dict is excluded) or another exclusions
-  map (for repeating).
-
-  :date-deltas A map with delta information (the units are taken from
-  the schema)."
+  map (for repeating)."
   template-category)
 
 (defmethod template-info :default [_] nil)
@@ -140,14 +134,14 @@
                                      [:vss-luokka :paloluokka])]
                               flatten
                               (remove nil?))
-        exclusions (-<>> [(remove #(get-in data [% :enabled])
-                                  date-deltas)
-                          (filter removed? [:conditions :appeal :statements
+        exclusions (-<>> [(filter removed? [:conditions :appeal :statements
                                             :collateral :rights :purpose])
                           (when (removed? :neighbors)
                             [:neighbors :neighbor-states])
                           (when (removed? :complexity)
-                            [:complexity :complexity-text])]
+                            [:complexity :complexity-text])
+                          (util/difference-as-kw shared/verdict-dates
+                                                 (:verdict-dates data))]
                          flatten
                          (remove nil?)
               (zipmap <> (repeat true))
@@ -155,12 +149,7 @@
                                                  (zipmap building-details
                                                          (repeat true))))
               not-empty)]
-    {:exclusions exclusions
-     :date-deltas (->> date-deltas
-                       (remove #(% exclusions))
-                       (reduce (fn [acc k]
-                                 (assoc acc k (get-in data [k :delta])))
-                               {}))}))
+    {:exclusions exclusions}))
 
 (defn new-verdict-draft [template-id {:keys [application organization created]
                                       :as   command}]
@@ -231,25 +220,27 @@
                                           {}
                                           changes)})))
 
-(defn update-automatic-verdict-dates [{:keys [category template verdict-data]}]
-  (let [datestring      (:verdict-date verdict-data)
-        template-schema shared/default-verdict-template
-        {:keys [exclusions date-deltas]} template
-        automatic?      (:automatic-verdict-dates verdict-data)]
+(defn update-automatic-verdict-dates [{:keys [category references verdict-data]}]
+  (let [datestring  (:verdict-date verdict-data)
+        dictionary  (-> shared/settings-schemas category :dictionary)
+        date-deltas (:date-deltas references)
+        automatic?  (:automatic-verdict-dates verdict-data)]
     (when (and automatic? (ss/not-blank? datestring))
-      (reduce (fn [acc kw]
-                (let [unit (-> template-schema :dictionary
-                               kw :date-delta :unit)]
-                  (assoc acc
-                         kw
-                         (date/parse-and-forward datestring
-                                                 ;; Delta could be empty.
-                                                 (or (util/->long (kw date-deltas)) 0)
-                                                 unit))))
-              {}
-              (remove #(% exclusions)
-                      [:julkipano :anto :valitus :lainvoimainen
-                       :aloitettava :voimassa])))))
+      (loop [dates      {}
+             [kw & kws] shared/verdict-dates
+             latest     datestring]
+        (if (nil? kw)
+          dates
+          (let [unit   (-> dictionary  kw :date-delta :unit)
+                result (date/parse-and-forward latest
+                                               ;; Delta could be empty.
+                                               (util/->long (kw date-deltas))
+                                               unit)]
+            (recur (assoc dates
+                          kw
+                          result)
+                   kws
+                   result)))))))
 
 ;; Additional changes to the verdict data.
 ;; Methods options include category, template, verdict-data, path and value.
@@ -321,6 +312,7 @@
                                   :value        value
                                   :verdict-data updated
                                   :template     template
+                                  :references   references
                                   :category     category}
                          changed (changes options)]
                      (verdict-changes-update command changed)

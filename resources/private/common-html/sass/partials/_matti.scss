@@ -222,24 +222,28 @@ div.matti-date-delta {
     white-space: nowrap;
     input.grid-style-input {
       max-width: 5em;
-      margin-left: 0.5em;
       margin-right: 0.2em;
     }
   }}
 
-.row.row--date-delta-title {
-  margin: 0;
-  padding-bottom: 0;
+.date-delta-plus {
+  padding-top: 30px;
+  padding-right: 20px;
+  text-align: center;
+  width: 100%;
+  > span {
+    font-size: 2em;
+  }
 }
 
 div.matti-template-list {
   .checkbox-wrapper {
     margin-top: $marginL;
+    margin-bottom: $marginL;
   }
   table.matti-templates-table {
     // No-row-hover mixin is defined in _tables.scss
     @include no-row-hover;
-    margin-top: $marginL;
   }
 
 }

@@ -18383,21 +18383,23 @@ div.matti-date-delta > div.delta-editor {
 
 div.matti-date-delta > div.delta-editor input.grid-style-input {
   max-width: 5em;
-  margin-left: 0.5em;
   margin-right: 0.2em;
 }
 
-.row.row--date-delta-title {
-  margin: 0;
-  padding-bottom: 0;
+.date-delta-plus {
+  padding-top: 30px;
+  padding-right: 20px;
+  text-align: center;
+  width: 100%;
+}
+
+.date-delta-plus > span {
+  font-size: 2em;
 }
 
 div.matti-template-list .checkbox-wrapper {
   margin-top: 24px;
-}
-
-div.matti-template-list table.matti-templates-table {
-  margin-top: 24px;
+  margin-bottom: 24px;
 }
 
 div.matti-template-list table.matti-templates-table tr:hover {

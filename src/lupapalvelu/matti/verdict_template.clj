@@ -112,9 +112,18 @@
        (remove :deleted)
        (map #(select-keys % [:id :name :type]))))
 
+(defn- pack-verdict-dates
+  "Since the date calculation is cumulative we always store every delta
+  into kw-delta map. Empty deltas are zeros."
+  [draft]
+  (->> shared/verdict-dates
+       (map (fn [k]
+              [k (-> draft k :delta schemas/parse-int)]))
+       (into {})))
+
 (defn- published-settings
   "The published settings only include lists without schema-ordained
-  structure. List items contain the localisations. In other words,
+  structure. Term liist items contain the localisations. In other words,
   subsequent localisation changes do not affect already published
   verdict templates."
   [organization category]
@@ -122,15 +131,20 @@
         {plan-ids   :plans
          review-ids :reviews
          :as        data}       (into {}
-                                      (for [[k v] draft]
+                                      (for [[k v] (select-keys draft
+                                                               [:plans
+                                                                :reviews
+                                                                :verdict-code
+                                                                :foremen])]
                                         [k (loop [v v]
                                              (if (map? v)
                                                (recur (-> v vals first))
                                                v))]))
         {:keys [plans reviews]} (:verdict-templates organization)]
     (assoc data
-           :plans   (pack-generics plan-ids plans)
-           :reviews (pack-generics review-ids reviews))))
+           :date-deltas (pack-verdict-dates draft)
+           :plans       (pack-generics plan-ids plans)
+           :reviews     (pack-generics review-ids reviews))))
 
 (defn save-draft-value
   "Error code on failure (see schemas for details)."
@@ -154,9 +168,9 @@
                      {$set {:verdict-templates.templates.$.published
                             {:published timestamp
                              :data      (:draft template)
-                             :settings (sc/validate schemas/MattiPublishedSettings
-                                                    (published-settings organization
-                                                                        (:category template)))}}})))
+                             :settings  (sc/validate schemas/MattiPublishedSettings
+                                                     (published-settings organization
+                                                                         (:category template)))}}})))
 
 (defn set-name [organization template-id timestamp name]
   (template-update organization

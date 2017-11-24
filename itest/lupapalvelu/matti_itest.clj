@@ -67,13 +67,32 @@
                :category "r")
         => (contains {:settings {:draft    {:verdict-code ["ehdollinen" "ei-puollettu"
                                                            "evatty" "hyvaksytty"]}
-                                 :modified modified}})))
-    (fact "Select three foremen"
-      (command sipoo :save-verdict-template-settings-value
-               :category :r
-               :path [:foremen]
-               :value [:vastaava-tj :iv-tj :erityis-tj])
-      => ok?)))
+                                 :modified modified}}))))
+  (fact "Select three foremen"
+    (command sipoo :save-verdict-template-settings-value
+             :category :r
+             :path [:foremen]
+             :value [:vastaava-tj :iv-tj :erityis-tj])
+    => ok?)
+  (facts "Verdict date deltas"
+    (letfn [(set-date-delta [k delta]
+              (fact {:midje/description (format "Set %s delta to %s" k delta)}
+                (command sipoo :save-verdict-template-settings-value
+                         :category :r
+                         :path [k :delta]
+                         :value delta) => ok?))]
+      (set-date-delta "julkipano" 1)
+      (set-date-delta "anto" 2)
+      (set-date-delta "valitus" 3)
+      (set-date-delta "lainvoimainen" 4)
+      (set-date-delta "aloitettava" 1) ;; years
+      (set-date-delta "voimassa" 2) ;; years
+      ))
+  (fact "Date delta validation"
+    (command sipoo :save-verdict-template-settings-value
+             :category :r
+             :path [:valitus :delta]
+             :value -8)=> (err :error.invalid-value)))
 
 (fact "Sipoo categories"
   (:categories (query sipoo :verdict-template-categories))
@@ -119,16 +138,12 @@
                             :name     "Uusi nimi"
                             :draft    {:giver "viranhaltija"}
                             :modified even-later}))
-            (fact "Enable anto date delta"
+            (fact "Enable every delta"
               (command sipoo :save-verdict-template-draft-value
                        :template-id id
-                       :path [:anto :enabled]
-                       :value true) => ok?)
-            (fact "Set anto date delta"
-              (command sipoo :save-verdict-template-draft-value
-                       :template-id id
-                       :path [:anto :delta]
-                       :value 2)=> ok?)
+                       :path [:verdict-dates]
+                       :value [:julkipano :anto :valitus :lainvoimainen
+                               :aloitettava :voimassa]) => ok?)
             (fact "vv-tj is not supported by settings"
               (command sipoo :save-verdict-template-draft-value
                        :template-id id
@@ -148,13 +163,13 @@
                              :value true) => ok?]
                 (fact "Fetch draft to see the compound items are OK"
                   (query sipoo :verdict-template :template-id id)
-                  => (contains {:id    id
-                                :name  "Uusi nimi"
-                                :draft {:giver            "viranhaltija"
-                                        :anto             {:enabled true
-                                                           :delta   2}
-                                        :removed-sections {:foremen true
-                                                           :plans   true}}
+                  => (contains {:id       id
+                                :name     "Uusi nimi"
+                                :draft    {:giver            "viranhaltija"
+                                           :verdict-dates ["julkipano" "anto" "valitus" "lainvoimainen"
+                                                           "aloitettava" "voimassa"]
+                                           :removed-sections {:foremen true
+                                                              :plans   true}}
                                 :modified last-edit}))
                 (fact "Publish template"
                   (let [{published :published} (publish-verdict-template sipoo id)]
@@ -202,8 +217,8 @@
                         copy-category => "r"
                         copy-name => "Uusi nimi (kopio)"
                         copy-draft => {:giver            "viranhaltija"
-                                       :anto             {:enabled true
-                                                          :delta   2}
+                                       :verdict-dates    ["julkipano" "anto" "valitus" "lainvoimainen"
+                                                          "aloitettava" "voimassa"]
                                        :removed-sections {:foremen true
                                                           :plans   true}}
                         (fact "Editing copy draft does not affect original"
@@ -215,8 +230,8 @@
                             (query sipoo :verdict-template
                                    :template-id copy-id)
                             => (contains {:draft {:giver            "viranhaltija"
-                                                  :anto             {:enabled true
-                                                                     :delta   2}
+                                                  :verdict-dates    ["julkipano" "anto" "valitus" "lainvoimainen"
+                                                                     "aloitettava" "voimassa"]
                                                   :removed-sections {:foremen true
                                                                      :plans   true}
                                                   :paatosteksti     "This is the verdict."}
@@ -229,8 +244,8 @@
                             (query sipoo :verdict-template
                                    :template-id id)
                             => (contains {:draft {:giver            "viranhaltija"
-                                                  :anto             {:enabled true
-                                                                     :delta   2}
+                                                  :verdict-dates    ["julkipano" "anto" "valitus" "lainvoimainen"
+                                                                     "aloitettava" "voimassa"]
                                                   :removed-sections {:foremen true
                                                                      :plans   true}}
                                           :name  "Uusi nimi"}))
@@ -255,16 +270,12 @@
   (let [{id :id} (init-verdict-template sipoo :r)]
     (command sipoo :save-verdict-template-draft-value
              :template-id id
-             :path [:julkipano :enabled]
-             :value "bad")=> (err :error.invalid-value)
+             :path [:verdict-dates]
+             :value ["bad"])=> (err :error.invalid-value)
     (command sipoo :save-verdict-template-draft-value
              :template-id id
              :path [:bad :path]
              :value false)=> (err :error.invalid-value-path)
-    (command sipoo :save-verdict-template-draft-value
-             :template-id id
-             :path [:valitus :delta]
-             :value -8) => (err :error.invalid-value)
     (command sipoo :save-verdict-template-draft-value
              :template-id id
              :path [:verdict-code]
@@ -595,15 +606,10 @@
         (command sipoo :set-verdict-template-name
                  :template-id template-id
                  :name "Full template") => ok?)
-      (facts "Enable and set all deltas"
-        (set-date-delta "julkipano" 1)
-        (set-date-delta "anto" 2)
-        (set-date-delta "valitus" 3)
-        (set-date-delta "lainvoimainen" 4)
-        (set-date-delta "aloitettava" 1) ;; years
-        (set-date-delta "voimassa" 2) ;; years
-        )
+
       (set-template-draft-values template-id
+                        :verdict-dates ["julkipano" "anto" "valitus" "lainvoimainen"
+                                        "aloitettava" "voimassa"]
                         "giver" :lautakunta
                         "verdict-code" :ehdollinen
                         "paatosteksti" "Verdict text."
@@ -682,16 +688,12 @@
                                                                   :error.invalid-value))
                                            (fact "No errors"
                                              errors => nil)))]
-              data => (contains {:voimassa         ""
-                                 :appeal           "Humble appeal."
-                                 :julkipano        ""
+              data => (contains { :appeal           "Humble appeal."
                                  :purpose          ""
                                  :verdict-text     "Verdict text."
                                  :anto             ""
                                  :giver            "lautakunta"
                                  :complexity       "medium"
-                                 :aloitettava      ""
-                                 :valitus          ""
                                  :foremen          ["iv-tj" "erityis-tj"]
                                  :verdict-code     "ehdollinen"
                                  :collateral       ""
@@ -701,7 +703,6 @@
                                  :foremen-included true
                                  :neighbors        ""
                                  :neighbor-states  []
-                                 :lainvoimainen    ""
                                  :reviews-included true
                                  :statements       ""})
               (fact "Building info is empty but contains the template fields"
@@ -740,22 +741,22 @@
                 (fact "Set automatic dates"
                   (check-changes (edit-verdict "automatic-verdict-dates" true)
                                  [[["julkipano"] "28.9.2017"]
-                                  [["anto"] "29.9.2017"]
-                                  [["valitus"] "2.10.2017"]
-                                  [["lainvoimainen"] "2.10.2017"]
-                                  [["aloitettava"] "27.9.2018"]
-                                  [["voimassa"] "27.9.2019"]]))
+                                  [["anto"] "2.10.2017"]
+                                  [["valitus"] "5.10.2017"]
+                                  [["lainvoimainen"] "9.10.2017"]
+                                  [["aloitettava"] "9.10.2018"]
+                                  [["voimassa"] "9.10.2020"]]))
                 (fact "Clearing the verdict date does not clear automatically calculated dates"
                   (edit-verdict "verdict-date" "")
                   => (contains {:changes []}))
                 (fact "Changing the verdict date recalculates others"
                   (check-changes (edit-verdict :verdict-date "6.10.2017")
                                  [[["julkipano"] "9.10.2017"]
-                                  [["anto"] "9.10.2017"]
-                                  [["valitus"] "9.10.2017"]
-                                  [["lainvoimainen"] "10.10.2017"]
-                                  [["aloitettava"] "8.10.2018"]
-                                  [["voimassa"] "7.10.2019"]])))
+                                  [["anto"] "11.10.2017"]
+                                  [["valitus"] "16.10.2017"]
+                                  [["lainvoimainen"] "20.10.2017"]
+                                  [["aloitettava"] "22.10.2018"]
+                                  [["voimassa"] "22.10.2020"]])))
               (facts "Verdict foremen"
                 (fact "vv-tj not in the template"
                   (check-error (edit-verdict :foremen ["vv-tj"]) :foremen))
@@ -926,10 +927,7 @@
                                          :path (map name (flatten [path]))
                                          :value value) => ok?))]
                       (fact "Disable julkipano, valitus, lainvoimainen and aloitettava"
-                        (edit-template [:julkipano :enabled] false)
-                        (edit-template [:valitus :enabled] false)
-                        (edit-template [:lainvoimainen :enabled] false)
-                        (edit-template [:aloitettava :enabled] false))
+                        (edit-template [:verdict-dates] ["anto" "voimassa"]))
                       (fact "Remove all the other sections except buildings (and verdict)"
                         (edit-template [:removed-sections :foremen] true)
                         (edit-template [:removed-sections :plans] true)
@@ -982,9 +980,10 @@
                                                 :paloluokka    ""}}}
                       (facts "Cannot edit verdict values not in the template"
                         (let [check-fn (fn [kwp value]
-                                         (check-error (edit-verdict (util/split-kw-path kwp)
-                                                                    value)
-                                                      kwp :error.invalid-value-path))]
+                                         (fact {:midje/description (str "Bad path " kwp)}
+                                           (check-error (edit-verdict (util/split-kw-path kwp)
+                                                                      value)
+                                                        kwp :error.invalid-value-path)))]
                           (check-fn :julkipano "29.9.2017")
                           (check-fn :buildings.vss-luokka "12")
                           (check-fn :buildings.kiinteiston-autopaikat 34)))

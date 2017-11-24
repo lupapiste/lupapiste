@@ -34,16 +34,19 @@
 
 (rum/defc verdict-template-publish < rum/reactive
   [{info* :info}]
-  [:div [:span.row-text.row-text--margin
-         (if-let [published (path/react [:published] info*)]
-           (common/loc :matti.last-published
-                       (js/util.finnishDateAndTime published))
-           (common/loc :matti.template-not-published))]
-   [:button.ghost
-    {:disabled (not (state/auth? :publish-verdict-template))
-     :on-click #(service/publish-template (path/value [:id] info*)
-                                          (common/response->state info* :published))}
-        (common/loc :matti.publish)]])
+  (let [published (path/react [:published] info*)]
+    [:div [:span.row-text.row-text--margin
+           (if published
+             (common/loc :matti.last-published
+                         (js/util.finnishDateAndTime published))
+             (common/loc :matti.template-not-published))]
+     [:button.ghost
+      {:disabled (or (not (state/auth? :publish-verdict-template))
+                     (> published
+                        (path/react [:modified] info*)))
+       :on-click #(service/publish-template (path/value [:id] info*)
+                                            (common/response->state info* :published))}
+      (common/loc :matti.publish)]]))
 
 
 (defn reset-template [{draft :draft :as template}]
