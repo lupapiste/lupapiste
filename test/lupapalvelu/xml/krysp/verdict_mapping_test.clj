@@ -9,12 +9,28 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.validator :as validator]))
 
-(def xml (:xml (permit/verdict-krysp-mapper application-rakennuslupa verdict {} "fi" "2.2.2" "BEGIN_OF_LINK")))
-(def xml_s (data-xml/indent-str xml))
+(def app (assoc application-rakennuslupa :attachments [{:id "11"
+                                                        :type {:type-id "paatosote" :type-group "paatoksenteko"}
+                                                        :latestVersion {:fileId "12" :filename "liite.txt"}
+                                                        :target {:type "verdict" :id (:id verdict)}}
+                                                       {:id "21"
+                                                        :type {:type-id "muu" :type-group "muut"}
+                                                        :latestVersion {:fileId "22" :filename "muu_liite.txt"}}
+                                                       {:id "31"
+                                                        :type {:type-id "paatosote" :type-group "paatoksenteko"}
+                                                        :latestVersion {:fileId "32" :filename "eri_paatoksen_liite.txt"}
+                                                        :target {:type "verdict" :id (str (:id verdict) "_eri")}}]))
+
+(def result (permit/verdict-krysp-mapper app verdict {} "fi" "2.2.2" "BEGIN_OF_LINK/") )
+
+(def attachments (:attachments result))
+
+(def xml_s (data-xml/indent-str (:xml result)))
+
 (def lp-xml (cr/strip-xml-namespaces (xml/parse xml_s)))
 
 (facts verdict-krysp-mapper
-  (fact "2.2.2: xml exist" xml => truthy)
+  (fact "2.2.2: xml exist" (:xml result) => truthy)
 
   (fact (validator/validate xml_s :R "2.2.2") => nil)
 
@@ -94,4 +110,17 @@
       (xml/get-text lp-xml [:paatostieto :poytakirja :paatospvm]) => "2017-11-23")
 
     (fact "pykala"
-      (xml/get-text lp-xml [:paatostieto :poytakirja :pykala]) => "99")))
+      (xml/get-text lp-xml [:paatostieto :poytakirja :pykala]) => "99"))
+
+  (facts "liitetieto"
+    (facts "attachment with verdict target is returned"
+      attachments => [{:fileId "12", :filename "12_liite.txt"}])
+
+    (fact "single attachment incuded in xml"
+      (count (xml/select lp-xml :liitetieto :Liite)) => 1)
+
+    (fact "kuvaus"
+      (xml/get-text lp-xml [:liitetieto :kuvaus]) => "P\u00e4\u00e4t\u00f6sote")
+
+    (fact "linkkiliitteeseen"
+      (xml/get-text lp-xml [:liitetieto :linkkiliitteeseen]) => "BEGIN_OF_LINK/12_liite.txt")))

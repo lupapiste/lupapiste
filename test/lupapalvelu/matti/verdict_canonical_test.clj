@@ -3,7 +3,8 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.matti.verdict-canonical :refer :all]))
 
-(def verdict {:data {:voimassa "23.11.2023"
+(def verdict {:id "1a156dd40e40adc8ee064463"
+              :data {:voimassa "23.11.2023"
                      :appeal "muutoksenhakuohje - teksti"
                      :julkipano "24.11.2017"
                      :bulletin-op-description "julkipano - teksti"
