@@ -25,6 +25,12 @@
       [:div.spacerL
        [:pre.wrapped_text (-> bulletin :verdictData :text)]]]]))
 
+(defn- kv-pair [label value]
+  (when value
+    [:div.key-value-pair
+     {:style {:width "80%"}}
+     [:label (common/loc label)]
+     [:span.value value]]))
 
 (rum/defc detailed-verdict-data [bulletin]
   (when-let [verdict (first (:verdicts bulletin))]
@@ -49,7 +55,16 @@
          [:span.value  (common/format-timestamp (:appealPeriodEndsAt bulletin))]]]
        [:div.spacerL
         [:h4 (common/loc :verdict.lupamaaraukset)]
-        [:div.accordion-content-part.spacerM 11]
+        [:div.accordion-content-part.spacerM
+         (kv-pair :verdict.autopaikkojaEnintaan (-> paatos :lupamaaraykset :autopaikkojaEnintaan))
+         (kv-pair :verdict.autopaikkojaVahintaan (-> paatos :lupamaaraykset :autopaikkojaVahintaan))
+         (kv-pair :verdict.autopaikkojaRakennettava (-> paatos :lupamaaraykset :autopaikkojaRakennettava))
+         (kv-pair :verdict.autopaikkojaRakennettu (-> paatos :lupamaaraykset :autopaikkojaRakennettu))
+         (kv-pair :verdict.autopaikkojaKiinteistolla (-> paatos :lupamaaraykset :autopaikkojaKiinteistolla))
+         (kv-pair :verdict.autopaikkojaUlkopuolella (-> paatos :lupamaaraykset :autopaikkojaUlkopuolella))
+         (kv-pair :verdict.kerrosala (-> paatos :lupamaaraykset :kerrosala))
+         (kv-pair :verdict.vaaditutTyonjohtajat (-> paatos :lupamaaraykset :vaaditutTyonjohtajat))
+         (kv-pair :verdict.vaaditutErityissuunnitelmat (clojure.string/join ", " (-> paatos :lupamaaraykset :vaaditutErityissuunnitelmat)))]
         [:h4 (common/loc :verdict.poytakirjat)]
         [:div.accordion-content-part.spacerM 1234]
         [:h4 (common/loc :application.attachments.paapiirustus)]
