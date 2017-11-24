@@ -231,7 +231,7 @@
    :states     krysp-enrichment-states
    :pre-checks [app/validate-authority-in-drafts]}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
-  (let [{url :url credentials :credentials} (org/get-krysp-wfs application)
+  (let [{url :url credentials :credentials} (org/get-building-wfs application)
         clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))]
     (if (or clear-ids? url)
       (let [document     (doc-persistence/by-id application collection documentId)
@@ -283,7 +283,7 @@
    :states     states/all-application-states
    :pre-checks [app/validate-authority-in-drafts]}
   [{{:keys [organization municipality propertyId] :as application} :application}]
-  (if-let [{url :url credentials :credentials} (org/get-krysp-wfs application)]
+  (if-let [{url :url credentials :credentials} (org/get-building-wfs application)]
     (ok :data (building-reader/building-info-list url credentials propertyId))
     (ok)))
 

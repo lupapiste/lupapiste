@@ -10,6 +10,7 @@
            [org.opengis.feature.simple SimpleFeature])
 
   (:require [cheshire.core :as json]
+            [clojure.set :as set]
             [clojure.walk :refer [keywordize-keys]]
             [lupapalvelu.attachment.stamp-schema :as stmp]
             [lupapalvelu.geojson :as geo]
@@ -162,6 +163,7 @@
 (sc/defschema KryspConf
   {(sc/optional-key :ftpUser) (sc/maybe sc/Str)
    (sc/optional-key :url) sc/Str
+   (sc/optional-key :buildingUrl) sc/Str
    (sc/optional-key :username) sc/Str
    (sc/optional-key :password) sc/Str
    (sc/optional-key :crypto-iv) sc/Str
@@ -324,21 +326,43 @@
     [username (decode-credentials password crypto-iv)]))
 
 (defn resolve-krysp-wfs
-  "Returns a map containing :url and :version information for municipality's KRYSP WFS"
+  "Returns a map containing information for municipality's KRYSP WFS.
+  url-key defines which URL type is of interest (eg :url or :buildingUrl)"
   ([organization permit-type]
+   (resolve-krysp-wfs :url organization permit-type))
+  ([url-key organization permit-type]
    (let [krysp-config (get-in organization [:krysp (keyword permit-type)])
          creds        (get-credentials krysp-config)]
-     (when-not (ss/blank? (:url krysp-config))
+     (when-not (ss/blank? (get krysp-config url-key))
        (->> (when (first creds) {:credentials creds})
-            (merge (select-keys krysp-config [:url :version])))))))
+            (merge (select-keys krysp-config [url-key :version])))))))
+
+(defn resolve-building-wfs
+  "Resolve :buildingUrl and associated data from organization.
+  Renames :buildingUrl to :url before returning a map."
+  [organization permit-type]
+  (set/rename-keys
+    (resolve-krysp-wfs :buildingUrl organization permit-type)
+    {:buildingUrl :url}))
 
 (defn get-krysp-wfs
   "Returns a map containing :url and :version information for municipality's KRYSP WFS"
-  ([{:keys [organization permitType] :as application}]
+  ([{:keys [organization permitType]}]
     (get-krysp-wfs {:_id organization} permitType))
   ([query permit-type]
    (-> (mongo/select-one :organizations query [:krysp])
        (resolve-krysp-wfs permit-type))))
+
+(defn get-building-wfs
+  "Resolves building WFS url for organization.
+  Looks for :buildingUrl in organization and fallbacks to :url if not found.
+  NOTE: converts :buildingUrl to :url for convenience."
+  ([{:keys [organization permitType]}]
+   (get-building-wfs {:_id organization} permitType))
+  ([query permit-type]
+   (when-some [org (mongo/select-one :organizations query [:krysp])]
+     (or (resolve-building-wfs org permit-type)
+         (resolve-krysp-wfs org permit-type)))))
 
 (defn municipality-address-endpoint [^String municipality]
   {:pre [(or (string? municipality) (nil? municipality))]}
