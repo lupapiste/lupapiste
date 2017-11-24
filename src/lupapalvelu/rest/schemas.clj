@@ -160,8 +160,8 @@
 (sc/defschema ApplicationId
   (field sc/Str "LP-tunnus"))
 
-(sc/defschema DocumentId
-  (field ssc/ObjectIdStr "Dokumentin tunnus"))
+(sc/defschema OperationId
+  (field ssc/ObjectIdStr "Toimenpiteen tunnus"))
 
-(sc/defschema VtjPrt
+(sc/defschema NationalBuildingId
   (field ssc/Rakennustunnus "Pysyv\u00e4 rakennustunnus"))
