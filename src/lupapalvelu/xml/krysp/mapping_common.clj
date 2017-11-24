@@ -667,7 +667,7 @@
    {:tag :liite :ns "yht"
     :child liite-children_216}])
 
-(def paatokset_218 {:tag :Paatos
+(def paatokset_218 {:tag :Paatos :ns "yht"
                     :child [{:tag :lupamaaraykset :ns "yht"
                              :child lupamaaraykset_218}
                             {:tag :paivamaarat :ns "yht"
