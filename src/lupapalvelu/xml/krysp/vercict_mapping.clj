@@ -9,7 +9,7 @@
 
 (def kayttotapaus "Uusi paatos")
 
-(defmethod permit/verdict-krysp-mapper :R [application user verdict lang krysp-version begin-of-link]
+(defmethod permit/verdict-krysp-mapper :R [application verdict user lang krysp-version begin-of-link]
   (let [attachments-canonical (att-canonical/get-attachments-as-canonical application begin-of-link (comp #{(:id verdict)} :id :target))]
 
     {:attachments (mapping-common/attachment-details-from-canonical attachments-canonical)
