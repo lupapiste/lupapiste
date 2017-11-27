@@ -1,4 +1,4 @@
-(ns lupapalvelu.integrations.matti
+(ns lupapalvelu.integrations.pate
   (:require [taoensso.timbre :refer [infof]]
             [schema.core :as sc]
             [clj-http.client :as clj-http]
@@ -119,7 +119,7 @@
             msg (util/assoc-when
                   {:id message-id :direction "out"
                    :status "published" :messageType "state-change"
-                   :partner "matti" :format "json" :transferType "http"
+                   :partner "pate" :format "json" :transferType "http"
                    :created (or (:created command) (now))
                    :application (-> (select-keys app [:id :organization])
                                     (assoc :state (name new-state)))
@@ -127,13 +127,13 @@
                    :data outgoing-data}
                   :action (:action command))]
         (messages/save msg)
-        (infof "MATTI state-change payload written to mongo for state '%s', messageId: %s" (name new-state) message-id)
-        (when-let [url (env/value :matti :rest :url)]         ; TODO send to MQ
-          (http/post (str url "/" (env/value :matti :rest :path :state-change))
-                     {:headers          {"X-Username" (env/value :matti :rest :username)
-                                         "X-Password" (env/value :matti :rest :password)
-                                         "X-Vault"    (env/value :matti :rest :vault)}
+        (infof "PATE state-change payload written to mongo for state '%s', messageId: %s" (name new-state) message-id)
+        (when-let [url (env/value :pate :rest :url)]         ; TODO send to MQ
+          (http/post (str url "/" (env/value :pate :rest :path :state-change))
+                     {:headers          {"X-Username" (env/value :pate :rest :username)
+                                         "X-Password" (env/value :pate :rest :password)
+                                         "X-Vault"    (env/value :pate :rest :vault)}
                       :body             (clj-http/json-encode outgoing-data)
                       :throw-exceptions true})
           (messages/mark-acknowledged-and-return message-id (now))
-          (infof "MATTI JSON sent to state-change endpoint successfully"))))))
+          (infof "PATE JSON sent to state-change endpoint successfully"))))))
