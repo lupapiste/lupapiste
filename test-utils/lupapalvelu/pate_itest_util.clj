@@ -1,4 +1,4 @@
-(ns lupapalvelu.matti-itest-util
+(ns lupapalvelu.pate-itest-util
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]))
 
