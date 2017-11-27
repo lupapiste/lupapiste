@@ -1,6 +1,6 @@
-(ns lupapalvelu.matti.phrases
-  (:require [lupapalvelu.matti.shared :as shared]
-            [lupapalvelu.matti.verdict-template :as template]
+(ns lupapalvelu.pate.phrases
+  (:require [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
