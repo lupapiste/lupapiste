@@ -1,7 +1,8 @@
 (ns lupapalvelu.ui.bulletins.bulletin-verdict-data
   (:require [rum.core :as rum]
             [lupapalvelu.ui.common :as common]
-            [lupapalvelu.ui.util :as util]))
+            [lupapalvelu.ui.util :as util]
+            [lupapalvelu.ui.rum-util :as rum-util]))
 
 (rum/defc verdict-data [bulletin]
   (when bulletin
@@ -53,18 +54,44 @@
          {:style {:width "80%"}}
          [:label (common/loc :verdict.muutoksenhaku.paattyy)]
          [:span.value  (common/format-timestamp (:appealPeriodEndsAt bulletin))]]]
+       (when-let [maaraykset (:lupamaaraykset paatos)]
+         [:div.spacerL
+          [:h4 (common/loc :verdict.lupamaaraukset)]
+          [:div.accordion-content-part.spacerM
+           (kv-pair :verdict.autopaikkojaEnintaan (:autopaikkojaEnintaan maaraykset))
+           (kv-pair :verdict.autopaikkojaVahintaan (:autopaikkojaVahintaan maaraykset))
+           (kv-pair :verdict.autopaikkojaRakennettava (:autopaikkojaRakennettava maaraykset))
+           (kv-pair :verdict.autopaikkojaRakennettu (:autopaikkojaRakennettu maaraykset))
+           (kv-pair :verdict.autopaikkojaKiinteistolla (:autopaikkojaKiinteistolla maaraykset))
+           (kv-pair :verdict.autopaikkojaUlkopuolella (:autopaikkojaUlkopuolella maaraykset))
+           (kv-pair :verdict.kerrosala (:kerrosala maaraykset))
+           (kv-pair :verdict.vaaditutTyonjohtajat (:vaaditutTyonjohtajat maaraykset))
+           (kv-pair :verdict.vaaditutErityissuunnitelmat (clojure.string/join ", " (:vaaditutErityissuunnitelmat maaraykset)))]
+          (when (seq (:muutMaaraykset maaraykset))
+            [:div
+             [:h5 (common/loc :verdict.muutMaaraykset)]
+             [:div.accordion-content-part.spacerM
+              [:ul
+               (rum-util/map-with-key #([:li %]) (:muutMaaraykset maaraykset))]]])
+          (when (seq (:vaaditutKatselmukset maaraykset))
+            [:div
+             [:h5 (common/loc :verdict.vaaditutKatselmukset)]
+             [:div.accordion-content-part.spacerM
+              [:ul
+               (for [[idx k] (sade.shared-util/indexed (:vaaditutKatselmukset maaraykset))]
+                 ^{:key (str "katselmus-" idx)}
+                 [:li
+                  (if (:tarkastuksenTaiKatselmuksenNimi k)
+                    (:tarkastuksenTaiKatselmuksenNimi k)
+                    (common/loc (str :task-katselmus.katselmuksenLaji "." (:katselmuksenLaji k))))])]]])
+          (when (seq (:maaraykset maaraykset))
+            [:div
+             [:h5 (common/loc :verdict.maaraykset)]
+             [:ul
+              (for [[idx m] (sade.shared-util/indexed (:maaraykset maaraykset))]
+                ^{:key (str "maaraysrivi-" idx)}
+                [:li (:sisalto m)])]])])
        [:div.spacerL
-        [:h4 (common/loc :verdict.lupamaaraukset)]
-        [:div.accordion-content-part.spacerM
-         (kv-pair :verdict.autopaikkojaEnintaan (-> paatos :lupamaaraykset :autopaikkojaEnintaan))
-         (kv-pair :verdict.autopaikkojaVahintaan (-> paatos :lupamaaraykset :autopaikkojaVahintaan))
-         (kv-pair :verdict.autopaikkojaRakennettava (-> paatos :lupamaaraykset :autopaikkojaRakennettava))
-         (kv-pair :verdict.autopaikkojaRakennettu (-> paatos :lupamaaraykset :autopaikkojaRakennettu))
-         (kv-pair :verdict.autopaikkojaKiinteistolla (-> paatos :lupamaaraykset :autopaikkojaKiinteistolla))
-         (kv-pair :verdict.autopaikkojaUlkopuolella (-> paatos :lupamaaraykset :autopaikkojaUlkopuolella))
-         (kv-pair :verdict.kerrosala (-> paatos :lupamaaraykset :kerrosala))
-         (kv-pair :verdict.vaaditutTyonjohtajat (-> paatos :lupamaaraykset :vaaditutTyonjohtajat))
-         (kv-pair :verdict.vaaditutErityissuunnitelmat (clojure.string/join ", " (-> paatos :lupamaaraykset :vaaditutErityissuunnitelmat)))]
         [:h4 (common/loc :verdict.poytakirjat)]
         [:div.accordion-content-part.spacerM 1234]
         [:h4 (common/loc :application.attachments.paapiirustus)]
