@@ -479,7 +479,7 @@
 
 (defquery current-configuration
   {:description "Returns current configuration values for specified keys"
-   :feature :matti-json
+   :feature :pate-json
    :user-roles #{:anonymous}}
   [_]
   (letfn [(key-display-name-mapper-with-loc-prefix [loc-prefix value]

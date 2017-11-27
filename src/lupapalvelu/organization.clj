@@ -16,7 +16,7 @@
             [lupapalvelu.geojson :as geo]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.integrations.messages :as messages]
-            [lupapalvelu.matti.schemas :refer [MattiSavedVerdictTemplates Phrase]]
+            [lupapalvelu.pate.schemas :refer [PateSavedVerdictTemplates Phrase]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.wfs :as wfs]
@@ -142,7 +142,7 @@
 
 (def permit-types (map keyword (keys (permit/permit-types))))
 
-(def backend-systems #{:facta :kuntanet :louhi :locus :keywinkki :iris :matti})
+(def backend-systems #{:facta :kuntanet :louhi :locus :keywinkki :iris :pate})
 
 (sc/defschema AuthTypeEnum (sc/enum "basic" "x-header"))
 
@@ -234,10 +234,10 @@
    (sc/optional-key :assignment-triggers) [AssignmentTrigger]
    (sc/optional-key :stamps) [stmp/StampTemplate]
    (sc/optional-key :docstore-info) DocStoreInfo
-   (sc/optional-key :verdict-templates) MattiSavedVerdictTemplates
+   (sc/optional-key :verdict-templates) PateSavedVerdictTemplates
    (sc/optional-key :phrases) [Phrase]
    (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}
-   (sc/optional-key :matti-enabled)                 sc/Bool
+   (sc/optional-key :pate-enabled)                 sc/Bool
    (sc/optional-key :multiple-operations-supported) sc/Bool
    (sc/optional-key :local-bulletins-page-settings) {:texts (i18n/lenient-localization-schema {:heading1 sc/Str
                                                                                                :heading2 sc/Str
@@ -303,8 +303,8 @@
 (defn allowed-ip? [ip organization-id]
   (pos? (mongo/count :organizations {:_id organization-id, $and [{:allowedAutologinIPs {$exists true}} {:allowedAutologinIPs ip}]})))
 
-(defn matti-org? [org-id]
-  (pos? (mongo/count :organizations {:_id org-id :matti-enabled true})))
+(defn pate-org? [org-id]
+  (pos? (mongo/count :organizations {:_id org-id :pate-enabled true})))
 
 (defn encode-credentials
   [username password]

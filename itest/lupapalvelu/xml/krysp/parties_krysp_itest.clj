@@ -175,7 +175,7 @@
             (fact "Post3 in KRSYP message"
               (count second-designer-elements) => 1
               (xml/get-text (first second-designer-elements) [:henkilo :etunimi]) => "Post3"))
-          (command admin :set-kuntagml-http-endpoint :partner "matti"
+          (command admin :set-kuntagml-http-endpoint :partner "pate"
                    :url (str (server-address) "/dev/krysp/receiver") :organization "753-R" :permitType "R"
                    :username "kuntagml" :password "kryspi") => ok?
           (command sonja :parties-as-krysp :id application-id :lang "fi") => (partial expected-failure? :error.integration.krysp-http)

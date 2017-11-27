@@ -11,7 +11,7 @@
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.integrations.matti :as matti]
+            [lupapalvelu.integrations.pate :as pate]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.neighbors-api :as neighbors]
@@ -533,7 +533,7 @@
 (defn- fetch-reviews-for-organization
   [eraajo-user created {org-krysp :krysp :as organization} permit-types applications {:keys [overwrite-background-reviews?]}]
   (let [fields [:address :primaryOperation :permitSubtype :history :municipality :state :permitType :organization :tasks :verdicts :modified]
-        projection (cond-> (distinct (concat fields matti/base-keys))
+        projection (cond-> (distinct (concat fields pate/base-keys))
                      overwrite-background-reviews? (conj :attachments))
         permit-types (remove (fn-> keyword org-krysp :url ss/blank?) permit-types)
         grouped-apps (if (seq applications)
