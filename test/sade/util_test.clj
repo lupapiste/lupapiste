@@ -497,13 +497,13 @@
 (facts "difference-as-kw"
   (fact "s and kw"
     (difference-as-kw ["yi" :er "san"] '(:yi "er" :si) ["liu" :yi :er])
-    => #{:san})
+    => [:san])
   (fact "empty"
     (difference-as-kw ["yi" :er "san"] '(:yi "er" :si) ["san"])
-    => #{})
+    => [])
   (fact "nil safe"
     (difference-as-kw ["yi" :er "san"] '(:yi "er" :si) ["liu"] nil nil)
-    => #{:san}))
+    => [:san]))
 
 (facts get-in-tree
   (fact "single level"
