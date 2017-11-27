@@ -1,15 +1,15 @@
-(ns lupapalvelu.ui.matti.verdict-templates
-  (:require [lupapalvelu.matti.shared :as shared]
+(ns lupapalvelu.ui.pate.verdict-templates
+  (:require [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
-            [lupapalvelu.ui.matti.components :as matti-components]
-            [lupapalvelu.ui.matti.layout :as layout]
-            [lupapalvelu.ui.matti.path :as path]
-            [lupapalvelu.ui.matti.phrases :as phrases]
-            [lupapalvelu.ui.matti.sections :as sections]
-            [lupapalvelu.ui.matti.service :as service]
-            [lupapalvelu.ui.matti.settings :as settings]
-            [lupapalvelu.ui.matti.state :as state]
+            [lupapalvelu.ui.pate.components :as pate-components]
+            [lupapalvelu.ui.pate.layout :as layout]
+            [lupapalvelu.ui.pate.path :as path]
+            [lupapalvelu.ui.pate.phrases :as phrases]
+            [lupapalvelu.ui.pate.sections :as sections]
+            [lupapalvelu.ui.pate.service :as service]
+            [lupapalvelu.ui.pate.settings :as settings]
+            [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]))
 
 
@@ -37,16 +37,16 @@
   (let [published (path/react [:published] info*)]
     [:div [:span.row-text.row-text--margin
            (if published
-             (common/loc :matti.last-published
+             (common/loc :pate.last-published
                          (js/util.finnishDateAndTime published))
-             (common/loc :matti.template-not-published))]
+             (common/loc :pate.template-not-published))]
      [:button.ghost
       {:disabled (or (not (state/auth? :publish-verdict-template))
                      (> published
                         (path/react [:modified] info*)))
        :on-click #(service/publish-template (path/value [:id] info*)
                                             (common/response->state info* :published))}
-      (common/loc :matti.publish)]]))
+      (common/loc :pate.publish)]]))
 
 
 (defn reset-template [{draft :draft :as template}]
@@ -70,17 +70,17 @@
 (defn verdict-template
   [{:keys [schema state] :as options}]
   [:div.verdict-template
-   [:div.matti-grid-2
+   [:div.pate-grid-2
     [:div.row.row--tight
      [:div.col-1
       [:span.row-text.header
-       (common/loc "matti.edit-verdict-template")
+       (common/loc "pate.edit-verdict-template")
        (verdict-template-name options)]]
      [:div.col-1.col--right
       (verdict-template-publish options)]]
     [:div.row.row--tight
      [:div.col-2.col--right
-      (matti-components/last-saved options)]]]
+      (pate-components/last-saved options)]]]
    (sections/sections options :verdict-template)])
 
 (defn new-template [options]
@@ -89,7 +89,7 @@
 (defn toggle-delete [id deleted]
   [:button.primary.outline
    {:on-click #(service/toggle-delete-template id (not deleted) identity)}
-   (common/loc (if deleted :matti-restore :remove))])
+   (common/loc (if deleted :pate-restore :remove))])
 
 (defn set-category [category]
   (reset! state/current-category category)
@@ -98,7 +98,7 @@
 
 (rum/defc category-select < rum/reactive
   []
-  [:div.matti-grid-6
+  [:div.pate-grid-6
    [:div.row
     [:div.col-2.col--full
      [:select.dropdown
@@ -107,7 +107,7 @@
       (->> (rum/react state/categories)
            (map (fn [cid]
                   {:value cid
-                   :text (common/loc (str "matti-" cid))}))
+                   :text (common/loc (str "pate-" cid))}))
            (sort-by :text)
            (map (fn [{:keys [value text]}]
                   [:option {:key value :value value} text])))]]
@@ -122,8 +122,8 @@
   (let [templates (filter #(= (rum/react state/current-category)
                               (:category %))
                           (rum/react state/template-list))]
-    [:div.matti-template-list
-     [:h2 (common/loc "matti.verdict-templates")]
+    [:div.pate-template-list
+     [:h2 (common/loc "pate.verdict-templates")]
      (category-select)
      (when (some :deleted templates)
        [:div.checkbox-wrapper
@@ -138,11 +138,11 @@
                       templates
                       (remove :deleted templates))]
        (when (seq filtered)
-         [:table.matti-templates-table
+         [:table.pate-templates-table
           [:thead
            [:tr
-            [:th (common/loc "matti-verdict-template")]
-            [:th (common/loc "matti-verdict-template.published")]
+            [:th (common/loc "pate-verdict-template")]
+            [:th (common/loc "pate-verdict-template.published")]
             [:th]]]
           [:tbody
            (for [{:keys [id name published deleted]} filtered]
@@ -153,19 +153,19 @@
                       name])]
               [:td (js/util.finnishDate published)]
               [:td
-               [:div.matti-buttons
+               [:div.pate-buttons
                 (when-not deleted
                   [:button.primary.outline
                    {:on-click #(service/fetch-template id reset-template)}
                    (common/loc "edit")])
                 [:button.primary.outline
                  {:on-click #(service/copy-template id reset-template)}
-                 (common/loc "matti.copy")]
+                 (common/loc "pate.copy")]
                 (toggle-delete id deleted)]]])]]))
      [:button.positive
       {:on-click #(service/new-template @state/current-category new-template)}
       [:i.lupicon-circle-plus]
-      [:span (common/loc :matti.add-verdict-template)]]]))
+      [:span (common/loc :pate.add-verdict-template)]]]))
 
 (rum/defc verdict-templates < rum/reactive
   []
@@ -201,12 +201,12 @@
 (defonce args (atom {}))
 
 (defn mount-component []
-  (when (common/feature? :matti)
+  (when (common/feature? :pate)
     (rum/mount (verdict-templates)
                (.getElementById js/document (:dom-id @args)))))
 
 (defn ^:export start [domId]
-  (when (common/feature? :matti)
+  (when (common/feature? :pate)
     (swap! args assoc
            :dom-id (name domId))
     (reset! state/auth-fn lupapisteApp.models.globalAuthModel.ok)
