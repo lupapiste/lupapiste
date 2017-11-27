@@ -1,4 +1,4 @@
-(ns lupapalvelu.ui.matti.state
+(ns lupapalvelu.ui.pate.state
   (:require [rum.core :as rum]))
 
 (defonce state* (atom {}))
