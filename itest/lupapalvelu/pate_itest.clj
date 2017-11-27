@@ -1,7 +1,7 @@
-(ns lupapalvelu.matti-itest
+(ns lupapalvelu.pate-itest
   (:require [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.matti-itest-util :refer :all]
+            [lupapalvelu.pate-itest-util :refer :all]
             [midje.sweet :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]))
@@ -20,20 +20,20 @@
 (defn prefix-keys [m prefix]
   (mangle-keys m (util/fn->> name (str (name prefix)) keyword)))
 
-(defn toggle-sipoo-matti [flag]
-  (fact {:midje/description (str "Sipoo Matti: " flag)}
+(defn toggle-sipoo-pate [flag]
+  (fact {:midje/description (str "Sipoo Pate: " flag)}
     (command admin :set-organization-boolean-path
              :organizationId "753-R"
-             :path "matti-enabled"
+             :path "pate-enabled"
              :value flag) => ok?))
 
-(facts "Matti enabled"
-  (fact "Disable Matti in Sipoo"
-    (toggle-sipoo-matti false)
-    (query sipoo :matti-enabled) => (err :error.matti-disabled))
-  (fact "Enable Matti in Sipoo"
-    (toggle-sipoo-matti true)
-    (query sipoo :matti-enabled) => ok?))
+(facts "Pate enabled"
+  (fact "Disable Pate in Sipoo"
+    (toggle-sipoo-pate false)
+    (query sipoo :pate-enabled) => (err :error.pate-disabled))
+  (fact "Enable Pate in Sipoo"
+    (toggle-sipoo-pate true)
+    (query sipoo :pate-enabled) => ok?))
 
 (facts "Settings"
   (fact "Bad category"
@@ -630,37 +630,37 @@
                                                                   :propertyId sipoo-property-id
                                                                   :operation  :sisatila-muutos)
               verdict-fn-factory   (fn [verdict-id]
-                                     {:open #(query sonja :matti-verdict :id app-id
+                                     {:open #(query sonja :pate-verdict :id app-id
                                                     :verdict-id verdict-id)
-                                      :edit #(command sonja :edit-matti-verdict :id app-id
+                                      :edit #(command sonja :edit-pate-verdict :id app-id
                                                       :verdict-id verdict-id
                                                       :path (map name (flatten [%1]))
                                                       :value %2)})]
           (fact "Error: unpublished template-id for verdict draft"
-            (command sonja :new-matti-verdict-draft :id app-id :template-id template-id)
+            (command sonja :new-pate-verdict-draft :id app-id :template-id template-id)
             => fail?)
           (fact "Publish Full template"
             (publish-verdict-template sipoo template-id)
             => ok?)
           (fact "Pena cannot create verdict"
-            (command pena :new-matti-verdict-draft :id app-id :template-id template-id)
+            (command pena :new-pate-verdict-draft :id app-id :template-id template-id)
             => (err :error.unauthorized))
           (fact "Error: bad template-id for verdict draft"
-            (command sonja :new-matti-verdict-draft :id app-id :template-id "bad")
+            (command sonja :new-pate-verdict-draft :id app-id :template-id "bad")
             => fail?)
-          (fact "Error: Matti disabled in Sipoo"
-            (toggle-sipoo-matti false)
-            (command sonja :new-matti-verdict-draft
+          (fact "Error: Pate disabled in Sipoo"
+            (toggle-sipoo-pate false)
+            (command sonja :new-pate-verdict-draft
                      :id app-id :template-id template-id)
-            => (err :error.matti-disabled))
-          (fact "Matti verdict tab pseudo query fails"
-            (query sonja :matti-verdict-tab :id app-id)
-            => (err :error.matti-disabled))
-          (fact "Enable Matti in Sipoo"
-            (toggle-sipoo-matti true)
-            (query sonja :matti-verdict-tab :id app-id) => ok?)
+            => (err :error.pate-disabled))
+          (fact "Pate verdict tab pseudo query fails"
+            (query sonja :pate-verdict-tab :id app-id)
+            => (err :error.pate-disabled))
+          (fact "Enable Pate in Sipoo"
+            (toggle-sipoo-pate true)
+            (query sonja :pate-verdict-tab :id app-id) => ok?)
           (fact "Sonja creates verdict draft"
-            (let [draft                (command sonja :new-matti-verdict-draft
+            (let [draft                (command sonja :new-pate-verdict-draft
                                                 :id app-id :template-id template-id)
                   verdict-id           (-> draft :verdict :id)
                   data                 (-> draft :verdict :data)
@@ -946,7 +946,7 @@
                       (fact "Publish template"
                         (publish-verdict-template sipoo template-id) => ok?)))
                   (fact "New verdict"
-                    (let  [{verdict :verdict}   (command sonja :new-matti-verdict-draft
+                    (let  [{verdict :verdict}   (command sonja :new-pate-verdict-draft
                                                          :id app-id
                                                          :template-id template-id)
                            {data       :data
@@ -998,7 +998,7 @@
                       (facts "Add attachment to verdict draft again"
                         (let [attachment-id (add-verdict-attachment app-id verdict-id "Otepaatos")]
                           (fact "Publish verdict"
-                            (command sonja :publish-matti-verdict
+                            (command sonja :publish-pate-verdict
                                      :id app-id
                                      :verdict-id verdict-id) => ok?)
                           (fact "Attachment can no longer be deleted"
@@ -1009,7 +1009,7 @@
                         (edit-verdict :verdict-text "New verdict text")
                         => (err :error.verdict.not-draft))
                       (fact "Published verdict cannot be deleted"
-                        (command sonja :delete-matti-verdict :id app-id
+                        (command sonja :delete-pate-verdict :id app-id
                                  :verdict-id verdict-id) => fail?)
                       (fact "Application state is verdictGiven"
                         (:state (query-application sonja app-id))

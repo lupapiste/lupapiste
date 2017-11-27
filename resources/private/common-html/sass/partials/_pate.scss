@@ -1,11 +1,11 @@
-$matti-grid-margin: 10px;
+$pate-grid-margin: 10px;
 
-@mixin matti-column ($size, $columns) {
+@mixin pate-column ($size, $columns) {
   position: relative;
   float: left;
   @include column-width($size * (100% / $columns));
   min-height: 1px; // Enforce rendering of empty column.
-  padding-left: $matti-grid-margin;
+  padding-left: $pate-grid-margin;
 
   label.required:after {
     content: " *";
@@ -24,16 +24,16 @@ $matti-grid-margin: 10px;
 }
 
 
-@mixin matti-grid ($columns) {
-  .matti-grid-#{$columns} {
+@mixin pate-grid ($columns) {
+  .pate-grid-#{$columns} {
     width: 100%;
     color: $gray51;
     > .row {
       @include clearfix;
-      padding: $matti-grid-margin 0;
+      padding: $pate-grid-margin 0;
       @for $i from 1 through $columns {
        > .col-#{$i} {
-          @include matti-column($i, $columns);
+          @include pate-column($i, $columns);
           &:first-child {
             padding-left: 0;
           }
@@ -71,15 +71,15 @@ $matti-grid-margin: 10px;
 }
 
 @for $i from 1 through 12 {
-  @include matti-grid( $i );
+  @include pate-grid( $i );
 }
 
-.matti-list {
+.pate-list {
   > .item {
     display: inline-block;
   }
   > .item + .item {
-    margin-left: $matti-grid-margin;
+    margin-left: $pate-grid-margin;
   }
   > .item.item--full {
     display: block;
@@ -101,28 +101,28 @@ $matti-grid-margin: 10px;
   }
 }
 
-.matti-list.list--sparse {
+.pate-list.list--sparse {
   > .item + .item {
-    margin-left: 4 * $matti-grid-margin;
+    margin-left: 4 * $pate-grid-margin;
   }
 }
 
 // toggle-helper is defined in _inputs.scss
-@include toggle-helper ( matti-checkbox, "e604", "e603",
+@include toggle-helper ( pate-checkbox, "e604", "e603",
                          $wrapper-display: inline-block ) {}
-@include toggle-helper (matti-radio, "e635", "e634", $wrapper-display: block) {}
+@include toggle-helper (pate-radio, "e635", "e634", $wrapper-display: block) {}
 
-.matti-checkbox-wrapper {
+.pate-checkbox-wrapper {
   border: none;
   $margin-right: $marginS;
   $margin-bottom: $marginS;
 }
 
-.matti-radio-wrapper {
+.pate-radio-wrapper {
   border: none;
 }
 
-.matti-buttons {
+.pate-buttons {
     float: right;
     > button {
       margin-left: $marginS;
@@ -131,7 +131,7 @@ $matti-grid-margin: 10px;
 
 $section-border: 1px solid $gray51;
 
-.matti-section {
+.pate-section {
   div.section-header {
     padding-left: $marginM;
     padding-right: $marginM;
@@ -142,7 +142,7 @@ $section-border: 1px solid $gray51;
       font-weight: bold;
     }
   }
-  > .matti-buttons {
+  > .pate-buttons {
     margin-top: $marginS;
   }
   div.section-body {
@@ -158,20 +158,20 @@ $section-border: 1px solid $gray51;
   }
 }
 
-.matti-section + .matti-section {
+.pate-section + .pate-section {
   .section-header {
     border-top: none;
   }
 }
 
-.matti-verdict {
-  .matti-section {
+.pate-verdict {
+  .pate-section {
     min-height: 64px;
   }
 }
 
-.matti--view {
-  .matti-condition-box + .matti-condition-box:before {
+.pate--view {
+  .pate-condition-box + .pate-condition-box:before {
     content: ", ";
   }
 }
@@ -184,14 +184,14 @@ span.formatted {
   }
 }
 
-.matti-label {
+.pate-label {
   font-size: 15px;
   font-weight: bold;
 }
 
 // Meta status classes
-.matti--edit {}
-.matti--view {}
+.pate--edit {}
+.pate--view {}
 
 .row-text {
   line-height: $btn-height;
@@ -217,7 +217,7 @@ span.saved-info {
   color: $gray153;
 }
 
-div.matti-date-delta {
+div.pate-date-delta {
   > div.delta-editor {
     white-space: nowrap;
     input.grid-style-input {
@@ -236,12 +236,12 @@ div.matti-date-delta {
   }
 }
 
-div.matti-template-list {
+div.pate-template-list {
   .checkbox-wrapper {
     margin-top: $marginL;
     margin-bottom: $marginL;
   }
-  table.matti-templates-table {
+  table.pate-templates-table {
     // No-row-hover mixin is defined in _tables.scss
     @include no-row-hover;
   }
@@ -250,8 +250,8 @@ div.matti-template-list {
 
 // Settings
 
-div.matti-settings {
-  h2.matti-settings-title {
+div.pate-settings {
+  h2.pate-settings-title {
     margin-top: 0;
   }
   .section-header {
@@ -265,13 +265,13 @@ div.matti-settings {
 
 // Reviews
 
-div.matti-settings-editor {
+div.pate-settings-editor {
   padding-top: $marginS;
   margin-bottom: $marginL;
   .checkbox-wrapper {
     margin-bottom: $marginS;
   }
-  table.matti-editor-table {
+  table.pate-editor-table {
     // No-row-hover mixin is defined in _tables.scss
     @include no-row-hover;
     margin-top: 0;
@@ -280,8 +280,8 @@ div.matti-settings-editor {
 
 // Verdicts
 
-div.matti-verdict {
-  div.matti-section {
+div.pate-verdict {
+  div.pate-section {
     div.section-header {
       background-color: initial;
       border: none;
@@ -304,9 +304,9 @@ div.matti-verdict {
 
 // Phrases
 
-div.matti-phrases {
+div.pate-phrases {
   margin-top: $marginL;
-  table.matti-phrases-table {
+  table.pate-phrases-table {
     @include no-row-hover;
     margin-top: $marginL;
     th,
@@ -331,7 +331,7 @@ span.phrase-text {
 
 // Autocomplete
 
-div.matti-autocomplete {
+div.pate-autocomplete {
   position: relative;
   display: inline-block;
   // Without border-collapse fix, height would be 41px within tables
@@ -473,7 +473,7 @@ div.matti-autocomplete {
 }
 
 // The default input width is browser specific and the dateinput
-// especially does not play nicely with matti-grid.
+// especially does not play nicely with pate-grid.
 .dateinput.dateinput--safe {
   max-width: 90%;
   &.warning {
@@ -500,7 +500,7 @@ div.matti-autocomplete {
   margin-top: $marginS;
 }
 
-.matti-batch-table {
+.pate-batch-table {
   @include no-row-hover;
   .td-center {
     text-align: center;
@@ -545,7 +545,7 @@ div.matti-autocomplete {
       }
     }
   }
-  td > div.matti-autocomplete {
+  td > div.pate-autocomplete {
     vertical-align: middle;
   }
   td.batch--type {
@@ -573,7 +573,7 @@ div.matti-autocomplete {
   }
 }
 
-table.matti-attachments {
+table.pate-attachments {
   width: initial;
   tr {
     border: none;
@@ -594,7 +594,7 @@ span.verdict-published {
   font-weight: bold;
 }
 
-div.matti-note {
+div.pate-note {
   border-left: 4px solid $orange-dark;
   margin-top: $marginS;
   margin-bottom: $marginS;
