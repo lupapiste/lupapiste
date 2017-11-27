@@ -78,6 +78,10 @@
 
 (defschema MattiPublishedSettings
   {:verdict-code [(apply sc/enum (map name (keys shared/verdict-code-map)))]
+   :date-deltas  (->> shared/verdict-dates
+                      (map (fn [k]
+                             [(sc/optional-key k) sc/Int]))
+                      (into {}))
    :foremen      [(apply sc/enum (map name shared/foreman-codes))]
    :reviews      [{:id   ssc/ObjectIdStr
                    :name MattiName
@@ -146,10 +150,13 @@
 
 ;; Schema utils
 
-(defn- parse-int [x]
+(defn parse-int
+  "Empty strings are considered as zeros."
+  [x]
   (let [n (-> x str name)]
     (cond
       (integer? x)                 x
+      (ss/blank? x)                0
       (re-matches #"^[+-]?\d+$" n) (util/->int n))))
 
 (defmulti validate-resolution :type)
@@ -171,10 +178,9 @@
 (defmethod validate-resolution :date-delta
   [{:keys [path schema value] :as options}]
   (let [property (first path)]
-    (if (contains? #{:enabled :delta} property)
-     (schema-error (merge options
-                          (when (= property :delta)
-                            {:value (parse-int value)})))
+    (if (util/=as-kw :delta property)
+     (schema-error (assoc options
+                          :value (parse-int value)))
      :error.invalid-value-path)))
 
 (defn keyword-set [xs]

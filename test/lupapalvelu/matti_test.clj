@@ -89,11 +89,6 @@
     (validate-path-value [:check] "bad") => :error.invalid-value
     (validate-path-value [:check :bad] true) => :error.invalid-value-path)
   (facts "Date delta"
-    (validate-path-value [:delta] {:enabled true})
-    => :error.invalid-value-path
-    (validate-path-value [:delta :enabled] true) => nil
-    (validate-path-value [:delta :enabled] "bad") => :error.invalid-value
-    (validate-path-value [:delta :enabled] nil) => :error.invalid-value
     (validate-path-value [:delta :delta] 0) => nil
     (validate-path-value [:delta :delta] 2) => nil
     (validate-path-value [:delta :delta] -2) => :error.invalid-value)
@@ -199,9 +194,7 @@
     => :error.invalid-value-path)
   (facts "Repeating"
     (validate-path-value [:loop] :hii) => :error.invalid-value-path
-    (validate-path-value [:loop :delta3 :enabled] true)
-    => :error.invalid-value-path
-    (validate-path-value [:loop :some-index :delta3 :enabled] true)
+    (validate-path-value [:loop :some-index :delta3 :delta] 8)
     => nil
     (validate-path-value [:loop :date2] "25.9.2017")
     => :error.invalid-value-path

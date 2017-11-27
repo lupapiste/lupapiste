@@ -59,6 +59,9 @@
 
 (def foreman-codes [:vastaava-tj :vv-tj :iv-tj :erityis-tj])
 
+(def verdict-dates [:julkipano :anto :valitus :lainvoimainen
+                    :aloitettava :voimassa])
+
 ;; Phrases
 
 (def phrase-categories #{:paatosteksti :lupaehdot :naapurit
@@ -191,12 +194,13 @@
           :items                             [(sc/conditional
                                                :text  {:value keyword-or-string
                                                        :text  sc/Str}
-                                               :else keyword-or-string)]}))
+                                               :else keyword-or-string)]
+          ;; Selection sorted by label. Default is true.
+          (sc/optional-key :sort?) sc/Bool}))
 
 (defschema MattiDateDelta
   (merge MattiComponent
-         {(sc/optional-key :enabled) sc/Bool
-          (sc/optional-key :delta)   (sc/constrained sc/Int (comp not neg?))
+         {(sc/optional-key :delta)   (sc/constrained sc/Int (comp not neg?))
           :unit                      (sc/enum :days :years)}))
 
 (defschema MattiReference
@@ -367,21 +371,24 @@
                 :rows    [[{:dict id}]]}})
 
 (defn date-delta-row [kws]
-  (map (fn [kw]
-         {:col 2 :dict kw :id (name kw)})
-       kws))
+  (->> kws
+       (reduce (fn [acc kw]
+                 (conj acc
+                       (when (seq acc)
+                         {:dict :plus
+                          :css [:date-delta-plus]})
+                       {:col 1 :dict kw :id (name kw)}))
+               [])
+       (remove nil?)))
 
 
 ;; TODO: access via category
 (def default-verdict-template
   {:dictionary {;; Verdict section
-                :verdict-dates {:loc-text :matti-verdict-dates}
-                :julkipano     {:date-delta {:unit :days}}
-                :anto          {:date-delta {:unit :days}}
-                :valitus       {:date-delta {:unit :days}}
-                :lainvoimainen {:date-delta {:unit :days}}
-                :aloitettava   {:date-delta {:unit :years}}
-                :voimassa      {:date-delta {:unit :years}}
+                :verdict-dates {:multi-select {:items verdict-dates
+                                               :sort? false
+                                               :i18nkey :matti-verdict-dates
+                                               :item-loc-prefix :matti-verdict}}
                 :giver         {:docgen "matti-verdict-giver"}
                 :verdict-section  {:docgen "matti-verdict-section"}
                 :verdict-code  {:reference-list {:path       :settings.verdict-code
@@ -426,13 +433,8 @@
    :sections [{:id         "verdict"
                :loc-prefix :matti-verdict
                :grid       {:columns 12
-                            :rows    [{:css [:row--date-delta-title]
-                                       :row [{:col  12
-                                              :css  [:matti-label]
-                                              :dict :verdict-dates}]}
-                                      (date-delta-row [:julkipano :anto
-                                                       :valitus :lainvoimainen
-                                                       :aloitettava :voimassa])
+                            :rows    [[{:col 12
+                                        :dict :verdict-dates}]
                                       [{:col  3
                                         :id   :giver
                                         :dict :giver}
@@ -491,40 +493,56 @@
 
 (def r-settings
   {:title      "matti-r"
-   :dictionary {:verdict-code {:multi-select {:label?     false
-                                              :items      (keys verdict-code-map)}}
-                :foremen      {:multi-select {:label?     false
-                                              :items      foreman-codes}}
-                :plans        {:reference-list {:label?   false
-                                                :path     [:plans]
-                                                :item-key :id
-                                                :type     :multi-select
-                                                :term     {:path       :plans
-                                                           :extra-path :name}}}
-                :reviews      {:reference-list {:label?   false
-                                                :path     [:reviews]
-                                                :item-key :id
-                                                :type     :multi-select
-                                                :term     {:path       :reviews
-                                                           :extra-path :name}}}}
-   :sections   [{:id    "verdict"
+   :dictionary {:verdict-dates {:loc-text :matti-verdict-dates}
+                :plus          {:loc-text :plus}
+                :julkipano     {:date-delta {:unit :days}}
+                :anto          {:date-delta {:unit :days}}
+                :valitus       {:date-delta {:unit :days}}
+                :lainvoimainen {:date-delta {:unit :days}}
+                :aloitettava   {:date-delta {:unit :years}}
+                :voimassa      {:date-delta {:unit :years}}
+                :verdict-code  {:multi-select {:label? false
+                                               :items  (keys verdict-code-map)}}
+                :foremen       {:multi-select {:label? false
+                                               :items  foreman-codes}}
+                :plans         {:reference-list {:label?   false
+                                                 :path     [:plans]
+                                                 :item-key :id
+                                                 :type     :multi-select
+                                                 :term     {:path       :plans
+                                                            :extra-path :name}}}
+                :reviews       {:reference-list {:label?   false
+                                                 :path     [:reviews]
+                                                 :item-key :id
+                                                 :type     :multi-select
+                                                 :term     {:path       :reviews
+                                                            :extra-path :name}}}}
+   :sections   [{:id         "verdict-dates"
+                 :loc-prefix :matti-verdict-dates
+                 :grid       {:columns    12
+                              :loc-prefix :matti-verdict
+                              :rows       [(date-delta-row [:julkipano :anto
+                                                            :valitus :lainvoimainen
+                                                            :aloitettava :voimassa])]
+                              }}
+                {:id         "verdict"
                  :loc-prefix :matti-settings.verdict
-                 :grid  {:columns 1
-                         :loc-prefix :matti-r.verdict-code
-                         :rows    [[{:dict :verdict-code}]]}}
-                {:id    "foremen"
+                 :grid       {:columns    1
+                              :loc-prefix :matti-r.verdict-code
+                              :rows       [[{:dict :verdict-code}]]}}
+                {:id         "foremen"
                  :loc-prefix :matti-settings.foremen
-                 :grid  {:columns 1
-                         :loc-prefix :matti-r.foremen
-                         :rows    [[{:dict :foremen}]]}}
-                {:id    "plans"
+                 :grid       {:columns    1
+                              :loc-prefix :matti-r.foremen
+                              :rows       [[{:dict :foremen}]]}}
+                {:id         "plans"
                  :loc-prefix :matti-settings.plans
-                 :grid  {:columns 1
-                         :rows    [[{:dict :plans}]]}}
-                {:id    "reviews"
+                 :grid       {:columns 1
+                              :rows    [[{:dict :plans}]]}}
+                {:id         "reviews"
                  :loc-prefix :matti-settings.reviews
-                 :grid  {:columns 1
-                         :rows    [[{:dict :reviews}]]}}]})
+                 :grid       {:columns 1
+                              :rows    [[{:dict :reviews}]]}}]})
 
 (def settings-schemas
   {:r r-settings})
@@ -638,8 +656,7 @@
                                               :disabled? :automatic-verdict-dates
                                               :id        id
                                               :dict      kw}))
-                                         [:julkipano :anto :valitus
-                                          :lainvoimainen :aloitettava :voimassa])}]}}
+                                         verdict-dates)}]}}
      {:id   "matti-verdict"
       :grid {:columns 6
              :rows    [[{:loc-prefix :matti-verdict.giver
