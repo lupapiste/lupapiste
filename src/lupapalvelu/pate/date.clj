@@ -1,4 +1,4 @@
-(ns lupapalvelu.matti.date
+(ns lupapalvelu.pate.date
   "Date handling utilities. Limited to Finnish time zone and formats."
   (:require [clj-time.core :as time]
             [clj-time.format :as timef]))
