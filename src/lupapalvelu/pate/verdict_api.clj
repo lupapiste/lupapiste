@@ -1,10 +1,10 @@
-(ns lupapalvelu.matti.verdict-api
+(ns lupapalvelu.pate.verdict-api
   (:require [clojure.set :as set]
             [lupapalvelu.action :refer [defquery defcommand notify] :as action]
-            [lupapalvelu.matti.schemas :as schemas]
-            [lupapalvelu.matti.shared :as shared]
-            [lupapalvelu.matti.verdict :as verdict]
-            [lupapalvelu.matti.verdict-template :as template]
+            [lupapalvelu.pate.schemas :as schemas]
+            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.verdict :as verdict]
+            [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
@@ -24,13 +24,13 @@
 ;; TODO: Make sure that the functionality (including notifications)
 ;; and constraints are in sync with the legacy verdict API.
 
-(defn- matti-enabled
-  "Pre-checker that fails if Matti is not enabled in the application
+(defn- pate-enabled
+  "Pre-checker that fails if Pate is not enabled in the application
   organization."
   [{:keys [organization]}]
   (when (and organization
-             (not (:matti-enabled @organization)))
-    (fail :error.matti-disabled)))
+             (not (:pate-enabled @organization)))
+    (fail :error.pate-disabled)))
 
 (defn- verdict-exists
   "Returns pre-checker that fails if the verdict does not exist.
@@ -41,7 +41,7 @@
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
         (let [verdict (util/find-by-id verdict-id
-                                       (:matti-verdicts application))]
+                                       (:pate-verdicts application))]
           (when-not verdict
             (fail! :error.verdict-not-found))
           (when (and editable? (:published verdict))
@@ -50,94 +50,94 @@
 (defquery application-verdict-templates
   {:description      "List of id, name, default? maps for suitable
   application verdict templates."
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :pre-checks       [matti-enabled]
+   :pre-checks       [pate-enabled]
    :states           states/give-verdict-states}
   [{:keys [application organization]}]
   (ok :templates (template/application-verdict-templates @organization
                                                          application)))
 
-(defcommand new-matti-verdict-draft
+(defcommand new-pate-verdict-draft
   {:description      "Composes new verdict draft from the latest published
   template and its settings."
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id template-id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       (template/verdict-template-check :application :published)]
    :states           states/give-verdict-states}
   [command]
   (ok (verdict/new-verdict-draft template-id command)))
 
-(defquery matti-verdicts
+(defquery pate-verdicts
   {:description      "List of verdicts. Item properties:
                        id:        Verdict id
                        published: timestamp (can be nil)
                        modified:  timestamp"
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authority :applicant}
    :org-authz-roles  roles/reader-org-authz-roles
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :pre-checks       [matti-enabled]
+   :pre-checks       [pate-enabled]
    :states           (states/all-states-but [:draft :open])}
   [{:keys [application]}]
   (ok :verdicts (map verdict/verdict-summary
-                     (:matti-verdicts application))))
+                     (:pate-verdicts application))))
 
-(defquery matti-verdict
+(defquery pate-verdict
   {:description      "Verdict and its settings."
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authority :applicant}
    :org-authz-roles  roles/reader-org-authz-roles
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       (verdict-exists)]
    :states           states/give-verdict-states}
   [command]
   (ok (verdict/open-verdict command)))
 
-(defcommand delete-matti-verdict
+(defcommand delete-pate-verdict
   {:description      "Deletes verdict. Published verdicts cannot be
   deleted."
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       (verdict-exists :editable?)]
    :states           (states/all-states-but [:draft :open])}
   [command]
   (verdict/delete-verdict verdict-id command)
   (ok))
 
-(defcommand edit-matti-verdict
+(defcommand edit-pate-verdict
   {:description      "Updates verdict data. Returns changes and errors
   lists (items are path-vector value pairs)"
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id path value]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])
                       (partial action/vector-parameters [:path])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       (verdict-exists :editable?)]
    :states           states/give-verdict-states}
   [command]
   (ok (verdict/edit-verdict command)))
 
-(defcommand publish-matti-verdict
+(defcommand publish-pate-verdict
   {:description      "Publishes verdict.
 TODO: create tasks and PDF, application state change, attachments locking."
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       (verdict-exists :editable?)]
    :states           states/give-verdict-states
    :notified         true
@@ -145,38 +145,38 @@ TODO: create tasks and PDF, application state change, attachments locking."
   [command]
   (ok (verdict/publish-verdict command)))
 
-(defquery matti-verdict-tab
-  {:description     "Pseudo-query that fails if the Matti verdicts tab
+(defquery pate-verdict-tab
+  {:description     "Pseudo-query that fails if the Pate verdicts tab
   should not be shown on the UI."
-   :feature         :matti
+   :feature         :pate
    :parameters      [:id]
    :user-roles      #{:applicant :authority}
    :org-authz-roles roles/reader-org-authz-roles
    :states          (states/all-states-but [:draft :open])
-   :pre-checks      [matti-enabled]}
+   :pre-checks      [pate-enabled]}
   [_])
 
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))
 
 (defn- create-bulletin [application created verdict-id & [updates]]
-  (let [verdict (util/find-by-id verdict-id (:matti-verdicts application))
+  (let [verdict (util/find-by-id verdict-id (:pate-verdicts application))
         app-snapshot (-> (bulletins/create-bulletin-snapshot application)
-                         (dissoc :verdicts :matti-verdicts)
+                         (dissoc :verdicts :pate-verdicts)
                          (merge
                            updates
                            {:application-id (:id application)
-                            :matti-verdict verdict
+                            :pate-verdict verdict
                             :bulletin-op-description (-> verdict :data :bulletin-op-description)}))
-        search-fields [:municipality :address :matti-verdict :_applicantIndex
+        search-fields [:municipality :address :pate-verdict :_applicantIndex
                        :application-id
                        :bulletinState :applicant :organization :bulletin-op-description]
         search-updates (get-search-fields search-fields app-snapshot)]
     (bulletins/snapshot-updates app-snapshot search-updates created)))
 
-(defcommand upsert-matti-verdict-bulletin
+(defcommand upsert-pate-verdict-bulletin
   {:description      ""
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
