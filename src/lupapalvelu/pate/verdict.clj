@@ -1,4 +1,4 @@
-(ns lupapalvelu.matti.verdict
+(ns lupapalvelu.pate.verdict
   (:require [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
@@ -8,10 +8,10 @@
             [lupapalvelu.document.transformations :as transformations]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.inspection-summary :as inspection-summary]
-            [lupapalvelu.matti.date :as date]
-            [lupapalvelu.matti.schemas :as schemas]
-            [lupapalvelu.matti.shared :as shared]
-            [lupapalvelu.matti.verdict-template :as template]
+            [lupapalvelu.pate.date :as date]
+            [lupapalvelu.pate.schemas :as schemas]
+            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as ops]
             [lupapalvelu.organization :as org]
@@ -159,9 +159,9 @@
                         :id       (mongo/create-id)
                         :modified created)]
     (action/update-application command
-                               {$push {:matti-verdicts
+                               {$push {:pate-verdicts
                                        (sc/validate
-                                        schemas/MattiVerdict
+                                        schemas/PateVerdict
                                         (util/assoc-when draft
                                                          :category (:category template)))}})
     {:verdict  (enrich-verdict command draft)
@@ -177,7 +177,7 @@
     :default verdict))
 
 (defn command->verdict [{:keys [data application] :as command}]
-  (update (->> (util/find-by-id (:verdict-id data) (:matti-verdicts application))
+  (update (->> (util/find-by-id (:verdict-id data) (:pate-verdicts application))
                (mask-verdict-data command))
           :category keyword))
 
@@ -190,7 +190,7 @@
 
 (defn delete-verdict [verdict-id command]
   (action/update-application command
-                             {$pull {:matti-verdicts {:id verdict-id}}}))
+                             {$pull {:pate-verdicts {:id verdict-id}}}))
 
 (defn- listify
   "Transforms argument into list if it is not sequential. Nil results
@@ -204,9 +204,9 @@
 (defn- verdict-update [{:keys [data created application] :as command} update]
   (let [{verdict-id :verdict-id} data]
     (action/update-application command
-                               {:matti-verdicts {$elemMatch {:id verdict-id}}}
+                               {:pate-verdicts {$elemMatch {:id verdict-id}}}
                                (assoc-in update
-                                         [$set :matti-verdicts.$.modified]
+                                         [$set :pate-verdicts.$.modified]
                                          created))))
 
 (defn- verdict-changes-update
@@ -215,7 +215,7 @@
   (when (seq changes)
     (verdict-update command {$set (reduce (fn [acc [k v]]
                                             (assoc acc
-                                                   (util/kw-path :matti-verdicts.$.data k)
+                                                   (util/kw-path :pate-verdicts.$.data k)
                                                    v))
                                           {}
                                           changes)})))
@@ -304,7 +304,7 @@
       {:errors [[path error]]}
       (let [path    (map keyword path)
             updated (assoc-in data path value)]
-        (verdict-update command {$set {(util/kw-path :matti-verdicts.$.data
+        (verdict-update command {$set {(util/kw-path :pate-verdicts.$.data
                                                      path)
                                        value}})
         {:modified created
@@ -423,9 +423,9 @@
     (verdict-update command
                     (util/deep-merge
                      {$set (merge
-                            {:matti-verdicts.$.data      (:data (enrich-verdict command
+                            {:pate-verdicts.$.data      (:data (enrich-verdict command
                                                                                 verdict))
-                             :matti-verdicts.$.published created}
+                             :pate-verdicts.$.published created}
                             (att/attachment-array-updates (:id application)
                                                           (comp #{(:id verdict)} :id :target)
                                                           :readOnly true
