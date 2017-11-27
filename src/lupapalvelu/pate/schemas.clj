@@ -1,29 +1,29 @@
-(ns lupapalvelu.matti.schemas
+(ns lupapalvelu.pate.schemas
   (:require [clojure.set :as set]
             [lupapalvelu.document.schemas :as doc-schemas]
             [lupapalvelu.document.tools :refer [body] :as tools]
-            [lupapalvelu.matti.date :as date]
-            [lupapalvelu.matti.shared :as shared]
+            [lupapalvelu.pate.date :as date]
+            [lupapalvelu.pate.shared :as shared]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
             [schema-tools.core :as st]
             [schema.core :refer [defschema] :as sc]))
 
-(def matti-string {:name "matti-string"
+(def pate-string {:name "pate-string"
                    :type :string})
 
-(def verdict-text {:name "matti-verdict-text"
+(def verdict-text {:name "pate-verdict-text"
                    :type :string})
 
-(def verdict-section {:name "matti-verdict-section"
+(def verdict-section {:name "pate-verdict-section"
                       :type :string})
 
-(def verdict-contact {:name  "matti-verdict-contact"
+(def verdict-contact {:name  "pate-verdict-contact"
                       :label false
                       :type  :string})
 
-(def verdict-giver {:name "matti-verdict-giver"
+(def verdict-giver {:name "pate-verdict-giver"
                     :type :select
                     :body [{:name "viranhaltija"}
                            {:name "lautakunta"}]})
@@ -34,49 +34,49 @@
                           :body  [{:name "automatic"}
                                   {:name "manual"}]})
 
-(def verdict-check {:name "matti-verdict-check"
+(def verdict-check {:name "pate-verdict-check"
                     :label false
                     :type :checkbox})
 
 (def in-verdict {:name "required-in-verdict"
                  :label false
-                 :i18nkey "matti.template-removed"
+                 :i18nkey "pate.template-removed"
                  :type :checkbox})
 
-(def complexity {:name "matti-complexity"
+(def complexity {:name "pate-complexity"
                  :type :select
                  :body (map #(hash-map :name %)
                             ["small" "medium" "large" "extra-large"])})
 
-(def date {:name "matti-date"
+(def date {:name "pate-date"
            :type :date})
 
-(defschema MattiCategory
+(defschema PateCategory
   {:id       ssc/ObjectIdStr
    :category (sc/enum "r" "p" "ya" "kt" "ymp")})
 
-(defschema MattiName
+(defschema PateName
   {:fi sc/Str
    :sv sc/Str
    :en sc/Str})
 
-(defschema MattiGeneric
+(defschema PateGeneric
   "Generic is either review or plan."
-  (merge MattiCategory
-         {:name    MattiName
+  (merge PateCategory
+         {:name    PateName
           :deleted sc/Bool}))
 
 (def review-type (apply sc/enum (map name (keys shared/review-type-map))))
 
-(defschema MattiSettingsReview
-  (merge MattiGeneric
+(defschema PateSettingsReview
+  (merge PateGeneric
          {:type review-type}))
 
-(defschema MattiSavedSettings
+(defschema PateSavedSettings
   {:modified ssc/Timestamp
    :draft    sc/Any})
 
-(defschema MattiPublishedSettings
+(defschema PatePublishedSettings
   {:verdict-code [(apply sc/enum (map name (keys shared/verdict-code-map)))]
    :date-deltas  (->> shared/verdict-dates
                       (map (fn [k]
@@ -84,31 +84,31 @@
                       (into {}))
    :foremen      [(apply sc/enum (map name shared/foreman-codes))]
    :reviews      [{:id   ssc/ObjectIdStr
-                   :name MattiName
+                   :name PateName
                    :type review-type}]
    :plans        [{:id   ssc/ObjectIdStr
-                   :name MattiName}]})
+                   :name PateName}]})
 
-(defschema MattiSavedTemplate
-  (merge MattiCategory
+(defschema PateSavedTemplate
+  (merge PateCategory
          {:name     sc/Str
           :deleted  sc/Bool
           :draft    sc/Any ;; draft is published data on publish.
           :modified ssc/Timestamp
           (sc/optional-key :published) {:published ssc/Timestamp
                                         :data      sc/Any
-                                        :settings  MattiPublishedSettings}}))
+                                        :settings  PatePublishedSettings}}))
 
-(defschema MattiSavedVerdictTemplates
-  {:templates [MattiSavedTemplate]
-   (sc/optional-key :settings)  {(sc/optional-key :r) MattiSavedSettings}
-   (sc/optional-key :reviews)   [MattiSettingsReview]
-   (sc/optional-key :plans)     [MattiGeneric]})
+(defschema PateSavedVerdictTemplates
+  {:templates [PateSavedTemplate]
+   (sc/optional-key :settings)  {(sc/optional-key :r) PateSavedSettings}
+   (sc/optional-key :reviews)   [PateSettingsReview]
+   (sc/optional-key :plans)     [PateGeneric]})
 
-(def matti-schemas
+(def pate-schemas
   "Raw schemas are combined here for the benefit of
   pdf-export-test/ignored-schemas."
-  [matti-string verdict-section verdict-text verdict-contact
+  [pate-string verdict-section verdict-text verdict-contact
    verdict-check in-verdict verdict-giver automatic-vs-manual
    complexity date])
 
@@ -116,7 +116,7 @@
   (map (fn [m]
          {:info {:name (:name m)}
           :body (body m)})
-       matti-schemas))
+       pate-schemas))
 
 ;; Phrases
 
@@ -137,13 +137,13 @@
                                  map? (sc/recursive #'Exclusions)
                                  :else true)})
 
-(defschema MattiVerdict
-  (merge MattiCategory
+(defschema PateVerdict
+  (merge PateCategory
          {;; Verdict is draft until it is published
           (sc/optional-key :published)  ssc/Timestamp
           :modified                     ssc/Timestamp
           :data                         sc/Any
-          (sc/optional-key :references) MattiPublishedSettings
+          (sc/optional-key :references) PatePublishedSettings
           :template                     sc/Any
           ;;(sc/optional-key :exclusions) Exclusions
           }))
@@ -206,7 +206,7 @@
 (defmethod validate-resolution :docgen
   [{:keys [path schema value data] :as options}]
   ;; TODO: Use the old-school docgen validation if possible
-  ;; For now we support only the types used by Matti
+  ;; For now we support only the types used by Pate
   (let [body      (-> schema :body first)
         data-type (:type body)
         names     (map :name (:body body))
@@ -280,10 +280,10 @@
     (cond
       docgen       (wrap :docgen (doc-schemas/get-schema
                                   {:name (get docgen :name docgen)}) docgen)
-      date-delta   (wrap :date-delta shared/MattiDateDelta date-delta)
-      reflist      (wrap :reference-list shared/MattiReferenceList reflist)
-      multi-select (wrap :multi-select shared/MattiMultiSelect multi-select)
-      phrase-text  (wrap :phrase-text shared/MattiPhraseText phrase-text)
+      date-delta   (wrap :date-delta shared/PateDateDelta date-delta)
+      reflist      (wrap :reference-list shared/PateReferenceList reflist)
+      multi-select (wrap :multi-select shared/PateMultiSelect multi-select)
+      phrase-text  (wrap :phrase-text shared/PatePhraseText phrase-text)
       keymap       (wrap :keymap shared/KeyMap keymap))))
 
 (defn- validate-dictionary-value
