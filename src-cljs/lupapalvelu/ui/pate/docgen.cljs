@@ -1,9 +1,9 @@
-(ns lupapalvelu.ui.matti.docgen
-  "Rudimentary support for docgen subset in the Matti context."
-  (:require [lupapalvelu.matti.shared :as shared]
+(ns lupapalvelu.ui.pate.docgen
+  "Rudimentary support for docgen subset in the Pate context."
+  (:require [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
-            [lupapalvelu.ui.matti.path :as path]
+            [lupapalvelu.ui.pate.path :as path]
             [rum.core :as rum]
             [sade.shared_util :as util]))
 
@@ -21,7 +21,7 @@
   [:div.col--vertical
    (if (-> schema :body first :label false?)
      (common/empty-label)
-     [:label.matti-label {:for (path/id path)}
+     [:label.pate-label {:for (path/id path)}
       (docgen-loc options)])
    component])
 
@@ -74,12 +74,12 @@
   [{:keys [schema state path] :as options}]
   (let [state*    (path/state path state)
         input-id  (path/unique-id "checkbox-input")]
-    [:div.matti-checkbox-wrapper (docgen-attr options)
+    [:div.pate-checkbox-wrapper (docgen-attr options)
      [:input (docgen-attr options
                           :type    "checkbox"
                           :checked (rum/react state*)
                           :id      input-id)]
-     [:label.matti-checkbox-label
+     [:label.pate-checkbox-label
       {:for      input-id
        :on-click (fn [_]
                    (swap! state* not)
@@ -97,14 +97,14 @@
           (map (fn [{n :name}]
                  (let [radio-path (path/extend path n)
                        radio-id   (str (path/id radio-path) "radio")]
-                   [:div.matti-radio-wrapper
+                   [:div.pate-radio-wrapper
                     (docgen-attr {:path radio-path})
                     [:input {:type    "radio"
                              :checked  (= n checked)
                              :value    n
                              :name     (path/id path)
                              :id       radio-id}]
-                   [:label.matti-radio-label
+                   [:label.pate-radio-label
                     {:for      radio-id
                      :on-click (fn [_]
                                  (when (common/reset-if-needed! state n)
@@ -167,5 +167,5 @@
 (defmethod docgen-view :checkbox
   [{:keys [schema state path] :as options}]
   (when (rum/react (path/state path state))
-    [:span.matti-checkbox (docgen-attr options)
+    [:span.pate-checkbox (docgen-attr options)
      (docgen-loc options)]))
