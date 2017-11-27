@@ -1,14 +1,14 @@
-(ns lupapalvelu.ui.matti.attachments
-  "Attachments related components and utilities for Matti."
+(ns lupapalvelu.ui.pate.attachments
+  "Attachments related components and utilities for Pate."
   (:require [clojure.string :as s]
             [lupapalvelu.ui.attachment.components :as att]
             [lupapalvelu.ui.attachment.file-upload :as upload]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
-            [lupapalvelu.ui.matti.path :as path]
-            [lupapalvelu.ui.matti.service :as service]
-            [lupapalvelu.ui.matti.state :as state]
+            [lupapalvelu.ui.pate.path :as path]
+            [lupapalvelu.ui.pate.service :as service]
+            [lupapalvelu.ui.pate.state :as state]
             [lupapalvelu.ui.rum-util :as rum-util]
             [rum.core :as rum]
             [sade.shared-util :as util])
@@ -205,7 +205,7 @@
   (when (-> files* rum/react seq)
     (let [binding? (rum/react binding?*)]
       [:div
-       [:table.matti-batch-table
+       [:table.pate-batch-table
         [:thead
          [:tr
           [:th [:span (path/loc :attachment.file)]]
@@ -264,7 +264,7 @@
     (let [include?    (or (path/meta-value options :include?) identity)
           attachments (filter (partial include? options)
                               (service/attachments))]
-      [:table.matti-attachments
+      [:table.pate-attachments
        [:tbody
         (for [{:keys [type contents latestVersion can-delete?]
                :as   attachment} attachments]
@@ -277,7 +277,7 @@
              [:td.td--center [:i.lupicon-remove.primary
                               {:on-click #(att/delete-with-confirmation attachment)}]])])]])))
 
-(rum/defc matti-attachments < rum/reactive
+(rum/defc pate-attachments < rum/reactive
   "Displays and supports adding new attachments. This cannot be
   reactive since we want the input-id to remain somewhat constant."
   [{:keys [schema path state] :as options}]
