@@ -1,9 +1,9 @@
-(ns lupapalvelu.ui.matti.path
+(ns lupapalvelu.ui.pate.path
   "Various utilities for component state, path, schema and _meta
   handling."
   (:require [clojure.string :as s]
             [goog.events :as googe]
-            [lupapalvelu.matti.shared :as shared]
+            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [rum.core :as rum]
             [sade.shared-util :as util]))
@@ -136,9 +136,9 @@
 
 (defn css
   "List of CSS classes based on current :css value and status
-  classes (matti--edit, matti--view) from the latest _meta."
+  classes (pate--edit, pate--view) from the latest _meta."
   [options & other-classes]
-  (->> [(if (meta-value options :editing?) "matti--edit" "matti--view")
+  (->> [(if (meta-value options :editing?) "pate--edit" "pate--view")
         (some-> options :schema :css)
         other-classes]
        flatten
