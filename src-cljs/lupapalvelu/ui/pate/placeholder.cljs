@@ -1,5 +1,5 @@
-(ns lupapalvelu.ui.matti.placeholder
-  "In Matti, a placeholder is a component that displays data differently
+(ns lupapalvelu.ui.pate.placeholder
+  "In Pate, a placeholder is a component that displays data differently
   than a 'traditional' model-based (internal state) based
   component. The name refers to the scenario, where as a placeholder
   the displayed data is initially calculated and only fixed after
@@ -9,9 +9,9 @@
   (:require [clojure.string :as s]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
-            [lupapalvelu.ui.matti.path :as path]
-            [lupapalvelu.ui.matti.service :as service]
-            [lupapalvelu.ui.matti.state :as state]
+            [lupapalvelu.ui.pate.path :as path]
+            [lupapalvelu.ui.pate.service :as service]
+            [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
