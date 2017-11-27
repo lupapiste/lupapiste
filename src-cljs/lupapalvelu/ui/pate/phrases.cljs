@@ -1,12 +1,12 @@
-(ns lupapalvelu.ui.matti.phrases
+(ns lupapalvelu.ui.pate.phrases
   (:require [clojure.set :as set]
             [clojure.string :as s]
-            [lupapalvelu.matti.shared :as shared]
+            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
-            [lupapalvelu.ui.matti.path :as path]
-            [lupapalvelu.ui.matti.service :as service]
-            [lupapalvelu.ui.matti.state :as state]
+            [lupapalvelu.ui.pate.path :as path]
+            [lupapalvelu.ui.pate.service :as service]
+            [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
@@ -50,7 +50,7 @@
 (rum/defcs phrase-editor < rum/reactive
   (components/initial-value-mixin ::local)
   [{local* ::local} _ phrase*]
-  [:div.matti-grid-8
+  [:div.pate-grid-8
    [:div.row
     [:div.col-2
      [:div.col--vertical
@@ -126,13 +126,13 @@
   [{sort-column* ::sort-column
     descending?* ::descending?
     phrase* ::phrase}]
-  [:div.matti-phrases
+  [:div.pate-phrases
    [:h2 (common/loc :phrase.title)]
    (if (rum/react phrase*)
      (phrase-editor @phrase* phrase*)
      [:div
       (when (seq (rum/react state/phrases))
-        [:table.matti-phrases-table
+        [:table.pate-phrases-table
          [:thead
           [:tr
            (phrase-sorter :tag sort-column* descending?*)
