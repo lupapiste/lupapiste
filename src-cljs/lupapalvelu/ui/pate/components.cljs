@@ -1,26 +1,26 @@
-(ns lupapalvelu.ui.matti.components
-  "More or less Matti-specific user interface components. See
+(ns lupapalvelu.ui.pate.components
+  "More or less Pate-specific user interface components. See
   layout.cljs for documentation on the component conventions. Docgen
   support is in docgen.cljs."
   (:require [clojure.set :as set]
             [clojure.string :as s]
-            [lupapalvelu.matti.shared :as shared]
+            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
-            [lupapalvelu.ui.matti.docgen :as docgen]
-            [lupapalvelu.ui.matti.path :as path]
-            [lupapalvelu.ui.matti.phrases :as phrases]
-            [lupapalvelu.ui.matti.service :as service]
-            [lupapalvelu.ui.matti.state :as state]
+            [lupapalvelu.ui.pate.docgen :as docgen]
+            [lupapalvelu.ui.pate.path :as path]
+            [lupapalvelu.ui.pate.phrases :as phrases]
+            [lupapalvelu.ui.pate.service :as service]
+            [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
 (defn show-label? [{label? :label?} wrap-label?]
   (and wrap-label? (not (false? label?))))
 
-(rum/defc matti-date-delta < rum/reactive
+(rum/defc pate-date-delta < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
-  [:div.matti-date-delta
+  [:div.pate-date-delta
    (when (show-label? schema wrap-label?)
      [:div.delta-label (path/loc options)])
    [:div.delta-editor
@@ -28,14 +28,14 @@
                       :input.grid-style-input
                       {:type "number"
                        :disabled (path/disabled? options)})
-    (common/loc (str "matti-date-delta." (-> schema :unit name)))]])
+    (common/loc (str "pate-date-delta." (-> schema :unit name)))]])
 
 
-(rum/defc matti-multi-select < rum/reactive
+(rum/defc pate-multi-select < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
-  [:div.matti-multi-select
+  [:div.pate-multi-select
    (when (show-label? schema wrap-label?)
-     [:h4.matti-label (path/loc options)])
+     [:h4.pate-label (path/loc options)])
    (let [state (path/state path state)
          items (cond->> (map (fn [item]
                                (if (:value item)
@@ -51,13 +51,13 @@
      (for [{:keys [value text]} items
            :let                 [item-id (path/unique-id "multi")
                                  checked (util/includes-as-kw? (set (rum/react state)) value)]]
-       [:div.matti-checkbox-wrapper
+       [:div.pate-checkbox-wrapper
         {:key item-id}
         [:input {:type    "checkbox"
                  :id      item-id
                  :disabled (path/disabled? options)
                  :checked checked}]
-        [:label.matti-checkbox-label
+        [:label.pate-checkbox-label
          {:for      item-id
           :on-click (fn [_]
                       (swap! state
@@ -109,16 +109,16 @@
 
 (rum/defc multi-select-reference-list < rum/reactive
   [{:keys [schema] :as options} & [wrap-label?]]
-  (matti-multi-select (assoc-in options [:schema :items] (resolve-reference-list options))
+  (pate-multi-select (assoc-in options [:schema :items] (resolve-reference-list options))
                       wrap-label?))
 
 (rum/defc last-saved < rum/reactive
   [{info* :info}]
   [:span.saved-info
    (when-let [ts (path/react [:modified] info*)]
-     (common/loc :matti.last-saved (js/util.finnishDateAndTime ts)))])
+     (common/loc :pate.last-saved (js/util.finnishDateAndTime ts)))])
 
-(rum/defcs matti-phrase-text < rum/reactive
+(rum/defcs pate-phrase-text < rum/reactive
   (rum/local nil ::category)
   (rum/local "" ::selected)
   (rum/local "" ::replaced)
@@ -137,9 +137,9 @@
       (set-category (:category schema)))
     (let [ref-id    (path/unique-id "-ref")
           disabled? (path/disabled? options)]
-      [:div.matti-grid-12
+      [:div.pate-grid-12
        (when (show-label? schema wrap-label?)
-         [:h4.matti-label (path/loc options)])
+         [:h4.pate-label (path/loc options)])
        [:div.row
         [:div.col-3.col--full
          [:div.col--vertical
@@ -170,7 +170,7 @@
                          (update-text "")
                          (reset! selected* ""))
              :disabled disabled?}
-            (common/loc :matti.clear)]
+            (common/loc :pate.clear)]
            [:button.primary.outline
             {:disabled (let [phrase (rum/react selected*)]
                          (or disabled?
