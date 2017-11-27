@@ -1,10 +1,10 @@
-(ns lupapalvelu.matti.verdict-template-api
+(ns lupapalvelu.pate.verdict-template-api
   "Verdict templates and category-wide settings."
   (:require [clojure.set :as set]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
-            [lupapalvelu.matti.verdict-template :as template]
-            [lupapalvelu.matti.schemas :as schemas]
-            [lupapalvelu.matti.shared :as shared]
+            [lupapalvelu.pate.verdict-template :as template]
+            [lupapalvelu.pate.schemas :as schemas]
+            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
@@ -15,11 +15,11 @@
 ;; Pre-checks
 ;; ----------------------------------
 
-(defn- matti-enabled
-  "Pre-checker that fails if Matti is not enabled in the organization."
+(defn- pate-enabled
+  "Pre-checker that fails if Pate is not enabled in the organization."
   [cmd]
-  (when-not (:matti-enabled (template/command->organization cmd))
-    (fail :error.matti-disabled)))
+  (when-not (:pate-enabled (template/command->organization cmd))
+    (fail :error.pate-disabled)))
 
 (defn- valid-category [{{category :category} :data :as command}]
   (when category
@@ -82,23 +82,23 @@
 ;; Verdict template API
 ;; ----------------------------------
 
-(defquery matti-enabled
-  {:description "Pseudo-query that fails if Matti is not enabled in
+(defquery pate-enabled
+  {:description "Pseudo-query that fails if Pate is not enabled in
   the organization"
-   :feature     :matti
+   :feature     :pate
    :user-roles  #{:authorityAdmin}
-   :pre-checks  [matti-enabled]}
+   :pre-checks  [pate-enabled]}
   [_])
 
 
 (defcommand new-verdict-template
   {:description      "Creates new empty template. Returns template id, name
   and draft."
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       valid-category]}
   [{:keys [created user lang]}]
   (ok (template/new-verdict-template (usr/authority-admins-organization-id user)
@@ -108,10 +108,10 @@
 
 (defcommand set-verdict-template-name
   {:description "Name cannot be empty."
-   :feature          :matti
+   :feature          :pate
    :parameters       [template-id name]
    :input-validators [(partial action/non-blank-parameters [:name])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable)]
    :user-roles       #{:authorityAdmin}}
   [{created :created :as command}]
@@ -124,13 +124,13 @@
 (defcommand save-verdict-template-draft-value
   {:description      "Incremental save support for verdict template
   drafts. Returns modified timestamp."
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id path value]
    ;; Value is validated upon saving according to the schema.
    :input-validators [(partial action/vector-parameters [:path])
                       (partial action/non-blank-parameters [:template-id])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable)]}
   [{:keys [created] :as command}]
   (if-let [error (template/save-draft-value (template/command->organization command)
@@ -144,11 +144,11 @@
 (defcommand publish-verdict-template
   {:description      "Publish creates a frozen snapshot of the current
   template draft. The snapshot includes also the current settings."
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable :named)]}
   [{:keys [created user user-organizations] :as command}]
   (template/publish-verdict-template (template/command->organization command)
@@ -159,9 +159,9 @@
 (defquery verdict-templates
   {:description "Id, name, modified, published and deleted maps for
   every verdict template."
-   :feature     :matti
+   :feature     :pate
    :user-roles  #{:authorityAdmin}
-   :pre-checks  [matti-enabled]}
+   :pre-checks  [pate-enabled]}
   [command]
   (ok :verdict-templates (->> (template/command->organization command)
                               :verdict-templates
@@ -170,20 +170,20 @@
 
 (defquery verdict-template-categories
   {:description "Categories for the user's organization"
-   :feature     :matti
+   :feature     :pate
    :user-roles  #{:authorityAdmin}
-   :pre-checks  [matti-enabled]}
+   :pre-checks  [pate-enabled]}
   [command]
   (ok :categories (template/organization-categories (template/command->organization command))))
 
 (defquery verdict-template
   {:description      "Verdict template summary plus draft data. The
   template must be editable."
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable)]}
   [command]
   (let [template (template/verdict-template (template/command->organization command)
@@ -193,12 +193,12 @@
 
 (defcommand toggle-delete-verdict-template
   {:description      "Toggle template's deletion status"
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id delete]
    :input-validators [(partial action/non-blank-parameters [:template-id])
                       (partial action/boolean-parameters [:delete])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       (template/verdict-template-check)]}
   [command]
   (template/set-deleted (template/command->organization command)
@@ -209,11 +209,11 @@
   {:description      "Makes copy of the template. The new template does not
   have any published versions. In other words, the draft of the
   original is copied."
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       (template/verdict-template-check)]}
   [{:keys [created lang] :as command}]
   (ok (template/copy-verdict-template (template/command->organization command)
@@ -227,11 +227,11 @@
 
 (defquery verdict-template-settings
   {:description      "Settings matching the category or empty response."
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       valid-category]}
   [command]
   (when-let [settings (template/settings (template/command->organization command)
@@ -241,13 +241,13 @@
 (defcommand save-verdict-template-settings-value
   {:description      "Incremental save support for verdict template
   settings. Returns modified timestamp. Creates settings if needed."
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authorityAdmin}
    :parameters       [category path value]
    ;; Value is validated against schema on saving.
    :input-validators [(partial action/non-blank-parameters [:category])
                       (partial action/vector-parameters [:path])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       valid-category]}
   [{:keys [created] :as command}]
   (if-let [error (template/save-settings-value (template/command->organization command)
@@ -264,11 +264,11 @@
 
 (defquery verdict-template-reviews
   {:description      "Reviews matching the category"
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       valid-category]}
   [command]
   (ok :reviews (template/generic-list (template/command->organization command)
@@ -278,11 +278,11 @@
 (defcommand add-verdict-template-review
   {:description      "Creates empty review for the settings
   category. Returns review."
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       valid-category]}
   [{user :user}]
   (ok :review (template/new-review (usr/authority-admins-organization-id user)
@@ -291,7 +291,7 @@
 (defcommand update-verdict-template-review
   {:description         "Updates review details according to the
   parameters. Returns the updated review."
-   :feature             :matti
+   :feature             :pate
    :user-roles          #{:authorityAdmin}
    :parameters          [review-id]
    :optional-parameters [fi sv en type deleted]
@@ -300,7 +300,7 @@
                                                :type :deleted)
                          settings-generic-details-valid
                          settings-review-details-valid]
-   :pre-checks          [matti-enabled
+   :pre-checks          [pate-enabled
                          (settings-generic-editable :reviews)]}
   [{:keys [created user data] :as command}]
   (template/set-review-details (template/command->organization command)
@@ -318,11 +318,11 @@
 
 (defquery verdict-template-plans
   {:description      "Plans matching the category"
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       valid-category]}
   [command]
   (ok :plans (template/generic-list (template/command->organization command)
@@ -332,11 +332,11 @@
 (defcommand add-verdict-template-plan
   {:description      "Creates empty plan for the settings
   category. Returns plan."
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       valid-category]}
   [{user :user}]
   (ok :plan (template/new-plan (usr/authority-admins-organization-id user)
@@ -345,14 +345,14 @@
 (defcommand update-verdict-template-plan
   {:description         "Updates plan details according to the
   parameters. Returns the updated plan."
-   :feature             :matti
+   :feature             :pate
    :user-roles          #{:authorityAdmin}
    :parameters          [plan-id]
    :optional-parameters [fi sv en type deleted]
    :input-validators    [(partial action/non-blank-parameters [:plan-id])
                          (supported-parameters :plan-id :fi :sv :en :deleted)
                          settings-generic-details-valid]
-   :pre-checks          [matti-enabled
+   :pre-checks          [pate-enabled
                          (settings-generic-editable :plans)]}
   [{:keys [created user data] :as command}]
   (template/set-plan-details (template/command->organization command)
@@ -394,20 +394,20 @@
 (defquery default-operation-verdict-templates
   {:description "Map where keys are operations and values template
   ids. Deleted templates are filtered out."
-   :feature     :matti
+   :feature     :pate
    :user-roles  #{:authorityAdmin}
-   :pre-checks  [matti-enabled]}
+   :pre-checks  [pate-enabled]}
   [command]
   (ok :templates (template/operation-verdict-templates (template/command->organization command))))
 
 (defcommand set-default-operation-verdict-template
   {:description      "Set default verdict template for a selected operation
   in the organization."
-   :feature          :matti
+   :feature          :pate
    :user-roles       #{:authorityAdmin}
    :parameters       [operation template-id]
    :input-validators [(partial action/non-blank-parameters [:operation])]
-   :pre-checks       [matti-enabled
+   :pre-checks       [pate-enabled
                       (template/verdict-template-check :published :editable :blank)
                       organization-operation
                       operation-vs-template-category]}
