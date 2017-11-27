@@ -73,38 +73,13 @@ LUPAPISTE.StateIconsModel = function( params ) {
   function approverInfo(attachment) {
 
       var approverInfo = "";
-      var state = util.getIn(attachment, ["approvals", attachment.latestVersion.originalFileId, "state"]);
-
-      if (state === "ok") {
-
-          var getApproval = function (attachment) {
-              var latestApprovedMajorVersions = attachment.versions.length === 1
-                  ? [attachment.latestVersion]
-                  : _(attachment.versions)
-                      .filter(function (v) {
-                          return v.version.major === attachment.latestVersion.version.major
-                      });
-              var firstApprovedVersionId = latestApprovedMajorVersions.length === 1
-                  ? latestApprovedMajorVersions[0].originalFileId
-                  : _(latestApprovedMajorVersions)
-                      .filter(function (v) {
-                          return v.version.minor === 0;
-                      })
-                      .first()
-                      .originalFileId;
-              return util.getIn(attachment, ["approvals", firstApprovedVersionId])
-          };
-
-          var approval = getApproval(attachment);
-          if (approval) {
-              approverInfo = sprintf("%s %s:\n %s %s",
-                                     loc(["document.approved"]),
-                                     moment(approval.timestamp).format("D.M.YYYY HH:mm"),
-                                     approval.user.firstName,
-                                     approval.user.lastName);
-          }
-      } else if (state === "requires_authority_action") {
-
+      var approval = service.attachmentFirstApproval( attachment );
+      if (approval) {
+          approverInfo = sprintf("%s %s:\n %s %s",
+                                 loc(["document.approved"]),
+                                 moment(approval.timestamp).format("D.M.YYYY HH:mm"),
+                                 approval.user.firstName,
+                                 approval.user.lastName);
       }
 
       return approverInfo;
@@ -126,12 +101,16 @@ LUPAPISTE.StateIconsModel = function( params ) {
   }
 
   function stamperInfo(attachment) {
-      var user = attachment.latestVersion.user;
-      return sprintf( "%s %s:\n %s %s",
-          loc(["stamp.comment"]),
-          moment(attachment.latestVersion.created).format( "D.M.YYYY HH:mm" ),
-          user.firstName,
-          user.lastName);
+      var stamping = service.stampingData(attachment);
+      var info = "";
+      if (stamping.isStamped) {
+          info = sprintf("%s %s:\n %s %s",
+                         loc(["stamp.comment"]),
+                         moment(stamping.timestamp).format("D.M.YYYY HH:mm"),
+                         stamping.user.firstName,
+                         stamping.user.lastName);
+      }
+      return info;
   }
 
   self.stateIcons = function() {

@@ -596,6 +596,31 @@ LUPAPISTE.AttachmentsService = function() {
     return fileId && util.getIn( attachment, ["approvals", fileId]);
   };
 
+  // If stamped, gets the approval before stamping
+  self.attachmentFirstApproval = function ( attachment ) {
+      var state = util.getIn(attachment, ["approvals", attachment.latestVersion.originalFileId, "state"]);
+
+      if (attachment.latestVersion.stamped) {
+
+          var earliestPossibleApprovedVersion = _(attachment.versions)
+              .filter(function (v) { return v.version.major === attachment.latestVersion.version.major; })
+              .filter(function (v) { return Object.keys(attachment.approvals).indexOf(v.originalFileId) >= 0 &&
+                                            attachment.approvals[v.originalFileId].state === "ok"; })
+              .sortBy(function (v) { return util.getIn(attachment.approvals, [v.originalFileId, "timestamp"]) })
+              .first();
+
+          return util.getIn(attachment, ["approvals", earliestPossibleApprovedVersion.originalFileId]);
+
+      } else if (state === "ok") {
+
+          return attachment.approvals[attachment.latestVersion.originalFileId];
+
+      } else {
+          return null;
+      }
+
+  };
+
   self.stampingData = function ( attachment ) {
     return {
         isStamped: util.getIn(attachment,["latestVersion", "stamped"]),
@@ -603,7 +628,7 @@ LUPAPISTE.AttachmentsService = function() {
             firstName: util.getIn(attachment, ["latestVersion", "user", "firstName"]),
             lastName: util.getIn(attachment, ["latestVersion", "user", "lastName"])
         },
-        timestamp: util.getIn(attachment, ["latestVersion", "timestamp"])
+        timestamp: util.getIn(attachment, ["latestVersion", "created"])
     };
   };
 
