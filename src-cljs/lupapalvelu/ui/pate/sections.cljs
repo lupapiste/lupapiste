@@ -1,10 +1,10 @@
-(ns lupapalvelu.ui.matti.sections
+(ns lupapalvelu.ui.pate.sections
   (:require [clojure.string :as s]
-            [lupapalvelu.matti.shared :as shared]
+            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
-            [lupapalvelu.ui.matti.layout :as layout]
-            [lupapalvelu.ui.matti.path :as path]
+            [lupapalvelu.ui.pate.layout :as layout]
+            [lupapalvelu.ui.pate.path :as path]
             [rum.core :as rum]))
 
 
@@ -16,7 +16,7 @@
                      (reset! state* flag)
                      (path/meta-updated (assoc options
                                                :path path)))]
-    (components/checkbox {:label      "matti.template-removed"
+    (components/checkbox {:label      "pate.template-removed"
                           :value      (rum/react state*)
                           :handler-fn handler-fn
                           :disabled   (path/disabled? options)
@@ -34,7 +34,7 @@
   {:key-fn #(path/unique-id "section")}
   [{:keys [schema] :as options} section-type]
   (when (path/visible? options)
-    [:div.matti-section
+    [:div.pate-section
      {:class (path/css options)}
      (section-header options section-type)
      (section-body options section-type)]))
@@ -42,7 +42,7 @@
 (defn default-section-body
   [{:keys [schema] :as options}]
   [:div.section-body
-   (layout/matti-grid (path/schema-options options
+   (layout/pate-grid (path/schema-options options
                                            (:grid schema)))])
 
 ;; -------------------------
@@ -51,7 +51,7 @@
 
 (defn template-section-header
   [{:keys [dictionary schema] :as options}]
-  [:div.section-header.matti-grid-2
+  [:div.section-header.pate-grid-2
    [:div.row.row--tight
     [:div.col-1
      [:span.row-text.section-title (path/loc options)]]
@@ -60,7 +60,7 @@
                     (keyword (:id schema)))
        [:span
         (remove-section-checkbox options)]
-       [:span.row-text (common/loc :matti.always-in-verdict)])]]])
+       [:span.row-text (common/loc :pate.always-in-verdict)])]]])
 
 (rum/defc template-section-body < rum/reactive
   [{:keys [schema state] :as options} _]
