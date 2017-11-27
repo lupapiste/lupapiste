@@ -1,18 +1,18 @@
-(ns lupapalvelu.matti-test
+(ns lupapalvelu.pate-test
   (:require [clj-time.core :as time]
-            [lupapalvelu.matti.date :as date]
-            [lupapalvelu.matti.schemas :as schemas]
-            [lupapalvelu.matti.shared  :as shared]
+            [lupapalvelu.pate.date :as date]
+            [lupapalvelu.pate.schemas :as schemas]
+            [lupapalvelu.pate.shared  :as shared]
             [midje.sweet :refer :all]
             [schema.core :refer [defschema] :as sc]))
 
 (def test-template
-  {:dictionary {:check      {:docgen "matti-verdict-check"}
+  {:dictionary {:check      {:docgen "pate-verdict-check"}
                 :delta      {:date-delta {:unit :years}}
                 :phrase     {:phrase-text {:category :paatosteksti}}
                 :multi      {:multi-select {:items [:foo :bar {:text  "Hello"
                                                                :value :world}]}}
-                :string     {:docgen "matti-string"}
+                :string     {:docgen "pate-string"}
                 :delta2     {:date-delta {:unit :days}}
                 :ref-select {:reference-list {:type :select
                                               :path [:path :to :somewhere]}}
@@ -21,18 +21,18 @@
                 :ref-key     {:reference-list {:type     :select
                                                :path     [:my :path]
                                                :item-key :value}}
-                :text       {:docgen "matti-verdict-text"}
-                :giver      {:docgen "matti-verdict-giver"}
+                :text       {:docgen "pate-verdict-text"}
+                :giver      {:docgen "pate-verdict-giver"}
                 :radio      {:docgen "automatic-vs-manual"}
-                :date       {:docgen "matti-date"}
-                :complexity {:docgen {:name "matti-complexity"}}
+                :date       {:docgen "pate-date"}
+                :complexity {:docgen {:name "pate-complexity"}}
                 :keymap     {:keymap {:one   "hello"
                                       :two   :world
                                       :three 88}}
                 :placeholder {:placeholder {:type :neighbors}}
                 :loop {:repeating {:delta3 {:date-delta {:unit :years}}
-                                   :date2 {:docgen "matti-date"}
-                                   :inner-loop {:repeating {:date {:docgen "matti-verdict-check"}}}}}}
+                                   :date2 {:docgen "pate-date"}
+                                   :inner-loop {:repeating {:date {:docgen "pate-verdict-check"}}}}}}
    :name       "test"
    :sections   [{:id   "one"
                  :grid {:columns 4
@@ -70,7 +70,7 @@
                                                         :rows [[{:dict :date}]]}}]]}}]]}}]})
 
 (facts "Test template is valid"
-  (sc/validate shared/MattiVerdictTemplate test-template)
+  (sc/validate shared/PateVerdictTemplate test-template)
   => test-template)
 
 (defn validate-path-value [path value & [references]]

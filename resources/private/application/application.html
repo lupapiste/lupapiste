@@ -124,10 +124,10 @@
                                 <span data-bind="if: unseenVerdicts">
                                       <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
-                            <li data-bind="if: $root.authorization.ok( 'matti-verdict-tab')">
+                            <li data-bind="if: $root.authorization.ok( 'pate-verdict-tab')">
                               <a  data-bind="click: changeTab,
-                                             feature: 'matti'"
-                                  href="#" data-target="matti-verdict" data-test-id="matti-verdict-tab"
+                                             feature: 'pate'"
+                                  href="#" data-target="pate-verdict" data-test-id="pate-verdict-tab"
                                   class="link-btn">
                                 <span data-bind="ltext: 'application.tabVerdict'"></span>
                               </a>
@@ -412,11 +412,11 @@
                     </div>
                     <!-- /ko -->
 
-                    <!-- Matti verdict tab -->
-                    <!-- ko if: selectedTabName() === 'matti-verdict' -->
-                    <div id="application-matti-verdict-tab"
-                         class="tab-content feature--no-border" data-bind="feature: 'matti'">
-                      <cljs-matti_verdicts></cljs-matti_verdicts>
+                    <!-- Pate verdict tab -->
+                    <!-- ko if: selectedTabName() === 'pate-verdict' -->
+                    <div id="application-pate-verdict-tab"
+                         class="tab-content feature--no-border" data-bind="feature: 'pate'">
+                      <cljs-pate_verdicts></cljs-pate_verdicts>
                     </div>
                     <!-- /ko -->
 

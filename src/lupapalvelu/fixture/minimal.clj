@@ -937,7 +937,7 @@
                        :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true
-                       :matti-enabled true
+                       :pate-enabled true
                        :docstore-info (assoc org/default-docstore-info
                                              :docStoreInUse true
                                              :docTerminalInUse true
@@ -1045,7 +1045,7 @@
                        :krysp {:R {:url local-krysp :version "2.2.2"
                                    :http (merge
                                            {:auth-type "basic"
-                                            :partner "matti"
+                                            :partner "pate"
                                             :path {:application "hakemus-path"
                                                    :review  "katselmus-path"}
                                             :url local-krysp-receiver

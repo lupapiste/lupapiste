@@ -1,4 +1,4 @@
-(ns lupapalvelu.matti-integration-itest
+(ns lupapalvelu.pate-integration-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]))
@@ -34,7 +34,7 @@
       (command sonja :approve-application :id app-id :lang "fi") => ok?
       (check-count-and-last-state app-id 3 "sent"))
     (fact "verdictGiven generates message"
-      (give-verdict sonja app-id :verdictId "321-2016-MATTI")
+      (give-verdict sonja app-id :verdictId "321-2016-PATE")
       (check-count-and-last-state app-id 4 "verdictGiven"))
     #_(fact "canceled generates message"
       (command pena :cancel-application :id app-id :lang "fi" :text "prkl") => ok?
