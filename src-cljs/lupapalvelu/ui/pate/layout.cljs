@@ -1,4 +1,4 @@
-(ns lupapalvelu.ui.matti.layout
+(ns lupapalvelu.ui.pate.layout
   "General guidance on the layout component parameters:
 
   schema (schema): The schema of the current component.
@@ -31,24 +31,24 @@
   reference-list components)"
   (:require [clojure.set :as set]
             [clojure.string :as s]
-            [lupapalvelu.matti.shared :as shared]
+            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
-            [lupapalvelu.ui.matti.components :as matti-components]
-            [lupapalvelu.ui.matti.attachments :as matti-att]
-            [lupapalvelu.ui.matti.docgen :as docgen]
-            [lupapalvelu.ui.matti.path :as path]
-            [lupapalvelu.ui.matti.phrases :as phrases]
-            [lupapalvelu.ui.matti.placeholder :as placeholder]
-            [lupapalvelu.ui.matti.service :as service]
-            [lupapalvelu.ui.matti.state :as state]
+            [lupapalvelu.ui.pate.components :as pate-components]
+            [lupapalvelu.ui.pate.attachments :as pate-att]
+            [lupapalvelu.ui.pate.docgen :as docgen]
+            [lupapalvelu.ui.pate.path :as path]
+            [lupapalvelu.ui.pate.phrases :as phrases]
+            [lupapalvelu.ui.pate.placeholder :as placeholder]
+            [lupapalvelu.ui.pate.service :as service]
+            [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
 (defn schema-type [options]
   (-> options :schema keys first keyword))
 
-(declare matti-list)
+(declare pate-list)
 
 ;; -------------------------------
 ;; Miscellaneous components
@@ -70,7 +70,7 @@
     {:class (cond->> [(str "col-" (or col 1))]
               align (cons (str "col--" (name align))))}
     [:div.col--vertical
-     [:label.matti-label (cond
+     [:label.pate-label (cond
                            (keyword? label) (common/loc label)
                            (string? label) label
                            :default common/nbsp)]
@@ -103,12 +103,12 @@
         options      (path/schema-options options schema-value)]
     (if (path/react-meta options :editing?)
       ((case cell-type
-         :date-delta     matti-components/matti-date-delta
+         :date-delta     pate-components/pate-date-delta
          :reference-list (if (= :select (:type schema-value))
-                           matti-components/select-reference-list
-                           matti-components/multi-select-reference-list)
-         :multi-select   matti-components/matti-multi-select
-         :phrase-text    matti-components/matti-phrase-text
+                           pate-components/select-reference-list
+                           pate-components/multi-select-reference-list)
+         :multi-select   pate-components/pate-multi-select
+         :phrase-text    pate-components/pate-phrase-text
          ;; The rest are always displayed as view components
          (partial view-component cell-type)) options wrap-label?)
       (view-component cell-type options wrap-label?))))
@@ -140,18 +140,18 @@
 (defmethod view-component :reference-list
   [_ {:keys [state path schema ] :as options} & [wrap-label?]]
   (let [values (set (flatten [(path/value path state)]))
-        span [:span (->> (matti-components/resolve-reference-list options)
+        span [:span (->> (pate-components/resolve-reference-list options)
                          (filter #(contains? values (:value %)))
                          (map :text)
                          (s/join (get schema :separator ", ")))]]
-    (if (matti-components/show-label? schema wrap-label?)
+    (if (pate-components/show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options span)
       span)))
 
 (defmethod view-component :phrase-text
   [_ {:keys [state path schema] :as options} & [wrap-label?]]
   (let [span [:span.phrase-text (path/value path state)]]
-    (if (matti-components/show-label? schema wrap-label?)
+    (if (pate-components/show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options span)
       span)))
 
@@ -159,21 +159,21 @@
   [_ {:keys [state path schema] :as options} & [wrap-label?]]
   (let [span [:span.formatted (path/react (-> schema :path util/split-kw-path)
                                           state)]]
-    (if (matti-components/show-label? schema wrap-label?)
+    (if (pate-components/show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options span)
       span)))
 
 (defmethod view-component :placeholder
   [_ {:keys [state path schema] :as options} & [wrap-label?]]
   (let [elem (placeholder/placeholder options)]
-    (if (matti-components/show-label? schema wrap-label?)
+    (if (pate-components/show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options elem)
       elem)))
 
 (defmethod view-component :attachments
   [_ {:keys [state path schema] :as options} & [wrap-label?]]
-  (let [elem (matti-att/matti-attachments options)]
-    (if (matti-components/show-label? schema wrap-label?)
+  (let [elem (pate-att/pate-attachments options)]
+    (if (pate-components/show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options elem)
       elem)))
 
@@ -182,12 +182,12 @@
 ;; -------------------------------
 
 
-(rum/defc matti-list < rum/reactive
+(rum/defc pate-list < rum/reactive
   [{:keys [schema] :as options} & [wrap-label?]]
-  [:div.matti-list
+  [:div.pate-list
    {:class (path/css options)}
    (when (and wrap-label? (:title schema))
-     [:h4.matti-label (common/loc (:title schema))])
+     [:h4.pate-label (common/loc (:title schema))])
    (map-indexed (fn [i item-schema]
                   (let [item-options (path/schema-options options item-schema)]
                     (when (path/visible? item-options)
@@ -200,12 +200,12 @@
                                       true))])))
                 (:items schema))])
 
-(rum/defc matti-grid < rum/reactive
+(rum/defc pate-grid < rum/reactive
   [{:keys [schema path state] :as options}]
   (letfn [(grid [{:keys [schema] :as options}]
             [:div
              {:class (path/css options
-                               (str "matti-grid-" (:columns schema)))}
+                               (str "pate-grid-" (:columns schema)))}
              (map (fn [row-schema]
                     (let [row-options (path/schema-options options row-schema)]
                       ;; Row visibility
@@ -226,11 +226,11 @@
                                                     true)
 
                                        :list
-                                       :>> #(matti-list (path/schema-options cell-options %)
+                                       :>> #(pate-list (path/schema-options cell-options %)
                                                         true)
 
                                        :grid
-                                       :>> #(matti-grid (path/schema-options cell-options %))
+                                       :>> #(pate-grid (path/schema-options cell-options %))
 
                                        nil)])))
 
