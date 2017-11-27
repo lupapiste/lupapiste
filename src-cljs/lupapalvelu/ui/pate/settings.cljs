@@ -1,14 +1,14 @@
-(ns lupapalvelu.ui.matti.settings
+(ns lupapalvelu.ui.pate.settings
   (:require [clojure.string :as s]
-            [lupapalvelu.matti.shared :as shared]
+            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
-            [lupapalvelu.ui.matti.components :as matti-components]
-            [lupapalvelu.ui.matti.layout :as layout]
-            [lupapalvelu.ui.matti.path :as path]
-            [lupapalvelu.ui.matti.sections :as sections]
-            [lupapalvelu.ui.matti.service :as service]
-            [lupapalvelu.ui.matti.state :as state]
+            [lupapalvelu.ui.pate.components :as pate-components]
+            [lupapalvelu.ui.pate.layout :as layout]
+            [lupapalvelu.ui.pate.path :as path]
+            [lupapalvelu.ui.pate.sections :as sections]
+            [lupapalvelu.ui.pate.service :as service]
+            [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
@@ -73,7 +73,7 @@
      (->> shared/review-type-map
           keys
           (map (fn [k]
-                 {:text (common/loc (str "matti.review-type." (name k)))
+                 {:text (common/loc (str "pate.review-type." (name k)))
                   :value k}))
           (sort-by :text)
           (map (fn [{:keys [value text]}]
@@ -97,7 +97,7 @@
 
 (defn type-cell [{:keys [id type deleted]}]
   (if deleted
-    [:span (common/loc (str "matti.review-type." (name type)))]
+    [:span (common/loc (str "pate.review-type." (name type)))]
     (type-edit type (partial update-details :review id :type type))))
 
 (rum/defcs generic-editor < rum/reactive
@@ -105,7 +105,7 @@
   [{show-deleted ::show-deleted} generic-type]
   (let [items    (rum/react (generic-state generic-type))
         check-id (js/sprintf "show-deleted-%ss" (name generic-type))]
-    [:div.matti-settings-editor
+    [:div.pate-settings-editor
      (when (some :deleted items)
        [:div.checkbox-wrapper
         [:input {:type  "checkbox"
@@ -119,7 +119,7 @@
                       items
                       (remove :deleted items))]
        (when (seq filtered)
-         [:table.matti-editor-table
+         [:table.pate-editor-table
           [:thead
            [:tr
             [:th (common/loc "lang.fi")]
@@ -142,7 +142,7 @@
                                                         (upsert-generic generic-type)
                                                         :deleted
                                                         (not deleted))}
-                    (common/loc (if deleted :matti-restore :remove))]]])]]))
+                    (common/loc (if deleted :pate-restore :remove))]]])]]))
      [:button.positive
       {:on-click #(service/new-generic generic-type
                                        @state/current-category
@@ -155,10 +155,10 @@
 ;; -------------------------
 
 (defn settings-section-header [{:keys [path schema state] :as options} edit?]
-  [:div.matti-grid-6.section-header
+  [:div.pate-grid-6.section-header
    [:div.row.row--tight
     [:div.col-4
-     [:span.matti-label
+     [:span.pate-label
       (when edit? {:class :row-text})
       (path/loc options)]]
     (when (and edit? (path/enabled? options))
@@ -176,7 +176,7 @@
      (case (-> schema :id keyword)
        :reviews (generic-editor :review)
        :plans   (generic-editor :plan))
-     (layout/matti-grid (path/schema-options options
+     (layout/pate-grid (path/schema-options options
                                              (:grid schema))))])
 
 (defmethod sections/section-header :settings
@@ -190,12 +190,12 @@
 
 (rum/defc verdict-template-settings < rum/reactive
   [{:keys [schema] :as options}]
-  [:div.matti-settings
-   [:div.matti-grid-2
+  [:div.pate-settings
+   [:div.pate-grid-2
     [:div.row.row--tight
      [:div.col-1
-      [:h2.matti-settings-title (common/loc :matti-settings
+      [:h2.pate-settings-title (common/loc :pate-settings
                                             (common/loc (:title schema)))]]
      [:div.col-1.col--right
-      (matti-components/last-saved options)]]]
+      (pate-components/last-saved options)]]]
    (sections/sections options :settings)])
