@@ -1,7 +1,7 @@
-(ns lupapalvelu.ui.matti.service
+(ns lupapalvelu.ui.pate.service
   (:require [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.hub :as hub]
-            [lupapalvelu.ui.matti.state :as state]
+            [lupapalvelu.ui.pate.state :as state]
             [lupapalvelu.ui.authorization :as auth]
             [sade.shared-util :as util]))
 
@@ -26,7 +26,7 @@
   (fn [response]
     (fetch-template-list)
     (callback response)
-    (hub/send "matti::verdict-templates-changed")))
+    (hub/send "pate::verdict-templates-changed")))
 
 (defn fetch-categories [callback]
   (common/query "verdict-template-categories"
@@ -144,32 +144,32 @@
                 :id app-id))
 
 (defn fetch-verdict-list [app-id]
-  (common/query "matti-verdicts"
+  (common/query "pate-verdicts"
                 #(reset! state/verdict-list (:verdicts %))
                 :id app-id))
 
 (defn new-verdict-draft [app-id template-id callback]
-  (common/command {:command "new-matti-verdict-draft"
+  (common/command {:command "new-pate-verdict-draft"
                    :success #(do (fetch-verdict-list app-id)
                                  (callback %))}
                   :id app-id
                   :template-id template-id))
 
 (defn open-verdict [app-id verdict-id callback]
-  (common/query "matti-verdict"
+  (common/query "pate-verdict"
                 callback
                 :id app-id
                 :verdict-id verdict-id))
 
 (defn delete-verdict [app-id verdict-id callback]
-  (common/command {:command "delete-matti-verdict"
+  (common/command {:command "delete-pate-verdict"
                    :success #(do (fetch-verdict-list app-id)
                                  (callback %))}
                   :id app-id
                   :verdict-id verdict-id))
 
 (defn edit-verdict [app-id verdict-id path value callback]
-  (common/command {:command "edit-matti-verdict"
+  (common/command {:command "edit-pate-verdict"
                    :success callback}
                   :id app-id
                   :verdict-id verdict-id
@@ -177,7 +177,7 @@
                   :value value))
 
 (defn publish-and-reopen-verdict [app-id verdict-id callback]
-  (common/command {:command :publish-matti-verdict
+  (common/command {:command :publish-pate-verdict
                    :success (fn []
                               (open-verdict app-id verdict-id callback)
                               (js/repository.load app-id))}
