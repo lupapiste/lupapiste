@@ -1,11 +1,11 @@
-(ns lupapalvelu.matti.verdict-template
+(ns lupapalvelu.pate.verdict-template
   (:require [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.matti.date :as date]
-            [lupapalvelu.matti.schemas :as schemas]
-            [lupapalvelu.matti.shared :as shared]
+            [lupapalvelu.pate.date :as date]
+            [lupapalvelu.pate.schemas :as schemas]
+            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as ops]
             [lupapalvelu.organization :as org]
@@ -40,13 +40,13 @@
      (mongo/update-by-id :organizations
                          org-id
                          {$push {:verdict-templates.templates
-                                 (sc/validate schemas/MattiSavedTemplate
+                                 (sc/validate schemas/PateSavedTemplate
                                               (assoc data
                                                      :deleted false))}})
      data))
   ([org-id timestamp lang category]
    (new-verdict-template org-id timestamp lang category {}
-                         (i18n/localize lang :matti-verdict-template))))
+                         (i18n/localize lang :pate-verdict-template))))
 
 (defn verdict-template [{templates :verdict-templates} template-id]
   (util/find-by-id template-id (:templates templates)))
@@ -168,7 +168,7 @@
                      {$set {:verdict-templates.templates.$.published
                             {:published timestamp
                              :data      (:draft template)
-                             :settings  (sc/validate schemas/MattiPublishedSettings
+                             :settings  (sc/validate schemas/PatePublishedSettings
                                                      (published-settings organization
                                                                          (:category template)))}}})))
 
@@ -193,7 +193,7 @@
                           draft
                           (format "%s (%s)"
                                   name
-                                  (i18n/localize lang :matti-copy-postfix)))))
+                                  (i18n/localize lang :pate-copy-postfix)))))
 
 (defn- settings-key [category & extra]
   (->> [:verdict-templates.settings category extra]
@@ -292,7 +292,7 @@
 ;; Reviews
 
 (defn new-review [organization-id category]
-  (new-generic organization-id category :matti.katselmus :reviews
+  (new-generic organization-id category :pate.katselmus :reviews
                :type :muu-katselmus))
 
 (defn review [organization review-id]
@@ -304,7 +304,7 @@
 ;; Plans
 
 (defn new-plan [organization-id category]
-  (new-generic organization-id category :matti.plans :plans))
+  (new-generic organization-id category :pate.plans :plans))
 
 (defn plan [organization review-id]
   (generic organization review-id :plans))
