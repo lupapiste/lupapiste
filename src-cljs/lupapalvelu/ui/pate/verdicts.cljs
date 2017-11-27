@@ -1,26 +1,26 @@
-(ns lupapalvelu.ui.matti.verdicts
+(ns lupapalvelu.ui.pate.verdicts
   (:require [clojure.set :as set]
-            [lupapalvelu.matti.shared :as shared]
+            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
-            [lupapalvelu.ui.matti.layout :as layout]
-            [lupapalvelu.ui.matti.components :as matti-components]
-            [lupapalvelu.ui.matti.path :as path]
-            [lupapalvelu.ui.matti.phrases :as phrases]
-            [lupapalvelu.ui.matti.sections :as sections]
-            [lupapalvelu.ui.matti.service :as service]
-            [lupapalvelu.ui.matti.state :as state]
+            [lupapalvelu.ui.pate.layout :as layout]
+            [lupapalvelu.ui.pate.components :as pate-components]
+            [lupapalvelu.ui.pate.path :as path]
+            [lupapalvelu.ui.pate.phrases :as phrases]
+            [lupapalvelu.ui.pate.sections :as sections]
+            [lupapalvelu.ui.pate.service :as service]
+            [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]
             [sade.shared_util :as util]))
 
 (defonce args (atom {}))
 
 (defn- can-edit? []
-  (state/auth? :edit-matti-verdict))
+  (state/auth? :edit-pate-verdict))
 
 (defn- can-view? []
-  (state/auth? :matti-verdicts))
+  (state/auth? :pate-verdicts))
 
 (defn update-changes-and-errors [{:keys [state path]}]
   (fn [{:keys [modified changes errors] :as response}]
@@ -95,7 +95,7 @@
 
 (rum/defc verdict-section-header < rum/reactive
   [{:keys [schema] :as options}]
-  [:div.matti-grid-1.section-header
+  [:div.pate-grid-1.section-header
    (when (and (not (-> schema :buttons? false?))
               (path/enabled? options))
      [:div.row.row--tight
@@ -114,8 +114,8 @@
 (rum/defc verdict < rum/reactive
   [{:keys [schema state info] :as options}]
   (let [published (path/value :published info)]
-    [:div.matti-verdict
-     [:div.matti-grid-2
+    [:div.pate-verdict
+     [:div.pate-grid-2
       (when (path/enabled? options)
         [:div.row
          [:div.col-2.col--right
@@ -134,11 +134,11 @@
         [:div.row
          [:div.col-2.col--right
           [:span.verdict-published
-           (common/loc :matti.verdict-published
+           (common/loc :pate.verdict-published
                        (js/util.finnishDate published))]]]
         [:div.row.row--tight
          [:div.col-2.col--right
-          (matti-components/last-saved options)]])]
+          (pate-components/last-saved options)]])]
      (sections/sections options :verdict)]))
 
 (rum/defcs new-verdict < rum/reactive
@@ -147,16 +147,16 @@
   (let [templates (rum/react state/template-list)]
 
     (if (empty? templates)
-      [:div.matti-note (path/loc :matti.no-verdict-templates)]
+      [:div.pate-note (path/loc :pate.no-verdict-templates)]
       (let [items (map #(set/rename-keys % {:id :value :name :text})
                        templates)]
         (when-not (rum/react template*)
           (common/reset-if-needed! template*
                                    (:value (or (util/find-by-key :default? true items)
                                                (first items)))))
-        [:div.matti-grid-6
+        [:div.pate-grid-6
          [:div.row
-          (layout/vertical {:label :matti-verdict-template
+          (layout/vertical {:label :pate-verdict-template
                             :align :full}
                            (components/dropdown template*
                                                 {:items items}))
@@ -182,7 +182,7 @@
             (when (can-edit-verdict? verdict)
               [:i.lupicon-remove.primary {:on-click #(service/delete-verdict app-id id reset-verdict)}])])
          verdicts)]
-   (when (state/auth? :new-matti-verdict-draft)
+   (when (state/auth? :new-pate-verdict-draft)
      (new-verdict))])
 
 (rum/defc verdicts < rum/reactive
@@ -210,12 +210,12 @@
                                                      :references state/references)))))]))
 
 (defn mount-component []
-  (when (common/feature? :matti)
+  (when (common/feature? :pate)
     (rum/mount (verdicts)
                (.getElementById js/document (:dom-id @args)))))
 
 (defn ^:export start [domId _]
-  (when (common/feature? :matti)
+  (when (common/feature? :pate)
     (swap! args assoc
            :dom-id (name domId))
     (service/fetch-schemas)
