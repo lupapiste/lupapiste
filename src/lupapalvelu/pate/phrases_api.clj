@@ -1,8 +1,8 @@
-(ns lupapalvelu.matti.phrases-api
+(ns lupapalvelu.pate.phrases-api
   "Phrases support for verdicts and verdict templates."
   (:require [lupapalvelu.action :refer [defquery defcommand] :as action]
-            [lupapalvelu.matti.phrases :as phrases]
-            [lupapalvelu.matti.verdict-template :as template]
+            [lupapalvelu.pate.phrases :as phrases]
+            [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]))
@@ -10,7 +10,7 @@
 (defquery organization-phrases
   {:description "Phrases for the authority admin's organization."
    :user-roles  #{:authorityAdmin}
-   :feature     :matti}
+   :feature     :pate}
   [command]
   (ok :phrases (get (template/command->organization command)
                     :phrases
@@ -21,7 +21,7 @@
    :user-roles       #{:authority}
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :feature          :matti
+   :feature          :pate
    ;; TODO: Refine states
    :states           states/all-states}
   [{:keys [organization]}]
@@ -35,7 +35,7 @@
    :input-validators    [phrases/valid-category
                          (partial action/non-blank-parameters [:tag :phrase])]
    :pre-checks          [phrases/phrase-id-ok]
-   :feature             :matti}
+   :feature             :pate}
   [command]
   (phrases/upsert-phrase command))
 
@@ -45,7 +45,7 @@
    :parameters       [phrase-id]
    :input-validators [(partial action/non-blank-parameters [:phrase-id])]
    :pre-checks       [phrases/phrase-id-exists]
-   :feature          :matti}
+   :feature          :pate}
   [{user :user}]
   (phrases/delete-phrase (usr/authority-admins-organization-id user)
                          phrase-id))
