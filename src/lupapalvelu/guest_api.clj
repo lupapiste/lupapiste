@@ -53,7 +53,7 @@
   guestAuthority) access. Guest 'authorization' does not need to be
   explicitly acknowledged by the invitee."
    :user-roles          #{:applicant :authority}
-   :user-authz-roles    (conj roles/default-authz-writer-roles :foreman)
+   :user-authz-roles    roles/writer-roles-with-foreman
    :parameters          [:id :email :role]
    :optional-parameters [:text]
    :pre-checks          [foreman/allow-foreman-only-in-foreman-app
@@ -93,7 +93,7 @@
 (defcommand delete-guest-application
   {:description "Cancels the guest access from application."
    :user-roles #{:applicant :authority}
-   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
+   :user-authz-roles roles/writer-roles-with-foreman
    :parameters [:id :username]
    :input-validators [(partial action/non-blank-parameters [:username])]
    :pre-checks [guest/auth-modification-check

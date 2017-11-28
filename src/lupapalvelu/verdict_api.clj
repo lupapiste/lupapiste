@@ -198,7 +198,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :verdictId :password :lang])]
    :states     states/post-verdict-states
    :user-roles #{:applicant :authority}
-   :user-authz-roles roles/signing-user-authz-roles}
+   :user-authz-roles roles/writer-roles-with-foreman}
   [{:keys [application created user created] :as command}]
   (if (usr/get-user-with-password (:username user) password)
     (when-let [verdict (find-verdict application verdictId)]
