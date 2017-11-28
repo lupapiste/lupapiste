@@ -119,6 +119,18 @@ LUPAPISTE.DocumentDataService = function(params) {
     });
   };
 
+  self.uploadPremisesData = function(file, cb) {
+    var params = {
+        applicationId: self.applicationId,
+        cb: cb
+        };
+
+    alert("Jo matkaan muuttohaukka käy")
+      // ajax.command(upload-premises-data,
+      //              self.getTargetCollection(documentId),
+      //              params,
+  };
+
   function command(commandName, collection, documentId, params, opts) {
     var indicator = opts.indicator || _.noop;
     var cb = opts.cb || _.noop;
