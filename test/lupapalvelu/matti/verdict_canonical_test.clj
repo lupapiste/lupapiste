@@ -139,13 +139,23 @@
                                 :in-any-order :gaps-ok))
 
     (fact "not nil fields"
-      (keys (filter val canonical)) => (just #{:autopaikkojaRakennettu
+      (keys (filter val canonical)) => (just #{:autopaikkojaRakennettava
+                                               :autopaikkojaRakennettu
                                                :autopaikkojaKiinteistolla
                                                :vaaditutKatselmukset
                                                :maaraystieto
                                                :vaadittuErityissuunnitelmatieto
                                                :vaadittuTyonjohtajatieto}
                                              :in-any-order :gaps-ok))
+
+    (fact "autopaikkojarakennettava"
+      (:autopaikkojaRakennettava canonical) => 3)
+
+    (fact "autopaikkojarakennettu"
+      (:autopaikkojaRakennettu canonical) => 1)
+
+    (fact "autopaikkojakiinteistolla"
+      (:autopaikkojaKiinteistolla canonical) => 2)
 
     (fact "two reviews"
       (map (comp :katselmuksenLaji :Katselmus) (:vaaditutKatselmukset canonical))

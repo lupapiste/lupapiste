@@ -8,17 +8,17 @@
   (let [review (util/find-by-id review-id reviews)]
     {:Katselmus {:katselmuksenLaji (matti-shared/review-type-map (or (keyword (:type review)) :ei-tiedossa))
                  :tarkastuksenTaiKatselmuksenNimi (get-in review [:name (keyword lang)])
-                 :muuTunnustieto [#_{:MuuTunnus "yht:MuuTunnusType"}]}})) ; TODO: find out if reviews should be initialized and pass id here
+                 :muuTunnustieto [#_{:MuuTunnus "yht:MuuTunnusType"}]}})) ; TODO: initialize review tasks and pass ids here
 
 (defn- maarays-canonical [lang {data :data :as verdict}]
   {:Maarays {:sisalto (:conditions data)
-             :maaraysPvm (util/to-xml-date-from-string (:verdict-date data)) ; TODO: is this ok?
-             :toteutusHetki nil}}) ; TODO: should this be empty
+             :maaraysPvm (util/to-xml-date-from-string (:verdict-date data))
+             :toteutusHetki nil}})
 
 (defn- vaadittu-erityissuunnitelma-canonical [lang {{plans :plans} :references :as verdict} plan-id]
   (let [plan (util/find-by-id plan-id plans)]
     {:VaadittuErityissuunnitelma {:vaadittuErityissuunnitelma (get-in plan [:name (keyword lang)])
-                                  :toteutumisPvm nil}})) ; TODO: should this be empty
+                                  :toteutumisPvm nil}}))
 
 (def ^:private foreman-role-mapping {:vv-tj "KVV-ty\u00f6njohtaja"
                                      :iv-tj "IV-ty\u00f6njohtaja"
@@ -32,10 +32,10 @@
 
 (defn- lupamaaraykset-type-canonical [lang {{buildings :buildings :as data} :data :as verdict}]
   {:autopaikkojaEnintaan nil
-   :autopaikkojaVahintaan nil ; TODO: where to put this (:autopaikkoja-yhteensa building)
-   :autopaikkojaRakennettava nil
-   :autopaikkojaRakennettu (:rakennetut-autopaikat (first (vals buildings))) ; TODO: how this should work for multiple buildings
-   :autopaikkojaKiinteistolla (:kiinteiston-autopaikat (first (vals buildings))) ; TODO: how this should work for multiple buildings
+   :autopaikkojaVahintaan nil
+   :autopaikkojaRakennettava (->> (map :autopaikat-yhteensa (vals buildings)) (map util/->int) (apply +))
+   :autopaikkojaRakennettu (->> (map :rakennetut-autopaikat (vals buildings)) (map util/->int) (apply +))
+   :autopaikkojaKiinteistolla (->> (map :kiinteiston-autopaikat (vals buildings)) (map util/->int) (apply +))
    :autopaikkojaUlkopuolella nil
    :kerrosala nil
    :kokonaisala nil
@@ -49,7 +49,7 @@
   {:aloitettavaPvm (util/to-xml-date-from-string (:aloitettava data))
    :lainvoimainenPvm (util/to-xml-date-from-string (:lainvoimainen data))
    :voimassaHetkiPvm (util/to-xml-date-from-string (:voimassa data))
-   :raukeamisPvm nil ; TODO: find out if this sould be based on :voimassa
+   :raukeamisPvm nil
    :antoPvm (util/to-xml-date-from-string (:anto data))
    :viimeinenValitusPvm (util/to-xml-date-from-string (:valitus data))
    :julkipanoPvm (util/to-xml-date-from-string (:julkipano data))})
@@ -66,7 +66,7 @@
    :paatoksentekija (paatoksentekija lang verdict)
    :paatospvm (util/to-xml-date-from-string (:verdict-date data))
    :pykala (:verdict-section data)
-   :liite nil #_"yht:RakennusvalvontaLiiteType"}) ; TODO: add attachments
+   :liite nil #_"yht:RakennusvalvontaLiiteType"}) ; TODO: add generated pdf attachment
 
 (defn verdict-canonical [application lang verdict]
   {:Paatos {:lupamaaraykset (lupamaaraykset-type-canonical lang verdict)

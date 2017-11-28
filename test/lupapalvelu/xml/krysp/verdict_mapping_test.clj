@@ -6,6 +6,7 @@
             [sade.common-reader :as cr]
             [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa]]
             [lupapalvelu.matti.verdict-canonical-test :refer [verdict]]
+            [lupapalvelu.xml.krysp.vercict-mapping]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.validator :as validator]))
 
@@ -39,6 +40,9 @@
     => (:id application-rakennuslupa))
 
   (facts "lupamaaraykset"
+    (fact "autopaikkojarakennettava"
+      (xml/get-text lp-xml [:paatostieto :lupamaaraykset :autopaikkojaRakennettava]) => "3")
+
     (fact "autopaikkojarakennettu"
       (xml/get-text lp-xml [:paatostieto :lupamaaraykset :autopaikkojaRakennettu]) => "1")
 
