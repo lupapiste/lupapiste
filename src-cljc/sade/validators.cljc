@@ -1,6 +1,6 @@
 (ns sade.validators
   (:require #?@(:clj [[clj-time.format :as timeformat]
-                      [sade.strings :as ss]]
+                      [sade.env :as env]]
                 :cljs [[cljs-time.format :as timeformat]])))
 
 (defn matches? [re s] (boolean (when (string? s) (re-matches re s))))
@@ -81,7 +81,8 @@
 
 (def rakennustunnus-pattern
   "VRK pysyva rakennustunnus. KRYSP-skeemassa: ([1][0-9]{8})[0-9ABCDEFHJKLMNPRSTUVWXY]"
-  (re-pattern (or (env/value :rakennustunnus-pattern) "^1\\d{8}[0-9A-FHJ-NPR-Y]$")))
+  #?(:clj (re-pattern (or (env/value :rakennustunnus-pattern) "^1\\d{8}[0-9A-FHJ-NPR-Y]$"))
+     :cljs #"^1\{8}[0-9A-FHJ-NPR-Y]$"))
 
 (defn rakennustunnus? [^String prt]
   (and (matches? rakennustunnus-pattern prt) (rakennustunnus-checksum-matches? prt)))
