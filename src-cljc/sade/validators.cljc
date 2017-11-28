@@ -81,10 +81,10 @@
 
 (def rakennustunnus-pattern
   "VRK pysyva rakennustunnus. KRYSP-skeemassa: ([1][0-9]{8})[0-9ABCDEFHJKLMNPRSTUVWXY]"
-  #"^1\d{8}[0-9A-FHJ-NPR-Y]$")
+  (re-pattern (or (env/value :rakennustunnus-pattern) "^1\\d{8}[0-9A-FHJ-NPR-Y]$")))
 
 (defn rakennustunnus? [^String prt]
-  (and  (matches? rakennustunnus-pattern prt) (rakennustunnus-checksum-matches? prt)))
+  (and (matches? rakennustunnus-pattern prt) (rakennustunnus-checksum-matches? prt)))
 
 (def finnish-zip? (partial matches? #"^\d{5}$"))
 
