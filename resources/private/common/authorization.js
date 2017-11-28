@@ -68,7 +68,8 @@ var authorization = (function() {
           var newData = d.actionsById[id] || {};
           authModel.setData(newData);
           if (!_.isEqual(oldData, newData)) {
-            hub.send("category-auth-model-changed", {targetId: id});
+            hub.send("category-auth-model-changed", {targetId: id,
+                                                     category: category});
           }
         });
         if (_.isFunction(callback)) { callback(d.result); }

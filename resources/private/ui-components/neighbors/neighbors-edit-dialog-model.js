@@ -12,19 +12,19 @@ LUPAPISTE.NeighborsEditDialogModel = function(params) {
         address = owner.address || {};
 
     return self
-      .status(self.statusInit)
-      .id(lupapisteApp.models.application.id())
-      .neighborId(neighbor.id)
-      .propertyId(util.prop.toHumanFormat( neighbor.propertyId ))
-      .name(owner.name)
-      .street(address.street)
-      .city(address.city)
-      .zip(address.zip)
-      .email(owner.email)
-      .type(owner.type)
-      .nameOfDeceased(owner.nameOfDeceased)
-      .businessID(owner.businessID)
-      .pending(false);
+           .status(self.statusInit)
+           .id(lupapisteApp.models.application.id())
+           .neighborId(neighbor.id)
+           .propertyId(util.prop.toHumanFormat( neighbor.propertyId ))
+           .name(owner.name)
+           .street(address.street)
+           .city(address.city)
+           .zip(address.zip)
+           .email(owner.email)
+           .type(owner.type)
+           .nameOfDeceased(owner.nameOfDeceased)
+           .businessID(owner.businessID)
+           .pending(false);
   };
 
   self.edit = function() { return self.status(self.statusEdit); };
@@ -59,7 +59,7 @@ LUPAPISTE.NeighborsEditDialogModel = function(params) {
     }
   }, self);
 
-  self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId());});
+  self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyIdWithMaaraala(self.propertyId());});
   self.emailOk = ko.computed(function() { return _.isBlank(self.email()) || util.isValidEmailAddress(self.email()); });
   self.isSubmitEnabled = ko.pureComputed(function() { return !self.pending() && self.propertyIdOk() && self.emailOk(); });
 
@@ -78,7 +78,7 @@ LUPAPISTE.NeighborsEditDialogModel = function(params) {
     ajax
       .command(self.neighborId() ? "neighbor-update" : "neighbor-add",
                _.defaults(_.zipObject(paramNames, _.map(paramNames, paramValue)),
-                         {propertyId: util.prop.toDbFormat( self.propertyId()) }))
+                         {propertyId: util.prop.withMaaraalaToDbFormat( self.propertyId()) }))
       .pending(self.pending)
       .success(function() {
         repository.load(self.id());

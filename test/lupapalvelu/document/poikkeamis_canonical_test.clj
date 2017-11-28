@@ -217,7 +217,7 @@
         Popast (:Popast canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Popast) => truthy
         aineistonnimi (:aineistonnimi toimituksenTiedot) => (:title poikkari-hakemus)
-        aineistotoimittaja (:aineistotoimittaja toimituksenTiedot) => (env/value :technical-contact)
+        aineistotoimittaja (:aineistotoimittaja toimituksenTiedot) => (env/value :aineistotoimittaja)
         tila (:tila toimituksenTiedot) => "keskener\u00e4inen"
         kuntakoodi (:kuntakoodi toimituksenTiedot) => (:municipality poikkari-hakemus)
 
@@ -410,7 +410,7 @@
         Popast (:Popast canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Popast) => truthy
         aineistonnimi (:aineistonnimi toimituksenTiedot) => (:title suunnitelutarveratkaisu)
-        aineistotoimittaja (:aineistotoimittaja toimituksenTiedot) => (env/value :technical-contact)
+        aineistotoimittaja (:aineistotoimittaja toimituksenTiedot) => (env/value :aineistotoimittaja)
         tila (:tila toimituksenTiedot) => "keskener\u00e4inen"
         kuntakoodi (:kuntakoodi toimituksenTiedot) => (:municipality suunnitelutarveratkaisu)
 

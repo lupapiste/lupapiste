@@ -3555,6 +3555,108 @@
                                                    "Tj\u00e4nsteinnehavarbeslut fattas dagligen. Besv\u00e4rstiden \u00e4r 14 dagar fr\u00e5n det att besluten kungjorts."
                                                    "F\u00f6rteckningarna finns offentligt fra\u03c0mlagda p\u00e5 anslagstavlan i byggnadstillsynens entr\u00e9hall och p\u00e5 listan som finns nedanf\u00f6r."]}}}}}))
 
+
+(def bad-review-attachments-query {:attachments {$elemMatch {$and [{:target.type "task"}
+                                                                   {:type.type-id "paatos"}
+                                                                   {:latestVersion.user.username "eraajo@lupapiste.fi"}]}}})
+
+;; Old fetched review attachments had a wrong type (paatos).
+(defmigration katselmuspoytakirja-type-fix
+  {:apply-when (pos? (mongo/count :applications bad-review-attachments-query))}
+  (update-applications-array :attachments
+                             (fn [{:keys [target type latestVersion] :as attachment}]
+                               (if (and (= (:type target) "task")
+                                        (= (:type-id type) "paatos")
+                                        (= (get-in latestVersion [:user :username]) "eraajo@lupapiste.fi"))
+                                 (assoc attachment
+                                        :type {:type-group "katselmukset_ja_tarkastukset"
+                                               :type-id    "katselmuksen_tai_tarkastuksen_poytakirja"})
+                                 attachment))
+                             bad-review-attachments-query))
+
+(defmigration add-docterminal-use-info
+  {:apply-when (pos? (mongo/count :organizations {:docstore-info.docTerminalInUse {$exists false}}))}
+  (mongo/update :organizations
+                {:docstore-info.docTerminalInUse {$exists false}}
+                {$set {:docstore-info.docTerminalInUse false}}
+                :multi true))
+
+(defmigration add-docterminal-allowed-attachment-types
+  {:apply-when (pos? (mongo/count :organizations {:docstore-info.allowedTerminalAttachmentTypes {$exists false}}))}
+  (mongo/update :organizations
+                {:docstore-info.allowedTerminalAttachmentTypes {$exists false}}
+                {$set {:docstore-info.allowedTerminalAttachmentTypes []}}
+                :multi true))
+
+(def missing-onkalo-file-id-query
+  {:attachments {$elemMatch {:metadata.tila :arkistoitu
+                             :latestVersion.onkaloFileId {$exists false}}}})
+
+(defmigration add-onkalo-file-id-to-attachments
+  {:apply-when (pos? (mongo/count :applications missing-onkalo-file-id-query))}
+  (update-applications-array :attachments
+                             (fn [{:keys [id latestVersion versions metadata] :as attachment}]
+                               (if (and (= :arkistoitu (keyword (:tila metadata)))
+                                        (not (:onkaloFileId latestVersion)))
+                                 (let [lv (-> (last versions)
+                                              (assoc :onkaloFileId id))]
+                                   (-> (assoc-in attachment [:latestVersion :onkaloFileId] id)
+                                       (assoc :versions (-> (drop-last versions)
+                                                            (concat [lv])))))
+                                 attachment))
+                             missing-onkalo-file-id-query))
+
+(def archiving-project-file-query
+  {:permitType "ARK"
+   :attachments {$elemMatch {:metadata.tila :arkistoitu
+                             :latestVersion.fileId {$type "string"}}}})
+
+(defmigration remove-archived-archiving-project-files
+  {:apply-when (pos? (mongo/count :applications archiving-project-file-query))}
+  (doseq [app (mongo/select :applications archiving-project-file-query [:_id :attachments :permitType])]
+    (doseq [{:keys [metadata latestVersion] :as attachment} (:attachments app)]
+      (when (and (= "ARK" (:permitType app))
+                 (= :arkistoitu (keyword (:tila metadata)))
+                 (:onkaloFileId latestVersion))
+        (att/delete-archived-attachments-files-from-mongo! app attachment)))))
+
+(defn review-muutunnus-equality-fields [task]
+  (when-let [muu-tunnus (get-in task [:data :muuTunnus :value])]
+    (->> [muu-tunnus
+          (get-in task [:data :muuTunnusSovellus :value])
+          (get-in task [:state])]
+         (remove util/empty-or-nil?)
+         not-empty)))
+
+(defn get-duplicate-task-ids-by [equality-fields-getter {tasks :tasks}]
+  (-> (reduce (fn [{processed :processed :as result} task]
+                (if-let [fields (equality-fields-getter task)]
+                  (if (processed fields)
+                    (update result :duplicate-task-ids conj (:id task))
+                    (update result :processed conj fields))
+                  result))
+              {:duplicate-task-ids #{} :processed #{}}
+              tasks)
+      :duplicate-task-ids))
+
+(defn cleanup-task-attachments-for-removed-tasks! [{attachments :attachments :as app} deleted-task-ids]
+  (->> attachments
+       (filter (fn->> :target :id (contains? deleted-task-ids)))
+       (map :id)
+       (att/delete-attachments! app)))
+
+(defn remove-tasks-by-ids! [{app-id :id} task-ids]
+  (mongo/update :applications {:_id app-id} {$pull {:tasks {:id {$in task-ids}}}}))
+
+(defmigration remove-duplicate-task-ids-by-muutunnus
+  (->> (mongo/select :applications {:permitType "R" :tasks.data.muuTunnus.value {$exists true}} [:tasks :attachments])
+       (reduce (fn [counter app]
+                 (let [duplicate-task-ids (get-duplicate-task-ids-by review-muutunnus-equality-fields app)]
+                   (remove-tasks-by-ids! app duplicate-task-ids)
+                   (cleanup-task-attachments-for-removed-tasks! app duplicate-task-ids)
+                   (cond-> counter (not-empty duplicate-task-ids) inc)))
+               0)))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

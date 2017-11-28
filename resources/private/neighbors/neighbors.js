@@ -71,16 +71,21 @@
       self.map.drawDrawings(found, {}, drawingStyle);
 
       if (!_.isEmpty(missing)) {
-        ajax.datatables("property-borders", {propertyIds: missing})
-          .success(function(resp) {
-            _.each(_.groupBy(resp.wkts, "kiinttunnus"), function(m,k) {
-              borderCache[k] = _.map(m, "wkt");
-            });
-            self.map.drawDrawings(_.map(resp.wkts, "wkt"), {}, drawingStyle);
-          })
-          .onError("error.integration.ktj-down", notify.ajaxError)
-          .processing(processing)
-          .call();
+        ajax.datatables("property-borders",
+                        {propertyIds: _.map( missing,
+                                           function(  propId ) {
+                                             // Omit the possible maarala part.
+                                             return _.first( _.split( propId, "M" ));
+                                           })})
+        .success(function(resp) {
+          _.each(_.groupBy(resp.wkts, "kiinttunnus"), function(m,k) {
+            borderCache[k] = _.map(m, "wkt");
+          });
+          self.map.drawDrawings(_.map(resp.wkts, "wkt"), {}, drawingStyle);
+        })
+        .onError("error.integration.ktj-down", notify.ajaxError)
+        .processing(processing)
+        .call();
       }
     };
 

@@ -46,7 +46,7 @@
                 <span data-bind="ltext: 'application.pdf'"></span>
             </button>
             <button class="function"
-                    data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog, visible: $root.authorization.ok('add-link-permit'), enable: !processing() && $root.authorization.ok('add-link-permit')" data-test-id="application-add-link-permit-btn">
+                    data-bind="click: gotoLinkPermitCard, visible: $root.authorization.ok('add-link-permit'), enable: !processing() && $root.authorization.ok('add-link-permit')" data-test-id="application-add-link-permit-btn">
                 <i class="lupicon-circle-plus"></i>
                 <span data-bind="ltext: 'application.addLinkPermit'"></span>
             </button>
@@ -142,7 +142,8 @@
        <!-- /ko -->
        <!-- ko if: hasCompanyInvites -->
             <button class="positive"
-                    data-bind="click: approveInvite, enable: $root.authorization.ok('approve-invite')"
+                    data-bind="click: _.partial(approveInvite, 'company'),
+                               enable: $root.authorization.ok('approve-invite')"
                     data-test-id="accept-invite-button">
                 <span data-bind="ltext: 'applications.approveCompanyInvite'"></span>
             </button>

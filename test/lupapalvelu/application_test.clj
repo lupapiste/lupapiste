@@ -230,17 +230,17 @@
   (fact "new entry, no existing handlers"
     (handler-upsert-updates {:id ..new-id.. :info ..info..} [] ..created.. ..user..) =>
     {$push {:history {:handler {:id ..new-id.. :info ..info.., :new-entry true}, :ts ..created.., :user {}}},
-     $set {:handlers.0 {:id ..new-id.. :info ..info..}, :modified ..created..}})
+     $set {:handlers.0 {:id ..new-id.. :info ..info..}}})
 
   (fact "new entry, one existing handler"
     (handler-upsert-updates {:id ..new-id..} [{:id ..id..}] ..created.. ..user..) =>
     {$push {:history {:handler {:id ..new-id.., :new-entry true}, :ts ..created.., :user {}}},
-     $set {:handlers.1 {:id ..new-id..}, :modified ..created..}})
+     $set {:handlers.1 {:id ..new-id..}}})
 
   (fact "update existing handler"
     (handler-upsert-updates {:id ..id-1..} [{:id ..id-0..} {:id ..id-1..} {:id ..id-2..}] ..created.. ..user..) =>
     {$push {:history {:handler {:id ..id-1..}, :ts ..created.., :user {}}},
-     $set {:handlers.1 {:id ..id-1..}, :modified ..created..}}))
+     $set {:handlers.1 {:id ..id-1..}}}))
 
 (facts multioperation-attachment-updates
   (fact "multioperation attachment update with op array"
@@ -370,34 +370,6 @@
               => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"] ["hakija" "valtakirja"]]))
 
 )
-
-
-(facts person-id-masker-for-user
-  (fact "handler authority - no masking"
-    ((person-id-masker-for-user {:id ..id.. :role :authority} {:handlers [{:userId ..id..}]}) {:schema-info {:name "maksaja"}
-                                                                                               :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
-    => {:schema-info {:name "maksaja"}
-        :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
-
-  (fact "non handler authority"
-    ((person-id-masker-for-user {:id ..id.. :role :authority :orgAuthz {:org-id #{:authority}}} {:organization "org-id" :handlers [{:userId ..other-id..}]})
-     {:schema-info {:name "maksaja"}
-      :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
-    => {:schema-info {:name "maksaja"}
-        :data {:henkilo {:henkilotiedot {:hetu {:value "010101-****"}}}}})
-
-  (fact "authority in different organization"
-    ((person-id-masker-for-user {:id ..id.. :role :authority :orgAuthz {:another-org-id #{:authority}}} {:organization "org-id" :handlers [{:userId ..other-id..}]})
-     {:schema-info {:name "maksaja"}
-      :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
-    => {:schema-info {:name "maksaja"}
-        :data {:henkilo {:henkilotiedot {:hetu {:value "******-****"}}}}})
-
-  (fact "non authority user"
-    ((person-id-masker-for-user {:id ..id.. :role :authority} {:handlers [{:userId ..other-id..}]}) {:schema-info {:name "maksaja"}
-                                                                                                     :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
-    => {:schema-info {:name "maksaja"}
-        :data {:henkilo {:henkilotiedot {:hetu {:value "******-****"}}}}}))
 
 (facts "Validate digging permits linked agreement"
   (fact "Linked agreement have to be post verdict state"

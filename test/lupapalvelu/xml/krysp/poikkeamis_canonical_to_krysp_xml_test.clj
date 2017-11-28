@@ -33,7 +33,8 @@
 
       (fact "Mapping"
         ;; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
-        (mapping-to-krysp/save-application-as-krysp poikkari-hakemus "fi" poikkari-hakemus {:krysp {:P {:ftpUser "dev_sipoo" :version "2.1.2"}}}))
+        (mapping-to-krysp/save-application-as-krysp
+          {:application poikkari-hakemus :organization {:krysp {:P {:ftpUser "dev_sipoo" :version "2.1.2"}}}} "fi" poikkari-hakemus))
 
       (fact "Validate"
         (validator/validate xml_212_s (:permitType poikkari-hakemus) "2.1.2")) ; throws exception
@@ -48,7 +49,8 @@
                         (element-to-xml mapping/poikkeamis_to_krysp_214)
                         (indent-str))]
 
-      (mapping-to-krysp/save-application-as-krysp poikkari-hakemus "fi" poikkari-hakemus {:krysp {:P {:ftpUser "dev_sipoo" :version "2.1.4"}}})
+      (mapping-to-krysp/save-application-as-krysp
+        {:application poikkari-hakemus :organization {:krysp {:P {:ftpUser "dev_sipoo" :version "2.1.4"}}}} "fi" poikkari-hakemus)
 
       (validator/validate xml_214_s (:permitType poikkari-hakemus) "2.1.4") ; throws exception
 
@@ -63,7 +65,8 @@
                         (element-to-xml mapping/poikkeamis_to_krysp_215)
                         (indent-str))]
 
-      (mapping-to-krysp/save-application-as-krysp poikkari-hakemus "fi" poikkari-hakemus {:krysp {:P {:ftpUser "dev_sipoo" :version "2.1.5"}}})
+      (mapping-to-krysp/save-application-as-krysp
+        {:application poikkari-hakemus :organization {:krysp {:P {:ftpUser "dev_sipoo" :version "2.1.5"}}}} "fi" poikkari-hakemus)
 
       (validator/validate xml_215_s (:permitType poikkari-hakemus) "2.1.5"))) ; throws exception
 
@@ -73,7 +76,8 @@
                         (element-to-xml mapping/poikkeamis_to_krysp_220)
                         (indent-str))]
 
-      (mapping-to-krysp/save-application-as-krysp poikkari-hakemus "fi" poikkari-hakemus {:krysp {:P {:ftpUser "dev_sipoo" :version "2.2.0"}}})
+      (mapping-to-krysp/save-application-as-krysp
+        {:application poikkari-hakemus :organization {:krysp {:P {:ftpUser "dev_sipoo" :version "2.2.0"}}}} "fi" poikkari-hakemus)
 
       (validator/validate xml_220_s (:permitType poikkari-hakemus) "2.2.0"))) ; throws exception
 
@@ -82,7 +86,8 @@
                         (element-to-xml mapping/poikkeamis_to_krysp_221)
                         (indent-str))]
 
-      (mapping-to-krysp/save-application-as-krysp poikkari-hakemus "fi" poikkari-hakemus {:krysp {:P {:ftpUser "dev_sipoo" :version "2.2.1"}}})
+      (mapping-to-krysp/save-application-as-krysp
+        {:application poikkari-hakemus :organization {:krysp {:P {:ftpUser "dev_sipoo" :version "2.2.1"}}}} "fi" poikkari-hakemus)
 
       (validator/validate xml_s (:permitType poikkari-hakemus) "2.2.1") ; throws exception
 
@@ -107,7 +112,8 @@
                         (element-to-xml mapping/poikkeamis_to_krysp_223)
                         (indent-str))]
 
-      (mapping-to-krysp/save-application-as-krysp poikkari-hakemus "fi" poikkari-hakemus {:krysp {:P {:ftpUser "dev_sipoo" :version "2.2.3"}}})
+      (mapping-to-krysp/save-application-as-krysp
+        {:application poikkari-hakemus :organization {:krysp {:P {:ftpUser "dev_sipoo" :version "2.2.3"}}}} "fi" poikkari-hakemus)
 
       (validator/validate xml_s (:permitType poikkari-hakemus) "2.2.3") ; throws exception
 
@@ -177,7 +183,8 @@
 
       (fact "Mapping"
         ;; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
-        (mapping-to-krysp/save-application-as-krysp suunnitelutarveratkaisu "fi" suunnitelutarveratkaisu {:krysp {:P {:ftpUser "dev_sipoo" :version "2.1.2"}}}))
+        (mapping-to-krysp/save-application-as-krysp
+          {:application suunnitelutarveratkaisu :organization {:krysp {:P {:ftpUser "dev_sipoo" :version "2.1.2"}}}} "fi" suunnitelutarveratkaisu))
 
       (fact "Validate"
         (validator/validate xml_s (:permitType suunnitelutarveratkaisu) "2.1.2")) ; throws exception
@@ -191,7 +198,8 @@
                         (element-to-xml mapping/poikkeamis_to_krysp_221)
                         (indent-str))]
 
-      (mapping-to-krysp/save-application-as-krysp suunnitelutarveratkaisu "fi" suunnitelutarveratkaisu {:krysp {:P {:ftpUser "dev_sipoo" :version "2.2.1"}}})
+      (mapping-to-krysp/save-application-as-krysp
+        {:application suunnitelutarveratkaisu :organization {:krysp {:P {:ftpUser "dev_sipoo" :version "2.2.1"}}}} "fi" suunnitelutarveratkaisu)
 
       (validator/validate xml_s (:permitType suunnitelutarveratkaisu) "2.2.1") ; throws exception
 
@@ -216,7 +224,8 @@
                         (element-to-xml mapping/poikkeamis_to_krysp_223)
                         (indent-str))]
 
-      (mapping-to-krysp/save-application-as-krysp suunnitelutarveratkaisu "fi" suunnitelutarveratkaisu {:krysp {:P {:ftpUser "dev_sipoo" :version "2.2.3"}}})
+      (mapping-to-krysp/save-application-as-krysp
+        {:application suunnitelutarveratkaisu :organization {:krysp {:P {:ftpUser "dev_sipoo" :version "2.2.3"}}}} "fi" suunnitelutarveratkaisu)
 
       (validator/validate xml_s (:permitType suunnitelutarveratkaisu) "2.2.3") ; throws exception
 

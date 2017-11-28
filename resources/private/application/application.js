@@ -6,7 +6,6 @@
   var authorizationModel = lupapisteApp.models.applicationAuthModel;
   var applicationModel = lupapisteApp.models.application;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
-  var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
   var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
 
   constructionStateChangeModel.openConstructionStartDialog = _.partial(
@@ -641,7 +640,6 @@
       authorities: authorities,
       hasEditableDocs: hasEditableDocs,
       // models
-      addLinkPermitModel: addLinkPermitModel,
       addPartyModel: addPartyModel,
       authorization: authorizationModel,
       changeLocationModel: changeLocationModel,
@@ -667,7 +665,6 @@
     $("#application").applyBindings(bindings);
     $("#inforequest").applyBindings(bindings);
     $(changeLocationModel.dialogSelector).applyBindings({changeLocationModel: changeLocationModel});
-    $(addLinkPermitModel.dialogSelector).applyBindings({addLinkPermitModel: addLinkPermitModel});
     $(constructionStateChangeModel.dialogSelector).applyBindings({constructionStateChangeModel: constructionStateChangeModel});
     $(signingModel.dialogSelector).applyBindings({signingModel: signingModel, authorization: authorizationModel});
     $(verdictAttachmentPrintsOrderModel.dialogSelector).applyBindings({

@@ -121,7 +121,7 @@
            (sc/optional-key :oauth)               {:client-id sc/Str
                                                    :client-secret sc/Str
                                                    :scopes [(sc/enum "read" "pay")]
-                                                   :display-name i18n/LocalizationStringMap
+                                                   :display-name (i18n/lenient-localization-schema sc/Str)
                                                    :callback-url ssc/HttpUrl}})
 
 (defschema RegisterUser

@@ -41,20 +41,22 @@
 
 (defcommand check-for-verdict
   {:description "Fetches verdicts from municipality backend system.
-                 If the command is run more than once, existing verdicts are
-                 replaced by the new ones."
-   :parameters [:id]
-   :states     (conj states/give-verdict-states :constructionStarted) ; states reviewed 2015-10-12
-   :user-roles #{:authority}
-   :notified   true
-   :pre-checks [application-has-verdict-given-state]
-   :on-success (notify :application-state-change)}
+  If the command is run more than once, existing verdicts are replaced
+  by the new ones. After successful fetching and update, deprecated
+  attachments are deleted."
+   :parameters  [:id]
+   :states      (conj states/give-verdict-states :constructionStarted) ; states reviewed 2015-10-12
+   :user-roles  #{:authority}
+   :notified    true
+   :pre-checks  [application-has-verdict-given-state]
+   :on-success  (notify :application-state-change)}
   [{app :application :as command}]
   (let [result (verdict/do-check-for-verdict command)]
     (cond
       (nil? result) (fail :info.no-verdicts-found-from-backend)
-      (ok? result) (ok :verdictCount (count (:verdicts result)) :taskCount (count (:tasks result)))
-      :else result)))
+      (ok? result)  (ok :verdictCount (count (:verdicts result))
+                        :taskCount (count (:tasks result)))
+      :else         result)))
 
 ;;
 ;; Manual verdicts

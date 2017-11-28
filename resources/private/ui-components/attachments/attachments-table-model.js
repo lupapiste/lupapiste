@@ -33,7 +33,7 @@ LUPAPISTE.AttachmentsTableModel = function(params) {
   };
 
   self.hasFile = function(attachment) {
-    return _.get(ko.utils.unwrapObservable(attachment), "latestVersion.fileId");
+    return _.get(ko.utils.unwrapObservable(attachment), "latestVersion");
   };
 
   self.buildHash = function(attachment) {

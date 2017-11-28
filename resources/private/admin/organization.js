@@ -12,7 +12,7 @@
     self.indicator = ko.observable(false).extend({notify: "always"});
     self.pending = ko.observable();
     self.earliestArchivingDate = ko.observable();
-    self.mattiEnabled = ko.observable(false);
+    self.pateEnabled = ko.observable(false);
     self.backendSystems = ko.observableArray();
     self.availableBackendSystems = ko.observableArray();
 
@@ -39,6 +39,7 @@
     };
 
     self.docstoreEnabled = ko.observable(false);
+    self.docterminalEnabled = ko.observable(false);
     self.docstorePrice = ko.observable("");
     self.docstoreDescs = ko.observableArray();
 
@@ -53,6 +54,7 @@
       ajax.command("update-docstore-info",
                    {"org-id":                self.organization().id(),
                     docStoreInUse:           self.docstoreEnabled(),
+                    docTerminalInUse:        self.docterminalEnabled(),
                     documentPrice:           documentPrice,
                     organizationDescription: descs})
         .success(util.showSavedIndicator)
@@ -88,8 +90,8 @@
       organizationCommand("set-organization-boolean-path", {path: updatePath, value: boolValue});
     }
 
-    self.saveMattiEnabled = function() {
-      saveBooleanValue("matti-enabled", self.mattiEnabled());
+    self.savePateEnabled = function() {
+      saveBooleanValue("pate-enabled", self.pateEnabled());
     };
 
     function updateSsoKeys() {
@@ -147,6 +149,7 @@
           self.permanentArchiveEnabled(result.data["permanent-archive-enabled"]);
           self.digitizerToolsEnabled(result.data["digitizer-tools-enabled"]);
           self.docstoreEnabled(_.get(result, "data.docstore-info.docStoreInUse"));
+          self.docterminalEnabled(_.get(result, "data.docstore-info.docTerminalInUse"));
           self.docstorePrice((_.get(result, "data.docstore-info.documentPrice") / 100).toFixed(2).replace(".", ","));
           self.docstoreDescs(_.map(util.getIn(result,["data", "docstore-info", "organizationDescription"]), wrapDesc));
           self.calendarsEnabled(result.data["calendars-enabled"]);

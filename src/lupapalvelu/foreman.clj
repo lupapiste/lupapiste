@@ -286,18 +286,20 @@
                "yritys"  (yritys-invite % auth)))
        (remove nil?)))
 
-(defn create-company-auth [company-id]
+(defn- create-company-auth [inviter company-id timestamp]
   (when-let [company (company/find-company-by-id company-id)]
     ;; company-auth can be nil if company is locked
     (when-let [company-auth (company/company->auth company)]
       (assoc company-auth
-             :id "" ; prevents access to application before accepting invite
+             :company-role "admin"
              :role "reader"
-             :invite {:user {:id company-id}}))))
+             :inviter (usr/summary inviter)
+             :invite {:user {:id company-id}
+                      :created timestamp}))))
 
 (defn- invite->auth [inv app-id inviter timestamp]
   (if (:company-id inv)
-    (create-company-auth (:company-id inv))
+    (create-company-auth inviter (:company-id inv) timestamp)
     (let [invited (usr/get-or-create-user-by-email (:email inv) inviter)]
       (auth/create-invite-auth inviter invited app-id (:role inv) timestamp))))
 

@@ -207,33 +207,33 @@
             </div>
           </div>
           <!-- ko if: !_.isEmpty($data.latestVersion) -->
-          <div class="left" data-bind="with: $data.latestVersion">
+          <div class="left">
             <div class="additional-data-container">
               <div class="header" data-bind="ltext: 'esikatselu'"></div>
               <div class="contents preview-image">
-                <a data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + util.getIn($data, ['fileId'])}" target="_blank">
-                  <img data-bind="attr: {src: '/api/raw/preview-attachment?attachment-id=' + util.getIn($data, ['fileId'])}">
+                <a data-bind="attr: {href: '/api/raw/latest-attachment-version?&attachment-id=' + ko.unwrap(id)}" target="_blank">
+                  <img data-bind="attr: {src: '/api/raw/latest-attachment-version?preview=true&attachment-id=' + ko.unwrap(id)}">
                 </a>
               </div>
             </div>
-            <div data-bind="if: $parent.convertableToPdfA">
-              <button class="btn-primary" data-bind="click: _.partial($component.convertToPdfA, $parent), ltext: 'Konvertoi PDF/A-muotoon'"></button>
+            <div data-bind="if: convertableToPdfA">
+              <button class="btn-primary" data-bind="click: _.partial($component.convertToPdfA, $data), ltext: 'Konvertoi PDF/A-muotoon'"></button>
             </div>
-            <!-- ko if: $parent.showArchivalError -->
+            <!-- ko if: showArchivalError -->
             <div class="additional-data-container archival-summary-conversion-log">
               <div class="header" data-bind="ltext: 'archivalSummary.previousConversionResult'"></div>
               <div class="contents">
-                <span data-bind="ltext: archivabilityError"></span>
-                <div data-bind="if: !_.isEmpty($data.conversionLog)">
-                  <button class="btn" data-bind="toggleClick: $parent.showConversionLog">
-                    <i data-bind="css: {'lupicon-chevron-small-right': !ko.unwrap($parent.showConversionLog),
-                                        'lupicon-chevron-small-down': $parent.showConversionLog}"></i>
+                <span data-bind="ltext: latestVersion.archivabilityError"></span>
+                <div data-bind="if: !_.isEmpty(latestVersion.conversionLog)">
+                  <button class="btn" data-bind="toggleClick: showConversionLog">
+                    <i data-bind="css: {'lupicon-chevron-small-right': !ko.unwrap(showConversionLog),
+                                        'lupicon-chevron-small-down': showConversionLog}"></i>
                     <span data-bind="ltext: 'attachment.showConversionLog'"></span>
                   </button>
 
-                  <div data-bind="slider: $parent.showConversionLog">
+                  <div data-bind="slider: showConversionLog">
                     <table class="table">
-                      <tbody data-bind="foreach: $data.conversionLog">
+                      <tbody data-bind="foreach: latestVersion.conversionLog">
                       <tr>
                         <td data-bind="text: $data"></td>
                       </tr>

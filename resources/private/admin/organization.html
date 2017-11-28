@@ -33,7 +33,11 @@
               <label data-bind="ltext: 'organization.docstore.enabled'" for="docstore-enabled"></label>
               <input data-bind="checked: docstoreEnabled" id="docstore-enabled" type="checkbox"/>
             </div>
-            <!-- ko if: docstoreEnabled -->
+            <div>
+              <label data-bind="ltext: 'organization.docterminal.enabled'" for="docterminal-enabled"></label>
+              <input data-bind="checked: docterminalEnabled" id="docterminal-enabled" type="checkbox"/>
+            </div>
+            <!-- ko if: docstoreEnabled() || docterminalEnabled() -->
             <div data-test-id="docstore-enabled-settings">
               <label data-bind="ltext: 'organization.docstore.price'"
                      for="docstore-price"></label>
@@ -148,15 +152,15 @@
 
 
           <div>
-            <h2>MATTI k&auml;yt&ouml;ss&auml;?</h2>
+            <h2>Pate k&auml;yt&ouml;ss&auml;?</h2>
             <div>
               <div>
-                <label data-bind="text: loc('yes') + '/' + loc('no') " for="matti-enabled"></label>
-                <input data-bind="checked: mattiEnabled" id="matti-enabled" type="checkbox"/>
+                <label data-bind="text: loc('yes') + '/' + loc('no') " for="pate-enabled"></label>
+                <input data-bind="checked: pateEnabled" id="pate-enabled" type="checkbox"/>
               </div>
               <button data-bind="ltext: 'save',
-                                 click: saveMattiEnabled" class="btn positive"
-                      data-test-id="save-matti-enabled"></button>
+                                 click: savePateEnabled" class="btn positive"
+                      data-test-id="save-pate-enabled"></button>
             </div>
           </div>
 

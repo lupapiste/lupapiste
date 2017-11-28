@@ -19,7 +19,7 @@ LUPAPISTE.StateIconsModel = function( params ) {
   }
 
   function hasFile(attachment) {
-    return _.get(attachment, "latestVersion.fileId");
+    return _.get(attachment, "latestVersion.filename");
   }
 
   function canVouch(attachment) {

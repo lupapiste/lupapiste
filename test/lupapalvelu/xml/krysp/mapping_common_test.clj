@@ -72,8 +72,8 @@
     (fact "middle" (get-child-element sample-mapping [:a :b]) => {:tag :b :child [{:tag :c} {:tag :x}]})
     (fact "top" (get-child-element sample-mapping [:other3]) => {:tag :other3})))
 
-(def common-210 "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd\nhttp://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd\n")
-(def common-213 "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.3/yhteiset.xsd\nhttp://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd\n")
+(def common-210 "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.0/yhteiset.xsd http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd ")
+(def common-213 "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.3/yhteiset.xsd http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd ")
 
 (facts "schemalocation"
   (fact "rakval 2.1.2"
@@ -81,7 +81,7 @@
     (str common-210 "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.2/rakennusvalvonta.xsd"))
   (fact "rakval 2.1.4"
     (schemalocation :R "2.1.4") =>
-    "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.2/yhteiset.xsd\nhttp://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd\nhttp://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.4/rakennusvalvonta.xsd")
+    "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.2/yhteiset.xsd http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.4/rakennusvalvonta.xsd")
 
   (fact "poikkari 2.1.2"
     (schemalocation :P "2.1.2") =>

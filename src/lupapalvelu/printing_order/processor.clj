@@ -64,6 +64,7 @@
   (messages/save {:id internalOrderId
                   :direction "out"
                   :messageType "printing-order"
+                  :transferType "http"
                   :partner "mylly"
                   :format "xml"
                   :status "processing"

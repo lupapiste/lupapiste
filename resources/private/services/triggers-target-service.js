@@ -11,8 +11,8 @@ LUPAPISTE.TriggerTargetService = function() {
   });
 
   function load() {
-    if (lupapisteApp.models.globalAuthModel.ok("all-attachment-types-by-user")) {
-      ajax.query("all-attachment-types-by-user")
+    if (lupapisteApp.models.globalAuthModel.ok("organization-attachment-types")) {
+      ajax.query("organization-attachment-types")
         .success(function(res) {
           _data(res.attachmentTypes);
         })

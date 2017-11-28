@@ -84,6 +84,51 @@
                                     created
                                     manual-schema-datas))))
 
+(defn- schema-datas [{:keys [rakennusvalvontaasianKuvaus]} buildings]
+  (map
+    (fn [{:keys [data]}]
+      (remove empty? (conj [[[:valtakunnallinenNumero] (:valtakunnallinenNumero data)]
+                            [[:kaytto :kayttotarkoitus] (get-in data [:kaytto :kayttotarkoitus])]]
+                           (when-not (or (ss/blank? (:rakennusnro data))
+                                         (= "000" (:rakennusnro data)))
+                             [[:tunnus] (:rakennusnro data)])
+                           (when-not (ss/blank? rakennusvalvontaasianKuvaus)
+                             [[:kuvaus] rakennusvalvontaasianKuvaus]))))
+    buildings))
+
+(defn document-data->op-document [{:keys [schema-version] :as application} data]
+  (let [op (app/make-op :archiving-project (now))
+        doc (doc-persistence/new-doc application (schemas/get-schema schema-version "archiving-project") (now))
+        doc (assoc-in doc [:schema-info :op] op)
+        doc-updates (lupapalvelu.document.model/map2updates [] data)]
+    (lupapalvelu.document.model/apply-updates doc doc-updates)))
+
+(defn fetch-building-xml [organization permit-type property-id]
+  (when (and organization permit-type property-id)
+    (when-let [{url :url credentials :credentials} (org/get-building-wfs {:_id organization} permit-type)]
+      (building-reader/building-xml url credentials property-id))))
+
+(defn buildings-for-documents [xml]
+  (->> (building-reader/->buildings xml)
+       (map #(-> {:data %}))))
+
+(defn update-buildings-array! [xml application]
+  (let [doc-buildings (building/building-ids application)
+        buildings (building-reader/->buildings-summary xml)
+        find-op-id (fn [nid]
+                     (->> (filter #(= (:national-id %) nid) doc-buildings)
+                          first
+                          :operation-id))
+        updated-buildings (map
+                            (fn [{:keys [nationalId] :as bldg}]
+                              (-> (select-keys bldg [:localShortId :buildingId :localId :nationalId :location-wgs84 :location])
+                                  (assoc :operationId (find-op-id nationalId))))
+                            buildings)]
+    (when (seq updated-buildings)
+      (mongo/update-by-id :applications
+                          (:id application)
+                          {$set {:buildings updated-buildings}}))))
+
 (defn create-archiving-project-application!
   [command operation buildings-and-structures app-info location-info permit-type building-xml backend-id]
   (let [{:keys [hakijat]} app-info

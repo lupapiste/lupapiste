@@ -77,8 +77,11 @@
       (count (:invites (query teppo :invites))) => 1)
 
     (fact "Teppo must be able to decline invitation!"
-      (command teppo :decline-invitation :id application-id) => ok?
-      (count (:invites (query teppo :invites))) => 0)
+      (let [{modified :modified} (query-application mikko application-id)]
+        (command teppo :decline-invitation :id application-id) => ok?
+        (count (:invites (query teppo :invites))) => 0
+        (fact "decline-invitation should not update modified timestamp"
+          (:modified (query-application mikko application-id)) => modified)))
 
     (fact "Mikko must NOT be able to accept Teppo's invite"
       (invite mikko application-id suunnittelija-doc "suunnittelija" (email-for-key teppo)) => ok?

@@ -591,8 +591,14 @@
          (get-in attachment [:latestVersion :version :major]) => 0
          (get-in attachment [:latestVersion :version :minor]) => 1)
 
+       ;; Wait for preview generation
+       (Thread/sleep 1000)
+
        (fact "Preview image is created"
-         (raw sonja "preview-attachment" :attachment-id (get-in attachment [:latestVersion :fileId])) => http200?))
+         (raw sonja
+              "latest-attachment-version"
+              :attachment-id (:id attachment)
+              :preview "true") => http200?))
 
      (fact "Invalid mime not converted with Libre"
        (upload-attachment sonja application-id (second (:attachments application)) true :filename "dev-resources/test-gif-attachment.gif")

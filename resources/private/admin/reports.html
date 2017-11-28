@@ -28,6 +28,16 @@
                 <span>Lataa raportti</span>
               </a>
             </div>
+            <div class="row">
+              <div class="col-1">
+                <br>
+                <label>Henkil&ouml;t, joille ei l&auml;hetet&auml; s&auml;hk&ouml;postia</label>
+                <textarea class="grid-style-input"
+                          data-bind="value: emails"></textarea>
+                <button class="positive"
+                        data-bind="click: upsert">Tallenna</button>
+              </div>
+            </div>
           </div>
         </div>
         <!-- ko with: $data.applications -->

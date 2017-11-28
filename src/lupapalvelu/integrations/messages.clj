@@ -9,21 +9,22 @@
 
 (def create-id mongo/create-id)
 
-(def partners #{"ely" "mylly" "matti"})
+(def partners #{"ely" "mylly" "pate"})
 
 (sc/defschema IntegrationMessage
   {:id                            ssc/ObjectIdStr
    :direction                     (sc/enum "in" "out")
    :messageType                   sc/Str
-   :partner                       (apply sc/enum partners)
+   (sc/optional-key :transferType) (sc/enum "http" "sftp")
+   (sc/optional-key :partner)     (apply sc/enum partners)
    :format                        (sc/enum "xml" "json")
    :created                       ssc/Timestamp
-   :status                         (sc/enum "done" "published" "processing" "processed")
+   :status                        (sc/enum "done" "published" "processing" "processed" "received")
    (sc/optional-key :external-reference) sc/Str
    (sc/optional-key :output-dir)  sc/Str
    (sc/optional-key :application) {:id           ssc/ApplicationId
-                                   :organization sc/Str
-                                   :state        (apply sc/enum (map name states/all-states))}
+                                   (sc/optional-key :organization) sc/Str
+                                   (sc/optional-key :state)        (apply sc/enum (map name states/all-states))}
    (sc/optional-key :target)      {:id   ssc/ObjectIdStr
                                    :type sc/Str}
    (sc/optional-key :initator)    {:id       sc/Str
@@ -32,7 +33,7 @@
    (sc/optional-key :attached-files)    [ssc/ObjectIdStr]
    (sc/optional-key :attachmentsCount)  sc/Int
    (sc/optional-key :acknowledged)      ssc/Timestamp
-   (sc/optional-key :data)              {sc/Keyword sc/Any}})
+   (sc/optional-key :data)              (sc/cond-pre sc/Str {sc/Keyword sc/Any})})
 
 (sc/defn ^:always-validate save
   ([message :- IntegrationMessage]
@@ -47,3 +48,9 @@
    (mongo/with-id (mongo/update-one-and-return :integration-messages
                                                {:_id message-id}
                                                {$set (merge {:acknowledged timestamp} updates)}))))
+
+(defn update-message
+  ([message-id updates]
+    (update-message message-id updates WriteConcern/ACKNOWLEDGED))
+  ([message-id updates write-concern]
+    (mongo/update-by-id :integration-messages message-id updates :write-concern write-concern)))

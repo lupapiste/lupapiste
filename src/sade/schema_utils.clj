@@ -1,7 +1,7 @@
 (ns sade.schema-utils
   (:require [schema.core :as sc]
             [sade.util :as util])
-  (:refer-clojure :exclude [keys select-keys]))
+  (:refer-clojure :exclude [keys select-keys get]))
 
 (defn keys
   "Mimics clojure.core/keys.
@@ -21,7 +21,10 @@
   (reduce
     (fn [acc k]
       (if-let [key (get-schema-key schema k)]
-        (assoc acc key (get schema key))
+        (assoc acc key (clojure.core/get schema key))
         acc))
     {}
     keys))
+
+(defn get [schema k]
+  (clojure.core/get schema (get-schema-key schema k)))

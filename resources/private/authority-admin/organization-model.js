@@ -295,7 +295,7 @@ LUPAPISTE.OrganizationModel = function () {
   });
 
 
-  // Matti verdict templates
+  // Pate verdict templates
   self.verdictTemplates = ko.observableArray( [] );
   self.defaultOperationVerdictTemplates = ko.observable( {} );
 
@@ -312,8 +312,8 @@ LUPAPISTE.OrganizationModel = function () {
     .call();
   }
 
-  // Sent from matti/service.cljs
-  hub.subscribe( "matti::verdict-templates-changed", refreshVerdictTemplates );
+  // Sent from pate/service.cljs
+  hub.subscribe( "pate::verdict-templates-changed", refreshVerdictTemplates );
 
   self.init = function(data) {
     self.initialized = false;
@@ -448,7 +448,7 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.assignmentTriggers( _.get( organization, "assignment-triggers", []));
 
-    if( authorizationModel.ok("matti-enabled")) {
+    if( authorizationModel.ok("pate-enabled")) {
       refreshVerdictTemplates();
     }
     self.initialized = true;

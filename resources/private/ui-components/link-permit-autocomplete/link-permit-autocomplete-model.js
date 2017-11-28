@@ -9,9 +9,15 @@ LUPAPISTE.LinkPermitAutocompleteModel = function( params ) {
 
   ko.utils.extend( self, new LUPAPISTE.EnableComponentModel( params ));
 
-  self.sameProperty = ko.observable();
+  self.sameProperty = ko.observable(true);
   self.selected = params.value;
   self.query = ko.observable( "" );
+
+  hub.subscribe("cardService::select", function(event) {
+    if (_.get(event, "card") === "add-link-permit") {
+      self.sameProperty(true);
+    }
+  });
 
   self.list = self.disposedPureComputed( function() {
     var items = _.map(ko.unwrap( params.list ), function(item) {

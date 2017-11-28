@@ -31,7 +31,7 @@ LUPAPISTE.AttachmentsListingAccordionModel = function(params) {
 
   var fileCount = self.disposedPureComputed(function() {
     return _.filter(self.filteredAttachments(), function(att) {
-      return util.getIn(att, ["latestVersion", "fileId"]);
+      return util.getIn(att, ["latestVersion", "filename"]);
     }).length;
   });
 

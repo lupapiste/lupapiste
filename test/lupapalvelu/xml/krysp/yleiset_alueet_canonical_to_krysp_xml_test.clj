@@ -10,7 +10,6 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
             [lupapalvelu.xml.validator :refer :all :as validator]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer :all :as xml-test-common]
-            [lupapalvelu.xml.krysp.mapping-common :refer :all :as mapping-common]
             [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]
             [midje.sweet :refer :all]
             [clojure.data.xml :refer :all]
@@ -56,13 +55,17 @@
     ;; Alla oleva tekee jo validoinnin,
     ;; mutta annetaan olla tuossa alla viela tuo validointi, jottei joku tule ja riko olemassa olevaa validointia.
     (mapping-to-krysp/save-application-as-krysp
-      application "fi" application {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.1.2"}}})
+      {:application application :organization {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.1.2"}}}}
+      "fi" application)
     (mapping-to-krysp/save-application-as-krysp
-      application "fi" application {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.1.3"}}})
+      {:application application :organization {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.1.3"}}}}
+      "fi" application)
     (mapping-to-krysp/save-application-as-krysp
-      application "fi" application {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.2.0"}}})
+      {:application application :organization {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.2.0"}}}}
+      "fi" application)
     (mapping-to-krysp/save-application-as-krysp
-      application "fi" application {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.2.1"}}})
+      {:application application :organization {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.2.1"}}}}
+      "fi" application)
 
     (validator/validate xml-212s (:permitType application) "2.1.2")
     (validator/validate xml-213s (:permitType application) "2.1.3")

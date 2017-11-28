@@ -143,9 +143,13 @@
 (defn test-build? []
   (= target-env "TEST"))
 
+(def dev-env? (= (ss/upper-case target-env) "DEV"))
+
 (def ^:dynamic *in-dev-macro* false)
 
 (defmacro in-dev [& body]
   `(if (dev-mode?)
      (binding [*in-dev-macro* true]
        (do ~@body))))
+
+(defn server-address [] (System/getProperty "target_server" (or (value :host) "http://localhost:8000")))

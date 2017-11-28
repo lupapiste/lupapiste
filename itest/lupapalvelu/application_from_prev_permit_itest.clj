@@ -1,21 +1,19 @@
 (ns lupapalvelu.application-from-prev-permit-itest
-  (:require [midje.sweet :refer :all]
-            [clojure.java.io :as io]
-            [sade.core :refer [def- now]]
-            [sade.util :as util]
-            [sade.xml :as xml]
-            [lupapalvelu.mongo :as mongo]
+  (:require [clojure.java.io :as io]
             [lupapalvelu.application-api] ; require local endpoints
-            [lupapalvelu.prev-permit-api :refer :all]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.factlet :refer :all]
             [lupapalvelu.fixture.core :as fixture]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.prev-permit-api :refer :all]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.itest-util :as iutil]))
+            [midje.sweet :refer :all]
+            [sade.core :refer [def- now]]
+            [sade.util :as util]
+            [sade.xml :as xml]))
 
 (def local-db-name (str "test_app-from-prev-permit-itest_" (now)))
 
@@ -52,7 +50,8 @@
      (krysp-fetch/get-application-xml-by-application-id anything) => example-xml)
 
     (fact "missing parameters"
-      (create-app-from-prev-permit raktark-jarvenpaa :organizationId "") => (partial expected-failure? "error.missing-parameters"))
+      (create-app-from-prev-permit raktark-jarvenpaa :organizationId "")
+      => (partial expected-failure? "error.missing-parameters"))
 
     ;; 1: hakijalla ei ole oiketta noutaa aiempaa lupaa
 
@@ -131,7 +130,10 @@
                                                      :propertyId property-id)
                   app-id (:id resp1)
                   application (query-application local-query raktark-jarvenpaa app-id)
-                  invites (filter #(= raktark-jarvenpaa-id (get-in % [:invite :inviter :id])) (:auth application))]
+                  invites (filter #(= raktark-jarvenpaa-id (get-in % [:invite :inviter :id])) (:auth application))
+                  find-party (fn [schema-name firstname]
+                               (util/find-first (util/fn->> :data :henkilo :henkilotiedot :etunimi :value (= firstname))
+                                                (domain/get-documents-by-name application schema-name)))]
 
               resp1  => ok?
 
@@ -142,20 +144,15 @@
                 (count (:invites (local-query mikko :invites))) => 1
                 (count (:invites (local-query teppo :invites))) => 1)
 
-              (fact "hakija document count"
-                (count (domain/get-documents-by-name application "hakija-r")) => 5)
-
-              (fact "operation documents"
-                (count (domain/get-documents-by-name application "hankkeen-kuvaus")) => 0
-                (let [op-documents (domain/get-documents-by-name application "aiemman-luvan-toimenpide")
-                      omistajat    (mapcat #(-> % :data :rakennuksenOmistajat vals) op-documents)]
-                  (count op-documents) => 3
-                  (fact "building identifiers"
-                    (map #(-> % :data :valtakunnallinenNumero :value) op-documents) => (contains ["100222397J" "100222398K"]))
-                  (fact "building owner"
-                        (-> omistajat first (get-in [:henkilo :henkilotiedot :sukunimi :value])) => "Mainio")
-                  (fact "maalampokaivo"
-                    (application :secondaryOperations) => (has some (contains {:description "Maal\u00e4mp\u00f6pumppuj\u00e4rjestelm\u00e4"})))))
+              (facts "Party documents"
+                (fact "hakija document count"
+                  (count (domain/get-documents-by-name application "hakija-r")) => 5)
+                (fact "Elmeri's invalid email address is cleared"
+                  (-> (find-party "hakija-r" "Elmeri") :data :henkilo :yhteystiedot :email :value) => "")
+                (fact "Maksaja Pena's invalid hetu is cleared"
+                  (-> (find-party "maksaja" "Pena Jouko Tapani") :data :henkilo :henkilotiedot :hetu :value) => "")
+                (fact "Mikko's invalid postal code is cleared"
+                  (-> (find-party "hakija-r" "Mikko Ilmari") :data :henkilo :osoite :postinumero :value) => ""))
 
               ;; Cancel the application and re-call 'create-app-from-prev-permit' -> should open application with different ID
               (fact "fetching prev-permit again after canceling the previously fetched one"
@@ -237,12 +234,12 @@
 
 (facts "Application from kuntalupatunnus via rest API"      ; DOES NOT USE LOCAL QUERIES
   (let [rest-address (str (server-address) "/rest/get-lp-id-from-previous-permit")
-        params  {:query-params {"kuntalupatunnus" example-kuntalupatunnus}
-                 :basic-auth   ["jarvenpaa-backend" "jarvenpaa"]}]
+        params       {:query-params {"kuntalupatunnus" example-kuntalupatunnus}
+                      :basic-auth   ["jarvenpaa-backend" "jarvenpaa"]}]
     (against-background [(before :facts (apply-remote-minimal))]
                         (fact "should create new LP application if kuntalupatunnus doesn't match existing app"
-                          (let [response (http-get rest-address params)
-                                resp-body (:body (iutil/decode-response response))]
+                          (let [response  (http-get rest-address params)
+                                resp-body (:body (decode-response response))]
                             response => http200?
                             resp-body => ok?
                             (keyword (:text resp-body)) => :created-new-application
@@ -253,7 +250,7 @@
                           (let [{app-id :id} (create-and-submit-application pena :propertyId jarvenpaa-property-id)
                                 verdict-resp (give-verdict raktark-jarvenpaa app-id :verdictId example-kuntalupatunnus)
                                 response     (http-get rest-address params)
-                                resp-body    (:body (iutil/decode-response response))]
+                                resp-body    (:body (decode-response response))]
                             verdict-resp => ok?
                             response => http200?
                             resp-body => ok?
@@ -263,7 +260,7 @@
                           (let [{app-id :id} (create-and-submit-application pena :propertyId sipoo-property-id)
                                 verdict-resp (give-verdict sonja app-id :verdictId example-kuntalupatunnus)
                                 response     (http-get rest-address params)
-                                resp-body    (:body (iutil/decode-response response))]
+                                resp-body    (:body (decode-response response))]
                             verdict-resp => ok?
                             response => http200?
                             resp-body => ok?

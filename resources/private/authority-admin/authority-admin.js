@@ -16,7 +16,8 @@
       calendarsModel,
       reservationTypesModel,
       reservationPropertiesModel,
-      bulletinsModel;
+      bulletinsModel,
+      docterminalModel;
 
   function toAttachmentData(groupId, attachmentId) {
     return {
@@ -397,6 +398,71 @@
 
   }
 
+  function DocterminalModel() {
+    var self = this;
+    ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+
+    self.data = ko.observableArray();
+
+    self.numberEnabled = ko.pureComputed(function() {
+      var groups = self.data();
+      return _.sumBy(groups, function(group) {
+        return _.sumBy(group[1], function(typeEntry) {
+          return typeEntry.enabled() ? 1 : 0;
+        });
+      });
+    });
+
+    self.toggleSelectText = ko.pureComputed(function() {
+      return self.numberEnabled() === 0 ? "select-all" : "select-none";
+    });
+
+    function attachSave(typeEntry) {
+      var clicked = false; // Prevent save when computed is run first time
+      self.disposedComputed(function() {
+        var enabled = typeEntry.enabled();
+        if (clicked) {
+          ajax
+            .command("set-docterminal-attachment-type",
+                     {attachmentType: typeEntry.type,
+                      enabled: enabled})
+            .success(util.showSavedIndicator)
+            .error(util.showSavedIndicator)
+            .call();
+        } else {
+          clicked = true;
+        }
+      });
+    }
+
+    self.load = function () {
+      ajax.query("docterminal-attachment-types")
+        .success(function(data) {
+          self.data(_.map(data["attachment-types"], function(group) {
+            return [group[0],
+                    _.map(group[1], function(attachmentType) {
+                      var typeEnabled = ko.observable(attachmentType.enabled);
+                      var typeEntry = {type: attachmentType.type,
+                                       enabled: typeEnabled};
+                      attachSave(typeEntry);
+                      return typeEntry;
+                    })];
+          }));
+        })
+        .call();
+    };
+
+    self.toggleAll = function() {
+      var enableAll = self.numberEnabled() === 0;
+      ajax
+        .command("set-docterminal-attachment-type",
+                 {attachmentType: "all", enabled: enableAll})
+        .success(function(data) { self.load(); util.showSavedIndicator(data); })
+        .error(util.showSavedIndicator)
+        .call();
+    };
+  }
+
   organizationModel = new LUPAPISTE.OrganizationModel();
   organizationUsers = new LUPAPISTE.OrganizationUserModel(organizationModel);
   editSelectedOperationsModel = new EditSelectedOperationsModel();
@@ -414,6 +480,7 @@
   linkToVendorBackendModel = new LinkToVendorBackendModel();
   editRolesDialogModel = new LUPAPISTE.EditRolesDialogModel(organizationModel);
   bulletinsModel = new BulletinsModel();
+  docterminalModel = new DocterminalModel();
 
   var usersTableConfig = {
       hideRoleFilter: true,
@@ -482,6 +549,10 @@
     bulletinsModel.load();
   });
 
+  hub.onPageLoad("organization-terminal-settings", function() {
+    docterminalModel.load();
+  });
+
   $(function() {
     organizationModel.load();
     $("#navi-toolbar").applyBindings({});
@@ -537,7 +608,7 @@
       organization:        organizationModel,
       authorization:       lupapisteApp.models.globalAuthModel
     });
-    $("#matti-verdict-templates").applyBindings({
+    $("#pate-verdict-templates").applyBindings({
       organization:        organizationModel,
       authorization:       lupapisteApp.models.globalAuthModel
     });
@@ -549,6 +620,11 @@
       organization:        organizationModel,
       authorization:       lupapisteApp.models.globalAuthModel,
       bulletins:           bulletinsModel
+    });
+    $("#organization-terminal-settings").applyBindings({
+      organization:        organizationModel,
+      authorization:       lupapisteApp.models.globalAuthModel,
+      attachmentTypes:     docterminalModel
     });
 
     // Init the dynamically created dialogs

@@ -82,7 +82,7 @@
     (:organization application) => "069-R"))
 
 (facts upsert-application-handler
-  (let [{app-id :id :as application} (create-and-submit-application pena :propertyId sipoo-property-id)
+  (let [{app-id :id modified :modified :as application} (create-and-submit-application pena :propertyId sipoo-property-id)
         resp     (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId ronja-id)]
 
     (fact "Initially there is no handlers"
@@ -125,6 +125,9 @@
 
         update-resp => ok?
         (:id update-resp) => (:id resp)
+
+        (fact "handler upsert should not update the modified timestamp"
+          (:modified (query-application sonja app-id)) => modified)
 
         (fact "one handler still exists" (count handlers) => 1)
         (fact "handler has all data" (-> handlers first) => {:id (:id resp)
@@ -323,7 +326,7 @@
     (fact "integration messages"
       (count generated-messages) => 1
       (first generated-messages) => (contains {:status "published"
-                                               :partner "matti"
+                                               :partner "pate"
                                                :data (contains {:fromState (contains {:name "draft"})
                                                                 :toState   (contains {:name "submitted"})})}))
 
@@ -492,6 +495,7 @@
           company-path (into [] (concat [:data] (map keyword path) [:yritys]))
           experience-path (into [] (concat [:data] (map keyword path) [:patevyys]))
           suunnittelija? (in? ["paasuunnittelija" "suunnittelija"] schema-name )]
+      (get-in update-doc (concat (drop-last person-path) [:userId :value])) => mikko-id
       (get-in update-doc (into person-path [:etunimi :value])) => "Mikko"
       (get-in update-doc (into person-path [:sukunimi :value])) => "Intonen"
       (get-in update-doc (into person-path [:hetu :value])) => "******-****"
@@ -500,8 +504,7 @@
       (get-in update-doc (into experience-path [:koulutusvalinta :value])) => (if suunnittelija? "kirvesmies" nil)
       (get-in update-doc (into experience-path [:valmistumisvuosi :value])) => (if suunnittelija? "2000" nil)
       (get-in update-doc (into experience-path [:fise :value])) => (if suunnittelija? "f" nil)
-      (get-in update-doc (into experience-path [:fiseKelpoisuus :value])) => (if suunnittelija? "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)" nil)
-      )))
+      (get-in update-doc (into experience-path [:fiseKelpoisuus :value])) => (if suunnittelija? "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)" nil))))
 
 (defn- check-empty-person
   ([document doc-path args]
@@ -515,13 +518,12 @@
   )
 
 (facts "Set user to document"
-  (let [application   (create-and-submit-application mikko :propertyId sipoo-property-id)
+  (let [application      (create-and-submit-application mikko :propertyId sipoo-property-id)
         application-id   (:id application)
         paasuunnittelija (domain/get-document-by-name application "paasuunnittelija")
         suunnittelija    (domain/get-document-by-name application "suunnittelija")
-        hakija     (domain/get-applicant-document (:documents application))
-        maksaja    (domain/get-document-by-name application "maksaja")]
-
+        hakija           (domain/get-applicant-document (:documents application))
+        maksaja          (domain/get-document-by-name application "maksaja")]
 
     (fact "initially person data is empty"
       (check-empty-person paasuunnittelija [:data :henkilotiedot])
@@ -532,6 +534,16 @@
     (set-and-check-person mikko application-id hakija ["henkilo"])
     (set-and-check-person mikko application-id maksaja ["henkilo"])
 
+    (fact "Hakija can be set empty, but field values remain"
+      (command mikko :set-user-to-document :id application-id
+               :documentId (:id hakija) :userId "" :path "henkilo")
+      => ok?
+      (let [updated-app (query-application mikko application-id)
+            update-doc  (domain/get-document-by-id updated-app (:id hakija))]
+        (get-in update-doc [:data :henkilo :userId :value]) => ""
+        (get-in update-doc [:data :henkilo :henkilotiedot :etunimi :value]) => "Mikko"
+        (get-in update-doc [:data :henkilo :henkilotiedot :sukunimi :value]) => "Intonen"))
+
     (fact "there is no suunnittelija"
       suunnittelija => truthy
       (->> (get-in suunnittelija [:data :henkilotiedot])
@@ -540,11 +552,11 @@
       => {:etunimi "", :hetu nil, :sukunimi ""})
 
     (let [doc-id (:id suunnittelija)
-          code "RAK-rakennesuunnittelija"]
+          code   "RAK-rakennesuunnittelija"]
 
       (fact "suunnittelija kuntaroolikoodi is set"
         (command mikko :update-doc :id application-id :doc doc-id :updates [["kuntaRoolikoodi" code]]) => ok?
-        (let [updated-app          (query-application mikko application-id)
+        (let [updated-app           (query-application mikko application-id)
               updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
           updated-suunnittelija => truthy
           (get-in updated-suunnittelija [:data :kuntaRoolikoodi :value]) => code))
@@ -556,7 +568,7 @@
                                     ["patevyys.patevyys" "Lis\u00e4tietoa patevyydest\u00e4"]
                                     ["patevyys.fise" "fise-linkki"]
                                     ["patevyys.fiseKelpoisuus" "vaativa akustiikkasuunnittelu (uudisrakentaminen)"]]) => ok?
-        (let [updated-app          (query-application mikko application-id)
+        (let [updated-app           (query-application mikko application-id)
               updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
           updated-suunnittelija => truthy
           (get-in updated-suunnittelija [:data :patevyys :patevyys :value]) => "Lis\u00e4tietoa patevyydest\u00e4"
@@ -569,6 +581,7 @@
         (command mikko :set-user-to-document :id application-id :documentId (:id suunnittelija) :userId mikko-id :path "") => ok?
         (let [updated-app           (query-application mikko application-id)
               updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
+          (get-in updated-suunnittelija [:data :userId :value]) => mikko-id
           (get-in updated-suunnittelija [:data :henkilotiedot :etunimi :value]) => "Mikko"
           (get-in updated-suunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"
           (get-in updated-suunnittelija [:data :yritys :yritysnimi :value]) => "Yritys Oy"
@@ -585,25 +598,40 @@
           (fact "suunnittelija kuntaroolikoodi is preserved (LUPA-774)"
             (get-in updated-suunnittelija [:data :kuntaRoolikoodi :value]) => code)))
 
+      (fact "Suunnittelija can be set empty, but other fields are not cleared"
+        (command mikko :set-user-to-document :id application-id :documentId (:id suunnittelija) :userId "" :path "") => ok?
+        (let [updated-app           (query-application mikko application-id)
+              updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
+          (get-in updated-suunnittelija [:data :userId :value]) => ""
+          (get-in updated-suunnittelija [:data :henkilotiedot :etunimi :value]) => "Mikko"
+          (get-in updated-suunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"
+          (get-in updated-suunnittelija [:data :yritys :yritysnimi :value]) => "Yritys Oy"
+          (get-in updated-suunnittelija [:data :yritys :liikeJaYhteisoTunnus :value]) => "1234567-1"
+          (get-in updated-suunnittelija [:data :patevyys :koulutusvalinta :value]) => "kirvesmies"
+          (get-in updated-suunnittelija [:data :patevyys :koulutus :value]) => ""
+          (get-in updated-suunnittelija [:data :patevyys :valmistumisvuosi :value]) => "2000"
+          (get-in updated-suunnittelija [:data :patevyys :fise :value]) => "f"
+          (get-in updated-suunnittelija [:data :patevyys :fiseKelpoisuus :value]) => "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"))
+
       (fact "application is unassigned, Sonja does not see the full person IDs"
-        (let [app (query-application sonja application-id)
+        (let [app           (query-application sonja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
           (:handlers app) => empty?
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****"))
 
       (fact "application is unassigned, Ronja does not see the full person IDs"
-        (let [app (query-application ronja application-id)
+        (let [app           (query-application ronja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****"))
 
       (fact "Sonja assigns the application to herself and sees the full person ID"
         (command sonja :upsert-application-handler :id application-id :userId sonja-id :roleId sipoo-general-handler-id) => ok?
-        (let [app (query-application sonja application-id)
+        (let [app           (query-application sonja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-9988"))
 
       (fact "Ronja still does not see the full person ID"
-        (let [app (query-application ronja application-id)
+        (let [app           (query-application ronja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****")))))
 

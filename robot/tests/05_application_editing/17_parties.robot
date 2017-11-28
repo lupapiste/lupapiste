@@ -49,6 +49,28 @@ Roles and levels are localized
   Check accordion text  suunnittelija  PLANERARE  - Piia Piirtäjä - VVS-projekterare, ventilation (Sedvanlig)
   Language To  FI
 
+Pena selects himself as head designer
+  Select person by index  paasuunnittelija  1
+  Selected person is  paasuunnittelija  Panaani Pena
+  Person fields are  paasuunnittelija  Pena  Panaani
+
+Pena clears head designer selector, but names remain even after reload
+  Select person by index  paasuunnittelija  0
+  Selected person is  paasuunnittelija  - Valitse -
+  Reload page
+  Person fields are  paasuunnittelija  Pena  Panaani
+
+Pena selects himself as applicant
+  Select person by index  hakija-r  1
+  Selected person is  hakija-r  Panaani Pena
+  Person fields are  hakija-r  Pena  Panaani  henkilo.
+
+Pena clears applicant selector, but names remain even after reload
+  Select person by index  hakija-r  0
+  Selected person is  hakija-r  - Valitse -
+  Reload page
+  Person fields are  hakija-r  Pena  Panaani  henkilo.
+
 Pena executes test scenario
   Test scenario
   Logout
@@ -103,3 +125,21 @@ Select level
 Select role
   [Arguments]  ${party}  ${role}
   Select from list by value  jquery=section[data-doc-type='${party}'] select[data-docgen-path='kuntaRoolikoodi']  ${role}
+
+Doc input is
+  [Arguments]  ${doc}  ${path}  ${value}
+  Wait until  Textfield value should be  jquery=[data-doc-type=${doc}] input[data-docgen-path='${path}']  ${value}
+
+Person fields are
+  [Arguments]  ${doc}  ${firstname}  ${lastname}  ${extra}=${EMPTY}
+  Doc input is  ${doc}  ${extra}henkilotiedot.etunimi  ${firstname}
+  Doc input is  ${doc}  ${extra}henkilotiedot.sukunimi  ${lastname}
+
+# Index starts at zero
+Select person by index
+  [Arguments]  ${doc}  ${index}
+  Select from list by index  jquery=[data-doc-type=${doc}] div.person-select-box select  ${index}
+
+Selected person is
+  [Arguments]  ${doc}  ${person}
+  Wait until  List selection should be  jquery=[data-doc-type=${doc}] div.person-select-box select  ${person}

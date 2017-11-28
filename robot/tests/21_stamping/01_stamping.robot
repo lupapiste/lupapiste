@@ -164,7 +164,7 @@ Select all files and start stamping
   Wait Until  Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Leimaus valmis
 
 There were no errors
-  Page should not contain  Virhe
+  Element Should not contain  //span[@data-test-id="attachment-status-text"]  Virhe
 
 Reset stamping, stamping page should be refreshed
   Scroll and click test id  stamp-reset

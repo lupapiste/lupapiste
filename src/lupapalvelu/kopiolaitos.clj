@@ -34,7 +34,7 @@
   (reduce
     (fn [s att]
       (let [att-map (merge att (:type att))
-            file-name (str (:fileId att-map) "_" (:filename att-map))
+            file-name (str (:id att-map) "_" (:filename att-map))
             type-str (localize lang
                        (s/join
                          "."
@@ -80,8 +80,8 @@
       (error "Kopiolaitos email sending error to" address "from" (:ordererOrganization orderInfo)))
     {:email-address address :sending-succeeded sending-succeeded?}))
 
-(defn- send-kopiolaitos-email! [lang email-addresses attachments orderInfo]
-  (let [zip (attachment/get-all-attachments! attachments)]
+(defn- send-kopiolaitos-email! [lang email-addresses attachments orderInfo application user]
+  (let [zip (attachment/get-all-attachments! attachments application user)]
     (try
       (let [email-attachment {:content zip :file-name zip-file-name}
             email-subject (str (localize lang :kopiolaitos-email-subject) \space (:ordererOrganization orderInfo))
@@ -137,7 +137,7 @@
                      :timestamp created
                      :orderInfo orderInfo
                      :attachments (map #(select-keys % [:id :fileId :amount :filename :contents :type]) attachments)}]
-          (send-kopiolaitos-email! lang email-addresses attachments orderInfo)
+          (send-kopiolaitos-email! lang email-addresses attachments orderInfo application user)
           (action/update-application command {$push {:transfers order}, $set {:modified created}})
           (ok))
         (fail :error.kopiolaitos-print-order-invalid-parameters-content)))

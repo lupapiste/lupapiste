@@ -7,6 +7,7 @@
             [clj-time.local :as local]
             [cheshire.core :as json]
             [me.raynes.fs :as fs]
+            [ring.util.request :as ring-request]
             [ring.util.response :refer [resource-response]]
             [ring.util.io :as ring-io]
             [ring.middleware.content-type :refer [content-type-response]]
@@ -46,6 +47,7 @@
             [lupapalvelu.ident.dummy]
             [lupapalvelu.ident.suomifi]
             [lupapalvelu.idf.idf-api :as idf-api]
+            [lupapalvelu.integrations.messages :as imessages]
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.proxy-services :as proxy-services]
@@ -54,8 +56,7 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
-            [lupapalvelu.ya-extension :as yax]
-            )
+            [lupapalvelu.ya-extension :as yax])
   (:import (java.io OutputStreamWriter BufferedWriter)
            (java.nio.charset StandardCharsets)))
 
@@ -640,6 +641,29 @@
           typeName (sade.xml/select1-attribute-value xml-no-ns [:Query] :typeName)]
       (when (= typeName "yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa")
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/verdict-ya.xml"))))))
+
+  (defn krysp-endpoint-authentication
+    [request]
+    (let [[u p] (http/decode-basic-auth request)]
+      (debug (str
+               u
+               " requesting krysp receiver endpoint, db cookie being: "
+               (get-in request [:cookies "test_db_name" :value])))
+      (and (= u "kuntagml") (= p "kryspi"))))
+
+  (defpage [:post "/dev/krysp/receiver/:path"] {path :path}
+    (let [request (request/ring-request)]
+      (if (krysp-endpoint-authentication request)
+        (let [body-str (ring-request/body-string request)]
+          (if (ss/starts-with body-str "<?xml")
+            (do
+              (imessages/save {:id (mongo/create-id) :direction  "in" :messageType (str "KuntaGML " path)
+                               :transferType "http" :format "xml" :created (now)
+                               :status "received" :data body-str
+                               :application {:id (re-find #"L[PX]-\d{3}-\d{4}-\d{5}" body-str)}})
+              (resp/status 200 "OK"))
+            (resp/status 400 "Not XML")))
+        basic-401)))
 
   (defpage [:get "/dev/private-krysp"] []
     (let [request (request/ring-request)

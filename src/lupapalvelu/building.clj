@@ -38,7 +38,7 @@
                (some #(= (:name %) "valtakunnallinenNumero") schema-body))
       (= (:id op) op-id))))
 
-(defn buildingid-updates-for-operation
+(defn document-buildingid-updates-for-operation
   "Generates valtakunnallinenNumero updates to documents regarding operation.
    Example update: {documents.1.data.valtakunnalinenNumero.value '123456001M'}"
   [{:keys [documents]} buildingId op-id]
@@ -48,12 +48,22 @@
                                 "data.valtakunnallinenNumero.value"
                                 buildingId))
 
+(defn buildings-array-buildingid-updates-for-operation
+  "Generates nationalId (valtakunnallinenNumero) updates to buildings array regarding operation.
+   Example update: {buildings.1.nationalId '123456001M'}"
+  [{:keys [buildings]} buildingId op-id]
+  (mongo/generate-array-updates :buildings
+                                buildings
+                                (comp #{op-id} :operationId)
+                                "nationalId"
+                                buildingId))
+
 (defn- operation-building-updates [operation-buildings application]
   (remove
     util/empty-or-nil?
     (map
       (fn [{op-id :operationId buildingId :nationalId}]
-        (buildingid-updates-for-operation application buildingId op-id))
+        (document-buildingid-updates-for-operation application buildingId op-id))
       operation-buildings)))
 
 (defn building-updates
