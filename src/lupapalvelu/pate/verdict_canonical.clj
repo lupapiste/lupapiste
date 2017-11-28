@@ -1,12 +1,12 @@
-(ns lupapalvelu.matti.verdict-canonical
+(ns lupapalvelu.pate.verdict-canonical
   (:require [sade.util :as util]
             [sade.strings :as ss]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.matti.shared :as matti-shared]))
+            [lupapalvelu.pate.shared :as pate-shared]))
 
 (defn- vaadittu-katselmus-canonical [lang {{reviews :reviews} :references :as verdict} review-id]
   (let [review (util/find-by-id review-id reviews)]
-    {:Katselmus {:katselmuksenLaji (matti-shared/review-type-map (or (keyword (:type review)) :ei-tiedossa))
+    {:Katselmus {:katselmuksenLaji (pate-shared/review-type-map (or (keyword (:type review)) :ei-tiedossa))
                  :tarkastuksenTaiKatselmuksenNimi (get-in review [:name (keyword lang)])
                  :muuTunnustieto [#_{:MuuTunnus "yht:MuuTunnusType"}]}})) ; TODO: initialize review tasks and pass ids here
 
@@ -57,12 +57,12 @@
 (defn- paatoksentekija [lang {{:keys [contact giver]} :data :as verdict}]
   (cond
     (ss/blank? giver) contact
-    (ss/blank? contact) (i18n/localize lang "matti-verdict.giver" giver)
-    :else (format "%s (%s)" contact (i18n/localize lang "matti-verdict.giver" giver))))
+    (ss/blank? contact) (i18n/localize lang "pate-verdict.giver" giver)
+    :else (format "%s (%s)" contact (i18n/localize lang "pate-verdict.giver" giver))))
 
 (defn- paatospoytakirja-type-canonical [lang {data :data :as verdict}]
   {:paatos (:verdict-text data)
-   :paatoskoodi (matti-shared/verdict-code-map (or (keyword (:verdict-code data)) :ei-tiedossa))
+   :paatoskoodi (pate-shared/verdict-code-map (or (keyword (:verdict-code data)) :ei-tiedossa))
    :paatoksentekija (paatoksentekija lang verdict)
    :paatospvm (util/to-xml-date-from-string (:verdict-date data))
    :pykala (:verdict-section data)

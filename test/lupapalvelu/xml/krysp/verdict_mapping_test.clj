@@ -5,7 +5,7 @@
             [sade.xml :as xml]
             [sade.common-reader :as cr]
             [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa]]
-            [lupapalvelu.matti.verdict-canonical-test :refer [verdict]]
+            [lupapalvelu.pate.verdict-canonical-test :refer [verdict]]
             [lupapalvelu.xml.krysp.vercict-mapping]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.validator :as validator]))

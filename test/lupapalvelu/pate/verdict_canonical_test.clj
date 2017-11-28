@@ -1,7 +1,7 @@
-(ns lupapalvelu.matti.verdict-canonical-test
+(ns lupapalvelu.pate.verdict-canonical-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.matti.verdict-canonical :refer :all]))
+            [lupapalvelu.pate.verdict-canonical :refer :all]))
 
 (def verdict {:id "1a156dd40e40adc8ee064463"
               :data {:voimassa "23.11.2023"
@@ -62,7 +62,7 @@
                                              :en "Review2"}
                                       :type "paikan-merkitseminen"}]}})
 
-(testable-privates lupapalvelu.matti.verdict-canonical
+(testable-privates lupapalvelu.pate.verdict-canonical
                    vaadittu-katselmus-canonical
                    maarays-canonical
                    vaadittu-erityissuunnitelma-canonical
