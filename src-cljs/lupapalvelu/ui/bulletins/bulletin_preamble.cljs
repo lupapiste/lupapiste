@@ -59,13 +59,7 @@
            [:div
             [:p (common/loc :application.municipality)]
             [:span.application_summary_text
-             (common/loc (str "municipality." municipality))]]
-
-           [:div
-            [:p (str (common/loc :bulletin.applicants) ":")]
-            [:ul
-             (for [applicant _applicantIndex]
-               [:li {:key applicant} applicant])]]])
+             (common/loc (str "municipality." municipality))]]])
 
         [:div.application-map-container
          [:div#bulletin-map.map.map-large

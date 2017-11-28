@@ -8,38 +8,34 @@
             [ring.swagger.ui :as ui]
             [schema.core :as sc]
             [sade.core :refer [fail]]
+            [sade.env :as env]
             [sade.util :as util]
             [lupapalvelu.action :as action]
             [lupapalvelu.api-common :refer :all]
             [lupapalvelu.autologin :as autologin]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.rest.schemas :refer :all]
             [lupapalvelu.rest.applications-data :as applications-data]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.oauth :refer [user-for-access-token]]
-            [sade.env :as env]))
+            [lupapalvelu.oauth :refer [user-for-access-token]]))
 
-(defonce endpoints (atom []))
+(defonce endpoints (atom {}))
 
 (defn valid-inputs?
   ([request param-map]
    (and (valid-inputs? request (:required param-map) identity)
         (valid-inputs? request (:optional param-map) sc/maybe)))
   ([request param-map schema-fn]
-   (let [param-keys (keys param-map)]
-     (or (empty? param-keys)
-         (every? (fn [key]
-                   (let [input-schema (-> (or (get param-map key)
-                                              sc/Any)
-                                          (schema-fn))
-                         input-val    (get request key)]
-                     (not (sc/check input-schema input-val))))
-               param-keys)))))
+   (every? (fn [key]
+             (let [input-schema (-> (or (get param-map key)
+                                        sc/Any)
+                                    (schema-fn))
+                   input-val    (get request key)]
+               (not (sc/check input-schema input-val))))
+           (keys param-map))))
 
 (defn- param-schema-map [interspersed-keys-and-values]
-  (->> interspersed-keys-and-values
-       (partition 2)
-       (map vec)
-       (into {})))
+  (apply hash-map interspersed-keys-and-values))
 
 (defmacro defendpoint-for [role-check-fn path register-endpoint? & content]
   (let [meta-data (when (map? (first content)) (first content))
@@ -47,37 +43,52 @@
                                (param-schema-map))
                 :optional (->> (get meta-data :optional-parameters)
                                (param-schema-map))}
-        letkeys (apply concat (->> params vals (map keys)))
-        required-scope (keyword (:oauth-scope meta-data))]
-    `(let [[m# p#]        (if (string? ~path) [:get ~path] ~path)
-           retval-schema# (get ~meta-data :returns)]
-       (when ~register-endpoint?
-         (swap! endpoints conj {:method (keyword m#)
-                                :path   p#
-                                :meta   ~meta-data}))
-       (defpage ~path {:keys ~letkeys :as request#}
-         (if-let [~'user (if ~required-scope
-                           (user-for-access-token (request/ring-request))
-                           (or (basic-authentication (request/ring-request))
-                               (autologin/autologin  (request/ring-request))))]
-           (if (or (and (not ~required-scope)
-                        (~role-check-fn ~'user))
-                   ((set (:scopes ~'user)) ~required-scope))
-             ; Input schema validation
-             (if (valid-inputs? request# ~params)
-               (let [response-data# (do ~@content)]
-                 ; Response data schema validation
-                 (if (action/response? response-data#)
-                   response-data#
-                   (try
-                     (sc/validate retval-schema# response-data#)
-                     (resp/status 200 (resp/json response-data#))
-                     (catch Exception e#
-                       (errorf "Possible schema error or other failure in %s: %s" ~path e#)
-                       (resp/status 500 "Unknown server error")))))
-               (resp/status 400 (resp/json (fail :error.input-validation-error))))
-             (resp/status 401 "Unauthorized"))
-           basic-401)))))
+        oauth-scope (keyword (:oauth-scope meta-data))
+        retval-schema (get meta-data :returns)
+        [method path-string]  (if (string? path) [:get path] path)
+        response-data (gensym "response-data")]
+
+    `(do
+       ~(when register-endpoint?
+          `(swap! endpoints assoc
+                  ~[(keyword method) path-string]
+                  ~{:method (keyword method)
+                    :path   path-string
+                    :meta   meta-data}))
+
+       (defpage ~path {:keys ~(mapcat keys (vals params)) :as request#}
+           (let [~'user ~(if oauth-scope
+                           `(user-for-access-token (request/ring-request))
+                           `(or (basic-authentication (request/ring-request))
+                                (autologin/autologin  (request/ring-request))))
+                 ~response-data (delay (try ~@content
+                                            (catch Exception e#
+                                              (error e#)
+                                              (resp/status 500 "Unknown server error"))))]
+             (cond
+               (not ~'user)
+               basic-401
+
+               (not ~(if oauth-scope
+                       `(some #{~oauth-scope} (:scopes ~'user))
+                       `(~role-check-fn ~'user)))
+               (resp/status 401 "Unauthorized")
+
+               (not (valid-inputs? request# ~params))
+               (resp/status 400 (resp/json (fail :error.input-validation-error)))
+
+               (action/response? @~response-data)
+               @~response-data
+
+               :else
+               ~(if retval-schema
+                  `(try
+                    (sc/validate ~retval-schema @~response-data)
+                    (resp/status 200 (resp/json @~response-data))
+                    (catch Exception e#
+                      (errorf "Possible schema error or other failure in %s: %s" ~path e#)
+                      (resp/status 500 "Unknown server error")))
+                  `(resp/status 200 {}))))))))
 
 (defmacro defendpoint [path & content]
   "Defines a plain JSON endpoint which can be accessed with basic authentication or autologin.
@@ -86,6 +97,16 @@
    (only) by comparing the token given in Authorization header (Bearer token) to issued OAuth access tokens.
    The scopes requested at authorization time must include the one defined in endpoint metadata."
   `(defendpoint-for usr/rest-user? ~path true ~@content))
+
+(defendpoint [:post "/rest/application/:application-id/update-national-building-id"]
+  {:parameters       [:application-id     ApplicationId
+                      :operationId        OperationId
+                      :nationalBuildingId NationalBuildingId]}
+  (let [{org-id :organization :as app} (domain/get-application-as application-id user)]
+    (if (and (usr/user-is-authority-in-organization? user org-id)
+             (applications-data/update-national-building-id! app operationId nationalBuildingId))
+      (resp/status 200 {})
+      (resp/status 404 "Not found"))))
 
 (defendpoint "/rest/submitted-applications"
   {:summary          "Organisaation kaikki j\u00e4tetyt hakemukset."
@@ -128,7 +149,7 @@
                                                      :authorizationUrl (str (env/value :host) "/oauth/authorize")
                                                      :scopes           {:read "Grants read access"
                                                                         :pay  "Allows payment with company account"}}}
-                      :paths               (into {} (map mapper @endpoints))})))
+                      :paths               (into {} (map mapper (vals @endpoints)))})))
 
 (defpage "/rest/swagger.json" []
   (if-let [user (or (basic-authentication (request/ring-request))

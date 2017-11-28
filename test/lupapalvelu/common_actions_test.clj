@@ -229,8 +229,8 @@
                            :redirect-to-3d-map :ya-extensions :authority-notice
                            :ram-linked-attachments :attachment-groups :attachments :attachment :attachments-filters :attachments-tag-groups
                            :application-organization-archive-enabled
-                           ;; matti
-                           :matti-verdicts :matti-verdict :matti-verdict-tab
+                           ;; pate
+                           :pate-verdicts :pate-verdict :pate-verdict-tab
                            ;; raw
                            :download-all-attachments :download-attachments
                            :pdf-export

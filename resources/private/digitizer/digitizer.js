@@ -8,7 +8,7 @@
 
     hub.subscribe("digitizing-location-selected", function() {
       hub.send("track-click", {category:"Create", label:"map", event:"mapContinue"});
-      self.createArchivingProject(true, false);
+      self.createArchivingProject(true, false, false);
     });
 
     self.search = ko.observable("");
@@ -79,6 +79,10 @@
       self.locationModel.beginUpdateRequest()
         .searchPoint(self.search(), self.searching);
       return false;
+    };
+
+    self.createWithoutLocation = function () {
+      self.createArchivingProject(true, true, true);
     };
 
     var zoomLevelEnum = {
@@ -238,17 +242,18 @@
         {
           title: loc("yes"),
           fn: function() {
-            self.createArchivingProject(true, true);
+            self.createArchivingProject(true, true, false);
           }});
     }
 
-    self.createArchivingProject = function(createWithoutPrevPermit, createWithoutBuildings) {
+    self.createArchivingProject = function(createWithoutPrevPermit, createWithoutBuildings, createWithDefaultLocation) {
       var params = self.locationModel.toJS();
       params.lang = loc.getCurrentLanguage();
       params.organizationId = self.selectedPrevPermitOrganization();
       params.kuntalupatunnus = trimBackendId();
       params.createAnyway = createWithoutPrevPermit;
       params.createWithoutBuildings = createWithoutBuildings;
+      params.createWithDefaultLocation = createWithDefaultLocation;
 
       ajax.command("create-archiving-project", params)
         .processing(self.processing)

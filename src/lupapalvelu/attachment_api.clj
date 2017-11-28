@@ -353,7 +353,7 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :notified         true
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
+   :user-authz-roles roles/writer-roles-with-foreman
    :states           (difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})}
   [{application :application {attachment-id :attachmentId} :data created :created}]
   (if-let [attachment-id (ram/create-ram-attachment! application attachment-id created)]
@@ -701,8 +701,8 @@
   if the user is allowed to sign and there are signable
   attachments."
    :user-roles  #{:applicant :authority}
-   :pre-checks  [domain/validate-owner-or-write-access
-                 (fn [{application :application}]
+   :user-authz-roles roles/writer-roles-with-foreman
+   :pre-checks  [(fn [{application :application}]
                    (when-not (pos? (count (:attachments application)))
                      (fail :application.attachmentsEmpty)))
                  app/validate-authority-in-drafts
@@ -727,12 +727,11 @@
    :input-validators [(partial action/non-blank-parameters [:password])
                       (partial action/vector-parameters-with-non-blank-items [:attachmentIds])]
    :states           (states/all-application-states-but states/terminal-states)
-   :pre-checks       [domain/validate-owner-or-write-access
-                      (app/allow-roles-only-in-operations [:foreman] [:tyonjohtajan-nimeaminen-v2])
+   :pre-checks       [(app/allow-roles-only-in-operations [:foreman] [:tyonjohtajan-nimeaminen-v2])
                       app/validate-authority-in-drafts
                       permit/is-not-archiving-project]
    :user-roles       #{:applicant :authority}
-   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)}
+   :user-authz-roles roles/writer-roles-with-foreman}
   [{application :application u :user :as command}]
   (when (seq attachmentIds)
     (if (usr/get-user-with-password (:username u) password)
@@ -791,7 +790,7 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       (partial action/boolean-parameters [:notNeeded])]
    :user-roles #{:applicant :authority}
-   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
+   :user-authz-roles roles/writer-roles-with-foreman
    :states     #{:draft :open :submitted :complementNeeded}
    :pre-checks [app/validate-authority-in-drafts
                 att/foreman-must-be-uploader
@@ -847,7 +846,7 @@
   {:parameters       [id attachmentId value]
    :categories       #{:attachments}
    :user-roles       #{:authority :applicant}
-   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
+   :user-authz-roles roles/writer-roles-with-foreman
    :input-validators [(fn [{{nakyvyys-value :value} :data}]
                         (when-not (some (hash-set (keyword nakyvyys-value)) attachment-meta/visibilities)
                           (fail :error.invalid-nakyvyys-value)))]

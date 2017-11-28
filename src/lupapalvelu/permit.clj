@@ -206,6 +206,17 @@
   (error "KRYSP 'review mapper' method not defined for permit type: " permit-type)
   nil)
 
+(defmulti verdict-krysp-mapper
+  "Maps verdicts into KRYSP XML."
+  {:arglists '([application verdict user lang krysp-version begin-of-link])}
+  (fn [{permit-type :permitType} & _]
+    (keyword permit-type)))
+
+(defmethod verdict-krysp-mapper :default
+  [{permit-type :permitType} & _]
+  (error "KRYSP 'verdict mapper' method not defined for permit type: " permit-type)
+  nil)
+
 (defmulti read-verdict-xml
   "Reads verdicts (sequence) from KRYSP xml."
   {:arglists '([permit-type xml-without-ns])}

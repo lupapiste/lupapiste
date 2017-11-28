@@ -40,5 +40,36 @@
                          value: $root.organization.archivingProjectTosFunction,
                          valueAllowUnset: true"></select>
     </section>
+
+    <section>
+      <br>
+      <div>
+        <h3 data-bind="ltext: 'auth-admin.archiving.digitizing.defaultLocation'"></h3>
+        <table class="table grid-style-input default-digitalization-location">
+          <thead>
+            <tr>
+              <th><span data-bind="ltext: 'auth-admin.archiving.digitizing.defaultLocation.x'"></span></th>
+              <th><span data-bind="ltext: 'auth-admin.archiving.digitizing.defaultLocation.y'"></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <input data-bind="value: organization.defaultDigitalizationLocationX"
+                       type="text"
+                       id="default-digitalization-x"
+                       class="form-input-location">
+              </td>
+              <td>
+                <input data-bind="value: organization.defaultDigitalizationLocationY"
+                       type="text"
+                       id="default-digitalization-y"
+                       class="form-input-location">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
   </div>
 </section>

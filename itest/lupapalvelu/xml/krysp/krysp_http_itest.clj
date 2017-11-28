@@ -44,13 +44,12 @@
       (command veikko :request-for-complement :id application-id) => ok?
       (command admin :set-kuntagml-http-endpoint :url "http://invalid" :organization "837-R" :permitType "R") => ok?
       (command veikko :approve-application :id application-id :lang "fi") => fail?
-      (command admin :set-kuntagml-http-endpoint :partner "matti"
+      (command admin :set-kuntagml-http-endpoint :partner "pate"
                :url (str (server-address) "/dev/krysp/receiver") :organization "837-R" :permitType "R"
                :username "kuntagml" :password "invalid") => ok?
       (command veikko :approve-application :id application-id :lang "fi") => fail?)
     (fact "updating correct creds makes integration work again"
       (command admin :set-kuntagml-http-endpoint
                :url (str (server-address) "/dev/krysp/receiver") :organization "837-R" :permitType "R"
-               :username "kuntagml" :password "kryspi" :partner "matti") => ok?
+               :username "kuntagml" :password "kryspi" :partner "pate") => ok?
       (command veikko :approve-application :id application-id :lang "fi") => ok?)))
-

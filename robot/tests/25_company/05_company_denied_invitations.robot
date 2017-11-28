@@ -56,9 +56,9 @@ Company user cant be invited to application
   Wait until  Page should contain  ${error_message}
   Click by test id  person-invite-bubble-dialog-cancel
 
-Company user cannot be invited as guest
+Company user cannot be invited as guest authority
   Invite application guest authority  Duff3 Dummy3  ${dummy}  Talonvahti  Hello
-  Page should contain  ${error_message}
+  Wait until  Page should contain  ${error_message}
   Click by test id  guest-bubble-dialog-cancel
 
 Company user cannot be invited as foreman

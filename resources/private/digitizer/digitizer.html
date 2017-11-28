@@ -4,7 +4,7 @@
 <section class="page container" id="create-archiving-project">
   <h1 data-bind="ltext: 'newRequest.createArchivingProject'"></h1>
   <div class="form-grid form-grid--no-border">
-    <form data-bind="submit: function() { createArchivingProject(false, false); }">
+    <form data-bind="submit: function() { createArchivingProject(false, false, false); }">
       <div class="row">
         <label>
           <span data-bind="ltext: 'prev-permit-label-kuntalupatunnus'"></span>
@@ -51,6 +51,10 @@
           <button data-bind="click: searchNow" class="positive" data-test-id="create-search-button">
             <i class="lupicon-search"></i>
             <span data-bind="ltext: 'search'"></span>
+          </button>
+          <button data-bind="click: createWithoutLocation," class="secondary right">
+            <span data-bind="ltext: 'create.without.location'"></span>
+            <i class="lupicon-chevron-right"></i>
           </button>
         </div>
         <div id="archiving-map" class="map create-application-map" style="width: 100%; height: 700px;"></div>

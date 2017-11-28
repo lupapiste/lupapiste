@@ -58,7 +58,7 @@
            :on-click #(open-bulletin id)}
           [:td (str section " "
                     (when (and category code)
-                      (common/loc (str "matti-" category ".verdict-code." code)))
+                      (common/loc (str "pate-" category ".verdict-code." code)))
                     (when status
                       (common/loc (str "verdict.status." status))))]
           [:td (or application-id id)]

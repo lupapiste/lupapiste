@@ -1,8 +1,8 @@
 (ns lupapalvelu.ui.ui-components
   (:require [lupapalvelu.ui.inspection-summaries :as inspection-summaries]
             [lupapalvelu.ui.auth-admin.stamp.editor :as stamp-editor]
-            [lupapalvelu.ui.matti.verdict-templates :as verdict-templates]
-            [lupapalvelu.ui.matti.verdicts :as verdicts]
+            [lupapalvelu.ui.pate.verdict-templates :as verdict-templates]
+            [lupapalvelu.ui.pate.verdicts :as verdicts]
             [lupapalvelu.ui.printing-order.composer :as printing-order-composer]
             [lupapalvelu.ui.bulletins.bulletin-preamble :as bulletin-preamble]
             [lupapalvelu.ui.bulletins.local-bulletins :as local-bulletins]
