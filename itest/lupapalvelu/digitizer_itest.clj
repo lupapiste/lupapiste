@@ -12,8 +12,7 @@
   (mongo/with-db test-db-name
 
     (fact "Admin can set default location for organization"
-      (command jarvenpaa :set-default-digitalization-location-x :x "404262.00") => ok?
-      (command jarvenpaa :set-default-digitalization-location-y :y "6694511.00") => ok?
+      (command jarvenpaa :set-default-digitalization-location :x "404262.00" :y "6694511.00") => ok?
 
       (let [organization (mongo/by-id :organizations "186-R")]
         (get-in organization [:default-digitalization-location :x]) => "404262.00"
