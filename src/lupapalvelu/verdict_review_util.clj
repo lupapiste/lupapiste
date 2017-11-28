@@ -148,22 +148,22 @@
                   (io/copy in temp-file)
                   (when
                     (attachment/upload-and-attach! {:application current-application :user user}
-                                                 {:attachment-id attachment-id
-                                                  :attachment-type attachment-type
-                                                  :contents contents
-                                                  :target target
-                                                  :required false
-                                                  :read-only true
-                                                  :locked true
-                                                  :created (or (if (string? attachment-time)
-                                                                 (to-timestamp attachment-time)
-                                                                 attachment-time)
-                                                               timestamp)
-                                                  :state :ok
-                                                  :set-app-modified? set-app-modified?}
-                                                 {:filename filename
-                                                  :size content-length
-                                                  :content temp-file})
+                                                   {:attachment-id attachment-id
+                                                    :attachment-type attachment-type
+                                                    :contents contents
+                                                    :target target
+                                                    :required false
+                                                    :read-only true
+                                                    :locked true
+                                                    :created (or (if (string? attachment-time)
+                                                                   (to-timestamp attachment-time)
+                                                                   attachment-time)
+                                                                 timestamp)
+                                                    :state :ok
+                                                    :set-app-modified? set-app-modified?}
+                                                   {:filename filename
+                                                    :size content-length
+                                                    :content temp-file})
                     (run-assignment-triggers-for-poytakirja user application urlhash attachment-type)))
                 (error (str (:status resp) " - unable to download " url ": " resp)))))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
