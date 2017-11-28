@@ -1,8 +1,9 @@
 (ns lupapalvelu.rest.schemas
-  (:require [schema.core :as sc]
-            [ring.swagger.json-schema :as rjs]
+  (:require [ring.swagger.json-schema :as rjs]
+            [schema.core :as sc]
             [sade.util :as util]
-            [sade.schemas :as ssc]))
+            [sade.schemas :as ssc]
+            [lupapalvelu.rest.config :as config]))
 
 (defn- field [schema desc]
   (rjs/field schema {:description desc}))
@@ -165,3 +166,6 @@
 
 (sc/defschema NationalBuildingId
   (field ssc/Rakennustunnus "Pysyv\u00e4 rakennustunnus"))
+
+(sc/defschema Configuration
+  (field config/Configuration "Konfiguraatioarvot"))
