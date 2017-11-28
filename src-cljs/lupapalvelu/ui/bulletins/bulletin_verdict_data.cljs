@@ -2,7 +2,8 @@
   (:require [rum.core :as rum]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.util :as util]
-            [lupapalvelu.ui.rum-util :as rum-util]))
+            [lupapalvelu.ui.rum-util :as rum-util]
+            [sade.shared-util :as shared-util]))
 
 (rum/defc verdict-data [bulletin]
   (when bulletin
@@ -78,22 +79,51 @@
              [:h5 (common/loc :verdict.vaaditutKatselmukset)]
              [:div.accordion-content-part.spacerM
               [:ul
-               (for [[idx k] (sade.shared-util/indexed (:vaaditutKatselmukset maaraykset))]
+               (for [[idx k] (shared-util/indexed (:vaaditutKatselmukset maaraykset))]
                  ^{:key (str "katselmus-" idx)}
                  [:li
                   (if (:tarkastuksenTaiKatselmuksenNimi k)
                     (:tarkastuksenTaiKatselmuksenNimi k)
-                    (common/loc (str :task-katselmus.katselmuksenLaji "." (:katselmuksenLaji k))))])]]])
+                    (common/loc (str "task-katselmus.katselmuksenLaji." (:katselmuksenLaji k))))])]]])
           (when (seq (:maaraykset maaraykset))
             [:div
              [:h5 (common/loc :verdict.maaraykset)]
              [:ul
-              (for [[idx m] (sade.shared-util/indexed (:maaraykset maaraykset))]
+              (for [[idx m] (shared-util/indexed (:maaraykset maaraykset))]
                 ^{:key (str "maaraysrivi-" idx)}
                 [:li (:sisalto m)])]])])
+       (when (seq (:poytakirjat paatos))
+         [:div.spacerL
+          [:h4 (common/loc :verdict.poytakirjat)]
+          [:div.accordion-content-part.spacerM
+           [:table.table.table-striped.tablesorter
+            [:thead
+             [:tr
+              [:th {:colSpan 2} (common/loc :verdict.status)]
+              [:th (common/loc :verdict.pykala)]
+              [:th (common/loc :verdict.name)]
+              [:th (common/loc :verdict.paatospvm)]
+              [:th (common/loc :verdict.attachments)]]]
+            [:tbody
+             (for [[idx pk] (shared-util/indexed (:poytakirjat paatos))]
+               ^{:key (str "paatospk-" idx)}
+               [:tr
+                [:td (when (:status pk)
+                       (common/loc (str "verdict.status." (:status pk))))
+                     (when (and (not (:status pk)) (:paatoskoodi pk))
+                       (:paatoskoodi pk))]
+                [:td.verdict-text (:paatos pk)]
+                [:td (:pykala pk)]
+                [:td (:paatoksentekija pk)]
+                [:td (common/format-timestamp (:paatospvm pk))]
+                [:td (for [{:keys [id latestVersion]} (:attachments pk)]
+                       ^{:key id}
+                       [:span
+                        [:a {:href (str "/api/raw/download-bulletin-attachment?attachment-id=" (:fileId latestVersion))}]
+                        [:br]
+                        [:i (common/loc (:contentType latestVersion))]
+                        [:i "size"]])]])]]]])
        [:div.spacerL
-        [:h4 (common/loc :verdict.poytakirjat)]
-        [:div.accordion-content-part.spacerM 1234]
         [:h4 (common/loc :application.attachments.paapiirustus)]
         [:div.accordion-content-part.spacerM 1234435]]])]))
 
