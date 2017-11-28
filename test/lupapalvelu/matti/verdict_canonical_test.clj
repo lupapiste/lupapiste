@@ -135,8 +135,7 @@
                                   :vaaditutKatselmukset
                                   :maaraystieto
                                   :vaadittuErityissuunnitelmatieto
-                                  :vaadittuTyonjohtajatieto}
-                                :in-any-order :gaps-ok))
+                                  :vaadittuTyonjohtajatieto}))
 
     (fact "not nil fields"
       (keys (filter val canonical)) => (just #{:autopaikkojaRakennettava
@@ -145,8 +144,7 @@
                                                :vaaditutKatselmukset
                                                :maaraystieto
                                                :vaadittuErityissuunnitelmatieto
-                                               :vaadittuTyonjohtajatieto}
-                                             :in-any-order :gaps-ok))
+                                               :vaadittuTyonjohtajatieto}))
 
     (fact "autopaikkojarakennettava"
       (:autopaikkojaRakennettava canonical) => 3)
@@ -186,8 +184,8 @@
         :lainvoimainenPvm nil
         :voimassaHetkiPvm nil
         :raukeamisPvm nil
-        :antoPvm "2017-11-27"
-        :viimeinenValitusPvm "2017-11-27"
+        :antoPvm "2017-11-20"
+        :viimeinenValitusPvm "2017-12-27"
         :julkipanoPvm "2017-11-24"}))
 
 (facts paatoksentekija
