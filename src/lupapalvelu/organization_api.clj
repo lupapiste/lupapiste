@@ -544,6 +544,17 @@
           (ok))
       (fail :error.invalid-date))))
 
+(defcommand set-default-digitalization-location
+  {:parameters       [x y]
+   :user-roles       #{:authorityAdmin}
+   :input-validators [(fn [{{x :x y :y} :data}]
+                        (when-not (or (ss/decimal-number? x) (ss/decimal-number? y))
+                          (fail :error.illegal-number)))]}
+  [{user :user}]
+  (org/update-organization (usr/authority-admins-organization-id user) {$set {:default-digitalization-location.x x
+                                                                              :default-digitalization-location.y y}})
+  (ok))
+
 (defcommand set-organization-earliest-allowed-archiving-date
   {:parameters [organizationId date]
    :user-roles #{:admin}
