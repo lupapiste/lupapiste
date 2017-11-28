@@ -620,6 +620,61 @@
     [:lausuntotieto :Lausunto :liitetieto :Liite]
     {:tag :Liite :child liite-children_216}))
 
+(def lupamaaraykset_218
+  [{:tag :autopaikkojaEnintaan :ns "yht"}
+   {:tag :autopaikkojaVahintaan :ns "yht"}
+   {:tag :autopaikkojaRakennettava :ns "yht"}
+   {:tag :autopaikkojaRakennettu :ns "yht"}
+   {:tag :autopaikkojaKiinteistolla :ns "yht"}
+   {:tag :autopaikkojaUlkopuolella :ns "yht"}
+   {:tag :kerrosala :ns "yht"}
+   {:tag :kokonaisala :ns "yht"}
+   {:tag :rakennusoikeudellinenKerrosala :ns "yht"}
+   {:tag :vaaditutKatselmukset :ns "yht"
+    :child [{:tag :Katselmus :ns "yht"
+             :child [{:tag :katselmuksenLaji :ns "yht"}
+                     {:tag :tarkastuksenTaiKatselmuksenNimi :ns "yht"}
+                     {:tag :muuTunnustieto :ns "yht"
+                      :child [{:tag :MuuTunnus :child [{:tag :tunnus} {:tag :sovellus}]}]}]}]}
+   {:tag :maaraystieto :ns "yht"
+    :child [{:tag :Maarays :ns "yht"
+             :child [{:tag :sisalto :ns "yht"}
+                     {:tag :maaraysPvm :ns "yht"}
+                     {:tag :toteutusHetki :ns "yht"}]}]}
+   {:tag :vaadittuErityissuunnitelmatieto :ns "yht"
+    :child [{:tag :VaadittuErityissuunnitelma :ns "yht"
+             :child [{:tag :vaadittuErityissuunnitelma :ns "yht"}
+                     {:tag :toteutumisPvm :ns "yht"}]}]}
+   {:tag :vaadittuTyonjohtajatieto :ns "yht"
+    :child [{:tag :VaadittuTyonjohtaja :ns "yht"
+             :child [{:tag :tyonjohtajaRooliKoodi}]}]}])
+
+(def paivamaarat_218
+  [{:tag :aloitettavaPvm :ns "yht"}
+   {:tag :lainvoimainenPvm :ns "yht"}
+   {:tag :voimassaHetkiPvm :ns "yht"}
+   {:tag :raukeamisPvm :ns "yht"}
+   {:tag :antoPvm :ns "yht"}
+   {:tag :viimeinenValitusPvm :ns "yht"}
+   {:tag :julkipanoPvm :ns "yht"}])
+
+(def paatospoytakirja_218
+  [{:tag :paatos :ns "yht"}
+   {:tag :paatoskoodi :ns "yht"}
+   {:tag :paatoksentekija :ns "yht"}
+   {:tag :paatospvm :ns "yht"}
+   {:tag :pykala :ns "yht"}
+   {:tag :liite :ns "yht"
+    :child liite-children_216}])
+
+(def paatokset_218 {:tag :Paatos :ns "yht"
+                    :child [{:tag :lupamaaraykset :ns "yht"
+                             :child lupamaaraykset_218}
+                            {:tag :paivamaarat :ns "yht"
+                             :child paivamaarat_218}
+                            {:tag :poytakirja :ns "yht"
+                             :child paatospoytakirja_218}]})
+
 (def ymp-kasittelytieto-children [{:tag :muutosHetki :ns "yht"}
                                   {:tag :hakemuksenTila :ns "yht"}
                                   {:tag :asiatunnus :ns "yht"}
