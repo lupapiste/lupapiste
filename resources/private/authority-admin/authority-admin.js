@@ -608,7 +608,7 @@
       organization:        organizationModel,
       authorization:       lupapisteApp.models.globalAuthModel
     });
-    $("#matti-verdict-templates").applyBindings({
+    $("#pate-verdict-templates").applyBindings({
       organization:        organizationModel,
       authorization:       lupapisteApp.models.globalAuthModel
     });

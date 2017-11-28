@@ -104,7 +104,7 @@
 
 (defn fetch-building-xml [organization permit-type property-id]
   (when (and organization permit-type property-id)
-    (when-let [{url :url credentials :credentials} (org/get-krysp-wfs {:_id organization} permit-type)]
+    (when-let [{url :url credentials :credentials} (org/get-building-wfs {:_id organization} permit-type)]
       (building-reader/building-xml url credentials property-id))))
 
 (defn buildings-for-documents [xml]

@@ -14,7 +14,7 @@ LUPAPISTE.DefaultVerdictTemplateModel = function( params ) {
   var verdictTemplates = organization.verdictTemplates;
   var operation = params.operation;
 
-  // Categories originally defined in matti.clj.
+  // Categories originally defined in pate/shared.cljc.
   var categories = {r:   ["r"],
                     p:   ["p"],
                     ya:  ["ya"],

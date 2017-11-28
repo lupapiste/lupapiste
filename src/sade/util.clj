@@ -624,6 +624,7 @@
 (defalias not=as-kw          shared/not=as-kw)
 (defalias includes-as-kw?    shared/includes-as-kw?)
 (defalias intersection-as-kw shared/intersection-as-kw)
+(defalias difference-as-kw shared/difference-as-kw)
 
 (defn kw-path
   "a b c -> :a.b.c

@@ -74,12 +74,12 @@
   (let [input-id (str "input-" (rand-int 10000))
         value-fn (if negate? not identity)
         value (value-fn value)]
-    [:div.matti-checkbox-wrapper
+    [:div.pate-checkbox-wrapper
      [:input {:type     "checkbox"
               :disabled disabled
               :checked  value
               :id       input-id}]
-     [:label.matti-checkbox-label
+     [:label.pate-checkbox-label
       {:for      input-id
        :on-click #(handler-fn (not (value-fn value)))}
       (common/loc label)]]))
@@ -287,7 +287,7 @@
                                            {:on-focus  #(common/reset-if-needed! open?* true)
                                             :required? required?
                                             :disabled  disabled?})]
-    [:div.matti-autocomplete
+    [:div.pate-autocomplete
      [:div.ac--combobox text-edit]
      (when (and (rum/react open?*) (seq (items-fn @term*)))
        [:div.ac__menu menu-items])]))
@@ -322,7 +322,7 @@
         open? (rum/react open?*)]
     (when-not open?
       (common/reset-if-needed! term* ""))
-    [:div.matti-autocomplete
+    [:div.pate-autocomplete
      [:div.like-btn.ac--selected
       {:on-click (when-not disabled?
                    #(swap! open?* not))

@@ -82,3 +82,42 @@
   (create-trigger 123 ["target.attachment"] nil "Description") => {:id 123
                                                                    :targets ["target.attachment"]
                                                                    :description "Description"}))
+
+(let [permit-type :R
+      conf (fn [c] {:krysp {permit-type c}})]
+
+  (facts "resolve-krysp-wfs"
+    (against-background
+      [(get-credentials anything) => ["pena" "pena"]]
+      (fact "url must be present"
+        (resolve-krysp-wfs (conf {:url "foo" :version "1"}) permit-type) => (contains {:url "foo" :version "1"})
+        (resolve-krysp-wfs (conf {:url nil :version "1"}) permit-type) => nil
+        (resolve-krysp-wfs (conf {:buildingUrl "foo" :version "1"}) permit-type) => nil)))
+
+  (facts "resolve-building-wfs"
+    (against-background
+      [(get-credentials anything) => ["pena" "pena"]]
+      (fact "buildingUrl must be present"
+        (resolve-building-wfs (conf {:url "foo" :version "1"}) permit-type) => nil
+        (resolve-building-wfs (conf {:url nil :version "1"}) permit-type) => nil
+        (resolve-building-wfs (conf {:buildingUrl "foo" :version "1"}) permit-type) => (contains {:url "foo" :version "1"}))))
+
+  (fact "get-building-wfs without urls"
+    (get-building-wfs ..query.. permit-type) => nil
+    (provided
+      (mongo/select-one :organizations ..query.. [:krysp]) => (conf {:version "1" :username "foo"})))
+
+  (fact "get-building-wfs with :url"
+    (get-building-wfs ..query.. permit-type) => (just {:url "foo" :version "1"})
+    (provided
+      (mongo/select-one :organizations ..query.. [:krysp]) => (conf {:url "foo" :version "1"})))
+
+  (fact "get-building-wfs with :buildingUrl 1 (returned as :url)"
+    (get-building-wfs ..query.. permit-type) => (just {:url "foo" :version "1"})
+    (provided
+      (mongo/select-one :organizations ..query.. [:krysp]) => (conf {:buildingUrl "foo" :version "1"})))
+
+  (fact "get-building-wfs - :buildingUrl is bigger priority (returned as :url)"
+    (get-building-wfs ..query.. permit-type) => (just {:url "foo" :version "1"})
+    (provided
+      (mongo/select-one :organizations ..query.. [:krysp]) => (conf {:buildingUrl "foo" :version "1" :url "jee"}))))
