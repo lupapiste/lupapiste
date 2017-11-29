@@ -532,7 +532,7 @@
 
 (defn- fetch-reviews-for-organization
   [eraajo-user created {org-krysp :krysp :as organization} permit-types applications {:keys [overwrite-background-reviews?]}]
-  (let [fields [:address :primaryOperation :permitSubtype :history :municipality :state :permitType :organization :tasks :verdicts :modified]
+  (let [fields [:address :primaryOperation :permitSubtype :history :municipality :state :permitType :organization :tasks :verdicts :modified :documents]
         projection (cond-> (distinct (concat fields matti/base-keys))
                      overwrite-background-reviews? (conj :attachments))
         permit-types (remove (fn-> keyword org-krysp :url ss/blank?) permit-types)
