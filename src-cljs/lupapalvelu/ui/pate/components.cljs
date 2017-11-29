@@ -213,7 +213,6 @@
         link           (last (re-find regex text))
         ;; Split results include the
         [before after] (remove #(= link %) (s/split text regex))]
-    (console.log {:options options})
     [:span before
      [:a {:on-click #((path/meta-value options (:click schema)) options)} link]
      after]))

@@ -112,7 +112,8 @@
    query (see path/react-meta).
 
    :*ref the (remaining) path target is the references value of the
-   options instead of state.
+   options instead of state. If the value is sequential, then every
+   deleted item is ignored.
 
   :? True if the path is found within the state (regardless of its
   value)
@@ -379,11 +380,16 @@
                            :path   path}
                           extra)})
 
-(defn  multi-section [id]
+(defn  multi-section [id link-ref]
   {:loc-prefix (str "pate-" (name id))
    :id         (name id)
    :grid       {:columns 1
-                :rows    [[{:dict id }]]}})
+                :rows    [[{:align      :full
+                            :loc-prefix (str "pate-settings." (name id))
+                            :hide?      link-ref
+                            :dict       :link-to-settings-no-label}
+                           {:show? link-ref
+                            :dict  id }]]}})
 
 (defn text-section [id]
   {:loc-prefix (str "pate-" (name id))
@@ -406,32 +412,35 @@
 ;; TODO: access via category
 (def default-verdict-template
   {:dictionary {;; Verdict section
-                :verdict-dates         {:multi-select {:items           verdict-dates
-                                                       :sort?           false
-                                                       :i18nkey         :pate-verdict-dates
-                                                       :item-loc-prefix :pate-verdict}}
-                :giver                 {:docgen "pate-verdict-giver"}
-                :verdict-section       {:docgen "pate-verdict-section"}
-                :verdict-code          {:reference-list {:path       :settings.verdict-code
-                                                         :type       :select
-                                                         :loc-prefix :pate-r.verdict-code}}
-                :paatosteksti          {:phrase-text {:category :paatosteksti}}
-                :bulletinOpDescription {:phrase-text {:category :toimenpide-julkipanoon
-                                                      :i18nkey  :phrase.category.toimenpide-julkipanoon}}
-                :link-to-settings      {:link {:text-loc :pate.settings-link
-                                               :click    :open-settings}}
+                :verdict-dates             {:multi-select {:items           verdict-dates
+                                                           :sort?           false
+                                                           :i18nkey         :pate-verdict-dates
+                                                           :item-loc-prefix :pate-verdict}}
+                :giver                     {:docgen "pate-verdict-giver"}
+                :verdict-section           {:docgen "pate-verdict-section"}
+                :verdict-code              {:reference-list {:path       :settings.verdict-code
+                                                             :type       :select
+                                                             :loc-prefix :pate-r.verdict-code}}
+                :paatosteksti              {:phrase-text {:category :paatosteksti}}
+                :bulletinOpDescription     {:phrase-text {:category :toimenpide-julkipanoon
+                                                          :i18nkey  :phrase.category.toimenpide-julkipanoon}}
+                :link-to-settings          {:link {:text-loc :pate.settings-link
+                                                   :click    :open-settings}}
+                :link-to-settings-no-label {:link {:text-loc :pate.settings-link
+                                                   :label?   false
+                                                   :click    :open-settings}}
                 ;; The following keys are whole sections
-                :foremen               (reference-list :settings.foremen {:item-loc-prefix :pate-r.foremen})
-                :plans                 (reference-list :plans {:item-key :id
-                                                               :term     {:path       [:plans]
-                                                                          :extra-path [:name]
-                                                                          :match-key  :id}})
-                :reviews               (reference-list :reviews {:item-key :id
-                                                                 :term     {:path       [:reviews]
-                                                                            :extra-path [:name]
-                                                                            :match-key  :id}})
-                :conditions            {:phrase-text {:category :lupaehdot}}
-                :neighbors             {:loc-text :pate-neighbors.text}
+                :foremen                   (reference-list :settings.foremen {:item-loc-prefix :pate-r.foremen})
+                :plans                     (reference-list :plans {:item-key :id
+                                                                   :term     {:path       [:plans]
+                                                                              :extra-path [:name]
+                                                                              :match-key  :id}})
+                :reviews                   (reference-list :reviews {:item-key :id
+                                                                     :term     {:path       [:reviews]
+                                                                                :extra-path [:name]
+                                                                                :match-key  :id}})
+                :conditions                {:phrase-text {:category :lupaehdot}}
+                :neighbors                 {:loc-text :pate-neighbors.text}
 
                 :appeal           {:phrase-text {:category :muutoksenhaku
                                                  :i18nkey  :phrase.category.muutoksenhaku}}
@@ -466,22 +475,25 @@
                                        {:col  2
                                         :id   :section
                                         :dict :verdict-section}
+                                       {:align      :full
+                                        :col        3
+                                        :loc-prefix :pate-r.verdict-code
+                                        :hide?      :*ref.settings.verdict-code
+                                        :dict       :link-to-settings}
                                        {:align :full
                                         :col   3
+                                        :show? :*ref.settings.verdict-code
                                         :dict  :verdict-code}]
                                       [{:col  12
-                                        :dict :paatosteksti}]
-                                      [{:col   4
-                                        :hide? :*ref.settings.verdict-code
-                                        :dict  :link-to-settings}]]}}
+                                        :dict :paatosteksti}]]}}
               {:id         "bulletin"
                :loc-prefix :bulletin
                :grid       {:columns 1
                             :rows    [[{:col  1
                                         :dict :bulletinOpDescription}]]}}
-              (multi-section :foremen)
-              (multi-section :reviews)
-              (multi-section :plans)
+              (multi-section :foremen :*ref.settings.foremen)
+              (multi-section :reviews :*ref.reviews)
+              (multi-section :plans :*ref.plans)
               {:id         "conditions"
                :loc-prefix :phrase.category.lupaehdot
                :grid       {:columns 1

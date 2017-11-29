@@ -208,7 +208,9 @@
   (let [[x & k :as path] (resolve-path options kw-path)]
     (truthy? (case x
                :_meta (react-meta options k)
-               :*ref  (react k (:references options))
+               :*ref  (let [r (react k (:references options))]
+                        (cond->> r
+                          (sequential? r) (remove :deleted)))
               :?      (has-path? k state)
               (react path state)))))
 
