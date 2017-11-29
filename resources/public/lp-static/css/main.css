@@ -25308,6 +25308,22 @@ div.pate-settings-editor table.pate-editor-table tr:hover:nth-child(even) {
   background: #f6f6f6;
 }
 
+table.pate-verdicts-table {
+  width: initial;
+}
+
+table.pate-verdicts-table tr:hover {
+  background-color: white;
+}
+
+table.pate-verdicts-table tr:hover:nth-child(even) {
+  background: #f6f6f6;
+}
+
+table.pate-verdicts-table tr {
+  border: none;
+}
+
 div.pate-verdict div.pate-section div.section-header {
   background-color: initial;
   border: none;

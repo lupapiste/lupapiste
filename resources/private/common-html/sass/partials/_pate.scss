@@ -284,6 +284,14 @@ div.pate-settings-editor {
 
 // Verdicts
 
+table.pate-verdicts-table {
+  width: initial;
+  @include no-row-hover;
+  tr {
+    border: none;
+  }
+}
+
 div.pate-verdict {
   div.pate-section {
     div.section-header {
