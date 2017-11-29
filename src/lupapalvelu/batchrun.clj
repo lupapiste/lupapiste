@@ -778,7 +778,7 @@
         dbname   (:dbname conf)
         username (-> conf :credentials :username)
         password (-> conf :credentials :password)
-        server   (monger/server-address backup-host backup-port)
+        server   (monger/server-address backup-host (util/->long backup-port))
         options  (monger/mongo-options {:write-concern mongo/default-write-concern})
         backup-connection (if (and username password)
                             (monger/connect server options (monger-cred/create username dbname password))
