@@ -759,6 +759,19 @@
     (mongo/update :applications {:_id app-id} {$push {:tasks {$each restored-tasks}
                                                       :attachments {$each restored-attachments}}})))
 
+(defn copy-files-from-backup! [backup-db attachments]
+  (let [file-ids (->> (mapcat :versions attachments)
+                      (mapcat (juxt :originalFileId :fileId))
+                      (mapcat (juxt identity #(str % "-preview"))))]
+
+    (mongo/insert-batch :fs.files (monger-query/with-collection backup-db "fs.files"
+                                    (monger-query/find {:_id {$in file-ids}})
+                                    (monger-query/snapshot)))
+
+    (mongo/insert-batch :fs.chunks (monger-query/with-collection backup-db "fs.chunks"
+                                     (monger-query/find {:files_id {$in file-ids}})
+                                     (monger-query/snapshot)))))
+
 (defn restore-removed-tasks [backup-host backup-port]
   (mongo/connect!)
   (let [conf     (env/value :mongodb)
@@ -770,11 +783,15 @@
         backup-connection (if (and username password)
                             (monger/connect server options (monger-cred/create username dbname password))
                             (monger/connect server options))
-        grid-fs (monger/get-gridfs backup-connection (.getName (monger/get-db backup-connection dbname)))]
-    (->> (map mongo/with-id (monger-query/with-collection (monger/get-db backup-connection dbname) "applications"
-                              (monger-query/find {:tasks.data.muuTunnus.value ""})
-                              (monger-query/fields [:tasks :attachments])
-                              (monger-query/snapshot)))
+        backup-db (monger/get-db backup-connection dbname)]
+
+    (->> (monger-query/with-collection backup-db "applications"
+           (monger-query/find {:tasks.data.muuTunnus.value ""})
+           (monger-query/fields [:tasks :attachments])
+           (monger-query/snapshot))
+
+         (map mongo/with-id)
+
          (reduce (fn [counter {app-id :id backup-tasks :tasks backup-attachments :attachments :as backup-app}]
                    (let [app (mongo/by-id :applications app-id [:tasks])
                          existing-task-ids (set (map :id (:tasks app)))
@@ -782,7 +799,10 @@
                                              (remove (comp existing-task-ids :id)))
                          restored-task-ids (set (map :id restored-tasks))
                          restored-attachments (filter (comp restored-task-ids :id :target) backup-attachments)]
+
                      (when app
-                       (restore-tasks-and-attachments! app-id restored-tasks restored-attachments))
+                       (restore-tasks-and-attachments! app-id restored-tasks restored-attachments)
+                       (copy-files-from-backup! backup-db restored-attachments))
+
                      (cond-> counter (not-empty restored-tasks) inc)))
                  0))))
