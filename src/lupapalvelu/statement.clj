@@ -249,7 +249,7 @@
                          :status (:status statement-data)
                          :state  :given
                          :given  (:given statement-data)
-                         :text   (:text statement-data)
+                         :text   (or (:text statement-data) "Lausunto liitteen\u00e4")
                          :person (update (:person statement) :name (partial get-giver statement-data))
                          :external (util/assoc-when (:external statement) :externalId (:externalId statement-data)))]
       (action/update-application (action/application->command app)
