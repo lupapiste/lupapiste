@@ -558,11 +558,19 @@
            {:tag :tila}
            {:tag :kasittelija :child [henkilo]}]})
 
-(def lupatunnus {:tag :LupaTunnus :ns "yht"
-                 :child [{:tag :kuntalupatunnus}
-                         {:tag :muuTunnustieto :child [{:tag :MuuTunnus :child [{:tag :tunnus} {:tag :sovellus}]}]}
-                         {:tag :saapumisPvm}
-                         {:tag :viittaus}]})
+(def ymp-lupatunnus
+  "yht:YmparistoLuvanTunnisteTiedotType / yht:YmparistoLuvanTunnusType"
+  {:tag :LupaTunnus :ns "yht"
+   :child [{:tag :kuntalupatunnus}
+           {:tag :muuTunnustieto :child [{:tag :MuuTunnus :child [{:tag :tunnus} {:tag :sovellus}]}]}
+           {:tag :saapumisPvm}
+           {:tag :viittaus}]})
+
+(def lupatunnus
+  "yht:LuvanTunnisteTiedotType / yht:RakennusLuvanTunnusType"
+  (update ymp-lupatunnus
+          :child merge-into-coll-after-tag :muuTunnustieto
+          [{:tag :VRKLupatunnus}]))
 
 (def toimituksenTiedot [{:tag :aineistonnimi :ns "yht"}
                         {:tag :aineistotoimittaja :ns "yht"}
