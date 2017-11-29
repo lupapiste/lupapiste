@@ -66,7 +66,7 @@
               unzipped-path
               application
               attachment
-              {:type-group "muut" :type-id "muu"}
+              {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"}
               {:type "statement" :id (:id statement)}
               "Lausunnon liite (ELY-keskus)"
               created

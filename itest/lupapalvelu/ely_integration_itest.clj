@@ -135,6 +135,7 @@
           (count statement-attachments) => 1
           (get-in ely-attachment [:target :id]) => (:id ely-statement)
           (get-in ely-attachment [:target :type]) => "statement"
+          (get-in ely-attachment [:type :type-id]) => "lausunto"
           (get ely-attachment :contents) => (contains "Lausunnon liite")
           (get-in ely-attachment [:latestVersion :user :username]) => (:username usr/batchrun-user-data)
           (fact "as in give-statement, attachment should be set readonly"
