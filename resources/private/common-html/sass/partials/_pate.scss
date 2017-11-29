@@ -70,7 +70,7 @@ $pate-grid-margin: 10px;
   }
 }
 
-@for $i from 1 through 12 {
+@for $i from 1 through 24 {
   @include pate-grid( $i );
 }
 
@@ -187,6 +187,7 @@ span.formatted {
 .pate-label {
   font-size: 15px;
   font-weight: bold;
+ // white-space: nowrap;
 }
 
 // Meta status classes
@@ -218,6 +219,9 @@ span.saved-info {
 }
 
 div.pate-date-delta {
+  > label.delta-label {
+    white-space: nowrap;
+  }
   > div.delta-editor {
     white-space: nowrap;
     input.grid-style-input {
@@ -604,4 +608,10 @@ div.pate-note {
   padding-bottom: $marginS;
   background-color: $gray246;
   display: inline-block;
+}
+
+div.pate-unordered-list {
+  ul {
+    list-style-type: square;
+  }
 }

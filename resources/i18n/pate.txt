@@ -497,3 +497,4 @@
 "plus" "fi" "+"
 "plus" "sv" "+"
 "plus" "en" "+"
+"pate.settings-link" "fi" "Arvot tulevat [asetuksista]."

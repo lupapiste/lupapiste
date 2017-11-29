@@ -386,15 +386,10 @@
                                            :deleted false})}))
         (fact "Review not found"
           (command sipoo :update-verdict-template-review
-                   :review-id "notfoun"
+                   :review-id "notfound"
                    :type :aloituskokous
                    :fi "Hei")
-          => (err :error.settings-item-not-found))
-        (fact "Select review"
-          (command sipoo :save-verdict-template-settings-value
-                   :category "r"
-                   :path [:reviews]
-                   :value [id]) => ok?)))))
+          => (err :error.settings-item-not-found))))))
 
 (facts "Plans"
   (fact "Initially empty"
@@ -480,12 +475,7 @@
           (command sipoo :update-verdict-template-plan
                    :plan-id "notfound"
                    :fi "Hei")
-          => (err :error.settings-item-not-found))
-        (fact "Select plan"
-          (command sipoo :save-verdict-template-settings-value
-                   :category "r"
-                   :path [:plans]
-                   :value [id]) => ok?)))))
+          => (err :error.settings-item-not-found))))))
 
 (facts "Operation default verdict template"
   (fact "No defaults yet"

@@ -103,12 +103,16 @@
 
 
 (defschema PateEnabled
-  "Component state (enabled/disabled) as defined by paths. Empty
-  strings/collections are interpreted as falsey. Default: enabled.  On
-  conflicts, component is disabled. Some path prefixes are handled specially:
+  "Component state (enabled/disabled) as defined by paths into the
+  global state. Empty strings/collections are interpreted as
+  falsey. Default: enabled.  On conflicts, component is disabled. Some
+  path prefixes are handled specially:
 
    :_meta denotes that (the rest of) the path is interpreted as _meta
    query (see path/react-meta).
+
+   :*ref the (remaining) path target is the references value of the
+   options instead of state.
 
   :? True if the path is found within the state (regardless of its
   value)
@@ -120,8 +124,7 @@
 (defschema PateVisible
   "Similar to PateEnabled, but without any implicit prerequisite
   condition. Default is visible."
-  {(sc/optional-key :show?)
-  condition-type
+  {(sc/optional-key :show?) condition-type
    (sc/optional-key :hide?) condition-type})
 
 (defschema PateCss
@@ -130,8 +133,7 @@
                            :else    [sc/Keyword])})
 
 (defschema PateBase
-  (merge PateVisible
-         PateEnabled
+  (merge PateEnabled
          PateCss
          {;; If an schema ancestor has :loc-prefix then localization
           ;; term is loc-prefix + id-path, where id-path from
@@ -153,8 +155,8 @@
          ;; path typically refers to the settings.
          {:path                              path-type
           ;; In addition to UI, type also affects validation: :select
-          ;; only accepts single values.
-          :type                              (sc/enum :select :multi-select)
+          ;; only accepts single values. List is read-only.
+          :type                              (sc/enum :select :multi-select :list)
           ;; By default, an item value is the same as
           ;; source. If :item-key is given, then the corresponding
           ;; source property is used.
@@ -214,6 +216,19 @@
   (merge PateEnabled
          {:name sc/Str}))
 
+(defschema PateLink
+  "UI component that represents a text with link. The link is part of
+  the text-loc, using a special notattion: 'Text before [link]
+  after.' The click handler for the link is a _meta function."
+  (merge PateComponent
+         { ;; The label text is always determined by the default
+          ;; PateComponent mechanisms (loc-prefix, i18nkey), but the
+          ;; actual text with link is determined by the :text-loc key.
+          :text-loc sc/Keyword
+          ;; Must resolve to _meta function. The function receives
+          ;; options as arguments.
+          :click    sc/Keyword}))
+
 (defschema PatePlaceholder
   "Placholder for external (filled by backend) data."
   (merge PateComponent
@@ -264,6 +279,7 @@
                :date-delta     {:date-delta PateDateDelta}
                :multi-select   {:multi-select PateMultiSelect}
                :reference      {:reference PateReference}
+               :link           {:link PateLink}
                :placeholder    {:placeholder PatePlaceholder}
                :keymap         {:keymap KeyMap}
                :attachments    {:attachments PateAttachments}
@@ -273,12 +289,15 @@
   "Id to schema mapping."
   {:dictionary SchemaTypes})
 
+(defschema PateLayout
+  (merge PateBase PateVisible))
+
 (defschema PateMeta
   "Dynamic management. No UI counterpart. Not part of the saved data."
   {(sc/optional-key :_meta) {sc/Keyword sc/Any}})
 
 (defschema PateItem
-  (merge PateBase
+  (merge PateLayout
          {;; Id is used as a path part for _meta queries.
           (sc/optional-key :id)   keyword-or-string
           ;; Value is a dictionary key
@@ -289,7 +308,7 @@
    (sc/optional-key :align) (sc/enum :left :right :center :full)})
 
 (defschema PateList
-  (merge PateBase
+  (merge PateLayout
          CellConfig
          {:list (merge PateCss
                        {(sc/optional-key :title) sc/Str
@@ -307,20 +326,20 @@
                   :else PateItemCell))
 
 (defschema PateGrid
-  (merge PateBase
-         {:columns (apply sc/enum (range 1 13)) ;; Grid size (.pate-grid-n)
+  (merge PateLayout
+         {:columns (apply sc/enum (range 1 25)) ;; Grid size (.pate-grid-n)
           :rows    [(sc/conditional
                      :row (merge PateVisible
                                  PateCss
                                  {(sc/optional-key :id)         sc/Str
-                                  ;; The same semantics as in PateBase.
+                                  ;; The same semantics as in PateLayout.
                                   (sc/optional-key :loc-prefix) sc/Keyword
                                   :row                          [PateCell]})
                      :else [PateCell])]}))
 
 
 (defschema NestedGrid
-  (merge PateBase
+  (merge PateLayout
          CellConfig
          {:grid (assoc PateGrid
                        ;; The :repeating value is a nested dictionary
@@ -335,12 +354,8 @@
                        ;; the nested dictionary.
                        (sc/optional-key :repeating) sc/Keyword)}))
 
-
-
-
-
 (defschema PateSection
-  (merge PateBase
+  (merge PateLayout
          {:id   keyword-or-string ;; Also title localization key
           :grid PateGrid}))
 
@@ -377,7 +392,7 @@
                        (when (seq acc)
                          {:dict :plus
                           :css [:date-delta-plus]})
-                       {:col 1 :dict kw :id (name kw)}))
+                       {:col 2 :dict kw :id (name kw)}))
                [])
        (remove nil?)))
 
@@ -385,28 +400,32 @@
 ;; TODO: access via category
 (def default-verdict-template
   {:dictionary {;; Verdict section
-                :verdict-dates {:multi-select {:items verdict-dates
-                                               :sort? false
-                                               :i18nkey :pate-verdict-dates
-                                               :item-loc-prefix :pate-verdict}}
-                :giver         {:docgen "pate-verdict-giver"}
-                :verdict-section  {:docgen "pate-verdict-section"}
-                :verdict-code  {:reference-list {:path       :settings.verdict-code
-                                                 :type       :select
-                                                 :loc-prefix :pate-r.verdict-code}}
-                :paatosteksti  {:phrase-text {:category :paatosteksti}}
+                :verdict-dates         {:multi-select {:items           verdict-dates
+                                                       :sort?           false
+                                                       :i18nkey         :pate-verdict-dates
+                                                       :item-loc-prefix :pate-verdict}}
+                :giver                 {:docgen "pate-verdict-giver"}
+                :verdict-section       {:docgen "pate-verdict-section"}
+                :verdict-code          {:reference-list {:path       :settings.verdict-code
+                                                         :type       :select
+                                                         :loc-prefix :pate-r.verdict-code}}
+                :paatosteksti          {:phrase-text {:category :paatosteksti}}
                 :bulletinOpDescription {:phrase-text {:category :toimenpide-julkipanoon
-                                                        :i18nkey :phrase.category.toimenpide-julkipanoon}}
+                                                      :i18nkey  :phrase.category.toimenpide-julkipanoon}}
+                :link-to-settings      {:link {:text-loc :pate.settings-link
+                                               :click    :open-settings}}
                 ;; The following keys are whole sections
-                :foremen       (reference-list :settings.foremen {:item-loc-prefix :pate-r.foremen})
-                :plans         (reference-list :settings.plans {:term {:path       [:plans]
-                                                                       :extra-path [:name]
-                                                                       :match-key  :id}})
-                :reviews       (reference-list :settings.reviews {:term {:path       [:reviews]
-                                                                         :extra-path [:name]
-                                                                         :match-key  :id}})
-                :conditions    {:phrase-text {:category :lupaehdot}}
-                :neighbors     {:loc-text :pate-neighbors.text}
+                :foremen               (reference-list :settings.foremen {:item-loc-prefix :pate-r.foremen})
+                :plans                 (reference-list :plans {:item-key :id
+                                                               :term     {:path       [:plans]
+                                                                          :extra-path [:name]
+                                                                          :match-key  :id}})
+                :reviews               (reference-list :reviews {:item-key :id
+                                                                 :term     {:path       [:reviews]
+                                                                            :extra-path [:name]
+                                                                            :match-key  :id}})
+                :conditions            {:phrase-text {:category :lupaehdot}}
+                :neighbors             {:loc-text :pate-neighbors.text}
 
                 :appeal           {:phrase-text {:category :muutoksenhaku
                                                  :i18nkey  :phrase.category.muutoksenhaku}}
@@ -433,7 +452,7 @@
    :sections [{:id         "verdict"
                :loc-prefix :pate-verdict
                :grid       {:columns 12
-                            :rows    [[{:col 12
+                            :rows    [[{:col  12
                                         :dict :verdict-dates}]
                                       [{:col  3
                                         :id   :giver
@@ -445,12 +464,15 @@
                                         :col   3
                                         :dict  :verdict-code}]
                                       [{:col  12
-                                        :dict :paatosteksti}]]}}
-              {:id          "bulletin"
-               :loc-prefix  :bulletin
-               :grid        {:columns 1
-                             :rows [[{:col  1
-                                      :dict :bulletinOpDescription}]]}}
+                                        :dict :paatosteksti}]
+                                      [{:col   4
+                                        :hide? :*ref.settings.verdict-code
+                                        :dict  :link-to-settings}]]}}
+              {:id         "bulletin"
+               :loc-prefix :bulletin
+               :grid       {:columns 1
+                            :rows    [[{:col  1
+                                        :dict :bulletinOpDescription}]]}}
               (multi-section :foremen)
               (multi-section :reviews)
               (multi-section :plans)
@@ -508,18 +530,18 @@
                 :plans         {:reference-list {:label?   false
                                                  :path     [:plans]
                                                  :item-key :id
-                                                 :type     :multi-select
+                                                 :type     :list
                                                  :term     {:path       :plans
                                                             :extra-path :name}}}
                 :reviews       {:reference-list {:label?   false
                                                  :path     [:reviews]
                                                  :item-key :id
-                                                 :type     :multi-select
+                                                 :type     :list
                                                  :term     {:path       :reviews
                                                             :extra-path :name}}}}
    :sections   [{:id         "verdict-dates"
                  :loc-prefix :pate-verdict-dates
-                 :grid       {:columns    12
+                 :grid       {:columns    17
                               :loc-prefix :pate-verdict
                               :rows       [(date-delta-row [:julkipano :anto
                                                             :valitus :lainvoimainen
@@ -551,7 +573,7 @@
 
 
 (defschema PateVerdictSection
-  (merge PateBase
+  (merge PateLayout
          {:id   keyword-or-string ;; Also title localization key
           (sc/optional-key :buttons?) sc/Bool ;; Show edit button? (default true)
           :grid PateGrid}))

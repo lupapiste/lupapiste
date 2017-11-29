@@ -22,7 +22,8 @@
   [{:keys [state path schema] :as options}  & [wrap-label?]]
   [:div.pate-date-delta
    (when (show-label? schema wrap-label?)
-     [:div.delta-label (path/loc options)])
+     [:label.delta-label {:for (path/id (path/extend path :delta))}
+      (path/loc options)])
    [:div.delta-editor
     (docgen/text-edit (assoc options :path (path/extend path :delta))
                       :input.grid-style-input
@@ -110,7 +111,19 @@
 (rum/defc multi-select-reference-list < rum/reactive
   [{:keys [schema] :as options} & [wrap-label?]]
   (pate-multi-select (assoc-in options [:schema :items] (resolve-reference-list options))
-                      wrap-label?))
+                     wrap-label?))
+
+(rum/defc list-reference-list < rum/reactive
+  [{:keys [schema] :as options} & [wrap-label?]]
+  [:div.pate-unordered-list
+   (when (show-label? schema wrap-label?)
+     [:h4.pate-label (path/loc options)])
+   [:ul
+    (->> (resolve-reference-list options)
+         (sort-by :text)
+         (map (fn [{text :text}]
+                [:li {:key (path/unique-id "li")}text])
+              ))]])
 
 (rum/defc last-saved < rum/reactive
   [{info* :info}]
@@ -189,3 +202,15 @@
          (components/textarea-edit (path/state path state)
                                    {:callback update-text
                                     :disabled disabled?})]]])))
+
+(rum/defc pate-link < rum/reactive
+  [{:keys [schema] :as options}]
+  (let [regex          #"\[(.*)\]"
+        text           (path/loc (:text-loc schema))
+        link           (last (re-find regex text))
+        ;; Split results include the
+        [before after] (remove #(= link %) (s/split text regex))]
+    (console.log {:options options})
+    [:span before
+     [:a {:on-click #((path/meta-value options (:click schema)) options)} link]
+     after]))

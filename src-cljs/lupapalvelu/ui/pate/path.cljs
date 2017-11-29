@@ -207,7 +207,8 @@
 (defn- path-truthy? [{state :state :as options} kw-path]
   (let [[x & k :as path] (resolve-path options kw-path)]
     (truthy? (case x
-              :_meta  (react-meta options k )
+               :_meta (react-meta options k)
+               :*ref  (react k (:references options))
               :?      (has-path? k state)
               (react path state)))))
 
