@@ -250,7 +250,8 @@
                          :state  :given
                          :given  (:given statement-data)
                          :text   (:text statement-data)
-                         :person (update (:person statement) :name (partial get-giver statement-data)))]
+                         :person (update (:person statement) :name (partial get-giver statement-data))
+                         :external (util/assoc-when (:external statement) :externalId (:externalId statement-data)))]
       (action/update-application (action/application->command app)
                                  {:statements {$elemMatch {:id (:id statement)}}}
                                  {$set {:statements.$ updated :modified created}})

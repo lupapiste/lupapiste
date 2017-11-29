@@ -37,11 +37,14 @@
         ; external-id-statement (get-in lausunto-vastaus [:Lausunto :AsianTunnus])
         text (get-in lausunto-vastaus [:Lausunto :LausuntoTeksti])
         giver (get-in lausunto-vastaus [:Lausunto :Lausunnonantaja])
+        external-id (get-in lausunto-vastaus [:Lausunto :AsianTunnus])
         statement-required-data (get-required-data! lausunto-vastaus)
         statement-data (-> statement-required-data
                            (update :status ss/lower-case)
                            (update :given cr/to-timestamp)
-                           (util/assoc-when :text text :giver giver))
+                           (util/assoc-when :text text
+                                            :giver giver
+                                            :externalId (when-not (ss/blank? external-id) external-id)))
         attachments (-> (:Liitteet lausunto-vastaus)
                         (util/ensure-sequential :Liite)
                         :Liite)
