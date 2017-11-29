@@ -6,6 +6,9 @@
             [slingshot.slingshot :refer [try+]]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
+            [monger.core :as monger]
+            [monger.query :as monger-query]
+            [monger.credentials :as monger-cred]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
@@ -746,3 +749,60 @@
                                    (util/to-millis-from-local-date-string end-timestamp))
                                  (now))
                              (or (vec organizations) [])))
+
+(defn review-empty-muutunnus? [task]
+  (= "" (get-in task [:data :muuTunnus :value])))
+
+(defn restore-tasks-and-attachments! [app-id restored-tasks restored-attachments]
+  (when (not-empty restored-tasks)
+    (info app-id "- restoring tasks:" (mapv :id restored-tasks) "and attachments:" (mapv :id restored-attachments))
+    (mongo/update :applications {:_id app-id} {$push {:tasks {$each restored-tasks}
+                                                      :attachments {$each restored-attachments}}})))
+
+(defn copy-files-from-backup! [backup-db attachments]
+  (let [file-ids (->> (mapcat :versions attachments)
+                      (mapcat (juxt :originalFileId :fileId))
+                      (mapcat (juxt identity #(str % "-preview"))))]
+
+    (mongo/insert-batch :fs.files (monger-query/with-collection backup-db "fs.files"
+                                    (monger-query/find {:_id {$in file-ids}})
+                                    (monger-query/snapshot)))
+
+    (mongo/insert-batch :fs.chunks (monger-query/with-collection backup-db "fs.chunks"
+                                     (monger-query/find {:files_id {$in file-ids}})
+                                     (monger-query/snapshot)))))
+
+(defn restore-removed-tasks [backup-host backup-port]
+  (mongo/connect!)
+  (let [conf     (env/value :mongodb)
+        dbname   (:dbname conf)
+        username (-> conf :credentials :username)
+        password (-> conf :credentials :password)
+        server   (monger/server-address backup-host (util/->long backup-port))
+        options  (monger/mongo-options {:write-concern mongo/default-write-concern})
+        backup-connection (if (and username password)
+                            (monger/connect server options (monger-cred/create username dbname password))
+                            (monger/connect server options))
+        backup-db (monger/get-db backup-connection dbname)]
+
+    (->> (monger-query/with-collection backup-db "applications"
+           (monger-query/find {:tasks.data.muuTunnus.value ""})
+           (monger-query/fields [:tasks :attachments])
+           (monger-query/snapshot))
+
+         (map mongo/with-id)
+
+         (reduce (fn [counter {app-id :id backup-tasks :tasks backup-attachments :attachments :as backup-app}]
+                   (let [app (mongo/by-id :applications app-id [:tasks])
+                         existing-task-ids (set (map :id (:tasks app)))
+                         restored-tasks (->> (filter review-empty-muutunnus? backup-tasks)
+                                             (remove (comp existing-task-ids :id)))
+                         restored-task-ids (set (map :id restored-tasks))
+                         restored-attachments (filter (comp restored-task-ids :id :target) backup-attachments)]
+
+                     (when app
+                       (restore-tasks-and-attachments! app-id restored-tasks restored-attachments)
+                       (copy-files-from-backup! backup-db restored-attachments))
+
+                     (cond-> counter (not-empty restored-tasks) inc)))
+                 0))))
