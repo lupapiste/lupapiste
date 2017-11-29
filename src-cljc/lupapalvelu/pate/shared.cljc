@@ -57,7 +57,7 @@
    :loppukatselmus            "loppukatselmus"
    :ei-tiedossa               "ei tiedossa"})
 
-(def foreman-codes [:vastaava-tj :vv-tj :iv-tj :erityis-tj])
+(def foreman-codes [:vastaava-tj :vv-tj :iv-tj :erityis-tj :tj])
 
 (def verdict-dates [:julkipano :anto :valitus :lainvoimainen
                     :aloitettava :voimassa])
