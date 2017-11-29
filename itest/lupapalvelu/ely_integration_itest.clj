@@ -148,4 +148,10 @@
                              first)]
               (get-in child [:source :type]) => "statements"
               (get-in child [:contents]) => statement-subtype
-              (get-in child [:latestVersion :contentType]) => "application/pdf")))))))
+              (get-in child [:latestVersion :contentType]) => "application/pdf"))))
+      (fact "Response saved to integration-messages"
+        (let [msg (last (integration-messages (:id app)))
+              statement (-> (query-application mikko (:id app)) (:statements) (first))]
+          msg => truthy
+          (:status msg) => "processed"
+          (get-in msg [:target :id]) => (:id statement))))))

@@ -1,5 +1,6 @@
 (ns lupapalvelu.xml.asianhallinta.statement
   (:require [taoensso.timbre :refer [infof]]
+            [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.common-reader :as cr]
             [sade.strings :as ss]
@@ -9,7 +10,9 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.statement :as statement]
-            [lupapalvelu.xml.asianhallinta.attachment :as ah-att]))
+            [lupapalvelu.xml.asianhallinta.attachment :as ah-att]
+            [lupapalvelu.integrations.messages :as imessages])
+  (:import (com.mongodb WriteConcern)))
 
 (def path-to-required-keys {[:Lausunto :LausuntoTunnus] :id
                             [:HakemusTunnus] :application-id
@@ -32,6 +35,7 @@
 (defn statement-response-handler [parsed-xml unzipped-path ftp-user system-user created]
   (let [xml-edn   (xml/xml->edn parsed-xml)
         ely-user  (assoc system-user :firstName "ELY-keskus")
+        message-id (imessages/create-id)
         lausunto-vastaus (:LausuntoVastaus xml-edn)
         ; external-id (:AsianTunnus lausunto-vastaus)
         ; external-id-statement (get-in lausunto-vastaus [:Lausunto :AsianTunnus])
@@ -52,6 +56,12 @@
                       (:application-id statement-data))]
     (logging/with-logging-context
       {:applicationId (:id application) :userId ftp-user}
+      (imessages/save {:id message-id :direction "in" :messageType "ah-statement-response" :partner "ely"
+                       :transferType "sftp" :format "xml" :created (now)
+                       :status "processing" :external-reference (or external-id "")
+                       :application (select-keys application [:id :organization])
+                       :target {:type "statement" :id (:id statement-data)} :action "ah-batchrun"
+                       :data xml-edn})
       (if-let [statement (statement/save-ah-statement-response
                            application
                            ftp-user
@@ -78,6 +88,9 @@
             :statements
             (:id statement)
             "fi")
+          (imessages/update-message message-id
+                                    {$set {:status "processed" :attachmentsCount (count attachments)}}
+                                    WriteConcern/UNACKNOWLEDGED)
           (ok))
         (error-and-fail!
           (format "No statement found for ah statement response, statement id: %s" (:id statement-data))
