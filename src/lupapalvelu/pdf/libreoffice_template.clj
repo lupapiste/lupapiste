@@ -52,8 +52,8 @@
     (str (:lastName general-handler) " " (:firstName general-handler))
     (i18n/localize lang "application.export.empty")))
 
-(defn- get-operations [{:keys [primaryOperation secondaryOperations]}]
-  (s/join ", " (map (fn [[op c]] (str (if (> c 1) (str c " \u00D7 ")) (i18n/loc "operations" op)))
+(defn- get-operations [lang {:keys [primaryOperation secondaryOperations]}]
+  (s/join ", " (map (fn [[op c]] (str (if (> c 1) (str c " \u00D7 ")) (i18n/localize lang "operations" op)))
                     (frequencies (map :name (remove nil? (conj (seq secondaryOperations) primaryOperation)))))))
 
 (defn common-field-map [application lang]
@@ -84,7 +84,7 @@
                                 (s/join ", "))
 
    "LPATITLE_OPERATIONS"   (localized-text lang "selectm.source.label.edit-selected-operations")
-   "LPAVALUE_OPERATIONS"   (get-operations application)
+   "LPAVALUE_OPERATIONS"   (get-operations lang application)
 
    "LPATITLE_STATE"        (localized-text lang "application.export.state")
    "LPAVALUE_STATE"        (localized-text lang (:state application))})
