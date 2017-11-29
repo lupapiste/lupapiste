@@ -156,7 +156,9 @@
          {:path                              path-type
           ;; In addition to UI, type also affects validation: :select
           ;; only accepts single values. List is read-only.
-          :type                              (sc/enum :select :multi-select :list)
+          :type                              (sc/enum :select
+                                                      :multi-select
+                                                      :list)
           ;; By default, an item value is the same as
           ;; source. If :item-key is given, then the corresponding
           ;; source property is used.
@@ -164,8 +166,12 @@
           ;; Term-path overrides item-loc-prefix. However,
           ;; item-loc-prefix supports item-key.
           (sc/optional-key :item-loc-prefix) sc/Keyword
-          ;; Separator string between items when viewed. Default ", "
+          ;; Separator string between items when viewed. Not
+          ;; applicable for list type. Default ", "
           (sc/optional-key :separator)       sc/Str
+          ;; Are items sorted by textual presentation (e.g.,
+          ;; label). Default false.
+          (sc/optional-key :sort?)           sc/Bool
           ;; Term definition resolves the localization for the value.
           (sc/optional-key :term)
           {;; The path contains sources with corresponding fi, sv and
@@ -531,12 +537,14 @@
                                                  :path     [:plans]
                                                  :item-key :id
                                                  :type     :list
+                                                 :sort?    true
                                                  :term     {:path       :plans
                                                             :extra-path :name}}}
                 :reviews       {:reference-list {:label?   false
                                                  :path     [:reviews]
                                                  :item-key :id
                                                  :type     :list
+                                                 :sort?    true
                                                  :term     {:path       :reviews
                                                             :extra-path :name}}}}
    :sections   [{:id         "verdict-dates"

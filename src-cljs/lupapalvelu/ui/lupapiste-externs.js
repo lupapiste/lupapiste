@@ -65,14 +65,15 @@ var notify = {};
 notify.ajaxError = function() {};
 
 var util = {};
-util.finnishDate = function() {};
+util.finnishDate        = function() {};
 util.finnishDateAndTime = function() {};
-util.partyFullName = function() {};
+util.partyFullName      = function() {};
 util.prop = {};
 util.prop.toHumanFormat = function() {};
 util.showSavedIndicator = function() {};
-util.sizeString = function() {};
-util.toMoment = function() {};
+util.sizeString         = function() {};
+util.toMoment           = function() {};
+util.localeComparator   = function() {};
 
 var sprintf = function() {};
 

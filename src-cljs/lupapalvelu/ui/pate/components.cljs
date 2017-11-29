@@ -93,7 +93,10 @@
                                                                     extra-path (concat extra-path))))
                             item-loc-prefix           (path/loc [item-loc-prefix v])
                             :else                     (path/loc options v))})))
-         distinct)))
+         distinct
+         (sort-by :text  (if (:sort? schema)
+                           js/util.localeComparator
+                           identity)))))
 
 (rum/defc select-reference-list < rum/reactive
   [{:keys [schema references] :as options} & [wrap-label?]]
