@@ -586,421 +586,442 @@
         plan              (-> (query sipoo :verdict-template-plans :category "r")
                               :plans first)
         review            (-> (query sipoo :verdict-template-reviews :category "r")
-                              :reviews first)]
+                              :reviews first)
+        review-delete-id  (-> (command sipoo :add-verdict-template-review
+                                       :category "r")
+                              :review :id)
+        plan-delete-id    (-> (command sipoo :add-verdict-template-plan
+                                       :category "r")
+                              :plan :id)]
     (fact "Plan" plan =not=> nil)
     (fact "Review" review =not=> nil)
-    (letfn [(set-date-delta [k v]
-              (set-template-draft-values template-id [k :enabled] true
-                                                     [k :delta] v))]
-      (fact "Full template"
-        (command sipoo :set-verdict-template-name
-                 :template-id template-id
-                 :name "Full template") => ok?)
+    (fact "Review to be deleted" review-delete-id =not=> nil)
+    (fact "Plan to be deleted" plan-delete-id =not=> nil)
+    (fact "Add extra plan (not in the template)"
+      (command sipoo :add-verdict-template-plan
+               :category "r") => ok?)
+    (fact "Add extra review (not in the template)"
+      (command sipoo :add-verdict-template-review
+               :category "r") => ok?)
+    (fact "Full template"
+      (command sipoo :set-verdict-template-name
+               :template-id template-id
+               :name "Full template") => ok?)
 
-      (set-template-draft-values template-id
-                        :verdict-dates ["julkipano" "anto" "valitus" "lainvoimainen"
-                                        "aloitettava" "voimassa"]
-                        "giver" :lautakunta
-                        "verdict-code" :ehdollinen
-                        "paatosteksti" "Verdict text."
-                        :foremen [:iv-tj :erityis-tj]
-                        "plans" [(:id plan)]
-                        "reviews" [(:id review)]
-                        "conditions" "Other conditions."
-                        "appeal" "Humble appeal."
-                        "complexity" "medium"
-                        "complexity-text" "Complex explanation."
-                        "autopaikat" true
-                        "paloluokka" true
-                        "vss-luokka" true)
+    (set-template-draft-values template-id
+                               :verdict-dates ["julkipano" "anto" "valitus" "lainvoimainen"
+                                               "aloitettava" "voimassa"]
+                               "giver" :lautakunta
+                               "verdict-code" :ehdollinen
+                               "paatosteksti" "Verdict text."
+                               :foremen [:iv-tj :erityis-tj]
+                               "plans" [(:id plan) plan-delete-id]
+                               "reviews" [(:id review) review-delete-id]
+                               "conditions" "Other conditions."
+                               "appeal" "Humble appeal."
+                               "complexity" "medium"
+                               "complexity-text" "Complex explanation."
+                               "autopaikat" true
+                               "paloluokka" true
+                               "vss-luokka" true)
+    (fact "Delete review"
+      (command sipoo :update-verdict-template-review
+               :review-id review-delete-id
+               :deleted true) => ok?)
+    (fact "Delete plan"
+      (command sipoo :update-verdict-template-plan
+               :plan-id plan-delete-id
+               :deleted true) => ok?)
 
-      (facts "New verdict using Full template"
-        (let [{app-id :id
-               :as    application} (create-and-submit-application pena
-                                                                  :propertyId sipoo-property-id
-                                                                  :operation  :sisatila-muutos)
-              verdict-fn-factory   (fn [verdict-id]
-                                     {:open #(query sonja :pate-verdict :id app-id
-                                                    :verdict-id verdict-id)
-                                      :edit #(command sonja :edit-pate-verdict :id app-id
-                                                      :verdict-id verdict-id
-                                                      :path (map name (flatten [%1]))
-                                                      :value %2)})]
-          (fact "Error: unpublished template-id for verdict draft"
-            (command sonja :new-pate-verdict-draft :id app-id :template-id template-id)
-            => fail?)
-          (fact "Publish Full template"
-            (publish-verdict-template sipoo template-id)
-            => ok?)
-          (fact "Pena cannot create verdict"
-            (command pena :new-pate-verdict-draft :id app-id :template-id template-id)
-            => (err :error.unauthorized))
-          (fact "Error: bad template-id for verdict draft"
-            (command sonja :new-pate-verdict-draft :id app-id :template-id "bad")
-            => fail?)
-          (fact "Error: Pate disabled in Sipoo"
-            (toggle-sipoo-pate false)
-            (command sonja :new-pate-verdict-draft
-                     :id app-id :template-id template-id)
-            => (err :error.pate-disabled))
-          (fact "Pate verdict tab pseudo query fails"
-            (query sonja :pate-verdict-tab :id app-id)
-            => (err :error.pate-disabled))
-          (fact "Enable Pate in Sipoo"
-            (toggle-sipoo-pate true)
-            (query sonja :pate-verdict-tab :id app-id) => ok?)
-          (fact "Sonja creates verdict draft"
-            (let [draft                (command sonja :new-pate-verdict-draft
-                                                :id app-id :template-id template-id)
-                  verdict-id           (-> draft :verdict :id)
-                  data                 (-> draft :verdict :data)
-                  op-id                (-> data :buildings keys first keyword)
-                  {open-verdict :open
-                   edit-verdict :edit} (verdict-fn-factory verdict-id)
-                  check-changes        (fn [{changes :changes} expected]
-                                         (fact "Check changes"
-                                           changes => expected)
-                                         (fact "Check that verdict has been updated"
-                                           (-> (open-verdict) :verdict :data)
-                                           => (contains (reduce (fn [acc [x y]]
-                                                                  (assoc acc
-                                                                         (-> x first keyword)
-                                                                         y))
-                                                                {}
-                                                                changes))))
-                  check-error          (fn [{errors :errors} & [kw err-kw]]
-                                         (if kw
-                                           (fact "Check errors"
-                                             (some (fn [[x y]]
-                                                     (and (= kw (util/kw-path x))
-                                                          (keyword y)))
-                                                   errors) => (or err-kw
-                                                                  :error.invalid-value))
-                                           (fact "No errors"
-                                             errors => nil)))]
-              data => (contains { :appeal           "Humble appeal."
-                                 :purpose          ""
-                                 :verdict-text     "Verdict text."
-                                 :anto             ""
-                                 :giver            "lautakunta"
-                                 :complexity       "medium"
-                                 :foremen          ["iv-tj" "erityis-tj"]
-                                 :verdict-code     "ehdollinen"
-                                 :collateral       ""
-                                 :conditions       "Other conditions."
-                                 :rights           ""
-                                 :plans-included   true
-                                 :foremen-included true
-                                 :neighbors        ""
-                                 :neighbor-states  []
-                                 :reviews-included true
-                                 :statements       ""})
-              (fact "Building info is empty but contains the template fields"
-                data => (contains {:buildings {op-id {:description            ""
-                                                      :show-building          true
-                                                      :vss-luokka             ""
-                                                      :kiinteiston-autopaikat ""
-                                                      :building-id            ""
-                                                      :operation              "sisatila-muutos"
-                                                      :rakennetut-autopaikat  ""
-                                                      :tag                    ""
-                                                      :autopaikat-yhteensa    ""
-                                                      :paloluokka             ""}}}))
+    (facts "New verdict using Full template"
+      (let [{app-id :id
+             :as    application} (create-and-submit-application pena
+                                                                :propertyId sipoo-property-id
+                                                                :operation  :sisatila-muutos)
+            verdict-fn-factory   (fn [verdict-id]
+                                   {:open #(query sonja :pate-verdict :id app-id
+                                                  :verdict-id verdict-id)
+                                    :edit #(command sonja :edit-pate-verdict :id app-id
+                                                    :verdict-id verdict-id
+                                                    :path (map name (flatten [%1]))
+                                                    :value %2)})]
+        (fact "Error: unpublished template-id for verdict draft"
+          (command sonja :new-pate-verdict-draft :id app-id :template-id template-id)
+          => fail?)
+        (fact "Publish Full template"
+          (publish-verdict-template sipoo template-id)
+          => ok?)
+        (fact "Pena cannot create verdict"
+          (command pena :new-pate-verdict-draft :id app-id :template-id template-id)
+          => (err :error.unauthorized))
+        (fact "Error: bad template-id for verdict draft"
+          (command sonja :new-pate-verdict-draft :id app-id :template-id "bad")
+          => fail?)
+        (fact "Error: Pate disabled in Sipoo"
+          (toggle-sipoo-pate false)
+          (command sonja :new-pate-verdict-draft
+                   :id app-id :template-id template-id)
+          => (err :error.pate-disabled))
+        (fact "Pate verdict tab pseudo query fails"
+          (query sonja :pate-verdict-tab :id app-id)
+          => (err :error.pate-disabled))
+        (fact "Enable Pate in Sipoo"
+          (toggle-sipoo-pate true)
+          (query sonja :pate-verdict-tab :id app-id) => ok?)
+        (fact "Sonja creates verdict draft"
+          (let [draft                (command sonja :new-pate-verdict-draft
+                                              :id app-id :template-id template-id)
+                verdict-id           (-> draft :verdict :id)
+                data                 (-> draft :verdict :data)
+                op-id                (-> data :buildings keys first keyword)
+                {open-verdict :open
+                 edit-verdict :edit} (verdict-fn-factory verdict-id)
+                check-changes        (fn [{changes :changes} expected]
+                                       (fact "Check changes"
+                                         changes => expected)
+                                       (fact "Check that verdict has been updated"
+                                         (-> (open-verdict) :verdict :data)
+                                         => (contains (reduce (fn [acc [x y]]
+                                                                (assoc acc
+                                                                       (-> x first keyword)
+                                                                       y))
+                                                              {}
+                                                              changes))))
+                check-error          (fn [{errors :errors} & [kw err-kw]]
+                                       (if kw
+                                         (fact "Check errors"
+                                           (some (fn [[x y]]
+                                                   (and (= kw (util/kw-path x))
+                                                        (keyword y)))
+                                                 errors) => (or err-kw
+                                                                :error.invalid-value))
+                                         (fact "No errors"
+                                           errors => nil)))]
+            data => (contains { :appeal          "Humble appeal."
+                               :purpose          ""
+                               :verdict-text     "Verdict text."
+                               :anto             ""
+                               :giver            "lautakunta"
+                               :complexity       "medium"
+                               :foremen          ["iv-tj" "erityis-tj"]
+                               :verdict-code     "ehdollinen"
+                               :collateral       ""
+                               :conditions       "Other conditions."
+                               :rights           ""
+                               :plans-included   true
+                               :plans            [(:id plan)]
+                               :foremen-included true
+                               :neighbors        ""
+                               :neighbor-states  []
+                               :reviews-included true
+                               :reviews          [(:id review)]
+                               :statements       ""})
+            (fact "Building info is empty but contains the template fields"
+              data => (contains {:buildings {op-id {:description            ""
+                                                    :show-building          true
+                                                    :vss-luokka             ""
+                                                    :kiinteiston-autopaikat ""
+                                                    :building-id            ""
+                                                    :operation              "sisatila-muutos"
+                                                    :rakennetut-autopaikat  ""
+                                                    :tag                    ""
+                                                    :autopaikat-yhteensa    ""
+                                                    :paloluokka             ""}}}))
 
-              (facts "Verdict references"
-                (let [{:keys [foremen plans reviews]} (:references draft)]
-                  (fact "Foremen"
-                    foremen => (just ["vastaava-tj" "iv-tj" "erityis-tj"] :in-any-order))
-                  (fact "Reviews"
-                    (:reviews data) => [(-> reviews first :id)])
-                  (fact "Plans"
-                    (:plans data) => [(-> plans first :id)])))
-              (facts "Verdict dates"
-                (fact "Set julkipano date"
-                  (edit-verdict "julkipano" "20.9.2017") => ok?)
-                (fact "Set verdict date"
-                  (let [{:keys [modified changes]}
-                        (edit-verdict "verdict-date" "27.9.2017")]
-                    changes  => []
-                    modified => pos?
-                    (fact "Verdict data has been updated"
-                      (let [data (:verdict (open-verdict))]
-                        (:modified data) => modified
-                        (:data data) => (contains {:verdict-date "27.9.2017"
-                                                   :julkipano    "20.9.2017"})))))
-                (fact "Set automatic dates"
-                  (check-changes (edit-verdict "automatic-verdict-dates" true)
-                                 [[["julkipano"] "28.9.2017"]
-                                  [["anto"] "2.10.2017"]
-                                  [["valitus"] "5.10.2017"]
-                                  [["lainvoimainen"] "9.10.2017"]
-                                  [["aloitettava"] "9.10.2018"]
-                                  [["voimassa"] "9.10.2020"]]))
-                (fact "Clearing the verdict date does not clear automatically calculated dates"
-                  (edit-verdict "verdict-date" "")
-                  => (contains {:changes []}))
-                (fact "Changing the verdict date recalculates others"
-                  (check-changes (edit-verdict :verdict-date "6.10.2017")
-                                 [[["julkipano"] "9.10.2017"]
-                                  [["anto"] "11.10.2017"]
-                                  [["valitus"] "16.10.2017"]
-                                  [["lainvoimainen"] "20.10.2017"]
-                                  [["aloitettava"] "22.10.2018"]
-                                  [["voimassa"] "22.10.2020"]])))
-              (facts "Verdict foremen"
-                (fact "vv-tj not in the template"
-                  (check-error (edit-verdict :foremen ["vv-tj"]) :foremen))
-                (fact "Vastaava-tj is OK"
-                  (check-error (edit-verdict :foremen ["vastaava-tj"]))))
-              (facts "Verdict plans"
-                (fact "Bad plan not in the template"
-                  (check-error (edit-verdict :plans ["bad"]) :plans))
-                (fact "Empty plans is OK"
-                  (check-error (edit-verdict :plans [])))
-                (fact "Set good  plan"
-                  (check-error (edit-verdict :plans [(:id plan)]))))
-              (facts "Verdict reviews"
-                (fact "Bad review not in the template"
-                  (check-error (edit-verdict :reviews ["bad"]) :reviews))
-                (fact "Empty reviews is OK"
-                  (check-error (edit-verdict :reviews [])))
-                (fact "Set good  review"
-                  (check-error (edit-verdict :reviews [(:id review)]))))
-              (facts "Verdict neighbors"
-                (fact "Add two neighbors to the application"
-                  (let [first-prop-id  "75341600880088"
-                        second-prop-id "75341600990099"
-                        first-id       (:neighborId (command sonja :neighbor-add :id app-id
-                                                             :name "First neighbor"
-                                                             :street "Naapurintie 4"
-                                                             :city "Sipoo"
-                                                             :zip "12345"
-                                                             :email "first.neighbor@example.com"
-                                                             :propertyId first-prop-id))
-                        second-id      (:neighborId (command sonja :neighbor-add :id app-id
-                                                             :name "Second neighbor"
-                                                             :street "Naapurintie 6"
-                                                             :city "Sipoo"
-                                                             :zip "12345"
-                                                             :email "second.neighbor@example.com"
-                                                             :propertyId second-prop-id))]
-                    first-id => ss/not-blank?
-                    second-id => ss/not-blank?
-                    (fact "Verdict has now neighbor states"
-                      (-> (open-verdict)
-                          :verdict :data :neighbor-states)
-                      => (just [{:property-id first-prop-id :done nil}
-                                {:property-id second-prop-id :done nil}] :in-any-order))
-                    (fact "Mark the first neighbor heard"
-                      (command sonja :neighbor-mark-done :id app-id
-                               :lang :fi
-                               :neighborId first-id) => ok?)
-                    (fact "Neighbor states have been updated"
-                      (-> (open-verdict)
-                          :verdict :data :neighbor-states)
-                      => (just [(just {:property-id first-prop-id :done pos?})
-                                {:property-id second-prop-id :done nil}] :in-any-order))
-                    (fact "Remove the second neighbor"
-                      (command sonja :neighbor-remove :id app-id
-                               :neighborId second-id) => ok?)
-                    (fact "Neighbor states have been updated"
-                      (-> (open-verdict)
-                          :verdict :data :neighbor-states)
-                      => (just [(just {:property-id first-prop-id :done pos?})])))))
-              (facts "Verdict buildings"
-                (let [{doc-id :id} (util/find-first (util/fn-> :schema-info :op :id
-                                                               (util/=as-kw op-id))
-                                                    (:documents application))]
-                  (fact "Select building for sisatila-muutos operation"
-                    (command sonja :merge-details-from-krysp :id app-id
-                             :documentId doc-id
-                             :buildingId "199887766E"
-                             :collection "documents"
-                             :overwrite false
-                             :path "buildingId") => ok?)
-                  (fact "Operation description"
-                    (command sonja :update-op-description :id app-id
-                             :op-id op-id
-                             :desc "Hello world!") => ok?)
-                  (fact "Set vss-luokka for the building"
-                    (edit-verdict [:buildings op-id :vss-luokka] "Foo"))
-                  (fact "Verdict building info updated"
-                    (-> (open-verdict) :verdict :data :buildings op-id)
-                    => {:description            "Hello world!"
-                        :show-building          true
-                        :vss-luokka             "Foo"
-                        :kiinteiston-autopaikat ""
-                        :building-id            "199887766E"
-                        :operation              "sisatila-muutos"
-                        :rakennetut-autopaikat  ""
-                        :tag                    ""
-                        :autopaikat-yhteensa    ""
-                        :paloluokka             ""})
-                  (fact "Change building id to manual"
-                    (command sonja :update-doc :id app-id
-                             :doc doc-id
-                             :collection "documents"
-                             :updates [["buildingId" "other"]
-                                       ["valtakunnallinenNumero" ""]
-                                       ["manuaalinen_rakennusnro" "789"]])
-                    => ok?))
-                (fact "Add pientalo operation to the application"
-                  (command sonja :add-operation :id app-id
-                           :operation "pientalo") => ok?)
-                (let [{:keys [documents
-                              secondaryOperations]} (query-application sonja app-id)
-                      op-id-pientalo                (-> secondaryOperations
-                                                        first  :id keyword)
-                      {doc-id :id}                  (util/find-first
-                                                     (util/fn-> :schema-info :op :id
-                                                                (util/=as-kw op-id-pientalo))
-                                                     documents)]
-                  (fact "New empty building in verdict"
-                    (-> (open-verdict) :verdict :data :buildings)
-                    => {op-id          {:description            "Hello world!"
-                                        :show-building          true
-                                        :vss-luokka             "Foo"
-                                        :kiinteiston-autopaikat ""
-                                        :building-id            "789"
-                                        :operation              "sisatila-muutos"
-                                        :rakennetut-autopaikat  ""
-                                        :tag                    ""
-                                        :autopaikat-yhteensa    ""
-                                        :paloluokka             ""}
-                        op-id-pientalo {:description            ""
-                                        :show-building          true
-                                        :vss-luokka             ""
-                                        :kiinteiston-autopaikat ""
-                                        :building-id            ""
-                                        :operation              "pientalo"
-                                        :rakennetut-autopaikat  ""
-                                        :tag                    ""
-                                        :autopaikat-yhteensa    ""
-                                        :paloluokka             ""}})
-                  (fact "Add tag and description to pientalo"
-                    (command sonja :update-doc :id app-id
-                             :doc doc-id
-                             :collection "documents"
-                             :updates [["tunnus" "Hao"]]) => ok?
-                    (command sonja :update-op-description :id app-id
-                             :op-id op-id-pientalo
-                             :desc "Hen piaoliang!") => ok?)
-                  (fact "Set kiinteiston-autopaikat for pientalo"
-                    (check-error (edit-verdict [:buildings op-id-pientalo :kiinteiston-autopaikat] "8")))
-                  (fact "Buildings updated"
-                    (-> (open-verdict) :verdict :data :buildings)
-                    => {op-id          {:description            "Hello world!"
-                                        :show-building          true
-                                        :vss-luokka             "Foo"
-                                        :kiinteiston-autopaikat ""
-                                        :building-id            "789"
-                                        :operation              "sisatila-muutos"
-                                        :rakennetut-autopaikat  ""
-                                        :tag                    ""
-                                        :autopaikat-yhteensa    ""
-                                        :paloluokka             ""}
-                        op-id-pientalo {:description            "Hen piaoliang!"
-                                        :show-building          true
-                                        :vss-luokka             ""
-                                        :kiinteiston-autopaikat "8"
-                                        :building-id            ""
-                                        :operation              "pientalo"
-                                        :rakennetut-autopaikat  ""
-                                        :tag                    "Hao"
-                                        :autopaikat-yhteensa    ""
-                                        :paloluokka             ""}})
-                  (facts "Modify template"
-                    (letfn [(edit-template [path value]
-                              (fact {:midje/description (format "Template draft %s -> %s" path value)}
-                                (command sipoo :save-verdict-template-draft-value
-                                         :template-id template-id
-                                         :path (map name (flatten [path]))
-                                         :value value) => ok?))]
-                      (fact "Disable julkipano, valitus, lainvoimainen and aloitettava"
-                        (edit-template [:verdict-dates] ["anto" "voimassa"]))
-                      (fact "Remove all the other sections except buildings (and verdict)"
-                        (edit-template [:removed-sections :foremen] true)
-                        (edit-template [:removed-sections :plans] true)
-                        (edit-template [:removed-sections :reviews] true)
-                        (edit-template [:removed-sections :conditions] true)
-                        (edit-template [:removed-sections :neighbors] true)
-                        (edit-template [:removed-sections :appeal] true)
-                        (edit-template [:removed-sections :statements] true)
-                        (edit-template [:removed-sections :collateral] true)
-                        (edit-template [:removed-sections :complexity] true)
-                        (edit-template [:removed-sections :rights] true)
-                        (edit-template [:removed-sections :purpose] true))
-                      (fact "Unselect autopaikat and vss-luokka"
-                        (edit-template :autopaikat false)
-                        (edit-template :vss-luokka false))
-                      (fact "Publish template"
-                        (publish-verdict-template sipoo template-id) => ok?)))
-                  (fact "New verdict"
-                    (let  [{verdict :verdict}   (command sonja :new-pate-verdict-draft
-                                                         :id app-id
-                                                         :template-id template-id)
-                           {data       :data
-                            verdict-id :id}     verdict
-                           {open-verdict :open
-                            edit-verdict :edit} (verdict-fn-factory verdict-id)]
-                      data => {:voimassa                ""
-                               :verdict-text            "Verdict text."
-                               :anto                    ""
-                               :giver                   "lautakunta"
-                               :foremen-included        false
-                               :foremen                 ["iv-tj" "erityis-tj"]
-                               :verdict-code            "ehdollinen"
-                               :plans-included          false
-                               :plans                   [(:id plan)]
-                               :reviews-included        false
-                               :reviews                 [(:id review)]
-                               :bulletinOpDescription ""
-                               :buildings
-                               {op-id {:description   "Hello world!"
-                                       :show-building true
-                                       :building-id   "789"
-                                       :operation     "sisatila-muutos"
-                                       :tag           ""
-                                       :paloluokka    ""}
-                                op-id-pientalo {:description   "Hen piaoliang!"
-                                                :show-building true
-                                                :building-id   ""
-                                                :operation     "pientalo"
-                                                :tag           "Hao"
-                                                :paloluokka    ""}}}
-                      (facts "Cannot edit verdict values not in the template"
-                        (let [check-fn (fn [kwp value]
-                                         (fact {:midje/description (str "Bad path " kwp)}
-                                           (check-error (edit-verdict (util/split-kw-path kwp)
-                                                                      value)
-                                                        kwp :error.invalid-value-path)))]
-                          (check-fn :julkipano "29.9.2017")
-                          (check-fn :buildings.vss-luokka "12")
-                          (check-fn :buildings.kiinteiston-autopaikat 34)))
-                      (facts "Add attachment to verdict draft"
-                        (let [attachment-id (add-verdict-attachment app-id verdict-id "Paatosote")]
-                          (fact "Attachment can be deleted"
-                            (command sonja :delete-attachment :id app-id
-                                     :attachmentId attachment-id)=> ok?)))
-                      (fact "No attachments"
-                        (query-application sonja app-id)
-                        => (contains {:attachments []}))
-                      (facts "Add attachment to verdict draft again"
-                        (let [attachment-id (add-verdict-attachment app-id verdict-id "Otepaatos")]
-                          (fact "Publish verdict"
-                            (command sonja :publish-pate-verdict
-                                     :id app-id
-                                     :verdict-id verdict-id) => ok?)
-                          (fact "Attachment can no longer be deleted"
-                            (command sonja :delete-attachment :id app-id
-                                     :attachmentId attachment-id)
-                            => fail?)))
-                      (fact "Editing no longer allowed"
-                        (edit-verdict :verdict-text "New verdict text")
-                        => (err :error.verdict.not-draft))
-                      (fact "Published verdict cannot be deleted"
-                        (command sonja :delete-pate-verdict :id app-id
-                                 :verdict-id verdict-id) => fail?)
-                      (fact "Application state is verdictGiven"
-                        (:state (query-application sonja app-id))
-                        => "verdictGiven"))))))))))))
+            (facts "Verdict references"
+              (let [{:keys [foremen plans reviews]} (:references draft)]
+                (fact "Foremen"
+                  foremen => (just ["vastaava-tj" "iv-tj" "erityis-tj"] :in-any-order))
+                (fact "Reviews"
+                  (:reviews data) => [(-> reviews first :id)])
+                (fact "Plans"
+                  (:plans data) => [(-> plans first :id)])))
+            (facts "Verdict dates"
+              (fact "Set julkipano date"
+                (edit-verdict "julkipano" "20.9.2017") => ok?)
+              (fact "Set verdict date"
+                (let [{:keys [modified changes]}
+                      (edit-verdict "verdict-date" "27.9.2017")]
+                  changes  => []
+                  modified => pos?
+                  (fact "Verdict data has been updated"
+                    (let [data (:verdict (open-verdict))]
+                      (:modified data) => modified
+                      (:data data) => (contains {:verdict-date "27.9.2017"
+                                                 :julkipano    "20.9.2017"})))))
+              (fact "Set automatic dates"
+                (check-changes (edit-verdict "automatic-verdict-dates" true)
+                               [[["julkipano"] "28.9.2017"]
+                                [["anto"] "2.10.2017"]
+                                [["valitus"] "5.10.2017"]
+                                [["lainvoimainen"] "9.10.2017"]
+                                [["aloitettava"] "9.10.2018"]
+                                [["voimassa"] "9.10.2020"]]))
+              (fact "Clearing the verdict date does not clear automatically calculated dates"
+                (edit-verdict "verdict-date" "")
+                => (contains {:changes []}))
+              (fact "Changing the verdict date recalculates others"
+                (check-changes (edit-verdict :verdict-date "6.10.2017")
+                               [[["julkipano"] "9.10.2017"]
+                                [["anto"] "11.10.2017"]
+                                [["valitus"] "16.10.2017"]
+                                [["lainvoimainen"] "20.10.2017"]
+                                [["aloitettava"] "22.10.2018"]
+                                [["voimassa"] "22.10.2020"]])))
+            (facts "Verdict foremen"
+              (fact "vv-tj not in the template"
+                (check-error (edit-verdict :foremen ["vv-tj"]) :foremen))
+              (fact "Vastaava-tj is OK"
+                (check-error (edit-verdict :foremen ["vastaava-tj"]))))
+            (facts "Verdict plans"
+              (fact "Bad plan not in the template"
+                (check-error (edit-verdict :plans ["bad"]) :plans))
+              (fact "Empty plans is OK"
+                (check-error (edit-verdict :plans [])))
+              (fact "Set good  plan"
+                (check-error (edit-verdict :plans [(:id plan)]))))
+            (facts "Verdict reviews"
+              (fact "Bad review not in the template"
+                (check-error (edit-verdict :reviews ["bad"]) :reviews))
+              (fact "Empty reviews is OK"
+                (check-error (edit-verdict :reviews [])))
+              (fact "Set good  review"
+                (check-error (edit-verdict :reviews [(:id review)]))))
+            (facts "Verdict neighbors"
+              (fact "Add two neighbors to the application"
+                (let [first-prop-id  "75341600880088"
+                      second-prop-id "75341600990099"
+                      first-id       (:neighborId (command sonja :neighbor-add :id app-id
+                                                           :name "First neighbor"
+                                                           :street "Naapurintie 4"
+                                                           :city "Sipoo"
+                                                           :zip "12345"
+                                                           :email "first.neighbor@example.com"
+                                                           :propertyId first-prop-id))
+                      second-id      (:neighborId (command sonja :neighbor-add :id app-id
+                                                           :name "Second neighbor"
+                                                           :street "Naapurintie 6"
+                                                           :city "Sipoo"
+                                                           :zip "12345"
+                                                           :email "second.neighbor@example.com"
+                                                           :propertyId second-prop-id))]
+                  first-id => ss/not-blank?
+                  second-id => ss/not-blank?
+                  (fact "Verdict has now neighbor states"
+                    (-> (open-verdict)
+                        :verdict :data :neighbor-states)
+                    => (just [{:property-id first-prop-id :done nil}
+                              {:property-id second-prop-id :done nil}] :in-any-order))
+                  (fact "Mark the first neighbor heard"
+                    (command sonja :neighbor-mark-done :id app-id
+                             :lang :fi
+                             :neighborId first-id) => ok?)
+                  (fact "Neighbor states have been updated"
+                    (-> (open-verdict)
+                        :verdict :data :neighbor-states)
+                    => (just [(just {:property-id first-prop-id :done pos?})
+                              {:property-id second-prop-id :done nil}] :in-any-order))
+                  (fact "Remove the second neighbor"
+                    (command sonja :neighbor-remove :id app-id
+                             :neighborId second-id) => ok?)
+                  (fact "Neighbor states have been updated"
+                    (-> (open-verdict)
+                        :verdict :data :neighbor-states)
+                    => (just [(just {:property-id first-prop-id :done pos?})])))))
+            (facts "Verdict buildings"
+              (let [{doc-id :id} (util/find-first (util/fn-> :schema-info :op :id
+                                                             (util/=as-kw op-id))
+                                                  (:documents application))]
+                (fact "Select building for sisatila-muutos operation"
+                  (command sonja :merge-details-from-krysp :id app-id
+                           :documentId doc-id
+                           :buildingId "199887766E"
+                           :collection "documents"
+                           :overwrite false
+                           :path "buildingId") => ok?)
+                (fact "Operation description"
+                  (command sonja :update-op-description :id app-id
+                           :op-id op-id
+                           :desc "Hello world!") => ok?)
+                (fact "Set vss-luokka for the building"
+                  (edit-verdict [:buildings op-id :vss-luokka] "Foo"))
+                (fact "Verdict building info updated"
+                  (-> (open-verdict) :verdict :data :buildings op-id)
+                  => {:description            "Hello world!"
+                      :show-building          true
+                      :vss-luokka             "Foo"
+                      :kiinteiston-autopaikat ""
+                      :building-id            "199887766E"
+                      :operation              "sisatila-muutos"
+                      :rakennetut-autopaikat  ""
+                      :tag                    ""
+                      :autopaikat-yhteensa    ""
+                      :paloluokka             ""})
+                (fact "Change building id to manual"
+                  (command sonja :update-doc :id app-id
+                           :doc doc-id
+                           :collection "documents"
+                           :updates [["buildingId" "other"]
+                                     ["valtakunnallinenNumero" ""]
+                                     ["manuaalinen_rakennusnro" "789"]])
+                  => ok?))
+              (fact "Add pientalo operation to the application"
+                (command sonja :add-operation :id app-id
+                         :operation "pientalo") => ok?)
+              (let [{:keys [documents
+                            secondaryOperations]} (query-application sonja app-id)
+                    op-id-pientalo                (-> secondaryOperations
+                                                      first  :id keyword)
+                    {doc-id :id}                  (util/find-first
+                                                   (util/fn-> :schema-info :op :id
+                                                              (util/=as-kw op-id-pientalo))
+                                                   documents)]
+                (fact "New empty building in verdict"
+                  (-> (open-verdict) :verdict :data :buildings)
+                  => {op-id          {:description            "Hello world!"
+                                      :show-building          true
+                                      :vss-luokka             "Foo"
+                                      :kiinteiston-autopaikat ""
+                                      :building-id            "789"
+                                      :operation              "sisatila-muutos"
+                                      :rakennetut-autopaikat  ""
+                                      :tag                    ""
+                                      :autopaikat-yhteensa    ""
+                                      :paloluokka             ""}
+                      op-id-pientalo {:description            ""
+                                      :show-building          true
+                                      :vss-luokka             ""
+                                      :kiinteiston-autopaikat ""
+                                      :building-id            ""
+                                      :operation              "pientalo"
+                                      :rakennetut-autopaikat  ""
+                                      :tag                    ""
+                                      :autopaikat-yhteensa    ""
+                                      :paloluokka             ""}})
+                (fact "Add tag and description to pientalo"
+                  (command sonja :update-doc :id app-id
+                           :doc doc-id
+                           :collection "documents"
+                           :updates [["tunnus" "Hao"]]) => ok?
+                  (command sonja :update-op-description :id app-id
+                           :op-id op-id-pientalo
+                           :desc "Hen piaoliang!") => ok?)
+                (fact "Set kiinteiston-autopaikat for pientalo"
+                  (check-error (edit-verdict [:buildings op-id-pientalo :kiinteiston-autopaikat] "8")))
+                (fact "Buildings updated"
+                  (-> (open-verdict) :verdict :data :buildings)
+                  => {op-id          {:description            "Hello world!"
+                                      :show-building          true
+                                      :vss-luokka             "Foo"
+                                      :kiinteiston-autopaikat ""
+                                      :building-id            "789"
+                                      :operation              "sisatila-muutos"
+                                      :rakennetut-autopaikat  ""
+                                      :tag                    ""
+                                      :autopaikat-yhteensa    ""
+                                      :paloluokka             ""}
+                      op-id-pientalo {:description            "Hen piaoliang!"
+                                      :show-building          true
+                                      :vss-luokka             ""
+                                      :kiinteiston-autopaikat "8"
+                                      :building-id            ""
+                                      :operation              "pientalo"
+                                      :rakennetut-autopaikat  ""
+                                      :tag                    "Hao"
+                                      :autopaikat-yhteensa    ""
+                                      :paloluokka             ""}})
+                (facts "Modify template"
+                  (letfn [(edit-template [path value]
+                            (fact {:midje/description (format "Template draft %s -> %s" path value)}
+                              (command sipoo :save-verdict-template-draft-value
+                                       :template-id template-id
+                                       :path (map name (flatten [path]))
+                                       :value value) => ok?))]
+                    (fact "Disable julkipano, valitus, lainvoimainen and aloitettava"
+                      (edit-template [:verdict-dates] ["anto" "voimassa"]))
+                    (fact "Remove all the other sections except buildings (and verdict)"
+                      (edit-template [:removed-sections :foremen] true)
+                      (edit-template [:removed-sections :plans] true)
+                      (edit-template [:removed-sections :reviews] true)
+                      (edit-template [:removed-sections :conditions] true)
+                      (edit-template [:removed-sections :neighbors] true)
+                      (edit-template [:removed-sections :appeal] true)
+                      (edit-template [:removed-sections :statements] true)
+                      (edit-template [:removed-sections :collateral] true)
+                      (edit-template [:removed-sections :complexity] true)
+                      (edit-template [:removed-sections :rights] true)
+                      (edit-template [:removed-sections :purpose] true))
+                    (fact "Unselect autopaikat and vss-luokka"
+                      (edit-template :autopaikat false)
+                      (edit-template :vss-luokka false))
+                    (fact "Publish template"
+                      (publish-verdict-template sipoo template-id) => ok?)))
+                (fact "New verdict"
+                  (let  [{verdict :verdict}   (command sonja :new-pate-verdict-draft
+                                                       :id app-id
+                                                       :template-id template-id)
+                         {data       :data
+                          verdict-id :id}     verdict
+                         {open-verdict :open
+                          edit-verdict :edit} (verdict-fn-factory verdict-id)]
+                    data => {:voimassa              ""
+                             :verdict-text          "Verdict text."
+                             :anto                  ""
+                             :giver                 "lautakunta"
+                             :foremen-included      false
+                             :foremen               ["iv-tj" "erityis-tj"]
+                             :verdict-code          "ehdollinen"
+                             :plans-included        false
+                             :plans                 [(:id plan)]
+                             :reviews-included      false
+                             :reviews               [(:id review)]
+                             :bulletinOpDescription ""
+                             :buildings
+                             {op-id          {:description   "Hello world!"
+                                              :show-building true
+                                              :building-id   "789"
+                                              :operation     "sisatila-muutos"
+                                              :tag           ""
+                                              :paloluokka    ""}
+                              op-id-pientalo {:description   "Hen piaoliang!"
+                                              :show-building true
+                                              :building-id   ""
+                                              :operation     "pientalo"
+                                              :tag           "Hao"
+                                              :paloluokka    ""}}}
+                    (facts "Cannot edit verdict values not in the template"
+                      (let [check-fn (fn [kwp value]
+                                       (fact {:midje/description (str "Bad path " kwp)}
+                                         (check-error (edit-verdict (util/split-kw-path kwp)
+                                                                    value)
+                                                      kwp :error.invalid-value-path)))]
+                        (check-fn :julkipano "29.9.2017")
+                        (check-fn :buildings.vss-luokka "12")
+                        (check-fn :buildings.kiinteiston-autopaikat 34)))
+                    (facts "Add attachment to verdict draft"
+                      (let [attachment-id (add-verdict-attachment app-id verdict-id "Paatosote")]
+                        (fact "Attachment can be deleted"
+                          (command sonja :delete-attachment :id app-id
+                                   :attachmentId attachment-id)=> ok?)))
+                    (fact "No attachments"
+                      (query-application sonja app-id)
+                      => (contains {:attachments []}))
+                    (facts "Add attachment to verdict draft again"
+                      (let [attachment-id (add-verdict-attachment app-id verdict-id "Otepaatos")]
+                        (fact "Publish verdict"
+                          (command sonja :publish-pate-verdict
+                                   :id app-id
+                                   :verdict-id verdict-id) => ok?)
+                        (fact "Attachment can no longer be deleted"
+                          (command sonja :delete-attachment :id app-id
+                                   :attachmentId attachment-id)
+                          => fail?)))
+                    (fact "Editing no longer allowed"
+                      (edit-verdict :verdict-text "New verdict text")
+                      => (err :error.verdict.not-draft))
+                    (fact "Published verdict cannot be deleted"
+                      (command sonja :delete-pate-verdict :id app-id
+                               :verdict-id verdict-id) => fail?)
+                    (fact "Application state is verdictGiven"
+                      (:state (query-application sonja app-id))
+                      => "verdictGiven")))))))))))
