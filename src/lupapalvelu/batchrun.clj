@@ -762,15 +762,20 @@
 (defn copy-files-from-backup! [backup-db attachments]
   (let [file-ids (->> (mapcat :versions attachments)
                       (mapcat (juxt :originalFileId :fileId))
-                      (mapcat (juxt identity #(str % "-preview"))))]
+                      (remove nil?)
+                      (mapcat (juxt identity #(str % "-preview"))))
+        fs-files  (when (not-empty file-ids)
+                    (monger-query/with-collection backup-db "fs.files"
+                      (monger-query/find {:_id {$in file-ids}})
+                      (monger-query/snapshot)))
+        fs-chunks (when (not-empty file-ids)
+                    (monger-query/with-collection backup-db "fs.chunks"
+                      (monger-query/find {:files_id {$in file-ids}})
+                      (monger-query/snapshot)))]
 
-    (mongo/insert-batch :fs.files (monger-query/with-collection backup-db "fs.files"
-                                    (monger-query/find {:_id {$in file-ids}})
-                                    (monger-query/snapshot)))
-
-    (mongo/insert-batch :fs.chunks (monger-query/with-collection backup-db "fs.chunks"
-                                     (monger-query/find {:files_id {$in file-ids}})
-                                     (monger-query/snapshot)))))
+    (when (and (not-empty fs-files) (not-empty fs-chunks))
+      (mongo/insert-batch :fs.files fs-files)
+      (mongo/insert-batch :fs.chunks fs-chunks))))
 
 (defn restore-removed-tasks [backup-host backup-port]
   (mongo/connect!)
@@ -800,7 +805,7 @@
                          restored-task-ids (set (map :id restored-tasks))
                          restored-attachments (filter (comp restored-task-ids :id :target) backup-attachments)]
 
-                     (when app
+                     (when (and app (not-empty restored-tasks))
                        (restore-tasks-and-attachments! app-id restored-tasks restored-attachments)
                        (copy-files-from-backup! backup-db restored-attachments))
 
