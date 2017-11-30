@@ -507,3 +507,4 @@
 "pate.published-date" "fi" "Julkaistu {0}"
 "pate.published-date" "sv" "Kungjort {0}"
 "pate.published-date" "en" "Published {0}"
+"pate.delete-verdict-draft" "fi" "Haluatko varmasti poistaa päätösluonnoksen ja sen liitteet?"

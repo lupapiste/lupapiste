@@ -1024,4 +1024,21 @@
                                :verdict-id verdict-id) => fail?)
                     (fact "Application state is verdictGiven"
                       (:state (query-application sonja app-id))
-                      => "verdictGiven")))))))))))
+                      => "verdictGiven")))
+                (fact "Verdict draft to be deleted"
+                  (let  [{verdict :verdict}   (command sonja :new-pate-verdict-draft
+                                                       :id app-id
+                                                       :template-id template-id)
+                         {verdict-id :id}     verdict]
+                    (facts "Add attachment to verdict draft"
+                      (let [attachment-id (add-verdict-attachment app-id verdict-id "Hello world!")]
+                        (fact "Delete verdict draft"
+                          (command sonja :delete-pate-verdict :id app-id
+                                   :verdict-id verdict-id) => ok?)
+                        (let [{:keys [pate-verdicts attachments]} (query-application sonja app-id)]
+                          (fact "Verdict draft is no longer in the application"
+                            pate-verdicts =not=> (contains {:id verdict-id}))
+                          (fact "Verdict draft attachment is no longer in the application"
+                            attachments =not=> (contains {:id attachment-id}))
+                          (fact "There are still other attachments"
+                            (count attachments) => pos?))))))))))))))

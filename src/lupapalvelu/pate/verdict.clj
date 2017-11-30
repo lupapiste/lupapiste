@@ -190,7 +190,8 @@
 
 (defn delete-verdict [verdict-id command]
   (action/update-application command
-                             {$pull {:pate-verdicts {:id verdict-id}}}))
+                             {$pull {:pate-verdicts {:id verdict-id}
+                                     :attachments   {:target.id verdict-id}}}))
 
 (defn- listify
   "Transforms argument into list if it is not sequential. Nil results

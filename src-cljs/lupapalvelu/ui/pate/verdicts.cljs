@@ -168,6 +168,16 @@
                             [:span (common/loc :application.verdict.add)]])]]))))
 
 
+(defn- confirm-and-delete-verdict [app-id verdict-id]
+  (hub/send  "show-dialog"
+             {:ltitle          "areyousure"
+              :size            "medium"
+              :component       "yes-no-dialog"
+              :componentParams {:ltext "pate.delete-verdict-draft"
+                                :yesFn #(service/delete-verdict app-id
+                                                                verdict-id
+                                                                reset-verdict)}}))
+
 (rum/defc verdict-list < rum/reactive
   [verdicts app-id]
   [:div
@@ -183,7 +193,7 @@
                    (common/loc :pate.last-saved (js/util.finnishDateAndTime modified)))]
             [:td (when (and (can-edit-verdict? verdict) (not published))
                    [:i.lupicon-remove.primary
-                    {:on-click #(service/delete-verdict app-id id reset-verdict)}])]])
+                    {:on-click #(confirm-and-delete-verdict app-id id)}])]])
           verdicts)]]
    (when (state/auth? :new-pate-verdict-draft)
      (new-verdict))])
