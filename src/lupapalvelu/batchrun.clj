@@ -755,7 +755,7 @@
 
 (defn restore-tasks-and-attachments! [app-id restored-tasks restored-attachments]
   (when (not-empty restored-tasks)
-    (info app-id "- restoring tasks:" (mapv :id restored-tasks) "and attachments:" (mapv :id restored-attachments))
+    (logging/log-event :info {:application app-id :event "restoring tasks and attachments" :tasks (mapv :id restored-tasks) :attachemtns (mapv :id restored-attachments)})
     (mongo/update :applications {:_id app-id} {$push {:tasks {$each restored-tasks}
                                                       :attachments {$each restored-attachments}}})))
 
@@ -797,10 +797,10 @@
                                (remove (comp existing-chunks :_id)))]
 
       (when (not-empty fs-files)
-        (info "restore files for:" (mapv :_id fs-files))
+        (logging/log-event :info {:event "restoring files" :files (mapv :_id fs-files)})
         (mongo/insert-batch :fs.files fs-files))
       (when (not-empty fs-chunks)
-        (info "restore chunks for:" (vec (distinct (map :files_id fs-chunks))))
+        (logging/log-event :info {:event "restoring chunks" :chunks (vec (distinct (map :files_id fs-chunks)))})
         (mongo/insert-batch :fs.chunks fs-chunks)))))
 
 (defn restore-removed-tasks [backup-host backup-port]
@@ -835,13 +835,13 @@
                                                              (map :id)))
                          attachments-for-file-restore (filter (comp task-ids-for-file-restore :id :target) backup-attachments)]
 
-                     (when (and app (not-empty restored-tasks))
+                     (when app
                        (do
                          (restore-tasks-and-attachments! app-id restored-tasks restored-attachments)
                          #_(copy-files-from-backup! backup-db restored-attachments)
                          (restore-missing-files! backup-db attachments-for-file-restore)))
 
-                     (Thread/sleep 200)
+                     (Thread/sleep 100)
 
                      (cond-> counter (not-empty restored-tasks) inc)))
                  0))))
