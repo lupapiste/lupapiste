@@ -3,12 +3,12 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.pate.date :as date]
-            [lupapalvelu.pate.schemas :as schemas]
-            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as ops]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.pate.date :as date]
+            [lupapalvelu.pate.schemas :as schemas]
+            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
             [sade.core :refer :all]
@@ -106,10 +106,12 @@
 (defn settings [organization category]
   (get-in organization [:verdict-templates :settings (keyword category)]))
 
-(defn- pack-generics [gen-ids generics]
-  (->> gen-ids
-       (map #(util/find-by-id % generics))
+(defn- pack-generics [organization gen-key template-data]
+  (->> organization
+       :verdict-templates
+       gen-key
        (remove :deleted)
+       (filter #(util/includes-as-kw? (gen-key template-data) (:id %)))
        (map #(select-keys % [:id :name :type]))))
 
 (defn- pack-verdict-dates
@@ -123,54 +125,74 @@
 
 (defn- published-settings
   "The published settings only include lists without schema-ordained
-  structure. Term liist items contain the localisations. In other words,
+  structure. Term list items contain the localisations. In other words,
   subsequent localisation changes do not affect already published
   verdict templates."
-  [organization category]
-  (let [draft                   (:draft (settings organization category))
-        {plan-ids   :plans
-         review-ids :reviews
-         :as        data}       (into {}
-                                      (for [[k v] (select-keys draft
-                                                               [:plans
-                                                                :reviews
-                                                                :verdict-code
-                                                                :foremen])]
-                                        [k (loop [v v]
-                                             (if (map? v)
-                                               (recur (-> v vals first))
-                                               v))]))
-        {:keys [plans reviews]} (:verdict-templates organization)]
+  [organization category template-data]
+  (let [draft (:draft (settings organization category))
+        data  (into {}
+                    (for [[k v] (select-keys draft
+                                             [:verdict-code
+                                              :foremen])]
+                      [k (loop [v v]
+                           (if (map? v)
+                             (recur (-> v vals first))
+                             v))]))]
     (assoc data
            :date-deltas (pack-verdict-dates draft)
-           :plans       (pack-generics plan-ids plans)
-           :reviews     (pack-generics review-ids reviews))))
+           :plans       (pack-generics organization :plans template-data)
+           :reviews     (pack-generics organization :reviews template-data))))
+
+(declare generic-list)
 
 (defn save-draft-value
   "Error code on failure (see schemas for details)."
   [organization template-id timestamp path value]
-  (let [template (verdict-template organization template-id)]
+  (let [{:keys [category] :as template} (verdict-template organization template-id)]
     (or (schemas/validate-path-value shared/default-verdict-template
                                      path
                                      value
-                                     {:settings (:draft (settings organization
-                                                                  (:category template)))})
+                                     (merge
+                                      {:settings (:draft (settings organization
+                                                                   category))}
+                                      (when-let [ref-gen (some->> path
+                                                                  (util/intersection-as-kw [:plans :reviews])
+                                                                  first)]
+                                        (hash-map ref-gen
+                                                  (map :id (generic-list organization
+                                                                         category
+                                                                         ref-gen))))))
         (template-update organization
                          template-id
                          {$set {(util/kw-path (cons :verdict-templates.templates.$.draft
                                                     path)) value}}
                          timestamp))))
 
+(defn- prune-template-data
+  "Upon publishing the settings generics and template data must by
+  synchronized."
+  [settings gen-key template-data]
+  (update template-data gen-key (fn [ids]
+                                  (->> settings
+                                       gen-key
+                                       (map :id)
+                                       (util/intersection-as-kw ids)))))
+
 (defn publish-verdict-template [organization template-id timestamp]
-  (let [template (verdict-template organization template-id)]
+  (let [{:keys [draft category]
+         :as   template} (verdict-template organization template-id)
+        settings         (sc/validate schemas/PatePublishedSettings
+                                      (published-settings organization
+                                                          category
+                                                          draft))]
     (template-update organization
                      template-id
                      {$set {:verdict-templates.templates.$.published
                             {:published timestamp
-                             :data      (:draft template)
-                             :settings  (sc/validate schemas/PatePublishedSettings
-                                                     (published-settings organization
-                                                                         (:category template)))}}})))
+                             :data      (->> draft
+                                             (prune-template-data settings :reviews)
+                                             (prune-template-data settings :plans))
+                             :settings  settings}}})))
 
 (defn set-name [organization template-id timestamp name]
   (template-update organization
@@ -203,8 +225,6 @@
        (ss/join ".")
        keyword))
 
-(declare generic-list)
-
 (defn save-settings-value [organization category timestamp path value]
   (let [draft        (assoc-in (:draft (settings organization category))
                                (map keyword path)
@@ -214,13 +234,7 @@
                                           (keyword category))
                                      path
                                      value
-                                     (when-let [ref-gen (some->> path
-                                                                 (util/intersection-as-kw [:plans :reviews])
-                                                                 first)]
-                                       (hash-map ref-gen
-                                                 (map :id (generic-list organization
-                                                                        category
-                                                                        ref-gen)))))
+                                     )
      (mongo/update-by-id :organizations
                          (:id organization)
                          {$set {(util/kw-path settings-key :draft path) value

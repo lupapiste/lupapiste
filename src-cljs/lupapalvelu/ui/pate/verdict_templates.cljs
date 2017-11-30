@@ -19,6 +19,8 @@
                             (path/value path state)
                             (common/response->state info :modified)))
 
+(defn open-settings []
+  (reset! state/current-view ::settings))
 
 (rum/defc verdict-template-name < rum/reactive
   [{info* :info}]
@@ -53,10 +55,11 @@
   (reset! state/current-template
           (when template
             {:state draft
-             :info (dissoc template :draft)
-             :_meta {:updated   updater
-                     :enabled?  (state/auth? :save-verdict-template-draft-value)
-                     :editing?  true}}))
+             :info  (dissoc template :draft)
+             :_meta {:updated       updater
+                     :open-settings open-settings
+                     :enabled?      (state/auth? :save-verdict-template-draft-value)
+                     :editing?      true}}))
   (reset! state/current-view (if template ::template ::list)))
 
 (defn with-back-button [component]
@@ -81,7 +84,8 @@
     [:div.row.row--tight
      [:div.col-2.col--right
       (pate-components/last-saved options)]]]
-   (sections/sections options :verdict-template)])
+   (sections/sections options :verdict-template)
+   (components/debug-atom state/settings)])
 
 (defn new-template [options]
   (reset-template options))
@@ -113,7 +117,7 @@
                   [:option {:key value :value value} text])))]]
     [:div.col-4.col--right
      [:button.ghost
-      {:on-click #(reset! state/current-view ::settings)}
+      {:on-click open-settings}
       [:span (common/loc :auth-admin.organization.properties)]]]]])
 
 (rum/defcs verdict-template-list < rum/reactive
