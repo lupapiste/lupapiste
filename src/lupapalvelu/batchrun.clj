@@ -841,5 +841,7 @@
                          #_(copy-files-from-backup! backup-db restored-attachments)
                          (restore-missing-files! backup-db attachments-for-file-restore)))
 
+                     (Thread/sleep 50)
+
                      (cond-> counter (not-empty restored-tasks) inc)))
                  0))))
