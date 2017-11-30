@@ -777,6 +777,32 @@
       (mongo/insert-batch :fs.files fs-files)
       (mongo/insert-batch :fs.chunks fs-chunks))))
 
+(defn restore-missing-files! [backup-db attachments]
+  (when-let [file-ids (->> (mapcat :versions attachments)
+                           (mapcat (juxt :originalFileId :fileId))
+                           (remove nil?)
+                           (mapcat (juxt identity #(str % "-preview")))
+                           not-empty)]
+
+    (let [existing-ids    (set (->> (mongo/select :fs.files {:_id {$in file-ids}} [:id])
+                                    (map :id)))
+          existing-chunks (set (->> (mongo/select :fs.chunks {:files_id {$in file-ids}} [:id])
+                                    (map :id)))
+          fs-files        (monger-query/with-collection backup-db "fs.files"
+                            (monger-query/find {:_id {$in (remove existing-ids file-ids)}})
+                            (monger-query/snapshot))
+          fs-chunks       (->> (monger-query/with-collection backup-db "fs.chunks"
+                                 (monger-query/find {:files_id {$in file-ids}})
+                                 (monger-query/snapshot))
+                               (remove (comp existing-chunks :_id)))]
+
+      (when (not-empty fs-files)
+        (info "restore files for:" (mapv :_id fs-files))
+        (mongo/insert-batch :fs.files fs-files))
+      (when (not-empty fs-chunks)
+        (info "restore chunks for:" (vec (distinct (map :files_id fs-chunks))))
+        (mongo/insert-batch :fs.chunks fs-chunks)))))
+
 (defn restore-removed-tasks [backup-host backup-port]
   (mongo/connect!)
   (let [conf     (env/value :mongodb)
@@ -803,11 +829,19 @@
                          restored-tasks (->> (filter review-empty-muutunnus? backup-tasks)
                                              (remove (comp existing-task-ids :id)))
                          restored-task-ids (set (map :id restored-tasks))
-                         restored-attachments (filter (comp restored-task-ids :id :target) backup-attachments)]
+                         restored-attachments (filter (comp restored-task-ids :id :target) backup-attachments)
+
+                         task-ids-for-file-restore (set (->> (filter review-empty-muutunnus? backup-tasks)
+                                                             (map :id)))
+                         attachments-for-file-restore (filter (comp task-ids-for-file-restore :id :target) backup-attachments)]
 
                      (when (and app (not-empty restored-tasks))
-                       (restore-tasks-and-attachments! app-id restored-tasks restored-attachments)
-                       (copy-files-from-backup! backup-db restored-attachments))
+                       (do
+                         (restore-tasks-and-attachments! app-id restored-tasks restored-attachments)
+                         #_(copy-files-from-backup! backup-db restored-attachments)
+                         (restore-missing-files! backup-db attachments-for-file-restore)))
+
+                     (Thread/sleep 200)
 
                      (cond-> counter (not-empty restored-tasks) inc)))
                  0))))
