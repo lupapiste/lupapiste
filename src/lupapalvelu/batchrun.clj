@@ -755,7 +755,7 @@
 
 (defn restore-tasks-and-attachments! [app-id restored-tasks restored-attachments]
   (when (not-empty restored-tasks)
-    (logging/log-event :info {:application app-id :event "restoring tasks and attachments" :tasks (mapv :id restored-tasks) :attachemtns (mapv :id restored-attachments)})
+    (logging/log-event :info {:app-id app-id :event "restoring tasks and attachments" :tasks (mapv :id restored-tasks) :attachemtns (mapv :id restored-attachments)})
     (mongo/update :applications {:_id app-id} {$push {:tasks {$each restored-tasks}
                                                       :attachments {$each restored-attachments}}})))
 
@@ -782,26 +782,31 @@
                            (mapcat (juxt :originalFileId :fileId))
                            (remove nil?)
                            (mapcat (juxt identity #(str % "-preview")))
+                           distinct
                            not-empty)]
 
-    (let [existing-ids    (set (->> (mongo/select :fs.files {:_id {$in file-ids}} [:id])
+    (let [existing-ids    (set (->> (mongo/select :fs.files {:_id {$in file-ids}} [:_id])
                                     (map :id)))
-          existing-chunks (set (->> (mongo/select :fs.chunks {:files_id {$in file-ids}} [:id])
-                                    (map :id)))
-          fs-files        (monger-query/with-collection backup-db "fs.files"
-                            (monger-query/find {:_id {$in (remove existing-ids file-ids)}})
-                            (monger-query/snapshot))
-          fs-chunks       (->> (monger-query/with-collection backup-db "fs.chunks"
-                                 (monger-query/find {:files_id {$in file-ids}})
-                                 (monger-query/snapshot))
-                               (remove (comp existing-chunks :_id)))]
+          existing-chunks (set (->> (mongo/select :fs.chunks {:files_id {$in file-ids}} [:_id])
+                                    (map :id)))]
 
-      (when (not-empty fs-files)
-        (logging/log-event :info {:event "restoring files" :file-ids file-ids})
-        (mongo/insert-batch :fs.files fs-files))
-      (when (not-empty fs-chunks)
-        (logging/log-event :info {:event "restoring chunks" :file-ids file-ids})
-        (mongo/insert-batch :fs.chunks fs-chunks)))))
+      (logging/log-event :info {:event "restoring files" :file-ids file-ids})
+      (->> file-ids
+           (remove existing-ids)
+           (run! (fn [file-id] (some->> (monger-query/with-collection backup-db "fs.files"
+                                          (monger-query/find {:_id file-id})
+                                          (monger-query/snapshot))
+                                        not-empty
+                                        (mongo/insert-batch :fs.files )))))
+
+      (logging/log-event :info {:event "restoring chunks" :file-ids file-ids})
+      (->> file-ids
+           (run! (fn [file-id] (some->> (monger-query/with-collection backup-db "fs.chunks"
+                                          (monger-query/find {:files_id file-id})
+                                          (monger-query/snapshot))
+                                        (remove (comp existing-chunks :_id))
+                                        not-empty
+                                        (mongo/insert-batch :fs.chunks))))))))
 
 (defn restore-removed-tasks [backup-host backup-port]
   (mongo/connect!)
@@ -835,7 +840,7 @@
                                                              (map :id)))
                          attachments-for-file-restore (filter (comp task-ids-for-file-restore :id :target) backup-attachments)]
 
-                     (logging/log-event :info {:event "restoring tasks" :application app-id})
+                     (logging/log-event :info {:event "restoring tasks" :app-id app-id})
 
                      (when app
                        (do
