@@ -31,7 +31,7 @@
                                        (common/response->state info* :modified)))]
     (components/pen-input {:value      (rum/react (path/state [:name] info*))
                            :handler-fn handler-fn
-                           :disabled? (not (state/auth? :set-verdict-template-name))})))
+                           :disabled?  (not (state/auth? :set-verdict-template-name))})))
 
 
 (rum/defc verdict-template-publish < rum/reactive

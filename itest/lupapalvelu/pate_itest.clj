@@ -1056,7 +1056,20 @@
                                    :attachmentId attachment-id)
                           => fail?)))
                     (check-kuntagml application verdict-date)
-                    (fact "Editing no longer allowed"
+                    => fail?)
+                        (fact "Verdict PDF attachment has been created"
+                      (util/find-first (fn [{:keys [id target]}]
+                                                 (and (not= id attachment-id)
+                                                      (= (:id target) verdict-id)))
+                                       (:attachments (query-application sonja app-id)))
+                      => (contains {:readOnly         true
+                                    :locked           true
+                                    :contents         "P\u00e4\u00e4t\u00f6s"
+                                    :type             {:type-group "paatoksenteko"
+                                                       :type-id    "paatos"}
+                                    :applicationState "verdictGiven"
+                                    :latestVersion    (contains {:contentType "application/pdf"})}))))
+              (fact "Editing no longer allowed"
                       (edit-verdict :verdict-text "New verdict text")
                       => (err :error.verdict.not-draft))
                     (fact "Published verdict cannot be deleted"
@@ -1066,10 +1079,10 @@
                       (:state (query-application sonja app-id))
                       => "verdictGiven")))
                 (fact "Verdict draft to be deleted"
-                  (let  [{verdict :verdict}   (command sonja :new-pate-verdict-draft
-                                                       :id app-id
-                                                       :template-id template-id)
-                         {verdict-id :id}     verdict]
+                  (let  [{verdict :verdict} (command sonja :new-pate-verdict-draft
+                                                     :id app-id
+                                                     :template-id template-id)
+                         {verdict-id :id}   verdict]
                     (facts "Add attachment to verdict draft"
                       (let [attachment-id (add-verdict-attachment app-id verdict-id "Hello world!")]
                         (fact "Delete verdict draft"

@@ -11,6 +11,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.schemas :as schemas]
+            [lupapalvelu.pate.pdf :as pdf]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.mongo :as mongo]
@@ -22,7 +23,6 @@
             [sade.util :as util]
             [schema.core :as sc]
             [swiss.arrows :refer :all]))
-
 
 (defn neighbor-states
   "Application neighbor-states data in a format suitable for verdicts: list
@@ -413,12 +413,12 @@
    4. Other document updates (e.g., waste plan -> waste report)
    5. Freeze (locked and read-only) verdict attachments and update TOS details
    6. TODO: Create tasks
-   7. TODO: Create PDF/A for the verdict
+   7. Create PDF/A for the verdict
    8. TODO: Generate KuntaGML
   10. TODO: Assignments?"
   [{:keys [created application user organization] :as command}]
-  (let [verdict    (->> (command->verdict command)
-                        (enrich-verdict command))
+  (let [verdict    (enrich-verdict command
+                                   (command->verdict command))
         next-state (sm/verdict-given-state application)
         att-ids    (->> (:attachments application)
                         (filter #(= (-> % :target :id) (:id verdict)))
@@ -443,6 +443,9 @@
                                  (:mongo-updates doc-updates)))
     (tiedonohjaus/mark-app-and-attachments-final! (:id application)
                                                   created)
+    (pdf/create-verdict-attachment command
+                                   (assoc verdict :published created))
+
     ;; KuntaGML
     (when (org/krysp-integration? @organization (:permitType application))
       (-> (assoc command :application (domain/get-application-no-access-checking (:id application)))
