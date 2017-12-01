@@ -785,25 +785,27 @@
                            distinct
                            not-empty)]
 
-    (let [existing-ids    (set (->> (mongo/select :fs.files {:_id {$in file-ids}} [:_id])
-                                    (map :id)))
-          existing-chunks (set (->> (mongo/select :fs.chunks {:files_id {$in file-ids}} [:_id])
-                                    (map :id)))]
+    (let [existing-ids    (set (->> (monger-query/with-collection (mongo/get-db) "fs.files"
+                                      (monger-query/find {:_id {$in file-ids}})
+                                      (monger-query/fields [:_id]))
+                                    (map :_id)))
+          existing-chunks (set (->> (monger-query/with-collection (mongo/get-db) "fs.chunks"
+                                      (monger-query/find {:files_id {$in file-ids}})
+                                      (monger-query/fields [:_id]))
+                                    (map :_id)))]
 
       (logging/log-event :info {:event "restoring files" :file-ids file-ids})
       (->> file-ids
            (remove existing-ids)
            (run! (fn [file-id] (some->> (monger-query/with-collection backup-db "fs.files"
-                                          (monger-query/find {:_id file-id})
-                                          (monger-query/snapshot))
+                                          (monger-query/find {:_id file-id}))
                                         not-empty
                                         (mongo/insert-batch :fs.files )))))
 
       (logging/log-event :info {:event "restoring chunks" :file-ids file-ids})
       (->> file-ids
            (run! (fn [file-id] (some->> (monger-query/with-collection backup-db "fs.chunks"
-                                          (monger-query/find {:files_id file-id})
-                                          (monger-query/snapshot))
+                                          (monger-query/find {:files_id file-id}))
                                         (remove (comp existing-chunks :_id))
                                         not-empty
                                         (mongo/insert-batch :fs.chunks))))))))
@@ -824,16 +826,14 @@
     (->> (monger-query/with-collection backup-db "applications"
            (monger-query/find (cond-> {:tasks.data.muuTunnus.value ""}
                                 (not-empty orgs) (assoc :organization {$in orgs})))
-           (monger-query/fields [:_id])
-           (monger-query/snapshot))
+           (monger-query/fields [:_id]))
 
          (map mongo/with-id)
 
          (reduce (fn [counter {app-id :id}]
                    (let [{backup-tasks :tasks backup-attachments :attachments :as backup-app} (first (monger-query/with-collection backup-db "applications"
                                                                                                        (monger-query/find {:_id app-id})
-                                                                                                       (monger-query/fields [:tasks :attachments])
-                                                                                                       (monger-query/snapshot)))
+                                                                                                       (monger-query/fields [:tasks :attachments])))
                          app (mongo/by-id :applications app-id [:tasks])
                          existing-task-ids (set (map :id (:tasks app)))
                          restored-tasks (->> (filter review-empty-muutunnus? backup-tasks)
