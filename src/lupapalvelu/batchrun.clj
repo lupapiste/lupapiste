@@ -808,7 +808,7 @@
                                         not-empty
                                         (mongo/insert-batch :fs.chunks))))))))
 
-(defn restore-removed-tasks [backup-host backup-port]
+(defn restore-removed-tasks [backup-host backup-port & orgs]
   (mongo/connect!)
   (let [conf     (env/value :mongodb)
         dbname   (:dbname conf)
@@ -822,14 +822,19 @@
         backup-db (monger/get-db backup-connection dbname)]
 
     (->> (monger-query/with-collection backup-db "applications"
-           (monger-query/find {:tasks.data.muuTunnus.value ""})
-           (monger-query/fields [:tasks :attachments])
+           (monger-query/find (cond-> {:tasks.data.muuTunnus.value ""}
+                                (not-empty orgs) (assoc :organization {$in orgs})))
+           (monger-query/fields [:_id])
            (monger-query/snapshot))
 
          (map mongo/with-id)
 
-         (reduce (fn [counter {app-id :id backup-tasks :tasks backup-attachments :attachments :as backup-app}]
-                   (let [app (mongo/by-id :applications app-id [:tasks])
+         (reduce (fn [counter {app-id :id}]
+                   (let [{backup-tasks :tasks backup-attachments :attachments :as backup-app} (first (monger-query/with-collection backup-db "applications"
+                                                                                                       (monger-query/find {:_id app-id})
+                                                                                                       (monger-query/fields [:tasks :attachments])
+                                                                                                       (monger-query/snapshot)))
+                         app (mongo/by-id :applications app-id [:tasks])
                          existing-task-ids (set (map :id (:tasks app)))
                          restored-tasks (->> (filter review-empty-muutunnus? backup-tasks)
                                              (remove (comp existing-task-ids :id)))
