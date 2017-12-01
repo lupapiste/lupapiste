@@ -84,8 +84,7 @@
     [:div.row.row--tight
      [:div.col-2.col--right
       (pate-components/last-saved options)]]]
-   (sections/sections options :verdict-template)
-   (components/debug-atom state/settings)])
+   (sections/sections options :verdict-template)])
 
 (defn new-template [options]
   (reset-template options))

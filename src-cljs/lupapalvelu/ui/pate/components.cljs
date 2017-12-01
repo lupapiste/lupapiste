@@ -123,7 +123,6 @@
      [:h4.pate-label (path/loc options)])
    [:ul
     (->> (resolve-reference-list options)
-         (sort-by :text)
          (map (fn [{text :text}]
                 [:li {:key (path/unique-id "li")}text])
               ))]])
