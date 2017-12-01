@@ -186,7 +186,9 @@
    Queries for objects in this collection.
    This function returns clojure Seq of Maps."
   ([coll ref]
-   (mc/find-maps (get-db) coll ref)))
+   (mc/find-maps (get-db) coll ref))
+  ([coll ref fields]
+   (mc/find-maps (get-db) coll ref fields)))
 
 (defn distinct
   "Wrapper for monger.collection/distinct. Finds distinct values for a key."
