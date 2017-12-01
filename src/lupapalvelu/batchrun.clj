@@ -884,7 +884,7 @@
 
           (info "Checking restorable reviews for application" app-id)
 
-          (let [app (mongo/by-id :applications app-id [:tasks])
+          (let [app (mongo/by-id :applications app-id)
                 existing-task-ids (set (map :id (:tasks app)))
                 restored-tasks (->> (filter review-empty-muutunnus? backup-tasks)
                                     (remove (comp existing-task-ids :id)))
