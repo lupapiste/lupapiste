@@ -3649,7 +3649,7 @@
   (mongo/update :applications {:_id app-id} {$pull {:tasks {:id {$in task-ids}}}}))
 
 (defmigration remove-duplicate-task-ids-by-muutunnus
-  (->> (mongo/select :applications {:permitType "R" :tasks.data.muuTunnus.value {$exists true}} [:tasks :attachments])
+  (->> (mongo/select :applications {:permitType "R" :tasks.data.muuTunnus.value {$exists true $ne ""}} [:tasks :attachments])
        (reduce (fn [counter app]
                  (let [duplicate-task-ids (get-duplicate-task-ids-by review-muutunnus-equality-fields app)]
                    (remove-tasks-by-ids! app duplicate-task-ids)

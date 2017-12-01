@@ -857,3 +857,64 @@
 
                      (cond-> counter (not-empty restored-tasks) inc)))
                  0))))
+
+(defn generate-missing-task-pdf [application task user lang]
+  (logging/log-event :info {:event "Generating a new PDF version of approved task"
+                            :task-id (:id task)
+                            :taskname (:taskname task)})
+  (tasks/generate-task-pdfa application task user lang))
+
+(defn restore-removed-tasks-v2 [& orgs]
+  (mongo/connect!)
+  (let [dbname   "lupapiste-20171127"
+        ; 2017-11-27 00:00 GMT+2
+        start-ts 1511733600001
+        katselmus-types #{{:type-group "katselmukset_ja_tarkastukset" :type-id "aloituskokouksen_poytakirja"}
+                          {:type-group "katselmukset_ja_tarkastukset" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"}}]
+
+        (doseq [{app-id :id
+                 backup-tasks :tasks
+                 backup-attachments :attachments} (->> (mongo/with-db dbname
+                                                                         (mongo/find-maps "applications"
+                                                                                          (cond-> {:tasks {$elemMatch {:data.muuTunnus.value ""
+                                                                                                                       :created {$gte start-ts}}}}
+                                                                                                  (not-empty orgs) (assoc :organization {$in orgs}))
+                                                                                          [:tasks :_id :attachments]))
+                                                       (map mongo/with-id))]
+
+          (info "Checking restorable reviews for application" app-id)
+
+          (let [app (mongo/by-id :applications app-id [:tasks])
+                existing-task-ids (set (map :id (:tasks app)))
+                restored-tasks (->> (filter review-empty-muutunnus? backup-tasks)
+                                    (remove (comp existing-task-ids :id)))
+                restored-task-ids (set (map :id restored-tasks))
+                missing-attachments (filter (comp restored-task-ids :id :target) backup-attachments)]
+
+            (logging/log-event :info {:event "restoring tasks from application" :app-id app-id})
+
+            (when (and app (seq restored-tasks))
+              (logging/log-event :info {:app-id app-id :event "restoring tasks" :tasks (mapv :id restored-tasks)})
+              (mongo/update :applications {:_id app-id} {$push {:tasks {$each restored-tasks}}})
+
+              (doseq [attachment missing-attachments]
+                (let [task (first (filter #(= (:id %) (-> attachment :target :id)) restored-tasks))
+                      user (get-in attachment [:latestVersion :user])
+                      attachment-lang (case (get-in attachment [:latestVersion :filename])
+                                        "Katselmus.pdf" :fi
+                                        "Syn.pdf" :sv
+                                        nil)]
+                  (if (and (katselmus-types (:type attachment)) attachment-lang (#{"ok" "sent"} (:state task)))
+                    (generate-missing-task-pdf app task user attachment-lang)
+                    (let [log-data {:event "Attachment file is lost, will not be restored"
+                                    :app-id app-id
+                                    :attachment-id (:id attachment)
+                                    :attachment-type (:type attachment)
+                                    :attachment-file (-> attachment :latestVersion :filename)
+                                    :latest-version-uploader user
+                                    :task-id (:id task)
+                                    :taskname (:taskname task)
+                                    :task-state (:state task)}]
+                      (println log-data)
+                      (logging/log-event :warn log-data))))))
+            (Thread/sleep 50)))))

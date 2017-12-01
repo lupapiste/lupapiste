@@ -17,6 +17,7 @@
                "overwrite-reviews-for-orgs" 'lupapalvelu.batchrun/overwrite-reviews-for-orgs
                "extend-previous-permit"     'lupapalvelu.batchrun/extend-previous-permit
                "restore-removed-tasks"      'lupapalvelu.batchrun/restore-removed-tasks
+               "restore-removed-tasks-v2"   'lupapalvelu.batchrun/restore-removed-tasks-v2
                "fix-prev-permit-addresses"  'lupapalvelu.prev-permit/fix-prev-permit-addresses
                "fix-prev-permit-applicants" 'lupapalvelu.prev-permit/fix-prev-permit-applicants
                "pdfa-convert-review-pdfs"   'lupapalvelu.batchrun/pdfa-convert-review-pdfs
