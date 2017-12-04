@@ -10,7 +10,7 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   var data = attachmentData;
 
   // Attachment data fields that are mapped as observables
-  var observableFields = ["modified", "notNeeded", "contents", "drawingNumber", "forPrinting", "type", "op", "groupType", "manuallySetConstructionTime"];
+  var observableFields = ["modified", "notNeeded", "contents", "drawingNumber", "forPrinting", "type", "op", "groupType", "manuallySetConstructionTime", "backendId"];
 
   self.authModel = authModel;
 
@@ -23,8 +23,6 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   self.group = ko.observable(buildGroup(attachmentData));
 
   self.visibility = ko.observable(buildVisibility(attachmentData));
-
-  self.backendId = ko.observable(attachmentData.backendId);
 
   self.reset = function(attachmentData) {
     self.disposeAppliedSubscriptions();
@@ -40,8 +38,6 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
     self.visibility(buildVisibility(attachmentData));
 
     self.processing(false);
-
-    self.backendId = ko.observable(attachmentData.backendId);
 
     data = attachmentData;
 
@@ -117,14 +113,6 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   });
 
   addSelfUpdateListener("constructionTime");
-
-  self.backendIdString  = self.disposedComputed(function() {
-    return self.backendId;
-  });
-
-  ko.computed(function() {
-    console.log(self.backendId);
-  });
 
   self.registerApplyableSubscription(self.backendId, function(val) {
     service.setMeta(self.id, {backendId: val}, {field: "backendId"});

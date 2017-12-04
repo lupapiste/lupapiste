@@ -44,7 +44,7 @@
 ;; Metadata
 ;;
 
-(def attachment-meta-types [:size :scale :group :contents :drawingNumber])
+(def attachment-meta-types [:size :scale :group :contents :drawingNumber :backendId])
 
 (def attachment-scales
   [:1:20 :1:50 :1:100 :1:200 :1:500

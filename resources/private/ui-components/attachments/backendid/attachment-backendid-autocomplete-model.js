@@ -4,8 +4,8 @@ LUPAPISTE.AttachmentBackendidAutocompleteModel = function(params) {
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
-  self.selectedId = ko.observable(params.selected);
   self.disabled = params.disabled;
+  self.selectedId = params.selected;
 
   var service = lupapisteApp.services.attachmentsService;
 
@@ -17,19 +17,19 @@ LUPAPISTE.AttachmentBackendidAutocompleteModel = function(params) {
 
   self.query = ko.observable("");
 
-  self.data = self.disposedPureComputed(function() {
-    return util.filterDataByQuery({data: options(),
-      query: self.query(),
-      selected: self.selectedId(),
-      label: "title"});
-  });
-
   self.selected = self.disposedPureComputed({
     read: function() {
-      return {"value": self.selectedId(), "title": self.selectedId()};
+      return {"value": self.selectedId, "title": self.selectedId};
     },
     write: function(selected) {
       self.selectedId(selected["value"]);
     }
+  });
+
+  self.data = self.disposedPureComputed(function() {
+    return util.filterDataByQuery({data: options(),
+      query: self.query(),
+      selected: self.selected(),
+      label: "title"});
   });
 };

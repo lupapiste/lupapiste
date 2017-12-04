@@ -97,7 +97,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   function newRow(initialType, initialContents, drawingNumber, group, backendId, target) {
     var type = ko.observable(initialType || ko.unwrap(defaults.type) );
     var grouping = ko.observable(group || ko.unwrap(defaults.group) || {});
-    var backendId = ko.observable(backendId || ko.unwrap(service.getDefaultBackendId()) || {});
+    var backendId = ko.observable(backendId || ko.unwrap(service.getDefaultBackendId()));
     var contentsValue = ko.observable(initialContents);
     var contentsList = ko.observableArray();
     self.disposedSubscribe( type, function( type ) {
@@ -115,7 +115,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                 contents: contentsCell,
                 drawing: new Cell( ko.observable(drawingNumber)),
                 grouping: new Cell( grouping ),
-                backendid: new Cell ( backendId ),
+                backendId: new Cell ( backendId ),
                 sign: new Cell( ko.observable()),
                 construction: new Cell( ko.observable() ),
                 disableResell: new Cell( ko.observable() )
@@ -137,7 +137,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
           file.type.title = loc(["attachmentType", file.type["type-group"], file.type["type-id"]].join("."));
           file.contents = file.contents || _.get(service.contentsData(file.type), "defaultValue");
         }
-        newRows[fileId] = newRow(file.type, file.contents, file.drawingNumber, file.group, file.target);
+        newRows[fileId] = newRow(file.type, file.contents, file.drawingNumber, file.group, file.backendId, file.target);
       }
     });
     rows( _.merge( keepRows, newRows ));
@@ -310,7 +310,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                sign: data.sign.value(),
                constructionTime: data.construction.value(),
                disableResell: data.disableResell.value(),
-               backendId: data.backendid.value()
+               backendId: data.backendId.value()
       };
     }), self.password() );
 

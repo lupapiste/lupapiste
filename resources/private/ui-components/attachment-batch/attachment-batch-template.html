@@ -105,19 +105,19 @@
         </td>
         <!-- ko if: $component.showResell -->
         <td>
-          <div class="fill-pin"
-               data-bind="event: $parent.fillEvents( $data, 'backendIds'),
+          <div class="batch-autocomplete fill-pin"
+               data-bind="event: $parent.fillEvents( $data, 'backendId'),
                           testId: 'batch-backendid-' + $index()">
             <div data-bind="component: { name: 'attachment-backendid-autocomplete',
-                                         params: { selected: $parent.cell( $data, 'backendid').value,
+                                         params: { selected: $parent.cell( $data, 'backendId').value,
                                                    disabled: false} }"
                  class="attachment-batch-grouping"></div>
-            <icon-button params="click: $parent.filler( 'backendid', $data, 'number'),
+            <icon-button params="click: $parent.filler( 'backendId', $data ),
                                  buttonClass: 'function',
                                  ltext: 'attachment.batch-copy-down',
                                  icon: 'arrow-down',
                                  right: true"
-                         data-bind="visible: $parent.canFillDown( 'backendid', $data),
+                         data-bind="visible: $parent.canFillDown( 'backendId', $data),
                                     testId: 'fill-backendid-' + $index()"
                          class="fill-down"></icon-button>
           </div>
