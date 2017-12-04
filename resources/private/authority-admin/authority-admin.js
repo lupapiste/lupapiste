@@ -376,22 +376,90 @@
   function BulletinsModel() {
     var self = this;
 
-    self.data = ko.observableArray();
+    self.scopes = ko.observableArray();
+    self.texts = ko.observable();
+    self.textsInitialized = ko.observable(false);
 
     self.save = function(setting) {
       ajax
-        .command("update-organization-bulletin-settings", _.pick(ko.toJS(setting), ["permitType","municipality","notificationEmail"]))
+        .command("update-organization-bulletin-scope", _.pick(ko.toJS(setting), ["permitType","municipality","notificationEmail"]))
         .success(util.showSavedIndicator)
         .error(util.showSavedIndicator)
         .call();
     };
 
+    function upsertText(data) {
+      ajax
+        .command("upsert-organization-local-bulletins-text", data)
+        .success(data.onSuccess || util.showSavedIndicator)
+        .error(util.showSavedIndicator)
+        .call();
+    }
+
+    function newCaptionTextModel(lang, text, index) {
+      var obs = ko.observable(text);
+      ko.computed(function() {
+        var value = obs();
+        if (!ko.computedContext.isInitial()) {
+          upsertText({lang: lang, key: "caption", index: index, value: value});
+        }
+      });
+      return {text: obs, doRemove: _.partial(removeCaption, lang, index)};
+    }
+
+    self.appendCaption = function(lang) {
+      var caption = _.get(self.texts(), [lang, "caption"]);
+      if (caption) {
+        var captionArr = caption();
+        upsertText({lang: lang, key: "caption", index: captionArr.length, value: "", onSuccess: self.load});
+      }
+    }
+
+    function doRemoveCaption(lang, idx) {
+      ajax
+        .command("remove-organization-local-bulletins-caption", {lang: lang, index: idx})
+        .success(self.load)
+        .error(util.showSavedIndicator)
+        .call();
+    }
+
+    function removeCaption(lang, idx) {
+      hub.send("show-dialog", {ltitle: "areyousure",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {ltext: "auth-admin.local-bulletins-page-texts.caption-confirm-remove",
+                                                 yesFn: _.partial(doRemoveCaption, lang, idx)}});
+    }
+
     self.load = function() {
       ajax.query("user-organization-bulletin-settings")
         .success(function(data) {
-          self.data(_.map(data["bulletin-settings"], function(setting) {
+          self.scopes(_.map(data["bulletin-scopes"], function(setting) {
             return _.set(setting, "notificationEmail", ko.observable(_.get(setting, ["bulletins", "notification-email"])));
           }));
+          var koMappedTexts = ko.mapping.fromJS(data["local-bulletins-page-texts"]);
+
+          _.map(["fi", "sv"], function(lang) {
+            _.map(["heading1", "heading2"], function(key) {
+              ko.computed(function() {
+                var obs = _.get(koMappedTexts, [lang, key]);
+                var value = obs();
+                if (!ko.computedContext.isInitial()) {
+                  upsertText({lang: lang, key: key, value: value});
+                }
+              });
+            });
+
+            // map the observableArray of String paragraphs into an observableArray of
+            // observables with change listener computed functions inside
+            var captionObsArray = _.get(koMappedTexts, [lang, "caption"]);
+            if (captionObsArray) {
+              captionObsArray(_.map(captionObsArray(), _.partial(newCaptionTextModel, lang)));
+            }
+          });
+
+          self.texts(koMappedTexts);
+          self.textsInitialized(true);
         })
         .call();
     };

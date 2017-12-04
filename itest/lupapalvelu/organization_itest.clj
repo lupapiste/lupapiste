@@ -1214,7 +1214,7 @@
     (fact "sipoo"
       (let [result (query sipoo :user-organization-bulletin-settings)]
         result => ok?
-        (:bulletin-settings result)  => [{:permitType "R"
+        (:bulletin-scopes result)  => [{:permitType "R"
                                             :municipality "753"
                                             :bulletins {:enabled true
                                                         :url "http://localhost:8000/dev/julkipano"
@@ -1227,14 +1227,14 @@
     (facts "authority"
       (query sonja :user-organization-bulletin-settings) => unauthorized?))
 
-  (facts "update-organization-bulletin-settings"
+  (facts "update-organization-bulletin-scope"
     (fact "sipoo R"
-      (command sipoo :update-organization-bulletin-settings
+      (command sipoo :update-organization-bulletin-scope
                :permitType "R"
                :municipality "753"
                :notificationEmail "pena@example.com") => ok?
 
-      (:bulletin-settings (query sipoo :user-organization-bulletin-settings))
+      (:bulletin-scopes (query sipoo :user-organization-bulletin-settings))
       => [{:permitType "R"
            :municipality "753"
            :bulletins {:enabled true
@@ -1242,13 +1242,13 @@
                        :notification-email "pena@example.com"}}])
 
     (fact "sipoo P"
-      (command sipoo :update-organization-bulletin-settings
+      (command sipoo :update-organization-bulletin-scope
                :permitType "P"
                :municipality "753"
                :notificationEmail "pena@example.com")
       => (partial expected-failure? :error.bulletins-not-enebled-for-scope)
 
-      (:bulletin-settings (query sipoo :user-organization-bulletin-settings))
+      (:bulletin-scopes (query sipoo :user-organization-bulletin-settings))
       => [{:permitType "R"
            :municipality "753"
            :bulletins {:enabled true
@@ -1271,7 +1271,7 @@
 
       (fact "is enabled"
 
-        (:bulletin-settings (query sipoo :user-organization-bulletin-settings))
+        (:bulletin-scopes (query sipoo :user-organization-bulletin-settings))
         => [{:permitType "R"
              :municipality "753"
              :bulletins {:enabled true
@@ -1282,7 +1282,7 @@
              :bulletins {:enabled true
                          :url ""}}]
 
-        (command sipoo :update-organization-bulletin-settings
+        (command sipoo :update-organization-bulletin-scope
                  :permitType "P"
                  :municipality "753"
                  :notificationEmail "rane@example.com") => ok?))
@@ -1299,7 +1299,7 @@
                :bulletinsEnabled true
                :bulletinsUrl "http://foo.my.url") => ok?
 
-      (:bulletin-settings (query sipoo :user-organization-bulletin-settings))
+      (:bulletin-scopes (query sipoo :user-organization-bulletin-settings))
       => [{:permitType "R"
            :municipality "753"
            :bulletins {:enabled true
@@ -1324,13 +1324,13 @@
                :bulletinsUrl "http://foo.my.url") => ok?
 
       (fact "is disabled"
-        (command sipoo :update-organization-bulletin-settings
+        (command sipoo :update-organization-bulletin-scope
                  :permitType "P"
                  :municipality "753"
                  :notificationEmail "pena@example.com")
         => (partial expected-failure? :error.bulletins-not-enebled-for-scope)
 
-        (:bulletin-settings (query sipoo :user-organization-bulletin-settings))
+        (:bulletin-scopes (query sipoo :user-organization-bulletin-settings))
         => [{:permitType "R"
              :municipality "753"
              :bulletins {:enabled true
