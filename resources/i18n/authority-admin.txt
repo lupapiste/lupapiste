@@ -44,7 +44,7 @@
 "auth-admin.archiving.digitizing.tosFunction" "fi" "Oletustiedonohjausmenettely"
 "auth-admin.archiving.digitizing.tosFunction" "sv" "Standardinformationsstyrningsförfarande"
 "auth-admin.archiving.digitizing.defaultLocation" "en" ""
-"auth-admin.archiving.digitizing.defaultLocation" "fi" "Oletussijainti"
+"auth-admin.archiving.digitizing.defaultLocation" "fi" "Oletussijainti (EPSG:3067)"
 "auth-admin.archiving.digitizing.defaultLocation" "sv" ""
 "auth-admin.archiving.digitizing.defaultLocation.x" "en" ""
 "auth-admin.archiving.digitizing.defaultLocation.x" "fi" "X:"
