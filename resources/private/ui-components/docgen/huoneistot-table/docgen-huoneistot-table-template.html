@@ -276,13 +276,15 @@
                            clickFn: duplicateLastGroup,
                            testId: schemaName + '-copy-button' }}">
           </span>
-          <span data-bind="component: { name: 'docgen-button',
-                           params: { id: $component.documentId + '-huoneistot-import-button',
-                           className: 'positive',
-                           icon: 'lupicon-upload',
-                           label: uploadLabel,
-                           clickFn: uploadPremisesData,
-                           testId: schemaName + '-upload-huoneistot-button'}}">
+          <span data-bind="component: {name: 'premises-upload',
+                           params: { id: $component.documentId + 'huoneistot-upload',
+                           buttonClass: 'btn positive',
+                           buttonIcon: 'lupicon-upload',
+                           buttonText: 'Tuo huoneistotietotaulukko',
+                           waiting: $component.waiting,
+                           upload: $component.upload,
+                           visible: $component.visible,
+                           testId: schemaName + '-upload-button' }}">
           </span>
         </div>
 

@@ -10,7 +10,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.states :as states]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.action :as action]
+            [lupapalvelu.action :refer [defraw] :as action]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.mongo :as mongo]
             [swiss.arrows :refer :all]
@@ -91,14 +91,18 @@
                       :oirAuthority (states/all-states-but :canceled)} ;; ja tämä
    :notified         true
    :on-success       []}
-  [{:keys [applicationId documentId user]}]
-  (let [timestamp     (sc/now)
+  [{:keys [applicationId doc user]}]
+        (println "PLINK PLONK")
+        (println id file filename applicationId doc user)
+        (resp/status 200 (resp/json {:plink "plonk"}))
+  #_(let [timestamp     (sc/now)
         premises-data (-> file (xmc/xls-2-csv) :data (csv-data->ifc-coll))
         file-updated? (some-> premises-data
                               (save-premises-data applicationId timestamp user doc)
                               :ok)
         save-response (when file-updated? (-> {:filename filename :content file}
                                               (file-upload/save-file)))]
+    (when save-response (att/link-files-to-application applicationId [(:file-id save-response)]))
     (when file-updated? (mongo/update-by-id :applications
                                             applicationId
                                             {:ifc-data {:file-id (:file-id save-response)
@@ -108,3 +112,71 @@
          (resp/json)
          (resp/status (if file-updated? 200 500)))))
 
+(def headers ["Porras" "Huoneistonumero" "Huoneiston jakokirjain" "Sijaintikerros"
+              "Huoneiden lukumäärä" "Keittiötyyppi" "Huoneistoala" "Varusteena WC"
+              "Varusteena amme/suihku" "Varusteena parveke" "Varusteena Sauna"
+              "Varusteena lämmin vesi"])
+
+(def lupapiste-to-ifc-keys
+  {"porras"                 {:key "Porras"}
+   "huoneistonumero"        {:key "Huoneistonumero"}
+   "jakokirjain"            {:key "Huoneiston jakokirjain"}
+   "sijaintikerros"         {:key "Sijaintikerros"}
+   "huoneluku"              {:key "Huoneiden lukumäärä"}
+   "keittionTyyppi"         {:key "Keittiötyyppi"
+                             :values {"keittio"      "1"
+                                      "keittokomero" "2"
+                                      "keittotila"   "3"
+                                      "tupakaittio"  "4"
+                                      "ei tiedossa"  ""}}
+   "huoneistoala"           {:key "Huoneistoala"}
+   "WCKytkin"               {:key "Varusteena WC"
+                             :values {true  "1"
+                                      false "0"}}
+   "ammeTaiSuihkuKytkin"    {:key "Varusteena amme/suihku"
+                             :values {true  "1"
+                                      false "0"}}
+   "parvekeTaiTerassiKytkin"{:key "Varusteena parveke"
+                             :values {true  "1"
+                                      false "0"}}
+   "saunaKytkin"             {:key "Varusteena Sauna"
+                             :values {true  "1"
+                                      false "0"}}
+   "lamminvesiKytkin"       {:key "Varusteena lämmin vesi"
+                             :values {true  "1"
+                                      false "0"}}})
+
+(defn ifc->lp-key [ifc-key]
+  (-> ifc-key ifc-to-lupapiste-keys :key (keyword)))
+
+(defn resolve-ifc-val [item]
+  (let [values (-> item lupapiste-to-ifc-keys :values)]
+    (if (map? values)
+      (-> item values)
+      item)))
+
+(defn premise-to-row [premise]
+  (let [ifc-value (fn [ifc-key] (-> ifc-key
+                                    ifc->lp-key
+                                    premise
+                                    #(if (-> ifc-key ifc-to-lupapiste-keys :values)
+                                       )))]
+
+(defraw download-premises-data
+  {:parameters [application-id]
+   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
+   :user-roles #{:applicant}}
+  [{user :user}]
+  (when-not user (throw+ {:status 401 :body "forbidden"}))
+  (let [premises (->> (:documents (mongo/by-id :applications application-id))
+                      (filter #(= "uusiRakennus" (-> % :schema-info :name)))
+                      :data
+                      :huoneistot)
+        ]
+    {:status 200
+     :body ((:content attachment))
+     :headers {"Content-Type" (:contentType attachment)
+               "Content-Length" (str (:size attachment))
+               "Content-Disposition" (format "attachment;filename=\"%s\"" (ss/encode-filename (:filename attachment)))}}
+    {:status 404
+     :body (str "Attachment not found: id=" attachment-id)}))

@@ -9,7 +9,6 @@ LUPAPISTE.UploadButtonModel = function( params ) {
   var self = this;
 
   ko.utils.extend( self, new LUPAPISTE.BaseUploadModel(params));
-
   self.options = _.defaults( _.pick( params,
                                      ["buttonIcon", "buttonText", "buttonClass", "testId"]),
                              {buttonIcon: "lupicon-circle-plus",

@@ -663,20 +663,7 @@
       (error e "exception while uploading user attachment" (class e) (str e))
       (resp/json (fail :error.unknown)))))
 
-(defraw download-user-attachment
-  {:parameters [attachment-id]
-   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
-   :user-roles #{:applicant}}
-  [{user :user}]
-  (when-not user (throw+ {:status 401 :body "forbidden"}))
-  (if-let [attachment (mongo/download-find {:id attachment-id :metadata.user-id (:id user)})]
-    {:status 200
-     :body ((:content attachment))
-     :headers {"Content-Type" (:contentType attachment)
-               "Content-Length" (str (:size attachment))
-               "Content-Disposition" (format "attachment;filename=\"%s\"" (ss/encode-filename (:filename attachment)))}}
-    {:status 404
-     :body (str "Attachment not found: id=" attachment-id)}))
+§
 
 (defcommand remove-user-attachment
   {:parameters [attachment-id]

@@ -148,8 +148,4 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
          ? loc( "huoneistotTable.help.muutostapa" ) + help
          : help;
   });
-
-  self.uploadPremisesData = function() {
-      self.service.uploadPremisesData();
-  };
 };

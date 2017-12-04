@@ -67,7 +67,8 @@ LUPAPISTE.UploadModel = function( owner, params ) {
   function bindToService() {
     service.bindFileInput({id: self.fileInputId,
                            dropZone: params.dropZone,
-                           allowMultiple: params.allowMultiple});
+                           allowMultiple: params.allowMultiple,
+                           fileTarget: params.fileTarget});
     self.listenService( "filesUploaded", function( event ) {
       if( event.status === "success" ) {
         // Since the basic file upload jQuery plugin does not support

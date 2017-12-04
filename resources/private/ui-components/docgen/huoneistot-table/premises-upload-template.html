@@ -1,0 +1,14 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="premises-upload-template">
+  <input type="file" class="hidden" name="file"
+         data-bind="attr: {id: fileInputId,
+                    multiple: upload.allowMultiple},
+                    testId: testId + '-input'">
+  <label data-bind="attr: { 'class': buttonClass },
+                    css: { waiting: waiting },
+                    testId: testId + '-label'">
+    <i data-bind="attr: {'class': buttonIcon}"></i>
+    <i class="wait spin lupicon-refresh"></i>
+    <span data-bind="ltext: buttonText"></span>
+  </label>
+</script>
