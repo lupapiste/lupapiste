@@ -275,6 +275,11 @@
     (map-parameters-with-required-keys [:foo] [:x] {:data {:foo nil}})                 => {:ok false :text "error.unknown-type" :parameters [:foo]}
     (map-parameters-with-required-keys [:foo] [:x] {:data {:foo {:y "aa"}}})           => {:ok false :text "error.map-parameters-with-required-keys" :parameters [:foo] :required-keys [:x]})
 
+  (fact "non-empty-map-parameters"
+    (non-empty-map-parameters [:foo] {:data {:foo {:hii 88}}}) => nil
+    (non-empty-map-parameters [:foo] {:data {:foo {}}})
+    => {:ok false :text "error.empty-map-parameters" :parameters [:foo]})
+
   (fact "localization-parameters"
     (localization-parameters [:name] {:data {:name (i18n/supported-langs-map str)}})                       => nil
     (localization-parameters [:name] {:data {:name (dissoc (i18n/supported-langs-map str) :fi)}})          => (localization-error [:name])
