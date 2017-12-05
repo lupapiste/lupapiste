@@ -185,7 +185,8 @@
 (defcommand remove-organization-local-bulletins-caption
   {:user-roles #{:authorityAdmin}
    :parameters [lang index]
-   :input-validators [(partial action/supported-lang :lang)]
+   :input-validators [(partial action/supported-lang :lang)
+                      (partial action/positive-integer-parameters [:index])]
    :pre-checks [check-bulletins-enabled]}
   [{[user-org & _] :user-organizations}]
   (if (integer? index)
