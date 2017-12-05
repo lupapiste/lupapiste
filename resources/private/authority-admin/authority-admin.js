@@ -438,12 +438,14 @@
           }));
           var koMappedTexts = ko.mapping.fromJS(data["local-bulletins-page-texts"]);
 
-          _.map(["fi", "sv"], function(lang) {
+          _.map(loc.getSupportedLanguages(), function(lang) {
             _.map(["heading1", "heading2"], function(key) {
               var obs = _.get(koMappedTexts, [lang, key]);
-              obs.subscribe( function( value ) {
-                upsertText({lang: lang, key: key, value: value});
-              });
+              if (obs) {
+                obs.subscribe( function( value ) {
+                  upsertText({lang: lang, key: key, value: value});
+                });
+              }
             });
 
             // map the observableArray of String paragraphs into an observableArray of

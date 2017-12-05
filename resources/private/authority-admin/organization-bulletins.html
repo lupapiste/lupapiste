@@ -38,7 +38,8 @@
             </tbody>
           </table>
 
-          <!-- ko foreach: ['fi', 'sv'] -->
+          <!-- ko foreach: loc.getSupportedLanguages() -->
+          <!-- ko if: _.get($parent, $data) -->
           <h2 data-bind="ltext: 'auth-admin.local-bulletins-page-texts.caption-in-' + $data"></h2>
           <table class="admin-settings-local-bulletins">
             <tbody data-bind="foreach: _.get($parent, [$data, 'caption'])">
@@ -57,6 +58,7 @@
                                click: _.partial($root.bulletins.appendCaption, $data),
                                testId: 'add-row'"
                        data-bind="visible: true"></icon-button></p>
+          <!-- /ko -->
           <!-- /ko -->
         </section>
         <!-- /ko -->
