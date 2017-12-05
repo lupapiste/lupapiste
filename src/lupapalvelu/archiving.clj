@@ -275,6 +275,12 @@
      :location-wgs84        (location application op-filtered-bldgs :location-wgs84)
      :projectDescription    (project-description application op-filtered-docs)}))
 
+(defn- permit-ids-for-archiving [verdicts attachment permitType]
+  (let [backend-ids (remove nil? (map :kuntalupatunnus verdicts))]
+    (if (not= permitType permit/ARK)
+      backend-ids
+      (conj (remove (fn [id] (= id (:backendId attachment))) backend-ids) (:backendId attachment)))))
+
 (defn- generate-archive-metadata
   [{:keys [id propertyId _applicantIndex address organization municipality permitType
            tosFunction verdicts handlers closed drawings] :as application}
@@ -282,7 +288,7 @@
    s2-md-key
    & [attachment]]
   (let [s2-metadata (or (s2-md-key attachment) (s2-md-key application))
-        permit-ids (remove nil? (map :kuntalupatunnus verdicts))
+        permit-ids (permit-ids-for-archiving verdicts attachment permitType)
         base-metadata {:type                  (if attachment (make-attachment-type attachment) :hakemus)
                        ; Don't use application ids for archiving projects if there are municipal permit ids
                        :applicationId         (when (or (not= permitType permit/ARK) (empty? permit-ids)) id)
