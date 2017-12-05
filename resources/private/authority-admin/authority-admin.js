@@ -374,6 +374,7 @@
   }
 
   function BulletinsModel() {
+    // Model for the organization-bulletins page, functionality for maintaining (non-YMP) bulletin settings for organization
     var self = this;
 
     self.scopes = ko.observableArray();
@@ -398,12 +399,10 @@
 
     function newCaptionTextModel(lang, text, index) {
       var obs = ko.observable(text);
-      ko.computed(function() {
-        var value = obs();
-        if (!ko.computedContext.isInitial()) {
-          upsertText({lang: lang, key: "caption", index: index, value: value});
-        }
+      obs.subscribe( function( value ) {
+        upsertText({lang: lang, key: "caption", index: index, value: value});
       });
+
       return {text: obs, doRemove: _.partial(removeCaption, lang, index)};
     }
 
@@ -441,17 +440,14 @@
 
           _.map(["fi", "sv"], function(lang) {
             _.map(["heading1", "heading2"], function(key) {
-              ko.computed(function() {
-                var obs = _.get(koMappedTexts, [lang, key]);
-                var value = obs();
-                if (!ko.computedContext.isInitial()) {
-                  upsertText({lang: lang, key: key, value: value});
-                }
+              var obs = _.get(koMappedTexts, [lang, key]);
+              obs.subscribe( function( value ) {
+                upsertText({lang: lang, key: key, value: value});
               });
             });
 
             // map the observableArray of String paragraphs into an observableArray of
-            // observables with change listener computed functions inside
+            // observables with change listener functions inside
             var captionObsArray = _.get(koMappedTexts, [lang, "caption"]);
             if (captionObsArray) {
               captionObsArray(_.map(captionObsArray(), _.partial(newCaptionTextModel, lang)));
