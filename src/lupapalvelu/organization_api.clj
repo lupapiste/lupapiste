@@ -200,7 +200,7 @@
 (defcommand upsert-organization-local-bulletins-text
   {:user-roles #{:authorityAdmin}
    :parameters [lang key value]
-   :optional-parameters [index remove-caption?]
+   :optional-parameters [index]
    :input-validators [(partial action/supported-lang :lang)
                       (partial non-blank-parameters [:key])]
    :pre-checks [check-bulletins-enabled]}
