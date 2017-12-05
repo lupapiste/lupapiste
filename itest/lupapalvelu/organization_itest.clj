@@ -1311,6 +1311,22 @@
                        :url "http://foo.my.url"
                        :notification-email "rane@example.com"}}])
 
+    (fact "sipoo - update texts"
+      (command sipoo :upsert-organization-local-bulletins-text
+               :lang "fi" :key "heading1" :value "Sipoo") => {:ok true :valid true}
+      (command sipoo :upsert-organization-local-bulletins-text
+               :lang "fi" :key "heading2" :value "Rak.valv.julkipanolistat") => {:ok true :valid true}
+      (command sipoo :upsert-organization-local-bulletins-text
+               :lang "fi" :key "caption" :value "Sipoo") => {:ok true :valid false}
+      (command sipoo :upsert-organization-local-bulletins-text
+               :lang "fi" :key "caption" :index 0 :value "Sipoo123") => {:ok true :valid true}
+      (command sipoo :remove-organization-local-bulletins-caption :lang "fi" :index 1) => ok?
+      (command sipoo :remove-organization-local-bulletins-caption :lang "fi" :index 1) => ok?
+      (-> (query sipoo :user-organization-bulletin-settings) :local-bulletins-page-texts :fi)
+      => {:heading1 "Sipoo"
+          :heading2 "Rak.valv.julkipanolistat"
+          :caption ["Sipoo123"]})
+
     (fact "sipoo P - disable"
       (command admin :update-organization
                :permitType "P"
