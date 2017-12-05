@@ -1336,3 +1336,10 @@
              :bulletins {:enabled true
                          :url "http://localhost:8000/dev/julkipano"
                          :notification-email "pena@example.com"}}]))))
+
+(facts "update-organization-backend-systems"
+  (fact "Empty backend systems parameter is not allowed"
+    (command admin :update-organization-backend-systems
+             :org-id "564-YMP"
+             :backend-systems {})
+    => (partial expected-failure? :error.empty-map-parameters)))

@@ -215,6 +215,14 @@
       :error.map-parameters-with-required-keys
       {:required-keys required-keys})))
 
+(defn non-empty-map-parameters [params command]
+  (or
+    (map-parameters params command)
+    (filter-params-of-command params
+                              command
+                              empty?
+                              :error.empty-map-parameters)))
+
 (defn parameters-matching-schema [params schema command]
   (filter-params-of-command params command
                             (partial sc/check schema)

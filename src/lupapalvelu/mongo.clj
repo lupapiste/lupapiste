@@ -150,6 +150,7 @@
 (defn update-by-id
   "Updates data into collection by id (which is mapped to _id). Always returns nil."
   [collection id data & opts]
+  {:pre [(seq data)]}
   (mc/update-by-id (get-db) collection (remove-null-chars id) (remove-null-chars data) opts)
   nil)
 

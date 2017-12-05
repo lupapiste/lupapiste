@@ -789,7 +789,7 @@
   {:description "Updates organization backend systems by permit type."
    :parameters [org-id backend-systems]
    :user-roles #{:admin}
-   :input-validators [(partial action/map-parameters [:backend-systems])]}
+   :input-validators [(partial action/non-empty-map-parameters [:backend-systems])]}
   [_]
   (->> (util/map-keys (fn->> name (format "krysp.%s.backend-system"))  backend-systems)
        (reduce (fn [updates [path system]] (if (contains? org/backend-systems (keyword system))
