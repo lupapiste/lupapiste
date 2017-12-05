@@ -74,6 +74,7 @@ util.showSavedIndicator = function() {};
 util.sizeString         = function() {};
 util.toMoment           = function() {};
 util.localeComparator   = function() {};
+util.getIn              = function() {};
 
 var sprintf = function() {};
 
