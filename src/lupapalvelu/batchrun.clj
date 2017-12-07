@@ -656,7 +656,7 @@
                 (if (= (:id task) (:id (:source att)))
                   (do
                     (debug "application" (:id (:application command)) "- converting task" (:id task) "-> attachment" (:id att) )
-                    (attachment/convert-existing-to-pdfa! (:application command) (:user command) att)))))))))))
+                    (attachment/convert-existing-to-pdfa! (:application command) att)))))))))))
 
 (defn pdf-to-pdfa-conversion [& [organization start-date end-date]]
   (if (and organization start-date end-date)
@@ -676,23 +676,23 @@
                                                       (monger-query/sort {:submitted 1}))
                                (map mongo/with-id))]
         (logging/with-logging-context {:applicationId (:id application)}
-          (info "Converting attachments of application" (:id application))
+          (info "Checking attachments of application" (:id application))
           (doseq [{:keys [latestVersion] :as attachment} (:attachments application)]
             (when (and latestVersion (not (:archivable latestVersion)))
               (info "Trying to convert attachment" (:filename latestVersion))
-              (let [result (attachment/convert-existing-to-pdfa! application nil attachment)
+              (let [result (attachment/convert-existing-to-pdfa! application attachment)
                     log-message {:application-id (:id application)
                                  :attachment-id (:id attachment)
                                  :type (:type attachment)
                                  :filename (:filename latestVersion)}]
-                (if (:archivabilityError result)
+                (if (:archivable result)
+                  (logging/log-event :info (merge {:run-by "Batch PDF/A conversion run"
+                                                   :event "Successfully converted attachment to PDF/A"}
+                                                  log-message))
                   (logging/log-event :error (merge {:run-by "Batch PDF/A conversion run"
                                                     :event "Attachment conversion to PDF/A failed"
                                                     :archivability-error (:archivabilityError result)}
-                                                   log-message))
-                  (logging/log-event :info (merge {:run-by "Batch PDF/A conversion run"
-                                                   :event "Successfully converted attachment to PDF/A"}
-                                                  log-message)))))))))
+                                                   log-message)))))))))
     (println "Organization id, start date and end date arguments must be provided.")))
 
 (defn fetch-verdict-attachments
