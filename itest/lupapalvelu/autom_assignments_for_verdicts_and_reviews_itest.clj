@@ -33,14 +33,14 @@
     nil
     ["paatoksenteko.paatosote"]
     {:id "abba1111111111111111acdc"
-     :name {:fi "Käsittelijä" :sv "Handläggare" :en "Handler"}} "verdict-test-trigger"))
+     :name {:fi "K\u00e4sittelij\u00e4" :sv "Handl\u00e4ggare" :en "Handler"}} "verdict-test-trigger"))
 
 (def review-assignment-trigger
   (organization/create-trigger
     nil
     ["katselmukset_ja_tarkastukset.katselmuksen_tai_tarkastuksen_poytakirja"]
     {:id "abba1111111111111111acdc"
-     :name {:fi "Käsittelijä" :sv "Handläggare" :en "Handler"}} "review-test-trigger"))
+     :name {:fi "K\u00e4sittelij\u00e4" :sv "Handl\u00e4ggare" :en "Handler"}} "review-test-trigger"))
 
 (mongo/connect!)
 (mongo/with-db db-name
@@ -100,7 +100,7 @@
     (mongo/remove-many :applications {})
     (mongo/remove-many :assignments {})
 
-      (let [application-id-submitted (:id (create-and-submit-local-application pena :propertyId sipoo-property-id :address "Hakemusjätettie 15"))]
+      (let [application-id-submitted (:id (create-and-submit-local-application pena :propertyId sipoo-property-id :address "Hakemusj\u00e4tettie 15"))]
 
         (fact "review trigger ok"
           (->> (mongo/by-id :organizations "753-R")

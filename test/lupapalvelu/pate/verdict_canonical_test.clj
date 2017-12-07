@@ -165,7 +165,7 @@
 
     (fact "four foremen"
       (map (comp :tyonjohtajaRooliKoodi :VaadittuTyonjohtaja) (:vaadittuTyonjohtajatieto canonical))
-      => ["erityisalojen työnjohtaja" "IV-työnjohtaja" "vastaava työnjohtaja" "KVV-työnjohtaja"])))
+      => ["erityisalojen ty\u00f6njohtaja" "IV-ty\u00f6njohtaja" "vastaava ty\u00f6njohtaja" "KVV-ty\u00f6njohtaja"])))
 
 (facts paivamaarat-type-canonical
   (fact "all dates defined"
