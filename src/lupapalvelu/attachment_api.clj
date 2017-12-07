@@ -874,22 +874,9 @@
                           (when (or archivable (not (conversion/all-convertable-mime-types (keyword contentType))))
                             (fail :error.attachment.content-type))))]
    :states           (states/all-application-states-but :draft)}
-  [{:keys [application created]}]
+  [{:keys [application]}]
   (if-let [attachment (att/get-attachment-info application attachmentId)]
-    (let [{:keys [fileId filename user stamped] :as latest-version} (last (:versions attachment))]
-      (files/with-temp-file temp-pdf
-        (with-open [content ((:content (mongo/download fileId)))]
-          (io/copy content temp-pdf)
-          (let [{:keys [archivable archivabilityError]} (att/upload-and-attach! {:application application :user user}
-                                                                                {:attachment-id attachmentId
-                                                                                 :comment-text nil
-                                                                                 :required false
-                                                                                 :created (:created latest-version)
-                                                                                 :modified created
-                                                                                 :comment? false
-                                                                                 :stamped stamped
-                                                                                 :original-file-id fileId}
-                                                                                {:content temp-pdf :filename filename})]
-            (if archivable
-              (ok)
-              (fail archivabilityError))))))))
+    (let [{:keys [archivable archivabilityError]} (att/convert-existing-to-pdfa! application attachment)]
+      (if archivable
+        (ok)
+        (fail archivabilityError)))))
