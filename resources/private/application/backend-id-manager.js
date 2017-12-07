@@ -32,7 +32,9 @@ LUPAPISTE.BackendIdManagerModel = function(params) {
   };
 
   self.verdicts.subscribe(function(verdicts) {
-    initialize(verdicts);
+    if (initialized === false) {
+      initialize(verdicts);
+    }
   });
 
   initialize(self.verdicts());
@@ -96,6 +98,7 @@ LUPAPISTE.BackendIdManagerModel = function(params) {
         .success(function () {
           hub.send("indicator", {style: "positive"});
           repository.load(ko.unwrap(params.applicationId));
+          initialized = false;
           self.loading(false);
         })
         .error(function (e) {
