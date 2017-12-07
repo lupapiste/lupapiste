@@ -281,6 +281,16 @@
       backend-ids
       (conj (remove (fn [id] (= id (:backendId attachment))) backend-ids) (:backendId attachment)))))
 
+(defn get-ark-paatospvm [verdicts attachment]
+    (->> (filter #(= (:kuntalupatunnus %) (:backendId attachment)) verdicts)
+         first
+         :paatokset
+         first
+         :poytakirjat
+         :0
+         :paatospvm
+         ts->iso-8601-date))
+
 (defn- generate-archive-metadata
   [{:keys [id propertyId _applicantIndex address organization municipality permitType
            tosFunction verdicts handlers closed drawings] :as application}
@@ -303,7 +313,7 @@
                        :kuntalupatunnukset    permit-ids
                        :lupapvm               (or (get-verdict-date application :lainvoimainen)
                                                   (get-paatospvm application))
-                       :paatospvm             (get-paatospvm application)
+                       :paatospvm             (if (not= permitType permit/ARK) (get-paatospvm application) (get-ark-paatospvm verdicts attachment))
                        :jattopvm              (get-jattopvm application)
                        :paatoksentekija       (get-from-verdict-minutes application :paatoksentekija)
                        :tiedostonimi          (get-in attachment [:latestVersion :filename] (str id ".pdf"))

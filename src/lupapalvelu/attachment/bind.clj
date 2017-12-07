@@ -47,7 +47,6 @@
         automatic-ok-enabled  (org/get-organization-auto-ok (:organization application))
         placeholder-id        (or attachmentId
                                (att/get-empty-attachment-placeholder-id (:attachments application) type (set exclude-ids)))
-        _ (println "KEYS:::::" filedata)
         attachment            (or
                                 (att/get-attachment-info application placeholder-id)
                                 (att/create-attachment! application
