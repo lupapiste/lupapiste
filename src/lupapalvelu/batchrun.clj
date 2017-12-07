@@ -680,7 +680,10 @@
           (doseq [{:keys [latestVersion] :as attachment} (:attachments application)]
             (when (and latestVersion (not (:archivable latestVersion)))
               (info "Trying to convert attachment" (:filename latestVersion))
-              (let [result (attachment/convert-existing-to-pdfa! application attachment)
+              ; Re-fetch application to minimize errors because of it changing during processing
+              (let [{:keys [attachments] :as application} (mongo/by-id :applications (:id application))
+                    attachment (first (filter #(= (:id attachment) (:id %)) attachments))
+                    result (attachment/convert-existing-to-pdfa! application attachment)
                     log-message {:application-id (:id application)
                                  :attachment-id (:id attachment)
                                  :type (:type attachment)
