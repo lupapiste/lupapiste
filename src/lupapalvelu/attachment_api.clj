@@ -871,7 +871,7 @@
    :pre-checks       [(fn [{{attachment-id :attachmentId} :data {:keys [attachments]} :application}]
                         (let [attachment (util/find-first #(= (:id %) attachment-id) attachments)
                               {:keys [archivable contentType]} (last (:versions attachment))]
-                          (when (or archivable (not ((conj conversion/libre-conversion-file-types :image/jpeg :application/pdf) (keyword contentType))))
+                          (when (or archivable (not (conversion/all-convertable-mime-types (keyword contentType))))
                             (fail :error.attachment.content-type))))]
    :states           (states/all-application-states-but :draft)}
   [{:keys [application created]}]

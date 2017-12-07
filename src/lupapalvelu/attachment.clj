@@ -877,7 +877,7 @@
 (defn convert-existing-to-pdfa! [application user attachment]
   {:pre [(map? application) (:id application) (:attachments application)]}
   (let [{:keys [archivable contentType]} (last (:versions attachment))]
-    (if (or archivable (not ((conj conversion/libre-conversion-file-types :image/jpeg :application/pdf) (keyword contentType))))
+    (if (or archivable (not (conversion/all-convertable-mime-types (keyword contentType))))
       (fail :error.attachment.content-type)
       ;; else
       (let [{:keys [fileId filename user stamped]} (last (:versions attachment))
