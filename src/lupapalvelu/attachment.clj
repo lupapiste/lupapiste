@@ -874,29 +874,58 @@
                              :set-app-modified? true
                              :set-attachment-modified? false)))
 
-(defn convert-existing-to-pdfa! [application user attachment]
+(defn- update-latest-version-file!
+  "Updates the file id and archivability data of the latest version of the attachment.
+   originalFileId should include the original file id and it is not altered."
+  [application {:keys [latestVersion versions id]} {:keys [result file]}]
+  {:pre [(:fileId latestVersion) (:originalFileId latestVersion)]}
+  (let [idx (dec (count versions))
+        file-update (if (and (:archivable result) (:fileId file))
+                      (select-keys file [:fileId :contentType])
+                      {})
+        mongo-updates (reduce
+                        (fn [updates [k v]]
+                          (merge updates {(str "attachments.$.versions." idx "." (name k)) v
+                                          (str "attachments.$.latestVersion." (name k)) v}))
+                        file-update
+                        (merge file-update
+                               {:modified (now)}
+                               (select-keys result [:archivable :archivabilityError :missing-fonts
+                                                    :autoConversion :conversionLog :filename])))]
+    (update-application
+      (application->command application)
+      {:attachments.id id}
+      {$set mongo-updates})))
+
+(defn convert-existing-to-pdfa!
+  "Tries to converted latest attachment version file to PDF/A in-place, i.e. does NOT create a new attachment version.
+   Updates archivability data in the latest version file even if conversion fails."
+  [application attachment]
   {:pre [(map? application) (:id application) (:attachments application)]}
-  (let [{:keys [archivable contentType]} (last (:versions attachment))]
-    (if (or archivable (not ((conj conversion/libre-conversion-file-types :image/jpeg :application/pdf) (keyword contentType))))
-      (fail :error.attachment.content-type)
-      ;; else
-      (let [{:keys [fileId filename user stamped]} (last (:versions attachment))
-            file-content (mongo/download fileId)]
-        (if (nil? file-content)
-          (do
-            (error "PDF/A conversion: No mongo file for fileId" fileId)
-            (fail :error.attachment-not-found))
-          (files/with-temp-file temp-pdf
-            (with-open [content ((:content file-content))]
-              (io/copy content temp-pdf)
-              (upload-and-attach! {:application application :user user}
-                                  {:attachment-id (:id attachment)
-                                   :comment-text nil
-                                   :required false
-                                   :created (now)
-                                   :stamped stamped
-                                   :original-file-id fileId}
-                                  {:content temp-pdf :filename filename}))))))))
+  (let [{:keys [archivable contentType fileId]} (:latestVersion attachment)]
+    (cond
+      archivable
+      (info "Attachment" (:id attachment) "is already archivable, ignoring")
+
+      (not (conversion/all-convertable-mime-types (keyword contentType)))
+      (warn "Attachment" (:id attachment) "mime type" (keyword contentType) "is not convertible to PDF/A")
+
+      :else
+      (if-let [file-content (mongo/download fileId)]
+        (let [{:keys [result file] :as conversion-data} (->> (update file-content :content apply [])
+                                                             (conversion application))]
+          (if (and (:archivable result) (:fileId file))
+            ; If the file is already valid PDF/A, there's no conversion and thus no fileId
+            (do (update-latest-version-file! application attachment conversion-data)
+                (preview/preview-image! (:id application) (:fileId file) (:filename file) (:contentType file))
+                (link-files-to-application (:id application) [(:fileId file)])
+                (cleanup-temp-file result)
+                result)
+            (do (when-not (:archivable result)
+                  (warn "Attachment" (:id attachment) "could not be converted to PDF/A."))
+                (update-latest-version-file! application attachment conversion-data)
+                result)))
+        (error "PDF/A conversion: No mongo file for fileId" fileId)))))
 
 (defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState :as attachment}]
   (boolean (and (states/post-verdict-states (keyword app-state))
