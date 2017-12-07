@@ -357,10 +357,10 @@
   (let [ymp-permit-types (set (map name [YI YL YM VVVL MAL]))]
     (ymp-permit-types permit-type)))
 
-(defn archiving-project? [{{:keys [permitType]} :application}]
+(defn archiving-project? [{:keys [permitType]}]
   (= permitType (name ARK)))
 
-(defn is-archiving-project [application]
+(defn is-archiving-project [{{:keys [permitType] :as application} :application}]
   (when-not (archiving-project? application)
     (fail :error.unsupported-permit-type)))
 
