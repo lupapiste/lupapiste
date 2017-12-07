@@ -412,7 +412,7 @@
         var captionArr = caption();
         upsertText({lang: lang, key: "caption", index: captionArr.length, value: "", onSuccess: self.load});
       }
-    }
+    };
 
     function doRemoveCaption(lang, idx) {
       ajax
