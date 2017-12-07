@@ -889,6 +889,7 @@
                                           (str "attachments.$.latestVersion." (name k)) v}))
                         file-update
                         (merge file-update
+                               {:modified (now)}
                                (select-keys result [:archivable :archivabilityError :missing-fonts
                                                     :autoConversion :conversionLog :filename])))]
     (update-application
