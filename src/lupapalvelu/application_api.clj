@@ -603,7 +603,7 @@
                            $unset {:propertyIdSource true}})
       (try (app/autofill-rakennuspaikka (mongo/by-id :applications id) (now))
            (catch Exception e (warn "KTJ data was not updated after location changed")))
-      (when (permit/is-archiving-project application)
+      (when (permit/archiving-project? application)
         (app/fetch-buildings command propertyId)))
     (fail :error.property-in-other-muinicipality)))
 
