@@ -1,0 +1,625 @@
+$pate-grid-margin: 10px;
+
+@mixin pate-column ($size, $columns) {
+  position: relative;
+  float: left;
+  @include column-width($size * (100% / $columns));
+  min-height: 1px; // Enforce rendering of empty column.
+  padding-left: $pate-grid-margin;
+
+  label.required:after {
+    content: " *";
+    color: $label-required-star-color;
+  }
+
+  .col--vertical, .col--horizontal {
+    box-sizing: border-box;
+  }
+  .col--vertical {
+    label {
+      text-align: left;
+      display: block;
+    }
+  }
+}
+
+
+@mixin pate-grid ($columns) {
+  .pate-grid-#{$columns} {
+    width: 100%;
+    color: $gray51;
+    > .row {
+      @include clearfix;
+      padding: $pate-grid-margin 0;
+      @for $i from 1 through $columns {
+       > .col-#{$i} {
+          @include pate-column($i, $columns);
+          &:first-child {
+            padding-left: 0;
+          }
+        }
+      }
+      .col--full > * {
+        width: 100%;
+      }
+      .col--full > .col--vertical > * {
+        width: 100%;
+      }
+      .col--right > * {
+        float: right;
+      }
+      .col--left > * {
+        float: left;
+      }
+      .col--center {
+        text-align: center;
+        > * {
+          display: inline-block;
+        }
+      }
+      &.row--tight {
+        padding-top: $marginS;
+        padding-bottom: $marginS;
+        margin: 0 0 0 0;
+      }
+      &.row--indent {
+        padding-left: $marginL;
+        padding-top: 0;
+      }
+    }
+  }
+}
+
+@for $i from 1 through 24 {
+  @include pate-grid( $i );
+}
+
+.pate-list {
+  > .item {
+    display: inline-block;
+  }
+  > .item + .item {
+    margin-left: $pate-grid-margin;
+  }
+  > .item.item--full {
+    display: block;
+  }
+  .item--full > * {
+    width: 100%;
+  }
+  .item--right > * {
+    float: right;
+  }
+  .item--left > * {
+    float: left;
+  }
+  .item--center {
+    text-align: center;
+    > * {
+      display: inline-block;
+    }
+  }
+}
+
+.pate-list.list--sparse {
+  > .item + .item {
+    margin-left: 4 * $pate-grid-margin;
+  }
+}
+
+// toggle-helper is defined in _inputs.scss
+@include toggle-helper ( pate-checkbox, "e604", "e603",
+                         $wrapper-display: inline-block ) {}
+@include toggle-helper (pate-radio, "e635", "e634", $wrapper-display: block) {}
+
+.pate-checkbox-wrapper {
+  border: none;
+  $margin-right: $marginS;
+  $margin-bottom: $marginS;
+}
+
+.pate-radio-wrapper {
+  border: none;
+}
+
+.pate-buttons {
+    float: right;
+    > button {
+      margin-left: $marginS;
+    }
+}
+
+$section-border: 1px solid $gray51;
+
+.pate-section {
+  div.section-header {
+    padding-left: $marginM;
+    padding-right: $marginM;
+    border: $section-border;
+    background-color: transparentize( $orange-dark, 0.6);
+    .section-title {
+      font-size: 17px;
+      font-weight: bold;
+    }
+  }
+  > .pate-buttons {
+    margin-top: $marginS;
+  }
+  div.section-body {
+    padding: {
+      left: $marginM;
+      right: $marginM;
+    }
+    border: {
+      left: $section-border;
+      right: $section-border;
+      bottom: $section-border;
+    }
+  }
+}
+
+.pate-section + .pate-section {
+  .section-header {
+    border-top: none;
+  }
+}
+
+.pate-verdict {
+  .pate-section {
+    min-height: 64px;
+  }
+}
+
+.pate--view {
+  .pate-condition-box + .pate-condition-box:before {
+    content: ", ";
+  }
+}
+
+span.formatted {
+  white-space: pre-wrap;
+  display: inline-block;
+  &.warning {
+    color: $negative;
+  }
+}
+
+.pate-label {
+  font-size: 15px;
+  font-weight: bold;
+ // white-space: nowrap;
+}
+
+// Meta status classes
+.pate--edit {}
+.pate--view {}
+
+.row-text {
+  line-height: $btn-height;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.row-text--margin {
+  margin-right: $marginL;
+}
+
+div.verdict-template {
+  span.pen-input--edit, span.pen-input--view {
+    margin-left: $marginS;
+  }
+  span.header {
+    font-size: 17px;
+    font-weight: bold;
+  }
+}
+
+span.saved-info {
+  color: $gray153;
+}
+
+div.pate-date-delta {
+  > label.delta-label {
+    white-space: nowrap;
+  }
+  > div.delta-editor {
+    white-space: nowrap;
+    input.grid-style-input {
+      max-width: 5em;
+      margin-right: 0.2em;
+    }
+  }}
+
+.date-delta-plus {
+  padding-top: 30px;
+  padding-right: 20px;
+  text-align: center;
+  width: 100%;
+  > span {
+    font-size: 2em;
+  }
+}
+
+div.pate-template-list {
+  .checkbox-wrapper {
+    margin-top: $marginL;
+    margin-bottom: $marginL;
+  }
+  table.pate-templates-table {
+    // No-row-hover mixin is defined in _tables.scss
+    @include no-row-hover;
+  }
+
+}
+
+// Settings
+
+div.pate-settings {
+  h2.pate-settings-title {
+    margin-top: 0;
+  }
+  .section-header {
+    background-color: initial;
+    border-bottom: none;
+  }
+  // .section-body {
+  //   border: none;
+  // }
+}
+
+// Reviews
+
+div.pate-settings-editor {
+  padding-top: $marginS;
+  margin-bottom: $marginL;
+  .checkbox-wrapper {
+    margin-bottom: $marginS;
+  }
+  table.pate-editor-table {
+    // No-row-hover mixin is defined in _tables.scss
+    @include no-row-hover;
+    margin-top: 0;
+  }
+}
+
+// Verdicts
+
+table.pate-verdicts-table {
+  width: initial;
+  @include no-row-hover;
+  tr {
+    border: none;
+  }
+}
+
+div.pate-verdict {
+  div.pate-section {
+    div.section-header {
+      background-color: initial;
+      border: none;
+      border-top: 1px solid $gray221;
+      padding: 0;
+      div.verdict-buttons {
+        padding-top: $marginS;
+        position: absolute;
+        right: 0;
+        z-index: 888;
+      }
+    }
+    div.section-body {
+      border: none;
+      padding: 0;
+    }
+  }
+}
+
+
+// Phrases
+
+div.pate-phrases {
+  margin-top: $marginL;
+  table.pate-phrases-table {
+    @include no-row-hover;
+    margin-top: $marginL;
+    th,
+    th > div.like-btn {
+      cursor: pointer;
+      i.icon-placeholder {
+        min-width: 22px;
+      }
+    }
+    td.phrase {
+      width: 100%;
+      max-width: 0;
+      text-overflow: ellipsis;
+      overflow-x: hidden;
+    }
+  }
+}
+
+span.phrase-text {
+  white-space: pre-wrap;
+}
+
+// Autocomplete
+
+div.pate-autocomplete {
+  position: relative;
+  display: inline-block;
+  // Without border-collapse fix, height would be 41px within tables
+  // (e.g., attachment-batch-table)
+  border-collapse: initial;
+  .ac--combobox {
+    display: table;
+  }
+  .ac--selected {
+    min-height: 40px;
+    max-height: 40px;
+    line-height: 40px;
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    overflow-x: hidden;
+    background-color: white;
+    span {
+      font-size: 15px;
+      box-sizing: border-box;
+      border: 1px solid $input-border-color;
+      border-right: none;
+      min-height: 40px;
+      max-height: 40px;
+      height: 40px;
+      line-height: 38px;
+      padding: {
+        left: 12px;
+      }
+      min-width: 10em;
+      width: 100%;
+      overflow-x: hidden;
+      text-overflow: ellipsis;
+    }
+    i {
+      box-sizing: border-box;
+      min-width: 22px;
+      width: 32px;
+    }
+    i.ac--chevron {
+      font-weight: bold;
+      border: 1px solid $input-border-color;
+      border-left: none;
+    }
+    i.ac--clear {
+      padding-left: 12px;
+    }
+  }
+  .ac--selected.disabled {
+    //pointer-events: none;
+    span, i {
+      background-color: $input-disabled-background-color;
+      border-color: $input-disabled-border-color;
+    }
+    i {
+      color: $input-select-disabled-icon
+    }
+  }
+  .ac__menu {
+    background-color: white;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    z-index: 888;
+    min-width: 20em;
+    width: 100%;
+    border: 1px solid $orange-dark;
+    div.ac__term {
+      padding: 4px 4px 4px 4px;
+      width: 100%;
+      input {
+        font-size: 15px;
+        width: 100%;
+      }
+    }
+    ul.ac__items {
+      max-height: 10em;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      list-style-type: none;
+      padding-left: 0;
+      padding-right: 0;
+      padding-bottom: 4px;
+      li {
+        cursor: default;
+        font-size: 15px;
+        white-space: nowrap;
+        overflow-x: hidden;
+        text-overflow: ellipsis;
+        padding-top: 2px;
+        padding-right: 2px;
+        padding-left: 4px;
+        &.ac--current {
+          background-color: $orange-active;
+          color: white;
+        }
+        &.ac--group {
+          font-weight: bold;
+        }
+        &.ac--grouped {
+          padding-left: 10px;
+        }
+      }
+    }
+  }
+}
+
+// For debugging
+.pprint {
+  margin-top: $marginS;
+  padding: 4px;
+  font-size: 12px;
+  line-height: initial;
+  border: 1px solid $red-dark;
+  > .title {
+    text-align: center;
+    margin-top: -13px;
+    > h4 {
+      font-family: Consolas, "Lucida Console", monospace;
+      display: inline-block;
+      text-transform: uppercase;
+      font-size: 10px;
+      color: $red-dark;
+      text-align: center;
+      background-color: white;
+      padding-left: 1em;
+      padding-right: 1em;
+    }}
+  > .code {
+    font-family: Consolas, "Lucida Console", monospace;
+    white-space: pre-wrap;
+  }
+  > a {
+    @include styled-input( none, none, none,
+                           $text: $red-link, $hover-text: $red-hover,
+                           $active-text: $red-active, $disabled-bg: none);
+    float: right;
+  }
+}
+
+// The default input width is browser specific and the dateinput
+// especially does not play nicely with pate-grid.
+.dateinput.dateinput--safe {
+  max-width: 90%;
+  &.warning {
+    border-color: $negative;
+  }
+}
+
+.neighbor-states {
+  margin: 0;
+  .tabby__row.neighbor > .tabby__cell {
+    vertical-align: top;
+    padding-top: 0;
+    padding-bottom: 0;
+    &.property-id {
+      white-space: nowrap;
+    }
+  }
+}
+
+// Attachments (see also _tables.scss)
+
+.col--vertical div.add-file-div label.btn.batch--add-file {
+  display: inline-block;
+  margin-top: $marginS;
+}
+
+.pate-batch-table {
+  @include no-row-hover;
+  .td-center {
+    text-align: center;
+    > * {
+      vertical-align: middle;
+    }
+  }
+  input {
+    vertical-align: middle;
+  }
+  i.icon-spin.lupicon-refresh {
+    color: $gray153;
+  }
+
+  td.batch--file {
+    max-width: 40em;
+    vertical-align: middle;
+    div.batch--filedata {
+      line-height: 1.1;
+      .batch--filename {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        overflow-x: hidden;
+        display: inline-block;
+      }
+      .batch--fileinfo {
+        white-space: nowrap;
+      }
+    }
+  }
+  td.batch--progress {
+    width: 100%;
+    div {
+      width: 100%;
+      border: solid 1px $orange-darkest;
+      height: 24px;
+      span {
+        height: 22px;
+        background-color: $orange-dark;
+        display: inline-block;
+      }
+    }
+  }
+  td > div.pate-autocomplete {
+    vertical-align: middle;
+  }
+  td.batch--type {
+    min-width: 15em;
+  }
+  td.batch--error {
+    color: $negative;
+    min-width: 20em;
+    width: 100%;
+    white-space: normal;
+    word-break: break-word;
+  }
+  tfoot.batch--buttons {
+    tr {
+      border: none;
+    }
+    td {
+      padding-top: $marginS;
+      padding-right: 0;
+      text-align: right;
+      button {
+        margin-left: $marginM;
+      }
+    }
+  }
+}
+
+table.pate-attachments {
+  width: initial;
+  tr {
+    border: none;
+  }
+  @include no-row-hover;
+  .td--center {
+    text-align: center;
+    > * {
+      vertical-align: middle;
+    }
+  }
+  span.uploader-info {
+    white-space: nowrap;
+  }
+}
+
+span.verdict-published {
+  font-weight: bold;
+}
+
+div.pate-note {
+  border-left: 4px solid $orange-dark;
+  margin-top: $marginS;
+  margin-bottom: $marginS;
+  padding-left: $marginS;
+  padding-right: $marginS;
+  padding-top: $marginS;
+  padding-bottom: $marginS;
+  background-color: $gray246;
+  display: inline-block;
+}
+
+div.pate-unordered-list {
+  ul {
+    list-style-type: square;
+  }
+}

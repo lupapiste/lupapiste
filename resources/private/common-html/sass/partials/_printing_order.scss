@@ -1,11 +1,11 @@
-$matti-grid-margin: 10px;
+$pate-grid-margin: 10px;
 
 @mixin order-column ($size, $columns) {
   position: relative;
   float: left;
   @include column-width($size * (100% / $columns));
   min-height: 1px; // Enforce rendering of empty column.
-  padding-left: $matti-grid-margin * 3;
+  padding-left: $pate-grid-margin * 3;
 
   div.radio-wrapper {
     width: 100%;
@@ -33,7 +33,7 @@ $matti-grid-margin: 10px;
     color: $gray51;
     .row {
       @include clearfix;
-      padding: $matti-grid-margin 0;
+      padding: $pate-grid-margin 0;
       @for $i from 1 through $columns {
         .col-#{$i} {
           @include order-column($i, $columns);
@@ -92,7 +92,7 @@ span.order-summary-line {
 }
 
 div.order-section {
-  padding-bottom: $matti-grid-margin * 2;
+  padding-bottom: $pate-grid-margin * 2;
 
   div.attachments-table-container {
     padding:0;

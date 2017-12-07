@@ -15,7 +15,7 @@
    :created                       ssc/Timestamp
    (sc/optional-key :description) (sc/maybe sc/Str)})
 
-(defschema Application                                      ; WIP, used initially in MATTI state-change JSON
+(defschema Application                                      ; WIP, used initially in Pate state-change JSON
   {:id             ApplicationId
    :operations     [Operation]
    :propertyId     sc/Str

@@ -9,7 +9,8 @@
         <p data-bind="ltext: 'auth-admin.docterminal.allowed-document-types.instructions'"></p>
 
         <a data-bind="ltext: $root.attachmentTypes.toggleSelectText,
-                      click: $root.attachmentTypes.toggleAll"></a>
+                      click: $root.attachmentTypes.toggleAll,
+                      visible: $root.attachmentTypes.canEdit"></a>
         <!-- ko foreach: {data: $root.attachmentTypes.data} -->
         <table class="admin-settings docterminal-settings">
           <thead>
@@ -22,6 +23,7 @@
             <tr>
               <td>
                 <toggle params="value: $data.enabled,
+                                enable: $root.attachmentTypes.canEdit,
                                 ltext: 'attachmentType.' + $data.type,
                                 prefix: 'checkbox'">
               </td>
@@ -30,7 +32,8 @@
         </table>
         <!-- /ko -->
         <a data-bind="ltext: $root.attachmentTypes.toggleSelectText,
-                      click: $root.attachmentTypes.toggleAll"></a>
+                      click: $root.attachmentTypes.toggleAll,
+                      visible: $root.attachmentTypes.canEdit"></a>
       </section>
     </section>
   </body>

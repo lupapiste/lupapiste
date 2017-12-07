@@ -56,7 +56,7 @@
    :user-roles #{:admin}}
   [_]
     (if-let [application (mongo/by-id :applications applicationId ["organization" "permitType" "propertyId"])]
-      (let [{url :url credentials :credentials} (organization/get-krysp-wfs application)]
+      (let [{url :url credentials :credentials} (organization/get-building-wfs application)]
         {:status  200
          :body    (building-reader/building-xml url credentials (:propertyId application) true)
          :headers {"Content-Type"        "application/xml;charset=UTF-8"

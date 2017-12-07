@@ -52,9 +52,9 @@ LUPAPISTE.NaviSidebarService = function() {
                       showIf: authOk( "calendars-enabled" ),
                       feature: "ajanvaraus"},
                      {icon: "lupicon-circle-section-sign",
-                      page: "matti-verdict-templates",
-                      loc: "matti.verdict-templates",
-                      showIf: authOk( "matti-enabled")},
+                      page: "pate-verdict-templates",
+                      loc: "pate.verdict-templates",
+                      showIf: authOk( "pate-enabled")},
                      {icon: "lupicon-megaphone",
                       page: "organization-bulletins",
                       loc: "auth-admin.bulletin-settings",
@@ -62,7 +62,7 @@ LUPAPISTE.NaviSidebarService = function() {
                      {icon: "lupicon-archives",
                       page: "organization-terminal-settings",
                       loc:  "auth-admin.docterminal.title",
-                      showIf: authOk("set-docterminal-attachment-type")}],
+                      showIf: authOk("docterminal-enabled")}],
     admin: [{icon: "lupicon-download",
              page: "admin",
              loc: "admin.xml"},
@@ -143,6 +143,13 @@ LUPAPISTE.NaviSidebarService = function() {
     pageutil.openPage( item.page );
     close();
   };
+
+  self.showToolbar = ko.pureComputed( function() {
+    return _.some( self.userMenu(),
+                   function( item ) {
+                     return lupapisteApp.models.rootVMO.isCurrentPage( item.page );
+                   });
+  });
 
   // Pressing Esc closes menu
   hub.subscribe( "dialog-close", close );

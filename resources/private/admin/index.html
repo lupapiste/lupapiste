@@ -6,7 +6,8 @@
   <body>
 
     <nav>
-      <div class="navi-toolbar" id="navi-toolbar">
+      <div class="navi-toolbar" id="navi-toolbar"
+           data-bind="visible: lupapisteApp.services.naviSidebarService.showToolbar">
         <button class="sidebar-button"
                 data-bind="toggleClick: lupapisteApp.services.naviSidebarService.showMenu,
                            testId: 'sidebar-menu'">

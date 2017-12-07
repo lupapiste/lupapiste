@@ -24,13 +24,13 @@
   [(lupapalvelu.document.schemas/get-schema anything) => {:body [{:name "valtakunnallinenNumero"}]}]
 
   (facts "Building ID updates are in correct form"
-    (buildingid-updates-for-operation {:documents test-docs} "1234M" test-operation) => {"documents.1.data.valtakunnallinenNumero.value" "1234M"}
-    (buildingid-updates-for-operation {:documents []} "1234M" test-operation) => {}
-    (buildingid-updates-for-operation {:documents test-docs} "1234M" {:foo "bar"}) => {}
-    (buildingid-updates-for-operation {:documents test-docs} "1234M" nil) => {}))
+    (document-buildingid-updates-for-operation {:documents test-docs} "1234M" test-operation) => {"documents.1.data.valtakunnallinenNumero.value" "1234M"}
+    (document-buildingid-updates-for-operation {:documents []} "1234M" test-operation) => {}
+    (document-buildingid-updates-for-operation {:documents test-docs} "1234M" {:foo "bar"}) => {}
+    (document-buildingid-updates-for-operation {:documents test-docs} "1234M" nil) => {}))
 
 (fact "No update if schema doesn't have valtakunnallinenNumero"
-  (buildingid-updates-for-operation {:documents test-docs} "1234M" test-operation) => {}
+  (document-buildingid-updates-for-operation {:documents test-docs} "1234M" test-operation) => {}
   (provided
     (lupapalvelu.document.schemas/get-schema anything) => {:body [{:name "foobar"}]}))
 

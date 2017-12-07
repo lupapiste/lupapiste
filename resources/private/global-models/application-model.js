@@ -1007,4 +1007,28 @@ LUPAPISTE.ApplicationModel = function() {
       return "link-btn";
     }
   });
+
+  self.gotoLinkPermitCard = _.partial( hub.send,
+                                       "cardService::select",
+                                       {card: "add-link-permit",
+                                        deck: "summary"});
+
+  self.doRemoveLinkPermit = function(linkPermitId) {
+    ajax.command("remove-link-permit-by-app-id", {id: self.id(), linkPermitId: linkPermitId})
+      .processing(self.processing)
+      .pending(self.pending)
+      .success(function() {
+        repository.load(self.id());
+      })
+      .call();
+  };
+
+  self.removeSelectedLinkPermit = function(linkPermit) {
+    hub.send("show-dialog", {ltitle: "linkPermit.remove.header",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {text: loc("linkPermit.remove.message", linkPermit.id()),
+                                               yesFn: _.partial(self.doRemoveLinkPermit, linkPermit.id())}});
+  };
+
 };

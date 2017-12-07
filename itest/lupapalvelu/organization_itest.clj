@@ -1193,6 +1193,10 @@
     (command sipoo :set-docterminal-attachment-type :attachmentType "foo" :enabled true)
     => (partial expected-failure? :error.illegal-value:schema-validation))
 
+  (fact "Docterminal not enabled"
+    (query sipoo :docterminal-enabled)
+    => (partial expected-failure? :error.docterminal-not-enabled))
+
   (fact "cannot set unless docterminal is enabled"
     (command sipoo :set-docterminal-attachment-type :attachmentType "osapuolet.cv" :enabled true)
     => (partial expected-failure? :error.docterminal-not-enabled))
@@ -1207,7 +1211,11 @@
     (-> "753-R" get-docstore-info :allowedTerminalAttachmentTypes) => local-org-api/allowed-attachments
 
     (command sipoo :set-docterminal-attachment-type :attachmentType "all" :enabled false) => ok?
-    (-> "753-R" get-docstore-info :allowedTerminalAttachmentTypes) => []))
+    (-> "753-R" get-docstore-info :allowedTerminalAttachmentTypes) => [])
+
+  (fact "Docterminal enabled"
+    (query sipoo :docterminal-enabled)
+    => ok?))
 
 (fact "organizations bulletin settings"
   (facts "query setting"

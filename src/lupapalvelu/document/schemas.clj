@@ -1579,7 +1579,7 @@
            :repeating false
            :approvable true
            :type :party
-           :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
+           :user-authz-roles roles/writer-roles-with-foreman
            :after-update 'lupapalvelu.application-meta-fields/foreman-index-update
            :accordion-fields foreman-accordion-paths}
     :body tyonjohtaja-v2}

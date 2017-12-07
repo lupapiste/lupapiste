@@ -691,12 +691,34 @@ LUPAPISTE.AttachmentsService = function() {
   // Convience functions mostly for ClojureScript's benefit
 
   // Attachmens as plain JS and function properties removed.
+  // AuthModel is replaced with auth flags: can-delete?
   self.rawAttachments = function() {
     return _.map( ko.mapping.toJS( self.attachments ),
                   function( a ) {
-                    return _.omitBy( a, function( v, k ) {
-                      return _.isFunction( v ) || k === "authModel";
-                    } );
+                    return _.merge(
+                      _.omitBy( a, function( v, k ) {
+                        return _.isFunction( v ) || k === "authModel";
+                      } ),
+                      {"can-delete?": self.getAuthModel(a.id).ok( "delete-attachment")});
                   } );
   };
+
+  self.refreshAuthModels = function() {
+    authorization.refreshModelsForCategory(
+      self.authModels(),
+      self.applicationId(),
+      "attachments");
+  };
+
+  // Notify when attachments or auth models have changed
+  function notifyChanged() {
+    hub.send( self.serviceName + "::changed");
+  }
+  self.attachments.subscribe( notifyChanged );
+  hub.subscribe( "category-auth-model-changed",
+                 function( event ) {
+                   if (event.category === "attachments") {
+                     notifyChanged();
+                   }
+                 });
 };

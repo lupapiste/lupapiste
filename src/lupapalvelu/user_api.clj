@@ -711,7 +711,7 @@
 (defcommand copy-user-attachments-to-application
   {:parameters [id]
    :user-roles #{:applicant}
-   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
+   :user-authz-roles roles/writer-roles-with-foreman
    :states     (states/all-application-states-but states/terminal-states)
    :pre-checks [(fn [command]
                   (when-not (-> command :user :architect)

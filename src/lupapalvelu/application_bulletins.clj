@@ -33,7 +33,7 @@
    :modified        ssc/Timestamp
    :verdictCategory sc/Str
    (sc/optional-key :verdicts) [sc/Any]
-   (sc/optional-key :matti-verdict) sc/Any})
+   (sc/optional-key :pate-verdict) sc/Any})
 
 (def bulletin-state-seq (sm/state-seq states/bulletin-version-states))
 
@@ -89,7 +89,7 @@
 (def app-snapshot-fields
   [:_applicantIndex :address :applicant :created :documents :location
    :modified :municipality :organization :permitType :bulletinOpDescription
-   :primaryOperation :propertyId :state :verdicts :matti-verdict :tasks])
+   :primaryOperation :propertyId :state :verdicts :pate-verdict :tasks])
 
 (def attachment-snapshot-fields
   [:id :type :latestVersion :auth :metadata :contents :target])
@@ -97,7 +97,7 @@
 (def remove-party-docs-fn
   (partial remove (fn-> :schema-info :type keyword (= :party))))
 
-(defn create-bulletin-snapshot [{matti-verdict :matti-verdict [verdict & _] :verdicts permitType :permitType
+(defn create-bulletin-snapshot [{pate-verdict :pate-verdict [verdict & _] :verdicts permitType :permitType
                                 applicationId :id :as application}]
   (let [app-snapshot (-> application
                          (select-keys app-snapshot-fields)
@@ -112,8 +112,8 @@
                        [:documents]
                        (partial map #(dissoc % :meta)))
         verdict-data (cond
-                       matti-verdict   {:section (:verdict-section matti-verdict)
-                                        :code    (:verdict-code matti-verdict)}
+                       pate-verdict   {:section (:verdict-section pate-verdict)
+                                        :code    (:verdict-code pate-verdict)}
                        verdict         {:section  (-> verdict :paatokset first :poytakirjat first :pykala)
                                         :status   (-> verdict :paatokset first :poytakirjat first :status)
                                         :contact  (-> verdict :paatokset first :poytakirjat first :paatoksentekija)
@@ -129,7 +129,7 @@
                        :verdictData verdict-data
                        :category (cond
                                    (permit/ymp-permit-type? (:permitType application)) "ymp"
-                                   matti-verdict (:category matti-verdict)
+                                   pate-verdict (:category pate-verdict)
                                    :default (ss/lower-case (name permitType)))
                        :bulletinState (bulletin-state (:state app-snapshot)))]
     app-snapshot))
@@ -146,7 +146,7 @@
        app-snapshot (if updates
                       (merge app-snapshot updates)
                       app-snapshot)
-       search-fields [:municipality :address :verdicts :matti-verdict :_applicantIndex
+       search-fields [:municipality :address :verdicts :pate-verdict :_applicantIndex
                       :bulletinOpDescription :bulletinState :applicant :verdictData]
        search-updates (get-search-fields search-fields app-snapshot)]
    (snapshot-updates app-snapshot search-updates created)))

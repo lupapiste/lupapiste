@@ -281,7 +281,9 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
         self.upload.clearFile( fileId );
       } else if ( service.pollJobStatusFinished(status) ) {
         self.bindFailed(true);
-        rows()[fileId].disabled(false);
+        if (rows()[fileId] !== undefined && rows()[fileId] !== null) {
+          rows()[fileId].disabled(false);
+        }
       }
     });
     ajaxWaiting( _.some(jobStatuses(), function(status) { return !service.pollJobStatusFinished(status); }) );

@@ -582,6 +582,15 @@ var util = (function($) {
     return result;
   }
 
+  function localeCompare( locale, s1, s2 ) {
+    if( s1 === s2 ) {
+      return 0;
+    }
+    return _.isUndefined( s1 ) || _.isNull( s1 )
+         ? -1
+         : s1.localeCompare( s2, locale );
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -597,13 +606,12 @@ var util = (function($) {
     prop: {
       isPropertyId:           isPropertyId,
       isPropertyIdInDbFormat: isPropertyIdInDbFormat,
-      toHumanFormat:          propertyIdToHumanFormat,
+      toHumanFormat:          propertyIdWithMaaralaToHumanFormat,
       toDbFormat:             propertyIdToDbFormat,
       isPropertyIdWithMaaraala: isPropertyIdWithMaaraala,
       isPropertyIdWithMaaraalaInDbFormat: isPropertyIdWithMaaraalaInDbFormat,
       isPropertyIdWithMaaraalaInHumanFormat: isPropertyIdWithMaaraalaInHumanFormat,
-      withMaaraalaToDbFormat: propertyIdWithMaaralaToDbFormat,
-      withMaaraalaToHumanFormat: propertyIdWithMaaralaToHumanFormat
+      withMaaraalaToDbFormat: propertyIdWithMaaralaToDbFormat
     },
     buildingName: buildingName,
     constantly:   function(value) { return function() { return value; }; },
@@ -642,7 +650,8 @@ var util = (function($) {
     toMoment: toMoment,
     finnishDateAndTime: finnishDateAndTime,
     sizeString: sizeString,
-    getSchemaElement: getSchemaElement
+    getSchemaElement: getSchemaElement,
+    localeComparator: _.partial( localeCompare, loc.currentLanguage )
   };
 
 })(jQuery);
