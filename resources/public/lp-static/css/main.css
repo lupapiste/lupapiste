@@ -31415,6 +31415,40 @@ table.admin-settings td.value .save-indicator {
   top: 0px;
 }
 
+table.admin-settings-local-bulletins td:first-child {
+  width: 20%;
+}
+
+table.admin-settings-local-bulletins td.full-width {
+  width: 90%;
+}
+
+table.admin-settings-local-bulletins td.value {
+  position: relative;
+}
+
+table.admin-settings-local-bulletins td.value input {
+  min-height: 40px;
+  max-height: 40px;
+  line-height: 40px;
+  line-height: 1;
+  font-size: 16px;
+  width: 90%;
+}
+
+table.admin-settings-local-bulletins td.value textarea {
+  min-height: 40px;
+  max-height: 40px;
+  line-height: 40px;
+  line-height: 1;
+  font-size: 16px;
+  width: 99%;
+}
+
+table.admin-settings-local-bulletins td.value .save-indicator {
+  top: 0px;
+}
+
 .serversettings--error {
   color: #df3215;
   margin-left: 6px;

@@ -181,6 +181,9 @@
 (defn positive-number-parameters [params command]
   (filter-params-of-command params command (complement pos?) :error.illegal-number))
 
+(defn positive-integer-parameters [params command]
+  (filter-params-of-command params command (complement #(and (pos? %) (integer? %))) :error.illegal-number))
+
 (defn string-parameters [params command]
   (filter-params-of-command params command (complement string?) "error.illegal-value:not-a-string"))
 
