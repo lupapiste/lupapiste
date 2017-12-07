@@ -275,7 +275,7 @@
      :location-wgs84        (location application op-filtered-bldgs :location-wgs84)
      :projectDescription    (project-description application op-filtered-docs)}))
 
-(defn- permit-ids-for-archiving [verdicts attachment permitType]
+(defn permit-ids-for-archiving [verdicts attachment permitType]
   (let [backend-ids (remove nil? (map :kuntalupatunnus verdicts))]
     (if (not= permitType permit/ARK)
       backend-ids
