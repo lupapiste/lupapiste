@@ -1091,3 +1091,8 @@
   (-> user
       usr/authority-admins-organization-id
       (org/set-allowed-docterminal-attachment-type attachmentType enabled)))
+
+(defquery docterminal-enabled
+  {:pre-checks [check-docterminal-enabled]
+   :user-roles #{:authorityAdmin}}
+  [_])

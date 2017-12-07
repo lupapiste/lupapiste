@@ -595,12 +595,12 @@ Element should not be visible by test id
 
 Click by test id
   [Arguments]  ${id}
-  Element should be visible by test id  ${id}
+  Wait until  Element should be visible by test id  ${id}
   Click element  xpath=//*[@data-test-id="${id}"]
 
 Click enabled by test id
   [Arguments]  ${id}
-  Element should be visible by test id  ${id}
+  Wait until  Element should be visible by test id  ${id}
   Wait Until  Element Should Be Enabled  xpath=//*[@data-test-id="${id}"]
   Scroll and click test id  ${id}
 

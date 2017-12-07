@@ -48,6 +48,15 @@ Navigate to every admin page
   Navigate to  logs
   Navigate to  admin
 
+Open Sipoo organization
+  Navigate to  organizations
+  Fill test id  organization-search-term  753-R
+  Click by test id  organization-search
+  Click by test id  edit-organization-753-R
+
+Toolbar is not visible
+  No such test id  sidebar-menu
+
 No frontend errors
   There are no frontend errors
 

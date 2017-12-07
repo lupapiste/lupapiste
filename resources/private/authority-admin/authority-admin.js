@@ -404,6 +404,9 @@
 
     self.data = ko.observableArray();
 
+    self.canEdit = ko.pureComputed(  _.wrap("set-docterminal-attachment-type",
+                                            lupapisteApp.models.globalAuthModel.ok));
+
     self.numberEnabled = ko.pureComputed(function() {
       var groups = self.data();
       return _.sumBy(groups, function(group) {
