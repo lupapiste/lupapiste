@@ -277,6 +277,14 @@
     (->> (map :id links)
          (domain/get-multiple-applications-no-access-checking))))
 
+;; https://eevertti.vrk.fi/documents/2634109/3072453/VTJ-yll%C3%A4pito+Virhekoodit+Rajapinta/e7904362-6c43-43e6-8f1c-a80b24313ac9?version=1.0
+;; gives some hint for valid ID, but is still pretty confusing...
+;; Below mimics other system's intrepetation of VRKLupatunnus (KuntaGML), but has suffix length of 5
+;; because 4 digits is not enough to generate application numbers.
+(defn vrk-lupatunnus [{:keys [municipality created submitted id]}]
+  (when (and (not-any? ss/blank? [municipality id]) (or submitted created))
+    (format "%s000%ty-%s" municipality (or submitted created) (ss/suffix id "-"))))
+
 ;;
 ;; Application query post process
 ;;
