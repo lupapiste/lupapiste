@@ -76,10 +76,10 @@
     (facts "vaadittutyonjohtajatieto"
       (fact "vaadittutyonjohtaja - times four"
         (map :content (xml/select lp-xml :paatostieto :lupamaaraykset :vaadittuTyonjohtajatieto :tyonjohtajaRooliKoodi))
-        => [["erityisalojen työnjohtaja"]
-            ["IV-työnjohtaja"]
-            ["vastaava työnjohtaja"]
-            ["KVV-työnjohtaja"]])))
+        => [["erityisalojen ty\u00f6njohtaja"]
+            ["IV-ty\u00f6njohtaja"]
+            ["vastaava ty\u00f6njohtaja"]
+            ["KVV-ty\u00f6njohtaja"]])))
 
   (facts "paivamaarat"
     (fact "aloitettavapvm"
@@ -102,10 +102,10 @@
 
   (facts "poytakirja"
     (fact "paatos"
-      (xml/get-text lp-xml [:paatostieto :poytakirja :paatos]) => "päätös - teksti")
+      (xml/get-text lp-xml [:paatostieto :poytakirja :paatos]) => "p\u00e4\u00e4t\u00f6s - teksti")
 
     (fact "paatoskoodi"
-      (xml/get-text lp-xml [:paatostieto :poytakirja :paatoskoodi]) => "myönnetty")
+      (xml/get-text lp-xml [:paatostieto :poytakirja :paatoskoodi]) => "my\u00f6nnetty")
 
     (fact "paatoksentekija"
       (xml/get-text lp-xml [:paatostieto :poytakirja :paatoksentekija]) => "Pate Paattaja (Viranhaltija)")
