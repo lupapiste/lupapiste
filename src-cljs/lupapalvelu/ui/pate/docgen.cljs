@@ -51,7 +51,7 @@
   (let [local-state (path/state path state)
         sort-fn (if (some->> schema :body first
                              :sortBy (util/=as-kw :displayName))
-                  (partial sort-by :text)
+                  (partial sort-by :text js/util.localeComparator)
                   identity)]
     [:select.dropdown
      (docgen-attr options

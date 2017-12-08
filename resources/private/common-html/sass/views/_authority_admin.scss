@@ -26,6 +26,23 @@ table.admin-settings {
   }
 }
 
+table.admin-settings-local-bulletins {
+  td:first-child { width: 20%; }
+  td.full-width { width: 90%; }
+  td.value {
+    input {
+      @include textinputBig;
+      width: 90%;
+    }
+    textarea {
+      @include textinputBig;
+      width: 99%;
+    }
+    .save-indicator { top: 0px; }
+    position: relative;
+  }
+}
+
 .serversettings--error {
   color: $red-dark;
   margin: {

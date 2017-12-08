@@ -1,6 +1,6 @@
 (ns lupapalvelu.integrations-api
   "API for commands/functions working with integrations (ie. KRYSP, Asianhallinta)"
-  (:require [taoensso.timbre :as timbre :refer [infof info error errorf]]
+  (:require [taoensso.timbre :refer [infof info error errorf]]
             [clojure.java.io :as io]
             [noir.response :as resp]
             [monger.operators :refer [$in $set $unset $push $each $elemMatch]]
@@ -15,12 +15,12 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.rest.config :as config]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
@@ -32,7 +32,6 @@
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.http :as http]
-            [sade.municipality :as muni]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as validators]
@@ -479,14 +478,6 @@
 
 (defquery current-configuration
   {:description "Returns current configuration values for specified keys"
-   :feature :pate-json
    :user-roles #{:anonymous}}
   [_]
-  (letfn [(key-display-name-mapper-with-loc-prefix [loc-prefix value]
-            (hash-map :key (name value) :displayName (i18n/to-lang-map (str loc-prefix (name value)))))
-          (key-display-name-mapper [value]
-            (key-display-name-mapper-with-loc-prefix nil value))]
-    (ok {:permitTypes    (map key-display-name-mapper (keys (permit/permit-types)))
-         :states         (map key-display-name-mapper states/all-states)
-         :municipalities (map (partial key-display-name-mapper-with-loc-prefix "municipality.") muni/municipality-codes)
-         :operations     (map (partial key-display-name-mapper-with-loc-prefix "operations.") (keys operations/operations))})))
+  (ok (config/current-configuration)))

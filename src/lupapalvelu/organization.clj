@@ -177,6 +177,11 @@
       (dissoc (sc/optional-key :ftpUser))
       (assoc  (sc/optional-key :defaultSRS) (sc/maybe sc/Str))))
 
+(sc/defschema LocalBulletinsPageTexts (i18n/lenient-localization-schema {:heading1 sc/Str
+                                                                         :heading2 sc/Str
+                                                                         :caption [sc/Str]}))
+(sc/defschema LocalBulletinsPageSettings {:texts LocalBulletinsPageTexts})
+
 (sc/defschema Organization
   {:id OrgId
    :name (i18n/lenient-localization-schema sc/Str)
@@ -239,9 +244,7 @@
    (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}
    (sc/optional-key :pate-enabled)                 sc/Bool
    (sc/optional-key :multiple-operations-supported) sc/Bool
-   (sc/optional-key :local-bulletins-page-settings) {:texts (i18n/lenient-localization-schema {:heading1 sc/Str
-                                                                                               :heading2 sc/Str
-                                                                                               :caption [sc/Str]})}})
+   (sc/optional-key :local-bulletins-page-settings) LocalBulletinsPageSettings})
 
 
 (sc/defschema SimpleOrg

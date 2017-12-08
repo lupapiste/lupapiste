@@ -685,7 +685,7 @@
                                                               <td data-bind="dateString: $data.paatospvm"></td>
                                                               <td data-bind="foreach: $data.attachments">
                                                                   <span data-bind="with: $data.latestVersion">
-                                                                      <a href="#" data-bind="text: filename, attr: {href: '/api/raw/latest-attachment-version?attachment-id=' + $parent.id}"></a><br/>
+                                                                      <a href="#" data-bind="text: filename, attr: {href: '/api/raw/latest-attachment-version?attachment-id=' + $parent.id}" target="_blank"></a><br/>
                                                                       <i data-bind="ltext: contentType"></i>
                                                                       <i data-bind="size: size"></i><br/>
                                                                   </span>

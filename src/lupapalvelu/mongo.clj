@@ -150,6 +150,7 @@
 (defn update-by-id
   "Updates data into collection by id (which is mapped to _id). Always returns nil."
   [collection id data & opts]
+  {:pre [(seq data)]}
   (mc/update-by-id (get-db) collection (remove-null-chars id) (remove-null-chars data) opts)
   nil)
 
@@ -186,7 +187,9 @@
    Queries for objects in this collection.
    This function returns clojure Seq of Maps."
   ([coll ref]
-   (mc/find-maps (get-db) coll ref)))
+   (mc/find-maps (get-db) coll ref))
+  ([coll ref fields]
+   (mc/find-maps (get-db) coll ref fields)))
 
 (defn distinct
   "Wrapper for monger.collection/distinct. Finds distinct values for a key."

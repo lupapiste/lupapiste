@@ -184,6 +184,7 @@
             </tbody>
           </table>
           <button data-bind="ltext: 'save',
+                             enable: _.size( backendSystems() ),
                              click: updateBackendSystems" class="btn positive"></button>
 
           <div>

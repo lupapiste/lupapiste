@@ -117,7 +117,7 @@
           :field sc/Str}
    :skip   sc/Int
    :limit  sc/Int
-   :trigger (sc/optional-key sc/Str)})
+   :trigger (sc/maybe sc/Str)})
 
 (sc/defschema AssignmentsSearchResponse
   {:userTotalCount sc/Int
@@ -221,10 +221,11 @@
                                                 "$lt"  (or (:end createdDate) (tc/to-long (t/now)))}})
                         (when-not (empty? targetType)
                           {:targets.group {$in targetType}})
-                        (case trigger
-                          "user-created" {:trigger "user-created"}
-                          "any" nil
-                          {:trigger {"$ne" "user-created"}})
+                        (when-not (empty? trigger)
+                          (case trigger
+                            "user-created" {:trigger "user-created"}
+                            "any" nil
+                            {:trigger {"$ne" "user-created"}}))
                         {:status {$ne "canceled"}}])
   :post-lookup (filter seq
                        [(when-not (ss/blank? searchText)
