@@ -481,16 +481,25 @@ var util = (function($) {
     }
   }
 
+  function resolveIdentLogoutRedirectSuffix() {
+    var startPage = lupapisteApp.startPage;
+    if (startPage === "local-bulletins") {
+      return "/app/" + loc.getCurrentLanguage() + "/local-bulletins?organization=" + pageutil.getURLParameter("organization");
+    } else {
+      return "/app/" + loc.getCurrentLanguage() + "/" + startPage;
+    }
+  }
+
   function identLogoutRedirectBulletins() {
     var url = identLogoutUrl();
-    var suffix = "/app/" + loc.getCurrentLanguage() + "/bulletins";
+    var suffix = resolveIdentLogoutRedirectSuffix();
     if (url) {
       ajax.deleteReq("/api/vetuma/user")
         .success(function() {
-          window.location = _.escape(url) + "?return=" + suffix;
+          window.location = _.escape(url) + "?return=" + _.escape(suffix);
         })
         .error(function() {
-          window.location = _.escape(url) + "?return=" + suffix;
+          window.location = _.escape(url) + "?return=" + _.escape(suffix);
         }).call();
     }
   }
