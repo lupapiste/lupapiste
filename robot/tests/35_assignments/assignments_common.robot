@@ -27,7 +27,7 @@ Save assignment
 
 Create assignment
   [Arguments]  ${user}  ${targetGroup}  ${doctype}  ${description}=Foosignment  ${assignmentIdx}=1
-  ${docId}=  Get Element Attribute  xpath=//section[contains(@class, 'accordion') and @data-doc-type='${doctype}']@data-doc-id
+  ${docId}=  Get Element Attribute  xpath=//section[contains(@class, 'accordion') and @data-doc-type='${doctype}']  data-doc-id
   Open assignment editor
   Fill assignment editor  bubble-dialog[@data-test-id='create-assignment-bubble']  ${targetGroup}  ${docId}  ${user}  ${description}
   Save assignment
@@ -35,7 +35,7 @@ Create assignment
 
 Create attachment assignment
   [Arguments]  ${user}  ${targetGroup}  ${attType}  ${description}=Attsignment  ${assignmentIdx}=1
-  ${attId}=  Get element attribute  xpath=//tr[@data-test-type='${attType}']@attachment-id
+  ${attId}=  Get element attribute  xpath=//tr[@data-test-type='${attType}']  attachment-id
   Open assignment editor
   Fill assignment editor  bubble-dialog[@data-test-id='create-assignment-bubble']  ${targetGroup}  ${attId}  ${user}  ${description}
   Save assignment

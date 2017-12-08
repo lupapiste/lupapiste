@@ -130,10 +130,10 @@ Sets warranty start/end date
 
 Warranty start date should be
   [Arguments]  ${date}
-  ${value} =  Get Element Attribute  xpath=//input[@data-test-id='warranty-start-date-edit']@value
+  ${value} =  Get Element Attribute  xpath=//input[@data-test-id='warranty-start-date-edit']  value
   Should be equal  ${value}  ${date}
 
 Warranty end date should be
   [Arguments]  ${date}
-  ${value} =  Get Element Attribute  xpath=//input[@data-test-id='warranty-end-date-edit']@value
+  ${value} =  Get Element Attribute  xpath=//input[@data-test-id='warranty-end-date-edit']  value
   Should be equal  ${value}  ${date}
