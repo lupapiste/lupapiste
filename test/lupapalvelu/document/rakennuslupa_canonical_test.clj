@@ -46,7 +46,7 @@
     => (contains {:rakennusnro "123"
                   :valtakunnallinenNumero "122334455R"})))
 
-(def- municipality 753)
+(def- municipality "753")
 
 (def- nimi {:etunimi {:value "Pena"} :sukunimi {:value "Penttil\u00e4"}})
 

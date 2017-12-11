@@ -42,6 +42,8 @@
 
 (testable-privates lupapalvelu.application required-link-permits)
 
+(def VRKLupatunnus-path [:LupaTunnus :VRKLupatunnus])
+
 (defn- populate-task [{:keys [id tasks]} task-id apikey]
        (let [task (some #(when (= (:id %) task-id) %) tasks)
              schema (model/get-document-schema task)
@@ -283,7 +285,16 @@
             expected-attachment-count (if yl-kaataminen 2 3)
             expected-sent-attachment-count expected-attachment-count]
         (fact "application is sent" (:state approved-application) => "sent")
-        (final-xml-validation (str "do-test - " operation-name) approved-application autogenarated-attachment-count expected-attachment-count expected-sent-attachment-count)
+        (final-xml-validation
+          (str "do-test - " operation-name)
+          approved-application
+          autogenarated-attachment-count
+          expected-attachment-count
+          expected-sent-attachment-count
+          (fn [xml]
+            (when (and (= :R permit-type) (:pate-enabled organization)) ; VRKLupatunnus only when pate-enabled in org
+              (fact {:midje/description (str operation-name " - VRKLupatunnus R")}
+                (xml/get-text xml VRKLupatunnus-path) => string?))))
 
         (:to email) => (contains (email-for-key pena))
         (:subject email) => "Lupapiste: Ryspitie 289, Sipoo - hankkeen tila on nyt K\u00e4sittelyss\u00e4"
@@ -553,6 +564,31 @@
                                            (re-pattern (str "[^\\s]+/api/raw/submitted-application-pdf-export\\?id=" application-id "&lang=fi"))
                                            (re-pattern (str "[^\\s]+/api/raw/latest-attachment-version\\?attachment-id=" liite-id))]
                                           :in-any-order)))))
+
+(facts "VRKLupatunnus missing if PATE disabled"             ; Testing with Jaervenpaa R
+  (let [app (create-and-submit-application pena :propertyId jarvenpaa-property-id :operation "kerrostalo-rivitalo" :address "Testikatu")
+        application-id (:id app)]
+    (generate-documents app pena)
+    (:organization app) => "186-R"
+    (let [resp (command raktark-jarvenpaa :approve-application :id application-id :lang "fi")]
+      (fact "approve app" resp => ok?)
+      (:integrationAvailable resp) => true)
+    (let [approved-application (query-application pena application-id)
+          ;; Two generated application pdf attachments
+          autogenarated-attachment-count 2
+          expected-attachment-count 0
+          expected-sent-attachment-count expected-attachment-count]
+      (fact "application is sent" (:state approved-application) => "sent")
+      (final-xml-validation
+        (str "VRKLupatunnus not present - ")
+        approved-application
+        autogenarated-attachment-count
+        expected-attachment-count
+        expected-sent-attachment-count
+        (fn [xml]
+          (fact "No VRKLupatunnus in XML"
+            (xml/get-text xml VRKLupatunnus-path) => nil?))))))
+
 ;;
 ;; TODO: Fix this
 ;;
