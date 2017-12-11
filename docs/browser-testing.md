@@ -13,8 +13,8 @@ See [Robot Framework documentation](http://robotframework.org/robotframework/).
     1.  On Windows, append installation directory C:\Python27 and C:\Python27\Scripts to PATH environment variable
 3. Install [pip](http://www.pip-installer.org/en/latest/installing.html)
 4. Install Robot Framework: `pip install robotframework`
-5. Install Selenium (>= 3.4.0): `pip install selenium`
-6. Install Selenium 2 Library (>= 1.8.0): `pip install robotframework-selenium2library`
+5. Install Selenium (>= 3.8.0): `pip install selenium`
+6. Install Selenium 2 Library (>= 3.0.0): `pip install robotframework-selenium2library`
 7. Install [Robotframework-DebugLibrary](https://github.com/xyb/robotframework-debuglibrary): `pip install robotframework-debuglibrary`
 8. Download drivers and include them in PATH. On macOS you can use Homebrew.
     1.  [Geckodriver >= 0.16.1](https://github.com/mozilla/geckodriver/releases/)

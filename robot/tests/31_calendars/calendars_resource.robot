@@ -45,7 +45,7 @@ Add reservation type
 
 Goto following week in calendar view
   Wait for jQuery
-  ${timestampStr}=  Get Element Attribute  xpath=//td[@data-test-id='calendar-weekday-0']@data-test-timestamp
+  ${timestampStr}=  Get Element Attribute  xpath=//td[@data-test-id='calendar-weekday-0']  data-test-timestamp
   ${monday}=  Convert To Integer  ${timestampStr}
   Click by test id  calendar-view-following-week
   ${nextMonday}=  Add Time To Date  ${monday}  7 days  epoch

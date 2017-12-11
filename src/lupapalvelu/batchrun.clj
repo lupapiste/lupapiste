@@ -656,30 +656,47 @@
                 (if (= (:id task) (:id (:source att)))
                   (do
                     (debug "application" (:id (:application command)) "- converting task" (:id task) "-> attachment" (:id att) )
-                    (attachment/convert-existing-to-pdfa! (:application command) (:user command) att)))))))))))
+                    (attachment/convert-existing-to-pdfa! (:application command) att)))))))))))
 
-(defn pdf-to-pdfa-conversion [& args]
-  (info "Starting pdf to pdf/a conversion")
-  (mongo/connect!)
-  (let [organization (first args)
-        start-ts (c/to-long (c/from-string (second args)))
-        end-ts (c/to-long (c/from-string (second (next args))))]
-  (doseq [application (mongo/select :applications {:organization organization :state :verdictGiven})]
-    (let [command (application->command application)
-          last-verdict-given-date (:ts (last (sort-by :ts (filter #(= (:state % ) "verdictGiven") (:history application)))))]
-      (logging/with-logging-context {:applicationId (:id application)}
-        (when (and (= (:state application) "verdictGiven") (< start-ts last-verdict-given-date end-ts))
-          (info "Converting attachments of application" (:id application))
-          (doseq [attachment (:attachments application)]
-            (when (:latestVersion attachment)
-              (when-not (get-in attachment [:latestVersion :archivable])
-                  (do
-                    (info "Trying to convert attachment" (get-in attachment [:latestVersion :filename]))
-                    (let [result (attachment/convert-existing-to-pdfa! (:application command) nil attachment)]
-                      (if (:archivabilityError result)
-                        (error "Conversion failed to" (:id application) "/" (:id attachment) "/" (get-in attachment [:latestVersion :filename]) "with error:" (:archivabilityError result))
-                        (info "Conversion succeed to" (get-in attachment [:latestVersion :filename]) "/" (:id application))))))))))))))
-
+(defn pdf-to-pdfa-conversion [& [organization start-date end-date]]
+  (if (and organization start-date end-date)
+    (let [start-ts (c/to-long (c/from-string start-date))
+          end-ts (c/to-long (c/from-string end-date))]
+      (mongo/connect!)
+      ; Conversion with LibreOffice is error prone, disable it for this run
+      (env/disable-feature! :convert-pdfs-with-libre)
+      (info "Starting pdf to pdf/a conversion for" organization "from" start-date "to" end-date)
+      (doseq [application (->> (mongo/with-collection "applications"
+                                                      (monger-query/find {:organization organization
+                                                                          :state {$in states/post-verdict-states}
+                                                                          :archived.completed nil
+                                                                          $or [{:submitted {$gte start-ts $lte end-ts}}
+                                                                               {:submitted nil
+                                                                                :created   {$gte start-ts $lte end-ts}}]})
+                                                      (monger-query/sort {:submitted 1}))
+                               (map mongo/with-id))]
+        (logging/with-logging-context {:applicationId (:id application)}
+          (info "Checking attachments of application" (:id application))
+          (doseq [{:keys [latestVersion] :as attachment} (:attachments application)]
+            (when (and latestVersion (not (:archivable latestVersion)))
+              (info "Trying to convert attachment" (:filename latestVersion))
+              ; Re-fetch application to minimize errors because of it changing during processing
+              (let [{:keys [attachments] :as application} (mongo/by-id :applications (:id application))
+                    attachment (first (filter #(= (:id attachment) (:id %)) attachments))
+                    result (attachment/convert-existing-to-pdfa! application attachment)
+                    log-message {:application-id (:id application)
+                                 :attachment-id (:id attachment)
+                                 :type (:type attachment)
+                                 :filename (:filename latestVersion)}]
+                (if (:archivable result)
+                  (logging/log-event :info (merge {:run-by "Batch PDF/A conversion run"
+                                                   :event "Successfully converted attachment to PDF/A"}
+                                                  log-message))
+                  (logging/log-event :error (merge {:run-by "Batch PDF/A conversion run"
+                                                    :event "Attachment conversion to PDF/A failed"
+                                                    :archivability-error (:archivabilityError result)}
+                                                   log-message)))))))))
+    (println "Organization id, start date and end date arguments must be provided.")))
 
 (defn fetch-verdict-attachments
   [start-timestamp end-timestamp organizations]
@@ -752,339 +769,3 @@
                                    (util/to-millis-from-local-date-string end-timestamp))
                                  (now))
                              (or (vec organizations) [])))
-
-(defn review-empty-muutunnus? [task]
-  (= "" (get-in task [:data :muuTunnus :value])))
-
-(defn restore-tasks-and-attachments! [app-id restored-tasks restored-attachments]
-  (when (not-empty restored-tasks)
-    (logging/log-event :info {:app-id app-id :event "restoring tasks and attachments" :tasks (mapv :id restored-tasks) :attachemtns (mapv :id restored-attachments)})
-    (mongo/update :applications {:_id app-id} {$push {:tasks {$each restored-tasks}
-                                                      :attachments {$each restored-attachments}}})))
-
-(defn copy-files-from-backup! [backup-db attachments]
-  (let [file-ids (->> (mapcat :versions attachments)
-                      (mapcat (juxt :originalFileId :fileId))
-                      (remove nil?)
-                      (mapcat (juxt identity #(str % "-preview"))))
-        fs-files  (when (not-empty file-ids)
-                    (monger-query/with-collection backup-db "fs.files"
-                      (monger-query/find {:_id {$in file-ids}})
-                      (monger-query/snapshot)))
-        fs-chunks (when (not-empty file-ids)
-                    (monger-query/with-collection backup-db "fs.chunks"
-                      (monger-query/find {:files_id {$in file-ids}})
-                      (monger-query/snapshot)))]
-
-    (when (and (not-empty fs-files) (not-empty fs-chunks))
-      (mongo/insert-batch :fs.files fs-files)
-      (mongo/insert-batch :fs.chunks fs-chunks))))
-
-(defn restore-missing-files! [backup-db attachments]
-  (when-let [file-ids (->> (mapcat :versions attachments)
-                           (mapcat (juxt :originalFileId :fileId))
-                           (remove nil?)
-                           (mapcat (juxt identity #(str % "-preview")))
-                           distinct
-                           not-empty)]
-
-    (let [existing-ids    (set (->> (monger-query/with-collection (mongo/get-db) "fs.files"
-                                      (monger-query/find {:_id {$in file-ids}})
-                                      (monger-query/fields [:_id]))
-                                    (map :_id)))
-          existing-chunks (set (->> (monger-query/with-collection (mongo/get-db) "fs.chunks"
-                                      (monger-query/find {:files_id {$in file-ids}})
-                                      (monger-query/fields [:_id]))
-                                    (map :_id)))]
-
-      (logging/log-event :info {:event "restoring files" :file-ids file-ids})
-      (->> file-ids
-           (remove existing-ids)
-           (run! (fn [file-id] (some->> (monger-query/with-collection backup-db "fs.files"
-                                          (monger-query/find {:_id file-id}))
-                                        not-empty
-                                        (mongo/insert-batch :fs.files )))))
-
-      (logging/log-event :info {:event "restoring chunks" :file-ids file-ids})
-      (->> file-ids
-           (run! (fn [file-id] (some->> (monger-query/with-collection backup-db "fs.chunks"
-                                          (monger-query/find {:files_id file-id}))
-                                        (remove (comp existing-chunks :_id))
-                                        not-empty
-                                        (mongo/insert-batch :fs.chunks))))))))
-
-(defn restore-removed-tasks [backup-host backup-port & orgs]
-  (mongo/connect!)
-  (let [conf     (env/value :mongodb)
-        dbname   (:dbname conf)
-        username (-> conf :credentials :username)
-        password (-> conf :credentials :password)
-        server   (monger/server-address backup-host (util/->long backup-port))
-        options  (monger/mongo-options {:write-concern mongo/default-write-concern})
-        backup-connection (if (and username password)
-                            (monger/connect server options (monger-cred/create username dbname password))
-                            (monger/connect server options))
-        backup-db (monger/get-db backup-connection dbname)]
-
-    (->> (monger-query/with-collection backup-db "applications"
-           (monger-query/find (cond-> {:tasks.data.muuTunnus.value ""}
-                                (not-empty orgs) (assoc :organization {$in orgs})))
-           (monger-query/fields [:_id]))
-
-         (map mongo/with-id)
-
-         (reduce (fn [counter {app-id :id}]
-                   (let [{backup-tasks :tasks backup-attachments :attachments :as backup-app} (first (monger-query/with-collection backup-db "applications"
-                                                                                                       (monger-query/find {:_id app-id})
-                                                                                                       (monger-query/fields [:tasks :attachments])))
-                         app (mongo/by-id :applications app-id [:tasks])
-                         existing-task-ids (set (map :id (:tasks app)))
-                         restored-tasks (->> (filter review-empty-muutunnus? backup-tasks)
-                                             (remove (comp existing-task-ids :id)))
-                         restored-task-ids (set (map :id restored-tasks))
-                         restored-attachments (filter (comp restored-task-ids :id :target) backup-attachments)
-
-                         task-ids-for-file-restore (set (->> (filter review-empty-muutunnus? backup-tasks)
-                                                             (map :id)))
-                         attachments-for-file-restore (filter (comp task-ids-for-file-restore :id :target) backup-attachments)]
-
-                     (logging/log-event :info {:event "restoring tasks" :app-id app-id})
-
-                     (when app
-                       (do
-                         (restore-tasks-and-attachments! app-id restored-tasks restored-attachments)
-                         #_(copy-files-from-backup! backup-db restored-attachments)
-                         (restore-missing-files! backup-db attachments-for-file-restore)))
-
-                     (Thread/sleep 50)
-
-                     (cond-> counter (not-empty restored-tasks) inc)))
-                 0))))
-
-(defn generate-missing-task-pdf [application task user lang]
-  (logging/log-event :info {:event "Generating a new PDF version of approved task"
-                            :task-id (:id task)
-                            :taskname (:taskname task)})
-  (tasks/generate-task-pdfa application task user lang))
-
-(def katselmus-types #{{:type-group "katselmukset_ja_tarkastukset" :type-id "aloituskokouksen_poytakirja"}
-                       {:type-group "katselmukset_ja_tarkastukset" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"}})
-
-(defn restore-removed-tasks-v2 [& orgs]
-  (mongo/connect!)
-  (let [dbname   "lupapiste-20171127"
-        ; 2017-11-27 00:00 GMT+2
-        start-ts 1511733600001]
-
-        (doseq [{app-id :id
-                 backup-tasks :tasks
-                 backup-attachments :attachments} (->> (mongo/with-db dbname
-                                                                         (mongo/find-maps "applications"
-                                                                                          (cond-> {:tasks {$elemMatch {:data.muuTunnus.value ""
-                                                                                                                       :created {$gte start-ts}}}}
-                                                                                                  (not-empty orgs) (assoc :organization {$in orgs}))
-                                                                                          [:tasks :_id :attachments]))
-                                                       (map mongo/with-id))]
-
-          (info "Checking restorable reviews for application" app-id)
-
-          (let [app (mongo/by-id :applications app-id)
-                existing-task-ids (set (map :id (:tasks app)))
-                restored-tasks (->> (filter review-empty-muutunnus? backup-tasks)
-                                    (remove (comp existing-task-ids :id)))
-                restored-task-ids (set (map :id restored-tasks))
-                missing-attachments (filter (comp restored-task-ids :id :target) backup-attachments)]
-
-            (logging/log-event :info {:event "restoring tasks from application" :app-id app-id})
-
-            (when (and app (seq restored-tasks))
-              (logging/log-event :info {:app-id app-id :event "restoring tasks" :tasks (mapv :id restored-tasks)})
-              (mongo/update :applications {:_id app-id} {$push {:tasks {$each restored-tasks}}})
-
-              (doseq [attachment missing-attachments]
-                (let [task (first (filter #(= (:id %) (-> attachment :target :id)) restored-tasks))
-                      user (get-in attachment [:latestVersion :user])
-                      attachment-lang (case (get-in attachment [:latestVersion :filename])
-                                        "Katselmus.pdf" :fi
-                                        "Syn.pdf" :sv
-                                        nil)]
-                  (if (and (katselmus-types (:type attachment)) attachment-lang (#{"ok" "sent"} (:state task)))
-                    (generate-missing-task-pdf app task user attachment-lang)
-                    (let [log-data {:event "Attachment file is lost, will not be restored"
-                                    :app-id app-id
-                                    :attachment-id (:id attachment)
-                                    :attachment-type (:type attachment)
-                                    :attachment-file (-> attachment :latestVersion :filename)
-                                    :latest-version-uploader user
-                                    :task-id (:id task)
-                                    :taskname (:taskname task)
-                                    :task-state (:state task)}]
-                      (println log-data)
-                      (logging/log-event :warn log-data))))))
-            (Thread/sleep 50)))))
-
-(def suspect-review-ids ["551635d1e4b0432f111f25f7"
-                         "584252e928e06f09d203fee4"
-                         "589e9bae28e06f1f5c65a9bf"
-                         "58afc916edf02d2e601b6afd"
-                         "58dc9a6aedf02d13c352159a"
-                         "58e5af2a28e06f32fa34bb25"
-                         "58f5f6ebedf02d4491e6f7cd"
-                         "591c006dedf02d0d78a2a4f0"
-                         "59279a9f28e06f6a55bd8a5f"
-                         "5937c8dd28e06f2898f46469"
-                         "5954ad0dedf02d51f12801fc"
-                         "5955bfc528e06f415198ce64"
-                         "5955bfc528e06f415198ce65"
-                         "597ae4cb28e06f49579b6ab7"
-                         "599e514128e06f508366157e"
-                         "59aec834edf02d14b24b52c7"
-                         "59e976a928e06f6c3f1efdf2"
-                         "59fbfa0528e06f04c79335fa"
-                         "59fbfa0528e06f04c79335fb"
-                         "5a02918c28e06f07573ba7cf"
-                         "5a02918c28e06f07573ba7d1"
-                         "5a04268fedf02d75e59b1715"
-                         "5a0a8971edf02d630dbd89c3"
-                         "5a12632928e06f574ffdd64f"
-                         "5a12635a28e06f574ffdd704"
-                         "5a12635a28e06f574ffdd705"
-                         "5a12707dedf02d6fa2bd9717"
-                         "5a14216a28e06f5e176e4d45"
-                         "5a15061228e06f44552879e0"
-                         "5a16800028e06f55733d6a29"
-                         "5a17e37a59412f64606243e3"
-                         "5a18fa9528e06f52467a1c33"
-                         "5a1b9db028e06f7d335e8d98"
-                         "5a1bc4de59412f3ee91eb4e9"
-                         "5a1bfcf659412f3ee91ed675"
-                         "5a1c0e4c59412f3ee91ede6d"
-                         "5a1c12ad59412f3ee91ee08a"
-                         "573db893edf02d75bed063c9"
-                         "5780778328e06f2fcbd91454"
-                         "578ef93028e06f72b427f575"
-                         "578ef93028e06f72b427f576"
-                         "578ef93028e06f72b427f577"
-                         "578ef93028e06f72b427f578"
-                         "578ef93028e06f72b427f579"
-                         "5837c6d728e06f32ba262ee3"
-                         "5850d21dedf02d3952f51189"
-                         "58c234ca28e06f7f9d006550"
-                         "58fef24a28e06f398d1797d4"
-                         "5915682128e06f1e87c57f6b"
-                         "5915682128e06f1e87c57f6c"
-                         "5915682128e06f1e87c57f6d"
-                         "5915682128e06f1e87c57f6e"
-                         "5915682128e06f1e87c57f6f"
-                         "591a6f1528e06f7b37f3e1a0"
-                         "591a6f1528e06f7b37f3e1a1"
-                         "5932289e28e06f6b6c2fa5b0"
-                         "5932289e28e06f6b6c2fa5b1"
-                         "593689d828e06f2898f36dfb"
-                         "593a0fed28e06f2b91f85c12"
-                         "593a8da528e06f67a6728698"
-                         "593a8da528e06f67a6728699"
-                         "593a8da528e06f67a672869a"
-                         "5943c9f8edf02d7894fa4a69"
-                         "59531cd028e06f3f1bf091f0"
-                         "59531cd028e06f3f1bf091f2"
-                         "5955fae728e06f0224c35d70"
-                         "5955fae728e06f0224c35d71"
-                         "595ef98e28e06f3e4991adf9"
-                         "599e510f28e06f5083661443"
-                         "599e510f28e06f5083661444"
-                         "59a639db28e06f7e71ce44a8"
-                         "59ae233528e06f2c6690da32"
-                         "59c8855f28e06f334566f60f"
-                         "59c8855f28e06f334566f610"
-                         "59c8855f28e06f334566f611"
-                         "59c9d67f28e06f6e4147bae3"
-                         "59d1ca9128e06f55c43124ac"
-                         "59d45e7b28e06f64dc4d5cb2"
-                         "59d45e7b28e06f64dc4d5cb8"
-                         "59e582d528e06f2d2eed8b92"
-                         "59f2b0dd28e06f5c5902bb1e"
-                         "5a05350c28e06f0241735dd6"
-                         "5a13b4ac28e06f077b7955e4"
-                         "5a15061228e06f44552879de"
-                         "5a1678dd59412f7e35b9c99c"
-                         "5a1baf1728e06f30d12c76f0"
-                         "5a1bc571edf02d13cfb76fdf"
-                         "5a1c067128e06f30d12caa4b"])
-
-(defn- update-review-data [{:keys [id attachments handlers] task :tasks}]
-  (let [handler (mongo/by-id :users (-> handlers first :userId))
-        assignee (mongo/by-id :tasks (-> task :assignee :id))]
-
-    (logging/log-event :info {:event "Restoring task data"
-                              :app-id id
-                              :task-id (:id task)
-                              :taskname (:taskname task)
-                              :katselmuksenLaji (-> task :data :katselmuksenLaji :value)
-                              :task-state (:state task)
-                              :handler-email (:email handler)
-                              :assignee-email (:email assignee)})
-
-    (mongo/update "applications"
-                  {:_id id :tasks.id (:id task)}
-                  {$set {"tasks.$" task}})
-
-    (when-let [attachment (first (filter #(= (-> % :target :id) (:id task)) attachments))]
-      (let [user (get-in attachment [:latestVersion :user])
-            attachment-lang (case (get-in attachment [:latestVersion :filename])
-                              "Katselmus.pdf" :fi
-                              "Syn.pdf" :sv
-                              nil)]
-        (if (and (katselmus-types (:type attachment)) attachment-lang (#{"ok" "sent"} (:state task)))
-          (generate-missing-task-pdf (mongo/by-id :applications id) task user attachment-lang)
-          (let [log-data {:event "Attachment file is lost, will not be restored"
-                          :app-id id
-                          :attachment-id (:id attachment)
-                          :attachment-type (:type attachment)
-                          :attachment-file (-> attachment :latestVersion :filename)
-                          :latest-version-uploader user
-                          :task-id (:id task)
-                          :taskname (:taskname task)
-                          :task-state (:state task)}]
-            (println log-data)
-            (logging/log-event :warn log-data)))))))
-
-(defn restore-removed-tasks-v3 [& orgs]
-  (mongo/connect!)
-  (let [dbname   "lupapiste-20171127"
-        stages    [{$match {:tasks.id {$in suspect-review-ids}}}
-                   {$project {:tasks 1 :attachments 1 :handlers 1}}
-                   {$unwind {:path "$tasks"}}
-                   {$match {:tasks.data.muuTunnus.value ""
-                            :tasks.id {$in suspect-review-ids}}}
-                   {$sort {:_id 1
-                           :tasks.id 1}}]
-        _ (info "Fetching suspect reviews from backup database")
-        backup-reviews (->> (mongo/with-db dbname
-                              (mc/aggregate (mongo/get-db) "applications" stages))
-                            (map mongo/with-id))
-        _ (info "Fetching suspect reviews from production database")
-        current-reviews (->> (mc/aggregate (mongo/get-db) "applications" stages)
-                             (map mongo/with-id))
-        find-current-review (fn [{:keys [id tasks]}]
-                              (-> (filter #(and (= (:id %) id) (= (get-in % [:tasks :id]) (:id tasks))) current-reviews)
-                                  first))]
-
-    (doseq [{app-id :id backup-task :tasks :as backup-app} backup-reviews]
-
-      (info "Checking restorable review" (:id backup-task) "for application" app-id)
-
-      (let [{task :tasks :as current-app} (find-current-review backup-app)
-            diff (cd/diff backup-task task)]
-
-        (cond
-          (empty? current-app) (error "No current application / review found for" app-id "/" (:id backup-task))
-
-          (= (:state task) "sent") (info "Skipping because review" (:id backup-task) "is in sent state.")
-
-          (first diff) (do (info "Overwriting review" (:id task) "data from backup.")
-                           (clojure.pprint/pprint diff)
-                           (update-review-data backup-app))
-
-          :else (info "Skipping because backup review" (:id backup-task) "does not contain unique data."))))
-    (info "Reviews updated.")))

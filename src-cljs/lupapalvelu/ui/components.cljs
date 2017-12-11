@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.components
   (:require [clojure.string :as s]
+            [cljs.pprint :refer [pprint]]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components.datepicker :as datepicker]
             [lupapalvelu.ui.hub :as hub]
@@ -364,13 +365,15 @@
                     [:option {:key   value
                               :value value} text])))])
 
+(def log (.-log js/console))
+
 ;; Prettyprints the contents of the given atom.
 (rum/defc debug-atom < rum/reactive
   ([atom* title]
    [:div.pprint
     [:div.title [:h4 title]]
-    [:a {:on-click #(console.log @atom*)} "console"]
-    [:div.code (with-out-str (cljs.pprint/pprint (rum/react atom*)))]])
+    [:a {:on-click #(log @atom*)} "console"]
+    [:div.code (with-out-str (pprint (rum/react atom*)))]])
   ([atom*] (debug-atom atom* "debug")))
 
 ;; Special options (all optional):

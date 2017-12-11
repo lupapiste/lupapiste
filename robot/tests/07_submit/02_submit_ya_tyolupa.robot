@@ -31,7 +31,7 @@ Tyolupa cant be submitted because linked agreement is not post verdict state
   Open tab  requiredFieldSummary
   Wait test id visible  submit-error-0
   Element should be disabled  xpath=//*[@data-test-id='application-submit-btn']
-  ${attrValue}=  Get Element Attribute  xpath=(//div[@data-test-id='submit-errors-container']//span)@data-submit-error
+  ${attrValue}=  Get Element Attribute  xpath=(//div[@data-test-id='submit-errors-container']//span)  data-submit-error
   Should Be Equal As Strings   error.link-permit-app-not-in-post-verdict-state  ${attrValue}
 
 Sonja moves linked sijoitussopimus post verdict state
@@ -49,7 +49,7 @@ Tyolupa still cant be submitted because linked agreement is not signed
   Open tab  requiredFieldSummary
   Wait test id visible  submit-error-0
   Element should be disabled  xpath=//*[@data-test-id='application-submit-btn']
-  ${attrValue}=  Get Element Attribute  xpath=(//div[@data-test-id='submit-errors-container']//span)@data-submit-error
+  ${attrValue}=  Get Element Attribute  xpath=(//div[@data-test-id='submit-errors-container']//span)  data-submit-error
   Should Be Equal As Strings   error.link-permit-app-not-signed  ${attrValue}
 
 Sonja signs sijoitussopimus agreement
@@ -73,5 +73,5 @@ Tyolupa should be submittable now
 
 Open link permit dialog
   Click enabled by test id  application-add-link-permit-btn
-  Wait until  Element should be visible  dialog-add-link-permit
+  Wait until  Element should be visible by test id  add-link-permit-card
   Wait test id visible  link-permit-select

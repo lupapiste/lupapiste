@@ -2,7 +2,7 @@
   <div class="edit-handlers-container application_summary_info" data-test-id="add-link-permit-card">
     <icon-button params="icon: 'chevron-start',
                          buttonClass: 'secondary',
-                         ltext: 'back',
+                         ltext: 'application.return',
                          click: back,
                          testId: 'add-link-permit-back'"></icon-button>
     <h1 data-bind="ltext: 'linkPermit.dialog.header'" />
@@ -24,10 +24,10 @@
     <div data-bind="if: errorMessage" >
       <div data-bind="ltext: errorMessage" class="context-error"></div>
     </div>
-    <icon-button params="icon: 'circle-plus',
+    <icon-button params="icon: 'check',
                          buttonClass: 'positive',
                          click: addLinkPermit, enable: ok, disable: processing,
-                         ltext: 'linkPermit.dialog.continue',
+                         ltext: 'done',
                          testId: 'button-link-permit-dialog-add'"></icon-button>
   </div>
 </script>
