@@ -270,7 +270,7 @@
 
 (defn- landing-page
   ([]     (landing-page default-lang (usr/current-user (request/ring-request))))
-  ([lang] (landing-page lang         (usr/current-user (request/ring-request))) )
+  ([lang] (landing-page lang         (usr/current-user (request/ring-request))))
   ([lang user]
    (let [lang (get user :language lang)]
      (if-let [application-page (and (:id user) (usr/applicationpage-for (:role user)))]
@@ -385,7 +385,7 @@
         expires (:expires session-user)
         expired? (and expires (not (usr/virtual-user? session-user)) (< expires (now)))
         updated-user (and expired? (usr/session-summary (usr/get-user {:id (:id session-user), :enabled true})))
-        user (or api-key-auth updated-user session-user (autologin/autologin request) )]
+        user (or api-key-auth updated-user session-user (autologin/autologin request))]
     (if (and expired? (not updated-user))
       (resp/status 401 "Unauthorized")
       (let [response (handler (assoc request :user user))]
@@ -535,10 +535,10 @@
         (cond
            (and (re-matches #"^/api/(command|query|datatables|upload).*" (:uri request))
                 (not (logged-in-with-apikey? request)))
-             (anti-forgery/crosscheck-token handler request anti-csrf-cookie-name csrf-attack-hander)
+           (anti-forgery/crosscheck-token handler request anti-csrf-cookie-name csrf-attack-hander)
           (tokenless-request? request)
              ;; cookies via /proxy may end up overwriting current valid ones otherwise
-             (handler request)
+          (handler request)
           :else
              (anti-forgery/set-token-in-cookie request (handler request) anti-csrf-cookie-name cookie-attrs))))))
 
@@ -793,7 +793,7 @@
        :empty (json/generate-string {})
        :auth (let [[username password] (http/decode-basic-auth (request/ring-request))]
                (if (and (= username "suti") (= password "secret"))
-                 (json/generate-string {:productlist [{:name "Four" :expired true :expirydate "\\/Date(1467883327899)\\/" :downloaded "\\/Date(1467019327022)\\/" }
+                 (json/generate-string {:productlist [{:name "Four" :expired true :expirydate "\\/Date(1467883327899)\\/" :downloaded "\\/Date(1467019327022)\\/"}
                                                       {:name "Five" :expired true :expirydate "\\/Date(1468056127124)\\/" :downloaded nil}
                                                       {:name "Six" :expired false :expirydate nil :downloaded nil}]})
                  (resp/status 401 "Unauthorized")))

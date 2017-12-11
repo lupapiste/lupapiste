@@ -12,7 +12,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.vetuma :as vetuma]))
 
-(defn- file-size-legal [{{files :files} :data {role :role} :user}]
+(defn file-size-legal [{{files :files} :data {role :role} :user}]
   (let [max-size (env/value :file-upload :max-size (if (contains? roles/all-authenticated-user-roles (keyword role)) :logged-in :anonymous))]
     (when-not (every? #(<= % max-size) (map :size files))
       (fail :error.file-upload.illegal-upload-size :errorParams (/ max-size 1000 1000)))))

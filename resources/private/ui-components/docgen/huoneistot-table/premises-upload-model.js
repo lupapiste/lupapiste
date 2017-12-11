@@ -12,29 +12,55 @@ LUPAPISTE.PremisesUploadModel = function( params ) {
     self.buttonClass = 'btn positive';
     self.testId= "premises-upload-button";
 
+    self.disabled = ko.observable(false);
+    self.pending = ko.observable(false);
+    self.errorMessage = ko.observable(false);
+    self.successMessage = ko.observable(false);
 
+    self.visible =
 
-    ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
+    self.submit = function(form) {
+        var formData = new FormData(form);
+        $.ajax({
+            type: "POST",
+            url: "/api/raw/upload-premises-data",
+            enctype: "multipart/form-data",
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
+            beforeSend: function(request) {
+                self.pending(true);
+                self.errorMessage(false);
+                self.successMessage(false);
+                _.each(self.headers, function(value, key) { request.setRequestHeader(key, value); });
+                request.setRequestHeader("x-anti-forgery-token", $.cookie("anti-csrf-token"));
+            },
+            success: function(res) {
+                if (res.ok) {
+                    self.successMessage("upload.success");
+                    if (_.isFunction(params.onSuccess)) {
+                        params.onSuccess(res);
+                    }
+                } else {
+                    self.errorMessage(res.text || loc("error.upload-failed"));
+                }
+            },
+            complete: function() {
+                self.pending(false);
+                form.reset();
+            }
+        });
+    };
 
-    var upload = self.upload;
-    self.upload = new LUPAPISTE.UploadModel( self, {
-        allowMultiple: false,
-        readOnly: false,
-        badFileHandler: _.noop,
-        fileTarget: '/api/raw/upload-premises-data'
-    });
-    self.upload.init();
+    self.chooseFile = function(data, event) {
+        $(event.target).closest("form").find("input[name='files[]']").click();
+    };
 
-    self.disposedSubscribe( self.upload.files, function( files ) {
-        var file = _.last(files );
-        if( file && !file.attachmentId ) {
-            upload.files.push( _.merge( _.clone( file),
-                ko.mapping.toJS( params.proxy )));
-        }
-    });
-
-    self.waiting = self.disposedComputed(function() {
-        return self.upload.waiting();
-    });
+    self.fileChanged = function(data, event) {
+        $(event.target).closest("form").submit();
+    };
 
 };
+
+// repository.load kutsun jälkeen

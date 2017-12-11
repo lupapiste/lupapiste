@@ -919,3 +919,6 @@
 "permanent-archive-disabled" "en" "Municipality's PDF/A conversion was unavailable when the file was uploaded."
 "permanent-archive-disabled" "fi" "Kunnan PDF/A-konversio ei ollut käytettävissä tiedoston lisäyshetkellä."
 "permanent-archive-disabled" "sv" "Kommunens PDF/A-konvertering var inte i bruk när filen lades till."
+"error.illegal-primary-operation" "en" ""
+"error.illegal-primary-operation" "fi" "Toiminto ei sallittu tälle toimenpiteelle"
+"error.illegal-primary-operation" "sv" ""
