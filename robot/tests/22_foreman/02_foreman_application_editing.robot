@@ -115,24 +115,6 @@ Can not link base app to foreman application
   Click enabled by test id  button-link-permit-dialog-add
   Wait Until  Element should be visible  xpath=//div[@data-test-id="add-link-permit-card"]//div[@data-bind="ltext: errorMessage"]
   Element Text Should Be  xpath=//div[@data-test-id="add-link-permit-card"]//div[@data-bind="ltext: errorMessage"]  Kohdehakemukseen ei voi lisätä enempää viitteitä
-
-Create blank foreman application
-  Create application the fast way  ${appname}  753-416-25-22  tyonjohtajan-nimeaminen-v2
-  ${blankForemanAppId} =  Get Text  xpath=//span[@data-test-id='application-id']
-  Set Suite Variable  ${blankForemanAppId}
-
-Link the new foreman app from base app
-  Open project application
-  Open linking dialog
-
-  Select from autocomplete by test id  link-permit-select  ${appname}, ${blankForemanAppId}
-  Autocomplete selection by test id is  link-permit-select  ${appname}, ${blankForemanAppId}
-  Click enabled by test id  button-link-permit-dialog-add
-  Wait until  Element should not be visible  dialog-add-link-permit
-
-Foreman app is linking to base app
-  # ...even though we tried to create the link the other way
-  Wait until  Page Should Contain Element  xpath=//section[@id="application"]//a[@data-test-app-linking-to-us="${blankForemanAppId}"]
   Logout
 
 Authority opens the submitted foreman application
