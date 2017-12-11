@@ -13,15 +13,12 @@
        [:span (common/loc :application.verdict.title)]]
       [:div.spacerL
        [:div.key-value-pair
-        {:style {:width "80%"}}
         [:label (common/loc :verdict.id)]
         [:span.value  (-> bulletin :verdicts first :kuntalupatunnus)]]
        [:div.key-value-pair
-        {:style {:width "80%"}}
         [:label (common/loc :verdict.anto)]
         [:span.value  (common/format-timestamp (:verdictGivenAt bulletin))]]
        [:div.key-value-pair
-        {:style {:width "80%"}}
         [:label (common/loc :verdict.muutoksenhaku.paattyy)]
         [:span.value  (common/format-timestamp (:appealPeriodEndsAt bulletin))]]]
       [:div.spacerL
@@ -30,7 +27,6 @@
 (defn- kv-pair [label value]
   (when value
     [:div.key-value-pair
-     {:style {:width "80%"}}
      [:label (common/loc label)]
      [:span.value value]]))
 
@@ -44,15 +40,12 @@
         [:span (common/loc :application.verdict.title)]]
        [:div.spacerL
         [:div.key-value-pair
-         {:style {:width "80%"}}
          [:label (common/loc :verdict.id)]
          [:span.value  (:kuntalupatunnus verdict)]]
         [:div.key-value-pair
-         {:style {:width "80%"}}
          [:label (common/loc :verdict.anto)]
          [:span.value  (common/format-timestamp (:verdictGivenAt bulletin))]]
         [:div.key-value-pair
-         {:style {:width "80%"}}
          [:label (common/loc :verdict.muutoksenhaku.paattyy)]
          [:span.value  (common/format-timestamp (:appealPeriodEndsAt bulletin))]]]
        (when-let [maaraykset (:lupamaaraykset paatos)]
@@ -122,10 +115,7 @@
                         [:a {:href (str "/api/raw/download-bulletin-attachment?attachment-id=" (:fileId latestVersion))}]
                         [:br]
                         [:i (common/loc (:contentType latestVersion))]
-                        [:i "size"]])]])]]]])
-       [:div.spacerL
-        [:h4 (common/loc :application.attachments.paapiirustus)]
-        [:div.accordion-content-part.spacerM 1234435]]])]))
+                        [:i "size"]])]])]]]])])]))
 
 (rum/defc init-identification-link [bulletin]
   (let [pathname (aget js/window.location "pathname")
