@@ -663,7 +663,6 @@
       (error e "exception while uploading user attachment" (class e) (str e))
       (resp/json (fail :error.unknown)))))
 
-§
 
 (defcommand remove-user-attachment
   {:parameters [attachment-id]

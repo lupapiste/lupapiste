@@ -286,8 +286,17 @@
                            visible: $component.visible,
                            testId: schemaName + '-upload-button' }}">
           </span>
+          <span data-bind="component: { name: 'premises-download',
+                           params: { id: $component.documentId + '-huoneistot-download',
+                           buttonClass: 'positive',
+                           buttonType: 'button',
+                           iconClass: 'lupicon-download',
+                           buttonText: loc('huoneistot.downloadLabel'),
+                           clickFn: $component.downloadPremises,
+                           waiting: $component.waiting,
+                           testId: schemaName + '-download-button' }}">
+          </span>
         </div>
-
       </script>
     </section>
   </body>

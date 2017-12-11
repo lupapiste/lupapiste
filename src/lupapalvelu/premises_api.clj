@@ -14,8 +14,13 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.mongo :as mongo]
             [swiss.arrows :refer :all]
+            [slingshot.slingshot :refer [throw+]]
             [lupapalvelu.document.persistence :as doc-persistence]
-            [noir.response :as resp]))
+            [noir.response :as resp]
+            [dk.ative.docjure.spreadsheet :as spreadsheet]
+            [lupapalvelu.reports.excel :as excel]
+            [lupapalvelu.reports.reports-api :as reports-api]
+            [taoensso.timbre :as timbre]))
 
 ;;
 ;;  IFC-model apartment data from Excel file
@@ -27,26 +32,26 @@
    "huoneiston jakokirjain" {:key "jakokirjain"}
    "sijaintikerros"         {:key "sijaintikerros"}
    "huoneiden lukumäärä"    {:key "huoneluku"}
-   "keittiötyyppi"          {:key "keittionTyyppi"
+   "keittiötyyppi"          {:key    "keittionTyyppi"
                              :values {"1" "keittio"
                                       "2" "keittokomero"
                                       "3" "keittotila"
                                       "4" "tupakaittio"
-                                      "" "ei tiedossa"}}
+                                      ""  "ei tiedossa"}}
    "huoneistoala"           {:key "huoneistoala"}
-   "varusteena WC"          {:key "WCKytkin"
+   "varusteena WC"          {:key    "WCKytkin"
                              :values {"1" true
                                       "0" false}}
-   "varusteena amme/suihku" {:key "ammeTaiSuihkuKytkin"
+   "varusteena amme/suihku" {:key    "ammeTaiSuihkuKytkin"
                              :values {"1" true
                                       "0" false}}
-   "varusteena parveke"     {:key "parvekeTaiTerassiKytkin"
+   "varusteena parveke"     {:key    "parvekeTaiTerassiKytkin"
                              :values {"1" true
                                       "0" false}}
-   "varusteena Sauna"       {:key "saunaKytkin"
+   "varusteena Sauna"       {:key    "saunaKytkin"
                              :values {"1" true
                                       "0" false}}
-   "varusteena lämmin vesi" {:key "lamminvesiKytkin"
+   "varusteena lämmin vesi" {:key    "lamminvesiKytkin"
                              :values {"1" true
                                       "0" false}}})
 
@@ -70,47 +75,47 @@
   (let [pseudo-command {:application (mongo/by-id :applications applicationId)
                         :created     timestamp
                         :user        user}
-        updates        (reduce #(concat %1 (premise->updates %2)) [] ifc-coll)]
+        updates (reduce #(concat %1 (premise->updates %2)) [] ifc-coll)]
     (doc-persistence/update! pseudo-command doc updates "documents")))
 
 (defraw upload-premises-data
-  {:parameters       [id file filename]
-   :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles (conj roles/all-authz-writer-roles :foreman)
-   :pre-checks       [att/attachment-matches-application
-                      att/upload-to-target-allowed
-                      (action/some-pre-check att/allowed-only-for-authority-when-application-sent
-                                             (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))
-                      app/validate-authority-in-drafts
-                      att/validate-group]
-   :input-validators [(partial action/non-blank-parameters [:id :filename])
-                      (fn [{{size :size} :data}] (when-not (pos? size) (sc/fail :error.select-file)))
-                      (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (sc/fail :error.file-upload.illegal-file-type)))]
-   :states           {:applicant    (conj (states/all-states-but states/terminal-states) :answered) ;; tsekkaa tämä
-                      :authority    (states/all-states-but :canceled) ;; ja tämä
-                      :oirAuthority (states/all-states-but :canceled)} ;; ja tämä
-   :notified         true
-   :on-success       []}
-  [{:keys [applicationId doc user]}]
+        {:parameters       [id file filename]
+         :user-roles       #{:applicant :authority :oirAuthority}
+         :user-authz-roles (conj roles/all-authz-writer-roles :foreman)
+         :pre-checks       [att/attachment-matches-application
+                            att/upload-to-target-allowed
+                            (action/some-pre-check att/allowed-only-for-authority-when-application-sent
+                                                   (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))
+                            app/validate-authority-in-drafts
+                            att/validate-group]
+         :input-validators [(partial action/non-blank-parameters [:id :filename])
+                            (fn [{{size :size} :data}] (when-not (pos? size) (sc/fail :error.select-file)))
+                            (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (sc/fail :error.file-upload.illegal-file-type)))]
+         :states           {:applicant    (conj (states/all-states-but states/terminal-states) :answered) ;; tsekkaa tämä
+                            :authority    (states/all-states-but :canceled) ;; ja tämä
+                            :oirAuthority (states/all-states-but :canceled)} ;; ja tämä
+         :notified         true
+         :on-success       []}
+        [{:keys [applicationId doc user]}]
         (println "PLINK PLONK")
         (println id file filename applicationId doc user)
         (resp/status 200 (resp/json {:plink "plonk"}))
-  #_(let [timestamp     (sc/now)
-        premises-data (-> file (xmc/xls-2-csv) :data (csv-data->ifc-coll))
-        file-updated? (some-> premises-data
-                              (save-premises-data applicationId timestamp user doc)
-                              :ok)
-        save-response (when file-updated? (-> {:filename filename :content file}
-                                              (file-upload/save-file)))]
-    (when save-response (att/link-files-to-application applicationId [(:file-id save-response)]))
-    (when file-updated? (mongo/update-by-id :applications
-                                            applicationId
-                                            {:ifc-data {:file-id (:file-id save-response)
-                                                        :filename (:filename save-response)
-                                                        :timestamp timestamp}}))
-    (->> {:filename (:filename save-response)}
-         (resp/json)
-         (resp/status (if file-updated? 200 500)))))
+        #_(let [timestamp (sc/now)
+                premises-data (-> file (xmc/xls-2-csv) :data (csv-data->ifc-coll))
+                file-updated? (some-> premises-data
+                                      (save-premises-data applicationId timestamp user doc)
+                                      :ok)
+                save-response (when file-updated? (-> {:filename filename :content file}
+                                                      (file-upload/save-file)))]
+            (when save-response (att/link-files-to-application applicationId [(:file-id save-response)]))
+            (when file-updated? (mongo/update-by-id :applications
+                                                    applicationId
+                                                    {:ifc-data {:file-id   (:file-id save-response)
+                                                                :filename  (:filename save-response)
+                                                                :timestamp timestamp}}))
+            (->> {:filename (:filename save-response)}
+                 (resp/json)
+                 (resp/status (if file-updated? 200 500)))))
 
 (def headers ["Porras" "Huoneistonumero" "Huoneiston jakokirjain" "Sijaintikerros"
               "Huoneiden lukumäärä" "Keittiötyyppi" "Huoneistoala" "Varusteena WC"
@@ -118,33 +123,33 @@
               "Varusteena lämmin vesi"])
 
 (def lupapiste-to-ifc-keys
-  {"porras"                 {:key "Porras"}
-   "huoneistonumero"        {:key "Huoneistonumero"}
-   "jakokirjain"            {:key "Huoneiston jakokirjain"}
-   "sijaintikerros"         {:key "Sijaintikerros"}
-   "huoneluku"              {:key "Huoneiden lukumäärä"}
-   "keittionTyyppi"         {:key "Keittiötyyppi"
-                             :values {"keittio"      "1"
-                                      "keittokomero" "2"
-                                      "keittotila"   "3"
-                                      "tupakaittio"  "4"
-                                      "ei tiedossa"  ""}}
-   "huoneistoala"           {:key "Huoneistoala"}
-   "WCKytkin"               {:key "Varusteena WC"
-                             :values {true  "1"
-                                      false "0"}}
-   "ammeTaiSuihkuKytkin"    {:key "Varusteena amme/suihku"
-                             :values {true  "1"
-                                      false "0"}}
-   "parvekeTaiTerassiKytkin"{:key "Varusteena parveke"
-                             :values {true  "1"
-                                      false "0"}}
-   "saunaKytkin"             {:key "Varusteena Sauna"
-                             :values {true  "1"
-                                      false "0"}}
-   "lamminvesiKytkin"       {:key "Varusteena lämmin vesi"
-                             :values {true  "1"
-                                      false "0"}}})
+  {"porras"                  {:key "Porras"}
+   "huoneistonumero"         {:key "Huoneistonumero"}
+   "jakokirjain"             {:key "Huoneiston jakokirjain"}
+   "sijaintikerros"          {:key "Sijaintikerros"}
+   "huoneluku"               {:key "Huoneiden lukumäärä"}
+   "keittionTyyppi"          {:key    "Keittiötyyppi"
+                              :values {"keittio"      "1"
+                                       "keittokomero" "2"
+                                       "keittotila"   "3"
+                                       "tupakaittio"  "4"
+                                       "ei tiedossa"  ""}}
+   "huoneistoala"            {:key "Huoneistoala"}
+   "WCKytkin"                {:key    "Varusteena WC"
+                              :values {true  "1"
+                                       false "0"}}
+   "ammeTaiSuihkuKytkin"     {:key    "Varusteena amme/suihku"
+                              :values {true  "1"
+                                       false "0"}}
+   "parvekeTaiTerassiKytkin" {:key    "Varusteena parveke"
+                              :values {true  "1"
+                                       false "0"}}
+   "saunaKytkin"             {:key    "Varusteena Sauna"
+                              :values {true  "1"
+                                       false "0"}}
+   "lamminvesiKytkin"        {:key    "Varusteena lämmin vesi"
+                              :values {true  "1"
+                                       false "0"}}})
 
 (defn ifc->lp-key [ifc-key]
   (-> ifc-key ifc-to-lupapiste-keys :key (keyword)))
@@ -155,28 +160,32 @@
       (-> item values)
       item)))
 
-(defn premise-to-row [premise]
-  (let [ifc-value (fn [ifc-key] (-> ifc-key
-                                    ifc->lp-key
-                                    premise
-                                    #(if (-> ifc-key ifc-to-lupapiste-keys :values)
-                                       )))]
+(defn premises-to-row [premise]
+  (let [ifc-value (fn [ifc-key] (-> ifc-key ifc->lp-key premise resolve-ifc-val))]
+    (mapv ifc-value headers)))
+
+(defn excel-response [filename body]
+  (try
+    {:status  200
+     :headers {"Content-Type"        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+               "Content-Disposition" (str "attachment;filename=\"" filename "\"")}
+     :body    body}
+    (catch Exception e#
+      (timbre/error "Exception while compiling premises data excel:" e#)
+      {:status 500})))
 
 (defraw download-premises-data
-  {:parameters [application-id]
+  {:parameters       [application-id]
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
-   :user-roles #{:applicant}}
+   :user-roles       #{:applicant}}
   [{user :user}]
+        (println user application-id)
   (when-not user (throw+ {:status 401 :body "forbidden"}))
   (let [premises (->> (:documents (mongo/by-id :applications application-id))
                       (filter #(= "uusiRakennus" (-> % :schema-info :name)))
                       :data
                       :huoneistot)
-        ]
-    {:status 200
-     :body ((:content attachment))
-     :headers {"Content-Type" (:contentType attachment)
-               "Content-Length" (str (:size attachment))
-               "Content-Disposition" (format "attachment;filename=\"%s\"" (ss/encode-filename (:filename attachment)))}}
-    {:status 404
-     :body (str "Attachment not found: id=" attachment-id)}))
+        premises-data (cons headers (map premises-to-row (vals premises)))
+        workbook (spreadsheet/create-workbook "huoneistot" premises-data)]
+    (excel-response (str application-id "-huoneistot.xlsx")
+                    (excel/xlsx-stream workbook))))
