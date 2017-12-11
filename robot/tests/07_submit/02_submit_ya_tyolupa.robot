@@ -73,5 +73,5 @@ Tyolupa should be submittable now
 
 Open link permit dialog
   Click enabled by test id  application-add-link-permit-btn
-  Wait until  Element should be visible  dialog-add-link-permit
+  Wait until  Element should be visible by test id  add-link-permit-card
   Wait test id visible  link-permit-select

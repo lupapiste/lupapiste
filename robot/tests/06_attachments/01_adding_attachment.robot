@@ -440,7 +440,7 @@ No frontend errors
 Attachment state should be
   [Arguments]  ${type}  ${state}
   ## Fragile: assumes there is only one element that has data-test-state
-  ${STATE_ATTR_VALUE} =  Get Element Attribute  xpath=//tr[@data-test-state and @data-test-type="${type}"  data-test-state
+  ${STATE_ATTR_VALUE} =  Get Element Attribute  xpath=//tr[@data-test-state and @data-test-type="${type}"]  data-test-state
   Log  ${STATE_ATTR_VALUE}
   Should Be Equal  ${STATE_ATTR_VALUE}  ${state}
 
