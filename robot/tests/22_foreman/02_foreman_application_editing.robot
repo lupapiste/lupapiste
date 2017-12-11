@@ -13,7 +13,7 @@ Sonja creates an application and invites foreman
 
 Open linking dialog
   Click enabled by test id  application-add-link-permit-btn
-  Wait until  Element should be visible  dialog-add-link-permit
+  Wait until  Element should be visible by test id  add-link-permit-card
   Wait Until  Element should be visible  xpath=//div[@data-test-id='link-permit-select']
 
 *** Test Cases ***
@@ -113,8 +113,8 @@ Can not link base app to foreman application
   Select from autocomplete by test id  link-permit-select  ${app}, ${linkPermitAppId}
   Autocomplete selection by test id is  link-permit-select  ${app}, ${linkPermitAppId}
   Click enabled by test id  button-link-permit-dialog-add
-  Wait Until  Element should be visible  xpath=//div[@id="dialog-add-link-permit"]//div[@data-bind="ltext: errorMessage"]
-  Element Text Should Be  xpath=//div[@id="dialog-add-link-permit"]//div[@data-bind="ltext: errorMessage"]  Kohdehakemukseen ei voi lisätä enempää viitteitä
+  Wait Until  Element should be visible  xpath=//div[@data-test-id="add-link-permit-card"]//div[@data-bind="ltext: errorMessage"]
+  Element Text Should Be  xpath=//div[@data-test-id="add-link-permit-card"]//div[@data-bind="ltext: errorMessage"]  Kohdehakemukseen ei voi lisätä enempää viitteitä
 
 Create blank foreman application
   Create application the fast way  ${appname}  753-416-25-22  tyonjohtajan-nimeaminen-v2
