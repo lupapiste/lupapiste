@@ -380,6 +380,8 @@
     self.scopes = ko.observableArray();
     self.texts = ko.observable();
     self.textsInitialized = ko.observable(false);
+    self.canEdit = ko.computed( _.wrap("update-organization-bulletin-scope",
+                                       lupapisteApp.models.globalAuthModel.ok));
 
     self.save = function(setting) {
       ajax

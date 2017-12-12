@@ -817,6 +817,11 @@
        (hash-map $set)
        (org/update-organization org-id)))
 
+(defcommand pseudo-update-organization-name
+  {:description "Pseudo command for differentiating impersonation."
+   :user-roles  #{:authorityAdmin :admin}}
+  [_])
+
 (defquery available-backend-systems
   {:user-roles #{:admin}}
   (ok :backend-systems org/backend-systems))
