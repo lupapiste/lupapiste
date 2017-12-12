@@ -376,7 +376,10 @@
 
   var fileTemplate =
       _.template( "<a href='/api/raw/view-file?fileId"
-                  + "=<%- fileId %>' target='_blank'><%- filename %></a><br>"
+                  + "=<%- fileId %>' target='_blank'><%- filename %></a>"
+                  + "<span class='file-warn' data-bind='visible: <%- existsWithSameName %> === true'>"
+                  + "<i class='lupicon-circle-attention negative'></i>"
+                  + "<span class='file-warn message' data-bind=\"text: 'Hankkeella on ennestään samanniminen tiedosto'\"></span></span><br>"
                   + "<span class='fileinfo'><%- contentText %> <%- sizeText %></span>");
 
   // Fills the target element with:

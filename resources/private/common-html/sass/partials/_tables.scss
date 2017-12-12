@@ -634,6 +634,13 @@ select.waste-unit-select {
   tr.metadata {
     border-top: 0;
   }
+  span.file-warn {
+    margin-left: 15px;
+    color: #ff3c0a;
+    .message {
+      margin-left: 5px;
+    }
+  }
 }
 
 div.handler-roles-container {
