@@ -30,6 +30,8 @@
      [:label (common/loc label)]
      [:span.value value]]))
 
+
+
 (rum/defc detailed-verdict-data [bulletin]
   (when-let [verdict (first (:verdicts bulletin))]
     [:div.container
@@ -95,8 +97,7 @@
               [:th {:colSpan 2} (common/loc :verdict.status)]
               [:th (common/loc :verdict.pykala)]
               [:th (common/loc :verdict.name)]
-              [:th (common/loc :verdict.paatospvm)]
-              [:th (common/loc :verdict.attachments)]]]
+              [:th (common/loc :verdict.paatospvm)]]]
             [:tbody
              (for [[idx pk] (shared-util/indexed (:poytakirjat paatos))]
                ^{:key (str "paatospk-" idx)}
@@ -108,14 +109,7 @@
                 [:td.verdict-text (:paatos pk)]
                 [:td (:pykala pk)]
                 [:td (:paatoksentekija pk)]
-                [:td (common/format-timestamp (:paatospvm pk))]
-                [:td (for [{:keys [id latestVersion]} (:attachments pk)]
-                       ^{:key id}
-                       [:span
-                        [:a {:href (str "/api/raw/download-bulletin-attachment?attachment-id=" (:fileId latestVersion))}]
-                        [:br]
-                        [:i (common/loc (:contentType latestVersion))]
-                        [:i "size"]])]])]]]])])]))
+                [:td (common/format-timestamp (:paatospvm pk))]])]]]])])]))
 
 (rum/defc init-identification-link [bulletin]
   (let [pathname (aget js/window.location "pathname")
