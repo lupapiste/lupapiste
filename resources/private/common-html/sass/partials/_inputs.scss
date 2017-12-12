@@ -453,3 +453,13 @@ drop-zone {
 input.date-validator--invalid {
   border: 1px solid $negative;
 }
+
+// Convenience wrapper for labeled input that is not part of any grid
+// or similar container.
+div.labeled-input {
+  margin-top: $marginM;
+  margin-bottom: $marginM;
+  > label {
+    display: block;
+  }
+}
