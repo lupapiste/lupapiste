@@ -7861,6 +7861,15 @@ input.date-validator--invalid {
   border: 1px solid #df3215;
 }
 
+div.labeled-input {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+div.labeled-input > label {
+  display: block;
+}
+
 legend {
   font-size: 21.6px;
   font-family: "Source Sans Pro", sans-serif;
