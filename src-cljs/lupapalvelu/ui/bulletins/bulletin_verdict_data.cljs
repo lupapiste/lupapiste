@@ -123,6 +123,8 @@
         hash (aget js/window.location "hash")
         action-url (str "/dev/saml-login?success=" (js/escape (str pathname search hash "/success")))]
     [:div.container
+     [:p
+      [:b (common/loc :bulletins.proceed-to-appeal.info)]]
      [:a.btn.btn-primary
       {:href action-url}
       (common/loc :register.action)]]))

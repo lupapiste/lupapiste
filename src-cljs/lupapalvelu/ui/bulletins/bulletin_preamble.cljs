@@ -34,7 +34,8 @@
   (let [bulletin (rum/react state/current-bulletin)
         {:keys [address primaryOperation propertyId
                 bulletinOpDescription
-                municipality _applicantIndex]} bulletin]
+                municipality _applicantIndex]} bulletin
+        appeal-enabled? (common/feature? :rakval-bulletin-appeal)]
     [:div
      [:div.application_summary
       [:div.container
@@ -70,14 +71,13 @@
              {:on-click #(common/open-oskari-map bulletin)}
              (common/loc :map.open)]])]
         [:div.application_actions.stacked
-         {:data-test-id "bulletin-actions"}
-         #_[:button.function.julkipano {:data-test-id "print-bulletin"} [:i.lupicon-print [:span (common/loc :bulletin.pdf)]]]
-         ]]]]
-     (if ((:authenticated @args))
-       (verdict-data/detailed-verdict-data bulletin)
-       [:div
-        (verdict-data/verdict-data bulletin)
-        (verdict-data/init-identification-link bulletin)])]))
+         {:data-test-id "bulletin-actions"}]]]]
+     (cond
+       (not appeal-enabled?)    [:div (verdict-data/verdict-data bulletin)]
+       ((:authenticated @args)) [:div (verdict-data/detailed-verdict-data bulletin)]
+       :default                 [:div
+                                 (verdict-data/verdict-data bulletin)
+                                 (verdict-data/init-identification-link bulletin)])]))
 
 (defn mount-component []
   (rum/mount (bulletin-preamble)
