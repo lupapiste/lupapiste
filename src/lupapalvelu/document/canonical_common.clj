@@ -8,8 +8,8 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as v]
+            [lupapalvelu.application :as app]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.operations :as op]
             [lupapalvelu.statement :as statement]))
@@ -280,6 +280,11 @@
       util/not-empty-or-nil?
       :saapumisPvm     (util/to-xml-date submitted)
       :kuntalupatunnus backend-id)}))
+
+(defn lupatunnus-with-vrktunnus [application]
+  (assoc-in (lupatunnus application)
+            [:LupaTunnus :VRKLupatunnus]
+            (app/vrk-lupatunnus application)))
 
 (defn get-avainsanaTieto [{tags :tags :as application}]
   (->> (map :label tags)

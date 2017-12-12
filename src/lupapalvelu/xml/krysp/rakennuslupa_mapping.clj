@@ -1,12 +1,14 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa-mapping
   (:require [taoensso.timbre :as timbre :refer [debug]]
-            [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [lupapalvelu.permit :as permit]
             [sade.core :refer :all]
+            [sade.util :as util]
             [lupapalvelu.document.attachments-canonical :as attachments-canon]
             [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.rakennuslupa-canonical :as canonical]
-            [lupapalvelu.xml.emit :refer [element-to-xml]]))
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.xml.emit :refer [element-to-xml]]
+            [lupapalvelu.xml.krysp.mapping-common :as mapping-common]))
 
 ;RakVal
 
@@ -537,6 +539,12 @@
 (defmethod permit/application-krysp-mapper :R
   [application lang krysp-version begin-of-link]
   (let [canonical-without-attachments  (canonical/application-to-canonical application lang)
+        canonical-without-attachments (if-not (org/pate-org? (:organization application))
+                                        (util/dissoc-in canonical-without-attachments
+                                                        [:Rakennusvalvonta :rakennusvalvontaAsiatieto
+                                                         :RakennusvalvontaAsia :luvanTunnisteTiedot
+                                                         :LupaTunnus :VRKLupatunnus])
+                                        canonical-without-attachments)
         statement-given-ids (common/statements-ids-with-status
                               (get-in canonical-without-attachments
                                       [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]))

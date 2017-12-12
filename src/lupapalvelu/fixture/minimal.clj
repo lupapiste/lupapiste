@@ -424,7 +424,7 @@
     :enabled true
     :language "fi"
     :role "authority"
-    :orgAuthz {:186-R #{:authority :archivist}}
+    :orgAuthz {:186-R #{:authority :archivist :approver}}
     :firstName "Rakennustarkastaja"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
     :username "rakennustarkastaja@jarvenpaa.fi"
