@@ -19,7 +19,8 @@
 (defn web-stuff [request]
   {:user-agent (user-agent request)
    :client-ip  (http/client-ip request)
-   :host       (host request)})
+   :host       (host request)
+   :method     (:request-method request)})
 
 (defn enriched [m request]
   (merge m {:user    (usr/current-user request)

@@ -817,6 +817,11 @@
        (hash-map $set)
        (org/update-organization org-id)))
 
+(defcommand pseudo-update-organization-name
+  {:description "Pseudo command for differentiating impersonation."
+   :user-roles  #{:authorityAdmin :admin}}
+  [_])
+
 (defquery available-backend-systems
   {:user-roles #{:admin}}
   (ok :backend-systems org/backend-systems))
@@ -931,6 +936,13 @@
       (finally
         (when tmpdir
           (fs/delete-dir tmpdir))))))
+
+(defcommand pseudo-organization-area
+  {:description "Pseudo command for differentiating authority admin
+  impersonation regarding organization-area."
+   :user-roles #{:authorityAdmin}}
+  [_])
+
 
 (defquery get-map-layers-data
   {:description "Organization server and layer details."

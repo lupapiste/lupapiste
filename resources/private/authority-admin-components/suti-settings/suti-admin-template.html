@@ -5,7 +5,8 @@
     <p data-bind="lhtml: 'suti.admin.info'"></p>
     <div class="checkbox-wrapper">
       <input type="checkbox" id="suti-enabled"
-             data-bind="checked: enabled">
+             data-bind="checked: enabled,
+                        enable: canEdit">
       <label class="checkbox-label" for="suti-enabled"
              data-bind="ltext: 'suti.enabled'"></label>
     </div>
@@ -22,7 +23,8 @@
           <td class="value">
             <input type="url"
                     data-bind="value: www,
-                              lplaceholder: 'suti.admin.www.placeholder'"
+                               lplaceholder: 'suti.admin.www.placeholder',
+                               enable: canEdit"
                    data-test-id="suti-www"></td>
         </tr>
       </tbody>

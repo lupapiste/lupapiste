@@ -7,6 +7,9 @@ LUPAPISTE.TriggerService = function() {
   self.processing = ko.observable();
   self.pending = ko.observable();
 
+  self.canEdit = ko.computed( _.wrap(  "upsert-assignment-trigger",
+                                       lupapisteApp.models.globalAuthModel.ok ));
+
   self.organizationAssignmentTriggers = function(organization) {
     ko.computed(function() {
       triggers(_(util.getIn (organization, ["assignmentTriggers"])).value());

@@ -393,7 +393,12 @@
     unauthorized))
 
 (defn- impersonation [command]
-  (when (and (= :command (:type (meta-data command))) (get-in command [:user :impersonating]))
+  (when (and (let [md (meta-data command)]
+               (case (:type md)
+                 :command true
+                 :raw     (= :post (get-in command [:web :method]))
+                 false))
+             (get-in command [:user :impersonating]))
     unauthorized))
 
 (defn disallow-impersonation [command]

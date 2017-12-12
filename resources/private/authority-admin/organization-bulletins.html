@@ -20,19 +20,23 @@
               <tr>
                 <td data-bind="ltext: 'auth-admin.local-bulletins-page-texts.heading1'"></td>
                 <td class="value">
-                  <input type="text" data-bind="value: $data.fi.heading1"/>
+                  <input type="text" data-bind="value: $data.fi.heading1,
+                                                enable: $root.bulletins.canEdit"/>
                 </td>
                 <td class="value">
-                  <input type="text" data-bind="value: $data.sv.heading1"/>
+                  <input type="text" data-bind="value: $data.sv.heading1,
+                                                enable: $root.bulletins.canEdit"/>
                 </td>
               </tr>
               <tr>
                 <td data-bind="ltext: 'auth-admin.local-bulletins-page-texts.heading2'"></td>
                 <td class="value">
-                  <input type="text" data-bind="value: $data.fi.heading2"/>
+                  <input type="text" data-bind="value: $data.fi.heading2,
+                                                enable: $root.bulletins.canEdit"/>
                 </td>
                 <td class="value">
-                  <input type="text" data-bind="value: $data.sv.heading2"/>
+                  <input type="text" data-bind="value: $data.sv.heading2,
+                                                enable: $root.bulletins.canEdit"/>
                 </td>
               </tr>
             </tbody>
@@ -45,10 +49,12 @@
             <tbody data-bind="foreach: _.get($parent, [$data, 'caption'])">
               <tr>
                 <td class="value full-width">
-                  <textarea data-bind="value: $data.text" /></td>
+                  <textarea data-bind="value: $data.text,
+                                       enable: $root.bulletins.canEdit" /></td>
                 <td>
                   <i class="lupicon-remove primary"
-                     data-bind="click: $data.doRemove" />
+                     data-bind="click: $data.doRemove,
+                                visible: $root.bulletins.canEdit" />
                 </td>
               </tr>
             </tbody>
@@ -57,7 +63,7 @@
                                icon: 'circle-plus',
                                click: _.partial($root.bulletins.appendCaption, $data),
                                testId: 'add-row'"
-                       data-bind="visible: true"></icon-button></p>
+                          data-bind="visible: $root.bulletins.canEdit"></icon-button></p>
           <!-- /ko -->
           <!-- /ko -->
         </section>
@@ -76,7 +82,8 @@
               <tr data-bind="attr:{'data-test-type': $data.permitType}">
                 <td data-bind="ltext: $data.permitType"></td>
                 <td class="value">
-                  <input type="text" data-bind="value: $data.notificationEmail"/>
+                  <input type="text" data-bind="value: $data.notificationEmail,
+                                                enable: $root.bulletins.canEdit"/>
                 </td>
                 <td>
                   <span>
