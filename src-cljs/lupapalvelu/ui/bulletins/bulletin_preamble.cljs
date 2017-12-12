@@ -8,7 +8,6 @@
 
 (defn bulletin-loaded [{:keys [bulletin]}]
   (let [[x y] (:location  bulletin)]
-    (js/console.log "bulletin loaded")
     (reset! state/current-bulletin bulletin)
     (swap! args assoc :map  (-> js/gis
                                 (.makeMap "bulletin-map")
