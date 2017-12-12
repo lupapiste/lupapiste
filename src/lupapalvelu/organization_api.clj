@@ -932,6 +932,13 @@
         (when tmpdir
           (fs/delete-dir tmpdir))))))
 
+(defcommand pseudo-organization-area
+  {:description "Pseudo command for differentiating authority admin
+  impersonation regarding organization-area."
+   :user-roles #{:authorityAdmin}}
+  [_])
+
+
 (defquery get-map-layers-data
   {:description "Organization server and layer details."
    :user-roles #{:authorityAdmin}}

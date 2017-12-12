@@ -8,4 +8,6 @@ LUPAPISTE.SutiAdminModel = function() {
   self.enabled = service.sutiEnabled;
 
   self.www = service.sutiWww;
+
+  self.canEdit = lupapisteApp.models.globalAuthModel.ok( "suti-toggle-enabled");
 };

@@ -23,6 +23,8 @@ function TagsEditorBaseModel(options) {
 
   self.indicator = ko.observable().extend({notify: "always"});
 
+  self.canEdit = lupapisteApp.models.globalAuthModel.ok( options.saveCommandName );
+
   self.save = _.debounce(function() {
     self.tags.remove(function(item) {
       return _.isEmpty(ko.unwrap(item.label));
