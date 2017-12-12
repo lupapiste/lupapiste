@@ -279,11 +279,26 @@
 
 ;; https://eevertti.vrk.fi/documents/2634109/3072453/VTJ-yll%C3%A4pito+Virhekoodit+Rajapinta/e7904362-6c43-43e6-8f1c-a80b24313ac9?version=1.0
 ;; gives some hint for valid ID, but is still pretty confusing...
-;; Below mimics other system's intrepetation of VRKLupatunnus (KuntaGML), but has suffix length of 5
-;; because 4 digits is not enough to generate application numbers.
-(defn vrk-lupatunnus [{:keys [municipality created submitted id]}]
+
+(defn vrk-lupatunnus                                        ; LPK-3207
+  "Below mimics other system's intrepetation of VRKLupatunnus (KuntaGML).
+  Number part is fixed at 4 digits, and can't be '0000'.
+  When sequence hits 10000, it would generate illegal value '0000'. To bypass this we will take first 4 in this special case.
+  For the next value 10001 we would be back in line returning '0001'.
+  It seems values do not need to be unique accross time."
+  [{:keys [municipality created submitted id]}]
   (when (and (not-any? ss/blank? [municipality id]) (or submitted created))
-    (format "%s000%ty-%s" municipality (or submitted created) (ss/suffix id "-"))))
+    (let [orig-suffix (ss/suffix id "-")
+          vrk-suffix (->> orig-suffix
+                          (take-last 4)
+                          (apply str))
+          final-suffix (if (= "0000" vrk-suffix)            ; handle special case
+                         (->> orig-suffix
+                              (take 4)
+                              (apply str))
+                         vrk-suffix)]
+      (assert (not= "0000" final-suffix) "VRKLupatunnus number can't be '0000'")
+      (format "%s000%ty-%s" municipality (or submitted created) final-suffix))))
 
 ;;
 ;; Application query post process
