@@ -1,7 +1,7 @@
-(ns lupapalvelu.integrations.pate-state-change-json-test
+(ns lupapalvelu.integrations.state-change-json-test
   (:require [midje.sweet :refer :all]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.integrations.pate :as mjson]
+            [lupapalvelu.integrations.state-change :as mjson]
             [sade.coordinate :as coord]
             [sade.schemas :as ssc]
             [sade.schema-generators :as ssg]))

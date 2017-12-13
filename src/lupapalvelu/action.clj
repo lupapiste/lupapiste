@@ -13,7 +13,7 @@
             [lupapalvelu.control-api :as control]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.integrations.pate :as pate]
+            [lupapalvelu.integrations.state-change :as state-change]
             [lupapalvelu.logging :as log]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
@@ -302,7 +302,7 @@
           (when-let [new-state (get-in changes [$set :state])]
             (when (and (env/feature? :pate-json) organization (org/pate-org? organization))
               (util/future*
-                (pate/trigger-state-change command new-state))))
+                (state-change/trigger-state-change command new-state))))
           (if return-count? n nil))))))
 
 (defn application->command
