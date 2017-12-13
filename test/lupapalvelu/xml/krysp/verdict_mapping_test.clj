@@ -6,7 +6,7 @@
             [sade.common-reader :as cr]
             [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa]]
             [lupapalvelu.pate.verdict-canonical-test :refer [verdict]]
-            [lupapalvelu.xml.krysp.vercict-mapping]
+            [lupapalvelu.xml.krysp.verdict-mapping]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.validator :as validator]))
 

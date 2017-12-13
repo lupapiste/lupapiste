@@ -1,4 +1,4 @@
-(ns lupapalvelu.xml.krysp.vercict-mapping
+(ns lupapalvelu.xml.krysp.verdict-mapping
   (:require [lupapalvelu.document.attachments-canonical :as att-canonical]
             [lupapalvelu.pate.verdict-canonical :as canonical]
             [lupapalvelu.document.rakennuslupa-canonical :as r-canonical]
