@@ -1,4 +1,4 @@
-(ns lupapalvelu.integrations.pate
+(ns lupapalvelu.integrations.state-change
   (:require [taoensso.timbre :refer [infof]]
             [schema.core :as sc]
             [clj-http.client :as clj-http]
@@ -128,11 +128,11 @@
                   :action (:action command))]
         (messages/save msg)
         (infof "PATE state-change payload written to mongo for state '%s', messageId: %s" (name new-state) message-id)
-        (when-let [url (env/value :pate :rest :url)]         ; TODO send to MQ
-          (http/post (str url "/" (env/value :pate :rest :path :state-change))
-                     {:headers          {"X-Username" (env/value :pate :rest :username)
-                                         "X-Password" (env/value :pate :rest :password)
-                                         "X-Vault"    (env/value :pate :rest :vault)}
+        (when-let [url (env/value :matti :rest :url)]         ; TODO send to MQ
+          (http/post (str url "/" (env/value :matti :rest :path :state-change))
+                     {:headers          {"X-Username" (env/value :matti :rest :username)
+                                         "X-Password" (env/value :matti :rest :password)
+                                         "X-Vault"    (env/value :matti :rest :vault)}
                       :body             (clj-http/json-encode outgoing-data)
                       :throw-exceptions true})
           (messages/mark-acknowledged-and-return message-id (now))
