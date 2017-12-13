@@ -379,7 +379,11 @@
                   + "=<%- fileId %>' target='_blank'><%- filename %></a>"
                   + "<span class='file-warn' data-bind='visible: <%- existsWithSameName %> === true'>"
                   + "<i class='lupicon-circle-attention negative'></i>"
-                  + "<span class='file-warn message' data-bind=\"text: 'Hankkeella on ennestään samanniminen tiedosto'\"></span></span><br>"
+                  + "<span class='file-warn message' data-bind=\"ltext: 'attachments.file.already.exists'\"></span></span>"
+                  + "<span class='file-warn' data-bind='visible: <%- duplicateUpload %> === true'>"
+                  + "<i class='lupicon-circle-attention negative'></i>"
+                  + "<span class='file-warn message' data-bind=\"ltext: 'attachments.file.with.same.name'\"></span></span>"
+                  + "<br>"
                   + "<span class='fileinfo'><%- contentText %> <%- sizeText %></span>");
 
   // Fills the target element with:
@@ -390,6 +394,10 @@
       var v = ko.utils.unwrapObservable( valueAccessor());
       if( v ) {
         var data = ko.mapping.toJS( v );
+        if (_.isUndefined(data["duplicateUpload"])){
+          console.log("ei ole duplikaattio tietoa");
+          data["duplicateUpload"] = false;
+        }
         $(element).html( fileTemplate( _.merge( data, {contentText: loc( data.contentType),
                                                        sizeText: util.sizeString( data.size )})));
       }

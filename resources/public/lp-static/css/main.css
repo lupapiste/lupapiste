@@ -12212,6 +12212,15 @@ select.waste-unit-select {
   border-top: 0;
 }
 
+.attachment-batch-table span.file-warn {
+  margin-left: 15px;
+  color: #ff3c0a;
+}
+
+.attachment-batch-table span.file-warn .message {
+  margin-left: 5px;
+}
+
 div.handler-roles-container {
   margin-bottom: 24px;
 }

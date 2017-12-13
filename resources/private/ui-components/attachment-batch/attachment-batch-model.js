@@ -109,6 +109,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     var contentsCell = new Cell( contentsValue, true );
     contentsCell.list = contentsList;
     var row = { disabled: ko.observable(),
+                duplicate: ko.observable(false),
                 type: new Cell( type, true ),
                 target: target || ko.unwrap(defaults.target),
                 contents: contentsCell,
@@ -139,6 +140,25 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
       }
     });
     rows( _.merge( keepRows, newRows ));
+
+    var fileNames = _.map(self.upload.files(), function (file) {
+      return file["filename"];
+    });
+
+    var duplicateFiles = _.filter(fileNames, function (name, index, files) {
+      return _.includes(files, name, index + 1);
+    });
+
+    if (!_.isEmpty(duplicateFiles)) {
+       _.map(self.upload.files(), function (file) {
+        if (_.includes(duplicateFiles, file["filename"])) {
+          file["duplicateUpload"] = true;
+          console.log(rowData(file)["type"]);
+          rowData(file)["type"];
+          return file;
+        }
+      });
+    };
   });
 
   self.badFiles = ko.observableArray();

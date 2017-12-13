@@ -29,6 +29,7 @@
       <tbody data-bind="foreach: upload.files">
         <tr class="file">
           <td data-bind="file: $data, attr: {colspan: $component.colspan}"></td>
+          <td data-bind="$parent.cell( $data, 'duplicate').value"></td>
         </tr>
         <tr class="metadata">
         <td>
