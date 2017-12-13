@@ -94,10 +94,10 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                    });
   }
 
-  function newRow(initialType, initialContents, drawingNumber, group, backendId, target) {
+  function newRow(initialType, initialContents, drawingNumber, group, initialBackendId, target) {
     var type = ko.observable(initialType || ko.unwrap(defaults.type) );
     var grouping = ko.observable(group || ko.unwrap(defaults.group) || {});
-    var backendId = ko.observable(backendId || ko.unwrap(service.getDefaultBackendId()));
+    var backendId = ko.observable(initialBackendId || ko.unwrap(service.getDefaultBackendId()));
     var contentsValue = ko.observable(initialContents);
     var contentsList = ko.observableArray();
     self.disposedSubscribe( type, function( type ) {

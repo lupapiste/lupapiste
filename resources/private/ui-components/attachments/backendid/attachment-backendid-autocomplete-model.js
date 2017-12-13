@@ -22,7 +22,7 @@ LUPAPISTE.AttachmentBackendidAutocompleteModel = function(params) {
       return {"value": self.selectedId, "title": self.selectedId};
     },
     write: function(selected) {
-      self.selectedId(selected["value"]);
+      self.selectedId(selected.value);
     }
   });
 

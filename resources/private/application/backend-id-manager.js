@@ -25,7 +25,7 @@ LUPAPISTE.BackendIdManagerModel = function(params) {
           return ko.observable({id: verdict.id,
                                 kuntalupatunnus: ko.observable(verdict.kuntalupatunnus),
                                 verdictDate: ko.observable(verdictDateValue),
-                                invalidDate: ko.observable(!validDate(verdictDateValue))})
+                                invalidDate: ko.observable(!validDate(verdictDateValue))});
         }));
       initialized = true;
     }
@@ -81,7 +81,7 @@ LUPAPISTE.BackendIdManagerModel = function(params) {
       }
       return {id: bi().id, kuntalupatunnus: bi().kuntalupatunnus(), verdictDate: verdictDate};
     });
-  };
+  }
 
   self.disposedComputed(function() {
     return ko.toJSON(self.backendIds);
