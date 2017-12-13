@@ -65,6 +65,21 @@
     :orgAuthz {:837-YA #{:authorityAdmin}}
     :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereYAapikey"}}
 
+   {:id "837-R"                                             ; tampere / tampere
+    :enabled true
+    :lastName "Tampere"
+    :firstName "Paakayttaja"
+    :city "Tampere"
+    :language "fi"
+    :username "tampere"
+    :street "Paapankuja 12"
+    :phone "0102030405"
+    :email "tampere@example.com"
+    :role "authorityAdmin"
+    :zip "10203"
+    :orgAuthz {:837-R #{:authorityAdmin}}
+    :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereapikey"}}
+
    ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti:  veikko / veikko
    {:id "777777777777777777000016"
     :email "veikko.viranomainen@tampere.fi"
