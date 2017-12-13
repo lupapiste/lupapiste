@@ -24,7 +24,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                                                              service.authModel.ok));
   self.showSign = self.disposedPureComputed( _.wrap( "sign-attachments",
                                                      service.authModel.ok));
-  self.showResell = service.isArchivingProject;
+  self.isArchivingProject = service.isArchivingProject;
 
   var currentHover = ko.observable();
 
@@ -37,7 +37,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   self.colspan = self.disposedPureComputed(function() {
     var span = 5;
-    if (self.showResell()) {
+    if (self.isArchivingProject()) {
       span = span + 2;
     }
     if (self.showSign()) {
