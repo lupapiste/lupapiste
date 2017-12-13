@@ -8,34 +8,39 @@ LUPAPISTE.BackendIdManagerModel = function(params) {
   self.verdicts = params.verdicts;
   self.auth = params.authModel;
   self.backendIds = ko.observableArray();
-  self.mainVerdictDate = ko.observable();
   self.loading = ko.observable(false);
   var initialized = false;
-  var initialVerdictsTs = null;
+
+  var validDate = function(d) {
+    return _.isDate(d) && d <= (new Date());
+  };
 
   var initialize = function(verdicts) {
     if (_.isArray(verdicts)) {
       var filteredVerdicts = _.filter(verdicts, "kuntalupatunnus");
       self.backendIds(_.map(filteredVerdicts,
         function(verdict) {
-          return ko.observable({id: verdict.id, kuntalupatunnus: ko.observable(verdict.kuntalupatunnus)});
+          var verdictDate = util.getIn(verdict, ["paatokset", 0, "poytakirjat", 0, "paatospvm"]);
+          var verdictDateValue = _.isUndefined(verdictDate) ? null : new Date(verdictDate);
+          return ko.observable({id: verdict.id,
+                                kuntalupatunnus: ko.observable(verdict.kuntalupatunnus),
+                                verdictDate: ko.observable(verdictDateValue),
+                                invalidDate: ko.observable(!validDate(verdictDateValue))})
         }));
-      initialVerdictsTs = util.getIn(filteredVerdicts, [0, "paatokset", 0, "poytakirjat", 0, "paatospvm"]);
-      if (initialVerdictsTs) {
-        self.mainVerdictDate(new Date(initialVerdictsTs));
-      }
       initialized = true;
     }
   };
 
   self.verdicts.subscribe(function(verdicts) {
-    initialize(verdicts);
+    if (initialized === false) {
+      initialize(verdicts);
+    }
   });
 
   initialize(self.verdicts());
 
   self.addBackendId = function() {
-    self.backendIds.push(ko.observable({id: null, kuntalupatunnus: ko.observable("")}));
+    self.backendIds.push(ko.observable({id: null, kuntalupatunnus: ko.observable(""), verdictDate: ko.observable(""), invalidDate: ko.observable(false)}));
   };
 
   self.deleteBackendId = function(index) {
@@ -61,58 +66,44 @@ LUPAPISTE.BackendIdManagerModel = function(params) {
       !_.every(self.backendIds(), function(bi) {
         return _.some(self.verdicts(), function(v) {
           var backendId = ko.mapping.toJS(bi);
-        return v.id === backendId.id && v.kuntalupatunnus === backendId.kuntalupatunnus;
+          return v.id === backendId.id && v.kuntalupatunnus === backendId.kuntalupatunnus && v.verdictDate === backendId.verdictDate;
         });
       });
+  };
+
+  function verdictArray() {
+    return _.map(self.backendIds(), function (bi) {
+      var verdictDate = null;
+      if (!_.isNull(bi().verdictDate())) {
+        if (_.isFunction(bi().verdictDate().getTime)) {
+          verdictDate = bi().verdictDate().getTime();
+        }
+      }
+      return {id: bi().id, kuntalupatunnus: bi().kuntalupatunnus(), verdictDate: verdictDate};
+    });
   };
 
   self.disposedComputed(function() {
     return ko.toJSON(self.backendIds);
   }).subscribe(function(newValue) {
     if (newValue && initialized && verdictsModified() && allIdsValid(self.backendIds())) {
+      var updateVerdict = verdictArray();
       self.loading(true);
       ajax
         .command("store-archival-project-backend-ids",
           {
             id: ko.unwrap(params.applicationId),
-            verdicts: ko.mapping.toJS(self.backendIds)
+            verdicts: ko.mapping.toJS(updateVerdict)
           })
         .success(function () {
           hub.send("indicator", {style: "positive"});
           repository.load(ko.unwrap(params.applicationId));
+          initialized = false;
           self.loading(false);
         })
         .error(function (e) {
           hub.send("indicator", {style: "negative", message: e.text});
           self.loading(false);
-        })
-        .call();
-    }
-  });
-
-  var validDate = function(d) {
-    return _.isDate(d) && d <= (new Date());
-  };
-
-  self.invalidDate = self.disposedPureComputed(function() {
-    return !validDate(self.mainVerdictDate());
-  });
-
-  self.disposedComputed(function() {
-    var d = self.mainVerdictDate();
-    if (validDate(d) && d.getTime() !== initialVerdictsTs) {
-      ajax
-        .command("set-archival-project-permit-date", {
-          id: ko.unwrap(params.applicationId),
-          date: d.getTime()
-        })
-        .success(function () {
-          hub.send("indicator", {style: "positive"});
-          initialVerdictsTs = d.getTime();
-        })
-        .error(function (e) {
-          hub.send("indicator", {style: "negative", message: e.text});
-          repository.load(ko.unwrap(params.applicationId));
         })
         .call();
     }

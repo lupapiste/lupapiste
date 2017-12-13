@@ -29,6 +29,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   var service = lupapisteApp.services.attachmentsService;
 
+  self.showBackendId = service.isArchivingProject;
 
   var filterSet = service.getFilters( "attachments-listing" );
 
