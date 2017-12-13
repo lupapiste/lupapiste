@@ -15,7 +15,7 @@
    :created                       ssc/Timestamp
    (sc/optional-key :description) (sc/maybe sc/Str)})
 
-(defschema Application                                      ; WIP, used initially in Pate state-change JSON
+(defschema Application                                      ; WIP, used initially in state-change JSON
   {:id             ApplicationId
    :operations     [Operation]
    :propertyId     sc/Str
@@ -25,5 +25,12 @@
    :address        sc/Str
    :state          (apply sc/enum (map name states/all-states))
    :permitType     (apply sc/enum (map name (keys (permit/permit-types))))
+   :permitSubtype  (sc/maybe sc/Str)
+   ;; or (sc/maybe (->> (concat
+   ;;                     (->> (permit/permit-types) vals (map :subtypes) flatten distinct)
+   ;;                     (->> (vals op/operations) (map :subtypes) flatten distinct))
+   ;;                    (distinct)
+   ;;                    (apply sc/enum)))
+   ;; but requiring lupapalvelu.operation results in dependency cycle...
    :applicant      sc/Str
    :infoRequest    sc/Bool})

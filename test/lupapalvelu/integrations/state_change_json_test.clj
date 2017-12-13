@@ -104,3 +104,14 @@
     (fact "manuaal building id"
       (let [app (app-with-docs [old-building-manuaalinen-rakennusnumero])]
         (run-test (assoc app :state (name (first (sm/application-state-seq app)))) manual-building-id-test)))))
+
+(fact "permitSubtype"
+  (fact "if no key, nil"
+    (-> (assoc (app-with-docs [new-building-data]) :state "open")
+        (mjson/state-change-data "submitted")) => (contains {:permitSubtype nil}))
+  (fact "blank as nil"
+    (-> (assoc (app-with-docs [new-building-data]) :state "open" :permitSubtype "")
+        (mjson/state-change-data "submitted")) => (contains {:permitSubtype nil}))
+  (fact "ok"
+    (-> (assoc (app-with-docs [new-building-data]) :state "open" :permitSubtype "testi")
+        (mjson/state-change-data "submitted")) => (contains {:permitSubtype "testi"})))

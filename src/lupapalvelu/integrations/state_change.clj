@@ -7,6 +7,7 @@
             [sade.http :as http]
             [sade.schemas :as ssc]
             [sade.schema-utils :as ssu]
+            [sade.strings :as ss]
             [sade.util :as util]
             [clojure.set :as set]
             [lupapalvelu.application-schema :as app-schema]
@@ -27,9 +28,9 @@
 
 (def base-keys
   [:address :infoRequest :municipality
-   :state :permitType :location-wgs84
+   :state :permitType :permitSubtype
    :id :applicant :operations :propertyId
-   :location])
+   :location-wgs84 :location])
 
 (sc/defschema ApplicationBaseData                           ; Format application schema appropriate for integration
   (merge
@@ -94,6 +95,7 @@
   (-> (select-keys application (keys ApplicationBaseData))
       (update :location-wgs84 location-array-to-map)
       (update :location location-array-to-map)
+      (update :permitSubtype ss/blank-as-nil)
       (assoc :operations (build-operations application))
       (assoc :link (i18n/to-lang-map #(make-app-link (:id application) %)))))
 
