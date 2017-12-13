@@ -1,5 +1,6 @@
 (ns lupapalvelu.integrations.state-change
   (:require [taoensso.timbre :refer [infof]]
+            [monger.operators :refer [$set]]
             [schema.core :as sc]
             [clj-http.client :as clj-http]
             [sade.core :refer :all]
@@ -121,7 +122,7 @@
             msg (util/assoc-when
                   {:id message-id :direction "out"
                    :status "published" :messageType "state-change"
-                   :partner "pate" :format "json" :transferType "http"
+                   :partner "matti" :format "json" :transferType "http"
                    :created (or (:created command) (now))
                    :application (-> (select-keys app [:id :organization])
                                     (assoc :state (name new-state)))
@@ -137,5 +138,5 @@
                                          "X-Vault"    (env/value :matti :rest :vault)}
                       :body             (clj-http/json-encode outgoing-data)
                       :throw-exceptions true})
-          (messages/mark-acknowledged-and-return message-id (now))
+          (messages/update-message message-id {$set {:status "done" :acknowledged (now)}})
           (infof "PATE JSON sent to state-change endpoint successfully"))))))

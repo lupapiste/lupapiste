@@ -9,7 +9,7 @@
 
 (def create-id mongo/create-id)
 
-(def partners #{"ely" "mylly" "pate"})
+(def partners #{"ely" "mylly" "matti"})
 
 (sc/defschema IntegrationMessage
   {:id                            ssc/ObjectIdStr

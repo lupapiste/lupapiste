@@ -1060,7 +1060,7 @@
                        :krysp {:R {:url local-krysp :version "2.2.2"
                                    :http (merge
                                            {:auth-type "basic"
-                                            :partner "pate"
+                                            :partner "matti"
                                             :path {:application "hakemus-path"
                                                    :review  "katselmus-path"}
                                             :url local-krysp-receiver
