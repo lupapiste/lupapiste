@@ -109,7 +109,6 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     var contentsCell = new Cell( contentsValue, true );
     contentsCell.list = contentsList;
     var row = { disabled: ko.observable(),
-                duplicate: ko.observable(false),
                 type: new Cell( type, true ),
                 target: target || ko.unwrap(defaults.target),
                 contents: contentsCell,
@@ -138,11 +137,14 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
         }
         newRows[fileId] = newRow(file.type, file.contents, file.drawingNumber, file.group, file.target);
       }
+      file.duplicateFile = file.duplicateFile || ko.observable(false);
+      file.duplicateFile(false);
+      file.duplicateFileInApplication = file.duplicateFileInApplication || ko.observable(file.existsWithSameName);
     });
     rows( _.merge( keepRows, newRows ));
 
     var fileNames = _.map(self.upload.files(), function (file) {
-      return file["filename"];
+      return file.filename;
     });
 
     var duplicateFiles = _.filter(fileNames, function (name, index, files) {
@@ -151,14 +153,12 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
     if (!_.isEmpty(duplicateFiles)) {
        _.map(self.upload.files(), function (file) {
-        if (_.includes(duplicateFiles, file["filename"])) {
-          file["duplicateUpload"] = true;
-          console.log(rowData(file)["type"]);
-          rowData(file)["type"];
+        if (_.includes(duplicateFiles, file.filename)) {
+          file.duplicateFile(true);
           return file;
         }
       });
-    };
+    }
   });
 
   self.badFiles = ko.observableArray();

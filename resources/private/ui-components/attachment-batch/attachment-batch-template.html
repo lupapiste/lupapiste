@@ -28,8 +28,15 @@
       </thead>
       <tbody data-bind="foreach: upload.files">
         <tr class="file">
-          <td data-bind="file: $data, attr: {colspan: $component.colspan}"></td>
-          <td data-bind="$parent.cell( $data, 'duplicate').value"></td>
+          <td data-bind="attr: {colspan: $component.colspan}">
+            <span data-bind="file: $data"></span>
+            <span data-bind="visible: $data.duplicateFile() === true">
+              <span class="file-warn" data-bind="ltext: 'attachments.file.with.same.name'"></span>
+            </span>
+            <span data-bind="visible: $data.duplicateFileInApplication() === true">
+              <span class="file-warn" data-bind="ltext: 'attachments.file.already.exists'"></span>
+            </span>
+          </td>
         </tr>
         <tr class="metadata">
         <td>
