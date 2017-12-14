@@ -244,6 +244,7 @@
 "bulletins.beforeThan.appealPeriodStartsAt" "en" "The given date is after the start date of the appeal"
 "bulletins.beforeThan.appealPeriodStartsAt" "fi" "Annettu päivämäärä on valitusajan alkamispäivän jälkeen"
 "bulletins.beforeThan.appealPeriodStartsAt" "sv" "Angivet datum kommer efter besvärstidens begynnelsedatum"
+"bulletins.proceed-to-appeal.info" "fi" "Muutoksenhakua varten sinun tulee tunnistautua henkilökohtaisilla pankkitunnuksilla tai mobiilivarmenteella."
 "bulletins.search" "en" "Notice Search"
 "bulletins.search" "fi" "Ilmoitushaku"
 "bulletins.search" "sv" "Anmälningssökning"

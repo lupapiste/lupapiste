@@ -17,5 +17,10 @@
       ko.registerLupapisteComponents(components);
 
       $("#local-bulletins").applyBindings({vetumaService: new LUPAPISTE.VetumaService()});
+      var errorType = _.includes(["error", "cancel"], pageutil.lastSubPage()) ?
+        pageutil.lastSubPage() :
+        undefined;
+      hub.send("vetumaService::authenticateUser", {errorType: errorType});
+
     });
 })();

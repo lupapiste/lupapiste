@@ -33984,6 +33984,10 @@ div.summary-button-bar {
   margin-bottom: 24px;
 }
 
+#bulletins div.key-value-pair, #local-bulletins div.key-value-pair {
+  width: 80%;
+}
+
 #application-ymp-bulletin-tab .bulletin-state {
   font-weight: bold;
 }
