@@ -169,6 +169,8 @@
    (sc/optional-key :approvals)          VersionApprovals
    (sc/optional-key :backendId)          (sc/maybe sc/Str)})
 
+(def attachment-required-keys (filter sc/required-key? (keys Attachment)))
+
 ;;
 ;; Utils
 ;;

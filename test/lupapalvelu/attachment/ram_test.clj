@@ -5,10 +5,12 @@
             [clojure.test.check.generators :as gen]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.attachment :refer [Attachment]]
+            [lupapalvelu.attachment :refer [Attachment attachment-required-keys]]
             [lupapalvelu.attachment.ram :refer :all]))
 
 (testable-privates lupapalvelu.attachment.ram make-ram-attachment)
+
+(def required-keys-attachment (select-keys Attachment attachment-required-keys) )
 
 (facts make-ram-attachment
 
@@ -31,7 +33,7 @@
                           :verdicts     []
                           :organization "753-R"
                           :state        :constructionStarted}
-             base-attachment (assoc (ssg/generate Attachment) :contents "foo content" :size :A0 :scale :1:10)
+             base-attachment (assoc (ssg/generate required-keys-attachment) :contents "foo content" :size :A0 :scale :1:10)
              ram-attachment (make-ram-attachment base-attachment application 12345)]
          (fact "attachment meta is copied"
                (:contents ram-attachment) => "foo content"
@@ -40,13 +42,13 @@
 
 (facts resolve-ram-linked-attachments
        (fact "backward ram link"
-             (let [attachment1 (assoc (ssg/generate Attachment) :ramLink nil)
-                   attachment2 (assoc (ssg/generate Attachment) :ramLink (:id attachment1))]
+             (let [attachment1 (-> (ssg/generate required-keys-attachment) (assoc :ramLink nil))
+                   attachment2 (-> (ssg/generate required-keys-attachment) (assoc :ramLink (:id attachment1)))]
                (resolve-ram-links [attachment1 attachment2] (:id attachment2)) => [attachment1 attachment2]))
 
        (fact "forward ram link"
-             (let [attachment1 (assoc (ssg/generate Attachment) :ramLink nil)
-                   attachment2 (assoc (ssg/generate Attachment) :ramLink (:id attachment1))]
+             (let [attachment1 (-> (ssg/generate required-keys-attachment) (assoc :ramLink nil))
+                   attachment2 (-> (ssg/generate required-keys-attachment) (assoc :ramLink (:id attachment1)))]
                (resolve-ram-links [attachment1 attachment2] (:id attachment1)) => [attachment1 attachment2]))
 
        (fact "no linking"
