@@ -22,7 +22,7 @@
                                                         :latestVersion {:fileId "32" :filename "eri_paatoksen_liite.txt"}
                                                         :target {:type "verdict" :id (str (:id verdict) "_eri")}}]))
 
-(def result (permit/verdict-krysp-mapper app verdict {} "fi" "2.2.2" "BEGIN_OF_LINK/") )
+(def result (permit/verdict-krysp-mapper app verdict "fi" "2.2.2" "BEGIN_OF_LINK/") )
 
 (def attachments (:attachments result))
 

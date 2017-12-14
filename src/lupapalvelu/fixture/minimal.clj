@@ -847,7 +847,7 @@
                                                 :yl-uusi-toiminta [[:muut :muu]]
                                                 :maa-aineslupa [[:muut :muu]]
                                                 "vvvl-vesijohdosta" [[:muut :muu]]}
-                       :krysp {:R {:url local-krysp, :ftpUser "dev_sipoo", :version "2.2.0"}
+                       :krysp {:R {:url local-krysp, :ftpUser "dev_sipoo", :version "2.2.2"}
                                :P {:url local-krysp :ftpUser "dev_poik_sipoo" :version "2.1.2"}
                                :YI {:url local-krysp :ftpUser "dev_ymp_sipoo" :version "2.2.1"}
                                :YL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.2.1"}
@@ -1062,7 +1062,8 @@
                                            {:auth-type "basic"
                                             :partner "matti"
                                             :path {:application "hakemus-path"
-                                                   :review  "katselmus-path"}
+                                                   :review  "katselmus-path"
+                                                   :verdict "verdict-path"}
                                             :url local-krysp-receiver
                                             :headers [{:key "x-vault" :value "vaultti"}]}
                                            (org/encode-credentials "kuntagml" "kryspi"))}}

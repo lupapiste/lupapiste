@@ -207,8 +207,8 @@
   nil)
 
 (defmulti verdict-krysp-mapper
-  "Maps verdicts into KRYSP XML."
-  {:arglists '([application verdict user lang krysp-version begin-of-link])}
+  "Maps verdicts into KRYSP XML."                           ; as of writing this comment, paatostieto mapping was only available for R 2.2.2
+  {:arglists '([application verdict lang krysp-version begin-of-link])}
   (fn [{permit-type :permitType} & _]
     (keyword permit-type)))
 
