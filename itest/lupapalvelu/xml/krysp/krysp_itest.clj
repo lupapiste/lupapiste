@@ -415,7 +415,7 @@
           jp-r (organization-from-minimal-by-id "186-R")]
       sipoo-r => truthy
       jp-r => truthy
-      (get-in sipoo-r [:krysp :R :version]) => "2.2.0"
+      (get-in sipoo-r [:krysp :R :version]) => "2.2.2"
       (get-in jp-r [:krysp :R :version]) => "2.1.3"))
 
   (doseq [[apikey assignee property-id handler-role-id] [[sonja sonja-id sipoo-property-id sipoo-general-handler-id] [raktark-jarvenpaa (id-for-key raktark-jarvenpaa) jarvenpaa-property-id jarvenpaa-general-handler-id]]]
