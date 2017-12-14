@@ -10,10 +10,11 @@
                  :tarkastuksenTaiKatselmuksenNimi (get-in review [:name (keyword lang)])
                  :muuTunnustieto [#_{:MuuTunnus "yht:MuuTunnusType"}]}})) ; TODO: initialize review tasks and pass ids here
 
-(defn- maarays-canonical [lang {data :data :as verdict}]
-  {:Maarays {:sisalto (:conditions data)
-             :maaraysPvm (util/to-xml-date-from-string (:verdict-date data))
-             :toteutusHetki nil}})
+(defn- maarays-canonical [{data :data :as verdict}]
+  (when-not (ss/blank? (:conditions data))
+    {:Maarays {:sisalto (:conditions data)
+               :maaraysPvm (util/to-xml-date-from-string (:verdict-date data))
+               :toteutusHetki nil}}))
 
 (defn- vaadittu-erityissuunnitelma-canonical [lang {{plans :plans} :references :as verdict} plan-id]
   (let [plan (util/find-by-id plan-id plans)]
@@ -41,7 +42,7 @@
    :kokonaisala nil
    :rakennusoikeudellinenKerrosala nil
    :vaaditutKatselmukset (map (partial vaadittu-katselmus-canonical lang verdict) (:reviews data))
-   :maaraystieto [(maarays-canonical lang verdict)]
+   :maaraystieto (seq (remove nil? [(maarays-canonical verdict)]))
    :vaadittuErityissuunnitelmatieto (map (partial vaadittu-erityissuunnitelma-canonical lang verdict) (:plans data))
    :vaadittuTyonjohtajatieto (map vaadittu-tyonjohtaja-canonical (:foremen data))})
 
