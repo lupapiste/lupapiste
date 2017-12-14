@@ -3,7 +3,6 @@
             [clojure.set :refer [rename-keys]]
             [sade.core :refer :all]
             [sade.env :as env]
-            [sade.strings :as ss]
             [lupapalvelu.action :refer [defcommand defraw disallow-impersonation]]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.file-upload :as file-upload]
@@ -34,14 +33,6 @@
          (resp/json)
          (resp/status 200))))
 
-(defn mark-duplicates [application result]
-  (let [existing-files (mapv (fn [attachment] (first (ss/split (get-in attachment [:latestVersion :filename]) #"\."))) (:attachments application))
-        find-duplicates-fn (fn [file]
-                             (if (some #(= % (first (ss/split (:filename file) #"\."))) existing-files)
-                               (assoc file :existsWithSameName true)
-                               (assoc file :existsWithSameName false)))]
-    (assoc result :files (map find-duplicates-fn (remove nil? (:files result))))))
-
 (defraw upload-file-authenticated
   {:user-roles       #{:authority :applicant}
    :user-authz-roles (conj roles/writer-roles-with-foreman :statementGiver)
@@ -54,7 +45,7 @@
   [{:keys [application]}]
   (let [{:keys [ok] :as result} (file-upload/save-files application files (vetuma/session-id))]
     (->> result
-         (mark-duplicates application)
+         (file-upload/mark-duplicates application)
          (resp/json)
          (resp/status (if ok 200 400)))))
 
