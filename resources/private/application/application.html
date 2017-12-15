@@ -235,7 +235,8 @@
                             <div data-bind="if: $root.authorization.ok('link-permit-required')">
                               <div class="help-box margins-m">
                                 <p data-bind="ltext: 'help.AddPermit'"></p>
-                                <button data-bind="click: $root.openAddLinkPermitDialog,
+                                <button data-bind="click: $root.application.gotoLinkPermitCard,
+                                                   testId: 'add-required-link-permit',
                                                    enable: $root.authorization.ok('link-permit-required'),
                                                    visible: $root.authorization.ok('add-link-permit')"
                                         class="positive">
