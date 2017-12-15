@@ -5,6 +5,7 @@
             [lupapalvelu.attachment.accessibility :as attachment-access]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.comment :as comment]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.roles :as roles]
@@ -140,6 +141,7 @@
         (update-in [:comments] (partial filter (fn [comment] (and
                                                                (can-read-comments? application user)
                                                                (can-read-comment? comment user)))))
+        comment/flag-removed-attachment-comments
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
         (update-in [:statements] (partial map #(if (authorized-to-statement? user %) % (statement-summary %))))
         (update-in [:attachments] (partial remove (partial statement-attachment-hidden-for-user? application user)))
@@ -147,6 +149,7 @@
         (update-in [:attachments] (partial attachment-access/filter-attachments-for user application))
         (update-in [:neighbors] (partial normalize-neighbors application user))
         filter-targeted-attachment-comments
+        comment/remove-hidden-attachment-comments
         (update-in [:tasks] (partial only-authority-sees user (partial relates-to-draft-verdict? application)))
         (update-in [:company-notes] (partial pick-user-company-notes user))
         (filter-notice-from-application user))))
