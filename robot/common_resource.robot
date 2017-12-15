@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
-Library        CustomSelenium2Library.py  timeout=12  run_on_failure=Nothing
+Library        CustomSeleniumLibrary.py  timeout=12  run_on_failure=Nothing
 Library        String
 Library        OperatingSystem
 Library        DebugLibrary

@@ -1,9 +1,9 @@
 from robot.api.deco import keyword
 from selenium import webdriver
-from Selenium2Library import Selenium2Library
+from SeleniumLibrary import SeleniumLibrary
 
 
-class CustomSelenium2Library(Selenium2Library):
+class CustomSeleniumLibrary(SeleniumLibrary):
 
     @keyword
     def open_custom_browser(self, url, browser="firefox", remote_url=False):
