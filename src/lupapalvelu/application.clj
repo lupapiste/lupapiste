@@ -797,8 +797,10 @@
         secondary-ops             (mapv #(assoc (-> %1 :schema-info :op) :description %2) (rest building-docs) (rest structure-descriptions))
         application               (update-in application [:documents] concat building-docs)
         command                   (util/deep-merge command (action/application->command application))]
-  (mapv #(doc-persistence/remove! command (:id %) "documents") old-building-docs)
-  (action/update-application command {$set  {:primaryOperation    primary-operation
-                                             :secondaryOperations secondary-ops}
-                                      $push {:documents {$each building-docs}}})
-  (update-buildings-array! building-xml (mongo/by-id :applications (:id application)))))
+  (when (some? (:id primary-operation))
+    (do
+      (mapv #(doc-persistence/remove! command (:id %) "documents") old-building-docs)
+      (action/update-application command {$set  {:primaryOperation    primary-operation
+                                                 :secondaryOperations secondary-ops}
+                                          $push {:documents {$each building-docs}}})
+      (update-buildings-array! building-xml (mongo/by-id :applications (:id application)))))))
