@@ -262,6 +262,16 @@
   (error "No tj/suunnitelija verdict reader for permit type: " permit-type)
   nil)
 
+(defmulti read-app-descriptions-from-xml
+  "Reads application (issue) descriptions from KRYSP xml"
+  {:arglists '([permit-type xml-without-ns])}
+  (fn [permit-type & _]
+    (keyword permit-type)))
+
+(defmethod read-app-descriptions-from-xml :default
+  [& _]
+  nil)
+
 (defmulti fetch-xml-from-krysp
   "Fetches KRYSP XML from municipality backend."
   {:arglists '([permit-type server-url credentials ids search-type raw?])}

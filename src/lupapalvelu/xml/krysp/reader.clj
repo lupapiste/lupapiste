@@ -465,6 +465,16 @@
        (map ->kuntalupatunnus)
        (remove ss/blank?)))
 
+(defn ->rakval-app-descriptions [xml]
+  (->> (enlive/select (cr/strip-xml-namespaces xml) common/case-elem-selector)
+       (map (fn [asia] {:kuntalupatunnus (->kuntalupatunnus asia)
+                        :kuvaus (get-text asia [:rakennusvalvontaasianKuvaus])}))
+       (remove #(ss/blank? (:kuvaus %)))))
+
+(defmethod permit/read-app-descriptions-from-xml :R
+  [_ xml]
+  (->rakval-app-descriptions xml))
+
 (defmulti ->verdicts
   "Reads the verdicts."
   {:arglists '([xml permit-type reader & reader-args])}

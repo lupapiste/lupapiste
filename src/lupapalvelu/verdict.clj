@@ -160,6 +160,9 @@
        (map (partial verdict-attachments application user timestamp))
        (filter seq)))
 
+
+(defn- get-app-descriptions [xml])
+
 (defn- get-task-updates [application created verdicts app-xml]
   (when (not-any? (comp #{"verdict"} :type :source) (:tasks application))
     {$set {:tasks (-> (assoc application

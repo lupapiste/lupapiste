@@ -502,7 +502,10 @@
 
     (fact "kuntalupatunnus" kuntalupatunnus => "14-0241-R 3")
     (fact "municipality" municipality => "186")
-    (fact "rakennusvalvontaasianKuvaus" rakennusvalvontaasianKuvaus => "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto.")
+    (fact "rakennusvalvontaasianKuvaus"
+      rakennusvalvontaasianKuvaus => "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto."
+      (permit/read-app-descriptions-from-xml :R (cr/strip-xml-namespaces xml)) => (just {:kuntalupatunnus "14-0241-R 3"
+                                                                                         :kuvaus "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto."}))
     (fact "vahainenPoikkeaminen" vahainenPoikkeaminen => "Poikekkaa meill\u00e4!")
     (facts "hakijat"
       (fact "count" (count hakijat) => 6)
