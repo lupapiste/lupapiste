@@ -16,6 +16,11 @@
                 <i class="lupicon-circle-plus"></i>
                 <span data-bind="ltext: 'newRequest.createArchivingProject'"></span>
               </button>
+              <button data-bind="click: createArchivingReport"
+                      data-test-id="applications-create-archiving project"
+                      class="positive application-create">
+                <span data-bind="text: 'Digitointi raportit'"></span>
+              </button>
               <!-- /ko -->
 
               <!-- ko ifnot: authorizationModel.ok('user-is-pure-digitizer') || lupapisteApp.models.currentUser.isFinancialAuthority() -->

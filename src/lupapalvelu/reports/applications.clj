@@ -71,6 +71,13 @@
                  :modified {$gte (Long/parseLong start-ts 10)
                             $lte (Long/parseLong end-ts 10)}}))
 
+(defn digitized-applications-between [org-id start-ts end-ts]
+  (mongo/select :applications
+                {:organization org-id
+                 :permitType "ARK"
+                 :submitted {$gte (Long/parseLong start-ts 10)
+                             $lte (Long/parseLong end-ts 10)}}))
+
 (defn- authority [app]
   (->> app
        :handlers
@@ -219,6 +226,10 @@
                                      "company.report.excel.header.applicant"
                                      "company.report.excel.header.attachment"]))
 
+(defn- digitizer-report-headers [lang]
+  (map (partial i18n/localize lang) ["digitizer.report.excel.header.applicationId"
+                                     "digitizer.report.excel.header.attachmentCount"]))
+
 
 (defn- usage [application]
   (when-let [documents (:documents application)]
@@ -291,4 +302,13 @@
                           :row-fn     foreman-row-fn
                           :data       foreman-app-row-data}
         wb (excel/create-workbook (flatten [application-data foreman-app-data]))]
+    (excel/xlsx-stream wb)))
+
+(defn ^OutputStream digitized-attachments [org-id start-ts end-ts lang]
+  (let [applications (digitized-applications-between org-id start-ts end-ts)
+        wb (excel/create-workbook
+             [{:sheet-name  (i18n/localize lang "digitizer.excel.sheet.name")
+               :header      (digitizer-report-headers lang)
+               :row-fn      (juxt :_id)
+               :data        applications}])]
     (excel/xlsx-stream wb)))

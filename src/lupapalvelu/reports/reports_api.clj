@@ -4,6 +4,7 @@
             [sade.util :as util]
             [clj-time.core :as t]
             [clj-time.coerce :as tc]
+            [clojure.set :as set]
             [lupapalvelu.action :as action :refer [defraw]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as usr]
@@ -104,3 +105,17 @@
                                  ".xlsx")]
     (excel-response resulting-file-name
                     (app-reports/company-applications company startTs endTs lang user))))
+
+(defraw digitizer-report
+  {:description      "Excel report of digitized attachments"
+   :parameters       [startTs endTs]
+   :input-validators [(partial action/string-parameters [:startTs :endTs])]
+   :user-roles       #{:authority}}
+  [{user :user {lang :lang} :data}]
+  (let [org-id              (usr/authority-admins-organization-id user)
+        resulting-file-name (str (i18n/localize lang "digitizer.reports.excel.filename")
+                                 "_"
+                                 (util/to-xml-date (now))
+                                 ".xlsx")]
+    (excel-response resulting-file-name
+                    (app-reports/digitized-attachments org-id startTs endTs lang))))

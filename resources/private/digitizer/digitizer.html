@@ -62,5 +62,31 @@
     </div>
   </div>
 </section>
+<section class="page container" id="create-archiving-report">
+  <div>
+    <h1 data-bind="ltext: 'digitizer.report.title'"></h1>
+      <table class="company-report-table">
+        <thead>
+          <th><span data-bind="ltext: 'digitizer.report.startDate'"></span></th>
+          <th><span data-bind="ltext: 'digitizer.report.endDate'"></span></th>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="text" data-bind="datepicker: reportStartDate" class="dateinput"></td>
+            <td><input type="text" data-bind="datepicker: reportEndDate" class="dateinput"></td>
+          </tr>
+        </tbody>
+      </table>
+    <div class="downlaod">
+      <button class="positive"
+              data-bind="click: downloadReport"
+              data-test-id="download-digitizer-report-btn">
+        <i class="lupicon-download btn-small"></i>
+        <span data-bind="ltext: 'digitizer.report.download'"></span>
+      </button>
+
+    </div>
+  </div>
+</section>
 </body>
 </html>
