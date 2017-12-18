@@ -142,7 +142,7 @@
 
 (def permit-types (map keyword (keys (permit/permit-types))))
 
-(def backend-systems #{:facta :kuntanet :louhi :locus :keywinkki :iris :pate})
+(def backend-systems #{:facta :kuntanet :louhi :locus :keywinkki :iris :matti})
 
 (sc/defschema AuthTypeEnum (sc/enum "basic" "x-header"))
 
