@@ -62,6 +62,12 @@
                                         :taskname "Loppukatselmus"
                                         :data {:katselmus {:pitoPvm {:value "19.10.2017"}}}}]})
 
+(def digi-report-rows [{:date "10.12.2017" :id "LP-753-2017-00001" :attachments 5}
+                       {:date "10.12.2017" :id "LP-753-2017-00002" :attachments 7}
+                       {:date "12.12.2017" :id "LP-753-2017-00003" :attachments 15}
+                       {:date "14.12.2017" :id "LP-753-2017-00004" :attachments 3}
+                       {:date "19.12.2017" :id "LP-753-2017-00005" :attachments 12}
+                       {:date "19.12.2017" :id "LP-753-2017-00006" :attachments 6}])
 
 (facts "Company applications"
 
@@ -93,3 +99,17 @@
       (count (report-data-by-operations [application-with-multiple-operations] :fi {:role :authority})) => 3
       (provided
         (organization/get-organization "753-R") => {:name {:fi "Sipoon rakennusvalvonta"}}))))
+
+(facts "Digitized applications"
+
+  (fact "Row data is composed from application"
+    (digi-report-data application) => {:date "18.10.2017"
+                                       :id "LP-753-2017-00001"
+                                       :attachments 3}
+    (digi-report-data (dissoc! application :attachments) => {}))
+
+  (fact "Sum data is composed from row data"
+    (digi-report-sum digi-report-rows) => [{:date "10.12.2017" :attachments 12}
+                                           {:date "12.12.2017" :attachments 15}
+                                           {:date "14.12.2017" :attachments 3}
+                                           {:date "19.12.2017" :attachments 18}]))

@@ -71,12 +71,13 @@
                  :modified {$gte (Long/parseLong start-ts 10)
                             $lte (Long/parseLong end-ts 10)}}))
 
-(defn digitized-applications-between [org-id start-ts end-ts]
+(defn digitized-applications-between [org-ids start-ts end-ts]
   (mongo/select :applications
-                {:organization org-id
+                {:organization {$in org-ids}
                  :permitType "ARK"
-                 :submitted {$gte (Long/parseLong start-ts 10)
-                             $lte (Long/parseLong end-ts 10)}}))
+                 :created {$gte (Long/parseLong start-ts 10)
+                           $lte (Long/parseLong end-ts 10)}}
+                [:_id :created :attachments :state :handlers]))
 
 (defn- authority [app]
   (->> app
@@ -228,6 +229,7 @@
 
 (defn- digitizer-report-headers [lang]
   (map (partial i18n/localize lang) ["digitizer.report.excel.header.applicationId"
+                                     "digitizer.report.excel.header.date"
                                      "digitizer.report.excel.header.attachmentCount"]))
 
 
@@ -304,11 +306,33 @@
         wb (excel/create-workbook (flatten [application-data foreman-app-data]))]
     (excel/xlsx-stream wb)))
 
-(defn ^OutputStream digitized-attachments [org-id start-ts end-ts lang]
-  (let [applications (digitized-applications-between org-id start-ts end-ts)
-        wb (excel/create-workbook
-             [{:sheet-name  (i18n/localize lang "digitizer.excel.sheet.name")
-               :header      (digitizer-report-headers lang)
-               :row-fn      (juxt :_id)
-               :data        applications}])]
+(defn digi-report-data [application]
+  {:date          (util/to-local-date (:created application))
+   :id            (:id application)
+   :attachments   (count (:attachments application))})
+
+(defn digi-report-sum [rows]
+  (->> (group-by :date rows)
+       (map (fn [row] {:date (first row)
+                       :attachments (->> row
+                                         (second)
+                                         (flatten)
+                                         (map :attachments)
+                                         (apply +))}))))
+
+(defn ^OutputStream digitized-attachments [org-ids start-ts end-ts lang]
+  (let [applications  (digitized-applications-between org-ids start-ts end-ts)
+        row-data      (map #(digi-report-data %) applications)
+        sum-data      (digi-report-sum row-data)
+        sum-sheet     (i18n/localize lang "digitizer.excel.sum.sheet.name")
+        wb            (excel/create-workbook
+                        [{:sheet-name  (i18n/localize lang "digitizer.excel.data.sheet.name")
+                          :header      (digitizer-report-headers lang)
+                          :row-fn      (juxt :id :date :attachments)
+                          :data        row-data}
+                         {:sheet-name  sum-sheet
+                          :header      (rest (digitizer-report-headers lang))
+                          :row-fn      (juxt :date :attachments)
+                          :data        sum-data}])
+        sum-row       (excel/add-sum-row sum-sheet wb [(i18n/localize lang "digitizer.excel.sum") (apply + (map :attachments sum-data))])]
     (excel/xlsx-stream wb)))

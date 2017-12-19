@@ -112,10 +112,10 @@
    :input-validators [(partial action/string-parameters [:startTs :endTs])]
    :user-roles       #{:authority}}
   [{user :user {lang :lang} :data}]
-  (let [org-id              (usr/authority-admins-organization-id user)
+  (let [org-ids             (mapv :id (usr/get-organizations user))
         resulting-file-name (str (i18n/localize lang "digitizer.reports.excel.filename")
                                  "_"
                                  (util/to-xml-date (now))
                                  ".xlsx")]
     (excel-response resulting-file-name
-                    (app-reports/digitized-attachments org-id startTs endTs lang))))
+                    (app-reports/digitized-attachments org-ids startTs endTs lang))))
