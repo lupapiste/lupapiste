@@ -12,7 +12,7 @@ Tarvitset kehitysympäristöön seuraavat työkalut:
     - Macillä saattaa tulla avoimien tiedostojen raja vastaan: [How to persist ulimit settings in osx](http://unix.stackexchange.com/questions/108174/how-to-persist-ulimit-settings-in-osx-mavericks)
 - Python 2.x ja [Robot Framework](http://robotframework.org/) selaintestausta varten
   - `pip install robotframework`
-  - `pip install robotframework-selenium2library`
+  - `pip install robotframework-seleniumlibrary`
   - `pip install robotframework-debuglibrary`
   - Chromella ajettavia testejä varten [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/)-ajuri (löytyy myös Homebrewstä).
   - Firefoxilla ajettavia testejä varten [geckodriver](https://github.com/mozilla/geckodriver)-ajuri (löytyy myös Homebrewstä).

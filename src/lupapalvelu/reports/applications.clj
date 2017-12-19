@@ -24,7 +24,7 @@
 
 (defn open-applications-for-organization [organizationId excluded-operations]
   (let [query     (cond-> {:organization organizationId
-                           :state {$in ["submitted" "open" "draft"]}
+                           :state {$in ["submitted" "open" "draft" "sent" "complementNeeded"]}
                            :infoRequest false}
                     excluded-operations (assoc :primaryOperation.name {$nin excluded-operations}))
         roles-org (handler-roles-org organizationId)]

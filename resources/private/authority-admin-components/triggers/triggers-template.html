@@ -23,7 +23,8 @@
                         <span data-bind ="text: loc('triggers.no.handler')"></span>
                      </span>
                 </td>
-                <td width="15%" >
+                <td width="15%"
+                    data-bind="if: $parent.canEdit">
                     <span>
                        <a href="#" data-bind="click: $parent.editTrigger, ltext: 'edit'" data-test-id="edit-trigger" class="modal"></a>
                     </span>
@@ -39,6 +40,7 @@
   <icon-button params="ltext: 'triggers.add',
                        click: addTrigger,
                        icon: 'circle-plus',
+                       enable: canEdit,
                        testId: 'add-trigger'"
                data-bind="visible: true"></icon-button>
   <div id="dialog-add-trigger" class="window autosized selectm-dialog" style="overflow:visible">

@@ -101,5 +101,5 @@
 
 (def hex-string? (partial matches? #"^[0-9a-f]*$"))
 
-;; Some of the very first applications have mongoid as applicationId.
-(def application-id? (partial matches? #"^([0-9a-f]{24}|L[PX]-\d{3}-\d{4}-\d{5})$"))
+;; Some of the very first applications have mongoid as applicationId. But LPK-2914 cleaned them up.
+(def application-id? (partial matches? #"^L[PX]-\d{3}-\d{4}-\d{5}$"))

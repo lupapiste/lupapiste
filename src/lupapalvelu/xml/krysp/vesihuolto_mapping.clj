@@ -19,7 +19,7 @@
               :child [{:tag :kasittelytietotieto
                        :child [{:tag :KasittelyTieto :child mapping-common/ymp-kasittelytieto-children }]}
                       {:tag :luvanTunnistetiedot
-                       :child [mapping-common/lupatunnus]}
+                       :child [mapping-common/ymp-lupatunnus]}
                       {:tag :lausuntotieto
                        :child [mapping-common/lausunto_213]}
                       {:tag :vapautusperuste}

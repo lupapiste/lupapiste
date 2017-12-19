@@ -59,3 +59,30 @@
               second-building-doc-op-id (get-in (second documents) [:schema-info :op :id])]
           (= primary-operation-id first-building-id first-building-doc-op-id) => true?
           (= secondary-operation-id second-building-id second-building-doc-op-id) => true?)))
+
+(facts "Add multiple backendId and verdict dates"
+
+  (fact "There can be multiple backendId"
+    (let [response (command digitoija :create-archiving-project
+                            :lang "fi"
+                            :x "404262.00"
+                            :y "6694511.00"
+                            :address "Street 1"
+                            :propertyId "18600101140005"
+                            :organizationId "186-R"
+                            :kuntalupatunnus "186-0002"
+                            :createAnyway true
+                            :createWithoutBuildings true
+                            :createWithDefaultLocation false)
+          app-id (:id response)]
+      (command digitoija :store-archival-project-backend-ids :id app-id :verdicts [{:kuntalupatunnus "186-0003"} {:kuntalupatunnus "186-0004"}]) => ok?
+      (let [verdict-ids (map :id (:verdicts (query-application digitoija app-id)))
+            verdict-updates [{:id (first verdict-ids) :kuntalupatunnus "186-0003" :verdictDate 1512597600000}
+                             {:id (second verdict-ids) :kuntalupatunnus "186-0004" :verdictDate 1512594000000}]
+            _ (command digitoija :store-archival-project-backend-ids :id app-id :verdicts verdict-updates)
+            verdicts (:verdicts (query-application digitoija app-id))]
+        (count verdicts) => 2
+        (:kuntalupatunnus (first verdicts)) => "186-0003"
+        (:paatospvm (:0 (:poytakirjat (first (:paatokset (first verdicts)))))) => 1512597600000
+        (:kuntalupatunnus (second verdicts)) => "186-0004"
+        (:paatospvm (:0 (:poytakirjat (first (:paatokset (second verdicts)))))) => 1512594000000))))

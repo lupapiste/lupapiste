@@ -22,7 +22,7 @@
 
 (def ymparistolupaType
   [{:tag :kasittelytietotieto :child [{:tag :Kasittelytieto :child mapping-common/ymp-kasittelytieto-children}]}
-   {:tag :luvanTunnistetiedot :child [mapping-common/lupatunnus]}
+   {:tag :luvanTunnistetiedot :child [mapping-common/ymp-lupatunnus]}
    ; 0-n {:tag :valvontatapahtumattieto :child []}
    {:tag :lausuntotieto :child [mapping-common/lausunto_213]}
    {:tag :maksajatieto :child [{:tag :Maksaja :child mapping-common/maksajatype-children_213}]}

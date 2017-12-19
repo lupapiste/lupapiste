@@ -1,20 +1,21 @@
 (ns lupapalvelu.inspection-summary
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]
-            [sade.core :refer [now unauthorized fail]]
+  (:require [clojure.string :as s]
+            [lupapalvelu.attachment :as att]
+            [lupapalvelu.attachment.bind :as att-bind]
+            [lupapalvelu.authorization :as auth]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.pdf.html-template :as pdf-html]
+            [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
+            [sade.core :refer [now unauthorized fail]]
+            [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.schemas :as ssc]
-            [clojure.string :as s]
-            [lupapalvelu.attachment :as att]
-            [lupapalvelu.organization :as org]
-            [lupapalvelu.user :as usr]
-            [lupapalvelu.mongo :as mongo]
             [schema.core :as sc :refer [defschema]]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.pdf.html-template :as pdf-html]
-            [lupapalvelu.attachment.bind :as att-bind]
-            [lupapalvelu.operations :as operations]))
+            [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]))
 
 (defschema InspectionSummaryTargets
   {:target-name                     sc/Str   ;Tarkastuskohde
@@ -198,10 +199,13 @@
   (or (validate-summary-not-locked command)
       (fail-when-target-finished target-id inspection-summaries)))
 
-(defmethod att/edit-allowed-by-target :inspection-summary-item [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data :as command}]
+(defmethod att/edit-allowed-by-target :inspection-summary-item
+  [{{:keys [inspection-summaries attachments] :as application} :application
+    {:keys [attachmentId]} :data  user :user :as command}]
   (or (validate-summary-not-locked command)
       (when-let [target-id (get-inspection-target-id-from-attachment attachmentId attachments)]
-        (fail-when-target-finished target-id inspection-summaries))))
+        (when-not (auth/application-authority? application user)
+            (fail-when-target-finished target-id inspection-summaries)))))
 
 (defmethod att/delete-allowed-by-target :inspection-summary-item [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data :as command}]
   (or (validate-summary-not-locked command)

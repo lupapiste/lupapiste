@@ -117,7 +117,8 @@
                :required             true
                :requestedByAuthority true
                :forPrinting          false
-               :readOnly             false}
+               :readOnly             false
+               :backendId            nil}
               {:id                   "5790633c66e8f95ecc4287be"
                :locked               false
                :modified             999
@@ -134,7 +135,8 @@
                :required             true
                :requestedByAuthority true
                :forPrinting          false
-               :readOnly             false}])
+               :readOnly             false
+               :backendId            nil}])
     (provided
       (mongo/create-id) => "5790633c66e8f95ecc4287be")))
 
@@ -196,7 +198,8 @@
                :requestedByAuthority true
                :forPrinting          false
                :metadata             {:foo "bar"}
-               :readOnly             false}
+               :readOnly             false
+               :backendId            nil}
               {:id                   "5790633c66e8f95ecc4287be"
                :locked               false
                :modified             999
@@ -214,7 +217,8 @@
                :requestedByAuthority true
                :forPrinting          false
                :metadata             {:bar "baz"}
-               :readOnly             false}])
+               :readOnly             false
+               :backendId            nil}])
     (provided
      (mongo/create-id) => "5790633c66e8f95ecc4287be")))
 
@@ -240,7 +244,8 @@
                :required             true
                :requestedByAuthority true
                :forPrinting          false
-               :readOnly             false}
+               :readOnly             false
+               :backendId            nil}
               {:id                   "5790633c66e8f95ecc4287be"
                :locked               false
                :modified             999
@@ -258,7 +263,8 @@
                :required             true
                :requestedByAuthority true
                :forPrinting          false
-               :readOnly             false}])
+               :readOnly             false
+               :backendId            nil}])
     (provided
       (mongo/create-id) => "5790633c66e8f95ecc4287be")))
 

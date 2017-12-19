@@ -1,16 +1,13 @@
 (ns lupapalvelu.document.rakennuslupa-canonical
-  (:require [clojure.java.io :as io]
-            [clojure.xml :as xml]
-            [clojure.string :as s]
-            [clojure.walk :as walk]
+  (:require [clojure.walk :as walk]
             [swiss.arrows :refer [-<>]]
             [sade.core :refer [now]]
             [sade.strings :as ss]
             [sade.util :as util]
+            [lupapalvelu.application :as app]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.application :as app]
             [lupapalvelu.document.schemas :as schemas]))
 
 (defn- muutostapa
@@ -345,7 +342,7 @@
       {:RakennusvalvontaAsia
        (cond-> (util/assoc-when-pred
                      {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot (lupatunnus application)
+                      :luvanTunnisteTiedot (lupatunnus-with-vrktunnus application)
                       :osapuolettieto (osapuolet application documents-by-type lang)
                       :kayttotapaus (if (= "muutoslupa" (:permitSubtype application))
                                       "Rakentamisen aikainen muutos"

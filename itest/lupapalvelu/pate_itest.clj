@@ -2,9 +2,16 @@
   (:require [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.pate-itest-util :refer :all]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.xml.validator :as validator]
             [midje.sweet :refer :all]
+            [sade.core :refer [now]]
+            [sade.env :as env]
             [sade.strings :as ss]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [sade.xml :as xml]
+            [clojure.java.io :as io]
+            [clojure.data.xml :as cxml]))
 
 (apply-remote-minimal)
 
@@ -26,6 +33,35 @@
              :organizationId "753-R"
              :path "pate-enabled"
              :value flag) => ok?))
+
+(defn check-kuntagml [{:keys [organization permitType id]} verdict-date]
+  (let [organization (organization-from-minimal-by-id organization)
+        permit-type (keyword permitType)
+        sftp-user (get-in organization [:krysp permit-type :ftpUser])
+        krysp-version (get-in organization [:krysp permit-type :version])
+        permit-type-dir (permit/get-sftp-directory permit-type)
+        output-dir (str "target/" sftp-user permit-type-dir "/")
+        sftp-server (subs (env/value :fileserver-address) 7)
+        target-file-name (str "target/Downloaded-" id "-" (now) ".xml")
+        filename-starts-with id
+        xml-file (if get-files-from-sftp-server?
+                   (io/file (get-file-from-server
+                              sftp-user
+                              sftp-server
+                              filename-starts-with
+                              target-file-name
+                              (str permit-type-dir "/")))
+                   (io/file (get-local-filename output-dir filename-starts-with)))
+        xml-as-string (slurp xml-file)
+        xml (cxml/parse (io/reader xml-file))
+        ]
+    (fact "Correctly named xml file is created" (.exists xml-file) => true)
+    (fact "XML file is valid" (validator/validate xml-as-string permit-type krysp-version) => nil)
+    (facts "paatostieto"
+      (fact "element exists"
+        (xml/select1 xml [:paatostieto]) => truthy)
+      (fact "paatosPvm"
+        (xml/get-text xml [:paatostieto :poytakirja :paatospvm]) => (util/to-xml-date-from-string verdict-date)))))
 
 (facts "Pate enabled"
   (fact "Disable Pate in Sipoo"
@@ -960,6 +996,7 @@
                   (let  [{verdict :verdict}   (command sonja :new-pate-verdict-draft
                                                        :id app-id
                                                        :template-id template-id)
+                         verdict-date "27.9.2017"
                          {data       :data
                           verdict-id :id}     verdict
                          {open-verdict :open
@@ -1006,9 +1043,11 @@
                     (fact "No attachments"
                       (query-application sonja app-id)
                       => (contains {:attachments []}))
+                    (fact "Add required verdict date"
+                      (edit-verdict "verdict-date" verdict-date) => ok?)
                     (facts "Add attachment to verdict draft again"
                       (let [attachment-id (add-verdict-attachment app-id verdict-id "Otepaatos")]
-                        (fact "Publish verdict"
+                        (fact "Publish verdict"             ; TODO check that verdict can't be published if verdict-date is blank!
                           (command sonja :publish-pate-verdict
                                    :id app-id
                                    :verdict-id verdict-id) => ok?)
@@ -1016,6 +1055,7 @@
                           (command sonja :delete-attachment :id app-id
                                    :attachmentId attachment-id)
                           => fail?)))
+                    (check-kuntagml application verdict-date)
                     (fact "Editing no longer allowed"
                       (edit-verdict :verdict-text "New verdict text")
                       => (err :error.verdict.not-draft))

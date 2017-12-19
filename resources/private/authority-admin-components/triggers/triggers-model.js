@@ -13,6 +13,8 @@ LUPAPISTE.TriggersModel = function( params ) {
     return _.filter(roles(), _.negate(handlerService.isTemporaryRole));
   });
 
+  self.canEdit = triggerService.canEdit;
+
   function wrapInObject(types) {
     return _.map(types, function(type) {
       return {

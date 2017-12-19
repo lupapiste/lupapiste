@@ -33,6 +33,7 @@ LUPAPISTE.AttachmentsService = function() {
   self.processing = lupapisteApp.models.application.processing;
   self.applicationId = lupapisteApp.models.application.id;
   self.isArchivingProject = lupapisteApp.models.application.isArchivingProject;
+  self.applicationModel = lupapisteApp.models.application;
 
   var reload = function() {
     self.queryAll();
@@ -266,6 +267,10 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.attachmentTypeGroups = ko.pureComputed(function() {
     return _(self.attachmentTypes()).map("type-group").uniq().value();
+  });
+
+  self.attachmentBackendIds = ko.pureComputed(function() {
+    return self.applicationModel.kuntalupatunnukset();
   });
 
   function sendHubNotification(eventType, commandName, params, response) {
@@ -556,6 +561,10 @@ LUPAPISTE.AttachmentsService = function() {
         self.queryOne(attachmentId, {triggerCommand: "convert-to-pdfa"});
       })
       .call();
+  };
+
+  self.getDefaultBackendId = function() {
+    return _.first(self.applicationModel.kuntalupatunnukset());
   };
 
   function downloadRedirect( uri ) {

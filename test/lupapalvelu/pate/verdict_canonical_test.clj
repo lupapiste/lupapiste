@@ -85,9 +85,12 @@
     (vaadittu-katselmus-canonical "sv" verdict "6a156dd40e40adc8ee064463")
     => {:Katselmus {:katselmuksenLaji "rakennuksen paikan merkitseminen", :tarkastuksenTaiKatselmuksenNimi "Syn2", :muuTunnustieto []}}))
 
-(fact maarays-canonical
-  (maarays-canonical "fi" verdict)
-  => {:Maarays {:sisalto "muut lupaehdot - teksti", :maaraysPvm "2017-11-23", :toteutusHetki nil}})
+(facts maarays-canonical
+  (fact "text as :sisalto"
+    (maarays-canonical verdict)
+    => {:Maarays {:sisalto "muut lupaehdot - teksti", :maaraysPvm "2017-11-23", :toteutusHetki nil}})
+  (fact "without text nil"
+    (maarays-canonical (assoc-in verdict [:data :conditions] "")) => nil))
 
 (facts vaadittu-erityissuunnitelma-canonical
   (fact "suunnitelmat / Finnish"

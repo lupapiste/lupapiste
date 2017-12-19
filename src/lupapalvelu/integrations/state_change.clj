@@ -1,5 +1,6 @@
-(ns lupapalvelu.integrations.pate
+(ns lupapalvelu.integrations.state-change
   (:require [taoensso.timbre :refer [infof]]
+            [monger.operators :refer [$set]]
             [schema.core :as sc]
             [clj-http.client :as clj-http]
             [sade.core :refer :all]
@@ -7,6 +8,7 @@
             [sade.http :as http]
             [sade.schemas :as ssc]
             [sade.schema-utils :as ssu]
+            [sade.strings :as ss]
             [sade.util :as util]
             [clojure.set :as set]
             [lupapalvelu.application-schema :as app-schema]
@@ -27,9 +29,9 @@
 
 (def base-keys
   [:address :infoRequest :municipality
-   :state :permitType :location-wgs84
+   :state :permitType :permitSubtype
    :id :applicant :operations :propertyId
-   :location])
+   :location-wgs84 :location])
 
 (sc/defschema ApplicationBaseData                           ; Format application schema appropriate for integration
   (merge
@@ -94,6 +96,7 @@
   (-> (select-keys application (keys ApplicationBaseData))
       (update :location-wgs84 location-array-to-map)
       (update :location location-array-to-map)
+      (update :permitSubtype ss/blank-as-nil)
       (assoc :operations (build-operations application))
       (assoc :link (i18n/to-lang-map #(make-app-link (:id application) %)))))
 
@@ -119,7 +122,7 @@
             msg (util/assoc-when
                   {:id message-id :direction "out"
                    :status "published" :messageType "state-change"
-                   :partner "pate" :format "json" :transferType "http"
+                   :partner "matti" :format "json" :transferType "http"
                    :created (or (:created command) (now))
                    :application (-> (select-keys app [:id :organization])
                                     (assoc :state (name new-state)))
@@ -128,12 +131,12 @@
                   :action (:action command))]
         (messages/save msg)
         (infof "PATE state-change payload written to mongo for state '%s', messageId: %s" (name new-state) message-id)
-        (when-let [url (env/value :pate :rest :url)]         ; TODO send to MQ
-          (http/post (str url "/" (env/value :pate :rest :path :state-change))
-                     {:headers          {"X-Username" (env/value :pate :rest :username)
-                                         "X-Password" (env/value :pate :rest :password)
-                                         "X-Vault"    (env/value :pate :rest :vault)}
+        (when-let [url (env/value :matti :rest :url)]         ; TODO send to MQ
+          (http/post (str url "/" (env/value :matti :rest :path :state-change))
+                     {:headers          {"X-Username" (env/value :matti :rest :username)
+                                         "X-Password" (env/value :matti :rest :password)
+                                         "X-Vault"    (env/value :matti :rest :vault)}
                       :body             (clj-http/json-encode outgoing-data)
                       :throw-exceptions true})
-          (messages/mark-acknowledged-and-return message-id (now))
+          (messages/update-message message-id {$set {:status "done" :acknowledged (now)}})
           (infof "PATE JSON sent to state-change endpoint successfully"))))))

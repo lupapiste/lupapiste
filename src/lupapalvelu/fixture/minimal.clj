@@ -65,6 +65,21 @@
     :orgAuthz {:837-YA #{:authorityAdmin}}
     :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereYAapikey"}}
 
+   {:id "837-R"                                             ; tampere / tampere
+    :enabled true
+    :lastName "Tampere"
+    :firstName "Paakayttaja"
+    :city "Tampere"
+    :language "fi"
+    :username "tampere"
+    :street "Paapankuja 12"
+    :phone "0102030405"
+    :email "tampere@example.com"
+    :role "authorityAdmin"
+    :zip "10203"
+    :orgAuthz {:837-R #{:authorityAdmin}}
+    :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereapikey"}}
+
    ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti:  veikko / veikko
    {:id "777777777777777777000016"
     :email "veikko.viranomainen@tampere.fi"
@@ -424,7 +439,7 @@
     :enabled true
     :language "fi"
     :role "authority"
-    :orgAuthz {:186-R #{:authority :archivist}}
+    :orgAuthz {:186-R #{:authority :archivist :approver}}
     :firstName "Rakennustarkastaja"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
     :username "rakennustarkastaja@jarvenpaa.fi"
@@ -832,7 +847,7 @@
                                                 :yl-uusi-toiminta [[:muut :muu]]
                                                 :maa-aineslupa [[:muut :muu]]
                                                 "vvvl-vesijohdosta" [[:muut :muu]]}
-                       :krysp {:R {:url local-krysp, :ftpUser "dev_sipoo", :version "2.2.0"}
+                       :krysp {:R {:url local-krysp, :ftpUser "dev_sipoo", :version "2.2.2"}
                                :P {:url local-krysp :ftpUser "dev_poik_sipoo" :version "2.1.2"}
                                :YI {:url local-krysp :ftpUser "dev_ymp_sipoo" :version "2.2.1"}
                                :YL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.2.1"}
@@ -1045,9 +1060,10 @@
                        :krysp {:R {:url local-krysp :version "2.2.2"
                                    :http (merge
                                            {:auth-type "basic"
-                                            :partner "pate"
+                                            :partner "matti"
                                             :path {:application "hakemus-path"
-                                                   :review  "katselmus-path"}
+                                                   :review  "katselmus-path"
+                                                   :verdict "verdict-path"}
                                             :url local-krysp-receiver
                                             :headers [{:key "x-vault" :value "vaultti"}]}
                                            (org/encode-credentials "kuntagml" "kryspi"))}}

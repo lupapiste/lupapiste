@@ -7,22 +7,30 @@
         <p data-bind="visible: _.isEmpty(tags()), ltext: 'tags.no-tags'"></p>
         <ul class="tags" data-bind="visible: !_.isEmpty(tags())">
           <!-- ko foreach: tags -->
-          <li class="tag">
+          <li class="tag"
+              data-bind="css: {'tag--disabled': !$parent.canEdit}">
+            <!-- ko if: $parent.canEdit -->
             <span class="tag-remove icon remove"
                   data-bind="click: $parent.removeTag,
                              attr: {'data-test-id': 'remove-tag-button-' + $index()}"></span>
+            <!-- /ko -->
             <span class="tag-label"
                   data-bind="visible: !edit(), text: $data.label,
                              attr: {'data-test-id': 'tag-label-' + $index()}"></span>
             <input class="tag-editor"
                    data-bind="visible: edit, hasFocus: edit, value: $data.label, event: {keypress: $parent.onKeypress},
                               attr: {'data-test-id': 'edit-tag-input-' + $index()}"/>
+            <!-- ko if: $parent.canEdit -->
             <span class="tag-edit icon edit"
                   data-bind="visible: !edit(), click: $parent.editTag"></span>
+            <!-- /ko -->
           </li>
           <!-- /ko -->
         </ul>
-        <button class="btn btn-primary" data-test-id="add-tag-button" data-bind="ltext: 'auth-admin.tags.add', click: addTag"></button>
+        <button class="positive" data-test-id="add-tag-button"
+                data-bind="ltext: 'auth-admin.tags.add',
+                           click: addTag,
+                           enable: canEdit"></button>
       </div>
     </script>
   </section>

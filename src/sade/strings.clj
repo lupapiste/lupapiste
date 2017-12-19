@@ -222,3 +222,8 @@
   (->plain-string [value] ""))
 
 (def canonize-email (comp lower-case trim))
+
+(defn blank-as-nil
+  "If given string is blank, returns nil. Else returns string."
+  [string]
+  (when-not (blank? string) string))

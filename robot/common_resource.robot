@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
-Library        CustomSelenium2Library.py  timeout=12  run_on_failure=Nothing
+Library        CustomSeleniumLibrary.py  timeout=12  run_on_failure=Nothing
 Library        String
 Library        OperatingSystem
 Library        DebugLibrary
@@ -158,14 +158,14 @@ Language Is
 Current page id
   ${page_xpath}=  Set Variable  //section[contains(@class, 'visible')]
   Xpath should match X times  ${page_xpath}  1
-  ${page_id}=  Get Element Attribute  ${page_xpath}@id
+  ${page_id}=  Get Element Attribute  ${page_xpath}  id
   [return]  ${page_id}
 
 Current tab id
   ${current_page_id}=  Current page id
   ${tab_xpath}=  Set Variable  //section[@id='${current_page_id}']//div[contains(@class, 'tab-content')][contains(@style, 'display: block')]
   Xpath should match X times  ${tab_xpath}  1
-  ${current_tab_id}=  Get Element Attribute  ${tab_xpath}@id
+  ${current_tab_id}=  Get Element Attribute  ${tab_xpath}  id
   [return]  ${current_tab_id}
 
 Visible accordions Xpath
@@ -368,7 +368,7 @@ Admin logs in
   Admin front page should be open
 
 Get role
-  Run Keyword And Return  Get Element Attribute  user-name@data-test-role
+  Run Keyword And Return  Get Element Attribute  user-name  data-test-role
 
 User role should be
   [Arguments]  ${expected-role}
@@ -627,7 +627,7 @@ Edit operation description
   [Arguments]  ${doc}  ${text}  ${idx}=1
   ${jQueryIdx}=  Evaluate  ${idx} - 1
   Wait until   Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]//button[@data-test-id='toggle-identifiers-${doc}']
-  ${docId}=  Get Element Attribute  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]@data-doc-id
+  ${docId}=  Get Element Attribute  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]  data-doc-id
   ${identifiersClosed} =  Get identifiers closed  ${docId}
   # for jQuery ${idx}-1 because xpath indeces start from 1!
   Run keyword If  ${identifiersClosed}  Click element  div#application-info-tab [data-test-id=toggle-identifiers-${doc}]:eq(${jQueryIdx})
@@ -647,7 +647,7 @@ Operation description is
 Input building identifier
   [Arguments]  ${doc}  ${text}  ${idx}=1
   Wait until   Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]//button[@data-test-id='toggle-identifiers-${doc}']
-  ${docId}=  Get Element Attribute  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]@data-doc-id
+  ${docId}=  Get Element Attribute  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]  data-doc-id
   ${identifiersClosed} =  Get identifiers closed  ${docId}
   # for jQuery ${idx}-1 because xpath indeces start from 1!
   Run keyword If  ${identifiersClosed}  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
@@ -756,11 +756,11 @@ Prepare first request
 
 Selected Municipality Is
   [Arguments]  ${municipality}
-  ${selectedMuni} =  Get Element Attribute  xpath=//div[@id="popup-id"]//span[@data-test-id='create-municipality-select']@data-test-value
+  ${selectedMuni} =  Get Element Attribute  xpath=//div[@id="popup-id"]//span[@data-test-id='create-municipality-select']  data-test-value
   Should Be Equal  ${selectedMuni}  ${municipality}
 
 Address is not blank
-  ${address} =  Get Element Attribute  xpath=//div[@id="popup-id"]//input[@data-test-id='create-address']@value
+  ${address} =  Get Element Attribute  xpath=//div[@id="popup-id"]//input[@data-test-id='create-address']  value
   Should Not Be Equal As Strings  ${address}  ${EMPTY}
 
 Do prepare new request
@@ -1063,7 +1063,7 @@ Submit application errors count is
 Submit application error should be
   [Arguments]  ${errorText}
   Wait until  Element should be visible  //div[@data-test-id='submit-errors-container']
-  ${attrValue}=  Get Element Attribute  xpath=(//div[@data-test-id='submit-errors-container']//span)@data-submit-error
+  ${attrValue}=  Get Element Attribute  xpath=(//div[@data-test-id='submit-errors-container']//span)  data-submit-error
   Should Be Equal As Strings  ${errorText}  ${attrValue}
 
 Approve application no dialogs
@@ -1301,7 +1301,7 @@ Apply minimal fixture now
 
 Application state should be
   [Arguments]  ${state}
-  ${s} =  Get Element Attribute  xpath=//div[@data-test-id='application-state']@data-test-state
+  ${s} =  Get Element Attribute  xpath=//div[@data-test-id='application-state']  data-test-state
   Should be equal  ${s}  ${state}
 
 Permit type should be

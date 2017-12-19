@@ -215,16 +215,20 @@
 
 (defn update-verdicts [{:keys [application] :as command} verdicts]
   (let [current-verdicts (:verdicts application)
-        modified-verdicts (filter (fn [{:keys [id kuntalupatunnus]}]
-                                    (some #(and (= id (:id %))
-                                                (not= kuntalupatunnus (:kuntalupatunnus %))) current-verdicts))
+        modified-verdicts (filter (fn [verdict]
+                                    (some #(and (= (:id verdict) (:id %))
+                                                (or (not= (:kuntalupatunnus verdict) (:kuntalupatunnus %))
+                                                    (and  (not= (:verdictDate verdict) nil)
+                                                          (not= (:verdictDate verdict) (:paatospvm (first (:poytakirjat (first (:paatokset %))))))))
+                                                ) current-verdicts))
                                   verdicts)
         removed-verdicts (remove #(contains? (set (map :id verdicts)) (:id %)) current-verdicts)
         new-verdicts (filter #(nil? (:id %)) verdicts)]
-    (doseq [{:keys [id kuntalupatunnus]} modified-verdicts]
+    (doseq [{:keys [id kuntalupatunnus verdictDate]} modified-verdicts]
       (action/update-application command
                                  {:verdicts.id id}
-                                 {$set {:verdicts.$.kuntalupatunnus kuntalupatunnus}}))
+                                 {$set {:verdicts.$.kuntalupatunnus kuntalupatunnus
+                                        :verdicts.$.paatokset.0.poytakirjat.0.paatospvm verdictDate}}))
     (doseq [{:keys [id]} removed-verdicts]
       (action/update-application command
                                  {$pull {:verdicts {:id id}}}))

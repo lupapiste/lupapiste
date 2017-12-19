@@ -3,7 +3,7 @@ LUPAPISTE.AreaUploadModel = function(params) {
 
   var self = this;
 
-  self.disabled = ko.observable(false);
+  self.enabled = lupapisteApp.models.globalAuthModel.ok( "pseudo-organization-area" );
 
   self.pending = ko.observable(false);
 

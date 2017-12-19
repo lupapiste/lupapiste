@@ -6,7 +6,7 @@
             [sade.common-reader :as cr]
             [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa]]
             [lupapalvelu.pate.verdict-canonical-test :refer [verdict]]
-            [lupapalvelu.xml.krysp.vercict-mapping]
+            [lupapalvelu.xml.krysp.verdict-mapping]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.validator :as validator]))
 
@@ -22,7 +22,7 @@
                                                         :latestVersion {:fileId "32" :filename "eri_paatoksen_liite.txt"}
                                                         :target {:type "verdict" :id (str (:id verdict) "_eri")}}]))
 
-(def result (permit/verdict-krysp-mapper app verdict {} "fi" "2.2.2" "BEGIN_OF_LINK/") )
+(def result (permit/verdict-krysp-mapper app verdict "fi" "2.2.2" "BEGIN_OF_LINK/") )
 
 (def attachments (:attachments result))
 

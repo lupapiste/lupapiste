@@ -1,7 +1,7 @@
-(ns lupapalvelu.integrations.pate-state-change-json-test
+(ns lupapalvelu.integrations.state-change-json-test
   (:require [midje.sweet :refer :all]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.integrations.pate :as mjson]
+            [lupapalvelu.integrations.state-change :as mjson]
             [sade.coordinate :as coord]
             [sade.schemas :as ssc]
             [sade.schema-generators :as ssg]))
@@ -104,3 +104,14 @@
     (fact "manuaal building id"
       (let [app (app-with-docs [old-building-manuaalinen-rakennusnumero])]
         (run-test (assoc app :state (name (first (sm/application-state-seq app)))) manual-building-id-test)))))
+
+(fact "permitSubtype"
+  (fact "if no key, nil"
+    (-> (assoc (app-with-docs [new-building-data]) :state "open")
+        (mjson/state-change-data "submitted")) => (contains {:permitSubtype nil}))
+  (fact "blank as nil"
+    (-> (assoc (app-with-docs [new-building-data]) :state "open" :permitSubtype "")
+        (mjson/state-change-data "submitted")) => (contains {:permitSubtype nil}))
+  (fact "ok"
+    (-> (assoc (app-with-docs [new-building-data]) :state "open" :permitSubtype "testi")
+        (mjson/state-change-data "submitted")) => (contains {:permitSubtype "testi"})))

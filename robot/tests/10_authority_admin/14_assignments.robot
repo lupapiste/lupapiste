@@ -22,12 +22,12 @@ Authority admin goes to the application page
   Go to page  assignments
 
 Sees assignments are enabled
-  Checkbox should be selected  assignments-enabled
+  Checkbox wrapper selected by test id  assignments-enabled
 
 Disables assignments for organization
-  Unselect checkbox  assignments-enabled
+  Toggle toggle  assignments-enabled
   Wait until  Positive indicator should be visible
-  Checkbox should not be selected  assignments-enabled
+  Checkbox wrapper not selected by test id  assignments-enabled
   Logout
 
 Sonja logs in and sees assignments are not enabled

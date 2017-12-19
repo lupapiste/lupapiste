@@ -43,7 +43,8 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
         applicant: bulletin.applicant,
         date: bulletin.modified,
         commentingType: commentingType,
-        commentingEndsAt: commentingEndsAt
+        commentingEndsAt: commentingEndsAt,
+        category: bulletin.category
       };
     });
   });
@@ -59,6 +60,10 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
   });
 
   self.openBulletin = function(item) {
-    pageutil.openPage("bulletin", item.id);
+    if (_.get(item, "category") === "ymp") {
+      pageutil.openPage("ymp-bulletin", item.id);
+    } else {
+      pageutil.openPage("bulletin", item.id);
+    }
   };
 };
