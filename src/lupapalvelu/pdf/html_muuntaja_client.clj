@@ -38,7 +38,8 @@
       (fail :unknown))))
 
 (defn upload-pdf-stream
-  "Uploads pdf stream into given file-id using filename"
+  "Uploads pdf stream into given file-id using filename provided that
+  the given response is ok."
   [file-id filename {stream :pdf-file-stream :as resp}]
   (if (ok? resp)
     (with-open [s stream]
