@@ -55,35 +55,3 @@
           :answered (when (usr/applicant? user) {$set {:state :info}})
 
           nil)))))
-
-(defn- attachment-ids [application]
-  (->> (:attachments application)
-       (map :id)
-       set))
-
-(defn flag-removed-attachment-comments
-  "Flags comments relating to removed attachments. Called before any
-  attachment filtering. See filter-application-content-for function in
-  domain.clj for details. The flags are used when removing
-  comments (see below)."
-  [application]
-  (let [attachment-ids (attachment-ids application)]
-    (update application :comments (fn [comments]
-                                    (map (fn [{target :target :as comment}]
-                                           (cond-> comment
-                                             (and (util/=as-kw (:type target) :attachment)
-                                                  (not (contains? attachment-ids (:id target))))
-                                             (assoc :removed true)))
-                                         comments)))))
-
-(defn remove-hidden-attachment-comments
-  "Removes comments that are related to attachments that the user is not
-  allowed to see. Called after the attachments have been filtered."
-  [{:keys [attachments] :as application}]
-  (let [attachment-ids (attachment-ids application)]
-    (update application :comments (fn [comments]
-                                    (remove (fn [{:keys [target removed]}]
-                                              (and (util/=as-kw (:type target) :attachment)
-                                                   (not removed)
-                                                   (not (contains? attachment-ids (:id target)))))
-                                            comments)))))

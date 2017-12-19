@@ -5,7 +5,6 @@
             [lupapalvelu.attachment.accessibility :as attachment-access]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.comment :as comment]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.roles :as roles]
@@ -82,18 +81,6 @@
                   %)))
    neighbors))
 
-(defn- filter-targeted-attachment-comments
-  "If comment target type is attachment, check that attachment exists.
-   If not, show only comments with non-blank text related to deleted attachment"
-  [application]
-  (let [attachments (set (map :id (:attachments application)))]
-    (update-in application [:comments]
-      #(filter (fn [{:keys [target text]}] (or
-                                             (empty? target)
-                                             (not= (:type target) "attachment")
-                                             (or
-                                               (attachments (:id target))
-                                               (not (ss/blank? text))))) %))))
 
 (defn- filter-notice-from-application [application user]
   (if (user/authority? user)
@@ -135,21 +122,57 @@
                          (name role))]
     ((set roles) effective-role)))
 
+(defn- attachment-ids [application]
+  (->> (:attachments application)
+       (map :id)
+       set))
+
+(defn flag-removed-attachment-comments
+  "Flags comments relating to removed attachments. Called before any
+  attachment filtering. See filter-application-content-for function in
+  domain.clj for details. The flags are used when removing
+  comments (see below)."
+  [application]
+  (let [attachment-ids (attachment-ids application)]
+    (update application :comments (fn [comments]
+                                    (map (fn [{target :target :as comment}]
+                                           (cond-> comment
+                                             (and (util/=as-kw (:type target) :attachment)
+                                                  (not (contains? attachment-ids (:id target))))
+                                             (assoc :removed true)))
+                                         comments)))))
+
+(defn cleanup-attachment-comments
+  "An attachment comment is removed if it is either a) related to an
+  attachment that the user is not allowed to see, or b) the attachment
+  is removed but the comment text is blank. Called after the
+  attachments have been filtered. In other words, the non-removed
+  missing attachments are considered hidden."
+  [{:keys [attachments] :as application}]
+  (let [attachment-ids (attachment-ids application)]
+    (update application :comments (fn [comments]
+                                    (remove (fn [{:keys [target removed text]}]
+                                              (and (util/=as-kw (:type target) :attachment)
+                                                   (not (contains? attachment-ids (:id target)))
+                                                   (or (not removed) ; hidden
+                                                       (and removed (ss/blank? text)))))
+                                            comments)))))
+
+
 (defn filter-application-content-for [application user]
   (when (seq application)
     (-> application
         (update-in [:comments] (partial filter (fn [comment] (and
                                                                (can-read-comments? application user)
                                                                (can-read-comment? comment user)))))
-        comment/flag-removed-attachment-comments
+        flag-removed-attachment-comments
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
         (update-in [:statements] (partial map #(if (authorized-to-statement? user %) % (statement-summary %))))
         (update-in [:attachments] (partial remove (partial statement-attachment-hidden-for-user? application user)))
         (update-in [:attachments] (partial only-authority-sees user (partial relates-to-draft-verdict? application)))
         (update-in [:attachments] (partial attachment-access/filter-attachments-for user application))
         (update-in [:neighbors] (partial normalize-neighbors application user))
-        filter-targeted-attachment-comments
-        comment/remove-hidden-attachment-comments
+        cleanup-attachment-comments
         (update-in [:tasks] (partial only-authority-sees user (partial relates-to-draft-verdict? application)))
         (update-in [:company-notes] (partial pick-user-company-notes user))
         (filter-notice-from-application user))))
