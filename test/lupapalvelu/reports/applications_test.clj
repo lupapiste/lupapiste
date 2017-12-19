@@ -105,7 +105,7 @@
   (fact "Row data is composed from application"
     (digi-report-data application) => {:date "18.10.2017"
                                        :id "LP-753-2017-00001"
-                                       :attachments 3}))
+                                       :attachments 3})
 
   (fact "Sum data is composed from row data"
     (digi-report-sum digi-report-rows) => [{:date "10.12.2017" :attachments 12}
