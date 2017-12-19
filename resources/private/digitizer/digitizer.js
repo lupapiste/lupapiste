@@ -285,13 +285,9 @@
     };
 
     self.downloadReport = function() {
-      console.log("download");
-      console.log(self.reportStartDate().getTime());
-      console.log(self.reportEndDate().getTime());
       var startTs = self.reportStartDate().getTime();
       var endTs = self.reportEndDate().getTime();
       var url = "/api/raw/digitizer-report?startTs="+startTs+"&endTs="+endTs;
-      console.log(url);
       window.open(url, "_self");
     };
   }
