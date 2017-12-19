@@ -143,11 +143,11 @@
                                                  (:verdict-dates data))]
                          flatten
                          (remove nil?)
-              (zipmap <> (repeat true))
-              (util/assoc-when <> :buildings (or (removed? :buildings)
-                                                 (zipmap building-details
-                                                         (repeat true))))
-              not-empty)]
+                         (zipmap <> (repeat true))
+                         (util/assoc-when <> :buildings (or (removed? :buildings)
+                                                            (zipmap building-details
+                                                                    (repeat true))))
+                         not-empty)]
     {:exclusions exclusions}))
 
 (defn new-verdict-draft [template-id {:keys [application organization created]
@@ -172,7 +172,7 @@
 (defn mask-verdict-data [{:keys [user application]} verdict]
   (cond
     (not (auth/application-authority? application user))
-        (util/dissoc-in verdict [:data :bulletinOpDescription])
+    (util/dissoc-in verdict [:data :bulletinOpDescription])
     :default verdict))
 
 (defn command->verdict [{:keys [data application] :as command}]

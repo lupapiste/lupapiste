@@ -46,11 +46,11 @@
         filename-starts-with id
         xml-file (if get-files-from-sftp-server?
                    (io/file (get-file-from-server
-                              sftp-user
-                              sftp-server
-                              filename-starts-with
-                              target-file-name
-                              (str permit-type-dir "/")))
+                             sftp-user
+                             sftp-server
+                             filename-starts-with
+                             target-file-name
+                             (str permit-type-dir "/")))
                    (io/file (get-local-filename output-dir filename-starts-with)))
         xml-as-string (slurp xml-file)
         xml (cxml/parse (io/reader xml-file))
@@ -80,9 +80,9 @@
            :category "r")=> (just {:ok true}))
   (fact "Save to bad path"
     (command sipoo :save-verdict-template-settings-value
-                   :category "r"
-                   :path [:one :two]
-                   :value ["a" "b" "c"])
+             :category "r"
+             :path [:one :two]
+             :value ["a" "b" "c"])
     => (err :error.invalid-value-path))
   (fact "Save bad value"
     (command sipoo :save-verdict-template-settings-value
@@ -234,7 +234,7 @@
                                :value "Foo")
                       => (err :error.verdict-template-deleted))
                     (fact "Publish not allowed for deleted template"
-                          (publish-verdict-template sipoo id)
+                      (publish-verdict-template sipoo id)
                       => (err :error.verdict-template-deleted))
                     (fact "Fetch draft not allowed for deleted template"
                       (query sipoo :verdict-template
@@ -434,7 +434,7 @@
         :plans []})
   (fact "Add new plan"
     (let [{id :id} (:plan (command sipoo :add-verdict-template-plan
-                                     :category "r"))]
+                                   :category "r"))]
       id => truthy
       (fact "Fetch plans again"
         (:plans (query sipoo :verdict-template-plans :category "r"))
@@ -445,8 +445,8 @@
                              :deleted  false})]))
       (fact "Give name to the plan"
         (:plan (command sipoo :update-verdict-template-plan
-                          :plan-id id
-                          :fi "Nimi" :sv "Namn" :en "Name"))
+                        :plan-id id
+                        :fi "Nimi" :sv "Namn" :en "Name"))
         => (contains {:id       id
                       :name     {:fi "Nimi" :sv "Namn" :en "Name"}
                       :deleted  false
@@ -462,9 +462,9 @@
                    :plan-id id
                    :fi "Moro")
           => (contains {:plan (contains {:id id
-                                           :name {:fi "Moro"
-                                                  :sv "Namn"
-                                                  :en "Name"}})}))
+                                         :name {:fi "Moro"
+                                                :sv "Namn"
+                                                :en "Name"}})}))
         (fact "Name cannot be empty"
           (command sipoo :update-verdict-template-plan
                    :plan-id id
@@ -475,9 +475,9 @@
                    :plan-id id
                    :sv "Stockholm" :en "London")
           => (contains {:plan (contains {:id id
-                                           :name {:fi "Moro"
-                                                  :sv "Stockholm"
-                                                  :en "London"}})}))
+                                         :name {:fi "Moro"
+                                                :sv "Stockholm"
+                                                :en "London"}})}))
         (fact "Unsupported params"
           (command sipoo :update-verdict-template-plan
                    :plan-id id
@@ -1047,51 +1047,52 @@
                       (edit-verdict "verdict-date" verdict-date) => ok?)
                     (facts "Add attachment to verdict draft again"
                       (let [attachment-id (add-verdict-attachment app-id verdict-id "Otepaatos")]
-                        (fact "Publish verdict"             ; TODO check that verdict can't be published if verdict-date is blank!
+                        ;; TODO check that verdict can't be published if verdict-date is blank!
+                        (fact "Publish verdict"
                           (command sonja :publish-pate-verdict
                                    :id app-id
                                    :verdict-id verdict-id) => ok?)
                         (fact "Attachment can no longer be deleted"
                           (command sonja :delete-attachment :id app-id
                                    :attachmentId attachment-id)
-                          => fail?)))
-                    (check-kuntagml application verdict-date)
-                    => fail?)
+                          => fail?)
+                        (check-kuntagml application verdict-date)
+                        => fail?
                         (fact "Verdict PDF attachment has been created"
-                      (util/find-first (fn [{:keys [id target]}]
-                                                 (and (not= id attachment-id)
-                                                      (= (:id target) verdict-id)))
-                                       (:attachments (query-application sonja app-id)))
-                      => (contains {:readOnly         true
-                                    :locked           true
-                                    :contents         "P\u00e4\u00e4t\u00f6s"
-                                    :type             {:type-group "paatoksenteko"
-                                                       :type-id    "paatos"}
-                                    :applicationState "verdictGiven"
-                                    :latestVersion    (contains {:contentType "application/pdf"})}))))
-              (fact "Editing no longer allowed"
+                          (util/find-first (fn [{:keys [id target]}]
+                                             (and (not= id attachment-id)
+                                                  (= (:id target) verdict-id)))
+                                           (:attachments (query-application sonja app-id)))
+                          => (contains {:readOnly         true
+                                        :locked           true
+                                        :contents         "P\u00e4\u00e4t\u00f6s"
+                                        :type             {:type-group "paatoksenteko"
+                                                           :type-id    "paatos"}
+                                        :applicationState "verdictGiven"
+                                        :latestVersion    (contains {:contentType "application/pdf"})}))))
+                    (fact "Editing no longer allowed"
                       (edit-verdict :verdict-text "New verdict text")
                       => (err :error.verdict.not-draft))
                     (fact "Published verdict cannot be deleted"
                       (command sonja :delete-pate-verdict :id app-id
-                               :verdict-id verdict-id) => fail?)
-                    (fact "Application state is verdictGiven"
-                      (:state (query-application sonja app-id))
-                      => "verdictGiven")))
-                (fact "Verdict draft to be deleted"
-                  (let  [{verdict :verdict} (command sonja :new-pate-verdict-draft
-                                                     :id app-id
-                                                     :template-id template-id)
-                         {verdict-id :id}   verdict]
-                    (facts "Add attachment to verdict draft"
-                      (let [attachment-id (add-verdict-attachment app-id verdict-id "Hello world!")]
-                        (fact "Delete verdict draft"
-                          (command sonja :delete-pate-verdict :id app-id
-                                   :verdict-id verdict-id) => ok?)
-                        (let [{:keys [pate-verdicts attachments]} (query-application sonja app-id)]
-                          (fact "Verdict draft is no longer in the application"
-                            pate-verdicts =not=> (contains {:id verdict-id}))
-                          (fact "Verdict draft attachment is no longer in the application"
-                            attachments =not=> (contains {:id attachment-id}))
-                          (fact "There are still other attachments"
-                            (count attachments) => pos?))))))))))))))
+                               :verdict-id verdict-id) => fail?)))
+              (fact "Application state is verdictGiven"
+                (:state (query-application sonja app-id))
+                => "verdictGiven")))
+          (fact "Verdict draft to be deleted"
+            (let  [{verdict :verdict} (command sonja :new-pate-verdict-draft
+                                               :id app-id
+                                               :template-id template-id)
+                   {verdict-id :id}   verdict]
+              (facts "Add attachment to verdict draft"
+                (let [attachment-id (add-verdict-attachment app-id verdict-id "Hello world!")]
+                  (fact "Delete verdict draft"
+                    (command sonja :delete-pate-verdict :id app-id
+                             :verdict-id verdict-id) => ok?)
+                  (let [{:keys [pate-verdicts attachments]} (query-application sonja app-id)]
+                    (fact "Verdict draft is no longer in the application"
+                      pate-verdicts =not=> (contains {:id verdict-id}))
+                    (fact "Verdict draft attachment is no longer in the application"
+                      attachments =not=> (contains {:id attachment-id}))
+                    (fact "There are still other attachments"
+                      (count attachments) => pos?))))))))))))
