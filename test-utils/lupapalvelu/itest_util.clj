@@ -30,7 +30,8 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as u]
             [lupapalvelu.server]
-            [ring.util.codec :as codec])
+            [ring.util.codec :as codec]
+            [lupapalvelu.user :as usr])
   (:import org.apache.http.client.CookieStore
            java.io.FileNotFoundException))
 
@@ -555,7 +556,7 @@
 ;; API for local operations
 
 (defn make-local-request [apikey]
-  {:scheme "http", :user (find-user-from-minimal-by-apikey apikey)})
+  {:scheme "http", :user (usr/session-summary (find-user-from-minimal-by-apikey apikey))})
 
 (defn- execute-local [apikey web-fn action & args]
   (let [params (->arg-map args)]

@@ -164,6 +164,7 @@
 (defn delete-verdict [app-id verdict-id callback]
   (common/command {:command "delete-pate-verdict"
                    :success #(do (fetch-verdict-list app-id)
+                                 (js/lupapisteApp.services.attachmentsService.queryAll)
                                  (callback %))}
                   :id app-id
                   :verdict-id verdict-id))
@@ -179,6 +180,7 @@
 (defn publish-and-reopen-verdict [app-id verdict-id callback]
   (common/command {:command :publish-pate-verdict
                    :success (fn []
+                              (fetch-verdict-list app-id)
                               (open-verdict app-id verdict-id callback)
                               (js/repository.load app-id))}
                   :id app-id

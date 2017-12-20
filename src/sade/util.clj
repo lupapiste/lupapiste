@@ -7,9 +7,7 @@
             [clojure.java.io :as io]
             [clojure.walk :refer [postwalk prewalk]]
             [me.raynes.fs :as fs]
-            [me.raynes.fs.compression :as fsc]
             [sade.core :refer [fail!]]
-            [sade.files :as files]
             [sade.shared-util :as shared]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [schema.core :as sc]
@@ -624,7 +622,7 @@
 (defalias not=as-kw          shared/not=as-kw)
 (defalias includes-as-kw?    shared/includes-as-kw?)
 (defalias intersection-as-kw shared/intersection-as-kw)
-(defalias difference-as-kw shared/difference-as-kw)
+(defalias difference-as-kw   shared/difference-as-kw)
 
 (defn kw-path
   "a b c -> :a.b.c

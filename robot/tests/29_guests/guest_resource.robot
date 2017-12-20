@@ -215,7 +215,7 @@ Invite application guest authority
   Element Should Contain  jquery=table[data-test-id=application-guest-authorities] tr[data-test-id=${description}]  ${email}
   Element Should Contain  jquery=table[data-test-id=application-guest-authorities] tr[data-test-id=${description}]  ${description}
   Scroll to  table[data-test-id=application-guest-authorities] tr[data-test-id=${description}] input
-  Select Checkbox  jquery=table[data-test-id=application-guest-authorities] tr[data-test-id=${description}] input
+  Select Radio Button  guest-authorities  ${email}
   Guest bubble ok
 
 No more guest authorities

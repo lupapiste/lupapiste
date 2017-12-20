@@ -170,7 +170,7 @@
   {:parameters [id doc updates]
    :categories #{:documents}
    :user-roles #{:applicant :authority}
-   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
+   :user-authz-roles roles/writer-roles-with-foreman
    :input-validators [(partial action/non-blank-parameters [:id :doc])
                       (partial action/vector-parameters [:updates])]
    :pre-checks [(document-in-application-validator :doc)
@@ -199,7 +199,7 @@
   {:parameters       [id doc path collection]
    :categories       #{:documents :tasks}
    :user-roles       #{:applicant :authority}
-   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
+   :user-authz-roles roles/writer-roles-with-foreman
    :input-validators [doc-persistence/validate-collection]
    :pre-checks       [(document-in-application-validator :doc)
                       (editable-by-state? :doc #{:draft :answered :open :submitted :complementNeeded})
@@ -286,7 +286,7 @@
   {:parameters [id documentId userId path]
    :categories #{:documents}
    :user-roles #{:applicant :authority}
-   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
+   :user-authz-roles roles/writer-roles-with-foreman
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks [(document-in-application-validator :documentId)
                 (editable-by-state? :documentId states/update-doc-states)
@@ -301,7 +301,7 @@
   {:parameters [id documentId path]
    :categories #{:documents}
    :user-roles #{:applicant :authority}
-   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
+   :user-authz-roles roles/writer-roles-with-foreman
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks [(document-in-application-validator :documentId)
                 (editable-by-state? :documentId states/update-doc-states)
@@ -320,7 +320,7 @@
    :parameters       [id documentId companyId path]
    :categories       #{:documents}
    :user-roles       #{:applicant :authority}
-   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
+   :user-authz-roles roles/writer-roles-with-foreman
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks       [(document-in-application-validator :documentId)
                       (editable-by-state? :documentId states/update-doc-states)

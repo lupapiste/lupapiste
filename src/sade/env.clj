@@ -112,6 +112,14 @@
   "disables feature value in-memory."
   [& feature] (set-feature! false feature))
 
+(defmacro with-feature-value
+  "Binds given feature to value, executes body and finally returns feature to it's old value."
+  [feature value & body]
+  `(let [old-val# (feature? ~feature)]
+     (set-feature! ~value [~feature])
+     ~@body
+     (set-feature! old-val# [~feature])))
+
 (defn features
   "Returns a list of all enabled features."
   []

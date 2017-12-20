@@ -81,6 +81,9 @@
                 {"$project" bulletins/bulletins-fields}
                 {"$sort" (make-sort sort)}])
         apps (map #(assoc (:versions %) :id (:_id %)) apps)
+        apps (map (fn [{:keys [category] :as app}] (if (#{"ymp"} category)
+                                                     app
+                                                     (dissoc app :applicant))) apps)
         skip (* (dec page) bulletin-page-size)]
     {:left (- (count apps) skip bulletin-page-size)
      :data (->> apps (drop skip) (take bulletin-page-size))}))
@@ -254,6 +257,9 @@
                                    (update-in [:documents] (partial map append-schema-fn))
                                    (update-in [:attachments] (partial map #(dissoc % :metadata :auth)))
                                    (assoc :stateSeq bulletins/bulletin-state-seq))
+          bulletin             (if (#{"ymp"} (:category bulletin))
+                                 bulletin
+                                 (dissoc bulletin :applicant :_applicantIndex))
           bulletin-commentable (= (bulletin-can-be-commented command) nil)]
       (ok :bulletin (merge bulletin {:canComment bulletin-commentable})))
     (fail :error.bulletin.not-found)))

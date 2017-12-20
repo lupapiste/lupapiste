@@ -6,7 +6,7 @@
             [sade.common-reader :as cr]
             [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa]]
             [lupapalvelu.pate.verdict-canonical-test :refer [verdict]]
-            [lupapalvelu.xml.krysp.vercict-mapping]
+            [lupapalvelu.xml.krysp.verdict-mapping]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.validator :as validator]))
 
@@ -22,7 +22,7 @@
                                                         :latestVersion {:fileId "32" :filename "eri_paatoksen_liite.txt"}
                                                         :target {:type "verdict" :id (str (:id verdict) "_eri")}}]))
 
-(def result (permit/verdict-krysp-mapper app verdict {} "fi" "2.2.2" "BEGIN_OF_LINK/") )
+(def result (permit/verdict-krysp-mapper app verdict "fi" "2.2.2" "BEGIN_OF_LINK/") )
 
 (def attachments (:attachments result))
 
@@ -76,10 +76,10 @@
     (facts "vaadittutyonjohtajatieto"
       (fact "vaadittutyonjohtaja - times four"
         (map :content (xml/select lp-xml :paatostieto :lupamaaraykset :vaadittuTyonjohtajatieto :tyonjohtajaRooliKoodi))
-        => [["erityisalojen työnjohtaja"]
-            ["IV-työnjohtaja"]
-            ["vastaava työnjohtaja"]
-            ["KVV-työnjohtaja"]])))
+        => [["erityisalojen ty\u00f6njohtaja"]
+            ["IV-ty\u00f6njohtaja"]
+            ["vastaava ty\u00f6njohtaja"]
+            ["KVV-ty\u00f6njohtaja"]])))
 
   (facts "paivamaarat"
     (fact "aloitettavapvm"
@@ -102,10 +102,10 @@
 
   (facts "poytakirja"
     (fact "paatos"
-      (xml/get-text lp-xml [:paatostieto :poytakirja :paatos]) => "päätös - teksti")
+      (xml/get-text lp-xml [:paatostieto :poytakirja :paatos]) => "p\u00e4\u00e4t\u00f6s - teksti")
 
     (fact "paatoskoodi"
-      (xml/get-text lp-xml [:paatostieto :poytakirja :paatoskoodi]) => "myönnetty")
+      (xml/get-text lp-xml [:paatostieto :poytakirja :paatoskoodi]) => "my\u00f6nnetty")
 
     (fact "paatoksentekija"
       (xml/get-text lp-xml [:paatostieto :poytakirja :paatoksentekija]) => "Pate Paattaja (Viranhaltija)")

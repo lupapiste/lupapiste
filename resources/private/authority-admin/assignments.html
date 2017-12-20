@@ -13,9 +13,11 @@
 
       <section>
         <h2 data-bind="ltext: 'auth-admin.assignments.title'"></h2>
-        <input type="checkbox" class="form-input" id="assignments-enabled" data-test-id="assignments-enabled"
-               data-bind="checked: organization.assignmentsEnabled, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-assignments')" />
-        <label for="assignments-enabled" class="form-label" data-bind="ltext: 'auth-admin.assignments.enabled'"></label>
+        <toggle params="value: organization.assignmentsEnabled,
+                        ltext: 'auth-admin.assignments.enabled',
+                        prefix: 'blockbox',
+                        testId: 'assignments-enabled',
+                        enable: lupapisteApp.models.globalAuthModel.ok('set-organization-assignments')"></toggle>
       </section>
 
       <section data-bind="visible: organization.assignmentsEnabled">

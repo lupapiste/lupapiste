@@ -1,6 +1,7 @@
 (ns lupapalvelu.archiving-test
   (:require [midje.sweet :refer :all]
-            [lupapalvelu.archiving :refer :all]))
+            [lupapalvelu.archiving :refer :all]
+            [lupapalvelu.permit :as permit]))
 
 
 (facts "Should archiving valid YA applications"
@@ -24,3 +25,14 @@
     (valid-ya-state? {:id "LP-XXX-2017-00013" :permitType "R" :state "foremanVerdictGiven"}) => false)
   (fact "Invalid R application with invalid YA state - should not be in valid YA state"
     (valid-ya-state? {:id "LP-XXX-2017-00014" :permitType "R" :state "finished"}) => false))
+
+(facts "Archiving project"
+  (fact "Should set attachment specific backendId as first permit id"
+    (let [verdicts [{:kuntalupatunnus "LX-0001"} {:kuntalupatunnus "LX-0002"} {:kuntalupatunnus "LX-0003"}]]
+      (permit-ids-for-archiving verdicts {:backendId "LX-0002"} permit/ARK) => ["LX-0002" "LX-0001" "LX-0003"]
+      (permit-ids-for-archiving verdicts {:backendId "LX-0002"} permit/R) => ["LX-0001" "LX-0002" "LX-0003"]))
+  (fact "Should use attachment specific verdict for verdict date"
+    (let [verdicts [{:kuntalupatunnus "LX-0001" :paatokset [{:poytakirjat {:0 {:paatospvm 1482530400000}}}]}
+                    {:kuntalupatunnus "LX-0002" :paatokset [{:poytakirjat {:0 {:paatospvm 1512597600000}}}]}
+                    {:kuntalupatunnus "LX-0003" :paatokset [{:poytakirjat {:0 {:paatospvm 1510057163483}}}]}]]
+      (get-ark-paatospvm verdicts {:backendId "LX-0002"}) => "2017-12-07T00:00:00+02:00")))

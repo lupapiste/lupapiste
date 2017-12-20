@@ -9,12 +9,13 @@
             [sade.core :refer :all]
             [sade.util :as util]
             [lupapiste-commons.attachment-types :as attachment-types]
-            [lupapalvelu.permit :as permit]
             [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.parties-canonical]
             [lupapalvelu.document.tools :as doc-tools]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
             ;; Make sure all the mappers are registered
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
@@ -26,6 +27,7 @@
             [lupapalvelu.xml.krysp.kiinteistotoimitus-mapping]
             [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping]
             [lupapalvelu.xml.krysp.vesihuolto-mapping]
+            [lupapalvelu.xml.krysp.verdict-mapping]
             [lupapalvelu.xml.krysp.http :as krysp-http]
             [lupapalvelu.xml.disk-writer :as writer]
             [lupapalvelu.xml.validator :as validator]
@@ -196,6 +198,30 @@
                           (->> attachments (map :fileId) (remove nil?)))
                         #(writer/write-to-disk %1 application %2 (resolve-output-directory @organization permit-type)))
         mapping-result (rl-mapping/save-unsent-attachments-as-krysp filtered-app lang krysp-version begin-of-link)]
+    (if-some [{:keys [xml attachments]} mapping-result]
+      (-> (data-xml/emit-str xml)
+          (validator/validate-integration-message! permit-type krysp-version)
+          (output-fn attachments))
+      (fail! :error.unknown))))
+
+(defn verdict-as-kuntagml
+  [{:keys [application organization user]} verdict]
+  (let [organization  (if (delay? organization) @organization organization)
+        permit-type   (permit/permit-type application)
+        krysp-version (resolve-krysp-version organization permit-type)
+        begin-of-link (get-begin-of-link permit-type organization)
+        filtered-app  (-> application
+                           #_(filter-attachments-by-state current-state)
+                           (dissoc :attachments)            ; TODO: should application attachment be included in verdict XML?
+                           remove-non-approved-designers)
+        output-dir    (resolve-output-directory organization permit-type)
+        output-fn     (if-some [http-conf (http-conf organization permit-type)]
+                        (fn [xml attachments]
+                          (krysp-http/send-xml application user :verdict xml http-conf)
+                          (->> attachments (map :fileId) (remove nil?)))
+                        #(writer/write-to-disk %1 application %2 output-dir nil nil "verdict"))
+
+        mapping-result (permit/verdict-krysp-mapper filtered-app verdict (name i18n/*lang*) krysp-version begin-of-link)]
     (if-some [{:keys [xml attachments]} mapping-result]
       (-> (data-xml/emit-str xml)
           (validator/validate-integration-message! permit-type krysp-version)

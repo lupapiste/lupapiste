@@ -6,24 +6,23 @@
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.transformations :as transformations]
-            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.inspection-summary :as inspection-summary]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.schemas :as schemas]
+            [lupapalvelu.pate.pdf :as pdf]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.operations :as ops]
-            [lupapalvelu.organization :as org]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
-            [lupapalvelu.user :as usr]
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp]
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
             [schema.core :as sc]
             [swiss.arrows :refer :all]))
-
 
 (defn neighbor-states
   "Application neighbor-states data in a format suitable for verdicts: list
@@ -144,11 +143,11 @@
                                                  (:verdict-dates data))]
                          flatten
                          (remove nil?)
-              (zipmap <> (repeat true))
-              (util/assoc-when <> :buildings (or (removed? :buildings)
-                                                 (zipmap building-details
-                                                         (repeat true))))
-              not-empty)]
+                         (zipmap <> (repeat true))
+                         (util/assoc-when <> :buildings (or (removed? :buildings)
+                                                            (zipmap building-details
+                                                                    (repeat true))))
+                         not-empty)]
     {:exclusions exclusions}))
 
 (defn new-verdict-draft [template-id {:keys [application organization created]
@@ -173,7 +172,7 @@
 (defn mask-verdict-data [{:keys [user application]} verdict]
   (cond
     (not (auth/application-authority? application user))
-        (util/dissoc-in verdict [:data :bulletinOpDescription])
+    (util/dissoc-in verdict [:data :bulletinOpDescription])
     :default verdict))
 
 (defn command->verdict [{:keys [data application] :as command}]
@@ -190,7 +189,8 @@
 
 (defn delete-verdict [verdict-id command]
   (action/update-application command
-                             {$pull {:pate-verdicts {:id verdict-id}}}))
+                             {$pull {:pate-verdicts {:id verdict-id}
+                                     :attachments   {:target.id verdict-id}}}))
 
 (defn- listify
   "Transforms argument into list if it is not sequential. Nil results
@@ -201,7 +201,9 @@
     (nil? a)        '()
     :default        (list a)))
 
-(defn- verdict-update [{:keys [data created application] :as command} update]
+(defn- verdict-update
+  "Updates application, using $elemMatch query for given verdict."
+  [{:keys [data created] :as command} update]
   (let [{verdict-id :verdict-id} data]
     (action/update-application command
                                {:pate-verdicts {$elemMatch {:id verdict-id}}}
@@ -411,11 +413,12 @@
    4. Other document updates (e.g., waste plan -> waste report)
    5. Freeze (locked and read-only) verdict attachments and update TOS details
    6. TODO: Create tasks
-   7. TODO: Create PDF/A for the verdict
+   7. Create PDF/A for the verdict
    8. TODO: Generate KuntaGML
   10. TODO: Assignments?"
-  [{:keys [created application user] :as command}]
-  (let [verdict    (command->verdict command)
+  [{:keys [created application user organization] :as command}]
+  (let [verdict    (enrich-verdict command
+                                   (command->verdict command))
         next-state (sm/verdict-given-state application)
         att-ids    (->> (:attachments application)
                         (filter #(= (-> % :target :id) (:id verdict)))
@@ -423,8 +426,7 @@
     (verdict-update command
                     (util/deep-merge
                      {$set (merge
-                            {:pate-verdicts.$.data      (:data (enrich-verdict command
-                                                                                verdict))
+                            {:pate-verdicts.$.data      (:data verdict)
                              :pate-verdicts.$.published created}
                             (att/attachment-array-updates (:id application)
                                                           (comp #{(:id verdict)} :id :target)
@@ -435,10 +437,17 @@
                                                         application
                                                         user)))
     (inspection-summary/process-verdict-given application)
-    (when-let [doc-updates (not-empty (transformations/get-state-transition-updates command
-                                                                                         next-state))]
+    (when-let [doc-updates (not-empty (transformations/get-state-transition-updates command next-state))]
       (action/update-application command
                                  (:mongo-query doc-updates)
                                  (:mongo-updates doc-updates)))
     (tiedonohjaus/mark-app-and-attachments-final! (:id application)
-                                                  created)))
+                                                  created)
+    (pdf/create-verdict-attachment command
+                                   (assoc verdict :published created))
+
+    ;; KuntaGML
+    (when (org/krysp-integration? @organization (:permitType application))
+      (-> (assoc command :application (domain/get-application-no-access-checking (:id application)))
+          (krysp/verdict-as-kuntagml verdict))
+      nil)))

@@ -34,7 +34,8 @@
     (against-background
       [(mongo/update-by-query :applications
                               {:_id app-id :verdicts.id 2}
-                              {$set {:verdicts.$.kuntalupatunnus "baz"}}) => 1]
+                              {$set {:verdicts.$.kuntalupatunnus "baz"
+                                     :verdicts.$.paatokset.0.poytakirjat.0.paatospvm nil}}) => 1]
       (fact "kuntalupatunnus can be modified"
         (let
           [verdicts [(first existing-verdicts) {:id 2 :kuntalupatunnus "baz"}]]

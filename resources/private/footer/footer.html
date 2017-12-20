@@ -32,12 +32,6 @@
           <li><a target="_blank" data-bind="ltext: 'footer.current-issues.text',
                                             attr: {href: loc('footer.current-issues.href')}"></a></li>
           <!-- /ko -->
-          <li><a data-bind="attr: { href: loc( 'footer.support.request.href' ) },
-                            text: loc( 'footer.support.request.text' )"></a>
-        <!-- ko if: lupapisteApp.models.currentUser && lupapisteApp.models.currentUser.isApplicant() && !lupapisteApp.models.currentUser.isCompanyUser() -->
-                            <br /><span data-bind="ltext: 'footer.support.request.text2'"></span>
-        <!-- /ko -->
-          </li>
         <!-- ko if: lupapisteApp.models.currentUser && (lupapisteApp.models.currentUser.isAuthority() || lupapisteApp.models.currentUser.isCompanyUser()) -->
           <li><a data-bind="attr: {href: loc('footer.email.authority.href')}, text: loc('footer.email.authority.text')"></a></li>
           <li><span data-bind="ltext: 'footer.tel'"></span><br /><span data-bind="ltext: 'footer.tel.price'"></span><br />

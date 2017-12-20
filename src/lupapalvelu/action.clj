@@ -13,7 +13,7 @@
             [lupapalvelu.control-api :as control]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.integrations.pate :as pate]
+            [lupapalvelu.integrations.state-change :as state-change]
             [lupapalvelu.logging :as log]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
@@ -181,6 +181,9 @@
 (defn positive-number-parameters [params command]
   (filter-params-of-command params command (complement pos?) :error.illegal-number))
 
+(defn positive-integer-parameters [params command]
+  (filter-params-of-command params command (complement #(and (pos? %) (integer? %))) :error.illegal-number))
+
 (defn string-parameters [params command]
   (filter-params-of-command params command (complement string?) "error.illegal-value:not-a-string"))
 
@@ -214,6 +217,14 @@
       #(not (util/every-key-in-map? % required-keys))
       :error.map-parameters-with-required-keys
       {:required-keys required-keys})))
+
+(defn non-empty-map-parameters [params command]
+  (or
+    (map-parameters params command)
+    (filter-params-of-command params
+                              command
+                              empty?
+                              :error.empty-map-parameters)))
 
 (defn parameters-matching-schema [params schema command]
   (filter-params-of-command params command
@@ -291,7 +302,7 @@
           (when-let [new-state (get-in changes [$set :state])]
             (when (and (env/feature? :pate-json) organization (org/pate-org? organization))
               (util/future*
-                (pate/trigger-state-change command new-state))))
+                (state-change/trigger-state-change command new-state))))
           (if return-count? n nil))))))
 
 (defn application->command
@@ -382,7 +393,12 @@
     unauthorized))
 
 (defn- impersonation [command]
-  (when (and (= :command (:type (meta-data command))) (get-in command [:user :impersonating]))
+  (when (and (let [md (meta-data command)]
+               (case (:type md)
+                 :command true
+                 :raw     (= :post (get-in command [:web :method]))
+                 false))
+             (get-in command [:user :impersonating]))
     unauthorized))
 
 (defn disallow-impersonation [command]

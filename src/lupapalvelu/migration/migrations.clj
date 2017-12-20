@@ -3649,13 +3649,22 @@
   (mongo/update :applications {:_id app-id} {$pull {:tasks {:id {$in task-ids}}}}))
 
 (defmigration remove-duplicate-task-ids-by-muutunnus
-  (->> (mongo/select :applications {:permitType "R" :tasks.data.muuTunnus.value {$exists true}} [:tasks :attachments])
+  (->> (mongo/select :applications {:permitType "R" :tasks.data.muuTunnus.value {$exists true $ne ""}} [:tasks :attachments])
        (reduce (fn [counter app]
                  (let [duplicate-task-ids (get-duplicate-task-ids-by review-muutunnus-equality-fields app)]
                    (remove-tasks-by-ids! app duplicate-task-ids)
                    (cleanup-task-attachments-for-removed-tasks! app duplicate-task-ids)
                    (cond-> counter (not-empty duplicate-task-ids) inc)))
                0)))
+
+(defmigration permit-subtype-required-key                   ; some 140 applications are missing permitSubtype key, add as nil
+  {:apply-when (pos? (mongo/count :applications {:permitSubtype {$exists false}}))}
+  (mongo/update-by-query :submitted-applications {:permitSubtype {$exists false}} {$set {:permitSubtype nil}})
+  (mongo/update-by-query :applications {:permitSubtype {$exists false}} {$set {:permitSubtype nil}}))
+
+(defmigration pate-to-matti-integration-messages
+  {:apply-when (pos? (mongo/count :integration-messages {:partner "pate"}))}
+  (mongo/update-by-query :integration-messages {:partner "pate"} {$set {:partner "matti"}}))
 
 ;;
 ;; ****** NOTE! ******

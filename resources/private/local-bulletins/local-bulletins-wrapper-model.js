@@ -1,4 +1,4 @@
-LUPAPISTE.LocalBulletinsWrapperModel = function() {
+LUPAPISTE.LocalBulletinsWrapperModel = function(params) {
   "use strict";
   var self = this;
 
@@ -8,19 +8,12 @@ LUPAPISTE.LocalBulletinsWrapperModel = function() {
     limited: {values: supportedPages, defaultValue: "local-bulletins"}
   });
 
-/*  var vetumaService = params.vetumaService;
-  var fileuploadService = params.fileuploadService;
+/*  var fileuploadService = params.fileuploadService;
   var auth = params.auth; */
 
   self.bulletinId = ko.observable(pageutil.subPage());
-  self.pageParams = {};
-  /*self.pageParams = {bulletinService: bulletinService,
-                     authenticated: vetumaService.authenticated,
-                     pagePath: self.pagePath,
-                     bulletinId: self.bulletinId,
-                     userInfo: vetumaService.userInfo,
-                     fileuploadService: fileuploadService,
-                     auth: auth}; */
+  self.pageParams = {authenticated: params.vetumaService.authenticated};
+
 
   hub.onPageLoad("local-bulletins", function(e) {
     self.page(e.pageId);

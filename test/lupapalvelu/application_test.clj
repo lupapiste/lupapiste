@@ -17,7 +17,8 @@
             [lupapalvelu.test-util :refer :all]
             [lupapalvelu.user :as usr]
             [lupapalvelu.ya :as ya]
-            ))
+            [sade.util :as util]
+            [sade.env :as env]))
 
 (fact "update-document"
   (update-application {:application ..application.. :data {:id ..id..}} ..changes..) => nil
@@ -522,3 +523,41 @@
                                                                              {:code "12 13 14 17" :name ..tos-name-4..}
                                                                              {:code "12 13 14 18" :name ..tos-name-5..}
                                                                              {:code "12 13 14 19" :name ..tos-name-6..}])))
+
+(env/with-feature-value :prefixed-id false
+  (facts "VRKLupatunnus"
+    (vrk-lupatunnus {:municipality "" :created nil}) => nil
+    (vrk-lupatunnus {:municipality "123"
+                     :created      (util/to-millis-from-local-date-string "11.10.2016")
+                     :id           "LP-123-2016-00321"}) => "12300016-0321"
+    (vrk-lupatunnus {:municipality "123"
+                     :created      (util/to-millis-from-local-date-string "11.10.2016")
+                     :submitted    (util/to-millis-from-local-date-string "1.1.2017")
+                     :id           "LP-123-2016-00321"}) => "12300017-0321"
+    (fact "special '0000'"
+      (vrk-lupatunnus {:municipality "123"
+                       :created      (util/to-millis-from-local-date-string "11.10.2016")
+                       :submitted    (util/to-millis-from-local-date-string "1.1.2017")
+                       :id           "LP-123-2016-10000"}) => "12300017-1000")
+
+    (fact "with sequence"
+      (vrk-lupatunnus {:municipality "123"
+                       :created      (util/to-millis-from-local-date-string "11.10.2016")
+                       :submitted    (util/to-millis-from-local-date-string "1.1.2017")
+                       :id           (make-application-id "123")}) => "12300017-0012"
+      (provided
+        (lupapalvelu.mongo/get-next-sequence-value anything) => 12))
+    (fact "with sequence 9999"
+      (vrk-lupatunnus {:municipality "123"
+                       :created      (util/to-millis-from-local-date-string "11.10.2016")
+                       :submitted    (util/to-millis-from-local-date-string "1.1.2017")
+                       :id           (make-application-id "123")}) => "12300017-9999"
+      (provided
+        (lupapalvelu.mongo/get-next-sequence-value anything) => 9999))
+    (fact "with sequence 10000"
+      (vrk-lupatunnus {:municipality "123"
+                       :created      (util/to-millis-from-local-date-string "11.10.2016")
+                       :submitted    (util/to-millis-from-local-date-string "1.1.2017")
+                       :id           (make-application-id "123")}) => "12300017-1000"
+      (provided
+        (lupapalvelu.mongo/get-next-sequence-value anything) => 10000))))

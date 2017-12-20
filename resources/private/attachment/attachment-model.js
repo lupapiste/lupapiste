@@ -10,7 +10,7 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   var data = attachmentData;
 
   // Attachment data fields that are mapped as observables
-  var observableFields = ["modified", "notNeeded", "contents", "drawingNumber", "forPrinting", "type", "op", "groupType", "manuallySetConstructionTime"];
+  var observableFields = ["modified", "notNeeded", "contents", "drawingNumber", "forPrinting", "type", "op", "groupType", "manuallySetConstructionTime", "backendId"];
 
   self.authModel = authModel;
 
@@ -113,6 +113,12 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   });
 
   addSelfUpdateListener("constructionTime");
+
+  self.registerApplyableSubscription(self.backendId, function(val) {
+    service.setMeta(self.id, {backendId: val}, {field: "backendId"});
+  });
+
+  addSelfUpdateListener("backendId");
 
   //
   // Updates which do not require attachment reload

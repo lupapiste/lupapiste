@@ -121,7 +121,8 @@
           <div class="bottom-marginM" data-bind="ltext: 'auth-admin.automatic-review-fetch.info'"></div>
           <div class="checkbox-wrapper">
             <input type="checkbox" id="automatic-review-fetch-enabled"
-                   data-bind="checked: organization.automaticReviewFetchEnabled" />
+                   data-bind="checked: organization.automaticReviewFetchEnabled,
+                              enable: lupapisteApp.models.globalAuthModel.ok('set-organization-review-fetch-enabled')" />
             <label for="automatic-review-fetch-enabled" class="checkbox-label"
                    data-bind="ltext: 'auth-admin.automatic-review-fetch.enabled'"></label>
           </div>

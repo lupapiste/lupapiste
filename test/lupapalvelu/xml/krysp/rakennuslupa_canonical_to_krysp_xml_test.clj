@@ -127,6 +127,9 @@
             (xml/get-text lp-xml_212 [:luvanTunnisteTiedot :LupaTunnus :saapumisPvm]) => expected
             (xml/get-text lp-xml_213 [:luvanTunnisteTiedot :LupaTunnus :saapumisPvm]) => expected))
 
+        (fact "VRKLupatunnus"
+          (xml/get-text lp-xml_212 [:luvanTunnisteTiedot :LupaTunnus :VRKLupatunnus]) => (every-checker string? ss/not-blank?))
+
         (if validate-tyonjohtaja-type
           (do
             (fact "In KRYSP 2.1.2, patevyysvaatimusluokka/vaadittuPatevyysluokka A are mapped to 'ei tiedossa'"

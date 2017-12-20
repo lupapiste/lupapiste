@@ -109,18 +109,21 @@
                                            :statement-id (:id ely-statement)}})
               :body) => ok?)
 
-        (let [ely-statement (-> (query-application mikko (:id app)) (:statements) (first))]
+        (let [ely-statement-new (-> (query-application mikko (:id app)) (:statements) (first))]
           (fact "State is given"
-            (:state ely-statement) => "given")
+            (:state ely-statement-new) => "given")
           (fact "Values from XML are saved to statement"
-            (get-in ely-statement [:person :name]) => (contains "Eija Esimerkki")
-            (:status ely-statement) => "puollettu"
-            (:text ely-statement) => "Hyv\u00e4 homma"
-            (util/to-xml-date (:given ely-statement)) => "2017-05-07")
+            (get-in ely-statement-new [:person :name]) => (contains "Eija Esimerkki")
+            (:status ely-statement-new) => "puollettu"
+            (:text ely-statement-new) => "Hyv\u00e4 homma"
+            (util/to-xml-date (:given ely-statement-new)) => "2017-05-07")
           (fact "Old data is OK"
-            (:saateText ely-statement) => "moro"
-            (get-in ely-statement [:external :acknowledged]) => pos?
-            (get-in ely-statement [:external :externalId]) => string?)))
+            (:saateText ely-statement-new) => "moro"
+            (get-in ely-statement-new [:external :acknowledged]) => pos?)
+          (fact "externalId is changed, as AsianTunnus is different in acknowledgement XML vs statement-response"
+            (get-in ely-statement-new [:external :externalId]) => string?
+            (get-in ely-statement [:external :externalId]) => string?
+            (get-in ely-statement-new [:external :externalId]) =not=> (get-in ely-statement [:external :externalId]))))
       (fact "Atttachments are uploaded"
         (let [app (query-application mikko (:id app))
               ely-statement (first (:statements app))
@@ -132,6 +135,7 @@
           (count statement-attachments) => 1
           (get-in ely-attachment [:target :id]) => (:id ely-statement)
           (get-in ely-attachment [:target :type]) => "statement"
+          (get-in ely-attachment [:type :type-id]) => "lausunto"
           (get ely-attachment :contents) => (contains "Lausunnon liite")
           (get-in ely-attachment [:latestVersion :user :username]) => (:username usr/batchrun-user-data)
           (fact "as in give-statement, attachment should be set readonly"
@@ -144,4 +148,10 @@
                              first)]
               (get-in child [:source :type]) => "statements"
               (get-in child [:contents]) => statement-subtype
-              (get-in child [:latestVersion :contentType]) => "application/pdf")))))))
+              (get-in child [:latestVersion :contentType]) => "application/pdf"))))
+      (fact "Response saved to integration-messages"
+        (let [msg (last (integration-messages (:id app)))
+              statement (-> (query-application mikko (:id app)) (:statements) (first))]
+          msg => truthy
+          (:status msg) => "processed"
+          (get-in msg [:target :id]) => (:id statement))))))

@@ -168,20 +168,33 @@
                             [:span (common/loc :application.verdict.add)]])]]))))
 
 
+(defn- confirm-and-delete-verdict [app-id verdict-id]
+  (hub/send  "show-dialog"
+             {:ltitle          "areyousure"
+              :size            "medium"
+              :component       "yes-no-dialog"
+              :componentParams {:ltext "pate.delete-verdict-draft"
+                                :yesFn #(service/delete-verdict app-id
+                                                                verdict-id
+                                                                reset-verdict)}}))
+
 (rum/defc verdict-list < rum/reactive
   [verdicts app-id]
   [:div
    [:h2 (common/loc "application.tabVerdict")]
-   [:ol
-    (map (fn [{:keys [id published modified] :as verdict}]
-           [:li {:key id}
-            [:a {:on-click #(service/open-verdict app-id id reset-verdict)}
-             (js/sprintf "Published: %s, Modified: %s"
-                         (js/util.finnishDate published)
-                         (js/util.finnishDateAndTime modified))]
-            (when (can-edit-verdict? verdict)
-              [:i.lupicon-remove.primary {:on-click #(service/delete-verdict app-id id reset-verdict)}])])
-         verdicts)]
+   [:table.pate-verdicts-table
+    [:tbody
+     (map (fn [{:keys [id published modified] :as verdict}]
+           [:tr {:key id}
+            [:td [:a {:on-click #(service/open-verdict app-id id reset-verdict)}
+                  (path/loc (if published :pate-verdict :pate-verdict-draft))]]
+            [:td (if published
+                   (common/loc :pate.published-date (js/util.finnishDate published))
+                   (common/loc :pate.last-saved (js/util.finnishDateAndTime modified)))]
+            [:td (when (and (can-edit-verdict? verdict) (not published))
+                   [:i.lupicon-remove.primary
+                    {:on-click #(confirm-and-delete-verdict app-id id)}])]])
+          verdicts)]]
    (when (state/auth? :new-pate-verdict-draft)
      (new-verdict))])
 

@@ -52,7 +52,7 @@ Olli creates statement request to ELY
   Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-0']
 
 Time flies and ELY acknowledges statement request
-  ${messageId}=  Get Element Attribute  xpath=(//table[@data-test-id='application-statements']/tbody/tr)[1]@data-message-id
+  ${messageId}=  Get Element Attribute  xpath=(//table[@data-test-id='application-statements']/tbody/tr)[1]  data-message-id
   Go to  ${SERVER}/dev/ah/message-response?id=${appId}&messageId=${messageId}
   Wait until  Page should contain  "ok":true
   Go back
@@ -66,7 +66,7 @@ Pena comes to see the statement request in place
   As Pena
   Open application  ely-statements-ymp  564-416-25-22
   Open tab  statement
-  ${messageId}=  Get Element Attribute  xpath=(//table[@data-test-id='application-statements']/tbody/tr)[1]@data-message-id
+  ${messageId}=  Get Element Attribute  xpath=(//table[@data-test-id='application-statements']/tbody/tr)[1]  data-message-id
   Element should contain  xpath=//tr[@data-message-id='${messageId}']//td//span[@data-test-id='external-received']  1006789
   # Pena doesnt see link, only span containing description of the subtype
   Element should not be visible  xpath=//tr[@data-message-id='${messageId}']//a[@data-test-id='open-statement-0']
@@ -78,7 +78,7 @@ Olli logs back in, now ELY sends us the statement response
   As Olli
   Open application  ely-statements-ymp  564-416-25-22
   Open tab  statement
-  ${statement}=  Get Element Attribute  xpath=(//table[@data-test-id='application-statements']/tbody/tr)[1]@data-statement-id
+  ${statement}=  Get Element Attribute  xpath=(//table[@data-test-id='application-statements']/tbody/tr)[1]  data-statement-id
   Go to  ${SERVER}/dev/ah/statement-response?id=${appId}&statement-id=${statement}
   Wait until  Page should contain  "ok":true
   Go back

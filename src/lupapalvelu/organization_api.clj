@@ -162,12 +162,15 @@
   {:user-roles #{:authorityAdmin}
    :pre-checks [check-bulletins-enabled]}
   [{user :user user-orgs :user-organizations}]
-  (->> user-orgs first :scope
-       (filter (comp :enabled :bulletins))
-       (map #(select-keys % [:permitType :municipality :bulletins]))
-       (ok :bulletin-settings)))
+  (let [user-org (first user-orgs)
+        scopes (->> user-org :scope
+                    (filter (comp :enabled :bulletins))
+                    (map #(select-keys % [:permitType :municipality :bulletins])))
+        texts (->> user-org :local-bulletins-page-settings :texts)]
+    (ok :bulletin-scopes scopes
+        :local-bulletins-page-texts texts)))
 
-(defcommand update-organization-bulletin-settings
+(defcommand update-organization-bulletin-scope
   {:user-roles #{:authorityAdmin}
    :parameters [permitType municipality notificationEmail]
    :input-validators [permit/permit-type-validator
@@ -178,6 +181,39 @@
       {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
       {$set {:scope.$.bulletins.notification-email notificationEmail}})
   (ok))
+
+(defcommand remove-organization-local-bulletins-caption
+  {:user-roles #{:authorityAdmin}
+   :parameters [lang index]
+   :input-validators [(partial action/supported-lang :lang)
+                      (partial action/positive-integer-parameters [:index])]
+   :pre-checks [check-bulletins-enabled]}
+  [{[user-org & _] :user-organizations}]
+  (if (integer? index)
+    (let [{{texts :texts} :local-bulletins-page-settings org-id :id}  user-org
+          caption (get-in texts [(keyword lang) :caption])
+          caption (util/drop-nth index caption)
+          updates {$set {(util/kw-path [:local-bulletins-page-settings.texts (keyword lang) :caption]) caption}}]
+      (org/update-organization org-id updates)
+      (ok :removed true))
+    (ok :removed false)))
+
+(defcommand upsert-organization-local-bulletins-text
+  {:user-roles #{:authorityAdmin}
+   :parameters [lang key value]
+   :optional-parameters [index]
+   :input-validators [(partial action/supported-lang :lang)
+                      (partial non-blank-parameters [:key])]
+   :pre-checks [check-bulletins-enabled]}
+  [{[user-org & _] :user-organizations}]
+  (let [{{texts :texts} :local-bulletins-page-settings org-id :id} user-org
+        path (remove nil?
+               [(keyword lang) (keyword key) (when (integer? index) index)])
+        valid? (nil? (sc/check org/LocalBulletinsPageTexts (assoc-in texts path value)))
+        updates {$set {(util/kw-path (cons :local-bulletins-page-settings.texts path)) value}}]
+    (when valid?
+      (org/update-organization org-id updates))
+    (ok :valid valid?)))
 
 (defcommand update-organization
   {:description "Update organization details."
@@ -781,6 +817,11 @@
        (hash-map $set)
        (org/update-organization org-id)))
 
+(defcommand pseudo-update-organization-name
+  {:description "Pseudo command for differentiating impersonation."
+   :user-roles  #{:authorityAdmin :admin}}
+  [_])
+
 (defquery available-backend-systems
   {:user-roles #{:admin}}
   (ok :backend-systems org/backend-systems))
@@ -789,7 +830,7 @@
   {:description "Updates organization backend systems by permit type."
    :parameters [org-id backend-systems]
    :user-roles #{:admin}
-   :input-validators [(partial action/map-parameters [:backend-systems])]}
+   :input-validators [(partial action/non-empty-map-parameters [:backend-systems])]}
   [_]
   (->> (util/map-keys (fn->> name (format "krysp.%s.backend-system"))  backend-systems)
        (reduce (fn [updates [path system]] (if (contains? org/backend-systems (keyword system))
@@ -895,6 +936,13 @@
       (finally
         (when tmpdir
           (fs/delete-dir tmpdir))))))
+
+(defcommand pseudo-organization-area
+  {:description "Pseudo command for differentiating authority admin
+  impersonation regarding organization-area."
+   :user-roles #{:authorityAdmin}}
+  [_])
+
 
 (defquery get-map-layers-data
   {:description "Organization server and layer details."
@@ -1091,3 +1139,8 @@
   (-> user
       usr/authority-admins-organization-id
       (org/set-allowed-docterminal-attachment-type attachmentType enabled)))
+
+(defquery docterminal-enabled
+  {:pre-checks [check-docterminal-enabled]
+   :user-roles #{:authorityAdmin}}
+  [_])

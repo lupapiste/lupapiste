@@ -233,7 +233,7 @@
   {:parameters       [id text lang]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles       #{:applicant :authority}
-   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
+   :user-authz-roles roles/writer-roles-with-foreman
    :notified         true
    :on-success       (notify :application-state-change)
    :states           #{:draft :info :open :submitted}
@@ -258,7 +258,7 @@
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:authority :applicant}
-   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
+   :user-authz-roles roles/writer-roles-with-foreman
    :pre-checks       [(fn [{:keys [application]}]
                         (when-not (= :canceled
                                      ((comp keyword :state) (app-state/last-history-item application)))
@@ -350,7 +350,7 @@
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:applicant :authority}
-   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
+   :user-authz-roles roles/writer-roles-with-foreman
    :states           #{:draft :open}
    :notified         true
    :on-success       [(notify :application-state-change)
@@ -564,7 +564,7 @@
 (defcommand change-permit-sub-type
   {:parameters       [id permitSubtype]
    :user-roles       #{:applicant :authority}
-   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
+   :user-authz-roles roles/writer-roles-with-foreman
    :states           states/pre-sent-application-states
    :input-validators [(partial action/non-blank-parameters [:id :permitSubtype])]
    :pre-checks       [app/validate-has-subtypes
@@ -603,7 +603,7 @@
                            $unset {:propertyIdSource true}})
       (try (app/autofill-rakennuspaikka (mongo/by-id :applications id) (now))
            (catch Exception e (warn "KTJ data was not updated after location changed")))
-      (when (permit/is-archiving-project application)
+      (when (permit/archiving-project? application)
         (app/fetch-buildings command propertyId)))
     (fail :error.property-in-other-muinicipality)))
 
@@ -742,7 +742,7 @@
 (defcommand add-link-permit
   {:parameters       ["id" linkPermitId]
    :user-roles       #{:applicant :authority}
-   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
+   :user-authz-roles roles/writer-roles-with-foreman
    :states           (states/all-application-states-but (conj states/terminal-states :sent)) ;; Pitaako olla myos 'sent'-tila?
    :pre-checks       [validate-linking
                       app/validate-authority-in-drafts

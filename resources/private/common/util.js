@@ -481,16 +481,25 @@ var util = (function($) {
     }
   }
 
+  function resolveIdentLogoutRedirectSuffix() {
+    var startPage = lupapisteApp.startPage;
+    if (startPage === "local-bulletins") {
+      return "/app/" + loc.getCurrentLanguage() + "/local-bulletins?organization=" + pageutil.getURLParameter("organization");
+    } else {
+      return "/app/" + loc.getCurrentLanguage() + "/" + startPage;
+    }
+  }
+
   function identLogoutRedirectBulletins() {
     var url = identLogoutUrl();
-    var suffix = "/app/" + loc.getCurrentLanguage() + "/bulletins";
+    var suffix = resolveIdentLogoutRedirectSuffix();
     if (url) {
       ajax.deleteReq("/api/vetuma/user")
         .success(function() {
-          window.location = _.escape(url) + "?return=" + suffix;
+          window.location = _.escape(url) + "?return=" + _.escape(suffix);
         })
         .error(function() {
-          window.location = _.escape(url) + "?return=" + suffix;
+          window.location = _.escape(url) + "?return=" + _.escape(suffix);
         }).call();
     }
   }
@@ -582,6 +591,15 @@ var util = (function($) {
     return result;
   }
 
+  function localeCompare( locale, s1, s2 ) {
+    if( s1 === s2 ) {
+      return 0;
+    }
+    return _.isUndefined( s1 ) || _.isNull( s1 )
+         ? -1
+         : s1.localeCompare( s2, locale );
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -641,7 +659,8 @@ var util = (function($) {
     toMoment: toMoment,
     finnishDateAndTime: finnishDateAndTime,
     sizeString: sizeString,
-    getSchemaElement: getSchemaElement
+    getSchemaElement: getSchemaElement,
+    localeComparator: _.partial( localeCompare, loc.currentLanguage )
   };
 
 })(jQuery);

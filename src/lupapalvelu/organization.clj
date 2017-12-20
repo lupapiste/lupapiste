@@ -142,11 +142,11 @@
 
 (def permit-types (map keyword (keys (permit/permit-types))))
 
-(def backend-systems #{:facta :kuntanet :louhi :locus :keywinkki :iris :pate})
+(def backend-systems #{:facta :kuntanet :louhi :locus :keywinkki :iris :matti})
 
 (sc/defschema AuthTypeEnum (sc/enum "basic" "x-header"))
 
-(def endpoint-types #{:application :review :attachments :parties})
+(def endpoint-types #{:application :review :attachments :parties :verdict})
 
 (sc/defschema KryspHttpConf
   {:url                         (sc/maybe sc/Str)
@@ -176,6 +176,11 @@
   (-> KryspConf
       (dissoc (sc/optional-key :ftpUser))
       (assoc  (sc/optional-key :defaultSRS) (sc/maybe sc/Str))))
+
+(sc/defschema LocalBulletinsPageTexts (i18n/lenient-localization-schema {:heading1 sc/Str
+                                                                         :heading2 sc/Str
+                                                                         :caption [sc/Str]}))
+(sc/defschema LocalBulletinsPageSettings {:texts LocalBulletinsPageTexts})
 
 (sc/defschema Organization
   {:id OrgId
@@ -239,9 +244,7 @@
    (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}
    (sc/optional-key :pate-enabled)                 sc/Bool
    (sc/optional-key :multiple-operations-supported) sc/Bool
-   (sc/optional-key :local-bulletins-page-settings) {:texts (i18n/lenient-localization-schema {:heading1 sc/Str
-                                                                                               :heading2 sc/Str
-                                                                                               :caption [sc/Str]})}})
+   (sc/optional-key :local-bulletins-page-settings) LocalBulletinsPageSettings})
 
 
 (sc/defschema SimpleOrg

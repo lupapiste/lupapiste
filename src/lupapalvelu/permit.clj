@@ -207,8 +207,8 @@
   nil)
 
 (defmulti verdict-krysp-mapper
-  "Maps verdicts into KRYSP XML."
-  {:arglists '([application verdict user lang krysp-version begin-of-link])}
+  "Maps verdicts into KRYSP XML."                           ; as of writing this comment, paatostieto mapping was only available for R 2.2.2
+  {:arglists '([application verdict lang krysp-version begin-of-link])}
   (fn [{permit-type :permitType} & _]
     (keyword permit-type)))
 
@@ -357,8 +357,11 @@
   (let [ymp-permit-types (set (map name [YI YL YM VVVL MAL]))]
     (ymp-permit-types permit-type)))
 
-(defn is-archiving-project [{{:keys [permitType]} :application}]
-  (when-not (= permitType (name ARK))
+(defn archiving-project? [{:keys [permitType]}]
+  (= permitType (name ARK)))
+
+(defn is-archiving-project [{{:keys [permitType] :as application} :application}]
+  (when-not (archiving-project? application)
     (fail :error.unsupported-permit-type)))
 
 (defn is-not-archiving-project [{{:keys [permitType]} :application}]

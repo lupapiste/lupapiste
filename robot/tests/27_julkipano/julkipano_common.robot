@@ -83,7 +83,7 @@ Open bulletin by index
 
 Bulletin state is
   [Arguments]  ${state}
-  ${elemStateVal}=  Get Element Attribute  //div[@id='ymp-bulletin-component']//div[@data-test-id='bulletin-state']@data-test-state
+  ${elemStateVal}=  Get Element Attribute  //div[@id='ymp-bulletin-component']//div[@data-test-id='bulletin-state']  data-test-state
   Should Be Equal As Strings  ${state}  ${elemStateVal}
 
 Create application with attachment and publish it as bulletin

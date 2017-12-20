@@ -9,11 +9,11 @@
             [schema.core :as sc]
             [sade.core :refer [fail]]
             [sade.env :as env]
-            [sade.util :as util]
             [lupapalvelu.action :as action]
             [lupapalvelu.api-common :refer :all]
             [lupapalvelu.autologin :as autologin]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.rest.config :as config]
             [lupapalvelu.rest.schemas :refer :all]
             [lupapalvelu.rest.applications-data :as applications-data]
             [lupapalvelu.user :as usr]
@@ -131,6 +131,12 @@
        (if (:ok response)
          (resp/status 200 (resp/json response))
          (resp/status 404 (resp/json response))))))
+
+(defendpoint "/rest/current-configuration"
+  {:summary "Returns current configuration for some Lupapiste values"
+   :description "Returns JSON object with keys 'permitType' (lupatyypit), 'states' (tilat), 'municipalities' (kunnat) and 'operations' (toimenpiteet)."
+   :returns Configuration}
+  (resp/status 200 (resp/json (config/current-configuration))))
 
 (defn paths []
   (letfn [(mapper [{:keys [path method meta]}]

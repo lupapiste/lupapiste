@@ -1,7 +1,8 @@
 (ns lupapalvelu.comment-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.comment]))
+            [lupapalvelu.comment]
+            [lupapalvelu.domain :as domain]))
 
 (testable-privates lupapalvelu.comment enrich-attachment-comment enrich-user-information)
 
@@ -100,3 +101,40 @@
                                                  :user {:id "user-id1"
                                                         :role :applicant
                                                         :application-role :statementGiver}})))
+
+(facts "Comments for removed and hidden attachments"
+  (let [application {:attachments [{:id "regular"} {:id "hidden"}]
+                     :comments    [{:text "Just text"}
+                                   {:text   "Remove text"
+                                    :target {:type "attachment" :id "removed"}}
+                                   {:text   ""
+                                    :target {:type "attachment" :id "gone"}}
+                                   {:text   "Regular text"
+                                    :target {:type "attachment" :id "regular"}}
+                                   {:text   "Hidden text"
+                                    :target {:type "attachment" :id "hidden"}}]}]
+    (fact "Removed attachment comment is marked removed"
+      (let [application (domain/flag-removed-attachment-comments application)]
+        application => (just {:attachments [{:id "regular"} {:id "hidden"}]
+                              :comments    [{:text "Just text"}
+                                            {:text    "Remove text"
+                                             :target  {:type "attachment" :id "removed"}
+                                             :removed true}
+                                            ;; removed attachment + blank contents = comment not shown
+                                            {:text    ""
+                                             :target  {:type "attachment" :id "gone"}
+                                             :removed true}
+                                            {:text   "Regular text"
+                                             :target {:type "attachment" :id "regular"}}
+                                            {:text   "Hidden text"
+                                             :target {:type "attachment" :id "hidden"}}]})
+        (fact "Remove comments for removed hidden and blank contents attachment"
+          (domain/cleanup-attachment-comments (assoc application
+                                                     :attachments [{:id "regular"}]))
+          => (just {:attachments [{:id "regular"}]
+                    :comments    [{:text "Just text"}
+                                  {:text    "Remove text"
+                                   :target  {:type "attachment" :id "removed"}
+                                   :removed true}
+                                  {:text   "Regular text"
+                                   :target {:type "attachment" :id "regular"}}]}))))))

@@ -26,6 +26,8 @@
     :application/msword
     :text/plain})
 
+(def all-convertable-mime-types
+  (conj libre-conversion-file-types :image/jpeg :image/tiff :image/png :application/pdf))
 
 (defn libreoffice-conversion-required? 
   "Check if libre office conversion is required for given filename."

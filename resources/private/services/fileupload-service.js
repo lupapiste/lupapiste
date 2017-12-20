@@ -150,7 +150,10 @@ LUPAPISTE.FileuploadService = function() {
     }));
 
     hubscribe( "destroy", function()  {
-      $("#" + fileInputId ).fileupload( "destroy");
+      try {
+        $("#" + fileInputId ).fileupload( "destroy");
+      } catch( err ) {}
+
       if( $dropZone ) {
         $dropZone.off();
       }

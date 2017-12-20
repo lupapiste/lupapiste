@@ -13,7 +13,9 @@
             [lupapalvelu.document.tools :as tools]
             [sade.strings :as ss]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.verdict-review-util :as verdict-review-util]))
+            [lupapalvelu.verdict-review-util :as verdict-review-util]
+            [lupapalvelu.assignment :as assignment]
+            [lupapalvelu.organization :as organization]))
 
 (defn- empty-review-task? [t]
   (let [katselmus-data (-> t :data :katselmus)
@@ -274,7 +276,7 @@
         :attachments-by-task-id attachments-by-task-id
         :added-tasks-with-updated-buildings added-tasks-with-updated-buildings)))
 
-(defn save-review-updates [{user :user  application :application :as command} updates added-tasks-with-updated-buildings attachments-by-task-id]
+(defn save-review-updates [{user :user application :application :as command} updates added-tasks-with-updated-buildings attachments-by-task-id]
   (let [update-result (pos? (update-application command {:modified (:modified application)} updates :return-count? true))
         updated-application (domain/get-application-no-access-checking (:id application))] ;; TODO: mongo projection
     (when update-result
@@ -285,4 +287,5 @@
               (verdict-review-util/get-poytakirja! application user (now) {:type "task" :id id} att))
             (tasks/generate-task-pdfa updated-application added-task (:user command) "fi")))))
     (cond-> {:ok update-result}
-      (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))
+            (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))
+

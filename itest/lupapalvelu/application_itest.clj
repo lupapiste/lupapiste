@@ -326,7 +326,7 @@
     (fact "integration messages"
       (count generated-messages) => 1
       (first generated-messages) => (contains {:status "published"
-                                               :partner "pate"
+                                               :partner "matti"
                                                :data (contains {:fromState (contains {:name "draft"})
                                                                 :toState   (contains {:name "submitted"})})}))
 

@@ -1,4 +1,5 @@
 (ns lupapalvelu.ui.pate.state
+  (:refer-clojure :exclude [select-keys])
   (:require [rum.core :as rum]))
 
 (defonce state* (atom {}))

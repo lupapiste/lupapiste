@@ -6,5 +6,6 @@ LUPAPISTE.AssignmentsSearchTabsModel = function(params) {
 
   self.tabs = ko.observableArray(["all",
                                   "created",
+                                  "automatic",
                                   "completed"]);
 };
