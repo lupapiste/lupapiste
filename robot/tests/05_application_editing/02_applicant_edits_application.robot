@@ -103,6 +103,11 @@ Mikko removes apartment
   Wait Until  Element Should Not Be Visible  xpath=//tr[@data-test-id='huoneistot-row-0']
   Xpath Should Match X Times  //div[@id='application-info-tab']//table[contains(@class, 'huoneistot-table')]//tbody//tr  1
 
+#LPK-3401
+Mikko adds apartment with excel-upload
+  Scroll to test id  huoneistot-append-button
+  Wait Until  Element Should Be Visible  huoneistot-upload-button
+
 Mikko can't set "other" building material
   Open accordions  info
   Wait Until  Element should be visible  //section[@id='application']//div[@id='application-info-tab']//select[@data-docgen-path='rakenne.kantavaRakennusaine']

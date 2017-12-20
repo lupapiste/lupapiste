@@ -1,6 +1,6 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="premises-upload-template">
   <form enctype="multipart/form-data" data-bind="submit: submit" class="upload-component premises-upload">
-    <input class="hidden" type="file" name="files[]" data-bind="event: {change: fileChanged}, disable: disabled"/>
+    <input class="hidden" type="file" name="files[]" data-bind="event: {change: fileChanged}, disable: disabled" data-test-id="premises-upload-input"/>
     <button class="btn btn-primary"
             data-bind="click: chooseFile, disable: pending,
                        visible: visible, css: {waiting: pending}">
@@ -10,4 +10,3 @@
     </button>
   </form>
 </script>
-

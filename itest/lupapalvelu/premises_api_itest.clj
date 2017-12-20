@@ -6,9 +6,9 @@
 
 (apply-remote-minimal)
 
-(def filename "premises-data-example.xlsx")
-(def filepath "dev-resources/")
-(def file-source (str filepath filename))
+(def file-3-lines "premises-data-3-lines.xlsx")
+(def file-1-line "premises-data-1-line.xlsx")
+(def file-bad-file "premises-data-bad-file.xlsx")
 
 (defn get-huoneistot-doc [application]
   (->> (:documents application)
@@ -17,7 +17,7 @@
 
 (defn upload-premises
   [apikey filename doc app-id]
-  (let [uploadfile (io/file filename)
+  (let [uploadfile (io/file (str "dev-resources/" filename))
         uri (str (server-address) "/api/raw/upload-premises-data")
         multipart [{:name "files[]" :content uploadfile}
                    {:name "Content/type" :content "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
@@ -35,27 +35,52 @@
         doc (:id (get-huoneistot-doc application))]
 
     (fact "Uploading premises returns ok"
-      (:status (upload-premises pena file-source doc app-id)) => 200)
+      (-> (upload-premises pena file-3-lines doc app-id) :body :ok) => true)
 
     (let [updated-application (query-application pena app-id)
           updated-doc (get-huoneistot-doc updated-application)
-          huoneisto (-> updated-doc :data :huoneistot :0)]
+          huoneistot (-> updated-doc :data :huoneistot (dissoc :validationResult))]
 
       (fact "Application now contains correct huoneisto data"
-        (-> huoneisto :porras :value) => "A"
-        (-> huoneisto :huoneistonumero :value) => "001"
-        (-> huoneisto :jakokirjain :vale) => nil
-        (-> huoneisto :huoneluku :value) => "2"
-        (-> huoneisto :keittionTyyppi :value) => "keittotila"
-        (-> huoneisto :huoneistoala :value) => "56"
-        (-> huoneisto :WCKytkin :value) => true
-        (-> huoneisto :ammeTaiSuihkuKytkin :value) => true
-        (-> huoneisto :parvekeTaiTerassiKytkin :value) => true
-        (-> huoneisto :saunaKytkin :value) => true
-        (-> huoneisto :lamminvesiKytkin :value) => true)
+        (count huoneistot) => 3
+        (-> huoneistot :0 :porras :value) => "A"
+        (-> huoneistot :1 :porras :value) => "B"
+        (-> huoneistot :2 :porras :value) => "C"
+        (-> huoneistot :0 :huoneistonumero :value) => "001"
+        (-> huoneistot :0 :jakokirjain :value) => nil
+        (-> huoneistot :0 :huoneluku :value) => "2"
+        (-> huoneistot :0 :keittionTyyppi :value) => "keittotila"
+        (-> huoneistot :1 :huoneistoala :value) => "74.5"
+        (-> huoneistot :1 :WCKytkin :value) => true
+        (-> huoneistot :2 :ammeTaiSuihkuKytkin :value) => true
+        (-> huoneistot :2 :parvekeTaiTerassiKytkin :value) => true
+        (-> huoneistot :2 :saunaKytkin :value) => true
+        (-> huoneistot :2 :lamminvesiKytkin :value) => true)
 
       (fact "Application now contains information about the uploaded xlsx file"
-        (-> updated-application :ifc-data :filename) => filename))))
+        (-> updated-application :ifc-data :filename) => file-3-lines)
 
+      (fact "Updating application with bad excel file does not change data"
+        (-> (upload-premises pena file-bad-file doc app-id) :body :ok) => false
 
-; infinite error testi
+      (let [updated-application (query-application pena app-id)
+            updated-doc (get-huoneistot-doc updated-application)
+            huoneistot (-> updated-doc :data :huoneistot (dissoc :validationResult))]
+
+        (count huoneistot) => 3)))
+
+    (fact "Uploading new file with fewer lines returns ok"
+      (-> (upload-premises pena file-1-line doc app-id) :body :ok) => true)
+
+    (let [updated-application (query-application pena app-id)
+          updated-doc (get-huoneistot-doc updated-application)
+          huoneistot (-> updated-doc :data :huoneistot (dissoc :validationResult))]
+
+      (fact "Application now has only one apartment"
+        (count huoneistot) => 1)
+
+      (fact "Application has correct premises data"
+        (-> huoneistot :0 :porras :value) => "G"
+        (-> huoneistot :0 :huoneistonumero :value) => "7"
+        (-> huoneistot :0 :huoneluku :value) => "7"
+        (-> huoneistot :0 :keittionTyyppi :value) => "keittio"))))

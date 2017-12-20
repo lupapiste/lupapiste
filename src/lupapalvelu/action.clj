@@ -268,7 +268,7 @@
   ([command changes]
     (update-application command {} changes))
   ([command mongo-query changes & {:keys [return-count?]}]
-    (println "UPDATE APPLICATION: " changes)
+
     (when-let [new-state (get-in changes [$set :state])]
       (assert
         (or

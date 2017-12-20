@@ -370,7 +370,7 @@
 "huoneistot._group_label" "fi" "Huoneistot"
 "huoneistot._group_label" "sv" "Lägenheter"
 "huoneistot.premisesUploadButton" "en" ""
-"huoneistot.premisesUploadButton" "fi" "Tuo huoneistotietotaulukko (xlsx)"
+"huoneistot.premisesUploadButton" "fi" "Tuo tiedot Solibri Model Checker -taulukosta (xlsx)"
 "huoneistot.premisesUploadButton" "sv" ""
 "huoneistot.ammeTaiSuihkuKytkin" "en" "Bath tub/shower"
 "huoneistot.ammeTaiSuihkuKytkin" "fi" "Amme/ suihku"

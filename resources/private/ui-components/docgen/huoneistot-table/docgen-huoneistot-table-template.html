@@ -279,18 +279,8 @@
           <span data-bind="component: { name: 'premises-upload',
                            params: { id: $component.documentId + '-huoneistot-upload-button',
                            applicationId: $parent.applicationId,
-                           doc: $component.documentId} }">
-          </span>
-          <span data-bind="component: { name: 'premises-download',
-                           params: { id: $component.documentId + '-huoneistot-download',
-                           visible: $component.visible,
-                           buttonClass: 'positive',
-                           buttonType: 'button',
-                           iconClass: 'lupicon-download',
-                           buttonText: loc('huoneistot.downloadLabel'),
-                           clickFn: $component.downloadPremises,
-                           waiting: $component.waiting,
-                           testId: schemaName + '-download-button' }}">
+                           doc: $component.documentId,
+                           testId: schemaName + '-upload-button' }}">
           </span>
         </div>
       </script>

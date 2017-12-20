@@ -8481,6 +8481,10 @@ input.form-input.inline, input.inline.form-input--inline {
   display: inline-block;
 }
 
+.docgen-content form.premises-upload i {
+  padding-right: 10px;
+}
+
 .accordion-fields > .form-entry,
 .accordion-fields > .verdict-info-fields,
 .accordion-fields .personSelector,
