@@ -276,10 +276,10 @@
                            clickFn: duplicateLastGroup,
                            testId: schemaName + '-copy-button' }}">
           </span>
-          <span data-bind="component: {name: 'premises-upload',
-                           params: { id: $component.documentId + 'huoneistot-upload',
-                           buttonText: 'Tuo huoneistotietotaulukko',
-                           testId: schemaName + '-upload-button' }}">
+          <span data-bind="component: { name: 'premises-upload',
+                           params: { id: $component.documentId + '-huoneistot-upload-button',
+                           applicationId: $parent.applicationId,
+                           doc: $component.documentId} }">
           </span>
           <span data-bind="component: { name: 'premises-download',
                            params: { id: $component.documentId + '-huoneistot-download',

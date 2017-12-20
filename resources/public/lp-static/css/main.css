@@ -8477,6 +8477,10 @@ input.form-input.inline, input.inline.form-input--inline {
   border-bottom: 1px solid #dddddd;
 }
 
+.docgen-content form.premises-upload {
+  display: inline-block;
+}
+
 .accordion-fields > .form-entry,
 .accordion-fields > .verdict-info-fields,
 .accordion-fields .personSelector,

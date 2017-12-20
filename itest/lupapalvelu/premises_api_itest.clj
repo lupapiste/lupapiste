@@ -40,6 +40,7 @@
     (let [updated-application (query-application pena app-id)
           updated-doc (get-huoneistot-doc updated-application)
           huoneisto (-> updated-doc :data :huoneistot :0)]
+
       (fact "Application now contains correct huoneisto data"
         (-> huoneisto :porras :value) => "A"
         (-> huoneisto :huoneistonumero :value) => "001"

@@ -922,3 +922,6 @@
 "error.illegal-primary-operation" "en" ""
 "error.illegal-primary-operation" "fi" "Toiminto ei sallittu tälle toimenpiteelle"
 "error.illegal-primary-operation" "sv" ""
+"error.illegal-premises-excel" "en" ""
+"error.illegal-premises-excel" "fi" "Lähettämäsi tiedosto on virheellinen"
+"error.illegal-premises-excel" "sv" ""

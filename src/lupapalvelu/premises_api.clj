@@ -22,6 +22,11 @@
             [lupapalvelu.user :as usr]
             [monger.operators :refer [$set]]))
 
+(defn get-huoneistot-doc [application]
+  (->> (:documents application)
+       (filter #(= "uusiRakennus" (-> % :schema-info :name)))
+       (first)))
+
 ;;
 ;;  IFC-model apartment data from Excel file
 ;;
@@ -80,8 +85,8 @@
   (remove nil? (map #(item->update premises-number %) premise)))
 
 (defn remove-old-premises [pseudo-command doc]
-  (let [paths (->> pseudo-command
-                   (mongo/by-id :applications (-> pseudo-command :application :id))
+  (let [app-id (-> pseudo-command :application :id)
+        paths (->> (mongo/by-id :applications app-id)
                    :documents
                    (filter #(= "uusiRakennus" (-> % :schema-info :name)))
                    (first)
@@ -92,12 +97,14 @@
     (doc-persistence/remove-document-data pseudo-command doc paths "documents")))
 
 (defn save-premises-data [premise-data applicationId timestamp user doc]
-  (let [pseudo-command {:application (mongo/by-id :applications applicationId)
+  (let [application    (mongo/by-id :applications applicationId)
+        pseudo-command {:application application
+                        :data        {:id applicationId}
                         :created     timestamp
                         :user        user}
-        updates (reduce #(concat %1 (premise->updates (nth premise-data %2) %2)) [] (range (count premise-data)))]
-    ;; VALIDOI UPDATESSIT ENNEN KUIN TEHDÄÄN MITÄÄN PYSYVÄÄ ???
-    (remove-old-premises pseudo-command doc)
+        updates         (reduce #(concat %1 (premise->updates (nth premise-data %2) %2)) [] (range (count premise-data)))
+        remove-old?     (> (count (-> application (get-huoneistot-doc) :data :huoneistot)) 1)
+        remove-result   (when remove-old? (remove-old-premises pseudo-command doc))]
     (doc-persistence/update! pseudo-command doc updates "documents")))
 
 (defn- primary-operation-pre-check [{:keys [application]}]
@@ -130,15 +137,20 @@
   [{user :user application :application}]
   (let [timestamp           (sc/now)
         app-id              (:id application)
-        premises-data       (-> files (first) (xmc/xls-2-csv) :data (csv-data->ifc-coll))
-        file-updated?       (some-> premises-data
-                                    (save-premises-data app-id timestamp user doc)
-                                    :ok)
+        premises-csv        (-> files (first) (xmc/xls-2-csv))
+        premises-data       (when-not (empty? premises-csv) (-> premises-csv :data csv-data->ifc-coll))
+        file-updated?       (when-not (nil? premises-data)
+                              (-> premises-data
+                                  (save-premises-data app-id timestamp user doc)
+                                  :ok))
         save-response       (when file-updated? (->> (first files)
                                                      ((fn [file] {:filename (:filename file) :content (:tempfile file)}))
                                                      (file-upload/save-file)))
-        file-linked?        (when save-response (att/link-files-to-application app-id [(:fileId save-response)]))
-        return-status       (if file-linked? 200 500)]
+        file-linked?        (= 1 (att/link-files-to-application app-id [(:fileId save-response)]))
+        return-map          (cond
+                              file-updated? {:ok true :filename (:filename save-response)}
+                              (empty? premises-csv) {:ok false :text "error.illegal-premises-excel"}
+                              :else {:ok false})]
     (when file-linked?
       (do
         (timbre/info "Successfully linked premises xlsx" (:filename save-response) "to application" app-id)
@@ -148,9 +160,9 @@
                                               :filename  (:filename save-response)
                                               :timestamp timestamp
                                               :user      (usr/summary user)}}})))
-    (->> {:filename (:filename save-response)}
+    (->> return-map
          (resp/json)
-         (resp/status return-status))))
+         (resp/status 200))))
 
 ;;
 ;;

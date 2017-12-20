@@ -2,25 +2,19 @@ LUPAPISTE.PremisesUploadModel = function( params ) {
     "use strict";
     var self = this;
 
+    self.doc = params.doc;
+    self.
+        applicationId = params.applicationId;
 
-
-    self.file = params.file || ko.observable();
-    self.fileInputId = _.uniqueId( "file-input-id-" );
-    self.filename = ko.observable();
-    self.buttonIcon = 'lupicon-upload';
-    self.buttonText = 'huoneistot.premisesUploadButton';
-    self.buttonClass = 'btn positive';
-    self.testId= "premises-upload-button";
+    self.visible = true;
 
     self.disabled = ko.observable(false);
     self.pending = ko.observable(false);
-    self.errorMessage = ko.observable(false);
-    self.successMessage = ko.observable(false);
-
-    self.visible =
 
     self.submit = function(form) {
         var formData = new FormData(form);
+        formData.append('id', self.applicationId);
+        formData.append('doc', self.doc);
         $.ajax({
             type: "POST",
             url: "/api/raw/upload-premises-data",
@@ -31,19 +25,18 @@ LUPAPISTE.PremisesUploadModel = function( params ) {
             processData: false,
             beforeSend: function(request) {
                 self.pending(true);
-                self.errorMessage(false);
-                self.successMessage(false);
                 _.each(self.headers, function(value, key) { request.setRequestHeader(key, value); });
                 request.setRequestHeader("x-anti-forgery-token", $.cookie("anti-csrf-token"));
             },
             success: function(res) {
+                console.log(res);
                 if (res.ok) {
-                    self.successMessage("upload.success");
+                    repository.load(self.applicationId);
                     if (_.isFunction(params.onSuccess)) {
                         params.onSuccess(res);
                     }
                 } else {
-                    self.errorMessage(res.text || loc("error.upload-failed"));
+                    hub.send("indicator", {style: "negative", message: res.text || "error.file-upload-failed"});
                 }
             },
             complete: function() {
@@ -62,5 +55,3 @@ LUPAPISTE.PremisesUploadModel = function( params ) {
     };
 
 };
-
-// repository.load kutsun jälkeen

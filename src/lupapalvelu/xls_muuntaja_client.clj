@@ -8,7 +8,8 @@
 (defn xls-2-csv [file-request-map]
   (timbre/info "Sending premises excel file" (:filename file-request-map) "to muuntaja for processing")
   (try
-    (let [request-opts                {:multipart [{:name "file" :content (:tempfile file-request-map)}]}
+    (let [request-opts                {:multipart [{:name "file" :content (:tempfile file-request-map)}]
+                                       :throw-exceptions false}
           {:keys [status body error]} (http/post (str (env/value :muuntaja :url) xls-2-csv-path) request-opts)]
       (if (= status 200)
         (do
