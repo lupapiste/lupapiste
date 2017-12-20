@@ -80,9 +80,6 @@ LUPAPISTE.FileuploadService = function() {
     var $dropZone = prepareDropZone( options.dropZone, fileInputId );
     var isAuthenticated = Boolean(util.getIn(lupapisteApp, ["models","currentUser","username"]));
     var apiUrl = isAuthenticated ? "/api/raw/upload-file-authenticated" : "/api/raw/upload-file";
-    if (options.fileTarget) {
-      apiUrl = options.fileTarget;
-    }
     var formData = [ { name: "__anti-forgery-token", value: $.cookie("anti-csrf-token") } ];
     var applicationId = util.getIn(lupapisteApp, ["models", "application", "id"]);
     if (applicationId) {

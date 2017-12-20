@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [sade.core :refer [now fail]]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.premises-api :as premises-api]
             [clojure.java.io :as io]))
 
 (apply-remote-minimal)
@@ -9,11 +10,6 @@
 (def file-3-lines "premises-data-3-lines.xlsx")
 (def file-1-line "premises-data-1-line.xlsx")
 (def file-bad-file "premises-data-bad-file.xlsx")
-
-(defn get-huoneistot-doc [application]
-  (->> (:documents application)
-       (filter #(= "uusiRakennus" (-> % :schema-info :name)))
-       (first)))
 
 (defn upload-premises
   [apikey filename doc app-id]
@@ -32,13 +28,13 @@
 (facts "Uploading excel updates huoneistot"
   (let [app-id (create-app-id pena) => ok?
         application (query-application pena app-id)
-        doc (:id (get-huoneistot-doc application))]
+        doc (:id (premises-api/get-huoneistot-doc application))]
 
     (fact "Uploading premises returns ok"
       (-> (upload-premises pena file-3-lines doc app-id) :body :ok) => true)
 
     (let [updated-application (query-application pena app-id)
-          updated-doc (get-huoneistot-doc updated-application)
+          updated-doc (premises-api/get-huoneistot-doc updated-application)
           huoneistot (-> updated-doc :data :huoneistot (dissoc :validationResult))]
 
       (fact "Application now contains correct huoneisto data"
@@ -64,7 +60,7 @@
         (-> (upload-premises pena file-bad-file doc app-id) :body :ok) => false
 
       (let [updated-application (query-application pena app-id)
-            updated-doc (get-huoneistot-doc updated-application)
+            updated-doc (premises-api/get-huoneistot-doc updated-application)
             huoneistot (-> updated-doc :data :huoneistot (dissoc :validationResult))]
 
         (count huoneistot) => 3)))
@@ -73,7 +69,7 @@
       (-> (upload-premises pena file-1-line doc app-id) :body :ok) => true)
 
     (let [updated-application (query-application pena app-id)
-          updated-doc (get-huoneistot-doc updated-application)
+          updated-doc (premises-api/get-huoneistot-doc updated-application)
           huoneistot (-> updated-doc :data :huoneistot (dissoc :validationResult))]
 
       (fact "Application now has only one apartment"

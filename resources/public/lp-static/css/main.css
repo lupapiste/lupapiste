@@ -14316,6 +14316,10 @@ div.automatic-assignments .assignment .editor {
   margin: auto;
 }
 
+.tags-editor-component ul.tags li.tag.tag--disabled {
+  background-color: #dddddd;
+}
+
 .metadata-editor-container {
   margin-top: 15px;
   width: 100%;

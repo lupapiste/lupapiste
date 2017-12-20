@@ -1,4 +1,4 @@
-(ns lupapalvelu.document.premises-up-download-test
+(ns lupapalvelu.document.premises-upload-test
   (:require [clojure.test :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]))

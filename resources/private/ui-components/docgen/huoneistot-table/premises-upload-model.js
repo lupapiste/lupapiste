@@ -3,8 +3,7 @@ LUPAPISTE.PremisesUploadModel = function( params ) {
     var self = this;
 
     self.doc = params.doc;
-    self.
-        applicationId = params.applicationId;
+    self.applicationId = params.applicationId;
 
     self.visible = true;
 
