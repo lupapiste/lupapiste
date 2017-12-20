@@ -14,7 +14,8 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.application-meta-fields :as meta]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.states :as states])
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :as usr])
   (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)
            (org.apache.poi.xssf.usermodel XSSFWorkbook)
            (org.apache.poi.ss.usermodel CellType)))
@@ -71,13 +72,17 @@
                  :modified {$gte (Long/parseLong start-ts 10)
                             $lte (Long/parseLong end-ts 10)}}))
 
-(defn digitized-applications-between [org-ids start-ts end-ts]
-  (mongo/select :applications
-                {:organization {$in org-ids}
-                 :permitType "ARK"
-                 :created {$gte (Long/parseLong start-ts 10)
-                           $lte (Long/parseLong end-ts 10)}}
-                [:_id :created :attachments :state :handlers]))
+(defn digitized-applications-between [user start-ts end-ts]
+  (let [base-query {:permitType   "ARK"
+                    :created      {$gte (Long/parseLong start-ts 10)
+                                   $lte (Long/parseLong end-ts 10)}}
+        query      (if (usr/user-is-pure-digitizer? user)
+                     (assoc base-query :auth.id (:id user))
+                     (assoc base-query :organization {$in (mapv :id (usr/get-organizations user))}))
+        _ (println query)]
+    (mongo/select :applications
+                  query
+                  [:_id :created :attachments])))
 
 (defn- authority [app]
   (->> app
@@ -320,8 +325,11 @@
                                          (map :attachments)
                                          (apply +))}))))
 
-(defn ^OutputStream digitized-attachments [org-ids start-ts end-ts lang]
-  (let [applications  (digitized-applications-between org-ids start-ts end-ts)
+(defn ^OutputStream digitized-attachments [user start-ts end-ts lang]
+  (let [org-ids       (mapv :id (usr/get-organizations user))
+        _ (clojure.pprint/pprint user)
+        _ (println (clojure.core/type end-ts))
+        applications  (digitized-applications-between user start-ts end-ts)
         row-data      (map #(digi-report-data %) applications)
         sum-data      (digi-report-sum row-data)
         sum-sheet     (i18n/localize lang "digitizer.excel.sum.sheet.name")

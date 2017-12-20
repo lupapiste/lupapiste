@@ -286,7 +286,8 @@
 
     self.downloadReport = function() {
       var startTs = self.reportStartDate().getTime();
-      var endTs = self.reportEndDate().getTime();
+      var endDate = self.reportEndDate();
+      var endTs = new Date(endDate.getYear() + 1900, endDate.getMonth(), endDate.getDate(), 23, 59, 59).getTime();
       var url = "/api/raw/digitizer-report?startTs="+startTs+"&endTs="+endTs;
       window.open(url, "_self");
     };
