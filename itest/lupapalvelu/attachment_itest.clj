@@ -1,18 +1,19 @@
 (ns lupapalvelu.attachment-itest
-  (:require [lupapalvelu.factlet :refer [facts*]]
+  (:require [clojure.set :as set]
             [lupapalvelu.attachment :refer :all]
             [lupapalvelu.attachment.util :refer [attachment-state]]
-            [lupapalvelu.pdf.pdfa-conversion :as pdfa]
-            [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
+            [lupapalvelu.factlet :refer [facts*]]
             [lupapalvelu.itest-util :refer :all]
-            [sade.util :as util]
+            [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
+            [lupapalvelu.pdf.pdfa-conversion :as pdfa]
             [midje.sweet :refer :all]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 
 (facts "attachments"
-       (let [{application-id :id :as response} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")]
+  (let [{application-id :id :as response} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")]
 
          response => ok?
 
@@ -21,12 +22,12 @@
          (fact "Signing not possible"
                (query pena :signing-possible :id application-id) => fail?)
          (facts "by default 4 attachments exist"
-                (let [application (query-application pena application-id)
-                      op-id (-> application :primaryOperation :id)]
+           (let [application (query-application pena application-id)
+                 op-id       (-> application :primaryOperation :id)]
                   (fact "counting all attachments"
                         (count (:attachments application)) => 4)
                   (fact "asemapiirros, pohjapiirustus and vastonsuojasuunnitelma are related to operation 'kerrostalo-rivitalo'"
-                        (map :type (get-attachments-by-operation application op-id)) => (just #{{:type-group "paapiirustus" :type-id "asemapiirros"} {:type-group "paapiirustus" :type-id "pohjapiirustus"} {:type-group "pelastusviranomaiselle_esitettavat_suunnitelmat" :type-id "vaestonsuojasuunnitelma"}} :in-any-order))
+                    (map :type (get-attachments-by-operation application op-id)) => (just #{{:type-group "paapiirustus" :type-id "asemapiirros"} {:type-group "paapiirustus" :type-id "pohjapiirustus"} {:type-group "pelastusviranomaiselle_esitettavat_suunnitelmat" :type-id "vaestonsuojasuunnitelma"}} :in-any-order))
                   (fact "the attachments have 'required', 'notNeeded' and 'requestedByAuthority' flags correctly set"
                         (every? (fn [a]
                                   (every? #{"required" "notNeeded" "requestedByAuthority"} a) => truthy
@@ -36,12 +37,12 @@
                                 (:attachments application)) => truthy
                         )))
 
-         (let [resp (command veikko
-                             :create-attachments
-                             :id application-id
-                             :attachmentTypes [{:type-group "paapiirustus" :type-id "asemapiirros"}
-                                               {:type-group "paapiirustus" :type-id "pohjapiirustus"}]
-                             :group nil)
+         (let [resp           (command veikko
+                                       :create-attachments
+                                       :id application-id
+                                       :attachmentTypes [{:type-group "paapiirustus" :type-id "asemapiirros"}
+                                                         {:type-group "paapiirustus" :type-id "pohjapiirustus"}]
+                                       :group nil)
                attachment-ids (:attachmentIds resp)]
 
            (fact "Veikko can create an attachment"
@@ -63,20 +64,20 @@
                                                                                            :versions             []}))
 
            (fact "uploading files"
-                 (let [application (query-application pena application-id)
-                       _ (upload-attachment-to-all-placeholders pena application)
-                       application (query-application pena application-id)]
+             (let [application (query-application pena application-id)
+                   _           (upload-attachment-to-all-placeholders pena application)
+                   application (query-application pena application-id)]
 
                    (facts "Each attachment has Pena's auth"
-                          (let [p-id pena-id]
-                            (doseq [{auth :auth} (:attachments application)]
+                     (let [p-id pena-id]
+                       (doseq [{auth :auth} (:attachments application)]
                               (fact "Pena as uploader"
                                     (some #(when (#{p-id} (:id %)) (:role %)) auth) => "uploader"))))
                    (fact "Signing id possible"
                          (query pena :signing-possible :id application-id) => ok?)
 
                    (fact "download all"
-                         (let [resp (raw pena "download-all-attachments" :id application-id)]
+                     (let [resp (raw pena "download-all-attachments" :id application-id)]
                            resp => http200?
                            (get-in resp [:headers "content-disposition"]) => "attachment;filename=\"liitteet.zip\"")
                          (fact "p\u00e5 svenska"
@@ -87,7 +88,7 @@
                          (raw pena "pdf-export" :id application-id) => http200?)
 
                    (doseq [attachment-id (get-attachment-ids application)
-                           :let [file-id (attachment-latest-file-id application attachment-id)]]
+                           :let          [file-id (attachment-latest-file-id application attachment-id)]]
 
                      (fact "view-attachment anonymously should not be possible"
                            (raw nil "view-attachment" :attachment-id file-id) => http401?)
@@ -101,14 +102,14 @@
                      (fact "download-attachment as pena should be possible"
                            (raw pena "download-attachment" :attachment-id file-id) => http200?))
                    (fact "operation info"
-                     (upload-file-and-bind pena application-id {:type {:type-group "muut"
-                                                                       :type-id    "muu"}
-                                                                :group {:groupType "operation"
+                     (upload-file-and-bind pena application-id {:type  {:type-group "muut"
+                                                                        :type-id    "muu"}
+                                                                :group {:groupType  "operation"
                                                                         :operations [{:id "foo"}]}}
                                            :fails :error.illegal-attachment-operation)
-                     (upload-file-and-bind pena application-id {:type {:type-group "muut"
-                                                                       :type-id    "muu"}
-                                                                :group {:groupType "operation"
+                     (upload-file-and-bind pena application-id {:type  {:type-group "muut"
+                                                                        :type-id    "muu"}
+                                                                :group {:groupType  "operation"
                                                                         :operations [{:id (-> application :primaryOperation :id)}]}})
                      (->> (query-application pena application-id) :attachments last :op (map :name)) => ["kerrostalo-rivitalo"])))
 
@@ -126,9 +127,9 @@
                        (command pena :sign-attachments :id application-id :attachmentIds attachment-ids :password "pena") => ok?)
 
                  (fact "Signature is set"
-                       (let [application (query-application pena application-id)
-                             attachments (get-attachments-infos application attachment-ids)]
-                         (doseq [{signatures :signatures latest :latestVersion} attachments]
+                   (let [application (query-application pena application-id)
+                         attachments (get-attachments-infos application attachment-ids)]
+                     (doseq [{signatures :signatures latest :latestVersion} attachments]
                            (count signatures) => 1
                            (let [{:keys [user created version]} (first signatures)]
                              (:username user) => "pena"
@@ -140,8 +141,8 @@
 
 
            (fact "Pena change attachment metadata"
-                 (let [{:keys [primaryOperation]} (query-application pena application-id)
-                       op-id (:id primaryOperation)]
+             (let [{:keys [primaryOperation]} (query-application pena application-id)
+                   op-id                      (:id primaryOperation)]
 
                    (fact "Invalid operation fails"
                      (command pena :set-attachment-meta
@@ -149,17 +150,17 @@
                               :attachmentId (first attachment-ids)
                               :meta {:group {:groupType :operation :operations [{:id "fail"}]}}) => (partial expected-failure? :error.illegal-attachment-operation))
                    (fact "Pena can change operation"
-                         (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:group {:groupType :operation :operations [{:id op-id}]}}) => ok?)
+                     (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:group {:groupType :operation :operations [{:id op-id}]}}) => ok?)
                    (fact "Pena can change contents"
-                         (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:contents "foobart"}) => ok?)
+                     (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:contents "foobart"}) => ok?)
                    (fact "Pena can change size"
-                         (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:size "A4"}) => ok?)
+                     (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:size "A4"}) => ok?)
                    (fact "Pena can change scale"
-                         (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:scale "1:500"}) => ok?)
+                     (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:scale "1:500"}) => ok?)
 
                    (fact "Metadata is set"
-                         (let [application (query-application pena application-id)
-                               {:keys [op groupType contents size scale]} (get-attachment-info application (first attachment-ids))]
+                     (let [application                                (query-application pena application-id)
+                           {:keys [op groupType contents size scale]} (get-attachment-info application (first attachment-ids))]
                            (map :id op) => [op-id]
                            groupType => "operation"
                            contents => "foobart"
@@ -167,9 +168,9 @@
                            scale => "1:500"))
 
                    (fact "Pena resets attachment group to nil"
-                         (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:group nil}) => ok?
-                         (let [application (query-application pena application-id)
-                               {:keys [groupType]} (get-attachment-info application (first attachment-ids))]
+                     (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:group nil}) => ok?
+                     (let [application         (query-application pena application-id)
+                           {:keys [groupType]} (get-attachment-info application (first attachment-ids))]
                            groupType => nil))
 
                    (fact "Operation id must exist in application"
@@ -206,9 +207,9 @@
                            (get-in updated-attachment [:auth 1 :id]) => veikko-id)
 
                      (fact "Pena receives email pointing to comment page"
-                           (let [emails (sent-emails)
-                                 email  (first emails)
-                                 pena-email  (email-for "pena")]
+                       (let [emails     (sent-emails)
+                             email      (first emails)
+                             pena-email (email-for "pena")]
                              (count emails) => 1
                              email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")
                              (:to email) => (contains pena-email)))
@@ -225,7 +226,7 @@
                              (get-in ver-del-attachment [:latestVersion :version :minor]) => 0))
 
                      (fact "Applicant cannot delete attachment that is required"
-                           (command pena :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => (contains {:ok false :text "error.unauthorized"}))
+                       (command pena :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => (contains {:ok false :text "error.unauthorized"}))
                      )))
 
            (let [versioned-attachment (first (:attachments (query-application pena application-id)))]
@@ -252,7 +253,7 @@
                      (fact (count (:signatures (get-attachment-by-id veikko application-id (:id versioned-attachment)))) => 0))
 
                (fact "Deleting the last version clears attachment auth"
-                     (let [attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
+                 (let [attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
                        (count (:versions attachment )) => 1
                        (command veikko
                                 :delete-attachment-version
@@ -264,17 +265,44 @@
 
                (fact "Authority deletes attachment"
                      (command veikko :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => ok?
-                     (get-attachment-by-id veikko application-id (:id versioned-attachment)) => nil?))
-             ))
+                     (get-attachment-by-id veikko application-id (:id versioned-attachment)) => nil?))))
          (facts "Authority-added attachment"
-                (let [attachment-id (upload-attachment veikko application-id {:type {:type-id "tutkintotodistus"
-                                                                                     :type-group "osapuolet"}} true)]
-                  (fact "Applicant cannot delete"
-                        (command pena :delete-attachment :id application-id :attachmentId attachment-id)
-                        => (partial expected-failure? :error.unauthorized))
-                  (fact "Authority can delete"
-                        (command veikko :delete-attachment :id application-id :attachmentId attachment-id)
-                        => ok?)))))
+           (let [attachment-id (upload-attachment veikko application-id {:type {:type-id    "tutkintotodistus"
+                                                                                :type-group "osapuolet"}} true)]
+             (fact "Applicant cannot delete"
+               (command pena :delete-attachment :id application-id :attachmentId attachment-id)
+               => (partial expected-failure? :error.unauthorized))
+             (fact "Authority can delete"
+               (command veikko :delete-attachment :id application-id :attachmentId attachment-id)
+               => ok?)
+             (fact "Comment for the deleted attachment with blank Contents info is gone"
+               (let [{:keys [comments]} (query-application pena application-id)]
+                 (util/find-first (fn [{target :target}]
+                                    (and (= (:type target) "attachment")
+                                         (= (:id target) attachment-id)))
+                                  comments)
+                 => nil))
+             (fact "Authority adds attachment with Contents info"
+               (let [file-id (upload-file-and-bind veikko application-id
+                                                   {:contents "Drawing"
+                                                    :type     {:type-id    "pohjapiirustus"
+                                                               :type-group "paapiirustus"}})
+                     {:keys [attachments]} (query-application veikko application-id)
+                     {att-id :id} (util/find-first #(= file-id (-> % :latestVersion :originalFileId))
+                                                   attachments)]
+                 (fact "Attachment has been added"
+                   att-id =not=> nil)
+                 (fact "Authority deletes this attachment too"
+                   (command veikko :delete-attachment :id application-id :attachmentId att-id)
+                   => ok?)
+
+                 (fact "Comment for the deleted attachment is marked removed"
+                   (let [{:keys [comments attachments]} (query-application pena application-id)]
+                     (util/find-first (fn [{target :target}]
+                                        (and (= (:type target) "attachment")
+                                             (= (:id target) att-id)))
+                                      comments)
+                     => (contains {:removed true})))))))))
 
 (facts* "Signing signs corrrect attachments"
   (let [{application-id :id :as response} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
@@ -657,16 +685,27 @@
                    :attachmentId (get-in attachments [0 :id])
                    :value "viranomainen") => (partial expected-failure? :error.attachment.no-versions)
         _ (upload-attachment-to-all-placeholders pena application)
-        {attachments :attachments :as application} (query-application pena application-id)
+        {:keys [attachments] :as application} (query-application pena application-id)
         user-has-auth? (fn [username {auth :auth}]
                          (= username (:username (first auth))))
         att1 (first attachments)
         att2 (second attachments)
         aid1 (get-in attachments [0 :id])
-        aid2 (get-in attachments [1 :id])]
+        aid2 (get-in attachments [1 :id])
+        attachment-comments-match (fn [{:keys [attachments comments]}]
+                                    (facts "Attachments and comments match"
+                                     (let [attachment-ids (map :id attachments)
+                                           att-comment-ids (keep (fn [{target :target}]
+                                                                   (when (= (:type target) "attachment")
+                                                                     (:id target)))
+                                                                 comments)]
+                                       (set attachment-ids) => (set att-comment-ids))))]
 
     (fact "each attachment has Pena's auth"
       (every? (partial user-has-auth? "pena") attachments) => true)
+
+    (attachment-comments-match application)
+
 
     (fact "Can't set unknown visibility value"
       (command pena :set-attachment-visibility :id application-id :attachmentId aid1 :value "testi") => (partial expected-failure? :error.invalid-nakyvyys-value))
@@ -684,10 +723,11 @@
              :role "writer") => ok?
     (command mikko :approve-invite :id application-id) => ok?
     (fact "Mikko sees all uploaded attachments, one of them has visibility 'julkinen'"
-      (let [{attachments :attachments} (query-application mikko application-id)]
+      (let [{attachments :attachments :as application} (query-application mikko application-id)]
         (count attachments) => 4
         (count (filter #(contains? (:metadata %) :nakyvyys) attachments)) => 1
-        (util/find-by-id aid1 attachments) => (contains {:metadata {:nakyvyys "julkinen"}})))
+        (util/find-by-id aid1 attachments) => (contains {:metadata {:nakyvyys "julkinen"}})
+        (attachment-comments-match application)))
 
     (facts "Mikko uploads personal CV"
       (upload-attachment mikko application-id {:id "" :type {:type-group "osapuolet" :type-id "cv"}} true) => truthy
@@ -701,9 +741,14 @@
           (raw mikko "download-attachment" :attachment-id (:fileId (:latestVersion mikko-att))) => http200?
           (raw pena "download-attachment" :attachment-id (:fileId (:latestVersion mikko-att))) => http404?
           (raw nil "download-attachment" :attachment-id (:fileId (:latestVersion mikko-att))) => http401?)
-        (fact "Mikko can access attachment, Pena's app query doesn't contain attachment"
-          (util/find-by-id (:id mikko-att) (:attachments (query-application pena application-id))) => nil
-          (util/find-by-id (:id mikko-att) (:attachments (query-application mikko application-id))) => map?)))
+        (fact "Mikko can access the attachment"
+          (let [app (query-application mikko application-id)]
+            (util/find-by-id (:id mikko-att) (:attachments app)) => map?
+            (attachment-comments-match app)))
+        (fact "Pena cannot access the attachment"
+          (let [app (query-application pena application-id)]
+            (util/find-by-id (:id mikko-att) (:attachments app)) => nil
+            (attachment-comments-match app)))))
 
     (facts "Pena sets attachment visiblity to parties ('asiakas-ja-viranomainen')"
      (command pena :set-attachment-visibility :id application-id :attachmentId aid2 :value "asiakas-ja-viranomainen") => ok?
@@ -711,8 +756,12 @@
        (raw mikko "download-attachment" :attachment-id (:fileId (:latestVersion att2))) => http200?
        (raw pena "download-attachment" :attachment-id (:fileId (:latestVersion att2))) => http200?)
      (fact "Parties have attachment available in query"
-       (util/find-by-id aid2 (:attachments (query-application mikko application-id))) => (contains {:metadata {:nakyvyys "asiakas-ja-viranomainen"}})
-       (util/find-by-id aid2 (:attachments (query-application pena application-id))) => (contains {:metadata {:nakyvyys "asiakas-ja-viranomainen"}})))
+       (let [app (query-application mikko application-id)]
+         (util/find-by-id aid2 (:attachments app)) => (contains {:metadata {:nakyvyys "asiakas-ja-viranomainen"}})
+         (attachment-comments-match app))
+       (let [app (query-application pena application-id)]
+         (util/find-by-id aid2 (:attachments app)) => (contains {:metadata {:nakyvyys "asiakas-ja-viranomainen"}})
+         (attachment-comments-match app))))
 
     (command pena :submit-application :id application-id) => ok?
 
@@ -724,14 +773,17 @@
       (count attachments) => 6
       (fact "Veikko sets his attachment authority-only"
         (command veikko :set-attachment-visibility :id application-id :attachmentId (:id veikko-att) :value "viranomainen") => ok?)
+      (attachment-comments-match (query-application veikko application-id))
       (fact "Pena sees 4 attachments"                     ; does not see Mikkos CV or Veikkos attachment
-        (let [attachments (:attachments (query-application pena application-id))]
+        (let [{:keys [attachments] :as app} (query-application pena application-id)]
           (count attachments) => 4
-          (map :id attachments) =not=> (contains (:id veikko-att))))
+          (map :id attachments) =not=> (contains (:id veikko-att))
+          (attachment-comments-match app)))
       (fact "Mikko sees 5 attachments"                     ; does not see Veikkos attachment
-        (let [attachments (:attachments (query-application mikko application-id))]
+        (let [{:keys [attachments] :as app} (query-application mikko application-id)]
           (count attachments) => 5
-          (map :id attachments) =not=> (contains (:id veikko-att)))))
+          (map :id attachments) =not=> (contains (:id veikko-att))
+          (attachment-comments-match app))))
 
     (fact "Veikko uploads attachment for parties"
       (upload-attachment veikko application-id {:id "" :type {:type-group "ennakkoluvat_ja_lausunnot"
@@ -747,6 +799,7 @@
       (fact "Mikko sees Veikko's/Pena's attachment"
         (:id latest-attachment) => veikko-att-id
         (-> latest-attachment :latestVersion :user :username) => "pena")
+      (attachment-comments-match mikko-app)
       (fact "Mikko can't change visibility (not authed to attachment)"
         (command mikko :set-attachment-visibility
                  :id application-id
@@ -755,9 +808,13 @@
       (fact "Veikko sets visibility to only authority"
         (command veikko :set-attachment-visibility :id application-id :attachmentId veikko-att-id :value "viranomainen") => ok?)
       (fact "Mikko can't see attachment anymore"
-        (map :id (get (query-application mikko application-id) :attachments)) =not=> (contains veikko-att-id))
+        (let [app (query-application mikko application-id)]
+          (map :id (get app :attachments)) =not=> (contains veikko-att-id)
+          (attachment-comments-match app)))
       (fact "Pena can see attachment, because he is authed"
-        (map :id (get (query-application pena application-id) :attachments)) => (contains veikko-att-id))
+        (let [app (query-application pena application-id)]
+          (map :id (get app :attachments)) => (contains veikko-att-id)
+          (attachment-comments-match app)))
       (fact "Pena can change visibility, as he is authed"
         (command pena :set-attachment-visibility :id application-id :attachmentId veikko-att-id :value "julkinen") => ok?)
       )))
