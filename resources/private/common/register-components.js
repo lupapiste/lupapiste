@@ -205,7 +205,8 @@ jQuery(document).ready(function() {
     {name: "mark-review-faulty-dialog"},
     {name: "backend-id-manager"},
     {name: "generic-bulletin-tab"},
-    {name: "add-link-permit"}
+    {name: "add-link-permit"},
+    {name: "premises-upload", template: "premises-upload-template"}
 ];
 
   ko.registerLupapisteComponents(components);

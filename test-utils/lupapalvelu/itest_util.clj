@@ -193,7 +193,7 @@
     (first args)
     (apply hash-map args)))
 
-(defn- decode-post [action-type apikey command-name & args]
+(defn decode-post [action-type apikey command-name & args]
   (decode-response
     (http-post
       (str (server-address) "/api/" (name action-type) "/" (name command-name))

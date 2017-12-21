@@ -8487,6 +8487,14 @@ input.form-input.inline, input.inline.form-input--inline {
   border-bottom: 1px solid #dddddd;
 }
 
+.docgen-content form.premises-upload {
+  display: inline-block;
+}
+
+.docgen-content form.premises-upload i {
+  padding-right: 10px;
+}
+
 .accordion-fields > .form-entry,
 .accordion-fields > .verdict-info-fields,
 .accordion-fields .personSelector,
@@ -14311,6 +14319,10 @@ div.automatic-assignments .assignment .editor {
   top: 0;
   bottom: 0;
   margin: auto;
+}
+
+.tags-editor-component ul.tags li.tag.tag--disabled {
+  background-color: #dddddd;
 }
 
 .metadata-editor-container {
