@@ -4,7 +4,7 @@
             [lupapalvelu.domain :refer :all]
             [lupapalvelu.document.schemas :as schemas]))
 
-(testable-privates lupapalvelu.domain only-authority-sees-drafts filter-targeted-attachment-comments normalize-neighbors)
+(testable-privates lupapalvelu.domain only-authority-sees-drafts normalize-neighbors)
 
 (facts
   (let [application {:documents [{:id 1 :data "jee"} {:id 2 :data "juu"} {:id 1 :data "hidden"}]}]
@@ -169,10 +169,14 @@
                               :target {:type "attachment"
                                        :id 1}}
                              {:text "deleted attachment comment"
+                              :removed true
                               :target {:type "attachment"
                                        :id 0}}]]
       (fact "even comments for deleted attachments are returned, but not those which are empty"
-        (:comments (filter-targeted-attachment-comments application)) => expected-comments))))
+        (-> application
+            flag-removed-attachment-comments
+            cleanup-attachment-comments
+            :comments) => expected-comments))))
 
 (facts enrich-application-handlers
   (fact "handlers not used -> not enriched -> no mongo calls"
