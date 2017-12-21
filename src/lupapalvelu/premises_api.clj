@@ -1,28 +1,22 @@
 (ns lupapalvelu.premises-api
-  (:require [sade.core :as sc]
-            [sade.strings :as ss]
-            [lupapalvelu.file-upload-api :as file-upload-api]
-            [lupapalvelu.xls-muuntaja-client :as xmc]
-            [lupapalvelu.file-upload :as file-upload]
-            [lupapalvelu.roles :as roles]
+  (:require [lupapalvelu.action :refer [defraw] :as action]
             [lupapalvelu.attachment :as att]
-            [lupapalvelu.states :as states]
+            [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.action :refer [defraw] :as action]
-            [lupapalvelu.permit :as permit]
             [lupapalvelu.mongo :as mongo]
-            [swiss.arrows :refer :all]
-            [slingshot.slingshot :refer [throw+]]
-            [lupapalvelu.document.persistence :as doc-persistence]
-            [noir.response :as resp]
-            [taoensso.timbre :as timbre]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.premises :as premises]
+            [lupapalvelu.roles :as roles]
+            [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
-            [monger.operators :refer [$set]]))
-
-(defn get-huoneistot-doc [application]
-  (->> (:documents application)
-       (filter #(= "uusiRakennus" (-> % :schema-info :name)))
-       (first)))
+            [lupapalvelu.xls-muuntaja-client :as xmc]
+            [monger.operators :refer [$set]]
+            [noir.response :as resp]
+            [sade.core :refer :all]
+            [slingshot.slingshot :refer [throw+]]
+            [swiss.arrows :refer :all]
+            [taoensso.timbre :as timbre]
+            [lupapalvelu.domain :as domain]))
 
 ;;
 ;;  Validators and pre-checks
@@ -30,98 +24,15 @@
 
 (defn- primary-operation-pre-check [{:keys [application]}]
   (when (not (= "kerrostalo-rivitalo" (-> application :primaryOperation :name)))
-    (sc/fail :error.illegal-primary-operation)))
+    (fail :error.illegal-primary-operation)))
 
 (defn- file-size-positive [{{files :files} :data}]
   (when (not (pos? (-> files (first) :size)))
-    (sc/fail :error.select-file)))
+    (fail :error.select-file)))
 
 (defn- validate-mime-type [{{files :files} :data}]
   (when-not (-> files (first) :filename (mime/allowed-file?))
-    (sc/fail :error.file-upload.illegal-file-type)))
-
-;;
-;;  IFC-model apartment data from Excel file
-;;
-
-(def ifc-to-lupapiste-keys
-  {"porras"                 {:key "porras"}
-   "huoneistonumero"        {:key "huoneistonumero"}
-   "huoneiston jakokirjain" {:key "jakokirjain"}
-;  "sijaintikerros"         {:key "sijaintikerros"} ;; ei skeemassa, ei käytetä
-   "huoneiden lukumäärä"    {:key "huoneluku"}
-   "keittiötyyppi"          {:key    "keittionTyyppi"
-                             :values {"1" "keittio"
-                                      "2" "keittokomero"
-                                      "3" "keittotila"
-                                      "4" "tupakaittio"
-                                      ""  "ei tiedossa"}}
-   "huoneistoala"           {:key "huoneistoala"}
-   "varusteena wc"          {:key    "WCKytkin"
-                             :values {"1" true
-                                      "0" false}}
-   "varusteena amme/suihku" {:key    "ammeTaiSuihkuKytkin"
-                             :values {"1" true
-                                      "0" false}}
-   "varusteena parveke"     {:key    "parvekeTaiTerassiKytkin"
-                             :values {"1" true
-                                      "0" false}}
-   "varusteena sauna"       {:key    "saunaKytkin"
-                             :values {"1" true
-                                      "0" false}}
-   "varusteena lämmin vesi" {:key    "lamminvesiKytkin"
-                             :values {"1" true
-                                      "0" false}}})
-
-(defn- header-pairing-with-cells [vecs]
-  (let [headers (map #(.toLowerCase %) (first vecs))
-        data (rest vecs)]
-    (map #(zipmap headers %) data)))
-
-(defn- split-with-semicolon [row]
-  (map #(ss/split % #";") row))
-
-(defn- pick-only-header-and-data-rows [rows]
-  (drop-while #(not (clojure.string/starts-with? % "Porras")) rows))
-
-(defn- csv-data->ifc-coll [csv]
-  (-> csv
-      (ss/split #"\n")
-      (pick-only-header-and-data-rows)
-      (split-with-semicolon)
-      (header-pairing-with-cells)))
-
-(defn- item->update [premises-number [ifc-key ifc-val]]
-  (let [lp-key (-> ifc-key ifc-to-lupapiste-keys :key)
-        lp-val (-> ifc-key ifc-to-lupapiste-keys :values)]
-    (when (and (not (empty? ifc-val)) lp-key)
-      [(ss/join "." ["huoneistot" premises-number lp-key])
-       (if (map? lp-val) (-> ifc-val lp-val) (ss/replace ifc-val #"," "."))])))
-
-(defn- premise->updates [premise premises-number]
-  (remove nil? (map #(item->update premises-number %) premise)))
-
-(defn- remove-old-premises [pseudo-command doc]
-  (let [app-id (-> pseudo-command :application :id)
-        paths (->> (mongo/by-id :applications app-id)
-                   (get-huoneistot-doc)
-                   :data
-                   :huoneistot
-                   (keys)
-                   (map (fn [huoneisto-key] [:huoneistot huoneisto-key])))]
-    (doc-persistence/remove-document-data pseudo-command doc paths "documents")))
-
-(defn- save-premises-data [premise-data applicationId timestamp user doc]
-  (let [application    (mongo/by-id :applications applicationId)
-        pseudo-command {:application application
-                        :data        {:id applicationId}
-                        :created     timestamp
-                        :user        user}
-        updates        (reduce #(concat %1 (premise->updates (nth premise-data %2) %2))
-                               []
-                               (range (count premise-data)))]
-    (remove-old-premises pseudo-command doc)
-    (doc-persistence/update! pseudo-command doc updates "documents")))
+    (fail :error.file-upload.illegal-file-type)))
 
 (defraw upload-premises-data
   {:user-roles       #{:applicant :authority :oirAuthority}
@@ -134,18 +45,18 @@
    :input-validators [(partial action/non-blank-parameters [:id :doc])
                       validate-mime-type
                       file-size-positive
-                      file-upload-api/file-size-legal]
+                      file-upload/file-size-legal]
    :states           {:applicant    states/pre-verdict-states
                       :authority    states/pre-verdict-states
-                      :oirAuthority states/pre-verdict-states}}
-  [{user :user application :application}]
-  (let [timestamp (sc/now)
-        app-id        (:id application)
-        premises-data (-> files (first) (xmc/xls-2-csv) :data (csv-data->ifc-coll))
+                      :oirAuthority states/pre-verdict-states}
+   :feature          :premises-upload}
+  [{user :user application :application created :created :as command}]
+  (let [app-id        (:id application)
+        premises-data (-> files (first) (xmc/xls-2-csv) :data (premises/csv-data->ifc-coll))
         file-updated? (when-not (empty? premises-data)
-                        (-> premises-data (save-premises-data app-id timestamp user doc) :ok))
+                        (-> premises-data (premises/save-premises-data command doc) :ok))
         save-response (when file-updated?
-                        (timbre/info "Premises updated by premises Excel file in application" app-id)
+                        (timbre/info "Premises updated by premises Excel file in application")
                         (->> (first files)
                              ((fn [file] {:filename (:filename file) :content (:tempfile file)}))
                              (file-upload/save-file)))
@@ -156,12 +67,14 @@
                         (empty? premises-data) {:ok false :text "error.illegal-premises-excel"}
                         :else {:ok false})]
     (when file-linked?
-      (mongo/update-by-id :applications
-                          app-id
-                          {$set {:ifc-data {:fileId    (:fileId save-response)
-                                            :filename  (:filename save-response)
-                                            :timestamp timestamp
-                                            :user      (usr/summary user)}}}))
+      (let [old-ifc-fileId      (-> application :ifc-data :fileId)
+            updated-application (domain/get-application-as (:id application) user)
+            updated-command     (action/application->command updated-application user)]
+        (action/update-application updated-command {$set {:ifc-data  {:fileId    (:fileId save-response)
+                                                                      :filename  (:filename save-response)
+                                                                      :modified  created
+                                                                      :user      (usr/summary user)}}})
+        (when old-ifc-fileId (mongo/delete-file-by-id old-ifc-fileId))))
     (->> return-map
          (resp/json)
          (resp/status 200))))

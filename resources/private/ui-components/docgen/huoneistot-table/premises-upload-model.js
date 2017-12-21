@@ -35,7 +35,8 @@ LUPAPISTE.PremisesUploadModel = function( params ) {
                         params.onSuccess(res);
                     }
                 } else {
-                    hub.send("indicator", {style: "negative", message: res.text || "error.file-upload-failed"});
+                    util.showSavedIndicator(res);
+                    //hub.send("indicator", {style: "negative", message: res.text || "error.file-upload-failed"});
                 }
             },
             complete: function() {
