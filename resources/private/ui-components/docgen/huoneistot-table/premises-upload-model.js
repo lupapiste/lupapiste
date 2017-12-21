@@ -12,8 +12,8 @@ LUPAPISTE.PremisesUploadModel = function( params ) {
 
     self.submit = function(form) {
         var formData = new FormData(form);
-        formData.append('id', self.applicationId);
-        formData.append('doc', self.doc);
+        formData.append("id", self.applicationId);
+        formData.append("doc", self.doc);
         $.ajax({
             type: "POST",
             url: "/api/raw/upload-premises-data",
