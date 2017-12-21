@@ -37,7 +37,7 @@
 (defraw upload-premises-data
   {:user-roles       #{:applicant :authority :oirAuthority}
    :parameters       [doc id files]
-   :user-authz-roles (conj roles/all-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :pre-checks       [(action/some-pre-check att/allowed-only-for-authority-when-application-sent
                                              (permit/validate-permit-type-is :R))
                       primary-operation-pre-check
