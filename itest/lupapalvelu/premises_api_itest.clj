@@ -64,11 +64,14 @@
       (fact "Updating application with bad excel file does not change data"
         (-> (upload-premises pena file-bad-file doc app-id) :body :ok) => false
 
-      (let [updated-application (query-application pena app-id)
-            updated-doc (get-huoneistot-doc updated-application)
-            huoneistot (-> updated-doc :data :huoneistot (dissoc :validationResult))]
+        (let [updated-application (query-application pena app-id)
+              updated-doc (get-huoneistot-doc updated-application)
+              huoneistot (-> updated-doc :data :huoneistot (dissoc :validationResult))]
 
-        (count huoneistot) => 3)))
+          (count huoneistot) => 3
+          (-> huoneistot :0 :porras :value) => "A"
+          (-> huoneistot :1 :porras :value) => "B"
+          (-> huoneistot :2 :porras :value) => "C")))
 
     (fact "Uploading new file with fewer lines returns ok"
       (-> (upload-premises pena file-1-line doc app-id) :body :ok) => true)

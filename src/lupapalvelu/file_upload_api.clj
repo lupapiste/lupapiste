@@ -19,7 +19,7 @@
 (defraw upload-file
   {:user-roles #{:anonymous}
    :parameters [files]
-   :input-validators [file-mime-type-accepted file-size-legal]
+   :input-validators [file-mime-type-accepted file-upload/file-size-legal]
    :pre-checks [vetuma/session-pre-check]}
   (let [file-info (pmap
                     #(file-upload/save-file % :sessionId (vetuma/session-id) :linked false)
