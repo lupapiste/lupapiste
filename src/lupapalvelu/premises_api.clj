@@ -67,10 +67,8 @@
                         (empty? premises-data) {:ok false :text "error.illegal-premises-excel"}
                         :else {:ok false})]
     (when file-linked?
-      (let [old-ifc-fileId      (-> application :ifc-data :fileId)
-            updated-application (domain/get-application-as (:id application) user)
-            updated-command     (action/application->command updated-application user)]
-        (action/update-application updated-command {$set {:ifc-data  {:fileId    (:fileId save-response)
+      (let [old-ifc-fileId      (-> application :ifc-data :fileId)]
+        (action/update-application command {$set {:ifc-data  {:fileId    (:fileId save-response)
                                                                       :filename  (:filename save-response)
                                                                       :modified  created
                                                                       :user      (usr/summary user)}}})

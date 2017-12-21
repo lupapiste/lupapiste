@@ -74,8 +74,8 @@
   (remove nil? (map #(item->update premises-number %) premise)))
 
 (defn remove-old-premises [command doc]
-  (let [app-id (-> command :application :id)
-        paths (->> (mongo/by-id :applications app-id)
+  (let [paths (->> command
+                   :application
                    (get-huoneistot-from-application doc)
                    (keys)
                    (map (fn [huoneisto-key] [:huoneistot huoneisto-key])))]
