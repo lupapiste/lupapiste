@@ -45,6 +45,7 @@
   [{:keys [application]}]
   (let [{:keys [ok] :as result} (file-upload/save-files application files (vetuma/session-id))]
     (->> result
+         (file-upload/mark-duplicates application)
          (resp/json)
          (resp/status (if ok 200 400)))))
 

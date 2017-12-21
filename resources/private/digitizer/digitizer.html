@@ -14,9 +14,9 @@
       </div>
 
       <div class="row">
-        <label for="prev-permit-organization-select">
+        <label for="digitizer-prev-permit-organization-select">
           <span data-bind="ltext: 'prev-permit-label-organization'"></span>
-          <select id="prev-permit-organization-select" data-test-id="test-prev-permit-organization-select"
+          <select id="digitizer-prev-permit-organization-select" data-test-id="test-digitizer-prev-permit-organization-select"
                   class="dropdown"
                   data-bind="options: organizationOptions,
                                optionsText: function(org) { return util.getIn(org, ['name', loc.getCurrentLanguage()]) || org.name.fi; },

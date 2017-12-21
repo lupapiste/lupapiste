@@ -129,3 +129,11 @@
   (mongo/delete-file {$and [{:metadata.linked {$exists true}}
                             {:metadata.linked false}
                             {:metadata.uploaded {$lt (two-hours-ago)}}]}))
+
+(defn mark-duplicates [application result]
+  (let [existing-files (mapv (fn [attachment] (first (str/split (get-in attachment [:latestVersion :filename]) #"\."))) (:attachments application))
+        find-duplicates-fn (fn [file]
+                             (if (some #(= % (first (str/split (:filename file) #"\."))) existing-files)
+                               (assoc file :existsWithSameName true)
+                               (assoc file :existsWithSameName false)))]
+    (assoc result :files (map find-duplicates-fn (remove nil? (:files result))))))
