@@ -17,33 +17,33 @@
 ;;
 
 (def ifc-to-lupapiste-keys
-  {"porras"                 {:key "porras"}
-   "huoneistonumero"        {:key "huoneistonumero"}
-   "huoneiston jakokirjain" {:key "jakokirjain"}
-   ;  "sijaintikerros"         {:key "sijaintikerros"} ;; ei skeemassa, ei käytetä
-   "huoneiden lukumäärä"    {:key "huoneluku"}
-   "keittiötyyppi"          {:key    "keittionTyyppi"
-                             :values {"1" "keittio"
-                                      "2" "keittokomero"
-                                      "3" "keittotila"
-                                      "4" "tupakaittio"
-                                      ""  "ei tiedossa"}}
-   "huoneistoala"           {:key "huoneistoala"}
-   "varusteena wc"          {:key    "WCKytkin"
-                             :values {"1" true
-                                      "0" false}}
-   "varusteena amme/suihku" {:key    "ammeTaiSuihkuKytkin"
-                             :values {"1" true
-                                      "0" false}}
-   "varusteena parveke"     {:key    "parvekeTaiTerassiKytkin"
-                             :values {"1" true
-                                      "0" false}}
-   "varusteena sauna"       {:key    "saunaKytkin"
-                             :values {"1" true
-                                      "0" false}}
-   "varusteena lämmin vesi" {:key    "lamminvesiKytkin"
-                             :values {"1" true
-                                      "0" false}}})
+  {"porras"                             {:key "porras"}
+   "huoneistonumero"                    {:key "huoneistonumero"}
+   "huoneiston jakokirjain"             {:key "jakokirjain"}
+;  "sijaintikerros"                     {:key "sijaintikerros"} ;; ei skeemassa
+   "huoneiden lukum\u00e4\u00e4r\u00e4" {:key "huoneluku"}
+   "keitti\u00f6tyyppi"                 {:key    "keittionTyyppi"
+                                         :values {"1" "keittio"
+                                                  "2" "keittokomero"
+                                                  "3" "keittotila"
+                                                  "4" "tupakaittio"
+                                                  ""  "ei tiedossa"}}
+   "huoneistoala"                       {:key "huoneistoala"}
+   "varusteena wc"                      {:key    "WCKytkin"
+                                         :values {"1" true
+                                                  "0" false}}
+   "varusteena amme/suihku"             {:key    "ammeTaiSuihkuKytkin"
+                                         :values {"1" true
+                                                  "0" false}}
+   "varusteena parveke"                 {:key    "parvekeTaiTerassiKytkin"
+                                         :values {"1" true
+                                                  "0" false}}
+   "varusteena sauna"                   {:key    "saunaKytkin"
+                                         :values {"1" true
+                                                  "0" false}}
+   "varusteena l\u00e4mmin vesi"        {:key    "lamminvesiKytkin"
+                                         :values {"1" true
+                                                  "0" false}}})
 
 (defn header-pairing-with-cells [vecs]
   (let [headers (map #(.toLowerCase %) (first vecs))
