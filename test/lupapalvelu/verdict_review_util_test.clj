@@ -1,7 +1,9 @@
 (ns lupapalvelu.verdict-review-util-test
   (:require [lupapalvelu.verdict-review-util :refer :all]
             [midje.sweet :refer :all]
-            [midje.util :refer [testable-privates]])
+            [midje.util :refer [testable-privates]]
+            [lupapalvelu.user :as usr]
+            [sade.http :as http])
   (:import [java.nio.charset StandardCharsets]))
 
 (testable-privates lupapalvelu.verdict-review-util
@@ -104,3 +106,19 @@
                                                                                      StandardCharsets/ISO_8859_1)
                                                       "server"              "Microsoft-IIS/7.5"}})
              => "P\u00e4\u00e4t\u00f6sote.txt"))
+
+(facts "urlHash"
+ (let [pk {:liite {:linkkiliitteeseen "http://foo.bar/paatosote123.pdf"}}
+       app {:permitType "R" :id "1234567890"}
+       user (usr/batchrun-user "000-R")
+       ts 1513942123747]
+   (fact "included upon successful download-and-store"
+     (:urlHash (get-poytakirja! app user ts {:type "verdict" :id "abcd"} pk)) =not=> nil
+     (provided
+       (download-and-store-poytakirja! app user ts anything {:type "verdict", :id "abcd"} true
+                                       {:linkkiliitteeseen "http://foo.bar/paatosote123.pdf"}) => 1))
+   (fact "omitted upon failure"
+     (:urlHash (get-poytakirja! app user ts {:type "verdict" :id "abcd"} pk)) =not=> nil
+     (provided
+       (download-and-store-poytakirja! app user ts anything {:type "verdict", :id "abcd"} true
+                                       {:linkkiliitteeseen "http://foo.bar/paatosote123.pdf"}) => 1))))
