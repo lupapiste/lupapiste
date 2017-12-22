@@ -109,7 +109,7 @@
 (defraw digitizer-report
   {:description      "Excel report of digitized attachments"
    :parameters       [startTs endTs]
-   :input-validators [(partial action/string-parameters [:startTs :endTs])]
+   :input-validators [(partial action/numeric-parameters [:startTs :endTs])]
    :user-roles       #{:authority}}
   [{user :user {lang :lang} :data}]
   (let [resulting-file-name (str (i18n/localize lang "digitizer.reports.excel.filename")

@@ -78,8 +78,7 @@
                                    $lte (Long/parseLong end-ts 10)}}
         query      (if (usr/user-is-pure-digitizer? user)
                      (assoc base-query :auth.id (:id user))
-                     (assoc base-query :organization {$in (mapv :id (usr/get-organizations user))}))
-        _ (println query)]
+                     (assoc base-query :organization {$in (usr/organization-ids-by-roles (usr/with-org-auth user) #{:digitizer})}))]
     (mongo/select :applications
                   query
                   [:_id :created :attachments])))
@@ -327,8 +326,6 @@
 
 (defn ^OutputStream digitized-attachments [user start-ts end-ts lang]
   (let [org-ids       (mapv :id (usr/get-organizations user))
-        _ (clojure.pprint/pprint user)
-        _ (println (clojure.core/type end-ts))
         applications  (digitized-applications-between user start-ts end-ts)
         row-data      (map #(digi-report-data %) applications)
         sum-data      (digi-report-sum row-data)

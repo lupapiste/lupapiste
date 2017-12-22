@@ -350,8 +350,7 @@
 (defn user-is-pure-digitizer? [user]
   (let [all-roles (apply set/union (vals (:orgAuthz (with-org-auth user))))]
     (and (authority? user)
-         (contains? all-roles :digitizer)
-         (not (contains? all-roles :authority)))))
+         (every? #(= % :digitizer) all-roles))))
 
 (defn check-password-pre-check [{{:keys [password]} :data user :user}]
   (when-not (security/check-password password
