@@ -70,7 +70,34 @@
                 <span data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.buttonText'"></span>
               </button>
             </form>
-          </section
+          </section>
+
+          <section>
+            <br>
+            <h2 data-bind="ltext: 'authorityAdmin.postVerdictReports.title'"></h2>
+            <span data-bind="ltext: 'authorityAdmin.postVerdictReports.caption'"></span>
+            <form action="/api/raw/post-verdict-xlsx" method="get">
+              <input type="hidden" name="__anti-forgery-token"data-bind="value: $.cookie('anti-csrf-token')">
+              <input type="hidden" name="lang" data-bind="value: loc.currentLanguage">
+              <input type="hidden" name="startTs" data-bind="value: reportsModel.verdictsStartComputed">
+              <input type="hidden" name="endTs" data-bind="value: reportsModel.verdictsEndComputed">
+              <div class="labeled-input">
+                <label data-bind="ltext: 'authorityAdmin.postVerdictReports.timePeriod.startTs'"></label>
+                <input type="text" data-bind="datepicker: reportsModel.verdictsStartDate" class="dateinput">
+              </div>
+              <div class="labeled-input">
+                <label data-bind="ltext: 'authorityAdmin.postVerdictReports.timePeriod.endTs'"></label>
+                <input type="text" data-bind="datepicker: reportsModel.verdictsEndDate" class="dateinput">
+              </div>
+              <button type="submit"
+                      class="primary outline">
+                <i class="lupicon-download"></i>
+                <span data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.buttonText'"></span>
+              </button>
+            </form>
+          </section>
+
+
 
         </section>
       </div>
