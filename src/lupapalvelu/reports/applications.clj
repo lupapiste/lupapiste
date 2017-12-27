@@ -75,10 +75,11 @@
 (defn- get-latest-verdict-ts [{verdicts :verdicts}]
   (->> verdicts (sort-by :timestamp) (last) :timestamp))
 
-(defn post-verdict-applications [organizationId startTs endTs]
+(defn- post-verdict-applications [organizationId startTs endTs]
   (let [applications           (mongo/select :applications
                                              {:organization organizationId
-                                             :state {$in states/post-verdict-states}}
+                                              :state {$in states/post-verdict-states}
+                                              :verdicts {$elemMatch {:timestamp {$gte startTs}}}}
                                              [:_id :state :primaryOperation :verdicts :documents])
         verdict-in-time-period (fn [app] (< startTs (get-latest-verdict-ts app) (if (< (now) endTs) (now) endTs)))]
     (filter verdict-in-time-period applications)))
@@ -99,18 +100,18 @@
 
 (defn- applicants [app]
   (->> (domain/get-applicant-documents (:documents app))
-       (map app-meta/applicant-name-from-doc)
-       (ss/join ", ")))
+       (map app-meta/applicant-name-from-doc-first-last)
+       (ss/join "; ")))
 
 (defn get-applicant-email-from-doc [doc]
-  (or
+  (if (= "henkilo" (-> doc :data :_selected :value))
     (-> doc :data :henkilo :yhteystiedot :email :value)
-    (-> doc :yritys :yhteyshenkilo :yhteystedot :email :value)))
+    (-> doc :data :yritys :yhteyshenkilo :yhteystiedot :email :value)))
 
 (defn- applicants-emails [app]
   (->> (domain/get-applicant-documents (:documents app))
        (map get-applicant-email-from-doc)
-       (ss/join ", ")))
+       (ss/join "; ")))
 
 (defn- localized-state [lang app]
   (i18n/localize lang (get app :state)))
