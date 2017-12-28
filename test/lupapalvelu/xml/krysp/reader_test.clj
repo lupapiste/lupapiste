@@ -386,7 +386,7 @@
         katselmus-tasks (map (partial lupapalvelu.tasks/katselmus->task {} {} {}) reviews)
         aloitus-review-task (nth katselmus-tasks 0)
         non-empty (complement clojure.string/blank?)]
-    (fact "xml has 12 reviews" (count reviews) => 13)
+    (fact "xml has 13 reviews" (count reviews) => 13)
     (fact "huomautukset" (get-in aloitus-review-task [:data :katselmus :huomautukset :kuvaus :value]) => non-empty)
     (fact "katselmuksenLaji" (get-in aloitus-review-task [:data :katselmuksenLaji :value]) => "aloituskokous")
     (fact "tunnustieto" (get-in aloitus-review-task [:data :muuTunnus]) => truthy)
