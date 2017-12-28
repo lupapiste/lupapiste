@@ -605,16 +605,19 @@ LUPAPISTE.AttachmentsService = function() {
     return fileId && util.getIn( attachment, ["approvals", fileId]);
   };
 
-  // If stamped, gets the approval before stamping
+  // If stamped, gets the approval given before stamping
   self.attachmentFirstApproval = function ( attachment ) {
-      var state = util.getIn(attachment, ["approvals", attachment.latestVersion.originalFileId, "state"]);
 
-      if (attachment.latestVersion.stamped) {
+      var originalFileId = util.getIn(attachment, ["latestVersion", "originalFileId"]);
+      var state = util.getIn(attachment, ["approvals", originalFileId, "state"]);
+      var stamped = util.getIn(attachment, ["latestVersion", "stamped"]);
+
+      if (stamped) {
 
           var earliestPossibleApprovedVersion = _(attachment.versions)
               .filter(function (v) { return v.version.major === attachment.latestVersion.version.major; })
               .filter(function (v) { return Object.keys(attachment.approvals).indexOf(v.originalFileId) >= 0 &&
-                                            attachment.approvals[v.originalFileId].state === "ok"; })
+                  attachment.approvals[v.originalFileId].state === "ok"; })
               .sortBy(function (v) { return util.getIn(attachment.approvals, [v.originalFileId, "timestamp"]) })
               .first();
 
@@ -623,10 +626,9 @@ LUPAPISTE.AttachmentsService = function() {
       } else if (state === "ok") {
 
           return attachment.approvals[attachment.latestVersion.originalFileId];
-
-      } else {
-          return null;
       }
+
+      return null;
 
   };
 
