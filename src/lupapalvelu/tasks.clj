@@ -301,7 +301,7 @@
 (defn- get-muu-tunnus-data [katselmus]
   (->> (:muuTunnustieto katselmus)
        (map :MuuTunnus)
-       (util/find-first (util/fn-> :sovellus ss/lower-case (not= "lupapiste")))
+       first
        (krysp-reader/extract-muu-tunnus)))
 
 (defn katselmus->task [meta source {:keys [buildings]} katselmus]
