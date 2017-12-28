@@ -214,6 +214,13 @@
                                :liitetieto (when (seq liitetiedot)
                                              (map #(apply hash-map [:liite %]) liitetiedot))})))))
 
+(defn reviews->tasks [meta source buildings-summary reviews]
+  (letfn [(review-to-task [review] (tasks/katselmus->task meta source {:buildings buildings-summary} review))
+          (drop-reviews-with-lupapiste-muuTunnus [rs] (filter (util/fn-> :data :muuTunnusSovellus :value ss/lower-case (not= "lupapiste")) rs))]
+    (->> reviews
+         (map review-to-task)
+         drop-reviews-with-lupapiste-muuTunnus)))
+
 (defn read-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
@@ -223,8 +230,7 @@
         buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
-        review-to-task #(tasks/katselmus->task {:state :sent :created created} source {:buildings buildings-summary} %)
-        review-tasks (map review-to-task reviews)
+        review-tasks (reviews->tasks {:state :sent :created created} source buildings-summary reviews)
         validation-errors (doall (map #(tasks/task-doc-validation (-> % :schema-info :name) %) review-tasks))
         review-tasks (keep-indexed (fn [idx item]
                                      (if (empty? (get validation-errors idx))

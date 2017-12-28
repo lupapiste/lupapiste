@@ -360,6 +360,44 @@
                   </rakval:liitetieto>
                   <rakval:tarkastuksenTaiKatselmuksenNimi>aloituskokous</rakval:tarkastuksenTaiKatselmuksenNimi>
               </rakval:Katselmus>
+              <rakval:Katselmus>
+                  <rakval:katselmuksenRakennustieto>
+                      <rakval:KatselmuksenRakennus>
+                          <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                          <rakval:kiinttun>18600303560006</rakval:kiinttun>
+                          <rakval:rakennusnro>001</rakval:rakennusnro>
+                          <rakval:aanestysalue>002</rakval:aanestysalue>
+                          <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+                          <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                      </rakval:KatselmuksenRakennus>
+                  </rakval:katselmuksenRakennustieto>
+                  <rakval:muuTunnustieto>
+                      <rakval:MuuTunnus>
+                          <yht:tunnus>fefefefefefefefefefefefefefefa</yht:tunnus>
+                          <yht:sovellus>Lupapiste</yht:sovellus>
+                      </rakval:MuuTunnus>
+                  </rakval:muuTunnustieto>
+                  <rakval:pitoPvm>2011-11-11Z</rakval:pitoPvm>
+                  <rakval:osittainen>lopullinen</rakval:osittainen>
+                  <rakval:pitaja>Erkki Everest</rakval:pitaja>
+                  <rakval:katselmuksenLaji>aloituskokous</rakval:katselmuksenLaji>
+                  <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+                  <rakval:huomautukset>
+                      <rakval:huomautus>
+                          <rakval:kuvaus>Aloituskokous LVI+RAK&#xd;
+                              Seurantakatselmus pidetään 11.12.2011 klo 11:11.</rakval:kuvaus>
+                      </rakval:huomautus>
+                  </rakval:huomautukset>
+                  <rakval:liitetieto>
+                      <rakval:Liite>
+                          <yht:kuvaus>Katselmuspöytäkirja</yht:kuvaus>
+                          <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-attachment.txt</yht:linkkiliitteeseen>
+                          <yht:muokkausHetki>2014-09-17T09:37:06Z</yht:muokkausHetki>
+                          <yht:tyyppi>Päätösote</yht:tyyppi>
+                      </rakval:Liite>
+                  </rakval:liitetieto>
+                  <rakval:tarkastuksenTaiKatselmuksenNimi>aloituskokous</rakval:tarkastuksenTaiKatselmuksenNimi>
+              </rakval:Katselmus>
           </rakval:katselmustieto>
         </rakval:Toimenpide>
       </rakval:toimenpidetieto>
