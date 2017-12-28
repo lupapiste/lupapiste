@@ -156,6 +156,7 @@ jQuery(document).ready(function() {
     {name: "attachment-type-group-autocomplete"},
     {name: "attachment-type-autocomplete"},
     {name: "attachment-group-autocomplete"},
+    {name: "attachment-backendid-autocomplete"},
     {name: "attachments-require"},
     {name: "attachments-require-bubble"},
     {name: "rollup"},
@@ -204,7 +205,9 @@ jQuery(document).ready(function() {
     {name: "date-editor"},
     {name: "mark-review-faulty-dialog"},
     {name: "backend-id-manager"},
-    {name: "generic-bulletin-tab"}
+    {name: "generic-bulletin-tab"},
+    {name: "add-link-permit"},
+    {name: "premises-upload", template: "premises-upload-template"}
 ];
 
   ko.registerLupapisteComponents(components);

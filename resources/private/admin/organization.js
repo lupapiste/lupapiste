@@ -12,7 +12,7 @@
     self.indicator = ko.observable(false).extend({notify: "always"});
     self.pending = ko.observable();
     self.earliestArchivingDate = ko.observable();
-    self.mattiEnabled = ko.observable(false);
+    self.pateEnabled = ko.observable(false);
     self.backendSystems = ko.observableArray();
     self.availableBackendSystems = ko.observableArray();
 
@@ -90,8 +90,8 @@
       organizationCommand("set-organization-boolean-path", {path: updatePath, value: boolValue});
     }
 
-    self.saveMattiEnabled = function() {
-      saveBooleanValue("matti-enabled", self.mattiEnabled());
+    self.savePateEnabled = function() {
+      saveBooleanValue("pate-enabled", self.pateEnabled());
     };
 
     function updateSsoKeys() {

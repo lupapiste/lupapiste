@@ -6,6 +6,7 @@
             [sade.core :refer [now]]
             [lupapalvelu.action :refer [defraw]]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-meta-fields :as app-meta]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.reports.parties :as parties]
@@ -24,7 +25,7 @@
 
 (defn open-applications-for-organization [organizationId excluded-operations]
   (let [query     (cond-> {:organization organizationId
-                           :state {$in ["submitted" "open" "draft"]}
+                           :state {$in ["submitted" "open" "draft" "sent" "complementNeeded"]}
                            :infoRequest false}
                     excluded-operations (assoc :primaryOperation.name {$nin excluded-operations}))
         roles-org (handler-roles-org organizationId)]
@@ -71,6 +72,18 @@
                  :modified {$gte (Long/parseLong start-ts 10)
                             $lte (Long/parseLong end-ts 10)}}))
 
+(defn- get-latest-verdict-ts [{verdicts :verdicts}]
+  (->> verdicts (sort-by :timestamp) (last) :timestamp))
+
+(defn- post-verdict-applications [organizationId startTs endTs]
+  (let [applications           (mongo/select :applications
+                                             {:organization organizationId
+                                              :state {$in states/post-verdict-states}
+                                              :verdicts {$elemMatch {:timestamp {$gte startTs}}}}
+                                             [:_id :state :primaryOperation :verdicts :documents])
+        verdict-in-time-period (fn [app] (< startTs (get-latest-verdict-ts app) (if (< (now) endTs) (now) endTs)))]
+    (filter verdict-in-time-period applications)))
+
 (defn- authority [app]
   (->> app
        :handlers
@@ -84,6 +97,21 @@
        (remove :general)
        (map #(format "%s %s (%s)" (:firstName %) (:lastName %) (get-in % [:name (keyword lang)])))
        (ss/join ", ")))
+
+(defn- applicants [app]
+  (->> (domain/get-applicant-documents (:documents app))
+       (map app-meta/applicant-name-from-doc-first-last)
+       (ss/join "; ")))
+
+(defn get-applicant-email-from-doc [doc]
+  (if (= "henkilo" (-> doc :data :_selected :value))
+    (-> doc :data :henkilo :yhteystiedot :email :value)
+    (-> doc :data :yritys :yhteyshenkilo :yhteystiedot :email :value)))
+
+(defn- applicants-emails [app]
+  (->> (domain/get-applicant-documents (:documents app))
+       (map get-applicant-email-from-doc)
+       (ss/join "; ")))
 
 (defn- localized-state [lang app]
   (i18n/localize lang (get app :state)))
@@ -190,6 +218,25 @@
                :data (:foremen data)}])]
     (excel/hyperlinks-to-formulas! wb)
     (excel/xlsx-stream wb)))
+
+(defn ^OutputStream post-verdict-excel [organizationId startTs endTs lang]
+  (let [sheet-name         (str (i18n/localize lang "authorityAdmin.postVerdictReports.sheet-name-prefix")
+                                " "
+                                (util/to-local-date (now)))
+        header-row-content (map (partial i18n/localize lang) ["applications.id.longtitle"
+                                                              "application.applicants"
+                                                              "application.applicants.email"
+                                                              "operations.primary"
+                                                              "applications.status"
+                                                              "verdictGiven"])
+        data                (post-verdict-applications organizationId startTs endTs)
+        row-fn              (juxt :id
+                                  applicants
+                                  applicants-emails
+                                  (partial localized-primary-operation lang)
+                                  (partial localized-state lang)
+                                  #(-> % get-latest-verdict-ts util/to-local-date))]
+    (excel/xlsx-stream (excel/create-workbook data sheet-name header-row-content row-fn))))
 
 (defn- company-report-headers [lang]
   (map (partial i18n/localize lang) ["company.report.excel.header.buildingid"

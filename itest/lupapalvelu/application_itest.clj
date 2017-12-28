@@ -82,7 +82,7 @@
     (:organization application) => "069-R"))
 
 (facts upsert-application-handler
-  (let [{app-id :id :as application} (create-and-submit-application pena :propertyId sipoo-property-id)
+  (let [{app-id :id modified :modified :as application} (create-and-submit-application pena :propertyId sipoo-property-id)
         resp     (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId ronja-id)]
 
     (fact "Initially there is no handlers"
@@ -125,6 +125,9 @@
 
         update-resp => ok?
         (:id update-resp) => (:id resp)
+
+        (fact "handler upsert should not update the modified timestamp"
+          (:modified (query-application sonja app-id)) => modified)
 
         (fact "one handler still exists" (count handlers) => 1)
         (fact "handler has all data" (-> handlers first) => {:id (:id resp)

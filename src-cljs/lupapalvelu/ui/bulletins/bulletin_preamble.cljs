@@ -8,7 +8,6 @@
 
 (defn bulletin-loaded [{:keys [bulletin]}]
   (let [[x y] (:location  bulletin)]
-    (js/console.log "bulletin loaded")
     (reset! state/current-bulletin bulletin)
     (swap! args assoc :map  (-> js/gis
                                 (.makeMap "bulletin-map")
@@ -35,7 +34,8 @@
   (let [bulletin (rum/react state/current-bulletin)
         {:keys [address primaryOperation propertyId
                 bulletinOpDescription
-                municipality _applicantIndex]} bulletin]
+                municipality _applicantIndex]} bulletin
+        appeal-enabled? (common/feature? :rakval-bulletin-appeal)]
     [:div
      [:div.application_summary
       [:div.container
@@ -59,13 +59,7 @@
            [:div
             [:p (common/loc :application.municipality)]
             [:span.application_summary_text
-             (common/loc (str "municipality." municipality))]]
-
-           [:div
-            [:p (str (common/loc :bulletin.applicants) ":")]
-            [:ul
-             (for [applicant _applicantIndex]
-               [:li {:key applicant} applicant])]]])
+             (common/loc (str "municipality." municipality))]]])
 
         [:div.application-map-container
          [:div#bulletin-map.map.map-large
@@ -77,10 +71,13 @@
              {:on-click #(common/open-oskari-map bulletin)}
              (common/loc :map.open)]])]
         [:div.application_actions.stacked
-         {:data-test-id "bulletin-actions"}
-         #_[:button.function.julkipano {:data-test-id "print-bulletin"} [:i.lupicon-print [:span (common/loc :bulletin.pdf)]]]
-         ]]]]
-     (verdict-data/verdict-data bulletin)]))
+         {:data-test-id "bulletin-actions"}]]]]
+     (cond
+       (not appeal-enabled?)    [:div (verdict-data/verdict-data bulletin)]
+       ((:authenticated @args)) [:div (verdict-data/detailed-verdict-data bulletin)]
+       :default                 [:div
+                                 (verdict-data/verdict-data bulletin)
+                                 (verdict-data/init-identification-link bulletin)])]))
 
 (defn mount-component []
   (rum/mount (bulletin-preamble)
@@ -88,5 +85,6 @@
 
 (defn ^:export start [domId componentParams]
   (swap! args assoc :bulletinId (aget componentParams "bulletinId")
+                    :authenticated (aget componentParams "authenticated")
                     :dom-id (name domId))
   (mount-component))

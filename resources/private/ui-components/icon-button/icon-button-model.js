@@ -7,11 +7,11 @@
 //  click: Similar to KO binding
 //  right: If true, the icon is on the right side (default false)
 //  [testId]: Button test id (icon-button)
-//  [enable]: Similar to kO binding (default true)
+//  [enable]: Similar to KO binding (default true)
 //  [disable]: Similar to binding (false)
 //  [waiting]: Waiting observable (false)
 //  [type] Button type (button)
-//  Button is enabled when waiting and disable are false and enable is true.
+//  Button is disabled when waiting.
 LUPAPISTE.IconButtonModel = function( params ) {
   "use strict";
   var self = this;

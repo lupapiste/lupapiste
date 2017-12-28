@@ -152,15 +152,15 @@
 
 
           <div>
-            <h2>MATTI k&auml;yt&ouml;ss&auml;?</h2>
+            <h2>Pate k&auml;yt&ouml;ss&auml;?</h2>
             <div>
               <div>
-                <label data-bind="text: loc('yes') + '/' + loc('no') " for="matti-enabled"></label>
-                <input data-bind="checked: mattiEnabled" id="matti-enabled" type="checkbox"/>
+                <label data-bind="text: loc('yes') + '/' + loc('no') " for="pate-enabled"></label>
+                <input data-bind="checked: pateEnabled" id="pate-enabled" type="checkbox"/>
               </div>
               <button data-bind="ltext: 'save',
-                                 click: saveMattiEnabled" class="btn positive"
-                      data-test-id="save-matti-enabled"></button>
+                                 click: savePateEnabled" class="btn positive"
+                      data-test-id="save-pate-enabled"></button>
             </div>
           </div>
 
@@ -184,6 +184,7 @@
             </tbody>
           </table>
           <button data-bind="ltext: 'save',
+                             enable: _.size( backendSystems() ),
                              click: updateBackendSystems" class="btn positive"></button>
 
           <div>

@@ -44,7 +44,7 @@
 ;; Metadata
 ;;
 
-(def attachment-meta-types [:size :scale :group :contents :drawingNumber])
+(def attachment-meta-types [:size :scale :group :contents :drawingNumber :backendId])
 
 (def attachment-scales
   [:1:20 :1:50 :1:100 :1:200 :1:500
@@ -166,7 +166,10 @@
    (sc/optional-key :size)               (apply sc/enum attachment-sizes)
    :auth                                 [AttachmentAuthUser]
    (sc/optional-key :metadata)           {sc/Keyword sc/Any}
-   (sc/optional-key :approvals)          VersionApprovals})
+   (sc/optional-key :approvals)          VersionApprovals
+   (sc/optional-key :backendId)          (sc/maybe sc/Str)})
+
+(def attachment-required-keys (filter sc/required-key? (keys Attachment)))
 
 ;;
 ;; Utils
@@ -276,7 +279,7 @@
       {:op updated-op :groupType (when updated-op :operation)})))
 
 (defn make-attachment
-  [created target required? requested-by-authority? locked? application-state group attachment-type metadata & [attachment-id contents read-only? source]]
+  [created target required? requested-by-authority? locked? application-state group attachment-type metadata & [attachment-id contents read-only? source backend-id]]
   {:pre  [(sc/validate att-type/AttachmentType attachment-type) (keyword? application-state) (or (nil? target) (sc/validate Target target))]
    :post [(sc/validate Attachment %)]}
   (cond-> {:id (if (ss/blank? attachment-id) (mongo/create-id) attachment-id)
@@ -298,7 +301,8 @@
            :versions []
            ;:approvals {}
            :auth []
-           :contents contents}
+           :contents contents
+           :backendId backend-id}
           (:groupType group) (assoc :groupType (group-type-coercer (:groupType group)))
           (map? source) (assoc :source source)
           (seq metadata) (assoc :metadata metadata)))
@@ -339,7 +343,7 @@
 (defn create-attachment-data
   "Returns the attachment data model as map. This attachment data can be pushed to mongo (no versions included)."
   [application {:keys [attachment-id attachment-type group created target locked required requested-by-authority
-                       contents read-only source disableResell]
+                       contents read-only source disableResell backendId]
                 :or {required false locked false requested-by-authority false} :as options}]
   {:pre [(required-options-check options)]}
   (let [metadata (default-tos-metadata-for-attachment-type attachment-type application disableResell)]
@@ -355,7 +359,8 @@
                      attachment-id
                      contents
                      read-only
-                     source)))
+                     source
+                     backendId)))
 
 (defn create-attachment!
   "Creates attachment data and $pushes attachment to application. Updates TOS process metadata retention period, if needed"
@@ -874,29 +879,58 @@
                              :set-app-modified? true
                              :set-attachment-modified? false)))
 
-(defn convert-existing-to-pdfa! [application user attachment]
+(defn- update-latest-version-file!
+  "Updates the file id and archivability data of the latest version of the attachment.
+   originalFileId should include the original file id and it is not altered."
+  [application {:keys [latestVersion versions id]} {:keys [result file]}]
+  {:pre [(:fileId latestVersion) (:originalFileId latestVersion)]}
+  (let [idx (dec (count versions))
+        file-update (if (and (:archivable result) (:fileId file))
+                      (select-keys file [:fileId :contentType])
+                      {})
+        mongo-updates (reduce
+                        (fn [updates [k v]]
+                          (merge updates {(str "attachments.$.versions." idx "." (name k)) v
+                                          (str "attachments.$.latestVersion." (name k)) v}))
+                        file-update
+                        (merge file-update
+                               {:modified (now)}
+                               (select-keys result [:archivable :archivabilityError :missing-fonts
+                                                    :autoConversion :conversionLog :filename])))]
+    (update-application
+      (application->command application)
+      {:attachments.id id}
+      {$set mongo-updates})))
+
+(defn convert-existing-to-pdfa!
+  "Tries to converted latest attachment version file to PDF/A in-place, i.e. does NOT create a new attachment version.
+   Updates archivability data in the latest version file even if conversion fails."
+  [application attachment]
   {:pre [(map? application) (:id application) (:attachments application)]}
-  (let [{:keys [archivable contentType]} (last (:versions attachment))]
-    (if (or archivable (not ((conj conversion/libre-conversion-file-types :image/jpeg :application/pdf) (keyword contentType))))
-      (fail :error.attachment.content-type)
-      ;; else
-      (let [{:keys [fileId filename user stamped]} (last (:versions attachment))
-            file-content (mongo/download fileId)]
-        (if (nil? file-content)
-          (do
-            (error "PDF/A conversion: No mongo file for fileId" fileId)
-            (fail :error.attachment-not-found))
-          (files/with-temp-file temp-pdf
-            (with-open [content ((:content file-content))]
-              (io/copy content temp-pdf)
-              (upload-and-attach! {:application application :user user}
-                                  {:attachment-id (:id attachment)
-                                   :comment-text nil
-                                   :required false
-                                   :created (now)
-                                   :stamped stamped
-                                   :original-file-id fileId}
-                                  {:content temp-pdf :filename filename}))))))))
+  (let [{:keys [archivable contentType fileId]} (:latestVersion attachment)]
+    (cond
+      archivable
+      (info "Attachment" (:id attachment) "is already archivable, ignoring")
+
+      (not (conversion/all-convertable-mime-types (keyword contentType)))
+      (warn "Attachment" (:id attachment) "mime type" (keyword contentType) "is not convertible to PDF/A")
+
+      :else
+      (if-let [file-content (mongo/download fileId)]
+        (let [{:keys [result file] :as conversion-data} (->> (update file-content :content apply [])
+                                                             (conversion application))]
+          (if (and (:archivable result) (:fileId file))
+            ; If the file is already valid PDF/A, there's no conversion and thus no fileId
+            (do (update-latest-version-file! application attachment conversion-data)
+                (preview/preview-image! (:id application) (:fileId file) (:filename file) (:contentType file))
+                (link-files-to-application (:id application) [(:fileId file)])
+                (cleanup-temp-file result)
+                result)
+            (do (when-not (:archivable result)
+                  (warn "Attachment" (:id attachment) "could not be converted to PDF/A."))
+                (update-latest-version-file! application attachment conversion-data)
+                result)))
+        (error "PDF/A conversion: No mongo file for fileId" fileId)))))
 
 (defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState :as attachment}]
   (boolean (and (states/post-verdict-states (keyword app-state))

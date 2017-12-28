@@ -14,7 +14,8 @@
                   data-bind="ltext:'application.attachmentContents'"></span></th>
         <th><span data-bind="ltext:'attachment.drawing-number'"></span></th>
         <th><span data-bind="ltext:'attachment.label.operation'"></span></th>
-        <!-- ko if: $component.showResell -->
+        <!-- ko if: $component.isArchivingProject -->
+        <th><span data-bind="ltext:'digitizer.backendId'"></span></th>
         <th class="td-center" data-bind="ltext:'digitizer.resellCheckbox'"></th>
         <!-- /ko -->
         <!-- ko if: showSign -->
@@ -28,7 +29,15 @@
       </thead>
       <tbody data-bind="foreach: upload.files">
         <tr class="file">
-          <td data-bind="file: $data, attr: {colspan: $component.colspan}"></td>
+          <td data-bind="attr: {colspan: $component.colspan}">
+            <span data-bind="file: $data"></span>
+            <span data-bind="visible: $data.duplicateFile() === true">
+              <span class="file-warn" data-bind="ltext: 'attachments.file.with.same.name'"></span>
+            </span>
+            <span data-bind="visible: $data.duplicateFileInApplication() === true">
+              <span class="file-warn" data-bind="ltext: 'attachments.file.already.exists'"></span>
+            </span>
+          </td>
         </tr>
         <tr class="metadata">
         <td>
@@ -102,7 +111,25 @@
                          class="fill-down"></icon-button>
           </div>
         </td>
-        <!-- ko if: $component.showResell -->
+        <!-- ko if: $component.isArchivingProject -->
+        <td>
+          <div class="batch-autocomplete fill-pin"
+               data-bind="event: $parent.fillEvents( $data, 'backendId'),
+                          testId: 'batch-backendid-' + $index()">
+            <div data-bind="component: { name: 'attachment-backendid-autocomplete',
+                                         params: { selected: $parent.cell( $data, 'backendId').value,
+                                                   disabled: false} }"
+                 class="attachment-batch-grouping"></div>
+            <icon-button params="click: $parent.filler( 'backendId', $data ),
+                                 buttonClass: 'function',
+                                 ltext: 'attachment.batch-copy-down',
+                                 icon: 'arrow-down',
+                                 right: true"
+                         data-bind="visible: $parent.canFillDown( 'backendId', $data),
+                                    testId: 'fill-backendid-' + $index()"
+                         class="fill-down"></icon-button>
+          </div>
+        </td>
         <td class="td-center">
           <toggle params="value: $parent.cell( $data, 'disableResell' ).value,
                           disable: $parent.rowDisabled( $data ),
@@ -139,7 +166,7 @@
       <tfoot data-bind="if: fileCount() > 1">
         <tr>
           <td colspan="4"></td>
-          <!-- ko if: $component.showResell -->
+          <!-- ko if: $component.isArchivingProject -->
           <td class="td-center"></td>
           <!-- /ko -->
           <!-- ko if: showSign -->

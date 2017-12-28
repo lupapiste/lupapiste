@@ -293,8 +293,8 @@
       (assoc company-auth
              :company-role "admin"
              :role "reader"
+             :inviter (usr/summary inviter)
              :invite {:user {:id company-id}
-                      :inviter (usr/summary inviter)
                       :created timestamp}))))
 
 (defn- invite->auth [inv app-id inviter timestamp]

@@ -91,8 +91,10 @@
                  (contains? #{(keyword company-role) nil} (keyword (:company-role %))))
            auth)))
 
-(defn auth-via-company [application user-id]
-  (->> (usr/get-user-by-id user-id)
+(defn auth-via-company [application user-or-user-id]
+  (->> (if (map? user-or-user-id)
+         user-or-user-id
+         (usr/get-user-by-id user-or-user-id))
        (get-company-auths application)
        (util/find-first (comp #{"writer" "owner"} :role))))
 

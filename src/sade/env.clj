@@ -112,6 +112,14 @@
   "disables feature value in-memory."
   [& feature] (set-feature! false feature))
 
+(defmacro with-feature-value
+  "Binds given feature to value, executes body and finally returns feature to it's old value."
+  [feature value & body]
+  `(let [old-val# (feature? ~feature)]
+     (set-feature! ~value [~feature])
+     ~@body
+     (set-feature! old-val# [~feature])))
+
 (defn features
   "Returns a list of all enabled features."
   []
@@ -137,13 +145,16 @@
 (def log-dir (get-prop "lupapiste.logdir" (if (= mode :dev) "target" ".")))
 (defonce proxy-off (atom (read-value (str (get-prop "lupapiste.proxy-off" "false")))))
 
+(defn in-env? [env]
+  (= (ss/upper-case target-env) (ss/upper-case env)))
+
 (defn dev-mode? []
   (= :dev mode))
 
 (defn test-build? []
   (= target-env "TEST"))
 
-(def dev-env? (= (ss/upper-case target-env) "DEV"))
+(def dev-env? (in-env? "DEV"))
 
 (def ^:dynamic *in-dev-macro* false)
 

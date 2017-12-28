@@ -4,7 +4,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
-            [lupapalvelu.matti.schemas :as matti-schemas]
+            [lupapalvelu.pate.schemas :as pate-schemas]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.test-util :as test-util]
             [midje.sweet :refer :all]
@@ -30,7 +30,7 @@
                                    "approval-model-with-approvals"
                                    "approval-model-without-approvals"
                                    "rahoitus"]
-                                  (map :name matti-schemas/matti-schemas))))
+                                  (map :name pate-schemas/pate-schemas))))
 
 (defn- localized-doc-headings [schema-names]
   (map #(loc (str % "._group_label")) schema-names))

@@ -30,7 +30,8 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as u]
             [lupapalvelu.server]
-            [ring.util.codec :as codec])
+            [ring.util.codec :as codec]
+            [lupapalvelu.user :as usr])
   (:import org.apache.http.client.CookieStore
            java.io.FileNotFoundException))
 
@@ -93,6 +94,7 @@
 (def raktark-helsinki (apikey-for "rakennustarkastaja@hel.fi"))
 (def jussi      (apikey-for "jussi"))
 (def jussi--id  (id-for "jussi"))
+(def digitoija  (apikey-for "digitoija@jarvenpaa.fi"))
 
 
 (def sipoo-property-id "75300000000000")
@@ -191,7 +193,7 @@
     (first args)
     (apply hash-map args)))
 
-(defn- decode-post [action-type apikey command-name & args]
+(defn decode-post [action-type apikey command-name & args]
   (decode-response
     (http-post
       (str (server-address) "/api/" (name action-type) "/" (name command-name))
@@ -554,7 +556,7 @@
 ;; API for local operations
 
 (defn make-local-request [apikey]
-  {:scheme "http", :user (find-user-from-minimal-by-apikey apikey)})
+  {:scheme "http", :user (usr/session-summary (find-user-from-minimal-by-apikey apikey))})
 
 (defn- execute-local [apikey web-fn action & args]
   (let [params (->arg-map args)]

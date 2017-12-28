@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.components
   (:require [clojure.string :as s]
+            [cljs.pprint :refer [pprint]]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components.datepicker :as datepicker]
             [lupapalvelu.ui.hub :as hub]
@@ -74,12 +75,12 @@
   (let [input-id (str "input-" (rand-int 10000))
         value-fn (if negate? not identity)
         value (value-fn value)]
-    [:div.matti-checkbox-wrapper
+    [:div.pate-checkbox-wrapper
      [:input {:type     "checkbox"
               :disabled disabled
               :checked  value
               :id       input-id}]
-     [:label.matti-checkbox-label
+     [:label.pate-checkbox-label
       {:for      input-id
        :on-click #(handler-fn (not (value-fn value)))}
       (common/loc label)]]))
@@ -287,7 +288,7 @@
                                            {:on-focus  #(common/reset-if-needed! open?* true)
                                             :required? required?
                                             :disabled  disabled?})]
-    [:div.matti-autocomplete
+    [:div.pate-autocomplete
      [:div.ac--combobox text-edit]
      (when (and (rum/react open?*) (seq (items-fn @term*)))
        [:div.ac__menu menu-items])]))
@@ -322,7 +323,7 @@
         open? (rum/react open?*)]
     (when-not open?
       (common/reset-if-needed! term* ""))
-    [:div.matti-autocomplete
+    [:div.pate-autocomplete
      [:div.like-btn.ac--selected
       {:on-click (when-not disabled?
                    #(swap! open?* not))
@@ -364,13 +365,15 @@
                     [:option {:key   value
                               :value value} text])))])
 
+(def log (.-log js/console))
+
 ;; Prettyprints the contents of the given atom.
 (rum/defc debug-atom < rum/reactive
   ([atom* title]
    [:div.pprint
     [:div.title [:h4 title]]
-    [:a {:on-click #(console.log @atom*)} "console"]
-    [:div.code (with-out-str (cljs.pprint/pprint (rum/react atom*)))]])
+    [:a {:on-click #(log @atom*)} "console"]
+    [:div.code (with-out-str (pprint (rum/react atom*)))]])
   ([atom*] (debug-atom atom* "debug")))
 
 ;; Special options (all optional):

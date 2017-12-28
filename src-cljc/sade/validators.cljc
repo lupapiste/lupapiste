@@ -1,6 +1,6 @@
 (ns sade.validators
   (:require #?@(:clj [[clj-time.format :as timeformat]
-                      [sade.strings :as ss]]
+                      [sade.env :as env]]
                 :cljs [[cljs-time.format :as timeformat]])))
 
 (defn matches? [re s] (boolean (when (string? s) (re-matches re s))))
@@ -81,10 +81,11 @@
 
 (def rakennustunnus-pattern
   "VRK pysyva rakennustunnus. KRYSP-skeemassa: ([1][0-9]{8})[0-9ABCDEFHJKLMNPRSTUVWXY]"
-  #"^1\d{8}[0-9A-FHJ-NPR-Y]$")
+  #?(:clj (re-pattern (or (env/value :rakennustunnus-pattern) "^1\\d{8}[0-9A-FHJ-NPR-Y]$"))
+     :cljs #"^1\{8}[0-9A-FHJ-NPR-Y]$"))
 
 (defn rakennustunnus? [^String prt]
-  (and  (matches? rakennustunnus-pattern prt) (rakennustunnus-checksum-matches? prt)))
+  (and (matches? rakennustunnus-pattern prt) (rakennustunnus-checksum-matches? prt)))
 
 (def finnish-zip? (partial matches? #"^\d{5}$"))
 
@@ -100,5 +101,5 @@
 
 (def hex-string? (partial matches? #"^[0-9a-f]*$"))
 
-;; Some of the very first applications have mongoid as applicationId.
-(def application-id? (partial matches? #"^([0-9a-f]{24}|L[PX]-\d{3}-\d{4}-\d{5})$"))
+;; Some of the very first applications have mongoid as applicationId. But LPK-2914 cleaned them up.
+(def application-id? (partial matches? #"^L[PX]-\d{3}-\d{4}-\d{5}$"))

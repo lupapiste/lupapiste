@@ -65,14 +65,16 @@ var notify = {};
 notify.ajaxError = function() {};
 
 var util = {};
-util.finnishDate = function() {};
+util.finnishDate        = function() {};
 util.finnishDateAndTime = function() {};
-util.partyFullName = function() {};
+util.partyFullName      = function() {};
 util.prop = {};
 util.prop.toHumanFormat = function() {};
 util.showSavedIndicator = function() {};
-util.sizeString = function() {};
-util.toMoment = function() {};
+util.sizeString         = function() {};
+util.toMoment           = function() {};
+util.localeComparator   = function() {};
+util.getIn              = function() {};
 
 var sprintf = function() {};
 
@@ -123,6 +125,7 @@ lupapisteApp.services.attachmentsService.getAuthModel = function() {};
 lupapisteApp.services.attachmentsService.queryAll = function() {};
 lupapisteApp.services.attachmentsService.rawAttachments = function() {};
 lupapisteApp.services.attachmentsService.removeAttachment = function() {};
+lupapisteApp.services.attachmentsService.refreshAuthModels = function() {};
 lupapisteApp.services.buildingService = {};
 lupapisteApp.services.calendarService = {};
 lupapisteApp.services.cardService = {};
@@ -166,6 +169,9 @@ lupapisteApp.models.applicationAuthModel = {};
 lupapisteApp.models.applicationAuthModel.ok = function() {};
 lupapisteApp.models.globalAuthModel = {};
 lupapisteApp.models.globalAuthModel.ok = function() {};
+
+var repository = {};
+repository.load = function() {};
 
 var window = function() {};
 window.open = function() {};

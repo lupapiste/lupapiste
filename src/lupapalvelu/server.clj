@@ -89,10 +89,11 @@
             [lupapalvelu.admin-reports-api]
             [lupapalvelu.campaign-api]
             [lupapalvelu.digitizer-api]
-            [lupapalvelu.matti.verdict-template-api]
-            [lupapalvelu.matti.verdict-api]
-            [lupapalvelu.matti.phrases-api]
-            [lupapalvelu.financial-api])
+            [lupapalvelu.pate.verdict-template-api]
+            [lupapalvelu.pate.verdict-api]
+            [lupapalvelu.pate.phrases-api]
+            [lupapalvelu.financial-api]
+            [lupapalvelu.premises-api])
 
   (:import [javax.imageio ImageIO]
            [javax.activation MailcapCommandMap]

@@ -7,6 +7,8 @@
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical-operations]]
             [schema.core :as sc]
             [taoensso.timbre :as timbre :refer [warnf]]
+            [lupapalvelu.action :as action]
+            [lupapalvelu.building :as building]
             [lupapalvelu.rest.schemas :refer [HakemusTiedot]]))
 
 (defn- transform-operation [operation]
@@ -76,3 +78,15 @@
   (->> organization
        query-applications
        process-applications))
+
+(defn- national-building-id-updates [application operation-id national-building-id]
+  (util/assoc-when-pred
+      nil not-empty
+      $set (merge
+            (building/document-buildingid-updates-for-operation application national-building-id operation-id)
+            (building/buildings-array-buildingid-updates-for-operation application national-building-id operation-id))))
+
+(defn update-national-building-id! [application operation-id national-building-id]
+  (when-let [updates (national-building-id-updates application operation-id national-building-id)]
+    (action/update-application (action/application->command application) updates)
+    true))

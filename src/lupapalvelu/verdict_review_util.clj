@@ -10,7 +10,11 @@
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
-            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]])
+            [sade.core :as sc]
+            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.assignment :as assignment]
+            [lupapalvelu.organization :as organization])
   (:import (java.net URL)
            (java.nio.charset StandardCharsets)))
 
@@ -59,7 +63,7 @@
 
 (defn- content-disposition-filename
   "Extracts the filename from the Content-Disposition header of the
-  given respones. Decodes string according to the Server information."
+  given response. Decodes string according to the Server information."
   [{headers :headers}]
   (when-let [raw-filename (some->> (get headers "content-disposition")
                                    (re-find #".*filename=\"?([^\"]+)")
@@ -69,6 +73,26 @@
                               (.getBytes StandardCharsets/ISO_8859_1)
                               (String. StandardCharsets/UTF_8))
       raw-filename)))
+
+(defn- poytakirja-info-for-assignments [{:keys [user application attachment-id target]}]
+  (let [targets [{:id attachment-id :trigger-type target}]]
+    {:user             user
+     :organization     (organization/get-organization (:organization application))
+     :application      (domain/get-application-as (:id application) user)
+     :targets          targets
+     :assignment-group "attachments"
+     :timestamp        (sc/now)}))
+
+(defn- run-assignment-triggers-for-poytakirja [user application attachment-id attachment-type]
+  (try
+    ((assignment/run-assignment-triggers poytakirja-info-for-assignments)
+      {:user          user
+       :application   application
+       :attachment-id attachment-id
+       :target        (ss/join "." (vals attachment-type))})
+    (catch Exception e
+      (error "could not create assignment automatically for fetched attachment "
+             (:id application) ": "(.getMessage e)))))
 
 (defn get-poytakirja!
   "Fetches the verdict attachments listed in the verdict xml. If the
@@ -122,23 +146,25 @@
                   ;; Copy content to a temp file to keep the content close at hand
                   ;; during upload and conversion processing.
                   (io/copy in temp-file)
-                  (attachment/upload-and-attach! {:application current-application :user user}
-                                                 {:attachment-id attachment-id
-                                                  :attachment-type attachment-type
-                                                  :contents contents
-                                                  :target target
-                                                  :required false
-                                                  :read-only true
-                                                  :locked true
-                                                  :created (or (if (string? attachment-time)
-                                                                 (to-timestamp attachment-time)
-                                                                 attachment-time)
-                                                               timestamp)
-                                                  :state :ok
-                                                  :set-app-modified? set-app-modified?}
-                                                 {:filename filename
-                                                  :size content-length
-                                                  :content temp-file}))
+                  (when
+                    (attachment/upload-and-attach! {:application current-application :user user}
+                                                   {:attachment-id attachment-id
+                                                    :attachment-type attachment-type
+                                                    :contents contents
+                                                    :target target
+                                                    :required false
+                                                    :read-only true
+                                                    :locked true
+                                                    :created (or (if (string? attachment-time)
+                                                                   (to-timestamp attachment-time)
+                                                                   attachment-time)
+                                                                 timestamp)
+                                                    :state :ok
+                                                    :set-app-modified? set-app-modified?}
+                                                   {:filename filename
+                                                    :size content-length
+                                                    :content temp-file})
+                    (run-assignment-triggers-for-poytakirja user application urlhash attachment-type)))
                 (error (str (:status resp) " - unable to download " url ": " resp)))))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
     (do

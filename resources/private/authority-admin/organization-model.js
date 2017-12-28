@@ -239,6 +239,19 @@ LUPAPISTE.OrganizationModel = function () {
     }
   });
 
+  self.defaultDigitalizationLocationX = ko.observable("");
+  self.defaultDigitalizationLocationY = ko.observable("");
+  ko.computed(function() {
+    var x = self.defaultDigitalizationLocationX();
+    var y = self.defaultDigitalizationLocationY();
+    if (self.initialized) {
+      ajax.command("set-default-digitalization-location", {x: x, y: y})
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
+        .call();
+    }
+  });
+
   function setTosFunctionForOperation(operationId, functionCode) {
     var cmd = functionCode !== null ? "set-tos-function-for-operation" : "remove-tos-function-from-operation";
     var data = {operation: operationId};
@@ -282,7 +295,7 @@ LUPAPISTE.OrganizationModel = function () {
   });
 
 
-  // Matti verdict templates
+  // Pate verdict templates
   self.verdictTemplates = ko.observableArray( [] );
   self.defaultOperationVerdictTemplates = ko.observable( {} );
 
@@ -299,8 +312,8 @@ LUPAPISTE.OrganizationModel = function () {
     .call();
   }
 
-  // Sent from matti/service.cljs
-  hub.subscribe( "matti::verdict-templates-changed", refreshVerdictTemplates );
+  // Sent from pate/service.cljs
+  hub.subscribe( "pate::verdict-templates-changed", refreshVerdictTemplates );
 
   self.init = function(data) {
     self.initialized = false;
@@ -359,6 +372,9 @@ LUPAPISTE.OrganizationModel = function () {
     self.neighborOrderEmails(util.getIn(organization, ["notifications", "neighbor-order-emails"], []).join("; "));
     self.submitNotificationEmails(util.getIn(organization, ["notifications", "submit-notification-emails"], []).join("; "));
     self.infoRequestNotificationEmails(util.getIn(organization, ["notifications", "inforequest-notification-emails"], []).join("; "));
+
+    self.defaultDigitalizationLocationX(util.getIn(organization, ["default-digitalization-location", "x"], []));
+    self.defaultDigitalizationLocationY(util.getIn(organization, ["default-digitalization-location", "y"], []));
 
     _.forOwn(operationsAttachmentsPerPermitType, function(value, permitType) {
       var operationsAttachments = _(value)
@@ -432,7 +448,7 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.assignmentTriggers( _.get( organization, "assignment-triggers", []));
 
-    if( authorizationModel.ok("matti-enabled")) {
+    if( authorizationModel.ok("pate-enabled")) {
       refreshVerdictTemplates();
     }
     self.initialized = true;

@@ -63,6 +63,10 @@
                               card: 'edit-handlers'">
                           <edit-handlers></edit-handlers>
                 </card>
+                <card params="deck: 'summary',
+                              card: 'add-link-permit'">
+                  <add-link-permit></add-link-permit>
+                </card>
                     <!-- Tabs: -->
                     <div class="tabs-container"
                          data-bind="with: application,
@@ -120,10 +124,10 @@
                                 <span data-bind="if: unseenVerdicts">
                                       <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
-                            <li data-bind="if: $root.authorization.ok( 'matti-verdict-tab')">
+                            <li data-bind="if: $root.authorization.ok( 'pate-verdict-tab')">
                               <a  data-bind="click: changeTab,
-                                             feature: 'matti'"
-                                  href="#" data-target="matti-verdict" data-test-id="matti-verdict-tab"
+                                             feature: 'pate'"
+                                  href="#" data-target="pate-verdict" data-test-id="pate-verdict-tab"
                                   class="link-btn">
                                 <span data-bind="ltext: 'application.tabVerdict'"></span>
                               </a>
@@ -231,7 +235,8 @@
                             <div data-bind="if: $root.authorization.ok('link-permit-required')">
                               <div class="help-box margins-m">
                                 <p data-bind="ltext: 'help.AddPermit'"></p>
-                                <button data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog,
+                                <button data-bind="click: $root.application.gotoLinkPermitCard,
+                                                   testId: 'add-required-link-permit',
                                                    enable: $root.authorization.ok('link-permit-required'),
                                                    visible: $root.authorization.ok('add-link-permit')"
                                         class="positive">
@@ -408,11 +413,11 @@
                     </div>
                     <!-- /ko -->
 
-                    <!-- Matti verdict tab -->
-                    <!-- ko if: selectedTabName() === 'matti-verdict' -->
-                    <div id="application-matti-verdict-tab"
-                         class="tab-content feature--no-border" data-bind="feature: 'matti'">
-                      <cljs-matti_verdicts></cljs-matti_verdicts>
+                    <!-- Pate verdict tab -->
+                    <!-- ko if: selectedTabName() === 'pate-verdict' -->
+                    <div id="application-pate-verdict-tab"
+                         class="tab-content feature--no-border" data-bind="feature: 'pate'">
+                      <cljs-pate_verdicts></cljs-pate_verdicts>
                     </div>
                     <!-- /ko -->
 
@@ -681,7 +686,7 @@
                                                               <td data-bind="dateString: $data.paatospvm"></td>
                                                               <td data-bind="foreach: $data.attachments">
                                                                   <span data-bind="with: $data.latestVersion">
-                                                                      <a href="#" data-bind="text: filename, attr: {href: '/api/raw/latest-attachment-version?attachment-id=' + $parent.id}"></a><br/>
+                                                                      <a href="#" data-bind="text: filename, attr: {href: '/api/raw/latest-attachment-version?attachment-id=' + $parent.id}" target="_blank"></a><br/>
                                                                       <i data-bind="ltext: contentType"></i>
                                                                       <i data-bind="size: size"></i><br/>
                                                                   </span>

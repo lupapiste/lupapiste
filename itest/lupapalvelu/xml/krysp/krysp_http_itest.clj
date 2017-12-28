@@ -53,4 +53,3 @@
                :url (str (server-address) "/dev/krysp/receiver") :organization "837-R" :permitType "R"
                :username "kuntagml" :password "kryspi" :partner "matti") => ok?
       (command veikko :approve-application :id application-id :lang "fi") => ok?)))
-

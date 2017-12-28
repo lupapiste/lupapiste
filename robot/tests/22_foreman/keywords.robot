@@ -148,5 +148,5 @@ Add työnjohtaja task to current application
 
 Required foreman state is
   [Arguments]  ${role}  ${state}
-  ${s} =  Get Element Attribute  xpath=//table[contains(@class, 'tasks-foreman')]//tr[@data-test-name="${role}"]//td[@data-test-state]@data-test-state
+  ${s} =  Get Element Attribute  xpath=//table[contains(@class, 'tasks-foreman')]//tr[@data-test-name="${role}"]//td[@data-test-state]  data-test-state
   Should be equal  ${s}  ${state}

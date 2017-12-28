@@ -45,6 +45,17 @@
   (let [kw-set (apply set/intersection (map #(set (map keyword %)) colls))]
     (filter #(includes-as-kw? kw-set %) (first colls))))
 
+(defn difference-as-kw
+  "Difference operation where collection items are first converted to
+  keywords. Returns a keyword vector."
+  [& colls]
+  (->> colls
+       (map (fn [coll]
+              (map keyword coll)))
+       (map set)
+       (apply set/difference)
+       vec))
+
 (defn filter-map-by-val
   "Returns the mapping for which the value satisfies the predicate.
   (filter-map-by-val pos? {:a 1 :b -1}) => {:a 1}"

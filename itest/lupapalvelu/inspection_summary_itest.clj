@@ -162,11 +162,18 @@
                                           :target {:type "inspection-summary-item"
                                                    :id (:id test-target)}}
                                 :fails :error.inspection-summary-target.finished))
-        (fact "Can't edit attachment"
+        (fact "Pena cannot edit attachment"
           (command pena :set-attachment-meta :id id1 :attachmentId (:id summary-attachment) :meta {:contents "Tarkastuskohde"}) => (partial expected-failure? :error.inspection-summary-target.finished))
-        (fact "Can't delete attachment"
+        (fact "Pena cannot delete attachment"
           (command pena :delete-attachment :id id1 :attachmentId (:id summary-attachment)) => (partial expected-failure? :error.inspection-summary-target.finished))
-        )))
+        (fact "Authority can edit attachment"
+          (command raktark-jarvenpaa :set-attachment-meta :id id1
+                   :attachmentId (:id summary-attachment) :meta {:contents "Tarkastuskohde"})
+          => ok?)
+        (fact "Authority cannot delete attachment either"
+          (command raktark-jarvenpaa :delete-attachment :id id1
+                   :attachmentId (:id summary-attachment))
+          => (partial expected-failure? :error.inspection-summary-target.finished)))))
 
   (facts "Seting isnpection date"
     (let [{app-id :id} (create-and-submit-application pena :propertyId jarvenpaa-property-id :address "Jarvikatu 27")

@@ -6,12 +6,15 @@
             [slingshot.slingshot :refer [try+]]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
+            [monger.core :as monger]
+            [monger.query :as monger-query]
+            [monger.credentials :as monger-cred]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.integrations.matti :as matti]
+            [lupapalvelu.integrations.state-change :as state-change]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.neighbors-api :as neighbors]
@@ -33,7 +36,10 @@
             [sade.strings :as ss]
             [sade.threads :as threads]
             [sade.util :refer [fn-> pcond->] :as util]
-            [lupapalvelu.xml.asianhallinta.reader :as ah-reader])
+            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
+            [monger.collection :as mc]
+            [clojure.data :as cd]
+            [clojure.pprint])
   (:import [org.xml.sax SAXParseException]))
 
 
@@ -532,8 +538,8 @@
 
 (defn- fetch-reviews-for-organization
   [eraajo-user created {org-krysp :krysp :as organization} permit-types applications {:keys [overwrite-background-reviews?]}]
-  (let [fields [:address :primaryOperation :permitSubtype :history :municipality :state :permitType :organization :tasks :verdicts :modified]
-        projection (cond-> (distinct (concat fields matti/base-keys))
+  (let [fields [:address :primaryOperation :permitSubtype :history :municipality :state :permitType :organization :tasks :verdicts :modified :documents]
+        projection (cond-> (distinct (concat fields state-change/base-keys))
                      overwrite-background-reviews? (conj :attachments))
         permit-types (remove (fn-> keyword org-krysp :url ss/blank?) permit-types)
         grouped-apps (if (seq applications)
@@ -650,30 +656,47 @@
                 (if (= (:id task) (:id (:source att)))
                   (do
                     (debug "application" (:id (:application command)) "- converting task" (:id task) "-> attachment" (:id att) )
-                    (attachment/convert-existing-to-pdfa! (:application command) (:user command) att)))))))))))
+                    (attachment/convert-existing-to-pdfa! (:application command) att)))))))))))
 
-(defn pdf-to-pdfa-conversion [& args]
-  (info "Starting pdf to pdf/a conversion")
-  (mongo/connect!)
-  (let [organization (first args)
-        start-ts (c/to-long (c/from-string (second args)))
-        end-ts (c/to-long (c/from-string (second (next args))))]
-  (doseq [application (mongo/select :applications {:organization organization :state :verdictGiven})]
-    (let [command (application->command application)
-          last-verdict-given-date (:ts (last (sort-by :ts (filter #(= (:state % ) "verdictGiven") (:history application)))))]
-      (logging/with-logging-context {:applicationId (:id application)}
-        (when (and (= (:state application) "verdictGiven") (< start-ts last-verdict-given-date end-ts))
-          (info "Converting attachments of application" (:id application))
-          (doseq [attachment (:attachments application)]
-            (when (:latestVersion attachment)
-              (when-not (get-in attachment [:latestVersion :archivable])
-                  (do
-                    (info "Trying to convert attachment" (get-in attachment [:latestVersion :filename]))
-                    (let [result (attachment/convert-existing-to-pdfa! (:application command) nil attachment)]
-                      (if (:archivabilityError result)
-                        (error "Conversion failed to" (:id application) "/" (:id attachment) "/" (get-in attachment [:latestVersion :filename]) "with error:" (:archivabilityError result))
-                        (info "Conversion succeed to" (get-in attachment [:latestVersion :filename]) "/" (:id application))))))))))))))
-
+(defn pdf-to-pdfa-conversion [& [organization start-date end-date]]
+  (if (and organization start-date end-date)
+    (let [start-ts (c/to-long (c/from-string start-date))
+          end-ts (c/to-long (c/from-string end-date))]
+      (mongo/connect!)
+      ; Conversion with LibreOffice is error prone, disable it for this run
+      (env/disable-feature! :convert-pdfs-with-libre)
+      (info "Starting pdf to pdf/a conversion for" organization "from" start-date "to" end-date)
+      (doseq [application (->> (mongo/with-collection "applications"
+                                                      (monger-query/find {:organization organization
+                                                                          :state {$in states/post-verdict-states}
+                                                                          :archived.completed nil
+                                                                          $or [{:submitted {$gte start-ts $lte end-ts}}
+                                                                               {:submitted nil
+                                                                                :created   {$gte start-ts $lte end-ts}}]})
+                                                      (monger-query/sort {:submitted 1}))
+                               (map mongo/with-id))]
+        (logging/with-logging-context {:applicationId (:id application)}
+          (info "Checking attachments of application" (:id application))
+          (doseq [{:keys [latestVersion] :as attachment} (:attachments application)]
+            (when (and latestVersion (not (:archivable latestVersion)))
+              (info "Trying to convert attachment" (:filename latestVersion))
+              ; Re-fetch application to minimize errors because of it changing during processing
+              (let [{:keys [attachments] :as application} (mongo/by-id :applications (:id application))
+                    attachment (first (filter #(= (:id attachment) (:id %)) attachments))
+                    result (attachment/convert-existing-to-pdfa! application attachment)
+                    log-message {:application-id (:id application)
+                                 :attachment-id (:id attachment)
+                                 :type (:type attachment)
+                                 :filename (:filename latestVersion)}]
+                (if (:archivable result)
+                  (logging/log-event :info (merge {:run-by "Batch PDF/A conversion run"
+                                                   :event "Successfully converted attachment to PDF/A"}
+                                                  log-message))
+                  (logging/log-event :error (merge {:run-by "Batch PDF/A conversion run"
+                                                    :event "Attachment conversion to PDF/A failed"
+                                                    :archivability-error (:archivabilityError result)}
+                                                   log-message)))))))))
+    (println "Organization id, start date and end date arguments must be provided.")))
 
 (defn fetch-verdict-attachments
   [start-timestamp end-timestamp organizations]

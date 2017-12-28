@@ -5,7 +5,6 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.fixture.core :as fixture]
-            [lupapalvelu.xml.krysp.building-reader :refer [building-info-list]]
             [sade.core :as sade]
             [sade.xml :as xml]
             [sade.common-reader :as cr]))

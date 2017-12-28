@@ -13,10 +13,12 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.building :as building]
             [lupapalvelu.company :as com]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
@@ -30,11 +32,13 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
+            [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.property :as prop]
             [sade.util :as util :refer [merge-in]]
             [sade.coordinate :as coord]
+            [sade.strings :as ss]
             [lupapalvelu.application-utils :as app-utils]))
 
 
@@ -272,6 +276,29 @@
   (when-let [links (not-empty (filter (comp #{"lupapistetunnus"} :type) linkPermitData))]
     (->> (map :id links)
          (domain/get-multiple-applications-no-access-checking))))
+
+;; https://eevertti.vrk.fi/documents/2634109/3072453/VTJ-yll%C3%A4pito+Virhekoodit+Rajapinta/e7904362-6c43-43e6-8f1c-a80b24313ac9?version=1.0
+;; gives some hint for valid ID, but is still pretty confusing...
+
+(defn vrk-lupatunnus                                        ; LPK-3207
+  "Below mimics other system's intrepetation of VRKLupatunnus (KuntaGML).
+  Number part is fixed at 4 digits, and can't be '0000'.
+  When sequence hits 10000, it would generate illegal value '0000'. To bypass this we will take first 4 in this special case.
+  For the next value 10001 we would be back in line returning '0001'.
+  It seems values do not need to be unique accross time."
+  [{:keys [municipality created submitted id]}]
+  (when (and (not-any? ss/blank? [municipality id]) (or submitted created))
+    (let [orig-suffix (ss/suffix id "-")
+          vrk-suffix (->> orig-suffix
+                          (take-last 4)
+                          (apply str))
+          final-suffix (if (= "0000" vrk-suffix)            ; handle special case
+                         (->> orig-suffix
+                              (take 4)
+                              (apply str))
+                         vrk-suffix)]
+      (assert (not= "0000" final-suffix) "VRKLupatunnus number can't be '0000'")
+      (format "%s000%ty-%s" municipality (or submitted created) final-suffix))))
 
 ;;
 ;; Application query post process
@@ -700,7 +727,7 @@
 
 (defn handler-upsert-updates [handler handlers created user]
   (let [ind (util/position-by-id (:id handler) handlers)]
-    {$set  (merge {:modified created} {(util/kw-path :handlers (or ind (count handlers))) handler})
+    {$set  {(util/kw-path :handlers (or ind (count handlers))) handler}
      $push {:history (handler-history-entry (util/assoc-when handler :new-entry (nil? ind)) created user)}}))
 
 (defn autofill-rakennuspaikka [application time & [force?]]
@@ -712,3 +739,68 @@
                               (get-in rakennuspaikka [:data :kiinteisto :kiinteistoTunnus :value])
                               (:propertyId application))]
           (doc/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))
+
+(defn schema-datas [{:keys [rakennusvalvontaasianKuvaus]} buildings]
+  (map
+    (fn [{:keys [data]}]
+      (remove empty? (conj [[[:valtakunnallinenNumero] (:valtakunnallinenNumero data)]
+                            [[:kaytto :kayttotarkoitus] (get-in data [:kaytto :kayttotarkoitus])]]
+                           (when-not (or (ss/blank? (:rakennusnro data))
+                                         (= "000" (:rakennusnro data)))
+                             [[:tunnus] (:rakennusnro data)])
+                           (when-not (ss/blank? rakennusvalvontaasianKuvaus)
+                             [[:kuvaus] rakennusvalvontaasianKuvaus]))))
+    buildings))
+
+(defn document-data->op-document [{:keys [schema-version] :as application} data]
+  (let [op (make-op :archiving-project (now))
+        doc (doc-persistence/new-doc application (schemas/get-schema schema-version "archiving-project") (now))
+        doc (assoc-in doc [:schema-info :op] op)
+        doc-updates (model/map2updates [] data)]
+    (model/apply-updates doc doc-updates)))
+
+(defn fetch-building-xml [organization permit-type property-id]
+  (when (and organization permit-type property-id)
+    (when-let [{url :url credentials :credentials} (org/get-krysp-wfs {:_id organization} permit-type)]
+      (building-reader/building-xml url credentials property-id))))
+
+(defn buildings-for-documents [xml]
+  (->> (building-reader/->buildings xml)
+       (map #(-> {:data %}))))
+
+(defn update-buildings-array! [xml application]
+  (let [doc-buildings (building/building-ids application)
+        buildings (building-reader/->buildings-summary xml)
+        find-op-id (fn [nid]
+                     (->> (filter #(= (:national-id %) nid) doc-buildings)
+                          first
+                          :operation-id))
+        updated-buildings (map
+                            (fn [{:keys [nationalId] :as bldg}]
+                              (-> (select-keys bldg [:localShortId :buildingId :localId :nationalId :location-wgs84 :location])
+                                  (assoc :operationId (find-op-id nationalId))))
+                            buildings)]
+    (when (seq updated-buildings)
+      (mongo/update-by-id :applications
+                          (:id application)
+                          {$set {:buildings updated-buildings}}))))
+
+
+(defn fetch-buildings [{:keys [application] :as command} propertyId]
+  (let [building-xml              (fetch-building-xml (:organization application) "R" propertyId)
+        old-building-docs         (domain/get-documents-by-name application "archiving-project")
+        buildings-and-structures  (buildings-for-documents building-xml)
+        document-datas            (schema-datas nil buildings-and-structures)
+        structure-descriptions    (map :description buildings-and-structures)
+        building-docs             (map (partial document-data->op-document application) document-datas)
+        primary-operation         (assoc (-> (first building-docs) :schema-info :op) :description (first structure-descriptions))
+        secondary-ops             (mapv #(assoc (-> %1 :schema-info :op) :description %2) (rest building-docs) (rest structure-descriptions))
+        application               (update-in application [:documents] concat building-docs)
+        command                   (util/deep-merge command (action/application->command application))]
+  (when (some? (:id primary-operation))
+    (do
+      (mapv #(doc-persistence/remove! command (:id %) "documents") old-building-docs)
+      (action/update-application command {$set  {:primaryOperation    primary-operation
+                                                 :secondaryOperations secondary-ops}
+                                          $push {:documents {$each building-docs}}})
+      (update-buildings-array! building-xml (mongo/by-id :applications (:id application)))))))

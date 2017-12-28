@@ -18,19 +18,20 @@
   ([]
    (init-user-details nil))
   ([company]
-   (swap! state/component-state assoc-in [:contacts :orderer]
-          (merge
-            {:firstName (.firstName js/lupapisteApp.models.currentUser)
-             :lastName  (.lastName js/lupapisteApp.models.currentUser)
-             :streetAddress   (.street js/lupapisteApp.models.currentUser)
-             :postalCode (.zip js/lupapisteApp.models.currentUser)
-             :city       (.city js/lupapisteApp.models.currentUser)
-             :email      (.email js/lupapisteApp.models.currentUser)}
-            (when company
-              {:companyName (:name company)
-               :streetAddress (:address1 company)
-               :postalCode (:zip company)
-               :city (:po company)})))))
+   (letfn [(get-user-field [fieldName] (js/util.getIn js/lupapisteApp.models.currentUser #js [(name fieldName)]))]
+     (swap! state/component-state assoc-in [:contacts :orderer]
+            (merge
+              {:firstName (get-user-field :firstName)
+               :lastName        (get-user-field :lastName)
+               :streetAddress   (get-user-field :street)
+               :postalCode (get-user-field :zip)
+               :city       (get-user-field :city)
+               :email      (get-user-field :email)}
+              (when company
+                {:companyName (:name company)
+                 :streetAddress (:address1 company)
+                 :postalCode (:zip company)
+                 :city (:po company)}))))))
 
 (defn init
   [init-state props]

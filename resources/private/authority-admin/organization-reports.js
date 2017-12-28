@@ -20,4 +20,13 @@ LUPAPISTE.OrganizationReportsModel = function() {
   self.partiesEndComputed = ko.pureComputed(function() {
     return moment(self.partiesEndDate()).endOf("day").valueOf();
   });
+
+  self.verdictsStartDate = ko.observable(moment().subtract(1, "months").toDate());
+  self.verdictsEndDate = ko.observable(new Date());
+  self.verdictsStartComputed = ko.pureComputed(function() {
+      return moment(self.verdictsStartDate()).startOf("day").valueOf();
+  });
+  self.verdictsEndComputed = ko.pureComputed(function() {
+      return moment(self.verdictsEndDate()).endOf("day").valueOf();
+  });
 };

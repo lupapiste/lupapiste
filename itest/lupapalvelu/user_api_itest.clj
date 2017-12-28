@@ -1,14 +1,10 @@
 (ns lupapalvelu.user-api-itest
-  (:require [clojure.java.io :as io]
-            [cheshire.core :as json]
+  (:require [cheshire.core :as json]
             [monger.operators :refer :all]
             [midje.sweet :refer :all]
-            [ring.util.codec :as codec]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer [fact* facts*]]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
-            [lupapalvelu.user-api :as user-api]
             [sade.schema-generators :as ssg]))
 
 ;;
@@ -229,7 +225,8 @@
     (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority" "reader"])
 
   (fact "Jarvenpaa has permanent achive, can set TOS roles"
-    (fact "Meta: check current roles" (-> (query admin :user-by-email :email "rakennustarkastaja@jarvenpaa.fi") :user :orgAuthz :186-R) => ["authority" "archivist"])
+    (fact "Meta: check current roles"
+      (-> (query admin :user-by-email :email "rakennustarkastaja@jarvenpaa.fi") :user :orgAuthz :186-R) => ["authority" "approver" "archivist"])
     (command jarvenpaa :update-user-roles :email "rakennustarkastaja@jarvenpaa.fi" :roles ["authority" "tos-editor" "tos-publisher" "archivist"]) => ok?
     (-> (query admin :user-by-email :email "rakennustarkastaja@jarvenpaa.fi") :user :orgAuthz :186-R) => ["authority" "tos-editor" "tos-publisher" "archivist"]))
 

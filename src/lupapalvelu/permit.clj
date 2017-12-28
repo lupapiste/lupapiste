@@ -206,6 +206,17 @@
   (error "KRYSP 'review mapper' method not defined for permit type: " permit-type)
   nil)
 
+(defmulti verdict-krysp-mapper
+  "Maps verdicts into KRYSP XML."                           ; as of writing this comment, paatostieto mapping was only available for R 2.2.2
+  {:arglists '([application verdict lang krysp-version begin-of-link])}
+  (fn [{permit-type :permitType} & _]
+    (keyword permit-type)))
+
+(defmethod verdict-krysp-mapper :default
+  [{permit-type :permitType} & _]
+  (error "KRYSP 'verdict mapper' method not defined for permit type: " permit-type)
+  nil)
+
 (defmulti read-verdict-xml
   "Reads verdicts (sequence) from KRYSP xml."
   {:arglists '([permit-type xml-without-ns])}
@@ -346,8 +357,11 @@
   (let [ymp-permit-types (set (map name [YI YL YM VVVL MAL]))]
     (ymp-permit-types permit-type)))
 
-(defn is-archiving-project [{{:keys [permitType]} :application}]
-  (when-not (= permitType (name ARK))
+(defn archiving-project? [{:keys [permitType]}]
+  (= permitType (name ARK)))
+
+(defn is-archiving-project [{{:keys [permitType] :as application} :application}]
+  (when-not (archiving-project? application)
     (fail :error.unsupported-permit-type)))
 
 (defn is-not-archiving-project [{{:keys [permitType]} :application}]

@@ -1,3 +1,7 @@
+(require 'cemerick.pomegranate.aether)
+(cemerick.pomegranate.aether/register-wagon-factory!
+  "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
+
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
   :dependencies [[org.clojure/clojure "1.8.0"]
@@ -115,17 +119,17 @@
                  ; WKT parser
                  [cljts "0.3.0-20150228.035522-2" :exclusions [xerces/xercesImpl]]
                  ; Coordinate conversions, shape file handling etc.
-                 [org.geotools/gt-main "12.4"]
-                 [org.geotools/gt-shapefile "12.4"]
-                 [org.geotools/gt-geojson "12.4"]
-                 [org.geotools/gt-referencing "12.4"]
-                 [org.geotools/gt-epsg-wkt "12.4"]
+                 [org.geotools/gt-main "18.1"]
+                 [org.geotools/gt-shapefile "18.1"]
+                 [org.geotools/gt-geojson "18.1"]
+                 [org.geotools/gt-referencing "18.1"]
+                 [org.geotools/gt-epsg-wkt "18.1"]
 
                  ;; Lupapiste libraries
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.60"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.8.8"]
+                 [lupapiste/commons "0.8.12"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
@@ -211,11 +215,8 @@
   :jvm-opts ["-Dfile.encoding=UTF-8"]
   :nitpicker {:exts     ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug" #"lp-static/js/"]}
-  :repositories [["mygrid-repository" {:url       "http://www.mygrid.org.uk/maven/repository"
-                                       :snapshots false}]
-                 ["osgeo" {:url "http://download.osgeo.org/webdav/geotools"}]
-                 ["com.levigo.jbig2" {:url       "http://jbig2-imageio.googlecode.com/svn/maven-repository"
-                                      :snapshots false}]]
+  :repositories [["boundless" {:url "https://repo.boundlessgeo.com/main/"}]
+                 ["osgeo" {:url "http://download.osgeo.org/webdav/geotools"}]]
   :aliases {"integration" ["with-profile" "dev,itest" ["midje" ":filter" "-ajanvaraus"]]
             "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
             "stest"       ["with-profile" "dev,stest" "midje"]

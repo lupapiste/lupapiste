@@ -135,6 +135,8 @@ Solita is invited to the foreman application
   User logs in  kaino@solita.fi  kaino123  Kaino Solita
   Wait test id visible  accept-invite-button
   Element Should Contain  xpath=//div[@class='invitation'][1]//h3  Yritysvaltuutus: ${appname}, Sipoo, Työnjohtajan nimeäminen
+  Element Should Contain  xpath=//div[@class='invitation'][1]//span[1]  Kutsuja:
+  Element Should Contain  xpath=//div[@class='invitation'][1]//span[2]  Sibbo Sonja
 
 Solita opens the foreman application and dismisses invitation dialog
   Scroll and click test id  open-application-button

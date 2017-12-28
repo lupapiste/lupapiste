@@ -99,7 +99,7 @@
                                                {:logoutUrl (str (env/value :host) "/Shibboleth.sso/Logout")})
                                              (when (env/feature? :dummy-ident)
                                                {:logoutUrl (str (env/value :host) "/dev/saml-logout")})]))
-                 :convertableTypes      (conj conversion/libre-conversion-file-types :image/jpeg)
+                 :convertableTypes      conversion/all-convertable-mime-types
                  :footerLinkPrefix      (env/value :host)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
@@ -329,15 +329,14 @@
 
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker
                             :signing :invites :verdict-attachment-prints :calendar-view :printing-order]
-                  :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
+                  :js ["map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
                        "add-party.js" "archival-summary.js" "case-file.js"
                        "create-digging-permit.js"
                        "parties-model.js"
                        "application.js"
                        "backend-id-manager.js"]
-                  :html ["add-link-permit.html"
-                         "application.html" "inforequest.html" "add-operation.html" "change-location.html"
+                  :html ["application.html" "inforequest.html" "add-operation.html" "change-location.html"
                          "foreman-template.html" "archival-summary-template.html"
                          "required-fields-summary-tab-template.html" "parties-tab-template.html"
                          "case-file-template.html" "create-digging-permit.html"
@@ -476,7 +475,7 @@
                               "municipality-maps-service.js" "authority-admin.js"]
                          :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"
                                 "organization-reports.html" "organization-calendars.html" "calendar-admin.html" "assignments.html" "stamp-editor.html"
-                                "matti-verdict-templates.html" "archiving.html" "organization-bulletins.html"
+                                "pate-verdict-templates.html" "archiving.html" "organization-bulletins.html"
                                 "organization-terminal.html"]}
 
    :admin-app {:depends []

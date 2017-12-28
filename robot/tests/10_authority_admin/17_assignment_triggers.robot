@@ -23,12 +23,12 @@ Authority admin adds new handler role
   Wait until  Textfield value should be  //input[@data-test-id='edit-role-2-sv']  Handläggare robot
 
 Authority admin should see triggers only when assignments are anabled
-  Checkbox should be selected  assignments-enabled
+  Toggle selected  assignments-enabled
   Wait until  Element should be visible by test id  trigger-component
-  Unselect checkbox  assignments-enabled
-  Checkbox should not be selected  assignments-enabled
+  Toggle toggle  assignments-enabled
+  Toggle not selected  assignments-enabled
   Wait until  Element should not be visible by test id  trigger-component
-  Select checkbox  assignments-enabled
+  Toggle toggle  assignments-enabled
 
 Organization already have two triggers
   Wait Until  Xpath Should Match X Times  //div[@id='triggers-table']//table/tbody/tr  2

@@ -56,3 +56,9 @@
                            result))
         result (to-zip-entries zip-stream [])]
     result)) ; returns readable zip entries in sequence
+
+(require ['clojure.pprint :as 'pprint])
+(defn spy [v]
+  (println "--spying:")
+  (pprint/pprint v)
+  v)
