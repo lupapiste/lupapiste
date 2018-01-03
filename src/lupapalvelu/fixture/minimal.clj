@@ -631,9 +631,8 @@
     :firstName "Duff"
     :lastName "Dummy"
     :email  "dummy@example.com"
-    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"
-              :apikey "602cb9e58426c613c8b85abe"} ; Dummy user has apikey, should not actually happen
-    :role "applicant"}
+    :private {:apikey "602cb9e58426c613c8b85abe"} ; Dummy user has apikey, should not actually happen
+    :role "dummy"}
    ;; Dummy hakija 2: dummy2 / pena
    {:id  "51112424c26b7342d92acf3d"
     :enabled  false
@@ -642,8 +641,8 @@
     :firstName "Duff2"
     :lastName "Dummy2"
     :email  "dummy2@example.com"
-    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
-    :role "applicant"}
+    :private {}
+    :role "dummy"}
    ;; Dummy hakija 3: dummy3 / pena
    {:id  "51112424c26b7342d92acf3e"
     :enabled  false
@@ -652,7 +651,7 @@
     :firstName ""
     :lastName ""
     :email  "dummy3@example.com"
-    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
+    :private {}
     :role "dummy"}
 
    ;; Solita company admin

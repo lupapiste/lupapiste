@@ -201,7 +201,7 @@
                                                          :huoneistonumero {:value "000"
                                                                            :modified created}
                                                          :porras {:value ""}
-                                                         :muutostapa {:value "lisäys"
+                                                         :muutostapa {:value "lis\u00e4ys"
                                                                       :modified created}
                                                          :lamminvesiKytkin {:value false}
                                                          :parvekeTaiTerassiKytkin {:value false}}}
