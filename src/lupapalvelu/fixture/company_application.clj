@@ -1,5 +1,6 @@
 (ns lupapalvelu.fixture.company-application
   (:require [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.fixture.core :refer [deffixture]]
             [lupapalvelu.fixture.minimal :as minimal]))
 
 (def users (filter (comp #{:admin "sonja" "pena" "kaino@solita.fi" "erkki@example.com"} :username) minimal/users))
