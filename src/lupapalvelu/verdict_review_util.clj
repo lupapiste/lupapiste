@@ -121,26 +121,29 @@
                               ;; Copy content to a temp file to keep the content close at hand
                               ;; during upload and conversion processing.
                               (io/copy in temp-file)
-                              (when
-                                (attachment/upload-and-attach! {:application current-application :user user}
-                                                               {:attachment-id attachment-id
-                                                                :attachment-type attachment-type
-                                                                :contents contents
-                                                                :target target
-                                                                :required false
-                                                                :read-only true
-                                                                :locked true
-                                                                :created (or (if (string? attachment-time)
-                                                                               (to-timestamp attachment-time)
-                                                                               attachment-time)
-                                                                             timestamp)
-                                                                :state :ok
-                                                                :set-app-modified? set-app-modified?}
-                                                               {:filename filename
-                                                                :size content-length
-                                                                :content temp-file})
-                                (run-assignment-triggers-for-poytakirja user application urlhash attachment-type)
-                                1))
+                              (let [attachment-opts {:attachment-id attachment-id
+                                                     :attachment-type attachment-type
+                                                     :contents contents
+                                                     :target target
+                                                     :required false
+                                                     :read-only true
+                                                     :locked true
+                                                     :created (or (if (string? attachment-time)
+                                                                    (to-timestamp attachment-time)
+                                                                    attachment-time)
+                                                                  timestamp)
+                                                     :state :ok
+                                                     :set-app-modified? set-app-modified?}
+                                    upload-result (attachment/upload-and-attach! {:application current-application :user user}
+                                                                                 attachment-opts
+                                                                                 {:filename filename
+                                                                                  :size content-length
+                                                                                  :content temp-file})]
+                                (if upload-result
+                                  (do
+                                    (run-assignment-triggers-for-poytakirja user application urlhash attachment-type)
+                                    1)
+                                  0)))
                             (do
                               (error (str (:status resp) " - unable to download " url ": " resp))
                               0)))))
@@ -165,17 +168,16 @@
           ;; used with manually entered verdicts.
           pk-urlhash (if (= (count attachments) 1)
                        (-> attachments first :linkkiliitteeseen pandect/sha1)
-                       verdict-id)]
+                       verdict-id)
+          stored-files-count (reduce
+                               (fn [acc att]
+                                 (+ acc (download-and-store-poytakirja! application user timestamp pk-urlhash target set-app-modified? att)))
+                               0 attachments)]
       (when-not (seq attachments)
         (warnf "no valid attachment links in poytakirja, %s-id: %s" target-type verdict-id))
-      (-> pk
-          (dissoc :liite)
-          (util/assoc-when-pred
-            (pos?
-              (reduce
-                (fn [acc att]
-                  (+ acc (download-and-store-poytakirja! application user timestamp pk-urlhash target set-app-modified? att))) 0 attachments))
-            :urlHash pk-urlhash)))
+      (cond-> pk
+        true (dissoc :liite)
+        (pos? stored-files-count) (assoc :urlHash pk-urlhash)))
     (do
       (warnf "no attachments ('liite' elements) in poytakirja, %s-id: %s" target-type verdict-id)
       pk)))
