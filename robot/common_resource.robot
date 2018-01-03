@@ -1290,8 +1290,8 @@ Foreman count is
 # Quick, jettison the db...
 #
 
-Apply minimal fixture now
-  Go to  ${FIXTURE URL}/minimal
+Apply ${fixture-name} fixture now
+  Go to  ${FIXTURE URL}/${fixture-name}
   Wait until  Page should contain  true
   Go to login page
 
