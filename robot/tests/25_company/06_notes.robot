@@ -59,3 +59,6 @@ Reload page and re-open notes again
   Wait until  Element should be visible  jquery=[data-test-id=autocomplete-application-tags-component]
   Test id should contain  autocomplete-application-tags-component  Projekti1
   Textarea value should be  jquery=[data-test-id=application-company-note]  Huomio, Obs, Achtung!
+
+No frontend errors
+  There are no frontend errors
