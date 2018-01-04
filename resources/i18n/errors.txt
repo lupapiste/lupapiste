@@ -923,5 +923,5 @@
 "error.illegal-primary-operation" "fi" "Toiminto ei sallittu tälle toimenpiteelle"
 "error.illegal-primary-operation" "sv" ""
 "error.illegal-premises-excel" "en" ""
-"error.illegal-premises-excel" "fi" "Lähettämäsi tiedosto on virheellinen"
+"error.illegal-premises-excel" "fi" "Ladatuissa huoneistotiedoissa on virhe. Ole hyvä ja tarkista huoneistotiedot."
 "error.illegal-premises-excel" "sv" ""
