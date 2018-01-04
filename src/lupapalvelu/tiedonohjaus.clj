@@ -161,12 +161,13 @@
           :ts       (:requested stm)
           :user     (str "" (:name stm))}) (:statements application)))
 
-(defn- get-neighbour-requests-from-application [application]
-  (map (fn [req] (let [status (first (filterv #(= "open" (name (:state %))) (:status req)))]
-                   {:text     (get-in req [:owner :name])
-                    :category :request-neighbor
-                    :ts       (:created status)
-                    :user     (full-name (:user status))})) (:neighbors application)))
+(defn- get-neighbour-requests-from-application [application status category]
+  (->> (map (fn [req] (when-let [status (first (filterv #(= (name status) (name (:state %))) (:status req)))]
+                        {:text     (get-in req [:owner :name])
+                         :category category
+                         :ts       (:created status)
+                         :user     (full-name (:user status))})) (:neighbors application))
+       (remove nil?)))
 
 (defn- get-review-requests-from-application [application]
   (reduce (fn [acc task]
@@ -233,12 +234,13 @@
   (let [documents (get-documents-from-application application)
         attachments (get-attachments-from-application application)
         statement-reqs (get-statement-requests-from-application application)
-        neighbors-reqs (get-neighbour-requests-from-application application)
+        neighbors-reqs (get-neighbour-requests-from-application application :open :request-neighbor)
+        neighbors-done (get-neighbour-requests-from-application application :mark-done :request-neighbor-done)
         review-reqs (get-review-requests-from-application application)
         reviews-held (get-held-reviews-from-application application)
         tos-fn-changes (tos-function-changes-from-history history lang)
         handler-changes (handler-changes-from-history history organization lang)
-        all-docs (sort-by :ts (concat handler-changes tos-fn-changes documents attachments statement-reqs neighbors-reqs review-reqs reviews-held))
+        all-docs (sort-by :ts (concat handler-changes tos-fn-changes documents attachments statement-reqs neighbors-reqs neighbors-done review-reqs reviews-held))
         state-changes (filter :state history)]
     (doall
       (map (fn [[{:keys [state ts user]} next]]
@@ -413,6 +415,7 @@
                 :document (i18n/localize lang "caseFile.documentSubmitted")
                 :request-statement (i18n/localize lang "caseFile.operation.statement.request")
                 :request-neighbor (i18n/localize lang "caseFile.operation.neighbor.request")
+                :request-neighbor-done (i18n/localize lang "caseFile.operation.neighbor.request.done")
                 :request-review (i18n/localize lang "caseFile.operation.review.request")
                 :review (i18n/localize lang "caseFile.operation.review")
                 :tos-function-change (i18n/localize lang "caseFile.tosFunctionChange")
