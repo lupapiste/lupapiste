@@ -205,7 +205,7 @@
                                                      (str "item--" (name item-align))))}
                        (when (:dict item-schema)
                          (instantiate (path/dict-options item-options)
-                                      true))])))
+                                      (-> schema :labels? false? not)))])))
                 (:items schema))])
 
 (rum/defc pate-grid < rum/reactive

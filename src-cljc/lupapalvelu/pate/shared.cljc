@@ -318,8 +318,17 @@
   (merge PateLayout
          CellConfig
          {:list (merge PateCss
-                       {(sc/optional-key :title) sc/Str
-                        :items                   [PateItem]})}))
+                       {(sc/optional-key :title)   sc/Str
+                        ;; By default, items always have labels, if
+                        ;; when they are just empty strings. Otherwise
+                        ;; the vertical alignment could be
+                        ;; off. If :labels? is false, then the labels
+                        ;; are not laid out at all. This is useful,
+                        ;; when it is known that none of the items
+                        ;; have labels, thus avoiding superflous
+                        ;; whitespace. Default is true.
+                        (sc/optional-key :labels?) sc/Bool
+                        :items                     [PateItem]})}))
 
 (defschema PateItemCell
   (merge CellConfig
@@ -518,6 +527,7 @@
                :grid       {:columns 1
                             :rows    [[{:loc-prefix :pate-buildings.info
                                         :list       {:title "pate-buildings.info"
+                                                     :labels? false
                                                      :items (mapv (fn [check]
                                                                     {:dict check
                                                                      :id   check
