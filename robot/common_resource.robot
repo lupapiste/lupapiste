@@ -331,6 +331,8 @@ Login fails
 
 User should be logged in
   [Arguments]  ${name}
+  Maximize browser window
+  Scroll to top
   Wait Until  Element text should be  user-name  ${name}
 
 User logs in
