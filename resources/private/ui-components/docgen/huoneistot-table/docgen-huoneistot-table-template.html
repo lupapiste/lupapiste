@@ -276,12 +276,14 @@
                            clickFn: duplicateLastGroup,
                            testId: schemaName + '-copy-button' }}">
           </span>
+          <!-- ko if: showPremisesUpload -->
           <span data-bind="component: { name: 'premises-upload',
                            params: { id: $component.documentId + '-huoneistot-upload-button',
                            applicationId: $parent.applicationId,
                            doc: $component.documentId,
                            testId: schemaName + '-upload-button' }}">
           </span>
+          <!-- /ko -->
         </div>
       </script>
     </section>
