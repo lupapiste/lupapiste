@@ -14057,6 +14057,10 @@ div.accordion-assignments .assignment .editor {
   border-right: none;
 }
 
+.accordion-help {
+  margin-left: 10px;
+}
+
 div.automatic-assignments {
   color: black;
   margin: 0 auto;
