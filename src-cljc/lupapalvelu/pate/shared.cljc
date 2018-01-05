@@ -118,6 +118,12 @@
   :? True if the path is found within the state (regardless of its
   value)
 
+  If simple falsey/truthy resolution is not enough, the 'good/bad'
+  value can be given within a path definition (but not for :? paths):
+
+  :hii.hoo=9
+  :_meta.foo.bar!=10
+
   Note: :_meta.enabled? is always used as prerequisite."
   {(sc/optional-key :enabled?)  condition-type
    (sc/optional-key :disabled?) condition-type})
@@ -426,7 +432,6 @@
                                                            :i18nkey         :pate-verdict-dates
                                                            :item-loc-prefix :pate-verdict}}
                 :giver                     {:docgen "pate-verdict-giver"}
-                :verdict-section           {:docgen "pate-verdict-section"}
                 :verdict-code              {:reference-list {:path       :settings.verdict-code
                                                              :type       :select
                                                              :loc-prefix :pate-r.verdict-code}}
@@ -481,9 +486,6 @@
                                       [{:col  3
                                         :id   :giver
                                         :dict :giver}
-                                       {:col  2
-                                        :id   :section
-                                        :dict :verdict-section}
                                        {:align      :full
                                         :col        3
                                         :loc-prefix :pate-r.verdict-code
