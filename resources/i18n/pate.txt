@@ -512,3 +512,4 @@
 "pate.delete-verdict-draft" "fi" "Haluatko varmasti poistaa päätösluonnoksen ja sen liitteet?"
 "pate.pdf-filename" "fi" "{0} Päätös {1}.pdf"
 "pate.pdf-verdict-error" "fi" "Päätöksen PDF-version generointi epäonnistui."
+"pate-settings.boardname" "fi" "Lautakunnan nimi"

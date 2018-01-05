@@ -219,7 +219,10 @@
           :unit                      (sc/enum :days :years)}))
 
 (defschema PateReference
-  "Displays the referenced value."
+  "Displays the referenced value. By default, :path is resolved as a
+  regular path into the component state. However, if the path is
+  prefixed with :*ref the resolution target (for the rest) is
+  references (like in PateEnabled for example)."
   (merge PateComponent
          {:path path-type}))
 
@@ -555,6 +558,7 @@
                 :voimassa      {:date-delta {:unit :years}}
                 :verdict-code  {:multi-select {:label? false
                                                :items  (keys verdict-code-map)}}
+                :boardname     {:docgen "pate-string"}
                 :foremen       {:multi-select {:label? false
                                                :items  foreman-codes}}
                 :plans         {:reference-list {:label?   false
@@ -581,9 +585,14 @@
                               }}
                 {:id         "verdict"
                  :loc-prefix :pate-settings.verdict
-                 :grid       {:columns    1
+                 :grid       {:columns    8
                               :loc-prefix :pate-r.verdict-code
-                              :rows       [[{:dict :verdict-code}]]}}
+                              :rows       [[{:col  8
+                                             :dict :verdict-code}]
+                                           [{:col        2
+                                             :align      :full
+                                             :loc-prefix :pate-settings.boardname
+                                             :dict       :boardname}]]}}
                 {:id         "foremen"
                  :loc-prefix :pate-settings.foremen
                  :grid       {:columns    1
@@ -632,7 +641,7 @@
                                :disabled? :automatic-verdict-dates}}]))
           (into {}))
      {:contact-ref      {:reference {:path :contact}}
-      :giver            {:docgen "pate-verdict-giver"}
+      :boardname        {:reference {:path :*ref.boardname}}
       :contact          {:docgen "pate-verdict-contact"}
       :verdict-section  {:docgen "pate-verdict-section"}
       :verdict-code     {:reference-list {:path       :verdict-code
@@ -714,16 +723,18 @@
      {:id   "pate-verdict"
       :grid {:columns 6
              :rows    [[{:loc-prefix :pate-verdict.giver
-                         :hide?      :_meta.editing?
+                         :hide?      [:OR :_meta.editing? :*ref.boardname]
                          :dict       :contact-ref}
-                        {:col   2
-                         :show? :_meta.editing?
-                         :list  {:items [{:id   :giver
-                                          :dict :giver}
-                                         {:id    :contact
-                                          :show? :_meta.editing?
-                                          :dict  :contact}]}}
+                        {:loc-prefix :pate-verdict.giver
+                         :hide?      :_meta.editing?
+                         :show?      :*ref.boardname
+                         :dict       :boardname}
                         {:col   1
+                         :show? :_meta.editing?
+                         :hide? :*ref.boardname
+                         :dict  :contact}
+                        {:col   1
+                         :show? :*ref.boardname
                          :loc-prefix :pate-verdict.section
                          :dict  :verdict-section}
                         {:col   2

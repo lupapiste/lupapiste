@@ -16,7 +16,7 @@
   (service/save-settings-value (path/value [:category] info)
                                path
                                (path/value path state)
-                               (common/response->state state :modified)))
+                               (common/response->state info :modified)))
 
 (defn fetch-settings [category]
   (service/settings category

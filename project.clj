@@ -166,7 +166,7 @@
                                          [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
                                          [lupapiste/lein-buildid "0.4.2"]
                                          [lupapiste/lein-nitpicker "0.5.1"]
-                                         [lein-figwheel "0.5.13"]]
+                                         [lein-figwheel "0.5.14"]]
                         :resource-paths ["dev-resources"]
                         :source-paths   ["dev-src" "test-utils"]
                         :jvm-opts       ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]

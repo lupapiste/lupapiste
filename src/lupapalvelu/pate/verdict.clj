@@ -122,9 +122,8 @@
 
 (defmethod template-info :r
   [{snapshot :published}]
-  (let [data (:data snapshot)
-        removed? #(when (get-in data [:removed-sections %])
-                    true)
+  (let [data             (:data snapshot)
+        removed?         #(boolean (get-in data [:removed-sections %]))
         building-details (->> [(when-not (:autopaikat data)
                                  [:rakennetut-autopaikat
                                   :kiinteiston-autopaikat
@@ -134,21 +133,24 @@
                                      [:vss-luokka :paloluokka])]
                               flatten
                               (remove nil?))
-        exclusions (-<>> [(filter removed? [:conditions :appeal :statements
-                                            :collateral :rights :purpose])
-                          (when (removed? :neighbors)
-                            [:neighbors :neighbor-states])
-                          (when (removed? :complexity)
-                            [:complexity :complexity-text])
-                          (util/difference-as-kw shared/verdict-dates
-                                                 (:verdict-dates data))]
-                         flatten
-                         (remove nil?)
-                         (zipmap <> (repeat true))
-                         (util/assoc-when <> :buildings (or (removed? :buildings)
-                                                            (zipmap building-details
-                                                                    (repeat true))))
-                         not-empty)]
+        exclusions       (-<>> [(filter removed? [:conditions :appeal :statements
+                                                  :collateral :rights :purpose])
+                                (when (removed? :neighbors)
+                                  [:neighbors :neighbor-states])
+                                (when (removed? :complexity)
+                                  [:complexity :complexity-text])
+                                (util/difference-as-kw shared/verdict-dates
+                                                       (:verdict-dates data))
+                                (if (-> snapshot :settings :boardname)
+                                  :contact
+                                  :verdict-section)]
+                               flatten
+                               (remove nil?)
+                               (zipmap <> (repeat true))
+                               (util/assoc-when <> :buildings (or (removed? :buildings)
+                                                                  (zipmap building-details
+                                                                          (repeat true))))
+                               not-empty)]
     {:exclusions exclusions}))
 
 (defn new-verdict-draft [template-id {:keys [application organization created]

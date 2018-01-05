@@ -11,7 +11,7 @@
             [schema.core :refer [defschema] :as sc]))
 
 (def pate-string {:name "pate-string"
-                   :type :string})
+                  :type :string})
 
 (def verdict-text {:name "pate-verdict-text"
                    :type :string})
@@ -20,7 +20,6 @@
                       :type :string})
 
 (def verdict-contact {:name  "pate-verdict-contact"
-                      :label false
                       :type  :string})
 
 (def verdict-giver {:name "pate-verdict-giver"
@@ -77,17 +76,19 @@
    :draft    sc/Any})
 
 (defschema PatePublishedSettings
-  {:verdict-code [(apply sc/enum (map name (keys shared/verdict-code-map)))]
-   :date-deltas  (->> shared/verdict-dates
-                      (map (fn [k]
-                             [(sc/optional-key k) sc/Int]))
-                      (into {}))
-   :foremen      [(apply sc/enum (map name shared/foreman-codes))]
-   :reviews      [{:id   ssc/ObjectIdStr
-                   :name PateName
-                   :type review-type}]
-   :plans        [{:id   ssc/ObjectIdStr
-                   :name PateName}]})
+  {:verdict-code                [(apply sc/enum (map name (keys shared/verdict-code-map)))]
+   :date-deltas                 (->> shared/verdict-dates
+                                     (map (fn [k]
+                                            [(sc/optional-key k) sc/Int]))
+                                     (into {}))
+   :foremen                     [(apply sc/enum (map name shared/foreman-codes))]
+   :reviews                     [{:id   ssc/ObjectIdStr
+                                  :name PateName
+                                  :type review-type}]
+   :plans                       [{:id   ssc/ObjectIdStr
+                                  :name PateName}]
+   ;; Boardname included only when the verdict giver is Lautakunta.
+   (sc/optional-key :boardname) sc/Str})
 
 (defschema PateSavedTemplate
   (merge PateCategory

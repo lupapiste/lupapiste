@@ -138,10 +138,12 @@
                            (if (map? v)
                              (recur (-> v vals first))
                              v))]))]
-    (assoc data
-           :date-deltas (pack-verdict-dates draft)
-           :plans       (pack-generics organization :plans template-data)
-           :reviews     (pack-generics organization :reviews template-data))))
+    (merge data
+           {:date-deltas (pack-verdict-dates draft)
+            :plans       (pack-generics organization :plans template-data)
+            :reviews     (pack-generics organization :reviews template-data)}
+           (when (util/=as-kw (:giver template-data) :lautakunta)
+             {:boardname (:boardname draft)}))))
 
 (declare generic-list)
 
@@ -189,7 +191,7 @@
                      template-id
                      {$set {:verdict-templates.templates.$.published
                             {:published timestamp
-                             :data      (->> draft
+                             :data      (->> (dissoc draft :giver)
                                              (prune-template-data settings :reviews)
                                              (prune-template-data settings :plans))
                              :settings  settings}}})))
