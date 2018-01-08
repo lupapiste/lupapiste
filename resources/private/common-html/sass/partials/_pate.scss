@@ -184,10 +184,13 @@ span.formatted {
   }
 }
 
-.pate-label {
+@mixin pate-default-label() {
   font-size: 15px;
   font-weight: bold;
- // white-space: nowrap;
+}
+
+.pate-label {
+  @include pate-default-label;
 }
 
 // Meta status classes
@@ -220,6 +223,7 @@ span.saved-info {
 
 div.pate-date-delta {
   > label.delta-label {
+    @include pate-default-label;
     white-space: nowrap;
   }
   > div.delta-editor {

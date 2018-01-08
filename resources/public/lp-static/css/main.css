@@ -25273,6 +25273,8 @@ span.saved-info {
 }
 
 div.pate-date-delta > label.delta-label {
+  font-size: 15px;
+  font-weight: bold;
   white-space: nowrap;
 }
 
