@@ -59,7 +59,7 @@
 
 (def foreman-codes [:vastaava-tj :vv-tj :iv-tj :erityis-tj :tj])
 
-(def verdict-dates [:julkipano :anto :valitus :lainvoimainen
+(def verdict-dates [:julkipano :anto :muutoksenhaku :lainvoimainen
                     :aloitettava :voimassa])
 
 ;; Phrases
@@ -237,7 +237,7 @@
   the text-loc, using a special notattion: 'Text before [link]
   after.' The click handler for the link is a _meta function."
   (merge PateComponent
-         { ;; The label text is always determined by the default
+         {;; The label text is always determined by the default
           ;; PateComponent mechanisms (loc-prefix, i18nkey), but the
           ;; actual text with link is determined by the :text-loc key.
           :text-loc sc/Keyword
@@ -552,12 +552,13 @@
                 :plus          {:loc-text :plus}
                 :julkipano     {:date-delta {:unit :days}}
                 :anto          {:date-delta {:unit :days}}
-                :valitus       {:date-delta {:unit :days}}
+                :muutoksenhaku       {:date-delta {:unit :days}}
                 :lainvoimainen {:date-delta {:unit :days}}
                 :aloitettava   {:date-delta {:unit :years}}
                 :voimassa      {:date-delta {:unit :years}}
                 :verdict-code  {:multi-select {:label? false
                                                :items  (keys verdict-code-map)}}
+                :lautakunta-muutoksenhaku {:date-delta {:unit :days}}
                 :boardname     {:docgen "pate-string"}
                 :foremen       {:multi-select {:label? false
                                                :items  foreman-codes}}
@@ -580,19 +581,23 @@
                  :grid       {:columns    17
                               :loc-prefix :pate-verdict
                               :rows       [(date-delta-row [:julkipano :anto
-                                                            :valitus :lainvoimainen
+                                                            :muutoksenhaku :lainvoimainen
                                                             :aloitettava :voimassa])]
                               }}
                 {:id         "verdict"
                  :loc-prefix :pate-settings.verdict
-                 :grid       {:columns    8
+                 :grid       {:columns    1
                               :loc-prefix :pate-r.verdict-code
-                              :rows       [[{:col  8
-                                             :dict :verdict-code}]
-                                           [{:col        2
-                                             :align      :full
-                                             :loc-prefix :pate-settings.boardname
-                                             :dict       :boardname}]]}}
+                              :rows       [[{:dict :verdict-code}]]}}
+                {:id "board"
+                 :loc-prefix :pate-verdict.giver.lautakunta
+                 :grid {:columns 4
+                        :rows [[{:loc-prefix :pate-verdict.muutoksenhaku
+                                 :dict :lautakunta-muutoksenhaku}]
+                               [{:col        1
+                                 :align      :full
+                                 :loc-prefix :pate-settings.boardname
+                                 :dict       :boardname}]]}}
                 {:id         "foremen"
                  :loc-prefix :pate-settings.foremen
                  :grid       {:columns    1
@@ -635,7 +640,7 @@
     (merge
      {:verdict-date            {:docgen "pate-date"}
       :automatic-verdict-dates {:docgen {:name "pate-verdict-check"}}}
-     (->> [:julkipano :anto :valitus :lainvoimainen :aloitettava :voimassa]
+     (->> [:julkipano :anto :muutoksenhaku :lainvoimainen :aloitettava :voimassa]
           (map (fn [kw]
                  [kw {:docgen {:name      "pate-date"
                                :disabled? :automatic-verdict-dates}}]))

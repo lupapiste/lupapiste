@@ -119,7 +119,7 @@
                          :value delta) => ok?))]
       (set-date-delta "julkipano" 1)
       (set-date-delta "anto" 2)
-      (set-date-delta "valitus" 3)
+      (set-date-delta "muutoksenhaku" 3)
       (set-date-delta "lainvoimainen" 4)
       (set-date-delta "aloitettava" 1) ;; years
       (set-date-delta "voimassa" 2) ;; years
@@ -127,8 +127,17 @@
   (fact "Date delta validation"
     (command sipoo :save-verdict-template-settings-value
              :category :r
-             :path [:valitus :delta]
-             :value -8)=> (err :error.invalid-value)))
+             :path [:muutoksenhaku :delta]
+             :value -8)=> (err :error.invalid-value))
+  (fact "Board"
+    (command sipoo :save-verdict-template-settings-value
+             :category :r
+             :path [:lautakunta-muutoksenhaku :delta]
+             :value 10)=> ok?
+    (command sipoo :save-verdict-template-settings-value
+             :category :r
+             :path [:boardname]
+             :value "Board of peers")=> ok?))
 
 (fact "Sipoo categories"
   (:categories (query sipoo :verdict-template-categories))
@@ -178,7 +187,7 @@
               (command sipoo :save-verdict-template-draft-value
                        :template-id id
                        :path [:verdict-dates]
-                       :value [:julkipano :anto :valitus :lainvoimainen
+                       :value [:julkipano :anto :muutoksenhaku :lainvoimainen
                                :aloitettava :voimassa]) => ok?)
             (fact "vv-tj is not supported by settings"
               (command sipoo :save-verdict-template-draft-value
@@ -202,7 +211,7 @@
                   => (contains {:id       id
                                 :name     "Uusi nimi"
                                 :draft    {:giver            "viranhaltija"
-                                           :verdict-dates ["julkipano" "anto" "valitus" "lainvoimainen"
+                                           :verdict-dates ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
                                                            "aloitettava" "voimassa"]
                                            :removed-sections {:foremen true
                                                               :plans   true}}
@@ -253,7 +262,7 @@
                         copy-category => "r"
                         copy-name => "Uusi nimi (kopio)"
                         copy-draft => {:giver            "viranhaltija"
-                                       :verdict-dates    ["julkipano" "anto" "valitus" "lainvoimainen"
+                                       :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
                                                           "aloitettava" "voimassa"]
                                        :removed-sections {:foremen true
                                                           :plans   true}}
@@ -266,7 +275,7 @@
                             (query sipoo :verdict-template
                                    :template-id copy-id)
                             => (contains {:draft {:giver            "viranhaltija"
-                                                  :verdict-dates    ["julkipano" "anto" "valitus" "lainvoimainen"
+                                                  :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
                                                                      "aloitettava" "voimassa"]
                                                   :removed-sections {:foremen true
                                                                      :plans   true}
@@ -280,7 +289,7 @@
                             (query sipoo :verdict-template
                                    :template-id id)
                             => (contains {:draft {:giver            "viranhaltija"
-                                                  :verdict-dates    ["julkipano" "anto" "valitus" "lainvoimainen"
+                                                  :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
                                                                      "aloitettava" "voimassa"]
                                                   :removed-sections {:foremen true
                                                                      :plans   true}}
@@ -645,9 +654,9 @@
                :name "Full template") => ok?)
 
     (set-template-draft-values template-id
-                               :verdict-dates ["julkipano" "anto" "valitus" "lainvoimainen"
+                               :verdict-dates ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
                                                "aloitettava" "voimassa"]
-                               "giver" :lautakunta
+                               "giver" :viranhaltija
                                "verdict-code" :ehdollinen
                                "paatosteksti" "Verdict text."
                                :foremen [:iv-tj :erityis-tj]
@@ -675,12 +684,24 @@
                                                                 :propertyId sipoo-property-id
                                                                 :operation  :sisatila-muutos)
             verdict-fn-factory   (fn [verdict-id]
-                                   {:open #(query sonja :pate-verdict :id app-id
-                                                  :verdict-id verdict-id)
-                                    :edit #(command sonja :edit-pate-verdict :id app-id
-                                                    :verdict-id verdict-id
-                                                    :path (map name (flatten [%1]))
-                                                    :value %2)})]
+                                   (let [open-fn #(query sonja :pate-verdict :id app-id
+                                                         :verdict-id verdict-id)]
+                                     {:open          open-fn
+                                      :edit          #(command sonja :edit-pate-verdict :id app-id
+                                                               :verdict-id verdict-id
+                                                               :path (map name (flatten [%1]))
+                                                               :value %2)
+                                      :check-changes (fn [{changes :changes} expected]
+                                                       (fact "Check changes"
+                                                         changes => expected)
+                                                       (fact "Check that verdict has been updated"
+                                                         (-> (open-fn) :verdict :data)
+                                                         => (contains (reduce (fn [acc [x y]]
+                                                                                (assoc acc
+                                                                                       (-> x first keyword)
+                                                                                       y))
+                                                                              {}
+                                                                              changes))))}))]
         (fact "Error: unpublished template-id for verdict draft"
           (command sonja :new-pate-verdict-draft :id app-id :template-id template-id)
           => fail?)
@@ -705,39 +726,29 @@
           (toggle-sipoo-pate true)
           (query sonja :pate-verdict-tab :id app-id) => ok?)
         (fact "Sonja creates verdict draft"
-          (let [draft                (command sonja :new-pate-verdict-draft
-                                              :id app-id :template-id template-id)
-                verdict-id           (-> draft :verdict :id)
-                data                 (-> draft :verdict :data)
-                op-id                (-> data :buildings keys first keyword)
-                {open-verdict :open
-                 edit-verdict :edit} (verdict-fn-factory verdict-id)
-                check-changes        (fn [{changes :changes} expected]
-                                       (fact "Check changes"
-                                         changes => expected)
-                                       (fact "Check that verdict has been updated"
-                                         (-> (open-verdict) :verdict :data)
-                                         => (contains (reduce (fn [acc [x y]]
-                                                                (assoc acc
-                                                                       (-> x first keyword)
-                                                                       y))
-                                                              {}
-                                                              changes))))
-                check-error          (fn [{errors :errors} & [kw err-kw]]
-                                       (if kw
-                                         (fact "Check errors"
-                                           (some (fn [[x y]]
-                                                   (and (= kw (util/kw-path x))
-                                                        (keyword y)))
-                                                 errors) => (or err-kw
-                                                                :error.invalid-value))
-                                         (fact "No errors"
-                                           errors => nil)))]
-            data => (contains { :appeal          "Humble appeal."
+          (let [draft                          (command sonja :new-pate-verdict-draft
+                                                        :id app-id :template-id template-id)
+                verdict-id                     (-> draft :verdict :id)
+                data                           (-> draft :verdict :data)
+                op-id                          (-> data :buildings keys first keyword)
+                {open-verdict  :open
+                 edit-verdict  :edit
+                 check-changes :check-changes} (verdict-fn-factory verdict-id)
+
+                check-error (fn [{errors :errors} & [kw err-kw]]
+                              (if kw
+                                (fact "Check errors"
+                                  (some (fn [[x y]]
+                                          (and (= kw (util/kw-path x))
+                                               (keyword y)))
+                                        errors) => (or err-kw
+                                                       :error.invalid-value))
+                                (fact "No errors"
+                                  errors => nil)))]
+            data => (contains {:appeal           "Humble appeal."
                                :purpose          ""
                                :verdict-text     "Verdict text."
                                :anto             ""
-                               :giver            "lautakunta"
                                :complexity       "medium"
                                :foremen          ["iv-tj" "erityis-tj"]
                                :verdict-code     "ehdollinen"
@@ -763,6 +774,8 @@
                                                     :tag                    ""
                                                     :autopaikat-yhteensa    ""
                                                     :paloluokka             ""}}}))
+            (fact "Since the verdict is regular (official) we can set contact"
+              (edit-verdict "contact" "Authority Sonja Sibbo") => ok?)
 
             (facts "Verdict references"
               (let [{:keys [foremen plans reviews]} (:references draft)]
@@ -789,7 +802,7 @@
                 (check-changes (edit-verdict "automatic-verdict-dates" true)
                                [[["julkipano"] "28.9.2017"]
                                 [["anto"] "2.10.2017"]
-                                [["valitus"] "5.10.2017"]
+                                [["muutoksenhaku"] "5.10.2017"]
                                 [["lainvoimainen"] "9.10.2017"]
                                 [["aloitettava"] "9.10.2018"]
                                 [["voimassa"] "9.10.2020"]]))
@@ -800,7 +813,7 @@
                 (check-changes (edit-verdict :verdict-date "6.10.2017")
                                [[["julkipano"] "9.10.2017"]
                                 [["anto"] "11.10.2017"]
-                                [["valitus"] "16.10.2017"]
+                                [["muutoksenhaku"] "16.10.2017"]
                                 [["lainvoimainen"] "20.10.2017"]
                                 [["aloitettava"] "22.10.2018"]
                                 [["voimassa"] "22.10.2020"]])))
@@ -973,7 +986,7 @@
                                        :template-id template-id
                                        :path (map name (flatten [path]))
                                        :value value) => ok?))]
-                    (fact "Disable julkipano, valitus, lainvoimainen and aloitettava"
+                    (fact "Disable julkipano, muutoksenhaku, lainvoimainen and aloitettava"
                       (edit-template [:verdict-dates] ["anto" "voimassa"]))
                     (fact "Remove all the other sections except buildings (and verdict)"
                       (edit-template [:removed-sections :foremen] true)
@@ -990,21 +1003,23 @@
                     (fact "Unselect autopaikat and vss-luokka"
                       (edit-template :autopaikat false)
                       (edit-template :vss-luokka false))
+                    (fact "Board verdict template"
+                      (edit-template :giver :lautakunta) => true)
                     (fact "Publish template"
                       (publish-verdict-template sipoo template-id) => ok?)))
                 (fact "New verdict"
-                  (let  [{verdict :verdict}   (command sonja :new-pate-verdict-draft
-                                                       :id app-id
-                                                       :template-id template-id)
-                         verdict-date "27.9.2017"
+                  (let  [{verdict :verdict}             (command sonja :new-pate-verdict-draft
+                                                                 :id app-id
+                                                                 :template-id template-id)
+                         verdict-date                   "27.9.2017"
                          {data       :data
-                          verdict-id :id}     verdict
-                         {open-verdict :open
-                          edit-verdict :edit} (verdict-fn-factory verdict-id)]
+                          verdict-id :id}               verdict
+                         {open-verdict  :open
+                          edit-verdict  :edit
+                          check-changes :check-changes} (verdict-fn-factory verdict-id)]
                     data => {:voimassa              ""
                              :verdict-text          "Verdict text."
                              :anto                  ""
-                             :giver                 "lautakunta"
                              :foremen-included      false
                              :foremen               ["iv-tj" "erityis-tj"]
                              :verdict-code          "ehdollinen"
@@ -1034,7 +1049,20 @@
                                                       kwp :error.invalid-value-path)))]
                         (check-fn :julkipano "29.9.2017")
                         (check-fn :buildings.vss-luokka "12")
-                        (check-fn :buildings.kiinteiston-autopaikat 34)))
+                        (check-fn :buildings.kiinteiston-autopaikat 34)
+                        (fact "Contact cannot be set for board verdict"
+                          (check-fn :contact "Authority Sonja Sibbo"))))
+                    (facts "Muutoksenhaku calculation has changed"
+                      (fact "Set the verdict date"
+                        (edit-verdict :verdict-date "8.1.2018") => ok?)
+                      (fact "Calculate muutoksenhaku date automatically"
+                        (check-changes (edit-verdict :automatic-verdict-dates true)
+                                       [[["julkipano"] "9.1.2018"]
+                                        [["anto"] "11.1.2018"]
+                                        [["muutoksenhaku"] "22.1.2018"]
+                                        [["lainvoimainen"] "26.1.2018"]
+                                        [["aloitettava"] "28.1.2019"]
+                                        [["voimassa"] "28.1.2021"]])))
                     (facts "Add attachment to verdict draft"
                       (let [attachment-id (add-verdict-attachment app-id verdict-id "Paatosote")]
                         (fact "Attachment can be deleted"
