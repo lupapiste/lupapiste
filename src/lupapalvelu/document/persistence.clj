@@ -236,7 +236,7 @@
         post-results (model/validate application updated-doc)
         paths (map (partial map util/->keyword) paths)]
     (when-not document (fail! :error.document-not-found))
-    (validate-against-whitelist! document paths role)
+    (validate-against-whitelist! document paths role application)
     (validate-readonly-removes! document paths)
     (->> (removing-updates-by-path collection doc-id paths)
          ((juxt :mongo-query :mongo-updates))
