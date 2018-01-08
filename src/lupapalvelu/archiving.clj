@@ -15,7 +15,7 @@
             [sade.schemas :as ssc]
             [sade.schema-utils :as ssu]
             [sade.strings :as ss]
-            [sade.threads :as threads]
+            [lupapiste-commons.threads :as threads]
             [sade.util :as util]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
