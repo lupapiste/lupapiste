@@ -8,17 +8,8 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as usr]
             [lupapalvelu.reports.applications :as app-reports]
+            [lupapalvelu.reports.excel :refer [excel-response]]
             [lupapalvelu.company :as com]))
-
-(defn excel-response [filename body]
-  (try
-    {:status  200
-     :headers {"Content-Type"        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-               "Content-Disposition" (str "attachment;filename=\"" filename "\"")}
-     :body    body}
-    (catch Exception e#
-      (error "Exception while compiling open applications excel:" e#)
-      {:status 500})))
 
 (defraw open-applications-xlsx
   {:user-roles #{:authorityAdmin}}

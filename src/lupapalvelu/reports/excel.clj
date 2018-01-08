@@ -1,7 +1,8 @@
 (ns lupapalvelu.reports.excel
   (:require [dk.ative.docjure.spreadsheet :as spreadsheet]
             [sade.core :refer :all]
-            [sade.strings :as ss])
+            [sade.strings :as ss]
+            [taoensso.timbre :refer [error]])
   (:import (java.io ByteArrayInputStream ByteArrayOutputStream OutputStream)
            (org.apache.poi.xssf.usermodel XSSFWorkbook)
            (org.apache.poi.ss.usermodel CellType)))
@@ -52,3 +53,13 @@
     (doto cell
       (.setCellType CellType/FORMULA)
       (.setCellFormula (subs value 1)))))
+
+(defn excel-response [filename body]
+  (try
+    {:status  200
+     :headers {"Content-Type"        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+               "Content-Disposition" (str "attachment;filename=\"" filename "\"")}
+     :body    body}
+    (catch Exception e#
+      (error "Exception while compiling open applications excel:" e#)
+      {:status 500})))

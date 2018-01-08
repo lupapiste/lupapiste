@@ -5,34 +5,25 @@
 
 (testable-privates lupapalvelu.premises csv-data->ifc-coll
                                         ifc-to-lupapiste-keys
-                                        premise->updates)
+                                        premise->updates
+                                        data->model-updates)
 
-(fact "csv-data-comes-out-as-a-key-val-map"
+(fact "csv-data comes out as a header-data-map"
   (csv-data->ifc-coll "Porras;Huoneistonumero;Huoneiston jakokirjain;Sijaintikerros;Huoneiden lukumäärä;Keittiötyyppi;Huoneistoala;Varusteena WC;Varusteena amme/suihku;Varusteena parveke;Varusteena Sauna;Varusteena lämmin vesi\nA;001;;2;2;3;56;1;1;1;1;1")
-      => [{"sijaintikerros" "2"
-           "porras" "A"
-           "varusteena amme/suihku" "1"
-           "varusteena wc" "1"
-           "huoneistonumero" "001"
-           "varusteena parveke" "1"
-           "varusteena sauna" "1"
-           "huoneistoala" "56"
-           "keittiötyyppi" "3"
-           "huoneiden lukumäärä" "2"
-           "varusteena lämmin vesi" "1"
-           "huoneiston jakokirjain" ""}])
+      => {:header-row ["porras" "huoneistonumero" "huoneiston jakokirjain" "sijaintikerros" "huoneiden lukumäärä" "keittiötyyppi" "huoneistoala" "varusteena wc" "varusteena amme/suihku" "varusteena parveke" "varusteena sauna" "varusteena lämmin vesi"]
+          :data      [["A" "001" "" "2" "2" "3" "56" "1" "1" "1" "1" "1"]]})
 
 (fact "premise data becomes updates data"
-      (let [input (csv-data->ifc-coll "Porras;Huoneistonumero;Huoneiston jakokirjain;Huoneiden lukumäärä;Keittiötyyppi;Huoneistoala;Varusteena WC;Varusteena amme/suihku;Varusteena parveke;Varusteena Sauna;Varusteena lämmin vesi\nA;001;;2;3;56;1;1;1;1;1")]
-        (set (first (map #(premise->updates % 0) input))))
-      => #{["huoneistot.0.porras" "A"]
-           ["huoneistot.0.huoneistonumero" "001"]
-           ["huoneistot.0.huoneluku" "2"]
-           ["huoneistot.0.keittionTyyppi" "keittotila"]
-           ["huoneistot.0.huoneistoala" "56"]
-           ["huoneistot.0.WCKytkin" true]
-           ["huoneistot.0.ammeTaiSuihkuKytkin" true]
-           ["huoneistot.0.parvekeTaiTerassiKytkin" true]
-           ["huoneistot.0.saunaKytkin" true]
-           ["huoneistot.0.lamminvesiKytkin" true]})
+      (let [{header-row :header-row data :data} (csv-data->ifc-coll "Porras;Huoneistonumero;Huoneiston jakokirjain;Huoneiden lukumäärä;Keittiötyyppi;Huoneistoala;Varusteena WC;Varusteena amme/suihku;Varusteena parveke;Varusteena Sauna;Varusteena lämmin vesi\nA;001;;2;3;56;1;1;1;1;1")]
+        (set (data->model-updates header-row data)))
+      => #{[[:huoneistot :0 :porras] "A"]
+           [[:huoneistot :0 :huoneistonumero] "001"]
+           [[:huoneistot :0 :huoneluku] "2"]
+           [[:huoneistot :0 :keittionTyyppi] "keittotila"]
+           [[:huoneistot :0 :huoneistoala] "56"]
+           [[:huoneistot :0 :WCKytkin] true]
+           [[:huoneistot :0 :ammeTaiSuihkuKytkin] true]
+           [[:huoneistot :0 :parvekeTaiTerassiKytkin] true]
+           [[:huoneistot :0 :saunaKytkin] true]
+           [[:huoneistot :0 :lamminvesiKytkin] true]})
 

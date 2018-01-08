@@ -15,6 +15,14 @@
           <!-- ko if: groupHelp -->
           <span class="group-help-text" data-bind="ltext: groupHelp"></span>
           <!-- /ko -->
+          <!-- ko if: showPremisesUpload && groupHelp -->
+          <br>
+          <span class="group-help-text">
+              <span data-bind="ltext: 'huoneistot.premisesInfoText'"></span>
+              <a data-bind="attr: {href: '/api/raw/download-premises-template?document-id=' + $component.documentId +'&application-id=' + $parent.applicationId}, ltext: 'huoneistot.premisesDownloadLink'"></a>
+          </span>
+
+          <!-- /ko -->
 
           <table data-bind="attr: {'class': _.last(path) + '-table'}">
             <thead>
