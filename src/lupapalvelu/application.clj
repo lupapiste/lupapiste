@@ -200,12 +200,13 @@
 (defn- prefix-with [prefix coll]
   (conj (seq coll) prefix))
 
-(defn- enrich-single-doc-disabled-flag [{user-role :role} doc]
+(defn- enrich-single-doc-disabled-flag [{user-role :role} {permitType :permitType} doc]
   (let [doc-schema (model/get-document-schema doc)
         zip-root (tools/schema-zipper doc-schema)
         whitelisted-paths (tools/whitelistify-schema zip-root)]
     (reduce (fn [new-doc [path whitelist]]
-              (if-not ((set (:roles whitelist)) (keyword user-role))
+              (if-not (and ((set (:roles whitelist)) (keyword user-role))
+                           ((set (:permitType whitelist)) (keyword permitType)))
                 (tools/update-in-repeating new-doc (prefix-with :data path) merge {:whitelist-action (:otherwise whitelist)})
                 new-doc))
             doc
@@ -259,7 +260,7 @@
   (->> (validate application doc)
        (populate-operation-info (get-operations application))
        ((app-utils/person-id-masker-for-user user application))
-       (enrich-single-doc-disabled-flag user)))
+       (enrich-single-doc-disabled-flag user application)))
 
 (defn- process-documents-and-tasks [user application]
   (let [mapper (partial process-document-or-task user application)]

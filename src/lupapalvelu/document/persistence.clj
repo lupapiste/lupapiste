@@ -130,12 +130,13 @@
   (when-not (#{"documents" "tasks"} collection)
     (fail :error.unknown-type)))
 
-(defn validate-against-whitelist! [document update-paths user-role]
+(defn validate-against-whitelist! [document update-paths user-role {permitType :permitType}]
   (let [doc-schema (model/get-document-schema document)]
     (doseq [path update-paths]
       (let [{whitelist :whitelist} (model/find-by-name (:body doc-schema) path)]
         (when-not (or (empty? whitelist)
-                      (some #{(keyword user-role)} (:roles whitelist)))
+                      (some #{(keyword user-role)} (:roles whitelist))
+                      (some #{(keyword permitType)} (:permitType whitelist)))
           (unauthorized!))))))
 
 (defn- sent? [{state :state}]
@@ -164,7 +165,7 @@
         model-updates (->model-updates updates)
         update-paths  (map first model-updates)]
     (when-not document (fail! :error.document-not-found))
-    (validate-against-whitelist! document update-paths role)
+    (validate-against-whitelist! document update-paths role application)
     (validate-readonly-updates! document update-paths)
     (persist-model-updates application collection document model-updates timestamp)))
 
