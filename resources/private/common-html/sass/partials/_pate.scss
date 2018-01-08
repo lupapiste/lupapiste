@@ -193,6 +193,15 @@ span.formatted {
   @include pate-default-label;
 }
 
+label.pate--required:after {
+  content: " *";
+  color: $label-required-star-color;
+}
+
+input.pate--required {
+  border-color: $input-required-border-color;
+}
+
 // Meta status classes
 .pate--edit {}
 .pate--view {}

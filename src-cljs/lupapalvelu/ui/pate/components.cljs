@@ -20,16 +20,20 @@
 
 (rum/defc pate-date-delta < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
-  [:div.pate-date-delta
-   (when (show-label? schema wrap-label?)
-     [:label.delta-label {:for (path/id (path/extend path :delta))}
-      (path/loc options)])
-   [:div.delta-editor
-    (docgen/text-edit (assoc options :path (path/extend path :delta))
-                      :input.grid-style-input
-                      {:type "number"
-                       :disabled (path/disabled? options)})
-    (common/loc (str "pate-date-delta." (-> schema :unit name)))]])
+  (let [required? (path/required? options)]
+    [:div.pate-date-delta
+     (when (show-label? schema wrap-label?)
+       [:label.delta-label {:class (common/css-flags :pate--required required?)
+                            :for (path/id (path/extend path :delta))}
+        (path/loc options)])
+     [:div.delta-editor
+      (docgen/text-edit (assoc options
+                               :path (path/extend path :delta)
+                               :required? required?)
+                        :text
+                        {:type "number"
+                         :disabled (path/disabled? options)})
+      (common/loc (str "pate-date-delta." (-> schema :unit name)))]]))
 
 
 (rum/defc pate-multi-select < rum/reactive

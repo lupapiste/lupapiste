@@ -297,3 +297,6 @@
          (climb-to-condition options :hide?)))
 
 (defn not-visible? [options] (not (visible? options)))
+
+(defn required? [options]
+  (boolean (some-> options :_parent :schema :required?)))

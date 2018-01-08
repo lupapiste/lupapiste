@@ -34,6 +34,9 @@
              :path "pate-enabled"
              :value flag) => ok?))
 
+(defn no-errors? [{:keys [errors ok]}]
+  (and (nil? errors) (true? ok)))
+
 (defn check-kuntagml [{:keys [organization permitType id]} verdict-date]
   (let [organization (organization-from-minimal-by-id organization)
         permit-type (keyword permitType)
@@ -775,7 +778,10 @@
                                                     :autopaikat-yhteensa    ""
                                                     :paloluokka             ""}}}))
             (fact "Since the verdict is regular (official) we can set contact"
-              (edit-verdict "contact" "Authority Sonja Sibbo") => ok?)
+              (edit-verdict "contact" "Authority Sonja Sibbo") => no-errors?)
+            (fact "... but cannot set section"
+              (check-error (edit-verdict :verdict-section "8")
+                           :verdict-section :error.invalid-value-path ))
 
             (facts "Verdict references"
               (let [{:keys [foremen plans reviews]} (:references draft)]
@@ -787,7 +793,7 @@
                   (:plans data) => [(-> plans first :id)])))
             (facts "Verdict dates"
               (fact "Set julkipano date"
-                (edit-verdict "julkipano" "20.9.2017") => ok?)
+                (edit-verdict "julkipano" "20.9.2017") => no-errors?)
               (fact "Set verdict date"
                 (let [{:keys [modified changes]}
                       (edit-verdict "verdict-date" "27.9.2017")]
@@ -1051,10 +1057,12 @@
                         (check-fn :buildings.vss-luokka "12")
                         (check-fn :buildings.kiinteiston-autopaikat 34)
                         (fact "Contact cannot be set for board verdict"
-                          (check-fn :contact "Authority Sonja Sibbo"))))
+                          (check-fn :contact "Authority Sonja Sibbo"))
+                        (fact "... but section can be edited"
+                          (edit-verdict :verdict-section "10") => no-errors?)))
                     (facts "Muutoksenhaku calculation has changed"
                       (fact "Set the verdict date"
-                        (edit-verdict :verdict-date "8.1.2018") => ok?)
+                        (edit-verdict :verdict-date "8.1.2018") => no-errors?)
                       (fact "Calculate muutoksenhaku date automatically"
                         (check-changes (edit-verdict :automatic-verdict-dates true)
                                        [[["julkipano"] "9.1.2018"]
@@ -1072,7 +1080,7 @@
                       (query-application sonja app-id)
                       => (contains {:attachments []}))
                     (fact "Add required verdict date"
-                      (edit-verdict "verdict-date" verdict-date) => ok?)
+                      (edit-verdict "verdict-date" verdict-date) => no-errors?)
                     (facts "Add attachment to verdict draft again"
                       (let [attachment-id (add-verdict-attachment app-id verdict-id "Otepaatos")]
                         ;; TODO check that verdict can't be published if verdict-date is blank!

@@ -46,7 +46,7 @@
             [sade.shared-util :as util]))
 
 (defn schema-type [options]
-  (-> options :schema keys first keyword))
+  (-> options :schema (dissoc :required?) keys first keyword))
 
 (declare pate-list)
 

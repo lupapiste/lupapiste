@@ -99,11 +99,13 @@
 
 
 (defn- text-options [text* {:keys [callback required?
-                                   test-id immediate?] :as options}]
+                                   test-id immediate?
+                                   class] :as options}]
   (merge {:value     (rum/react text*)
-          :class     (common/css-flags :required (and required?
-                                                      (-> text* rum/react
-                                                          s/trim s/blank?)))
+          :class     (concat (or class [])
+                             (common/css-flags :required (and required?
+                                                              (-> text* rum/react
+                                                                  s/trim s/blank?))))
           :on-change (fn [event]
                        (let [value (.. event -target -value)]
                          (common/reset-if-needed! text* value)
@@ -113,7 +115,7 @@
            {:on-blur #(callback (.. % -target -value))})
          (when test-id
            {:data-test-id test-id})
-         (dissoc options :callback :required? :test-id :immediate?)))
+         (dissoc options :callback :required? :test-id :immediate? :class)))
 
 ;; Arguments Initial value, options
 ;; Initial value can be atom for two-way binding (see the mixin).
@@ -128,8 +130,8 @@
   [local-state _ & [options]]
   (let [text* (::text local-state)]
     [:input.grid-style-input
-     (assoc (text-options text* options)
-            :type "text")]))
+     (merge {:type "text"}
+            (text-options text* options))]))
 
 ;; The same arguments as for text-edit.
 (rum/defcs textarea-edit < (initial-value-mixin ::text)

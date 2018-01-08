@@ -284,21 +284,27 @@
           ;; time. Default false.
           (sc/optional-key :multiple?)  sc/Bool}))
 
+(defschema PateRequired
+  {(sc/optional-key :required?) sc/Bool})
+
+(defn- required [m]
+  (merge PateRequired m))
+
 (defschema SchemaTypes
   {sc/Keyword (sc/conditional
-               :docgen         {:docgen (sc/conditional
-                                         :name PateDocgen
-                                         :else sc/Str)}
-               :reference-list {:reference-list PateReferenceList}
-               :phrase-text    {:phrase-text PatePhraseText}
+               :docgen         (required {:docgen (sc/conditional
+                                                   :name PateDocgen
+                                                   :else sc/Str)})
+               :reference-list (required {:reference-list PateReferenceList})
+               :phrase-text    (required {:phrase-text PatePhraseText})
                :loc-text       {:loc-text sc/Keyword} ;; Localisation term shown as text.
-               :date-delta     {:date-delta PateDateDelta}
-               :multi-select   {:multi-select PateMultiSelect}
+               :date-delta     (required {:date-delta PateDateDelta})
+               :multi-select   (required {:multi-select PateMultiSelect})
                :reference      {:reference PateReference}
                :link           {:link PateLink}
                :placeholder    {:placeholder PatePlaceholder}
                :keymap         {:keymap KeyMap}
-               :attachments    {:attachments PateAttachments}
+               :attachments    (required {:attachments PateAttachments})
                :repeating      {:repeating (sc/recursive #'SchemaTypes)})})
 
 (defschema Dictionary
@@ -426,6 +432,8 @@
                [])
        (remove nil?)))
 
+(defn req [m]
+  (assoc m :required? true))
 
 ;; TODO: access via category
 (def default-verdict-template
@@ -548,34 +556,34 @@
 
 (def r-settings
   {:title      "pate-r"
-   :dictionary {:verdict-dates {:loc-text :pate-verdict-dates}
-                :plus          {:loc-text :plus}
-                :julkipano     {:date-delta {:unit :days}}
-                :anto          {:date-delta {:unit :days}}
-                :muutoksenhaku       {:date-delta {:unit :days}}
-                :lainvoimainen {:date-delta {:unit :days}}
-                :aloitettava   {:date-delta {:unit :years}}
-                :voimassa      {:date-delta {:unit :years}}
-                :verdict-code  {:multi-select {:label? false
-                                               :items  (keys verdict-code-map)}}
-                :lautakunta-muutoksenhaku {:date-delta {:unit :days}}
-                :boardname     {:docgen "pate-string"}
-                :foremen       {:multi-select {:label? false
-                                               :items  foreman-codes}}
-                :plans         {:reference-list {:label?   false
-                                                 :path     [:plans]
-                                                 :item-key :id
-                                                 :type     :list
-                                                 :sort?    true
-                                                 :term     {:path       :plans
-                                                            :extra-path :name}}}
-                :reviews       {:reference-list {:label?   false
-                                                 :path     [:reviews]
-                                                 :item-key :id
-                                                 :type     :list
-                                                 :sort?    true
-                                                 :term     {:path       :reviews
-                                                            :extra-path :name}}}}
+   :dictionary {:verdict-dates            {:loc-text :pate-verdict-dates}
+                :plus                     {:loc-text :plus}
+                :julkipano                (req {:date-delta {:unit :days}})
+                :anto                     (req {:date-delta {:unit :days}})
+                :muutoksenhaku            (req {:date-delta {:unit :days}})
+                :lainvoimainen            (req {:date-delta {:unit :days}})
+                :aloitettava              (req {:date-delta {:unit :years}})
+                :voimassa                 (req {:date-delta {:unit :years}})
+                :verdict-code             (req {:multi-select {:label? false
+                                                               :items  (keys verdict-code-map)}})
+                :lautakunta-muutoksenhaku (req {:date-delta {:unit :days}})
+                :boardname                (req {:docgen    "pate-string"})
+                :foremen                  {:multi-select {:label? false
+                                                          :items  foreman-codes}}
+                :plans                    {:reference-list {:label?   false
+                                                            :path     [:plans]
+                                                            :item-key :id
+                                                            :type     :list
+                                                            :sort?    true
+                                                            :term     {:path       :plans
+                                                                       :extra-path :name}}}
+                :reviews                  {:reference-list {:label?   false
+                                                            :path     [:reviews]
+                                                            :item-key :id
+                                                            :type     :list
+                                                            :sort?    true
+                                                            :term     {:path       :reviews
+                                                                       :extra-path :name}}}}
    :sections   [{:id         "verdict-dates"
                  :loc-prefix :pate-verdict-dates
                  :grid       {:columns    17
@@ -589,15 +597,15 @@
                  :grid       {:columns    1
                               :loc-prefix :pate-r.verdict-code
                               :rows       [[{:dict :verdict-code}]]}}
-                {:id "board"
+                {:id         "board"
                  :loc-prefix :pate-verdict.giver.lautakunta
-                 :grid {:columns 4
-                        :rows [[{:loc-prefix :pate-verdict.muutoksenhaku
-                                 :dict :lautakunta-muutoksenhaku}]
-                               [{:col        1
-                                 :align      :full
-                                 :loc-prefix :pate-settings.boardname
-                                 :dict       :boardname}]]}}
+                 :grid       {:columns 4
+                              :rows    [[{:loc-prefix :pate-verdict.muutoksenhaku
+                                          :dict       :lautakunta-muutoksenhaku}]
+                                        [{:col        1
+                                          :align      :full
+                                          :loc-prefix :pate-settings.boardname
+                                          :dict       :boardname}]]}}
                 {:id         "foremen"
                  :loc-prefix :pate-settings.foremen
                  :grid       {:columns    1

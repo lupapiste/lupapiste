@@ -25249,6 +25249,15 @@ span.formatted.warning {
   font-weight: bold;
 }
 
+label.pate--required:after {
+  content: " *";
+  color: #df3215;
+}
+
+input.pate--required {
+  border-color: #f39129;
+}
+
 .row-text {
   line-height: 40px;
   display: inline-block;
