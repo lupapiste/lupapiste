@@ -317,3 +317,16 @@
        :error.invalid-value-path)))
   ([options path value]
    (validate-path-value options path value nil)))
+
+(defn required-filled?
+  "True if every required dict item has a proper value."
+  [schema data]
+  (->> schema
+       :dictionary
+       (filter (fn [[k v]]
+                 (:required? v)))
+       (every? (fn [[k v]]
+                 (case (-> v (dissoc :required?) keys first)
+                   :date-delta   (ss/not-blank? (str (get-in data [k :delta])))
+                   :multi-select (not-empty (k data))
+                   (ss/not-blank? (k data)))))))

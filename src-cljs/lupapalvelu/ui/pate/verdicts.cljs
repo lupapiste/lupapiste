@@ -22,31 +22,13 @@
 (defn- can-view? []
   (state/auth? :pate-verdicts))
 
-(defn update-changes-and-errors [{:keys [state path]}]
-  (fn [{:keys [modified changes errors] :as response}]
-    (when (or (seq changes) (seq errors))
-      (swap! state (fn [state]
-                     (let [state (reduce (fn [acc [k v]]
-                                           (assoc-in acc (map keyword k) v))
-                                         state
-                                         changes)]
-                       (reduce (fn [acc [k v]]
-                                 (assoc-in acc
-                                           (cons :_errors (map keyword k))
-                                           v))
-                               (assoc-in state
-                                         (cons :_errors (map keyword path))
-                                         nil)
-                               errors)))))
-    (when modified
-      (swap! state/current-verdict #(assoc-in % [:info :modified] modified)))))
-
 (defn updater [{:keys [state path] :as options}]
   (service/edit-verdict @state/application-id
                         (path/value [:info :id] state/current-verdict)
                         path
                         (path/value path state)
-                        (update-changes-and-errors options)))
+                        (service/update-changes-and-errors state/current-verdict
+                                                           options)))
 
 (defn- can-edit-verdict? [{published :published}]
   (and (can-edit?)

@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.pate.verdict-templates
-  (:require [lupapalvelu.pate.shared :as shared]
+  (:require [clojure.set :as set]
+            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.pate.components :as pate-components]
@@ -13,11 +14,12 @@
             [rum.core :as rum]))
 
 
-(defn updater [{:keys [state info path]}]
+(defn updater [{:keys [state info path] :as options}]
   (service/save-draft-value (path/value [:id] info)
                             path
                             (path/value path state)
-                            (common/response->state info :modified)))
+                            (service/update-changes-and-errors state/current-template
+                                                               options)))
 
 (defn open-settings []
   (reset! state/current-view ::settings))
@@ -45,7 +47,8 @@
      [:button.ghost
       {:disabled (or (not (state/auth? :publish-verdict-template))
                      (> published
-                        (path/react [:modified] info*)))
+                        (path/react [:modified] info*))
+                     (false? (path/react :filled? info*)))
        :on-click #(service/publish-template (path/value [:id] info*)
                                             (common/response->state info* :published))}
       (common/loc :pate.publish)]]))
@@ -55,7 +58,8 @@
   (reset! state/current-template
           (when template
             {:state draft
-             :info  (dissoc template :draft)
+             :info  (set/rename-keys (dissoc template :draft)
+                                     {:filled :filled?})
              :_meta {:updated       updater
                      :open-settings open-settings
                      :enabled?      (state/auth? :save-verdict-template-draft-value)
@@ -82,7 +86,9 @@
      [:div.col-1.col--right
       (verdict-template-publish options)]]
     [:div.row.row--tight
-     [:div.col-2.col--right
+     [:div.col-1
+      (pate-components/required-fields-note options)]
+     [:div.col-1.col--right
       (pate-components/last-saved options)]]]
    (sections/sections options :verdict-template)])
 

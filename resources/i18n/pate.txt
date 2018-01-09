@@ -513,3 +513,4 @@
 "pate.pdf-filename" "fi" "{0} Päätös {1}.pdf"
 "pate.pdf-verdict-error" "fi" "Päätöksen PDF-version generointi epäonnistui."
 "pate-settings.boardname" "fi" "Lautakunnan nimi"
+"pate.required-fields" "fi" "Täytä kaikki pakolliset kentät."

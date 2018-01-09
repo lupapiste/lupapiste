@@ -437,12 +437,11 @@
 
 ;; TODO: access via category
 (def default-verdict-template
-  {:dictionary {;; Verdict section
-                :verdict-dates             {:multi-select {:items           verdict-dates
+  {:dictionary {:verdict-dates             {:multi-select {:items           verdict-dates
                                                            :sort?           false
                                                            :i18nkey         :pate-verdict-dates
                                                            :item-loc-prefix :pate-verdict}}
-                :giver                     {:docgen "pate-verdict-giver"}
+                :giver                     (req {:docgen "pate-verdict-giver"})
                 :verdict-code              {:reference-list {:path       :settings.verdict-code
                                                              :type       :select
                                                              :loc-prefix :pate-r.verdict-code}}
@@ -552,7 +551,9 @@
 (defschema PateSettings
   (merge Dictionary
          {:title    sc/Str
-          :sections [PateSection]}))
+          :sections [(assoc PateSection
+                            ;; A way to to show "required star" on the section title.
+                            (sc/optional-key :required?) sc/Bool)]}))
 
 (def r-settings
   {:title      "pate-r"
@@ -567,7 +568,7 @@
                 :verdict-code             (req {:multi-select {:label? false
                                                                :items  (keys verdict-code-map)}})
                 :lautakunta-muutoksenhaku (req {:date-delta {:unit :days}})
-                :boardname                (req {:docgen    "pate-string"})
+                :boardname                (req {:docgen "pate-string"})
                 :foremen                  {:multi-select {:label? false
                                                           :items  foreman-codes}}
                 :plans                    {:reference-list {:label?   false
@@ -593,6 +594,7 @@
                                                             :aloitettava :voimassa])]
                               }}
                 {:id         "verdict"
+                 :required?  true
                  :loc-prefix :pate-settings.verdict
                  :grid       {:columns    1
                               :loc-prefix :pate-r.verdict-code

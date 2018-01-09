@@ -37,6 +37,9 @@
 (defn no-errors? [{:keys [errors ok]}]
   (and (nil? errors) (true? ok)))
 
+(defn invalid-value? [{:keys [errors]}]
+  (util/=as-kw (-> errors first last) :error.invalid-value))
+
 (defn check-kuntagml [{:keys [organization permitType id]} verdict-date]
   (let [organization (organization-from-minimal-by-id organization)
         permit-type (keyword permitType)
@@ -92,7 +95,7 @@
              :category "r"
              :path [:foremen]
              :value [:bad-tj])
-    => (err :error.invalid-value))
+    => invalid-value?)
   (fact "Save settings draft"
     (let [{modified :modified}
           (command sipoo :save-verdict-template-settings-value
@@ -131,7 +134,7 @@
     (command sipoo :save-verdict-template-settings-value
              :category :r
              :path [:muutoksenhaku :delta]
-             :value -8)=> (err :error.invalid-value))
+             :value -8)=> invalid-value?)
   (fact "Board"
     (command sipoo :save-verdict-template-settings-value
              :category :r
@@ -197,7 +200,7 @@
                        :template-id id
                        :path [:foremen]
                        :value [:vv-tj])
-              => (err :error.invalid-value))
+              => invalid-value?)
             (fact "Set foremen removed"
               (command sipoo :save-verdict-template-draft-value
                        :template-id id
@@ -319,7 +322,7 @@
     (command sipoo :save-verdict-template-draft-value
              :template-id id
              :path [:verdict-dates]
-             :value ["bad"])=> (err :error.invalid-value)
+             :value ["bad"])=> invalid-value?
     (command sipoo :save-verdict-template-draft-value
              :template-id id
              :path [:bad :path]
@@ -327,7 +330,7 @@
     (command sipoo :save-verdict-template-draft-value
              :template-id id
              :path [:verdict-code]
-             :value :bad) => (err :error.invalid-value)
+             :value :bad) => invalid-value?
     (command sipoo :save-verdict-template-draft-value
              :template-id id
              :path [:verdict-code]

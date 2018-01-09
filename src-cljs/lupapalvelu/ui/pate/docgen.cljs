@@ -23,20 +23,17 @@
    (if (-> schema :body first :label false?)
      (common/empty-label)
      [:label.pate-label {:for (path/id path)
-                         :class (common/css-flags :pate--required
+                         :class (common/css-flags :required
                                                   (path/required? options))}
       (docgen-loc options)])
    component])
-
-(defn warning? [{:keys [path state]}]
-  (path/react (cons :_errors path) state ))
 
 (defn docgen-attr [{:keys [path state] :as options} & kv]
   (let [id (path/id path)]
     (merge {:key id
             :id  id
             :disabled (path/disabled? options)
-            :class (common/css-flags :warning (warning? options))}
+            :class (common/css-flags :warning (path/error? options))}
            (apply hash-map kv))))
 
 (defn- state-change

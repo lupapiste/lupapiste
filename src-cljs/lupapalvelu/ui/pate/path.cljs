@@ -300,3 +300,6 @@
 
 (defn required? [options]
   (boolean (some-> options :_parent :schema :required?)))
+
+(defn error? [{:keys [state path]}]
+  (boolean (react (extend :_errors path) state)))

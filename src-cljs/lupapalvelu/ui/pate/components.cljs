@@ -20,15 +20,16 @@
 
 (rum/defc pate-date-delta < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
-  (let [required? (path/required? options)]
+  (let [required? (path/required? options)
+        delta-path (path/extend path :delta)]
     [:div.pate-date-delta
      (when (show-label? schema wrap-label?)
-       [:label.delta-label {:class (common/css-flags :pate--required required?)
-                            :for (path/id (path/extend path :delta))}
+       [:label.delta-label {:class (common/css-flags :required required?)
+                            :for (path/id delta-path)}
         (path/loc options)])
      [:div.delta-editor
       (docgen/text-edit (assoc options
-                               :path (path/extend path :delta)
+                               :path delta-path
                                :required? required?)
                         :text
                         {:type "number"
@@ -136,6 +137,12 @@
   [:span.saved-info
    (when-let [ts (path/react [:modified] info*)]
      (common/loc :pate.last-saved (js/util.finnishDateAndTime ts)))])
+
+(rum/defc required-fields-note < rum/reactive
+  [{info* :info}]
+  (when (false? (path/react [:filled?] info*))
+    [:div.pate-required-fields-note
+     (common/loc :pate.required-fields)]))
 
 (rum/defcs pate-phrase-text < rum/reactive
   (rum/local nil ::category)

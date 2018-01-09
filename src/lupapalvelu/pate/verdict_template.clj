@@ -30,6 +30,11 @@
 (defn operation->category [operation]
   (shared/permit-type->category (ops/permit-type-of-operation operation)))
 
+(defn error-response [path error]
+  (if (= error :error.invalid-value-path)
+    (fail error)
+    (ok :errors [[path error]])))
+
 (defn new-verdict-template
   ([org-id timestamp lang category draft name]
    (let [data {:id       (mongo/create-id)
@@ -231,20 +236,42 @@
        (ss/join ".")
        keyword))
 
+(defn- settings-schema [category]
+  (get shared/settings-schemas (keyword category)))
+
 (defn save-settings-value [organization category timestamp path value]
   (let [draft        (assoc-in (:draft (settings organization category))
                                (map keyword path)
                                value)
         settings-key (settings-key category)]
-    (or (schemas/validate-path-value (get shared/settings-schemas
-                                          (keyword category))
+    (or (schemas/validate-path-value (settings-schema category)
                                      path
-                                     value
-                                     )
+                                     value)
      (mongo/update-by-id :organizations
                          (:id organization)
                          {$set {(util/kw-path settings-key :draft path) value
                                 (util/kw-path settings-key :modified)   timestamp}}))))
+
+(defn- organization-templates [org-id]
+  (org/get-organization org-id {:verdict-templates 1}))
+
+(defn settings-filled?
+  "Settings are filled properly if every requireid field has been filled."
+  [{org-id :org-id ready :settings} category]
+  (schemas/required-filled? (settings-schema category)
+                            (:draft (or ready
+                                        (settings (organization-templates org-id)
+                                                  category)))))
+
+(defn template-filled?
+  "In addition to template itself, the settings must have been filled as well."
+  [{:keys [org-id template template-id]}]
+  (let [{category :category
+         data     :draft} (or template
+                              (verdict-template (organization-templates org-id)
+                                                template-id))]
+    (and (schemas/required-filled? shared/default-verdict-template data)
+         (settings-filled? {:org-id org-id} category))))
 
 ;; Generic is a placeholder term that means either review or plan
 ;; depending on the context. Namely, the subcollection argument in
