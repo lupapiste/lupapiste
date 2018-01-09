@@ -162,13 +162,14 @@
           :user     (str "" (:name stm))}) (:statements application)))
 
 (defn- get-neighbour-requests-from-application [application state category]
-  (->> (map (fn [req] (when-let [status (first (filterv #(= (name state) (name (:state %))) (:status req)))]
+  (->> (:neighbors application)
+       (map (fn [req] (when-let [status (util/find-first #(= (name state) (name (:state %))) (:status req))]
                         {:text     (get-in req [:owner :name])
                          :category category
                          :ts       (:created status)
                          :user     (if (#{:response-given-ok :response-given-comments} state)
                                      (full-name (:vetuma status))
-                                     (full-name (:user status)))})) (:neighbors application))
+                                     (full-name (:user status)))})))
        (remove nil?)))
 
 (defn- get-review-requests-from-application [application]
