@@ -41,7 +41,7 @@
             [lupapalvelu.features-api]
             [lupapalvelu.file-upload-api]
             [lupapalvelu.fixture.fixture-api]
-            [lupapalvelu.fixture.minimal]
+            [lupapalvelu.fixture.fixtures]
             [lupapalvelu.foreman-api]
             [lupapalvelu.guest-api]
             [lupapalvelu.i18n :as i18n]
