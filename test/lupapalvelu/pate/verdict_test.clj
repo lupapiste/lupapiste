@@ -16,19 +16,24 @@
     (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 99))
 
   (fact "org-id is nil"
-    (next-section nil 1515151515151 :test) => nil)
+    (next-section nil 1515151515151 :test) => nil
+    (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0))
 
   (fact "org-id is blank"
-    (next-section "" 1515151515151 :test) => nil)
+    (next-section "" 1515151515151 :test) => nil
+    (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0))
 
   (fact "created is nil"
-    (next-section "123-T" nil :test) => nil)
+    (next-section "123-T" nil :test) => nil
+    (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0))
 
   (fact "verdict-giver is nil"
-    (next-section "123-T" 1515151515151 nil) => nil)
+    (next-section "123-T" 1515151515151 nil) => nil
+    (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0))
 
   (fact "verdict-giver is blank"
-    (next-section "123-T" 1515151515151 "") => nil))
+    (next-section "123-T" 1515151515151 "") => nil
+    (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0)))
 
 (facts insert-section
   (fact "section is not set"
