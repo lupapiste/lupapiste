@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.verdict
-  (:require [lupapalvelu.action :as action]
+  (:require [clj-time.core :as time]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as att]
@@ -405,6 +406,22 @@
                                                      verdict))))
      :references (:references verdict)}))
 
+(defn- next-section [org-id created verdict-giver]
+  (when (and org-id created verdict-giver
+             (ss/not-blank? (name org-id))
+             (ss/not-blank? (name verdict-giver)))
+    (->> (util/to-datetime-with-timezone created)
+         (time/year)
+         (vector "verdict" (name verdict-giver) (name org-id))
+         (ss/join "_")
+         (mongo/get-next-sequence-value)
+         (str))))
+
+(defn- insert-section [org-id created {{section :verdict-section giver :giver} :data :as verdict}]
+  (cond-> verdict
+    (ss/blank? section) (assoc-in [:data :verdict-section]
+                                  (next-section org-id created giver))))
+
 (defn publish-verdict
   "Publishing verdict does the following:
    1. Finalize and publish verdict
@@ -413,12 +430,14 @@
    4. Other document updates (e.g., waste plan -> waste report)
    5. Freeze (locked and read-only) verdict attachments and update TOS details
    6. TODO: Create tasks
-   7. Create PDF/A for the verdict
-   8. TODO: Generate KuntaGML
+   7. Generate section
+   8. Create PDF/A for the verdict
+   9. TODO: Generate KuntaGML
   10. TODO: Assignments?"
   [{:keys [created application user organization] :as command}]
-  (let [verdict    (enrich-verdict command
-                                   (command->verdict command))
+  (let [verdict    (->> (enrich-verdict command
+                                        (command->verdict command))
+                        (insert-section (:organization application) created))
         next-state (sm/verdict-given-state application)
         att-ids    (->> (:attachments application)
                         (filter #(= (-> % :target :id) (:id verdict)))
