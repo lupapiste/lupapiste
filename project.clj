@@ -54,7 +54,7 @@
                  [cheshire "5.7.0"]
 
                  ; HTTP client
-                 [clj-http "3.7.0" :exclusions [commons-codec]]
+                 [clj-http "3.4.1" :exclusions [commons-codec]]
 
                  ; Email client
                  [com.draines/postal "1.11.4" :exclusions [commons-codec/commons-codec]]
