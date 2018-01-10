@@ -13,6 +13,7 @@
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.pdf :as pdf]
             [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.tasks :as pate-tasks]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.state-machine :as sm]
@@ -412,9 +413,9 @@
    3. Inspection summaries
    4. Other document updates (e.g., waste plan -> waste report)
    5. Freeze (locked and read-only) verdict attachments and update TOS details
-   6. TODO: Create tasks
+   6. TODO: Create tasks - if this is 'replacement' verdict, old tasks need to be deleted
    7. Create PDF/A for the verdict
-   8. TODO: Generate KuntaGML
+   8. Generate KuntaGML
   10. TODO: Assignments?"
   [{:keys [created application user organization] :as command}]
   (let [verdict    (enrich-verdict command
@@ -422,7 +423,8 @@
         next-state (sm/verdict-given-state application)
         att-ids    (->> (:attachments application)
                         (filter #(= (-> % :target :id) (:id verdict)))
-                        (map :id))]
+                        (map :id))
+        tasks      (pate-tasks/pate-verdict->tasks application verdict created)]
     (verdict-update command
                     (util/deep-merge
                      {$set (merge
