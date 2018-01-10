@@ -47,7 +47,8 @@
      [:button.ghost
       {:disabled (or (not (state/auth? :publish-verdict-template))
                      (> published
-                        (path/react [:modified] info*))
+                        (max (path/react [:modified] info*)
+                             (path/react [:info :modified] state/settings-info)))
                      (false? (path/react :filled? info*))
                      (false? (path/react [:info :filled?] state/settings-info)))
        :on-click #(service/publish-template (path/value [:id] info*)
