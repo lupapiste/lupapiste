@@ -21,8 +21,10 @@
                             (service/update-changes-and-errors state/current-template
                                                                options)))
 
-(defn open-settings []
-  (reset! state/current-view ::settings))
+(defn open-settings
+  [& [template-id]]
+  (reset! state/current-view {:view ::settings
+                              :back template-id}))
 
 (rum/defc verdict-template-name < rum/reactive
   [{info* :info}]
@@ -63,21 +65,26 @@
              :info  (set/rename-keys (dissoc template :draft)
                                      {:filled :filled?})
              :_meta {:updated       updater
-                     :open-settings open-settings
+                     :open-settings (partial open-settings (:id template))
                      :enabled?      (state/auth? :save-verdict-template-draft-value)
                      :editing?      true}}))
-  (reset! state/current-view (if template ::template ::list)))
+  (reset! state/current-view {:view (if template ::template ::list)}))
+
+(defn open-template [template-id]
+  (service/fetch-template template-id reset-template))
 
 (defn with-back-button [component]
   [:div
    [:button.ghost
-    {:on-click #(reset-template nil)}
+    {:on-click #(if-let [template-id (path/value :back state/current-view)]
+                  (open-template template-id)
+                  (reset-template nil))}
     [:i.lupicon-chevron-left]
     [:span (common/loc "back")]]
    component])
 
 (defn verdict-template
-  [{:keys [schema state] :as options}]
+  [{:keys [schema state info] :as options}]
   [:div.verdict-template
    [:div.pate-grid-2
     [:div.row.row--tight
@@ -92,7 +99,7 @@
       (pate-components/required-fields-note options)
       (pate-components/required-fields-note {:info (rum/cursor-in state/settings-info [:info])}
                                             (components/text-and-link {:text-loc :pate.settings-required-fields
-                                                                       :click    open-settings}))]
+                                                                       :click    #(open-settings (path/value :id info))}))]
      [:div.col-1.col--right
       (pate-components/last-saved options)]]]
    (sections/sections options :verdict-template)])
@@ -127,7 +134,7 @@
                   [:option {:key value :value value} text])))]]
     [:div.col-4.col--right
      [:button.ghost
-      {:on-click open-settings}
+      {:on-click #(open-settings)}
       [:span (common/loc :auth-admin.organization.properties)]]]]])
 
 (rum/defcs verdict-template-list < rum/reactive
@@ -163,14 +170,14 @@
              [:tr {:key id}
               [:td (if deleted
                      name
-                     [:a {:on-click #(service/fetch-template id reset-template)}
+                     [:a {:on-click #(open-template id)}
                       name])]
               [:td (js/util.finnishDate published)]
               [:td
                [:div.pate-buttons
                 (when-not deleted
                   [:button.primary.outline
-                   {:on-click #(service/fetch-template id reset-template)}
+                   {:on-click #(open-template id)}
                    (common/loc "edit")])
                 [:button.primary.outline
                  {:on-click #(service/copy-template id reset-template)}
@@ -187,7 +194,7 @@
              (rum/react state/categories)
              (rum/react state/phrases))
     [:div
-     (case (rum/react state/current-view)
+     (case (:view (rum/react state/current-view))
        ::template
        (with-back-button
          (verdict-template
