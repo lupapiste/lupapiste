@@ -29053,14 +29053,13 @@ div.pate-required-fields-note {
   padding-top: 0;
   padding-bottom: 0;
   padding-left: 6px;
-  background-color: #f6f6f6;
   display: inline-block;
+  margin-right: 6px;
 }
 
 div.pate-required-fields-note:after {
   content: " *";
   color: #df3215;
-  background-color: #f6f6f6;
   padding-right: 6px;
 }
 

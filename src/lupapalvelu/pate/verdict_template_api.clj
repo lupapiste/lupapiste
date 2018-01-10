@@ -152,7 +152,7 @@
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
    :pre-checks       [pate-enabled
-                      (template/verdict-template-check :editable :named)]}
+                      (template/verdict-template-check :editable :named :filled)]}
   [{:keys [created user user-organizations] :as command}]
   (template/publish-verdict-template (template/command->organization command)
                                      template-id

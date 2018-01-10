@@ -139,10 +139,12 @@
      (common/loc :pate.last-saved (js/util.finnishDateAndTime ts)))])
 
 (rum/defc required-fields-note < rum/reactive
-  [{info* :info}]
-  (when (false? (path/react [:filled?] info*))
-    [:div.pate-required-fields-note
-     (common/loc :pate.required-fields)]))
+  ([{info* :info} note]
+   (when (false? (path/react [:filled?] info*))
+     [:div.pate-required-fields-note
+      note]))
+  ([options]
+   (required-fields-note options (common/loc :pate.required-fields))))
 
 (rum/defcs pate-phrase-text < rum/reactive
   (rum/local nil ::category)
@@ -218,11 +220,6 @@
 
 (rum/defc pate-link < rum/reactive
   [{:keys [schema] :as options}]
-  (let [regex          #"\[(.*)\]"
-        text           (path/loc (:text-loc schema))
-        link           (last (re-find regex text))
-        ;; Split results include the
-        [before after] (remove #(= link %) (s/split text regex))]
-    [:span before
-     [:a {:on-click #((path/meta-value options (:click schema)) options)} link]
-     after]))
+  (components/text-and-link {:text-loc (:text-loc schema)
+                             :click    #((path/meta-value options (:click schema))
+                                         options)}))

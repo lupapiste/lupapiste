@@ -393,3 +393,17 @@
                                    (.. % -target -value)
                                    callback)}
           (dissoc options :callback))])
+
+;; Renders text with included link
+;; Options (text and text-loc are mutually exclusive):
+;;   text Text where link is in brackets: 'Press [me] for details'
+;;   text-loc Localization key for text.
+;;   click Function to be called when the link is clicked
+(rum/defc text-and-link < rum/reactive
+  [{:keys [text text-loc click]}]
+  (let [regex          #"\[(.*)\]"
+        text           (or text (common/loc text-loc))
+        link           (last (re-find regex text))
+        ;; Split results include the link
+        [before after] (remove #(= link %) (s/split text regex))]
+    [:span before [:a {:on-click click} link] after]))

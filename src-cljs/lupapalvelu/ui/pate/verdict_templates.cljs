@@ -48,7 +48,8 @@
       {:disabled (or (not (state/auth? :publish-verdict-template))
                      (> published
                         (path/react [:modified] info*))
-                     (false? (path/react :filled? info*)))
+                     (false? (path/react :filled? info*))
+                     (false? (path/react [:info :filled?] state/settings-info)))
        :on-click #(service/publish-template (path/value [:id] info*)
                                             (common/response->state info* :published))}
       (common/loc :pate.publish)]]))
@@ -87,7 +88,10 @@
       (verdict-template-publish options)]]
     [:div.row.row--tight
      [:div.col-1
-      (pate-components/required-fields-note options)]
+      (pate-components/required-fields-note options)
+      (pate-components/required-fields-note {:info (rum/cursor-in state/settings-info [:info])}
+                                            (components/text-and-link {:text-loc :pate.settings-required-fields
+                                                                       :click    open-settings}))]
      [:div.col-1.col--right
       (pate-components/last-saved options)]]]
    (sections/sections options :verdict-template)])

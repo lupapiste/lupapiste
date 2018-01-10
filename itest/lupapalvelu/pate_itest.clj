@@ -109,7 +109,8 @@
                :category "r")
         => (contains {:settings {:draft    {:verdict-code ["ehdollinen" "ei-puollettu"
                                                            "evatty" "hyvaksytty"]}
-                                 :modified modified}}))))
+                                 :modified modified}
+                      :filled   false}))))
   (fact "Select three foremen"
     (command sipoo :save-verdict-template-settings-value
              :category :r
@@ -143,7 +144,10 @@
     (command sipoo :save-verdict-template-settings-value
              :category :r
              :path [:boardname]
-             :value "Board of peers")=> ok?))
+             :value "Board of peers")=> ok?)
+  (fact "The settings are now filled"
+    (query sipoo :verdict-template-settings :category "r")
+    => (contains {:filled true})))
 
 (fact "Sipoo categories"
   (:categories (query sipoo :verdict-template-categories))
@@ -206,7 +210,7 @@
                        :template-id id
                        :path [:removed-sections :foremen]
                        :value true) => ok?)
-            (fact "Set plans removed"
+            (facts "Set plans removed"
               (let [{last-edit :modified}
                     (command sipoo :save-verdict-template-draft-value
                              :template-id id
@@ -217,95 +221,119 @@
                   => (contains {:id       id
                                 :name     "Uusi nimi"
                                 :draft    {:giver            "viranhaltija"
-                                           :verdict-dates ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
-                                                           "aloitettava" "voimassa"]
+                                           :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
+                                                              "aloitettava" "voimassa"]
                                            :removed-sections {:foremen true
                                                               :plans   true}}
-                                :modified last-edit}))
-                (fact "Publish template"
-                  (let [{published :published} (publish-verdict-template sipoo id)]
-                    (- published last-edit) => pos?
-                    (fact "Delete template"
-                      (command sipoo :toggle-delete-verdict-template
-                               :template-id id
-                               :delete true) => ok?)
-                    (fact "Template list again. Publishing and deletion do not affect modified timestamp."
-                      (query sipoo :verdict-templates)
-                      => (contains {:verdict-templates [{:id        id
-                                                         :name      "Uusi nimi"
-                                                         :modified  last-edit
-                                                         :deleted   true
-                                                         :category  "r"
-                                                         :published published}]}))
-                    (fact "Name change not allowed for deleted template"
-                      (command sipoo :set-verdict-template-name
-                               :template-id id
-                               :name "Foo")
-                      => (err :error.verdict-template-deleted))
-                    (fact "Draft data update not allowed for deleted template"
-                      (command sipoo :save-verdict-template-draft-value
-                               :template-id id
-                               :path [:hii]
-                               :value "Foo")
-                      => (err :error.verdict-template-deleted))
-                    (fact "Publish not allowed for deleted template"
-                      (publish-verdict-template sipoo id)
-                      => (err :error.verdict-template-deleted))
-                    (fact "Fetch draft not allowed for deleted template"
-                      (query sipoo :verdict-template
-                             :template-id id)
-                      => (err :error.verdict-template-deleted))
-                    (fact "Copying is allowed also for deleted templates"
-                      (let [{:keys [copy-id copy-modified copy-published
-                                    copy-deleted copy-draft copy-name
-                                    copy-category]}
-                            (prefix-keys (command sipoo :copy-verdict-template
-                                                  :template-id id)
-                                         :copy-)]
-                        copy-id =not=> id
-                        (- copy-modified published) => pos?
-                        copy-published => nil
-                        copy-category => "r"
-                        copy-name => "Uusi nimi (kopio)"
-                        copy-draft => {:giver            "viranhaltija"
-                                       :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
-                                                          "aloitettava" "voimassa"]
-                                       :removed-sections {:foremen true
-                                                          :plans   true}}
-                        (fact "Editing copy draft does not affect original"
-                          (command sipoo :save-verdict-template-draft-value
-                                   :template-id copy-id
-                                   :path [:paatosteksti]
-                                   :value  "This is the verdict.") => ok?
-                          (fact "Copy has new data"
-                            (query sipoo :verdict-template
-                                   :template-id copy-id)
-                            => (contains {:draft {:giver            "viranhaltija"
-                                                  :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
-                                                                     "aloitettava" "voimassa"]
-                                                  :removed-sections {:foremen true
-                                                                     :plans   true}
-                                                  :paatosteksti     "This is the verdict."}
-                                          :name  "Uusi nimi (kopio)"}))
-                          (fact "Restore the deleted template"
-                            (command sipoo :toggle-delete-verdict-template
-                                     :template-id id
-                                     :delete false) => ok?)
-                          (fact "The original (restored) template does not have new data"
-                            (query sipoo :verdict-template
-                                   :template-id id)
-                            => (contains {:draft {:giver            "viranhaltija"
-                                                  :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
-                                                                     "aloitettava" "voimassa"]
-                                                  :removed-sections {:foremen true
-                                                                     :plans   true}}
-                                          :name  "Uusi nimi"}))
-                          (fact "Template list has both templates"
-                            (->> (query sipoo :verdict-templates)
-                                 :verdict-templates
-                                 (map #(select-keys % [:id :name])))
-                            =>  [{:id id :name "Uusi nimi"}
-                                 {:id copy-id :name "Uusi nimi (kopio)"}]))))))))))))))
+                                :modified last-edit
+                                :filled   true})))
+              (facts "Publish template"
+                (publish-verdict-template sipoo id) => ok?
+                (facts "Required fields"
+                  (fact "The template cannot be published if any settings required field is empty"
+                    (command sipoo :save-verdict-template-settings-value
+                             :category "r" :path [:boardname] :value "")
+                    => (contains {:filled false})
+                    (publish-verdict-template sipoo id) => (err :pate.required-fields)
+                    (command sipoo :save-verdict-template-settings-value
+                             :category "r" :path [:boardname] :value "Board of peers")
+                    => (contains {:filled true})
+                    (publish-verdict-template sipoo id) => ok?)
+                  (fact "The template cannot be published if any required field is empty"
+                    (command sipoo :save-verdict-template-draft-value
+                             :template-id id :path [:giver] :value "")
+                    => (contains {:filled false})
+                    (publish-verdict-template sipoo id) => (err :pate.required-fields)
+                    ))
+                (let [{filled    :filled
+                       last-edit :modified}  (command sipoo :save-verdict-template-draft-value
+                                                      :template-id id
+                                                      :path [:giver]
+                                                      :value :viranhaltija)
+                      {published :published} (publish-verdict-template sipoo id)]
+                  filled => true
+                  (- published last-edit) => pos?
+                  (fact "Delete template"
+                    (command sipoo :toggle-delete-verdict-template
+                             :template-id id
+                             :delete true) => ok?)
+                  (fact "Template list again. Publishing and deletion do not affect modified timestamp."
+                    (-> (query sipoo :verdict-templates) :verdict-templates first)
+                    => (contains {:id        id
+                                  :name      "Uusi nimi"
+                                  :modified  last-edit
+                                  :deleted   true
+                                  :category  "r"
+                                  :published published}))
+                  (fact "Name change not allowed for deleted template"
+                    (command sipoo :set-verdict-template-name
+                             :template-id id
+                             :name "Foo")
+                    => (err :error.verdict-template-deleted))
+                  (fact "Draft data update not allowed for deleted template"
+                    (command sipoo :save-verdict-template-draft-value
+                             :template-id id
+                             :path [:hii]
+                             :value "Foo")
+                    => (err :error.verdict-template-deleted))
+                  (fact "Publish not allowed for deleted template"
+                    (publish-verdict-template sipoo id)
+                    => (err :error.verdict-template-deleted))
+                  (fact "Fetch draft not allowed for deleted template"
+                    (query sipoo :verdict-template
+                           :template-id id)
+                    => (err :error.verdict-template-deleted))
+                  (fact "Copying is allowed also for deleted templates"
+                    (let [{:keys [copy-id copy-modified copy-published
+                                  copy-deleted copy-draft copy-name
+                                  copy-category]}
+                          (prefix-keys (command sipoo :copy-verdict-template
+                                                :template-id id)
+                                       :copy-)]
+                      copy-id =not=> id
+                      (- copy-modified published) => pos?
+                      copy-published => nil
+                      copy-category => "r"
+                      copy-name => "Uusi nimi (kopio)"
+                      copy-draft => {:giver            "viranhaltija"
+                                     :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
+                                                        "aloitettava" "voimassa"]
+                                     :removed-sections {:foremen true
+                                                        :plans   true}}
+                      (fact "Editing copy draft does not affect original"
+                        (command sipoo :save-verdict-template-draft-value
+                                 :template-id copy-id
+                                 :path [:paatosteksti]
+                                 :value  "This is the verdict.") => ok?
+                        (fact "Copy has new data"
+                          (query sipoo :verdict-template
+                                 :template-id copy-id)
+                          => (contains {:draft {:giver            "viranhaltija"
+                                                :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
+                                                                   "aloitettava" "voimassa"]
+                                                :removed-sections {:foremen true
+                                                                   :plans   true}
+                                                :paatosteksti     "This is the verdict."}
+                                        :name  "Uusi nimi (kopio)"}))
+                        (fact "Restore the deleted template"
+                          (command sipoo :toggle-delete-verdict-template
+                                   :template-id id
+                                   :delete false) => ok?)
+                        (fact "The original (restored) template does not have new data"
+                          (query sipoo :verdict-template
+                                 :template-id id)
+                          => (contains {:draft {:giver            "viranhaltija"
+                                                :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
+                                                                   "aloitettava" "voimassa"]
+                                                :removed-sections {:foremen true
+                                                                   :plans   true}}
+                                        :name  "Uusi nimi"}))
+                        (fact "Template list has both templates"
+                          (->> (query sipoo :verdict-templates)
+                               :verdict-templates
+                               (map #(select-keys % [:id :name])))
+                          =>  [{:id id :name "Uusi nimi"}
+                               {:id copy-id :name "Uusi nimi (kopio)"}])))))))))))))
 
 (fact "Delete nonexisting template"
   (command sipoo :toggle-delete-verdict-template
@@ -533,6 +561,12 @@
     (:templates (query sipoo :default-operation-verdict-templates))
     => {})
   (let [{template-id :id} (init-verdict-template sipoo :r)]
+    (fact "Fill required fields"
+      (command sipoo :save-verdict-template-draft-value
+               :template-id template-id
+               :path [:giver]
+               :value :viranhaltija)
+      => (contains {:filled true}))
     (fact "Verdict template not published"
       (command sipoo :set-default-operation-verdict-template
                :operation "pientalo" :template-id template-id)

@@ -638,12 +638,13 @@ div.pate-required-fields-note {
   padding-top: 0;
   padding-bottom: 0;
   padding-left: $marginS;
-  background-color: $gray246;
+  //background-color: $gray246;
   display: inline-block;
+  margin-right: $marginS;
   &:after {
     content: " *";
     color: $label-required-star-color;
-    background-color: $gray246;
+    //background-color: $gray246;
     padding-right: $marginS;
   }
 }

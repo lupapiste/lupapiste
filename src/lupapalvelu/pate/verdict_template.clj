@@ -61,6 +61,8 @@
                       [:id :name :modified :deleted :category])
          :published (:published published)))
 
+(declare settings-filled? template-filled?)
+
 (defn verdict-template-check
   "Returns prechecker for template-id parameters.
    Condition parameters:
@@ -71,24 +73,26 @@
      :named       Template name cannot be empty
      :application Template must belong to the same category as the
                   application
+     :filled      All the required fields (both in the template and
+                  settings) must have been filled.
 
    Template's existence is always checked unless :blank matches."
   [& conditions]
-  (let [{:keys [editable published blank named application]} (zipmap conditions
-                                                                     (repeat true))]
+  (let [{:keys [editable published blank
+                named application filled]} (zipmap conditions
+                                                   (repeat true))]
     (fn [{{template-id :template-id} :data :as command}]
       (when template-id
         (if (ss/blank? template-id)
           (when-not blank
             (fail :error.missing-parameters))
-          (let [template (some-> (command->organization command)
-                                 (verdict-template template-id)
-                                 verdict-template-summary)]
+          (let [organization (command->organization command)
+                template     (verdict-template organization template-id)]
             (when-not template
               (fail! :error.verdict-template-not-found))
             (when (and editable (:deleted template))
               (fail! :error.verdict-template-deleted))
-            (when (and published (not (:published template)))
+            (when (and published (not (:published (verdict-template-summary template))))
               (fail! :error.verdict-template-not-published))
             (when (and named (-> template :name ss/blank?))
               (fail! :error.verdict-template-name-missing))
@@ -96,7 +100,11 @@
                        (util/not=as-kw (:category template)
                                        (-> command :application :permitType
                                            shared/permit-type->category)))
-              (fail! :error.invalid-category))))))))
+              (fail! :error.invalid-category))
+            (when (and filled (or (not (template-filled? {:template template}))
+                                  (not (settings-filled? {:org-id (:id organization)}
+                                                         (:category template)))))
+              (fail! :pate.required-fields))))))))
 
 (defn- template-update [organization template-id update  & [timestamp]]
   (mongo/update :organizations
@@ -264,14 +272,12 @@
                                                   category)))))
 
 (defn template-filled?
-  "In addition to template itself, the settings must have been filled as well."
+  "Template is filled when every required field has been filled."
   [{:keys [org-id template template-id]}]
-  (let [{category :category
-         data     :draft} (or template
-                              (verdict-template (organization-templates org-id)
-                                                template-id))]
-    (and (schemas/required-filled? shared/default-verdict-template data)
-         (settings-filled? {:org-id org-id} category))))
+  (let [{data :draft} (or template
+                          (verdict-template (organization-templates org-id)
+                                            template-id))]
+    (schemas/required-filled? shared/default-verdict-template data)))
 
 ;; Generic is a placeholder term that means either review or plan
 ;; depending on the context. Namely, the subcollection argument in
