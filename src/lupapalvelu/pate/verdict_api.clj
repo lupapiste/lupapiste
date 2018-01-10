@@ -71,7 +71,8 @@
                       (template/verdict-template-check :application :published)]
    :states           states/give-verdict-states}
   [command]
-  (ok (verdict/new-verdict-draft template-id command)))
+  (ok (assoc (verdict/new-verdict-draft template-id command)
+             :filled false)))
 
 (defquery pate-verdicts
   {:description      "List of verdicts. Item properties:
@@ -100,7 +101,8 @@
                       (verdict-exists)]
    :states           states/give-verdict-states}
   [command]
-  (ok (verdict/open-verdict command)))
+  (ok (assoc (verdict/open-verdict command)
+             :filled (verdict/verdict-filled? command))))
 
 (defcommand delete-pate-verdict
   {:description      "Deletes verdict. Published verdicts cannot be
@@ -128,7 +130,8 @@
                       (verdict-exists :editable?)]
    :states           states/give-verdict-states}
   [command]
-  (ok (verdict/edit-verdict command)))
+  (ok (assoc (verdict/edit-verdict command)
+             :filled (verdict/verdict-filled? command true))))
 
 (defcommand publish-pate-verdict
   {:description      "Publishes verdict.

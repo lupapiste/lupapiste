@@ -34,11 +34,12 @@
   (and (can-edit?)
        (not published)))
 
-(defn reset-verdict [{:keys [verdict references]}]
+(defn reset-verdict [{:keys [verdict references filled]}]
   (reset! state/current-verdict
           (when verdict
             {:state (:data verdict)
-             :info (dissoc verdict :data)
+             :info (assoc (dissoc verdict :data)
+                          :filled? filled)
              :_meta {:updated updater
                      :enabled? (can-edit-verdict? verdict)
                      :attachments.filedata (fn [_ filedata & kvs]
@@ -102,7 +103,8 @@
         [:div.row
          [:div.col-2.col--right
           [:button.primary.outline
-           {:on-click (fn []
+           {:disabled (false? (path/react :filled? info))
+            :on-click (fn []
                         (hub/send "show-dialog"
                                   {:ltitle "areyousure"
                                    :size "medium"
@@ -119,7 +121,9 @@
            (common/loc :pate.verdict-published
                        (js/util.finnishDate published))]]]
         [:div.row.row--tight
-         [:div.col-2.col--right
+         [:div.col-1
+          (pate-components/required-fields-note options)]
+         [:div.col-1.col--right
           (pate-components/last-saved options)]])]
      (sections/sections options :verdict)]))
 

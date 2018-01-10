@@ -648,21 +648,21 @@
   {:r
    {:dictionary
     (merge
-     {:verdict-date            {:docgen "pate-date"}
+     {:verdict-date            (req {:docgen "pate-date"})
       :automatic-verdict-dates {:docgen {:name "pate-verdict-check"}}}
      (->> [:julkipano :anto :muutoksenhaku :lainvoimainen :aloitettava :voimassa]
           (map (fn [kw]
-                 [kw {:docgen {:name      "pate-date"
-                               :disabled? :automatic-verdict-dates}}]))
+                 [kw (req {:docgen {:name      "pate-date"
+                                    :disabled? :automatic-verdict-dates}})]))
           (into {}))
      {:contact-ref      {:reference {:path :contact}}
       :boardname        {:reference {:path :*ref.boardname}}
-      :contact          {:docgen "pate-verdict-contact"}
-      :verdict-section  {:docgen "pate-verdict-section"}
-      :verdict-code     {:reference-list {:path       :verdict-code
-                                          :type       :select
-                                          :loc-prefix :pate-r.verdict-code}}
-      :verdict-text     {:phrase-text {:category :paatosteksti}}
+      :contact          (req {:docgen "pate-verdict-contact"})
+      :verdict-section  (req {:docgen "pate-verdict-section"})
+      :verdict-code     (req {:reference-list {:path       :verdict-code
+                                           :type       :select
+                                           :loc-prefix :pate-r.verdict-code}})
+      :verdict-text     (req {:phrase-text {:category :paatosteksti}})
       :bulletinOpDescription {:phrase-text {:category :toimenpide-julkipanoon
                                               :i18nkey :phrase.category.toimenpide-julkipanoon}}
       :verdict-text-ref {:reference {:path :verdict-text}}
@@ -737,17 +737,15 @@
                                          verdict-dates)}]}}
      {:id   "pate-verdict"
       :grid {:columns 6
-             :rows    [[{:loc-prefix :pate-verdict.giver
-                         :hide?      [:OR :_meta.editing? :*ref.boardname]
-                         :dict       :contact-ref}
+             :rows    [[{:col   1
+                         :loc-prefix :pate-verdict.giver
+                         ;;:show? :_meta.editing?
+                         :hide? :*ref.boardname
+                         :dict  :contact}
                         {:loc-prefix :pate-verdict.giver
                          :hide?      :_meta.editing?
                          :show?      :*ref.boardname
                          :dict       :boardname}
-                        {:col   1
-                         :show? :_meta.editing?
-                         :hide? :*ref.boardname
-                         :dict  :contact}
                         {:col   1
                          :show? :*ref.boardname
                          :loc-prefix :pate-verdict.section

@@ -177,10 +177,20 @@
     (util/dissoc-in verdict [:data :bulletinOpDescription])
     :default verdict))
 
-(defn command->verdict [{:keys [data application] :as command}]
-  (update (->> (util/find-by-id (:verdict-id data) (:pate-verdicts application))
-               (mask-verdict-data command))
-          :category keyword))
+(defn command->verdict
+  "Gets verdict based on command data. If refresh? is true then the
+  application is read from mongo and not taken from command."
+  ([{:keys [data application] :as command} refresh?]
+   (update (->> (if refresh?
+                  (domain/get-application-no-access-checking (:id application)
+                                                             {:pate-verdicts 1})
+                  application)
+                :pate-verdicts
+                (util/find-by-id (:verdict-id data))
+                (mask-verdict-data command))
+           :category keyword))
+  ([command]
+   (command->verdict command false)))
 
 (defn verdict-template-for-verdict [verdict organization]
   (let [{:keys [id version-id]} (:template verdict)]
@@ -285,9 +295,24 @@
             {}
             dictionary)))
 
+(defn- verdict-schema [category template]
+  (update (category shared/verdict-schemas)
+          :dictionary
+          (partial strip-exclusions (:exclusions template))))
+
+(defn verdict-filled?
+  "Have all the required fields been filled. Refresh? argument can force
+  the read from mongo (see command->verdict)."
+  ([command refresh?]
+   (let [{:keys [data category template]} (command->verdict command refresh?)
+         schema (verdict-schema category template)]
+     (schemas/required-filled? schema data)))
+  ([command]
+   (verdict-filled? command false)))
+
 (defn edit-verdict
   "Updates the verdict data. Validation takes the template exclusions
-  into account. Some updates (e.g., automat dates) can propagate other
+  into account. Some updates (e.g., automatic dates) can propagate other
   changes as well. Returns errors or modified and (possible
   additional) changes."
   [{{:keys [verdict-id path value]} :data
@@ -298,9 +323,7 @@
   (let [{:keys [data category
                 template
                 references]} (command->verdict command)
-        schema               (update (category shared/verdict-schemas)
-                                     :dictionary
-                                     (partial strip-exclusions (:exclusions template)))]
+        schema               (verdict-schema category template)]
     (if-let [error (schemas/validate-path-value
                     schema
                     path value

@@ -101,10 +101,11 @@
    :pre-checks       [pate-enabled
                       valid-category]}
   [{:keys [created user lang]}]
-  (ok (template/new-verdict-template (usr/authority-admins-organization-id user)
-                                     created
-                                     lang
-                                     category)))
+  (ok (assoc (template/new-verdict-template (usr/authority-admins-organization-id user)
+                                            created
+                                            lang
+                                            category)
+             :filled false)))
 
 (defcommand set-verdict-template-name
   {:description "Name cannot be empty."
@@ -221,10 +222,13 @@
    :pre-checks       [pate-enabled
                       (template/verdict-template-check)]}
   [{:keys [created lang] :as command}]
-  (ok (template/copy-verdict-template (template/command->organization command)
-                                      template-id
-                                      created
-                                      lang)))
+  (let [organization (template/command->organization command)]
+    (ok (assoc (template/copy-verdict-template organization
+                                               template-id
+                                               created
+                                               lang)
+               :filled (template/template-filled? {:org-id      (:id organization)
+                                                   :template-id template-id})))))
 
 ;; ----------------------------------
 ;; Verdict template settings API

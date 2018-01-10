@@ -101,11 +101,14 @@
 (defn- text-options [text* {:keys [callback required?
                                    test-id immediate?
                                    class] :as options}]
+  ;; Textarea/input can lose focus without blur when the typing starts if the
+  ;; contents are nil.
+  (when (nil? @text*)
+    (reset! text* ""))
   (merge {:value     (rum/react text*)
           :class     (concat (or class [])
                              (common/css-flags :required (and required?
-                                                              (-> text* rum/react
-                                                                  s/trim s/blank?))))
+                                                              (-> text* rum/react s/blank?))))
           :on-change (fn [event]
                        (let [value (.. event -target -value)]
                          (common/reset-if-needed! text* value)
@@ -138,10 +141,6 @@
   rum/reactive
   [local-state _ & [options]]
   (let [text* (::text local-state)]
-    ;; Textarea loses focus without blur when the typing starts if the
-    ;; contents are nil.
-    (when (nil? @text*)
-      (reset! text* ""))
     [:textarea.grid-style-input
      (text-options text* options)]))
 
