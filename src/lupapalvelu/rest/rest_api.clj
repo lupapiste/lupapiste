@@ -103,6 +103,7 @@
                       :operationId        OperationId
                       :nationalBuildingId NationalBuildingId]}
   (let [{org-id :organization :as app} (domain/get-application-as application-id user)]
+    (println user application-id nationalBuildingId (usr/user-is-authority-in-organization? user org-id))
     (if (and (usr/user-is-authority-in-organization? user org-id)
              (applications-data/update-national-building-id! app operationId nationalBuildingId))
       (resp/status 200 {})

@@ -363,8 +363,8 @@
   "Map of building infos: operation id is key and value map contains
   operation (loc-key), building-id (either national or manual id),
   tag (tunnus) and description."
-  [{:keys [documents] :as application}]
-  (->> documents
+  [application]
+  (->> application
        app-documents-having-buildings
        (reduce (fn [acc {:keys [schema-info data]}]
                  (let [{:keys [id name
@@ -384,7 +384,8 @@
                {})))
 
 (defn ->buildings-array [application]
-  (map (fn [{toimenpide :data op :op}]
+  (map (fn [{toimenpide :data {op :op} :schema-info}]
+         (println "OP " op)
          (let [{:keys [rakennusnro valtakunnallinenNumero mitat kaytto tunnus]} toimenpide
                description-parts (remove ss/blank? [tunnus (:description op)])]
            {:localShortId rakennusnro
