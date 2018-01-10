@@ -1,12 +1,12 @@
 (ns lupapalvelu.notice-api
   (:require [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as app]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.organization :as org]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [monger.operators :refer :all]
-            [sade.core :refer [ok fail fail!]]
-            [sade.util :as util]))
+            [sade.core :refer [ok fail fail!]]))
 
 (defn validate-urgency [{{urgency :urgency} :data}]
   (when-not (#{"normal" "urgent" "pending"} urgency)
@@ -62,5 +62,7 @@
    :user-authz-roles #{:statementGiver}
    :org-authz-roles  roles/reader-org-authz-roles
    :states           states/all-but-draft
-   :pre-checks       [org/statement-giver-in-organization]}
+   :pre-checks       [(action/some-pre-check
+                        auth/application-authority-pre-check
+                        org/statement-giver-in-organization)]}
   [_])

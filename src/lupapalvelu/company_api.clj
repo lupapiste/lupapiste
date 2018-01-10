@@ -30,9 +30,7 @@
          authorised to the application."
    :user-roles  #{:applicant :authority}
    :pre-checks  [(some-pre-check domain/validate-owner-or-write-access
-                                 (fn [{application :application user :user}]
-                                   (when-not (auth/application-authority? application user)
-                                     (fail :error.unauthorized))))]
+                                 auth/application-authority-pre-check)]
    :parameters  [id]}
   [{{auth :auth} :application}]
   (let [authorised-companies (map #(select-keys % [:id :name])
