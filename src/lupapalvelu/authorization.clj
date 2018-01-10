@@ -5,6 +5,7 @@
             [lupapalvelu.application-schema :as aps]
             [lupapalvelu.document.tools :as doc-tools]
             [schema.core :refer [defschema] :as sc]
+            [sade.core :refer :all]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]))
@@ -153,6 +154,12 @@
   "Returns true if the user is an authority in the organization that processes the application"
   [application user]
   (boolean (has-organization-authz-roles? #{:authority :approver} (:organization application) user)))
+
+(defn application-authority-pre-check
+  "Fails if user is NOT application authority"
+  [{application :application user :user}]
+  (when-not (application-authority? application user)
+    (fail :error.unauthorized)))
 
 (defn application-role [application user]
   (if (application-authority? application user) :authority :applicant))
