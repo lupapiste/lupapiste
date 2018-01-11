@@ -23,7 +23,8 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [schema.core :as sc]
-            [swiss.arrows :refer :all]))
+            [swiss.arrows :refer :all]
+            [sade.validators :as validators]))
 
 (defn neighbor-states
   "Application neighbor-states data in a format suitable for verdicts: list
@@ -353,7 +354,8 @@
 
 (defn- app-documents-having-buildings
   [{:keys [documents] :as application}]
-  (->> documents
+  (->> application
+       app/get-sorted-operation-documents
        tools/unwrapped
        (filter (util/fn-> :data (contains? :valtakunnallinenNumero)))
        (map (partial app/populate-operation-info
@@ -384,22 +386,22 @@
                {})))
 
 (defn ->buildings-array [application]
-  (map (fn [{toimenpide :data {op :op} :schema-info}]
-         (println "OP " op)
-         (let [{:keys [rakennusnro valtakunnallinenNumero mitat kaytto tunnus]} toimenpide
-               description-parts (remove ss/blank? [tunnus (:description op)])]
-           {:localShortId rakennusnro
-            :localId nil
-            :nationalId valtakunnallinenNumero
-            :buildingId (or valtakunnallinenNumero rakennusnro)
-            :location-wgs84 nil
-            :location nil
-            :area (:kokonaisala mitat)
-            :index nil
-            :description (ss/join ": " description-parts)
-            :operationId (:id op)
-            :usage (or (:kayttotarkoitus kaytto) "")}))
-       (app-documents-having-buildings application)))
+  (->> application
+       app-documents-having-buildings
+       (util/indexed 1)
+       (map (fn [[n {toimenpide :data {op :op} :schema-info}]]
+              (let [{:keys [rakennusnro valtakunnallinenNumero mitat kaytto tunnus]} toimenpide
+                    description-parts (remove ss/blank? [tunnus (:description op)])]
+                 {:localShortId (or rakennusnro (when (validators/rakennusnumero? tunnus) tunnus))
+                  :nationalId valtakunnallinenNumero
+                  :buildingId (or valtakunnallinenNumero rakennusnro)
+                  :location-wgs84 nil
+                  :location nil
+                  :area (:kokonaisala mitat)
+                  :index n
+                  :description (ss/join ": " description-parts)
+                  :operationId (:id op)
+                  :usage (or (:kayttotarkoitus kaytto) "")})))))
 
 (defn- merge-buildings [app-buildings verdict-buildings defaults]
   (reduce (fn [acc [op-id v]]

@@ -69,11 +69,14 @@
 
 (defn indexed
   "Returns a lazy sequence of [index, item] pairs, where items come
-  from 's' and indexes count up from zero.
+  from 's' and indexes count up from offset (default: 0).
 
-  (indexed '(a b c d))  =>  ([0 a] [1 b] [2 c] [3 d])"
-  [s]
-  (map vector (iterate inc 0) s))
+  (indexed '(a b c d))    =>  ([0 a] [1 b] [2 c] [3 d])
+  (indexed 1 '(a b c d))  =>  ([1 a] [2 b] [3 c] [4 d])"
+  ([s]
+   (indexed 0 s))
+  ([offset s]
+   (map vector (iterate inc offset) s)))
 
 ;; ---------------------------------------------
 ;; The following are not aliased in sade.util.
