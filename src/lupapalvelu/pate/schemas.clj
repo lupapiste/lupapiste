@@ -240,17 +240,22 @@
 
 (defmethod validate-resolution :reference-list
   [{:keys [path schema data value references] :as options}]
-  (let [canon-value (->> [value] flatten (remove nil?))]
+  (let [canon-value (->> [value] flatten (remove nil?))
+        data-type   (:type data)]
     (or
      (path-error path)
-     (when (and (= (:type data) :select)
+     (when (and (= data-type :select)
                 (> (count canon-value) 1))
        :error.invalid-value)
-     (when (and (= (:type data) :multi-select)
+     (when (and (= data-type :multi-select)
                 (not (or (nil? value)
                          (sequential? value))))
        :error.invalid-value)
-     (when (seq canon-value) ;; Empty selection is allowed.
+     ;; Empty selection for all types and "" for select type is
+     ;; allowed.
+     (when (and (seq canon-value)
+                (not (and (= data-type :select)
+                          (= (first canon-value) ""))))
        (check-items canon-value
                     (map #(get % (:item-key data) %)
                          (get-in references (get-path data))))))))
