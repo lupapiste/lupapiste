@@ -497,10 +497,21 @@
           (coordinate/convert source-projection common/to-projection 3 coords))))
     (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus))))
 
+(defn- resolve-area-coordinates [coordinates-array-xml building-location]
+  (if (some? (select1 building-location [:piste :Point]))
+    (let [building-coordinates-str (->> (cr/all-of building-location) :piste :Point :pos)
+          building-coordinates (ss/split building-coordinates-str #" ")
+          source-projection (common/->source-projection building-location [:Point])]
+      (when-not (contains? coordinate/known-bad-coordinates building-coordinates)
+        (coordinate/convert source-projection common/to-projection 3 building-coordinates)))
+    (let [area-coordinates-str (->> (cr/all-of coordinates-array-xml) :Polygon :outerBoundaryIs :LinearRing :coordinates)
+          area-coordinates (ss/split area-coordinates-str #" ")]
+      area-coordinates)))
 
 (defn- extract-osoitenimi [osoitenimi-elem lang]
   (let [osoitenimi-elem (or (select1 osoitenimi-elem [(enlive/attr= :xml:lang lang)])
-                            (select1 osoitenimi-elem [(enlive/attr= :xml:lang "fi")]))]
+                            (select1 osoitenimi-elem [(enlive/attr= :xml:lang "fi")])
+                            (select1 osoitenimi-elem [(enlive/attr= :xml:lang "und")]))]
     (cr/all-of osoitenimi-elem)))
 
 (defn- build-huoneisto [huoneisto jakokirjain jakokirjain2]
@@ -580,11 +591,15 @@
 
             kiinteistotunnus (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus)
             municipality (or (p/municipality-id-by-property-id kiinteistotunnus) kuntakoodi)
-            coord-array-Rakennuspaikka (resolve-coordinates
-                                         (select1 asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste])
-                                         (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos)
-                                         kuntalupatunnus)
-
+            location-point (select1 asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste])
+            coord-array-Rakennuspaikka (if (some? location-point)
+                                         (resolve-coordinates
+                                           (select1 asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste])
+                                           (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos)
+                                           kuntalupatunnus)
+                                         (resolve-area-coordinates
+                                           (select1 asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :alue])
+                                           (select1 asia [:Rakennus :sijaintitieto :Sijainti])))
             osapuolet (map cr/all-of (select asia [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli]))
             suunnittelijat (map cr/all-of (select asia [:osapuolettieto :Osapuolet :suunnittelijatieto :Suunnittelija]))
             [hakijat muut-osapuolet] ((juxt filter remove) #(= "hakija" (:VRKrooliKoodi %)) osapuolet)]

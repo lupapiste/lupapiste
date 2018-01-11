@@ -515,6 +515,30 @@
         (fact "address" address => "Kylykuja 3-5 D 35b-c")
         (fact "propertyId" propertyId => "18600303560006")))))
 
+(facts* "Testing area like location information for application creation"
+  (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-with-area-like-location.xml"))
+        info (get-app-info-from-message xml "895-2015-001") => truthy
+        rakennuspaikka (:rakennuspaikka info)]
+
+    (let [{:keys [x y address propertyId] :as rakennuspaikka} rakennuspaikka]
+      (fact "contains all the needed keys" (every? (-> rakennuspaikka keys set) [:x :y :address :propertyId]))
+      (fact "x" x => #(and (instance? Double %) (= 393033.614 %)))
+      (fact "y" y => #(and (instance? Double %) (= 6707228.994 %)))
+      (fact "address" address => "Pitkäkarta 48")
+      (fact "propertyId" propertyId => "89552200010051"))))
+
+(facts* "Testing area like location with building location information for application creation"
+  (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-with-building-location.xml"))
+        info (get-app-info-from-message xml "895-2015-002") => truthy
+        rakennuspaikka (:rakennuspaikka info)]
+
+    (let [{:keys [x y address propertyId] :as rakennuspaikka} rakennuspaikka]
+      (fact "contains all the needed keys" (every? (-> rakennuspaikka keys set) [:x :y :address :propertyId]))
+      (fact "x" x => #(and (instance? Double %) (= 393102.134 %)))
+      (fact "y" y => #(and (instance? Double %) (= 6707146.895 %)))
+      (fact "address" address => "Pitkäkarta 48")
+      (fact "propertyId" propertyId => "89552200010051"))))
+
 
 (facts* "Tests for TJ/suunnittelijan verdicts parsing"
   (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-2.1.8-foremen.xml"))

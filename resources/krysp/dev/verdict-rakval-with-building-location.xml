@@ -33,7 +33,7 @@
           </rakval:kasittelynTilatieto>
           <rakval:luvanTunnisteTiedot>
               <yht:LupaTunnus>
-                  <yht:kuntalupatunnus>895-2015-257</yht:kuntalupatunnus>
+                  <yht:kuntalupatunnus>895-2015-002</yht:kuntalupatunnus>
                   <yht:saapumisPvm>2015-05-26</yht:saapumisPvm>
               </yht:LupaTunnus>
           </rakval:luvanTunnisteTiedot>
@@ -316,9 +316,13 @@
                                       </yht:osoitenimi>
                                       <yht:osoitenumero>48</yht:osoitenumero>
                                       <yht:postinumero>23450</yht:postinumero>
-                                      <yht:postitoimipaikannimi>LOKALAHTI</yht:postitoimipaikannimi>
+                                      <yht:postitoimipaikannimi>LOKALAHTI2222</yht:postitoimipaikannimi>
                                   </yht:osoite>
-                                  <yht:tyhja />
+                                  <yht:piste>
+                                      <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                                          <gml:pos>2.5503007E7 6708252.0</gml:pos>
+                                      </gml:Point>
+                                  </yht:piste>
                               </rakval:Sijainti>
                           </rakval:sijaintitieto>
                           <rakval:rakennuksenTiedot>

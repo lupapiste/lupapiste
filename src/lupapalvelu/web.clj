@@ -632,7 +632,8 @@
           (and (= "rakval:RakennusvalvontaAsia" typeName)
                (= "rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:kuntalupatunnus" filter-type-name))
               (case search-literal
-                "895-2015-257" (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/verdict-rakval-from-kuntalupatunnus-query-257.xml")))
+                "895-2015-001" (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/verdict-rakval-with-area-like-location.xml")))
+                "895-2015-002" (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/verdict-rakval-with-building-location.xml")))
                 (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml"))))
           (not-empty overrides) (resp/content-type "application/xml; charset=utf-8" (override-xml (io/resource (xmls typeName)) overrides))
           :else (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (xmls typeName))))))
