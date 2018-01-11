@@ -27,7 +27,9 @@
    :states (states/all-states-but [:draft])
    :user-authz-roles #{:statementGiver}
    :input-validators [validate-urgency]
-   :pre-checks [org/statement-giver-in-organization]}
+   :pre-checks [(action/some-pre-check
+                  auth/application-authority-pre-check
+                  org/statement-giver-in-organization)]}
   [command]
   (update-notice-data command {:urgency urgency}))
 
@@ -37,7 +39,9 @@
    :states (states/all-states-but [:draft])
    :user-authz-roles #{:statementGiver}
    :user-roles #{:authority :applicant}
-   :pre-checks [org/statement-giver-in-organization]}
+   :pre-checks [(action/some-pre-check
+                  auth/application-authority-pre-check
+                  org/statement-giver-in-organization)]}
   [command]
   (update-notice-data command {:authorityNotice authorityNotice}))
 
@@ -47,7 +51,9 @@
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:tags])]
    :user-authz-roles #{:statementGiver}
    :user-roles #{:authority :applicant}
-   :pre-checks [org/statement-giver-in-organization]}
+   :pre-checks [(action/some-pre-check
+                  auth/application-authority-pre-check
+                  org/statement-giver-in-organization)]}
   [{organization :organization :as command}]
   (let [org-tag-ids (map :id (:tags @organization))]
     (if (every? (set org-tag-ids) tags)
