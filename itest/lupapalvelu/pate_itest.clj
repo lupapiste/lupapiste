@@ -11,7 +11,8 @@
             [sade.util :as util]
             [sade.xml :as xml]
             [clojure.java.io :as io]
-            [clojure.data.xml :as cxml]))
+            [clojure.data.xml :as cxml]
+            [lupapalvelu.document.tools :as tools]))
 
 (apply-remote-minimal)
 
@@ -1006,6 +1007,12 @@
                   (command sonja :update-op-description :id app-id
                            :op-id op-id-pientalo
                            :desc "Hen piaoliang!") => ok?)
+                (fact "national-id update pre-verdict"
+                      (api-update-national-building-id-call app-id {:form-params {:applicationId app-id :operationId (name op-id-pientalo) :nationalBuildingId "1234567881"}
+                                                                :as :json :basic-auth ["sipoo-r-backend" "sipoo"]}) => http200?
+                      (->> (query-application sonja app-id) :documents
+                           (util/find-by-id doc-id)
+                           :data :valtakunnallinenNumero :value) => "1234567881")
                 (fact "Set kiinteiston-autopaikat for pientalo"
                   (check-error (edit-verdict [:buildings op-id-pientalo :kiinteiston-autopaikat] "8")))
                 (fact "Buildings updated"
@@ -1024,7 +1031,7 @@
                                       :show-building          true
                                       :vss-luokka             ""
                                       :kiinteiston-autopaikat "8"
-                                      :building-id            ""
+                                      :building-id            "1234567881"
                                       :operation              "pientalo"
                                       :rakennetut-autopaikat  ""
                                       :tag                    "Hao"
