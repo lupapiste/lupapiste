@@ -63,6 +63,10 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     _.delay(window.Stickyfill.rebuild, 0);
   });
 
+  self.isArchiveProject = function () {
+    return "ARK" === _.get(self.docModel, ["application", "permitType"]);
+  };
+
   var docData = self.accordionService && self.accordionService.getDocumentData(self.docModel.docId);
 
   self.accordionText = ko.pureComputed(function() {

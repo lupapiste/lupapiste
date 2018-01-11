@@ -8,6 +8,7 @@
                              'id': docId + '-op-description-editor'}">
     <span data-bind="saveIndicator: indicator"></span>
   </div>
+  <!-- ko if: !isArchiveProject() -->
   <div class="inline-col">
     <button class="secondary"
             data-bind="attr: {'data-op-name': operation.name()},
@@ -18,4 +19,5 @@
       <span data-bind="ltext: starTitle"></span>
     </button>
   </div>
+  <!-- /ko -->
 </script>

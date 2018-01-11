@@ -868,7 +868,7 @@
           updates (filterv (fn [[path value]]
                              (try
                                (let [splitted-path (ss/split path #"\.")]
-                                 (doc-persistence/validate-against-whitelist! document [splitted-path] user-role)
+                                 (doc-persistence/validate-against-whitelist! document [splitted-path] user-role application)
                                  (doc-persistence/validate-readonly-updates! document [splitted-path]))
                                true
                                (catch Exception _

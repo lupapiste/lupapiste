@@ -87,6 +87,15 @@
       </button>
       <!-- ko if: showIdentifierEditors -->
       <div class="identifier-editors container-bubble" data-test-id="identifier-editors" data-bind="event: {keydown: closeEditors}">
+       <!-- ko if: isArchiveProject() -->
+       <div class="inline-col identifier-component"
+        data-bind="component: {name: 'building-identifier',
+                               params: {docModel: docModel,
+                                        authModel: auth,
+                                        operation: operation,
+                                        isPrimary: isPrimaryOperation,
+                                        options: docModelOptions}}"></div><br>
+        <!-- /ko -->
         <!-- ko if: identifierField -->
         <div class="inline-col identifier-component"
             data-bind="component: {name: 'document-identifier',
@@ -100,8 +109,9 @@
                                              operation: operation,
                                              isPrimary: isPrimaryOperation,
                                              auth: auth}}"></div>
+
         <!-- ko if: identifierField -->
-        <p data-bind="lhtml: 'document.operation-identifier.notice'"></p>
+        <p class="accordion-help" data-bind="lhtml: 'document.operation-identifier.notice'"></p>
         <!-- /ko -->
       </div>
       <!-- /ko -->
