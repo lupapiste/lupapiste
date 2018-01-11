@@ -63,9 +63,12 @@
                   (partial sort-by :text js/util.localeComparator)
                   identity)]
     [:select.dropdown
-     (docgen-attr options
-                  :value     (rum/react local-state)
-                  :on-change (state-change options))
+     (common/update-css (docgen-attr options
+                                     :value     (rum/react local-state)
+                                     :on-change (state-change options))
+                        :required (and
+                                   (s/blank? (rum/react local-state))
+                                   (path/required? options)))
      (->> schema :body first
           :body
           (map (fn [{n :name}]

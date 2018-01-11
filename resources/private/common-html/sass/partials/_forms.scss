@@ -1549,7 +1549,8 @@ select.dropdown::-ms-expand,.dataTables_length select::-ms-expand {
   display: none;
 }
 
-select.dropdown.mandatory {
+select.dropdown.mandatory,
+select.dropdown.required {
   border-color: $input-required-border-color;
 }
 

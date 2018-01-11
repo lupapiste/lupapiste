@@ -50,6 +50,11 @@
 (def date {:name "pate-date"
            :type :date})
 
+(def collateral-type {:name "collateral-type"
+                      :type :select
+                      :body [{:name "shekki"}
+                             {:name "panttaussitoumus"}]})
+
 (defschema PateCategory
   {:id       ssc/ObjectIdStr
    :category (sc/enum "r" "p" "ya" "kt" "ymp")})
@@ -111,7 +116,7 @@
   pdf-export-test/ignored-schemas."
   [pate-string verdict-section verdict-text verdict-contact
    verdict-check in-verdict verdict-giver automatic-vs-manual
-   complexity date])
+   complexity date collateral-type])
 
 (doc-schemas/defschemas 1
   (map (fn [m]

@@ -135,6 +135,8 @@
                               (remove nil?))
         exclusions       (-<>> [(filter removed? [:conditions :appeal :statements
                                                   :collateral :rights :purpose])
+                                (when (removed? :collateral)
+                                  [:collateral :collateral-date :collateral-type])
                                 (when (removed? :neighbors)
                                   [:neighbors :neighbor-states])
                                 (when (removed? :complexity)
