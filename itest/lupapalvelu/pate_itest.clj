@@ -803,6 +803,14 @@
                                :reviews-included true
                                :reviews          [(:id review)]
                                :statements       ""})
+            (fact "No section"
+              (:section data) => nil?)
+            (fact "New verdict is not filled"
+              draft => (contains {:filled false}))
+            (fact "Verdict cannot be published since required fields are missing"
+              (command sonja :publish-pate-verdict :id app-id
+                       :verdict-id verdict-id)
+              => (err :pate.required-fields))
             (fact "Building info is empty but contains the template fields"
               data => (contains {:buildings {op-id {:description            ""
                                                     :show-building          true
@@ -1022,6 +1030,12 @@
                                       :tag                    "Hao"
                                       :autopaikat-yhteensa    ""
                                       :paloluokka             ""}})
+                (fact "Sonja can publish the verdict"
+                  (command sonja :publish-pate-verdict :id app-id
+                           :verdict-id verdict-id) => ok?)
+                (fact "Verdict's section is one"
+                  (-> (open-verdict) :verdict :data :verdict-section)
+                  => "1")
                 (facts "Modify template"
                   (letfn [(edit-template [path value]
                             (fact {:midje/description (format "Template draft %s -> %s" path value)}
@@ -1096,7 +1110,7 @@
                         (fact "Contact cannot be set for board verdict"
                           (check-fn :contact "Authority Sonja Sibbo"))
                         (fact "... but section can be edited"
-                          (edit-verdict :verdict-section "10") => no-errors?)))
+                          (edit-verdict :verdict-section "88") => no-errors?)))
                     (facts "Muutoksenhaku calculation has changed"
                       (fact "Set the verdict date"
                         (edit-verdict :verdict-date "8.1.2018") => no-errors?)
@@ -1114,17 +1128,22 @@
                           (command sonja :delete-attachment :id app-id
                                    :attachmentId attachment-id)=> ok?)))
                     (fact "No attachments"
-                      (query-application sonja app-id)
-                      => (contains {:attachments []}))
+                      (:attachment (query-application sonja app-id))
+                      => empty?)
                     (fact "Add required verdict date"
                       (edit-verdict "verdict-date" verdict-date) => no-errors?)
                     (facts "Add attachment to verdict draft again"
                       (let [attachment-id (add-verdict-attachment app-id verdict-id "Otepaatos")]
-                        ;; TODO check that verdict can't be published if verdict-date is blank!
                         (fact "Publish verdict"
                           (command sonja :publish-pate-verdict
                                    :id app-id
                                    :verdict-id verdict-id) => ok?)
+                        (facts "Published verdict"
+                          (let [data  (-> (open-verdict) :verdict :data)]
+                            (fact "Section is 88"
+                              data => (contains {:verdict-section "88"}))
+                            (fact "No contact information"
+                              (:contact data) => empty?)))
                         (fact "Attachment can no longer be deleted"
                           (command sonja :delete-attachment :id app-id
                                    :attachmentId attachment-id)

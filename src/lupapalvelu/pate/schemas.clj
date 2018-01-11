@@ -334,4 +334,5 @@
                  (case (-> v (dissoc :required?) keys first)
                    :date-delta   (ss/not-blank? (str (get-in data [k :delta])))
                    :multi-select (not-empty (k data))
+                   :reference    true ;; Required only for highlighting purposes
                    (ss/not-blank? (k data)))))))

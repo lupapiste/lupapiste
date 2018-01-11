@@ -298,8 +298,15 @@
 
 (defn not-visible? [options] (not (visible? options)))
 
-(defn required? [options]
-  (boolean (some-> options :_parent :schema :required?)))
+(defn required?
+  "True if the parent schema has :required? flag. Why parent and not the
+  schema itself? The :required? key is on the same level as the schema
+  reference (in a dictionary value). If meta property
+  highlight-required? is false (default true), then the result is
+  always false"
+  [options]
+  (boolean (and (some-> options :_parent :schema :required?)
+                (not (false? (meta-value options :highlight-required?))))))
 
 (defn error? [{:keys [state path]}]
   (boolean (react (extend :_errors path) state)))

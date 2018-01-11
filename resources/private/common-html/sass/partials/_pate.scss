@@ -7,7 +7,7 @@ $pate-grid-margin: 10px;
   min-height: 1px; // Enforce rendering of empty column.
   padding-left: $pate-grid-margin;
 
-  span.pate-label.required:after,
+  .pate-label.required:after,
   label.required:after {
     content: " *";
     color: $label-required-star-color;

@@ -38,14 +38,15 @@
   (reset! state/current-verdict
           (when verdict
             {:state (:data verdict)
-             :info (assoc (dissoc verdict :data)
-                          :filled? filled)
-             :_meta {:updated updater
-                     :enabled? (can-edit-verdict? verdict)
+             :info  (assoc (dissoc verdict :data)
+                           :filled? filled)
+             :_meta {:updated              updater
+                     :highlight-required?  (-> verdict :published not)
+                     :enabled?             (can-edit-verdict? verdict)
                      :attachments.filedata (fn [_ filedata & kvs]
                                              (apply assoc filedata
                                                     :target {:type :verdict
-                                                             :id (:id verdict)}
+                                                             :id   (:id verdict)}
                                                     kvs))
                      :attachments.include? (fn [_ {target :target :as att}]
                                              (= (:id target) (:id verdict)))}}))

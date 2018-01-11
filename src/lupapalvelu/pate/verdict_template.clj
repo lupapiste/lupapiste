@@ -208,7 +208,7 @@
                      template-id
                      {$set {:verdict-templates.templates.$.published
                             {:published timestamp
-                             :data      (->> (dissoc draft :giver)
+                             :data      (->> draft
                                              (prune-template-data settings :reviews)
                                              (prune-template-data settings :plans))
                              :settings  settings}}})))

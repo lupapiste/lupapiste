@@ -112,6 +112,7 @@
   "Contents of the verdict's template property. The actual contents
   depend on the category. Typical keys:
 
+  :giver      Verdict giver type (lautakunta vs. viranhaltija).
   :exclusions A map where each key matches a verdict dictionary
   key. Value is either true (dict is excluded) or another exclusions
   map (for repeating)."
@@ -150,7 +151,8 @@
                                                                   (zipmap building-details
                                                                           (repeat true))))
                                not-empty)]
-    {:exclusions exclusions}))
+    {:giver      (:giver data)
+     :exclusions exclusions}))
 
 (defn new-verdict-draft [template-id {:keys [application organization created]
                                       :as   command}]
@@ -441,10 +443,18 @@
          (mongo/get-next-sequence-value)
          (str))))
 
-(defn- insert-section [org-id created {{section :verdict-section giver :giver} :data :as verdict}]
-  (cond-> verdict
-    (ss/blank? section) (assoc-in [:data :verdict-section]
-                                  (next-section org-id created giver))))
+(defn- insert-section
+  "Section is generated only for non-board verdicts (lautakunta)."
+  [org-id created {:keys [data template] :as verdict}]
+  (let [{section :verdict-section} data
+        {giver :giver}             template]
+    (cond-> verdict
+      (and (ss/blank? section)
+           (util/not=as-kw giver
+                           :lautakunta)) (assoc-in [:data :verdict-section]
+                                                   (next-section org-id
+                                                                 created
+                                                                 giver)))))
 
 (defn publish-verdict
   "Publishing verdict does the following:
@@ -456,11 +466,11 @@
    6. TODO: Create tasks
    7. Generate section
    8. Create PDF/A for the verdict
-   9. TODO: Generate KuntaGML
+   9. Generate KuntaGML
   10. TODO: Assignments?"
   [{:keys [created application user organization] :as command}]
-  (let [verdict    (->> (enrich-verdict command
-                                        (command->verdict command))
+  (let [verdict    (->> (command->verdict command)
+                        (enrich-verdict command)
                         (insert-section (:organization application) created))
         next-state (sm/verdict-given-state application)
         att-ids    (->> (:attachments application)

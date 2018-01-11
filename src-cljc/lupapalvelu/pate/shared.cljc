@@ -300,7 +300,7 @@
                :loc-text       {:loc-text sc/Keyword} ;; Localisation term shown as text.
                :date-delta     (required {:date-delta PateDateDelta})
                :multi-select   (required {:multi-select PateMultiSelect})
-               :reference      {:reference PateReference}
+               :reference      (required {:reference PateReference})
                :link           {:link PateLink}
                :placeholder    {:placeholder PatePlaceholder}
                :keymap         {:keymap KeyMap}
@@ -655,18 +655,18 @@
                  [kw (req {:docgen {:name      "pate-date"
                                     :disabled? :automatic-verdict-dates}})]))
           (into {}))
-     {:contact-ref      {:reference {:path :contact}}
-      :boardname        {:reference {:path :*ref.boardname}}
-      :contact          (req {:docgen "pate-verdict-contact"})
-      :verdict-section  (req {:docgen "pate-verdict-section"})
-      :verdict-code     (req {:reference-list {:path       :verdict-code
-                                           :type       :select
-                                           :loc-prefix :pate-r.verdict-code}})
-      :verdict-text     (req {:phrase-text {:category :paatosteksti}})
+     {:contact-ref           {:reference {:path :contact}}
+      :boardname             {:reference {:path :*ref.boardname}}
+      :contact               (req {:docgen "pate-verdict-contact"})
+      :verdict-section       (req {:docgen "pate-verdict-section"})
+      :verdict-code          (req {:reference-list {:path       :verdict-code
+                                                    :type       :select
+                                                    :loc-prefix :pate-r.verdict-code}})
+      :verdict-text          (req {:phrase-text {:category :paatosteksti}})
       :bulletinOpDescription {:phrase-text {:category :toimenpide-julkipanoon
-                                              :i18nkey :phrase.category.toimenpide-julkipanoon}}
-      :verdict-text-ref {:reference {:path :verdict-text}}
-      :application-id   {:placeholder {:type :application-id}}}
+                                            :i18nkey  :phrase.category.toimenpide-julkipanoon}}
+      :verdict-text-ref      (req {:reference {:path :verdict-text}})
+      :application-id        {:placeholder {:type :application-id}}}
      (reduce (fn [acc [loc-prefix kw term? separator?]]
                (let [included (keyword (str (name kw) "-included"))
                      path     kw]
@@ -698,7 +698,7 @@
       :neighbor-states {:placeholder {:type :neighbors}}
       :collateral      {:phrase-text {:category :vakuus}}
       :appeal          {:phrase-text {:category :muutoksenhaku}}
-      :complexity      {:docgen "pate-complexity"}
+      :complexity      (req {:docgen "pate-complexity"})
       :complexity-text {:phrase-text {:label?   false
                                       :category :vaativuus}}
       :rights          {:phrase-text {:category :rakennusoikeus}}
@@ -736,20 +736,21 @@
                                               :dict      kw}))
                                          verdict-dates)}]}}
      {:id   "pate-verdict"
-      :grid {:columns 6
-             :rows    [[{:col   1
+      :grid {:columns 7
+             :rows    [[{:col        2
                          :loc-prefix :pate-verdict.giver
-                         ;;:show? :_meta.editing?
-                         :hide? :*ref.boardname
-                         :dict  :contact}
-                        {:loc-prefix :pate-verdict.giver
+                         :hide?      :*ref.boardname
+                         :dict       :contact}
+                        {:col        2
+                         :loc-prefix :pate-verdict.giver
                          :hide?      :_meta.editing?
                          :show?      :*ref.boardname
                          :dict       :boardname}
-                        {:col   1
-                         :show? :*ref.boardname
+                        {:col        1
+                         :show?      [:OR :*ref.boardname :verdict-section]
                          :loc-prefix :pate-verdict.section
-                         :dict  :verdict-section}
+                         :dict       :verdict-section}
+                        {:hide? :verdict-section}
                         {:col   2
                          :align :full
                          :dict  :verdict-code}]
@@ -764,13 +765,13 @@
                          :id    "application-id"
                          :hide? :_meta.editing?
                          :dict  :application-id}]]}}
-     {:id          "bulletin"
-      :loc-prefix  :bulletin
-      :show?       :?.bulletin-op-description
-      :grid        {:columns 1
-                    :rows [[{:col  1
-                             :id   "toimenpide-julkipanoon"
-                             :dict :bulletinOpDescription}]]}}
+     {:id         "bulletin"
+      :loc-prefix :bulletin
+      :show?      :?.bulletin-op-description
+      :grid       {:columns 1
+                   :rows    [[{:col  1
+                               :id   "toimenpide-julkipanoon"
+                               :dict :bulletinOpDescription}]]}}
      {:id   "requirements"
       :grid {:columns 7
              :rows    (concat (map (fn [dict]
@@ -860,8 +861,8 @@
      {:id       "attachments"
       :buttons? false
       :grid     {:columns 7
-                 :rows    [[{:col   6
-                             :dict  :attachments}]]}}]}})
+                 :rows    [[{:col  6
+                             :dict :attachments}]]}}]}})
 
 (sc/validate PateVerdict (:r verdict-schemas))
 

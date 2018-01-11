@@ -47,6 +47,13 @@
           (when (and editable? (:published verdict))
             (fail! :error.verdict.not-draft)))))))
 
+(defn- verdict-filled
+  "Precheck that fails if any of the required fields is empty."
+  [{data :data :as command}]
+  (when (:verdict-id data)
+    (when-not (verdict/verdict-filled? command)
+      (fail :pate.required-fields))))
+
 (defquery application-verdict-templates
   {:description      "List of id, name, default? maps for suitable
   application verdict templates."
@@ -141,7 +148,8 @@ TODO: create tasks and PDF, application state change, attachments locking."
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
-                      (verdict-exists :editable?)]
+                      (verdict-exists :editable?)
+                      verdict-filled]
    :states           states/give-verdict-states
    :notified         true
    :on-success       (notify :application-state-change)}

@@ -37,20 +37,35 @@
 
 (facts insert-section
   (fact "section is not set"
-    (insert-section "123-T" 1515151515151 {:data {:giver "test"}})
-    => {:data {:giver "test" :verdict-section "2"}}
+    (insert-section "123-T" 1515151515151 {:data     {}
+                                           :template {:giver "test"}})
+    => {:data     {:verdict-section "2"}
+        :template {:giver "test"}}
 
     (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 2))
 
   (fact "section is blank"
-    (insert-section "123-T" 1515151515151 {:data {:giver "test" :verdict-section ""}})
-    => {:data {:giver "test" :verdict-section "1"}}
+    (insert-section "123-T" 1515151515151 {:data     {:verdict-section ""}
+                                           :template {:giver "test"}})
+    => {:data     {:verdict-section "1"}
+        :template {:giver "test"}}
 
     (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 1))
 
   (fact "section already given"
-    (insert-section "123-T" 1515151515151 {:data {:giver "test" :verdict-section "9"}})
+    (insert-section "123-T" 1515151515151 {:data     {:verdict-section "9"}
+                                           :template {:giver "test"}})
 
-    => {:data {:giver "test" :verdict-section "9"}}
+    => {:data     {:verdict-section "9"}
+        :template {:giver "test"}}
+
+    (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0))
+
+  (fact "Board verdict (lautakunta)"
+    (insert-section "123-T" 1515151515151 {:data     {}
+                                           :template {:giver "lautakunta"}})
+
+    => {:data     {}
+        :template {:giver "lautakunta"}}
 
     (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0)))

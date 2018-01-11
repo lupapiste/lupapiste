@@ -36,12 +36,13 @@
                          :disabled (path/disabled? options)})
       (common/loc (str "pate-date-delta." (-> schema :unit name)))]]))
 
-
 (rum/defc pate-multi-select < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
   [:div.pate-multi-select
    (when (show-label? schema wrap-label?)
-     [:h4.pate-label (path/loc options)])
+     [:h4.pate-label
+      {:class (common/css-flags :required (path/required? options))}
+      (path/loc options)])
    (let [state (path/state path state)
          items (cond->> (map (fn [item]
                                (if (:value item)
@@ -125,7 +126,9 @@
   [{:keys [schema] :as options} & [wrap-label?]]
   [:div.pate-unordered-list
    (when (show-label? schema wrap-label?)
-     [:h4.pate-label (path/loc options)])
+     [:h4.pate-label
+      {:class (common/css-flags :required (path/required? options))}
+      (path/loc options)])
    [:ul
     (->> (resolve-reference-list options)
          (map (fn [{text :text}]
@@ -164,10 +167,13 @@
     (when-not @category*
       (set-category (:category schema)))
     (let [ref-id    (path/unique-id "-ref")
-          disabled? (path/disabled? options)]
+          disabled? (path/disabled? options)
+          required? (path/required? options)]
       [:div.pate-grid-12
        (when (show-label? schema wrap-label?)
-         [:h4.pate-label (path/loc options)])
+         [:h4.pate-label
+          {:class (common/css-flags :required required?)}
+          (path/loc options)])
        [:div.row
         [:div.col-3.col--full
          [:div.col--vertical
@@ -215,8 +221,9 @@
         [:div.col-12.col--full
          {:ref ref-id}
          (components/textarea-edit (path/state path state)
-                                   {:callback update-text
-                                    :disabled disabled?})]]])))
+                                   {:callback  update-text
+                                    :disabled  disabled?
+                                    :required? required?})]]])))
 
 (rum/defc pate-link < rum/reactive
   [{:keys [schema] :as options}]
