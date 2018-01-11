@@ -6,7 +6,8 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.file-upload :as file-upload]
             [lupapiste-commons.threads :as threads]
-            [sade.env :as env])
+            [sade.env :as env]
+            [lupapalvelu.logging :as logging])
   (:import [java.io InputStream]))
 
 (defonce preview-generation-pool (threads/threadpool 2 "preview-generation-worker"))
@@ -26,28 +27,30 @@
                              :application application-id))
     (threads/submit
       preview-generation-pool
-      (try
-        (mongo/with-db (or db-name mongo/default-db-name)
-          (when (seq (mongo/file-metadata {:id file-id}))
-            (if-let [preview-content (util/timing
-                                       (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
-                                       ;; It's possible at least in tests to delete the file before preview
-                                       ;; generation runs.
-                                       (when-let [content-fn (:content (mongo/download file-id))]
-                                         (with-open [content (content-fn)]
-                                           (ext-preview/create-preview content
-                                                                       content-type
-                                                                       (env/value :muuntaja :url)))))]
-              (do (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
-                  (mongo/delete-file-by-id preview-file-id)
-                  (file-upload/save-file {:fileId   preview-file-id
-                                          :filename preview-filename
-                                          :content  preview-content}
-                                         :application application-id)
-                  (.close ^InputStream preview-content))
-              (warnf "Preview image of %s file '%s' (id=%s) was not generated" content-type filename file-id))))
-        (catch Throwable t
-          (error t "Preview generation failed"))))))
+      (logging/with-logging-context
+        {:applicationId application-id}
+        (try
+          (mongo/with-db (or db-name mongo/default-db-name)
+            (when (seq (mongo/file-metadata {:id file-id}))
+              (if-let [preview-content (util/timing
+                                         (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
+                                         ;; It's possible at least in tests to delete the file before preview
+                                         ;; generation runs.
+                                         (when-let [content-fn (:content (mongo/download file-id))]
+                                           (with-open [content (content-fn)]
+                                             (ext-preview/create-preview content
+                                                                         content-type
+                                                                         (env/value :muuntaja :url)))))]
+                (do (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
+                    (mongo/delete-file-by-id preview-file-id)
+                    (file-upload/save-file {:fileId   preview-file-id
+                                            :filename preview-filename
+                                            :content  preview-content}
+                                           :application application-id)
+                    (.close ^InputStream preview-content))
+                (warnf "Preview image of %s file '%s' (id=%s) was not generated" content-type filename file-id))))
+          (catch Throwable t
+            (error t "Preview generation failed")))))))
 
 (defn generate-preview-and-return-placeholder!
   [application-id file-id filename content-type]
