@@ -1168,13 +1168,18 @@
                     (fact "Published verdict cannot be deleted"
                       (command sonja :delete-pate-verdict :id app-id
                                :verdict-id verdict-id) => fail?)))
-              (let [post-verdict-app (query-application sonja app-id)]
+              (let [{:keys [state buildings id] {operation-id :id} :primaryOperation :as post-verdict-app} (query-application sonja app-id)]
                 (fact "Application state is verdictGiven"
-                  (:state post-verdict-app) => "verdictGiven")
-                (fact "Buildings array is created"
-                  (first (:buildings post-verdict-app)) => {:index 1
-                                                            :localShortId "002"
-                                                            :description "Hello world!"}))))
+                  state => "verdictGiven")
+                (fact "Buildings array is created, primaryOperation gets index = 1"
+                  (first buildings) => (contains {:index 1
+                                                  :localShortId "002"
+                                                  :description "Hello world!"}))
+                (fact "national-id update post-verdict is reflected to buildings array as well"
+                  (api-update-national-building-id-call id {:form-params {:applicationId id :operationId operation-id :nationalBuildingId "1234567892"}
+                                                            :as :json
+                                                            :basic-auth ["sipoo-r-backend" "sipoo"]}) => http200?
+                  (-> (query-application sonja app-id) :buildings first :nationalId) => "1234567892"))))
           (fact "Verdict draft to be deleted"
             (let  [{verdict :verdict} (command sonja :new-pate-verdict-draft
                                                :id app-id
