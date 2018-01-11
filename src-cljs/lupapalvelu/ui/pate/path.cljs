@@ -24,14 +24,14 @@
 
 (defn loc-extend
   "Extends loc-path based on the options. The options can include
-  loc-prefix, locPrefix (via docgen body) or id."
-  [loc-path {:keys [id loc-prefix body]}]
+  loc-prefix, locPrefix (via docgen body), id"
+  [loc-path {:keys [id loc-prefix body dict]}]
   (let [locPrefix (some-> body first :locPrefix)]
     (cond
       loc-prefix [loc-prefix]
       locPrefix  [locPrefix]
-      id (extend loc-path id)
-      :else loc-path)))
+      id         (extend loc-path id)
+      :else      loc-path)))
 
 (defn id-extend
   "Extends id-path with the options id."

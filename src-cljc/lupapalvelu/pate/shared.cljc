@@ -696,7 +696,9 @@
       :neighbors       {:phrase-text {:i18nkey  :phrase.category.naapurit
                                       :category :naapurit}}
       :neighbor-states {:placeholder {:type :neighbors}}
-      :collateral      {:phrase-text {:category :vakuus}}
+      :collateral      {:docgen "pate-string"}
+      :collateral-date {:docgen "pate-date"}
+      :collateral-type {:docgen "collateral-type"}
       :appeal          {:phrase-text {:category :muutoksenhaku}}
       :complexity      (req {:docgen "pate-complexity"})
       :complexity-text {:phrase-text {:label?   false
@@ -797,10 +799,17 @@
                          :row   [{:col        6
                                   :loc-prefix :verdict.muutoksenhaku
                                   :dict       :appeal}]}
-                        {:show? :?.collateral
-                         :row   [{:col        6
-                                  :loc-prefix :pate-collateral
-                                  :dict       :collateral}]}]}}
+                        {:show?      :?.collateral
+                         :loc-prefix :pate
+                         :row        [{:col  2
+                                       :id   :collateral-date
+                                       :dict :collateral-date}
+                                      {:col  2
+                                       :id   :collateral
+                                       :dict :collateral}
+                                      {:col  2
+                                       :id   :collateral-type
+                                       :dict :collateral-type}]}]}}
      {:id    "neighbors"
       :show? :?.neighbors
       :grid  {:columns 12
