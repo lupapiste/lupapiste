@@ -117,6 +117,8 @@
     (validate-path-value [:string] 88) => :error.invalid-value)
   (facts "Reference list"
     (let [refs {:path {:to {:somewhere [:one :two :three]}}}]
+      (fact "Empty selection"
+        (validate-path-value [:ref-select] [""] refs) => nil)
       (validate-path-value [:ref-select] [:one] refs) => nil
       (validate-path-value [:ref-select] :one refs) => nil
       (validate-path-value [:ref-select] ["one"] refs) => nil
