@@ -64,7 +64,7 @@
    :input-validators [(partial action/non-blank-parameters [:application-id :document-id])]
    :feature          :premises-upload}
   [{{:keys [application-id document-id lang]} :data user :user :as command}]
-  (let [filename (str (i18n/localize lang "huoneistotietotaulukko")
+  (let [filename (str (i18n/localize lang "huoneistot.excel-file-name")
                       "-"
                       (local/format-local-time (local/local-now) :basic-date)
                       ".xlsx")

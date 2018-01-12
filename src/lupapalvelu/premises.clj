@@ -36,10 +36,10 @@
                              "2" "keittokomero"
                              "3" "keittotila"
                              "4" "tupakeittio"
-                             ""  "ei tiedossa"}
+                             "5"  "ei tiedossa"}
    :huoneistoTyyppi         {"1" "asuinhuoneisto"
                              "2" "toimitila"
-                             ""  "ei tiedossa"}
+                             "3"  "ei tiedossa"}
    :WCKytkin                {"1" true "0" false}
    :ammeTaiSuihkuKytkin     {"1" true "0" false}
    :parvekeTaiTerassiKytkin {"1" true "0" false}
@@ -111,7 +111,7 @@
       (header-data-map)))
 
 (defn item->update [premises-number [ifc-key ifc-val]]
-  (let [lp-val-keys #{:WCKytkin :huoneistoTyyppi :keittionTyyppi :ammeTaiSuihkuKytkin
+  (let [lp-val-keys #{:WCKytkin :keittionTyyppi :huoneistoTyyppi :ammeTaiSuihkuKytkin
                       :saunaKytkin :lamminvesiKytkin :parvekeTaiTerassiKytkin}
         lp-key (-> ifc-key localized-ifc-keys)
         lp-val (cond
@@ -119,7 +119,7 @@
                  (= :huoneistonumero lp-key) (->> ifc-val ss/remove-leading-zeros util/->int (format "%03d"))
                  (= :huoneistoala lp-key) (ss/replace ifc-val #"," ".")
                  :else ifc-val)]
-    (when (and (not (empty? ifc-val)) lp-key)
+    (when (and (not (empty? ifc-val)) (not (nil? lp-val)) lp-key)
       [[:huoneistot (-> premises-number str keyword) lp-key] lp-val])))
 
 (defn premise->updates [premise premises-number]
@@ -191,13 +191,13 @@
                         "keittokomero" "2"
                         "keittotila"   "3"
                         "tupakeittio"  "4"
-                        "ei tiedossa"  ""}]
+                        "ei tiedossa"  "5"}]
     (get keittio-values tyyppi)))
 
 (defn- get-huoneisto [tyyppi]
   (let [huoneisto-values {"asuinhuoneisto" "1"
                           "toimitila"      "2"
-                          "ei tiedossa"    ""}]
+                          "ei tiedossa"    "3"}]
     (get huoneisto-values tyyppi)))
 
 (defn- premises-workbook [sheet-name sheet-data]
