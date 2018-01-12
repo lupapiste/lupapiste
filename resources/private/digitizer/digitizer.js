@@ -292,6 +292,11 @@
       var url = "/api/raw/digitizer-report?startTs="+startTs+"&endTs="+endTs;
       window.open(url, "_self");
     };
+
+    self.createArchivingReport = function() {
+      hub.send("track-click", {category:"Applications", label:"create", event:"createArchivingReport"});
+      pageutil.openPage("create-archiving-report");
+    };
   }
 
   var model = new CreateApplicationModel();
@@ -316,10 +321,5 @@
     initAutocomplete("#archiving-address-search");
 
   });
-
-  self.createArchivingReport = function() {
-    hub.send("track-click", {category:"Applications", label:"create", event:"createArchivingReport"});
-    pageutil.openPage("create-archiving-report");
-  };
 
 })();
