@@ -12,7 +12,8 @@
   (case (keyword (metadata/get-visibility attachment))
     :asiakas-ja-viranomainen (or
                                (or (auth/has-auth? {:auth auth} (:id user)) ; attachment auth
-                                   (auth/has-auth? {:auth app-auth} (:id user))) ; application auth
+                                   (auth/has-auth? {:auth app-auth} (:id user)) ; application auth
+                                   (auth/has-auth-via-company? {:auth app-auth} user))
                                (auth/org-authz org user))
     :viranomainen (or (auth/has-auth? {:auth auth} (:id user)) (auth/org-authz org user)) ; attachment auth
     :julkinen true

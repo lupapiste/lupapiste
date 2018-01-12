@@ -161,12 +161,16 @@
           :ts       (:requested stm)
           :user     (str "" (:name stm))}) (:statements application)))
 
-(defn- get-neighbour-requests-from-application [application]
-  (map (fn [req] (let [status (first (filterv #(= "open" (name (:state %))) (:status req)))]
-                   {:text     (get-in req [:owner :name])
-                    :category :request-neighbor
-                    :ts       (:created status)
-                    :user     (full-name (:user status))})) (:neighbors application)))
+(defn- get-neighbour-requests-from-application [application state category]
+  (->> (:neighbors application)
+       (map (fn [req] (when-let [status (util/find-first #(= (name state) (name (:state %))) (:status req))]
+                        {:text     (get-in req [:owner :name])
+                         :category category
+                         :ts       (:created status)
+                         :user     (if (#{:response-given-ok :response-given-comments} state)
+                                     (full-name (:vetuma status))
+                                     (full-name (:user status)))})))
+       (remove nil?)))
 
 (defn- get-review-requests-from-application [application]
   (reduce (fn [acc task]
@@ -229,11 +233,18 @@
                             (:removed handler) (handler-remove (:id handler) history user handler-roles lang)
                             :else (handler-change handler history handler-roles lang user))))))))
 
+(defn- get-neighbour-requests [application]
+  (concat
+    (get-neighbour-requests-from-application application :open :request-neighbor)
+    (get-neighbour-requests-from-application application :mark-done :request-neighbor-done)
+    (get-neighbour-requests-from-application application :response-given-ok :request-neighbor-responded)
+    (get-neighbour-requests-from-application application :response-given-comments :request-neighbor-responded)))
+
 (defn generate-case-file-data [{:keys [history organization] :as application} lang]
   (let [documents (get-documents-from-application application)
         attachments (get-attachments-from-application application)
         statement-reqs (get-statement-requests-from-application application)
-        neighbors-reqs (get-neighbour-requests-from-application application)
+        neighbors-reqs (get-neighbour-requests application)
         review-reqs (get-review-requests-from-application application)
         reviews-held (get-held-reviews-from-application application)
         tos-fn-changes (tos-function-changes-from-history history lang)
@@ -413,6 +424,8 @@
                 :document (i18n/localize lang "caseFile.documentSubmitted")
                 :request-statement (i18n/localize lang "caseFile.operation.statement.request")
                 :request-neighbor (i18n/localize lang "caseFile.operation.neighbor.request")
+                :request-neighbor-done (i18n/localize lang "caseFile.operation.neighbor.request.done")
+                :request-neighbor-responded (i18n/localize lang "caseFile.operation.neighbor.responded")
                 :request-review (i18n/localize lang "caseFile.operation.review.request")
                 :review (i18n/localize lang "caseFile.operation.review")
                 :tos-function-change (i18n/localize lang "caseFile.tosFunctionChange")

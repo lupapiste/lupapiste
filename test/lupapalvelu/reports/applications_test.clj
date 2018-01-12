@@ -4,7 +4,8 @@
             [lupapalvelu.reports.applications :refer :all]
             [lupapalvelu.organization :as organization]))
 
-(testable-privates lupapalvelu.reports.applications row-data)
+(testable-privates lupapalvelu.reports.applications row-data get-latest-verdict-ts post-verdict-applications applicants
+                                                    applicants-emails)
 
 (def application {:id                  "LP-753-2017-00001"
                   :title               "Application title"
@@ -12,7 +13,8 @@
                   :documents           [{:schema-info {:subtype "hakija" :version 1}
                                          :data        {:_selected {:value "henkilo"}
                                                        :henkilo   {:henkilotiedot {:etunimi  {:value "Firstname"}
-                                                                                   :sukunimi {:value "Lastname"}}}}
+                                                                                   :sukunimi {:value "Lastname"}}
+                                                                   :yhteystiedot {:email {:value "firstname.lastname@example.com"}}}}
                                          :meta {:_approved {:value "rejected"}}}
                                         {:schema-info {:op {:id "59dcb8ebcfd3a952669de178" :name "kerrostalo-rivitalo"}
                                                        :name "uusiRakennus"}
@@ -112,3 +114,20 @@
                                            {:date "12.12.2017" :attachments 15}
                                            {:date "14.12.2017" :attachments 3}
                                            {:date "19.12.2017" :attachments 18}]))
+
+(facts "Post verdict applications"
+  (let [updated-app (assoc application :verdicts [{:timestamp 1498827288337}
+                                                  {:timestamp 1514385423295}])
+        updated-app (update updated-app :documents conj {:schema-info {:subtype "hakija" :version 1}
+                                                         :data {:_selected {:value "yritys"}
+                                                                :yritys {:yritysnimi {:value "Firma"}
+                                                                         :yhteyshenkilo {:yhteystiedot {:email {:value "anders.anderson@firma.com"}}}}}})]
+
+    (fact "Latest verdicts"
+      (get-latest-verdict-ts updated-app) => 1514385423295)
+
+    (fact "Applicants"
+      (applicants updated-app) => "Firstname Lastname; Firma")
+
+    (fact "Applicant emails"
+      (applicants-emails updated-app) => "firstname.lastname@example.com; anders.anderson@firma.com")))

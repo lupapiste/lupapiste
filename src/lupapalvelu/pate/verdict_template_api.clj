@@ -101,10 +101,11 @@
    :pre-checks       [pate-enabled
                       valid-category]}
   [{:keys [created user lang]}]
-  (ok (template/new-verdict-template (usr/authority-admins-organization-id user)
-                                     created
-                                     lang
-                                     category)))
+  (ok (assoc (template/new-verdict-template (usr/authority-admins-organization-id user)
+                                            created
+                                            lang
+                                            category)
+             :filled false)))
 
 (defcommand set-verdict-template-name
   {:description "Name cannot be empty."
@@ -133,13 +134,16 @@
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable)]}
   [{:keys [created] :as command}]
-  (if-let [error (template/save-draft-value (template/command->organization command)
-                                            template-id
-                                            created
-                                            path
-                                            value)]
-    (fail error)
-    (ok :modified created)))
+  (let [organization (template/command->organization command)]
+    (if-let [error (template/save-draft-value organization
+                                              template-id
+                                              created
+                                              path
+                                              value)]
+      (template/error-response path error)
+      (ok :modified created
+          :filled (template/template-filled? {:org-id (:id organization)
+                                              :template-id template-id})))))
 
 (defcommand publish-verdict-template
   {:description      "Publish creates a frozen snapshot of the current
@@ -149,7 +153,7 @@
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
    :pre-checks       [pate-enabled
-                      (template/verdict-template-check :editable :named)]}
+                      (template/verdict-template-check :editable :named :filled)]}
   [{:keys [created user user-organizations] :as command}]
   (template/publish-verdict-template (template/command->organization command)
                                      template-id
@@ -186,10 +190,12 @@
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable)]}
   [command]
-  (let [template (template/verdict-template (template/command->organization command)
-                                            template-id)]
+  (let [organization (template/command->organization command)
+        template     (template/verdict-template organization template-id)]
     (ok (assoc (template/verdict-template-summary template)
-               :draft (:draft template)))))
+               :draft (:draft template)
+               :filled (template/template-filled? {:org-id   (:id organization)
+                                                   :template template})))))
 
 (defcommand toggle-delete-verdict-template
   {:description      "Toggle template's deletion status"
@@ -216,10 +222,13 @@
    :pre-checks       [pate-enabled
                       (template/verdict-template-check)]}
   [{:keys [created lang] :as command}]
-  (ok (template/copy-verdict-template (template/command->organization command)
-                                      template-id
-                                      created
-                                      lang)))
+  (let [organization (template/command->organization command)]
+    (ok (assoc (template/copy-verdict-template organization
+                                               template-id
+                                               created
+                                               lang)
+               :filled (template/template-filled? {:org-id      (:id organization)
+                                                   :template-id template-id})))))
 
 ;; ----------------------------------
 ;; Verdict template settings API
@@ -236,7 +245,8 @@
   [command]
   (when-let [settings (template/settings (template/command->organization command)
                                          category)]
-    (ok :settings settings)))
+    (ok :settings settings
+        :filled (template/settings-filled? {:settings settings} category))))
 
 (defcommand save-verdict-template-settings-value
   {:description      "Incremental save support for verdict template
@@ -250,13 +260,16 @@
    :pre-checks       [pate-enabled
                       valid-category]}
   [{:keys [created] :as command}]
-  (if-let [error (template/save-settings-value (template/command->organization command)
-                                               category
-                                               created
-                                               path
-                                               value)]
-    (fail error)
-    (ok :modified created)))
+  (let [organization (template/command->organization command)]
+    (if-let [error (template/save-settings-value organization
+                                                 category
+                                                 created
+                                                 path
+                                                 value)]
+      (template/error-response path error)
+      (ok :modified created
+          :filled (template/settings-filled? {:org-id (:id organization)}
+                                             category)))))
 
 ;; ----------------------------------
 ;; Verdict template reviews API

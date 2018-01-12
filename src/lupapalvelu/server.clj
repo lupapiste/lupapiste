@@ -41,7 +41,7 @@
             [lupapalvelu.features-api]
             [lupapalvelu.file-upload-api]
             [lupapalvelu.fixture.fixture-api]
-            [lupapalvelu.fixture.minimal]
+            [lupapalvelu.fixture.fixtures]
             [lupapalvelu.foreman-api]
             [lupapalvelu.guest-api]
             [lupapalvelu.i18n :as i18n]
@@ -92,7 +92,8 @@
             [lupapalvelu.pate.verdict-template-api]
             [lupapalvelu.pate.verdict-api]
             [lupapalvelu.pate.phrases-api]
-            [lupapalvelu.financial-api])
+            [lupapalvelu.financial-api]
+            [lupapalvelu.premises-api])
 
   (:import [javax.imageio ImageIO]
            [javax.activation MailcapCommandMap]
@@ -211,6 +212,7 @@
     (start-jetty!)))
 
 (defn start-jmx-server! []
+  (info "Starting JMX...")
   (swap! jmx-server
          (fn [old-server]
            (if (nil? old-server)

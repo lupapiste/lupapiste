@@ -139,8 +139,28 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
         }
         newRows[fileId] = newRow(file.type, file.contents, file.drawingNumber, file.group, file.backendId, file.target);
       }
+      file.duplicateFile = file.duplicateFile || ko.observable(false);
+      file.duplicateFile(false);
+      file.duplicateFileInApplication = file.duplicateFileInApplication || ko.observable(file.existsWithSameName);
     });
     rows( _.merge( keepRows, newRows ));
+
+    var fileNames = _.map(self.upload.files(), function (file) {
+      return file.filename;
+    });
+
+    var duplicateFiles = _.filter(fileNames, function (name, index, files) {
+      return _.includes(files, name, index + 1);
+    });
+
+    if (!_.isEmpty(duplicateFiles)) {
+       _.map(self.upload.files(), function (file) {
+        if (_.includes(duplicateFiles, file.filename)) {
+          file.duplicateFile(true);
+          return file;
+        }
+      });
+    }
   });
 
   self.badFiles = ko.observableArray();

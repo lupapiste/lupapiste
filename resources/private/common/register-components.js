@@ -134,6 +134,7 @@ jQuery(document).ready(function() {
     {name: "company-invite-bubble"},
     {name: "operation-editor"},
     {name: "document-identifier"},
+    {name: "building-identifier"},
     {name: "change-state"},
     {name: "verdict-appeal"},
     {name: "verdict-appeal-bubble"},
@@ -205,7 +206,8 @@ jQuery(document).ready(function() {
     {name: "mark-review-faulty-dialog"},
     {name: "backend-id-manager"},
     {name: "generic-bulletin-tab"},
-    {name: "add-link-permit"}
+    {name: "add-link-permit"},
+    {name: "premises-upload", template: "premises-upload-template"}
 ];
 
   ko.registerLupapisteComponents(components);

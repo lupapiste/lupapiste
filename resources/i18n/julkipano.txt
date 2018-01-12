@@ -105,7 +105,7 @@
 "bulletin.location" "sv" "Läge"
 "bulletin.lupatunnus" "en" "Permit ID"
 "bulletin.lupatunnus" "fi" "Lupatunnus"
-"bulletin.lupatunnus" "sv" "Tillståndskod"
+"bulletin.lupatunnus" "sv" "Tillståndsbeteckning"
 "bulletin.municipalities-search.caption" "en" "Entire Finland"
 "bulletin.municipalities-search.caption" "fi" "Koko Suomi"
 "bulletin.municipalities-search.caption" "sv" "Hela Finland"

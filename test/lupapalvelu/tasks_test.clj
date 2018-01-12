@@ -85,14 +85,8 @@
                      :tarkastuksenTaiKatselmuksenNimi "Aloituskokous"
                      :muuTunnustieto [{:MuuTunnus {:sovellus "RakApp" :tunnus "999"}} ]}) => {:muuTunnus "999" :muuTunnusSovellus "RakApp"})
 
-  (fact "muu-tunnus - :sovellus is Lupapiste"
-    (get-muu-tunnus-data {:katselmuksenLaji "aloituskokous"
-                     :tarkastuksenTaiKatselmuksenNimi "Aloituskokous"
-                     :muuTunnustieto [{:MuuTunnus {:sovellus "Lupapiste" :tunnus "999"}} ]}) => {:muuTunnus "" :muuTunnusSovellus ""})
-
   (fact "muu-tunnus multiple muuTunnus elements"
     (get-muu-tunnus-data {:katselmuksenLaji "muu tarkastus"
-                     :muuTunnustieto [{:MuuTunnus {:sovellus "lupapiste" :tunnus "999"}}
-                                      {:MuuTunnus {:sovellus "RakApp" :tunnus "998"}}
+                     :muuTunnustieto [{:MuuTunnus {:sovellus "RakApp12" :tunnus "998"}}
                                       {:MuuTunnus {:sovellus "RakApp" :tunnus "997"}}]
-                          :tarkastuksenTaiKatselmuksenNimi "K\u00E4ytt\u00F6\u00F6nottotarkastus"}) => {:muuTunnus "998" :muuTunnusSovellus "RakApp"}))
+                          :tarkastuksenTaiKatselmuksenNimi "K\u00E4ytt\u00F6\u00F6nottotarkastus"}) => {:muuTunnus "998" :muuTunnusSovellus "RakApp12"}))

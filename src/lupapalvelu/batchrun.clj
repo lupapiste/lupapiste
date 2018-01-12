@@ -34,7 +34,7 @@
             [sade.dummy-email-server]
             [sade.http :as http]
             [sade.strings :as ss]
-            [sade.threads :as threads]
+            [lupapiste-commons.threads :as threads]
             [sade.util :refer [fn-> pcond->] :as util]
             [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
             [monger.collection :as mc]
@@ -525,16 +525,12 @@
                                    :created timestamp)
                             task-id)))))
 
-(defn- log-review-results-for-organization [organization-id applications-with-results]
+(defn- log-review-results-for-organization [organization-id results-by-app-id]
   (logging/log-event :info {:run-by "Automatic review checking"
                             :event "Review checking finished for organization"
                             :organization-id organization-id
-                            :application-count (count applications-with-results)
-                            :faulty-tasks (->> applications-with-results
-                                               (map (juxt (comp :id first)
-                                                          (comp :new-faulty-tasks
-                                                                second)))
-                                               (into {}))}))
+                            :application-count (count results-by-app-id)
+                            :faulty-tasks (util/map-values :new-faulty-tasks results-by-app-id)}))
 
 (defn- fetch-reviews-for-organization
   [eraajo-user created {org-krysp :krysp :as organization} permit-types applications {:keys [overwrite-background-reviews?]}]
@@ -560,7 +556,7 @@
                                               :result result}))
                   (when (ok? save-result)
                     (mark-reviews-faulty-for-application app result)
-                    [app result]))))
+                    [(:id app) (select-keys result [:new-faulty-tasks])]))))
          (remove nil?)
          (log-review-results-for-organization (:id organization)))))
 

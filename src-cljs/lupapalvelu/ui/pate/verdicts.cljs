@@ -22,47 +22,31 @@
 (defn- can-view? []
   (state/auth? :pate-verdicts))
 
-(defn update-changes-and-errors [{:keys [state path]}]
-  (fn [{:keys [modified changes errors] :as response}]
-    (when (or (seq changes) (seq errors))
-      (swap! state (fn [state]
-                     (let [state (reduce (fn [acc [k v]]
-                                           (assoc-in acc (map keyword k) v))
-                                         state
-                                         changes)]
-                       (reduce (fn [acc [k v]]
-                                 (assoc-in acc
-                                           (cons :_errors (map keyword k))
-                                           v))
-                               (assoc-in state
-                                         (cons :_errors (map keyword path))
-                                         nil)
-                               errors)))))
-    (when modified
-      (swap! state/current-verdict #(assoc-in % [:info :modified] modified)))))
-
 (defn updater [{:keys [state path] :as options}]
   (service/edit-verdict @state/application-id
                         (path/value [:info :id] state/current-verdict)
                         path
                         (path/value path state)
-                        (update-changes-and-errors options)))
+                        (service/update-changes-and-errors state/current-verdict
+                                                           options)))
 
 (defn- can-edit-verdict? [{published :published}]
   (and (can-edit?)
        (not published)))
 
-(defn reset-verdict [{:keys [verdict references]}]
+(defn reset-verdict [{:keys [verdict references filled]}]
   (reset! state/current-verdict
           (when verdict
             {:state (:data verdict)
-             :info (dissoc verdict :data)
-             :_meta {:updated updater
-                     :enabled? (can-edit-verdict? verdict)
+             :info  (assoc (dissoc verdict :data)
+                           :filled? filled)
+             :_meta {:updated              updater
+                     :highlight-required?  (-> verdict :published not)
+                     :enabled?             (can-edit-verdict? verdict)
                      :attachments.filedata (fn [_ filedata & kvs]
                                              (apply assoc filedata
                                                     :target {:type :verdict
-                                                             :id (:id verdict)}
+                                                             :id   (:id verdict)}
                                                     kvs))
                      :attachments.include? (fn [_ {target :target :as att}]
                                              (= (:id target) (:id verdict)))}}))
@@ -120,7 +104,8 @@
         [:div.row
          [:div.col-2.col--right
           [:button.primary.outline
-           {:on-click (fn []
+           {:disabled (false? (path/react :filled? info))
+            :on-click (fn []
                         (hub/send "show-dialog"
                                   {:ltitle "areyousure"
                                    :size "medium"
@@ -137,7 +122,9 @@
            (common/loc :pate.verdict-published
                        (js/util.finnishDate published))]]]
         [:div.row.row--tight
-         [:div.col-2.col--right
+         [:div.col-1
+          (pate-components/required-fields-note options)]
+         [:div.col-1.col--right
           (pate-components/last-saved options)]])]
      (sections/sections options :verdict)]))
 

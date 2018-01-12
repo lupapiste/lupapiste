@@ -72,3 +72,11 @@
                                    :c2 true
                                    :c3 nil}}}))
 
+(facts "in-env?"
+  (with-redefs [target-env "foo"]
+    (fact "FOO" (in-env? "FOO") => true)
+    (fact "foo" (in-env? "foo") => true)
+    (fact "lol" (in-env? "lol") => false)
+    (fact "nil" (in-env? nil) => false)
+    (fact "a number" (in-env? 12) => false)))
+

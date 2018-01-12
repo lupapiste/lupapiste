@@ -90,6 +90,26 @@
                       (util/to-long endTs)
                       lang))))
 
+(defraw post-verdict-xlsx                                   ; LPK-3517
+  {:description "Excel to list applications in post verdict state"
+   :parameters       [startTs endTs]
+   :input-validators [(partial action/numeric-parameters [:startTs :endTs])
+                      start-gt-end
+                      max-month-window]
+   :user-roles       #{:authorityAdmin}}
+  [{user :user {lang :lang} :data ts :created}]
+  (let [orgId               (usr/authority-admins-organization-id user)
+        resulting-file-name (str (i18n/localize lang "applications.report.post-verdict.file-name")
+                                 "_"
+                                 (util/to-xml-date ts)
+                                 ".xlsx")]
+    (excel-response resulting-file-name
+                    (app-reports/post-verdict-excel
+                      orgId
+                      (util/to-long startTs)
+                      (util/to-long endTs)
+                      lang))))
+
 (defraw company-report
   {:description      "Excel report for company authority"
    :parameters       [startTs endTs]
