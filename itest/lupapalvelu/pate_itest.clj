@@ -11,8 +11,7 @@
             [sade.util :as util]
             [sade.xml :as xml]
             [clojure.java.io :as io]
-            [clojure.data.xml :as cxml]
-            [lupapalvelu.document.tools :as tools]))
+            [clojure.data.xml :as cxml]))
 
 (apply-remote-minimal)
 
