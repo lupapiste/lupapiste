@@ -2,6 +2,7 @@
   (:require [clj-time.local :as local]
             [lupapalvelu.action :refer [defraw] :as action]
             [lupapalvelu.attachment :as att]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
@@ -29,6 +30,10 @@
   (when-not (-> files (first) :filename (mime/allowed-file?))
     (fail :error.file-upload.illegal-file-type)))
 
+(defn- document-exists [{application :application {doc :doc} :data}]
+  (let [document (doc-persistence/by-id application "documents" doc)]
+    (when-not document (fail :error.document-not-found))))
+
 ;;
 ;;  Upload
 ;;
@@ -40,7 +45,8 @@
    :pre-checks       [(action/some-pre-check att/allowed-only-for-authority-when-application-sent
                                              (permit/validate-permit-type-is :R))
                       uusiRakennus-pre-check
-                      action/disallow-impersonation]
+                      action/disallow-impersonation
+                      document-exists]
    :input-validators [(partial action/non-blank-parameters [:id :doc])
                       validate-mime-type
                       file-size-positive

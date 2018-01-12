@@ -26,7 +26,6 @@ LUPAPISTE.PremisesUploadModel = function( params ) {
                 request.setRequestHeader("x-anti-forgery-token", $.cookie("anti-csrf-token"));
             },
             success: function(res) {
-
                 if (res.ok) {
                     repository.load(self.applicationId);
                     if (_.isFunction(params.onSuccess)) {

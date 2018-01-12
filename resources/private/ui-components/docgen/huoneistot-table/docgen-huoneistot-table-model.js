@@ -154,4 +154,11 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
     var documentName = util.getIn( doc, ["schema", "name"]);
     return documentName === "uusiRakennus";
   });
+
+  self.premisesExcelDownloadUrl = function (applicationId) {
+    return sprintf("/api/raw/download-premises-template?%s&%s&%s",
+                   "document-id=" + self.documentId,
+                   "application-id=" + applicationId,
+                   "lang=" + loc.getCurrentLanguage());
+  };
 };

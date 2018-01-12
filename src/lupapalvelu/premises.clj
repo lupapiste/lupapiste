@@ -94,8 +94,12 @@
    "warm water"             :lamminvesiKytkin})
 
 (defn- header-data-map [vecs]
-  {:header-row (mapv #(.toLowerCase %) (first vecs))
-   :data       (rest vecs)})
+  (let [header-row       (mapv #(.toLowerCase %) (first vecs))
+        allowed-headers  (-> localized-ifc-keys (keys) (set))
+        headers-valid?   (= (count header-row) (count (map #(allowed-headers %) header-row)))
+        header-validated (when headers-valid? header-row)]
+    {:header-row header-validated
+     :data       (rest vecs)}))
 
 (defn split-with-semicolon [row]
   (map #(ss/split % #";") row))
@@ -119,7 +123,7 @@
                  (= :huoneistonumero lp-key) (->> ifc-val ss/remove-leading-zeros util/->int (format "%03d"))
                  (= :huoneistoala lp-key) (ss/replace ifc-val #"," ".")
                  :else ifc-val)]
-    (when (and (not (empty? ifc-val)) (not (nil? lp-val)) lp-key)
+    (when (and (not (empty? ifc-val)) lp-key)
       [[:huoneistot (-> premises-number str keyword) lp-key] lp-val])))
 
 (defn premise->updates [premise premises-number]
@@ -144,7 +148,6 @@
         update-paths                                     (map first model-updates)
         {:keys [mongo-query mongo-updates post-results]} (apply doc-persistence/validated-model-updates application "documents" document
                                                                 (doc-persistence/transform document model-updates) timestamp nil)]
-    (when-not document (fail! :error.document-not-found))
     (doc-persistence/validate-against-whitelist! document update-paths role application)
     (doc-persistence/validate-readonly-updates! document update-paths)
     (remove-old-premises command doc-id)
