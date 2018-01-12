@@ -19,6 +19,16 @@
   }
 }
 
+.archiving-top {
+  .button-group {
+    float: right;
+    button {
+      margin-left: $grid-margin;
+    }
+    margin-top: -25px;
+  }
+}
+
 #invitations {
   background-color: $gray238;
   margin-bottom: -$marginL;

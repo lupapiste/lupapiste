@@ -4,7 +4,7 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer [fail!]]
-            [sade.threads :as threads]
+            [lupapiste-commons.threads :as threads]
             [sade.util :as util]
             [lupapalvelu.integrations.messages :as messages]
             [clj-time.core :as t]

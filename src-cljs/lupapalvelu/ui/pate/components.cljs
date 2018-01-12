@@ -20,23 +20,29 @@
 
 (rum/defc pate-date-delta < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
-  [:div.pate-date-delta
-   (when (show-label? schema wrap-label?)
-     [:label.delta-label {:for (path/id (path/extend path :delta))}
-      (path/loc options)])
-   [:div.delta-editor
-    (docgen/text-edit (assoc options :path (path/extend path :delta))
-                      :input.grid-style-input
-                      {:type "number"
-                       :disabled (path/disabled? options)})
-    (common/loc (str "pate-date-delta." (-> schema :unit name)))]])
-
+  (let [required? (path/required? options)
+        delta-path (path/extend path :delta)]
+    [:div.pate-date-delta
+     (when (show-label? schema wrap-label?)
+       [:label.delta-label {:class (common/css-flags :required required?)
+                            :for (path/id delta-path)}
+        (path/loc options)])
+     [:div.delta-editor
+      (docgen/text-edit (assoc options
+                               :path delta-path
+                               :required? required?)
+                        :text
+                        {:type "number"
+                         :disabled (path/disabled? options)})
+      (common/loc (str "pate-date-delta." (-> schema :unit name)))]]))
 
 (rum/defc pate-multi-select < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
   [:div.pate-multi-select
    (when (show-label? schema wrap-label?)
-     [:h4.pate-label (path/loc options)])
+     [:h4.pate-label
+      {:class (common/css-flags :required (path/required? options))}
+      (path/loc options)])
    (let [state (path/state path state)
          items (cond->> (map (fn [item]
                                (if (:value item)
@@ -120,7 +126,9 @@
   [{:keys [schema] :as options} & [wrap-label?]]
   [:div.pate-unordered-list
    (when (show-label? schema wrap-label?)
-     [:h4.pate-label (path/loc options)])
+     [:h4.pate-label
+      {:class (common/css-flags :required (path/required? options))}
+      (path/loc options)])
    [:ul
     (->> (resolve-reference-list options)
          (map (fn [{text :text}]
@@ -132,6 +140,14 @@
   [:span.saved-info
    (when-let [ts (path/react [:modified] info*)]
      (common/loc :pate.last-saved (js/util.finnishDateAndTime ts)))])
+
+(rum/defc required-fields-note < rum/reactive
+  ([{info* :info} note]
+   (when (false? (path/react [:filled?] info*))
+     [:div.pate-required-fields-note
+      note]))
+  ([options]
+   (required-fields-note options (common/loc :pate.required-fields))))
 
 (rum/defcs pate-phrase-text < rum/reactive
   (rum/local nil ::category)
@@ -151,10 +167,13 @@
     (when-not @category*
       (set-category (:category schema)))
     (let [ref-id    (path/unique-id "-ref")
-          disabled? (path/disabled? options)]
+          disabled? (path/disabled? options)
+          required? (path/required? options)]
       [:div.pate-grid-12
        (when (show-label? schema wrap-label?)
-         [:h4.pate-label (path/loc options)])
+         [:h4.pate-label
+          {:class (common/css-flags :required required?)}
+          (path/loc options)])
        [:div.row
         [:div.col-3.col--full
          [:div.col--vertical
@@ -202,16 +221,12 @@
         [:div.col-12.col--full
          {:ref ref-id}
          (components/textarea-edit (path/state path state)
-                                   {:callback update-text
-                                    :disabled disabled?})]]])))
+                                   {:callback  update-text
+                                    :disabled  disabled?
+                                    :required? required?})]]])))
 
 (rum/defc pate-link < rum/reactive
   [{:keys [schema] :as options}]
-  (let [regex          #"\[(.*)\]"
-        text           (path/loc (:text-loc schema))
-        link           (last (re-find regex text))
-        ;; Split results include the
-        [before after] (remove #(= link %) (s/split text regex))]
-    [:span before
-     [:a {:on-click #((path/meta-value options (:click schema)) options)} link]
-     after]))
+  (components/text-and-link {:text-loc (:text-loc schema)
+                             :click    #((path/meta-value options (:click schema))
+                                         options)}))

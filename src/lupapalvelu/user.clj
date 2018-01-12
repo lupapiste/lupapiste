@@ -347,6 +347,11 @@
         org-set (if organization (set/intersection #{organization} archive-orgs) archive-orgs)]
     (and (seq org-set) (org/some-organization-has-archive-enabled? org-set))))
 
+(defn user-is-pure-digitizer? [user]
+  (let [all-roles (apply set/union (vals (:orgAuthz (with-org-auth user))))]
+    (and (authority? user)
+         (every? #(= % :digitizer) all-roles))))
+
 (defn check-password-pre-check [{{:keys [password]} :data user :user}]
   (when-not (security/check-password password
                                      (some-<>> user

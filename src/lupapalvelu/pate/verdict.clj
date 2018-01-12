@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.verdict
-  (:require [lupapalvelu.action :as action]
+  (:require [clj-time.core :as time]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as att]
@@ -22,7 +23,8 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [schema.core :as sc]
-            [swiss.arrows :refer :all]))
+            [swiss.arrows :refer :all]
+            [sade.validators :as validators]))
 
 (defn neighbor-states
   "Application neighbor-states data in a format suitable for verdicts: list
@@ -80,8 +82,7 @@
 (defmethod initial-draft :r
   [{snapshot :published} application]
   {:data       (data-draft
-                (merge {:giver        :giver
-                        :verdict-code :verdict-code
+                (merge {:verdict-code :verdict-code
                         :verdict-text :paatosteksti
                         :bulletinOpDescription :bulletinOpDescription}
                        (reduce (fn [acc kw]
@@ -112,6 +113,7 @@
   "Contents of the verdict's template property. The actual contents
   depend on the category. Typical keys:
 
+  :giver      Verdict giver type (lautakunta vs. viranhaltija).
   :exclusions A map where each key matches a verdict dictionary
   key. Value is either true (dict is excluded) or another exclusions
   map (for repeating)."
@@ -121,9 +123,8 @@
 
 (defmethod template-info :r
   [{snapshot :published}]
-  (let [data (:data snapshot)
-        removed? #(when (get-in data [:removed-sections %])
-                    true)
+  (let [data             (:data snapshot)
+        removed?         #(boolean (get-in data [:removed-sections %]))
         building-details (->> [(when-not (:autopaikat data)
                                  [:rakennetut-autopaikat
                                   :kiinteiston-autopaikat
@@ -133,22 +134,28 @@
                                      [:vss-luokka :paloluokka])]
                               flatten
                               (remove nil?))
-        exclusions (-<>> [(filter removed? [:conditions :appeal :statements
-                                            :collateral :rights :purpose])
-                          (when (removed? :neighbors)
-                            [:neighbors :neighbor-states])
-                          (when (removed? :complexity)
-                            [:complexity :complexity-text])
-                          (util/difference-as-kw shared/verdict-dates
-                                                 (:verdict-dates data))]
-                         flatten
-                         (remove nil?)
-                         (zipmap <> (repeat true))
-                         (util/assoc-when <> :buildings (or (removed? :buildings)
-                                                            (zipmap building-details
-                                                                    (repeat true))))
-                         not-empty)]
-    {:exclusions exclusions}))
+        exclusions       (-<>> [(filter removed? [:conditions :appeal :statements
+                                                  :collateral :rights :purpose])
+                                (when (removed? :collateral)
+                                  [:collateral :collateral-date :collateral-type])
+                                (when (removed? :neighbors)
+                                  [:neighbors :neighbor-states])
+                                (when (removed? :complexity)
+                                  [:complexity :complexity-text])
+                                (util/difference-as-kw shared/verdict-dates
+                                                       (:verdict-dates data))
+                                (if (-> snapshot :settings :boardname)
+                                  :contact
+                                  :verdict-section)]
+                               flatten
+                               (remove nil?)
+                               (zipmap <> (repeat true))
+                               (util/assoc-when <> :buildings (or (removed? :buildings)
+                                                                  (zipmap building-details
+                                                                          (repeat true))))
+                               not-empty)]
+    {:giver      (:giver data)
+     :exclusions exclusions}))
 
 (defn new-verdict-draft [template-id {:keys [application organization created]
                                       :as   command}]
@@ -175,10 +182,20 @@
     (util/dissoc-in verdict [:data :bulletinOpDescription])
     :default verdict))
 
-(defn command->verdict [{:keys [data application] :as command}]
-  (update (->> (util/find-by-id (:verdict-id data) (:pate-verdicts application))
-               (mask-verdict-data command))
-          :category keyword))
+(defn command->verdict
+  "Gets verdict based on command data. If refresh? is true then the
+  application is read from mongo and not taken from command."
+  ([{:keys [data application] :as command} refresh?]
+   (update (->> (if refresh?
+                  (domain/get-application-no-access-checking (:id application)
+                                                             {:pate-verdicts 1})
+                  application)
+                :pate-verdicts
+                (util/find-by-id (:verdict-id data))
+                (mask-verdict-data command))
+           :category keyword))
+  ([command]
+   (command->verdict command false)))
 
 (defn verdict-template-for-verdict [verdict organization]
   (let [{:keys [id version-id]} (:template verdict)]
@@ -283,9 +300,24 @@
             {}
             dictionary)))
 
+(defn- verdict-schema [category template]
+  (update (category shared/verdict-schemas)
+          :dictionary
+          (partial strip-exclusions (:exclusions template))))
+
+(defn verdict-filled?
+  "Have all the required fields been filled. Refresh? argument can force
+  the read from mongo (see command->verdict)."
+  ([command refresh?]
+   (let [{:keys [data category template]} (command->verdict command refresh?)
+         schema (verdict-schema category template)]
+     (schemas/required-filled? schema data)))
+  ([command]
+   (verdict-filled? command false)))
+
 (defn edit-verdict
   "Updates the verdict data. Validation takes the template exclusions
-  into account. Some updates (e.g., automat dates) can propagate other
+  into account. Some updates (e.g., automatic dates) can propagate other
   changes as well. Returns errors or modified and (possible
   additional) changes."
   [{{:keys [verdict-id path value]} :data
@@ -296,9 +328,7 @@
   (let [{:keys [data category
                 template
                 references]} (command->verdict command)
-        schema               (update (category shared/verdict-schemas)
-                                     :dictionary
-                                     (partial strip-exclusions (:exclusions template)))]
+        schema               (verdict-schema category template)]
     (if-let [error (schemas/validate-path-value
                     schema
                     path value
@@ -322,16 +352,22 @@
                             [(util/split-kw-path k) v])
                           changed))}))))
 
+(defn- app-documents-having-buildings
+  [{:keys [documents] :as application}]
+  (->> application
+       app/get-sorted-operation-documents
+       tools/unwrapped
+       (filter (util/fn-> :data (contains? :valtakunnallinenNumero)))
+       (map (partial app/populate-operation-info
+                     (app/get-operations application)))))
+
 (defn buildings
   "Map of building infos: operation id is key and value map contains
   operation (loc-key), building-id (either national or manual id),
   tag (tunnus) and description."
-  [{:keys [documents] :as application}]
-  (->> documents
-       tools/unwrapped
-       (filter (util/fn-> :data (contains? :valtakunnallinenNumero)))
-       (map (partial app/populate-operation-info
-                     (app/get-operations application)))
+  [application]
+  (->> application
+       app-documents-having-buildings
        (reduce (fn [acc {:keys [schema-info data]}]
                  (let [{:keys [id name
                                description]} (:op schema-info)]
@@ -348,6 +384,27 @@
                             :tag         (:tunnus data)}
                            ss/->plain-string))))
                {})))
+
+(defn ->buildings-array [application]
+  "Construction of the application-buildings array. This should be equivalent to ->buildings-summary function in
+   lupapalvelu.xml.krysp.building-reader the namespace, but instead of the message from backing system,
+   here all the input data is originating from PATE verdict."
+  (->> application
+       app-documents-having-buildings
+       (util/indexed 1)
+       (map (fn [[n {toimenpide :data {op :op} :schema-info}]]
+              (let [{:keys [rakennusnro valtakunnallinenNumero mitat kaytto tunnus]} toimenpide
+                    description-parts (remove ss/blank? [tunnus (:description op)])]
+                 {:localShortId (or rakennusnro (when (validators/rakennusnumero? tunnus) tunnus))
+                  :nationalId valtakunnallinenNumero
+                  :buildingId (or valtakunnallinenNumero rakennusnro)
+                  :location-wgs84 nil
+                  :location nil
+                  :area (:kokonaisala mitat)
+                  :index n
+                  :description (ss/join ": " description-parts)
+                  :operationId (:id op)
+                  :usage (or (:kayttotarkoitus kaytto) "")})))))
 
 (defn- merge-buildings [app-buildings verdict-buildings defaults]
   (reduce (fn [acc [op-id v]]
@@ -405,29 +462,58 @@
                                                      verdict))))
      :references (:references verdict)}))
 
+(defn- next-section [org-id created verdict-giver]
+  (when (and org-id created verdict-giver
+             (ss/not-blank? (name org-id))
+             (ss/not-blank? (name verdict-giver)))
+    (->> (util/to-datetime-with-timezone created)
+         (time/year)
+         (vector "verdict" (name verdict-giver) (name org-id))
+         (ss/join "_")
+         (mongo/get-next-sequence-value)
+         (str))))
+
+(defn- insert-section
+  "Section is generated only for non-board verdicts (lautakunta)."
+  [org-id created {:keys [data template] :as verdict}]
+  (let [{section :verdict-section} data
+        {giver :giver}             template]
+    (cond-> verdict
+      (and (ss/blank? section)
+           (util/not=as-kw giver
+                           :lautakunta)) (assoc-in [:data :verdict-section]
+                                                   (next-section org-id
+                                                                 created
+                                                                 giver)))))
+
 (defn publish-verdict
   "Publishing verdict does the following:
    1. Finalize and publish verdict
    2. Update application state
    3. Inspection summaries
    4. Other document updates (e.g., waste plan -> waste report)
+   4a. Construct buildings array
    5. Freeze (locked and read-only) verdict attachments and update TOS details
    6. TODO: Create tasks
-   7. Create PDF/A for the verdict
-   8. TODO: Generate KuntaGML
+   7. Generate section
+   8. Create PDF/A for the verdict
+   9. Generate KuntaGML
   10. TODO: Assignments?"
   [{:keys [created application user organization] :as command}]
-  (let [verdict    (enrich-verdict command
-                                   (command->verdict command))
+  (let [verdict    (->> (command->verdict command)
+                        (enrich-verdict command)
+                        (insert-section (:organization application) created))
         next-state (sm/verdict-given-state application)
         att-ids    (->> (:attachments application)
                         (filter #(= (-> % :target :id) (:id verdict)))
-                        (map :id))]
+                        (map :id))
+        buildings-updates {:buildings (->buildings-array application)}]
     (verdict-update command
                     (util/deep-merge
                      {$set (merge
                             {:pate-verdicts.$.data      (:data verdict)
                              :pate-verdicts.$.published created}
+                            buildings-updates
                             (att/attachment-array-updates (:id application)
                                                           (comp #{(:id verdict)} :id :target)
                                                           :readOnly true

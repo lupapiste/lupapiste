@@ -46,7 +46,7 @@
             [sade.shared-util :as util]))
 
 (defn schema-type [options]
-  (-> options :schema keys first keyword))
+  (-> options :schema (dissoc :required?) keys first keyword))
 
 (declare pate-list)
 
@@ -157,9 +157,12 @@
       span)))
 
 (defmethod view-component :reference
-  [_ {:keys [state path schema] :as options} & [wrap-label?]]
-  (let [span [:span.formatted (path/react (-> schema :path util/split-kw-path)
-                                          state)]]
+  [_ {:keys [state schema references] :as options} & [wrap-label?]]
+  (let [[x & xs :as path] (-> schema :path util/split-kw-path)
+        span [:span.formatted
+              (if (util/=as-kw x :*ref)
+                (path/react xs references)
+                (path/react path state))]]
     (if (pate-components/show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options span)
       span)))
@@ -205,7 +208,7 @@
                                                      (str "item--" (name item-align))))}
                        (when (:dict item-schema)
                          (instantiate (path/dict-options item-options)
-                                      true))])))
+                                      (-> schema :labels? false? not)))])))
                 (:items schema))])
 
 (rum/defc pate-grid < rum/reactive

@@ -26,4 +26,3 @@
            [[:huoneistot :0 :parvekeTaiTerassiKytkin] true]
            [[:huoneistot :0 :saunaKytkin] true]
            [[:huoneistot :0 :lamminvesiKytkin] true]})
-

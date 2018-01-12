@@ -1,6 +1,7 @@
 (ns lupapalvelu.ui.pate.docgen
   "Rudimentary support for docgen subset in the Pate context."
-  (:require [lupapalvelu.pate.shared :as shared]
+  (:require [clojure.string :as s]
+            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.pate.path :as path]
@@ -21,26 +22,34 @@
   [:div.col--vertical
    (if (-> schema :body first :label false?)
      (common/empty-label)
-     [:label.pate-label {:for (path/id path)}
+     [:label.pate-label {:for (path/id path)
+                         :class (common/css-flags :required
+                                                  (path/required? options))}
       (docgen-loc options)])
    component])
-
-(defn warning? [{:keys [path state]}]
-  (path/react (cons :_errors path) state ))
 
 (defn docgen-attr [{:keys [path state] :as options} & kv]
   (let [id (path/id path)]
     (merge {:key id
             :id  id
             :disabled (path/disabled? options)
-            :class (common/css-flags :warning (warning? options))}
+            :class (common/css-flags :warning (path/error? options))}
            (apply hash-map kv))))
 
-(defn- state-change [{:keys [state path] :as options}]
+(defn- state-change
+  "Updates state according to event."
+  [{:keys [state path] :as options}]
   (let [handler (common/event->state (path/state path state))]
     (fn [event]
       (when (handler event)
         (path/meta-updated options)))))
+
+(defn- state-change-callback
+  "Updates state according to value."
+  [{:keys [state path] :as options}]
+  (fn [value]
+    (when (common/reset-if-needed! (path/state path state) value)
+      (path/meta-updated options))))
 
 ;; ---------------------------------------
 ;; Components
@@ -54,9 +63,12 @@
                   (partial sort-by :text js/util.localeComparator)
                   identity)]
     [:select.dropdown
-     (docgen-attr options
-                  :value     (rum/react local-state)
-                  :on-change (state-change options))
+     (common/update-css (docgen-attr options
+                                     :value     (rum/react local-state)
+                                     :on-change (state-change options))
+                        :required (and
+                                   (s/blank? (rum/react local-state))
+                                   (path/required? options)))
      (->> schema :body first
           :body
           (map (fn [{n :name}]
@@ -112,21 +124,19 @@
                     (docgen-loc options n)]]))))]))
 
 
-(rum/defcs text-edit < (rum/local "" ::text)
-  rum/reactive
+(rum/defc text-edit < rum/reactive
   {:key-fn (fn [_ {path :path} _ & _] (path/id path))}
   "Update the options model state only on blur. Immediate update does
   not work reliably."
-  [local-state {:keys [schema state path] :as options} tag & [attr]]
-  (let [text* (::text local-state)
-        state (path/state path state)]
-    (common/reset-if-needed! text* @state)
-    [tag
-     (merge (docgen-attr options
-                         :value     @text*
-                         :on-change identity ;; A function is needed
-                         :on-blur   (state-change options))
-            attr)]))
+  [{:keys [schema state path] :as options} tag & [attr]]
+  ((case tag
+     :text components/text-edit
+     :textarea components/textarea-edit)
+   (path/value path state)
+   (merge {:required? (path/required? options)
+           :callback (state-change-callback options)}
+          (docgen-attr options)
+          attr)))
 
 (rum/defc docgen-date < rum/reactive
   [{:keys [schema path state] :as options}]
@@ -143,8 +153,8 @@
     :select     (docgen-select options)
     :checkbox   (docgen-checkbox options)
     :radioGroup (docgen-radio-group options)
-    :string     (text-edit options :input.grid-style-input {:type "text"})
-    :text       (text-edit options :textarea.grid-style-input)
+    :string     (text-edit options :text)
+    :text       (text-edit options :textarea)
     :date       (docgen-date options)))
 
 ;; ---------------------------------------

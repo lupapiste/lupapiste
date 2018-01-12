@@ -34,6 +34,12 @@
              :path "pate-enabled"
              :value flag) => ok?))
 
+(defn no-errors? [{:keys [errors ok]}]
+  (and (nil? errors) (true? ok)))
+
+(defn invalid-value? [{:keys [errors]}]
+  (util/=as-kw (-> errors first last) :error.invalid-value))
+
 (defn check-kuntagml [{:keys [organization permitType id]} verdict-date]
   (let [organization (organization-from-minimal-by-id organization)
         permit-type (keyword permitType)
@@ -89,7 +95,7 @@
              :category "r"
              :path [:foremen]
              :value [:bad-tj])
-    => (err :error.invalid-value))
+    => invalid-value?)
   (fact "Save settings draft"
     (let [{modified :modified}
           (command sipoo :save-verdict-template-settings-value
@@ -103,7 +109,8 @@
                :category "r")
         => (contains {:settings {:draft    {:verdict-code ["ehdollinen" "ei-puollettu"
                                                            "evatty" "hyvaksytty"]}
-                                 :modified modified}}))))
+                                 :modified modified}
+                      :filled   false}))))
   (fact "Select three foremen"
     (command sipoo :save-verdict-template-settings-value
              :category :r
@@ -119,7 +126,7 @@
                          :value delta) => ok?))]
       (set-date-delta "julkipano" 1)
       (set-date-delta "anto" 2)
-      (set-date-delta "valitus" 3)
+      (set-date-delta "muutoksenhaku" 3)
       (set-date-delta "lainvoimainen" 4)
       (set-date-delta "aloitettava" 1) ;; years
       (set-date-delta "voimassa" 2) ;; years
@@ -127,8 +134,20 @@
   (fact "Date delta validation"
     (command sipoo :save-verdict-template-settings-value
              :category :r
-             :path [:valitus :delta]
-             :value -8)=> (err :error.invalid-value)))
+             :path [:muutoksenhaku :delta]
+             :value -8)=> invalid-value?)
+  (fact "Board"
+    (command sipoo :save-verdict-template-settings-value
+             :category :r
+             :path [:lautakunta-muutoksenhaku :delta]
+             :value 10)=> ok?
+    (command sipoo :save-verdict-template-settings-value
+             :category :r
+             :path [:boardname]
+             :value "Board of peers")=> ok?)
+  (fact "The settings are now filled"
+    (query sipoo :verdict-template-settings :category "r")
+    => (contains {:filled true})))
 
 (fact "Sipoo categories"
   (:categories (query sipoo :verdict-template-categories))
@@ -178,20 +197,20 @@
               (command sipoo :save-verdict-template-draft-value
                        :template-id id
                        :path [:verdict-dates]
-                       :value [:julkipano :anto :valitus :lainvoimainen
+                       :value [:julkipano :anto :muutoksenhaku :lainvoimainen
                                :aloitettava :voimassa]) => ok?)
             (fact "vv-tj is not supported by settings"
               (command sipoo :save-verdict-template-draft-value
                        :template-id id
                        :path [:foremen]
                        :value [:vv-tj])
-              => (err :error.invalid-value))
+              => invalid-value?)
             (fact "Set foremen removed"
               (command sipoo :save-verdict-template-draft-value
                        :template-id id
                        :path [:removed-sections :foremen]
                        :value true) => ok?)
-            (fact "Set plans removed"
+            (facts "Set plans removed"
               (let [{last-edit :modified}
                     (command sipoo :save-verdict-template-draft-value
                              :template-id id
@@ -202,95 +221,119 @@
                   => (contains {:id       id
                                 :name     "Uusi nimi"
                                 :draft    {:giver            "viranhaltija"
-                                           :verdict-dates ["julkipano" "anto" "valitus" "lainvoimainen"
-                                                           "aloitettava" "voimassa"]
+                                           :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
+                                                              "aloitettava" "voimassa"]
                                            :removed-sections {:foremen true
                                                               :plans   true}}
-                                :modified last-edit}))
-                (fact "Publish template"
-                  (let [{published :published} (publish-verdict-template sipoo id)]
-                    (- published last-edit) => pos?
-                    (fact "Delete template"
-                      (command sipoo :toggle-delete-verdict-template
-                               :template-id id
-                               :delete true) => ok?)
-                    (fact "Template list again. Publishing and deletion do not affect modified timestamp."
-                      (query sipoo :verdict-templates)
-                      => (contains {:verdict-templates [{:id        id
-                                                         :name      "Uusi nimi"
-                                                         :modified  last-edit
-                                                         :deleted   true
-                                                         :category  "r"
-                                                         :published published}]}))
-                    (fact "Name change not allowed for deleted template"
-                      (command sipoo :set-verdict-template-name
-                               :template-id id
-                               :name "Foo")
-                      => (err :error.verdict-template-deleted))
-                    (fact "Draft data update not allowed for deleted template"
-                      (command sipoo :save-verdict-template-draft-value
-                               :template-id id
-                               :path [:hii]
-                               :value "Foo")
-                      => (err :error.verdict-template-deleted))
-                    (fact "Publish not allowed for deleted template"
-                      (publish-verdict-template sipoo id)
-                      => (err :error.verdict-template-deleted))
-                    (fact "Fetch draft not allowed for deleted template"
-                      (query sipoo :verdict-template
-                             :template-id id)
-                      => (err :error.verdict-template-deleted))
-                    (fact "Copying is allowed also for deleted templates"
-                      (let [{:keys [copy-id copy-modified copy-published
-                                    copy-deleted copy-draft copy-name
-                                    copy-category]}
-                            (prefix-keys (command sipoo :copy-verdict-template
-                                                  :template-id id)
-                                         :copy-)]
-                        copy-id =not=> id
-                        (- copy-modified published) => pos?
-                        copy-published => nil
-                        copy-category => "r"
-                        copy-name => "Uusi nimi (kopio)"
-                        copy-draft => {:giver            "viranhaltija"
-                                       :verdict-dates    ["julkipano" "anto" "valitus" "lainvoimainen"
-                                                          "aloitettava" "voimassa"]
-                                       :removed-sections {:foremen true
-                                                          :plans   true}}
-                        (fact "Editing copy draft does not affect original"
-                          (command sipoo :save-verdict-template-draft-value
-                                   :template-id copy-id
-                                   :path [:paatosteksti]
-                                   :value  "This is the verdict.") => ok?
-                          (fact "Copy has new data"
-                            (query sipoo :verdict-template
-                                   :template-id copy-id)
-                            => (contains {:draft {:giver            "viranhaltija"
-                                                  :verdict-dates    ["julkipano" "anto" "valitus" "lainvoimainen"
-                                                                     "aloitettava" "voimassa"]
-                                                  :removed-sections {:foremen true
-                                                                     :plans   true}
-                                                  :paatosteksti     "This is the verdict."}
-                                          :name  "Uusi nimi (kopio)"}))
-                          (fact "Restore the deleted template"
-                            (command sipoo :toggle-delete-verdict-template
-                                     :template-id id
-                                     :delete false) => ok?)
-                          (fact "The original (restored) template does not have new data"
-                            (query sipoo :verdict-template
-                                   :template-id id)
-                            => (contains {:draft {:giver            "viranhaltija"
-                                                  :verdict-dates    ["julkipano" "anto" "valitus" "lainvoimainen"
-                                                                     "aloitettava" "voimassa"]
-                                                  :removed-sections {:foremen true
-                                                                     :plans   true}}
-                                          :name  "Uusi nimi"}))
-                          (fact "Template list has both templates"
-                            (->> (query sipoo :verdict-templates)
-                                 :verdict-templates
-                                 (map #(select-keys % [:id :name])))
-                            =>  [{:id id :name "Uusi nimi"}
-                                 {:id copy-id :name "Uusi nimi (kopio)"}]))))))))))))))
+                                :modified last-edit
+                                :filled   true})))
+              (facts "Publish template"
+                (publish-verdict-template sipoo id) => ok?
+                (facts "Required fields"
+                  (fact "The template cannot be published if any settings required field is empty"
+                    (command sipoo :save-verdict-template-settings-value
+                             :category "r" :path [:boardname] :value "")
+                    => (contains {:filled false})
+                    (publish-verdict-template sipoo id) => (err :pate.required-fields)
+                    (command sipoo :save-verdict-template-settings-value
+                             :category "r" :path [:boardname] :value "Board of peers")
+                    => (contains {:filled true})
+                    (publish-verdict-template sipoo id) => ok?)
+                  (fact "The template cannot be published if any required field is empty"
+                    (command sipoo :save-verdict-template-draft-value
+                             :template-id id :path [:giver] :value "")
+                    => (contains {:filled false})
+                    (publish-verdict-template sipoo id) => (err :pate.required-fields)
+                    ))
+                (let [{filled    :filled
+                       last-edit :modified}  (command sipoo :save-verdict-template-draft-value
+                                                      :template-id id
+                                                      :path [:giver]
+                                                      :value :viranhaltija)
+                      {published :published} (publish-verdict-template sipoo id)]
+                  filled => true
+                  (- published last-edit) => pos?
+                  (fact "Delete template"
+                    (command sipoo :toggle-delete-verdict-template
+                             :template-id id
+                             :delete true) => ok?)
+                  (fact "Template list again. Publishing and deletion do not affect modified timestamp."
+                    (-> (query sipoo :verdict-templates) :verdict-templates first)
+                    => (contains {:id        id
+                                  :name      "Uusi nimi"
+                                  :modified  last-edit
+                                  :deleted   true
+                                  :category  "r"
+                                  :published published}))
+                  (fact "Name change not allowed for deleted template"
+                    (command sipoo :set-verdict-template-name
+                             :template-id id
+                             :name "Foo")
+                    => (err :error.verdict-template-deleted))
+                  (fact "Draft data update not allowed for deleted template"
+                    (command sipoo :save-verdict-template-draft-value
+                             :template-id id
+                             :path [:hii]
+                             :value "Foo")
+                    => (err :error.verdict-template-deleted))
+                  (fact "Publish not allowed for deleted template"
+                    (publish-verdict-template sipoo id)
+                    => (err :error.verdict-template-deleted))
+                  (fact "Fetch draft not allowed for deleted template"
+                    (query sipoo :verdict-template
+                           :template-id id)
+                    => (err :error.verdict-template-deleted))
+                  (fact "Copying is allowed also for deleted templates"
+                    (let [{:keys [copy-id copy-modified copy-published
+                                  copy-deleted copy-draft copy-name
+                                  copy-category]}
+                          (prefix-keys (command sipoo :copy-verdict-template
+                                                :template-id id)
+                                       :copy-)]
+                      copy-id =not=> id
+                      (- copy-modified published) => pos?
+                      copy-published => nil
+                      copy-category => "r"
+                      copy-name => "Uusi nimi (kopio)"
+                      copy-draft => {:giver            "viranhaltija"
+                                     :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
+                                                        "aloitettava" "voimassa"]
+                                     :removed-sections {:foremen true
+                                                        :plans   true}}
+                      (fact "Editing copy draft does not affect original"
+                        (command sipoo :save-verdict-template-draft-value
+                                 :template-id copy-id
+                                 :path [:paatosteksti]
+                                 :value  "This is the verdict.") => ok?
+                        (fact "Copy has new data"
+                          (query sipoo :verdict-template
+                                 :template-id copy-id)
+                          => (contains {:draft {:giver            "viranhaltija"
+                                                :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
+                                                                   "aloitettava" "voimassa"]
+                                                :removed-sections {:foremen true
+                                                                   :plans   true}
+                                                :paatosteksti     "This is the verdict."}
+                                        :name  "Uusi nimi (kopio)"}))
+                        (fact "Restore the deleted template"
+                          (command sipoo :toggle-delete-verdict-template
+                                   :template-id id
+                                   :delete false) => ok?)
+                        (fact "The original (restored) template does not have new data"
+                          (query sipoo :verdict-template
+                                 :template-id id)
+                          => (contains {:draft {:giver            "viranhaltija"
+                                                :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
+                                                                   "aloitettava" "voimassa"]
+                                                :removed-sections {:foremen true
+                                                                   :plans   true}}
+                                        :name  "Uusi nimi"}))
+                        (fact "Template list has both templates"
+                          (->> (query sipoo :verdict-templates)
+                               :verdict-templates
+                               (map #(select-keys % [:id :name])))
+                          =>  [{:id id :name "Uusi nimi"}
+                               {:id copy-id :name "Uusi nimi (kopio)"}])))))))))))))
 
 (fact "Delete nonexisting template"
   (command sipoo :toggle-delete-verdict-template
@@ -307,7 +350,7 @@
     (command sipoo :save-verdict-template-draft-value
              :template-id id
              :path [:verdict-dates]
-             :value ["bad"])=> (err :error.invalid-value)
+             :value ["bad"])=> invalid-value?
     (command sipoo :save-verdict-template-draft-value
              :template-id id
              :path [:bad :path]
@@ -315,7 +358,7 @@
     (command sipoo :save-verdict-template-draft-value
              :template-id id
              :path [:verdict-code]
-             :value :bad) => (err :error.invalid-value)
+             :value :bad) => invalid-value?
     (command sipoo :save-verdict-template-draft-value
              :template-id id
              :path [:verdict-code]
@@ -518,6 +561,12 @@
     (:templates (query sipoo :default-operation-verdict-templates))
     => {})
   (let [{template-id :id} (init-verdict-template sipoo :r)]
+    (fact "Fill required fields"
+      (command sipoo :save-verdict-template-draft-value
+               :template-id template-id
+               :path [:giver]
+               :value :viranhaltija)
+      => (contains {:filled true}))
     (fact "Verdict template not published"
       (command sipoo :set-default-operation-verdict-template
                :operation "pientalo" :template-id template-id)
@@ -645,9 +694,9 @@
                :name "Full template") => ok?)
 
     (set-template-draft-values template-id
-                               :verdict-dates ["julkipano" "anto" "valitus" "lainvoimainen"
+                               :verdict-dates ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
                                                "aloitettava" "voimassa"]
-                               "giver" :lautakunta
+                               "giver" :viranhaltija
                                "verdict-code" :ehdollinen
                                "paatosteksti" "Verdict text."
                                :foremen [:iv-tj :erityis-tj]
@@ -675,12 +724,24 @@
                                                                 :propertyId sipoo-property-id
                                                                 :operation  :sisatila-muutos)
             verdict-fn-factory   (fn [verdict-id]
-                                   {:open #(query sonja :pate-verdict :id app-id
-                                                  :verdict-id verdict-id)
-                                    :edit #(command sonja :edit-pate-verdict :id app-id
-                                                    :verdict-id verdict-id
-                                                    :path (map name (flatten [%1]))
-                                                    :value %2)})]
+                                   (let [open-fn #(query sonja :pate-verdict :id app-id
+                                                         :verdict-id verdict-id)]
+                                     {:open          open-fn
+                                      :edit          #(command sonja :edit-pate-verdict :id app-id
+                                                               :verdict-id verdict-id
+                                                               :path (map name (flatten [%1]))
+                                                               :value %2)
+                                      :check-changes (fn [{changes :changes} expected]
+                                                       (fact "Check changes"
+                                                         changes => expected)
+                                                       (fact "Check that verdict has been updated"
+                                                         (-> (open-fn) :verdict :data)
+                                                         => (contains (reduce (fn [acc [x y]]
+                                                                                (assoc acc
+                                                                                       (-> x first keyword)
+                                                                                       y))
+                                                                              {}
+                                                                              changes))))}))]
         (fact "Error: unpublished template-id for verdict draft"
           (command sonja :new-pate-verdict-draft :id app-id :template-id template-id)
           => fail?)
@@ -705,39 +766,29 @@
           (toggle-sipoo-pate true)
           (query sonja :pate-verdict-tab :id app-id) => ok?)
         (fact "Sonja creates verdict draft"
-          (let [draft                (command sonja :new-pate-verdict-draft
-                                              :id app-id :template-id template-id)
-                verdict-id           (-> draft :verdict :id)
-                data                 (-> draft :verdict :data)
-                op-id                (-> data :buildings keys first keyword)
-                {open-verdict :open
-                 edit-verdict :edit} (verdict-fn-factory verdict-id)
-                check-changes        (fn [{changes :changes} expected]
-                                       (fact "Check changes"
-                                         changes => expected)
-                                       (fact "Check that verdict has been updated"
-                                         (-> (open-verdict) :verdict :data)
-                                         => (contains (reduce (fn [acc [x y]]
-                                                                (assoc acc
-                                                                       (-> x first keyword)
-                                                                       y))
-                                                              {}
-                                                              changes))))
-                check-error          (fn [{errors :errors} & [kw err-kw]]
-                                       (if kw
-                                         (fact "Check errors"
-                                           (some (fn [[x y]]
-                                                   (and (= kw (util/kw-path x))
-                                                        (keyword y)))
-                                                 errors) => (or err-kw
-                                                                :error.invalid-value))
-                                         (fact "No errors"
-                                           errors => nil)))]
-            data => (contains { :appeal          "Humble appeal."
+          (let [draft                          (command sonja :new-pate-verdict-draft
+                                                        :id app-id :template-id template-id)
+                verdict-id                     (-> draft :verdict :id)
+                data                           (-> draft :verdict :data)
+                op-id                          (-> data :buildings keys first keyword)
+                {open-verdict  :open
+                 edit-verdict  :edit
+                 check-changes :check-changes} (verdict-fn-factory verdict-id)
+
+                check-error (fn [{errors :errors} & [kw err-kw]]
+                              (if kw
+                                (fact "Check errors"
+                                  (some (fn [[x y]]
+                                          (and (= kw (util/kw-path x))
+                                               (keyword y)))
+                                        errors) => (or err-kw
+                                                       :error.invalid-value))
+                                (fact "No errors"
+                                  errors => nil)))]
+            data => (contains {:appeal           "Humble appeal."
                                :purpose          ""
                                :verdict-text     "Verdict text."
                                :anto             ""
-                               :giver            "lautakunta"
                                :complexity       "medium"
                                :foremen          ["iv-tj" "erityis-tj"]
                                :verdict-code     "ehdollinen"
@@ -752,6 +803,14 @@
                                :reviews-included true
                                :reviews          [(:id review)]
                                :statements       ""})
+            (fact "No section"
+              (:section data) => nil?)
+            (fact "New verdict is not filled"
+              draft => (contains {:filled false}))
+            (fact "Verdict cannot be published since required fields are missing"
+              (command sonja :publish-pate-verdict :id app-id
+                       :verdict-id verdict-id)
+              => (err :pate.required-fields))
             (fact "Building info is empty but contains the template fields"
               data => (contains {:buildings {op-id {:description            ""
                                                     :show-building          true
@@ -763,6 +822,11 @@
                                                     :tag                    ""
                                                     :autopaikat-yhteensa    ""
                                                     :paloluokka             ""}}}))
+            (fact "Since the verdict is regular (official) we can set contact"
+              (edit-verdict "contact" "Authority Sonja Sibbo") => no-errors?)
+            (fact "... but cannot set section"
+              (check-error (edit-verdict :verdict-section "8")
+                           :verdict-section :error.invalid-value-path ))
 
             (facts "Verdict references"
               (let [{:keys [foremen plans reviews]} (:references draft)]
@@ -774,7 +838,7 @@
                   (:plans data) => [(-> plans first :id)])))
             (facts "Verdict dates"
               (fact "Set julkipano date"
-                (edit-verdict "julkipano" "20.9.2017") => ok?)
+                (edit-verdict "julkipano" "20.9.2017") => no-errors?)
               (fact "Set verdict date"
                 (let [{:keys [modified changes]}
                       (edit-verdict "verdict-date" "27.9.2017")]
@@ -789,7 +853,7 @@
                 (check-changes (edit-verdict "automatic-verdict-dates" true)
                                [[["julkipano"] "28.9.2017"]
                                 [["anto"] "2.10.2017"]
-                                [["valitus"] "5.10.2017"]
+                                [["muutoksenhaku"] "5.10.2017"]
                                 [["lainvoimainen"] "9.10.2017"]
                                 [["aloitettava"] "9.10.2018"]
                                 [["voimassa"] "9.10.2020"]]))
@@ -800,7 +864,7 @@
                 (check-changes (edit-verdict :verdict-date "6.10.2017")
                                [[["julkipano"] "9.10.2017"]
                                 [["anto"] "11.10.2017"]
-                                [["valitus"] "16.10.2017"]
+                                [["muutoksenhaku"] "16.10.2017"]
                                 [["lainvoimainen"] "20.10.2017"]
                                 [["aloitettava"] "22.10.2018"]
                                 [["voimassa"] "22.10.2020"]])))
@@ -942,6 +1006,12 @@
                   (command sonja :update-op-description :id app-id
                            :op-id op-id-pientalo
                            :desc "Hen piaoliang!") => ok?)
+                (fact "national-id update pre-verdict"
+                      (api-update-national-building-id-call app-id {:form-params {:applicationId app-id :operationId (name op-id-pientalo) :nationalBuildingId "1234567881"}
+                                                                :as :json :basic-auth ["sipoo-r-backend" "sipoo"]}) => http200?
+                      (->> (query-application sonja app-id) :documents
+                           (util/find-by-id doc-id)
+                           :data :valtakunnallinenNumero :value) => "1234567881")
                 (fact "Set kiinteiston-autopaikat for pientalo"
                   (check-error (edit-verdict [:buildings op-id-pientalo :kiinteiston-autopaikat] "8")))
                 (fact "Buildings updated"
@@ -960,12 +1030,18 @@
                                       :show-building          true
                                       :vss-luokka             ""
                                       :kiinteiston-autopaikat "8"
-                                      :building-id            ""
+                                      :building-id            "1234567881"
                                       :operation              "pientalo"
                                       :rakennetut-autopaikat  ""
                                       :tag                    "Hao"
                                       :autopaikat-yhteensa    ""
                                       :paloluokka             ""}})
+                (fact "Sonja can publish the verdict"
+                  (command sonja :publish-pate-verdict :id app-id
+                           :verdict-id verdict-id) => ok?)
+                (fact "Verdict's section is one"
+                  (-> (open-verdict) :verdict :data :verdict-section)
+                  => "1")
                 (facts "Modify template"
                   (letfn [(edit-template [path value]
                             (fact {:midje/description (format "Template draft %s -> %s" path value)}
@@ -973,7 +1049,7 @@
                                        :template-id template-id
                                        :path (map name (flatten [path]))
                                        :value value) => ok?))]
-                    (fact "Disable julkipano, valitus, lainvoimainen and aloitettava"
+                    (fact "Disable julkipano, muutoksenhaku, lainvoimainen and aloitettava"
                       (edit-template [:verdict-dates] ["anto" "voimassa"]))
                     (fact "Remove all the other sections except buildings (and verdict)"
                       (edit-template [:removed-sections :foremen] true)
@@ -990,21 +1066,23 @@
                     (fact "Unselect autopaikat and vss-luokka"
                       (edit-template :autopaikat false)
                       (edit-template :vss-luokka false))
+                    (fact "Board verdict template"
+                      (edit-template :giver :lautakunta) => true)
                     (fact "Publish template"
                       (publish-verdict-template sipoo template-id) => ok?)))
                 (fact "New verdict"
-                  (let  [{verdict :verdict}   (command sonja :new-pate-verdict-draft
-                                                       :id app-id
-                                                       :template-id template-id)
-                         verdict-date "27.9.2017"
+                  (let  [{verdict :verdict}             (command sonja :new-pate-verdict-draft
+                                                                 :id app-id
+                                                                 :template-id template-id)
+                         verdict-date                   "27.9.2017"
                          {data       :data
-                          verdict-id :id}     verdict
-                         {open-verdict :open
-                          edit-verdict :edit} (verdict-fn-factory verdict-id)]
+                          verdict-id :id}               verdict
+                         {open-verdict  :open
+                          edit-verdict  :edit
+                          check-changes :check-changes} (verdict-fn-factory verdict-id)]
                     data => {:voimassa              ""
                              :verdict-text          "Verdict text."
                              :anto                  ""
-                             :giver                 "lautakunta"
                              :foremen-included      false
                              :foremen               ["iv-tj" "erityis-tj"]
                              :verdict-code          "ehdollinen"
@@ -1022,7 +1100,7 @@
                                               :paloluokka    ""}
                               op-id-pientalo {:description   "Hen piaoliang!"
                                               :show-building true
-                                              :building-id   ""
+                                              :building-id   "1234567881"
                                               :operation     "pientalo"
                                               :tag           "Hao"
                                               :paloluokka    ""}}}
@@ -1034,24 +1112,44 @@
                                                       kwp :error.invalid-value-path)))]
                         (check-fn :julkipano "29.9.2017")
                         (check-fn :buildings.vss-luokka "12")
-                        (check-fn :buildings.kiinteiston-autopaikat 34)))
+                        (check-fn :buildings.kiinteiston-autopaikat 34)
+                        (fact "Contact cannot be set for board verdict"
+                          (check-fn :contact "Authority Sonja Sibbo"))
+                        (fact "... but section can be edited"
+                          (edit-verdict :verdict-section "88") => no-errors?)))
+                    (facts "Muutoksenhaku calculation has changed"
+                      (fact "Set the verdict date"
+                        (edit-verdict :verdict-date "8.1.2018") => no-errors?)
+                      (fact "Calculate muutoksenhaku date automatically"
+                        (check-changes (edit-verdict :automatic-verdict-dates true)
+                                       [[["julkipano"] "9.1.2018"]
+                                        [["anto"] "11.1.2018"]
+                                        [["muutoksenhaku"] "22.1.2018"]
+                                        [["lainvoimainen"] "26.1.2018"]
+                                        [["aloitettava"] "28.1.2019"]
+                                        [["voimassa"] "28.1.2021"]])))
                     (facts "Add attachment to verdict draft"
                       (let [attachment-id (add-verdict-attachment app-id verdict-id "Paatosote")]
                         (fact "Attachment can be deleted"
                           (command sonja :delete-attachment :id app-id
                                    :attachmentId attachment-id)=> ok?)))
                     (fact "No attachments"
-                      (query-application sonja app-id)
-                      => (contains {:attachments []}))
+                      (:attachment (query-application sonja app-id))
+                      => empty?)
                     (fact "Add required verdict date"
-                      (edit-verdict "verdict-date" verdict-date) => ok?)
+                      (edit-verdict "verdict-date" verdict-date) => no-errors?)
                     (facts "Add attachment to verdict draft again"
                       (let [attachment-id (add-verdict-attachment app-id verdict-id "Otepaatos")]
-                        ;; TODO check that verdict can't be published if verdict-date is blank!
                         (fact "Publish verdict"
                           (command sonja :publish-pate-verdict
                                    :id app-id
                                    :verdict-id verdict-id) => ok?)
+                        (facts "Published verdict"
+                          (let [data  (-> (open-verdict) :verdict :data)]
+                            (fact "Section is 88"
+                              data => (contains {:verdict-section "88"}))
+                            (fact "No contact information"
+                              (:contact data) => empty?)))
                         (fact "Attachment can no longer be deleted"
                           (command sonja :delete-attachment :id app-id
                                    :attachmentId attachment-id)
@@ -1076,9 +1174,18 @@
                     (fact "Published verdict cannot be deleted"
                       (command sonja :delete-pate-verdict :id app-id
                                :verdict-id verdict-id) => fail?)))
-              (fact "Application state is verdictGiven"
-                (:state (query-application sonja app-id))
-                => "verdictGiven")))
+              (let [{:keys [state buildings id] {operation-id :id} :primaryOperation :as post-verdict-app} (query-application sonja app-id)]
+                (fact "Application state is verdictGiven"
+                  state => "verdictGiven")
+                (fact "Buildings array is created, primaryOperation gets index = 1"
+                  (first buildings) => (contains {:index 1
+                                                  :localShortId "002"
+                                                  :description "Hello world!"}))
+                (fact "national-id update post-verdict is reflected to buildings array as well"
+                  (api-update-national-building-id-call id {:form-params {:applicationId id :operationId operation-id :nationalBuildingId "1234567892"}
+                                                            :as :json
+                                                            :basic-auth ["sipoo-r-backend" "sipoo"]}) => http200?
+                  (-> (query-application sonja app-id) :buildings first :nationalId) => "1234567892"))))
           (fact "Verdict draft to be deleted"
             (let  [{verdict :verdict} (command sonja :new-pate-verdict-draft
                                                :id app-id
