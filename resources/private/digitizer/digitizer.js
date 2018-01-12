@@ -37,6 +37,9 @@
 
     self.permitNotFound = ko.observable(false);
 
+    self.reportStartDate = ko.observable(new Date());
+    self.reportEndDate = ko.observable(new Date());
+
     var localStorageKey = "digitizer-prev-permit-organization";
     self.selectedPrevPermitOrganization.subscribe(function(organizationId) {
       if (organizationId && window.localStorage) {
@@ -280,6 +283,20 @@
         })
         .call();
     };
+
+    self.downloadReport = function() {
+      var startDate = self.reportStartDate();
+      var startTs = new Date(startDate.getYear() + 1900, startDate.getMonth(), startDate.getDate(), 0, 0, 0).getTime();
+      var endDate = self.reportEndDate();
+      var endTs = new Date(endDate.getYear() + 1900, endDate.getMonth(), endDate.getDate(), 23, 59, 59).getTime();
+      var url = "/api/raw/digitizer-report?startTs="+startTs+"&endTs="+endTs;
+      window.open(url, "_self");
+    };
+
+    self.createArchivingReport = function() {
+      hub.send("track-click", {category:"Applications", label:"create", event:"createArchivingReport"});
+      pageutil.openPage("create-archiving-report");
+    };
   }
 
   var model = new CreateApplicationModel();
@@ -300,6 +317,7 @@
 
   $(function() {
     $("#create-archiving-project").applyBindings(model);
+    $("#create-archiving-report").applyBindings(model);
     initAutocomplete("#archiving-address-search");
 
   });

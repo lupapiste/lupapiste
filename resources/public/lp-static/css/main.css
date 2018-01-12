@@ -14759,6 +14759,15 @@ div.automatic-assignments .assignment .editor {
   display: inline-block;
 }
 
+.archiving-top .button-group {
+  float: right;
+  margin-top: -25px;
+}
+
+.archiving-top .button-group button {
+  margin-left: 20px;
+}
+
 #invitations {
   background-color: #eeeeee;
   margin-bottom: -24px;
