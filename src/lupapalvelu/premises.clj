@@ -70,10 +70,10 @@
    "keittiön tyyppi"        :keittionTyyppi
    "typ av kök"             :keittionTyyppi
    "kitchen type"           :keittionTyyppi
-   "huoneistoala"           :huoneistoala
-   "huoneistoala m2"        :huoneistoala
-   "lägenhetsyta"           :huoneistoala
-   "floor area"             :huoneistoala
+   "huoneistoala"           "huoneistoala"
+   "huoneistoala m2"        "huoneistoala"
+   "lägenhetsyta"           "huoneistoala"
+   "floor area"             "huoneistoala"
    "varusteena wc"          :WCKytkin
    "wc"                     :WCKytkin
    "toilet"                 :WCKytkin
@@ -116,7 +116,7 @@
         lp-val (cond
                  (keyword? lp-key) (-> lp-key ifc->lp-val-map (get ifc-val))
                  (= "huoneistonumero" lp-key) (->> ifc-val ss/remove-leading-zeros util/->int (format "%03d"))
-                 (= "huoneistonala" lp-key) (ss/replace ifc-val #"," ".")
+                 (= "huoneistoala" lp-key) (ss/replace ifc-val #"," ".")
                  :else ifc-val)]
     (when (and (not (empty? ifc-val)) lp-key)
       [(mapv keyword ["huoneistot" (str premises-number) lp-key]) lp-val])))
@@ -156,7 +156,6 @@
         {:keys [header-row data]} (when (:data csv-data) (-> csv-data :data (csv-data->ifc-coll)))
         premises-data             (when (and header-row data)
                                     (data->model-updates header-row data))
-        _ (println "PREMISES-DATA " premises-data)
         file-updated?             (when-not (empty? premises-data)
                                     (-> premises-data (save-premises-data command doc) :ok))
         save-response             (when file-updated?

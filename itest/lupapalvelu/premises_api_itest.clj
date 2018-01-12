@@ -2,7 +2,6 @@
   (:require [midje.sweet :refer :all]
             [sade.core :refer [now fail]]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.premises-api :as premises-api]
             [clojure.java.io :as io]))
 
 (apply-remote-minimal)
@@ -30,7 +29,7 @@
         resp (http-post uri params)]
     (decode-response resp)))
 
-(facts "Uploading excel updates huoneistot"
+(facts "Uploading and downloading huoneistot excel"
   (let [app-id (create-app-id pena) => ok?
         application (query-application pena app-id)
         doc (:id (get-huoneistot-doc application))]
@@ -68,7 +67,7 @@
               updated-doc (get-huoneistot-doc updated-application)
               huoneistot (-> updated-doc :data :huoneistot (dissoc :validationResult))]
 
-          (count huoneistot) => 3
+          (-> (query-application pena app-id) :ifc-data :filename) => file-3-lines
           (-> huoneistot :0 :porras :value) => "A"
           (-> huoneistot :1 :porras :value) => "B"
           (-> huoneistot :2 :porras :value) => "C")))
@@ -84,7 +83,13 @@
         (count huoneistot) => 1)
 
       (fact "Application has correct premises data"
+        (-> updated-application :ifc-data :filename) => file-1-line
         (-> huoneistot :0 :porras :value) => "G"
-        (-> huoneistot :0 :huoneistonumero :value) => "7"
+        (-> huoneistot :0 :huoneistonumero :value) => "007"
         (-> huoneistot :0 :huoneluku :value) => "7"
-        (-> huoneistot :0 :keittionTyyppi :value) => "keittio"))))
+        (-> huoneistot :0 :keittionTyyppi :value) => "keittio"))
+
+    (fact "Downloading huoneistot-excel"
+      (let [resp (raw pena :download-premises-template :application-id app-id :document-id doc)
+            _ (println (:headers resp))]
+        (:status resp) => 200))))
