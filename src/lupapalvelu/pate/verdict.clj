@@ -386,6 +386,9 @@
                {})))
 
 (defn ->buildings-array [application]
+  "Construction of the application-buildings array. This should be equivalent to ->buildings-summary function in
+   lupapalvelu.xml.krysp.building-reader the namespace, but instead of the message from backing system,
+   here all the input data is originating from PATE verdict."
   (->> application
        app-documents-having-buildings
        (util/indexed 1)
