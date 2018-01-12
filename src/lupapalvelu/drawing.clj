@@ -70,3 +70,10 @@
   "Converts a WKT drawing to a valid GeoJSON object. Returns nil if the drawing can't be converted to valid GeoJSON."
   [drawing]
   (parse-wkt-drawing drawing))
+
+(defn interior-point [geometry-string]
+  (try
+    (.getInteriorPoint ^Geometry (jts/read-wkt-str geometry-string))
+    (catch Exception e
+      (timbre/warn "Failed to resolve interior point for geometry:" geometry-string "(" (.getMessage e) ")")
+      nil)))

@@ -10,6 +10,7 @@
             [sade.coordinate :as coordinate]
             [sade.core :refer [now def- fail]]
             [sade.property :as p]
+            [lupapalvelu.drawing :as drawing]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.xml.krysp.verdict :as verdict]
@@ -497,6 +498,13 @@
           (coordinate/convert source-projection common/to-projection 3 coords))))
     (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus))))
 
+(defn- area-geometry-str [coordinates source-projection geometry-type]
+  (let [wgs-coordinates      (map #(coordinate/convert source-projection "WGS84" 6 (ss/split % #",")) coordinates)
+        wgs-coordinates-str  (apply str (mapv #(str (first %) " " (last %) ", ") wgs-coordinates))
+        first-coordinate     (first wgs-coordinates)
+        first-coordinate-str (str (first first-coordinate) " " (last first-coordinate))]
+    (str geometry-type "((" wgs-coordinates-str first-coordinate-str "))")))
+
 (defn- resolve-area-coordinates [coordinates-array-xml building-location]
   (if (some? (select1 building-location [:piste :Point]))
     (let [building-coordinates-str (->> (cr/all-of building-location) :piste :Point :pos)
@@ -505,7 +513,11 @@
       (when-not (contains? coordinate/known-bad-coordinates building-coordinates)
         (coordinate/convert source-projection common/to-projection 3 building-coordinates)))
     (let [area-coordinates-str (->> (cr/all-of coordinates-array-xml) :Polygon :outerBoundaryIs :LinearRing :coordinates)
-          area-coordinates (ss/split area-coordinates-str #" ")]
+          area-coordinates (ss/split area-coordinates-str #" ")
+          area-geometry-str (area-geometry-str area-coordinates "EPSG:3876" "POLYGON")
+          interior-point (drawing/interior-point area-geometry-str)
+          _ (println interior-point)
+          ]
       area-coordinates)))
 
 (defn- extract-osoitenimi [osoitenimi-elem lang]
