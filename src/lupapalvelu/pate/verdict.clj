@@ -23,7 +23,8 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [schema.core :as sc]
-            [swiss.arrows :refer :all]))
+            [swiss.arrows :refer :all]
+            [sade.validators :as validators]))
 
 (defn neighbor-states
   "Application neighbor-states data in a format suitable for verdicts: list
@@ -351,16 +352,22 @@
                             [(util/split-kw-path k) v])
                           changed))}))))
 
+(defn- app-documents-having-buildings
+  [{:keys [documents] :as application}]
+  (->> application
+       app/get-sorted-operation-documents
+       tools/unwrapped
+       (filter (util/fn-> :data (contains? :valtakunnallinenNumero)))
+       (map (partial app/populate-operation-info
+                     (app/get-operations application)))))
+
 (defn buildings
   "Map of building infos: operation id is key and value map contains
   operation (loc-key), building-id (either national or manual id),
   tag (tunnus) and description."
-  [{:keys [documents] :as application}]
-  (->> documents
-       tools/unwrapped
-       (filter (util/fn-> :data (contains? :valtakunnallinenNumero)))
-       (map (partial app/populate-operation-info
-                     (app/get-operations application)))
+  [application]
+  (->> application
+       app-documents-having-buildings
        (reduce (fn [acc {:keys [schema-info data]}]
                  (let [{:keys [id name
                                description]} (:op schema-info)]
@@ -377,6 +384,27 @@
                             :tag         (:tunnus data)}
                            ss/->plain-string))))
                {})))
+
+(defn ->buildings-array [application]
+  "Construction of the application-buildings array. This should be equivalent to ->buildings-summary function in
+   lupapalvelu.xml.krysp.building-reader the namespace, but instead of the message from backing system,
+   here all the input data is originating from PATE verdict."
+  (->> application
+       app-documents-having-buildings
+       (util/indexed 1)
+       (map (fn [[n {toimenpide :data {op :op} :schema-info}]]
+              (let [{:keys [rakennusnro valtakunnallinenNumero mitat kaytto tunnus]} toimenpide
+                    description-parts (remove ss/blank? [tunnus (:description op)])]
+                 {:localShortId (or rakennusnro (when (validators/rakennusnumero? tunnus) tunnus))
+                  :nationalId valtakunnallinenNumero
+                  :buildingId (or valtakunnallinenNumero rakennusnro)
+                  :location-wgs84 nil
+                  :location nil
+                  :area (:kokonaisala mitat)
+                  :index n
+                  :description (ss/join ": " description-parts)
+                  :operationId (:id op)
+                  :usage (or (:kayttotarkoitus kaytto) "")})))))
 
 (defn- merge-buildings [app-buildings verdict-buildings defaults]
   (reduce (fn [acc [op-id v]]
@@ -464,6 +492,7 @@
    2. Update application state
    3. Inspection summaries
    4. Other document updates (e.g., waste plan -> waste report)
+   4a. Construct buildings array
    5. Freeze (locked and read-only) verdict attachments and update TOS details
    6. TODO: Create tasks
    7. Generate section
@@ -477,12 +506,14 @@
         next-state (sm/verdict-given-state application)
         att-ids    (->> (:attachments application)
                         (filter #(= (-> % :target :id) (:id verdict)))
-                        (map :id))]
+                        (map :id))
+        buildings-updates {:buildings (->buildings-array application)}]
     (verdict-update command
                     (util/deep-merge
                      {$set (merge
                             {:pate-verdicts.$.data      (:data verdict)
                              :pate-verdicts.$.published created}
+                            buildings-updates
                             (att/attachment-array-updates (:id application)
                                                           (comp #{(:id verdict)} :id :target)
                                                           :readOnly true

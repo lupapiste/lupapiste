@@ -1006,6 +1006,12 @@
                   (command sonja :update-op-description :id app-id
                            :op-id op-id-pientalo
                            :desc "Hen piaoliang!") => ok?)
+                (fact "national-id update pre-verdict"
+                      (api-update-national-building-id-call app-id {:form-params {:applicationId app-id :operationId (name op-id-pientalo) :nationalBuildingId "1234567881"}
+                                                                :as :json :basic-auth ["sipoo-r-backend" "sipoo"]}) => http200?
+                      (->> (query-application sonja app-id) :documents
+                           (util/find-by-id doc-id)
+                           :data :valtakunnallinenNumero :value) => "1234567881")
                 (fact "Set kiinteiston-autopaikat for pientalo"
                   (check-error (edit-verdict [:buildings op-id-pientalo :kiinteiston-autopaikat] "8")))
                 (fact "Buildings updated"
@@ -1024,7 +1030,7 @@
                                       :show-building          true
                                       :vss-luokka             ""
                                       :kiinteiston-autopaikat "8"
-                                      :building-id            ""
+                                      :building-id            "1234567881"
                                       :operation              "pientalo"
                                       :rakennetut-autopaikat  ""
                                       :tag                    "Hao"
@@ -1094,7 +1100,7 @@
                                               :paloluokka    ""}
                               op-id-pientalo {:description   "Hen piaoliang!"
                                               :show-building true
-                                              :building-id   ""
+                                              :building-id   "1234567881"
                                               :operation     "pientalo"
                                               :tag           "Hao"
                                               :paloluokka    ""}}}
@@ -1168,9 +1174,18 @@
                     (fact "Published verdict cannot be deleted"
                       (command sonja :delete-pate-verdict :id app-id
                                :verdict-id verdict-id) => fail?)))
-              (fact "Application state is verdictGiven"
-                (:state (query-application sonja app-id))
-                => "verdictGiven")))
+              (let [{:keys [state buildings id] {operation-id :id} :primaryOperation :as post-verdict-app} (query-application sonja app-id)]
+                (fact "Application state is verdictGiven"
+                  state => "verdictGiven")
+                (fact "Buildings array is created, primaryOperation gets index = 1"
+                  (first buildings) => (contains {:index 1
+                                                  :localShortId "002"
+                                                  :description "Hello world!"}))
+                (fact "national-id update post-verdict is reflected to buildings array as well"
+                  (api-update-national-building-id-call id {:form-params {:applicationId id :operationId operation-id :nationalBuildingId "1234567892"}
+                                                            :as :json
+                                                            :basic-auth ["sipoo-r-backend" "sipoo"]}) => http200?
+                  (-> (query-application sonja app-id) :buildings first :nationalId) => "1234567892"))))
           (fact "Verdict draft to be deleted"
             (let  [{verdict :verdict} (command sonja :new-pate-verdict-draft
                                                :id app-id
