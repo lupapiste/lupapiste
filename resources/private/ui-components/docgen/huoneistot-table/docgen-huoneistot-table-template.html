@@ -19,7 +19,8 @@
           <br>
           <span class="group-help-text" data-bind="feature: 'premises-upload'">
               <span data-bind="ltext: 'huoneistot.premisesInfoText'"></span>
-              <a data-bind="attr: {href: '/api/raw/download-premises-template?document-id=' + $component.documentId +'&application-id=' + $parent.applicationId}, ltext: 'huoneistot.premisesDownloadLink'"></a>
+              <a data-bind="attr: {href: '/api/raw/download-premises-template?document-id=' + $component.documentId +'&application-id=' + $parent.applicationId + '&lang=' + loc.getCurrentLanguage()},
+                            ltext: 'huoneistot.premisesDownloadLink'"></a>
           </span>
 
           <!-- /ko -->

@@ -211,7 +211,7 @@
     (spreadsheet/set-row-style! header header-style)
     wb))
 
-(defn ^OutputStream download-premises-template [{:keys [lang] :as user} app-id doc-id]
+(defn ^OutputStream download-premises-template [user app-id doc-id lang]
   (let [application        (domain/get-application-as app-id user :include-canceled-apps? false)
         data               (->> doc-id (domain/get-document-by-id application) :data :huoneistot (vals))
         sheet-name         (i18n/localize lang "huoneistot.excel-sheet-name")

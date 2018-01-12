@@ -58,13 +58,13 @@
 
 (defraw download-premises-template
   {:user-roles       #{:applicant :authority :oirAuthority}
-   :parameters       [application-id document-id]
+   :parameters       [application-id document-id lang]
    :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :pre-checks       []
    :input-validators [(partial action/non-blank-parameters [:application-id :document-id])]
    :feature          :premises-upload}
-  [{{:keys [application-id document-id]} :data user :user}]
+  [{{:keys [application-id document-id lang]} :data user :user :as command}]
   (let [filename "huoneistotietotaulukko.xlsx"]
     (excel/excel-response
       filename
-      (premises/download-premises-template user application-id document-id))))
+      (premises/download-premises-template user application-id document-id lang))))
