@@ -138,11 +138,11 @@
       (validate-path-value [:ref-multi] nil refs) => nil
       (validate-path-value [:ref-multi] "one" refs)
       => :error.invalid-value))
-    (facts "Reference list with item-key"
-      (let [refs {:my {:path [{:name "One" :value :one}
-                              {:name "Two" :value :two}
-                              {:name "Three" :value :three}
-                              {:name "Four" :value :four}]}}]
+  (facts "Reference list with item-key"
+    (let [refs {:my {:path [{:name "One" :value :one}
+                            {:name "Two" :value :two}
+                            {:name "Three" :value :three}
+                            {:name "Four" :value :four}]}}]
       (validate-path-value [:ref-key] [:one] refs) => nil
       (validate-path-value [:ref-key] [:bad] refs) => :error.invalid-value
       (validate-path-value [:ref-key] [:two :three] refs)
@@ -220,6 +220,258 @@
     => :error.invalid-value
     (validate-path-value [:date] "25.9.2017")
     => nil))
+
+(defn validate-and-process-value [path value old-data & [references]]
+  (schemas/validate-and-process-value test-template
+                                      path
+                                      value
+                                      old-data
+                                      references))
+(defn err
+  ([path error]
+   {:errors [[path error]]})
+  ([failure]
+   {:failure failure}))
+
+(defn ok [path value & [m]]
+  (let [path (map keyword path)]
+    {:value value
+     :path path
+     :data (assoc-in m path value)}))
+
+(facts "Value validation and processing"
+  (fact "Bad path"
+    (validate-and-process-value [:foo :bar] 88 {})
+    => (err :error.invalid-value-path))
+  (facts "Docgen: checkbox"
+    (validate-and-process-value [:check] true {}) => (ok [:check] true)
+    (validate-and-process-value ["check"] false {:foo 8})
+    => (ok [:check] false {:foo 8})
+    (validate-and-process-value ["check"] "bad" {})
+    => (err [:check] :error.invalid-value)
+    (validate-and-process-value [:check :bad] true {})
+    => (err :error.invalid-value-path))
+  (facts "Date delta"
+    (validate-and-process-value [:delta :delta] 0 {})
+    => (ok [:delta :delta] 0)
+    (validate-and-process-value [:delta :delta] 2 {})
+    => (ok [:delta :delta] 2)
+    (validate-and-process-value [:delta :delta] -2 {})
+    => (err [:delta :delta] :error.invalid-value))
+  (facts "Phrase text"
+    (validate-and-process-value [:phrase] "hello" {:hi "moi"})
+    => (ok [:phrase] "hello" {:hi "moi"})
+    (validate-and-process-value [:phrase :bad] "hello" {})
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:phrase] 888 {}) =>
+    (err [:phrase] :error.invalid-value)
+    (validate-and-process-value [:phrase] nil {})
+    => (err [:phrase] :error.invalid-value))
+  (facts "Multi-select"
+    (validate-and-process-value [:multi] [:foo] {})
+    => (ok [:multi] [:foo])
+    (validate-and-process-value [:multi] ["foo"] {})
+    => (ok [:multi] ["foo"])
+    (validate-and-process-value [:multi] [] {})
+    => (ok [:multi] [])
+    (validate-and-process-value [:multi] [:bar :foo] {})
+    => (ok [:multi] [:bar :foo])
+    (validate-and-process-value [:multi :bad] [:foo] {})
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:multi :items] [:foo] {})
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:multi] [:foo :bad] {})
+    => (err [:multi] :error.invalid-value)
+    (validate-and-process-value [:multi] [88] {})
+    => (err [:multi] :error.invalid-value)
+    (validate-and-process-value [:multi] [:world] {})
+    => (ok [:multi] [:world])
+    (validate-and-process-value [:multi] [:world "bar" :foo] {:dum "dom"})
+    => (ok [:multi] [:world "bar" :foo] {:dum "dom"}))
+  (facts "Docgen: string"
+    (validate-and-process-value [:string] "hello" {})
+    => (ok [:string] "hello")
+    (validate-and-process-value ["string"] "hello" {})
+    => (ok [:string] "hello")
+    (validate-and-process-value [:string :hii] "hello" {})
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:string] nil {})
+    => (err [:string] :error.invalid-value)
+    (validate-and-process-value [:string] "" {})
+    => (ok [:string] "")
+    (validate-and-process-value [:string] 88 {})
+    => (err [:string ]:error.invalid-value))
+  (facts "Reference list"
+    (let [refs {:path {:to {:somewhere [:one :two :three]}}}]
+      (fact "Empty selection"
+        (validate-and-process-value [:ref-select] [""] {} refs)
+        => (ok [:ref-select] [""]))
+      (validate-and-process-value [:ref-select] [:one] {} refs)
+      => (ok [:ref-select] [:one])
+      (validate-and-process-value [:ref-select] :one {} refs)
+      => (ok [:ref-select] :one)
+      (validate-and-process-value [:ref-select] ["one"] {} refs)
+      => (ok [:ref-select] ["one"])
+      (validate-and-process-value [:ref-select] [:bad] {} refs)
+      => (err [:ref-select] :error.invalid-value)
+      (validate-and-process-value [:ref-select] :bad {} refs)
+      => (err [:ref-select] :error.invalid-value)
+      (validate-and-process-value [:ref-select :bad] [] {} refs)
+      => (err :error.invalid-value-path)
+      (validate-and-process-value [:ref-select] [:two :three] {} refs)
+      => (err [:ref-select] :error.invalid-value)
+      (validate-and-process-value [:ref-select] [] {} refs)
+      => (ok [:ref-select] [])
+      (validate-and-process-value [:ref-select] nil {} refs)
+      => (ok [:ref-select] nil)
+      (validate-and-process-value [:ref-multi] [:two :three] {} refs)
+      => (ok [:ref-multi] [:two :three])
+      (validate-and-process-value [:ref-multi] [:two "three"] {} refs)
+      => (ok [:ref-multi] [:two "three"])
+      (validate-and-process-value [:ref-multi] [:two :three :bad] {} refs)
+      => (err [:ref-multi] :error.invalid-value)
+      (validate-and-process-value [:ref-multi] [] {} refs)
+      => (ok [:ref-multi] [])
+      (validate-and-process-value [:ref-multi] nil {} refs)
+      => (ok [:ref-multi] nil)
+      (validate-and-process-value [:ref-multi] "one" {} refs)
+      => (err [:ref-multi] :error.invalid-value)))
+  (facts "Reference list with item-key"
+    (let [refs {:my {:path [{:name "One" :value :one}
+                            {:name "Two" :value :two}
+                            {:name "Three" :value :three}
+                            {:name "Four" :value :four}]}}]
+      (validate-and-process-value [:ref-key] [:one] {} refs)
+      => (ok [:ref-key] [:one])
+      (validate-and-process-value [:ref-key] [:bad] {} refs)
+      => (err [:ref-key] :error.invalid-value)
+      (validate-and-process-value [:ref-key] [:two :three] {} refs)
+      => (err [:ref-key] :error.invalid-value)
+      (validate-and-process-value [:ref-key] [] {} refs)
+      => (ok [:ref-key] [])
+      (validate-and-process-value [:ref-key] nil {} refs)
+      => (ok [:ref-key] nil)))
+  (facts "Docgen: select"
+    (validate-and-process-value [:giver :bad] "viranhaltija" {})
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:giver] "viranhaltija" {})
+    => (ok [:giver] "viranhaltija")
+    (validate-and-process-value [:giver] :viranhaltija {})
+    => (ok [:giver] :viranhaltija)
+    (validate-and-process-value [:giver] :lautakunta {})
+    => (ok [:giver] :lautakunta)
+    (validate-and-process-value [:giver] :bad {})
+    => (err [:giver] :error.invalid-value)
+    (validate-and-process-value [:giver] 88 {})
+    => (err [:giver] :error.invalid-value)
+    ;; Empty selection
+    (validate-and-process-value [:giver] nil {:foo "bar"})
+    => (ok [:giver] nil {:foo "bar"})
+    (validate-and-process-value [:giver] "" {})
+    => (ok [:giver] ""))
+  (facts "Docgen: radioGroup"
+    (validate-and-process-value [:radio] :automatic {})
+    => (ok [:radio] :automatic)
+    (validate-and-process-value [:radio] "manual" {})
+    => (ok [:radio] "manual")
+    (validate-and-process-value [:radio] :bad {})
+    => (err [:radio] :error.invalid-value)
+    (validate-and-process-value [:radio :bad] :automatic {})
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:radio] nil {})
+    => (err [:radio] :error.invalid-value))
+  (facts "Date"
+    (validate-and-process-value [:date] "13.9.2017" {})
+    => (ok [:date] "13.9.2017")
+    (validate-and-process-value [:date] "13.09.2017" {})
+    => (ok [:date] "13.09.2017")
+    (validate-and-process-value [:date] "03.9.2017" {})
+    => (ok [:date] "03.9.2017")
+    (validate-and-process-value [:date] "03.09.2017" {})
+    => (ok [:date] "03.09.2017")
+    (validate-and-process-value [:date] "31.9.2017" {})
+    => (err [:date] :error.invalid-value)
+    (validate-and-process-value [:date] "bad" {})
+    => (err [:date] :error.invalid-value)
+    (validate-and-process-value [:date] "" {})
+    => (ok [:date] "")
+    (validate-and-process-value [:date] nil {})
+    => (ok [:date] nil))
+  (facts "Docgen: select defined with map"
+    (validate-and-process-value [:complexity] :medium {})
+    => (ok [:complexity] :medium)
+    (validate-and-process-value [:complexity] "large" {})
+    => (ok [:complexity] "large")
+    (validate-and-process-value [:complexity] nil {})
+    => (ok [:complexity] nil)
+    (validate-and-process-value [:complexity] "" {})
+    => (ok [:complexity] "")
+    (validate-and-process-value [:complexity] "bad" {})
+    => (err [:complexity] :error.invalid-value)
+    (validate-and-process-value [:complexity :bad] :extra-large {})
+    => (err :error.invalid-value-path))
+  (facts "KeyMap"
+    (validate-and-process-value [:keymap] :hii {})
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:keymap :one] :hii {})
+    => (ok [:keymap :one] :hii)
+    (validate-and-process-value [:keymap :one :extra] :hii {})
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:keymap :bad] 33 {})
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:keymap :two] 33 {})
+    => (ok [:keymap :two] 33))
+  (facts "Placeholder: always fails"
+    (validate-and-process-value [:placeholder] :hii {})
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:placeholder :type] :neighbors {})
+    => (err :error.invalid-value-path))
+  (facts "Repeating"
+    (validate-and-process-value [:loop] :hii {})
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:loop :some-index :delta3 :delta]
+                                8 {:loop {:some-index {}}})
+    => (ok [:loop :some-index :delta3 :delta] 8)
+    (validate-and-process-value [:loop :some-index :delta3 :delta]
+                                8 {:loop {:some-index {:delta3 {}}}})
+    => (ok [:loop :some-index :delta3 :delta] 8)
+    (validate-and-process-value [:loop :some-index :delta3 :delta]
+                                8 {:loop {:some-index {:delta3 {:delta 1}}}})
+    => (ok [:loop :some-index :delta3 :delta] 8)
+    (validate-and-process-value [:loop :some-index :delta3 :delta]
+                                8 {:loop {}})
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:loop :some-index :delta3 :delta]
+                                8 {})
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:loop :date2] "25.9.2017" {})
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:loop :i :date2] "25.9.2017" {:loop {:i {}}})
+    => (ok [:loop :i :date2] "25.9.2017")
+    (validate-and-process-value [:date2] "25.9.2017" {})
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:loop :inner-loop] :foo {:loop {:inner-loop {}}})
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:loop :i :inner-loop] :foo (:loop {:i {:inner-loop {}}}))
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:loop :i :inner-loop :j] :foo
+                                {:loop {:i {:inner-loop {:j {}}}}})
+    => (err :error.invalid-value-path)
+    ;; Dict :date refers to docgen checkbox within inner-loop.
+    (validate-and-process-value [:loop :i :inner-loop :j :date] "25.9.2017"
+                                {:loop {:i {:inner-loop {:j {}}}}})
+    => (err [:loop :i :inner-loop :j :date] :error.invalid-value)
+    (validate-and-process-value [:loop :i :inner-loop :j :date] true
+                                {:loop {:i {:inner-loop {:z {}}}}})
+    => (err :error.invalid-value-path)
+    (validate-and-process-value [:loop :i :inner-loop :j :date] false
+                                {:loop {:i {:inner-loop {:j {}}}}})
+    => (ok [:loop :i :inner-loop :j :date] false)
+    ;; Top-level date is still docgen date.
+    (validate-and-process-value [:date] false {})
+    => (err [:date] :error.invalid-value)
+    (validate-and-process-value [:date] "25.9.2017" {})
+    => (ok [:date] "25.9.2017")))
 
 (defn work-day
   ([id from]

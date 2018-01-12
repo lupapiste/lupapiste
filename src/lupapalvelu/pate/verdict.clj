@@ -315,43 +315,6 @@
   ([command]
    (verdict-filled? command false)))
 
-(defn edit-verdict
-  "Updates the verdict data. Validation takes the template exclusions
-  into account. Some updates (e.g., automatic dates) can propagate other
-  changes as well. Returns errors or modified and (possible
-  additional) changes."
-  [{{:keys [verdict-id path value]} :data
-    organization                    :organization
-    application                     :application
-    created                         :created
-    :as                             command}]
-  (let [{:keys [data category
-                template
-                references]} (command->verdict command)
-        schema               (verdict-schema category template)]
-    (if-let [error (schemas/validate-path-value
-                    schema
-                    path value
-                    references)]
-      {:errors [[path error]]}
-      (let [path    (map keyword path)
-            updated (assoc-in data path value)]
-        (verdict-update command {$set {(util/kw-path :pate-verdicts.$.data
-                                                     path)
-                                       value}})
-        {:modified created
-         :changes  (let [options {:path         path
-                                  :value        value
-                                  :verdict-data updated
-                                  :template     template
-                                  :references   references
-                                  :category     category}
-                         changed (changes options)]
-                     (verdict-changes-update command changed)
-                     (map (fn [[k v]]
-                            [(util/split-kw-path k) v])
-                          changed))}))))
-
 (defn- app-documents-having-buildings
   [{:keys [documents] :as application}]
   (->> application
@@ -405,6 +368,52 @@
                   :description (ss/join ": " description-parts)
                   :operationId (:id op)
                   :usage (or (:kayttotarkoitus kaytto) "")})))))
+
+(defn edit-verdict
+  "Updates the verdict data. Validation takes the template exclusions
+  into account. Some updates (e.g., automatic dates) can propagate other
+  changes as well. Returns processing result or modified and (possible
+  additional) changes."
+  [{{:keys [verdict-id path value]} :data
+    organization                    :organization
+    application                     :application
+    created                         :created
+    :as                             command}]
+  (let [{:keys [data category
+                template
+                references]} (command->verdict command)
+        {:keys [data value path]
+         :as     processed}    (schemas/validate-and-process-value
+                                (verdict-schema category template)
+                                path value
+                                ;; Make sure that building related
+                                ;; paths can be resolved.
+                                (update data
+                                        :buildings
+                                        (fn [houses]
+                                          (merge (zipmap (keys (buildings application))
+                                                         (repeat {}))
+                                                 houses)))
+                                references)]
+    (if data
+      (do
+        (verdict-update command {$set {(util/kw-path :pate-verdicts.$.data
+                                                     path)
+                                       value}})
+        {:modified created
+         :changes  (let [options {:path         path
+                                  :value        value
+                                  :verdict-data data
+                                  :template     template
+                                  :references   references
+                                  :category     category}
+                         changed (changes options)]
+                     (verdict-changes-update command changed)
+                     (map (fn [[k v]]
+                            [(util/split-kw-path k) v])
+                          changed))})
+      processed)))
+
 
 (defn- merge-buildings [app-buildings verdict-buildings defaults]
   (reduce (fn [acc [op-id v]]

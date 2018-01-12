@@ -825,8 +825,8 @@
             (fact "Since the verdict is regular (official) we can set contact"
               (edit-verdict "contact" "Authority Sonja Sibbo") => no-errors?)
             (fact "... but cannot set section"
-              (check-error (edit-verdict :verdict-section "8")
-                           :verdict-section :error.invalid-value-path ))
+              (edit-verdict :verdict-section "8")
+              => (err :error.invalid-value-path))
 
             (facts "Verdict references"
               (let [{:keys [foremen plans reviews]} (:references draft)]
@@ -944,7 +944,7 @@
                            :op-id op-id
                            :desc "Hello world!") => ok?)
                 (fact "Set vss-luokka for the building"
-                  (edit-verdict [:buildings op-id :vss-luokka] "Foo"))
+                  (check-error (edit-verdict [:buildings op-id :vss-luokka] "Foo")))
                 (fact "Verdict building info updated"
                   (-> (open-verdict) :verdict :data :buildings op-id)
                   => {:description            "Hello world!"
@@ -1013,7 +1013,11 @@
                            (util/find-by-id doc-id)
                            :data :valtakunnallinenNumero :value) => "1234567881")
                 (fact "Set kiinteiston-autopaikat for pientalo"
-                  (check-error (edit-verdict [:buildings op-id-pientalo :kiinteiston-autopaikat] "8")))
+                  (check-error (edit-verdict [:buildings op-id-pientalo :kiinteiston-autopaikat]
+                                             "8")))
+                (fact "Cannot edit non-existent building"
+                  (edit-verdict [:buildings "bad-building" :paloluokka] "foo")
+                  => fail?)
                 (fact "Buildings updated"
                   (-> (open-verdict) :verdict :data :buildings)
                   => {op-id          {:description            "Hello world!"
@@ -1107,9 +1111,10 @@
                     (facts "Cannot edit verdict values not in the template"
                       (let [check-fn (fn [kwp value]
                                        (fact {:midje/description (str "Bad path " kwp)}
-                                         (check-error (edit-verdict (util/split-kw-path kwp)
-                                                                    value)
-                                                      kwp :error.invalid-value-path)))]
+                                         (edit-verdict (util/split-kw-path kwp)
+                                                       value)
+                                         => (err :error.invalid-value-path)))]
+
                         (check-fn :julkipano "29.9.2017")
                         (check-fn :buildings.vss-luokka "12")
                         (check-fn :buildings.kiinteiston-autopaikat 34)

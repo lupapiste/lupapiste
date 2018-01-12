@@ -325,8 +325,51 @@
                                   path
                                   references)
        :error.invalid-value-path)))
-  ([options path value]
-   (validate-path-value options path value nil)))
+  ([schema path value]
+   (validate-path-value schema path value nil)))
+
+(defn validate-and-process-value
+  "Processes new value. This should be called after
+  validate-dictionary-value. Old-data is the whole old-data.
+
+  For error situations the returned map has either
+
+  :errors  Value is a vector of paths and errors
+  :failure Value is error. Unexpected failure (e.g., invalid value path)
+
+  On success the map has the following keys:
+
+  :path  canonized path
+  :value processed value
+  :data  processed data
+
+  Typically there is no transformation and the old-data is simply
+  updted with value."
+  ([{dic :dictionary} path value old-data references]
+   (let [path                (canonize-path path)
+         {dict-schema :schema
+          dict-path   :path} (shared/dict-resolve path dic)
+         error               (if dict-schema
+                               (validate-dictionary-value dict-schema
+                                                          value
+                                                          dict-path
+                                                          references)
+                               :error.invalid-value-path)
+         err                 (fn [e]
+                               (if (= e :error.invalid-value-path)
+                                 {:failure e}
+                                 {:errors [[path e]]}))
+         repeating-path      (drop-last (-> dict-path count inc) path)]
+     (cond
+       error                                         (err error)
+       ;; Repeating indeces must exist
+       (and (not-empty repeating-path)
+            (nil? (get-in old-data repeating-path))) (err :error.invalid-value-path)
+       :else                                         {:path  path
+                                                      :value value
+                                                      :data  (assoc-in old-data path value)})))
+  ([schema path value old-data]
+   (validate-and-process-value schema path value old-data nil)))
 
 (defn required-filled?
   "True if every required dict item has a proper value."

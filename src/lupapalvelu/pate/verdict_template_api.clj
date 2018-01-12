@@ -134,16 +134,17 @@
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable)]}
   [{:keys [created] :as command}]
-  (let [organization (template/command->organization command)]
-    (if-let [error (template/save-draft-value organization
-                                              template-id
-                                              created
-                                              path
-                                              value)]
-      (template/error-response path error)
+  (let [organization  (template/command->organization command)
+        {data :data
+         :as  updated} (template/save-draft-value organization
+                                                  template-id
+                                                  created
+                                                  path
+                                                  value)]
+    (if data
       (ok :modified created
-          :filled (template/template-filled? {:org-id (:id organization)
-                                              :template-id template-id})))))
+          :filled (template/template-filled? {:data data}))
+      (template/error-response updated))))
 
 (defcommand publish-verdict-template
   {:description      "Publish creates a frozen snapshot of the current
@@ -261,15 +262,16 @@
                       valid-category]}
   [{:keys [created] :as command}]
   (let [organization (template/command->organization command)]
-    (if-let [error (template/save-settings-value organization
-                                                 category
-                                                 created
-                                                 path
-                                                 value)]
-      (template/error-response path error)
-      (ok :modified created
-          :filled (template/settings-filled? {:org-id (:id organization)}
-                                             category)))))
+    (let [{data :data :as updated} (template/save-settings-value organization
+                                                                 category
+                                                                 created
+                                                                 path
+                                                                 value)]
+      (if data
+        (ok :modified created
+            :filled (template/settings-filled? {:data data}
+                                               category))
+       (template/error-response updated)))))
 
 ;; ----------------------------------
 ;; Verdict template reviews API

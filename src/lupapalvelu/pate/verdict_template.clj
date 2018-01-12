@@ -30,10 +30,10 @@
 (defn operation->category [operation]
   (shared/permit-type->category (ops/permit-type-of-operation operation)))
 
-(defn error-response [path error]
-  (if (= error :error.invalid-value-path)
-    (fail error)
-    (ok :errors [[path error]])))
+(defn error-response [{:keys [failure errors]}]
+  (if failure
+    (fail failure)
+    (ok :errors errors)))
 
 (defn new-verdict-template
   ([org-id timestamp lang category draft name]
@@ -167,25 +167,31 @@
 (defn save-draft-value
   "Error code on failure (see schemas for details)."
   [organization template-id timestamp path value]
-  (let [{:keys [category] :as template} (verdict-template organization template-id)]
-    (or (schemas/validate-path-value shared/default-verdict-template
-                                     path
-                                     value
-                                     (merge
-                                      {:settings (:draft (settings organization
-                                                                   category))}
-                                      (when-let [ref-gen (some->> path
-                                                                  (util/intersection-as-kw [:plans :reviews])
-                                                                  first)]
-                                        (hash-map ref-gen
-                                                  (map :id (generic-list organization
-                                                                         category
-                                                                         ref-gen))))))
-        (template-update organization
+  (let [{:keys [category draft]
+         :as   template}  (verdict-template organization template-id)
+        {:keys [path value]
+         :as   processed} (schemas/validate-and-process-value
+                           shared/default-verdict-template
+                           path
+                           value
+                           draft
+                           (merge
+                            {:settings (:draft (settings organization
+                                                         category))}
+                            (when-let [ref-gen (some->> path
+                                                        (util/intersection-as-kw [:plans :reviews])
+                                                        first)]
+                              (hash-map ref-gen
+                                        (map :id (generic-list organization
+                                                               category
+                                                               ref-gen))))))]
+    (when path ;; Value could be nil
+      (template-update organization
                          template-id
                          {$set {(util/kw-path (cons :verdict-templates.templates.$.draft
                                                     path)) value}}
-                         timestamp))))
+                         timestamp))
+    processed))
 
 (defn- prune-template-data
   "Upon publishing the settings generics and template data must by
@@ -248,36 +254,41 @@
   (get shared/settings-schemas (keyword category)))
 
 (defn save-settings-value [organization category timestamp path value]
-  (let [draft        (assoc-in (:draft (settings organization category))
-                               (map keyword path)
-                               value)
-        settings-key (settings-key category)]
-    (or (schemas/validate-path-value (settings-schema category)
-                                     path
-                                     value)
-     (mongo/update-by-id :organizations
-                         (:id organization)
-                         {$set {(util/kw-path settings-key :draft path) value
-                                (util/kw-path settings-key :modified)   timestamp}}))))
+  (let [settings-key    (settings-key category)
+        {:keys [path value]
+         :as   processed} (schemas/validate-and-process-value (settings-schema category)
+                                                              path
+                                                              value
+                                                              (:draft (settings organization
+                                                                                category)))]
+    (when path  ;; Value could be nil.
+      (mongo/update-by-id :organizations
+                          (:id organization)
+                          {$set {(util/kw-path settings-key :draft path) value
+                                 (util/kw-path settings-key :modified)   timestamp}}))
+    processed))
 
 (defn- organization-templates [org-id]
   (org/get-organization org-id {:verdict-templates 1}))
 
 (defn settings-filled?
   "Settings are filled properly if every requireid field has been filled."
-  [{org-id :org-id ready :settings} category]
+  [{org-id :org-id ready :settings data :data} category]
   (schemas/required-filled? (settings-schema category)
-                            (:draft (or ready
-                                        (settings (organization-templates org-id)
-                                                  category)))))
+                            (or data
+                                (:draft (or ready
+                                            (settings (organization-templates org-id)
+                                                      category))))))
 
 (defn template-filled?
   "Template is filled when every required field has been filled."
-  [{:keys [org-id template template-id]}]
-  (let [{data :draft} (or template
-                          (verdict-template (organization-templates org-id)
-                                            template-id))]
-    (schemas/required-filled? shared/default-verdict-template data)))
+  [{:keys [org-id template template-id data]}]
+  (schemas/required-filled? shared/default-verdict-template
+                            (or data
+                                (:draft (or template
+                                            (verdict-template (organization-templates
+                                                               org-id)
+                                                              template-id))))))
 
 ;; Generic is a placeholder term that means either review or plan
 ;; depending on the context. Namely, the subcollection argument in
