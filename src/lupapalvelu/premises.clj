@@ -3,7 +3,9 @@
             [lupapalvelu.action :as action]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.document.persistence :as doc-persistence]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.file-upload :as file-upload]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.reports.excel :as excel]
             [lupapalvelu.user :as usr]
@@ -14,10 +16,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [slingshot.slingshot :refer [throw+]]
-            [swiss.arrows :refer :all]
-            [taoensso.timbre :as timbre]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.i18n :as i18n])
+            [taoensso.timbre :as timbre])
   (:import (java.io OutputStream)))
 
 (defn get-huoneistot-from-application [doc-id application]
@@ -36,7 +35,7 @@
   {:keittionTyyppi          {"1" "keittio"
                              "2" "keittokomero"
                              "3" "keittotila"
-                             "4" "tupakaittio"
+                             "4" "tupakeittio"
                              ""  "ei tiedossa"}
    :huoneistoTyyppi         {"1" "asuinhuoneisto"
                              "2" "toimitila"
@@ -51,29 +50,29 @@
   {"huoneiston tyyppi"      :huoneistoTyyppi
    "lägenhetstyp"           :huoneistoTyyppi
    "dwelling type"          :huoneistoTyyppi
-   "porras"                 "porras"
-   "trappa"                 "porras"
-   "stairway"               "porras"
-   "huoneistonumero"        "huoneistonumero"
-   "huoneiston numero"      "huoneistonumero"
-   "lägenhetsnummer"        "huoneistonumero"
-   "flat number"            "huoneistonumero"
-   "huoneiston jakokirjain" "jakokirjain"
-   "jakokirjain"            "jakokirjain"
-   "delningsbokstav"        "jakokirjain"
-   "splitting letter"       "jakokirjain"
-   "huoneiden lukumäärä"    "huoneluku"
-   "huoneluku"              "huoneluku"
-   "antal rum"              "huoneluku"
-   "number of rooms"        "huoneluku"
+   "porras"                 :porras
+   "trappa"                 :porras
+   "stairway"               :porras
+   "huoneistonumero"        :huoneistonumero
+   "huoneiston numero"      :huoneistonumero
+   "lägenhetsnummer"        :huoneistonumero
+   "flat number"            :huoneistonumero
+   "huoneiston jakokirjain" :jakokirjain
+   "jakokirjain"            :jakokirjain
+   "delningsbokstav"        :jakokirjain
+   "splitting letter"       :jakokirjain
+   "huoneiden lukumäärä"    :huoneluku
+   "huoneluku"              :huoneluku
+   "antal rum"              :huoneluku
+   "number of rooms"        :huoneluku
    "keittiötyyppi"          :keittionTyyppi
    "keittiön tyyppi"        :keittionTyyppi
    "typ av kök"             :keittionTyyppi
    "kitchen type"           :keittionTyyppi
-   "huoneistoala"           "huoneistoala"
-   "huoneistoala m2"        "huoneistoala"
-   "lägenhetsyta"           "huoneistoala"
-   "floor area"             "huoneistoala"
+   "huoneistoala"           :huoneistoala
+   "huoneistoala m2"        :huoneistoala
+   "lägenhetsyta"           :huoneistoala
+   "floor area"             :huoneistoala
    "varusteena wc"          :WCKytkin
    "wc"                     :WCKytkin
    "toilet"                 :WCKytkin
@@ -112,14 +111,16 @@
       (header-data-map)))
 
 (defn item->update [premises-number [ifc-key ifc-val]]
-  (let [lp-key (-> ifc-key localized-ifc-keys)
+  (let [lp-val-keys #{:WCKytkin :huoneistoTyyppi :keittionTyyppi :ammeTaiSuihkuKytkin
+                      :saunaKytkin :lamminvesiKytkin :parvekeTaiTerassiKytkin}
+        lp-key (-> ifc-key localized-ifc-keys)
         lp-val (cond
-                 (keyword? lp-key) (-> lp-key ifc->lp-val-map (get ifc-val))
-                 (= "huoneistonumero" lp-key) (->> ifc-val ss/remove-leading-zeros util/->int (format "%03d"))
-                 (= "huoneistoala" lp-key) (ss/replace ifc-val #"," ".")
+                 (lp-val-keys lp-key) (-> lp-key ifc->lp-val-map (get ifc-val))
+                 (= :huoneistonumero lp-key) (->> ifc-val ss/remove-leading-zeros util/->int (format "%03d"))
+                 (= :huoneistoala lp-key) (ss/replace ifc-val #"," ".")
                  :else ifc-val)]
     (when (and (not (empty? ifc-val)) lp-key)
-      [(mapv keyword ["huoneistot" (str premises-number) lp-key]) lp-val])))
+      [[:huoneistot (-> premises-number str keyword) lp-key] lp-val])))
 
 (defn premise->updates [premise premises-number]
   (remove nil? (map #(item->update premises-number %) premise)))
@@ -144,7 +145,7 @@
         {:keys [mongo-query mongo-updates post-results]} (apply doc-persistence/validated-model-updates application "documents" document
                                                                 (doc-persistence/transform document model-updates) timestamp nil)]
     (when-not document (fail! :error.document-not-found))
-    (doc-persistence/validate-against-whitelist! document update-paths role)
+    (doc-persistence/validate-against-whitelist! document update-paths role application)
     (doc-persistence/validate-readonly-updates! document update-paths)
     (remove-old-premises command doc-id)
     (action/update-application command mongo-query mongo-updates)

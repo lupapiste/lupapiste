@@ -58,12 +58,12 @@
   (let [sheet (spreadsheet/select-sheet sheet-name wb)]
     (spreadsheet/add-row! sheet values)))
 
-(defn excel-response [filename body]
+(defn excel-response [filename body error-message]
   (try
     {:status  200
      :headers {"Content-Type"        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                "Content-Disposition" (str "attachment;filename=\"" filename "\"")}
      :body    body}
     (catch Exception e#
-      (error "Exception while compiling open applications excel:" e#)
+      (error error-message e#)
       {:status 500})))

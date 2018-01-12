@@ -1,17 +1,17 @@
 (ns lupapalvelu.premises-api
-  (:require [lupapalvelu.action :refer [defraw defquery] :as action]
+  (:require [clj-time.local :as local]
+            [lupapalvelu.action :refer [defraw] :as action]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.file-upload :as file-upload]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.premises :as premises]
             [lupapalvelu.reports.excel :as excel]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
-            [monger.operators :refer [$set]]
             [sade.core :refer :all]
-            [slingshot.slingshot :refer [throw+]]
-            [swiss.arrows :refer :all]))
+            [slingshot.slingshot :refer [throw+]]))
 
 ;;
 ;;  Validators and pre-checks
@@ -64,7 +64,12 @@
    :input-validators [(partial action/non-blank-parameters [:application-id :document-id])]
    :feature          :premises-upload}
   [{{:keys [application-id document-id lang]} :data user :user :as command}]
-  (let [filename "huoneistotietotaulukko.xlsx"]
+  (let [filename (str (i18n/localize lang "huoneistotietotaulukko")
+                      "-"
+                      (local/format-local-time (local/local-now) :basic-date)
+                      ".xlsx")
+        error-message "Exception while compiling premises excel file: "]
     (excel/excel-response
       filename
-      (premises/download-premises-template user application-id document-id lang))))
+      (premises/download-premises-template user application-id document-id lang)
+      error-message)))

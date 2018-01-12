@@ -90,6 +90,5 @@
         (-> huoneistot :0 :keittionTyyppi :value) => "keittio"))
 
     (fact "Downloading huoneistot-excel"
-      (let [resp (raw pena :download-premises-template :application-id app-id :document-id doc)
-            _ (println (:headers resp))]
+      (let [resp (raw pena :download-premises-template :application-id app-id :document-id doc :lang "fi")]
         (:status resp) => 200))))

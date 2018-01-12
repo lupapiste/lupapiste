@@ -9,8 +9,12 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as usr]
             [lupapalvelu.reports.applications :as app-reports]
-            [lupapalvelu.reports.excel :refer [excel-response]]
+            [lupapalvelu.reports.excel :as excel]
             [lupapalvelu.company :as com]))
+
+(defn excel-response [filename body]
+  (let [error-message "Exception while compiling open applications excel:"]
+    (excel/excel-response filename body error-message)))
 
 (defraw open-applications-xlsx
   {:user-roles #{:authorityAdmin}}
