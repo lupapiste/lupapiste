@@ -104,7 +104,7 @@
 "underReview.title" "fi" "Tarkastettavana-tilassa viranomainen tarkastaa syötetyt tiedot ja skannatut tiedostot."
 "underReview.title" "sv" "Vid Kontrollering-tillstånd kontrollerar myndigheten de angivna uppgifterna och skannade filerna."
 "digitizer.report.title" "en" ""
-"digitizer.report.title" "fi" "Digitointi raportti"
+"digitizer.report.title" "fi" "Digitointiraportti"
 "digitizer.report.title" "sv" ""
 "digitizer.report.startDate" "en" ""
 "digitizer.report.startDate" "fi" "Raportti alkaen:"

@@ -3,6 +3,16 @@
 <body>
 <section class="page container" id="create-archiving-project">
   <h1 data-bind="ltext: 'newRequest.createArchivingProject'"></h1>
+  <div class="archiving-top">
+      <div class="button-group">
+        <button data-bind="click: createArchivingReport"
+                data-test-id="applications-create-archiving-report"
+                class="positive application-create">
+          <i class="lupicon-document-list"></i>
+          <span data-bind="ltext: 'digitizer.report.title'"></span>
+        </button>
+      </div>
+  </div>
   <div class="form-grid form-grid--no-border">
     <form data-bind="submit: function() { createArchivingProject(false, false, false); }">
       <div class="row">
@@ -63,6 +73,14 @@
   </div>
 </section>
 <section class="page container" id="create-archiving-report">
+  <div class="operation-button-row">
+    <button class="secondary"
+            data-bind="click: function() { history.go(-1); }"
+            data-test-id="back-button">
+      <i class="lupicon-chevron-start"></i>
+      <span data-bind="ltext: 'back'"></span>
+    </button>
+  </div>
   <div>
     <h1 data-bind="ltext: 'digitizer.report.title'"></h1>
       <table class="company-report-table">

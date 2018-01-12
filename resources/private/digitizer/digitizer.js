@@ -317,4 +317,9 @@
 
   });
 
+  self.createArchivingReport = function() {
+    hub.send("track-click", {category:"Applications", label:"create", event:"createArchivingReport"});
+    pageutil.openPage("create-archiving-report");
+  };
+
 })();
