@@ -1243,8 +1243,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (!models) {
           models = subSchema.initiallyEmpty ? [] : [{}];
       }
-
-      var elements = subSchema["repeating-init-empty"] ? [] : buildElements(models);
+      var elements = buildElements(models);
 
       if (subSchema.type === "table") {
         var div = document.createElement("div");
