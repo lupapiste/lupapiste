@@ -1101,7 +1101,7 @@
                                               :paloluokka    ""}
                               op-id-pientalo {:description   "Hen piaoliang!"
                                               :show-building true
-                                              :building-id   ""
+                                              :building-id   "1234567881"
                                               :operation     "pientalo"
                                               :tag           "Hao"
                                               :paloluokka    ""}}}
