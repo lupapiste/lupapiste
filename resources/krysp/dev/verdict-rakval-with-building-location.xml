@@ -320,7 +320,7 @@
                                   </yht:osoite>
                                   <yht:piste>
                                       <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
-                                          <gml:pos>2.5503007E7 6708252.0</gml:pos>
+                                          <gml:pos>2.5301237586351E7 6740748.662049</gml:pos>
                                       </gml:Point>
                                   </yht:piste>
                               </rakval:Sijainti>

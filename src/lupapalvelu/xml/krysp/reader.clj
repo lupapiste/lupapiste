@@ -10,6 +10,7 @@
             [sade.coordinate :as coordinate]
             [sade.core :refer [now def- fail]]
             [sade.property :as p]
+            [sade.xml :as sxml]
             [lupapalvelu.drawing :as drawing]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.wfs :as wfs]
@@ -514,11 +515,11 @@
         (coordinate/convert source-projection common/to-projection 3 building-coordinates)))
     (let [area-coordinates-str (->> (cr/all-of coordinates-array-xml) :Polygon :outerBoundaryIs :LinearRing :coordinates)
           area-coordinates (ss/split area-coordinates-str #" ")
-          area-geometry-str (area-geometry-str area-coordinates "EPSG:3876" "POLYGON")
+          source-projection (common/->polygon-source-projection coordinates-array-xml)
+          area-geometry-str (area-geometry-str area-coordinates source-projection "POLYGON")
           interior-point (drawing/interior-point area-geometry-str)
-          _ (println interior-point)
-          ]
-      area-coordinates)))
+          interior-point-coordinates (coordinate/convert "WGS84" common/to-projection 6 interior-point)]
+      interior-point-coordinates)))
 
 (defn- extract-osoitenimi [osoitenimi-elem lang]
   (let [osoitenimi-elem (or (select1 osoitenimi-elem [(enlive/attr= :xml:lang lang)])

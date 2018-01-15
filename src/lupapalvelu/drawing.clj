@@ -3,7 +3,7 @@
             [cljts.io :as jts]
             [cljts.geom :as geom]
             [taoensso.timbre :as timbre])
-  (:import [com.vividsolutions.jts.geom Polygon Geometry GeometryCollection]))
+  (:import [com.vividsolutions.jts.geom Polygon Geometry GeometryCollection Point]))
 
 (defn- get-pos [coordinates]
   (mapv (fn [c] [(-> c .x) (-> c .y)]) coordinates))
@@ -73,7 +73,10 @@
 
 (defn interior-point [geometry-string]
   (try
-    (.getInteriorPoint ^Geometry (jts/read-wkt-str geometry-string))
+    (let [interior-point (.getInteriorPoint ^Geometry (jts/read-wkt-str geometry-string))
+          x (.getX ^Point interior-point)
+          y (.getY ^Point interior-point)]
+      [x y])
     (catch Exception e
       (timbre/warn "Failed to resolve interior point for geometry:" geometry-string "(" (.getMessage e) ")")
       nil)))
