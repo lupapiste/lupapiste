@@ -1,5 +1,5 @@
 (ns lupapalvelu.application-bulletins-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn warnf error errorf fatal]]
             [monger.operators :refer :all]
             [monger.query :as query]
             [sade.core :refer :all]
@@ -166,11 +166,18 @@
 
 (def delivery-address-fields #{:firstName :lastName :street :zip :city})
 
+(defn validate-uploaded-files [command]
+  (when-let [files (seq (get-in command [:data :files]))]
+    (when-let [err (some bulletins/comment-file-checker files)]
+      (warnf "schema validation error in add-bulletin-comment: %s" (pr-str err))
+      (fail :error.illegal-value:schema-validation :source ::validate-uploaded-files))))
+
 (defcommand add-bulletin-comment
   {:description      "Add comment to bulletin"
    :pre-checks       [comment-can-be-added
                       vetuma/session-pre-check]
-   :input-validators [referenced-file-can-be-attached]
+   :input-validators [referenced-file-can-be-attached
+                      validate-uploaded-files]
    :user-roles       #{:anonymous}}
   [{{files :files bulletin-id :bulletinId comment :comment bulletin-version-id :bulletinVersionId
      email :email emailPreferred :emailPreferred otherReceiver :otherReceiver :as data} :data created :created :as action}]
