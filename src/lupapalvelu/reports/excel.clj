@@ -1,7 +1,8 @@
 (ns lupapalvelu.reports.excel
   (:require [dk.ative.docjure.spreadsheet :as spreadsheet]
             [sade.core :refer :all]
-            [sade.strings :as ss])
+            [sade.strings :as ss]
+            [taoensso.timbre :refer [error]])
   (:import (java.io ByteArrayInputStream ByteArrayOutputStream OutputStream)
            (org.apache.poi.xssf.usermodel XSSFWorkbook)
            (org.apache.poi.ss.usermodel CellType)))
@@ -56,3 +57,13 @@
 (defn add-sum-row [sheet-name wb values]
   (let [sheet (spreadsheet/select-sheet sheet-name wb)]
     (spreadsheet/add-row! sheet values)))
+
+(defn excel-response [filename body error-message]
+  (try
+    {:status  200
+     :headers {"Content-Type"        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+               "Content-Disposition" (str "attachment;filename=\"" filename "\"")}
+     :body    body}
+    (catch Exception e#
+      (error error-message e#)
+      {:status 500})))

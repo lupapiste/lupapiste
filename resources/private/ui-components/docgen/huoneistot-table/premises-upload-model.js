@@ -5,8 +5,6 @@ LUPAPISTE.PremisesUploadModel = function( params ) {
     self.doc = params.doc;
     self.applicationId = params.applicationId;
 
-    self.visible = true;
-
     self.disabled = ko.observable(false);
     self.pending = ko.observable(false);
 
@@ -28,7 +26,6 @@ LUPAPISTE.PremisesUploadModel = function( params ) {
                 request.setRequestHeader("x-anti-forgery-token", $.cookie("anti-csrf-token"));
             },
             success: function(res) {
-
                 if (res.ok) {
                     repository.load(self.applicationId);
                     if (_.isFunction(params.onSuccess)) {
@@ -36,8 +33,10 @@ LUPAPISTE.PremisesUploadModel = function( params ) {
                     }
                 } else {
                     util.showSavedIndicator(res);
-                    //hub.send("indicator", {style: "negative", message: res.text || "error.file-upload-failed"});
                 }
+            },
+            error: function(res) {
+                hub.send("indicator", {style: "negative", message: res.responseJSON.text});
             },
             complete: function() {
                 self.pending(false);

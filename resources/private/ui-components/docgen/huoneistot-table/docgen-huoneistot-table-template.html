@@ -15,6 +15,14 @@
           <!-- ko if: groupHelp -->
           <span class="group-help-text" data-bind="ltext: groupHelp"></span>
           <!-- /ko -->
+          <!-- ko if: showPremisesUpload  -->
+          <br>
+          <span class="group-help-text" data-bind="feature: 'premises-upload'">
+              <span data-bind="ltext: 'huoneistot.premisesInfoText'"></span>
+              <a data-bind="attr: {href: premisesExcelDownloadUrl($parent.applicationId) }, ltext: 'huoneistot.premisesDownloadLink'"></a>
+          </span>
+
+          <!-- /ko -->
 
           <table data-bind="attr: {'class': _.last(path) + '-table'}">
             <thead>
@@ -276,12 +284,14 @@
                            clickFn: duplicateLastGroup,
                            testId: schemaName + '-copy-button' }}">
           </span>
+          <!-- ko if: showPremisesUpload -->
           <span data-bind="component: { name: 'premises-upload',
                            params: { id: $component.documentId + '-huoneistot-upload-button',
                            applicationId: $parent.applicationId,
                            doc: $component.documentId,
                            testId: schemaName + '-upload-button' }}">
           </span>
+          <!-- /ko -->
         </div>
       </script>
     </section>
