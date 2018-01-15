@@ -524,7 +524,7 @@
       (fact "contains all the needed keys" (every? (-> rakennuspaikka keys set) [:x :y :address :propertyId]))
       (fact "x" x => #(and (instance? Double %) (= 192416.901187 %)))
       (fact "y" y => #(and (instance? Double %) (= 6745788.046445 %)))
-      (fact "address" address => "Pitkäkarta 48")
+      (fact "address" address => "Pitk\u00e4karta 48")
       (fact "propertyId" propertyId => "89552200010051"))))
 
 (facts* "Testing area like location with building location information for application creation"
@@ -536,7 +536,7 @@
       (fact "contains all the needed keys" (every? (-> rakennuspaikka keys set) [:x :y :address :propertyId]))
       (fact "x" x => #(and (instance? Double %) (= 192413.401 %)))
       (fact "y" y => #(and (instance? Double %) (= 6745769.046 %)))
-      (fact "address" address => "Pitkäkarta 48")
+      (fact "address" address => "Pitk\u00e4karta 48")
       (fact "propertyId" propertyId => "89552200010051"))))
 
 
