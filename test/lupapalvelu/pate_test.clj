@@ -1,38 +1,48 @@
 (ns lupapalvelu.pate-test
   (:require [clj-time.core :as time]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared  :as shared]
             [midje.sweet :refer :all]
+            [sade.util :as util]
             [schema.core :refer [defschema] :as sc]))
 
 (def test-template
-  {:dictionary {:check      {:docgen "pate-verdict-check"}
-                :delta      {:date-delta {:unit :years}}
-                :phrase     {:phrase-text {:category :paatosteksti}}
-                :multi      {:multi-select {:items [:foo :bar {:text  "Hello"
-                                                               :value :world}]}}
-                :string     {:docgen "pate-string"}
-                :delta2     {:date-delta {:unit :days}}
-                :ref-select {:reference-list {:type :select
-                                              :path [:path :to :somewhere]}}
-                :ref-multi  {:reference-list {:type :multi-select
-                                              :path [:path :to :somewhere]}}
+  {:dictionary {:check       {:docgen "pate-verdict-check"}
+                :delta       {:date-delta {:unit :years}}
+                :phrase      {:phrase-text {:category :paatosteksti}}
+                :multi       {:multi-select {:items [:foo :bar {:text  "Hello"
+                                                                :value :world}]}}
+                :string      {:docgen "pate-string"}
+                :delta2      {:date-delta {:unit :days}}
+                :ref-select  {:reference-list {:type :select
+                                               :path [:path :to :somewhere]}}
+                :ref-multi   {:reference-list {:type :multi-select
+                                               :path [:path :to :somewhere]}}
                 :ref-key     {:reference-list {:type     :select
                                                :path     [:my :path]
                                                :item-key :value}}
-                :text       {:docgen "pate-verdict-text"}
-                :giver      {:docgen "pate-verdict-giver"}
-                :radio      {:docgen "automatic-vs-manual"}
-                :date       {:docgen "pate-date"}
-                :complexity {:docgen {:name "pate-complexity"}}
-                :keymap     {:keymap {:one   "hello"
-                                      :two   :world
-                                      :three 88}}
+                :text        {:docgen "pate-verdict-text"}
+                :giver       {:docgen "pate-verdict-giver"}
+                :radio       {:docgen "automatic-vs-manual"}
+                :date        {:docgen "pate-date"}
+                :complexity  {:docgen {:name "pate-complexity"}}
+                :keymap      {:keymap {:one   "hello"
+                                       :two   :world
+                                       :three 88}}
                 :placeholder {:placeholder {:type :neighbors}}
-                :loop {:repeating {:delta3 {:date-delta {:unit :years}}
-                                   :date2 {:docgen "pate-date"}
-                                   :inner-loop {:repeating {:date {:docgen "pate-verdict-check"}}}}}}
+                :loop        {:repeating {:delta3     {:date-delta {:unit :years}}
+                                          :date2      {:docgen "pate-date"}
+                                          :inner-loop {:repeating {:date {:docgen "pate-verdict-check"}}}}}
+                :dynamic     {:repeating {:text        {:docgen "pate-string"}
+                                          :remove-item {:button {:remove :dynamic}}
+                                          :sublevel    {:repeating {:tick       {:docgen "pate-verdict-check"}
+                                                                    :remove-sub {:button {:remove :sublevel}}
+                                                                    :remove-top {:button {:remove :dynamic}}}}
+                                          :add-sub     {:button {:add :sublevel}}
+                                          :bad-add     {:button {:add :dynamic}}}}
+                :add-item    {:button {:add :dynamic}}}
    :name       "test"
    :sections   [{:id   "one"
                  :grid {:columns 4
@@ -59,15 +69,22 @@
                                          {:dict :radio}
                                          {:dict :date}
                                          {:dict :complexity}]}]}}
-                {:id "repeat"
+                {:id   "repeat"
                  :grid {:columns 1
-                        :rows [[{:grid {:columns 3
-                                        :repeating :loop
-                                        :rows [[{:dict :delta3}
-                                                {:dict :date2}
-                                                {:grid {:columns 1
-                                                        :repeating :inner-loop
-                                                        :rows [[{:dict :date}]]}}]]}}]]}}]})
+                        :rows    [[{:grid {:columns   3
+                                           :repeating :loop
+                                           :rows      [[{:dict :delta3}
+                                                        {:dict :date2}
+                                                        {:grid {:columns   1
+                                                                :repeating :inner-loop
+                                                                :rows      [[{:dict :date}]]}}]]}}]]}}
+                {:id   "dynamic"
+                 :grid {:columns 1
+                        :rows    [[{:grid {:columns   2
+                                           :repeating :dynamic
+                                           :rows      [[{:dict :text}
+                                                        {:dict :remove-item}]]}}]
+                                  [{:dict :add-item}]]}}]})
 
 (facts "Test template is valid"
   (sc/validate shared/PateVerdictTemplate test-template)
@@ -219,7 +236,12 @@
     (validate-path-value [:date] false)
     => :error.invalid-value
     (validate-path-value [:date] "25.9.2017")
-    => nil))
+    => nil)
+  (facts "Dynamic repeating"
+    (validate-path-value [:add-item] true)
+    => nil
+    (validate-path-value [:add-item :bad] true)
+    => :error.invalid-value-path))
 
 (defn validate-and-process-value [path value old-data & [references]]
   (schemas/validate-and-process-value test-template
@@ -235,9 +257,24 @@
 
 (defn ok [path value & [m]]
   (let [path (map keyword path)]
-    {:value value
-     :path path
-     :data (assoc-in m path value)}))
+    {:op   :set
+     :value value
+     :path  path
+     :data  (assoc-in m path value)}))
+
+(defn ok-add [path value & [m]]
+  (let [path (map keyword path)]
+    {:op    :add
+     :value value
+     :path  path
+     :data  (assoc-in m path value)}))
+
+(defn ok-remove [path m]
+  (let [path (map keyword path)]
+    {:op    :remove
+     :value true
+     :path  path
+     :data  (util/dissoc-in m path)}))
 
 (facts "Value validation and processing"
   (fact "Bad path"
@@ -471,7 +508,71 @@
     (validate-and-process-value [:date] false {})
     => (err [:date] :error.invalid-value)
     (validate-and-process-value [:date] "25.9.2017" {})
-    => (ok [:date] "25.9.2017")))
+    => (ok [:date] "25.9.2017"))
+  (facts "Dynamic repeating"
+    (facts "Subpaths"
+      (shared/repeating-subpath :dynamic [:dynamic] (:dictionary test-template))
+      => [:dynamic]
+      (shared/repeating-subpath :dynamic-foo [:dynamic] (:dictionary test-template))
+      => nil?
+      (shared/repeating-subpath :dynamic [:dynamic :id :dynamic] (:dictionary test-template))
+      => nil?)
+    (facts "Top level"
+      (validate-and-process-value [:add-item] true {:dynamic {}})
+      => (ok-add [:dynamic :new-id] {} {})
+      (provided (mongo/create-id) => "new-id")
+      (validate-and-process-value [:add-item] true {})
+      => (ok-add [:dynamic :new-id] {} {})
+      (provided (mongo/create-id) => "new-id")
+      (validate-and-process-value [:dynamic :old-id :remove-item]
+                                  true
+                                  {:dynamic {:id     {:foo 8}
+                                             :old-id {:bar 99}}})
+      => (ok-remove [:dynamic :old-id] {:dynamic {:id     {:foo 8}
+                                                  :old-id {:bar 99}}}))
+    (facts "Sub level"
+      (fact "Add button must be sibling"
+        (validate-and-process-value [:dynamic :id :bad-add]
+                                    true
+                                    {:dynamic {:id {}}})
+        => (err :error.invalid-value-path)
+        (validate-and-process-value [:dynamic :id :add-sub]
+                                    true
+                                    {:dynamic {:id {}}})
+        => (ok-add [:dynamic :id :sublevel :new-id] {} {})
+        (provided (mongo/create-id) => "new-id"))
+      (fact "Remove sublevel item"
+        (validate-and-process-value [:dynamic :id :sublevel :foo :remove-sub]
+                                    true
+                                    {:dynamic {:id {:sublevel {:foo {:tick false}
+                                                               :bar {:tick true}}}}})
+        => (ok-remove [:dynamic :id :sublevel :foo]
+                      {:dynamic {:id {:sublevel {:foo {:tick false}
+                                                 :bar {:tick true}}}}}))
+      (fact "Remove toplevel item from sublevel"
+        (validate-and-process-value [:dynamic :id :sublevel :foo :remove-top]
+                                    true
+                                    {:dynamic {:id {:sublevel {:foo {:tick false}
+                                                               :bar {:tick true}}}
+                                               :doh {:hi "hello"}}})
+        => (ok-remove [:dynamic :id]
+                      {:dynamic {:id {:sublevel {:foo {:tick false}
+                                                 :bar {:tick true}}}
+                                 :doh {:hi "hello"}}}))
+      (fact "Add sublevel item"
+        (validate-and-process-value [:dynamic :id :add-sub] true {:dynamic {:id {}}})
+        => (ok-add [:dynamic :id :sublevel :new-id] {})
+        (provided (mongo/create-id) => "new-id")
+        (validate-and-process-value [:dynamic :id :add-sub] true
+                                    {:dynamic {:id {:sublevel {:old {:tick false}}}}})
+        => (ok-add [:dynamic :id :sublevel :new-id] {}
+               {:dynamic {:id {:sublevel {:old {:tick false}}}}})
+        (provided (mongo/create-id) => "new-id"))
+      (fact "Cannot skip level"
+        (validate-and-process-value [:dynamic :id :add-sub] true {})
+        => (err :error.invalid-value-path)
+        (validate-and-process-value [:dynamic :id :add-sub] true {:dynamic {}})
+        => (err :error.invalid-value-path)))))
 
 (defn work-day
   ([id from]

@@ -153,6 +153,57 @@
   (:categories (query sipoo :verdict-template-categories))
   => (contains ["r" "p" "ymp" "kt"] :in-any-order))
 
+(defn add-condition [add-cmd fill-cmd condition]
+  (let [changes      (:changes (add-cmd))
+        condition-id (-> changes first first last keyword)]
+    (fact "Add new condition"
+      condition-id => truthy
+      (when condition
+        (fact "Fill the added condition"
+          (fill-cmd condition-id condition)
+          => ok?)))
+    condition-id))
+
+(defn remove-condition [remove-cmd condition-id]
+  (fact "Remove condition"
+    (let [removals (:removals (remove-cmd))
+          removed-id (-> removals first last keyword)]
+      removed-id => condition-id)))
+
+(defn check-conditions [conditions-query kv]
+  (fact "Check conditions"
+    (conditions-query)
+    => (reduce-kv (fn [acc k v]
+                    (assoc acc k (if v
+                                   {:condition v}
+                                   {})))
+                  {}
+                  (apply hash-map kv))))
+
+(defn add-template-condition [template-id condition]
+  (add-condition #(command sipoo :save-verdict-template-draft-value
+                           :template-id template-id
+                           :path [:add-condition]
+                           :value true)
+                 #(command sipoo :save-verdict-template-draft-value
+                   :template-id template-id
+                   :path [:conditions %1 :condition]
+                   :value %2)
+                 condition))
+
+(defn remove-template-condition [template-id condition-id]
+  (remove-condition #(command sipoo :save-verdict-template-draft-value
+                              :template-id template-id
+                              :path [:conditions condition-id :remove-condition]
+                              :value true)
+                    condition-id))
+
+
+(defn check-template-conditions [template-id & kv]
+  (check-conditions #(-> (query sipoo :verdict-template :template-id template-id)
+                         :draft :conditions)
+                    kv))
+
 (fact "Create new template"
   (let [{:keys [id name draft modified category]} (init-verdict-template sipoo :r)]
     id => string?
@@ -205,6 +256,20 @@
                        :path [:foremen]
                        :value [:vv-tj])
               => invalid-value?)
+            (fact "Dynamic repeating conditions"
+              (fact "Add conditions"
+                (let [condition-id1   (add-template-condition id "Strict condition")
+                      condition-id2   (add-template-condition id "Other condition")
+                      empty-condition (add-template-condition id nil)]
+                  (check-template-conditions id
+                                             condition-id1 "Strict condition"
+                                             condition-id2 "Other condition"
+                                             empty-condition nil)
+                  (fact "Remove condition"
+                    (remove-template-condition id condition-id2)
+                    (check-template-conditions id
+                                             condition-id1 "Strict condition"
+                                             empty-condition nil)))))
             (fact "Set foremen removed"
               (command sipoo :save-verdict-template-draft-value
                        :template-id id
@@ -220,11 +285,12 @@
                   (query sipoo :verdict-template :template-id id)
                   => (contains {:id       id
                                 :name     "Uusi nimi"
-                                :draft    {:giver            "viranhaltija"
-                                           :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
-                                                              "aloitettava" "voimassa"]
-                                           :removed-sections {:foremen true
-                                                              :plans   true}}
+                                :draft    (contains {:giver            "viranhaltija"
+                                                     :verdict-dates    ["julkipano" "anto"
+                                                                        "muutoksenhaku" "lainvoimainen"
+                                                                        "aloitettava" "voimassa"]
+                                                     :removed-sections {:foremen true
+                                                                        :plans   true}})
                                 :modified last-edit
                                 :filled   true})))
               (facts "Publish template"
@@ -243,8 +309,7 @@
                     (command sipoo :save-verdict-template-draft-value
                              :template-id id :path [:giver] :value "")
                     => (contains {:filled false})
-                    (publish-verdict-template sipoo id) => (err :pate.required-fields)
-                    ))
+                    (publish-verdict-template sipoo id) => (err :pate.required-fields)))
                 (let [{filled    :filled
                        last-edit :modified}  (command sipoo :save-verdict-template-draft-value
                                                       :template-id id
@@ -295,39 +360,34 @@
                       copy-published => nil
                       copy-category => "r"
                       copy-name => "Uusi nimi (kopio)"
-                      copy-draft => {:giver            "viranhaltija"
-                                     :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
-                                                        "aloitettava" "voimassa"]
-                                     :removed-sections {:foremen true
-                                                        :plans   true}}
+                      copy-draft => (contains {:giver            "viranhaltija"
+                                               :verdict-dates    ["julkipano" "anto"
+                                                                  "muutoksenhaku" "lainvoimainen"
+                                                                  "aloitettava" "voimassa"]
+                                               :removed-sections {:foremen true
+                                                                  :plans   true}})
+                      (fact "Conditions are copied"
+                        (-> copy-draft :conditions vals)
+                        => (just [{:condition "Strict condition"} {}] :in-any-order))
                       (fact "Editing copy draft does not affect original"
                         (command sipoo :save-verdict-template-draft-value
                                  :template-id copy-id
                                  :path [:paatosteksti]
                                  :value  "This is the verdict.") => ok?
                         (fact "Copy has new data"
-                          (query sipoo :verdict-template
-                                 :template-id copy-id)
-                          => (contains {:draft {:giver            "viranhaltija"
-                                                :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
-                                                                   "aloitettava" "voimassa"]
-                                                :removed-sections {:foremen true
-                                                                   :plans   true}
-                                                :paatosteksti     "This is the verdict."}
-                                        :name  "Uusi nimi (kopio)"}))
+                          (-> (query sipoo :verdict-template
+                                     :template-id copy-id)
+                              :draft :paatosteksti)
+                          => "This is the verdict.")
                         (fact "Restore the deleted template"
                           (command sipoo :toggle-delete-verdict-template
                                    :template-id id
                                    :delete false) => ok?)
                         (fact "The original (restored) template does not have new data"
-                          (query sipoo :verdict-template
-                                 :template-id id)
-                          => (contains {:draft {:giver            "viranhaltija"
-                                                :verdict-dates    ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
-                                                                   "aloitettava" "voimassa"]
-                                                :removed-sections {:foremen true
-                                                                   :plans   true}}
-                                        :name  "Uusi nimi"}))
+                          (-> (query sipoo :verdict-template
+                                     :template-id id)
+                              :draft :paatosteksti)
+                          => nil)
                         (fact "Template list has both templates"
                           (->> (query sipoo :verdict-templates)
                                :verdict-templates
@@ -666,6 +726,35 @@
       attachment-id => truthy)
     attachment-id))
 
+(defn add-verdict-condition [app-id verdict-id condition]
+  (add-condition #(command sonja :edit-pate-verdict
+                           :id app-id
+                           :verdict-id verdict-id
+                           :path [:add-condition]
+                           :value true)
+                 #(command sonja :edit-pate-verdict
+                           :id app-id
+                           :verdict-id verdict-id
+                           :path [:conditions %1 :condition]
+                           :value %2)
+                 condition))
+
+(defn remove-verdict-condition [app-id verdict-id condition-id]
+  (remove-condition #(command sonja :edit-pate-verdict
+                           :id app-id
+                           :verdict-id verdict-id
+                           :path [:conditions condition-id :remove-condition]
+                           :value true)
+                    condition-id))
+
+(defn check-verdict-conditions [app-id verdict-id & kv]
+  (check-conditions #(-> (query sonja :pate-verdict
+                                :id app-id
+                                :verdict-id verdict-id)
+                         :verdict :data :conditions)
+                    kv))
+
+
 (facts "Verdicts"
   (let [{template-id :id} (init-verdict-template sipoo :r)
         plan              (-> (query sipoo :verdict-template-plans :category "r")
@@ -677,7 +766,14 @@
                               :review :id)
         plan-delete-id    (-> (command sipoo :add-verdict-template-plan
                                        :category "r")
-                              :plan :id)]
+                              :plan :id)
+        good-condition    (add-template-condition template-id "Good condition")
+        empty-condition   (add-template-condition template-id nil)
+        blank-condition   (add-template-condition template-id "    ")
+        other-condition   (add-template-condition template-id "Other condition")
+        remove-condition  (add-template-condition template-id "Remove condition")]
+    (fact "Remove condition"
+      (remove-template-condition template-id remove-condition))
     (fact "Plan" plan =not=> nil)
     (fact "Review" review =not=> nil)
     (fact "Review to be deleted" review-delete-id =not=> nil)
@@ -694,7 +790,8 @@
                :name "Full template") => ok?)
 
     (set-template-draft-values template-id
-                               :verdict-dates ["julkipano" "anto" "muutoksenhaku" "lainvoimainen"
+                               :verdict-dates ["julkipano" "anto"
+                                               "muutoksenhaku" "lainvoimainen"
                                                "aloitettava" "voimassa"]
                                "giver" :viranhaltija
                                "verdict-code" :ehdollinen
@@ -702,7 +799,6 @@
                                :foremen [:iv-tj :erityis-tj]
                                "plans" [(:id plan) plan-delete-id]
                                "reviews" [(:id review) review-delete-id]
-                               "conditions" "Other conditions."
                                "appeal" "Humble appeal."
                                "complexity" "medium"
                                "complexity-text" "Complex explanation."
@@ -793,7 +889,6 @@
                                :foremen          ["iv-tj" "erityis-tj"]
                                :verdict-code     "ehdollinen"
                                :collateral       ""
-                               :conditions       "Other conditions."
                                :rights           ""
                                :plans-included   true
                                :plans            [(:id plan)]
@@ -803,6 +898,29 @@
                                :reviews-included true
                                :reviews          [(:id review)]
                                :statements       ""})
+            (facts "Verdict draft conditions"
+              (let [conditions (->> data :conditions
+                                    (reduce-kv (fn [acc k v]
+                                                 (assoc acc (:condition v) k))
+                                               {}))]
+                (fact "Two conditions"
+                  (keys conditions)
+                  => (just ["Good condition" "Other condition"] :in-any-order))
+                (fact "New ids"
+                  (util/intersection-as-kw (vals conditions)
+                                           [good-condition other-condition])
+                  => empty?)
+                (let [good-id  (keyword (get conditions "Good condition"))
+                      other-id (keyword (get conditions "Other condition"))
+                      new-id   (add-verdict-condition app-id verdict-id "New condition")]
+                  (check-verdict-conditions app-id verdict-id
+                                            good-id "Good condition"
+                                            other-id "Other condition"
+                                            new-id "New condition")
+                  (remove-verdict-condition app-id verdict-id new-id)
+                  (check-verdict-conditions app-id verdict-id
+                                            good-id "Good condition"
+                                            other-id "Other condition"))))
             (fact "No section"
               (:section data) => nil?)
             (fact "New verdict is not filled"
@@ -1007,8 +1125,8 @@
                            :op-id op-id-pientalo
                            :desc "Hen piaoliang!") => ok?)
                 (fact "national-id update pre-verdict"
-                      (api-update-national-building-id-call app-id {:form-params {:applicationId app-id :operationId (name op-id-pientalo) :nationalBuildingId "1234567881"}
-                                                                :as :json :basic-auth ["sipoo-r-backend" "sipoo"]}) => http200?
+                  (api-update-national-building-id-call app-id {:form-params {:applicationId app-id :operationId (name op-id-pientalo) :nationalBuildingId "1234567881"}
+                                                                :as          :json :basic-auth ["sipoo-r-backend" "sipoo"]}) => http200?
                       (->> (query-application sonja app-id) :documents
                            (util/find-by-id doc-id)
                            :data :valtakunnallinenNumero :value) => "1234567881")
@@ -1150,7 +1268,7 @@
                                    :id app-id
                                    :verdict-id verdict-id) => ok?)
                         (facts "Published verdict"
-                          (let [data  (-> (open-verdict) :verdict :data)]
+                          (let [data (-> (open-verdict) :verdict :data)]
                             (fact "Section is 88"
                               data => (contains {:verdict-section "88"}))
                             (fact "No contact information"
@@ -1179,17 +1297,17 @@
                     (fact "Published verdict cannot be deleted"
                       (command sonja :delete-pate-verdict :id app-id
                                :verdict-id verdict-id) => fail?)))
-              (let [{:keys [state buildings id] {operation-id :id} :primaryOperation :as post-verdict-app} (query-application sonja app-id)]
+                (let [{:keys [state buildings id] {operation-id :id} :primaryOperation :as post-verdict-app} (query-application sonja app-id)]
                 (fact "Application state is verdictGiven"
                   state => "verdictGiven")
                 (fact "Buildings array is created, primaryOperation gets index = 1"
-                  (first buildings) => (contains {:index 1
+                  (first buildings) => (contains {:index        1
                                                   :localShortId "002"
-                                                  :description "Hello world!"}))
+                                                  :description  "Hello world!"}))
                 (fact "national-id update post-verdict is reflected to buildings array as well"
                   (api-update-national-building-id-call id {:form-params {:applicationId id :operationId operation-id :nationalBuildingId "1234567892"}
-                                                            :as :json
-                                                            :basic-auth ["sipoo-r-backend" "sipoo"]}) => http200?
+                                                            :as          :json
+                                                            :basic-auth  ["sipoo-r-backend" "sipoo"]}) => http200?
                   (-> (query-application sonja app-id) :buildings first :nationalId) => "1234567892"))))
           (fact "Verdict draft to be deleted"
             (let  [{verdict :verdict} (command sonja :new-pate-verdict-draft

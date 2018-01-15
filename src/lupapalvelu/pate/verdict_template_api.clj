@@ -134,7 +134,7 @@
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable)]}
   [{:keys [created] :as command}]
-  (let [organization  (template/command->organization command)
+  (let [organization   (template/command->organization command)
         {data :data
          :as  updated} (template/save-draft-value organization
                                                   template-id
@@ -142,8 +142,10 @@
                                                   path
                                                   value)]
     (if data
-      (ok :modified created
-          :filled (template/template-filled? {:data data}))
+      (ok  (template/changes-response
+            {:modified created
+             :filled   (template/template-filled? {:data data})}
+            updated))
       (template/error-response updated))))
 
 (defcommand publish-verdict-template

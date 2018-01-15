@@ -2,6 +2,7 @@
   (:require [clojure.set :as set]
             [lupapalvelu.document.schemas :as doc-schemas]
             [lupapalvelu.document.tools :refer [body] :as tools]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.shared :as shared]
             [sade.schemas :as ssc]
@@ -276,26 +277,28 @@
       (when-not (util/includes-as-kw? (keys data) (first path))
         :error.invalid-value-path)))
 
+(defmethod validate-resolution :button
+  [{:keys [path schema value data]}]
+  (path-error path))
+
 (defn- resolve-dict-value
   [data]
-  (let [docgen       (:docgen data)
-        reflist      (:reference-list data)
-        date-delta   (:date-delta data)
-        multi-select (:multi-select data)
-        phrase-text  (:phrase-text data)
-        keymap       (:keymap data)
-        wrap         (fn [type schema data]
-                       {:type   type
-                        :schema schema
-                        :data   data})]
+  (let [{:keys [docgen reference-list
+                date-delta multi-select
+                phrase-text keymap button]} data
+        wrap                                (fn [type schema data]
+                                              {:type   type
+                                               :schema schema
+                                               :data   data})]
     (cond
-      docgen       (wrap :docgen (doc-schemas/get-schema
-                                  {:name (get docgen :name docgen)}) docgen)
-      date-delta   (wrap :date-delta shared/PateDateDelta date-delta)
-      reflist      (wrap :reference-list shared/PateReferenceList reflist)
-      multi-select (wrap :multi-select shared/PateMultiSelect multi-select)
-      phrase-text  (wrap :phrase-text shared/PatePhraseText phrase-text)
-      keymap       (wrap :keymap shared/KeyMap keymap))))
+      docgen         (wrap :docgen (doc-schemas/get-schema
+                                    {:name (get docgen :name docgen)}) docgen)
+      date-delta     (wrap :date-delta shared/PateDateDelta date-delta)
+      reference-list (wrap :reference-list shared/PateReferenceList reference-list)
+      multi-select   (wrap :multi-select shared/PateMultiSelect multi-select)
+      phrase-text    (wrap :phrase-text shared/PatePhraseText phrase-text)
+      keymap         (wrap :keymap shared/KeyMap keymap)
+      button         (wrap :button shared/PateButton button))))
 
 (defn- validate-dictionary-value
   "Validates that path-value combination is valid for the given
@@ -339,6 +342,8 @@
 
   On success the map has the following keys:
 
+  :op Eiher :set, :add or :remove. The latter two are :repeating
+      operations.
   :path  canonized path
   :value processed value
   :data  processed data
@@ -361,13 +366,45 @@
                                  {:errors [[path e]]}))
          repeating-path      (drop-last (-> dict-path count inc) path)]
      (cond
-       error                                         (err error)
+       error
+       (err error)
+
        ;; Repeating indeces must exist
        (and (not-empty repeating-path)
-            (nil? (get-in old-data repeating-path))) (err :error.invalid-value-path)
-       :else                                         {:path  path
-                                                      :value value
-                                                      :data  (assoc-in old-data path value)})))
+            (nil? (get-in old-data repeating-path)))
+       (err :error.invalid-value-path)
+
+       (:button dict-schema)
+       (if-let  [add (-> dict-schema :button :add)]
+         (if-let [subpath (shared/repeating-subpath add
+                                                    (concat (butlast path) [add])
+                                                    dic)]
+           (let [add-path (->> (mongo/create-id)
+                               keyword
+                               list
+                               (concat subpath))]
+             {:op   :add
+              :path  add-path
+              :value {}
+              :data  (assoc-in old-data add-path {})})
+           (err :error.invalid-value-path))
+         (if-let [remove (-> dict-schema :button :remove)]
+           (if-let [subpath (shared/repeating-subpath remove
+                                                      path
+                                                      dic)]
+             (let [removepath (subvec (vec path) 0 (inc (count subpath)))]
+               {:op   :remove
+                :path  removepath
+                :value true
+                :data  (util/dissoc-in old-data removepath)})
+             (err :error.invalid-value-path))
+           (err :error.invalide-value-path)))
+
+       :else
+       {:op   :set
+        :path  path
+        :value value
+        :data  (assoc-in old-data path value)})))
   ([schema path value old-data]
    (validate-and-process-value schema path value old-data nil)))
 

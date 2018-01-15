@@ -1,6 +1,6 @@
 (ns lupapalvelu.pate.shared
   (:require [clojure.string :as s]
-            [sade.shared-util :as util]
+            [clojure.set :as set]
             [schema.core :refer [defschema] :as sc]))
 
 ;; identifier - KuntaGML-paatoskoodi (yhteiset.xsd)
@@ -79,6 +79,16 @@
 (def keyword-or-string (sc/conditional
                         keyword? sc/Keyword
                         :else    sc/Str))
+(defn only-one-of
+  "Only one of the given keys are allowed in the data."
+  [allowed-keys schema]
+  (sc/constrained schema
+                  (fn [data]
+                    (< (->> (keys data)
+                            (util/intersection-as-kw allowed-keys)
+                            count)
+                       2))
+                  (str "Only one of the keys is allowed: " allowed-keys)))
 
 (def PathCondition
   [(sc/one (sc/enum :OR :AND) :OR)
@@ -234,7 +244,7 @@
 
 (defschema PateLink
   "UI component that represents a text with link. The link is part of
-  the text-loc, using a special notattion: 'Text before [link]
+  the text-loc, using a special notation: 'Text before [link]
   after.' The click handler for the link is a _meta function."
   (merge PateComponent
          {;; The label text is always determined by the default
@@ -244,6 +254,20 @@
           ;; Must resolve to _meta function. The function receives
           ;; options as arguments.
           :click    sc/Keyword}))
+
+(defschema PateButton
+  "Button with an optional icon."
+  (only-one-of [:add :remove :click]
+               (merge PateComponent
+                      ;; Icon class (e.g., :lupicon-save)
+                      {(sc/optional-key :icon)   sc/Keyword
+                       ;; Keyword must be a sibling repeating dict id.
+                       (sc/optional-key :add)    sc/Keyword
+                       ;; Keyword is an encompassing repeating dict id
+                       (sc/optional-key :remove) sc/Keyword
+                       ;; Must resolve to _meta function. The function
+                       ;; receives options as arguments.
+                       (sc/optional-key :click)  sc/Keyword})))
 
 (defschema PatePlaceholder
   "Placholder for external (filled by backend) data."
@@ -302,6 +326,7 @@
                :multi-select   (required {:multi-select PateMultiSelect})
                :reference      (required {:reference PateReference})
                :link           {:link PateLink}
+               :button         {:button PateButton}
                :placeholder    {:placeholder PatePlaceholder}
                :keymap         {:keymap KeyMap}
                :attachments    (required {:attachments PateAttachments})
@@ -463,7 +488,10 @@
                                                                      :term     {:path       [:reviews]
                                                                                 :extra-path [:name]
                                                                                 :match-key  :id}})
-                :conditions                {:phrase-text {:category :lupaehdot}}
+                :conditions      {:repeating {:condition        {:phrase-text {:i18nkey  :phrase.category.lupaehdot
+                                                                               :category :lupaehdot}}
+                                              :remove-condition {:button {:remove :conditions}}}}
+                :add-condition   {:button {:add :conditions}}
                 :neighbors                 {:loc-text :pate-neighbors.text}
 
                 :appeal           {:phrase-text {:category :muutoksenhaku
@@ -691,8 +719,10 @@
              [[:pate-r.foremen :foremen false false]
               [:pate-plans :plans true false]
               [:pate-reviews :reviews true true]])
-     {:conditions      {:phrase-text {:i18nkey  :phrase.category.lupaehdot
-                                      :category :lupaehdot}}
+     {:conditions      {:repeating {:condition        {:phrase-text {:i18nkey  :phrase.category.lupaehdot
+                                                                     :category :lupaehdot}}
+                                    :remove-condition {:button {:remove :conditions}}}}
+      :add-condition   {:button {:add :conditions}}
       :neighbors       {:phrase-text {:i18nkey  :phrase.category.naapurit
                                       :category :naapurit}}
       :neighbor-states {:placeholder {:type :neighbors}}
@@ -894,14 +924,32 @@
 
   Returns map with :schema and :path keys. The path is
   the remaining path (e.g., [:delta] for pate-delta). Note: the
-  result is empty map if the path resolves to the repeating schema."
+  result is empty map if the path resolves to the repeating schema.
+
+  Returns nil when the resolution fails."
   [path dictionary]
   (loop [[x & xs]   (->> path
                          (remove nil?)
                          (map keyword))
          dictionary dictionary]
-    (if-let [schema (get dictionary x)]
-      (if (:repeating schema)
-        (recur (rest xs) (:repeating schema))
-        {:schema schema :path xs})
-      {})))
+    (when dictionary
+      (if x
+        (when-let [schema (get dictionary x)]
+          (if (:repeating schema)
+            (recur (rest xs) (:repeating schema))
+            {:schema schema :path xs}))
+        {}))))
+
+(defn repeating-subpath
+  "Subpath that resolves to a repeating named repeating. Nil if not
+  found. Note that the actual existence of the path within data is not
+  checked."
+  [repeating path dictionary]
+  (loop [path path]
+    (cond
+      (empty? path)           nil
+      (= (last path)
+         repeating) (when (= (dict-resolve path dictionary)
+                             {})
+                      path)
+      :else                   (recur (butlast path)))))

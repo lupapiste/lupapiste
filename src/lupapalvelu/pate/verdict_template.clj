@@ -35,6 +35,17 @@
     (fail failure)
     (ok :errors errors)))
 
+(defn changes-response
+  "Encriches given response with changes and removals properties that
+  are resulting from repeating add and remove operations updates
+  respectively. Existing properties are augmented"
+  [{:keys [changes removals] :as response} {:keys [op path value]}]
+  (merge response
+         (case op
+           :add {:changes (concat (or changes []) [[path value]])}
+           :remove {:removals (concat (or removals []) [path])}
+           {})))
+
 (defn new-verdict-template
   ([org-id timestamp lang category draft name]
    (let [data {:id       (mongo/create-id)
@@ -169,7 +180,7 @@
   [organization template-id timestamp path value]
   (let [{:keys [category draft]
          :as   template}  (verdict-template organization template-id)
-        {:keys [path value]
+        {:keys [path value op]
          :as   processed} (schemas/validate-and-process-value
                            shared/default-verdict-template
                            path
@@ -185,12 +196,15 @@
                                         (map :id (generic-list organization
                                                                category
                                                                ref-gen))))))]
-    (when path ;; Value could be nil
-      (template-update organization
-                         template-id
-                         {$set {(util/kw-path (cons :verdict-templates.templates.$.draft
-                                                    path)) value}}
-                         timestamp))
+    (when op ;; Value could be nil
+      (let [mongo-path (util/kw-path (cons :verdict-templates.templates.$.draft
+                                           path))]
+        (template-update organization
+                        template-id
+                        (if (= op :remove)
+                          {$unset {mongo-path 1}}
+                          {$set {mongo-path value}})
+                        timestamp)))
     processed))
 
 (defn- prune-template-data
@@ -202,6 +216,20 @@
                                        gen-key
                                        (map :id)
                                        (util/intersection-as-kw ids)))))
+
+(defn- transform-conditions
+  "Transform conditions from map of maps to sequence of strings. If
+  conditions section is removed or transformation result is empty,
+  conditions are removed from draft. Returns draft."
+  [{:keys [conditions removed-sections] :as draft}]
+  (let [transformed (some->> conditions
+                                vals
+                                (map :condition)
+                                (remove ss/blank?))]
+    (if (and (-> removed-sections :conditions not)
+             transformed)
+      (assoc draft :conditions transformed)
+      (dissoc draft :conditions))))
 
 (defn publish-verdict-template [organization template-id timestamp]
   (let [{:keys [draft category]
@@ -216,7 +244,8 @@
                             {:published timestamp
                              :data      (->> draft
                                              (prune-template-data settings :reviews)
-                                             (prune-template-data settings :plans))
+                                             (prune-template-data settings :plans)
+                                             transform-conditions)
                              :settings  settings}}})))
 
 (defn set-name [organization template-id timestamp name]
