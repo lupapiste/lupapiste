@@ -35,7 +35,7 @@ LUPAPISTE.PremisesUploadModel = function( params ) {
                     util.showSavedIndicator(res);
                 }
             },
-            error: function(res) {
+            error: function(res) {
                 hub.send("indicator", {style: "negative", message: res.responseJSON.text});
             },
             complete: function() {

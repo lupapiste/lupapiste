@@ -27,9 +27,9 @@
 ;;
 
 (def ifc-labels ["Porras" "Huoneistonumero" "Huoneiston jakokirjain" "Sijaintikerros"
-                 "Huoneiden lukumäärä" "Keittiötyyppi" "Huoneistoala" "Varusteena WC"
+                 "Huoneiden lukum\u00e4r\u00e4" "Keitti\u00f6tyyppi" "Huoneistoala" "Varusteena WC"
                  "Varusteena amme/suihku" "Varusteena parveke" "Varusteena Sauna"
-                 "Varusteena lämmin vesi"])
+                 "Varusteena l\u00e4mmin vesi"])
 
 (def ifc->lp-val-map
   {:keittionTyyppi          {"1" "keittio"
@@ -47,51 +47,51 @@
    :lamminvesiKytkin        {"1" true "0" false}})
 
 (def localized-ifc-keys
-  {"huoneiston tyyppi"      :huoneistoTyyppi
-   "lägenhetstyp"           :huoneistoTyyppi
-   "dwelling type"          :huoneistoTyyppi
-   "porras"                 :porras
-   "trappa"                 :porras
-   "stairway"               :porras
-   "huoneistonumero"        :huoneistonumero
-   "huoneiston numero"      :huoneistonumero
-   "lägenhetsnummer"        :huoneistonumero
-   "flat number"            :huoneistonumero
-   "huoneiston jakokirjain" :jakokirjain
-   "jakokirjain"            :jakokirjain
-   "delningsbokstav"        :jakokirjain
-   "splitting letter"       :jakokirjain
-   "huoneiden lukumäärä"    :huoneluku
-   "huoneluku"              :huoneluku
-   "antal rum"              :huoneluku
-   "number of rooms"        :huoneluku
-   "keittiötyyppi"          :keittionTyyppi
-   "keittiön tyyppi"        :keittionTyyppi
-   "typ av kök"             :keittionTyyppi
-   "kitchen type"           :keittionTyyppi
-   "huoneistoala"           :huoneistoala
-   "huoneistoala m2"        :huoneistoala
-   "lägenhetsyta"           :huoneistoala
-   "floor area"             :huoneistoala
-   "varusteena wc"          :WCKytkin
-   "wc"                     :WCKytkin
-   "toilet"                 :WCKytkin
-   "varusteena amme/suihku" :ammeTaiSuihkuKytkin
-   "amme/ suihku"           :ammeTaiSuihkuKytkin
-   "badkar/dusch"           :ammeTaiSuihkuKytkin
-   "bath tub/shower"        :ammeTaiSuihkuKytkin
-   "varusteena parveke"     :parvekeTaiTerassiKytkin
-   "parveke/ terassi"       :parvekeTaiTerassiKytkin
-   "balkong/ terass"        :parvekeTaiTerassiKytkin
-   "balcony/terrace"        :parvekeTaiTerassiKytkin
-   "varusteena sauna"       :saunaKytkin
-   "sauna"                  :saunaKytkin
-   "bastu"                  :saunaKytkin
-   "varusteena lämmin vesi" :lamminvesiKytkin
-   "lämminvesi"             :lamminvesiKytkin
-   "lämmin vesi"            :lamminvesiKytkin
-   "varmvatten"             :lamminvesiKytkin
-   "warm water"             :lamminvesiKytkin})
+  {"huoneiston tyyppi"                  :huoneistoTyyppi
+   "l\u00e4genhetstyp"                  :huoneistoTyyppi
+   "dwelling type"                      :huoneistoTyyppi
+   "porras"                             :porras
+   "trappa"                             :porras
+   "stairway"                           :porras
+   "huoneistonumero"                    :huoneistonumero
+   "huoneiston numero"                  :huoneistonumero
+   "l\u00e4genhetsnummer"               :huoneistonumero
+   "flat number"                        :huoneistonumero
+   "huoneiston jakokirjain"             :jakokirjain
+   "jakokirjain"                        :jakokirjain
+   "delningsbokstav"                    :jakokirjain
+   "splitting letter"                   :jakokirjain
+   "huoneiden lukum\u00e4\u00e4r\u00e4" :huoneluku
+   "huoneluku"                          :huoneluku
+   "antal rum"                          :huoneluku
+   "number of rooms"                    :huoneluku
+   "keitti\u00f6tyyppi"                 :keittionTyyppi
+   "keitti\u00f6n tyyppi"               :keittionTyyppi
+   "typ av k\u00f6k"                    :keittionTyyppi
+   "kitchen type"                       :keittionTyyppi
+   "huoneistoala"                       :huoneistoala
+   "huoneistoala m2"                    :huoneistoala
+   "l\u00e4genhetsyta"                  :huoneistoala
+   "floor area"                         :huoneistoala
+   "varusteena wc"                      :WCKytkin
+   "wc"                                 :WCKytkin
+   "toilet"                             :WCKytkin
+   "varusteena amme/suihku"             :ammeTaiSuihkuKytkin
+   "amme/ suihku"                       :ammeTaiSuihkuKytkin
+   "badkar/dusch"                       :ammeTaiSuihkuKytkin
+   "bath tub/shower"                    :ammeTaiSuihkuKytkin
+   "varusteena parveke"                 :parvekeTaiTerassiKytkin
+   "parveke/ terassi"                   :parvekeTaiTerassiKytkin
+   "balkong/ terass"                    :parvekeTaiTerassiKytkin
+   "balcony/terrace"                    :parvekeTaiTerassiKytkin
+   "varusteena sauna"                   :saunaKytkin
+   "sauna"                              :saunaKytkin
+   "bastu"                              :saunaKytkin
+   "varusteena l\u00e4mmin vesi"        :lamminvesiKytkin
+   "l\u00e4mminvesi"                    :lamminvesiKytkin
+   "l\u00e4mmin vesi"                   :lamminvesiKytkin
+   "varmvatten"                         :lamminvesiKytkin
+   "warm water"                         :lamminvesiKytkin})
 
 (defn- header-data-map [vecs]
   (let [header-row       (mapv #(.toLowerCase %) (first vecs))
