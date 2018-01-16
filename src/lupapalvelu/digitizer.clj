@@ -149,6 +149,8 @@
         created-application (update-in created-application [:documents] concat other-building-docs)
         created-application (update-in created-application [:secondaryOperations] concat secondary-ops)
 
+        created-application (assoc created-application :drawings (:drawings app-info))
+
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).

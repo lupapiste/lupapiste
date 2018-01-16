@@ -499,12 +499,15 @@
           (coordinate/convert source-projection common/to-projection 3 coords))))
     (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus))))
 
-(defn- area-geometry-str [coordinates source-projection geometry-type]
-  (let [wgs-coordinates      (map #(coordinate/convert source-projection "WGS84" 6 (ss/split % #",")) coordinates)
-        wgs-coordinates-str  (apply str (mapv #(str (first %) " " (last %) ", ") wgs-coordinates))
-        first-coordinate     (first wgs-coordinates)
-        first-coordinate-str (str (first first-coordinate) " " (last first-coordinate))]
-    (str geometry-type "((" wgs-coordinates-str first-coordinate-str "))")))
+(defn- area-geometry-str [coordinates-array-xml geometry-type target-projection]
+  (let [area-coordinates-str       (->> (cr/all-of coordinates-array-xml) :Polygon :outerBoundaryIs :LinearRing :coordinates)
+        area-coordinates           (ss/split area-coordinates-str #" ")
+        source-projection          (common/->polygon-source-projection coordinates-array-xml)
+        converted-coordinates      (map #(coordinate/convert source-projection target-projection 6 (ss/split % #",")) area-coordinates)
+        converted-coordinates-str  (apply str (mapv #(str (first %) " " (last %) ", ") converted-coordinates))
+        first-coordinate           (first converted-coordinates)
+        first-coordinate-str       (str (first first-coordinate) " " (last first-coordinate))]
+    (str geometry-type "((" converted-coordinates-str first-coordinate-str "))")))
 
 (defn- resolve-area-coordinates [coordinates-array-xml building-location]
   (if (some? (select1 building-location [:piste :Point]))
@@ -513,10 +516,7 @@
           source-projection (common/->source-projection building-location [:Point])]
       (when-not (contains? coordinate/known-bad-coordinates building-coordinates)
         (coordinate/convert source-projection common/to-projection 3 building-coordinates)))
-    (let [area-coordinates-str (->> (cr/all-of coordinates-array-xml) :Polygon :outerBoundaryIs :LinearRing :coordinates)
-          area-coordinates (ss/split area-coordinates-str #" ")
-          source-projection (common/->polygon-source-projection coordinates-array-xml)
-          area-geometry-str (area-geometry-str area-coordinates source-projection "POLYGON")
+    (let [area-geometry-str (area-geometry-str coordinates-array-xml "POLYGON" "WGS84")
           interior-point (drawing/interior-point area-geometry-str)
           interior-point-coordinates (coordinate/convert "WGS84" common/to-projection 6 interior-point)]
       interior-point-coordinates)))
@@ -635,7 +635,12 @@
                                   :propertyId kiinteistotunnus}}
 
                 (and (nil? coord-array-Rakennuspaikka) (not (ss/blank? kiinteistotunnus)))
-                (resolve-location-by-property-id kiinteistotunnus kuntalupatunnus)))
+                (resolve-location-by-property-id kiinteistotunnus kuntalupatunnus))
+
+              (when-not (some? location-point)
+                (let [geometry-str (area-geometry-str (select1 asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :alue]) "POLYGON" common/to-projection)]
+                {:drawings [{:geometry geometry-str
+                             :geometry-wgs84 (drawing/wgs84-geometry {:geometry geometry-str})}]})))
 
             cr/convert-booleans
             cr/cleanup)))))
