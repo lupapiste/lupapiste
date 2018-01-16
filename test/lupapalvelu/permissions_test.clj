@@ -10,9 +10,12 @@
    :test-scope-b {:tester            #{:test/test
                                        :test/do}}})
 
+(defpermission test-more
+  {:test-scope   {:test-role         #{:test-more/test}}})
+
 (facts get-permissions-by-role
   (fact "existing scope and role"
-    (get-permissions-by-role :test-scope "test-role") => #{:test/test :test/fail})
+    (get-permissions-by-role :test-scope "test-role") => #{:test/test :test/fail :test-more/test})
 
   (fact "existing scope and another role"
     (get-permissions-by-role :test-scope :another-test-role) => #{:test/fail})
@@ -85,3 +88,46 @@
 
     (provided (get-permissions-by-role :organization "org-mighty")  => #{:test/do-anything :test/test})
     (provided (get-permissions-by-role :organization "org-nocando") => #{})))
+
+(defcontext test-context [{{id :test-id field :test-field} :test-user coll :test-coll}]
+  (let [thing (util/find-by-id id coll)]
+    {:context-scope :test-scope
+     :context-role  (:role thing)
+     :thing         thing}))
+
+(facts "defcontext"
+  (facts test-context
+    (fact "is function"
+      test-context => fn?)
+
+    (fact "context extended with thing"
+      (test-context {:test-user {:test-id 1 :test-field "something"} :test-coll [{:id 1 :role "test-role"}]})
+
+      => {:test-user   {:test-id 1 :test-field "something"}
+          :test-coll   [{:id 1 :role "test-role"}]
+          :thing       {:id 1 :role "test-role"}
+          :permissions #{:test/test :test/fail :test-more/test}})
+
+    (fact "context extended with thing - permissions extended"
+      (test-context {:test-user {:test-id 1 :test-field "something"} :test-coll [{:id 1 :role "test-role"}] :permissions #{:application/do}})
+
+      => {:test-user   {:test-id 1 :test-field "something"}
+          :test-coll   [{:id 1 :role "test-role"}]
+          :thing       {:id 1 :role "test-role"}
+          :permissions #{:test/test :test/fail :test-more/test :application/do}})
+
+    (fact "thing not found - no permissions"
+      (test-context {:test-user {:test-id 1 :test-field "something"} :test-coll [{:id 2 :role "test-role"}]})
+
+      => {:test-user   {:test-id 1 :test-field "something"}
+          :test-coll   [{:id 2 :role "test-role"}]
+          :thing       nil
+          :permissions nil})
+
+    (fact "thing not found - permissions unchanged"
+      (test-context {:test-user {:test-id 1 :test-field "something"} :test-coll [{:id 2 :role "test-role"}] :permissions #{:application/do}})
+
+      => {:test-user   {:test-id 1 :test-field "something"}
+          :test-coll   [{:id 2 :role "test-role"}]
+          :thing       nil
+          :permissions #{:application/do}})))

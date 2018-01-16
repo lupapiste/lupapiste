@@ -538,6 +538,9 @@
                   (permissions/get-organization-permissions command))
        (assoc command :permissions)))
 
+(defn- enrich-action-contexts [command]
+  (reduce (fn [cmd ctx-fn] (ctx-fn cmd)) command (:contexts (meta-data command))))
+
 (defn- run [command validators execute?]
   (try+
     (or
@@ -567,7 +570,8 @@
                          :application-assignments assignments}
                         (merge command)
                         (update :user update-user-application-role application)
-                        enrich-default-permissions)]
+                        enrich-default-permissions
+                        enrich-action-contexts)]
         (or
           (not-authorized-to-application command)
           (pre-checks-fail command)
