@@ -1,6 +1,7 @@
 (ns lupapalvelu.pate.shared
   (:require [clojure.string :as s]
             [clojure.set :as set]
+            [sade.shared-util :as util]
             [schema.core :refer [defschema] :as sc]))
 
 ;; identifier - KuntaGML-paatoskoodi (yhteiset.xsd)

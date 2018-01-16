@@ -331,9 +331,43 @@
   ([schema path value]
    (validate-path-value schema path value nil)))
 
+(defn- process-button
+  "In the context of the backend schema validation and processing,
+  button always presents either adding or removing item from a
+  repeating structure. This function is called from
+  validate-and-process-value (see below)."
+  [{:keys [path old-data dict-schema dict-path dictionary err]}]
+  (let [add    (-> dict-schema :button :add)
+        remove (-> dict-schema :button :remove)]
+    (or
+     (cond
+       ;; Add button dict must be a sibling for the target repeating.
+       add (when-let [subpath (shared/repeating-subpath add
+                                                        (concat (butlast path) [add])
+                                                        dictionary)]
+             (let [add-path (->> (mongo/create-id)
+                                 keyword
+                                 list
+                                 (concat subpath))]
+               {:op    :add
+                :path  add-path
+                :value {}
+                :data  (assoc-in old-data add-path {})}))
+       ;; Remove button must belong to the target repeating. However,
+       ;; the target can be an ancestor repeating as well.
+       remove (when-let [subpath (shared/repeating-subpath remove
+                                                           path
+                                                           dictionary)]
+                (let [removepath (subvec (vec path) 0 (inc (count subpath)))]
+                  {:op    :remove
+                   :path  removepath
+                   :value true
+                   :data  (util/dissoc-in old-data removepath)})))
+     (err :error.invalid-value-path))))
+
+
 (defn validate-and-process-value
-  "Processes new value. This should be called after
-  validate-dictionary-value. Old-data is the whole old-data.
+  "Validates and rocesses new value.  Old-data is the whole old-data.
 
   For error situations the returned map has either
 
@@ -375,33 +409,12 @@
        (err :error.invalid-value-path)
 
        (:button dict-schema)
-       (if-let  [add (-> dict-schema :button :add)]
-         (if-let [subpath (shared/repeating-subpath add
-                                                    (concat (butlast path) [add])
-                                                    dic)]
-           (let [add-path (->> (mongo/create-id)
-                               keyword
-                               list
-                               (concat subpath))]
-             {:op   :add
-              :path  add-path
-              :value {}
-              :data  (assoc-in old-data add-path {})})
-           (err :error.invalid-value-path))
-         (if-let [remove (-> dict-schema :button :remove)]
-           (if-let [subpath (shared/repeating-subpath remove
-                                                      path
-                                                      dic)]
-             (let [removepath (subvec (vec path) 0 (inc (count subpath)))]
-               {:op   :remove
-                :path  removepath
-                :value true
-                :data  (util/dissoc-in old-data removepath)})
-             (err :error.invalid-value-path))
-           (err :error.invalide-value-path)))
+       (process-button {:path        path        :old-data  old-data
+                        :dict-schema dict-schema :dict-path dict-path
+                        :dictionary  dic         :err       err})
 
        :else
-       {:op   :set
+       {:op    :set
         :path  path
         :value value
         :data  (assoc-in old-data path value)})))

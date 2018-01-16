@@ -6,7 +6,27 @@
             [lupapalvelu.pate.shared  :as shared]
             [midje.sweet :refer :all]
             [sade.util :as util]
-            [schema.core :refer [defschema] :as sc]))
+            [schema.core :refer [defschema] :as sc]
+            [schema.utils :refer [validation-error-explain]]))
+
+(fact "only-one-of constraint"
+  (let [err-msg (util/fn-> validation-error-explain second first)
+        s "Only one of the keys is allowed: [:add :remove :click]"]
+    (err-msg (sc/check shared/PateButton
+                       {:click :foo :add :bar :remove :baz})) => s
+    (err-msg (sc/check shared/PateButton
+                       {:add :one :remove :two :click :three})) => s
+    (err-msg (sc/check shared/PateButton
+                       {:click :one :add :two})) => s
+    (err-msg (sc/check shared/PateButton
+                       {:add :one :remove :hii})) => s
+    (err-msg (sc/check shared/PateButton
+                       {:remove :foo :click :bar})) => s)
+  (sc/check shared/PateButton {:click :foo}) => nil
+  (sc/check shared/PateButton {:add :bar}) => nil
+  (sc/check shared/PateButton {:remove :baz}) => nil
+  (sc/check shared/PateButton {}) => nil)
+
 
 (def test-template
   {:dictionary {:check       {:docgen "pate-verdict-check"}

@@ -408,7 +408,8 @@
                                                          (repeat {}))
                                                  houses)))
                                 references)]
-    (if data
+    (if-not data
+      processed
       (let [mongo-path (util/kw-path :pate-verdicts.$.data path)]
         (verdict-update command
                         (if (= op :remove)
@@ -426,8 +427,7 @@
                                                 (map (fn [[k v]]
                                                        [(util/split-kw-path k) v])
                                                      changed))}
-                                   processed))
-      processed)))
+                                   processed)))))
 
 
 (defn- merge-buildings [app-buildings verdict-buildings defaults]
