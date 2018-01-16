@@ -18,6 +18,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.permissions :as permissions]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
@@ -461,6 +462,11 @@
                           missing-parameters
                           input-validators-fail))
 
+(defn access-denied-by-insufficient-permissions [{user-permissions :permisssions :as command}]
+  (let [permissions (permissions/get-required-permissions (meta-data command) command)]
+    (when-not (set/subset? (:required permissions) user-permissions)
+      unauthorized)))
+
 (defn requires-application? [{data :data}]
   (contains? data :id))
 
@@ -575,6 +581,7 @@
         (or
           (not-authorized-to-application command)
           (pre-checks-fail command)
+          (access-denied-by-insufficient-permissions command)
           (when execute?
             (let [status   (executed command)
                   post-fns (get-post-fns status (get-meta (:action command)))]

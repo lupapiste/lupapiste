@@ -70,3 +70,13 @@
              perms# (get-permissions-by-role (:context-scope ctx#) (:context-role ctx#))]
          (-> (merge ~(:as cmd) (dissoc ctx# :context-scope :context-role :permissions))
              (update :permissions set/union perms#))))))
+
+(defn- matching-context? [ctx-matcher context]
+  (cond
+    (map? ctx-matcher) (every? (fn [[k v]] (matching-context? v (k context))) ctx-matcher)
+    (nil? ctx-matcher) true
+    (set? ctx-matcher) (contains? ctx-matcher (keyword context))
+    (fn? ctx-matcher)  (ctx-matcher context)))
+
+(defn get-required-permissions [{permissions :permissions :as command-meta} command]
+  (util/find-first (util/fn-> :context (matching-context? command)) permissions))

@@ -131,3 +131,123 @@
           :test-coll   [{:id 2 :role "test-role"}]
           :thing       nil
           :permissions #{:application/do}})))
+
+(testable-privates lupapalvelu.permissions matching-context?)
+
+(facts matching-context?
+  (fact "set matcher with match"
+    (matching-context? #{:sent :submitted}
+                       :sent) => truthy)
+
+  (fact "set matcher without match"
+    (matching-context? #{:sent :submitted}
+                       :draft) => falsey)
+
+  (fact "function matcher with match"
+    (matching-context? keyword?
+                       :sent) => truthy)
+
+  (fact "simple map matcher with match"
+    (matching-context? {:state #{:sent :submitted}}
+                       {:state :sent}) => truthy)
+
+  (fact "simple map matcher without match"
+    (matching-context? {:state #{:sent :submitted}}
+                       {:state :draft}) => falsey)
+
+  (fact "empty map matcher"
+    (matching-context? {}
+                       {:any {:command :context}}) => truthy)
+
+  (fact "context matcher is nil"
+    (matching-context? nil
+                       {:any {:command :context}}) => truthy)
+
+  (fact "simple map/function matcher with match"
+    (matching-context? {:state keyword?}
+                       {:state :sent}) => truthy)
+
+  (fact "simple map/function matcher without match"
+    (matching-context? {:state string?}
+                       {:state :draft}) => falsey)
+
+  (fact "two stage map matcher with match"
+    (matching-context? {:application {:state #{:sent :submitted}}}
+                       {:application {:state :submitted}}) => truthy)
+
+  (fact "two stage map matcher without match"
+    (matching-context? {:application {:state #{:sent :submitted}}}
+                       {:application {:state :draft}}) => falsey)
+
+  (fact "two stage map matcher with match and wider context"
+    (matching-context? {:application {:permitType #{:R :P}}}
+                       {:application {:state :submitted :permitType :R}}) => truthy)
+
+  (fact "two stage map wide matcher with match"
+    (matching-context? {:application {:permitType #{:R :P} :state #{:sent :submitted}}}
+                       {:application {:state :submitted :permitType :R}}) => truthy)
+
+  (fact "two stage map even wider matcher with match"
+    (matching-context? {:application {:permitType #{:R :P} :state #{:sent :submitted}} :attachment {:applicationState #{:sent}}}
+                       {:application {:state :submitted :permitType :R} :attachment {:applicationState :sent}}) => truthy)
+
+  (fact "two stage map even wider matcher with non matching state in application context"
+    (matching-context? {:application {:permitType #{:R :P} :state #{:sent :submitted}} :attachment {:applicationState #{:sent}}}
+                       {:application {:state :verdictGiven :permitType :R} :attachment {:applicationState :sent}}) => falsey))
+
+(facts get-required-permissions
+  (fact "one simple matcher"
+    (get-required-permissions {:permissions [{:context  {:application {:permitType #{:YA}}}
+                                              :required [:application/modify :attachment/ya-delete]}]}
+                              {:application {:permitType :YA}})
+    => {:context  {:application {:permitType #{:YA}}}
+        :required [:application/modify :attachment/ya-delete]})
+
+  (fact "one simple matcher without match"
+    (get-required-permissions {:permissions [{:context  {:application {:permitType #{:YA}}}
+                                              :required [:application/modify :attachment/ya-delete]}]}
+                              {:application {:permitType :R}})
+    => nil)
+
+  (fact "multiple matchers - first match is returned - case YA"
+    (get-required-permissions {:permissions [{:context  {:application {:state #{:canceled}}}
+                                              :required [:application/modify]}
+                                             {:context  {:application {:permitType #{:YA}}}
+                                              :required [:application/modify :attachment/ya-delete]}
+                                             {:context  {:application {:state #{:sent :submitted}}}
+                                              :required [:application/modify :attachment/delete]}
+                                             {:context  {:application {:state #{:verdictGiven}}
+                                                         :attachment  {:applicationState #{:verdictGiven}}}
+                                              :required [:attachment/delete]}]}
+                              {:application {:permitType :YA :state :sent}})
+    => {:context  {:application {:permitType #{:YA}}}
+        :required [:application/modify :attachment/ya-delete]})
+
+  (fact "multiple matchers - first match is returned - case R"
+    (get-required-permissions {:permissions [{:context  {:application {:state #{:canceled}}}
+                                              :required [:application/modify]}
+                                             {:context  {:application {:permitType #{:YA}}}
+                                              :required [:application/modify :attachment/ya-delete]}
+                                             {:context  {:application {:state #{:sent :submitted}}}
+                                              :required [:application/modify :attachment/delete]}
+                                             {:context  {:application {:state #{:verdictGiven}}
+                                                         :attachment  {:applicationState #{:verdictGiven}}}
+                                              :required [:attachment/delete]}]}
+                              {:application {:permitType :R :state :sent}})
+    => {:context  {:application {:state #{:sent :submitted}}}
+        :required [:application/modify :attachment/delete]})
+
+  (fact "multiple matchers - first match is returned - case R / verdictGiven"
+    (get-required-permissions {:permissions [{:context  {:application {:state #{:canceled}}}
+                                              :required [:application/modify]}
+                                             {:context  {:application {:permitType #{:YA}}}
+                                              :required [:application/modify :attachment/ya-delete]}
+                                             {:context  {:application {:state #{:sent :submitted}}}
+                                              :required [:application/modify :attachment/delete]}
+                                             {:context  {:application {:state #{:verdictGiven}}
+                                                         :attachment  {:applicationState #{:verdictGiven}}}
+                                              :required [:attachment/delete]}]}
+                              {:application {:permitType :R :state :verdictGiven} :attachment {:applicationState :verdictGiven}})
+    => {:context  {:application {:state #{:verdictGiven}}
+                   :attachment  {:applicationState #{:verdictGiven}}}
+        :required [:attachment/delete]}))
