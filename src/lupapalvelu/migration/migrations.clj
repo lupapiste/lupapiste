@@ -3680,6 +3680,15 @@
       (throw (ex-info "bulletin-comment migration failure" {:err (pr-str err) :comment (:id comment)})))
     (mongo/update-by-id :application-bulletin-comments (:id comment) {$set {:attachments attachments}})))
 
+(defmigration bulletin-comment-attachments-metadata
+  {:apply-when (pos? (mongo/count :application-bulletin-comments {:attachments.metadata {$exists true}}))}
+  (doseq [comment (mongo/select :application-bulletin-comments {:attachments.metadata {$exists true}})
+          :let [attachments (->> (:attachments comment)
+                                 (map #(dissoc % :metadata)))]]
+    (when-let [err (some bulletins/comment-file-checker attachments)]
+      (throw (ex-info "bulletin-comment-metadata migration failure" {:err (pr-str err) :comment (:id comment)})))
+    (mongo/update-by-id :application-bulletin-comments (:id comment) {$set {:attachments attachments}})))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
