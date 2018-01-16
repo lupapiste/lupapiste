@@ -175,8 +175,8 @@
     (when source-projection-attr
       (let [projection-name-index (.lastIndexOf source-projection-attr "EPSG")
             source-projection (when (> projection-name-index -1)
-                          (-> (subs source-projection-attr projection-name-index)
-                              (ss/replace #".XML#" ":")))
+                                (-> (subs source-projection-attr projection-name-index)
+                                    (ss/replace #".XML#" ":")))
             source-projection-number (subs source-projection (count allowed-projection-prefix))]
     (if (util/->int source-projection-number false)
       source-projection
