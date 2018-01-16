@@ -644,10 +644,16 @@
 (defn- skip-validation? [obj]
   (boolean (get (meta obj) :skip-validation)))
 
+(def PermissionContext
+  {sc/Keyword (sc/conditional
+               set?     #{sc/Keyword}
+               fn?      sc/Any
+               map?     (sc/recursive #'PermissionContext))})
+
 (def ActionMetaData
   {
    ; Set of user role keywords. Use :user-roles #{:anonymous} to grant access to anyone.
-   :user-roles (subset-of roles/all-user-roles)
+   (sc/optional-key :user-roles) (subset-of roles/all-user-roles)
    ; Parameters can be keywords or symbols. Symbols will be available in the action body.
    ; If a parameter is missing from request, an error will be raised.
    (sc/optional-key :parameters)  [(sc/cond-pre sc/Keyword sc/Symbol)]
@@ -672,6 +678,12 @@
    (sc/optional-key :states)      (sc/if map?
                                     {(apply sc/enum roles/all-user-roles) (subset-of states/all-states)}
                                     (subset-of states/all-states))
+   (sc/optional-key :contexts)    [(sc/pred fn? "context extender function")]
+   (sc/optional-key :permissions) (sc/constrained [{(sc/optional-key :description) sc/Str
+                                                    (sc/optional-key :context)  PermissionContext
+                                                    :required [sc/Keyword]}]
+                                                  (util/fn->> butlast (every? :context))
+                                                  "key :context is required for all but last element of permissions")
    (sc/optional-key :on-complete) (sc/cond-pre util/Fn [util/Fn])
    (sc/optional-key :on-success)  (sc/cond-pre util/Fn [util/Fn])
    (sc/optional-key :on-fail)     (sc/cond-pre util/Fn [util/Fn])
@@ -697,7 +709,10 @@
                          res
                          (select-keys meta-data (keys res)))]
 
-      (throw (AssertionError. (str "Action '" action-name "' has invalid meta data: " invalid-meta)))))
+      (throw (AssertionError. (str "Action '" action-name "' has invalid meta data: " invalid-meta ", schema-error: " res)))))
+
+  (assert (or (:user-roles meta-data) (:permissions meta-data))
+          (str "You must define :user-roles or :permissions meta data for " action-name))
 
   (assert (or (ss/ends-with ns-str "-api") (ss/ends-with ns-str "-test") (ss/starts-with (ss/suffix ns-str ".") "dummy"))
     (str "Please define actions in *-api namespaces. Offending action: " action-name " at " ns-str ":" line))
@@ -733,8 +748,10 @@
                             #{}
                             (roles/default-user-authz action-type))
         :org-authz-roles (cond
+                           (nil? user-roles) roles/all-org-authz-roles
                            (some user-roles [:authority :oirAuthority]) roles/default-org-authz-roles
-                           (user-roles :anonymous) roles/all-org-authz-roles)}
+                           (user-roles :anonymous) roles/all-org-authz-roles)
+        :permissions     [{:required #{}}]} ; no permissions required by default
         meta-data
         {:type action-type
          :ns ns-str
