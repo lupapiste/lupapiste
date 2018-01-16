@@ -532,6 +532,12 @@
       (catch Throwable e
         (error e "post fn fail")))))
 
+(defn- enrich-default-permissions [command]
+  (->> (set/union (permissions/get-global-permissions command)
+                  (permissions/get-application-permissions command)
+                  (permissions/get-organization-permissions command))
+       (assoc command :permissions)))
+
 (defn- run [command validators execute?]
   (try+
     (or
@@ -560,7 +566,8 @@
                          :company company
                          :application-assignments assignments}
                         (merge command)
-                        (update :user update-user-application-role application))]
+                        (update :user update-user-application-role application)
+                        enrich-default-permissions)]
         (or
           (not-authorized-to-application command)
           (pre-checks-fail command)
