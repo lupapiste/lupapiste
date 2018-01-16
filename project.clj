@@ -129,7 +129,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.60"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.8.12"]
+                 [lupapiste/commons "0.9.2"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
@@ -166,7 +166,7 @@
                                          [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
                                          [lupapiste/lein-buildid "0.4.2"]
                                          [lupapiste/lein-nitpicker "0.5.1"]
-                                         [lein-figwheel "0.5.13"]]
+                                         [lein-figwheel "0.5.14"]]
                         :resource-paths ["dev-resources"]
                         :source-paths   ["dev-src" "test-utils"]
                         :jvm-opts       ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]
@@ -177,8 +177,12 @@
                                          :source-map   true}
                         :repl-options   {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]
                                          :timeout          200000}
-                        :cljsbuild      {:builds {:rum {:figwheel {:websocket-host "lupapiste.local"
-                                                                   :on-jsload      lupapalvelu.ui.ui-components/reload-hook}
+                        :cljsbuild      {:builds {:rum {:figwheel {:websocket-host   "lupapiste.local"
+                                                                   :on-jsload        lupapalvelu.ui.ui-components/reload-hook
+                                                                   ;; If the figwheel does not connect,
+                                                                   ;; turn the heads-up display temporarily off
+                                                                   ;; :heads-up-display false
+                                                                   }
                                                         :compiler {:output-dir     "resources/public/lp-static/js/out"
                                                                    :output-to      "resources/public/lp-static/js/rum-app.js"
                                                                    :main           lupapalvelu.ui.ui-components

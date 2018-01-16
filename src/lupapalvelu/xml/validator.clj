@@ -1,7 +1,8 @@
 (ns lupapalvelu.xml.validator
   (:require [taoensso.timbre :as timbre :refer [trace tracef debug debugf info warn warnf error errorf fatal]]
-            [sade.strings :as s]
             [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.strings :as ss]
             [clojure.java.io :as io])
   (:import [java.io InputStream Reader StringReader]
            [javax.xml.transform.stream StreamSource]
@@ -12,8 +13,8 @@
 (.setResourceResolver schema-factory
   (reify LSResourceResolver
     (^LSInput resolveResource [this ^String type, ^String namespaceURI, ^String publicId, ^String systemId, ^String baseURI]
-      (let [filename (s/suffix baseURI "/")
-            path (clojure.string/replace (s/suffix baseURI "classpath:") filename systemId)]
+      (let [filename (ss/suffix baseURI "/")
+            path (ss/replace (ss/suffix baseURI "classpath:") filename systemId)]
         (tracef "Loading XML schema resource 'classpath:%s' which was referenced by %s" path filename)
         (reify LSInput
           (^String getBaseURI [this] baseURI)
@@ -95,8 +96,8 @@
 
 (def- yht-2_1_8
   (conj public-schema-sources
-    "krysp/yhteiset-2.1.8.xsd"
-    "krysp/rakennusvalvonta-2.2.2.xsd"
+    (if (env/in-env? "QA") "krysp/yhteiset-2.1.8_qa.xsd" "krysp/yhteiset-2.1.8.xsd")
+    (if (env/in-env? "QA") "krysp/rakennusvalvonta-2.2.2_qa.xsd" "krysp/rakennusvalvonta-2.2.2.xsd")
     "krysp/poikkeamispaatos_ja_suunnittelutarveratkaisu-2.2.3.xsd"
     "krysp/YleisenAlueenKaytonLupahakemus-2.2.3.xsd"
     "krysp/ymparistoluvat-2.2.3.xsd"
@@ -257,7 +258,7 @@
   (reduce (fn [m [k versions]] (assoc m k (filter #(Character/isDigit (.charAt % 0)) versions))) {} supported-versions-by-permit-type))
 
 (def supported-asianhallinta-versions-by-permit-type
-  (reduce (fn [m [k versions]] (assoc m k (filter #(s/starts-with % "ah") versions))) {} supported-versions-by-permit-type))
+  (reduce (fn [m [k versions]] (assoc m k (filter #(ss/starts-with % "ah") versions))) {} supported-versions-by-permit-type))
 
 (defn validate
   "Throws an exception if the markup is invalid"

@@ -7,9 +7,19 @@ $pate-grid-margin: 10px;
   min-height: 1px; // Enforce rendering of empty column.
   padding-left: $pate-grid-margin;
 
+  .pate-label.required:after,
   label.required:after {
     content: " *";
     color: $label-required-star-color;
+  }
+  input.required {
+    border-color: $input-required-border-color;
+  }
+
+  input.warning,
+  textarea.warning {
+    border-color: $negative;
+    background-color: transparentize( $negative, 0.95 );
   }
 
   .col--vertical, .col--horizontal {
@@ -184,11 +194,16 @@ span.formatted {
   }
 }
 
-.pate-label {
+@mixin pate-default-label() {
   font-size: 15px;
   font-weight: bold;
- // white-space: nowrap;
 }
+
+.pate-label {
+  @include pate-default-label;
+}
+
+
 
 // Meta status classes
 .pate--edit {}
@@ -220,6 +235,7 @@ span.saved-info {
 
 div.pate-date-delta {
   > label.delta-label {
+    @include pate-default-label;
     white-space: nowrap;
   }
   > div.delta-editor {
@@ -488,9 +504,6 @@ div.pate-autocomplete {
 // especially does not play nicely with pate-grid.
 .dateinput.dateinput--safe {
   max-width: 90%;
-  &.warning {
-    border-color: $negative;
-  }
 }
 
 .neighbor-states {
@@ -616,6 +629,24 @@ div.pate-note {
   padding-bottom: $marginS;
   background-color: $gray246;
   display: inline-block;
+}
+
+div.pate-required-fields-note {
+  border-left: 4px solid $orange-dark;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: $marginS;
+  //background-color: $gray246;
+  display: inline-block;
+  margin-right: $marginS;
+  &:after {
+    content: " *";
+    color: $label-required-star-color;
+    //background-color: $gray246;
+    padding-right: $marginS;
+  }
 }
 
 div.pate-unordered-list {

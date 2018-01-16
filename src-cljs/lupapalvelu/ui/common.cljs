@@ -84,6 +84,21 @@
        keys
        (map name)))
 
+(defn update-css
+  "Upserts existing :class definition. Flags use css-flags semantics."
+  [attr & flags]
+  (update attr :class (fn [cls]
+                        (let [s       (s/join " " (flatten [cls]))
+                              old-map (zipmap (map keyword
+                                                   (remove s/blank?
+                                                           (s/split s #"\s+")))
+                                              (repeat true))
+                              updates (apply hash-map flags)]
+                          (->> (merge old-map updates)
+                               (into [])
+                               flatten
+                               (apply css-flags)))) ))
+
 (defn fuzzy-re
   "Simplified Clojurescript version of sade.strings.fuzzy-re.
 

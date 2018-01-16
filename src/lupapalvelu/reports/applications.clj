@@ -6,6 +6,7 @@
             [sade.core :refer [now]]
             [lupapalvelu.action :refer [defraw]]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-meta-fields :as app-meta]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.reports.parties :as parties]
@@ -14,7 +15,8 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.application-meta-fields :as meta]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.states :as states])
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :as usr])
   (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)
            (org.apache.poi.xssf.usermodel XSSFWorkbook)
            (org.apache.poi.ss.usermodel CellType)))
@@ -71,6 +73,29 @@
                  :modified {$gte (Long/parseLong start-ts 10)
                             $lte (Long/parseLong end-ts 10)}}))
 
+(defn digitized-applications-between [user start-ts end-ts]
+  (let [base-query {:permitType   "ARK"
+                    :created      {$gte (Long/parseLong start-ts 10)
+                                   $lte (Long/parseLong end-ts 10)}}
+        query      (if (usr/user-is-pure-digitizer? user)
+                     (assoc base-query :auth.id (:id user))
+                     (assoc base-query :organization {$in (usr/organization-ids-by-roles (usr/with-org-auth user) #{:digitizer})}))]
+    (mongo/select :applications
+                  query
+                  [:_id :created :attachments])))
+
+(defn- get-latest-verdict-ts [{verdicts :verdicts}]
+  (->> verdicts (sort-by :timestamp) (last) :timestamp))
+
+(defn- post-verdict-applications [organizationId startTs endTs]
+  (let [applications           (mongo/select :applications
+                                             {:organization organizationId
+                                              :state {$in states/post-verdict-states}
+                                              :verdicts {$elemMatch {:timestamp {$gte startTs}}}}
+                                             [:_id :state :primaryOperation :verdicts :documents])
+        verdict-in-time-period (fn [app] (< startTs (get-latest-verdict-ts app) (if (< (now) endTs) (now) endTs)))]
+    (filter verdict-in-time-period applications)))
+
 (defn- authority [app]
   (->> app
        :handlers
@@ -84,6 +109,21 @@
        (remove :general)
        (map #(format "%s %s (%s)" (:firstName %) (:lastName %) (get-in % [:name (keyword lang)])))
        (ss/join ", ")))
+
+(defn- applicants [app]
+  (->> (domain/get-applicant-documents (:documents app))
+       (map app-meta/applicant-name-from-doc-first-last)
+       (ss/join "; ")))
+
+(defn get-applicant-email-from-doc [doc]
+  (if (= "henkilo" (-> doc :data :_selected :value))
+    (-> doc :data :henkilo :yhteystiedot :email :value)
+    (-> doc :data :yritys :yhteyshenkilo :yhteystiedot :email :value)))
+
+(defn- applicants-emails [app]
+  (->> (domain/get-applicant-documents (:documents app))
+       (map get-applicant-email-from-doc)
+       (ss/join "; ")))
 
 (defn- localized-state [lang app]
   (i18n/localize lang (get app :state)))
@@ -191,6 +231,25 @@
     (excel/hyperlinks-to-formulas! wb)
     (excel/xlsx-stream wb)))
 
+(defn ^OutputStream post-verdict-excel [organizationId startTs endTs lang]
+  (let [sheet-name         (str (i18n/localize lang "authorityAdmin.postVerdictReports.sheet-name-prefix")
+                                " "
+                                (util/to-local-date (now)))
+        header-row-content (map (partial i18n/localize lang) ["applications.id.longtitle"
+                                                              "application.applicants"
+                                                              "application.applicants.email"
+                                                              "operations.primary"
+                                                              "applications.status"
+                                                              "verdictGiven"])
+        data                (post-verdict-applications organizationId startTs endTs)
+        row-fn              (juxt :id
+                                  applicants
+                                  applicants-emails
+                                  (partial localized-primary-operation lang)
+                                  (partial localized-state lang)
+                                  #(-> % get-latest-verdict-ts util/to-local-date))]
+    (excel/xlsx-stream (excel/create-workbook data sheet-name header-row-content row-fn))))
+
 (defn- company-report-headers [lang]
   (map (partial i18n/localize lang) ["company.report.excel.header.buildingid"
                                      "company.report.excel.header.operation"
@@ -218,6 +277,11 @@
                                      "company.report.excel.header.organization"
                                      "company.report.excel.header.applicant"
                                      "company.report.excel.header.attachment"]))
+
+(defn- digitizer-report-headers [lang]
+  (map (partial i18n/localize lang) ["digitizer.report.excel.header.applicationId"
+                                     "digitizer.report.excel.header.date"
+                                     "digitizer.report.excel.header.attachmentCount"]))
 
 
 (defn- usage [application]
@@ -291,4 +355,36 @@
                           :row-fn     foreman-row-fn
                           :data       foreman-app-row-data}
         wb (excel/create-workbook (flatten [application-data foreman-app-data]))]
+    (excel/xlsx-stream wb)))
+
+(defn digi-report-data [application]
+  {:date          (util/to-local-date (:created application))
+   :id            (:id application)
+   :attachments   (count (:attachments application))})
+
+(defn digi-report-sum [rows]
+  (->> (group-by :date rows)
+       (map (fn [row] {:date (first row)
+                       :attachments (->> row
+                                         (second)
+                                         (flatten)
+                                         (map :attachments)
+                                         (apply +))}))))
+
+(defn ^OutputStream digitized-attachments [user start-ts end-ts lang]
+  (let [org-ids       (mapv :id (usr/get-organizations user))
+        applications  (digitized-applications-between user start-ts end-ts)
+        row-data      (map #(digi-report-data %) applications)
+        sum-data      (digi-report-sum row-data)
+        sum-sheet     (i18n/localize lang "digitizer.excel.sum.sheet.name")
+        wb            (excel/create-workbook
+                        [{:sheet-name  (i18n/localize lang "digitizer.excel.data.sheet.name")
+                          :header      (digitizer-report-headers lang)
+                          :row-fn      (juxt :id :date :attachments)
+                          :data        row-data}
+                         {:sheet-name  sum-sheet
+                          :header      (rest (digitizer-report-headers lang))
+                          :row-fn      (juxt :date :attachments)
+                          :data        sum-data}])
+        sum-row       (excel/add-sum-row sum-sheet wb [(i18n/localize lang "digitizer.excel.sum") (apply + (map :attachments sum-data))])]
     (excel/xlsx-stream wb)))

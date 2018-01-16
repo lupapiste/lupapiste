@@ -21,7 +21,7 @@ LUPAPISTE.BackendIdManagerModel = function(params) {
       self.backendIds(_.map(filteredVerdicts,
         function(verdict) {
           var verdictDate = util.getIn(verdict, ["paatokset", 0, "poytakirjat", 0, "paatospvm"]);
-          var verdictDateValue = _.isUndefined(verdictDate) ? null : new Date(verdictDate);
+          var verdictDateValue = _.isUndefined(verdictDate) ? undefined : new Date(verdictDate);
           return ko.observable({id: verdict.id,
                                 kuntalupatunnus: ko.observable(verdict.kuntalupatunnus),
                                 verdictDate: ko.observable(verdictDateValue),
@@ -32,9 +32,7 @@ LUPAPISTE.BackendIdManagerModel = function(params) {
   };
 
   self.verdicts.subscribe(function(verdicts) {
-    if (initialized === false) {
       initialize(verdicts);
-    }
   });
 
   initialize(self.verdicts());
@@ -66,7 +64,9 @@ LUPAPISTE.BackendIdManagerModel = function(params) {
       !_.every(self.backendIds(), function(bi) {
         return _.some(self.verdicts(), function(v) {
           var backendId = ko.mapping.toJS(bi);
-          return v.id === backendId.id && v.kuntalupatunnus === backendId.kuntalupatunnus && v.verdictDate === backendId.verdictDate;
+          var vVerdictDate = util.getIn(v, ["paatokset", 0, "poytakirjat", 0, "paatospvm"]);
+          var bVerdictDate = _.isUndefined(backendId.verdictDate) ? undefined : backendId.verdictDate.getTime();
+          return v.id === backendId.id && v.kuntalupatunnus === backendId.kuntalupatunnus && vVerdictDate === bVerdictDate;
         });
       });
   };
@@ -74,7 +74,7 @@ LUPAPISTE.BackendIdManagerModel = function(params) {
   function verdictArray() {
     return _.map(self.backendIds(), function (bi) {
       var verdictDate = null;
-      if (!_.isNull(bi().verdictDate())) {
+      if (!_.isUndefined(bi().verdictDate())) {
         if (_.isFunction(bi().verdictDate().getTime)) {
           verdictDate = bi().verdictDate().getTime();
         }

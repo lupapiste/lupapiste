@@ -26,7 +26,8 @@
 
 (defcommand update-guest-authority-organization
   {:parameters [email firstName lastName description]
-   :input-validators [(partial action/non-blank-parameters [:email :firstName :lastName])]
+   :input-validators [(partial action/non-blank-parameters [:email :firstName :lastName])
+                      action/email-validator]
    :user-roles #{:authorityAdmin}
    :description "Add or update organization's guest authority."}
   [{admin :user}]

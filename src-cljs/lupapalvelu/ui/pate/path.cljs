@@ -24,14 +24,14 @@
 
 (defn loc-extend
   "Extends loc-path based on the options. The options can include
-  loc-prefix, locPrefix (via docgen body) or id."
-  [loc-path {:keys [id loc-prefix body]}]
+  loc-prefix, locPrefix (via docgen body), id"
+  [loc-path {:keys [id loc-prefix body dict]}]
   (let [locPrefix (some-> body first :locPrefix)]
     (cond
       loc-prefix [loc-prefix]
       locPrefix  [locPrefix]
-      id (extend loc-path id)
-      :else loc-path)))
+      id         (extend loc-path id)
+      :else      loc-path)))
 
 (defn id-extend
   "Extends id-path with the options id."
@@ -204,15 +204,43 @@
                     (map keyword))]
     result))
 
+(defn- parse-path-condition
+  "The condition kw-path has the following format [optional]:
+
+  <path>      -> <path-part>[<op><expected>]
+  <path-part> -> string
+  <op>        -> != | =
+  <expected>  -> string
+
+  Examples:
+
+  :?.hii.hoo
+  :hii.hoo.foo=9
+  :_meta.foo.bar!=hello
+
+  Returns map with two keys:
+   :path path-part as kw-path
+   :fun? Resolution function that takes path value and compares it to
+         the expected."
+  [kw-path]
+  (let [[_ path op expected] (re-find #"([^!=]+)(?:(!?=)([^\s]+))?"
+                                      (name kw-path))]
+    {:path (keyword path)
+     :fun? (if op
+             (fn [value]
+               ((case op "=" = "!=" not=) expected (str value)))
+             truthy?)}))
+
 (defn- path-truthy? [{state :state :as options} kw-path]
-  (let [[x & k :as path] (resolve-path options kw-path)]
-    (truthy? (case x
-               :_meta (react-meta options k)
-               :*ref  (let [r (react k (:references options))]
-                        (cond->> r
-                          (sequential? r) (remove :deleted)))
-              :?      (has-path? k state)
-              (react path state)))))
+  (let [{:keys [path fun?]} (parse-path-condition kw-path)
+        [x & k :as path] (resolve-path options path)]
+    (fun? (case x
+            :_meta (react-meta options k)
+            :*ref  (let [r (react k (:references options))]
+                     (cond->> r
+                       (sequential? r) (remove :deleted)))
+            :?      (has-path? k state)
+            (react path state)))))
 
 (defn- eval-state-condition [options condition]
   (cond
@@ -269,3 +297,16 @@
          (climb-to-condition options :hide?)))
 
 (defn not-visible? [options] (not (visible? options)))
+
+(defn required?
+  "True if the parent schema has :required? flag. Why parent and not the
+  schema itself? The :required? key is on the same level as the schema
+  reference (in a dictionary value). If meta property
+  highlight-required? is false (default true), then the result is
+  always false"
+  [options]
+  (boolean (and (some-> options :_parent :schema :required?)
+                (not (false? (meta-value options :highlight-required?))))))
+
+(defn error? [{:keys [state path]}]
+  (boolean (react (extend :_errors path) state)))

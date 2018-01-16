@@ -632,6 +632,13 @@ input.form-input.inline {
     background-color: $gray246;
     border-bottom: 1px solid $gray221;
   }
+
+  form.premises-upload {
+    display: inline-block;
+    i {
+      padding-right: 10px;
+    }
+  }
 }
 
 
@@ -1542,7 +1549,8 @@ select.dropdown::-ms-expand,.dataTables_length select::-ms-expand {
   display: none;
 }
 
-select.dropdown.mandatory {
+select.dropdown.mandatory,
+select.dropdown.required {
   border-color: $input-required-border-color;
 }
 

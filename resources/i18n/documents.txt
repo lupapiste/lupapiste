@@ -1,3 +1,6 @@
+"document.building.identifier" "en" "National building identifier (VTJ-PRT)"
+"document.building.identifier" "fi" "Valtakunnallinen rakennustunnus (VTJ-PRT)"
+"document.building.identifier" "sv" "Nationell byggnadsbeteckning (VTJ-PRT)"
 "document.disabled" "en" "Disabled"
 "document.disabled" "fi" "Ei käytössä"
 "document.disabled" "sv" "Ej i användning"

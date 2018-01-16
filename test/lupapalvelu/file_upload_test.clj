@@ -238,3 +238,29 @@
                                                                  :type-id :cv}
                                                           :metadata {:linked false, :sessionId "abc"}
                                                           :group {:groupType :parties}}]}))))))
+
+(facts "Check if uploaded file already exists in application"
+
+  (fact "should find duplicate files"
+    (mark-duplicates {:attachments [{:latestVersion {:filename "file1.jpg"}}
+                                    {:latestVersion {:filename "file2.jpg"}}
+                                    {:latestVersion {:filename "file3.jpg"}}]}
+                     {:ok true
+                      :files [{:filename "file1.jpg"}
+                              {:filename "newfile.jpg"}]}) => {:ok true
+                                                               :files [{:filename "file1.jpg"
+                                                                        :existsWithSameName true}
+                                                                       {:filename "newfile.jpg"
+                                                                        :existsWithSameName false}]})
+
+  (fact "file type shouldn't matter"
+    (mark-duplicates {:attachments [{:latestVersion {:filename "file1.pdf"}}
+                                    {:latestVersion {:filename "file2.pdf"}}
+                                    {:latestVersion {:filename "file3.pdf"}}]}
+                     {:ok true
+                      :files [{:filename "file1.jpg"}
+                              {:filename "newfile.jpg"}]}) => {:ok true
+                                                               :files [{:filename "file1.jpg"
+                                                                        :existsWithSameName true}
+                                                                       {:filename "newfile.jpg"
+                                                                        :existsWithSameName false}]}))

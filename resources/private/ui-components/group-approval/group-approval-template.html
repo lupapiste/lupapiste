@@ -6,7 +6,7 @@
       <span data-bind="template: 'approval-template'"></span>
       <button class="secondary is-right"
               data-bind="visible: remove.fun,
-                         data-test-class: remove.testClass,
+                         attr: util.getIn(remove, ['attr']),
                          click: remove.fun">
         <i class="lupicon-remove"></i>
         <span data-bind="ltext: 'remove'"></span>

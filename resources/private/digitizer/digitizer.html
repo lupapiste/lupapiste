@@ -3,6 +3,16 @@
 <body>
 <section class="page container" id="create-archiving-project">
   <h1 data-bind="ltext: 'newRequest.createArchivingProject'"></h1>
+  <div class="archiving-top">
+      <div class="button-group">
+        <button data-bind="click: createArchivingReport"
+                data-test-id="applications-create-archiving-report"
+                class="positive application-create">
+          <i class="lupicon-document-list"></i>
+          <span data-bind="ltext: 'digitizer.report.title'"></span>
+        </button>
+      </div>
+  </div>
   <div class="form-grid form-grid--no-border">
     <form data-bind="submit: function() { createArchivingProject(false, false, false); }">
       <div class="row">
@@ -14,9 +24,9 @@
       </div>
 
       <div class="row">
-        <label for="prev-permit-organization-select">
+        <label for="digitizer-prev-permit-organization-select">
           <span data-bind="ltext: 'prev-permit-label-organization'"></span>
-          <select id="prev-permit-organization-select" data-test-id="test-prev-permit-organization-select"
+          <select id="digitizer-prev-permit-organization-select" data-test-id="test-digitizer-prev-permit-organization-select"
                   class="dropdown"
                   data-bind="options: organizationOptions,
                                optionsText: function(org) { return util.getIn(org, ['name', loc.getCurrentLanguage()]) || org.name.fi; },
@@ -59,6 +69,40 @@
         </div>
         <div id="archiving-map" class="map create-application-map" style="width: 100%; height: 700px;"></div>
       </div>
+    </div>
+  </div>
+</section>
+<section class="page container" id="create-archiving-report">
+  <div class="operation-button-row">
+    <button class="secondary"
+            data-bind="click: function() { history.go(-1); }"
+            data-test-id="back-button">
+      <i class="lupicon-chevron-start"></i>
+      <span data-bind="ltext: 'back'"></span>
+    </button>
+  </div>
+  <div>
+    <h1 data-bind="ltext: 'digitizer.report.title'"></h1>
+      <table class="company-report-table">
+        <thead>
+          <th><span data-bind="ltext: 'digitizer.report.startDate'"></span></th>
+          <th><span data-bind="ltext: 'digitizer.report.endDate'"></span></th>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="text" data-bind="datepicker: reportStartDate" class="dateinput"></td>
+            <td><input type="text" data-bind="datepicker: reportEndDate" class="dateinput"></td>
+          </tr>
+        </tbody>
+      </table>
+    <div class="downlaod">
+      <button class="positive"
+              data-bind="click: downloadReport"
+              data-test-id="download-digitizer-report-btn">
+        <i class="lupicon-download btn-small"></i>
+        <span data-bind="ltext: 'digitizer.report.download'"></span>
+      </button>
+
     </div>
   </div>
 </section>

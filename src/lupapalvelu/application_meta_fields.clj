@@ -26,7 +26,14 @@
         {first-name :firstName last-name :lastName} owner]
     (full-name first-name last-name)))
 
-(defn- applicant-name-from-doc [document]
+(defn applicant-name-from-doc-first-last [document]
+  (when-let [body (:data document)]
+    (if (= (get-in body [:_selected :value]) "yritys")
+      (get-in body [:yritys :yritysnimi :value])
+      (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
+        (ss/trim (str (:value first-name) \space (:value last-name)))))))
+
+(defn applicant-name-from-doc [document]
   (when-let [body (:data document)]
     (if (= (get-in body [:_selected :value]) "yritys")
       (get-in body [:yritys :yritysnimi :value])

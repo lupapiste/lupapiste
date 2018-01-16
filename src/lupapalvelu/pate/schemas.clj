@@ -11,7 +11,7 @@
             [schema.core :refer [defschema] :as sc]))
 
 (def pate-string {:name "pate-string"
-                   :type :string})
+                  :type :string})
 
 (def verdict-text {:name "pate-verdict-text"
                    :type :string})
@@ -20,7 +20,6 @@
                       :type :string})
 
 (def verdict-contact {:name  "pate-verdict-contact"
-                      :label false
                       :type  :string})
 
 (def verdict-giver {:name "pate-verdict-giver"
@@ -51,6 +50,11 @@
 (def date {:name "pate-date"
            :type :date})
 
+(def collateral-type {:name "collateral-type"
+                      :type :select
+                      :body [{:name "shekki"}
+                             {:name "panttaussitoumus"}]})
+
 (defschema PateCategory
   {:id       ssc/ObjectIdStr
    :category (sc/enum "r" "p" "ya" "kt" "ymp")})
@@ -77,17 +81,19 @@
    :draft    sc/Any})
 
 (defschema PatePublishedSettings
-  {:verdict-code [(apply sc/enum (map name (keys shared/verdict-code-map)))]
-   :date-deltas  (->> shared/verdict-dates
-                      (map (fn [k]
-                             [(sc/optional-key k) sc/Int]))
-                      (into {}))
-   :foremen      [(apply sc/enum (map name shared/foreman-codes))]
-   :reviews      [{:id   ssc/ObjectIdStr
-                   :name PateName
-                   :type review-type}]
-   :plans        [{:id   ssc/ObjectIdStr
-                   :name PateName}]})
+  {:verdict-code                [(apply sc/enum (map name (keys shared/verdict-code-map)))]
+   :date-deltas                 (->> shared/verdict-dates
+                                     (map (fn [k]
+                                            [(sc/optional-key k) sc/Int]))
+                                     (into {}))
+   :foremen                     [(apply sc/enum (map name shared/foreman-codes))]
+   :reviews                     [{:id   ssc/ObjectIdStr
+                                  :name PateName
+                                  :type review-type}]
+   :plans                       [{:id   ssc/ObjectIdStr
+                                  :name PateName}]
+   ;; Boardname included only when the verdict giver is Lautakunta.
+   (sc/optional-key :boardname) sc/Str})
 
 (defschema PateSavedTemplate
   (merge PateCategory
@@ -110,7 +116,7 @@
   pdf-export-test/ignored-schemas."
   [pate-string verdict-section verdict-text verdict-contact
    verdict-check in-verdict verdict-giver automatic-vs-manual
-   complexity date])
+   complexity date collateral-type])
 
 (doc-schemas/defschemas 1
   (map (fn [m]
@@ -239,17 +245,22 @@
 
 (defmethod validate-resolution :reference-list
   [{:keys [path schema data value references] :as options}]
-  (let [canon-value (->> [value] flatten (remove nil?))]
+  (let [canon-value (->> [value] flatten (remove nil?))
+        data-type   (:type data)]
     (or
      (path-error path)
-     (when (and (= (:type data) :select)
+     (when (and (= data-type :select)
                 (> (count canon-value) 1))
        :error.invalid-value)
-     (when (and (= (:type data) :multi-select)
+     (when (and (= data-type :multi-select)
                 (not (or (nil? value)
                          (sequential? value))))
        :error.invalid-value)
-     (when (seq canon-value) ;; Empty selection is allowed.
+     ;; Empty selection for all types and "" for select type is
+     ;; allowed.
+     (when (and (seq canon-value)
+                (not (and (= data-type :select)
+                          (= (first canon-value) ""))))
        (check-items canon-value
                     (map #(get % (:item-key data) %)
                          (get-in references (get-path data))))))))
@@ -316,3 +327,17 @@
        :error.invalid-value-path)))
   ([options path value]
    (validate-path-value options path value nil)))
+
+(defn required-filled?
+  "True if every required dict item has a proper value."
+  [schema data]
+  (->> schema
+       :dictionary
+       (filter (fn [[k v]]
+                 (:required? v)))
+       (every? (fn [[k v]]
+                 (case (-> v (dissoc :required?) keys first)
+                   :date-delta   (ss/not-blank? (str (get-in data [k :delta])))
+                   :multi-select (not-empty (k data))
+                   :reference    true ;; Required only for highlighting purposes
+                   (ss/not-blank? (k data)))))))

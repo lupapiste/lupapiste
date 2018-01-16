@@ -193,7 +193,7 @@
     (first args)
     (apply hash-map args)))
 
-(defn- decode-post [action-type apikey command-name & args]
+(defn decode-post [action-type apikey command-name & args]
   (decode-response
     (http-post
       (str (server-address) "/api/" (name action-type) "/" (name command-name))
@@ -641,6 +641,12 @@
 ;; Stuffin' data in
 ;;
 
+;; VTJ-PRT
+
+(defn api-update-national-building-id-call [application-id params]
+  (http-post (format "%s/rest/application/%s/update-national-building-id" (server-address) application-id)
+             (merge params {:throw-exceptions false})))
+
 ;; attachments
 
 (defn sign-attachment [apikey id attachmentId password]
@@ -868,7 +874,7 @@
           updates (filterv (fn [[path value]]
                              (try
                                (let [splitted-path (ss/split path #"\.")]
-                                 (doc-persistence/validate-against-whitelist! document [splitted-path] user-role)
+                                 (doc-persistence/validate-against-whitelist! document [splitted-path] user-role application)
                                  (doc-persistence/validate-readonly-updates! document [splitted-path]))
                                true
                                (catch Exception _
