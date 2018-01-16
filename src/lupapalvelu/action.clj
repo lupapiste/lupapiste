@@ -462,7 +462,7 @@
                           missing-parameters
                           input-validators-fail))
 
-(defn access-denied-by-insufficient-permissions [{user-permissions :permisssions :as command}]
+(defn access-denied-by-insufficient-permissions [{user-permissions :permissions :as command}]
   (let [permissions (permissions/get-required-permissions (meta-data command) command)]
     (when-not (set/subset? (:required permissions) user-permissions)
       unauthorized)))

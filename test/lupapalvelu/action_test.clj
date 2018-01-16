@@ -174,6 +174,22 @@
 
     )
 
+  (facts access-denied-by-insufficient-permissions
+    (fact "no required permissions - default case when :permissions is not defined for action"
+      (access-denied-by-insufficient-permissions {:action :test-action :permissions #{}}) => falsey
+
+      (provided (meta-data {:action :test-action :permissions #{}}) => {:permissions [{:required #{}}]}))
+
+    (fact "insufficient permissions"
+      (access-denied-by-insufficient-permissions {:action :test-action :permissions #{}}) => unauthorized
+
+      (provided (meta-data {:action :test-action :permissions #{}}) => {:permissions [{:required [:global/test]}]}))
+
+    (fact "has required permissions"
+      (access-denied-by-insufficient-permissions {:action :test-action :permissions #{:global/test}}) => falsey
+
+      (provided (meta-data {:action :test-action :permissions #{:global/test}}) => {:permissions [{:required [:global/test]}]})))
+
   (facts "Parameter validation"
     (against-background (get-actions) => {:test-command {:parameters [:id]}})
     (fact  (missing-parameters {:action "test-command" :data {}})           => { :ok false :parameters ["id"] :text "error.missing-parameters"})
