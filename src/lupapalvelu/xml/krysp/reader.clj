@@ -569,6 +569,14 @@
                         :propertyId property-id}})
     (warn "Could not resolve location for kuntalupatunnus" kuntalupatunnus "by property id" property-id)))
 
+(defn resolve-property-id-by-point [coordinates]
+  (let [x (first coordinates)
+        y (last coordinates)
+        response (-> {:params {:x x :y y}}
+                     proxy-services/property-id-by-point-proxy
+                     :body)]
+    (json/parse-string response true)))
+
 ;;
 ;; Information parsed from verdict xml message for application creation
 ;;
@@ -602,8 +610,6 @@
             osoite-xml     (select asia [:rakennuspaikkatieto :Rakennuspaikka :osoite])
             osoite-Rakennuspaikka (build-address osoite-xml asioimiskieli-code)
 
-            kiinteistotunnus (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus)
-            municipality (or (p/municipality-id-by-property-id kiinteistotunnus) kuntakoodi)
             location-point (select1 asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste])
             coord-array-Rakennuspaikka (if (some? location-point)
                                          (resolve-coordinates
@@ -615,7 +621,11 @@
                                            (select1 asia [:Rakennus :sijaintitieto :Sijainti])))
             osapuolet (map cr/all-of (select asia [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli]))
             suunnittelijat (map cr/all-of (select asia [:osapuolettieto :Osapuolet :suunnittelijatieto :Suunnittelija]))
-            [hakijat muut-osapuolet] ((juxt filter remove) #(= "hakija" (:VRKrooliKoodi %)) osapuolet)]
+            [hakijat muut-osapuolet] ((juxt filter remove) #(= "hakija" (:VRKrooliKoodi %)) osapuolet)
+            kiinteistotunnus (if (and (seq coord-array-Rakennuspaikka) (not (some? location-point)))
+                               (resolve-property-id-by-point coord-array-Rakennuspaikka)
+                               (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus))
+            municipality (or (p/municipality-id-by-property-id kiinteistotunnus) kuntakoodi)]
 
         (-> (merge
               {:id                          (->lp-tunnus asia)

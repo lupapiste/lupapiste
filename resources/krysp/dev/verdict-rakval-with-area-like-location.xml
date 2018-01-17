@@ -150,7 +150,7 @@
                               <yht:Kiinteisto>
                                   <yht:kylanimi>Lokalahden Pitkäluoto</yht:kylanimi>
                                   <yht:tilannimi>RIIHIRANTA</yht:tilannimi>
-                                  <yht:kiinteistotunnus>89552200010051</yht:kiinteistotunnus>
+                                  <yht:kiinteistotunnus>123456789</yht:kiinteistotunnus>
                               </yht:Kiinteisto>
                           </yht:kiinteistotieto>
                           <yht:hallintaperuste>oma</yht:hallintaperuste>
@@ -200,7 +200,7 @@
                               <rakval:KatselmuksenRakennus>
                                   <rakval:valtakunnallinenNumero>1005334384</rakval:valtakunnallinenNumero>
                                   <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
-                                  <rakval:kiinttun>89552200010051</rakval:kiinttun>
+                                  <rakval:kiinttun>123456789</rakval:kiinttun>
                                   <rakval:rakennusnro>004</rakval:rakennusnro>
                                   <rakval:aanestysalue>004</rakval:aanestysalue>
                               </rakval:KatselmuksenRakennus>
@@ -224,7 +224,7 @@
                               <rakval:KatselmuksenRakennus>
                                   <rakval:valtakunnallinenNumero>1005334384</rakval:valtakunnallinenNumero>
                                   <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
-                                  <rakval:kiinttun>89552200010051</rakval:kiinttun>
+                                  <rakval:kiinttun>123456789</rakval:kiinttun>
                                   <rakval:rakennusnro>004</rakval:rakennusnro>
                                   <rakval:aanestysalue>004</rakval:aanestysalue>
                               </rakval:KatselmuksenRakennus>
@@ -249,7 +249,7 @@
                               <rakval:KatselmuksenRakennus>
                                   <rakval:valtakunnallinenNumero>1005334384</rakval:valtakunnallinenNumero>
                                   <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
-                                  <rakval:kiinttun>89552200010051</rakval:kiinttun>
+                                  <rakval:kiinttun>123456789</rakval:kiinttun>
                                   <rakval:rakennusnro>004</rakval:rakennusnro>
                                   <rakval:aanestysalue>004</rakval:aanestysalue>
                               </rakval:KatselmuksenRakennus>
@@ -274,7 +274,7 @@
                               <rakval:KatselmuksenRakennus>
                                   <rakval:valtakunnallinenNumero>1005334384</rakval:valtakunnallinenNumero>
                                   <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
-                                  <rakval:kiinttun>89552200010051</rakval:kiinttun>
+                                  <rakval:kiinttun>123456789</rakval:kiinttun>
                                   <rakval:rakennusnro>004</rakval:rakennusnro>
                                   <rakval:aanestysalue>004</rakval:aanestysalue>
                               </rakval:KatselmuksenRakennus>
@@ -324,7 +324,7 @@
                               <rakval:rakennustunnus>
                                   <rakval:valtakunnallinenNumero>1005334384</rakval:valtakunnallinenNumero>
                                   <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
-                                  <rakval:kiinttun>89552200010051</rakval:kiinttun>
+                                  <rakval:kiinttun>123456789</rakval:kiinttun>
                                   <rakval:rakennusnro>004</rakval:rakennusnro>
                                   <rakval:aanestysalue>004</rakval:aanestysalue>
                               </rakval:rakennustunnus>

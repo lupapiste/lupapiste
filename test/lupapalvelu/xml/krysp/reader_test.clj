@@ -525,7 +525,7 @@
       (fact "x" x => #(and (instance? Double %) (= 192416.901187 %)))
       (fact "y" y => #(and (instance? Double %) (= 6745788.046445 %)))
       (fact "address" address => "Pitk\u00e4karta 48")
-      (fact "propertyId" propertyId => "89552200010051"))
+      (fact "Property id from service" propertyId => "89552200010051"))
 
     (fact "Original area is stored for metadata"
       (:geometry (first (:drawings info))) => (contains "POLYGON((192391.716803 6745749.455827, 192368.715229 6745821.2047, 192396.462342 6745826.766509")
@@ -547,7 +547,7 @@
       (fact "x" x => #(and (instance? Double %) (= 192413.401 %)))
       (fact "y" y => #(and (instance? Double %) (= 6745769.046 %)))
       (fact "address" address => "Pitk\u00e4karta 48")
-      (fact "propertyId" propertyId => "89552200010051"))
+      (fact "Property id from service" propertyId => "89552200010051"))
 
     (fact "Original area is stored for metadata"
       (:geometry (first (:drawings info))) => (contains "POLYGON((192391.716803 6745749.455827, 192368.715229 6745821.2047, 192396.462342 6745826.766509")
