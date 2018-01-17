@@ -65,6 +65,12 @@
          (-> (merge ~(:as cmd) (dissoc ctx# :context-scope :context-role :permissions))
              (update :permissions set/union perms#))))))
 
+(def ContextMatcher
+  {sc/Keyword (sc/conditional
+               set?     #{sc/Keyword}
+               fn?      sc/Any
+               map?     (sc/recursive #'ContextMatcher))})
+
 (defn- matching-context? [ctx-matcher context]
   (cond
     (map? ctx-matcher) (every? (fn [[k v]] (matching-context? v (k context))) ctx-matcher)

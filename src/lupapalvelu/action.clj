@@ -644,12 +644,6 @@
 (defn- skip-validation? [obj]
   (boolean (get (meta obj) :skip-validation)))
 
-(def PermissionContext
-  {sc/Keyword (sc/conditional
-               set?     #{sc/Keyword}
-               fn?      sc/Any
-               map?     (sc/recursive #'PermissionContext))})
-
 (def ActionMetaData
   {
    ; Set of user role keywords. Use :user-roles #{:anonymous} to grant access to anyone.
@@ -680,7 +674,7 @@
                                     (subset-of states/all-states))
    (sc/optional-key :contexts)    [(sc/pred fn? "context extender function")]
    (sc/optional-key :permissions) (sc/constrained [{(sc/optional-key :description) sc/Str
-                                                    (sc/optional-key :context)  PermissionContext
+                                                    (sc/optional-key :context) permissions/ContextMatcher
                                                     :required [sc/Keyword]}]
                                                   (util/fn->> butlast (every? :context))
                                                   "key :context is required for all but last element of permissions")
