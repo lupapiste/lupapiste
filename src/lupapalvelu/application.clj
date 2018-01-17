@@ -570,7 +570,7 @@
         info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest scope))]
 
-    (when-not organization-id
+    (when (ss/blank? organization-id)
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
     (if info-request?
       (when-not (:inforequest-enabled scope)

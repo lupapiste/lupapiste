@@ -9,12 +9,12 @@
                                         data->model-updates)
 
 (fact "csv-data comes out as a header-data-map"
-  (csv-data->ifc-coll "Porras;Huoneistonumero;Huoneiston jakokirjain;Sijaintikerros;Huoneiden lukumäärä;Keittiötyyppi;Huoneistoala;Varusteena WC;Varusteena amme/suihku;Varusteena parveke;Varusteena Sauna;Varusteena lämmin vesi\nA;001;;2;2;3;56;1;1;1;1;1")
-      => {:header-row ["porras" "huoneistonumero" "huoneiston jakokirjain" "sijaintikerros" "huoneiden lukumäärä" "keittiötyyppi" "huoneistoala" "varusteena wc" "varusteena amme/suihku" "varusteena parveke" "varusteena sauna" "varusteena lämmin vesi"]
+  (csv-data->ifc-coll "Porras;Huoneistonumero;Huoneiston jakokirjain;Sijaintikerros;Huoneiden lukum\u00e4\u00e4r\u00e4;Keitti\u00f6tyyppi;Huoneistoala;Varusteena WC;Varusteena amme/suihku;Varusteena parveke;Varusteena Sauna;Varusteena l\u00e4mmin vesi\nA;001;;2;2;3;56;1;1;1;1;1")
+      => {:header-row ["porras" "huoneistonumero" "huoneiston jakokirjain" "sijaintikerros" "huoneiden lukum\u00e4\u00e4r\u00e4" "keitti\u00f6tyyppi" "huoneistoala" "varusteena wc" "varusteena amme/suihku" "varusteena parveke" "varusteena sauna" "varusteena l\u00e4mmin vesi"]
           :data      [["A" "001" "" "2" "2" "3" "56" "1" "1" "1" "1" "1"]]})
 
 (fact "premise data becomes updates data"
-      (let [{header-row :header-row data :data} (csv-data->ifc-coll "Porras;Huoneistonumero;Huoneiston jakokirjain;Huoneiden lukumäärä;Keittiötyyppi;Huoneistoala;Varusteena WC;Varusteena amme/suihku;Varusteena parveke;Varusteena Sauna;Varusteena lämmin vesi\nA;001;;2;3;56;1;1;1;1;1")]
+      (let [{header-row :header-row data :data} (csv-data->ifc-coll "Porras;Huoneistonumero;Huoneiston jakokirjain;Huoneiden lukum\u00e4\u00e4r\u00e4;Keitti\u00f6tyyppi;Huoneistoala;Varusteena WC;Varusteena amme/suihku;Varusteena parveke;Varusteena Sauna;Varusteena l\u00e4mmin vesi\nA;001;;2;3;56;1;1;1;1;1")]
         (set (data->model-updates header-row data)))
       => #{[[:huoneistot :0 :porras] "A"]
            [[:huoneistot :0 :huoneistonumero] "001"]
