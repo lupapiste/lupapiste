@@ -56,6 +56,7 @@
                                           :date2      {:docgen "pate-date"}
                                           :inner-loop {:repeating {:date {:docgen "pate-verdict-check"}}}}}
                 :dynamic     {:repeating {:text        {:docgen "pate-string"}
+                                          :flag        {:docgen "pate-verdict-check"}
                                           :remove-item {:button {:remove :dynamic}}
                                           :sublevel    {:repeating {:tick       {:docgen "pate-verdict-check"}
                                                                     :remove-sub {:button {:remove :sublevel}}
@@ -549,7 +550,11 @@
                                   {:dynamic {:id     {:foo 8}
                                              :old-id {:bar 99}}})
       => (ok-remove [:dynamic :old-id] {:dynamic {:id     {:foo 8}
-                                                  :old-id {:bar 99}}}))
+                                                  :old-id {:bar 99}}})
+      (validate-and-process-value [:dynamic :id :flag]
+                                  true
+                                  {:dynamic {:id {}}})
+      => (ok [:dynamic :id :flag] true))
     (facts "Sub level"
       (fact "Add button must be sibling"
         (validate-and-process-value [:dynamic :id :bad-add]

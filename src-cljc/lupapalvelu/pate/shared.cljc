@@ -262,6 +262,9 @@
                (merge PateComponent
                       ;; Icon class (e.g., :lupicon-save)
                       {(sc/optional-key :icon)   sc/Keyword
+                       ;; If false the button shows only icon. Default
+                       ;; true.
+                       (sc/optional-key :text?)  sc/Bool
                        ;; Keyword must be a sibling repeating dict id.
                        (sc/optional-key :add)    sc/Keyword
                        ;; Keyword is an encompassing repeating dict id
@@ -489,10 +492,17 @@
                                                                      :term     {:path       [:reviews]
                                                                                 :extra-path [:name]
                                                                                 :match-key  :id}})
-                :conditions      {:repeating {:condition        {:phrase-text {:i18nkey  :phrase.category.lupaehdot
-                                                                               :category :lupaehdot}}
-                                              :remove-condition {:button {:remove :conditions}}}}
-                :add-condition   {:button {:add :conditions}}
+                :conditions                {:repeating {:condition        {:phrase-text {:i18nkey  :pate-condition
+                                                                                         :category :lupaehdot}}
+                                                        :remove-condition {:button {:i18nkey :remove
+                                                                                    :label?  false
+                                                                                    :icon    :lupicon-remove
+                                                                                    :css     [:primary :outline]
+                                                                                    :remove  :conditions}}}}
+                :add-condition             {:button {:icon    :lupicon-circle-plus
+                                                     :i18nkey :pate-conditions.add
+                                                     :css     :positive
+                                                     :add     :conditions}}
                 :neighbors                 {:loc-text :pate-neighbors.text}
 
                 :appeal           {:phrase-text {:category :muutoksenhaku
@@ -547,7 +557,13 @@
               {:id         "conditions"
                :loc-prefix :phrase.category.lupaehdot
                :grid       {:columns 1
-                            :rows    [[{:dict :conditions}]]}}
+                            :rows    [[{:grid {:columns   8
+                                               :repeating :conditions
+                                               :rows      [[{:col  6
+                                                             :dict :condition}
+                                                            {}
+                                                            {:dict :remove-condition}]]}}]
+                                      [{:dict :add-condition}]]}}
               (text-section :neighbors)
               {:id         "appeal"
                :loc-prefix :pate-appeal
@@ -567,13 +583,13 @@
                :loc-prefix :pate-buildings
                :grid       {:columns 1
                             :rows    [[{:loc-prefix :pate-buildings.info
-                                        :list       {:title "pate-buildings.info"
+                                        :list       {:title   "pate-buildings.info"
                                                      :labels? false
-                                                     :items (mapv (fn [check]
-                                                                    {:dict check
-                                                                     :id   check
-                                                                     :css  [:pate-condition-box]})
-                                                                  [:autopaikat :vss-luokka :paloluokka])}}]]}}]})
+                                                     :items   (mapv (fn [check]
+                                                                      {:dict check
+                                                                       :id   check
+                                                                       :css  [:pate-condition-box]})
+                                                                    [:autopaikat :vss-luokka :paloluokka])}}]]}}]})
 
 (sc/validate PateVerdictTemplate default-verdict-template)
 

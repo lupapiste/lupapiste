@@ -210,7 +210,7 @@
                          (or disabled?
                              (s/blank? phrase)
                              (not (re-find (re-pattern (goog.string/regExpEscape phrase))
-                                           (path/react path state)))))
+                                           (or (path/react path state) "")))))
              :on-click (fn []
                          (update-text (s/replace-first (path/value path state)
                                                        @selected*
@@ -220,7 +220,7 @@
        [:div.row
         [:div.col-12.col--full
          {:ref ref-id}
-         (components/textarea-edit (path/state path state)
+         (components/textarea-edit (path/value path state)
                                    {:callback  update-text
                                     :disabled  disabled?
                                     :required? required?})]]])))
@@ -230,3 +230,29 @@
   (components/text-and-link {:text-loc (:text-loc schema)
                              :click    #((path/meta-value options (:click schema))
                                          options)}))
+
+(rum/defc pate-button < rum/reactive
+  [{:keys [schema] :as options} & [wrap-label?]]
+  (let [{:keys [icon text?
+                label? click
+                add remove]} schema
+        text?                (-> text? false? not)
+        button               (when (path/visible? options)
+                               [:button {:disabled (path/disabled? options)
+                                         :class    (path/css options)
+                                         :on-click (fn [_]
+                                                     (cond
+                                                       click
+                                                       (path/meta-value options click)
+
+                                                       (or add remove)
+                                                       (path/meta-updated options true)))}
+                                (when icon
+                                  [:i {:class icon}])
+                                (when text?
+                                  [:span (path/loc options)])])]
+    (if (and wrap-label? (-> label? false? not))
+      [:div
+       (common/empty-label :pate-label)
+       button]
+      button)))

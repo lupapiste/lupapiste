@@ -63,7 +63,7 @@
 (defn value
   "Value of the substate denoted by path (and extras)."
   [path state* & extra]
-  @(state (extend path extra) state*))
+  (get-in @state* (extend path extra)))
 
 (defn react
   "Like value but uses rum/reac for deref."
@@ -147,9 +147,9 @@
 
 (defn meta-updated
   "Calls _meta :updated if defined."
-  [options]
+  [options & extra-args]
   (when-let [fun (access-meta options :updated)]
-    (fun options)))
+    (apply fun (cons options extra-args))))
 
 (defn key-fn
   "Rum key-fn, where key is the path id."

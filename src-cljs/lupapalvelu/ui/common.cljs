@@ -112,8 +112,9 @@
 
 (def nbsp {:dangerouslySetInnerHTML {:__html "&nbsp;"}})
 
-(defn empty-label []
-  [:label nbsp])
+(defn empty-label [& cls]
+  [:label (assoc nbsp
+                 :class cls)])
 
 (defn open-oskari-map [{id :id [x y] :location municipality :municipality}]
   (let [features "addPoint=0&addArea=0&addLine=0&addCircle=0&addEllipse=0"

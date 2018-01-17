@@ -110,6 +110,7 @@
                            :list         pate-components/list-reference-list)
          :multi-select   pate-components/pate-multi-select
          :phrase-text    pate-components/pate-phrase-text
+         :button         pate-components/pate-button
          ;; The rest are always displayed as view components
          (partial view-component cell-type)) options wrap-label?)
       (view-component cell-type options wrap-label?))))
@@ -249,8 +250,8 @@
                   (-> schema :rows))])]
     (if-let [repeating (:repeating schema)]
       [:div (map (fn [k]
-                   (grid (assoc options
+                   (pate-grid (assoc options
                                 :schema (dissoc schema :repeating)
                                 :path (path/extend path repeating k))))
-                 (keys (path/value repeating state)))]
+                 (keys (path/react repeating state)))]
       (grid options))))
