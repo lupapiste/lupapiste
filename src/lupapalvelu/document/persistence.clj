@@ -130,8 +130,10 @@
   (when-not (#{"documents" "tasks"} collection)
     (fail :error.unknown-type)))
 
-(defn validate-whitelist-properties [value-mapping [k v]]
-  (some #{(get value-mapping k)} v))
+(defn validate-whitelist-properties
+  [value-mapping [k v]]
+  {:pre [(every? keyword? v)]}
+  (some #{(keyword (get value-mapping k))} v))
 
 (defn validate-against-whitelist! [document update-paths user-role {permitType :permitType}]
   (let [doc-schema (model/get-document-schema document)]
