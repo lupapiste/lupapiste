@@ -283,7 +283,7 @@
       (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)
     ; Log the changes for later review
-    (info "company-update - changes were:" (ss/join ", " (changes company updated)))
+    (info "company-update for" (:name company) "/" (:y company) "- changes were:" (ss/join ", " (changes company updated)))
     updated))
 
 (defn company-user-edit-allowed
