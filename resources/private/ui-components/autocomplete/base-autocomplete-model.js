@@ -152,6 +152,7 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
     self.dropdownClick(false); // set to false so dropdown closes
     self.inputSelected(false);
     self.query("");
+
   };
 
   self.navigate = function(data, event) {
@@ -195,6 +196,16 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
         self.index(self.index() + 1);
       }
       scrollToActiveItem(self.index());
+    }
+
+    else {
+      // This aims to select an option automatically (on keyup) if there's a single option, or if one of the options
+      // matches the input text exactly.
+      var items = self.data();
+      if (items.length === 2 || (items.length > 2 && items[1].title.toUpperCase() === self.query().toUpperCase())) {
+        self.index(1);
+        scrollToActiveItem(self.index())
+      }
     }
     return true;
   };
