@@ -40,7 +40,8 @@
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.inspection-summary :as inspection-summary])
+            [lupapalvelu.inspection-summary :as inspection-summary]
+            [lupapalvelu.foreman :as foreman])
   (:import [java.net URL]
            [java.nio.charset StandardCharsets]))
 
@@ -345,7 +346,7 @@
 
 (defn do-check-for-verdict [{:keys [application organization] :as command}]
   {:pre [(every? command [:application :user :created])]}
-  (when-let [app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
+  (if-let [app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
                          ;; LPK-1538 If fetching with application-id fails try to fetch application with first to find backend-id
                          (krysp-fetch/get-application-xml-by-backend-id application (some :kuntalupatunnus (:verdicts application))))]
     (let [app-xml          (normalize-special-verdict application app-xml)
@@ -360,7 +361,10 @@
               backend-id-updates (->> (seq (krysp-reader/->backend-ids app-xml))
                                       (backend-id-mongo-updates application))]
           (some->> (util/deep-merge extras-updates backend-id-updates) (update-application command))
-          validation-error)))))
+          validation-error)))
+    ;; LPK-2459
+    (when (foreman/foreman-app? application)
+      (fetch-tj-suunnittelija-verdict command))))
 
 (defn- verdict-task?
   "True if given task is 'rooted' via source chain to the verdict.
