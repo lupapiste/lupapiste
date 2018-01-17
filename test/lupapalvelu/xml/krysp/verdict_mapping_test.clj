@@ -1,14 +1,15 @@
 (ns lupapalvelu.xml.krysp.verdict-mapping-test
-  (:require [midje.sweet :refer :all]
-            [midje.util :refer [testable-privates]]
-            [clojure.data.xml :as data-xml]
-            [sade.xml :as xml]
-            [sade.common-reader :as cr]
+  (:require [clojure.data.xml :as data-xml]
             [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa]]
             [lupapalvelu.pate.verdict-canonical-test :refer [verdict]]
-            [lupapalvelu.xml.krysp.verdict-mapping]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.validator :as validator]))
+            [lupapalvelu.xml.krysp.verdict-mapping]
+            [lupapalvelu.xml.validator :as validator]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
+            [net.cgrand.enlive-html :as enlive]
+            [sade.common-reader :as cr]
+            [sade.xml :as xml]))
 
 (def app (assoc application-rakennuslupa :attachments [{:id "11"
                                                         :type {:type-id "paatosote" :type-group "paatoksenteko"}
@@ -61,11 +62,9 @@
             ["Katselmus2"]]))
 
     (facts "maaraystieto"
-      (fact "sisalto"
-        (xml/get-text lp-xml [:paatostieto :lupamaaraykset :maaraystieto :sisalto]) => "muut lupaehdot - teksti")
-
-      (fact "maarayspvm"
-        (xml/get-text lp-xml [:paatostieto :lupamaaraykset :maaraystieto :maaraysPvm]) => "2017-11-23"))
+      (fact "sisalto - times tow"
+        (xml/select lp-xml [:paatostieto :lupamaaraykset :maaraystieto :Maarays :sisalto enlive/content])
+        => (just ["muut lupaehdot - teksti" "toinen teksti"] :in-any-order)))
 
     (facts "vaadittuerityissuunnitelmatieto"
       (fact "vaadittuerityissuunnitelma - times two"

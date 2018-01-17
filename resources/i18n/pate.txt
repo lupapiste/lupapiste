@@ -58,6 +58,8 @@
 "pate-conditions" "en" "Permit terms and regulations"
 "pate-conditions" "fi" "Lupaehdot ja -määräykset"
 "pate-conditions" "sv" "Tillståndsvillkor och bestämmelser"
+"pate-conditions.add" "fi" "Lisää lupaehto"
+"pate-condition" "fi" "Lupaehto tai -määräys"
 "pate-copy-postfix" "en" "copy"
 "pate-copy-postfix" "fi" "kopio"
 "pate-copy-postfix" "sv" "kopia"

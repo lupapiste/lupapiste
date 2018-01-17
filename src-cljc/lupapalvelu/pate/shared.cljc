@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.shared
   (:require [clojure.string :as s]
+            [clojure.set :as set]
             [sade.shared-util :as util]
             [schema.core :refer [defschema] :as sc]))
 
@@ -79,6 +80,16 @@
 (def keyword-or-string (sc/conditional
                         keyword? sc/Keyword
                         :else    sc/Str))
+(defn only-one-of
+  "Only one of the given keys are allowed in the data."
+  [allowed-keys schema]
+  (sc/constrained schema
+                  (fn [data]
+                    (< (->> (keys data)
+                            (util/intersection-as-kw allowed-keys)
+                            count)
+                       2))
+                  (str "Only one of the keys is allowed: " allowed-keys)))
 
 (def PathCondition
   [(sc/one (sc/enum :OR :AND) :OR)
@@ -234,7 +245,7 @@
 
 (defschema PateLink
   "UI component that represents a text with link. The link is part of
-  the text-loc, using a special notattion: 'Text before [link]
+  the text-loc, using a special notation: 'Text before [link]
   after.' The click handler for the link is a _meta function."
   (merge PateComponent
          {;; The label text is always determined by the default
@@ -244,6 +255,23 @@
           ;; Must resolve to _meta function. The function receives
           ;; options as arguments.
           :click    sc/Keyword}))
+
+(defschema PateButton
+  "Button with an optional icon."
+  (only-one-of [:add :remove :click]
+               (merge PateComponent
+                      ;; Icon class (e.g., :lupicon-save)
+                      {(sc/optional-key :icon)   sc/Keyword
+                       ;; If false the button shows only icon. Default
+                       ;; true.
+                       (sc/optional-key :text?)  sc/Bool
+                       ;; Keyword must be a sibling repeating dict id.
+                       (sc/optional-key :add)    sc/Keyword
+                       ;; Keyword is an encompassing repeating dict id
+                       (sc/optional-key :remove) sc/Keyword
+                       ;; Must resolve to _meta function. The function
+                       ;; receives options as arguments.
+                       (sc/optional-key :click)  sc/Keyword})))
 
 (defschema PatePlaceholder
   "Placholder for external (filled by backend) data."
@@ -302,6 +330,7 @@
                :multi-select   (required {:multi-select PateMultiSelect})
                :reference      (required {:reference PateReference})
                :link           {:link PateLink}
+               :button         {:button PateButton}
                :placeholder    {:placeholder PatePlaceholder}
                :keymap         {:keymap KeyMap}
                :attachments    (required {:attachments PateAttachments})
@@ -463,7 +492,17 @@
                                                                      :term     {:path       [:reviews]
                                                                                 :extra-path [:name]
                                                                                 :match-key  :id}})
-                :conditions                {:phrase-text {:category :lupaehdot}}
+                :conditions                {:repeating {:condition        {:phrase-text {:i18nkey  :pate-condition
+                                                                                         :category :lupaehdot}}
+                                                        :remove-condition {:button {:i18nkey :remove
+                                                                                    :label?  false
+                                                                                    :icon    :lupicon-remove
+                                                                                    :css     [:primary :outline]
+                                                                                    :remove  :conditions}}}}
+                :add-condition             {:button {:icon    :lupicon-circle-plus
+                                                     :i18nkey :pate-conditions.add
+                                                     :css     :positive
+                                                     :add     :conditions}}
                 :neighbors                 {:loc-text :pate-neighbors.text}
 
                 :appeal           {:phrase-text {:category :muutoksenhaku
@@ -518,7 +557,13 @@
               {:id         "conditions"
                :loc-prefix :phrase.category.lupaehdot
                :grid       {:columns 1
-                            :rows    [[{:dict :conditions}]]}}
+                            :rows    [[{:grid {:columns   8
+                                               :repeating :conditions
+                                               :rows      [[{:col  6
+                                                             :dict :condition}
+                                                            {}
+                                                            {:dict :remove-condition}]]}}]
+                                      [{:dict :add-condition}]]}}
               (text-section :neighbors)
               {:id         "appeal"
                :loc-prefix :pate-appeal
@@ -538,13 +583,13 @@
                :loc-prefix :pate-buildings
                :grid       {:columns 1
                             :rows    [[{:loc-prefix :pate-buildings.info
-                                        :list       {:title "pate-buildings.info"
+                                        :list       {:title   "pate-buildings.info"
                                                      :labels? false
-                                                     :items (mapv (fn [check]
-                                                                    {:dict check
-                                                                     :id   check
-                                                                     :css  [:pate-condition-box]})
-                                                                  [:autopaikat :vss-luokka :paloluokka])}}]]}}]})
+                                                     :items   (mapv (fn [check]
+                                                                      {:dict check
+                                                                       :id   check
+                                                                       :css  [:pate-condition-box]})
+                                                                    [:autopaikat :vss-luokka :paloluokka])}}]]}}]})
 
 (sc/validate PateVerdictTemplate default-verdict-template)
 
@@ -691,33 +736,44 @@
              [[:pate-r.foremen :foremen false false]
               [:pate-plans :plans true false]
               [:pate-reviews :reviews true true]])
-     {:conditions      {:phrase-text {:i18nkey  :phrase.category.lupaehdot
-                                      :category :lupaehdot}}
-      :neighbors       {:phrase-text {:i18nkey  :phrase.category.naapurit
-                                      :category :naapurit}}
-      :neighbor-states {:placeholder {:type :neighbors}}
-      :collateral      {:docgen "pate-string"}
-      :collateral-date {:docgen "pate-date"}
-      :collateral-type {:docgen "collateral-type"}
-      :appeal          {:phrase-text {:category :muutoksenhaku}}
-      :complexity      (req {:docgen "pate-complexity"})
-      :complexity-text {:phrase-text {:label?   false
-                                      :category :vaativuus}}
-      :rights          {:phrase-text {:category :rakennusoikeus}}
-      :purpose         {:phrase-text {:category :kaava}}
-      :buildings       {:repeating {:building-name          {:placeholder {:label? false
-                                                                           :type   :building}}
-                                    :rakennetut-autopaikat  {:docgen "pate-string"}
-                                    :kiinteiston-autopaikat {:docgen "pate-string"}
-                                    :autopaikat-yhteensa    {:docgen "pate-string"}
-                                    :vss-luokka             {:docgen "pate-string"}
-                                    :paloluokka             {:docgen "pate-string"}
-                                    :show-building          {:docgen "required-in-verdict"}}}
-      :attachments     {:attachments {:i18nkey    :application.verdict-attachments
-                                      :type-group #"paatoksenteko"
-                                      :default    :paatoksenteko.paatosote
-                                      :dropzone   "#application-pate-verdict-tab"
-                                      :multiple?  true}}})
+     {:conditions-title {:loc-text :phrase.category.lupaehdot}
+      :conditions       {:repeating {:condition        {:phrase-text {:label? false
+                                                                      ;;:i18nkey  :pate-condition
+                                                                      :category :lupaehdot}}
+                                     :remove-condition {:button {:i18nkey :remove
+                                                                 :label?  false
+                                                                 :icon    :lupicon-remove
+                                                                 :css     :secondary
+                                                                 :remove  :conditions}}}}
+      :add-condition    {:button {:icon    :lupicon-circle-plus
+                                  :i18nkey :pate-conditions.add
+                                  :css     :positive
+                                  :add     :conditions}}
+      :neighbors        {:phrase-text {:i18nkey  :phrase.category.naapurit
+                                       :category :naapurit}}
+      :neighbor-states  {:placeholder {:type :neighbors}}
+      :collateral       {:docgen "pate-string"}
+      :collateral-date  {:docgen "pate-date"}
+      :collateral-type  {:docgen "collateral-type"}
+      :appeal           {:phrase-text {:category :muutoksenhaku}}
+      :complexity       (req {:docgen "pate-complexity"})
+      :complexity-text  {:phrase-text {:label?   false
+                                       :category :vaativuus}}
+      :rights           {:phrase-text {:category :rakennusoikeus}}
+      :purpose          {:phrase-text {:category :kaava}}
+      :buildings        {:repeating {:building-name          {:placeholder {:label? false
+                                                                            :type   :building}}
+                                     :rakennetut-autopaikat  {:docgen "pate-string"}
+                                     :kiinteiston-autopaikat {:docgen "pate-string"}
+                                     :autopaikat-yhteensa    {:docgen "pate-string"}
+                                     :vss-luokka             {:docgen "pate-string"}
+                                     :paloluokka             {:docgen "pate-string"}
+                                     :show-building          {:docgen "required-in-verdict"}}}
+      :attachments      {:attachments {:i18nkey    :application.verdict-attachments
+                                       :type-group #"paatoksenteko"
+                                       :default    :paatoksenteko.paatosote
+                                       :dropzone   "#application-pate-verdict-tab"
+                                       :multiple?  true}}})
     :sections
     [{:id   "pate-dates"
       :grid {:columns 7
@@ -776,22 +832,29 @@
                                :dict :bulletinOpDescription}]]}}
      {:id   "requirements"
       :grid {:columns 7
-             :rows    (concat (map (fn [dict]
-                                     (let [check-path (keyword (str (name dict) "-included"))]
-                                       {:show? [:OR :_meta.editing? check-path]
-                                        :row   [{:col  4
-                                                 :dict dict}
-                                                {:col   2
-                                                 :align :right
-                                                 :show? :_meta.editing?
-                                                 :id    "included"
-                                                 :dict  check-path}]}))
-                                   [:foremen :plans :reviews])
-                              [{:show? :?.conditions
-                                :row   [{:col   6
-                                         :id    "other"
-                                         :align :full
-                                         :dict  :conditions}]}])}}
+             :rows    (map (fn [dict]
+                             (let [check-path (keyword (str (name dict) "-included"))]
+                               {:show? [:OR :_meta.editing? check-path]
+                                :row   [{:col  4
+                                         :dict dict}
+                                        {:col   2
+                                         :align :right
+                                         :show? :_meta.editing?
+                                         :id    "included"
+                                         :dict  check-path}]}))
+                           [:foremen :plans :reviews])}}
+     {:id   "conditions"
+      :grid {:columns 1
+             :rows    [[{:css  :pate-label
+                         :dict :conditions-title}]
+                       [{:grid {:columns   9
+                                :repeating :conditions
+                                :rows      [[{:col  7
+                                              :dict :condition}
+                                             {:align :right
+                                              :dict  :remove-condition}]]}}]
+                       [{:dict :add-condition}]]}}
+
      {:id    "appeal"
       :show? [:OR :?.appeal :?.collateral]
       :grid  {:columns 7
@@ -894,14 +957,32 @@
 
   Returns map with :schema and :path keys. The path is
   the remaining path (e.g., [:delta] for pate-delta). Note: the
-  result is empty map if the path resolves to the repeating schema."
+  result is empty map if the path resolves to the repeating schema.
+
+  Returns nil when the resolution fails."
   [path dictionary]
   (loop [[x & xs]   (->> path
                          (remove nil?)
                          (map keyword))
          dictionary dictionary]
-    (if-let [schema (get dictionary x)]
-      (if (:repeating schema)
-        (recur (rest xs) (:repeating schema))
-        {:schema schema :path xs})
-      {})))
+    (when dictionary
+      (if x
+        (when-let [schema (get dictionary x)]
+          (if (:repeating schema)
+            (recur (rest xs) (:repeating schema))
+            {:schema schema :path xs}))
+        {}))))
+
+(defn repeating-subpath
+  "Subpath that resolves to a repeating named repeating. Nil if not
+  found. Note that the actual existence of the path within data is not
+  checked."
+  [repeating path dictionary]
+  (loop [path path]
+    (cond
+      (empty? path)           nil
+      (= (last path)
+         repeating) (when (= (dict-resolve path dictionary)
+                             {})
+                      path)
+      :else                   (recur (butlast path)))))

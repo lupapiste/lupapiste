@@ -14,12 +14,15 @@
             [rum.core :as rum]))
 
 
-(defn updater [{:keys [state info path] :as options}]
-  (service/save-draft-value (path/value [:id] info)
-                            path
-                            (path/value path state)
-                            (service/update-changes-and-errors state/current-template
-                                                               options)))
+(defn updater
+  ([{:keys [state info path] :as options} value]
+   (service/save-draft-value (path/value [:id] info)
+                             path
+                             value
+                             (service/update-changes-and-errors state/current-template
+                                                                options)))
+  ([{:keys [path state] :as options}]
+   (updater options (path/value path state))))
 
 (defn open-settings
   [& [template-id]]
