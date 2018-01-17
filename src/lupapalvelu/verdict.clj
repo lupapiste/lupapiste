@@ -246,7 +246,10 @@
   [application xml]
   (let [op-name      (-> application :primaryOperation :name)
         tag          (if (ss/starts-with op-name "tyonjohtajan-") :Tyonjohtaja :Suunnittelija)
-        [party]      (enlive/select xml [tag])
+        op-doc       (domain/get-document-by-operation application (-> application :primaryOperation :id))
+        hetu         (-> op-doc :data :henkilotiedot :hetu :value)
+        parties      (enlive/select xml [tag])
+        party        (util/find-first #(= (xml/get-text % [:henkilotunnus]) hetu) parties)
         attachment   (-> party (enlive/select [:liitetieto :Liite]) first enlive/unwrap)
         date         (xml/get-text party [:paatosPvm])
         decision     (xml/get-text party [:paatostyyppi])
