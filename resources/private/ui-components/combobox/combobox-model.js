@@ -20,6 +20,8 @@ LUPAPISTE.ComboboxModel = function( params ) {
   self.selectedIndex = ko.observable(-1);
   self.testId = params.testId || "combobox-input";
 
+  var localStorageKey = "combobox-prev-entries-for-" + params.prevEntriesKey;
+
   // Textinput focus
   self.hasFocus = ko.observable();
 
@@ -54,7 +56,12 @@ LUPAPISTE.ComboboxModel = function( params ) {
 
   self.shortList = self.disposedPureComputed( function() {
     self.selectedIndex( -1 );
-    var result = _.filter( ko.unwrap( self.list ),
+    var items = ko.unwrap(self.list);
+    // If there are no options, we offer the values that user has previously input for this field
+    if ((!items || items.length === 0) && params.prevEntriesKey && window.localStorage.getItem(localStorageKey)) {
+      items = JSON.parse(window.localStorage.getItem(localStorageKey));
+    }
+    var result = _.filter( items,
                            function( item ) {
                              return _.includes( _.toLower(item),
                                                 _.toLower(_.trim( self.textInput())));
