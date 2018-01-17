@@ -110,6 +110,7 @@
         ;; Reload application from DB, attachments have changed
         ;; if verdict has several attachments.
         current-application (domain/get-application-as (:id application) user)]
+    (assert current-application (str "no application found for id " (:id application) " when downloading poytakirja"))
     ;; If the attachment-id, i.e., hash of the URL matches
     ;; any old attachment, a new version will be added
     (when (= content-length 0)
