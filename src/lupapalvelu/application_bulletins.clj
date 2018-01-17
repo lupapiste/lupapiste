@@ -35,6 +35,14 @@
    (sc/optional-key :verdicts) [sc/Any]
    (sc/optional-key :pate-verdict) sc/Any})
 
+(sc/defschema CommentFile
+  {:fileId ssc/ObjectIdStr
+   :filename sc/Str
+   :size sc/Int
+   :contentType sc/Str})
+
+(def comment-file-checker (sc/checker CommentFile))
+
 (def bulletin-state-seq (sm/state-seq states/bulletin-version-states))
 
 (defn bulletin-state [app-state]

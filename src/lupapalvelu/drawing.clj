@@ -3,7 +3,7 @@
             [cljts.io :as jts]
             [cljts.geom :as geom]
             [taoensso.timbre :as timbre])
-  (:import [com.vividsolutions.jts.geom Polygon Geometry GeometryCollection]))
+  (:import [com.vividsolutions.jts.geom Polygon Geometry GeometryCollection Point]))
 
 (defn- get-pos [coordinates]
   (mapv (fn [c] [(-> c .x) (-> c .y)]) coordinates))
@@ -70,3 +70,13 @@
   "Converts a WKT drawing to a valid GeoJSON object. Returns nil if the drawing can't be converted to valid GeoJSON."
   [drawing]
   (parse-wkt-drawing drawing))
+
+(defn interior-point [geometry-string]
+  (try
+    (let [interior-point (.getInteriorPoint ^Geometry (jts/read-wkt-str geometry-string))
+          x (.getX ^Point interior-point)
+          y (.getY ^Point interior-point)]
+      [x y])
+    (catch Exception e
+      (timbre/warn "Failed to resolve interior point for geometry:" geometry-string "(" (.getMessage e) ")")
+      nil)))

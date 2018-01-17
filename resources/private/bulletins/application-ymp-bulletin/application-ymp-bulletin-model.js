@@ -139,7 +139,7 @@ LUPAPISTE.ApplicationYmpBulletinModel = function(params) {
 
   hub.send("bulletinService::fetchBulletin", {id: self.bulletinId()});
 
-  var returnUrl = "/app/" + loc.getCurrentLanguage() + "/bulletins#!/bulletin/" + self.bulletinId();
+  var returnUrl = "/app/" + loc.getCurrentLanguage() + "/bulletins#!/ymp-bulletin/" + self.bulletinId();
   self.vetumaParams = {success: returnUrl,
                        cancel:  returnUrl + "/cancel",
                        error:   returnUrl + "/error",

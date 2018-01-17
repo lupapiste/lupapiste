@@ -121,15 +121,16 @@
      (provided
        (attachment/upload-and-attach! {:application app :user user} anything anything) => nil
        (domain/get-application-as "1234567890" user) => app
-       (http/get "http://foo.bar/paatosote123.pdf" :as :stream :throw-exceptions false) => {:status 200
-                                                                                            :headers {"content-length" 2}
-                                                                                            :body   (io/string-input-stream "12")}))
+       (http/get "http://foo.bar/paatosote123.pdf" :as :stream :throw-exceptions false :conn-timeout 10000)
+       => {:status 200
+           :headers {"content-length" 2}
+           :body   (io/string-input-stream "12")}))
    (fact "HTTP request to municipality WFS fails => download-and-store returns 0"
      (download-and-store-poytakirja! app user ts "hash1234" {:type "verdict", :id "abcd"} true
                                      {:linkkiliitteeseen "http://foo.bar/paatosote123.pdf"}) => 0
      (provided
        (domain/get-application-as "1234567890" user) => app
-       (http/get "http://foo.bar/paatosote123.pdf" :as :stream :throw-exceptions false) => {:status 500}))
+       (http/get "http://foo.bar/paatosote123.pdf" :as :stream :throw-exceptions false :conn-timeout 10000) => {:status 500}))
    (fact "included upon successful download-and-store"
      (:urlHash (get-poytakirja! app user ts {:type "verdict" :id "abcd"} pk)) => "73d84addb5dc77651a612e24698025f1f8684b8b"
      (provided

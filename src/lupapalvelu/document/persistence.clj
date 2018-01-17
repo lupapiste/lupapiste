@@ -130,14 +130,19 @@
   (when-not (#{"documents" "tasks"} collection)
     (fail :error.unknown-type)))
 
+(defn validate-whitelist-properties
+  [value-mapping [k v]]
+  {:pre [(every? keyword? v)]}
+  (some #{(keyword (get value-mapping k))} v))
+
 (defn validate-against-whitelist! [document update-paths user-role {permitType :permitType}]
   (let [doc-schema (model/get-document-schema document)]
-    (doseq [path update-paths]
-      (let [{whitelist :whitelist} (model/find-by-name (:body doc-schema) path)]
-        (when-not (or (empty? whitelist)
-                      (some #{(keyword user-role)} (:roles whitelist))
-                      (some #{(keyword permitType)} (:permitType whitelist)))
-          (unauthorized!))))))
+    (doseq [path update-paths
+            :let [{whitelist :whitelist} (model/find-by-name (:body doc-schema) path)
+                  whitelist-key-mapping {:roles (keyword user-role)
+                                         :permitType (keyword permitType)}]]
+      (when-not (every? (partial validate-whitelist-properties whitelist-key-mapping) (dissoc whitelist :otherwise))
+        (unauthorized!)))))
 
 (defn- sent? [{state :state}]
   (and state (= "sent" (name state))))
