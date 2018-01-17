@@ -207,6 +207,12 @@
     (validate-whitelist-properties {:k1 :foo} [:k2 [:foo]]) => nil)
   (fact "found"
     (validate-whitelist-properties {:k1 :foo} [:k1 [:foo]]) => :foo)
+  (fact "string works"
+    (validate-whitelist-properties {:k1 "foo"} [:k1 [:foo]]) => :foo)
+  (fact "string not found"
+    (validate-whitelist-properties {:k1 "faa"} [:k1 [:foo]]) => nil)
+  (fact "whitelist values must be keyword"
+    (validate-whitelist-properties {:k1 "foo"} [:k1 ["foo"]]) => (throws AssertionError))
   (fact "roles ok"
     (validate-whitelist-properties {:roles :authority :permitType :lol} [:roles [:authority]]) => :authority)
   (fact "permitType ok"
