@@ -3,14 +3,14 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.permissions :refer :all]))
 
-(defpermission test
+(defpermissions test
   {:test-scope   {:test-role         #{:test/test
                                        :test/fail}
                   :another-test-role #{:test/fail}}
    :test-scope-b {:tester            #{:test/test
                                        :test/do}}})
 
-(defpermission test-more
+(defpermissions test-more
   {:test-scope   {:test-role         #{:test-more/test}}})
 
 (facts get-permissions-by-role

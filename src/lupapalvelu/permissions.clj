@@ -11,7 +11,7 @@
   (sc/constrained sc/Keyword (fn-> namespace name (= (name context-type)))
                   "Permission namespace equals context-type"))
 
-(defmacro defpermission [context-type permissions]
+(defmacro defpermissions [context-type permissions]
   (sc/validate {Scope {Role #{(permission-schema context-type)}}} permissions)
   (swap! permission-tree #(merge-with (partial merge-with into) % permissions)))
 
