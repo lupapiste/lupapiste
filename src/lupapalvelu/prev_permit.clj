@@ -10,6 +10,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as organization]
@@ -25,8 +26,7 @@
             [sade.property :as p]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.validators :as validators]
-            [taoensso.timbre :refer [debug info]]))
+            [taoensso.timbre :refer [debug info infof]]))
 
 (def building-fields
   (->> schemas/rakennuksen-tiedot (map (comp keyword :name)) (concat [:rakennuksenOmistajat :valtakunnallinenNumero])))
@@ -255,22 +255,32 @@
 
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
+  (logging/with-logging-context {:applicationId (:id created-application)}
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (application/insert-application created-application)
+    (infof "Inserted prev-permit app: org=%s kuntalupatunnus=%s authorizeApplicants=%s"
+           (:organization created-application)
+           (get-in command [:data :kuntalupatunnus])
+           authorize-applicants)
     ;; Get verdicts for the application
     (when-let [updates (verdict/find-verdicts-from-xml command xml)]
       (action/update-application command updates))
 
+    (invite-applicants command hakijat authorize-applicants)
+    (infof "Processed applicants, processable applicants count was: %s" (count (filter get-applicant-type hakijat)))
+
     (let [updated-application (mongo/by-id :applications (:id created-application))
           {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml user/batchrun-user-data (now) updated-application xml)
-          review-command (assoc (action/application->command updated-application) :user user/batchrun-user-data :action "prev-permit-review-udpates")]
-      (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id))
+          review-command (assoc (action/application->command updated-application (:user command)) :action "prev-permit-review-udpates")
+          update-result (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id)]
+      (if (:ok update-result)
+        (info "Saved review updates")
+        (infof "Reviews were not saved: %s" (:desc update-result))))
 
-    (invite-applicants command hakijat authorize-applicants)
 
     (let [fetched-application (mongo/by-id :applications (:id created-application))]
       (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
-      fetched-application)))
+      fetched-application))))
 
 (defn enough-location-info-from-parameters? [{{:keys [x y address propertyId]} :data}]
   (and

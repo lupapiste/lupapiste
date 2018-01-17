@@ -98,7 +98,7 @@
   (let [{url :linkkiliitteeseen attachment-time :muokkausHetki type :tyyppi description :kuvaus} att
         java-url        (URL. (URL. "http://") url) ; LPK-2903 HTTP is given as default URL context, if protocol is not defined
         url-filename    (-> java-url (.getPath) (ss/suffix "/"))
-        resp            (http/get (.toString java-url) :as :stream :throw-exceptions false)
+        resp            (http/get (.toString java-url) :as :stream :throw-exceptions false :conn-timeout (* 10 1000))
         header-filename (content-disposition-filename resp)
         filename        (mime/sanitize-filename (or header-filename url-filename))
         content-length  (util/->int (get-in resp [:headers "content-length"] 0))
@@ -110,6 +110,7 @@
         ;; Reload application from DB, attachments have changed
         ;; if verdict has several attachments.
         current-application (domain/get-application-as (:id application) user)]
+    (assert current-application (str "no application found for id " (:id application) " when downloading poytakirja"))
     ;; If the attachment-id, i.e., hash of the URL matches
     ;; any old attachment, a new version will be added
     (when (= content-length 0)
