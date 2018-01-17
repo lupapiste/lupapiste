@@ -10,6 +10,8 @@
             [sade.coordinate :as coordinate]
             [sade.core :refer [now def- fail]]
             [sade.property :as p]
+            [sade.xml :as sxml]
+            [lupapalvelu.drawing :as drawing]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.xml.krysp.verdict :as verdict]
@@ -497,10 +499,32 @@
           (coordinate/convert source-projection common/to-projection 3 coords))))
     (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus))))
 
+(defn- area-geometry-str [coordinates-array-xml geometry-type target-projection]
+  (let [area-coordinates-str       (->> (cr/all-of coordinates-array-xml) :Polygon :outerBoundaryIs :LinearRing :coordinates)
+        area-coordinates           (ss/split area-coordinates-str #" ")
+        source-projection          (common/->polygon-source-projection coordinates-array-xml)
+        converted-coordinates      (map #(coordinate/convert source-projection target-projection 6 (ss/split % #",")) area-coordinates)
+        converted-coordinates-str  (apply str (mapv #(str (first %) " " (last %) ", ") converted-coordinates))
+        first-coordinate           (first converted-coordinates)
+        first-coordinate-str       (str (first first-coordinate) " " (last first-coordinate))]
+    (str geometry-type "((" converted-coordinates-str first-coordinate-str "))")))
+
+(defn- resolve-area-coordinates [coordinates-array-xml building-location]
+  (if (some? (select1 building-location [:piste :Point]))
+    (let [building-coordinates-str (->> (cr/all-of building-location) :piste :Point :pos)
+          building-coordinates (ss/split building-coordinates-str #" ")
+          source-projection (common/->source-projection building-location [:Point])]
+      (when-not (contains? coordinate/known-bad-coordinates building-coordinates)
+        (coordinate/convert source-projection common/to-projection 3 building-coordinates)))
+    (let [area-geometry-str (area-geometry-str coordinates-array-xml "POLYGON" "WGS84")
+          interior-point (drawing/interior-point area-geometry-str)
+          interior-point-coordinates (coordinate/convert "WGS84" common/to-projection 6 interior-point)]
+      interior-point-coordinates)))
 
 (defn- extract-osoitenimi [osoitenimi-elem lang]
   (let [osoitenimi-elem (or (select1 osoitenimi-elem [(enlive/attr= :xml:lang lang)])
-                            (select1 osoitenimi-elem [(enlive/attr= :xml:lang "fi")]))]
+                            (select1 osoitenimi-elem [(enlive/attr= :xml:lang "fi")])
+                            (select1 osoitenimi-elem [(enlive/attr= :xml:lang "und")]))]
     (cr/all-of osoitenimi-elem)))
 
 (defn- build-huoneisto [huoneisto jakokirjain jakokirjain2]
@@ -545,6 +569,14 @@
                         :propertyId property-id}})
     (warn "Could not resolve location for kuntalupatunnus" kuntalupatunnus "by property id" property-id)))
 
+(defn resolve-property-id-by-point [coordinates]
+  (let [x (first coordinates)
+        y (last coordinates)
+        response (-> {:params {:x x :y y}}
+                     proxy-services/property-id-by-point-proxy
+                     :body)]
+    (json/parse-string response true)))
+
 ;;
 ;; Information parsed from verdict xml message for application creation
 ;;
@@ -578,16 +610,22 @@
             osoite-xml     (select asia [:rakennuspaikkatieto :Rakennuspaikka :osoite])
             osoite-Rakennuspaikka (build-address osoite-xml asioimiskieli-code)
 
-            kiinteistotunnus (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus)
-            municipality (or (p/municipality-id-by-property-id kiinteistotunnus) kuntakoodi)
-            coord-array-Rakennuspaikka (resolve-coordinates
-                                         (select1 asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste])
-                                         (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos)
-                                         kuntalupatunnus)
-
+            location-point (select1 asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste])
+            coord-array-Rakennuspaikka (if (some? location-point)
+                                         (resolve-coordinates
+                                           (select1 asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste])
+                                           (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos)
+                                           kuntalupatunnus)
+                                         (resolve-area-coordinates
+                                           (select1 asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :alue])
+                                           (select1 asia [:Rakennus :sijaintitieto :Sijainti])))
             osapuolet (map cr/all-of (select asia [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli]))
             suunnittelijat (map cr/all-of (select asia [:osapuolettieto :Osapuolet :suunnittelijatieto :Suunnittelija]))
-            [hakijat muut-osapuolet] ((juxt filter remove) #(= "hakija" (:VRKrooliKoodi %)) osapuolet)]
+            [hakijat muut-osapuolet] ((juxt filter remove) #(= "hakija" (:VRKrooliKoodi %)) osapuolet)
+            kiinteistotunnus (if (and (seq coord-array-Rakennuspaikka) (not (some? location-point)))
+                               (resolve-property-id-by-point coord-array-Rakennuspaikka)
+                               (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus))
+            municipality (or (p/municipality-id-by-property-id kiinteistotunnus) kuntakoodi)]
 
         (-> (merge
               {:id                          (->lp-tunnus asia)
@@ -607,7 +645,12 @@
                                   :propertyId kiinteistotunnus}}
 
                 (and (nil? coord-array-Rakennuspaikka) (not (ss/blank? kiinteistotunnus)))
-                (resolve-location-by-property-id kiinteistotunnus kuntalupatunnus)))
+                (resolve-location-by-property-id kiinteistotunnus kuntalupatunnus))
+
+              (when-not (some? location-point)
+                (let [geometry-str (area-geometry-str (select1 asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :alue]) "POLYGON" common/to-projection)]
+                {:drawings [{:geometry geometry-str
+                             :geometry-wgs84 (drawing/wgs84-geometry {:geometry geometry-str})}]})))
 
             cr/convert-booleans
             cr/cleanup)))))
