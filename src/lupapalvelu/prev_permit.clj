@@ -261,12 +261,14 @@
     (when-let [updates (verdict/find-verdicts-from-xml command xml)]
       (action/update-application command updates))
 
+    (invite-applicants command hakijat authorize-applicants)
+    (infof "Processed applicants, processable applicants count was: %s" (count (filter get-applicant-type hakijat)))
+
     (let [updated-application (mongo/by-id :applications (:id created-application))
           {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml user/batchrun-user-data (now) updated-application xml)
           review-command (assoc (action/application->command updated-application) :user user/batchrun-user-data :action "prev-permit-review-udpates")]
       (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id))
 
-    (invite-applicants command hakijat authorize-applicants)
 
     (let [fetched-application (mongo/by-id :applications (:id created-application))]
       (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
