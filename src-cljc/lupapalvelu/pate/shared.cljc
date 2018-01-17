@@ -736,35 +736,44 @@
              [[:pate-r.foremen :foremen false false]
               [:pate-plans :plans true false]
               [:pate-reviews :reviews true true]])
-     {:conditions      {:repeating {:condition        {:phrase-text {:i18nkey  :phrase.category.lupaehdot
-                                                                     :category :lupaehdot}}
-                                    :remove-condition {:button {:remove :conditions}}}}
-      :add-condition   {:button {:add :conditions}}
-      :neighbors       {:phrase-text {:i18nkey  :phrase.category.naapurit
-                                      :category :naapurit}}
-      :neighbor-states {:placeholder {:type :neighbors}}
-      :collateral      {:docgen "pate-string"}
-      :collateral-date {:docgen "pate-date"}
-      :collateral-type {:docgen "collateral-type"}
-      :appeal          {:phrase-text {:category :muutoksenhaku}}
-      :complexity      (req {:docgen "pate-complexity"})
-      :complexity-text {:phrase-text {:label?   false
-                                      :category :vaativuus}}
-      :rights          {:phrase-text {:category :rakennusoikeus}}
-      :purpose         {:phrase-text {:category :kaava}}
-      :buildings       {:repeating {:building-name          {:placeholder {:label? false
-                                                                           :type   :building}}
-                                    :rakennetut-autopaikat  {:docgen "pate-string"}
-                                    :kiinteiston-autopaikat {:docgen "pate-string"}
-                                    :autopaikat-yhteensa    {:docgen "pate-string"}
-                                    :vss-luokka             {:docgen "pate-string"}
-                                    :paloluokka             {:docgen "pate-string"}
-                                    :show-building          {:docgen "required-in-verdict"}}}
-      :attachments     {:attachments {:i18nkey    :application.verdict-attachments
-                                      :type-group #"paatoksenteko"
-                                      :default    :paatoksenteko.paatosote
-                                      :dropzone   "#application-pate-verdict-tab"
-                                      :multiple?  true}}})
+     {:conditions-title {:loc-text :phrase.category.lupaehdot}
+      :conditions       {:repeating {:condition        {:phrase-text {:label? false
+                                                                      ;;:i18nkey  :pate-condition
+                                                                      :category :lupaehdot}}
+                                     :remove-condition {:button {:i18nkey :remove
+                                                                 :label?  false
+                                                                 :icon    :lupicon-remove
+                                                                 :css     :secondary
+                                                                 :remove  :conditions}}}}
+      :add-condition    {:button {:icon    :lupicon-circle-plus
+                                  :i18nkey :pate-conditions.add
+                                  :css     :positive
+                                  :add     :conditions}}
+      :neighbors        {:phrase-text {:i18nkey  :phrase.category.naapurit
+                                       :category :naapurit}}
+      :neighbor-states  {:placeholder {:type :neighbors}}
+      :collateral       {:docgen "pate-string"}
+      :collateral-date  {:docgen "pate-date"}
+      :collateral-type  {:docgen "collateral-type"}
+      :appeal           {:phrase-text {:category :muutoksenhaku}}
+      :complexity       (req {:docgen "pate-complexity"})
+      :complexity-text  {:phrase-text {:label?   false
+                                       :category :vaativuus}}
+      :rights           {:phrase-text {:category :rakennusoikeus}}
+      :purpose          {:phrase-text {:category :kaava}}
+      :buildings        {:repeating {:building-name          {:placeholder {:label? false
+                                                                            :type   :building}}
+                                     :rakennetut-autopaikat  {:docgen "pate-string"}
+                                     :kiinteiston-autopaikat {:docgen "pate-string"}
+                                     :autopaikat-yhteensa    {:docgen "pate-string"}
+                                     :vss-luokka             {:docgen "pate-string"}
+                                     :paloluokka             {:docgen "pate-string"}
+                                     :show-building          {:docgen "required-in-verdict"}}}
+      :attachments      {:attachments {:i18nkey    :application.verdict-attachments
+                                       :type-group #"paatoksenteko"
+                                       :default    :paatoksenteko.paatosote
+                                       :dropzone   "#application-pate-verdict-tab"
+                                       :multiple?  true}}})
     :sections
     [{:id   "pate-dates"
       :grid {:columns 7
@@ -823,22 +832,29 @@
                                :dict :bulletinOpDescription}]]}}
      {:id   "requirements"
       :grid {:columns 7
-             :rows    (concat (map (fn [dict]
-                                     (let [check-path (keyword (str (name dict) "-included"))]
-                                       {:show? [:OR :_meta.editing? check-path]
-                                        :row   [{:col  4
-                                                 :dict dict}
-                                                {:col   2
-                                                 :align :right
-                                                 :show? :_meta.editing?
-                                                 :id    "included"
-                                                 :dict  check-path}]}))
-                                   [:foremen :plans :reviews])
-                              [{:show? :?.conditions
-                                :row   [{:col   6
-                                         :id    "other"
-                                         :align :full
-                                         :dict  :conditions}]}])}}
+             :rows    (map (fn [dict]
+                             (let [check-path (keyword (str (name dict) "-included"))]
+                               {:show? [:OR :_meta.editing? check-path]
+                                :row   [{:col  4
+                                         :dict dict}
+                                        {:col   2
+                                         :align :right
+                                         :show? :_meta.editing?
+                                         :id    "included"
+                                         :dict  check-path}]}))
+                           [:foremen :plans :reviews])}}
+     {:id   "conditions"
+      :grid {:columns 1
+             :rows    [[{:css  :pate-label
+                         :dict :conditions-title}]
+                       [{:grid {:columns   9
+                                :repeating :conditions
+                                :rows      [[{:col  7
+                                              :dict :condition}
+                                             {:align :right
+                                              :dict  :remove-condition}]]}}]
+                       [{:dict :add-condition}]]}}
+
      {:id    "appeal"
       :show? [:OR :?.appeal :?.collateral]
       :grid  {:columns 7

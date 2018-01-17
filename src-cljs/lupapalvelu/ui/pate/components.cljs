@@ -233,8 +233,7 @@
 
 (rum/defc pate-button < rum/reactive
   [{:keys [schema] :as options} & [wrap-label?]]
-  (let [{:keys [icon text?
-                label? click
+  (let [{:keys [icon text? click
                 add remove]} schema
         text?                (-> text? false? not)
         button               (when (path/visible? options)
@@ -251,8 +250,8 @@
                                   [:i {:class icon}])
                                 (when text?
                                   [:span (path/loc options)])])]
-    (if (and wrap-label? (-> label? false? not))
-      [:div
+    (if (show-label? options wrap-label?)
+      [:div.col--vertical
        (common/empty-label :pate-label)
        button]
       button)))

@@ -139,6 +139,9 @@
 (defmulti view-component (fn [cell-type & _]
                            cell-type))
 
+(defmethod view-component :default
+  [& _])
+
 (defmethod view-component :reference-list
   [_ {:keys [state path schema ] :as options} & [wrap-label?]]
   (let [values (set (flatten [(path/value path state)]))
@@ -213,6 +216,7 @@
                 (:items schema))])
 
 (rum/defc pate-grid < rum/reactive
+  {:key-fn #(-> % :path path/id)}
   [{:keys [schema path state] :as options}]
   (letfn [(grid [{:keys [schema] :as options}]
             [:div

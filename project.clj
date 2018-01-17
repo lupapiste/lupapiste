@@ -180,8 +180,8 @@
                         :cljsbuild      {:builds {:rum {:figwheel {:websocket-host   "lupapiste.local"
                                                                    :on-jsload        lupapalvelu.ui.ui-components/reload-hook
                                                                    ;; If the figwheel does not connect,
-                                                                   ;; turn the heads-up display temporarily off
-                                                                   ;; :heads-up-display false
+                                                                   ;; turn the heads-up display off.
+                                                                   :heads-up-display false
                                                                    }
                                                         :compiler {:output-dir     "resources/public/lp-static/js/out"
                                                                    :output-to      "resources/public/lp-static/js/rum-app.js"
