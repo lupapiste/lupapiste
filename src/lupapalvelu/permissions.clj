@@ -1,24 +1,18 @@
 (ns lupapalvelu.permissions
   (:require [clojure.set :as set]
-            [sade.util :as util]))
+            [schema.core :as sc]
+            [sade.util :refer [fn->] :as util]))
 
 (defonce permission-tree (atom {}))
 
+(def ^:private Scope sc/Keyword)
+(def ^:private Role  sc/Keyword)
+(defn- permission-schema [context-type]
+  (sc/constrained sc/Keyword (fn-> namespace name (= (name context-type)))
+                  "Permission namespace equals context-type"))
+
 (defmacro defpermission [context-type permissions]
-  (assert (map? permissions)
-          "Permissions should be defnied as a map.")
-  (assert (every? map? (vals permissions))
-          "Permissions should be defnied as a map of maps.")
-  (assert (->> (vals permissions)
-               (mapcat vals)
-               (every? set?))
-          "Permissions should be defnied as a map of maps of sets.")
-  (assert (->> (vals permissions)
-               (mapcat vals)
-               (apply concat)
-               (map namespace)
-               (every? #{(name context-type)}))
-          "Namespace of the permission keyword for all permissions should match context type")
+  (sc/validate {Scope {Role #{(permission-schema context-type)}}} permissions)
   (swap! permission-tree #(merge-with (partial merge-with into) % permissions)))
 
 (defn get-permissions-by-role [scope role]
