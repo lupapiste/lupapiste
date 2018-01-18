@@ -28410,6 +28410,10 @@ input:disabled + .pate-checkbox-label:hover.pate-checkbox-label:before {
   background-color: #f6f6f6;
 }
 
+.pate-checkbox-wrapper {
+  border: none;
+}
+
 label.pate-radio-label {
   width: 100%;
   display: inline-block;
@@ -28491,10 +28495,6 @@ input:disabled + .pate-radio-label:hover.pate-radio-label:before {
 
 .pate-radio-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
-}
-
-.pate-checkbox-wrapper {
-  border: none;
 }
 
 .pate-radio-wrapper {
@@ -29075,6 +29075,195 @@ div.pate-required-fields-note:after {
 
 div.pate-unordered-list ul {
   list-style-type: square;
+}
+
+div.pate-application-attachments {
+  margin-top: 6px;
+  border: solid 1px #eeeeee;
+  display: inline-block;
+  padding: 6px;
+}
+
+label.pate-attachment-group-label {
+  width: 100%;
+  display: inline-block;
+  color: #333333;
+  padding-left: 7px;
+  padding-right: 7px;
+  padding-bottom: 7px;
+  padding-top: 7px;
+}
+
+.pate-attachment-group-label:before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'lupapiste' !important;
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\e603";
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: top;
+  color: #f39129;
+  cursor: pointer;
+}
+
+.pate-attachment-group-label:hover.pate-attachment-group-label:before,
+input:checked + .pate-attachment-group-label:hover.pate-attachment-group-label:before {
+  color: #fbc732;
+}
+
+input:checked + .pate-attachment-group-label:before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'lupapiste' !important;
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\e604";
+  color: #f39129;
+}
+
+input:disabled + .pate-attachment-group-label:before,
+input:disabled + .pate-attachment-group-label:hover.pate-attachment-group-label:before {
+  cursor: initial;
+  color: #bbbbbb;
+}
+
+.no-label-text.pate-attachment-group-label:before {
+  margin-right: 0;
+}
+
+.pate-attachment-group-wrapper {
+  display: inline-block;
+  box-sizing: border-box;
+  border: 1px solid #dddddd;
+}
+
+.pate-attachment-group-wrapper input[type=checkbox], .pate-attachment-group-wrapper input[type=radio] {
+  display: block;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  position: absolute;
+  font-size: 0;
+}
+
+.pate-attachment-group-wrapper.wrapper--disabled {
+  background-color: #f6f6f6;
+}
+
+.pate-attachment-group-wrapper {
+  border: none;
+}
+
+.pate-attachment-group-wrapper .pate-attachment-group-label {
+  font-weight: bold;
+}
+
+label.pate-attachment-check-label {
+  width: 100%;
+  display: inline-block;
+  color: #333333;
+  padding-left: 7px;
+  padding-right: 7px;
+  padding-bottom: 7px;
+  padding-top: 7px;
+}
+
+.pate-attachment-check-label:before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'lupapiste' !important;
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\e603";
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: top;
+  color: #f39129;
+  cursor: pointer;
+}
+
+.pate-attachment-check-label:hover.pate-attachment-check-label:before,
+input:checked + .pate-attachment-check-label:hover.pate-attachment-check-label:before {
+  color: #fbc732;
+}
+
+input:checked + .pate-attachment-check-label:before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'lupapiste' !important;
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\e604";
+  color: #f39129;
+}
+
+input:disabled + .pate-attachment-check-label:before,
+input:disabled + .pate-attachment-check-label:hover.pate-attachment-check-label:before {
+  cursor: initial;
+  color: #bbbbbb;
+}
+
+.no-label-text.pate-attachment-check-label:before {
+  margin-right: 0;
+}
+
+.pate-attachment-check-wrapper {
+  display: inline-block;
+  box-sizing: border-box;
+  border: 1px solid #dddddd;
+}
+
+.pate-attachment-check-wrapper input[type=checkbox], .pate-attachment-check-wrapper input[type=radio] {
+  display: block;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  position: absolute;
+  font-size: 0;
+}
+
+.pate-attachment-check-wrapper.wrapper--disabled {
+  background-color: #f6f6f6;
+}
+
+.pate-attachment-check-wrapper {
+  border: none;
+}
+
+.pate-attachment-check-wrapper .pate-attachment-check-label {
+  padding-left: 36px;
 }
 
 .order-grid-1 {

@@ -62,7 +62,7 @@
     [align] column alignment (:left, :right, :center or :full)
     [label]  keyword -> localization key
              string  -> label string
-             Default is nbsp (see above)"
+             Default is common/nbsp (non-breaking space)"
   ([component]
    (vertical {} component))
   ([{:keys [col align label]} component]
@@ -111,6 +111,7 @@
          :multi-select   pate-components/pate-multi-select
          :phrase-text    pate-components/pate-phrase-text
          :button         pate-components/pate-button
+         :application-attachments pate-att/pate-application-attachments
          ;; The rest are always displayed as view components
          (partial view-component cell-type)) options wrap-label?)
       (view-component cell-type options wrap-label?))))

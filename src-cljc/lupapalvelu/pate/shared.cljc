@@ -333,7 +333,8 @@
                :button         {:button PateButton}
                :placeholder    {:placeholder PatePlaceholder}
                :keymap         {:keymap KeyMap}
-               :attachments    (required {:attachments PateAttachments})
+               :attachments    {:attachments PateAttachments}
+               :application-attachments {:application-attachments PateComponent}
                :repeating      {:repeating (sc/recursive #'SchemaTypes)})})
 
 (defschema Dictionary
@@ -737,7 +738,7 @@
               [:pate-plans :plans true false]
               [:pate-reviews :reviews true true]])
      {:conditions-title {:loc-text :phrase.category.lupaehdot}
-      :conditions       {:repeating {:condition        {:phrase-text {:label? false
+      :conditions       {:repeating {:condition        {:phrase-text {:label?   false
                                                                       ;;:i18nkey  :pate-condition
                                                                       :category :lupaehdot}}
                                      :remove-condition {:button {:i18nkey :remove
@@ -773,7 +774,8 @@
                                        :type-group #"paatoksenteko"
                                        :default    :paatoksenteko.paatosote
                                        :dropzone   "#application-pate-verdict-tab"
-                                       :multiple?  true}}})
+                                       :multiple?  true}}
+      :old-attachments  {:application-attachments {:i18nkey :application.verdict-attachments}}})
     :sections
     [{:id   "pate-dates"
       :grid {:columns 7
@@ -934,7 +936,11 @@
       :buttons? false
       :grid     {:columns 7
                  :rows    [[{:col  6
-                             :dict :attachments}]]}}]}})
+                             :dict :attachments}]]}}
+     {:id   "application-attachments"
+      :grid {:columns 7
+             :rows    [[{:col  6
+                         :dict :old-attachments}]]}}]}})
 
 (sc/validate PateVerdict (:r verdict-schemas))
 
