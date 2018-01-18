@@ -853,7 +853,7 @@
    :aita                        {:schema "kaupunkikuvatoimenpide-ei-tunnusta"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
+                                 :required (remove #(= "paasuunnittelija" %) common-rakval-schemas)
                                  :org-required common-rakval-org-schemas
                                  :optional optional-rakval-schemas
                                  :attachments kaupunkikuva_toimenpide_liitteet
@@ -864,7 +864,7 @@
    :maalampo                    {:schema "maalampokaivo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
+                                 :required (remove #(= "paasuunnittelija" %) common-rakval-schemas)
                                  :org-required common-rakval-org-schemas
                                  :optional optional-rakval-schemas
                                  :attachments kaupunkikuva_toimenpide_liitteet
