@@ -25,10 +25,34 @@ LUPAPISTE.ComboboxModel = function( params ) {
   // Textinput focus
   self.hasFocus = ko.observable();
 
+  function rememberEntry(newContents) {
+    // Store entries to field in local storage for later reuse
+    if (newContents && window.localStorage) {
+      var prevData = window.localStorage.getItem(localStorageKey);
+      var items;
+      if (prevData) {
+        var parsed = JSON.parse(prevData);
+        if (_.isArray(parsed)) {
+          parsed.unshift(newContents);
+          // Keep max 20 latest entries
+          items = _.uniq(parsed).slice(0,20);
+        } else {
+          items = [newContents];
+        }
+      } else {
+        items = [newContents];
+      }
+      window.localStorage.setItem(localStorageKey, JSON.stringify(items));
+    }
+  }
+
   var hadFocus = false;
   self.disposedSubscribe( self.hasFocus, function( flag ) {
     if( hadFocus && !flag ) {
       outsideValue( self.textInput());
+      if (params.prevEntriesKey && self.textInput().length > 0 && ko.unwrap(self.list).length === 0) {
+        rememberEntry(self.textInput());
+      }
     }
     hadFocus = flag;
   });

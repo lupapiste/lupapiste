@@ -316,32 +316,12 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     return g ? {groupType: "operation", id: _.last( g )} : value;
   }
 
-  function rememberContentEntry(newContents) {
-    if (newContents && window.localStorage) {
-      var prevData = window.localStorage.getItem("combobox-prev-entries-for-contents");
-      var items;
-      if (prevData) {
-        var parsed = JSON.parse(prevData);
-        if (_.isArray(parsed)) {
-          parsed.unshift(newContents);
-          items = _.uniq(parsed);
-        } else {
-          items = [newContents];
-        }
-      } else {
-        items = [newContents];
-      }
-      window.localStorage.setItem("combobox-prev-entries-for-contents", JSON.stringify(items));
-    }
-  }
-
   self.bind = function() {
     disableRows( true );
     self.bindFailed(false);
     self.badFiles.removeAll();
 
     var statuses = service.bindAttachments( _.map(rows(), function(data, fileId) {
-      rememberContentEntry(data.contents.value());
       return { fileId: fileId,
                type: _.pick( data.type.value(), ["type-group", "type-id"] ),
                group: groupParam(data.grouping.value() || {groupType: null} ),
