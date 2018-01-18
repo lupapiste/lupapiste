@@ -84,9 +84,9 @@
         (cond
           (empty? rows) nil
           (= (map ifc-labels-set row) row) {:header (ifc->lp-keys row) :data (rest rows)}
-          (some true? [(= (map fi-labels row) row)
-                       (= (map sv-labels row) row)
-                       (= (map en-labels row) row)]) {:header lp-huoneisto-keys :data (rest rows)}
+          (or (= (map fi-labels row) row)
+              (= (map sv-labels row) row)
+              (= (map en-labels row) row)) {:header lp-huoneisto-keys :data (rest rows)}
           :else (recur (rest rows)))))))
 
 (defn csv->header-and-data [csv]
@@ -137,7 +137,7 @@
 (defn upload-premises-data [{user :user application :application created :created :as command} files doc]
   (let [app-id                    (:id application)
         csv-data                  (-> files (first) (xmc/xls-2-csv))
-        {:keys [header data]} (when (:data csv-data) (-> csv-data :data (csv->header-and-data)))
+        {:keys [header data]}     (when (:data csv-data) (-> csv-data :data (csv->header-and-data)))
         premises-data             (when (and header data)
                                     (data->model-updates header data))
         file-updated?             (when-not (empty? premises-data)
