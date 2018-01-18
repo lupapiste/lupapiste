@@ -15,7 +15,9 @@
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [schema.core :as sc]
-            [lupapalvelu.permit :as permit])
+            [lupapalvelu.permit :as permit]
+            [clojure.java.io :as io]
+            [ring.util.response :as resp])
   (:import (java.net URL)))
 
 (def db-name (str "test_autom-assignments-for-verd-and-rev-itest_" (now)))
@@ -91,9 +93,15 @@
                  (:trigger (first assignments)) => (:id verdict-assignment-trigger))) => truthy
 
       (provided (permit/fetch-xml-from-krysp anything anything anything anything anything anything)
-             => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
-                    (ss/replace #"LP-186-2014-90009" app-id)
-                    (sxml/parse-string "utf-8")))))))
+                => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
+                        (ss/replace #"LP-186-2014-90009" app-id)
+                        (sxml/parse-string "utf-8"))
+                (sade.http/get anything :as :stream :throw-exceptions false :conn-timeout 10000)
+                => (-> (io/resource "public/dev/sample-attachment.txt")
+                       (slurp)
+                       (resp/response)
+                       (resp/header "content-length" 7)
+                       (resp/header "content-disposition" "filename=foo.txt")))))))
 
 (facts "Automatic checking for reviews trigger automatic assignments"
   (mongo/with-db db-name
@@ -135,7 +143,13 @@
             (krysp-reader/rakval-application-xml anything anything [application-id-submitted] :application-id anything)
             => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
                    (ss/replace #"LP-186-2014-90009" application-id-submitted)
-                   (sxml/parse-string "utf-8")))
+                   (sxml/parse-string "utf-8"))
+            (sade.http/get anything :as :stream :throw-exceptions false :conn-timeout 10000)
+            => (-> (io/resource "public/dev/sample-attachment.txt")
+                   (slurp)
+                   (resp/response)
+                   (resp/header "content-length" 7)
+                   (resp/header "content-disposition" "filename=foo.txt")))
           (let [old-assignments (get-assignments)
                 poll-result (batchrun/poll-verdicts-for-reviews)
                 assignments (get-assignments)]
