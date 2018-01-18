@@ -47,6 +47,13 @@
           (when (and editable? (:published verdict))
             (fail! :error.verdict.not-draft)))))))
 
+(defn- verdict-filled
+  "Precheck that fails if any of the required fields is empty."
+  [{data :data :as command}]
+  (when (:verdict-id data)
+    (when-not (verdict/verdict-filled? command)
+      (fail :pate.required-fields))))
+
 (defquery application-verdict-templates
   {:description      "List of id, name, default? maps for suitable
   application verdict templates."
@@ -71,7 +78,8 @@
                       (template/verdict-template-check :application :published)]
    :states           states/give-verdict-states}
   [command]
-  (ok (verdict/new-verdict-draft template-id command)))
+  (ok (assoc (verdict/new-verdict-draft template-id command)
+             :filled false)))
 
 (defquery pate-verdicts
   {:description      "List of verdicts. Item properties:
@@ -100,7 +108,8 @@
                       (verdict-exists)]
    :states           states/give-verdict-states}
   [command]
-  (ok (verdict/open-verdict command)))
+  (ok (assoc (verdict/open-verdict command)
+             :filled (verdict/verdict-filled? command))))
 
 (defcommand delete-pate-verdict
   {:description      "Deletes verdict. Published verdicts cannot be
@@ -128,7 +137,11 @@
                       (verdict-exists :editable?)]
    :states           states/give-verdict-states}
   [command]
-  (ok (verdict/edit-verdict command)))
+  (let [result (verdict/edit-verdict command)]
+    (if (:modified result)
+      (ok (assoc result
+                 :filled (verdict/verdict-filled? command true)))
+      (template/error-response result))))
 
 (defcommand publish-pate-verdict
   {:description      "Publishes verdict.
@@ -138,7 +151,8 @@ TODO: create tasks and PDF, application state change, attachments locking."
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
-                      (verdict-exists :editable?)]
+                      (verdict-exists :editable?)
+                      verdict-filled]
    :states           states/give-verdict-states
    :notified         true
    :on-success       (notify :application-state-change)}

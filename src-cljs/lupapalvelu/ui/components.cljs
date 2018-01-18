@@ -90,20 +90,27 @@
   initialized to the first component argument. If the argument is an
   atom or cursor it is used as is (aka poor man's two-way binding)"
   [local-key]
-  {:will-mount (fn [state]
-                 (let [value (-> state :rum/args first)]
-                   (assoc state local-key (if (or (instance? Atom value)
-                                                  (instance? rum.cursor.Cursor value))
-                                            value
-                                            (atom value)))))})
+  (letfn [(update-state [state]
+            (let [value (-> state :rum/args first)]
+              (assoc state local-key (if (or (instance? Atom value)
+                                             (instance? rum.cursor.Cursor value))
+                                       value
+                                       (atom value)))))]
+    {:will-mount  update-state
+     :did-remount #(update-state %2)}))
 
 
 (defn- text-options [text* {:keys [callback required?
-                                   test-id immediate?] :as options}]
-  (merge {:value     (rum/react text*)
-          :class     (common/css-flags :required (and required?
-                                                      (-> text* rum/react
-                                                          s/trim s/blank?)))
+                                   test-id immediate?
+                                   class] :as options}]
+  ;; Textarea/input can lose focus without blur when the typing starts if the
+  ;; contents are nil.
+  (when (nil? @text*)
+    (reset! text* ""))
+  (merge {:value     @text*
+          :class     (concat (or class [])
+                             (common/css-flags :required (and required?
+                                                              (-> text* rum/react s/blank?))))
           :on-change (fn [event]
                        (let [value (.. event -target -value)]
                          (common/reset-if-needed! text* value)
@@ -113,7 +120,7 @@
            {:on-blur #(callback (.. % -target -value))})
          (when test-id
            {:data-test-id test-id})
-         (dissoc options :callback :required? :test-id :immediate?)))
+         (dissoc options :callback :required? :test-id :immediate? :class)))
 
 ;; Arguments Initial value, options
 ;; Initial value can be atom for two-way binding (see the mixin).
@@ -128,18 +135,14 @@
   [local-state _ & [options]]
   (let [text* (::text local-state)]
     [:input.grid-style-input
-     (assoc (text-options text* options)
-            :type "text")]))
+     (merge {:type "text"}
+            (text-options text* options))]))
 
 ;; The same arguments as for text-edit.
 (rum/defcs textarea-edit < (initial-value-mixin ::text)
   rum/reactive
   [local-state _ & [options]]
   (let [text* (::text local-state)]
-    ;; Textarea loses focus without blur when the typing starts if the
-    ;; contents are nil.
-    (when (nil? @text*)
-      (reset! text* ""))
     [:textarea.grid-style-input
      (text-options text* options)]))
 
@@ -391,3 +394,17 @@
                                    (.. % -target -value)
                                    callback)}
           (dissoc options :callback))])
+
+;; Renders text with included link
+;; Options (text and text-loc are mutually exclusive):
+;;   text Text where link is in brackets: 'Press [me] for details'
+;;   text-loc Localization key for text.
+;;   click Function to be called when the link is clicked
+(rum/defc text-and-link < rum/reactive
+  [{:keys [text text-loc click]}]
+  (let [regex          #"\[(.*)\]"
+        text           (or text (common/loc text-loc))
+        link           (last (re-find regex text))
+        ;; Split results include the link
+        [before after] (remove #(= link %) (s/split text regex))]
+    [:span before [:a {:on-click click} link] after]))

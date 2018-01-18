@@ -86,7 +86,7 @@ Open all latest emails
 
 Applications page should be open
   Location should contain  ${APPLICATIONS PATH}
-  Title should be  Lupapiste
+  Wait Until  Title should be  Lupapiste
   Wait Until  Element should be visible  xpath=//*[@data-test-id='own-applications']
 
 Authority applications page should be open
@@ -331,6 +331,8 @@ Login fails
 
 User should be logged in
   [Arguments]  ${name}
+  Maximize browser window
+  Scroll to top
   Wait Until  Element text should be  user-name  ${name}
 
 User logs in
@@ -1290,8 +1292,8 @@ Foreman count is
 # Quick, jettison the db...
 #
 
-Apply minimal fixture now
-  Go to  ${FIXTURE URL}/minimal
+Apply ${fixture-name} fixture now
+  Go to  ${FIXTURE URL}/${fixture-name}
   Wait until  Page should contain  true
   Go to login page
 

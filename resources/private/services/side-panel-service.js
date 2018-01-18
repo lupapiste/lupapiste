@@ -114,6 +114,7 @@ LUPAPISTE.SidePanelService = function() {
 
   hub.subscribe("SidePanelService::CompanyTagsChanged", function(event) {
     changeNoticeInfo("update-application-company-notes", _.pick(event, "tags"));
+    self.companyTags( event.tags );
   });
 
   // Conversation

@@ -67,7 +67,9 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
     var comment = self.otherReceiver() ?
       _.merge(ko.toJS(self.basicCommentFields), { otherReceiver: ko.toJS(self.otherReceiverInfo) }) :
       ko.toJS(self.basicCommentFields);
-    comment.files = self.attachments();
+    comment.files = _.map(self.attachments(), function(att) {
+      return _.pick(att, ["fileId", "contentType", "filename", "size"]);
+    });
     comment.bulletinId = self.bulletinId();
     comment.bulletinVersionId = self.versionId();
 

@@ -1,7 +1,12 @@
 (ns lupapalvelu.verdict-review-util-test
   (:require [lupapalvelu.verdict-review-util :refer :all]
             [midje.sweet :refer :all]
-            [midje.util :refer [testable-privates]])
+            [midje.util :refer [testable-privates]]
+            [lupapalvelu.user :as usr]
+            [sade.http :as http]
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.domain :as domain]
+            [ring.util.io :as io])
   (:import [java.nio.charset StandardCharsets]))
 
 (testable-privates lupapalvelu.verdict-review-util
@@ -104,3 +109,35 @@
                                                                                      StandardCharsets/ISO_8859_1)
                                                       "server"              "Microsoft-IIS/7.5"}})
              => "P\u00e4\u00e4t\u00f6sote.txt"))
+
+(facts "urlHash"
+ (let [pk {:liite {:linkkiliitteeseen "http://foo.bar/paatosote123.pdf"}}
+       app {:permitType "R" :id "1234567890"}
+       user (usr/batchrun-user "000-R")
+       ts 1513942123747]
+   (fact "upload-and-attach! returns falsey => download-and-store returns 0"
+     (download-and-store-poytakirja! app user ts "hash1234" {:type "verdict", :id "abcd"} true
+                                     {:linkkiliitteeseen "http://foo.bar/paatosote123.pdf"}) => 0
+     (provided
+       (attachment/upload-and-attach! {:application app :user user} anything anything) => nil
+       (domain/get-application-as "1234567890" user) => app
+       (http/get "http://foo.bar/paatosote123.pdf" :as :stream :throw-exceptions false :conn-timeout 10000)
+       => {:status 200
+           :headers {"content-length" 2}
+           :body   (io/string-input-stream "12")}))
+   (fact "HTTP request to municipality WFS fails => download-and-store returns 0"
+     (download-and-store-poytakirja! app user ts "hash1234" {:type "verdict", :id "abcd"} true
+                                     {:linkkiliitteeseen "http://foo.bar/paatosote123.pdf"}) => 0
+     (provided
+       (domain/get-application-as "1234567890" user) => app
+       (http/get "http://foo.bar/paatosote123.pdf" :as :stream :throw-exceptions false :conn-timeout 10000) => {:status 500}))
+   (fact "included upon successful download-and-store"
+     (:urlHash (get-poytakirja! app user ts {:type "verdict" :id "abcd"} pk)) => "73d84addb5dc77651a612e24698025f1f8684b8b"
+     (provided
+       (download-and-store-poytakirja! app user ts anything {:type "verdict", :id "abcd"} true
+                                       {:linkkiliitteeseen "http://foo.bar/paatosote123.pdf"}) => 1))
+   (fact "omitted upon failure"
+     (:urlHash (get-poytakirja! app user ts {:type "verdict" :id "abcd"} pk)) => nil
+     (provided
+       (download-and-store-poytakirja! app user ts anything {:type "verdict", :id "abcd"} true
+                                       {:linkkiliitteeseen "http://foo.bar/paatosote123.pdf"}) => 0))))

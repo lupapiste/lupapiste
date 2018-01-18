@@ -15,7 +15,7 @@
             [sade.schemas :as ssc]
             [sade.schema-utils :as ssu]
             [sade.strings :as ss]
-            [sade.threads :as threads]
+            [lupapiste-commons.threads :as threads]
             [sade.util :as util]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
@@ -33,7 +33,7 @@
             [lupapalvelu.permit :as permit])
   (:import [java.io InputStream]))
 
-(defonce upload-threadpool (threads/threadpool 6 "archive-upload-worker"))
+(defonce upload-threadpool (threads/threadpool 10 "archive-upload-worker"))
 (defonce post-archiving-pool (threads/threadpool 1 "mark-archived-worker"))
 
 (def archival-states #{:arkistoidaan :arkistoitu})

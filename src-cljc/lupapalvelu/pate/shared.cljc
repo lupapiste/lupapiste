@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.shared
   (:require [clojure.string :as s]
+            [clojure.set :as set]
             [sade.shared-util :as util]
             [schema.core :refer [defschema] :as sc]))
 
@@ -59,7 +60,7 @@
 
 (def foreman-codes [:vastaava-tj :vv-tj :iv-tj :erityis-tj :tj])
 
-(def verdict-dates [:julkipano :anto :valitus :lainvoimainen
+(def verdict-dates [:julkipano :anto :muutoksenhaku :lainvoimainen
                     :aloitettava :voimassa])
 
 ;; Phrases
@@ -79,6 +80,16 @@
 (def keyword-or-string (sc/conditional
                         keyword? sc/Keyword
                         :else    sc/Str))
+(defn only-one-of
+  "Only one of the given keys are allowed in the data."
+  [allowed-keys schema]
+  (sc/constrained schema
+                  (fn [data]
+                    (< (->> (keys data)
+                            (util/intersection-as-kw allowed-keys)
+                            count)
+                       2))
+                  (str "Only one of the keys is allowed: " allowed-keys)))
 
 (def PathCondition
   [(sc/one (sc/enum :OR :AND) :OR)
@@ -117,6 +128,12 @@
 
   :? True if the path is found within the state (regardless of its
   value)
+
+  If simple falsey/truthy resolution is not enough, the 'good/bad'
+  value can be given within a path definition (but not for :? paths):
+
+  :hii.hoo=9
+  :_meta.foo.bar!=10
 
   Note: :_meta.enabled? is always used as prerequisite."
   {(sc/optional-key :enabled?)  condition-type
@@ -213,7 +230,10 @@
           :unit                      (sc/enum :days :years)}))
 
 (defschema PateReference
-  "Displays the referenced value."
+  "Displays the referenced value. By default, :path is resolved as a
+  regular path into the component state. However, if the path is
+  prefixed with :*ref the resolution target (for the rest) is
+  references (like in PateEnabled for example)."
   (merge PateComponent
          {:path path-type}))
 
@@ -225,16 +245,33 @@
 
 (defschema PateLink
   "UI component that represents a text with link. The link is part of
-  the text-loc, using a special notattion: 'Text before [link]
+  the text-loc, using a special notation: 'Text before [link]
   after.' The click handler for the link is a _meta function."
   (merge PateComponent
-         { ;; The label text is always determined by the default
+         {;; The label text is always determined by the default
           ;; PateComponent mechanisms (loc-prefix, i18nkey), but the
           ;; actual text with link is determined by the :text-loc key.
           :text-loc sc/Keyword
           ;; Must resolve to _meta function. The function receives
           ;; options as arguments.
           :click    sc/Keyword}))
+
+(defschema PateButton
+  "Button with an optional icon."
+  (only-one-of [:add :remove :click]
+               (merge PateComponent
+                      ;; Icon class (e.g., :lupicon-save)
+                      {(sc/optional-key :icon)   sc/Keyword
+                       ;; If false the button shows only icon. Default
+                       ;; true.
+                       (sc/optional-key :text?)  sc/Bool
+                       ;; Keyword must be a sibling repeating dict id.
+                       (sc/optional-key :add)    sc/Keyword
+                       ;; Keyword is an encompassing repeating dict id
+                       (sc/optional-key :remove) sc/Keyword
+                       ;; Must resolve to _meta function. The function
+                       ;; receives options as arguments.
+                       (sc/optional-key :click)  sc/Keyword})))
 
 (defschema PatePlaceholder
   "Placholder for external (filled by backend) data."
@@ -275,21 +312,28 @@
           ;; time. Default false.
           (sc/optional-key :multiple?)  sc/Bool}))
 
+(defschema PateRequired
+  {(sc/optional-key :required?) sc/Bool})
+
+(defn- required [m]
+  (merge PateRequired m))
+
 (defschema SchemaTypes
   {sc/Keyword (sc/conditional
-               :docgen         {:docgen (sc/conditional
-                                         :name PateDocgen
-                                         :else sc/Str)}
-               :reference-list {:reference-list PateReferenceList}
-               :phrase-text    {:phrase-text PatePhraseText}
+               :docgen         (required {:docgen (sc/conditional
+                                                   :name PateDocgen
+                                                   :else sc/Str)})
+               :reference-list (required {:reference-list PateReferenceList})
+               :phrase-text    (required {:phrase-text PatePhraseText})
                :loc-text       {:loc-text sc/Keyword} ;; Localisation term shown as text.
-               :date-delta     {:date-delta PateDateDelta}
-               :multi-select   {:multi-select PateMultiSelect}
-               :reference      {:reference PateReference}
+               :date-delta     (required {:date-delta PateDateDelta})
+               :multi-select   (required {:multi-select PateMultiSelect})
+               :reference      (required {:reference PateReference})
                :link           {:link PateLink}
+               :button         {:button PateButton}
                :placeholder    {:placeholder PatePlaceholder}
                :keymap         {:keymap KeyMap}
-               :attachments    {:attachments PateAttachments}
+               :attachments    (required {:attachments PateAttachments})
                :repeating      {:repeating (sc/recursive #'SchemaTypes)})})
 
 (defschema Dictionary
@@ -318,8 +362,17 @@
   (merge PateLayout
          CellConfig
          {:list (merge PateCss
-                       {(sc/optional-key :title) sc/Str
-                        :items                   [PateItem]})}))
+                       {(sc/optional-key :title)   sc/Str
+                        ;; By default, items always have labels, if
+                        ;; when they are just empty strings. Otherwise
+                        ;; the vertical alignment could be
+                        ;; off. If :labels? is false, then the labels
+                        ;; are not laid out at all. This is useful,
+                        ;; when it is known that none of the items
+                        ;; have labels, thus avoiding superflous
+                        ;; whitespace. Default is true.
+                        (sc/optional-key :labels?) sc/Bool
+                        :items                     [PateItem]})}))
 
 (defschema PateItemCell
   (merge CellConfig
@@ -408,16 +461,16 @@
                [])
        (remove nil?)))
 
+(defn req [m]
+  (assoc m :required? true))
 
 ;; TODO: access via category
 (def default-verdict-template
-  {:dictionary {;; Verdict section
-                :verdict-dates             {:multi-select {:items           verdict-dates
+  {:dictionary {:verdict-dates             {:multi-select {:items           verdict-dates
                                                            :sort?           false
                                                            :i18nkey         :pate-verdict-dates
                                                            :item-loc-prefix :pate-verdict}}
-                :giver                     {:docgen "pate-verdict-giver"}
-                :verdict-section           {:docgen "pate-verdict-section"}
+                :giver                     (req {:docgen "pate-verdict-giver"})
                 :verdict-code              {:reference-list {:path       :settings.verdict-code
                                                              :type       :select
                                                              :loc-prefix :pate-r.verdict-code}}
@@ -439,7 +492,17 @@
                                                                      :term     {:path       [:reviews]
                                                                                 :extra-path [:name]
                                                                                 :match-key  :id}})
-                :conditions                {:phrase-text {:category :lupaehdot}}
+                :conditions                {:repeating {:condition        {:phrase-text {:i18nkey  :pate-condition
+                                                                                         :category :lupaehdot}}
+                                                        :remove-condition {:button {:i18nkey :remove
+                                                                                    :label?  false
+                                                                                    :icon    :lupicon-remove
+                                                                                    :css     [:primary :outline]
+                                                                                    :remove  :conditions}}}}
+                :add-condition             {:button {:icon    :lupicon-circle-plus
+                                                     :i18nkey :pate-conditions.add
+                                                     :css     :positive
+                                                     :add     :conditions}}
                 :neighbors                 {:loc-text :pate-neighbors.text}
 
                 :appeal           {:phrase-text {:category :muutoksenhaku
@@ -472,9 +535,6 @@
                                       [{:col  3
                                         :id   :giver
                                         :dict :giver}
-                                       {:col  2
-                                        :id   :section
-                                        :dict :verdict-section}
                                        {:align      :full
                                         :col        3
                                         :loc-prefix :pate-r.verdict-code
@@ -497,7 +557,13 @@
               {:id         "conditions"
                :loc-prefix :phrase.category.lupaehdot
                :grid       {:columns 1
-                            :rows    [[{:dict :conditions}]]}}
+                            :rows    [[{:grid {:columns   8
+                                               :repeating :conditions
+                                               :rows      [[{:col  6
+                                                             :dict :condition}
+                                                            {}
+                                                            {:dict :remove-condition}]]}}]
+                                      [{:dict :add-condition}]]}}
               (text-section :neighbors)
               {:id         "appeal"
                :loc-prefix :pate-appeal
@@ -517,61 +583,76 @@
                :loc-prefix :pate-buildings
                :grid       {:columns 1
                             :rows    [[{:loc-prefix :pate-buildings.info
-                                        :list       {:title "pate-buildings.info"
-                                                     :items (mapv (fn [check]
-                                                                    {:dict check
-                                                                     :id   check
-                                                                     :css  [:pate-condition-box]})
-                                                                  [:autopaikat :vss-luokka :paloluokka])}}]]}}]})
+                                        :list       {:title   "pate-buildings.info"
+                                                     :labels? false
+                                                     :items   (mapv (fn [check]
+                                                                      {:dict check
+                                                                       :id   check
+                                                                       :css  [:pate-condition-box]})
+                                                                    [:autopaikat :vss-luokka :paloluokka])}}]]}}]})
 
 (sc/validate PateVerdictTemplate default-verdict-template)
 
 (defschema PateSettings
   (merge Dictionary
          {:title    sc/Str
-          :sections [PateSection]}))
+          :sections [(assoc PateSection
+                            ;; A way to to show "required star" on the section title.
+                            (sc/optional-key :required?) sc/Bool)]}))
 
 (def r-settings
   {:title      "pate-r"
-   :dictionary {:verdict-dates {:loc-text :pate-verdict-dates}
-                :plus          {:loc-text :plus}
-                :julkipano     {:date-delta {:unit :days}}
-                :anto          {:date-delta {:unit :days}}
-                :valitus       {:date-delta {:unit :days}}
-                :lainvoimainen {:date-delta {:unit :days}}
-                :aloitettava   {:date-delta {:unit :years}}
-                :voimassa      {:date-delta {:unit :years}}
-                :verdict-code  {:multi-select {:label? false
-                                               :items  (keys verdict-code-map)}}
-                :foremen       {:multi-select {:label? false
-                                               :items  foreman-codes}}
-                :plans         {:reference-list {:label?   false
-                                                 :path     [:plans]
-                                                 :item-key :id
-                                                 :type     :list
-                                                 :sort?    true
-                                                 :term     {:path       :plans
-                                                            :extra-path :name}}}
-                :reviews       {:reference-list {:label?   false
-                                                 :path     [:reviews]
-                                                 :item-key :id
-                                                 :type     :list
-                                                 :sort?    true
-                                                 :term     {:path       :reviews
-                                                            :extra-path :name}}}}
+   :dictionary {:verdict-dates            {:loc-text :pate-verdict-dates}
+                :plus                     {:loc-text :plus}
+                :julkipano                (req {:date-delta {:unit :days}})
+                :anto                     (req {:date-delta {:unit :days}})
+                :muutoksenhaku            (req {:date-delta {:unit :days}})
+                :lainvoimainen            (req {:date-delta {:unit :days}})
+                :aloitettava              (req {:date-delta {:unit :years}})
+                :voimassa                 (req {:date-delta {:unit :years}})
+                :verdict-code             (req {:multi-select {:label? false
+                                                               :items  (keys verdict-code-map)}})
+                :lautakunta-muutoksenhaku (req {:date-delta {:unit :days}})
+                :boardname                (req {:docgen "pate-string"})
+                :foremen                  {:multi-select {:label? false
+                                                          :items  foreman-codes}}
+                :plans                    {:reference-list {:label?   false
+                                                            :path     [:plans]
+                                                            :item-key :id
+                                                            :type     :list
+                                                            :sort?    true
+                                                            :term     {:path       :plans
+                                                                       :extra-path :name}}}
+                :reviews                  {:reference-list {:label?   false
+                                                            :path     [:reviews]
+                                                            :item-key :id
+                                                            :type     :list
+                                                            :sort?    true
+                                                            :term     {:path       :reviews
+                                                                       :extra-path :name}}}}
    :sections   [{:id         "verdict-dates"
                  :loc-prefix :pate-verdict-dates
                  :grid       {:columns    17
                               :loc-prefix :pate-verdict
                               :rows       [(date-delta-row [:julkipano :anto
-                                                            :valitus :lainvoimainen
+                                                            :muutoksenhaku :lainvoimainen
                                                             :aloitettava :voimassa])]
                               }}
                 {:id         "verdict"
+                 :required?  true
                  :loc-prefix :pate-settings.verdict
                  :grid       {:columns    1
                               :loc-prefix :pate-r.verdict-code
                               :rows       [[{:dict :verdict-code}]]}}
+                {:id         "board"
+                 :loc-prefix :pate-verdict.giver.lautakunta
+                 :grid       {:columns 4
+                              :rows    [[{:loc-prefix :pate-verdict.muutoksenhaku
+                                          :dict       :lautakunta-muutoksenhaku}]
+                                        [{:col        1
+                                          :align      :full
+                                          :loc-prefix :pate-settings.boardname
+                                          :dict       :boardname}]]}}
                 {:id         "foremen"
                  :loc-prefix :pate-settings.foremen
                  :grid       {:columns    1
@@ -612,25 +693,25 @@
   {:r
    {:dictionary
     (merge
-     {:verdict-date            {:docgen "pate-date"}
+     {:verdict-date            (req {:docgen "pate-date"})
       :automatic-verdict-dates {:docgen {:name "pate-verdict-check"}}}
-     (->> [:julkipano :anto :valitus :lainvoimainen :aloitettava :voimassa]
+     (->> [:julkipano :anto :muutoksenhaku :lainvoimainen :aloitettava :voimassa]
           (map (fn [kw]
-                 [kw {:docgen {:name      "pate-date"
-                               :disabled? :automatic-verdict-dates}}]))
+                 [kw (req {:docgen {:name      "pate-date"
+                                    :disabled? :automatic-verdict-dates}})]))
           (into {}))
-     {:contact-ref      {:reference {:path :contact}}
-      :giver            {:docgen "pate-verdict-giver"}
-      :contact          {:docgen "pate-verdict-contact"}
-      :verdict-section  {:docgen "pate-verdict-section"}
-      :verdict-code     {:reference-list {:path       :verdict-code
-                                          :type       :select
-                                          :loc-prefix :pate-r.verdict-code}}
-      :verdict-text     {:phrase-text {:category :paatosteksti}}
+     {:contact-ref           {:reference {:path :contact}}
+      :boardname             {:reference {:path :*ref.boardname}}
+      :contact               (req {:docgen "pate-verdict-contact"})
+      :verdict-section       (req {:docgen "pate-verdict-section"})
+      :verdict-code          (req {:reference-list {:path       :verdict-code
+                                                    :type       :select
+                                                    :loc-prefix :pate-r.verdict-code}})
+      :verdict-text          (req {:phrase-text {:category :paatosteksti}})
       :bulletinOpDescription {:phrase-text {:category :toimenpide-julkipanoon
-                                              :i18nkey :phrase.category.toimenpide-julkipanoon}}
-      :verdict-text-ref {:reference {:path :verdict-text}}
-      :application-id   {:placeholder {:type :application-id}}}
+                                            :i18nkey  :phrase.category.toimenpide-julkipanoon}}
+      :verdict-text-ref      (req {:reference {:path :verdict-text}})
+      :application-id        {:placeholder {:type :application-id}}}
      (reduce (fn [acc [loc-prefix kw term? separator?]]
                (let [included (keyword (str (name kw) "-included"))
                      path     kw]
@@ -655,31 +736,44 @@
              [[:pate-r.foremen :foremen false false]
               [:pate-plans :plans true false]
               [:pate-reviews :reviews true true]])
-     {:conditions      {:phrase-text {:i18nkey  :phrase.category.lupaehdot
-                                      :category :lupaehdot}}
-      :neighbors       {:phrase-text {:i18nkey  :phrase.category.naapurit
-                                      :category :naapurit}}
-      :neighbor-states {:placeholder {:type :neighbors}}
-      :collateral      {:phrase-text {:category :vakuus}}
-      :appeal          {:phrase-text {:category :muutoksenhaku}}
-      :complexity      {:docgen "pate-complexity"}
-      :complexity-text {:phrase-text {:label?   false
-                                      :category :vaativuus}}
-      :rights          {:phrase-text {:category :rakennusoikeus}}
-      :purpose         {:phrase-text {:category :kaava}}
-      :buildings       {:repeating {:building-name          {:placeholder {:label? false
-                                                                           :type   :building}}
-                                    :rakennetut-autopaikat  {:docgen "pate-string"}
-                                    :kiinteiston-autopaikat {:docgen "pate-string"}
-                                    :autopaikat-yhteensa    {:docgen "pate-string"}
-                                    :vss-luokka             {:docgen "pate-string"}
-                                    :paloluokka             {:docgen "pate-string"}
-                                    :show-building          {:docgen "required-in-verdict"}}}
-      :attachments     {:attachments {:i18nkey    :application.verdict-attachments
-                                      :type-group #"paatoksenteko"
-                                      :default    :paatoksenteko.paatosote
-                                      :dropzone   "#application-pate-verdict-tab"
-                                      :multiple?  true}}})
+     {:conditions-title {:loc-text :phrase.category.lupaehdot}
+      :conditions       {:repeating {:condition        {:phrase-text {:label? false
+                                                                      ;;:i18nkey  :pate-condition
+                                                                      :category :lupaehdot}}
+                                     :remove-condition {:button {:i18nkey :remove
+                                                                 :label?  false
+                                                                 :icon    :lupicon-remove
+                                                                 :css     :secondary
+                                                                 :remove  :conditions}}}}
+      :add-condition    {:button {:icon    :lupicon-circle-plus
+                                  :i18nkey :pate-conditions.add
+                                  :css     :positive
+                                  :add     :conditions}}
+      :neighbors        {:phrase-text {:i18nkey  :phrase.category.naapurit
+                                       :category :naapurit}}
+      :neighbor-states  {:placeholder {:type :neighbors}}
+      :collateral       {:docgen "pate-string"}
+      :collateral-date  {:docgen "pate-date"}
+      :collateral-type  {:docgen "collateral-type"}
+      :appeal           {:phrase-text {:category :muutoksenhaku}}
+      :complexity       (req {:docgen "pate-complexity"})
+      :complexity-text  {:phrase-text {:label?   false
+                                       :category :vaativuus}}
+      :rights           {:phrase-text {:category :rakennusoikeus}}
+      :purpose          {:phrase-text {:category :kaava}}
+      :buildings        {:repeating {:building-name          {:placeholder {:label? false
+                                                                            :type   :building}}
+                                     :rakennetut-autopaikat  {:docgen "pate-string"}
+                                     :kiinteiston-autopaikat {:docgen "pate-string"}
+                                     :autopaikat-yhteensa    {:docgen "pate-string"}
+                                     :vss-luokka             {:docgen "pate-string"}
+                                     :paloluokka             {:docgen "pate-string"}
+                                     :show-building          {:docgen "required-in-verdict"}}}
+      :attachments      {:attachments {:i18nkey    :application.verdict-attachments
+                                       :type-group #"paatoksenteko"
+                                       :default    :paatoksenteko.paatosote
+                                       :dropzone   "#application-pate-verdict-tab"
+                                       :multiple?  true}}})
     :sections
     [{:id   "pate-dates"
       :grid {:columns 7
@@ -700,20 +794,21 @@
                                               :dict      kw}))
                                          verdict-dates)}]}}
      {:id   "pate-verdict"
-      :grid {:columns 6
-             :rows    [[{:loc-prefix :pate-verdict.giver
+      :grid {:columns 7
+             :rows    [[{:col        2
+                         :loc-prefix :pate-verdict.giver
+                         :hide?      :*ref.boardname
+                         :dict       :contact}
+                        {:col        2
+                         :loc-prefix :pate-verdict.giver
                          :hide?      :_meta.editing?
-                         :dict       :contact-ref}
-                        {:col   2
-                         :show? :_meta.editing?
-                         :list  {:items [{:id   :giver
-                                          :dict :giver}
-                                         {:id    :contact
-                                          :show? :_meta.editing?
-                                          :dict  :contact}]}}
-                        {:col   1
+                         :show?      :*ref.boardname
+                         :dict       :boardname}
+                        {:col        1
+                         :show?      [:OR :*ref.boardname :verdict-section]
                          :loc-prefix :pate-verdict.section
-                         :dict  :verdict-section}
+                         :dict       :verdict-section}
+                        {:hide? :verdict-section}
                         {:col   2
                          :align :full
                          :dict  :verdict-code}]
@@ -728,31 +823,38 @@
                          :id    "application-id"
                          :hide? :_meta.editing?
                          :dict  :application-id}]]}}
-     {:id          "bulletin"
-      :loc-prefix  :bulletin
-      :show?       :?.bulletin-op-description
-      :grid        {:columns 1
-                    :rows [[{:col  1
-                             :id   "toimenpide-julkipanoon"
-                             :dict :bulletinOpDescription}]]}}
+     {:id         "bulletin"
+      :loc-prefix :bulletin
+      :show?      :?.bulletin-op-description
+      :grid       {:columns 1
+                   :rows    [[{:col  1
+                               :id   "toimenpide-julkipanoon"
+                               :dict :bulletinOpDescription}]]}}
      {:id   "requirements"
       :grid {:columns 7
-             :rows    (concat (map (fn [dict]
-                                     (let [check-path (keyword (str (name dict) "-included"))]
-                                       {:show? [:OR :_meta.editing? check-path]
-                                        :row   [{:col  4
-                                                 :dict dict}
-                                                {:col   2
-                                                 :align :right
-                                                 :show? :_meta.editing?
-                                                 :id    "included"
-                                                 :dict  check-path}]}))
-                                   [:foremen :plans :reviews])
-                              [{:show? :?.conditions
-                                :row   [{:col   6
-                                         :id    "other"
-                                         :align :full
-                                         :dict  :conditions}]}])}}
+             :rows    (map (fn [dict]
+                             (let [check-path (keyword (str (name dict) "-included"))]
+                               {:show? [:OR :_meta.editing? check-path]
+                                :row   [{:col  4
+                                         :dict dict}
+                                        {:col   2
+                                         :align :right
+                                         :show? :_meta.editing?
+                                         :id    "included"
+                                         :dict  check-path}]}))
+                           [:foremen :plans :reviews])}}
+     {:id   "conditions"
+      :grid {:columns 1
+             :rows    [[{:css  :pate-label
+                         :dict :conditions-title}]
+                       [{:grid {:columns   9
+                                :repeating :conditions
+                                :rows      [[{:col  7
+                                              :dict :condition}
+                                             {:align :right
+                                              :dict  :remove-condition}]]}}]
+                       [{:dict :add-condition}]]}}
+
      {:id    "appeal"
       :show? [:OR :?.appeal :?.collateral]
       :grid  {:columns 7
@@ -760,10 +862,17 @@
                          :row   [{:col        6
                                   :loc-prefix :verdict.muutoksenhaku
                                   :dict       :appeal}]}
-                        {:show? :?.collateral
-                         :row   [{:col        6
-                                  :loc-prefix :pate-collateral
-                                  :dict       :collateral}]}]}}
+                        {:show?      :?.collateral
+                         :loc-prefix :pate
+                         :row        [{:col  2
+                                       :id   :collateral-date
+                                       :dict :collateral-date}
+                                      {:col  2
+                                       :id   :collateral
+                                       :dict :collateral}
+                                      {:col  2
+                                       :id   :collateral-type
+                                       :dict :collateral-type}]}]}}
      {:id    "neighbors"
       :show? :?.neighbors
       :grid  {:columns 12
@@ -824,8 +933,8 @@
      {:id       "attachments"
       :buttons? false
       :grid     {:columns 7
-                 :rows    [[{:col   6
-                             :dict  :attachments}]]}}]}})
+                 :rows    [[{:col  6
+                             :dict :attachments}]]}}]}})
 
 (sc/validate PateVerdict (:r verdict-schemas))
 
@@ -848,14 +957,32 @@
 
   Returns map with :schema and :path keys. The path is
   the remaining path (e.g., [:delta] for pate-delta). Note: the
-  result is empty map if the path resolves to the repeating schema."
+  result is empty map if the path resolves to the repeating schema.
+
+  Returns nil when the resolution fails."
   [path dictionary]
   (loop [[x & xs]   (->> path
                          (remove nil?)
                          (map keyword))
          dictionary dictionary]
-    (if-let [schema (get dictionary x)]
-      (if (:repeating schema)
-        (recur (rest xs) (:repeating schema))
-        {:schema schema :path xs})
-      {})))
+    (when dictionary
+      (if x
+        (when-let [schema (get dictionary x)]
+          (if (:repeating schema)
+            (recur (rest xs) (:repeating schema))
+            {:schema schema :path xs}))
+        {}))))
+
+(defn repeating-subpath
+  "Subpath that resolves to a repeating named repeating. Nil if not
+  found. Note that the actual existence of the path within data is not
+  checked."
+  [repeating path dictionary]
+  (loop [path path]
+    (cond
+      (empty? path)           nil
+      (= (last path)
+         repeating) (when (= (dict-resolve path dictionary)
+                             {})
+                      path)
+      :else                   (recur (butlast path)))))

@@ -48,4 +48,8 @@ LUPAPISTE.OperationEditorModel = function(params) {
 
   };
 
+  self.isArchiveProject = function () {
+    return "ARK" === _.get(self.docModel, ["application", "permitType"]);
+  };
+
 };

@@ -146,14 +146,21 @@
     (fact (-> three-apartments :huoneistot keys) => (just #{:2 :1 :0}))
     (fact (-> two-apartments :huoneistot keys) => (just #{:2 :1 :validationResult}))))
 
-(fact "'lyhyt rakennustunnus' cannot exceed maximum length"
+(fact "building data"
   (let [application-id             (create-app-id pena)
         application                (query-application pena application-id)
         uusi-rakennus-doc-id       (:id (domain/get-document-by-name application "uusiRakennus"))]
-    (fact (command pena :update-doc :id application-id :doc uusi-rakennus-doc-id
-                   :collection "documents" :updates [["tunnus" "123456"]]) => ok?
-          (command pena :update-doc :id application-id :doc uusi-rakennus-doc-id
-                   :collection "documents" :updates [["tunnus" "1234567"]]) => fail?)))
+    (fact "'lyhyt rakennustunnus' cannot exceed maximum length"
+      (command pena :update-doc :id application-id :doc uusi-rakennus-doc-id
+               :collection "documents" :updates [["tunnus" "123456"]]) => ok?
+      (command pena :update-doc :id application-id :doc uusi-rakennus-doc-id
+               :collection "documents" :updates [["tunnus" "1234567"]]) => fail?)
+    (command pena :submit-application :id application-id) => ok?
+    (fact "valtakunnallinenNumero can't be edited"
+      (command sonja :update-doc :id application-id :doc uusi-rakennus-doc-id
+               :collection "documents" :updates [["valtakunnallinenNumero" "1234567"]]) => unauthorized?
+      (command pena :update-doc :id application-id :doc uusi-rakennus-doc-id
+               :collection "documents" :updates [["valtakunnallinenNumero" "1234567"]]) => unauthorized?)))
 
 (facts "facts about party-document-names query"
   (let [application-id        (create-app-id pena)

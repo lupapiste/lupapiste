@@ -386,7 +386,7 @@
         katselmus-tasks (map (partial lupapalvelu.tasks/katselmus->task {} {} {}) reviews)
         aloitus-review-task (nth katselmus-tasks 0)
         non-empty (complement clojure.string/blank?)]
-    (fact "xml has 12 reviews" (count reviews) => 12)
+    (fact "xml has 13 reviews" (count reviews) => 13)
     (fact "huomautukset" (get-in aloitus-review-task [:data :katselmus :huomautukset :kuvaus :value]) => non-empty)
     (fact "katselmuksenLaji" (get-in aloitus-review-task [:data :katselmuksenLaji :value]) => "aloituskokous")
     (fact "tunnustieto" (get-in aloitus-review-task [:data :muuTunnus]) => truthy)
@@ -514,6 +514,62 @@
         (fact "y" y => #(and (instance? Double %) (= 6707228.994 %)))
         (fact "address" address => "Kylykuja 3-5 D 35b-c")
         (fact "propertyId" propertyId => "18600303560006")))))
+
+(facts* "Testing area like location information for application creation"
+  (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-with-area-like-location.xml"))
+        info (get-app-info-from-message xml "895-2015-001") => truthy
+        rakennuspaikka (:rakennuspaikka info)]
+
+    (let [{:keys [x y address propertyId] :as rakennuspaikka} rakennuspaikka]
+      (fact "contains all the needed keys" (every? (-> rakennuspaikka keys set) [:x :y :address :propertyId]))
+
+      (fact "Location point coordinates is calculated from area as interior point"
+        x => #(and (instance? Double %) (= 192416.901187 %))
+        y => #(and (instance? Double %) (= 6745788.046445 %)))
+
+      (fact "Address is not changed, it's same as in xml"
+        address => "Pitk\u00e4karta 48")
+
+      (fact "Property id is fetched from service"
+        propertyId => "89552200010051"))
+
+    (fact "Original area is stored for metadata"
+      (:geometry (first (:drawings info))) => (contains "POLYGON((192391.716803 6745749.455827, 192368.715229 6745821.2047, 192396.462342 6745826.766509")
+      (get-in (first (:drawings info)) [:geometry-wgs84 :type]) => "Polygon"
+      (->> (:drawings info)
+           (first)
+           :geometry-wgs84
+           :coordinates
+           (first)
+           (first)) => [21.355934608866 60.728233303])))
+
+(facts* "Testing area like location with building location information for application creation"
+  (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-with-building-location.xml"))
+        info (get-app-info-from-message xml "895-2015-002") => truthy
+        rakennuspaikka (:rakennuspaikka info)]
+
+    (let [{:keys [x y address propertyId] :as rakennuspaikka} rakennuspaikka]
+      (fact "contains all the needed keys" (every? (-> rakennuspaikka keys set) [:x :y :address :propertyId]))
+
+      (fact "Location point coordinates is taken from first building location"
+        x => #(and (instance? Double %) (= 192413.401 %))
+        y => #(and (instance? Double %) (= 6745769.046 %)))
+
+      (fact "Address is not changed, it's same as in xml"
+        address => "Pitk\u00e4karta 48")
+
+      (fact "Property id is fetched from service"
+        propertyId => "89552200010051"))
+
+    (fact "Original area is stored for metadata"
+      (:geometry (first (:drawings info))) => (contains "POLYGON((192391.716803 6745749.455827, 192368.715229 6745821.2047, 192396.462342 6745826.766509")
+      (get-in (first (:drawings info)) [:geometry-wgs84 :type]) => "Polygon"
+      (->> (:drawings info)
+           (first)
+           :geometry-wgs84
+           :coordinates
+           (first)
+           (first)) => [21.355934608866 60.728233303])))
 
 
 (facts* "Tests for TJ/suunnittelijan verdicts parsing"

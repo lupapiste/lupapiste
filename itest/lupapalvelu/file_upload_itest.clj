@@ -1,6 +1,7 @@
 (ns lupapalvelu.file-upload-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application-bulletins-itest-util :as bulletin-util]
             [cheshire.core :as json]
             [lupapalvelu.vetuma-itest-util :as vetuma-util]))
@@ -40,7 +41,8 @@
               upload-resp   (-> (bulletin-util/send-file cookie-store)
                                 :body
                                 (json/decode keyword))
-              uploaded-file (first (:files upload-resp))]
+              uploaded-file (-> (first (:files upload-resp))
+                                (select-keys (keys bulletins/CommentFile)))]
 
           upload-resp => ok?
 

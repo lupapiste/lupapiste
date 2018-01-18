@@ -75,8 +75,9 @@
                                      {:email (email-for-key teppo)
                                       :name  "Teppo" :text "hei"}]) => ok?)
         (facts "Authority notice pseudo query"
-          (query pena :authority-notice :id id) => fail?
+          (query pena :authority-notice :id id) => unauthorized?
           (query sonja :authority-notice :id id) => ok?
+          (query ronja :authority-notice :id id) => ok?
           (query luukas :authority-notice :id id) => ok?
           (query jussi :authority-notice :id id) => ok?
           (query teppo :authority-notice :id id) => err)
@@ -105,6 +106,25 @@
             (query teppo :application-organization-tags :id id) => err
             (query luukas :application-organization-tags :id id) => fail?
             (query pena :application-organization-tags :id id) => fail?))))
+    (facts "Authority + application statementGiver combo LP-365545 & LP-365577"
+      (fact "Ronja can see notices"
+        (query ronja :authority-notice :id id) => ok?)
+      (fact "Ronja could change urgnecy"
+        ronja => (allowed? :change-urgency :id id :urgency "foo"))
+      (fact "Ronja could add notice & tags"
+        ronja => (allowed? :add-authority-notice :id id :authorityNotice "foo")
+        ronja => (allowed? :add-application-tags :id id :tags ["foo"]))
+      ; invite Ronja as statementGiver to reveal bug presented in LP-365545 & LP-365577
+      (command sonja :request-for-statement :functionCode nil :id id
+               :selectedPersons [{:name "R0NJ4" :text "Testi" :email (email-for "ronja")}]
+               :saateText "ronja testi" :dueDate 1450994400000) => ok?
+      (fact "Ronja can still see notices"
+        (query ronja :authority-notice :id id) => ok?)
+      (fact "Ronja can still change urgnecy"
+        ronja => (allowed? :change-urgency :id id :urgency "foo"))
+      (fact "Ronja can still add notice & tags"
+        ronja => (allowed? :add-authority-notice :id id :authorityNotice "foo")
+        ronja => (allowed? :add-application-tags :id id :tags ["foo"])))
     (facts "Guests and notice panel"
       (fact "Add Veikko as a guest authority"
         (command sipoo :update-guest-authority-organization

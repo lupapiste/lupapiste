@@ -779,7 +779,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         }
       };
       if( options && options.dataTestSpecifiers ) {
-        opts.attr =  {"data-test-class": "delete-schemas." + subSchema. name};
+        opts.attr =  {"data-test-class": "delete-schemas." + subSchema.name};
       }
     }
     return opts;
@@ -798,13 +798,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     div.id = pathStrToGroupID(myPath);
     div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
 
-    if (subSchema.approvable) {
+    var removeOptions = resolveRemoveOptions(subSchema, path);
+    if (subSchema.approvable || removeOptions) {
       $(div).append(createComponent("group-approval",
                                     {docModel: self,
                                      subSchema: subSchema,
                                      model: myModel,
                                      path: path,
-                                     remove: resolveRemoveOptions(subSchema, path)}));
+                                     remove: removeOptions}));
     }
     var label = makeLabel(subSchema, "group", myPath, validationResult);
     div.appendChild(label);
@@ -1243,8 +1244,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (!models) {
           models = subSchema.initiallyEmpty ? [] : [{}];
       }
-
-      var elements = subSchema["repeating-init-empty"] ? [] : buildElements(models);
+      var elements = buildElements(models);
 
       if (subSchema.type === "table") {
         var div = document.createElement("div");

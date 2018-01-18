@@ -46,7 +46,7 @@
             [sade.shared-util :as util]))
 
 (defn schema-type [options]
-  (-> options :schema keys first keyword))
+  (-> options :schema (dissoc :required?) keys first keyword))
 
 (declare pate-list)
 
@@ -110,6 +110,7 @@
                            :list         pate-components/list-reference-list)
          :multi-select   pate-components/pate-multi-select
          :phrase-text    pate-components/pate-phrase-text
+         :button         pate-components/pate-button
          ;; The rest are always displayed as view components
          (partial view-component cell-type)) options wrap-label?)
       (view-component cell-type options wrap-label?))))
@@ -138,6 +139,9 @@
 (defmulti view-component (fn [cell-type & _]
                            cell-type))
 
+(defmethod view-component :default
+  [& _])
+
 (defmethod view-component :reference-list
   [_ {:keys [state path schema ] :as options} & [wrap-label?]]
   (let [values (set (flatten [(path/value path state)]))
@@ -157,9 +161,12 @@
       span)))
 
 (defmethod view-component :reference
-  [_ {:keys [state path schema] :as options} & [wrap-label?]]
-  (let [span [:span.formatted (path/react (-> schema :path util/split-kw-path)
-                                          state)]]
+  [_ {:keys [state schema references] :as options} & [wrap-label?]]
+  (let [[x & xs :as path] (-> schema :path util/split-kw-path)
+        span [:span.formatted
+              (if (util/=as-kw x :*ref)
+                (path/react xs references)
+                (path/react path state))]]
     (if (pate-components/show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options span)
       span)))
@@ -205,10 +212,11 @@
                                                      (str "item--" (name item-align))))}
                        (when (:dict item-schema)
                          (instantiate (path/dict-options item-options)
-                                      true))])))
+                                      (-> schema :labels? false? not)))])))
                 (:items schema))])
 
 (rum/defc pate-grid < rum/reactive
+  {:key-fn #(-> % :path path/id)}
   [{:keys [schema path state] :as options}]
   (letfn [(grid [{:keys [schema] :as options}]
             [:div
@@ -246,8 +254,8 @@
                   (-> schema :rows))])]
     (if-let [repeating (:repeating schema)]
       [:div (map (fn [k]
-                   (grid (assoc options
+                   (pate-grid (assoc options
                                 :schema (dissoc schema :repeating)
                                 :path (path/extend path repeating k))))
-                 (keys (path/value repeating state)))]
+                 (keys (path/react repeating state)))]
       (grid options))))

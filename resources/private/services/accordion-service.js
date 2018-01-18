@@ -154,6 +154,10 @@ LUPAPISTE.AccordionService = function() {
     return util.getIn(_.find(self.documents(), {docId: docId}), ["operation"]);
   };
 
+  self.getBuildingId = function(docId) {
+    return util.getIn(_.find(self.documents(), {docId: docId}), ["data", "valtakunnallinenNumero"]);
+  };
+
   self.getDocumentByOpId = function(opId) {
     return _.find(self.documents(), function(doc) {
       return doc.operation.id && doc.operation.id() === opId;
@@ -240,6 +244,18 @@ LUPAPISTE.AccordionService = function() {
     if (documentData) { // ie in neighbor case could be that data is unavailable
       var accordionDataObservable = _.get(documentData.data, _.words(eventPath, "."));
       accordionDataObservable(value);
+    }
+  });
+
+  hub.subscribe("accordionService::saveBuildingId", function(event) {
+    var docId = event.docId;
+    var value = event.value;
+    var indicator = event.indicator;
+    var doc = _.find(self.documents(), {docId: docId});
+    var buildingId = util.getIn(doc, ["data", "valtakunnallinenNumero"]);
+    if (buildingId !== value) {
+      lupapisteApp.services.documentDataService.updateDoc(docId, [[["valtakunnallinenNumero"], value]], indicator);
+      doc.data.valtakunnallinenNumero(value);
     }
   });
 };

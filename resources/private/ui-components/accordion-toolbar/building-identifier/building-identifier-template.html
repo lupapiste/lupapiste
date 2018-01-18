@@ -1,0 +1,21 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="building-identifier-template">
+    <div class="inline-col">
+      <label data-bind="ltext: 'document.building.identifier'"></label>
+      <input class="form-input inline long" type="text"
+             data-bind="textInput: identifier,
+                        enable: enabled,
+                        attr: {'data-test-id': documentId + '-building-identifier-input',
+                               'id': documentId + '-building-identifier-input'}">
+      <span data-bind="saveIndicator: indicator"></span>
+    </div>
+    <div class="inline-col">
+      <button class="secondary"
+              data-bind="attr: {'data-op-name': operation.name()},
+                         disable: isPrimaryOperation,
+                         click: clickStar,
+                         visible: showStar">
+        <i class="lupicon-star"></i>
+        <span data-bind="ltext: starTitle"></span>
+      </button>
+    </div>
+</script>

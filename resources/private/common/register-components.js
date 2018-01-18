@@ -135,6 +135,7 @@ jQuery(document).ready(function() {
     {name: "company-invite-bubble"},
     {name: "operation-editor"},
     {name: "document-identifier"},
+    {name: "building-identifier"},
     {name: "change-state"},
     {name: "verdict-appeal"},
     {name: "verdict-appeal-bubble"},
