@@ -27,9 +27,10 @@
        (reduce into #{})))
 
 (defn get-application-permissions [{{user-id :id} :user {auth :auth} :application}]
-  (->> (util/find-by-id user-id auth)
-       (:role)
-       (get-permissions-by-role :application)))
+  (->> (filter (comp #{user-id} :id) auth)
+       (map :role)
+       (map (partial get-permissions-by-role :application))
+       (reduce into #{})))
 
 (defmacro defcontext
   "Creates an extender function for action context. Function takes only command parameter

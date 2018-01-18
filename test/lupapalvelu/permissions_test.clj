@@ -1,7 +1,8 @@
 (ns lupapalvelu.permissions-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.permissions :refer :all]))
+            [lupapalvelu.permissions :refer :all]
+            [sade.util :as util]))
 
 (defpermissions test
   {:test-scope   {:test-role         #{:test/test
@@ -43,27 +44,36 @@
 
 (facts get-application-permissions
   (fact "existing role"
-    (get-application-permissions {:user {:id 1} :application {:auth [{:id 1 :role "app-tester"}]}}) => ..permissions..
+    (get-application-permissions {:user {:id 1} :application {:auth [{:id 1 :role "app-tester"}]}}) => #{:test/do}
 
-    (provided (get-permissions-by-role :application "app-tester") => ..permissions..))
+    (provided (get-permissions-by-role :application "app-tester") => #{:test/do}))
 
   (fact "no role in auth"
     (get-application-permissions {:user {:id 1} :application {:auth []}}) => irrelevant
 
-    (provided (get-permissions-by-role :application nil) => irrelevant :times 1))
+    (provided (get-permissions-by-role :application nil) => irrelevant :times 0))
 
   (fact "no application in command"
     (get-application-permissions {:user {:id 1}}) => irrelevant
 
-    (provided (get-permissions-by-role :application nil) => irrelevant :times 1))
+    (provided (get-permissions-by-role :application nil) => irrelevant :times 0))
 
   (fact "existing role - multiple roles in auth"
     (get-application-permissions {:user {:id 1} :application {:auth [{:id 2 :role "some-role"}
                                                                      {:id 1 :role "app-tester"}
                                                                      {:id 3 :role "another-role"}]}})
-    => ..permissions..
+    => #{:test/do}
 
-    (provided (get-permissions-by-role :application "app-tester") => ..permissions..)))
+    (provided (get-permissions-by-role :application "app-tester") => #{:test/do}))
+
+  (fact "same user with multiple roles in auth"
+    (get-application-permissions {:user {:id 1} :application {:auth [{:id 2 :role "some-role"}
+                                                                     {:id 1 :role "app-tester"}
+                                                                     {:id 1 :role "another-role"}]}})
+    => #{:test/do :test/test :test/fail}
+
+    (provided (get-permissions-by-role :application "app-tester") => #{:test/do :test/fail})
+    (provided (get-permissions-by-role :application "another-role") => #{:test/do :test/test})))
 
 (facts get-organization-permissions
   (fact "existing role"
