@@ -1,3 +1,6 @@
+"document.building.identifier" "en" "National building identifier (VTJ-PRT)"
+"document.building.identifier" "fi" "Valtakunnallinen rakennustunnus (VTJ-PRT)"
+"document.building.identifier" "sv" "Nationell byggnadsbeteckning (VTJ-PRT)"
 "document.disabled" "en" "Disabled"
 "document.disabled" "fi" "Ei käytössä"
 "document.disabled" "sv" "Ej i användning"
@@ -37,6 +40,3 @@
 "document.status.toggle.enable" "en" "Return to active status"
 "document.status.toggle.enable" "fi" "Palauta aktiiviseksi"
 "document.status.toggle.enable" "sv" "Returnera till aktiv"
-"document.building.identifier" "en" ""
-"document.building.identifier" "fi" "Valtakunnallinen rakennustunnus (VTJ-PRT)"
-"document.building.identifier" "sv" ""

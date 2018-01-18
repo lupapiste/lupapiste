@@ -4,6 +4,7 @@
             [clojure.set :refer [rename-keys] :as set]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.assignment :as assignment]
@@ -3665,6 +3666,28 @@
 (defmigration pate-to-matti-integration-messages
   {:apply-when (pos? (mongo/count :integration-messages {:partner "pate"}))}
   (mongo/update-by-query :integration-messages {:partner "pate"} {$set {:partner "matti"}}))
+
+(defn id-to-file-id [attachment]
+  (set/rename-keys attachment {:id :fileId}))
+
+(defmigration bulletin-comment-attachments-fileids
+  {:apply-when (pos? (mongo/count :application-bulletin-comments {:attachments.id {$exists true}}))}
+  (doseq [comment (mongo/select :application-bulletin-comments {:attachments.id {$exists true}})
+          :let [attachments (->> (:attachments comment)
+                                 (map id-to-file-id)
+                                 (map #(dissoc % :metadata)))]]
+    (when-let [err (some bulletins/comment-file-checker attachments)]
+      (throw (ex-info "bulletin-comment migration failure" {:err (pr-str err) :comment (:id comment)})))
+    (mongo/update-by-id :application-bulletin-comments (:id comment) {$set {:attachments attachments}})))
+
+(defmigration bulletin-comment-attachments-metadata
+  {:apply-when (pos? (mongo/count :application-bulletin-comments {:attachments.metadata {$exists true}}))}
+  (doseq [comment (mongo/select :application-bulletin-comments {:attachments.metadata {$exists true}})
+          :let [attachments (->> (:attachments comment)
+                                 (map #(dissoc % :metadata)))]]
+    (when-let [err (some bulletins/comment-file-checker attachments)]
+      (throw (ex-info "bulletin-comment-metadata migration failure" {:err (pr-str err) :comment (:id comment)})))
+    (mongo/update-by-id :application-bulletin-comments (:id comment) {$set {:attachments attachments}})))
 
 ;;
 ;; ****** NOTE! ******

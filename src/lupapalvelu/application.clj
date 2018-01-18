@@ -203,10 +203,10 @@
 (defn- enrich-single-doc-disabled-flag [{user-role :role} {permitType :permitType} doc]
   (let [doc-schema (model/get-document-schema doc)
         zip-root (tools/schema-zipper doc-schema)
-        whitelisted-paths (tools/whitelistify-schema zip-root)]
+        whitelisted-paths (tools/whitelistify-schema zip-root)
+        whitelist-validator (partial doc-persistence/validate-whitelist-properties {:roles user-role :permitType permitType})]
     (reduce (fn [new-doc [path whitelist]]
-              (if-not (and ((set (:roles whitelist)) (keyword user-role))
-                           ((set (:permitType whitelist)) (keyword permitType)))
+              (if-not (every? whitelist-validator (dissoc whitelist :otherwise))
                 (tools/update-in-repeating new-doc (prefix-with :data path) merge {:whitelist-action (:otherwise whitelist)})
                 new-doc))
             doc
@@ -570,7 +570,7 @@
         info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest scope))]
 
-    (when-not organization-id
+    (when (ss/blank? organization-id)
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
     (if info-request?
       (when-not (:inforequest-enabled scope)

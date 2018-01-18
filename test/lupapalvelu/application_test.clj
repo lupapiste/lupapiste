@@ -27,7 +27,7 @@
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
 (testable-privates lupapalvelu.application-api add-operation-allowed? validate-handler-role validate-handler-role-not-in-use validate-handler-id-in-application validate-handler-in-organization)
-(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user enrich-tos-function-name)
+(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user enrich-tos-function-name enrich-single-doc-disabled-flag)
 (testable-privates lupapalvelu.ya validate-link-agreements-signature validate-link-agreements-state)
 
 (facts "mark-indicators-seen-updates"
@@ -561,3 +561,13 @@
                        :id           (make-application-id "123")}) => "12300017-1000"
       (provided
         (lupapalvelu.mongo/get-next-sequence-value anything) => 10000))))
+
+(facts "whitelist-action"
+  (let [doc {:schema-info {:name "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"}
+             :data {:mitat {:tilavuus {:value "foo"}}}}]
+    (fact "authority is passed (no restrictions added)"
+      (enrich-single-doc-disabled-flag {:role "authority"} {:permitType "R"} doc) => doc)
+    (fact "applicant gets flagged out with whitelist-acion :disabled"
+      (let [result (enrich-single-doc-disabled-flag {:role "applicant"} {:permitType "R"} doc)]
+        result =not=> doc
+        (vals (get-in result [:data :mitat])) => (has every? #(= (dissoc % :value) {:whitelist-action :disabled}))))))

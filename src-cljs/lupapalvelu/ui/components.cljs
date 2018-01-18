@@ -90,12 +90,14 @@
   initialized to the first component argument. If the argument is an
   atom or cursor it is used as is (aka poor man's two-way binding)"
   [local-key]
-  {:will-mount (fn [state]
-                 (let [value (-> state :rum/args first)]
-                   (assoc state local-key (if (or (instance? Atom value)
-                                                  (instance? rum.cursor.Cursor value))
-                                            value
-                                            (atom value)))))})
+  (letfn [(update-state [state]
+            (let [value (-> state :rum/args first)]
+              (assoc state local-key (if (or (instance? Atom value)
+                                             (instance? rum.cursor.Cursor value))
+                                       value
+                                       (atom value)))))]
+    {:will-mount  update-state
+     :did-remount #(update-state %2)}))
 
 
 (defn- text-options [text* {:keys [callback required?
@@ -105,7 +107,7 @@
   ;; contents are nil.
   (when (nil? @text*)
     (reset! text* ""))
-  (merge {:value     (rum/react text*)
+  (merge {:value     @text*
           :class     (concat (or class [])
                              (common/css-flags :required (and required?
                                                               (-> text* rum/react s/blank?))))

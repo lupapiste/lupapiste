@@ -30,24 +30,29 @@
 
 (defn update-changes-and-errors
   "Returns a success callback function that updates the state according
-  to the command response. container* is a 'top-level' atom that
-  contains the info property (including modified and filled?)."
+  to the command response (e.g., changes, removals and errors). container*
+  is a 'top-level' atom that contains the info property (including
+  modified and filled?)."
   [container* {:keys [state path]}]
-  (fn [{:keys [modified changes errors filled] :as response}]
+  (fn [{:keys [modified changes errors removals filled] :as response}]
     (swap! state (fn [state]
-                   (let [state (reduce (fn [acc [k v]]
-                                         (assoc-in acc (map keyword k) v))
-                                       state
-                                       changes)]
+                   (let [state (as-> state $
+                                 (reduce (fn [acc [k v]]
+                                           (assoc-in acc (map keyword k) v))
+                                         $
+                                         changes)
+                                 (reduce (fn [acc k]
+                                           (util/dissoc-in acc (map keyword k)))
+                                         $
+                                         removals))]
                      (reduce (fn [acc [k v]]
                                (assoc-in acc
                                          (cons :_errors
                                                (map keyword k))
                                          v))
-                             (assoc-in state
-                                       (cons :_errors
-                                             (map keyword path))
-                                       nil)
+                             (util/dissoc-in state
+                                             (cons :_errors
+                                                   (map keyword path)))
                              errors))))
     (swap! container* (fn [container]
                         (cond-> container

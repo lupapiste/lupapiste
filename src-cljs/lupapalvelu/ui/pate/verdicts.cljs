@@ -22,13 +22,16 @@
 (defn- can-view? []
   (state/auth? :pate-verdicts))
 
-(defn updater [{:keys [state path] :as options}]
-  (service/edit-verdict @state/application-id
-                        (path/value [:info :id] state/current-verdict)
-                        path
-                        (path/value path state)
-                        (service/update-changes-and-errors state/current-verdict
-                                                           options)))
+(defn updater
+  ([{:keys [state path] :as options} value]
+   (service/edit-verdict @state/application-id
+                         (path/value [:info :id] state/current-verdict)
+                         path
+                         value
+                         (service/update-changes-and-errors state/current-verdict
+                                                            options)))
+  ([{:keys [state path] :as options}]
+   (updater options (path/value path state))))
 
 (defn- can-edit-verdict? [{published :published}]
   (and (can-edit?)

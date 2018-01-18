@@ -180,7 +180,9 @@
         old-bulletin (create-application-and-bulletin :app app :cookie-store cookie-store)
         bulletin     (create-application-and-bulletin :app app :cookie-store cookie-store)
         _            (vetuma-util/authenticate-to-vetuma! cookie-store)
-        files        (:files (json/decode (:body (send-file cookie-store)) true))]
+        files        (->> (json/decode (:body (send-file cookie-store)) true)
+                          :files
+                          (map #(select-keys % [:fileId :contentType :size :filename])))]
 
     (fact "unable to add comment for older version"
       (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId old-bulletin) :comment "foobar" :cookie-store cookie-store) => {:ok false :text "error.invalid-version-id"})

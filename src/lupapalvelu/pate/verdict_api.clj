@@ -137,8 +137,11 @@
                       (verdict-exists :editable?)]
    :states           states/give-verdict-states}
   [command]
-  (ok (assoc (verdict/edit-verdict command)
-             :filled (verdict/verdict-filled? command true))))
+  (let [result (verdict/edit-verdict command)]
+    (if (:modified result)
+      (ok (assoc result
+                 :filled (verdict/verdict-filled? command true)))
+      (template/error-response result))))
 
 (defcommand publish-pate-verdict
   {:description      "Publishes verdict.
