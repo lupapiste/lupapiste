@@ -4,7 +4,7 @@
             [lupapalvelu.factlet :refer [fact* facts*]]
             [clj-time.coerce :as coerce]
             [sade.xml :as xml]
-            [lupapalvelu.xml.krysp.reader :refer [->verdicts get-app-info-from-message application-state]]
+            [lupapalvelu.xml.krysp.reader :refer [->verdicts get-app-info-from-message application-state resolve-property-id-by-point]]
             [lupapalvelu.xml.krysp.common-reader :refer [rakval-case-type property-equals property-in wfs-krysp-url]]
             [lupapalvelu.xml.krysp.review-reader :as review-reader]
             [lupapalvelu.xml.validator :as xml-validator]
@@ -515,9 +515,11 @@
         (fact "address" address => "Kylykuja 3-5 D 35b-c")
         (fact "propertyId" propertyId => "18600303560006")))))
 
-(facts* "Testing area like location information for application creation"
+(facts "Testing area like location information for application creation"
+  (against-background
+    (resolve-property-id-by-point anything) => "89552200010051")
   (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-with-area-like-location.xml"))
-        info (get-app-info-from-message xml "895-2015-001") => truthy
+        info (get-app-info-from-message xml "895-2015-001")
         rakennuspaikka (:rakennuspaikka info)]
 
     (let [{:keys [x y address propertyId] :as rakennuspaikka} rakennuspaikka]
@@ -543,9 +545,11 @@
            (first)
            (first)) => [21.355934608866 60.728233303])))
 
-(facts* "Testing area like location with building location information for application creation"
+(facts "Testing area like location with building location information for application creation"
+  (against-background
+    (resolve-property-id-by-point anything) => "89552200010052")
   (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-with-building-location.xml"))
-        info (get-app-info-from-message xml "895-2015-002") => truthy
+        info (get-app-info-from-message xml "895-2015-002")
         rakennuspaikka (:rakennuspaikka info)]
 
     (let [{:keys [x y address propertyId] :as rakennuspaikka} rakennuspaikka]
@@ -559,7 +563,7 @@
         address => "Pitk\u00e4karta 48")
 
       (fact "Property id is fetched from service"
-        propertyId => "89552200010051"))
+        propertyId => "89552200010052"))
 
     (fact "Original area is stored for metadata"
       (:geometry (first (:drawings info))) => (contains "POLYGON((192391.716803 6745749.455827, 192368.715229 6745821.2047, 192396.462342 6745826.766509")
