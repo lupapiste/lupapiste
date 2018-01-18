@@ -160,6 +160,7 @@
                                          [rhizome "0.2.7"]
                                          [pdfboxing "0.1.13"]
                                          [com.cemerick/piggieback "0.2.2"]
+                                         [figwheel-sidecar "0.5.8"]
                                          ;; Better Chrome Dev Tools support
                                          [binaryage/devtools "0.9.4"]]
                         :plugins        [[lein-midje "3.2"]
