@@ -16,7 +16,11 @@
   (swap! permission-tree #(merge-with (partial merge-with into) % permissions)))
 
 (defn get-permissions-by-role [scope role]
-  (get-in @permission-tree [(keyword scope) (keyword role)] #{}))
+  (set/union
+   (get-in @permission-tree [(keyword scope) (keyword role)] #{})
+   (when role
+     (get-in @permission-tree [(keyword scope) :roles/any]))))
+
 
 (defn get-global-permissions [{{role :role} :user}]
   (get-permissions-by-role :global (keyword role)))
