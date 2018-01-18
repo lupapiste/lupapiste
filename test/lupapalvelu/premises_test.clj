@@ -3,19 +3,45 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]))
 
-(testable-privates lupapalvelu.premises csv-data->ifc-coll
+(testable-privates lupapalvelu.premises csv->header-and-data
                                         ifc-to-lupapiste-keys
                                         premise->updates
-                                        data->model-updates)
+                                        data->model-updates
+                                        pick-only-header-and-data-rows)
+
+(fact "picking header and data rows"
+  (let [sample-data [["info-line"]
+                     ["Porras" "Huoneistonumero" "Huoneiston jakokirjain" "Sijaintikerros"
+                      "Huoneiden lukum\u00e4\u00e4r\u00e4" "Keitti\u00f6tyyppi" "Huoneistoala"
+                      "Varusteena WC" "Varusteena amme/suihku" "Varusteena parveke"
+                      "Varusteena Sauna"  "Varusteena l\u00e4mmin vesi"]
+                     ["A" "001" "" "2" "2" "3" "56" "1" "1" "1" "1" "1"]]]
+    (pick-only-header-and-data-rows sample-data)
+    => {:header [:porras :huoneistonumero :jakokirjain :sijaintikerros :huoneluku :keittionTyyppi :huoneistoala
+                 :WCKytkin :ammeTaiSuihkuKytkin :parvekeTaiTerassiKytkin :saunaKytkin :lamminvesiKytkin]
+        :data [["A" "001" "" "2" "2" "3" "56" "1" "1" "1" "1" "1"]]}))
+
+(fact "works with lupapiste labels also"
+  (let [sample-data [["test-rows"]
+                     ["info-line"]
+                     ["Huoneiston tyyppi" "Porras" "Huoneiston numero" "Jakokirjain" "Huoneluku"
+                        "Keittiön tyyppi" "Huoneistoala m2" "WC" "Amme/ suihku" "Parveke/ terassi"
+                        "Sauna" "Lämmin vesi"]
+                     ["1" "A" "001" "" "2" "3" "56" "1" "1" "1" "1" "1"]]]
+    (pick-only-header-and-data-rows sample-data)
+    => {:header [:huoneistoTyyppi :porras :huoneistonumero :jakokirjain :huoneluku :keittionTyyppi :huoneistoala
+                 :WCKytkin :ammeTaiSuihkuKytkin :parvekeTaiTerassiKytkin :saunaKytkin :lamminvesiKytkin]
+        :data [["1" "A" "001" "" "2" "3" "56" "1" "1" "1" "1" "1"]]}))
 
 (fact "csv-data comes out as a header-data-map"
-  (csv-data->ifc-coll "Porras;Huoneistonumero;Huoneiston jakokirjain;Sijaintikerros;Huoneiden lukum\u00e4\u00e4r\u00e4;Keitti\u00f6tyyppi;Huoneistoala;Varusteena WC;Varusteena amme/suihku;Varusteena parveke;Varusteena Sauna;Varusteena l\u00e4mmin vesi\nA;001;;2;2;3;56;1;1;1;1;1")
-      => {:header-row ["porras" "huoneistonumero" "huoneiston jakokirjain" "sijaintikerros" "huoneiden lukum\u00e4\u00e4r\u00e4" "keitti\u00f6tyyppi" "huoneistoala" "varusteena wc" "varusteena amme/suihku" "varusteena parveke" "varusteena sauna" "varusteena l\u00e4mmin vesi"]
-          :data      [["A" "001" "" "2" "2" "3" "56" "1" "1" "1" "1" "1"]]})
+  (csv->header-and-data "Porras;Huoneistonumero;Huoneiston jakokirjain;Sijaintikerros;Huoneiden lukumäärä;Keittiötyyppi;Huoneistoala;Varusteena WC;Varusteena amme/suihku;Varusteena parveke;Varusteena Sauna;Varusteena lämmin vesi\nA;001;;2;2;3;56;1;1;1;1;1")
+      => {:header [:porras :huoneistonumero :jakokirjain :sijaintikerros :huoneluku :keittionTyyppi :huoneistoala
+                   :WCKytkin :ammeTaiSuihkuKytkin :parvekeTaiTerassiKytkin :saunaKytkin :lamminvesiKytkin]
+          :data    [["A" "001" "" "2" "2" "3" "56" "1" "1" "1" "1" "1"]]})
 
 (fact "premise data becomes updates data"
-      (let [{header-row :header-row data :data} (csv-data->ifc-coll "Porras;Huoneistonumero;Huoneiston jakokirjain;Huoneiden lukum\u00e4\u00e4r\u00e4;Keitti\u00f6tyyppi;Huoneistoala;Varusteena WC;Varusteena amme/suihku;Varusteena parveke;Varusteena Sauna;Varusteena l\u00e4mmin vesi\nA;001;;2;3;56;1;1;1;1;1")]
-        (set (data->model-updates header-row data)))
+      (let [{header :header data :data} (csv->header-and-data "Porras;Huoneistonumero;Huoneiston jakokirjain;Sijaintikerros;Huoneiden lukumäärä;Keittiötyyppi;Huoneistoala;Varusteena WC;Varusteena amme/suihku;Varusteena parveke;Varusteena Sauna;Varusteena lämmin vesi\nA;001;;2;2;3;56;1;1;1;1;1")]
+        (set (data->model-updates header data)))
       => #{[[:huoneistot :0 :porras] "A"]
            [[:huoneistot :0 :huoneistonumero] "001"]
            [[:huoneistot :0 :huoneluku] "2"]
