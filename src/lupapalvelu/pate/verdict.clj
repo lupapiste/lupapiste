@@ -82,8 +82,8 @@
 (defmethod initial-draft :r
   [{snapshot :published} application]
   {:data       (data-draft
-                (merge {:verdict-code :verdict-code
-                        :verdict-text :paatosteksti
+                (merge {:verdict-code          :verdict-code
+                        :verdict-text          :paatosteksti
                         :bulletinOpDescription :bulletinOpDescription}
                        (reduce (fn [acc kw]
                                  (assoc acc
@@ -102,8 +102,19 @@
                        (reduce (fn [acc k]
                                  (merge acc (map-unremoved-section (:data snapshot) k)))
                                {}
-                               [:conditions :neighbors :appeal :statements :collateral
-                                :complexity :rights :purpose]))
+                               [:neighbors :appeal :statements :collateral
+                                :complexity :rights :purpose])
+                       ;; List of conditions to conditions map where keys are ids.
+                       (when (map-unremoved-section (:data snapshot) :conditions)
+                         {:conditions {:fn        (fn [{:keys [conditions]}]
+                                                    (reduce (fn [acc condition]
+                                                              (assoc-in acc
+                                                                        [(keyword (mongo/create-id)) :condition]
+                                                                        condition))
+                                                            {}
+                                                            conditions))
+                                       :skip-nil? true}}
+                         ))
                 snapshot)
    :references (:settings snapshot)})
 
@@ -134,8 +145,10 @@
                                      [:vss-luokka :paloluokka])]
                               flatten
                               (remove nil?))
-        exclusions       (-<>> [(filter removed? [:conditions :appeal :statements
+        exclusions       (-<>> [(filter removed? [:appeal :statements
                                                   :collateral :rights :purpose])
+                                (when (removed? :conditions)
+                                  [:conditions :add-condition])
                                 (when (removed? :collateral)
                                   [:collateral :collateral-date :collateral-type])
                                 (when (removed? :neighbors)
@@ -315,43 +328,6 @@
   ([command]
    (verdict-filled? command false)))
 
-(defn edit-verdict
-  "Updates the verdict data. Validation takes the template exclusions
-  into account. Some updates (e.g., automatic dates) can propagate other
-  changes as well. Returns errors or modified and (possible
-  additional) changes."
-  [{{:keys [verdict-id path value]} :data
-    organization                    :organization
-    application                     :application
-    created                         :created
-    :as                             command}]
-  (let [{:keys [data category
-                template
-                references]} (command->verdict command)
-        schema               (verdict-schema category template)]
-    (if-let [error (schemas/validate-path-value
-                    schema
-                    path value
-                    references)]
-      {:errors [[path error]]}
-      (let [path    (map keyword path)
-            updated (assoc-in data path value)]
-        (verdict-update command {$set {(util/kw-path :pate-verdicts.$.data
-                                                     path)
-                                       value}})
-        {:modified created
-         :changes  (let [options {:path         path
-                                  :value        value
-                                  :verdict-data updated
-                                  :template     template
-                                  :references   references
-                                  :category     category}
-                         changed (changes options)]
-                     (verdict-changes-update command changed)
-                     (map (fn [[k v]]
-                            [(util/split-kw-path k) v])
-                          changed))}))))
-
 (defn- app-documents-having-buildings
   [{:keys [documents] :as application}]
   (->> application
@@ -405,6 +381,54 @@
                   :description (ss/join ": " description-parts)
                   :operationId (:id op)
                   :usage (or (:kayttotarkoitus kaytto) "")})))))
+
+(defn edit-verdict
+  "Updates the verdict data. Validation takes the template exclusions
+  into account. Some updates (e.g., automatic dates) can propagate other
+  changes as well. Returns processing result or modified and (possible
+  additional) changes."
+  [{{:keys [verdict-id path value]} :data
+    organization                    :organization
+    application                     :application
+    created                         :created
+    :as                             command}]
+  (let [{:keys [data category
+                template
+                references]} (command->verdict command)
+        {:keys [data value path op]
+         :as     processed}    (schemas/validate-and-process-value
+                                (verdict-schema category template)
+                                path value
+                                ;; Make sure that building related
+                                ;; paths can be resolved.
+                                (update data
+                                        :buildings
+                                        (fn [houses]
+                                          (merge (zipmap (keys (buildings application))
+                                                         (repeat {}))
+                                                 houses)))
+                                references)]
+    (if-not data
+      processed
+      (let [mongo-path (util/kw-path :pate-verdicts.$.data path)]
+        (verdict-update command
+                        (if (= op :remove)
+                          {$unset {mongo-path 1}}
+                          {$set {mongo-path value}}))
+        (template/changes-response {:modified created
+                                    :changes  (let [options {:path         path
+                                                             :value        value
+                                                             :verdict-data data
+                                                             :template     template
+                                                             :references   references
+                                                             :category     category}
+                                                    changed (changes options)]
+                                                (verdict-changes-update command changed)
+                                                (map (fn [[k v]]
+                                                       [(util/split-kw-path k) v])
+                                                     changed))}
+                                   processed)))))
+
 
 (defn- merge-buildings [app-buildings verdict-buildings defaults]
   (reduce (fn [acc [op-id v]]
@@ -531,7 +555,6 @@
                                                   created)
     (pdf/create-verdict-attachment command
                                    (assoc verdict :published created))
-
     ;; KuntaGML
     (when (org/krysp-integration? @organization (:permitType application))
       (-> (assoc command :application (domain/get-application-no-access-checking (:id application)))

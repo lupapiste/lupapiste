@@ -160,6 +160,7 @@
                                          [rhizome "0.2.7"]
                                          [pdfboxing "0.1.13"]
                                          [com.cemerick/piggieback "0.2.2"]
+                                         [figwheel-sidecar "0.5.8"]
                                          ;; Better Chrome Dev Tools support
                                          [binaryage/devtools "0.9.4"]]
                         :plugins        [[lein-midje "3.2"]
@@ -180,8 +181,8 @@
                         :cljsbuild      {:builds {:rum {:figwheel {:websocket-host   "lupapiste.local"
                                                                    :on-jsload        lupapalvelu.ui.ui-components/reload-hook
                                                                    ;; If the figwheel does not connect,
-                                                                   ;; turn the heads-up display temporarily off
-                                                                   ;; :heads-up-display false
+                                                                   ;; turn the heads-up display off.
+                                                                   :heads-up-display false
                                                                    }
                                                         :compiler {:output-dir     "resources/public/lp-static/js/out"
                                                                    :output-to      "resources/public/lp-static/js/rum-app.js"
