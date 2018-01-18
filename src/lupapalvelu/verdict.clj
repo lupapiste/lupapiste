@@ -41,7 +41,8 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.organization :as org]
             [lupapalvelu.inspection-summary :as inspection-summary]
-            [lupapalvelu.foreman :as foreman])
+            [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.application :as app])
   (:import [java.net URL]
            [java.nio.charset StandardCharsets]))
 
@@ -363,7 +364,7 @@
           (some->> (util/deep-merge extras-updates backend-id-updates) (update-application command))
           validation-error)))
     ;; LPK-2459
-    (when (foreman/foreman-app? application)
+    (when (or (foreman/foreman-app? application) (app/designer-app? application))
       (fetch-tj-suunnittelija-verdict command))))
 
 (defn- verdict-task?
