@@ -4,7 +4,7 @@
             [lupapalvelu.permissions :refer :all]
             [sade.util :as util]))
 
-(defpermissions test
+(defpermissions :test
   {:test-scope   {:test-role         #{:test/test
                                        :test/fail}
                   :another-test-role #{:test/fail}}
@@ -13,7 +13,7 @@
    :test-scope-c {:roles/any         #{:test/fail}
                   :tester            #{:test/test}}})
 
-(defpermissions test-more
+(defpermissions :test-more
   {:test-scope   {:test-role         #{:test-more/test}}})
 
 (facts get-permissions-by-role
