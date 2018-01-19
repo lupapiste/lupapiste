@@ -351,7 +351,7 @@
 (defn- has-required-user-role [command {user-roles :user-roles parameters :parameters :as meta-data}]
   (let [allowed-roles (or user-roles #{})
         user-role (-> command :user :role keyword)]
-    (or (allowed-roles :anonymous) (allowed-roles user-role) (allowed-financial-authority allowed-roles user-role parameters))))
+    (or (nil? user-roles) (allowed-roles :anonymous) (allowed-roles user-role) (allowed-financial-authority allowed-roles user-role parameters))))
 
 (defn meta-data [{command :action}]
   ((get-actions) (keyword command)))
@@ -484,8 +484,8 @@
     (auth/user-authz? allowed-roles application user)))
 
 (defn- organization-authz? [command-meta-data application user]
-  (let [required-authz (get command-meta-data :org-authz-roles #{})]
-    (auth/has-organization-authz-roles? required-authz (:organization application) user)))
+  (let [allowed-roles (get command-meta-data :org-authz-roles #{})]
+    (auth/has-organization-authz-roles? allowed-roles (:organization application) user)))
 
 (defn- company-authz? [command-meta-data application user]
   (-> (get command-meta-data :user-authz-roles #{})
@@ -705,7 +705,7 @@
 
       (throw (AssertionError. (str "Action '" action-name "' has invalid meta data: " invalid-meta ", schema-error: " res)))))
 
-  (assert (or (:user-roles meta-data) (:permissions meta-data))
+  (assert (or (seq (:user-roles meta-data)) (seq (:permissions meta-data)))
           (str "You must define :user-roles or :permissions meta data for " action-name))
 
   (assert (or (ss/ends-with ns-str "-api") (ss/ends-with ns-str "-test") (ss/starts-with (ss/suffix ns-str ".") "dummy"))
@@ -713,9 +713,9 @@
 
   (assert
     (if (some #(= % :id) (:parameters meta-data))
-      (or (seq (:states meta-data)) (seq (:pre-checks meta-data)))
+      (or (seq (:permissions meta-data)) (seq (:states meta-data)) (seq (:pre-checks meta-data)))
       true)
-    (str "You must define :states or :pre-checks meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
+    (str "You must define :permissions, :states or :pre-checks meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
 
   (assert (or  (nil? (:states meta-data)) (set? (:states meta-data)) (-> meta-data :states keys set (= (:user-roles meta-data))))
     (str "Keys of :states should match :user-roles for " action-name " when :states is defined as a map."))
@@ -737,15 +737,15 @@
     (swap! actions assoc
       action-keyword
       (merge
-       {:user-authz-roles (if (= #{:authority} user-roles)
-                            ;; By default, authority gets authorization fron organization role
-                            #{}
-                            (roles/default-user-authz action-type))
+       {:user-authz-roles (cond
+                            (nil? user-roles) roles/all-authz-roles
+                            (= #{:authority} user-roles) #{} ;; By default, authority gets authorization fron organization role
+                            :else (roles/default-user-authz action-type))
         :org-authz-roles (cond
                            (nil? user-roles) roles/all-org-authz-roles
                            (some user-roles [:authority :oirAuthority]) roles/default-org-authz-roles
                            (user-roles :anonymous) roles/all-org-authz-roles)
-        :permissions     [{:required #{}}]} ; no permissions required by default
+        :permissions     [{:required []}]} ; no permissions required by default
         meta-data
         {:type action-type
          :ns ns-str
