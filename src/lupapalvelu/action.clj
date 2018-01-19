@@ -675,7 +675,7 @@
    (sc/optional-key :contexts)    [(sc/pred fn? "context extender function")]
    (sc/optional-key :permissions) (sc/constrained [{(sc/optional-key :description) sc/Str
                                                     (sc/optional-key :context) permissions/ContextMatcher
-                                                    :required [sc/Keyword]}]
+                                                    :required [permissions/RequiredPermission]}]
                                                   (util/fn->> butlast (every? :context))
                                                   "key :context is required for all but last element of permissions")
    (sc/optional-key :on-complete) (sc/cond-pre util/Fn [util/Fn])

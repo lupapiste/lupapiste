@@ -73,10 +73,19 @@
              (update :permissions set/union perms#))))))
 
 (def ContextMatcher
-  {sc/Keyword (sc/conditional
-               set?     #{sc/Keyword}
-               fn?      sc/Any
-               map?     (sc/recursive #'ContextMatcher))})
+  (sc/conditional
+   set?     #{sc/Keyword}
+   fn?      sc/Any
+   map?     {sc/Keyword (sc/recursive #'ContextMatcher)}))
+
+(defn- known-permission? [permission]
+  (contains? (->> (vals @permission-tree)
+                  (mapcat vals)
+                  (reduce into #{:global/not-allowed}))
+             permission))
+
+(def RequiredPermission
+  (sc/constrained sc/Keyword known-permission?))
 
 (defn- matching-context? [ctx-matcher context]
   (cond
