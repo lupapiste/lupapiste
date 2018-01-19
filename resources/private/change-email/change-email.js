@@ -58,12 +58,13 @@
         });
   });
 
-  hub.onPageLoad("change-email-fa", function() {
+  hub.onPageLoad("change-email-simple", function() {
     var token = getToken();
-    ajax.command("change-financial-authority-email", {tokenId: token})
+    ajax.command("change-email-simple", {tokenId: token})
       .success(function() {
         changingModel.success(true);
       })
+      .error(function(r) { changingModel.error(r.text); })
       .fail(_.partial(initError, "error.token-not-found"))
       .call();
   });
@@ -71,7 +72,7 @@
   $(function(){
     $("#email").applyBindings({error: initError, status: statusModel, vetuma: vetumaParams, info: infoModel});
     $("#change-email").applyBindings(changingModel);
-    $("#change-email-fa").applyBindings(changingModel);
+    $("#change-email-simple").applyBindings(changingModel);
   });
 
 })();
