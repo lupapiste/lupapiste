@@ -48,7 +48,7 @@ LUPAPISTE.ApprovalModel = function(params) {
 
 
     self.details = self.disposedComputed( function()  {
-      return self.approvalInfo( service.attachmentApproval( attachment)) ;
+      return self.approvalInfo( service.attachmentFirstApproval( ko.unwrap(attachment))) ;
     } );
   }
 };
