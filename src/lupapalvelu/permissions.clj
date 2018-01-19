@@ -66,8 +66,10 @@
               :else                {:as command-param})]
     `(defn ~context-name [~cmd]
        (let [ctx#   (do ~@body)
-             perms# (get-permissions-by-role (:context-scope ctx#) (:context-role ctx#))]
-         (-> (merge ~(:as cmd) (dissoc ctx# :context-scope :context-role :permissions))
+             perms# (->> (:context-roles ctx#)
+                         (map (partial get-permissions-by-role (:context-scope ctx#)))
+                         (reduce into #{}))]
+         (-> (merge ~(:as cmd) (dissoc ctx# :context-scope :context-roles :permissions))
              (update :permissions set/union perms#))))))
 
 (def ContextMatcher

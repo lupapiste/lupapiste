@@ -111,10 +111,10 @@
     (provided (get-permissions-by-role :organization "org-nocando") => #{})))
 
 (defcontext test-context [{{id :test-id field :test-field} :test-user coll :test-coll}]
-  (let [thing (util/find-by-id id coll)]
-    {:context-scope :test-scope
-     :context-role  (:role thing)
-     :thing         thing}))
+  (let [things (filter (comp #{id} :id) coll)]
+    {:context-scope  :test-scope
+     :context-roles  (map :role things)
+     :thing          (first things)}))
 
 (facts "defcontext"
   (facts test-context
@@ -136,6 +136,19 @@
           :test-coll   [{:id 1 :role "test-role"}]
           :thing       {:id 1 :role "test-role"}
           :permissions #{:test/test :test/fail :test-more/test :application/do}})
+
+    (fact "context extended with thing - multiple roles"
+      (test-context {:test-user {:test-id 1 :test-field "something"}
+                     :test-coll [{:id 1 :role "test-role"}
+                                 {:id 2 :role "test-role"}
+                                 {:id 1 :role "another test-role"}]})
+
+      => {:test-user   {:test-id 1 :test-field "something"}
+          :test-coll   [{:id 1 :role "test-role"}
+                        {:id 2 :role "test-role"}
+                        {:id 1 :role "another test-role"}]
+          :thing       {:id 1 :role "test-role"}
+          :permissions #{:test/test :test/fail :test-more/test}})
 
     (fact "thing not found - no permissions"
       (test-context {:test-user {:test-id 1 :test-field "something"} :test-coll [{:id 2 :role "test-role"}]})
