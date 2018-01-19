@@ -46,7 +46,7 @@
 
 (def cmd {:application tj-app :user {:username "sonja"} :created (now)})
 
-(facts "Tyonjohtaja and suunnittelijan nimeaminen tests"
+(facts "Tyonjohtaja and suunnittelijan nimeaminen tests KRYSP 2.1.8"
   (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-2.1.8-foremen.xml"))]
     (facts
       (fact "Success when TJ data is ok, compared to XML. Email is same, kuntaRoolikoodi is same"
@@ -110,13 +110,41 @@
                                                :content [{:tag :vahainenPoikkeaminen, :attrs nil, :content nil}
                                                          {:tag :rakennusvalvontaasianKuvaus, :attrs nil, :content nil}]}]}]}]}]})
 
-(def example-application
-  {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}})
+(def example-vast-tj-application
+  {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
+   :permitSubtype "tyonjohtaja-hakemus"
+   :documents [{:schema-info {:name "tyonjohtaja-v2"}
+                :data {:kuntaRooliKoodi {:value "vastaava ty\u00f6njohtaja"}
+                       :henkilotiedot {:hetu {:value "251057-9662"}}}}]
+   :linkPermitData [{:type "lupapistetunnus"
+                     :id "LP-638-2018-90003"}]})
+
+(def example-iv-tj-application
+  {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
+   :permitSubtype "tyonjohtaja-hakemus"
+   :documents [{:schema-info {:name "tyonjohtaja-v2"}
+                :data {:kuntaRooliKoodi {:value "IV-ty\u00f6njohtaja"}
+                       :henkilotiedot {:hetu {:value "070470-987M"}}}}]
+   :linkPermitData [{:type "lupapistetunnus"
+                     :id "LP-638-2018-90013"}]})
+
+(defn- check-for-tj-verdict [application xml fact-label paatospvm]
+  (let [verdict (verdict-xml-with-foreman-designer-verdicts application xml)]
+    (fact (str "paatostieto - " fact-label)
+      (let [pt (cr/all-of verdict [:RakennusvalvontaAsia])]
+        (keys pt) => (contains [:paatostieto])
+        (-> pt :paatostieto :Paatos :poytakirja :paatospvm) => paatospvm))))
 
 (facts "special foreman/designer verdict"
-  (let [xml (verdict-xml-with-foreman-designer-verdicts example-application example-meaningful-tj-krysp)]
+  (let [xml (verdict-xml-with-foreman-designer-verdicts example-vast-tj-application example-meaningful-tj-krysp)]
     (fact "paatostieto is injected before lisatiedot"
-          (keys (cr/all-of xml [:RakennusvalvontaAsia])) => (just [:paatostieto :lisatiedot :asianTiedot]))))
+          (keys (cr/all-of xml [:RakennusvalvontaAsia])) => (just [:paatostieto :lisatiedot :asianTiedot])))
+  (facts "from 2.2.2 KuntaGML"
+    (let [xml (->> (slurp "dev-resources/krysp/verdict-r-2.2.2-foremen.xml")
+                   xml/parse
+                   cr/strip-xml-namespaces)]
+      (check-for-tj-verdict example-vast-tj-application xml "application #1" "2018-01-15")
+      (check-for-tj-verdict example-iv-tj-application xml "application #2" "2018-01-17"))))
 
 (facts "Section requirement for verdicts"
        (let [org        {:section {:operations ["pool" "house"]
