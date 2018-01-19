@@ -12,9 +12,6 @@
 (defn change-email-link [lang token]
   (str (env/value :host) "/app/" (name lang) "/welcome#!/email/" token))
 
-(defn change-email-for-company-user-link [lang token]
-  (str (env/value :host) "/app/" (name lang) "/welcome#!/change-email/" token))
-
 (defn change-email-simple [lang token]
   (str (env/value :host) "/app/" (name lang) "/welcome#!/change-email-simple/" token))
 
