@@ -126,6 +126,9 @@
 (defn verdict-given? [{:keys [state]}]
   (boolean (states/post-verdict-states (keyword state))))
 
+(defn designer-app? [application]
+  (= :suunnittelijan-nimeaminen (-> application :primaryOperation :name keyword)))
+
 (defn- contains-primary-operation? [application op-set]
   {:pre [(set? op-set)]}
   (contains? op-set (-> application :primaryOperation :name keyword)))
