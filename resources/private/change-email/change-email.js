@@ -20,7 +20,8 @@
   var changingModel = {error: ko.observable(),
                        success: ko.observable(false),
                        back: back,
-                       done: ko.observable(false)};
+                       done: ko.observable(false),
+                       logout: function() { hub.send("logout"); }};
 
   var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
   var vetumaParams = new LUPAPISTE.VetumaButtonModel(urlPrefix, "vetuma-init-email", "email", "change-email");
