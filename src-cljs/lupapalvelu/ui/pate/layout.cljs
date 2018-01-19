@@ -111,7 +111,7 @@
          :multi-select   pate-components/pate-multi-select
          :phrase-text    pate-components/pate-phrase-text
          :button         pate-components/pate-button
-         :application-attachments pate-att/pate-application-attachments
+         :application-attachments pate-att/pate-select-application-attachments
          ;; The rest are always displayed as view components
          (partial view-component cell-type)) options wrap-label?)
       (view-component cell-type options wrap-label?))))
@@ -189,6 +189,13 @@
 (defmethod view-component :link
   [_ {:keys [schema] :as options} & [wrap-label?]]
   (let [elem (pate-components/pate-link options)]
+    (if (pate-components/show-label? schema wrap-label?)
+      (docgen/docgen-label-wrap options elem)
+      elem)))
+
+(defmethod view-component :application-attachments
+  [_ {:keys [schema] :as options} & [wrap-label?]]
+  (let [elem (pate-att/pate-application-attachments options)]
     (if (pate-components/show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options elem)
       elem)))

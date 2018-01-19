@@ -659,7 +659,7 @@ div.pate-unordered-list {
 
 // Application attachments
 
-div.pate-application-attachments {
+div.pate-select-application-attachments {
   margin-top: $marginS;
   border: solid 1px $gray238;
   display: inline-block;
@@ -683,5 +683,12 @@ div.pate-application-attachments {
   border: none;
   .pate-attachment-check-label {
     padding-left: 36px;
+  }
+}
+
+.tabby.pate-application-attachments {
+  display: inline-block;
+  div.amount {
+    text-align: right;
   }
 }

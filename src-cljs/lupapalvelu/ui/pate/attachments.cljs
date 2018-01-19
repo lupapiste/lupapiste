@@ -317,19 +317,26 @@
       (compare a-filename b-filename)
       type-cmp)))
 
-(defn attachment-items []
-  (->> (service/attachments)
-       (filter #(some-> % :latestVersion :fileId))
-       (map #(assoc (select-keys % [:type :id])
-                    :filename (get-in % [:latestVersion
-                                         :filename])
-                    :target-id (get-in % [:target :id])))
-       (group-by #(-> % :type :type-group))
-       (reduce-kv (fn [acc k v]
-                    (assoc acc k (sort cmp-attachments v)))
-                  {})))
+(defn attachment-items
+  "If grouped? is true (default false) the items are grouped by attachment
+  type groups."
+  ([grouped?]
+   (let [items (->> (service/attachments)
+                    (filter #(some-> % :latestVersion :fileId))
+                    (map #(assoc (select-keys % [:type :id])
+                                 :filename (get-in % [:latestVersion
+                                                      :filename])
+                                 :target-id (get-in % [:target :id]))))]
+     (if grouped?
+       (->> items
+            (group-by #(-> % :type :type-group))
+            (reduce-kv (fn [acc k v]
+                         (assoc acc k (sort cmp-attachments v)))
+                       {}))
+       (sort cmp-attachments items))))
+  ([] (attachment-items false)))
 
-(rum/defcs application-attachments < rum/reactive
+(rum/defcs select-application-attachments < rum/reactive
   (components/initial-value-mixin ::selected)
   (attachments-refresh-mixin)
   "Editor for selecting application attachments. The selection result
@@ -351,7 +358,7 @@
         targeted?       #(= (:target-id %) target-id)
         selected?       #(or (targeted? %)
                              (-> selected* rum/react set (contains? (:id %))))
-        att-items       (attachment-items)
+        att-items       (attachment-items true)
         group-selected? #(->> (get att-items %)
                               (remove targeted?)
                               (every? selected?))
@@ -370,7 +377,7 @@
                                 []
                                 (sort #(compare (group-loc %1) (group-loc %2))
                                       (keys att-items)))]
-    [:div.pate-application-attachments
+    [:div.pate-select-application-attachments
      (for [{:keys [group type id filename] :as item} items]
        [:div
         {:key (or id group)}
@@ -389,12 +396,35 @@
              :handler-fn #(toggle [id] %)
              :disabled   (or disabled? (targeted? item))}))])]))
 
-(rum/defc pate-application-attachments < rum/reactive
+(rum/defc pate-select-application-attachments < rum/reactive
   [{:keys [schema path state info] :as options} & [wrap-label?]]
-  (cond->> (application-attachments (path/state path state)
-                                    {:callback  (partial path/meta-updated
-                                                         options)
-                                     :disabled? (path/disabled? options)
-                                     :target-id (path/value :id info)})
+  (cond->> (select-application-attachments (path/state path state)
+                                           {:callback  (partial path/meta-updated
+                                                                options)
+                                            :disabled? (path/disabled? options)
+                                            :target-id (path/value :id info)})
     (pate-components/show-label? schema wrap-label?)
     (docgen/docgen-label-wrap options)))
+
+(rum/defc pate-application-attachments < rum/reactive
+  (attachments-refresh-mixin)
+  [{:keys [path state info]}]
+  (let [verdict-id (path/value :id info)
+        marked     (set (path/react path state))
+        items      (->> (attachment-items)
+                        (filter (fn [{:keys [id target-id]}]
+                                  (or (contains? marked id)
+                                      (= target-id verdict-id))))
+                        (group-by #(type-loc (-> % :type :type-group)
+                                             (-> % :type :type-id)))
+                        (map (fn [[k v]]
+                               {:type-string k
+                                :amount       (count v)}))
+                        (sort-by :type-string))]
+    [:div.tabby.pate-application-attachments
+     (for [{:keys [type-string amount]} items]
+       [:div.tabby__row
+        {:key type-string}
+        [:div.tabby__cell type-string]
+        [:div.tabby__cell.amount amount]
+        [:div.tabby__cell (common/loc :unit.kpl)]])]))

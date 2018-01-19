@@ -29077,7 +29077,7 @@ div.pate-unordered-list ul {
   list-style-type: square;
 }
 
-div.pate-application-attachments {
+div.pate-select-application-attachments {
   margin-top: 6px;
   border: solid 1px #eeeeee;
   display: inline-block;
@@ -29264,6 +29264,14 @@ input:disabled + .pate-attachment-check-label:hover.pate-attachment-check-label:
 
 .pate-attachment-check-wrapper .pate-attachment-check-label {
   padding-left: 36px;
+}
+
+.tabby.pate-application-attachments {
+  display: inline-block;
+}
+
+.tabby.pate-application-attachments div.amount {
+  text-align: right;
 }
 
 .order-grid-1 {
