@@ -451,12 +451,14 @@
         (assoc (zipmap subkeys (repeat ""))
                :show-building true)))))
 
+(defn command->category [{app :application}]
+  (shared/permit-type->category (:permitType app)))
 
 (defmulti enrich-verdict
   "Augments verdict data, but MUST NOT update mongo (this is called from
   query actions, too)."
-  (fn [{app :application} & _]
-    (shared/permit-type->category (:permitType app))))
+  (fn [command & _]
+    (command->category command)))
 
 (defmethod enrich-verdict :default [_ verdict _]
   verdict)
@@ -510,36 +512,77 @@
                                                                  created
                                                                  giver)))))
 
+(defn- verdict-attachment-items
+  "Type-groups, type-ids and ids of the verdict attachments. These
+  include the new, added verdict attachments and the attachments
+  corresponding to the given attachments dict.
+  Note: Empty attachments are ignored."
+  [{:keys [application]} {verdict-id :id data :data} attachments-dict]
+  (let [ids (set (attachments-dict data))]
+    (->> (:attachments application)
+         (filter #(some-> % :latestVersion :fileId ss/not-blank?))
+         (filter (fn [{:keys [id target]}]
+                   (or (= verdict-id (:id target))
+                       (contains? ids id))))
+         (map (fn [{:keys [type id]}]
+                {:type-group (keyword (:type-group type))
+                 :type-id    (keyword (:type-id type))
+                 :id         id})))))
+
+;; Each method returns a map with the following properties
+;;  items: Attachment items (verdict-attachment-items result)
+;;  update-fn: Function that takes verdict data as argument and updates it.
+(defmulti attachment-items (fn [command _]
+                             (command->category command)))
+
+(defmethod attachment-items :r
+  [command verdict]
+  (let [items (verdict-attachment-items command
+                                        verdict
+                                        :attachments)]
+    {:items     items
+     :update-fn (fn [data]
+                  (assoc data
+                         :attachments
+                         (->> (cons {:type-group :paatoksenteko
+                                     :type-id    :paatos}
+                                    items)
+                              (group-by #(select-keys % [:type-group
+                                                         :type-id]))
+                              (map (fn [[k v]]
+                                     (assoc k :amount (count v)))))))}))
+
 (defn publish-verdict
   "Publishing verdict does the following:
    1. Finalize and publish verdict
    2. Update application state
    3. Inspection summaries
    4. Other document updates (e.g., waste plan -> waste report)
-   4a. Construct buildings array
-   5. Freeze (locked and read-only) verdict attachments and update TOS details
-   6. TODO: Create tasks
-   7. Generate section
-   8. Create PDF/A for the verdict
-   9. Generate KuntaGML
-  10. TODO: Assignments?"
+   5. Construct buildings array
+   6. Freeze (locked and read-only) verdict attachments and update TOS details
+   7. TODO: Create tasks
+   8. Generate section
+   9. Create PDF/A for the verdict
+  10. Generate KuntaGML
+  11. TODO: Assignments?"
   [{:keys [created application user organization] :as command}]
-  (let [verdict    (->> (command->verdict command)
-                        (enrich-verdict command)
-                        (insert-section (:organization application) created))
-        next-state (sm/verdict-given-state application)
-        att-ids    (->> (:attachments application)
-                        (filter #(= (-> % :target :id) (:id verdict)))
-                        (map :id))
-        buildings-updates {:buildings (->buildings-array application)}]
+  (let [verdict                (->> (command->verdict command)
+                                    (enrich-verdict command)
+                                    (insert-section (:organization application)
+                                                    created))
+        next-state             (sm/verdict-given-state application)
+        {att-items :items
+         update-fn :update-fn} (attachment-items command verdict)
+        buildings-updates      {:buildings (->buildings-array application)}]
     (verdict-update command
                     (util/deep-merge
                      {$set (merge
-                            {:pate-verdicts.$.data      (:data verdict)
+                            {:pate-verdicts.$.data      (update-fn (:data verdict))
                              :pate-verdicts.$.published created}
                             buildings-updates
                             (att/attachment-array-updates (:id application)
-                                                          (comp #{(:id verdict)} :id :target)
+                                                          #(util/includes-as-kw? (map :id att-items)
+                                                                                 (:id %))
                                                           :readOnly true
                                                           :locked   true))}
                      (app-state/state-transition-update next-state

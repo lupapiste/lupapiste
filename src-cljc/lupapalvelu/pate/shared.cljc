@@ -770,12 +770,12 @@
                                      :vss-luokka             {:docgen "pate-string"}
                                      :paloluokka             {:docgen "pate-string"}
                                      :show-building          {:docgen "required-in-verdict"}}}
-      :attachments      {:attachments {:i18nkey    :application.verdict-attachments
+      :upload           {:attachments {:i18nkey    :application.verdict-attachments
                                        :type-group #"paatoksenteko"
                                        :default    :paatoksenteko.paatosote
                                        :dropzone   "#application-pate-verdict-tab"
                                        :multiple?  true}}
-      :old-attachments  {:application-attachments {:i18nkey :application.verdict-attachments}}})
+      :attachments      {:application-attachments {:i18nkey :application.verdict-attachments}}})
     :sections
     [{:id   "pate-dates"
       :grid {:columns 7
@@ -933,14 +933,14 @@
                                                         :show? :_meta.editing?}]}
                                               ]}}]]}}
      {:id       "attachments"
-      :buttons? false
       :grid     {:columns 7
                  :rows    [[{:col  6
                              :dict :attachments}]]}}
-     {:id   "application-attachments"
-      :grid {:columns 7
+     {:id   "upload"
+            :buttons? false
+:grid {:columns 7
              :rows    [[{:col  6
-                         :dict :old-attachments}]]}}]}})
+                         :dict :upload}]]}}]}})
 
 (sc/validate PateVerdict (:r verdict-schemas))
 
