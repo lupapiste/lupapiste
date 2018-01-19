@@ -136,21 +136,6 @@
   (quick-check 100 user-is-authority-in-organization-prop :max-size 50)
   => passing-quick-check)
 
-(def validate-authority-in-organization-prop
-  (prop/for-all [{:keys [user organization-id]} user-and-organization-id-generator]
-    (let [org-id (name organization-id)
-          command {:user user
-                   :application {:organization org-id}}
-          result (catch-all (validate-authority-in-organization command))]
-      (if (user-is-authority-in-organization? user org-id)
-        (nil? result)
-        (fail? result)))))
-
-(fact :qc validate-authority-in-organization-spec
-  (quick-check 100 validate-authority-in-organization-prop :max-size 50)
-  => passing-quick-check)
-
-
 (facts municipality-name->system-user-email
   (fact "srting with caps"
     (municipality-name->system-user-email "Kunta") => "jarjestelmatunnus.kunta@lupapiste.fi")

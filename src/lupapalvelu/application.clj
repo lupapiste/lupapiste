@@ -78,21 +78,19 @@
   (count (or (:linkPermitData application)
              (:linkPermitData (meta-fields/enrich-with-link-permit-data application)))))
 
-(defn- required-link-permits [application]
+(defn- count-required-link-permits [application]
   (let [muutoslupa? (= :muutoslupa (keyword (:permitSubtype application)))]
     (->> (get-operations application)
          (map :name)
          (map op/required-link-permits)
          (reduce + (if muutoslupa? 1 0)))))
 
-(defn validate-link-permits [application]
-  (when (> (required-link-permits application) (count-link-permits application))
-    (fail :error.permit-must-have-link-permit)))
+(defn extra-link-permits? [application]
+  (< (count-required-link-permits application) (count-link-permits application)))
 
-(defn authorized-to-remove-link-permit [{user :user application :application}]
-  (when (and (not (usr/authority? user))
-             (>= (required-link-permits application) (count-link-permits application)))
-    unauthorized))
+(defn validate-link-permits [application]
+  (when (> (count-required-link-permits application) (count-link-permits application))
+    (fail :error.permit-must-have-link-permit)))
 
 (defn validate-only-authority-before-verdict-given
   "Validator: Restrict applicant access before the application verdict

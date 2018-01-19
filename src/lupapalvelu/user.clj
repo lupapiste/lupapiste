@@ -310,16 +310,6 @@
   (let [org-set (organization-ids-by-roles user (set valid-org-authz-roles))]
     (contains? org-set organization-id)))
 
-(defn validate-authority-in-organization
-  "Validator: current user must be an authority. To be used in commands'
-   :pre-check vectors."
-  [{:keys [user application]}]
-  (when-let [organization-id (:organization application)]
-    (when-not (user-is-authority-in-organization? user organization-id)
-      (fail! :error.unauthorized
-             :desc "user is not an authority in applications organization"))))
-
-
 (defn org-authz-match [organization-ids & [role]]
   {$or (for [org-id organization-ids] {(str "orgAuthz." (name org-id)) (or role {$exists true})})})
 

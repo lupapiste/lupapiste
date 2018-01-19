@@ -34,11 +34,6 @@
       (when (and (not (:sopimus verdict)) (agreement-subtype? app))
         (fail :error.ya-sijoitussopimus-invalid-subtype)))))
 
-(defn authority-only [{app :application user :user}]
-  (when (and (= (:permitType app) permit/YA)
-             (not (usr/user-is-authority-in-organization? user (:organization app))))
-    (fail :error.ya-subtype-change-authority-only)))
-
 (defn- validate-link-agreements-state [link-permit]
   (when-not (app/verdict-given? link-permit)
     (fail :error.link-permit-app-not-in-post-verdict-state)))

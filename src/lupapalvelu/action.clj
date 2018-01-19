@@ -379,15 +379,6 @@
     (info "invalid type:" (name type))
     (fail :error.invalid-type)))
 
-(defn outside-authority-only
-  "Pre-check that fails if the current user is authority in the
-  application organisation."
-  [{:keys [user application] :as command}]
-  (when (usr/user-is-authority-in-organization? user (:organization application))
-    unauthorized))
-
-
-
 (defn missing-roles [command]
   (when-not (has-required-user-role command (meta-data command))
     (tracef "command '%s' is unauthorized for role '%s'" (:action command) (-> command :user :role))

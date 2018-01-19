@@ -1,0 +1,79 @@
+{:global       {:applicant          #{:application/create
+                                      :application/show-operations
+                                      :application/accordions-open}
+                :authority          #{:application/create
+                                      :application/show-operations}
+                :oirAuthority       #{:application/read
+                                      :application/show-operations
+                                      :application/show-inforequest-markers
+                                      :application/cancel
+                                      :application/mark-everything-seen
+                                      :application/change-location-in-pre-verdict-states
+                                      :application/edit-drawings}}
+ :organization {:roles/any          #{:application/mark-everything-seen}
+                :authority          #{:application/read
+                                      :application/submit
+                                      :application/request-for-complement
+                                      :application/cancel
+                                      :application/edit
+                                      :application/edit-drawings
+                                      :application/edit-permit-subtype
+                                      :application/edit-permit-subtype-in-ya
+                                      :application/edit-warranty-dates
+                                      :application/edit-handlers
+                                      :application/remove-link-permit
+                                      :application/remove-extra-link-permit
+                                      :application/access-backend
+                                      :application/show-authorities
+                                      :application/show-commenters
+                                      :application/show-inforequest-markers
+                                      :application/change-location-in-pre-verdict-states
+                                      :application/change-location-in-post-verdict-states
+                                      :application/change-state}
+                :approver           #{:application/approve
+                                      :application/read
+                                      :application/submit
+                                      :application/request-for-complement
+                                      :application/cancel
+                                      :application/edit
+                                      :application/edit-drawings
+                                      :application/edit-permit-subtype
+                                      :application/edit-permit-subtype-in-ya
+                                      :application/edit-warranty-dates
+                                      :application/edit-handlers
+                                      :application/remove-link-permit
+                                      :application/remove-extra-link-permit
+                                      :application/access-backend
+                                      :application/show-authorities
+                                      :application/show-commenters
+                                      :application/show-inforequest-markers
+                                      :application/change-location-in-pre-verdict-states
+                                      :application/change-location-in-post-verdict-states
+                                      :application/change-state}
+                :commenter          #{:application/read}
+                :reader             #{:application/read}
+                :tos-editor         #{:application/edit-tos-function}
+                :archivist          #{:application/archive}
+                :digitizer          #{:application/show-authorities}}
+ :application  {:roles/any          #{:application/read}
+                :owner              #{:application/read-draft
+                                      :application/submit
+                                      :application/cancel-in-restricted-states
+                                      :application/edit
+                                      :application/edit-permit-subtype
+                                      :application/remove-extra-link-permit
+                                      :application/change-location-in-pre-verdict-states}
+                :writer             #{:application/read-draft
+                                      :application/submit
+                                      :application/cancel-in-restricted-states
+                                      :application/edit
+                                      :application/edit-permit-subtype
+                                      :application/remove-extra-link-permit
+                                      :application/change-location-in-pre-verdict-states}}
+ :inforequest  {:owner              #{:application/cancel}
+                :writer             #{:application/cancel}}
+ :foreman-app  {:foreman            #{:application/read-draft
+                                      :application/submit
+                                      :application/cancel-in-restricted-states
+                                      :application/edit
+                                      :application/edit-permit-subtype}}}

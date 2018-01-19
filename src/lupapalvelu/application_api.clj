@@ -33,6 +33,7 @@
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.permissions :refer [defpermissions defcontext] :as permissions]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
@@ -42,6 +43,8 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
             [lupapalvelu.ya :as ya])
   (:import (java.net SocketTimeoutException)))
+
+(defpermissions :application (util/read-edn-resource "permissions/application.edn"))
 
 (defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
   (assoc (notifications/create-app-model command conf recipient)
@@ -73,10 +76,7 @@
 
 (defquery application
   {:parameters       [:id]
-   :states           states/all-states
-   :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles roles/all-authz-roles
-   :org-authz-roles  roles/reader-org-authz-roles}
+   :permissions      [{:required [:application/read]}]}
   [{:keys [application user] :as command}]
   (if application
     (ok :application (app/post-process-app command)
@@ -84,45 +84,31 @@
     (fail :error.application-not-found)))
 
 (defquery application-authorities
-  {:user-roles #{:authority}
-   :org-authz-roles (conj roles/default-org-authz-roles :digitizer)
+  {:permissions [{:required [:application/show-authorities]}]
    :states     (states/all-states-but :draft)
    :parameters [:id]}
   [{app :application}]
   (ok :authorities (app/application-org-authz-users app #{"authority" "digitizer"})))
 
 (defquery application-commenters
-  {:user-roles #{:authority}
+  {:permissions [{:required [:application/show-commenters]}]
    :states     (states/all-states-but :draft)
    :parameters [:id]}
   [{app :application}]
   (ok :authorities (app/application-org-authz-users app #{"authority" "commenter"})))
 
-(defn validate-authority-in-applications-org
-  [{:keys [user application]}]
-  (when-not (usr/user-is-authority-in-organization? user (:organization application))
-    (fail :error.unauthorized
-          :source ::validate-authority-in-applications-org)))
-
 (defquery enable-accordions
-  {:description "Pseudo-query for checking if accordions should be open or
-                 closed"
-   :user-roles roles/all-authenticated-user-roles
-   :pre-checks [(action/some-pre-check
-                  permit/is-archiving-project
-                  (action/and-pre-check
-                    (permit/validate-permit-type-is :YA)
-                    usr/validate-authority
-                    validate-authority-in-applications-org)
-                  (action/not-pre-check
-                     usr/validate-authority
-                    :error.unauthorized :source ::enable-accordions))]}
+  {:description "Pseudo-query for checking if accordions should be open or closed"
+   :permissions [{:description "Always when permit type is YA or ARK (archiving project)"
+                  :context  {:application {:permitType #{:YA :ARK}}}
+                  :required [:application/read]}
+
+                 {:required [:application/read :application/accordions-open]}]}
   [_])
 
 (defquery party-document-names
   {:parameters [:id]
-   :user-roles #{:applicant :authority}
-   :states     states/all-application-or-archiving-project-states}
+   :permissions [{:required [:application/read]}]}
   [{{:keys [documents schema-version state] :as application} :application}]
   (let [op-meta (op/get-primary-operation-metadata application)
         original-schema-names   (->> (select-keys op-meta [:required :optional]) vals (apply concat))
@@ -142,17 +128,16 @@
 (defcommand mark-seen
   {:parameters       [id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (app/collections-to-be-seen type) (fail :error.unknown-type)))]
-   :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles roles/all-authz-roles
-   :org-authz-roles roles/reader-org-authz-roles  ;; For info-links
-   :states           states/all-states
-   :pre-checks       [app/validate-authority-in-drafts]}
+   :permissions      [{:context {:application {:state #{:draft}}}
+                       :required [:application/read-draft]}
+
+                      {:required [:application/read]}]}
   [{:keys [data user created] :as command}]
   (update-application command {$set (app/mark-collection-seen-update user created type)}))
 
 (defcommand mark-everything-seen
   {:parameters [:id]
-   :user-roles #{:authority :oirAuthority}
+   :permissions [{:required [:application/read :application/mark-everything-seen]}]
    :states     (states/all-states-but [:draft :archived])}
   [{:keys [application user created] :as command}]
   (update-application command {$set (app/mark-indicators-seen-updates application user created)}))
@@ -188,8 +173,8 @@
                 validate-handler-id-in-application
                 validate-handler-in-organization]
    :input-validators [(partial action/non-blank-parameters [:id :userId :roleId])]
-   :user-roles #{:authority}
-   :states     (states/all-states-but :draft :canceled)}
+   :states     (states/all-states-but :draft :canceled)
+   :permissions [{:required [:application/edit-handlers]}]}
   [{created :created {handlers :handlers application-org :organization} :application user :user :as command}]
   (let [handler (->> (usr/find-user {:id userId (util/kw-path :orgAuthz application-org) "authority"})
                      (usr/create-handler handlerId roleId))]
@@ -201,7 +186,7 @@
   {:parameters [id handlerId]
    :pre-checks [validate-handler-id-in-application]
    :input-validators [(partial action/non-blank-parameters [:id :handlerId])]
-   :user-roles #{:authority}
+   :permissions [{:required [:application/edit-handlers]}]
    :states     (states/all-states-but :draft :canceled)}
   [{created :created {handlers :handlers} :application user :user :as command}]
   (let [result   (update-application command
@@ -218,47 +203,58 @@
 ;;
 
 
+(defcontext inforequest-context [{{user-id :id} :user application :application}]
+  ;; Some permissions are added in inforequests by user application role
+  (when (:infoRequest application)
+    {:context-scope :inforequest
+     :context-roles (->> (auth/get-auths application user-id)
+                         (map :role))}))
 
 (defcommand cancel-inforequest
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :user-roles       #{:applicant :authority :oirAuthority}
+   :contexts         [inforequest-context]
+   :permissions      [{:required [:application/cancel]}]
    :notified         true
    :on-success       (notify :application-state-change)
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
   [command]
   (app/cancel-inforequest command))
 
+(defcontext foreman-app-context [{{user-id :id} :user application :application}]
+  ;; Some permissions are added in foreman applicatons by user application role
+  (when (foreman/foreman-app? application)
+    {:context-scope :foreman-app
+     :context-roles (->> (auth/get-auths application user-id)
+                         (map :role))}))
+
 (defcommand cancel-application
   {:parameters       [id text lang]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
-   :user-roles       #{:applicant :authority}
-   :user-authz-roles roles/writer-roles-with-foreman
+   :contexts         [foreman-app-context]
+   :permissions      [{:required [:application/cancel-in-restricted-states]}]
    :notified         true
    :on-success       (notify :application-state-change)
    :states           #{:draft :info :open :submitted}
-   :pre-checks       [(partial sm/validate-state-transition :canceled)
-                      action/outside-authority-only
-                      foreman/allow-foreman-only-in-foreman-app]}
+   :pre-checks       [(partial sm/validate-state-transition :canceled)]}
   [command]
   (app/cancel-application command))
 
 (defcommand cancel-application-authority
   {:parameters       [id text lang]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
-   :user-roles       #{:authority}
+   :permissions      [{:required [:application/cancel]}]
    :notified         true
    :on-success       (notify :application-state-change)
-   :pre-checks       [app/validate-authority-in-drafts
-                      (partial sm/validate-state-transition :canceled)]}
+   :states           states/all-but-draft
+   :pre-checks       [(partial sm/validate-state-transition :canceled)]}
   [command]
   (app/cancel-application command))
 
 (defcommand undo-cancellation
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :user-roles       #{:authority :applicant}
-   :user-authz-roles roles/writer-roles-with-foreman
+   :permissions      [{:required [:application/read]}] ; rely on pre-checks
    :pre-checks       [(fn [{:keys [application]}]
                         (when-not (= :canceled
                                      ((comp keyword :state) (app-state/last-history-item application)))
@@ -267,7 +263,7 @@
                         (when-not (states/all-states (app-state/get-previous-app-state application))
                           (fail :error.illegal-state)))
                       (fn [{:keys [application user]}]
-                        (when-not (usr/authority? user)
+                        (when-not (usr/authority? user) ; TODO: role based check -> permission based check
                           (let [canceled-entry (app-state/last-history-item application)]
                             (when-not (= (:username user) (get-in canceled-entry [:user :username]))
                               (fail :error.undo-only-for-canceler)))))]
@@ -280,7 +276,7 @@
 (defcommand request-for-complement
   {:parameters       [:id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :user-roles       #{:authority}
+   :permissions      [{:required [:application/request-for-complement]}]
    :notified         true
    :on-success       (notify :application-state-change)
    :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
@@ -292,7 +288,7 @@
   criteria depends on the message contents."
    :parameters       [:id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :user-roles       #{:authority}
+   :permissions      [{:required [:application/access-backend]}]
    :states           #{:complementNeeded}}
   [{:keys [application]}]
   (krysp-output/cleanup-output-dir application))
@@ -338,7 +334,8 @@
   {:description "Query for frontend, to display possible errors regarding application submit"
    :parameters [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :user-roles       #{:applicant :authority}
+   :contexts         [foreman-app-context]
+   :permissions      [{:required [:application/read :application/submit]}]
    :states           #{:draft :open}}
   [command]
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data (:application command)))]
@@ -349,20 +346,18 @@
 (defcommand submit-application
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :user-roles       #{:applicant :authority}
-   :user-authz-roles roles/writer-roles-with-foreman
    :states           #{:draft :open}
+   :contexts         [foreman-app-context]
+   :permissions      [{:context  {:application {:state #{:draft}}}
+                       :required [:application/read-draft :application/submit]}
+
+                      {:required [:application/read :application/submit]}]
    :notified         true
    :on-success       [(notify :application-state-change)
                       (notify :neighbor-hearing-requested)
                       (notify :organization-on-submit)
                       (notify :organization-housing-office)]
-   :pre-checks       [(action/some-pre-check
-                       domain/validate-owner-or-write-access
-                       usr/validate-authority-in-organization)
-                      foreman/allow-foreman-only-in-foreman-app
-                      app/validate-authority-in-drafts
-                      (partial sm/validate-state-transition :submitted)]}
+   :pre-checks       [(partial sm/validate-state-transition :submitted)]}
   [{:keys [application] :as command}]
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
     (if-some [errors (seq (submit-validation-errors command))]
@@ -371,7 +366,7 @@
 
 (defcommand refresh-ktj
   {:parameters [:id]
-   :user-roles #{:authority}
+   :permissions [{:required [:application/access-backend]}]
    :states     (states/all-application-states-but (conj states/terminal-states :draft))}
   [{:keys [application created]}]
   (app/autofill-rakennuspaikka application created)
@@ -380,9 +375,11 @@
 (defcommand save-application-drawings
   {:parameters       [:id drawings]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :user-roles       #{:applicant :authority :oirAuthority}
    :states           #{:draft :info :answered :open :submitted :complementNeeded}
-   :pre-checks       [app/validate-authority-in-drafts]}
+   :permissions      [{:context  {:application {:state #{:draft}}}
+                       :required [:application/read-draft :application/edit-drawings]}
+
+                      {:required [:application/read :application/edit-drawings]}]}
   [{:keys [created] :as command}]
   (when (sequential? drawings)
     (let [drawings-with-geojson (map #(assoc % :geometry-wgs84 (draw/wgs84-geometry %)) drawings)]
@@ -417,8 +414,8 @@
 
 (defquery inforequest-markers
           {:parameters       [id lang x y]
-           :user-roles       #{:authority :oirAuthority}
            :states           states/all-inforequest-states
+           :permissions      [{:required [:application/show-inforequest-markers]}]
            :input-validators [(partial action/non-blank-parameters [:id :x :y])]}
           [{:keys [application user]}]
           (let [x (util/->double x)
@@ -460,7 +457,7 @@
 
 (defcommand create-application
   {:parameters       [:operation :x :y :address :propertyId]
-   :user-roles       #{:applicant :authority}
+   :permissions      [{:required [:application/create]}]
    :notified         true                                   ; info requests (also oir)
    :input-validators [(partial action/non-blank-parameters [:operation :address :propertyId])
                       (partial action/property-id-parameters [:propertyId])
@@ -503,11 +500,13 @@
 
 (defcommand add-operation
   {:parameters       [id operation]
-   :user-roles       #{:applicant :authority}
    :states           states/pre-sent-application-states
+   :permissions      [{:context  {:application {:state #{:draft}}}
+                       :required [:application/read-draft :application/edit]}
+
+                      {:required [:application/read :application/edit]}]
    :input-validators [operation-validator]
    :pre-checks       [add-operation-allowed?
-                      app/validate-authority-in-drafts
                       multiple-operations-supported?]}
   [{{app-state :state
      tos-function :tosFunction :as application} :application
@@ -530,9 +529,11 @@
    :categories #{:documents} ; edited from document header
    :input-validators [(partial action/non-blank-parameters [:id :op-id])
                       (partial action/string-parameters [:desc])]
-   :user-roles #{:applicant :authority}
    :states     states/pre-sent-application-states
-   :pre-checks [app/validate-authority-in-drafts]}
+   :permissions [{:context  {:application {:state #{:draft}}}
+                  :required [:application/read-draft :application/edit]}
+
+                 {:required [:application/read :application/edit]}]}
   [{:keys [application] :as command}]
   (if (= (get-in application [:primaryOperation :id]) op-id)
     (update-application command {$set {"primaryOperation.description" desc}})
@@ -542,9 +543,11 @@
   {:parameters [id secondaryOperationId]
    :categories #{:documents} ; edited from document header
    :input-validators [(partial action/non-blank-parameters [:id :secondaryOperationId])]
-   :user-roles #{:applicant :authority}
    :states states/pre-sent-application-states
-   :pre-checks [app/validate-authority-in-drafts]}
+   :permissions [{:context  {:application {:state #{:draft}}}
+                  :required [:application/read-draft :application/edit]}
+
+                 {:required [:application/read :application/edit]}]}
   [{:keys [application] :as command}]
   (let [old-primary-op (:primaryOperation application)
         old-secondary-ops (:secondaryOperations application)
@@ -563,33 +566,39 @@
 
 (defcommand change-permit-sub-type
   {:parameters       [id permitSubtype]
-   :user-roles       #{:applicant :authority}
-   :user-authz-roles roles/writer-roles-with-foreman
    :states           states/pre-sent-application-states
    :input-validators [(partial action/non-blank-parameters [:id :permitSubtype])]
+   :contexts         [foreman-app-context]
+   :permissions      [{:description "draft non-YA application"
+                       :context  {:application {:state #{:draft} :permitType (comp not #{:YA} keyword)}}
+                       :required [:application/read-draft :application/edit-permit-subtype]}
+
+                      {:description "non-YA application"
+                       :context  {:application {:permitType (comp not #{:YA} keyword)}}
+                       :required [:application/read :application/edit-permit-subtype]}
+
+                      {:description "non-draft YA application"
+                       :context  {:application {:state states/all-but-draft :permitType #{:YA}}}
+                       :required [:application/read :application/edit-permit-subtype-in-ya]}]
    :pre-checks       [app/validate-has-subtypes
-                      app/pre-check-permit-subtype
-                      foreman/allow-foreman-only-in-foreman-app
-                      ya/authority-only
-                      app/validate-authority-in-drafts]}
+                      app/pre-check-permit-subtype]}
   [{:keys [application created] :as command}]
   (update-application command {$set {:permitSubtype permitSubtype, :modified created}})
   (ok))
 
-(defn authority-if-post-verdict-state [{user :user app :application}]
-  (when-not (or (usr/authority? user)
-                (states/pre-verdict-states (keyword (:state app))))
-    (fail :error.unauthorized)))
-
 (defcommand change-location
   {:parameters       [id x y address propertyId]
-   :user-roles       #{:applicant :authority :oirAuthority}
    :states           (states/all-states-but (conj states/terminal-states :sent))
    :input-validators [(partial action/non-blank-parameters [:address])
                       (partial action/property-id-parameters [:propertyId])
                       coord/validate-x coord/validate-y]
-   :pre-checks       [authority-if-post-verdict-state
-                      app/validate-authority-in-drafts]}
+   :permissions      [{:context  {:application {:state #{:draft}}}
+                       :required [:application/read-draft :application/change-location-in-pre-verdict-states]}
+
+                      {:context  {:application {:state states/pre-verdict-states}}
+                       :required [:application/read :application/change-location-in-pre-verdict-states]}
+
+                      {:required [:application/read :application/change-location-in-post-verdict-states]}]}
   [{:keys [created application] :as command}]
   (if (= (:municipality application) (prop/municipality-id-by-property-id propertyId))
     (do
@@ -613,9 +622,10 @@
   the transition from appealed to a verdict given state is supported."
    :parameters       [id state]
    :input-validators [(partial action/non-blank-parameters [:state])]
-   :user-roles       #{:authority}
    :states           (conj states/post-verdict-states :underReview)
-   :pre-checks       [permit/valid-permit-types-for-state-change app/valid-new-state]
+   :pre-checks       [permit/valid-permit-types-for-state-change
+                      app/valid-new-state]
+   :permissions      [{:required [:application/change-state]}]
    :notified         true
    :on-success       (notify :application-state-change)}
   [{:keys [user application] :as command}]
@@ -633,7 +643,7 @@
   {:description "Returns the application to draft state."
    :parameters       [id text lang]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
-   :user-roles #{:authority}
+   :permissions      [{:required [:application/change-state]}]
    :states #{:submitted}
    :pre-checks [(partial sm/validate-state-transition :draft)]
    :on-success (notify :application-return-to-draft)}
@@ -653,7 +663,7 @@
    :parameters       [id startDate]
    :input-validators [(partial action/number-parameters [:startDate])
                       (partial action/positive-number-parameters [:startDate])]
-   :user-roles       #{:authority}
+   :permissions      [{:required [:application/edit-warranty-dates]}]
    :states           states/post-verdict-states}
    [{:keys [application] :as command}]
   (update-application command {$set {:warrantyStart startDate}})
@@ -664,7 +674,7 @@
    :parameters       [id endDate]
    :input-validators [(partial action/number-parameters [:endDate])
                       (partial action/positive-number-parameters [:endDate])]
-   :user-roles       #{:authority}
+   :permissions      [{:required [:application/edit-warranty-dates]}]
    :states           states/post-verdict-states}
   [{:keys [application] :as command}]
   (update-application command {$set {:warrantyEnd endDate}})
@@ -673,7 +683,7 @@
 (defquery change-application-state-targets
   {:description "List of possible target states for
   change-application-state transitions."
-   :user-roles  #{:authority}
+   :permissions [{:required [:application/change-state]}]
    :pre-checks  [permit/valid-permit-types-for-state-change]
    :states      (conj states/post-verdict-states :underReview)}
   [{application :application}]
@@ -686,7 +696,7 @@
 (defquery link-permit-required
           {:description "Dummy command for UI logic: returns falsey if link permit is not required."
            :parameters  [:id]
-           :user-roles  #{:applicant :authority}
+           :permissions [{:required [:application/read]}]
            :states      states/pre-sent-application-states
            :pre-checks  [(fn [{application :application}]
                            (when-not (app/validate-link-permits application)
@@ -695,7 +705,7 @@
 (defquery app-matches-for-link-permits
   {:parameters [id]
    :description "Retuns a list of application IDs that can be linked to current application."
-   :user-roles #{:applicant :authority}
+   :permissions [{:required [:application/read]}]
    :states     (states/all-application-states-but (conj states/terminal-states :sent))}
   [{{:keys [propertyId] :as application} :application user :user :as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)
@@ -741,12 +751,14 @@
 
 (defcommand add-link-permit
   {:parameters       ["id" linkPermitId]
-   :user-roles       #{:applicant :authority}
-   :user-authz-roles roles/writer-roles-with-foreman
+   :contexts         [foreman-app-context]
+   :permissions      [{:context  {:application {:state #{:draft}}}
+                       :required [:application/read-draft :application/edit]}
+
+                      {:required [:application/read :application/edit]}]
    :states           (states/all-application-states-but (conj states/terminal-states :sent)) ;; Pitaako olla myos 'sent'-tila?
-   :pre-checks       [validate-linking
-                      app/validate-authority-in-drafts
-                      permit/is-not-archiving-project]
+   :pre-checks       [permit/is-not-archiving-project
+                      validate-linking]
    :input-validators [(partial action/non-blank-parameters [:linkPermitId])
                       (fn [{data :data}] (when (= (:id data) (ss/trim (:linkPermitId data))) (fail :error.link-permit-self-reference)))
                       (action/valid-db-key :linkPermitId)]}
@@ -757,10 +769,14 @@
 (defcommand remove-link-permit-by-app-id
   {:parameters [id linkPermitId]
    :input-validators [(partial action/non-blank-parameters [:id :linkPermitId])]
-   :user-roles #{:applicant :authority}
-   :states     (states/all-application-states-but (conj states/terminal-states :sent))
-   :pre-checks [app/validate-authority-in-drafts ;; Pitaako olla myos 'sent'-tila?
-                app/authorized-to-remove-link-permit]}
+   :permissions      [{:context  {:application (every-pred (comp #{:draft} keyword :state) app/extra-link-permits?)}
+                       :required [:application/read-draft :application/remove-extra-link-permit]}
+
+                      {:context  {:application app/extra-link-permits?}
+                       :required [:application/read :application/remove-extra-link-permit]}
+
+                      {:required [:application/read :application/remove-link-permit]}]
+   :states     (states/all-application-states-but (conj states/terminal-states :sent))}
   [{application :application}]
   (if (mongo/remove :app-links (app/make-mongo-id-for-link-permit id linkPermitId))
     (ok)
@@ -769,7 +785,7 @@
 (defquery all-operations-in
   {:description "Return all operation names in operation tree for given paths."
    :optional-parameters [path]
-   :user-roles          #{:authority :oirAuthority :applicant}
+   :permissions         [{:required [:application/show-operations]}]
    :input-validators    [(partial action/string-parameters [:path])]}
   [command]
   (ok :operations (op/operations-in (ss/split (not-empty path) #"\."))))
@@ -780,8 +796,8 @@
 
 (defcommand create-change-permit
   {:parameters ["id"]
-   :user-roles #{:applicant :authority}
    :states     #{:verdictGiven :constructionStarted :appealed :inUse :onHold}
+   :permissions [{:required [:application/edit]}]
    :pre-checks [(permit/validate-permit-type-is permit/R)
                 (app/reject-primary-operations #{:raktyo-aloit-loppuunsaat})]}
   [{:keys [created user application] :as command}]
@@ -791,7 +807,7 @@
         op-id-mapping (into {} (map
                                  #(vector (:id %) (mongo/create-id))
                                  (conj secondary-ops primary-op)))
-        state (if (usr/authority? user) :open :draft)
+        state (if (usr/authority? user) :open :draft) ; TODO: role based check -> permission based check
         muutoslupa-app (merge domain/application-skeleton
                               (select-keys application
                                            [:propertyId :location
@@ -809,7 +825,7 @@
                                :permitType    permit/R
                                :permitSubtype :muutoslupa
                                :created       created
-                               :opened        (when (usr/authority? user) created)
+                               :opened        (when (usr/authority? user) created) ; TODO: role based check -> permission based check
                                :modified      created
                                :documents     (into [] (map
                                                          (fn [doc]
@@ -858,7 +874,7 @@
 
 (defcommand create-continuation-period-permit
   {:parameters ["id"]
-   :user-roles #{:applicant :authority}
+   :permissions [{:required [:application/edit]}]
    :states     #{:verdictGiven :constructionStarted}
    :pre-checks [(permit/validate-permit-type-is permit/YA) validate-not-jatkolupa-app]}
   [{:keys [created user application] :as command}]
@@ -872,7 +888,7 @@
                                                  :municipality (:municipality application)
                                                  :infoRequest  false
                                                  :messages     []}))
-        continuation-app (merge continuation-app {:authority (:authority application)})
+        continuation-app (merge continuation-app {:handlers (:handlers application)})
         ;;
         ;; ************
         ;; Lain mukaan hankeen aloituspvm on hakupvm + 21pv, tai kunnan paatospvm jos se on tata aiempi.
@@ -901,7 +917,7 @@
 
 (defcommand convert-to-application
   {:parameters [id]
-   :user-roles #{:applicant :authority}
+   :permissions [{:required [:application/edit]}]
    :states     states/all-inforequest-states
    :pre-checks [validate-new-applications-enabled]}
   [{user :user created :created {state :state op :primaryOperation tos-fn :tosFunction :as app} :application org :organization :as command}]
@@ -950,7 +966,7 @@
 
 (defraw redirect-to-vendor-backend
   {:parameters [id]
-   :user-roles #{:authority}
+   :permissions [{:required [:application/access-backend]}]
    :states     states/post-sent-states
    :pre-checks [validate-organization-backend-urls
                 correct-urls-configured]}
@@ -967,8 +983,7 @@
 
 (defquery application-handlers
   {:parameters       [id]
-   :user-authz-roles roles/all-authz-roles
-   :user-roles       #{:authority :applicant :oirAuthority}
+   :permissions      [{:required [:application/read]}]
    :states           states/all-states}
   [{:keys [application lang organization]}]
   (ok :handlers (map (fn [{role-name :name :as handler}]
@@ -981,7 +996,7 @@
   {:description "Every handler defined in the organization, including
   the disabled ones."
    :parameters  [id]
-   :user-roles  #{:authority}
+   :permissions [{:required [:application/show-authorities]}]
    :states      states/all-states}
   [{:keys [organization]}]
   (ok :handlerRoles (:handler-roles @organization)))
@@ -991,9 +1006,7 @@
   on the (delayed) organization parameter and thus implicitly from the
   application id parameter as well."
    :parameters [:id]
-   :user-authz-roles roles/all-authz-roles
-   :org-authz-roles roles/reader-org-authz-roles
-   :user-roles #{:applicant :authority :oirAuthority}
+   :permissions [{:required [:application/read]}]
    :states states/all-states
    :pre-checks  [(fn [{organization :organization}]
                    (when-not (some-> organization deref :permanent-archive-enabled)
@@ -1003,6 +1016,6 @@
 (defquery ya-application
   {:parameters [id]
    :states states/all-states
-   :user-roles #{:applicant :authority}
+   :permissions [{:required [:application/read]}]
    :pre-checks [(permit/validate-permit-type-is permit/YA)]}
   [_])
