@@ -95,4 +95,5 @@
     (fn? ctx-matcher)  (ctx-matcher context)))
 
 (defn get-required-permissions [{permissions :permissions :as command-meta} command]
-  (util/find-first (util/fn-> :context (matching-context? command)) permissions))
+  (or (util/find-first (util/fn-> :context (matching-context? command)) permissions)
+      {:required [:global/not-allowed]}))

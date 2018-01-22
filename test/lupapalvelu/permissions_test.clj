@@ -240,8 +240,8 @@
   (fact "one simple matcher without match"
     (get-required-permissions {:permissions [{:context  {:application {:permitType #{:YA}}}
                                               :required [:application/modify :attachment/ya-delete]}]}
-                              {:application {:permitType :R}})
-    => nil)
+                              {:application {:permitType "R"}})
+    => {:required [:global/not-allowed]})
 
   (fact "multiple matchers - first match is returned - case YA"
     (get-required-permissions {:permissions [{:context  {:application {:state #{:canceled}}}
