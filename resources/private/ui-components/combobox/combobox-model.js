@@ -50,7 +50,8 @@ LUPAPISTE.ComboboxModel = function( params ) {
   self.disposedSubscribe( self.hasFocus, function( flag ) {
     if( hadFocus && !flag ) {
       outsideValue( self.textInput());
-      if (params.prevEntriesKey && self.textInput().length > 0 && ko.unwrap(self.list).length === 0) {
+      if (params.prevEntriesKey && ko.unwrap(self.textInput) && ko.unwrap(self.textInput).length > 0 &&
+        ko.unwrap(self.list).length === 0) {
         rememberEntry(self.textInput());
       }
     }
