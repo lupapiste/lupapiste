@@ -406,12 +406,24 @@
     (pate-components/show-label? schema wrap-label?)
     (docgen/docgen-label-wrap options)))
 
+
+(defn- attachments-table
+  "Items are maps with type-string and amount keys."
+  [items]
+  [:div.tabby.pate-application-attachments
+   (for [{:keys [type-string amount]} (sort-by :type-string items)]
+       [:div.tabby__row
+        {:key type-string}
+        [:div.tabby__cell type-string]
+        [:div.tabby__cell.amount amount]
+        [:div.tabby__cell (common/loc :unit.kpl)]])])
+
 (rum/defc pate-application-attachments < rum/reactive
   (attachments-refresh-mixin)
   [{:keys [path state info]}]
   (let [verdict-id (path/value :id info)
-        marked     (set (path/react path state))
-        items      (->> (attachment-items)
+        marked     (set (path/react path state))]
+    (->> (attachment-items)
                         (filter (fn [{:keys [id target-id]}]
                                   (or (contains? marked id)
                                       (= target-id verdict-id))))
@@ -420,11 +432,13 @@
                         (map (fn [[k v]]
                                {:type-string k
                                 :amount       (count v)}))
-                        (sort-by :type-string))]
-    [:div.tabby.pate-application-attachments
-     (for [{:keys [type-string amount]} items]
-       [:div.tabby__row
-        {:key type-string}
-        [:div.tabby__cell type-string]
-        [:div.tabby__cell.amount amount]
-        [:div.tabby__cell (common/loc :unit.kpl)]])]))
+                        attachments-table)))
+
+(rum/defc pate-frozen-application-attachments
+  "When a verdict is published its attachments list is frozen."
+  [{:keys [path state]}]
+  (->> (path/value path state)
+       (map (fn [{:keys [type-group type-id amount]}]
+          {:type-string (type-loc type-group type-id)
+           :amount      amount}))
+       attachments-table))

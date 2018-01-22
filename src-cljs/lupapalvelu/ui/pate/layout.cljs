@@ -194,8 +194,10 @@
       elem)))
 
 (defmethod view-component :application-attachments
-  [_ {:keys [schema] :as options} & [wrap-label?]]
-  (let [elem (pate-att/pate-application-attachments options)]
+  [_ {:keys [schema info] :as options} & [wrap-label?]]
+  (let [elem ((if (path/value :published info)
+                pate-att/pate-frozen-application-attachments
+                pate-att/pate-application-attachments) options)]
     (if (pate-components/show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options elem)
       elem)))
