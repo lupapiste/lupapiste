@@ -17,8 +17,9 @@ LUPAPISTE.BuildingIdentifierModel = function(params) {
     hub.send("accordionService::saveBuildingId", {docId: self.documentId, value: buildingId, indicator: self.indicator});
   });
 
-  self.dispose = function(buildingId) {
-    hub.send("accordionService::saveBuildingId", {docId: self.documentId, value: buildingId, indicator: self.indicator});
+
+  self.dispose = function() {
+    hub.send("accordionService::saveBuildingId", {docId: self.documentId, value: self.identifier(), indicator: self.indicator});
   };
 
   self.enabled = ko.pureComputed(function() {
