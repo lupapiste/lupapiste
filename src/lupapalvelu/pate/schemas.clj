@@ -282,8 +282,10 @@
   (path-error path))
 
 (defmethod validate-resolution :application-attachments
-  [{:keys [path]}]
-  (path-error path))
+  [{:keys [path  value]}]
+  (or (path-error path)
+      (when (sc/check [sc/Str] value)
+        :error.invalid-value)))
 
 (defn- resolve-dict-value
   [data]
