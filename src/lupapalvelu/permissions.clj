@@ -39,17 +39,17 @@
 (defmacro defcontext
   "Creates an extender function for action context. Function takes only command parameter
   which is passed trough and exteded with output of the extender function. Function should
-  return a map, where :context-scope and :context-role keys are handled as special keys.
+  return a map, where :context-scope and :context-roles keys are handled as special keys.
   Command :permissions are extended by resolving permissions from permission tree by
-  :context-scope and :context-role. :context-scope and :context-role are not merged into
+  :context-scope and :context-roles. :context-scope and :context-roles are not merged into
   command.
 
   example:
   (defcontext thing-context [{{user-id :id} :user app :application}]
     (let [thing (app/find-user-thing user-id app)]
       {:context-scope  :thing
-       :context-role   (:role thing})
-       :thing          thing))
+       :context-roles  [(:role thing)]
+       :thing          thing}))
 
   returns a command extended with :thing and :permissions. :permissions is union of
   original command permissions and permissions for :context-role in :context-scope.
