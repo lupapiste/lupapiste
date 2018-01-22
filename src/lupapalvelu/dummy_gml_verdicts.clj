@@ -63,7 +63,7 @@
                    search-key (case filter-type-name
                                 "rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:kuntalupatunnus" :kuntalupatunnus
                                 "rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus" :asiointitunnus
-                                :default nil)
+                                nil)
                    typeName (if (ss/starts-with typeName "kiito:") "kiito:every-type" typeName)
                    overrides (-> (json/decode overrides)
                                  (clojure.walk/keywordize-keys))]
@@ -123,7 +123,7 @@
                                  [:td (when kuntalupatunnus
                                         (str "kuntalupatunnus = " kuntalupatunnus))]
                                  [:td template-file]
-                                 [:td [:button {:type "submit"} "Remove"]]]) @dummy-verdicts)]]]]]])))
+                                 [:td " "]]) @dummy-verdicts)]]]]]])))
 
   (defn krysp-endpoint-authentication
     [request]
