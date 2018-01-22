@@ -27,7 +27,7 @@
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
 (testable-privates lupapalvelu.application-api add-operation-allowed? validate-handler-role validate-handler-role-not-in-use validate-handler-id-in-application validate-handler-in-organization)
-(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user enrich-tos-function-name)
+(testable-privates lupapalvelu.application count-required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user enrich-tos-function-name)
 (testable-privates lupapalvelu.ya validate-link-agreements-signature validate-link-agreements-state)
 
 (facts "mark-indicators-seen-updates"
@@ -54,23 +54,23 @@
     (schemas/get-schema 1 "b") => {:info {:type :party :repeating false}}
     (schemas/get-schema 1 "c") => {:info {:type :foo :repeating true}}))
 
-(facts required-link-permits
+(facts count-required-link-permits
   (fact "Muutoslupa"
-    (required-link-permits {:permitSubtype "muutoslupa"}) => 1)
+    (count-required-link-permits {:permitSubtype "muutoslupa"}) => 1)
   (fact "Aloitusilmoitus"
-    (required-link-permits {:primaryOperation {:name "aloitusoikeus"}}) => 1)
+    (count-required-link-permits {:primaryOperation {:name "aloitusoikeus"}}) => 1)
   (fact "Poikkeamis"
-    (required-link-permits {:primaryOperation {:name "poikkeamis"}}) => 0)
+    (count-required-link-permits {:primaryOperation {:name "poikkeamis"}}) => 0)
   (fact "ya-jatkoaika, primary"
-    (required-link-permits {:primaryOperation {:name "ya-jatkoaika"}}) => 1)
+    (count-required-link-permits {:primaryOperation {:name "ya-jatkoaika"}}) => 1)
   (fact "ya-jatkoaika, secondary"
-    (required-link-permits {:secondaryOperations [{:name "ya-jatkoaika"}]}) => 1)
+    (count-required-link-permits {:secondaryOperations [{:name "ya-jatkoaika"}]}) => 1)
   (fact "ya-jatkoaika x 2"
-    (required-link-permits {:secondaryOperations [{:name "ya-jatkoaika"} {:name "ya-jatkoaika"}]}) => 2)
+    (count-required-link-permits {:secondaryOperations [{:name "ya-jatkoaika"} {:name "ya-jatkoaika"}]}) => 2)
   (fact "muutoslupa+ya-jatkoaika"
-    (required-link-permits {:permitSubtype "muutoslupa" :secondaryOperations [{:name "ya-jatkoaika"}]}) => 2)
+    (count-required-link-permits {:permitSubtype "muutoslupa" :secondaryOperations [{:name "ya-jatkoaika"}]}) => 2)
   (fact "muutoslupa+aloitusilmoitus+ya-jatkoaika"
-    (required-link-permits {:permitSubtype "muutoslupa" :primaryOperation {:name "aloitusoikeus"} :secondaryOperations [{:name "ya-jatkoaika"}]}) => 3))
+    (count-required-link-permits {:permitSubtype "muutoslupa" :primaryOperation {:name "aloitusoikeus"} :secondaryOperations [{:name "ya-jatkoaika"}]}) => 3))
 
 (facts get-sorted-operation-documents
   (fact "one operation - two docs"
