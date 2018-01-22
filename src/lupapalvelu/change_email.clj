@@ -15,11 +15,10 @@
                                    :auto-consume false
                                    :ttl ttl/change-email-token-ttl)
         token (token/get-token token-id)]
-    (notifications/notify! (if (or (usr/company-user? user) (usr/financial-authority? user))
-                             (if (usr/company-user? user)
-                               :change-email-for-company-user
-                               :change-email-for-financial-authority)
-                             :change-email)
+    (notifications/notify! (cond
+                             (usr/financial-authority? user) :change-email-for-financial-authority
+                             (usr/company-user? user) :change-email-for-company-user
+                             :else :change-email)
                            {:user (assoc user :email new-email)
                             :data {:old-email (:email user)
                                    :new-email new-email
@@ -74,12 +73,13 @@
          id        :id :as user} (usr/get-user-by-id! (:user-id token))
         new-email                (get-in token [:data :new-email])
         com-admin?               (usr/company-admin? user)
+        financial-authority?     (usr/financial-authority? user)
         {vetuma-hetu :userid}    (when (or (usr/verified-person-id? user) com-admin?)
                                    (vetuma/get-user stamp))
         not-company?             (-> user :company :role ss/blank?)]
     (cond
       (not= (:token-type token) :change-email) (fail! :error.token-not-found)
-      (and (not hetu) not-company? (not (usr/financial-authority? user))) (fail! :error.missing-person-id)
+      (and (not hetu) not-company? (not financial-authority?)) (fail! :error.missing-person-id)
       (and (usr/verified-person-id? user) (not= hetu vetuma-hetu)) (fail! :error.personid-mismatch)
       (usr/email-in-use? new-email)            (fail! :error.duplicate-email))
 

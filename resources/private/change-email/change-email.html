@@ -11,7 +11,10 @@
 
       <div data-bind="if: success">
         <p data-bind="ltext: 'change-email.done'"></p>
-        <a href="#login" class="btn btn-primary" data-test-id="login-new-email"><i class="lupicon-log-in"></i><span data-bind="ltext: 'continue'"></span></a>
+        <a data-bind="click: logout" class="btn btn-primary" data-test-id="login-new-email">
+          <i class="lupicon-log-in"></i>
+          <span data-bind="ltext: 'continue'"></span>
+        </a>
       </div>
 
       <div data-bind="if: error">
