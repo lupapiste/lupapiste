@@ -106,9 +106,17 @@
                  {:required [:application/read :application/accordions-open]}]}
   [_])
 
+(defcontext foreman-app-context [{{user-id :id} :user application :application}]
+  ;; Some permissions are added in foreman applicatons by user application role
+  (when (foreman/foreman-app? application)
+    {:context-scope :foreman-app
+     :context-roles (->> (auth/get-auths application user-id)
+                         (map :role))}))
+
 (defquery party-document-names
   {:parameters [:id]
-   :permissions [{:required [:application/read]}]}
+   :contexts    [foreman-app-context]
+   :permissions [{:required [:application/edit]}]}
   [{{:keys [documents schema-version state] :as application} :application}]
   (let [op-meta (op/get-primary-operation-metadata application)
         original-schema-names   (->> (select-keys op-meta [:required :optional]) vals (apply concat))
@@ -221,13 +229,6 @@
   [command]
   (app/cancel-inforequest command))
 
-(defcontext foreman-app-context [{{user-id :id} :user application :application}]
-  ;; Some permissions are added in foreman applicatons by user application role
-  (when (foreman/foreman-app? application)
-    {:context-scope :foreman-app
-     :context-roles (->> (auth/get-auths application user-id)
-                         (map :role))}))
-
 (defcommand cancel-application
   {:parameters       [id text lang]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
@@ -254,7 +255,8 @@
 (defcommand undo-cancellation
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :permissions      [{:required [:application/read]}] ; rely on pre-checks
+   :contexts         [foreman-app-context]
+   :permissions      [{:required [:application/edit]}]
    :pre-checks       [(fn [{:keys [application]}]
                         (when-not (= :canceled
                                      ((comp keyword :state) (app-state/last-history-item application)))
@@ -696,7 +698,8 @@
 (defquery link-permit-required
           {:description "Dummy command for UI logic: returns falsey if link permit is not required."
            :parameters  [:id]
-           :permissions [{:required [:application/read]}]
+           :contexts    [foreman-app-context]
+           :permissions [{:required [:application/edit]}]
            :states      states/pre-sent-application-states
            :pre-checks  [(fn [{application :application}]
                            (when-not (app/validate-link-permits application)
@@ -705,7 +708,8 @@
 (defquery app-matches-for-link-permits
   {:parameters [id]
    :description "Retuns a list of application IDs that can be linked to current application."
-   :permissions [{:required [:application/read]}]
+   :contexts    [foreman-app-context]
+   :permissions [{:required [:application/edit]}]
    :states     (states/all-application-states-but (conj states/terminal-states :sent))}
   [{{:keys [propertyId] :as application} :application user :user :as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)
@@ -785,7 +789,8 @@
 (defquery all-operations-in
   {:description "Return all operation names in operation tree for given paths."
    :optional-parameters [path]
-   :permissions         [{:required [:application/show-operations]}]
+   :contexts            [foreman-app-context]
+   :permissions         [{:required [:application/edit]}]
    :input-validators    [(partial action/string-parameters [:path])]}
   [command]
   (ok :operations (op/operations-in (ss/split (not-empty path) #"\."))))

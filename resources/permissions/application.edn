@@ -1,10 +1,7 @@
 {:global       {:applicant          #{:application/create
-                                      :application/show-operations
                                       :application/accordions-open}
-                :authority          #{:application/create
-                                      :application/show-operations}
+                :authority          #{:application/create}
                 :oirAuthority       #{:application/read
-                                      :application/show-operations
                                       :application/show-inforequest-markers
                                       :application/cancel
                                       :application/mark-everything-seen
