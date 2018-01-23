@@ -33,6 +33,7 @@
                                  {:type-name "rakval:RakennusvalvontaAsia", :kuntalupatunnus nil, :template-file "krysp/dev/verdict.xml"}
                                  {:type-name "rakval:RakennusvalvontaAsia", :kuntalupatunnus "895-2015-001", :template-file "krysp/dev/verdict-rakval-with-area-like-location.xml"}
                                  {:type-name "rakval:RakennusvalvontaAsia", :kuntalupatunnus "895-2015-002", :template-file "krysp/dev/verdict-rakval-with-building-location.xml"}
+                                 {:type-name "rakval:RakennusvalvontaAsia", :kuntalupatunnus "475-2016-001", :template-file "krysp/dev/verdict-rakval-missing-location.xml"}
                                  {:type-name "ymy:Ymparistolupa", :kuntalupatunnus nil, :template-file "krysp/dev/verdict-yl.xml"}
                                  {:type-name "ymm:MaaAineslupaAsia", :kuntalupatunnus nil, :template-file "krysp/dev/verdict-mal.xml"}
                                  {:type-name "ymv:Vapautus", :kuntalupatunnus nil, :template-file "krysp/dev/verdict-vvvl.xml"}
