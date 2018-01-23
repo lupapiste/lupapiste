@@ -36,7 +36,8 @@
                                 :doc (get doc-map doc-name)
                                 :updates updates)
                        => ok?))]
-    (update-doc "hankkeen-kuvaus" [["kuvaus" "Description"]])
+    (update-doc "hankkeen-kuvaus" [["kuvaus" "Description"]
+                                   ["poikkeamat" "Deviation from mean."]])
     (update-doc "rakennuspaikka" [["hallintaperuste" "oma"]])
     (fact "Select building"
       (command apikey :merge-details-from-krysp

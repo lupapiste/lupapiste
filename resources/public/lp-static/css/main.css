@@ -28674,6 +28674,10 @@ div.pate-verdict div.pate-section div.section-header {
   padding: 0;
 }
 
+div.pate-verdict div.pate-section div.section-header.pate-section--no-border {
+  border-top: none;
+}
+
 div.pate-verdict div.pate-section div.section-header div.verdict-buttons {
   padding-top: 6px;
   position: absolute;

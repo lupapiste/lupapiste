@@ -66,8 +66,8 @@
 ;; Phrases
 
 (def phrase-categories #{:paatosteksti :lupaehdot :naapurit
-                         :muutoksenhaku :vakuus :vaativuus
-                         :rakennusoikeus :kaava :toimenpide-julkipanoon})
+                         :muutoksenhaku :vaativuus :rakennusoikeus
+                         :kaava :toimenpide-julkipanoon :yleinen})
 
 (def path-type (sc/conditional
                 ;; Joined kw-path (e.g. :one.two.three)
@@ -514,6 +514,8 @@
                 :complexity-text  {:phrase-text {:label?   false
                                                  :category :vaativuus}}
                 ;; Text sections
+                :extra-info       {:loc-text :pate-extra-info.text}
+                :deviations       {:loc-text :pate-deviations.text}
                 :rights           {:loc-text :pate-rights.text}
                 :purpose          {:loc-text :pate-purpose.text}
                 :statements       {:loc-text :pate-statements.text}
@@ -521,12 +523,15 @@
                 :autopaikat       {:docgen "pate-verdict-check"}
                 :vss-luokka       {:docgen "pate-verdict-check"}
                 :paloluokka       {:docgen "pate-verdict-check"}
+                ;; Attachments section
+                :upload           {:docgen "pate-verdict-check"}
                 ;; Removable sections
                 :removed-sections {:keymap (zipmap [:foremen :reviews :plans
                                                     :conditions :neighbors
                                                     :appeal :statements :collateral
+                                                    :extra-info :deviations
                                                     :complexity :rights :purpose
-                                                    :buildings]
+                                                    :buildings :attachments]
                                                    (repeat false))}}
    :sections [{:id         "verdict"
                :loc-prefix :pate-verdict
@@ -577,6 +582,8 @@
                             :rows    [[{:dict :complexity }]
                                       [{:id   "text"
                                         :dict :complexity-text}]]}}
+              (text-section :extra-info)
+              (text-section :deviations)
               (text-section :rights)
               (text-section :purpose)
               (text-section :statements)
@@ -590,7 +597,14 @@
                                                                       {:dict check
                                                                        :id   check
                                                                        :css  [:pate-condition-box]})
-                                                                    [:autopaikat :vss-luokka :paloluokka])}}]]}}]})
+                                                                    [:autopaikat :vss-luokka :paloluokka])}}]]}}
+              {:id         "attachments"
+               :loc-prefix :application.verdict-attachments
+               :grid       {:columns 1
+                            :rows    [[{:loc-prefix :pate.attachments
+                                        :list       {:labels? false
+                                                     :items   [{:id   :upload
+                                                                :dict :upload}]}}]]}}]})
 
 (sc/validate PateVerdictTemplate default-verdict-template)
 
@@ -676,6 +690,7 @@
 
 (defschema PateVerdictSection
   (merge PateLayout
+         PateCss
          {:id   keyword-or-string ;; Also title localization key
           (sc/optional-key :buttons?) sc/Bool ;; Show edit button? (default true)
           :grid PateGrid}))
@@ -739,7 +754,6 @@
               [:pate-reviews :reviews true true]])
      {:conditions-title {:loc-text :phrase.category.lupaehdot}
       :conditions       {:repeating {:condition        {:phrase-text {:label?   false
-                                                                      ;;:i18nkey  :pate-condition
                                                                       :category :lupaehdot}}
                                      :remove-condition {:button {:i18nkey :remove
                                                                  :label?  false
@@ -757,9 +771,11 @@
       :collateral-date  {:docgen "pate-date"}
       :collateral-type  {:docgen "collateral-type"}
       :appeal           {:phrase-text {:category :muutoksenhaku}}
-      :complexity       (req {:docgen "pate-complexity"})
+      :complexity       {:docgen "pate-complexity"}
       :complexity-text  {:phrase-text {:label?   false
                                        :category :vaativuus}}
+      :extra-info       {:phrase-text {:category :yleinen}}
+      :deviations       {:phrase-text {:category :yleinen}}
       :rights           {:phrase-text {:category :rakennusoikeus}}
       :purpose          {:phrase-text {:category :kaava}}
       :buildings        {:repeating {:building-name          {:placeholder {:label? false
@@ -771,6 +787,7 @@
                                      :paloluokka             {:docgen "pate-string"}
                                      :show-building          {:docgen "required-in-verdict"}}}
       :upload           {:attachments {:i18nkey    :application.verdict-attachments
+                                       :label?     false
                                        :type-group #"paatoksenteko"
                                        :default    :paatoksenteko.paatosote
                                        :dropzone   "#application-pate-verdict-tab"
@@ -783,7 +800,8 @@
                          :dict :verdict-date}
                         {:id    "automatic-verdict-dates"
                          :col   2
-                         :show? :_meta.editing?
+                         :show? [:AND :_meta.editing?
+                                 (cons :OR (map #(util/kw-path :? %) verdict-dates))]
                          :dict  :automatic-verdict-dates}]
                        {:id         "deltas"
                         :css        [:pate-date]
@@ -847,6 +865,7 @@
                            [:foremen :plans :reviews])}}
      {:id   "conditions"
       :grid {:columns 1
+             :show?   :?.conditions
              :rows    [[{:css  :pate-label
                          :dict :conditions-title}]
                        [{:grid {:columns   9
@@ -905,6 +924,18 @@
                               :row   [{:col        6
                                        :loc-prefix :phrase.category.kaava
                                        :dict       :purpose}]}]}}
+     {:id "extra-info"
+      :loc-prefix :pate-extra-info
+      :show? :?.extra-info
+      :grid {:columns 7
+             :rows [[{:col 6
+                      :dict :extra-info}]]}}
+     {:id "deviations"
+      :loc-prefix :pate-deviations
+      :show? :?.extra-info
+      :grid {:columns 7
+             :rows [[{:col 6
+                      :dict :deviations}]]}}
      {:id    "buildings"
       :show? :?.buildings
       :grid  {:columns 7
@@ -932,15 +963,16 @@
                                                        {:dict  :show-building
                                                         :show? :_meta.editing?}]}
                                               ]}}]]}}
-     {:id       "attachments"
+     {:id   "attachments"
+      :grid {:columns 7
+             :rows    [[{:col  6
+                         :dict :attachments}]]}}
+     {:id       "upload"
+      :css      :pate-section--no-border
+      :buttons? false
       :grid     {:columns 7
                  :rows    [[{:col  6
-                             :dict :attachments}]]}}
-     {:id   "upload"
-            :buttons? false
-:grid {:columns 7
-             :rows    [[{:col  6
-                         :dict :upload}]]}}]}})
+                             :dict :upload}]]}}]}})
 
 (sc/validate PateVerdict (:r verdict-schemas))
 

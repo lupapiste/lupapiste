@@ -377,24 +377,26 @@
                                 []
                                 (sort #(compare (group-loc %1) (group-loc %2))
                                       (keys att-items)))]
-    [:div.pate-select-application-attachments
-     (for [{:keys [group type id filename] :as item} items]
-       [:div
-        {:key (or id group)}
-        (components/checkbox
-          (if group
-            {:text       (group-loc group)
-             :value      (group-selected? group)
-             :prefix     :pate-attachment-group
-             :handler-fn #(toggle (map :id (get att-items group)) %)
-             :disabled   disabled?}
-            {:text       (str (type-loc (:type-group type)
-                                        (:type-id type))
-                              ". " filename)
-             :value      (selected? item)
-             :prefix     :pate-attachment-check
-             :handler-fn #(toggle [id] %)
-             :disabled   (or disabled? (targeted? item))}))])]))
+    (if (seq items)
+      [:div.pate-select-application-attachments
+       (for [{:keys [group type id filename] :as item} items]
+         [:div
+          {:key (or id group)}
+          (components/checkbox
+           (if group
+             {:text       (group-loc group)
+              :value      (group-selected? group)
+              :prefix     :pate-attachment-group
+              :handler-fn #(toggle (map :id (get att-items group)) %)
+              :disabled   disabled?}
+             {:text       (str (type-loc (:type-group type)
+                                         (:type-id type))
+                               ". " filename)
+              :value      (selected? item)
+              :prefix     :pate-attachment-check
+              :handler-fn #(toggle [id] %)
+              :disabled   (or disabled? (targeted? item))}))])]
+      [:span (common/loc :pate.no-attachments)])))
 
 (rum/defc pate-select-application-attachments < rum/reactive
   [{:keys [schema path state info] :as options} & [wrap-label?]]
@@ -424,15 +426,15 @@
   (let [verdict-id (path/value :id info)
         marked     (set (path/react path state))]
     (->> (attachment-items)
-                        (filter (fn [{:keys [id target-id]}]
-                                  (or (contains? marked id)
-                                      (= target-id verdict-id))))
-                        (group-by #(type-loc (-> % :type :type-group)
-                                             (-> % :type :type-id)))
-                        (map (fn [[k v]]
-                               {:type-string k
-                                :amount       (count v)}))
-                        attachments-table)))
+         (filter (fn [{:keys [id target-id]}]
+                   (or (contains? marked id)
+                       (= target-id verdict-id))))
+         (group-by #(type-loc (-> % :type :type-group)
+                              (-> % :type :type-id)))
+         (map (fn [[k v]]
+                {:type-string k
+                 :amount      (count v)}))
+         attachments-table)))
 
 (rum/defc pate-frozen-application-attachments
   "When a verdict is published its attachments list is frozen."

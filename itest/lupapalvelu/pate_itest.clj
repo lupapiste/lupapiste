@@ -789,7 +789,7 @@
     (fact "Add extra review (not in the template)"
       (command sipoo :add-verdict-template-review
                :category "r") => ok?)
-    (fact "Full template"
+    (fact "Full template without attachments"
       (command sipoo :set-verdict-template-name
                :template-id template-id
                :name "Full template") => ok?)
@@ -809,7 +809,8 @@
                                "complexity-text" "Complex explanation."
                                "autopaikat" true
                                "paloluokka" true
-                               "vss-luokka" true)
+                               "vss-luokka" true
+                               [:removed-sections :attachments] true)
     (fact "Delete review"
       (command sipoo :update-verdict-template-review
                :review-id review-delete-id
@@ -911,7 +912,10 @@
                                    :neighbor-states  []
                                    :reviews-included true
                                    :reviews          [(:id review)]
-                                   :statements       ""})
+                                   :statements       ""
+                                   :deviations       "Deviation from mean."})
+                (fact "Attachments cannot be added to the verdict"
+                  (edit-verdict :attachments ["foobar"]) => fail?)
                 (facts "Verdict draft conditions"
                   (let [conditions (->> data :conditions
                                         (reduce-kv (fn [acc k v]
@@ -1190,7 +1194,7 @@
                                            :value value) => ok?))]
                         (fact "Disable julkipano, muutoksenhaku, lainvoimainen and aloitettava"
                           (edit-template [:verdict-dates] ["anto" "voimassa"]))
-                        (fact "Remove all the other sections except buildings (and verdict)"
+                        (fact "Remove all the other sections except buildings and attachments (and verdict)"
                           (edit-template [:removed-sections :foremen] true)
                           (edit-template [:removed-sections :plans] true)
                           (edit-template [:removed-sections :reviews] true)
@@ -1201,7 +1205,10 @@
                           (edit-template [:removed-sections :collateral] true)
                           (edit-template [:removed-sections :complexity] true)
                           (edit-template [:removed-sections :rights] true)
-                          (edit-template [:removed-sections :purpose] true))
+                          (edit-template [:removed-sections :purpose] true)
+                          (edit-template [:removed-sections :extra-info] true)
+                          (edit-template [:removed-sections :deviations] true)
+                          (edit-template [:removed-sections :attachments] false))
                         (fact "Unselect autopaikat and vss-luokka"
                           (edit-template :autopaikat false)
                           (edit-template :vss-luokka false))
@@ -1242,7 +1249,8 @@
                                                   :building-id   "1234567881"
                                                   :operation     "pientalo"
                                                   :tag           "Hao"
-                                                  :paloluokka    ""}}}
+                                                  :paloluokka    ""}}
+                                 :attachments           []}
                         (facts "Cannot edit verdict values not in the template"
                           (let [check-fn (fn [kwp value]
                                            (fact {:midje/description (str "Bad path " kwp)}

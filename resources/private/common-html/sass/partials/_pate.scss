@@ -316,6 +316,9 @@ div.pate-verdict {
       background-color: initial;
       border: none;
       border-top: 1px solid $gray221;
+      &.pate-section--no-border {
+        border-top: none;
+      }
       padding: 0;
       div.verdict-buttons {
         padding-top: $marginS;

@@ -38,27 +38,36 @@
        neighbors))
 
 (defn data-draft
-  "Kmap keys are draft targets (kw-paths). Values are either kw-paths or
-  maps with :fn and :skip-nil? properties. :fn is the source
-  (full) data handler function. If :skip-nil? is true the nil value
-  entries are skipped (default false and nil value is substituted with
-  empty string). The second argument is the published template
-  snapshot."
+  "Kmap keys are draft targets (kw-paths). Each value is either
+
+   1. kw-path: Path into template value to be taken as the initial value.
+
+   2. Maps with :fn and :skip-nil? properties. :fn is the source
+  (full) data handler function. If :skip-nil? is true then nil value
+  entries are skipped.
+
+   3. Anything else is used as an initial value as is.
+
+  Nil values are substituted with empty string (unless :skip-nil? is
+  true in 2).
+
+  The second argument is the published template snapshot."
   [kmap {data :data}]
-  (reduce (fn [acc [k v]]
-            (let [v-fn   (get v :fn identity)
-                  value  (if-let [v-fn (get v :fn)]
-                           (v-fn data)
-                           (get-in data (util/split-kw-path v)))]
-              (if (and (nil? value) (:skip-nil? v))
-                acc
-                (assoc-in acc
-                          (util/split-kw-path k)
-                          (if (nil? value)
-                            ""
-                            value)))))
-          {}
-          kmap))
+  (reduce-kv (fn [acc k v]
+               (let [v-fn  (get v :fn)
+                     value (cond
+                             v-fn         (v-fn data)
+                             (keyword? v) (get-in data (util/split-kw-path v))
+                             :else v)]
+                 (if (and (nil? value) (:skip-nil? v))
+                   acc
+                   (assoc-in acc
+                             (util/split-kw-path k)
+                             (if (nil? value)
+                               ""
+                               value)))))
+             {}
+             kmap))
 
 (defn- map-unremoved-section
   "Map (for data-draft) section only it has not been removed. If
@@ -103,7 +112,8 @@
                                  (merge acc (map-unremoved-section (:data snapshot) k)))
                                {}
                                [:neighbors :appeal :statements :collateral
-                                :complexity :rights :purpose])
+                                :complexity :rights :purpose :extra-info
+                                :attachments])
                        ;; List of conditions to conditions map where keys are ids.
                        (when (map-unremoved-section (:data snapshot) :conditions)
                          {:conditions {:fn        (fn [{:keys [conditions]}]
@@ -113,8 +123,14 @@
                                                                         condition))
                                                             {}
                                                             conditions))
-                                       :skip-nil? true}}
-                         ))
+                                       :skip-nil? true}})
+                       (when (map-unremoved-section (:data snapshot) :deviations)
+                         {:deviations (-> (domain/get-document-by-name application
+                                                                       "hankkeen-kuvaus")
+                                          :data :poikkeamat :value
+                                          (or ""))})
+                       (when (map-unremoved-section (:data snapshot) :attachments)
+                         {:attachments []}))
                 snapshot)
    :references (:settings snapshot)})
 
@@ -146,7 +162,8 @@
                               flatten
                               (remove nil?))
         exclusions       (-<>> [(filter removed? [:appeal :statements
-                                                  :collateral :rights :purpose])
+                                                  :collateral :rights :purpose
+                                                  :extra-info :deviations])
                                 (when (removed? :conditions)
                                   [:conditions :add-condition])
                                 (when (removed? :collateral)
@@ -155,6 +172,11 @@
                                   [:neighbors :neighbor-states])
                                 (when (removed? :complexity)
                                   [:complexity :complexity-text])
+                                (let [no-attachments? (removed? :attachments)]
+                                  [(when no-attachments?
+                                     :attachments)
+                                   (when (or no-attachments? (not (:upload data)))
+                                     :upload)])
                                 (util/difference-as-kw shared/verdict-dates
                                                        (:verdict-dates data))
                                 (if (-> snapshot :settings :boardname)

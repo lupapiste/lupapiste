@@ -83,6 +83,7 @@
 (rum/defc verdict-section-header < rum/reactive
   [{:keys [schema] :as options}]
   [:div.pate-grid-1.section-header
+   {:class (path/css options)}
    (when (and (not (-> schema :buttons? false?))
               (path/enabled? options))
      [:div.row.row--tight
