@@ -172,15 +172,22 @@
 
 (defcommand update-organization-bulletin-scope
   {:user-roles #{:authorityAdmin}
-   :parameters [permitType municipality notificationEmail]
-   :input-validators [permit/permit-type-validator
-                      (partial action/email-validator :notificationEmail)]
+   :parameters [permitType municipality]
+   :optional-parameters [notificationEmail descriptionsFromBackendSystem]
+   :input-validators [permit/permit-type-validator]
    :pre-checks [check-bulletins-enabled]}
-  [{user :user}]
-  (mongo/update-by-query :organizations
-      {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
-      {$set {:scope.$.bulletins.notification-email notificationEmail}})
-  (ok))
+  [{user :user data :data}]
+  (when (and notificationEmail (not (v/valid-email? notificationEmail))
+    (fail! :error.email)))
+  (let [updates (merge (when (util/not-empty-or-nil? notificationEmail)
+                         {:scope.$.bulletins.notification-email notificationEmail})
+                       (when (contains? data :descriptionsFromBackendSystem)
+                         {:scope.$.bulletins.descriptions-from-backend-system descriptionsFromBackendSystem}))]
+    (println updates)
+    (when updates
+      (mongo/update-by-query :organizations
+        {:scope {$elemMatch {:permitType permitType :municipality municipality}}}  {$set updates}))
+    (ok)))
 
 (defcommand remove-organization-local-bulletins-caption
   {:user-roles #{:authorityAdmin}

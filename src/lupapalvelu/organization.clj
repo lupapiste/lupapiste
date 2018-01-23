@@ -138,7 +138,8 @@
                                       (sc/optional-key :ftpUser) sc/Str}
    (sc/optional-key :bulletins) {:enabled sc/Bool
                                  :url sc/Str
-                                 (sc/optional-key :notification-email) sc/Str}})
+                                 (sc/optional-key :notification-email) sc/Str
+                                 (sc/optional-key :descriptions-from-backend-system) sc/Bool}})
 
 (def permit-types (map keyword (keys (permit/permit-types))))
 
@@ -812,6 +813,13 @@
                  permit-type  (filter (comp #{permit-type} :permitType))
                  municipality (filter (comp #{municipality} :municipality)))]
     (boolean (some (comp :enabled :bulletins) scopes))))
+
+(defn bulletin-settings-for-scope
+  [organization permit-type municipality]
+  (let [scopes (cond->> (:scope organization)
+                        permit-type  (filter (comp #{permit-type} :permitType))
+                        municipality (filter (comp #{municipality} :municipality)))]
+    (some :bulletins scopes)))
 
 (defn statement-giver-in-organization
   "Pre-check that fails if the user is statementGiver but not defined

@@ -5,7 +5,39 @@
       <navi-sidebar></navi-sidebar>
       <div class="container container--authority-admin"
            data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+
         <!-- ko if: $root.bulletins.textsInitialized -->
+        <section>
+          <h2 data-bind="ltext: 'auth-admin.bulletin-scope-settings'"></h2>
+          <div data-bind="foreach: {data: $root.bulletins.scopes}">
+            <h3 data-bind="ltext: $data.permitType"></h3>
+            <table class="admin-settings">
+              <thead>
+              <tr>
+                <th data-bind="ltext: 'auth-admin.parameter'"></th>
+                <th data-bind="ltext: 'auth-admin.value'"></th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr data-bind="attr:{'data-test-type': $data.permitType}">
+                <td data-bind="ltext: 'auth-admin.bulletin-notification-email'"></td>
+                <td class="value">
+                  <input type="text" data-bind="value: $data.notificationEmail,
+                                                enable: $root.bulletins.canEdit"/>
+                </td>
+              </tr>
+              <tr data-bind="attr:{'data-test-type': $data.permitType}">
+                <td data-bind="ltext: 'auth-admin.bulletin-descriptions-from-backend-system.enabled'"></td>
+                <td class="value">
+                  <toggle params="value: $data.descriptionsFromBackendSystem,
+                                  prefix: 'checkbox'"></toggle>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          </section>
+
         <section data-bind="with: $root.bulletins.texts">
           <h2 data-bind="ltext: 'auth-admin.local-bulletins-page-texts'"></h2>
           <table class="admin-settings-local-bulletins">
@@ -68,33 +100,6 @@
           <!-- /ko -->
         </section>
         <!-- /ko -->
-        <section>
-          <h2 data-bind="ltext: 'auth-admin.bulletin-notification-emails'"></h2>
-          <table class="admin-settings">
-            <thead>
-              <tr>
-                <th data-bind="ltext: 'auth-admin.parameter'"></th>
-                <th data-bind="ltext: 'auth-admin.value'"></th>
-                <th data-bind="ltext: 'auth-admin.actions'"></th>
-              </tr>
-            </thead>
-            <tbody data-bind="foreach: {data: $root.bulletins.scopes}">
-              <tr data-bind="attr:{'data-test-type': $data.permitType}">
-                <td data-bind="ltext: $data.permitType"></td>
-                <td class="value">
-                  <input type="text" data-bind="value: $data.notificationEmail,
-                                                enable: $root.bulletins.canEdit"/>
-                </td>
-                <td>
-                  <span>
-                    [<a href="#" data-bind="click: $root.bulletins.saveScope, ltext: 'save'"
-                        data-test-id="edit" class="modal"></a>]
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </section>
       </div>
     </section>
   </body>
