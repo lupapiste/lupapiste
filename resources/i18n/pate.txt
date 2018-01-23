@@ -548,3 +548,4 @@
 "pate-deviations.text" "fi" "Mahdolliset poikkeamiset tulee kirjata päätökseen käsin."
 "pate.no-attachments" "fi" "Ei liitteitä"
 "pate.no-attachments" "en" "No attachments"
+"pdf.r.permit" "fi" "Rakennuslupa"

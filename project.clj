@@ -42,6 +42,8 @@
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [org.freemarker/freemarker "2.3.23"]
+                 ; CSS
+                 [garden "1.3.3"]
 
                  ; Encryption and secure hashing
                  [org.jasypt/jasypt "1.9.2"]
