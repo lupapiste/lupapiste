@@ -62,7 +62,7 @@
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :pre-checks       [pate-enabled]
-   :states           states/give-verdict-states}
+   :states           states/post-submitted-states}
   [{:keys [application organization]}]
   (ok :templates (template/application-verdict-templates @organization
                                                          application)))
@@ -76,7 +76,7 @@
    :input-validators [(partial action/non-blank-parameters [:id])]
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :application :published)]
-   :states           states/give-verdict-states}
+   :states           states/post-submitted-states}
   [command]
   (ok (assoc (verdict/new-verdict-draft template-id command)
              :filled false)))
@@ -92,7 +92,7 @@
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :pre-checks       [pate-enabled]
-   :states           (states/all-states-but [:draft :open])}
+   :states           states/post-submitted-states}
   [{:keys [application]}]
   (ok :verdicts (map verdict/verdict-summary
                      (:pate-verdicts application))))
@@ -106,7 +106,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
                       (verdict-exists)]
-   :states           states/give-verdict-states}
+   :states           states/post-submitted-states}
   [command]
   (ok (assoc (verdict/open-verdict command)
              :filled (verdict/verdict-filled? command))))
@@ -120,7 +120,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
                       (verdict-exists :editable?)]
-   :states           (states/all-states-but [:draft :open])}
+   :states           states/post-submitted-states}
   [command]
   (verdict/delete-verdict verdict-id command)
   (ok))
@@ -135,7 +135,7 @@
                       (partial action/vector-parameters [:path])]
    :pre-checks       [pate-enabled
                       (verdict-exists :editable?)]
-   :states           states/give-verdict-states}
+   :states           states/post-submitted-states}
   [command]
   (let [result (verdict/edit-verdict command)]
     (if (:modified result)
@@ -145,7 +145,7 @@
 
 (defcommand publish-pate-verdict
   {:description      "Publishes verdict.
-TODO: create tasks and PDF, application state change, attachments locking."
+TODO: create tasks and PDF, application state change"
    :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
@@ -153,7 +153,9 @@ TODO: create tasks and PDF, application state change, attachments locking."
    :pre-checks       [pate-enabled
                       (verdict-exists :editable?)
                       verdict-filled]
-   :states           states/give-verdict-states
+   ;; As KuntaGML message is generated the application state must be
+   ;; at least :sent
+   :states           states/post-sent-states
    :notified         true
    :on-success       (notify :application-state-change)}
   [command]
@@ -166,7 +168,7 @@ TODO: create tasks and PDF, application state change, attachments locking."
    :parameters      [:id]
    :user-roles      #{:applicant :authority}
    :org-authz-roles roles/reader-org-authz-roles
-   :states          (states/all-states-but [:draft :open])
+   :states          states/post-submitted-states
    :pre-checks      [pate-enabled]}
   [_])
 
@@ -195,7 +197,7 @@ TODO: create tasks and PDF, application state change, attachments locking."
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(verdict-exists :editable?)]
-   :states           states/give-verdict-states}
+   :states           states/post-submitted-states}
   [{application :application created :created}]
   (let [today-long (tc/to-long (t/today-at-midnight))
         updates (create-bulletin application created verdict-id

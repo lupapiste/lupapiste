@@ -278,14 +278,21 @@
         :error.invalid-value-path)))
 
 (defmethod validate-resolution :button
-  [{:keys [path schema value data]}]
+  [{:keys [path]}]
   (path-error path))
+
+(defmethod validate-resolution :application-attachments
+  [{:keys [path  value]}]
+  (or (path-error path)
+      (when (sc/check [sc/Str] value)
+        :error.invalid-value)))
 
 (defn- resolve-dict-value
   [data]
   (let [{:keys [docgen reference-list
                 date-delta multi-select
-                phrase-text keymap button]} data
+                phrase-text keymap button
+                application-attachments]} data
         wrap                                (fn [type schema data]
                                               {:type   type
                                                :schema schema
@@ -298,7 +305,10 @@
       multi-select   (wrap :multi-select shared/PateMultiSelect multi-select)
       phrase-text    (wrap :phrase-text shared/PatePhraseText phrase-text)
       keymap         (wrap :keymap shared/KeyMap keymap)
-      button         (wrap :button shared/PateButton button))))
+      button         (wrap :button shared/PateButton button)
+      application-attachments (wrap :application-attachments
+                                    shared/PateComponent
+                                    application-attachments))))
 
 (defn- validate-dictionary-value
   "Validates that path-value combination is valid for the given
