@@ -1,7 +1,6 @@
 (ns lupapalvelu.comment-api
   (:require [clojure.set :refer [union]]
             [monger.operators :refer :all]
-            [sade.env :as env]
             [sade.util :as util]
             [sade.core :refer [ok fail fail!]]
             [sade.strings :as ss]
@@ -13,7 +12,7 @@
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
-            [lupapalvelu.roles :as roles]
+            [lupapalvelu.permissions :refer [defpermissions]]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]))
 
@@ -56,8 +55,8 @@
 ;; Validation
 ;;
 
-(defn applicant-cant-set-to [{{:keys [to]} :data user :user}]
-  (when (and to (not (usr/authority? user)))
+(defn applicant-cant-set-to [{{:keys [to]} :data perms :permissions}]
+  (when (and to (not (contains? perms :comment/set-target)))
     (fail :error.to-settable-only-by-authority)))
 
 (defn- validate-comment-target [{{:keys [target]} :data}]
@@ -71,36 +70,32 @@
 (def commenting-states (union states/all-inforequest-states (states/all-application-states-but states/terminal-states)))
 
 (defcommand can-target-comment-to-authority
-  {:description "Dummy command for UI logic"
-   :parameters [id]
-   :user-roles #{:authority}
-   :org-authz-roles roles/commenter-org-authz-roles
-   :states      (disj commenting-states :draft)})
+   {:description "Dummy command for UI logic"
+    :parameters [id]
+    :permissions [{:required [:comment/set-target]}]
+    :states      (disj commenting-states :draft)})
 
 (defcommand can-mark-answered
   {:description "Dummy command for UI logic"
-   :user-roles #{:authority :oirAuthority}
+   :permissions [{:required [:comment/mark-answered]}]
    :states      #{:info}})
 
 (defquery comments
   {:parameters [id]
-   :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles roles/comment-user-authz-roles
-   :org-authz-roles roles/commenter-org-authz-roles
+   :permissions [{:required [:comment/read]}]
    :states states/all-states}
   [{{app-id :id :as application} :application}]
-  (ok {:id app-id :comments (comment/enrich-comments application)}))
+  (ok :comments (comment/enrich-comments application)))
 
 (defcommand add-comment
   {:parameters [id text target roles]
    :optional-parameters [to mark-answered openApplication]
-   :user-roles #{:applicant :authority :oirAuthority}
+   :contexts [foreman/foreman-app-context]
+   :permissions [{:context {:application {:state #{:draft}}}
+                  :required [:application/read-draft :comment/add]}
+                 {:required [:comment/add]}]
    :states     commenting-states
-   :user-authz-roles roles/comment-user-authz-roles
-   :org-authz-roles roles/commenter-org-authz-roles
-   :pre-checks [applicant-cant-set-to
-                foreman/allow-foreman-only-in-foreman-app
-                application/validate-authority-in-drafts]
+   :pre-checks [applicant-cant-set-to]
    :input-validators [validate-comment-target
                       (partial action/map-parameters [:target])
                       (partial action/vector-parameters [:roles])]

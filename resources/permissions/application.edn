@@ -27,7 +27,7 @@
                                       :application/change-location-in-pre-verdict-states
                                       :application/change-location-in-post-verdict-states
                                       :application/change-state}
-                :approver           #{:application/approve
+                :approver           #{:application/approve  ;; TODO: could this be just 'approve', as in a supplement for :authority role. Then just 'approver' role couldn't exist.
                                       :application/read
                                       :application/submit
                                       :application/request-for-complement
