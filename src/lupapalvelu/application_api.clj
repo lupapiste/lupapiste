@@ -33,9 +33,7 @@
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.permissions :refer [defpermissions defcontext] :as permissions]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.suti :as suti]
@@ -43,8 +41,6 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
             [lupapalvelu.ya :as ya])
   (:import (java.net SocketTimeoutException)))
-
-(defpermissions :application (util/read-edn-resource "permissions/application.edn"))
 
 (defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
   (assoc (notifications/create-app-model command conf recipient)
@@ -106,16 +102,9 @@
                  {:required [:application/read :application/accordions-open]}]}
   [_])
 
-(defcontext foreman-app-context [{{user-id :id} :user application :application}]
-  ;; Some permissions are added in foreman applicatons by user application role
-  (when (foreman/foreman-app? application)
-    {:context-scope :foreman-app
-     :context-roles (->> (auth/get-auths application user-id)
-                         (map :role))}))
-
 (defquery party-document-names
   {:parameters [:id]
-   :contexts    [foreman-app-context]
+   :contexts    [foreman/foreman-app-context]
    :permissions [{:required [:application/edit]}]}
   [{{:keys [documents schema-version state] :as application} :application}]
   (let [op-meta (op/get-primary-operation-metadata application)
@@ -211,17 +200,10 @@
 ;;
 
 
-(defcontext inforequest-context [{{user-id :id} :user application :application}]
-  ;; Some permissions are added in inforequests by user application role
-  (when (:infoRequest application)
-    {:context-scope :inforequest
-     :context-roles (->> (auth/get-auths application user-id)
-                         (map :role))}))
-
 (defcommand cancel-inforequest
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :contexts         [inforequest-context]
+   :contexts         [open-inforequest/inforequest-context]
    :permissions      [{:required [:application/cancel]}]
    :notified         true
    :on-success       (notify :application-state-change)
@@ -232,7 +214,7 @@
 (defcommand cancel-application
   {:parameters       [id text lang]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
-   :contexts         [foreman-app-context]
+   :contexts         [foreman/foreman-app-context]
    :permissions      [{:required [:application/cancel-in-restricted-states]}]
    :notified         true
    :on-success       (notify :application-state-change)
@@ -255,7 +237,7 @@
 (defcommand undo-cancellation
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :contexts         [foreman-app-context]
+   :contexts         [foreman/foreman-app-context]
    :permissions      [{:required [:application/edit]}]
    :pre-checks       [(fn [{:keys [application]}]
                         (when-not (= :canceled
@@ -336,7 +318,7 @@
   {:description "Query for frontend, to display possible errors regarding application submit"
    :parameters [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :contexts         [foreman-app-context]
+   :contexts         [foreman/foreman-app-context]
    :permissions      [{:required [:application/read :application/submit]}]
    :states           #{:draft :open}}
   [command]
@@ -349,7 +331,7 @@
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :states           #{:draft :open}
-   :contexts         [foreman-app-context]
+   :contexts         [foreman/foreman-app-context]
    :permissions      [{:context  {:application {:state #{:draft}}}
                        :required [:application/read-draft :application/submit]}
 
@@ -570,7 +552,7 @@
   {:parameters       [id permitSubtype]
    :states           states/pre-sent-application-states
    :input-validators [(partial action/non-blank-parameters [:id :permitSubtype])]
-   :contexts         [foreman-app-context]
+   :contexts         [foreman/foreman-app-context]
    :permissions      [{:description "draft non-YA application"
                        :context  {:application {:state #{:draft} :permitType (comp not #{:YA} keyword)}}
                        :required [:application/read-draft :application/edit-permit-subtype]}
@@ -698,7 +680,7 @@
 (defquery link-permit-required
           {:description "Dummy command for UI logic: returns falsey if link permit is not required."
            :parameters  [:id]
-           :contexts    [foreman-app-context]
+           :contexts    [foreman/foreman-app-context]
            :permissions [{:required [:application/edit]}]
            :states      states/pre-sent-application-states
            :pre-checks  [(fn [{application :application}]
@@ -708,7 +690,7 @@
 (defquery app-matches-for-link-permits
   {:parameters [id]
    :description "Retuns a list of application IDs that can be linked to current application."
-   :contexts    [foreman-app-context]
+   :contexts    [foreman/foreman-app-context]
    :permissions [{:required [:application/edit]}]
    :states     (states/all-application-states-but (conj states/terminal-states :sent))}
   [{{:keys [propertyId] :as application} :application user :user :as command}]
@@ -755,7 +737,7 @@
 
 (defcommand add-link-permit
   {:parameters       ["id" linkPermitId]
-   :contexts         [foreman-app-context]
+   :contexts         [foreman/foreman-app-context]
    :permissions      [{:context  {:application {:state #{:draft}}}
                        :required [:application/read-draft :application/edit]}
 
@@ -789,7 +771,7 @@
 (defquery all-operations-in
   {:description "Return all operation names in operation tree for given paths."
    :optional-parameters [path]
-   :contexts            [foreman-app-context]
+   :contexts            [foreman/foreman-app-context]
    :permissions         [{:required [:application/edit]}]
    :input-validators    [(partial action/string-parameters [:path])]}
   [command]

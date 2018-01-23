@@ -27,6 +27,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as op]
+            [lupapalvelu.permissions :refer [defpermissions]]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as usr]
@@ -40,6 +41,9 @@
             [sade.coordinate :as coord]
             [sade.strings :as ss]
             [lupapalvelu.application-utils :as app-utils]))
+
+
+(defpermissions :application (util/read-edn-resource "permissions/application.edn"))
 
 
 (defn get-operations [application]
