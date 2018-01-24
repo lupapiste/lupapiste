@@ -532,7 +532,8 @@
 (defn- enrich-default-permissions [command]
   (->> (set/union (permissions/get-global-permissions command)
                   (permissions/get-application-permissions command)
-                  (permissions/get-organization-permissions command))
+                  (permissions/get-organization-permissions command)
+                  (permissions/get-company-permissions command))
        (assoc command :permissions)))
 
 (defn- enrich-action-contexts [command]

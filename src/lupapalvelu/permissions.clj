@@ -30,6 +30,21 @@
        (map (partial get-permissions-by-role :organization))
        (reduce into #{})))
 
+(defn- apply-company-restrictions [{company-submitter :submit} permissions]
+  (cond-> permissions
+    (not company-submitter) (disj :application/submit)))
+
+(defn get-company-permissions [{{{company-id :id company-role :role :as company} :company} :user
+                                {auth :auth} :application}]
+  (when company-id
+    (->> auth
+         (filter (every-pred (comp #{company-id} :id)
+                             (comp (some-fn #{(keyword company-role)} nil?) keyword :company-role)))
+         (map :role)
+         (map (partial get-permissions-by-role :application))
+         (reduce into #{})
+         (apply-company-restrictions company))))
+
 (defn get-application-permissions [{{user-id :id} :user {auth :auth} :application}]
   (->> (filter (comp #{user-id} :id) auth)
        (map :role)

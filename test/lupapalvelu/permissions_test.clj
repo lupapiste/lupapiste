@@ -110,6 +110,81 @@
     (provided (get-permissions-by-role :organization "org-mighty")  => #{:test/do-anything :test/test})
     (provided (get-permissions-by-role :organization "org-nocando") => #{})))
 
+(testable-privates lupapalvelu.permissions apply-company-restrictions)
+
+(fact apply-company-restrictions
+  (fact "submitter"
+    (apply-company-restrictions {:submit true} #{:application/submit :test/do}) => #{:application/submit :test/do})
+
+  (fact "non-submitter"
+    (apply-company-restrictions {:submit false} #{:application/submit :test/do}) => #{:test/do})
+
+  (fact "no submit field -> non-submitter"
+    (apply-company-restrictions {} #{:application/submit :test/do}) => #{:test/do})
+
+  (fact "is submitter but no submit permissions in"
+    (apply-company-restrictions {:submit true} #{:test/do}) => #{:test/do}))
+
+(facts get-company-permissions
+  (fact "company has existing role in auth"
+    (get-company-permissions {:user {:company {:id 1 :role "user"}}
+                              :application {:auth [{:id 1 :role "app-tester"}]}}) => #{:test/do}
+
+    (provided (get-permissions-by-role :application "app-tester") => #{:test/do}))
+
+  (fact "company has existing role in auth - with matching company role"
+    (get-company-permissions {:user {:company {:id 1 :role "user"}}
+                              :application {:auth [{:id 1 :role "app-tester" :company-role "user"}]}}) => #{:test/do}
+
+    (provided (get-permissions-by-role :application "app-tester") => #{:test/do}))
+
+  (fact "company has existing role in auth - company role does not match"
+    (get-company-permissions {:user {:company {:id 1 :role "user"}}
+                              :application {:auth [{:id 1 :role "app-tester" :company-role "admin"}]}}) => #{}
+
+    (provided (get-permissions-by-role :application irrelevant) => irrelevant :times 0))
+
+  (fact "company has existing role in auth - with submit rights"
+    (get-company-permissions {:user {:company {:id 1 :role "user" :submit true}}
+                              :application {:auth [{:id 1 :role "app-tester"}]}}) => #{:test/do :application/submit}
+
+    (provided (get-permissions-by-role :application "app-tester") => #{:test/do :application/submit}))
+
+  (fact "company has existing role in auth - no submit rights"
+    (get-company-permissions {:user {:company {:id 1 :role "user" :submit false}}
+                              :application {:auth [{:id 1 :role "app-tester"}]}}) => #{:test/do}
+
+    (provided (get-permissions-by-role :application "app-tester") => #{:test/do :application/submit}))
+
+  (fact "no role in auth"
+    (get-company-permissions {:user {:copmany {:id 1 :role "uer"}} :application {:auth []}}) => irrelevant
+
+    (provided (get-permissions-by-role :application nil) => irrelevant :times 0))
+
+  (fact "no application in command"
+    (get-company-permissions {:user {:company {:id 1 :role "user"}}}) => irrelevant
+
+    (provided (get-permissions-by-role :application nil) => irrelevant :times 0))
+
+  (fact "company has multiple roles in auth"
+    (get-company-permissions {:user {:company {:id 1 :role "user"}}
+                              :application {:auth [{:id 2 :role "some-role"}
+                                                   {:id 1 :role "app-tester"}
+                                                   {:id 3 :role "another-role"}]}})
+    => #{:test/do}
+
+    (provided (get-permissions-by-role :application "app-tester") => #{:test/do}))
+
+  (fact "same company with multiple roles in auth"
+    (get-company-permissions {:user {:company {:id 1 :role "user"}}
+                              :application {:auth [{:id 2 :role "some-role"}
+                                                   {:id 1 :role "app-tester"}
+                                                   {:id 1 :role "another-role"}]}})
+    => #{:test/do :test/test :test/fail}
+
+    (provided (get-permissions-by-role :application "app-tester") => #{:test/do :test/fail})
+    (provided (get-permissions-by-role :application "another-role") => #{:test/do :test/test})))
+
 (defcontext test-context [{{id :test-id field :test-field} :test-user coll :test-coll}]
   (let [things (filter (comp #{id} :id) coll)]
     {:context-scope  :test-scope
