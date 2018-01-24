@@ -162,7 +162,8 @@
                                          [com.cemerick/piggieback "0.2.2"]
                                          [figwheel-sidecar "0.5.8"]
                                          ;; Better Chrome Dev Tools support
-                                         [binaryage/devtools "0.9.4"]]
+                                         ;[binaryage/devtools "0.9.4"]
+                                         ]
                         :plugins        [[lein-midje "3.2"]
                                          [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
                                          [lupapiste/lein-buildid "0.4.2"]
@@ -192,7 +193,8 @@
                                                                    :parallel-build true
                                                                    :pretty-print   true
                                                                    :optimizations  :none
-                                                                   :preloads       [devtools.preload]}}}}}
+                                                                   ;:preloads       [devtools.preload]
+                                                                   }}}}}
              :uberjar  {:main       lupapalvelu.main
                         :cljsbuild  {:builds {:rum {:compiler ^:replace {:output-dir     "resources/public/lp-static/js/out"
                                                                          :output-to      "resources/public/lp-static/js/rum-app.js"

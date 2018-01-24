@@ -557,17 +557,21 @@
       hideRoleFilter: true,
       hideEnabledFilter: true,
       ops: [{name: "removeFromOrg",
+             button: "btn secondary",
+             icon: "lupicon-remove",
              showFor: _.partial(lupapisteApp.models.globalAuthModel.ok, "remove-user-organization"),
              operation: function(email, callback) {
-               ajax
-                 .command("remove-user-organization", {email: email})
-                 .success(function() { callback(true); })
-                 .call();
-             }},
+                          ajax
+                            .command("remove-user-organization", {email: email})
+                            .success(function() { callback(true); })
+                            .call();
+            }},
             {name: "editUser",
+             button: "btn positive",
+             icon: "lupicon-pen",
              showFor: _.partial(lupapisteApp.models.globalAuthModel.ok, "update-user-roles"),
              rowOperationFn: function (row) {
-               editRolesDialogModel.showDialog({email: row[0], name: row[1], roles: row[2]});
+               pageutil.openPage("userpage", row.user._id);
              }}]
   };
 
@@ -622,6 +626,16 @@
 
   hub.onPageLoad("organization-terminal-settings", function() {
     docterminalModel.load();
+  });
+
+  self.authUserIdObservable = ko.observable();
+
+  hub.onPageLoad("userpage", function () {
+      self.authUserIdObservable(_.head(pageutil.getPagePath()));
+  });
+
+  hub.onPageUnload("userpage", function () {
+      self.authUserIdObservable("");
   });
 
   $(function() {
@@ -697,8 +711,12 @@
       authorization:       lupapisteApp.models.globalAuthModel,
       attachmentTypes:     docterminalModel
     });
+    $("#userpage").applyBindings({
+        authorization: lupapisteApp.models.globalAuthModel,
+        authUserIdObservable: self.authUserIdObservable,
+        backToUsers: function() { pageutil.openPage("users"); }
+    });
 
-    // Init the dynamically created dialogs
     LUPAPISTE.ModalDialog.init();
   });
 

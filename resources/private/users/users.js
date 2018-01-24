@@ -49,12 +49,14 @@ var users = (function($) {
           td$ = $(td);
       _.each(opts.ops, function(op) {
         if (op.showFor(user)) {
-          td$.append("[")
-           .append($("<a>")
+          td$.append($("<a>")
             .attr("href", "#")
+            .attr("class", op.button)
             .attr("data-op", op.name)
-            .text(loc(["users.op", op.name])))
-           .append("] ");
+              .append($("<i>")
+                  .attr("class", op.icon))
+              .append($("<span>")
+                  .text(loc(["users.op", op.name]))));
         }
       });
     };
