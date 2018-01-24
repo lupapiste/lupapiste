@@ -79,7 +79,7 @@
                                    $lte (Long/parseLong end-ts 10)}}
         query      (if (usr/user-is-pure-digitizer? user)
                      (assoc base-query :auth.id (:id user))
-                     (assoc base-query :organization {$in (usr/organization-ids-by-roles (usr/with-org-auth user) #{:digitizer})}))]
+                     (assoc base-query :organization {$in (usr/organization-ids-by-roles (usr/with-org-auth user) #{:digitizer :archivist :authorityAdmin})}))]
     (mongo/select :applications
                   query
                   [:_id :created :attachments])))
