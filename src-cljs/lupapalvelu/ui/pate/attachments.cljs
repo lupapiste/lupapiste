@@ -225,10 +225,10 @@
               :progress (td-progress (:progress filedata))
               [
                [:td.batch--type
-                {:key (path/unique-id "batch-type")}
+                {:key (common/unique-id "batch-type")}
                 (type-selector options filedata)]
                [:td.batch--contents
-                {:key (path/unique-id "batch-contents")}
+                {:key (common/unique-id "batch-contents")}
                 (contents-editor options filedata)]])
             [:td.td-center
              (when-not binding?

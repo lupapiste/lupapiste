@@ -31,7 +31,7 @@
 ;; -------------------------
 
 (rum/defc default-section < rum/reactive
-  {:key-fn #(path/unique-id "section")}
+  {:key-fn #(common/unique-id "section")}
   [{:keys [schema] :as options} section-type]
   (when (path/visible? options)
     [:div.pate-section

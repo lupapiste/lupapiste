@@ -1,7 +1,6 @@
 (ns lupapalvelu.ui.components
   (:require [cljs.pprint :refer [pprint]]
             [clojure.string :as s]
-            [goog.events :as googe]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components.datepicker :as datepicker]
             [lupapalvelu.ui.hub :as hub]
@@ -82,7 +81,7 @@
    [disabled]: Is the checkbox disabled (default false)
    [prefix]:   Wrapper class prefix (default :pate-checkbox)"
   [{:keys [label text value handler-fn disabled negate? prefix]}]
-  (let [input-id (str "input-" (googe/getUniqueId "check"))
+  (let [input-id (str "input-" (common/unique-id "check"))
         value-fn (if negate? not identity)
         value    (value-fn value)
         label    (or (if label (common/loc label) text) "")
