@@ -26,6 +26,10 @@
    (sc/optional-key :asiointitunnus) (sc/maybe sc/Str)
    })
 
+;; Dummy KRYSP Service that also enables the variation of the interface responses according to various parameters.
+;;
+;; Also includes a simple HTML form to configure additional override configurations,
+;; for example, to force the service to return a different verdict XML per application or municipal verdict id.
 
 (when (env/feature? :dummy-krysp)
 
