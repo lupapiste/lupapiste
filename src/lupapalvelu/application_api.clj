@@ -237,25 +237,19 @@
 (defcommand undo-cancellation
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :contexts         [foreman/foreman-app-context]
-   :permissions      [{:required [:application/edit]}]
-   :pre-checks       [(fn [{:keys [application]}]
+   :contexts         [app/canceled-app-context]
+   :permissions      [{:required [:application/undo-cancelation]}]
+   :pre-checks       [(fn last-history-item-is-canceled [{:keys [application]}]
                         (when-not (= :canceled
                                      ((comp keyword :state) (app-state/last-history-item application)))
                           (fail :error.latest-state-not-canceled)))
-                      (fn [{:keys [application]}]
+                      (fn has-previous-state [{:keys [application]}]
                         (when-not (states/all-states (app-state/get-previous-app-state application))
-                          (fail :error.illegal-state)))
-                      (fn [{:keys [application user]}]
-                        (when-not (usr/authority? user) ; TODO: role based check -> permission based check
-                          (let [canceled-entry (app-state/last-history-item application)]
-                            (when-not (= (:username user) (get-in canceled-entry [:user :username]))
-                              (fail :error.undo-only-for-canceler)))))]
+                          (fail :error.illegal-state)))]
    :on-success       (notify :undo-cancellation)
    :states           #{:canceled}}
   [command]
   (app/undo-cancellation command))
-
 
 (defcommand request-for-complement
   {:parameters       [:id]

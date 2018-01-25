@@ -27,7 +27,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as op]
-            [lupapalvelu.permissions :refer [defpermissions]]
+            [lupapalvelu.permissions :refer [defpermissions defcontext]]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as usr]
@@ -45,6 +45,12 @@
 
 (defpermissions :application (util/read-edn-resource "permissions/application.edn"))
 
+(defcontext canceled-app-context [{{user-id :id} :user application :application}]
+  (let [last-history-entry (app-state/last-history-item application)]
+    (when (and (= user-id (get-in last-history-entry [:user :id]))
+               (-> last-history-entry :state keyword (= :canceled)))
+      {:context-scope :canceled-app
+       :context-roles [:canceler]})))
 
 (defn get-operations [application]
   (remove nil? (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
