@@ -519,6 +519,15 @@
         (fact "address" address => "Kylykuja 3-5 D 35b-c")
         (fact "propertyId" propertyId => "18600303560006")))))
 
+(facts "Multiple features with different descriptions in the same XML file"
+  (let [xml (xml/parse (slurp "resources/krysp/dev/feature-collection-with-many-featureMember-elems.xml"))]
+   (fact "rakennusvalvontaasianKuvaus"
+         (set (permit/read-app-descriptions-from-xml :R (cr/strip-xml-namespaces xml))) =>
+         #{{:kuntalupatunnus "999-2017-11"
+            :kuvaus "Kuvaus 999-2017-11"}
+           {:kuntalupatunnus "999-2016-999"
+            :kuvaus "Kuvaus 999-2016-999"}})))
+
 (facts "Testing area like location information for application creation"
   (against-background
     (resolve-property-id-by-point anything) => "89552200010051")
