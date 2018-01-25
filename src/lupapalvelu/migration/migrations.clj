@@ -38,7 +38,7 @@
             [sade.strings :as str]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs fn->>] :as util]
             [sade.validators :as v]
-            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]])
+            [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]])
   (:import [org.joda.time DateTime]))
 
 (defn drop-schema-data [document]
@@ -3688,6 +3688,25 @@
     (when-let [err (some bulletins/comment-file-checker attachments)]
       (throw (ex-info "bulletin-comment-metadata migration failure" {:err (pr-str err) :comment (:id comment)})))
     (mongo/update-by-id :application-bulletin-comments (:id comment) {$set {:attachments attachments}})))
+
+(defn fix-company-auth
+  "Fix some legacy company invites, which are missing 'company-role' and possibly 'id'"
+  [{:keys [type company-role invite id] :as auth}]
+  (if (and (= "company" type) (nil? company-role) (map? invite))
+    (assoc auth :company-role "admin" :id (get-in invite [:user :id] id))
+    auth))
+
+(defmigration legacy-copmany-auth-invites
+  {:apply-when (pos? (mongo/count :applications {:auth
+                                                 {$elemMatch
+                                                  {:type "company",
+                                                   :company-role {$exists false},
+                                                   :invite {$exists true}}}}))}
+  (update-applications-array :auth fix-company-auth {:auth
+                                                     {$elemMatch
+                                                      {:type "company",
+                                                       :company-role {$exists false},
+                                                       :invite {$exists true}}}}))
 
 ;;
 ;; ****** NOTE! ******
