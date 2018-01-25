@@ -204,7 +204,7 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
       var items = self.data();
       if (items.length === 2 || (items.length > 2 && items[1].title.toUpperCase() === self.query().toUpperCase())) {
         self.index(1);
-        scrollToActiveItem(self.index())
+        scrollToActiveItem(self.index());
       }
     }
     return true;

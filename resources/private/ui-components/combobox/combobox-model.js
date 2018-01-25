@@ -19,8 +19,12 @@ LUPAPISTE.ComboboxModel = function( params ) {
   self.textInput = ko.observable( outsideValue() );
   self.selectedIndex = ko.observable(-1);
   self.testId = params.testId || "combobox-input";
+  self.prevEntriesKey = params.prevEntriesKey;
 
-  var localStorageKey = "combobox-prev-entries-for-" + params.prevEntriesKey;
+  self.localStorageKey = self.disposedPureComputed(function() {
+    var uw = ko.unwrap(self.prevEntriesKey);
+    return uw ? ("combobox-prev-entries-for-" + uw) : null;
+  });
 
   // Textinput focus
   self.hasFocus = ko.observable();
@@ -28,7 +32,7 @@ LUPAPISTE.ComboboxModel = function( params ) {
   function rememberEntry(newContents) {
     // Store entries to field in local storage for later reuse
     if (newContents && window.localStorage) {
-      var prevData = window.localStorage.getItem(localStorageKey);
+      var prevData = window.localStorage.getItem(ko.unwrap(self.localStorageKey));
       var items;
       if (prevData) {
         var parsed = JSON.parse(prevData);
@@ -42,7 +46,7 @@ LUPAPISTE.ComboboxModel = function( params ) {
       } else {
         items = [newContents];
       }
-      window.localStorage.setItem(localStorageKey, JSON.stringify(items));
+      window.localStorage.setItem(ko.unwrap(self.localStorageKey), JSON.stringify(items));
     }
   }
 
@@ -50,7 +54,7 @@ LUPAPISTE.ComboboxModel = function( params ) {
   self.disposedSubscribe( self.hasFocus, function( flag ) {
     if( hadFocus && !flag ) {
       outsideValue( self.textInput());
-      if (params.prevEntriesKey && ko.unwrap(self.textInput) && ko.unwrap(self.textInput).length > 0 &&
+      if (ko.unwrap(self.localStorageKey) && ko.unwrap(self.textInput) && ko.unwrap(self.textInput).length > 0 &&
         ko.unwrap(self.list).length === 0) {
         rememberEntry(self.textInput());
       }
@@ -83,8 +87,8 @@ LUPAPISTE.ComboboxModel = function( params ) {
     self.selectedIndex( -1 );
     var items = ko.unwrap(self.list);
     // If there are no options, we offer the values that user has previously input for this field
-    if ((!items || items.length === 0) && params.prevEntriesKey && window.localStorage.getItem(localStorageKey)) {
-      items = JSON.parse(window.localStorage.getItem(localStorageKey));
+    if ((!items || items.length === 0) && ko.unwrap(self.localStorageKey) && window.localStorage.getItem(ko.unwrap(self.localStorageKey))) {
+      items = JSON.parse(window.localStorage.getItem(ko.unwrap(self.localStorageKey)));
     }
     var result = _.filter( items,
                            function( item ) {
