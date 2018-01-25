@@ -43,7 +43,7 @@
             [lupapalvelu.calendars-api :as calendars]
             [lupapalvelu.control-api :as control]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.dummy-gml-verdicts]
+            [lupapalvelu.dummy-krysp-service]
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
             [lupapalvelu.ident.dummy]
             [lupapalvelu.ident.suomifi]

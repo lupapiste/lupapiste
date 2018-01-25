@@ -1,4 +1,4 @@
-(ns lupapalvelu.dummy-gml-verdicts
+(ns lupapalvelu.dummy-krysp-service
   (:require [taoensso.timbre :as timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]
             [schema.core :as sc]
             [net.cgrand.enlive-html :as enlive]
@@ -29,16 +29,18 @@
 
 (when (env/feature? :dummy-krysp)
 
-  (defonce dummy-verdicts (atom [{:type-name "rakval:ValmisRakennus", :kuntalupatunnus nil, :template-file "krysp/dev/building.xml"}
-                                 {:type-name "rakval:RakennusvalvontaAsia", :kuntalupatunnus nil, :template-file "krysp/dev/verdict.xml"}
-                                 {:type-name "rakval:RakennusvalvontaAsia", :kuntalupatunnus "895-2015-001", :template-file "krysp/dev/verdict-rakval-with-area-like-location.xml"}
-                                 {:type-name "rakval:RakennusvalvontaAsia", :kuntalupatunnus "895-2015-002", :template-file "krysp/dev/verdict-rakval-with-building-location.xml"}
-                                 {:type-name "rakval:RakennusvalvontaAsia", :kuntalupatunnus "475-2016-001", :template-file "krysp/dev/verdict-rakval-missing-location.xml"}
-                                 {:type-name "ymy:Ymparistolupa", :kuntalupatunnus nil, :template-file "krysp/dev/verdict-yl.xml"}
-                                 {:type-name "ymm:MaaAineslupaAsia", :kuntalupatunnus nil, :template-file "krysp/dev/verdict-mal.xml"}
-                                 {:type-name "ymv:Vapautus", :kuntalupatunnus nil, :template-file "krysp/dev/verdict-vvvl.xml"}
-                                 {:type-name "ppst:Poikkeamisasia,ppst:Suunnittelutarveasia", :kuntalupatunnus nil, :template-file "krysp/dev/verdict-p.xml"}
-                                 {:type-name "kiito:every-type", :kuntalupatunnus nil, :template-file "krysp/dev/verdict-kt.xml"}]))
+  (def default-dummy-verdicts [{:type-name "rakval:ValmisRakennus", :kuntalupatunnus nil, :template-file "krysp/dev/building.xml"}
+                               {:type-name "rakval:RakennusvalvontaAsia", :kuntalupatunnus nil, :template-file "krysp/dev/verdict.xml"}
+                               {:type-name "rakval:RakennusvalvontaAsia", :kuntalupatunnus "895-2015-001", :template-file "krysp/dev/verdict-rakval-with-area-like-location.xml"}
+                               {:type-name "rakval:RakennusvalvontaAsia", :kuntalupatunnus "895-2015-002", :template-file "krysp/dev/verdict-rakval-with-building-location.xml"}
+                               {:type-name "rakval:RakennusvalvontaAsia", :kuntalupatunnus "475-2016-001", :template-file "krysp/dev/verdict-rakval-missing-location.xml"}
+                               {:type-name "ymy:Ymparistolupa", :kuntalupatunnus nil, :template-file "krysp/dev/verdict-yl.xml"}
+                               {:type-name "ymm:MaaAineslupaAsia", :kuntalupatunnus nil, :template-file "krysp/dev/verdict-mal.xml"}
+                               {:type-name "ymv:Vapautus", :kuntalupatunnus nil, :template-file "krysp/dev/verdict-vvvl.xml"}
+                               {:type-name "ppst:Poikkeamisasia,ppst:Suunnittelutarveasia", :kuntalupatunnus nil, :template-file "krysp/dev/verdict-p.xml"}
+                               {:type-name "kiito:every-type", :kuntalupatunnus nil, :template-file "krysp/dev/verdict-kt.xml"}])
+
+  (defonce dummy-verdicts (atom default-dummy-verdicts))
 
   (defn verdict-xml [typeName & [search-key search-val]]
     (let [verdicts-by-type (filter (comp #{typeName} :type-name) @dummy-verdicts)]
