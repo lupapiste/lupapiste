@@ -3696,7 +3696,7 @@
     (assoc auth :company-role "admin" :id (get-in invite [:user :id] id))
     auth))
 
-(defmigration legacy-copmany-auth-invites
+(defmigration legacy-company-auth-invites
   {:apply-when (pos? (mongo/count :applications {:auth
                                                  {$elemMatch
                                                   {:type "company",

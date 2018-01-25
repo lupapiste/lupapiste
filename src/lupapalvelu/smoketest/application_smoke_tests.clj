@@ -16,7 +16,8 @@
             [clojure.set :refer [difference]]
             [sade.strings :as ss]
             [sade.schemas :as ssc]
-            [schema.core :as sc])
+            [schema.core :as sc]
+            [sade.shared-util :as util])
   (:import [schema.utils.ErrorContainer]))
 
 (defn- validate-doc [ignored-errors application {:keys [id schema-info data] :as doc}]
@@ -77,7 +78,10 @@
 (defn validate-auth-array [{auths :auth}]
   (seq (concat (->> (map validate-auth-against-schema auths) ; validate schema
                     (remove nil?))
-               (->> (frequencies (map :id auths))           ; check duplicate IDs
+               (->> auths            ; check duplicate IDs without statementGivers
+                    (remove #(= "statementGiver" (:role %)))
+                    (map :id)
+                    (frequencies)
                     (reduce
                       (fn [acc [k v]]
                         (cond-> acc
@@ -128,7 +132,6 @@
          :attachment-id id
          :application-ops op-ids
          :attachment-ops (map :id op)}))))
-
 
 
 (defn validate-attachments
