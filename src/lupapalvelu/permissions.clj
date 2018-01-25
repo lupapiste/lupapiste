@@ -11,6 +11,22 @@
   (sc/constrained sc/Keyword (fn-> namespace name (= (name context-type)))
                   "Permission namespace equals context-type"))
 
+(def ^:private common-permissions
+  "Set of permissions that are used outside of the required permissions action meta
+  (eg. inside pre-checks or action body)."
+  #{:application/submit
+    :comment/set-target})
+
+(defn restriction [& restrictions]
+  (assert (every? common-permissions restrictions)
+          "All restrictions must be defined in lupapalvelu.permissions/common-permissions")
+  (fn [permissions] (apply disj permissions restrictions)))
+
+(defn require-permissions [& required-permissions]
+  (assert (every? common-permissions required-permissions)
+          "All required-permissions must be defined in lupapalvelu.permissions/common-permissions")
+  (fn [command] (every? (get command :permissions #{}) required-permissions)))
+
 (defn defpermissions [context-type permissions]
   (sc/validate {Scope {Role #{(permission-schema context-type)}}} permissions)
   (swap! permission-tree #(merge-with (partial merge-with into) % permissions)))
@@ -30,9 +46,11 @@
        (map (partial get-permissions-by-role :organization))
        (reduce into #{})))
 
+(def ^:private submit-restriction (restriction :application/submit))
+
 (defn- apply-company-restrictions [{company-submitter :submit} permissions]
   (cond-> permissions
-    (not company-submitter) (disj :application/submit)))
+    (not company-submitter) submit-restriction))
 
 (defn get-company-permissions [{{{company-id :id company-role :role :as company} :company} :user
                                 {auth :auth} :application}]

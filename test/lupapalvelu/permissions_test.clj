@@ -4,6 +4,54 @@
             [lupapalvelu.permissions :refer :all]
             [sade.util :as util]))
 
+(def valid-permissions (reduce (fn [permissions file]
+                                 (->> (util/read-edn-resource (str "permissions/" (.getName file)))
+                                      (mapcat val)
+                                      (mapcat val)
+                                      (into permissions)))
+                               #{}
+                               (util/get-files-by-regex "resources/permissions"  #".+\.edn")))
+
+(testable-privates lupapalvelu.permissions common-permissions)
+
+(fact "common-permissions are defined in permission files"
+  (every? valid-permissions common-permissions))
+
+(facts restriction
+  (fact "restircted permission not in common-permissions"
+    (restriction :test/do) => (throws java.lang.AssertionError))
+
+  (fact "single restriction"
+    ((restriction :application/submit) #{:application/submit :test/do}) => #{:test/do})
+
+  (fact "multiple restictions"
+    ((restriction :application/submit :comment/set-target) #{:application/submit :comment/set-target :test/do}) => #{:test/do})
+
+  (fact "multiple restrictions - nothing left"
+    ((restriction :application/submit :comment/set-target) #{:application/submit :comment/set-target}) => #{})
+
+  (fact "two restrictions - other not in permission"
+    ((restriction :application/submit :comment/set-target) #{:application/submit}) => #{}))
+
+(facts require-permissions
+  (fact "restircted permission not in common-permissions"
+    (require-permissions :test/do) => (throws java.lang.AssertionError))
+
+  (fact "single required permission"
+    ((require-permissions :application/submit) {:permissions #{:application/submit :test/do}}) => true)
+
+  (fact "multiple required permissions"
+    ((require-permissions :application/submit :comment/set-target) {:permissions #{:application/submit :comment/set-target :test/do}}) => true)
+
+  (fact "permission denied"
+    ((require-permissions :application/submit) {:permissions #{:test/do}}) => false)
+
+  (fact "multiple reuired permissions permission denied"
+    ((require-permissions :application/submit :comment/set-target) {:permissions #{:application/submit :test/do}}) => false)
+
+  (fact "no permissions in command"
+    ((require-permissions :application/submit :comment/set-target) {}) => false))
+
 (defpermissions :test
   {:test-scope   {:test-role         #{:test/test
                                        :test/fail}

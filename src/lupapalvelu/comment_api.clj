@@ -12,7 +12,7 @@
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
-            [lupapalvelu.permissions :refer [defpermissions]]
+            [lupapalvelu.permissions :refer [defpermissions] :as permissions]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]))
 
@@ -55,8 +55,10 @@
 ;; Validation
 ;;
 
-(defn applicant-cant-set-to [{{:keys [to]} :data perms :permissions}]
-  (when (and to (not (contains? perms :comment/set-target)))
+(def ^:private has-set-target-permission? (permissions/require-permissions :comment/set-target))
+
+(defn applicant-cant-set-to [{{:keys [to]} :data :as command}]
+  (when (and to (not (has-set-target-permission? command)))
     (fail :error.to-settable-only-by-authority)))
 
 (defn- validate-comment-target [{{:keys [target]} :data}]
