@@ -27,4 +27,14 @@
       (-> bulletins first :bulletinState) => "verdictGiven"
       ;TODO ensure bulletin dates looks correct
       (fact "description is set"
-        (-> bulletins first :bulletinOpDescription) => op-description))))
+        (-> bulletins first :bulletinOpDescription) => op-description)))
+
+  (fact "Fetch bulletin app-description from backend"
+    (command sipoo :update-organization-bulletin-scope
+             :permitType "R"
+             :municipality "753"
+             :descriptionsFromBackendSystem true) => ok?
+    (command sonja :check-for-verdict :id app-id) => ok?)
+    (let [bulletins (:data (datatables mikko :application-bulletins :municipality sonja-muni :searchText "" :state "" :page 1 :sort ""))]
+      (fact "description is set according to the backend verdict"
+        (-> bulletins first :bulletinOpDescription) => "Uudisrakennuksen ja talousrakennuksen 15 m2 rakentaminen. Yhden huoneiston erillistalo.")))
