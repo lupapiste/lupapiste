@@ -6,6 +6,7 @@
             [hiccup.core :as hiccup]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.bind :as bind]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.logging :as logging]
@@ -14,10 +15,11 @@
             [lupapalvelu.pdf.html-template :as html-pdf]
             [lupapalvelu.pdf.html-template-common :as common]
             [sade.core :refer :all]
+            [sade.property :as property]
             [sade.strings :as ss]
             [sade.util :as util]))
 
-(defn- page-number-script []
+(defonce page-number-script
   [:script
    (-> common/wkhtmltopdf-page-numbering-script-path
        io/resource
@@ -38,15 +40,15 @@
                         [:div.header {:padding-bottom "1em"}]
                         [:.page-break {:page-break-before :always}]
                         [:.section {:display :table
-                                    :width "100%"
-                                    :padding-bottom "1em"}
+                                    :width "100%"}
                          [:&.border {:border-top  "1px solid black"
                                      :padding-top  "1em"}]
                          [:&.header {:padding 0
                                      :border-bottom  "1px solid black"
                                      }]
                          [:.row {:display :table-row}
-                          [:&.pad [:.cell {:padding-bottom "0.5em"}]]
+                          [:&.pad-after [:.cell {:padding-bottom "0.5em"}]]
+                          [:&.pad-before [:.cell {:padding-top "0.5em"}]]
                           [:.cell {:display     :table-cell
                                    :white-space :pre-wrap
                                    :padding-right "1em"}
@@ -59,31 +61,88 @@
                                   {:display     :table-cell
                                    :white-space :pre-wrap
                                    :width       (str n "%")}])
-                               (range 10 101 10))
+                               (range 10 101 5))
                           ]]])]]
          [:body
           body
           (when script?
-            (page-number-script))]])))
+            page-number-script)]])))
 
-(defn verdict-body [lang application {:keys [published data]}]
-  (let [loc (partial i18n/localize-and-fill lang)]
-    [:div
-     [:div.section
+(defn doc-value [doc-name kw-path]
+  (fn [{app :application}]
+    (get-in (domain/get-document-by-name app (name doc-name))
+            (cons :data (map keyword (ss/split (name kw-path) #"\."))))))
+
+(defn dict-value [dict]
+  (fn [{verdict :verdict}]
+    (get-in verdict [:data dict])))
+
+(defn wrap [wrap-fn fetch]
+  (letfn [(do-wrap [data w v]
+            (when (seq v)
+              (w data v)))]
+    (fn [data]
+      (if (fn? fetch)
+        (->> data fetch (do-wrap data wrap-fn))
+        (do-wrap data wrap-fn fetch)))))
+
+(defn unit-wrap [unit]
+  (fn [{lang :lang} v]
+    (case unit
+      :ha (str v " " (i18n/localize lang :unit.hehtaaria))
+      :m2 [:span v " m" [:sup 2]]
+      :m3 [:span v " m" [:sup 3]])))
+
+(defn loc-wrap [prefix]
+  (fn [{lang :lang} v]
+    (i18n/localize lang prefix v)))
+
+(defn entry-row
+  [{lang :lang :as data} title fetch & opts]
+  (when-let [entry (not-empty (if (fn? fetch)
+                                (fetch data)
+                                fetch))]
+    (let [{:keys [bold-title] :as opts} (zipmap opts (repeat true))]
       [:div.row
-       [:div.cell.cell--30 "Morbi tempus, leo in aliquet placerat, eros nisl congue ligula, in sagittis leo diam sed velit. Aliquam erat volutpat. Vestibulum tristique consectetur diam vitae elementum. Etiam vulputate libero nec sapien scelerisque, at tincidunt mauris convallis. Vivamus id facilisis lectus. Nullam mattis nisi in est fringilla, nec mollis turpis finibus. Nam risus nunc, eleifend quis nunc et, blandit molestie ligula. Ut volutpat facilisis ornare. Vivamus volutpat rhoncus posuere. Maecenas non venenatis velit, eu aliquam eros. Curabitur tincidunt massa sit amet tempor aliquam. Vivamus eu mollis lectus."]
-       [:div.cell.cell--70.right "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vitae finibus nisi. Cras venenatis rhoncus eleifend. Vestibulum non nisl et purus rhoncus vulputate. Curabitur laoreet nisi in arcu lacinia porta. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nunc ac nunc quis eros condimentum blandit ut id ligula. Aenean ut metus vitae eros fringilla tristique. Integer lacus libero, scelerisque vitae ex tincidunt, aliquet dictum dolor. Morbi vehicula commodo nisi eu tempor. Curabitur sit amet laoreet mi. Lorem ipsum dolor sit amet, consectetur adipiscing elit."]]]
-     [:div.section.border
-      [:div.row
-       [:div.cell.cell--30 "Morbi tempus, leo in aliquet placerat, eros nisl congue ligula, in sagittis leo diam sed velit. Aliquam erat volutpat. Vestibulum tristique consectetur diam vitae elementum. Etiam vulputate libero nec sapien scelerisque, at tincidunt mauris convallis. Vivamus id facilisis lectus. Nullam mattis nisi in est fringilla, nec mollis turpis finibus. Nam risus nunc, eleifend quis nunc et, blandit molestie ligula. Ut volutpat facilisis ornare. Vivamus volutpat rhoncus posuere. Maecenas non venenatis velit, eu aliquam eros. Curabitur tincidunt massa sit amet tempor aliquam. Vivamus eu mollis lectus."]
-       [:div.cell.cell--70.right "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vitae finibus nisi. Cras venenatis rhoncus eleifend. Vestibulum non nisl et purus rhoncus vulputate. Curabitur laoreet nisi in arcu lacinia porta. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nunc ac nunc quis eros condimentum blandit ut id ligula. Aenean ut metus vitae eros fringilla tristique. Integer lacus libero, scelerisque vitae ex tincidunt, aliquet dictum dolor. Morbi vehicula commodo nisi eu tempor. Curabitur sit amet laoreet mi. Lorem ipsum dolor sit amet, consectetur adipiscing elit."]]]
-     (repeat 10 [:div
-                 [:p "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vitae finibus nisi. Cras venenatis rhoncus eleifend. Vestibulum non nisl et purus rhoncus vulputate. Curabitur laoreet nisi in arcu lacinia porta. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nunc ac nunc quis eros condimentum blandit ut id ligula. Aenean ut metus vitae eros fringilla tristique. Integer lacus libero, scelerisque vitae ex tincidunt, aliquet dictum dolor. Morbi vehicula commodo nisi eu tempor. Curabitur sit amet laoreet mi. Lorem ipsum dolor sit amet, consectetur adipiscing elit."]
-                 [:p "Morbi tempus, leo in aliquet placerat, eros nisl congue ligula, in sagittis leo diam sed velit. Aliquam erat volutpat. Vestibulum tristique consectetur diam vitae elementum. Etiam vulputate libero nec sapien scelerisque, at tincidunt mauris convallis. Vivamus id facilisis lectus. Nullam mattis nisi in est fringilla, nec mollis turpis finibus. Nam risus nunc, eleifend quis nunc et, blandit molestie ligula. Ut volutpat facilisis ornare. Vivamus volutpat rhoncus posuere. Maecenas non venenatis velit, eu aliquam eros. Curabitur tincidunt massa sit amet tempor aliquam. Vivamus eu mollis lectus."]
-                 [:p "Phasellus placerat magna tortor, ut auctor nulla sodales in. Nullam tellus mauris, accumsan ut ornare sit amet, euismod sit amet urna. Donec aliquet aliquam ullamcorper. In hac habitasse platea dictumst. Aenean rhoncus, diam id varius eleifend, tellus lectus laoreet urna, id euismod elit ex ut libero. Sed tempus nisl erat, id aliquet ante porttitor vel. Phasellus laoreet massa urna, non elementum neque rhoncus eu. Sed fringilla velit elit, eget sagittis nunc malesuada in. Sed convallis egestas euismod. Sed at libero congue, maximus turpis ac, aliquam massa. Pellentesque vitae magna ex. Donec nec est tortor."]
-                 [:p "Ut pulvinar dolor est, ac semper mauris maximus ac. Vivamus tristique tellus eget pharetra efficitur. Sed at ultricies risus. Integer vel massa maximus, egestas lacus vitae, maximus ex. Suspendisse viverra dignissim odio, quis rutrum tortor. Fusce mattis felis quis nisl maximus efficitur. Nullam libero risus, accumsan ut ligula nec, consectetur semper nunc. Vivamus finibus, est vel feugiat congue, leo risus vulputate ipsum, at placerat nulla mi ac tellus. In hac habitasse platea dictumst. Integer nec tristique velit, ut volutpat lorem. Vestibulum ante odio, iaculis eu odio in, sollicitudin molestie nisl. Nunc egestas urna ut placerat tempor. In sit amet magna eget libero ullamcorper iaculis. Etiam vitae libero posuere, gravida massa efficitur, hendrerit augue."]
-                 [:p "Mauris at lorem eleifend, semper est id, efficitur diam. Pellentesque dignissim massa ligula. Nullam malesuada justo vitae tortor pulvinar, sed egestas orci rhoncus. Suspendisse sollicitudin velit quis ipsum facilisis fringilla. Proin at diam a nisi lobortis ultricies sed ut odio. Phasellus accumsan est eget viverra sagittis. Donec posuere rhoncus massa. Donec magna diam, efficitur in ultricies a, sollicitudin fermentum nibh. Cras at ullamcorper quam. Etiam laoreet quam sed felis laoreet, non lacinia lacus dapibus. Donec at tellus felis. In mattis quis urna in imperdiet."]])
-     [:div.page-break "Tämän pitäisi olla uudella sivulla."]]))
+       {:class (->> (keys opts)
+                    (util/intersection-as-kw [:pad-after :pad-before])
+                    (mapv name)
+                    (ss/join " "))}
+       [:div.cell.cell--30
+        {:class (when bold-title "bold")}
+        (i18n/localize lang title)]
+       [:div.cell.cell--70 entry]])))
+
+(defn content
+  [data entries]
+  [:div.section
+   (->> entries
+        (map (partial apply (partial entry-row data)))
+        (filter not-empty))])
+
+(defmulti verdict-body (util/fn-> :verdict :category keyword))
+
+(defmethod verdict-body :r
+  [{:keys [lang application verdict] :as data}]
+  (content data
+           [[:pate-verdict.application-id (:id application) :bold-title :pad-after]
+
+            ;; Rakennuspaikka
+            [:rakennuspaikka._group_label " " :bold-title]
+            [:rakennuspaikka.kiinteisto.kiinteistotunnus
+             (-> application
+                 :propertyId
+                 property/to-human-readable-property-id)]
+            [:rakennuspaikka.kiinteisto.tilanNimi
+             (doc-value :rakennuspaikka :kiinteisto.tilanNimi)]
+            [:pdf.pinta-ala (wrap (unit-wrap :ha)
+                                  (doc-value :rakennuspaikka
+                                             :kiinteisto.maapintaala))]
+            [:rakennuspaikka.kaavatilanne._group_label
+             (wrap (loc-wrap :rakennuspaikka.kaavatilanne)
+                   (doc-value :rakennuspaikka :kaavatilanne))
+             :pad-after]
+            [:pate-purpose (dict-value :purpose) :pad-after]]))
 
 (defn verdict-header
   [lang {:keys [organization]} {:keys [published category data]}]
@@ -94,9 +153,9 @@
      [:div.cell.cell--40.center
       [:div (i18n/localize lang :attachmentType.paatoksenteko.paatos)]]
      [:div.cell.cell--30.right
-      [:div.permit (i18n/localize lang (format "pdf.%s.permit" category))]]]
+      [:div.permit (i18n/localize lang :pdf category :permit)]]]
     [:div.row
-     [:div.cell.cell--30 (:section data)]
+     [:div.cell.cell--30 (:verdict-section data)]
      [:div.cell.cell--40.center [:div (util/to-local-date published)]]
      [:div.cell.cell--30.right "Sivu " [:span#page-number "sivu"]]]]])
 
@@ -105,13 +164,15 @@
   (html-pdf/create-and-upload-pdf
    application
    "pate-verdict"
-   (html (verdict-body lang application verdict))
+   (html (verdict-body {:lang        lang
+                        :application (tools/unwrapped application)
+                        :verdict     verdict}))
    {:filename (i18n/localize-and-fill lang
                                       :pate.pdf-filename
                                       (:id application)
                                       (util/to-local-datetime published))
-    :header (html (verdict-header lang application verdict) true)
-    :footer (html nil)}))
+    :header   (html (verdict-header lang application verdict) true)
+    :footer   (html nil)}))
 
 
 (defn create-verdict-attachment

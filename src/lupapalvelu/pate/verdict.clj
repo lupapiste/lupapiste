@@ -595,11 +595,12 @@
         next-state             (sm/verdict-given-state application)
         {att-items :items
          update-fn :update-fn} (attachment-items command verdict)
-        buildings-updates      {:buildings (->buildings-array application)}]
+        buildings-updates      {:buildings (->buildings-array application)}
+        verdict                (update verdict :data update-fn)]
     (verdict-update command
                     (util/deep-merge
                      {$set (merge
-                            {:pate-verdicts.$.data      (update-fn (:data verdict))
+                            {:pate-verdicts.$.data      (:data verdict)
                              :pate-verdicts.$.published created}
                             buildings-updates
                             (att/attachment-array-updates (:id application)

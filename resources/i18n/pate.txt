@@ -549,3 +549,6 @@
 "pate.no-attachments" "fi" "Ei liitteitä"
 "pate.no-attachments" "en" "No attachments"
 "pdf.r.permit" "fi" "Rakennuslupa"
+"pdf.pinta-ala" "en" "Area"
+"pdf.pinta-ala" "fi" "Pinta-ala"
+"pdf.pinta-ala" "sv" "Areal"
