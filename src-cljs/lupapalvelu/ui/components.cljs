@@ -329,7 +329,7 @@
     term*     ::term
     current*  ::current
     open?*    ::open?
-    :as       local-state} initial {:keys [items clear? callback disabled?]
+    :as       local-state} _ {:keys [items clear? callback disabled?]
                                     :as options}]
   (let [{:keys [text-edit
                 menu-items
