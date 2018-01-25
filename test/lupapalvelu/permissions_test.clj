@@ -15,7 +15,7 @@
 (testable-privates lupapalvelu.permissions common-permissions)
 
 (fact "common-permissions are defined in permission files"
-  (every? valid-permissions common-permissions))
+  (every? valid-permissions @common-permissions))
 
 (facts restriction
   (fact "restircted permission not in common-permissions"
