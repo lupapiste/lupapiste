@@ -331,7 +331,7 @@ LUPAPISTE.ApplicationModel = function() {
     repository.load(self.id(), undefined, undefined, true);
   };
 
-  var withRoles = function(r, i) {
+  function withRoles(r, i) {
       if (i.id() === "" && i.invite) {
         i.id(util.getIn(i, ["invite", "user", "id"]));
       }
@@ -342,7 +342,8 @@ LUPAPISTE.ApplicationModel = function() {
       }
       r[i.id()] = auth;
       return r;
-  };
+  }
+
   self.roles = ko.pureComputed(function() {
     var pimped = _.reduce(self.auth(), withRoles, {});
     return _.values(pimped);
