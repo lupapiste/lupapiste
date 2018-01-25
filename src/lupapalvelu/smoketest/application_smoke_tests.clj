@@ -75,9 +75,14 @@
        :coercion-result coercion-result})))
 
 (defn validate-auth-array [{auths :auth}]
-  (->> (map validate-auth-against-schema auths)
-       (remove nil?)
-       seq))
+  (seq (concat (->> (map validate-auth-against-schema auths) ; validate schema
+                    (remove nil?))
+               (->> (frequencies (map :id auths))           ; check duplicate IDs
+                    (reduce
+                      (fn [acc [k v]]
+                        (cond-> acc
+                          (> v 1) (conj {:auth-id k :error "Duplicate auth id"})))
+                      [])))))
 
 ;; All auths are valid
 (mongocheck :applications validate-auth-array :auth)
