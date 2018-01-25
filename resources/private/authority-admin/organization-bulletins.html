@@ -10,7 +10,7 @@
         <section>
           <h2 data-bind="ltext: 'auth-admin.bulletin-scope-settings'"></h2>
           <div data-bind="foreach: {data: $root.bulletins.scopes}">
-            <h3 data-bind="ltext: $data.permitType"></h3>
+            <h3 data-bind="text: loc($data.permitType) + ' (' + loc('municipality.'+$data.municipality) + ')'"></h3>
             <table class="admin-settings">
               <thead>
               <tr>
