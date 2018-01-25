@@ -162,7 +162,7 @@
 
 
 (defn- get-app-descriptions [{:keys [permitType] :as application} xml]
-  (permit/read-app-descriptions-from-xml permitType (cr/strip-xml-namespaces xml)))
+  (permit/read-permit-descriptions-from-xml permitType (cr/strip-xml-namespaces xml)))
 
 (defn- get-task-updates [application created verdicts app-xml]
   (when (not-any? (comp #{"verdict"} :type :source) (:tasks application))

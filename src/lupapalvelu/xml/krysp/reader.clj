@@ -471,7 +471,7 @@
                         :kuvaus (get-text asia [:rakennusvalvontaasianKuvaus])}))
        (remove #(ss/blank? (:kuvaus %)))))
 
-(defmethod permit/read-app-descriptions-from-xml :R
+(defmethod permit/read-permit-descriptions-from-xml :R
   [_ xml]
   (->rakval-app-descriptions xml))
 

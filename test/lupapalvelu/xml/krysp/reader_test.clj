@@ -504,7 +504,7 @@
     (fact "municipality" municipality => "186")
     (fact "rakennusvalvontaasianKuvaus"
       rakennusvalvontaasianKuvaus => "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto."
-      (permit/read-app-descriptions-from-xml :R (cr/strip-xml-namespaces xml)) => (just {:kuntalupatunnus "14-0241-R 3"
+      (permit/read-permit-descriptions-from-xml :R (cr/strip-xml-namespaces xml)) => (just {:kuntalupatunnus "14-0241-R 3"
                                                                                          :kuvaus "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto."}))
     (fact "vahainenPoikkeaminen" vahainenPoikkeaminen => "Poikekkaa meill\u00e4!")
     (facts "hakijat"
@@ -522,7 +522,7 @@
 (facts "Multiple features with different descriptions in the same XML file"
   (let [xml (xml/parse (slurp "resources/krysp/dev/feature-collection-with-many-featureMember-elems.xml"))]
    (fact "rakennusvalvontaasianKuvaus"
-         (set (permit/read-app-descriptions-from-xml :R (cr/strip-xml-namespaces xml))) =>
+         (set (permit/read-permit-descriptions-from-xml :R (cr/strip-xml-namespaces xml))) =>
          #{{:kuntalupatunnus "999-2017-11"
             :kuvaus "Kuvaus 999-2017-11"}
            {:kuntalupatunnus "999-2016-999"
