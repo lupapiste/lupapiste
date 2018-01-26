@@ -3,6 +3,7 @@
             [midje.util :refer [testable-privates]]
             [monger.operators :refer :all]
             [sade.core :refer [fail?]]
+            [lupapalvelu.generators.user]
             [lupapalvelu.itest-util :refer [expected-failure? unauthorized?]]
             [lupapalvelu.test-util :refer [catch-all passing-quick-check]]
             [lupapalvelu.user :refer :all]
