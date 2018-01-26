@@ -12,6 +12,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.application-bulletin-utils :refer :all]
             [schema.core :as sc]
             [sade.schemas :as ssc]
             [clj-time.coerce :as tc]
@@ -236,19 +237,6 @@
         end   (get-in command [:data enddate-kw])]
     (when-not (< start end)
       (fail :error.startdate-before-enddate))))
-
-(defn bulletin-version-date-valid?
-  "Verify that bulletin visibility date is valid at the given (or current) point of time"
-  ([bulletin-version]
-   (bulletin-version-date-valid? (now) bulletin-version))
-  ([now {state :bulletinState :as bulletin-version}]
-   (case (keyword state)
-     :proclaimed   (and (< (:proclamationStartsAt bulletin-version) now)
-                        (> (:proclamationEndsAt bulletin-version) now))
-     :verdictGiven (and (< (:appealPeriodStartsAt bulletin-version) now)
-                        (> (:appealPeriodEndsAt bulletin-version) now))
-     :final        (and (< (:officialAt bulletin-version) now)
-                        (> (tc/to-long (t/plus (tc/from-long now) (t/days 14))))))))
 
 (defn verdict-given-bulletin-exists? [app-id]
   (mongo/any? :application-bulletins {:_id app-id :versions {"$elemMatch" {:bulletinState "verdictGiven"}}}))
