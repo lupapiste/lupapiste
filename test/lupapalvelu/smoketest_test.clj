@@ -25,7 +25,7 @@
         errors =not=> empty?
         errors => (has every? #(= "123" (:auth-id %)))))))
 
-(fact :ac "auth with duplicate id's are not valid"
+#_(fact :ac "auth with duplicate id's are not valid"        ; FIXME enable after LPK-3564
   (tc/quick-check
     150
     duplicate-auth-id-prop
