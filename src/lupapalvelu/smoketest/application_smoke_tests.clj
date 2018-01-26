@@ -89,7 +89,7 @@
 
 (defn validate-auth-array [{auths :auth}]
   (->> (concat (map validate-auth-against-schema auths)
-               (validate-duplicate-auths auths))
+               #_(validate-duplicate-auths auths))          ; FIXME enable duplicate validation after LPK-3564
        (remove nil?)
        (seq)))
 
