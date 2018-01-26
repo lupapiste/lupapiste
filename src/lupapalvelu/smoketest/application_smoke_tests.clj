@@ -75,19 +75,23 @@
        :error "Not valid auth"
        :coercion-result coercion-result})))
 
+
+(defn validate-duplicate-auths [auths]
+  (->> auths            ; check duplicate IDs without statementGivers
+       (remove #(= "statementGiver" (:role %)))
+       (remove #(= "company" (:type %)))       ; remove companies, but FIXME after LPK-3564
+       (map :id)
+       (frequencies)
+       (reduce (fn [acc [k v]]
+                 (cond-> acc
+                   (> v 1) (conj {:auth-id k :error "Duplicate auth id"})))
+               [])))
+
 (defn validate-auth-array [{auths :auth}]
-  (seq (concat (->> (map validate-auth-against-schema auths) ; validate schema
-                    (remove nil?))
-               (->> auths            ; check duplicate IDs without statementGivers
-                    (remove #(= "statementGiver" (:role %)))
-                    (remove #(= "company" (:type %)))       ; remove companies, but FIXME after LPK-3564
-                    (map :id)
-                    (frequencies)
-                    (reduce
-                      (fn [acc [k v]]
-                        (cond-> acc
-                          (> v 1) (conj {:auth-id k :error "Duplicate auth id"})))
-                      [])))))
+  (->> (concat (map validate-auth-against-schema auths)
+               (validate-duplicate-auths auths))
+       (remove nil?)
+       (seq)))
 
 ;; All auths are valid
 (mongocheck :applications validate-auth-array :auth)
