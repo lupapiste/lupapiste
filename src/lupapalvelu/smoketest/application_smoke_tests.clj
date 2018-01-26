@@ -80,6 +80,7 @@
                     (remove nil?))
                (->> auths            ; check duplicate IDs without statementGivers
                     (remove #(= "statementGiver" (:role %)))
+                    (remove #(= "company" (:type %)))       ; remove companies, but FIXME after LPK-3564
                     (map :id)
                     (frequencies)
                     (reduce
