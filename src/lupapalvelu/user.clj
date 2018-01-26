@@ -25,14 +25,6 @@
 ;; User schema
 ;;
 
-(def user-skeleton
-  {:id        ""
-   :firstName ""
-   :lastName  ""
-   :role      "dummy"
-   :email     "dummy@example.com"
-   :username  "dummy@example.com"
-   :enabled   false})
 
 (defschema SearchFilter
   {:id        sc/Str
