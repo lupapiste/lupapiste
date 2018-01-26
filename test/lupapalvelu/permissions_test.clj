@@ -4,22 +4,9 @@
             [lupapalvelu.permissions :refer :all]
             [sade.util :as util]))
 
-(def valid-permissions (reduce (fn [permissions file]
-                                 (->> (util/read-edn-resource (str "permissions/" (.getName file)))
-                                      (mapcat val)
-                                      (mapcat val)
-                                      (into permissions)))
-                               #{}
-                               (util/get-files-by-regex "resources/permissions"  #".+\.edn")))
-
-(testable-privates lupapalvelu.permissions common-permissions)
-
-(fact "common-permissions are defined in permission files"
-  (every? valid-permissions @common-permissions))
-
 (facts restriction
   (fact "restircted permission not in common-permissions"
-    (restriction :test/do) => (throws java.lang.AssertionError))
+    (restriction :test/unknown-permission) => (throws java.lang.AssertionError))
 
   (fact "single restriction"
     ((restriction :application/submit) #{:application/submit :test/do}) => #{:test/do})
@@ -35,7 +22,7 @@
 
 (facts require-permissions
   (fact "restircted permission not in common-permissions"
-    (require-permissions :test/do) => (throws java.lang.AssertionError))
+    (require-permissions :test/unknown-permission) => (throws java.lang.AssertionError))
 
   (fact "single required permission"
     ((require-permissions :application/submit) {:permissions #{:application/submit :test/do}}) => true)

@@ -27,7 +27,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as op]
-            [lupapalvelu.permissions :refer [defpermissions defcontext]]
+            [lupapalvelu.permissions :refer [defpermissions defcontext] :as permissions]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as usr]
@@ -44,6 +44,8 @@
 
 
 (defpermissions :application (util/read-edn-resource "permissions/application.edn"))
+
+(def read-draft-permission? (permissions/require-permissions :application/read-draft))
 
 (defcontext canceled-app-context [{{user-id :id} :user application :application}]
   (let [last-history-entry (app-state/last-history-item application)]
@@ -198,11 +200,11 @@
   {:pre [(collections-to-be-seen collection) id timestamp]}
   {(str "_" collection "-seen-by." id) timestamp})
 
-(defn mark-indicators-seen-updates [application user timestamp]
+(defn mark-indicators-seen-updates [{application :application user :user timestamp :created :as command}]
   (merge
     (apply merge (map (partial mark-collection-seen-update user timestamp) collections-to-be-seen))
-    (when (usr/authority? user) (model/mark-approval-indicators-seen-update application timestamp))
-    (when (usr/authority? user) {:_attachment_indicator_reset timestamp})))
+    (when (doc/approve-permission? command) (model/mark-approval-indicators-seen-update application timestamp))
+    (when (att/approve-permission? command) {:_attachment_indicator_reset timestamp})))
 
 ; whitelist-action
 (defn- prefix-with [prefix coll]

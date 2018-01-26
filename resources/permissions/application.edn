@@ -1,5 +1,4 @@
-{:global       {:applicant          #{:application/create
-                                      :application/accordions-open}
+{:global       {:applicant          #{:application/create}
                 :authority          #{:application/create}
                 :oirAuthority       #{:application/read
                                       :application/show-inforequest-markers
@@ -54,7 +53,8 @@
                 :tos-editor         #{:application/edit-tos-function}
                 :archivist          #{:application/archive}
                 :digitizer          #{:application/show-authorities}}
- :application  {:roles/any          #{:application/read}
+ :application  {:roles/any          #{:application/read
+                                      :application/accordions-open}
                 :owner              #{:application/read-draft
                                       :application/submit
                                       :application/cancel-in-restricted-states

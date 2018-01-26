@@ -11,20 +11,18 @@
   (sc/constrained sc/Keyword (fn-> namespace name (= (name context-type)))
                   "Permission namespace equals context-type"))
 
-(def ^:private common-permissions
-  "Set of permissions that are used outside of the required permissions action meta
-  (eg. inside pre-checks or action body)."
-  #{:application/submit
-    :comment/set-target})
+(defn- known-permission? [permission]
+  (contains? (->> (vals @permission-tree)
+                  (mapcat vals)
+                  (reduce into #{:global/not-allowed}))
+             permission))
 
 (defn restriction [& restrictions]
-  (assert (every? common-permissions restrictions)
-          "All restrictions must be defined in lupapalvelu.permissions/common-permissions")
+  {:pre [(every? known-permission? restrictions)]}
   (fn [permissions] (apply disj permissions restrictions)))
 
 (defn require-permissions [& required-permissions]
-  (assert (every? common-permissions required-permissions)
-          "All required-permissions must be defined in lupapalvelu.permissions/common-permissions")
+  {:pre [(every? known-permission? required-permissions)]}
   (fn [command] (every? (get command :permissions #{}) required-permissions)))
 
 (defn defpermissions [context-type permissions]
@@ -110,12 +108,6 @@
    set?     #{sc/Keyword}
    fn?      sc/Any
    map?     {sc/Keyword (sc/recursive #'ContextMatcher)}))
-
-(defn- known-permission? [permission]
-  (contains? (->> (vals @permission-tree)
-                  (mapcat vals)
-                  (reduce into #{:global/not-allowed}))
-             permission))
 
 (def RequiredPermission
   (sc/constrained sc/Keyword known-permission?))

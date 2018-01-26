@@ -788,7 +788,7 @@
         op-id-mapping (into {} (map
                                  #(vector (:id %) (mongo/create-id))
                                  (conj secondary-ops primary-op)))
-        state (if (usr/authority? user) :open :draft) ; TODO: role based check -> permission based check
+        state (if (app/read-draft-permission? command) :draft :open)
         muutoslupa-app (merge domain/application-skeleton
                               (select-keys application
                                            [:propertyId :location
@@ -806,7 +806,7 @@
                                :permitType    permit/R
                                :permitSubtype :muutoslupa
                                :created       created
-                               :opened        (when (usr/authority? user) created) ; TODO: role based check -> permission based check
+                               :opened        (when (= state :open) created)
                                :modified      created
                                :documents     (into [] (map
                                                          (fn [doc]

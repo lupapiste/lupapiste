@@ -14,16 +14,21 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.permissions :refer [defpermissions] :as permissions]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [lupapalvelu.wfs :as wfs]
             [clj-time.format :as tf]))
 
+
+(defpermissions :document (util/read-edn-resource "permissions/document.edn"))
+
+(def approve-permission? (permissions/require-permissions :document/approve))
+
 ;;
 ;; Validators
 ;;
-
 
 (defn state-valid-by-schema? [schema schema-states-key default-states state]
   (-> (get-in schema [:info (keyword schema-states-key)])
