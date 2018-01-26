@@ -38,9 +38,9 @@
                                (zipmap <> (repeat timestamp)))
         expected-attachment (assoc expected-seen-bys :_attachment_indicator_reset timestamp)
         expected-docs (assoc expected-attachment "documents.0.meta._indicator_reset.timestamp" timestamp)]
-    (mark-indicators-seen-updates {} {:id "pena"} timestamp) => expected-seen-bys
-    (mark-indicators-seen-updates {:documents []} {:id "pena", :role "authority"} timestamp) => expected-attachment
-    (mark-indicators-seen-updates {:documents [{}]} {:id "pena", :role "authority"} timestamp) => expected-docs))
+    (mark-indicators-seen-updates {:application {} :user {:id "pena"} :created timestamp :permissions #{}}) => expected-seen-bys
+    (mark-indicators-seen-updates {:application {:documents []} :user {:id "pena", :role "authority"} :created timestamp :permissions #{:document/approve :attachment/approve}}) => expected-attachment
+    (mark-indicators-seen-updates {:application {:documents [{}]} :user {:id "pena", :role "authority"} :created timestamp :permissions #{:document/approve :attachment/approve}}) => expected-docs))
 
 (defn find-by-schema? [docs schema-name]
   (domain/get-document-by-name {:documents docs} schema-name))

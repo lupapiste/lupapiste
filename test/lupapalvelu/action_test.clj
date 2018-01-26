@@ -199,6 +199,34 @@
     (fact  (missing-parameters {:action "test-command" :data {:id 1}})      => nil)
     (fact  (missing-parameters {:action "test-command" :data {:id 1 :_ 2}}) => nil))
 
+  (facts "Permissions check is run"
+    (against-background
+      (get-actions) => {:test-command1 {:pre-checks [(constantly nil)], :user-roles #{:authority}, :org-authz-roles #{:authority} :permissions [{:required [:test/do]}]}
+                        :test-command2 {:pre-checks [(constantly nil)], :user-roles #{:authority}, :org-authz-roles #{:authority} :permissions [{:required [:test/fail :test/do]}]}
+                        :test-command3 {:pre-checks [(constantly nil)], :user-roles #{:authority}, :org-authz-roles #{:authority} :permissions [{:required []}]}}
+      (domain/get-application-as "123" {:id "user123" :orgAuthz {:ankkalinna #{:authority}} :role :authority} :include-canceled-apps? true) => {:organization "ankkalinna" :state "submitted"})
+
+    (fact "test-command1 - has required permissions"
+      (execute {:action "test-command1" :user {:id "user123" :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}})
+      => ok?
+
+      (provided (lupapalvelu.permissions/get-permissions-by-role :global :authority) => #{})
+      (provided (lupapalvelu.permissions/get-permissions-by-role :organization :authority) => #{:test/do}))
+
+    (fact "test-command2 - missing required permission"
+      (execute {:action "test-command2" :user {:id "user123" :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}})
+      => {:ok false :text "error.unauthorized"}
+
+      (provided (lupapalvelu.permissions/get-permissions-by-role :global :authority) => #{})
+      (provided (lupapalvelu.permissions/get-permissions-by-role :organization :authority) => #{:test/do}))
+
+    (fact "test-command3 - no required permissions for command"
+      (execute {:action "test-command3" :user {:id "user123" :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}})
+      => ok?
+
+      (provided (lupapalvelu.permissions/get-permissions-by-role :global :authority) => #{})
+      (provided (lupapalvelu.permissions/get-permissions-by-role :organization :authority) => #{:test/do})))
+
   (facts "Custom pre-check is run"
     (against-background
       (get-actions) => {:test-command1 {:pre-checks [(constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority} :permissions [{:required []}]}

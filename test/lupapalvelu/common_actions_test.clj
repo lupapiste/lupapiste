@@ -124,6 +124,7 @@
                           :validate-doc
                           :fetch-validation-errors
                           :add-comment
+                          :enable-accordions
                           :comments
                           :attachments
                           :attachment
@@ -176,13 +177,15 @@
                           :mark-seen-organization-links
                           :redirect-to-3d-map
                           :ya-extensions
+                          :ya-application
                           :tasks-tab-visible
                           :application-info-tab-visible
                           :application-summary-tab-visible
                           :application-verdict-tab-visible
                           :application-handlers
-                          :application-organization-archive-enabled}
-        user {:id "user123" :organizations [] :role :applicant}
+                          :application-organization-archive-enabled
+                          :create-application}
+        user {:id "user123" :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (foreach-action {:web {} :user user :application application :data {}})
             :let [action (keyword (:action command))

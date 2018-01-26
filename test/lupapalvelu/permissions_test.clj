@@ -100,7 +100,7 @@
     (provided (get-permissions-by-role :application nil) => irrelevant :times 0))
 
   (fact "no application in command"
-    (get-application-permissions {:user {:id 1}}) => irrelevant
+    (get-application-permissions {:user {:id 1}}) => #{}
 
     (provided (get-permissions-by-role :application nil) => irrelevant :times 0))
 
@@ -192,12 +192,12 @@
     (provided (get-permissions-by-role :application "app-tester") => #{:test/do :application/submit}))
 
   (fact "no role in auth"
-    (get-company-permissions {:user {:copmany {:id 1 :role "uer"}} :application {:auth []}}) => irrelevant
+    (get-company-permissions {:user {:company {:id 1 :role "user"}} :application {:auth []}}) => #{}
 
     (provided (get-permissions-by-role :application nil) => irrelevant :times 0))
 
   (fact "no application in command"
-    (get-company-permissions {:user {:company {:id 1 :role "user"}}}) => irrelevant
+    (get-company-permissions {:user {:company {:id 1 :role "user"}}}) => #{}
 
     (provided (get-permissions-by-role :application nil) => irrelevant :times 0))
 
