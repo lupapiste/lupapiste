@@ -6720,7 +6720,7 @@ input:focus + .arrow-label:before {
 .attachment-batch-table input:focus + .arrow-label:before {
   padding: 3px 3px 4px 3px;
   border: 2px solid #fbc732;
-  border-radius: 15px;
+  border-radius: 16px;
 }
 
 .attachment-batch-table input:focus + label.arrow-label {
@@ -6817,7 +6817,7 @@ input:focus + .checkbox-label:before {
 .attachment-batch-table input:focus + .checkbox-label:before {
   padding: 3px 3px 4px 3px;
   border: 2px solid #fbc732;
-  border-radius: 15px;
+  border-radius: 16px;
 }
 
 .attachment-batch-table input:focus + label.checkbox-label {
@@ -6914,7 +6914,7 @@ input:focus + .blockbox-label:before {
 .attachment-batch-table input:focus + .blockbox-label:before {
   padding: 3px 3px 4px 3px;
   border: 2px solid #fbc732;
-  border-radius: 15px;
+  border-radius: 16px;
 }
 
 .attachment-batch-table input:focus + label.blockbox-label {
@@ -7011,7 +7011,7 @@ input:focus + .docgen-checkbox-label:before {
 .attachment-batch-table input:focus + .docgen-checkbox-label:before {
   padding: 3px 3px 4px 3px;
   border: 2px solid #fbc732;
-  border-radius: 15px;
+  border-radius: 16px;
 }
 
 .attachment-batch-table input:focus + label.docgen-checkbox-label {
@@ -7113,7 +7113,7 @@ input:focus + .sectionbox-label:before {
 .attachment-batch-table input:focus + .sectionbox-label:before {
   padding: 3px 3px 4px 3px;
   border: 2px solid #fbc732;
-  border-radius: 15px;
+  border-radius: 16px;
 }
 
 .attachment-batch-table input:focus + label.sectionbox-label {
@@ -7210,7 +7210,7 @@ input:focus + .stampbox-label:before {
 .attachment-batch-table input:focus + .stampbox-label:before {
   padding: 3px 3px 4px 3px;
   border: 2px solid #fbc732;
-  border-radius: 15px;
+  border-radius: 16px;
 }
 
 .attachment-batch-table input:focus + label.stampbox-label {
@@ -7311,7 +7311,7 @@ input:focus + .signbox-label:before {
 .attachment-batch-table input:focus + .signbox-label:before {
   padding: 3px 3px 4px 3px;
   border: 2px solid #fbc732;
-  border-radius: 15px;
+  border-radius: 16px;
 }
 
 .attachment-batch-table input:focus + label.signbox-label {
@@ -7412,7 +7412,7 @@ input:focus + .radio-label:before {
 .attachment-batch-table input:focus + .radio-label:before {
   padding: 3px 3px 4px 3px;
   border: 2px solid #fbc732;
-  border-radius: 15px;
+  border-radius: 16px;
 }
 
 .attachment-batch-table input:focus + label.radio-label {
@@ -7509,7 +7509,7 @@ input:focus + .radio-field-label:before {
 .attachment-batch-table input:focus + .radio-field-label:before {
   padding: 3px 3px 4px 3px;
   border: 2px solid #fbc732;
-  border-radius: 15px;
+  border-radius: 16px;
 }
 
 .attachment-batch-table input:focus + label.radio-field-label {
@@ -7618,7 +7618,7 @@ input:focus + .filter-label:before {
 .attachment-batch-table input:focus + .filter-label:before {
   padding: 3px 3px 4px 3px;
   border: 2px solid #fbc732;
-  border-radius: 15px;
+  border-radius: 16px;
 }
 
 .attachment-batch-table input:focus + label.filter-label {
@@ -28510,7 +28510,7 @@ input:focus + .pate-checkbox-label:before {
 .attachment-batch-table input:focus + .pate-checkbox-label:before {
   padding: 3px 3px 4px 3px;
   border: 2px solid #fbc732;
-  border-radius: 15px;
+  border-radius: 16px;
 }
 
 .attachment-batch-table input:focus + label.pate-checkbox-label {
@@ -28611,7 +28611,7 @@ input:focus + .pate-radio-label:before {
 .attachment-batch-table input:focus + .pate-radio-label:before {
   padding: 3px 3px 4px 3px;
   border: 2px solid #fbc732;
-  border-radius: 15px;
+  border-radius: 16px;
 }
 
 .attachment-batch-table input:focus + label.pate-radio-label {

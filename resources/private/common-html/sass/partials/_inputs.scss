@@ -97,7 +97,7 @@
   .attachment-batch-table input:focus + .#{$cls}-label:before {
     padding: 3px 3px 4px 3px;
     border: 2px solid $hover;
-    border-radius: 15px;
+    border-radius: 16px;
   }
 
   .attachment-batch-table input:focus + label.#{$cls}-label {
