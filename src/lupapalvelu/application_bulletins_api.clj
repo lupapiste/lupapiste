@@ -22,7 +22,9 @@
             [monger.collection :as collection]
             [clj-time.coerce :as tc]
             [clj-time.core :as t]
-            [lupapalvelu.states :as states]))
+            [lupapalvelu.states :as states]
+            [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.application :as app]))
 
 (def bulletin-page-size 10)
 
@@ -366,8 +368,10 @@
    :user-roles #{:authority :applicant}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]})
 
-(defn- check-bulletins-enabled [{organization :organization {permit-type :permitType municipality :municipality} :application}]
-  (when-not (and organization (org/bulletins-enabled? @organization permit-type municipality))
+(defn- check-bulletins-enabled [{organization :organization {permit-type :permitType municipality :municipality :as app} :application}]
+  (when (and organization (or (not (org/bulletins-enabled? @organization permit-type municipality))
+                              (foreman/foreman-app? app)
+                              (app/designer-app? app)))
     (fail :error.bulletins-not-enebled-for-scope)))
 
 (defn- check-bulletin-op-description-required [{organization :organization {permit-type :permitType municipality :municipality} :application}]
@@ -396,6 +400,7 @@
    :user-roles  #{:authority}
    :states      #{:submitted :complementNeeded}
    :pre-checks  [(permit/validate-permit-type-is-not permit/YI permit/YL permit/YM permit/VVVL permit/MAL)
+                 check-bulletins-enabled
                  check-bulletin-op-description-required]})
 
 (defcommand update-app-bulletin-op-description
