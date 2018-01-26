@@ -73,15 +73,14 @@ LUPAPISTE.StateIconsModel = function( params ) {
   function approverInfo(attachment) {
 
       var approverInfo = "";
-      var approval = service.attachmentFirstApproval( attachment );
-      if (approval) {
+      var approval = service.attachmentApproval( attachment );
+      if (approval && approval.state !== "requires_authority_action") {
           approverInfo = sprintf("%s %s:\n %s %s",
                                  loc(["document.approved"]),
                                  moment(approval.timestamp).format("D.M.YYYY HH:mm"),
                                  approval.user.firstName,
                                  approval.user.lastName);
       }
-
       return approverInfo;
   }
 

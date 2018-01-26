@@ -12,11 +12,12 @@ LUPAPISTE.AttachmentPageStampingModel = function( params ) {
         var stamping = ko.unwrap( stampingData );
         var text = null;
         if ( stamping && stamping.isStamped ) {
-             text = loc( [STAMPED] );
-             text += " ("
-                 + stamping.user.firstName + " "
-                 + stamping.user.lastName + " "
-                 + moment(stamping.timestamp).format( "D.M.YYYY HH:mm" ) + ")";
+            text = sprintf("%s %s%s %s %s",
+                           loc( [STAMPED] ),
+                           moment(stamping.timestamp).format( "D.M.YYYY HH:mm" ),
+                           ":",
+                           stamping.user.firstName,
+                           stamping.user.lastName);
         }
         return text;
     };
