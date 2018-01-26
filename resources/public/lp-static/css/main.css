@@ -29292,6 +29292,20 @@ input:checked + .pate-attachment-group-label:hover.pate-attachment-group-label:b
   color: #fbc732;
 }
 
+input:focus + .pate-attachment-group-label:before {
+  color: #fbc732 !important;
+}
+
+.attachment-batch-table input:focus + .pate-attachment-group-label:before {
+  padding: 3px 3px 4px 3px;
+  border: 2px solid #fbc732;
+  border-radius: 16px;
+}
+
+.attachment-batch-table input:focus + label.pate-attachment-group-label {
+  padding: 0 !important;
+}
+
 input:checked + .pate-attachment-group-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -29381,6 +29395,20 @@ label.pate-attachment-check-label {
 .pate-attachment-check-label:hover.pate-attachment-check-label:before,
 input:checked + .pate-attachment-check-label:hover.pate-attachment-check-label:before {
   color: #fbc732;
+}
+
+input:focus + .pate-attachment-check-label:before {
+  color: #fbc732 !important;
+}
+
+.attachment-batch-table input:focus + .pate-attachment-check-label:before {
+  padding: 3px 3px 4px 3px;
+  border: 2px solid #fbc732;
+  border-radius: 16px;
+}
+
+.attachment-batch-table input:focus + label.pate-attachment-check-label {
+  padding: 0 !important;
 }
 
 input:checked + .pate-attachment-check-label:before {
