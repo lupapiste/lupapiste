@@ -90,14 +90,14 @@
 (defn- ensure-bulletin-op-description-is-set-if-needed
   [{{organizationId :organization permit-type :permitType municipality :municipality primaryOperation :primaryOperation
      bulletinOpDescription :bulletinOpDescription :as application} :application}]
-  (let [{:keys [enabled descriptions-from-backend-system]} (org/bulletin-settings-for-scope (org/get-organization organizationId) permit-type municipality)]
-    (when (and organizationId
-               enabled
-               (not descriptions-from-backend-system)
-               (not (foreman/foreman-app? application))
-               (not (= (:name primaryOperation) "suunnittelijan-nimeaminen"))
-               (ss/blank? bulletinOpDescription))
-      (fail :error.invalid-value))))
+  (when organizationId
+    (let [{:keys [enabled descriptions-from-backend-system]} (org/bulletin-settings-for-scope (org/get-organization organizationId) permit-type municipality)]
+      (when (and enabled
+                 (not descriptions-from-backend-system)
+                 (not (foreman/foreman-app? application))
+                 (not (= (:name primaryOperation) "suunnittelijan-nimeaminen"))
+                 (ss/blank? bulletinOpDescription))
+        (fail :error.invalid-value)))))
 
 (defcommand approve-application
   {:parameters       [id lang]
