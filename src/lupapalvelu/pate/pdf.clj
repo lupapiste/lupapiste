@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.pdf
-  "PDF generation via HTML for Pate verdicts."
+  "PDF generation via HTML for Pate verdicts. Utilises a simple
+  schema-based mechanism for the layout definiton and generation."
   (:require [clojure.java.io :as io]
             [garden.core :as garden]
             [lupapalvelu.application :as app]
@@ -11,6 +12,7 @@
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pdf.html-template :as html-pdf]
             [lupapalvelu.pdf.html-template-common :as common]
             [rum.core :as rum]
@@ -18,7 +20,73 @@
             [sade.property :as property]
             [sade.strings :as ss]
             [sade.util :as util]
+            [schema.core :refer [defschema] :as sc]
             [swiss.arrows :refer :all]))
+
+(def cell-widths (range 10 101 5))
+(def row-styles [:pad-after :pad-before
+                 :border-top :border-bottom
+                 :page-break :bold :spaced])
+(def cell-styles [:bold :center :right :nowrap])
+
+(defschema Source
+  "Value of PdfEntry :source property aka data source for the row."
+  (sc/conditional
+   ;; Keyword corresponds to a key in the data context.
+   keyword? sc/Keyword
+   :else (shared/only-one-of [:doc :dict]
+                             ;; Vector is a path to applicatio
+                             ;; document data. The first item is the
+                             ;; document name and rest are path within
+                             ;; the data.
+                             {(sc/optional-key :doc)  [sc/Keyword]
+                              ;; Kw-path into published verdict data.
+                              (sc/optional-key :dict) sc/Keyword})))
+
+(defn styles
+  "Definition that only allows either individual kw or subset of kws."
+  [kws]
+  (let [enum (apply sc/enum kws)]
+    (sc/conditional
+     keyword? enum
+     :else    [enum])))
+
+(defschema PdfEntry
+  "An entry in the layout consists of left- and right-hand sides. The
+  former contains the entry title and the latter actual data. In the
+  schema, an entry is modeled as a vector, where the first element
+  defines both the title and the data source for the whole entry."
+  [(sc/one {;; Localisation key for the row (left-hand) title.
+            :loc                        sc/Keyword
+            ;; If :loc-many is given it is used as the title key if
+            ;; the source value denotes multiple values.
+            (sc/optional-key :loc-many) sc/Keyword
+            (sc/optional-key :source)   Source
+            (sc/optional-key :styles)   (styles row-styles)}
+           {})
+   ;; Note that the right-hand side can consist of multpiple
+   ;; cells/columns. As every property is optional, the cells can be
+   ;; omitted. In that case, the value of the right-hand side is the
+   ;; source value.
+   (shared/only-one-of [:value :text]
+                       ;; Path within the source value. Useful, when the value is a map.
+                       {(sc/optional-key :path)       shared/path-type
+                        ;; Textual representation that is static and
+                        ;; independent from any source value.
+                        (sc/optional-key :text)       shared/keyword-or-string
+                        (sc/optional-key :width)      (apply sc/enum cell-widths)
+                        (sc/optional-key :unit)       (sc/enum :ha :m2 :m3 :kpl)
+                        ;; Additional localisation key prefix. Is
+                        ;; applied both to path and text values.
+                        (sc/optional-key :loc-prefix) shared/path-type
+                        (sc/optional-key :styles)     (styles cell-styles)})])
+
+(defschema PdfLayout
+  "PDF contents layout."
+  {;; Width of the left-hand side.
+   :left-width (apply sc/enum cell-widths)
+   :entries    [PdfEntry]})
+
 
 (def page-number-script
   [:script
@@ -67,9 +135,105 @@
                          (map (fn [n]
                                 [(keyword (str ".cell.cell--" n))
                                  {:width (str n "%")}])
-                              (range 10 101 5))]]])}}]]
+                              cell-widths)
+                         [:&.spaced
+                          [(sel/+ :.row :.row)
+                           [:.cell {:padding-top "0.5em"}]]]]]])}}]]
          [:body body (when script?
                        page-number-script)]])))
+
+(def pdf-layouts
+  {:r {:left-width 30
+       :entries    [[{:loc    :pate-verdict.application-id
+                      :source :application-id
+                      :styles [:bold :pad-after]}]
+                    [{:loc    :rakennuspaikka._group_label
+                      :styles :bold}]
+                    [{:loc    :rakennuspaikka.kiinteisto.kiinteistotunnus
+                      :source :property-id}]
+                    [{:loc    :rakennuspaikka.kiinteisto.tilanNimi
+                      :source {:doc [:rakennuspaikka :kiinteisto.tilanNimi]}}]
+                    [{:loc    :pdf.pinta-ala
+                      :source {:doc [:rakennuspaikka :kiinteisto.maapintaala]}}
+                     {:unit :ha}]
+                    [{:loc    :rakennuspaikka.kaavatilanne._group_label
+                      :source {:doc [:rakennuspaikka :kaavatilanne]}
+                      :styles :pad-after}
+                     {:loc-prefix :rakennuspaikka.kaavatilanne}]
+                    [{:loc    :pate-purpose
+                      :source {:dict :purpose}
+                      :styles :pad-after}]
+                    [{:loc      :pdf.applicant
+                      :loc-many :pdf.applicants
+                      :source   :applicants
+                      :styles   [:pad-after :border-bottom]}]
+                    [{:loc      :applications.operation
+                      :loc-many :operations
+                      :source   :operations
+                      :styles   [:bold :pad-before]}
+                     {:loc-prefix :operations
+                      :path       :name}]
+                    [{:loc    :pate-extra-info
+                      :source {:dict :extra-info}
+                      :styles :pad-before}]
+                    [{:loc    :pate.complexity
+                      :source :complexity
+                      :styles [:spaced :pad-after :pad-before]}]
+                    [{:loc    :pate-rights
+                      :source {:dict :rights}
+                      :styles :pad-before}]
+                    [{:loc    :pdf.design-complexity
+                      :source :designers
+                      :styles :pad-before}
+                     {:path   :role
+                      :styles :nowrap}
+                     {:path       :difficulty
+                      :width      100
+                      :loc-prefix :osapuoli.suunnittelutehtavanVaativuusluokka}]
+                    [{:loc      :pdf.designer
+                      :loc-many :pdf.designers
+                      :source   :designers
+                      :styles   :pad-before}
+                     {:path   :role
+                      :styles :nowrap}
+                     {:path  :person
+                      :width 100}]
+                    [{:loc    :verdict.kerrosala
+                      :source :primary
+                      :styles :pad-before}
+                     {:path :mitat.kerrosala
+                      :unit :m2}]
+                    [{:loc    :verdict.kokonaisala
+                      :source :primary}
+                     {:path :mitat.kokonaisala
+                      :unit :m2}]
+                    [{:loc    :pdf.volume
+                      :source :primary}
+                     {:path :mitat.tilavuus
+                      :unit :m3}]
+                    [{:loc    :pate-buildings.info.paloluokka
+                      :source :paloluokka}]
+                    [{:loc    :pdf.parking
+                      :source :parking
+                      :styles :pad-before}
+                     {:path   :text
+                      :styles :nowrap}
+                     {:path   :amount
+                      :styles :right}
+                     {:text  ""
+                      :width 100}]
+                    [{:loc :verdict.attachments
+                      :source :attachments
+                      :styles [:bold :pad-before]}
+                     {:path :text
+                      :styles :nowrap}
+                     {:path :amount
+                      :styles [:right :nowrap]
+                      :unit :kpl}
+                     {:text ""
+                      :width 100}]]}})
+
+(sc/validate PdfLayout (:r pdf-layouts))
 
 (defn applicants
   "Returns list of name, address maps for properly filled party
@@ -99,55 +263,31 @@
 (defn- pathify [kw-path]
   (map keyword (ss/split (name kw-path) #"\.")))
 
-(defn doc-value [doc-name kw-path]
-  (fn [{app :application}]
-    (get-in (domain/get-document-by-name app (name doc-name))
-            (cons :data (pathify kw-path)))))
+(defn doc-value [application doc-name kw-path]
+  (get-in (domain/get-document-by-name application (name doc-name))
+          (cons :data (pathify kw-path))))
 
-(defn dict-value [dict]
-  (fn [{verdict :verdict}]
-    (get-in verdict [:data dict])))
+(defn dict-value [verdict kw-path]
+  (get-in verdict (cons :data (pathify kw-path))))
 
-(defn primary-value [kw-path]
-  (fn [{app :application}]
-    (-<>> app
-          :primaryOperation
-          :id
-          (domain/get-document-by-operation app)
-          :data
-          (get-in <> (pathify kw-path)))))
+(defn add-unit [lang unit v]
+  (case unit
+    :ha  (str v " " (i18n/localize lang :unit.hehtaaria))
+    :m2  [:span v " m" [:sup 2]]
+    :m3  [:span v " m" [:sup 3]]
+    :kpl (str v " " (i18n/localize lang :unit.kpl)) ))
 
-(defn wrap [wrap-fn fetch]
-  (letfn [(do-wrap [data w v]
-            (when (seq v)
-              (w data v)))]
-    (fn [data]
-      (if (fn? fetch)
-        (->> data fetch (do-wrap data wrap-fn))
-        (do-wrap data wrap-fn fetch)))))
+(defn complexity [lang verdict]
+  (remove nil?
+          [(i18n/localize lang
+                          :pate.complexity
+                          (dict-value verdict :complexity))
+           (dict-value verdict :complexity-text)]))
 
-(defn unit-wrap [unit]
-  (fn [{lang :lang} v]
-    (case unit
-      :ha (str v " " (i18n/localize lang :unit.hehtaaria))
-      :m2 [:span v " m" [:sup 2]]
-      :m3 [:span v " m" [:sup 3]])))
-
-(defn loc-wrap [prefix]
-  (fn [{lang :lang} v]
-    (when-not (-> v str ss/blank?)
-      (i18n/localize lang prefix v))))
-
-(defn complexity [data]
-  (let [[c txt]   ((juxt (wrap (loc-wrap :pate.complexity)
-                               (dict-value :complexity))
-                         (dict-value :complexity-text)) data)]
-    (remove nil? [c (when txt [:p txt])])))
-
-(defn property-id [data]
-  (->> [(-> data :application :propertyId
+(defn property-id [application]
+  (->> [(-> application :propertyId
             property/to-human-readable-property-id)
-        ((doc-value :rakennuspaikka :kiinteisto.maaraalaTunnus) data)]
+        (doc-value application :rakennuspaikka :kiinteisto.maaraalaTunnus)]
        (remove ss/blank?)
        (ss/join "-")))
 
@@ -176,21 +316,23 @@
                     degree       :koulutusvalinta
                     other-degree :koulutus
                     role         :role}]
-                {:role       (or role
-                                 (value-or-other lang
-                                                 role-code other-role
-                                                 role-keys))
-                 :difficulty (i18n/localize lang
-                                            :osapuoli
-                                            :suunnittelutehtavanVaativuusluokka
-                                            difficulty)
-                 :name       (format "%s %s"
-                                     (or (:etunimi info) "")
-                                     (or (:sukunimi info) ""))
-                 :education (value-or-other lang
-                                            (:koulutusvalinta skills)
-                                            (:koulutus skills))}))
-         (remove (util/fn-> :name ss/blank?))
+                (let [designer-name (format "%s %s"
+                                      (or (:etunimi info) "")
+                                      (or (:sukunimi info) ""))]
+                  (when-not (ss/blank? designer-name)
+                    {:role       (or role
+                                     (value-or-other lang
+                                                     role-code other-role
+                                                     role-keys))
+                     :difficulty difficulty
+                     :person (->> [designer-name
+                                   (value-or-other lang
+                                                   (:koulutusvalinta skills)
+                                                   (:koulutus skills))]
+                                  (map ss/trim)
+                                  (remove ss/blank?)
+                                  (ss/join ", "))}))))
+         (remove nil?)
          (sort (fn [a b]
                  (if (= a head-loc) -1 1))))))
 
@@ -215,90 +357,155 @@
                                        (ss/trim))]])
           designers)]))
 
+(defn resolve-source
+  [{:keys [application verdict] :as data} {doc-source  :doc
+                                           dict-source :dict
+                                           :as         source}]
+  (cond
+    doc-source  (apply doc-value (cons application doc-source))
+    dict-source (apply dict-value (cons verdict [dict-source]))
+    :else       (when source (source data))))
+
+(defn resolve-class [all selected & extra]
+  (->> (util/intersection-as-kw all (flatten [selected]))
+       (concat extra)
+       (remove nil?)
+       (mapv name)
+       (ss/join " ")))
+
+(defn resolve-cell [{lang :lang :as data} source-value
+                    {:keys [text width unit loc-prefix styles] :as cell}]
+  (let [path (some-> cell :path pathify)]
+    [:div.cell {:class (resolve-class cell-styles
+                                      styles
+                                      (when width (str "cell--" width))
+                                      (or (when (seq path)
+                                            (get-in source-value
+                                                    (cons ::styles path)))
+                                          (get-in source-value
+                                                  [::styles ::cell])))}
+     (cond->> (or text (get-in source-value path source-value))
+       loc-prefix (i18n/localize lang loc-prefix)
+       unit (add-unit lang unit))]))
+
 (defn entry-row
-  [{lang :lang :as data} title fetch & opts]
-  (when-let [entry (not-empty (if (fn? fetch)
-                                (fetch data)
-                                fetch))]
-    (let [{:keys [bold-title] :as opts} (zipmap opts (repeat true))]
+  [left-width {lang :lang :as data} [{:keys [loc loc-many source styles]} & cells]]
+  (let [source-value (util/pcond-> (resolve-source data source) string? ss/trim)
+        multiple?    (and (sequential? source-value)
+                          (> (count source-value) 1))]
+    (when (or (nil? source) (not-empty source-value))
       [:div.row
-       {:class (->> (keys opts)
-                    (util/intersection-as-kw [:pad-after :pad-before
-                                              :border-top :border-bottom])
-                    (mapv name)
-                    (ss/join " "))}
-       [:div.cell.cell--30
-        {:class (when bold-title "bold")}
-        (i18n/localize lang title)]
-       [:div.cell.cell--70 (util/pcond-> entry string? ss/trim)]])))
+       {:class (resolve-class row-styles styles
+                              (get-in source-value [::styles :row]))}
+       [:div.cell
+        {:class (resolve-class [:bold] styles (when left-width
+                                                (str "cell--" left-width)))}
+        (i18n/localize lang (if multiple? (or loc-many loc) loc))]
+       (if (or (> (count cells) 1) multiple?)
+         [:div.cell
+          [:div.section
+           (for [v (cond-> source-value  (not multiple?) vector)]
+             [:div.row
+              {:class (get-in v [::styles :row])}
+              (map (partial resolve-cell data v)
+                   (if (empty? cells) [{}] cells))])]]
+         (resolve-cell data source-value (first cells)))])))
 
 (defn content
-  [data entries]
+  [data {:keys [left-width entries]}]
   [:div.section
    (->> entries
-        (map (partial apply (partial entry-row data)))
+        (map (partial entry-row left-width data))
         (filter not-empty))])
 
-(defn loc-alternative [xs one many]
-  (if (= (count xs) 1) one many))
+(defn primary-operation-data [application]
+  (->> application
+       :primaryOperation
+       :id
+       (domain/get-document-by-operation application)
+       :data))
+
+(defn operation-infos [application]
+  (mapv (util/fn-> :schema-info :op)
+        (app/get-sorted-operation-documents application)))
+
+(defn verdict-buildings [{:keys [application verdict]}]
+  (let [buildings (reduce-kv (fn [acc k {flag? :show-building :as v}]
+                               (cond-> acc
+                                 flag? (assoc k v)))
+                             {}
+                             (dict-value verdict :buildings))]
+    (->> (map (comp keyword :id) (operation-infos application))
+         (map #(get buildings %))
+         (remove nil?))))
+
+(defn join-non-blanks [separator & coll]
+  (->> coll
+       flatten
+       (remove ss/blank?)
+       (ss/join separator)))
+
+(defn building-parking [lang {:keys [description tag building-id]
+                              :as building}]
+  (letfn [(park [kw]
+            (hash-map :text (i18n/localize lang :pate-buildings.info kw)
+                      :amount (kw building)))]
+    (-<>> [:kiinteiston-autopaikat :rakennetut-autopaikat
+           :rakennettavat-autopaikat :autopaikkoja-enintaan
+           :autopaikkoja-vahintaan :ulkopuoliset-autopaikat]
+          (map park)
+          (sort-by :text)
+          vec
+          (conj <> (park :autopaikat-yhteensa))
+          (remove (comp ss/blank? :amount))
+          (cons {:text (-<>> [tag description]
+                             (join-non-blanks ": ")
+                             (join-non-blanks " \u2013 " <> building-id))
+                 :amount ""}))))
+
+(defn parking-section [lang buildings]
+  (let [rows (->> buildings
+                  (map (partial building-parking lang))
+                  (remove nil?))]
+    (when (seq rows)
+      [:div.section rows])))
+
+(defn verdict-attachments [lang verdict]
+  (->> (dict-value verdict :attachments)
+       (map (fn [{:keys [type-group type-id amount]}]
+              {:text (i18n/localize lang :attachmentType type-group type-id)
+               :amount amount}))
+       (sort-by :text)))
 
 (defmulti verdict-body (util/fn-> :verdict :category keyword))
 
 (defmethod verdict-body :r
   [{:keys [lang application verdict] :as data}]
-  (content data
-           (concat
-            [[:pate-verdict.application-id (:id application) :bold-title :pad-after]
-
-             ;; Rakennuspaikka
-             [:rakennuspaikka._group_label " " :bold-title]
-             [:rakennuspaikka.kiinteisto.kiinteistotunnus property-id]
-             [:rakennuspaikka.kiinteisto.tilanNimi
-              (doc-value :rakennuspaikka :kiinteisto.tilanNimi)]
-             [:pdf.pinta-ala (wrap (unit-wrap :ha)
-                                   (doc-value :rakennuspaikka
-                                              :kiinteisto.maapintaala))]
-             [:rakennuspaikka.kaavatilanne._group_label
-              (wrap (loc-wrap :rakennuspaikka.kaavatilanne)
-                    (doc-value :rakennuspaikka :kaavatilanne))
-              :pad-after]
-             [:pate-purpose (dict-value :purpose) :pad-after]
-
-             ;; Applicants
-             (let [apps (applicants data)]
-               [(loc-alternative apps :pdf.applicant :pdf.applicants)
-                (->> apps
-                     (map (fn [{:keys [name address]}]
-                            (format "%s\n%s" name address)))
-                     (ss/join "\n\n"))
-                :pad-after :border-bottom])
-
-             ;; Operations
-             (let [[x & xs :as op-names]
-                   (->> (app/get-sorted-operation-documents application)
-                        (map (util/fn-> :schema-info :op :name))
-                        (map #(i18n/localize lang :operations %)))]
-               [(loc-alternative op-names :applications.operation :operations)
-                (concat [[:b x] "\n"] (ss/join "\n" xs))
-                :pad-before])
-             [:pate-extra-info (dict-value :extra-info) :pad-before]
-             [:pate.complexity complexity :pad-before]
-             [:pate-rights (dict-value :rights) :pad-before]]
-
-            ;; Designers
-            (let [designers (designers data)]
-              [[:pdf.design-complexity (design-complexity designers) :pad-before]
-               [(loc-alternative designers :pdf.designer :pdf.designers)
-                (designer-info designers) :pad-before]])
-
-            ;; Primary operation
-            [[:verdict.kerrosala (wrap (unit-wrap :m2)
-                                       (primary-value :mitat.kerrosala))
-              :pad-before]
-             [:verdict.kokonaisala (wrap (unit-wrap :m2)
-                                         (primary-value :mitat.kokonaisala))]
-             [:pdf.volume (wrap (unit-wrap :m3)
-                                (primary-value :mitat.tilavuus))]])))
+  (let [buildings (verdict-buildings data)]
+    (content (assoc data
+                    :application-id (:id application)
+                    :property-id (property-id application)
+                    :applicants (->> (applicants data)
+                                     (map #(format "%s\n%s"
+                                                   (:name %) (:address %)))
+                                     (ss/join "\n\n"))
+                    :operations (assoc-in (operation-infos application)
+                                          [0 ::styles :name] :bold)
+                    :complexity (complexity lang verdict)
+                    :designers (designers data)
+                    :primary (primary-operation-data application)
+                    :paloluokka (->> buildings
+                                     (map :paloluokka)
+                                     (remove ss/blank?)
+                                     distinct
+                                     (ss/join " / "))
+                    :parking (->>  buildings
+                                   (map (partial building-parking lang))
+                                   (interpose {:text "" :amount ""
+                                               ::styles {:row :pad-before}})
+                                   flatten)
+                    :attachments (verdict-attachments lang verdict))
+             (:r pdf-layouts))))
 
 (defn verdict-header
   [lang {:keys [organization]} {:keys [published category data]}]

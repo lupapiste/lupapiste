@@ -560,3 +560,6 @@
 "pdf.volume" "en" "Volume"
 "pdf.volume" "fi" "Tilavuus"
 "pdf.volume" "sv" "Volym"
+"pdf.parking" "en" "Parking spaces"
+"pdf.parking" "fi" "Autopaikat"
+"pdf.parking" "sv" "Bilplatser"
