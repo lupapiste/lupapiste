@@ -3708,6 +3708,10 @@
                                                        :company-role {$exists false},
                                                        :invite {$exists true}}}}))
 
+(defmigration remove-foreman-app-bulletins
+  {:apply-when (pos? (mongo/count :application-bulletins {:versions.primaryOperation.name "tyonjohtajan-nimeaminen-v2"}))}
+  (mongo/remove-many :application-bulletins {:versions.primaryOperation.name "tyonjohtajan-nimeaminen-v2"}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
