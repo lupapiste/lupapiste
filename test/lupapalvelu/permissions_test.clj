@@ -39,6 +39,8 @@
   (fact "no permissions in command"
     ((require-permissions :application/submit :comment/set-target) {}) => false))
 
+(testable-privates lupapalvelu.permissions defpermissions)
+
 (defpermissions :test
   {:test-scope   {:test-role         #{:test/test
                                        :test/fail}

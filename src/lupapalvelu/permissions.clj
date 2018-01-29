@@ -1,6 +1,7 @@
 (ns lupapalvelu.permissions
   (:require [clojure.set :as set]
             [schema.core :as sc]
+            [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]))
 
 (defonce permission-tree (atom {}))
@@ -10,6 +11,23 @@
 (defn- permission-schema [context-type]
   (sc/constrained sc/Keyword (fn-> namespace name (= (name context-type)))
                   "Permission namespace equals context-type"))
+
+(defn- defpermissions [context-type permissions]
+  (sc/validate {Scope {Role #{(permission-schema context-type)}}} permissions)
+  (swap! permission-tree #(merge-with (partial merge-with into) % permissions)))
+
+(re-matches #".*\.jar$" "foo.jar")
+
+(defn load-permissions! []
+  (let [this-path (util/this-jar lupapalvelu.main)
+        files (if (ss/ends-with this-path ".jar") ; are we inside jar
+                (filter #(ss/ends-with % ".edn") (util/list-jar this-path "permissions/"))
+                (util/get-files-by-regex "resources/permissions/" #".+\.edn$"))]
+    (reset! permission-tree {})
+    (doseq [file files]
+      (defpermissions (->> (.getName file) (re-find #"(.*)(.edn)") second) (util/read-edn-file (.getPath file))))))
+
+(load-permissions!)
 
 (defn- known-permission? [permission]
   (contains? (->> (vals @permission-tree)
@@ -24,10 +42,6 @@
 (defn require-permissions [& required-permissions]
   {:pre [(every? known-permission? required-permissions)]}
   (fn [command] (every? (get command :permissions #{}) required-permissions)))
-
-(defn defpermissions [context-type permissions]
-  (sc/validate {Scope {Role #{(permission-schema context-type)}}} permissions)
-  (swap! permission-tree #(merge-with (partial merge-with into) % permissions)))
 
 (defn get-permissions-by-role [scope role]
   (set/union

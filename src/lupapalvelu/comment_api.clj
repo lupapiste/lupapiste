@@ -12,7 +12,7 @@
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
-            [lupapalvelu.permissions :refer [defpermissions] :as permissions]
+            [lupapalvelu.permissions :as permissions]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]))
 

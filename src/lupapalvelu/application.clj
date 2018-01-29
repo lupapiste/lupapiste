@@ -27,7 +27,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as op]
-            [lupapalvelu.permissions :refer [defpermissions defcontext] :as permissions]
+            [lupapalvelu.permissions :refer [defcontext] :as permissions]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as usr]
@@ -42,8 +42,6 @@
             [sade.strings :as ss]
             [lupapalvelu.application-utils :as app-utils]))
 
-
-(defpermissions :application (util/read-edn-resource "permissions/application.edn"))
 
 (def read-draft-permission? (permissions/require-permissions :application/read-draft))
 
@@ -103,14 +101,6 @@
 (defn validate-link-permits [application]
   (when (> (count-required-link-permits application) (count-link-permits application))
     (fail :error.permit-must-have-link-permit)))
-
-(defn validate-only-authority-before-verdict-given
-  "Validator: Restrict applicant access before the application verdict
-  is given. To be used in commands' :pre-checks vector"
-  [{user :user app :application}]
-  (when-not (or (states/post-verdict-states (keyword (:state app)))
-                (usr/authority? user))
-    unauthorized))
 
 (defn validate-authority-in-drafts
   "Validator: Restrict authority access in draft application.

@@ -5,10 +5,7 @@
             [sade.strings :as ss]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.permissions :refer [defpermissions]]
             [lupapalvelu.user :as usr]))
-
-(defpermissions :comment (util/read-edn-resource "permissions/comment.edn"))
 
 (defn- enrich-attachment-comment [attachments {{target-type :type target-id :id :as target} :target :as comment}]
   (if (and (= (keyword target-type) :attachment) target-id)
