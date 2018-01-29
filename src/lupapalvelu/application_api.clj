@@ -137,7 +137,7 @@
    :permissions [{:required [:application/read :application/mark-everything-seen]}]
    :states     (states/all-states-but [:draft :archived])}
   [{:keys [application user created] :as command}]
-  (update-application command {$set (app/mark-indicators-seen-updates application user created)}))
+  (update-application command {$set (app/mark-indicators-seen-updates command)}))
 
 ;;
 ;; Assign
