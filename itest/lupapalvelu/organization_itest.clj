@@ -1174,7 +1174,10 @@
         :docTerminalInUse false
         :allowedTerminalAttachmentTypes []
         :documentPrice 100
-        :organizationDescription {:fi "Kuvaus" :sv "Beskrivning" :en "Description"}})
+        :organizationDescription {:fi "Kuvaus" :sv "Beskrivning" :en "Description"}
+        :documentRequest {:enabled false
+                          :email ""
+                          :instructions {:en "" :fi "" :sv ""}}})
 
   (fact "can't set negative document price"
     (update-docstore-info "753-R" true false -100 "Description")
@@ -1216,6 +1219,15 @@
   (fact "Docterminal enabled"
     (query sipoo :docterminal-enabled)
     => ok?))
+
+(fact "Document request info"
+  (fact "only authority admin can call"
+    (command sonja :set-document-request-info :enabled false :email "a@b.c" :instructions "Instructions")
+    => (partial expected-failure? :error.unauthorized))
+
+  (fact "email must be valid"
+        (command sipoo :set-document-request-info :enabled false :email "not-valid-email" :instructions "Instructions")
+        => (partial expected-failure? :error.email)))
 
 (fact "organizations bulletin settings"
   (facts "query setting"

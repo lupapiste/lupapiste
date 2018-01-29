@@ -3708,6 +3708,15 @@
                                                        :company-role {$exists false},
                                                        :invite {$exists true}}}}))
 
+(defmigration add-docterminal-use-info
+  {:apply-when (pos? (mongo/count :organizations {:docstore-info.documentRequest {$exists false}}))}
+  (mongo/update :organizations
+                {:docstore-info.documentRequest {$exists false}}
+                {$set {:docstore-info.documentRequest.enabled false
+                       :docstore-info.documentRequest.email ""
+                       :docstore-info.documentRequest.instructions ""}}
+                :multi true))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

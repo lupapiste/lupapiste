@@ -30,6 +30,7 @@
             [sade.municipality :as muni]
             [sade.property :as p]
             [sade.shared-schemas :as sssc]
+            [sade.schemas :as ssc]
             [sade.schema-utils :as ssu]
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]
@@ -1092,19 +1093,29 @@
   {:description      "Updates organization's document store information"
    :parameters       [org-id docStoreInUse docTerminalInUse documentPrice organizationDescription]
    :user-roles       #{:admin}
-   :input-validators [(partial boolean-parameters [:docStoreInUse])
-                      (partial number-parameters [:documentPrice])
-                      (fn [{{price :documentPrice} :data}]
-                        (when (sc/check sssc/Nat price)
-                          (fail :error.illegal-number)))
+   :input-validators [(partial boolean-parameters [:docStoreInUse :docTerminalInUse])
+                      (partial parameters-matching-schema [:documentPrice] sssc/Nat :error.illegal-number)
                       (partial localization-parameters [:organizationDescription])]}
-  [{user :user created :created}]
+  [_]
   (mongo/update-by-query :organizations
       {:_id org-id}
       {$set {:docstore-info.docStoreInUse docStoreInUse
              :docstore-info.docTerminalInUse docTerminalInUse
              :docstore-info.documentPrice documentPrice
              :docstore-info.organizationDescription organizationDescription}})
+  (ok))
+
+(defcommand set-document-request-info
+  {:description "Updates organization's document request info. Docucment requests are made from document store."
+   :parameters [enabled email instructions]
+   :user-roles #{:authorityAdmin}
+   :input-validators [(partial boolean-parameters [:enabled])
+                      (partial parameters-matching-schema [:email] ssc/OptionalEmail :error.email)
+                      (partial localization-parameters [:instructions])]}
+  [{user :user}]
+  (-> user
+      usr/authority-admins-organization-id
+      (org/set-document-request-info enabled email instructions))
   (ok))
 
 (defquery docterminal-attachment-types
