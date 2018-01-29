@@ -23,10 +23,13 @@
                                       :application/access-backend
                                       :application/show-authorities
                                       :application/show-commenters
+                                      :application/show-foreman-history
                                       :application/show-inforequest-markers
                                       :application/change-location-in-pre-verdict-states
                                       :application/change-location-in-post-verdict-states
-                                      :application/change-state}
+                                      :application/change-state
+                                      :application/create-foreman-app-in-pre-verdict-states
+                                      :application/create-foreman-app-in-post-verdict-states}
                 :approver           #{:application/approve  ;; TODO: could this be just 'approve', as in a supplement for :authority role. Then just 'approver' role couldn't exist.
                                       :application/read
                                       :application/submit
@@ -44,12 +47,17 @@
                                       :application/access-backend
                                       :application/show-authorities
                                       :application/show-commenters
+                                      :application/show-foreman-history
                                       :application/show-inforequest-markers
                                       :application/change-location-in-pre-verdict-states
                                       :application/change-location-in-post-verdict-states
-                                      :application/change-state}
-                :commenter          #{:application/read}
-                :reader             #{:application/read}
+                                      :application/change-state
+                                      :application/create-foreman-app-in-pre-verdict-states
+                                      :application/create-foreman-app-in-post-verdict-states}
+                :commenter          #{:application/read
+                                      :application/show-foreman-history}
+                :reader             #{:application/read
+                                      :application/show-foreman-history}
                 :tos-editor         #{:application/edit-tos-function}
                 :archivist          #{:application/archive}
                 :digitizer          #{:application/show-authorities}}
@@ -61,14 +69,16 @@
                                       :application/edit
                                       :application/edit-permit-subtype
                                       :application/remove-extra-link-permit
-                                      :application/change-location-in-pre-verdict-states}
+                                      :application/change-location-in-pre-verdict-states
+                                      :application/create-foreman-app-in-post-verdict-states}
                 :writer             #{:application/read-draft
                                       :application/submit
                                       :application/cancel-in-restricted-states
                                       :application/edit
                                       :application/edit-permit-subtype
                                       :application/remove-extra-link-permit
-                                      :application/change-location-in-pre-verdict-states}}
+                                      :application/change-location-in-pre-verdict-states
+                                      :application/create-foreman-app-in-post-verdict-states}}
  :inforequest  {:owner              #{:application/cancel}
                 :writer             #{:application/cancel}}
  :canceled-app {:canceler           #{:application/undo-cancelation}}
