@@ -18,7 +18,9 @@
             [clj-time.coerce :as tc]
             [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.application :as app]))
 
 (sc/defschema ApplicationBulletin
   {:id             sc/Str
@@ -269,7 +271,10 @@
   [{{old-verdicts :verdicts applicationId :id :keys [organization permitType municipality] :as application} :application
     created :created :as command} new-verdicts app-descriptions]
   (let [{:keys [enabled descriptions-from-backend-system]} (org/bulletin-settings-for-scope (org/get-organization organization) permitType municipality)]
-    (when (and (not (permit/ymp-permit-type? (:permitType application))) enabled)
+    (when (and (not (permit/ymp-permit-type? (:permitType application)))
+               enabled
+               (not (foreman/foreman-app? application))
+               (not (app/designer-app? application)))
       (let [old-verdict-ids          (map :id (remove :draft old-verdicts))
             new-verdict-ids          (map :id (remove :draft new-verdicts))
             removed-verdict-ids      (set/difference (set old-verdict-ids) (set new-verdict-ids))]

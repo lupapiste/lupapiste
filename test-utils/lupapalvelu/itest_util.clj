@@ -598,6 +598,15 @@
     (command apikey :update-doc :id foreman-app-id :doc (:id foreman-doc) :updates [["patevyysvaatimusluokka" difficulty]])
     foreman-app-id))
 
+(defn finalize-foreman-app [apikey authority foreman-app-id application?]
+  (facts "Finalize foreman application"
+    (command apikey :change-permit-sub-type :id foreman-app-id
+             :permitSubtype (if application?  "tyonjohtaja-hakemus" "tyonjohtaja-ilmoitus")) => ok?
+    (command apikey :submit-application :id foreman-app-id) => ok?
+    (if application?
+      (command authority :check-for-verdict :id foreman-app-id)
+      (command authority :approve-application :lang :fi :id foreman-app-id)) => ok?))
+
 (defn invite-company-and-accept-invitation [apikey app-id company-id company-admin-apikey]
   (command apikey :company-invite :id app-id :company-id company-id) => ok?
   (command company-admin-apikey :approve-invite :id app-id :invite-type :company))
