@@ -330,7 +330,7 @@
     (LocalDateTime. (long timestamp-or-datetime))
     (LocalDateTime. timestamp-or-datetime)))
 
-(defn- format-timestamp-local-tz [^Long timestamp ^String fmt]
+(defn format-timestamp-local-tz [^Long timestamp ^String fmt]
   (when timestamp
     (let [dt (local-date-time (->long timestamp))]
       (timeformat/unparse-local (timeformat/formatter fmt) dt))))

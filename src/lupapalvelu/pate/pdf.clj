@@ -226,6 +226,16 @@
                       :styles :right}
                      {:text  ""
                       :width 100}]
+                    [{:loc    :pate-deviations
+                      :source {:dict :deviations}
+                      :styles :pad-before}]
+                    [{:loc :statement.lausunto
+                      :loc-many :pate-statements
+                      :source :statements
+                      :styles [:bold :pad-before :border-top]}]
+                    [{:loc :phrase.category.naapurit
+                      :source {:dict :neighbors}
+                      :styles [:bold :pad-before]}]
                     [{:loc      :pdf.attachment
                       :loc-many :verdict.attachments
                       :source   :attachments
@@ -416,12 +426,17 @@
           (if (or (> (count cells) 1) multiple?)
             [:div.cell
              [:div.section
-              (for [v (cond-> source-value  (not multiple?) vector)]
+              (for [v (if (sequential? source-value)
+                        source-value
+                        (vector source-value))]
                 [:div.row
                  {:class (get-in v [::styles :row])}
                  (map (partial resolve-cell data v)
                       (if (empty? cells) [{}] cells))])]]
-            (resolve-cell data source-value (first cells)))]]))))
+            (resolve-cell data
+                          (util/pcond-> source-value
+                                        sequential? first)
+                          (first cells)))]]))))
 
 (defn content
   [data {:keys [left-width entries]}]
@@ -490,8 +505,7 @@
 
 (defn references [lang {:keys [references] :as verdict} kw]
   (let [ids (dict-value verdict kw)]
-    (->> references
-         kw
+    (->> (get references kw)
          (filter #(util/includes-as-kw? ids (:id %)))
          (map #(get-in % [:name (keyword lang)])))))
 
@@ -502,6 +516,21 @@
                :text (:condition v)}))
        (sort-by :id)
        (map :text)))
+
+(defn finnish-date
+  "Timestamp in the Finnish date format without zero-padding.
+  For example, 30.1.2018."
+  [timestamp]
+  (util/format-timestamp-local-tz timestamp "D.M.YYYY"))
+
+(defn statements [lang {statements :statements}]
+  (->> statements
+       (filter :given)
+       (map (fn [{:keys [given person status]}]
+              (join-non-blanks ", "
+                               (:text person)
+                               (finnish-date given)
+                               (i18n/localize lang :statement status))))))
 
 (defmulti verdict-body (util/fn-> :verdict :category keyword))
 
@@ -533,7 +562,8 @@
                     :attachments (verdict-attachments lang verdict)
                     :reviews (references lang verdict :reviews)
                     :plans   (references lang verdict :plans)
-                    :conditions (conditions verdict))
+                    :conditions (conditions verdict)
+                    :statements (statements lang application))
              (:r pdf-layouts))))
 
 (defn verdict-header
