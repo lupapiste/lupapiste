@@ -13,7 +13,6 @@
             [clojure.set :as set]
             [clojure.walk :refer [keywordize-keys]]
             [lupapalvelu.attachment.stamp-schema :as stmp]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.geojson :as geo]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.integrations.messages :as messages]
@@ -831,9 +830,14 @@
 (defn- statement-giver-in-organization? [{user-email :email} {organization-statement-givers :statementGivers}]
   (boolean (util/find-by-key :email user-email organization-statement-givers)))
 
+(defn- statement-giver-in-application? [{user-id :id} {application-auth :aut}]
+  (->> (filter (comp #{:statementGiver} keyword :role) application-auth)
+       (util/find-by-id user-id)
+       boolean))
+
 (defcontext organization-statement-giver-context [{:keys [user organization application]}]
   (when (and (statement-giver-in-organization? user @organization)
-             (auth/has-auth-role? application (:id user) :statementGiver))
+             (statement-giver-in-application? user application))
     {:context-scope :organization
      :context-roles [:statementGiver]}))
 
