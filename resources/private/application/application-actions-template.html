@@ -122,7 +122,7 @@
             <!-- /ko -->
             <!-- Add property -->
             <button class="function"
-                    data-bind="click: addProperty, visible: showAddPropertyButton"
+                    data-bind="click: addProperty, visible: showAddPropertyButton, enable: !processing()"
                     data-test-id="add-property">
               <i class="lupicon-circle-plus"></i>
               <span data-bind="ltext: 'secondary-kiinteistot._append_label'"></span>
@@ -130,12 +130,12 @@
         <!-- /ko  -->
         <!-- ko if: hasPersonalInvites -->
             <button class="positive"
-                    data-bind="click: approveInvite, enable: $root.authorization.ok('approve-invite')"
+                    data-bind="click: approveInvite, enable: $root.authorization.ok('approve-invite') && !processing()"
                     data-test-id="accept-invite-button">
                 <span data-bind="ltext: 'applications.approveInvite'"></span>
             </button>
             <button class="function"
-                    data-bind="click: declineInvite, enable: $root.authorization.ok('decline-invitation')"
+                    data-bind="click: declineInvite, enable: $root.authorization.ok('decline-invitation') && !processing()"
                     data-test-id="decline-invite-button">
                 <span data-bind="ltext: 'applications.declineInvite'"></span>
             </button>
@@ -143,19 +143,19 @@
        <!-- ko if: hasCompanyInvites -->
             <button class="positive"
                     data-bind="click: _.partial(approveInvite, 'company'),
-                               enable: $root.authorization.ok('approve-invite')"
+                               enable: $root.authorization.ok('approve-invite') && !processing()"
                     data-test-id="accept-invite-button">
                 <span data-bind="ltext: 'applications.approveCompanyInvite'"></span>
             </button>
             <button class="function"
-                    data-bind="click: declineInvite, enable: $root.authorization.ok('decline-invitation')"
+                    data-bind="click: declineInvite, enable: $root.authorization.ok('decline-invitation') && !processing()"
                     data-test-id="decline-invite-button">
                 <span data-bind="ltext: 'applications.declineCompanyInvite'"></span>
             </button>
        <!-- /ko -->
        <!-- ko if: canBeCopied -->
             <button class="function"
-                    data-bind="click: copy, enable: $root.authorization.ok('copy-application')"
+                    data-bind="click: copy, enable: $root.authorization.ok('copy-application') && !processing()"
                     data-test-id="copy-application-button">
               <i class="lupicon-copy"></i>
               <span data-bind="ltext: 'application.copy'"></span>
@@ -163,7 +163,7 @@
        <!-- /ko -->
        <!-- ko if: $root.authorization.ok('create-digging-permit') -->
             <button class="function"
-                    data-bind="click: createDiggingPermit"
+                    data-bind="click: createDiggingPermit, enable: !processing()"
                     data-test-id="create-digging-permit-button">
               <i class="lupicon-circle-plus"></i>
               <span data-bind="ltext: 'application.createDiggingPermit'"></span>
