@@ -56,7 +56,24 @@
   "An entry in the layout consists of left- and right-hand sides. The
   former contains the entry title and the latter actual data. In the
   schema, an entry is modeled as a vector, where the first element
-  defines both the title and the data source for the whole entry."
+  defines both the title and the data source for the whole entry.
+
+  On styles: the :styles definition of the first item applies to the
+  whole row. Border styles (:border-top and :border-bottom) include
+  padding and margin so the adjacent rows should not add any
+  padding. Cell items' :styles only apply to the corresponding cell.
+
+  In addition to the schema definition, styles can be added in
+  'runtime': if source value has ::styles property, it should be map
+  with the following possible keys:
+
+  :row    Row styles
+
+  :cell   Cell styles (applied to every cell)
+
+  path    Path is the value of the :path property. For example, if
+  the :path has a value of :foo, then the cell could be emphasized
+  with ::styles map {:foo :bold}. "
   [(sc/one {;; Localisation key for the row (left-hand) title.
             :loc                        sc/Keyword
             ;; If :loc-many is given it is used as the title key if
@@ -117,6 +134,12 @@
                        [:.page-break {:page-break-before :always}]
                        [:.section {:display :table
                                    :width   "100%"}
+                        [:&.border-top {:margin-top "1em"
+                                        :border-top "1px solid black"
+                                        :padding-top "1em"}]
+                        [:&.border-bottom {:margin-bottom "1em"
+                                           :border-bottom "1px solid black"
+                                           :padding-bottom "1em"}]
                         [:&.header {:padding       0
                                     :border-bottom "1px solid black"}]
                         [:&.footer {:border-top "1px solid black"}]
@@ -167,11 +190,11 @@
                     [{:loc      :pdf.applicant
                       :loc-many :pdf.applicants
                       :source   :applicants
-                      :styles   [:pad-after :border-bottom]}]
+                      :styles   :border-bottom}]
                     [{:loc      :applications.operation
                       :loc-many :operations
                       :source   :operations
-                      :styles   [:bold :pad-before]}
+                      :styles   :bold}
                      {:loc-prefix :operations
                       :path       :name}]
                     [{:loc    :pate-extra-info
@@ -232,14 +255,14 @@
                     [{:loc :statement.lausunto
                       :loc-many :pate-statements
                       :source :statements
-                      :styles [:bold :pad-before :border-top]}]
+                      :styles [:bold :border-top]}]
                     [{:loc :phrase.category.naapurit
                       :source {:dict :neighbors}
                       :styles [:bold :pad-before]}]
                     [{:loc      :pdf.attachment
                       :loc-many :verdict.attachments
                       :source   :attachments
-                      :styles   [:bold :pad-before :pad-after]}
+                      :styles   [:bold :pad-before]}
                      {:path   :text
                       :styles :nowrap}
                      {:path   :amount
@@ -249,7 +272,7 @@
                       :width 100}]
                     [{:loc    :pate-verdict
                       :source {:dict :verdict-code}
-                      :styles [:bold :pad-before :border-top]}
+                      :styles [:bold :border-top]}
                      {:loc-prefix :pate-r.verdict-code}]
                     [{:loc    :empty
                       :source {:dict :verdict-text}
@@ -413,12 +436,13 @@
         multiple?    (and (sequential? source-value)
                           (> (count source-value) 1))]
     (when (or (nil? source) (not-empty source-value))
-      (let [row-styles (resolve-class row-styles styles
+      (let [section-styles [:page-break :border-top :border-bottom]
+            row-styles (resolve-class row-styles styles
                                       (get-in source-value [::styles :row]))]
         [:div.section
-         {:class (util/intersection-as-kw [:page-break] row-styles)}
+         {:class (util/intersection-as-kw section-styles row-styles)}
          [:div.row
-          {:class (util/difference-as-kw row-styles [:page-break])}
+          {:class (util/difference-as-kw row-styles section-styles)}
           [:div.cell
            {:class (resolve-class [:bold] styles (when left-width
                                                    (str "cell--" left-width)))}
