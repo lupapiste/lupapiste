@@ -46,12 +46,12 @@
              :_meta {:updated              updater
                      :highlight-required?  (-> verdict :published not)
                      :enabled?             (can-edit-verdict? verdict)
-                     :attachments.filedata (fn [_ filedata & kvs]
+                     :upload.filedata (fn [_ filedata & kvs]
                                              (apply assoc filedata
                                                     :target {:type :verdict
                                                              :id   (:id verdict)}
                                                     kvs))
-                     :attachments.include? (fn [_ {target :target :as att}]
+                     :upload.include? (fn [_ {target :target :as att}]
                                              (= (:id target) (:id verdict)))}}))
   (reset! state/references references)
   (reset! state/current-view (if verdict ::verdict ::list)))
@@ -83,6 +83,7 @@
 (rum/defc verdict-section-header < rum/reactive
   [{:keys [schema] :as options}]
   [:div.pate-grid-1.section-header
+   {:class (path/css options)}
    (when (and (not (-> schema :buttons? false?))
               (path/enabled? options))
      [:div.row.row--tight

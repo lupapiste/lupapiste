@@ -2,7 +2,6 @@
   "Various utilities for component state, path, schema and _meta
   handling."
   (:require [clojure.string :as s]
-            [goog.events :as googe]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [rum.core :as rum]
@@ -155,11 +154,6 @@
   "Rum key-fn, where key is the path id."
   [{id-path :id-path}]
   (id id-path))
-
-
-;; Callthrough for goog.events.getUniqueId.
-;; Must be in the global scope.
-(def unique-id googe/getUniqueId)
 
 (defn pathify
   "Splits kw-path if necessary."

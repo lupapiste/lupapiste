@@ -118,15 +118,17 @@ $pate-grid-margin: 10px;
 }
 
 // toggle-helper is defined in _inputs.scss
-@include toggle-helper ( pate-checkbox, "e604", "e603",
-                         $wrapper-display: inline-block ) {}
-@include toggle-helper (pate-radio, "e635", "e634", $wrapper-display: block) {}
+ @include toggle-helper ( pate-checkbox, "e604", "e603",
+                         $wrapper-display: inline-block ){}
 
 .pate-checkbox-wrapper {
   border: none;
   $margin-right: $marginS;
   $margin-bottom: $marginS;
 }
+
+
+@include toggle-helper (pate-radio, "e635", "e634", $wrapper-display: block) {}
 
 .pate-radio-wrapper {
   border: none;
@@ -314,6 +316,9 @@ div.pate-verdict {
       background-color: initial;
       border: none;
       border-top: 1px solid $gray221;
+      &.pate-section--no-border {
+        border-top: none;
+      }
       padding: 0;
       div.verdict-buttons {
         padding-top: $marginS;
@@ -652,5 +657,41 @@ div.pate-required-fields-note {
 div.pate-unordered-list {
   ul {
     list-style-type: square;
+  }
+}
+
+// Application attachments
+
+div.pate-select-application-attachments {
+  margin-top: $marginS;
+  border: solid 1px $gray238;
+  display: inline-block;
+  padding: $marginS;
+}
+
+@include toggle-helper ( pate-attachment-group, "e604", "e603",
+                         $wrapper-display: inline-block)
+
+.pate-attachment-group-wrapper {
+  border: none;
+  .pate-attachment-group-label {
+    font-weight: bold;
+  }
+}
+
+@include toggle-helper ( pate-attachment-check, "e604", "e603",
+                         $wrapper-display: inline-block)
+
+.pate-attachment-check-wrapper {
+  border: none;
+  .pate-attachment-check-label {
+    padding-left: 36px;
+  }
+}
+
+.tabby.pate-application-attachments {
+  display: inline-block;
+  div.amount {
+    text-align: right;
   }
 }

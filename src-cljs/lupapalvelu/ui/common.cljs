@@ -1,9 +1,10 @@
 (ns lupapalvelu.ui.common
-  (:require [clojure.string :as s]
-            [cljs-time.format :as tf]
-            [cljs-time.coerce :as tc]
+  (:require [cljs-time.coerce :as tc]
             [cljs-time.core :as t]
-            [clojure.string :as str]))
+            [cljs-time.format :as tf]
+            [clojure.string :as s]
+            [clojure.string :as str]
+            [goog.events :as googe]))
 
 (defn get-current-language []
   (.getCurrentLanguage js/loc))
@@ -127,3 +128,7 @@
                   features]
         url      (str "/oskari/fullmap.html?" (str/join "&" params))]
     (js/window.open url)))
+
+;; Callthrough for goog.events.getUniqueId.
+;; Must be in the global scope.
+(def unique-id googe/getUniqueId)

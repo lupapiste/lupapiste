@@ -1,6 +1,6 @@
 (ns lupapalvelu.ui.components
-  (:require [clojure.string :as s]
-            [cljs.pprint :refer [pprint]]
+  (:require [cljs.pprint :refer [pprint]]
+            [clojure.string :as s]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components.datepicker :as datepicker]
             [lupapalvelu.ui.hub :as hub]
@@ -71,19 +71,33 @@
             [:i.lupicon-pen]])])))
 
 (rum/defc checkbox
-  [{:keys [label value handler-fn disabled negate?]}]
-  (let [input-id (str "input-" (rand-int 10000))
+  "Checkbox component (using checkbox wrapper mechanism).
+   Parameters [optional]:
+   label:      Localization key. Overrides label if both given.
+   text:       'Raw label text'.
+   value:      Initial value
+   handler-fn: Toggle callback function.
+   [negate?]:  If true, the value is negated (default false)
+   [disabled]: Is the checkbox disabled (default false)
+   [prefix]:   Wrapper class prefix (default :pate-checkbox)"
+  [{:keys [label text value handler-fn disabled negate? prefix]}]
+  (let [input-id (str "input-" (common/unique-id "check"))
         value-fn (if negate? not identity)
-        value (value-fn value)]
-    [:div.pate-checkbox-wrapper
+        value    (value-fn value)
+        label    (or (if label (common/loc label) text) "")
+        prefix   (name (or prefix :pate-checkbox))]
+    [:div
+     {:class (str prefix "-wrapper")
+      :key   input-id}
      [:input {:type     "checkbox"
               :disabled disabled
               :checked  value
               :id       input-id}]
-     [:label.pate-checkbox-label
-      {:for      input-id
+     [:label
+      {:class    (str prefix "-label")
+       :for      input-id
        :on-click #(handler-fn (not (value-fn value)))}
-      (common/loc label)]]))
+      label]]))
 
 (defn initial-value-mixin
   "Assocs to component's local state local-key with atom that is
@@ -146,7 +160,7 @@
     [:textarea.grid-style-input
      (text-options text* options)]))
 
-(defn- default-items-fn [items]
+(defn default-items-fn [items]
   (fn [term]
     (let [fuzzy (common/fuzzy-re term)]
       (filter #(re-find fuzzy (:text %)) items))))

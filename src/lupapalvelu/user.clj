@@ -25,14 +25,6 @@
 ;; User schema
 ;;
 
-(def user-skeleton
-  {:id        ""
-   :firstName ""
-   :lastName  ""
-   :role      "dummy"
-   :email     "dummy@example.com"
-   :username  "dummy@example.com"
-   :enabled   false})
 
 (defschema SearchFilter
   {:id        sc/Str
@@ -47,7 +39,7 @@
               (sc/optional-key :areas)         [sc/Str]
               (sc/optional-key :event)        [sc/Str]}})
 
-(def Id sc/Str) ; Variation of user ids in different environments is too diverse for a simple customized schema.
+(def Id (ssc/min-length-string 1)) ; Variation of user ids in different environments is too diverse for a simple customized schema.
 
 (def all-roles
   "vector of role strings that can be used in User's :role field"

@@ -41,11 +41,10 @@
 (defquery invites
   {:user-roles #{:applicant :authority :oirAuthority :financialAuthority}}
   [{{user-id :id {company-id :id company-role :role} :company :as user} :user}]
-  (let [query (if (nil? company-id)
+  (let [query (if (nil? company-id)                         ; TODO: use company permissions/restrictions to optimize query
                 {:auth.invite.user.id user-id}
                 {$or [{:auth.invite.user.id user-id}
-                      {:auth {$elemMatch {:invite.user.id company-id :company-role company-role}}}
-                      {:auth {$elemMatch {:invite.user.id company-id :company-role {$exists false}}}}]})]
+                      {:auth {$elemMatch {:invite.user.id company-id :company-role company-role}}}]})]
     (->> (mongo/select :applications
                        (merge query {:state {$ne :canceled}})
                        [:auth :primaryOperation :address :municipality])
