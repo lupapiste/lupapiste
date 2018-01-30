@@ -1350,7 +1350,7 @@
                       (fact "Application state is verdictGiven"
                         state => "verdictGiven")
                       (fact "Buildings array is created, primaryOperation gets index = 1"
-                        (first buildings) => (contains {:index        1
+                        (first buildings) => (contains {:index        "1"
                                                         :localShortId "002"
                                                         :description  "Hello world!"}))
                       (fact "national-id update post-verdict is reflected to buildings array as well"

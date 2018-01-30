@@ -399,7 +399,7 @@
                   :location-wgs84 nil
                   :location nil
                   :area (:kokonaisala mitat)
-                  :index n
+                  :index (str n)
                   :description (ss/join ": " description-parts)
                   :operationId (:id op)
                   :usage (or (:kayttotarkoitus kaytto) "")})))))
