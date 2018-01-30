@@ -32,7 +32,10 @@
                                       :application/set-authority-notice
                                       :application/read-authority-notice
                                       :application/create-foreman-app-in-pre-verdict-states
-                                      :application/create-foreman-app-in-post-verdict-states}
+                                      :application/create-foreman-app-in-post-verdict-states
+                                      :application/get-document-states
+                                      :application/check-final-archiving-state
+                                      :application/check-within-archiving-time-limit}
                 :approver           #{:application/approve  ;; TODO: could this be just 'approve', as in a supplement for :authority role. Then just 'approver' role couldn't exist.
                                       :application/read
                                       :application/submit
@@ -59,7 +62,10 @@
                                       :application/set-authority-notice
                                       :application/read-authority-notice
                                       :application/create-foreman-app-in-pre-verdict-states
-                                      :application/create-foreman-app-in-post-verdict-states}
+                                      :application/create-foreman-app-in-post-verdict-states
+                                      :application/get-document-states
+                                      :application/check-final-archiving-state
+                                      :application/check-within-archiving-time-limit}
                 :commenter          #{:application/read
                                       :application/show-foreman-history
                                       :application/read-authority-notice}

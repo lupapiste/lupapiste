@@ -6,6 +6,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.permissions :refer [defcontext] :as permissions]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.security :as security]
             [lupapalvelu.user-enums :as user-enums]
@@ -155,6 +156,12 @@
 ;; Utils:
 ;; ==============================================================================
 ;;
+
+(defcontext without-application-context [{{org-authz :orgAuthz} :user application :application}]
+  (when-not application
+    {:context-scope :organization
+     :context-roles (->> (vals org-authz)
+                         (reduce into #{}))}))
 
 (defn full-name [{:keys [firstName lastName]}] (str firstName " " lastName))
 

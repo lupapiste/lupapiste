@@ -27,8 +27,7 @@
 (defcommand archive-documents
   {:parameters       [:id attachmentIds documentIds]
    :input-validators [(partial non-blank-parameters [:id])]
-   :user-roles       #{:authority}
-   :org-authz-roles  #{:archivist}
+   :permissions      [{:required [:application/archive]}]
    :states           (conj states/post-verdict-states :underReview)
    :pre-checks       [application-within-time-limit]}
   [{:keys [application user organization] :as command}]
@@ -40,7 +39,7 @@
 (defquery document-states
   {:parameters       [:id]
    :input-validators [(partial non-blank-parameters [:id])]
-   :user-roles       #{:authority}
+   :permissions      [{:required [:application/get-document-states]}]
    :states           states/all-application-or-archiving-project-states}
   [{:keys [application]}]
   (let [app-doc-id (str (:id application) "-application")
@@ -56,8 +55,7 @@
 (defcommand mark-pre-verdict-phase-archived
   {:parameters       [:id]
    :input-validators [(partial non-blank-parameters [:id])]
-   :user-roles       #{:authority}
-   :org-authz-roles  #{:archivist}
+   :permisisons      [{:required [:application/archive]}]
    :states           states/post-verdict-states
    :pre-checks       [permit/is-not-archiving-project]}
   [{:keys [application created]}]
@@ -65,27 +63,23 @@
   (ok))
 
 (defquery archiving-operations-enabled
-  {:user-roles      #{:authority}
-   :org-authz-roles (with-meta #{:archivist} {:skip-validation true})
-   :states          (conj states/post-verdict-states :underReview)
-   :pre-checks      [(fn [{:keys [user application]}]
-                       (when-not (or application (usr/user-is-archivist? user nil)) ; If application, :org-authz-roles works as validator
-                         unauthorized))
-                     validate-permanent-archive-enabled]}
+  {:contexts        [usr/without-application-context]
+   :permissions     [{:required [:organization/get-archiving-status]}]
+   :states          (conj states/post-verdict-states :underReview)}
   (ok))
 
 (defquery permanent-archive-enabled
-  {:user-roles #{:applicant :authority :authorityAdmin}
+  {:permissions [{:required [:application/read]}]
    :categories #{:attachments}
    :pre-checks [validate-permanent-archive-enabled]}
   [_])
 
 (defquery application-in-final-archiving-state
-  {:user-roles #{:authority}
+  {:permissions [{:required [:application/check-final-archiving-state]}]
    :states     states/archival-final-states}
   (ok))
 
 (defquery application-date-within-time-limit
-  {:user-roles #{:authority}
+  {:permissions [{:required [:application/check-within-archiving-time-limit]}]
    :pre-checks [application-within-time-limit]}
   [_])

@@ -1,1 +1,2 @@
-{:global        {:admin      #{:organization/convert-inforequests}}}
+{:global              {:admin      #{:organization/convert-inforequests}}
+ :organization        {:archivist  #{:organization/get-archiving-status}}}
