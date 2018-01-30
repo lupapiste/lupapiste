@@ -55,10 +55,8 @@
 ;; Validation
 ;;
 
-(def ^:private has-set-target-permission? (permissions/require-permissions :comment/set-target))
-
 (defn applicant-cant-set-to [{{:keys [to]} :data :as command}]
-  (when (and to (not (has-set-target-permission? command)))
+  (when (and to (not (permissions/permissions? command [:comment/set-target])))
     (fail :error.to-settable-only-by-authority)))
 
 (defn- validate-comment-target [{{:keys [target]} :data}]

@@ -34,15 +34,12 @@
             [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
-            [lupapalvelu.permissions :refer [defcontext] :as permissions]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as usr]
             [me.raynes.fs :as fs])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File InputStream]))
 
-
-(def approve-permission? (permissions/require-permissions :attachment/approve))
 
 ;;
 ;; Metadata

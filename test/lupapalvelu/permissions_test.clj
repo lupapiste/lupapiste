@@ -4,6 +4,20 @@
             [lupapalvelu.permissions :refer :all]
             [sade.util :as util]))
 
+(testable-privates lupapalvelu.permissions defpermissions)
+
+(defpermissions :test
+  {:test-scope   {:test-role         #{:test/test
+                                       :test/fail}
+                  :another-test-role #{:test/fail}}
+   :test-scope-b {:tester            #{:test/test
+                                       :test/do}}
+   :test-scope-c {:roles/any         #{:test/fail}
+                  :tester            #{:test/test}}})
+
+(defpermissions :test-more
+  {:test-scope   {:test-role         #{:test-more/test}}})
+
 (facts restriction
   (fact "restircted permission not in common-permissions"
     (restriction :test/unknown-permission) => (throws java.lang.AssertionError))
@@ -20,38 +34,26 @@
   (fact "two restrictions - other not in permission"
     ((restriction :application/submit :comment/set-target) #{:application/submit}) => #{}))
 
-(facts require-permissions
-  (fact "restircted permission not in common-permissions"
-    (require-permissions :test/unknown-permission) => (throws java.lang.AssertionError))
+(facts permissions?
+
+  (fact "single required permission - command threaded"
+    (-> {:permissions #{:application/submit :test/do}}
+        (permissions? [:application/submit])) => true)
 
   (fact "single required permission"
-    ((require-permissions :application/submit) {:permissions #{:application/submit :test/do}}) => true)
+    (permissions? {:permissions #{:application/submit :test/do}} [:application/submit]) => true)
 
   (fact "multiple required permissions"
-    ((require-permissions :application/submit :comment/set-target) {:permissions #{:application/submit :comment/set-target :test/do}}) => true)
+    (permissions? {:permissions #{:application/submit :comment/set-target :test/do}} [:application/submit :comment/set-target]) => true)
 
   (fact "permission denied"
-    ((require-permissions :application/submit) {:permissions #{:test/do}}) => false)
+    (permissions? {:permissions #{:test/do}} [:application/submit]) => false)
 
   (fact "multiple reuired permissions permission denied"
-    ((require-permissions :application/submit :comment/set-target) {:permissions #{:application/submit :test/do}}) => false)
+    (permissions? {:permissions #{:application/submit :test/do}} [:application/submit :comment/set-target]) => false)
 
   (fact "no permissions in command"
-    ((require-permissions :application/submit :comment/set-target) {}) => false))
-
-(testable-privates lupapalvelu.permissions defpermissions)
-
-(defpermissions :test
-  {:test-scope   {:test-role         #{:test/test
-                                       :test/fail}
-                  :another-test-role #{:test/fail}}
-   :test-scope-b {:tester            #{:test/test
-                                       :test/do}}
-   :test-scope-c {:roles/any         #{:test/fail}
-                  :tester            #{:test/test}}})
-
-(defpermissions :test-more
-  {:test-scope   {:test-role         #{:test-more/test}}})
+    (permissions? {} [:application/submit :comment/set-target]) => false))
 
 (facts get-permissions-by-role
   (fact "existing scope and role"

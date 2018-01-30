@@ -42,9 +42,6 @@
             [sade.strings :as ss]
             [lupapalvelu.application-utils :as app-utils]))
 
-
-(def read-draft-permission? (permissions/require-permissions :application/read-draft))
-
 (defcontext canceled-app-context [{{user-id :id} :user application :application}]
   (let [last-history-entry (app-state/last-history-item application)]
     (when (and (= user-id (get-in last-history-entry [:user :id]))
@@ -193,8 +190,8 @@
 (defn mark-indicators-seen-updates [{application :application user :user timestamp :created :as command}]
   (merge
     (apply merge (map (partial mark-collection-seen-update user timestamp) collections-to-be-seen))
-    (when (doc/approve-permission? command) (model/mark-approval-indicators-seen-update application timestamp))
-    (when (att/approve-permission? command) {:_attachment_indicator_reset timestamp})))
+    (when (permissions/permissions? command [:document/approve]) (model/mark-approval-indicators-seen-update application timestamp))
+    (when (permissions/permissions? command [:attachment/approve]) {:_attachment_indicator_reset timestamp})))
 
 ; whitelist-action
 (defn- prefix-with [prefix coll]

@@ -33,6 +33,7 @@
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.permissions :as permissions]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
@@ -788,7 +789,7 @@
         op-id-mapping (into {} (map
                                  #(vector (:id %) (mongo/create-id))
                                  (conj secondary-ops primary-op)))
-        state (if (app/read-draft-permission? command) :draft :open)
+        state (if (permissions/permissions? command [:application/read-draft]) :draft :open)
         muutoslupa-app (merge domain/application-skeleton
                               (select-keys application
                                            [:propertyId :location

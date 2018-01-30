@@ -14,14 +14,11 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.permissions :as permissions]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [lupapalvelu.wfs :as wfs]
             [clj-time.format :as tf]))
-
-(def approve-permission? (permissions/require-permissions :document/approve))
 
 ;;
 ;; Validators

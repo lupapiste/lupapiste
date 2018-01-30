@@ -16,8 +16,6 @@
   (sc/validate {Scope {Role #{(permission-schema context-type)}}} permissions)
   (swap! permission-tree #(merge-with (partial merge-with into) % permissions)))
 
-(re-matches #".*\.jar$" "foo.jar")
-
 (defn load-permissions! []
   (let [this-path (util/this-jar lupapalvelu.main)
         files (if (ss/ends-with this-path ".jar") ; are we inside jar
@@ -39,9 +37,13 @@
   {:pre [(every? known-permission? restrictions)]}
   (fn [permissions] (apply disj permissions restrictions)))
 
-(defn require-permissions [& required-permissions]
+(defmacro permissions?
+  "Macro returns a checks that required permissions are included in a command.
+  Validation for required-permissions is run in compile time for developing
+  convenience."
+  [command required-permissions]
   {:pre [(every? known-permission? required-permissions)]}
-  (fn [command] (every? (get command :permissions #{}) required-permissions)))
+  `(every? (get ~command :permissions #{}) ~required-permissions))
 
 (defn get-permissions-by-role [scope role]
   (set/union
