@@ -128,7 +128,13 @@
             (krysp-reader/rakval-application-xml anything anything [application-id-submitted] :application-id anything)
             => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
                    (ss/replace #"LP-186-2014-90009" application-id-submitted)
-                   (sxml/parse-string "utf-8")))
+                   (sxml/parse-string "utf-8"))
+            (sade.http/get anything :as :stream :throw-exceptions false :conn-timeout 10000)
+            => (-> (io/resource "public/dev/sample-attachment.txt")
+                   (slurp)
+                   (resp/response)
+                   (resp/header "content-length" 7)
+                   (resp/header "content-disposition" "filename=foo.txt")))
           (let [poll-result (batchrun/poll-verdicts-for-reviews)
                 assignments (get-assignments)]
 
