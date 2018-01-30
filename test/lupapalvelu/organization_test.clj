@@ -121,3 +121,34 @@
     (get-building-wfs ..query.. permit-type) => (just {:url "foo" :version "1"})
     (provided
       (mongo/select-one :organizations ..query.. [:krysp]) => (conf {:buildingUrl "foo" :version "1" :url "jee"}))))
+
+(facts organization-statement-giver-context
+  (fact "is statementGiver"
+    (:permissions (organization-statement-giver-context {:user         {:id "1" :email "pena@example.com"}
+                                                         :application  {:auth [{:id "1" :role "statementGiver"}]}
+                                                         :organization (delay {:statementGivers [{:email "pena@example.com"}]})}))
+    => not-empty)
+
+  (fact "statementGiver not authorized in application"
+    (:permissions (organization-statement-giver-context {:user         {:id "1" :email "pena@example.com"}
+                                                         :application  {:auth [{:id "2" :role "statementGiver"}]}
+                                                         :organization (delay {:statementGivers [{:email "pena@example.com"}]})}))
+    => empty?)
+
+  (fact "is statementGiver - multiple roles"
+    (:permissions (organization-statement-giver-context {:user         {:id "1" :email "pena@example.com"}
+                                                         :application  {:auth [{:id "1" :role "writer"} {:id "1" :role "statementGiver"}]}
+                                                         :organization (delay {:statementGivers [{:email "pena@example.com"}]})}))
+    => not-empty)
+
+  (fact "no statementGiver authorization in application"
+    (:permissions (organization-statement-giver-context {:user         {:id "1" :email "pena@example.com"}
+                                                         :application  {:auth [{:id "1" :role "writer"}]}
+                                                         :organization (delay {:statementGivers [{:email "pena@example.com"}]})}))
+    => empty?)
+
+  (fact "not statementGiver in organization"
+    (:permissions (organization-statement-giver-context {:user         {:id "1" :email "pena@example.com"}
+                                                         :application  {:auth [{:id "1" :role "statementGiver"}]}
+                                                         :organization (delay {:statementGivers [{:email "mikko@example.com"}]})}))
+    => empty?))

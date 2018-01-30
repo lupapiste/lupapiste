@@ -28,6 +28,9 @@
                                       :application/change-location-in-pre-verdict-states
                                       :application/change-location-in-post-verdict-states
                                       :application/change-state
+                                      :application/set-urgency
+                                      :application/set-authority-notice
+                                      :application/read-authority-notice
                                       :application/create-foreman-app-in-pre-verdict-states
                                       :application/create-foreman-app-in-post-verdict-states}
                 :approver           #{:application/approve  ;; TODO: could this be just 'approve', as in a supplement for :authority role. Then just 'approver' role couldn't exist.
@@ -52,15 +55,23 @@
                                       :application/change-location-in-pre-verdict-states
                                       :application/change-location-in-post-verdict-states
                                       :application/change-state
+                                      :application/set-urgency
+                                      :application/set-authority-notice
+                                      :application/read-authority-notice
                                       :application/create-foreman-app-in-pre-verdict-states
                                       :application/create-foreman-app-in-post-verdict-states}
                 :commenter          #{:application/read
-                                      :application/show-foreman-history}
+                                      :application/show-foreman-history
+                                      :application/read-authority-notice}
                 :reader             #{:application/read
-                                      :application/show-foreman-history}
+                                      :application/show-foreman-history
+                                      :application/read-authority-notice}
                 :tos-editor         #{:application/edit-tos-function}
                 :archivist          #{:application/archive}
-                :digitizer          #{:application/show-authorities}}
+                :digitizer          #{:application/show-authorities}
+                :statementGiver     #{:application/set-urgency
+                                      :application/set-authority-notice
+                                      :application/read-authority-notice}}
  :application  {:roles/any          #{:application/read
                                       :application/accordions-open}
                 :owner              #{:application/read-draft

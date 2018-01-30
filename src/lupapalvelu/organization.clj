@@ -13,11 +13,13 @@
             [clojure.set :as set]
             [clojure.walk :refer [keywordize-keys]]
             [lupapalvelu.attachment.stamp-schema :as stmp]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.geojson :as geo]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.pate.schemas :refer [PateSavedVerdictTemplates Phrase]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.permissions :refer [defcontext] :as permissions]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.wfs :as wfs]
             [lupapiste-commons.archive-metadata-schema :as archive-schema]
@@ -825,6 +827,15 @@
              (not (util/find-by-key :email (:email user)
                                    (:statementGivers @organization))))
     (fail :error.not-organization-statement-giver)))
+
+(defn- statement-giver-in-organization? [{user-email :email} {organization-statement-givers :statementGivers}]
+  (boolean (util/find-by-key :email user-email organization-statement-givers)))
+
+(defcontext organization-statement-giver-context [{:keys [user organization application]}]
+  (when (and (statement-giver-in-organization? user @organization)
+             (auth/has-auth-role? application (:id user) :statementGiver))
+    {:context-scope :organization
+     :context-roles [:statementGiver]}))
 
 (defn get-docstore-info-for-organization! [org-id]
   (-> (get-organization org-id [:docstore-info])
