@@ -3,6 +3,7 @@
   schema-based mechanism for the layout definiton and generation."
   (:require [clojure.java.io :as io]
             [garden.core :as garden]
+            [garden.selectors :as sel]
             [lupapalvelu.application :as app]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.bind :as bind]
@@ -211,6 +212,9 @@
                       :source :primary}
                      {:path :mitat.tilavuus
                       :unit :m3}]
+                    [{:loc    :purku.mitat.kerrosluku
+                      :source :primary}
+                     {:path :mitat.kerrosluku}]
                     [{:loc    :pate-buildings.info.paloluokka
                       :source :paloluokka}]
                     [{:loc    :pdf.parking
@@ -222,16 +226,44 @@
                       :styles :right}
                      {:text  ""
                       :width 100}]
-                    [{:loc :verdict.attachments
-                      :source :attachments
-                      :styles [:bold :pad-before]}
-                     {:path :text
+                    [{:loc      :pdf.attachment
+                      :loc-many :verdict.attachments
+                      :source   :attachments
+                      :styles   [:bold :pad-before :pad-after]}
+                     {:path   :text
                       :styles :nowrap}
-                     {:path :amount
+                     {:path   :amount
                       :styles [:right :nowrap]
-                      :unit :kpl}
-                     {:text ""
-                      :width 100}]]}})
+                      :unit   :kpl}
+                     {:text  ""
+                      :width 100}]
+                    [{:loc    :pate-verdict
+                      :source {:dict :verdict-code}
+                      :styles [:bold :pad-before :border-top]}
+                     {:loc-prefix :pate-r.verdict-code}]
+                    [{:loc    :empty
+                      :source {:dict :verdict-text}
+                      :styles :pad-before}]
+                    [{:loc      :pdf.required-foreman
+                      :loc-many :verdict.vaaditutTyonjohtajat
+                      :source   {:dict :foremen}
+                      :styles   :pad-before}
+                     {:loc-prefix :pate-r.foremen}]
+                    [{:loc      :pdf.required-review
+                      :loc-many :verdict.vaaditutKatselmukset
+                      :source   :reviews
+                      :styles   :pad-before}]
+                    [{:loc      :pdf.required-plan
+                      :loc-many :verdict.vaaditutErityissuunnitelmat
+                      :source   :plans
+                      :styles   :pad-before}]
+                    [{:loc      :pdf.condition
+                      :loc-many :pdf.conditions
+                      :source   :conditions
+                      :styles   [:pad-before :spaced]}]
+                    [{:loc    :pate-verdict.muutoksenhaku
+                      :source {:dict :appeal}
+                      :styles [:bold :page-break]}]]}})
 
 (sc/validate PdfLayout (:r pdf-layouts))
 
@@ -336,27 +368,6 @@
          (sort (fn [a b]
                  (if (= a head-loc) -1 1))))))
 
-(defn design-complexity [designers]
-  (when (seq designers)
-    [:div.section
-     (map (fn [{:keys [role difficulty]}]
-            [:div.row
-             [:div.cell.nowrap role]
-             [:div.cell.cell--100 difficulty]])
-          designers)]))
-
-(defn designer-info [designers]
-  (when (seq designers)
-    [:div.section
-     (map (fn [{:keys [role name education]}]
-            [:div.row
-             [:div.cell.nowrap role]
-             [:div.cell.cell--100 (->> [name education]
-                                       (remove ss/blank?)
-                                       (ss/join ", ")
-                                       (ss/trim))]])
-          designers)]))
-
 (defn resolve-source
   [{:keys [application verdict] :as data} {doc-source  :doc
                                            dict-source :dict
@@ -369,9 +380,7 @@
 (defn resolve-class [all selected & extra]
   (->> (util/intersection-as-kw all (flatten [selected]))
        (concat extra)
-       (remove nil?)
-       (mapv name)
-       (ss/join " ")))
+       (remove nil?)))
 
 (defn resolve-cell [{lang :lang :as data} source-value
                     {:keys [text width unit loc-prefix styles] :as cell}]
@@ -394,29 +403,31 @@
         multiple?    (and (sequential? source-value)
                           (> (count source-value) 1))]
     (when (or (nil? source) (not-empty source-value))
-      [:div.row
-       {:class (resolve-class row-styles styles
-                              (get-in source-value [::styles :row]))}
-       [:div.cell
-        {:class (resolve-class [:bold] styles (when left-width
-                                                (str "cell--" left-width)))}
-        (i18n/localize lang (if multiple? (or loc-many loc) loc))]
-       (if (or (> (count cells) 1) multiple?)
-         [:div.cell
-          [:div.section
-           (for [v (cond-> source-value  (not multiple?) vector)]
-             [:div.row
-              {:class (get-in v [::styles :row])}
-              (map (partial resolve-cell data v)
-                   (if (empty? cells) [{}] cells))])]]
-         (resolve-cell data source-value (first cells)))])))
+      (let [row-styles (resolve-class row-styles styles
+                                      (get-in source-value [::styles :row]))]
+        [:div.section
+         {:class (util/intersection-as-kw [:page-break] row-styles)}
+         [:div.row
+          {:class (util/difference-as-kw row-styles [:page-break])}
+          [:div.cell
+           {:class (resolve-class [:bold] styles (when left-width
+                                                   (str "cell--" left-width)))}
+           (i18n/localize lang (if multiple? (or loc-many loc) loc))]
+          (if (or (> (count cells) 1) multiple?)
+            [:div.cell
+             [:div.section
+              (for [v (cond-> source-value  (not multiple?) vector)]
+                [:div.row
+                 {:class (get-in v [::styles :row])}
+                 (map (partial resolve-cell data v)
+                      (if (empty? cells) [{}] cells))])]]
+            (resolve-cell data source-value (first cells)))]]))))
 
 (defn content
   [data {:keys [left-width entries]}]
-  [:div.section
-   (->> entries
-        (map (partial entry-row left-width data))
-        (filter not-empty))])
+  (->> entries
+       (map (partial entry-row left-width data))
+       (filter not-empty)))
 
 (defn primary-operation-data [application]
   (->> application
@@ -477,6 +488,21 @@
                :amount amount}))
        (sort-by :text)))
 
+(defn references [lang {:keys [references] :as verdict} kw]
+  (let [ids (dict-value verdict kw)]
+    (->> references
+         kw
+         (filter #(util/includes-as-kw? ids (:id %)))
+         (map #(get-in % [:name (keyword lang)])))))
+
+(defn conditions [verdict]
+  (->> (dict-value verdict :conditions)
+       (map (fn [[k v]]
+              {:id   (name k)
+               :text (:condition v)}))
+       (sort-by :id)
+       (map :text)))
+
 (defmulti verdict-body (util/fn-> :verdict :category keyword))
 
 (defmethod verdict-body :r
@@ -501,10 +527,13 @@
                                      (ss/join " / "))
                     :parking (->>  buildings
                                    (map (partial building-parking lang))
-                                   (interpose {:text "" :amount ""
+                                   (interpose {:text    "" :amount ""
                                                ::styles {:row :pad-before}})
                                    flatten)
-                    :attachments (verdict-attachments lang verdict))
+                    :attachments (verdict-attachments lang verdict)
+                    :reviews (references lang verdict :reviews)
+                    :plans   (references lang verdict :plans)
+                    :conditions (conditions verdict))
              (:r pdf-layouts))))
 
 (defn verdict-header
