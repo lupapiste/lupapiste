@@ -16,7 +16,7 @@ Pena logs in and creates application
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Party-on-${secs}
   Set Suite Variable  ${propertyId}  753-423-2-22
-  Create application with state  ${appname}  ${propertyId}  aita  open
+  Create application with state  ${appname}  ${propertyId}  mainoslaite  open
 
 Pena edits head designer information
   Open tab  parties
