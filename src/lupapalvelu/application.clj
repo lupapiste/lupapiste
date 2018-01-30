@@ -372,7 +372,7 @@
   [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
   (let [types     (new-attachment-types-for-operation organization operation existing-attachments-types)
         groups    (map (partial attachment-grouping-for-type operation) types)
-        metadatas (map (partial tos/metadata-for-document (:id organization) tos-function) types)]
+        metadatas (pmap (partial tos/metadata-for-document (:id organization) tos-function) types)]
     (map (partial att/make-attachment created target true false false (keyword applicationState)) groups types metadatas)))
 
 (defn multioperation-attachment-updates [operation organization attachments]
