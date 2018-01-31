@@ -633,9 +633,6 @@
   {:pre [(set? reference-set)]}
   (sc/pred (fn [x] (and (set? x) (every? reference-set x)))))
 
-(defn- skip-validation? [obj]
-  (boolean (get (meta obj) :skip-validation)))
-
 (def ActionMetaData
   {
    ; Set of user role keywords. Use :user-roles #{:anonymous} to grant access to anyone.
@@ -718,7 +715,6 @@
     (str "Input validators must be defined for " action-name))
 
   (assert (or (empty? (:org-authz-roles meta-data))
-              (skip-validation? (:org-authz-roles meta-data)) ; :skip-validation meta for generic actions requiring org-authz-roles
               (some #{:id} (:parameters meta-data)))
           (str "org-authz-roles depends on application, can't be used outside application context - " action-name))
 

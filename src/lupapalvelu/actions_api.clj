@@ -11,23 +11,19 @@
 ;;
 
 (defquery actions
-  {:user-roles #{:admin}
+  {:permissions [{:required [:global/get-actions]}]
    :description "List of all actions and their meta-data."} [_]
   (ok :actions (action/serializable-actions)))
 
 (defquery allowed-actions
-  {:user-roles       #{:anonymous}
-   :user-authz-roles roles/all-authz-roles
-   :org-authz-roles  (with-meta roles/reader-org-authz-roles {:skip-validation true})}
+  {:permissions [{:required []}]}
   [command]
   (ok :actions (->> (action/foreach-action command)
                     (action/validate-actions))))
 
 (defquery allowed-actions-for-category
   {:description      "Returns map of allowed actions for a category (attachments, tasks, etc.)"
-   :user-roles       #{:anonymous}
-   :user-authz-roles roles/all-authz-roles
-   :org-authz-roles  (with-meta roles/reader-org-authz-roles {:skip-validation true})}
+   :permissions      [{:required []}]}
   [command]
   (if-let [actions-by-id (action/allowed-actions-for-category command)]
     (ok :actionsById actions-by-id)
