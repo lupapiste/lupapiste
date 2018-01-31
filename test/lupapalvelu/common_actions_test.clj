@@ -114,11 +114,12 @@
   =>
   passing-quick-check)
 
-(facts "Allowed actions for statementGiver"
+(facts "Allowed actions for organization statementGiver"
   (let [allowed-actions #{:give-statement
                           :save-statement-as-draft
                           :get-possible-statement-statuses
                           :application
+                          :openinforequest
                           :allowed-actions
                           :allowed-actions-for-category
                           :validate-doc
@@ -153,7 +154,6 @@
                           :change-urgency
                           :add-authority-notice
                           :foreman-applications
-                          :foreman-history
                           :reduced-foreman-history
                           :add-application-tags
                           :application-organization-tags
@@ -187,7 +187,7 @@
                           :create-application}
         user {:id "user123" :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
-    (doseq [command (foreach-action {:web {} :user user :application application :data {}})
+    (doseq [command (foreach-action {:web {} :user user :application application :data {} :organization (delay {:statementGivers [{:id "user123"}]})})
             :let [action (keyword (:action command))
                   result (or (user-is-not-allowed-to-access? command application)
                              (-> command
