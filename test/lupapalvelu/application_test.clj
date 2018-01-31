@@ -561,3 +561,30 @@
                        :id           (make-application-id "123")}) => "12300017-1000"
       (provided
         (lupapalvelu.mongo/get-next-sequence-value anything) => 10000))))
+
+(facts canceled-app-context
+  (fact "app is canceled by the current user"
+    (-> (canceled-app-context {:user {:id "1"}
+                               :application {:state "canceled" :history [{:user {:id "1"} :state "open"}
+                                                                         {:user {:id "1"} :state "canceled"}]}})
+        :permissions)
+    => #{:application/undo-cancelation})
+
+  (fact "app is canceled by some other user"
+    (-> (canceled-app-context {:user {:id "1"}
+                               :application {:state "canceled" :history [{:user {:id "1"} :state "open"}
+                                                                         {:user {:id "2"} :state "canceled"}]}})
+        :permissions)
+    => empty?)
+
+  (fact "last state not canceled"
+    (-> (canceled-app-context {:user {:id "1"}
+                               :application {:state "canceled" :history [{:user {:id "1"} :state "open"}
+                                                                         {:user {:id "1"} :state "submitted"}]}})
+        :permissions)
+    => empty?)
+
+  (fact "no application in command"
+    (-> (canceled-app-context {:user {:id "1"}})
+        :permissions)
+    => empty?))

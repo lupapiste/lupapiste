@@ -830,13 +830,14 @@
 (defn- statement-giver-in-organization? [{user-email :email} {organization-statement-givers :statementGivers}]
   (boolean (util/find-by-key :email user-email organization-statement-givers)))
 
-(defn- statement-giver-in-application? [{user-id :id} {application-auth :aut}]
+(defn- statement-giver-in-application? [{user-id :id} {application-auth :auth}]
   (->> (filter (comp #{:statementGiver} keyword :role) application-auth)
        (util/find-by-id user-id)
        boolean))
 
 (defcontext organization-statement-giver-context [{:keys [user organization application]}]
-  (when (and (statement-giver-in-organization? user @organization)
+  (when (and application organization
+             (statement-giver-in-organization? user @organization)
              (statement-giver-in-application? user application))
     {:context-scope :organization
      :context-roles [:statementGiver]}))
