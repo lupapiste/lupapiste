@@ -36,6 +36,7 @@
                                       :application/create-continuation-period-permit
                                       :application/create-foreman-app-in-pre-verdict-states
                                       :application/create-foreman-app-in-post-verdict-states
+                                      :application/convert-to-application
                                       :application/get-document-states
                                       :application/check-final-archiving-state
                                       :application/check-within-archiving-time-limit}
@@ -69,6 +70,7 @@
                                       :application/create-continuation-period-permit
                                       :application/create-foreman-app-in-pre-verdict-states
                                       :application/create-foreman-app-in-post-verdict-states
+                                      :application/convert-to-application
                                       :application/get-document-states
                                       :application/check-final-archiving-state
                                       :application/check-within-archiving-time-limit}
@@ -96,7 +98,8 @@
                                       :application/change-location-in-pre-verdict-states
                                       :application/create-change-permit
                                       :application/create-continuation-period-permit
-                                      :application/create-foreman-app-in-post-verdict-states}
+                                      :application/create-foreman-app-in-post-verdict-states
+                                      :application/convert-to-application}
                 :writer             #{:application/read-draft
                                       :application/submit
                                       :application/cancel-in-restricted-states
@@ -107,7 +110,8 @@
                                       :application/change-location-in-pre-verdict-states
                                       :application/create-change-permit
                                       :application/create-continuation-period-permit
-                                      :application/create-foreman-app-in-post-verdict-states}}
+                                      :application/create-foreman-app-in-post-verdict-states
+                                      :application/convert-to-application}}
  :inforequest  {:owner              #{:application/cancel}
                 :writer             #{:application/cancel}}
  :canceled-app {:canceler           #{:application/undo-cancelation}}
