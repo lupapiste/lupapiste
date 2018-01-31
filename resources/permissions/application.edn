@@ -92,6 +92,7 @@
                                       :application/submit
                                       :application/cancel-in-restricted-states
                                       :application/edit
+                                      :application/edit-drawings
                                       :application/edit-operation
                                       :application/edit-permit-subtype
                                       :application/remove-extra-link-permit
@@ -104,6 +105,7 @@
                                       :application/submit
                                       :application/cancel-in-restricted-states
                                       :application/edit
+                                      :application/edit-drawings
                                       :application/edit-operation
                                       :application/edit-permit-subtype
                                       :application/remove-extra-link-permit

@@ -72,9 +72,10 @@
                  :height "12"}])
 
 (defn- add-drawings [application]
-       (command pena :save-application-drawings
-                :id (:id application)
-                :drawings drawings))
+  (fact {:midje/description (format "pena adds drawings, permitType: %s, primaryOperation: %s" (:permitType application) (:name (:primaryOperation application)))}
+      (command pena :save-application-drawings
+               :id (:id application)
+               :drawings drawings) => ok?))
 
 (defn- generate-link-permit [{id :id :as application} apikey]
   (when (pos? (count-required-link-permits application))
