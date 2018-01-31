@@ -55,7 +55,7 @@
 (defcommand mark-pre-verdict-phase-archived
   {:parameters       [:id]
    :input-validators [(partial non-blank-parameters [:id])]
-   :permisisons      [{:required [:application/archive]}]
+   :permissions      [{:required [:application/archive]}]
    :states           states/post-verdict-states
    :pre-checks       [permit/is-not-archiving-project]}
   [{:keys [application created]}]
