@@ -951,8 +951,10 @@
                         (contains? applications luukas-draft) => true)))))
 
 (facts "all operations in operation tree"
+  (let [app-id (create-app-id pena :operation :pientalo :propertyId sipoo-property-id)]
+
   (fact "get everything"
-    (:operations (query pena :all-operations-in :path ""))
+    (:operations (query pena :all-operations-in :id app-id :path ""))
     => (just (->> (flatten op/operation-tree)
                   (filter keyword?)
                   (map name)
@@ -960,12 +962,12 @@
              :in-any-order :gaps-ok))
 
   (fact "YA operations - sijoitusluvat - muu sijoituslupa"
-    (:operations (query pena :all-operations-in :path "yleisten-alueiden-luvat.sijoituslupa.muu-sijoituslupa"))
+    (:operations (query pena :all-operations-in :id app-id :path "yleisten-alueiden-luvat.sijoituslupa.muu-sijoituslupa"))
     => ["ya-sijoituslupa-muu-sijoituslupa"])
 
   (fact "R operation - rakennelman rakentaminen"
-    (:operations (query pena :all-operations-in :path "Rakentaminen ja purkaminen.Rakennelman rakentaminen"))
-    => (just #{"auto-katos" "masto-tms" "mainoslaite" "aita" "maalampo" "jatevesi"} :in-any-order :gaps-ok)))
+    (:operations (query pena :all-operations-in :id app-id :path "Rakentaminen ja purkaminen.Rakennelman rakentaminen"))
+    => (just #{"auto-katos" "masto-tms" "mainoslaite" "aita" "maalampo" "jatevesi"} :in-any-order :gaps-ok))))
 
 (facts "Application organization archive enabled"
        (let [app-id (create-app-id pena :operation :pientalo :propertyId sipoo-property-id)]
