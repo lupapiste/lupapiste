@@ -101,44 +101,41 @@
            (resp/redirect "/dev/krysp/manager")))
 
   (defpage [:get "/dev/krysp/manager"] {}
-     (let []
-       (core/html [:html
-                   [:head [:title "Dummy Dev Krysp Manager"]
-                    [:script {:type "text/javascript" :src "https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.3.min.js"}]
-                    [:script {:type "text/javascript" :src "/app/0/common.js?lang=fi"}]]
-                   [:body {:style "background-color: #fbc742; padding: 4em; font-size: 14px; font-family: Courier"}
-                    [:h3 "Dummy Dev Krysp Manager"]
-                    [:form {:action "/dev/krysp/manager/add" :method :post}
-                      [:div
-                       [:table {:border "1px"}
-                        [:thead
-                         [:tr
-                          [:th "typeName"]
-                          [:th "filter"]
-                          [:th "verdict file"]]
-                         [:tr
-                          [:td [:input {:type "text" :name "new-type-name"}]]
-                          [:td [:select {:name "new-filter-key"}
-                                [:option {:value "kuntalupatunnus"} "kuntalupatunnus = "]
-                                [:option {:value "asiointitunnus"} "asiointitunnus = "]]
-                               [:input {:type "text" :name "new-filter"}]]
-                          [:td [:input {:type "text" :name "verdict-file"}]]
-                          [:td [:button {:type "submit"} "Add"]]]
-                         (map (fn [{:keys [type-name kuntalupatunnus template-file]}]
-                                [:tr
-                                 [:td type-name]
-                                 [:td (when kuntalupatunnus
-                                        (str "kuntalupatunnus = " kuntalupatunnus))]
-                                 [:td template-file]
-                                 [:td " "]]) @dummy-verdicts)]]]]]])))
+    (core/html [:html
+               [:head [:title "Dummy Dev Krysp Manager"]
+                [:script {:type "text/javascript" :src "https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.3.min.js"}]
+                [:script {:type "text/javascript" :src "/app/0/common.js?lang=fi"}]]
+               [:body {:style "background-color: #fbc742; padding: 4em; font-size: 14px; font-family: Courier"}
+                [:h3 "Dummy Dev Krysp Manager"]
+                [:form {:action "/dev/krysp/manager/add" :method :post}
+                 [:div
+                  [:table {:border "1px"}
+                   [:thead
+                    [:tr
+                     [:th "typeName"]
+                     [:th "filter"]
+                     [:th "verdict file"]]
+                    [:tr
+                     [:td [:input {:type "text" :name "new-type-name"}]]
+                     [:td [:select {:name "new-filter-key"}
+                           [:option {:value "kuntalupatunnus"} "kuntalupatunnus = "]
+                           [:option {:value "asiointitunnus"} "asiointitunnus = "]]
+                      [:input {:type "text" :name "new-filter"}]]
+                     [:td [:input {:type "text" :name "verdict-file"}]]
+                     [:td [:button {:type "submit"} "Add"]]]
+                    (map (fn [{:keys [type-name kuntalupatunnus template-file]}]
+                           [:tr
+                            [:td type-name]
+                            [:td (when kuntalupatunnus
+                                   (str "kuntalupatunnus = " kuntalupatunnus))]
+                            [:td template-file]
+                            [:td " "]]) @dummy-verdicts)]]]]]]))
 
   (defn krysp-endpoint-authentication
     [request]
     (let [[u p] (http/decode-basic-auth request)]
-      (debug (str
-               u
-               " requesting krysp receiver endpoint, db cookie being: "
-               (get-in request [:cookies "test_db_name" :value])))
+      (debug "%s requesting krysp receiver endpoint, db cookie being: %s"
+             u (get-in request [:cookies "test_db_name" :value]))
       (and (= u "kuntagml") (= p "kryspi"))))
 
   (defpage [:post "/dev/krysp/receiver/:path"] {path :path}

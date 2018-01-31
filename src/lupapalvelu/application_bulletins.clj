@@ -3,7 +3,7 @@
             [monger.operators :refer :all]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
-            [clojure.set :refer [difference]]
+            [clojure.set :as set]
             [sade.util :refer [fn->] :as util]
             [sade.core :refer :all]
             [lupapalvelu.attachment.metadata :as metadata]
@@ -47,10 +47,10 @@
 
 (defn bulletin-state [app-state]
   (condp contains? (keyword app-state)
-    states/pre-verdict-states              :proclaimed
-    (difference states/post-verdict-states
-                states/terminal-states)    :verdictGiven
-    #{:final}                              :final))
+    states/pre-verdict-states                  :proclaimed
+    (set/difference states/post-verdict-states
+                    states/terminal-states)    :verdictGiven
+    #{:final}                                  :final))
 
 ;; Query/Projection fields
 
@@ -277,14 +277,14 @@
   (mongo/remove :application-bulletins (str applicationId "_" verdictId)))
 
 (defn process-check-for-verdicts-result
+  "For (non-YMP) organizations with bulletins enabled, update bulletins to match with verdicts retrieved from backing system"
   [{{old-verdicts :verdicts applicationId :id :keys [organization permitType municipality] :as application} :application
     created :created :as command} new-verdicts app-descriptions]
-  "For (non-YMP) organizations with bulletins enabled, update bulletins to match with verdicts retrieved from backing system"
   (let [{:keys [enabled descriptions-from-backend-system]} (org/bulletin-settings-for-scope (org/get-organization organization) permitType municipality)]
     (when (and (not (permit/ymp-permit-type? (:permitType application))) enabled)
       (let [old-verdict-ids          (map :id (remove :draft old-verdicts))
             new-verdict-ids          (map :id (remove :draft new-verdicts))
-            removed-verdict-ids      (clojure.set/difference (set old-verdict-ids) (set new-verdict-ids))]
+            removed-verdict-ids      (set/difference (set old-verdict-ids) (set new-verdict-ids))]
         (doseq [vid removed-verdict-ids] ; Delete bulletins related to removed verdicts
           (process-delete-verdict applicationId vid))
         (doseq [{vid :id kuntalupatunnus :kuntalupatunnus :as verdict} new-verdicts]
@@ -297,5 +297,5 @@
                                                    :verdicts [verdict])
                                                    created
                              {:verdictGivenAt (-> verdict :paatokset first :paivamaarat :anto)
-                              :appealPeriodStartsAt (or (-> verdict :paatokset first :paivamaarat :julkipano) (now))
-                              :appealPeriodEndsAt   (or (-> verdict :paatokset first :paivamaarat :viimeinenValitus) (now))})))))))
+                              :appealPeriodStartsAt (or (-> verdict :paatokset first :paivamaarat :julkipano) created)
+                              :appealPeriodEndsAt   (or (-> verdict :paatokset first :paivamaarat :viimeinenValitus) created)})))))))
