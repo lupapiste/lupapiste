@@ -69,7 +69,7 @@
   (ok))
 
 (defquery permanent-archive-enabled
-  {:permissions [{:required [:application/read]}]
+  {:permissions [{:required [:organization/show-permanent-arcvhive-enabled]}]
    :categories #{:attachments}
    :pre-checks [validate-permanent-archive-enabled]}
   [_])
