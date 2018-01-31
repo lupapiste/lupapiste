@@ -572,8 +572,8 @@
                         enrich-action-contexts)]
         (or
           (not-authorized-to-application command)
-          (pre-checks-fail command)
           (access-denied-by-insufficient-permissions command)
+          (pre-checks-fail command)
           (when execute?
             (let [status   (executed command)
                   post-fns (get-post-fns status (get-meta (:action command)))]
