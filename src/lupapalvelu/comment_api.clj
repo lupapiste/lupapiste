@@ -92,7 +92,7 @@
    :optional-parameters [to mark-answered openApplication]
    :contexts [foreman/foreman-app-context]
    :permissions [{:context {:application {:state #{:draft}}}
-                  :required [:application/read-draft :comment/add]}
+                  :required [:application/edit-draft :comment/add]}
                  {:required [:comment/add]}]
    :states     commenting-states
    :pre-checks [applicant-cant-set-to]

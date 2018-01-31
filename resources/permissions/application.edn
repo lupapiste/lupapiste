@@ -88,7 +88,7 @@
                                       :application/read-authority-notice}}
  :application  {:roles/any          #{:application/read
                                       :application/accordions-open}
-                :owner              #{:application/read-draft
+                :owner              #{:application/edit-draft
                                       :application/submit
                                       :application/cancel-in-restricted-states
                                       :application/edit
@@ -101,7 +101,7 @@
                                       :application/create-continuation-period-permit
                                       :application/create-foreman-app-in-post-verdict-states
                                       :application/convert-to-application}
-                :writer             #{:application/read-draft
+                :writer             #{:application/edit-draft
                                       :application/submit
                                       :application/cancel-in-restricted-states
                                       :application/edit
@@ -117,7 +117,7 @@
  :inforequest  {:owner              #{:application/cancel}
                 :writer             #{:application/cancel}}
  :canceled-app {:canceler           #{:application/undo-cancelation}}
- :foreman-app  {:foreman            #{:application/read-draft
+ :foreman-app  {:foreman            #{:application/edit-draft
                                       :application/submit
                                       :application/cancel-in-restricted-states
                                       :application/edit

@@ -127,7 +127,7 @@
   {:parameters       [id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (app/collections-to-be-seen type) (fail :error.unknown-type)))]
    :permissions      [{:context {:application {:state #{:draft}}}
-                       :required [:application/read-draft]}
+                       :required [:application/edit-draft]}
 
                       {:required [:application/read]}]}
   [{:keys [data user created] :as command}]
@@ -328,9 +328,9 @@
    :states           #{:draft :open}
    :contexts         [foreman/foreman-app-context]
    :permissions      [{:context  {:application {:state #{:draft}}}
-                       :required [:application/read-draft :application/submit]}
+                       :required [:application/edit-draft :application/submit]}
 
-                      {:required [:application/read :application/submit]}]
+                      {:required [:application/submit]}]
    :notified         true
    :on-success       [(notify :application-state-change)
                       (notify :neighbor-hearing-requested)
@@ -356,9 +356,9 @@
    :input-validators [(partial action/non-blank-parameters [:id])]
    :states           #{:draft :info :answered :open :submitted :complementNeeded}
    :permissions      [{:context  {:application {:state #{:draft}}}
-                       :required [:application/read-draft :application/edit-drawings]}
+                       :required [:application/edit-draft :application/edit-drawings]}
 
-                      {:required [:application/read :application/edit-drawings]}]}
+                      {:required [:application/edit-drawings]}]}
   [{:keys [created] :as command}]
   (when (sequential? drawings)
     (let [drawings-with-geojson (map #(assoc % :geometry-wgs84 (draw/wgs84-geometry %)) drawings)]
@@ -481,9 +481,9 @@
   {:parameters       [id operation]
    :states           states/pre-sent-application-states
    :permissions      [{:context  {:application {:state #{:draft}}}
-                       :required [:application/read-draft :application/edit-operation]}
+                       :required [:application/edit-draft :application/edit-operation]}
 
-                      {:required [:application/read :application/edit-operation]}]
+                      {:required [:application/edit-operation]}]
    :input-validators [operation-validator]
    :pre-checks       [add-operation-allowed?
                       multiple-operations-supported?]}
@@ -510,9 +510,9 @@
                       (partial action/string-parameters [:desc])]
    :states     states/pre-sent-application-states
    :permissions [{:context  {:application {:state #{:draft}}}
-                  :required [:application/read-draft :application/edit-operation]}
+                  :required [:application/edit-draft :application/edit-operation]}
 
-                 {:required [:application/read :application/edit-operation]}]}
+                 {:required [:application/edit-operation]}]}
   [{:keys [application] :as command}]
   (if (= (get-in application [:primaryOperation :id]) op-id)
     (update-application command {$set {"primaryOperation.description" desc}})
@@ -524,9 +524,9 @@
    :input-validators [(partial action/non-blank-parameters [:id :secondaryOperationId])]
    :states states/pre-sent-application-states
    :permissions [{:context  {:application {:state #{:draft}}}
-                  :required [:application/read-draft :application/edit-operation]}
+                  :required [:application/edit-draft :application/edit-operation]}
 
-                 {:required [:application/read :application/edit-operation]}]}
+                 {:required [:application/edit-operation]}]}
   [{:keys [application] :as command}]
   (let [old-primary-op (:primaryOperation application)
         old-secondary-ops (:secondaryOperations application)
@@ -550,15 +550,15 @@
    :contexts         [foreman/foreman-app-context]
    :permissions      [{:description "draft non-YA application"
                        :context  {:application {:state #{:draft} :permitType (comp not #{:YA} keyword)}}
-                       :required [:application/read-draft :application/edit-permit-subtype]}
+                       :required [:application/edit-draft :application/edit-permit-subtype]}
 
                       {:description "non-YA application"
                        :context  {:application {:permitType (comp not #{:YA} keyword)}}
-                       :required [:application/read :application/edit-permit-subtype]}
+                       :required [:application/edit-permit-subtype]}
 
                       {:description "non-draft YA application"
                        :context  {:application {:state states/all-but-draft :permitType #{:YA}}}
-                       :required [:application/read :application/edit-permit-subtype-in-ya]}]
+                       :required [:application/edit-permit-subtype-in-ya]}]
    :pre-checks       [app/validate-has-subtypes
                       app/pre-check-permit-subtype]}
   [{:keys [application created] :as command}]
@@ -572,12 +572,12 @@
                       (partial action/property-id-parameters [:propertyId])
                       coord/validate-x coord/validate-y]
    :permissions      [{:context  {:application {:state #{:draft}}}
-                       :required [:application/read-draft :application/change-location-in-pre-verdict-states]}
+                       :required [:application/edit-draft :application/change-location-in-pre-verdict-states]}
 
                       {:context  {:application {:state states/pre-verdict-states}}
-                       :required [:application/read :application/change-location-in-pre-verdict-states]}
+                       :required [:application/change-location-in-pre-verdict-states]}
 
-                      {:required [:application/read :application/change-location-in-post-verdict-states]}]}
+                      {:required [:application/change-location-in-post-verdict-states]}]}
   [{:keys [created application] :as command}]
   (if (= (:municipality application) (prop/municipality-id-by-property-id propertyId))
     (do
@@ -734,9 +734,9 @@
   {:parameters       ["id" linkPermitId]
    :contexts         [foreman/foreman-app-context]
    :permissions      [{:context  {:application {:state #{:draft}}}
-                       :required [:application/read-draft :application/edit]}
+                       :required [:application/edit-draft]}
 
-                      {:required [:application/read :application/edit]}]
+                      {:required [:application/edit]}]
    :states           (states/all-application-states-but (conj states/terminal-states :sent)) ;; Pitaako olla myos 'sent'-tila?
    :pre-checks       [permit/is-not-archiving-project
                       validate-linking]
@@ -751,12 +751,12 @@
   {:parameters [id linkPermitId]
    :input-validators [(partial action/non-blank-parameters [:id :linkPermitId])]
    :permissions      [{:context  {:application (every-pred (comp #{:draft} keyword :state) app/extra-link-permits?)}
-                       :required [:application/read-draft :application/remove-extra-link-permit]}
+                       :required [:application/edit-draft :application/remove-extra-link-permit]}
 
                       {:context  {:application app/extra-link-permits?}
-                       :required [:application/read :application/remove-extra-link-permit]}
+                       :required [:application/remove-extra-link-permit]}
 
-                      {:required [:application/read :application/remove-link-permit]}]
+                      {:required [:application/remove-link-permit]}]
    :states     (states/all-application-states-but (conj states/terminal-states :sent))}
   [{application :application}]
   (if (mongo/remove :app-links (app/make-mongo-id-for-link-permit id linkPermitId))
@@ -789,7 +789,7 @@
         op-id-mapping (into {} (map
                                  #(vector (:id %) (mongo/create-id))
                                  (conj secondary-ops primary-op)))
-        state (if (permissions/permissions? command [:application/read-draft]) :draft :open)
+        state (if (permissions/permissions? command [:application/edit-draft]) :draft :open)
         muutoslupa-app (merge domain/application-skeleton
                               (select-keys application
                                            [:propertyId :location

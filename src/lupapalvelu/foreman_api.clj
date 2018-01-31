@@ -48,7 +48,7 @@
    :input-validators [(partial action/string-parameters [:foremanHetu])]
    :contexts    [foreman/foreman-app-context]
    :permissions [{:context  {:application {:state #{:draft}}}
-                  :required [:application/read-draft :application/edit]}
+                  :required [:application/edit-draft]}
                  {:required [:application/edit]}]
    :states     states/all-states
    :pre-checks [foreman-app-check]}
@@ -71,7 +71,7 @@
   {:parameters [id taskId foremanAppId]
    :input-validators [(partial action/non-blank-parameters [:id :taskId])]
    :permissions [{:context  {:application {:state #{:draft}}}
-                  :required [:application/read-draft :application/edit]}
+                  :required [:application/edit-draft]}
                  {:required [:application/edit]}]
    :states states/all-states
    :pre-checks [foreman/ensure-foreman-not-linked]}
