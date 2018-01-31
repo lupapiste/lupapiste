@@ -19,6 +19,9 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
   "use strict";
 
   var self = this;
+  var ENTER = 13;
+  var KEY_UP = 38;
+  var KEY_DOWN = 40;
 
   self.selectedOptions = params.selectedOptions || ko.pureComputed({
     read: function() { return _.filter([ko.unwrap(params.selectedOption)]); },
@@ -166,7 +169,7 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
       container.scrollTop(activeItem.offset().top - container.height() - activeItem.height());
     }
 
-    if (event.keyCode === 13) {
+    if (event.keyCode === ENTER) {
       var currentItem = getCurrentItem();
       // Don't select group header or empty result
       if (currentItem && !currentItem.groupHeader) {
@@ -174,7 +177,7 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
       }
     }
 
-    else if (event.keyCode === 38) {
+    else if (event.keyCode === KEY_UP) {
       var firstItem = self.index() <= 0;
       self.index(firstItem ? 0 : self.index() - 1);
 
@@ -188,7 +191,7 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
       scrollToActiveItem(self.index());
     }
 
-    else if (event.keyCode === 40) {
+    else if (event.keyCode === KEY_DOWN) {
       var lastItem = self.index() + 1 >= self.data().length;
       self.index(lastItem ? self.index() : self.index() + 1);
       // skip groupheader
