@@ -24,7 +24,7 @@
                 (map #(.getName %) (util/get-files-by-regex "resources/permissions/" #".+\.edn$")))]
     (reset! permission-tree {})
     (doseq [file files]
-      (defpermissions (->> file (re-find #"(.*)(.edn)") second) (util/read-edn-file (io/resource (str "permissions/" file)))))))
+      (defpermissions (->> file (re-find #"(.*)(.edn)") second) (util/read-edn-resource (str "permissions/" file))))))
 
 (load-permissions!)
 
