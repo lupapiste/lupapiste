@@ -205,7 +205,7 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
       // This aims to select an option automatically (on keyup) if there's a single option, or if one of the options
       // matches the input text exactly.
       var items = self.data();
-      if (items.length === 2 || (items.length > 2 && items[1].title.toUpperCase() === self.query().toUpperCase())) {
+      if (items.length === 2 || (items.length > 2 && ko.unwrap(items[1][self.optionsText]).toUpperCase() === self.query().toUpperCase())) {
         self.index(1);
         scrollToActiveItem(self.index());
       }
