@@ -435,7 +435,7 @@ show_finished() {
    local EXIT_CODE=$(grep "pybot exited with" "$1" | sed -E 's/.*exited with ([0-9]+) .*/\1/')
    local REASON=
    echo "$STATUS" | grep -q "[^0-9]0 failed" || COLOR=$RED
-   test "$EXIT_CODE" -eq "124" && COLOR=$MAGENTA && REASON="- TIMEOUT [value=$TIMEOUT]"
+   test "$EXIT_CODE" -eq "124" && COLOR=$MAGENTA && REASON=" - TIMEOUT [value=$TIMEOUT]"
    echo -e "$COLOR$REASON - $1 done: $STATUS, $ATTEMPTS runs"
    grep -E "FAIL" "$1" | head -n 1 | sed -e 's/^/      /'
    echo -n -e "$DEFAULT"
