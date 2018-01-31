@@ -40,7 +40,7 @@
 
 (apply-remote-minimal)
 
-(testable-privates lupapalvelu.application required-link-permits)
+(testable-privates lupapalvelu.application count-required-link-permits)
 
 (def VRKLupatunnus-path [:LupaTunnus :VRKLupatunnus])
 
@@ -77,7 +77,7 @@
                 :drawings drawings))
 
 (defn- generate-link-permit [{id :id :as application} apikey]
-  (when (pos? (required-link-permits application))
+  (when (pos? (count-required-link-permits application))
     (fact "Add required link permit"
       (command apikey :add-link-permit :id id :linkPermitId "Kuntalupatunnus 123") => ok?)))
 
