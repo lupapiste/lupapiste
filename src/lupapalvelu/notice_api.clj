@@ -23,13 +23,10 @@
 
 (defcommand change-urgency
   {:parameters [id urgency]
-   :user-roles #{:authority :applicant}
    :states (states/all-states-but [:draft])
-   :user-authz-roles #{:statementGiver}
-   :input-validators [validate-urgency]
-   :pre-checks [(action/some-pre-check
-                  auth/application-authority-pre-check
-                  org/statement-giver-in-organization)]}
+   :contexts    [org/organization-statement-giver-context]
+   :permissions [{:required [:application/set-urgency]}]
+   :input-validators [validate-urgency]}
   [command]
   (update-notice-data command {:urgency urgency}))
 
@@ -37,11 +34,8 @@
   {:parameters [id authorityNotice]
    :input-validators [(partial action/string-parameters [:authorityNotice])]
    :states (states/all-states-but [:draft])
-   :user-authz-roles #{:statementGiver}
-   :user-roles #{:authority :applicant}
-   :pre-checks [(action/some-pre-check
-                  auth/application-authority-pre-check
-                  org/statement-giver-in-organization)]}
+   :contexts    [org/organization-statement-giver-context]
+   :permissions [{:required [:application/set-authority-notice]}]}
   [command]
   (update-notice-data command {:authorityNotice authorityNotice}))
 
@@ -49,11 +43,8 @@
   {:parameters [id tags]
    :states (states/all-states-but [:draft])
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:tags])]
-   :user-authz-roles #{:statementGiver}
-   :user-roles #{:authority :applicant}
-   :pre-checks [(action/some-pre-check
-                  auth/application-authority-pre-check
-                  org/statement-giver-in-organization)]}
+   :contexts    [org/organization-statement-giver-context]
+   :permissions [{:required [:application/set-authority-notice]}]}
   [{organization :organization :as command}]
   (let [org-tag-ids (map :id (:tags @organization))]
     (if (every? (set org-tag-ids) tags)
@@ -64,11 +55,7 @@
   {:description      "Notice is shown to authorities and organization statement givers."
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :user-roles       #{:authority :applicant}
-   :user-authz-roles #{:statementGiver}
-   :org-authz-roles  roles/reader-org-authz-roles
-   :states           states/all-but-draft
-   :pre-checks       [(action/some-pre-check
-                        auth/application-authority-pre-check
-                        org/statement-giver-in-organization)]}
+   :contexts    [org/organization-statement-giver-context]
+   :permissions [{:required [:application/read-authority-notice]}]
+   :states           states/all-but-draft}
   [_])

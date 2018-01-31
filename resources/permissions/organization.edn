@@ -1,0 +1,12 @@
+{:global       {:admin              #{:organization/convert-inforequests}
+                :authorityAdmin     #{:organization/check-permanent-arcvhive-enabled}}
+ :organization {:authority          #{:organization/check-permanent-arcvhive-enabled}
+                :approver           #{:organization/check-permanent-arcvhive-enabled}
+                :archivist          #{:organization/get-archiving-status}}
+ :application  {:owner              #{:organization/check-permanent-arcvhive-enabled}
+                :writer             #{:organization/check-permanent-arcvhive-enabled}
+                :reader             #{:organization/check-permanent-arcvhive-enabled}
+                :foreman            #{:organization/check-permanent-arcvhive-enabled}
+                :guest              #{:organization/check-permanent-arcvhive-enabled}
+                :guestAuthority     #{:organization/check-permanent-arcvhive-enabled}
+                :financialAuthority #{:organization/check-permanent-arcvhive-enabled}}}

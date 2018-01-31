@@ -34,7 +34,7 @@
             [lupapalvelu.authorization :as auth]
             [sade.schema-utils :as ssu]))
 
-(testable-privates lupapalvelu.action user-is-not-allowed-to-access?)
+(testable-privates lupapalvelu.action user-is-not-allowed-to-access? enrich-default-permissions enrich-action-contexts)
 
 (facts "enable-accordions"
   (with-all-mocked-orgs
@@ -85,10 +85,9 @@
         action (build-action "enable-accordions" action-skeleton)
         org-id (:organization application)
         permit-type (:permitType application)
-        authority? (usr/authority? user)
         allowed-to-access? (action/user-is-allowed-to-access?
                              action application)
-        authority-in-org? (usr/user-is-authority-in-organization? user (name org-id))
+        authority-in-org? (not-empty (get-in user [:orgAuthz (keyword org-id)]))
         auths-in-application? (auth/user-authz? roles/all-authenticated-user-roles
                                                 application
                                                 user)]
@@ -97,7 +96,7 @@
             (and authority-in-org?
                  (or (= permit-type "YA")
                      (= permit-type "ARK"))) (ok? (validate action))
-            authority?                       (fail? (validate action))
+            authority-in-org?                (fail? (validate action))
             :else                            (ok? (validate action))))))
 
 (def enable-accordions-prop
@@ -115,16 +114,18 @@
   =>
   passing-quick-check)
 
-(facts "Allowed actions for statementGiver"
+(facts "Allowed actions for organization statementGiver"
   (let [allowed-actions #{:give-statement
                           :save-statement-as-draft
                           :get-possible-statement-statuses
                           :application
+                          :openinforequest
                           :allowed-actions
                           :allowed-actions-for-category
                           :validate-doc
                           :fetch-validation-errors
                           :add-comment
+                          :enable-accordions
                           :comments
                           :attachments
                           :attachment
@@ -153,7 +154,6 @@
                           :change-urgency
                           :add-authority-notice
                           :foreman-applications
-                          :foreman-history
                           :reduced-foreman-history
                           :add-application-tags
                           :application-organization-tags
@@ -177,17 +177,23 @@
                           :mark-seen-organization-links
                           :redirect-to-3d-map
                           :ya-extensions
+                          :ya-application
                           :tasks-tab-visible
                           :application-info-tab-visible
                           :application-summary-tab-visible
                           :application-verdict-tab-visible
                           :application-handlers
-                          :application-organization-archive-enabled}
-        user {:id "user123" :organizations [] :role :applicant}
+                          :application-organization-archive-enabled
+                          :create-application}
+        user {:id "user123" :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
-    (doseq [command (foreach-action {:web {} :user user :application application :data {}})
+    (doseq [command (foreach-action {:web {} :user user :application application :data {} :organization (delay {:statementGivers [{:id "user123"}]})})
             :let [action (keyword (:action command))
-                  result (user-is-not-allowed-to-access? command application)]]
+                  result (or (user-is-not-allowed-to-access? command application)
+                             (-> command
+                                 enrich-default-permissions
+                                 enrich-action-contexts
+                                 access-denied-by-insufficient-permissions))]]
       (fact {:midje/description (name action)}
         (fact "has user" (:user command) => user)
         (fact "has upplication" (:application command) => application)

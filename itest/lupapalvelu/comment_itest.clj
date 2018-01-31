@@ -26,7 +26,7 @@
       (command pena :can-target-comment-to-authority :id id) => fail?
       pena =not=> (allowed? :add-comment :id id :to irrelevant)
       (comment-application pena id false) => ok?
-      (comment-application pena id false sonja-id) => fail?)
+      (comment-application pena id false sonja-id) => (partial expected-failure? :error.to-settable-only-by-authority))
 
     (fact "authority can comment and applicant gets email"
       (comment-application sonja id false) => ok?

@@ -134,21 +134,6 @@
   (quick-check 100 user-is-authority-in-organization-prop :max-size 50)
   => passing-quick-check)
 
-(def validate-authority-in-organization-prop
-  (prop/for-all [{:keys [user organization-id]} user-and-organization-id-generator]
-    (let [org-id (name organization-id)
-          command {:user user
-                   :application {:organization org-id}}
-          result (catch-all (validate-authority-in-organization command))]
-      (if (user-is-authority-in-organization? user org-id)
-        (nil? result)
-        (fail? result)))))
-
-(fact :qc validate-authority-in-organization-spec
-  (quick-check 100 validate-authority-in-organization-prop :max-size 50)
-  => passing-quick-check)
-
-
 (facts municipality-name->system-user-email
   (fact "srting with caps"
     (municipality-name->system-user-email "Kunta") => "jarjestelmatunnus.kunta@lupapiste.fi")
@@ -467,3 +452,40 @@
   (email-recipient? {:id 8}) => true
   (provided
     (find-user {:id 8}) => {:id 8 :dummy false :enabled true, :private {:password ""}}))
+
+(facts without-application-context
+  (fact "single org-authz role"
+    (:permissions (without-application-context {:user {:role "authority" :orgAuthz {:123-T ["commenter"]}}}))
+    => #{:test/do :test/comment}
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role :organization "commenter") => #{:test/do :test/comment}))
+
+  (fact "no org-authz roles"
+    (:permissions (without-application-context {:user {:role "authority" :orgAuthz {}}}))
+    => empty?
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role irrelevant irrelevant) => irrelevant :times 0))
+
+  (fact "multiple org-authz roles"
+    (:permissions (without-application-context {:user {:role "authority" :orgAuthz {:123-T ["commenter" "approver"]}}}))
+    => #{:test/do :test/comment :test/approve}
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role :organization "commenter") => #{:test/do :test/comment})
+    (provided (lupapalvelu.permissions/get-permissions-by-role :organization "approver") => #{:test/do :test/approve}))
+
+  (fact "multiple org-authz roles in multiple organizations"
+    (:permissions (without-application-context {:user {:role "authority" :orgAuthz {:123-T ["commenter" "approver"]
+                                                                                    :456-T ["commenter" "tester"]}}}))
+    => #{:test/do :test/comment :test/approve :test/test}
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role :organization "commenter") => #{:test/do :test/comment})
+    (provided (lupapalvelu.permissions/get-permissions-by-role :organization "approver") => #{:test/do :test/approve})
+    (provided (lupapalvelu.permissions/get-permissions-by-role :organization "tester") => #{:test/do :test/test}))
+
+  (fact "application in command"
+    (:permissions (without-application-context {:user {:role "authority" :orgAuthz {:123-T ["commenter" "approver"]
+                                                                                    :456-T ["commenter" "tester"]}}
+                                                :application {:organization "123-T"}}))
+    => empty?
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role irrelevant irrelevant) => irrelevant :times 0)))
