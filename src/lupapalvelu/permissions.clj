@@ -1,5 +1,6 @@
 (ns lupapalvelu.permissions
   (:require [clojure.set :as set]
+            [clojure.java.io :as io]
             [schema.core :as sc]
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]))
@@ -20,10 +21,10 @@
   (let [this-path (util/this-jar lupapalvelu.main)
         files (if (ss/ends-with this-path ".jar") ; are we inside jar
                 (filter #(ss/ends-with % ".edn") (util/list-jar this-path "permissions/"))
-                (util/get-files-by-regex "resources/permissions/" #".+\.edn$"))]
+                (map #(.getName %) (util/get-files-by-regex "resources/permissions/" #".+\.edn$")))]
     (reset! permission-tree {})
     (doseq [file files]
-      (defpermissions (->> (.getName file) (re-find #"(.*)(.edn)") second) (util/read-edn-file (.getPath file))))))
+      (defpermissions (->> file (re-find #"(.*)(.edn)") second) (util/read-edn-file (io/resource (str "permissions/" file)))))))
 
 (load-permissions!)
 
