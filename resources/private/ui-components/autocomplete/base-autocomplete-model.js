@@ -200,7 +200,7 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
       }
       scrollToActiveItem(self.index());
     }
-
+/* TODO: fix this logic to detect if the autocomplete items are groupHeaders or actual items.
     else {
       // This aims to select an option automatically (on keyup) if there's a single option, or if one of the options
       // matches the input text exactly.
@@ -209,7 +209,7 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
         self.index(1);
         scrollToActiveItem(self.index());
       }
-    }
+    }*/
     return true;
   };
 
