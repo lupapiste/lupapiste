@@ -364,7 +364,7 @@
     (fact "Luukas (reader) can't undo-cancellation"
       (command luukas :undo-cancellation :id application-id) => unauthorized?)
     (fact "Teppo can't undo cancellation, as he is not the canceler"
-      (command teppo :undo-cancellation :id application-id) => (partial expected-failure? :error.undo-only-for-canceler))
+      (command teppo :undo-cancellation :id application-id) => unauthorized?)
     (fact "Pena can undo his cancellation"
       (command pena :undo-cancellation :id application-id) => ok?)
 
@@ -379,7 +379,7 @@
       (:state (query-application teppo application-id)) => "canceled")
 
     (fact "Pena can't undo Teppos cancelation, although he is the owner"
-      (command pena :undo-cancellation :id application-id) => (partial expected-failure? :error.undo-only-for-canceler))
+      (command pena :undo-cancellation :id application-id) => unauthorized?)
 
     (fact "Sonja can undo cancellation"
       (command sonja :undo-cancellation :id application-id) => ok?
