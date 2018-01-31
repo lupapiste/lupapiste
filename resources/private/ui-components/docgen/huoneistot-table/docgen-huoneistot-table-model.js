@@ -148,4 +148,17 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
          ? loc( "huoneistotTable.help.muutostapa" ) + help
          : help;
   });
+
+  self.showPremisesUpload = self.disposedComputed( function() {
+    var doc = self.service.findDocumentById(self.documentId);
+    var documentName = util.getIn( doc, ["schema", "name"]);
+    return documentName === "uusiRakennus";
+  });
+
+  self.premisesExcelDownloadUrl = function (applicationId) {
+    return sprintf("/api/raw/download-premises-template?%s&%s&%s",
+                   "document-id=" + self.documentId,
+                   "application-id=" + applicationId,
+                   "lang=" + loc.getCurrentLanguage());
+  };
 };

@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rakval:Rakennusvalvonta
+    xsi:schemaLocation="http://www.kuntatietopalvelu.fi/gml/yhteiset
+          http://www.kuntatietopalvelu.fi/gml/yhteiset/2.1.7/yhteiset.xsd
+          http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta
+          http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta/2.2.2/rakennusvalvonta.xsd
+          http://www.opengis.net/wfs
+          http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+    xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset" xmlns:ogc="http://www.opengis.net/ogc"
+    xmlns:wfs="http://www.opengis.net/wfs" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:rakval="http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta"
+    xmlns:ows="http://www.opengis.net/ows" xmlns:gml="http://www.opengis.net/gml"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2018-01-15</yht:pvm>
+          <yht:tila>vireillä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">
+          <yht:kuntalupatunnus>638-2018-0005</yht:kuntalupatunnus>
+          <yht:muuTunnustieto>
+            <yht:MuuTunnus>
+              <yht:tunnus>LP-638-2018-90003</yht:tunnus>
+            </yht:MuuTunnus>
+          </yht:muuTunnustieto>
+          <yht:muuTunnustieto>
+            <yht:MuuTunnus>
+              <yht:tunnus>LP-638-2018-90004</yht:tunnus>
+            </yht:MuuTunnus>
+          </yht:muuTunnustieto>
+          <yht:VRKLupatunnus>63800018-0005</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2018-01-15</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:osapuolettieto>
+        <yht:Osapuolet xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+              <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Louhi</yht:etunimi>
+                  <yht:sukunimi>Palvelin</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:kunta>Porvoo</yht:kunta>
+                  <yht:osoitenimi>
+                    <yht:teksti>Wolffintie</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:osoitenumero>36</yht:osoitenumero>
+                  <yht:porras>M</yht:porras>
+                  <yht:huoneisto>10</yht:huoneisto>
+                  <yht:postinumero>65200</yht:postinumero>
+                  <yht:postitoimipaikannimi>VAASA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>louhi@example.com</yht:sahkopostiosoite>
+                <yht:henkilotunnus>151139-935S</yht:henkilotunnus>
+              </yht:henkilo>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian laskun maksaja</yht:kuntaRooliKoodi>
+              <yht:VRKrooliKoodi>maksaja</yht:VRKrooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Louhi</yht:etunimi>
+                  <yht:sukunimi>Palvelin</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:kunta>Porvoo</yht:kunta>
+                  <yht:osoitenimi>
+                    <yht:teksti>Wolffintie</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:osoitenumero>36</yht:osoitenumero>
+                  <yht:porras>M</yht:porras>
+                  <yht:huoneisto>10</yht:huoneisto>
+                  <yht:postinumero>65200</yht:postinumero>
+                  <yht:postitoimipaikannimi>VAASA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>louhi@example.com</yht:sahkopostiosoite>
+                <yht:henkilotunnus>151139-935S</yht:henkilotunnus>
+              </yht:henkilo>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:suunnittelijatieto>
+            <yht:Suunnittelija>
+              <yht:suunnittelijaRoolikoodi>muu</yht:suunnittelijaRoolikoodi>
+              <yht:VRKrooliKoodi>erityissuunnittelija</yht:VRKrooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Louhi</yht:etunimi>
+                  <yht:sukunimi>Palvelin</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:kunta>Porvoo</yht:kunta>
+                  <yht:osoitenimi>
+                    <yht:teksti>Wolffintie</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:osoitenumero>36</yht:osoitenumero>
+                  <yht:porras>M</yht:porras>
+                  <yht:huoneisto>10</yht:huoneisto>
+                  <yht:postinumero>65200</yht:postinumero>
+                  <yht:postitoimipaikannimi>VAASA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>louhi@example.com</yht:sahkopostiosoite>
+                <yht:henkilotunnus>151139-935S</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:koulutus>koulutus=insinööri, valmistumisvuosi=1999</yht:koulutus>
+              <yht:muuSuunnittelijaRooli>Jahkaaja</yht:muuSuunnittelijaRooli>
+            </yht:Suunnittelija>
+          </yht:suunnittelijatieto>
+          <yht:suunnittelijatieto>
+            <yht:Suunnittelija>
+              <yht:suunnittelijaRoolikoodi>pääsuunnittelija</yht:suunnittelijaRoolikoodi>
+              <yht:VRKrooliKoodi>pääsuunnittelija</yht:VRKrooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Pää</yht:etunimi>
+                  <yht:sukunimi>Suunnittelija</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:kunta>Porvoo</yht:kunta>
+                  <yht:osoitenimi>
+                    <yht:teksti></yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postitoimipaikannimi></yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>m.s@sito.fi</yht:sahkopostiosoite>
+                <yht:henkilotunnus>100372-9248</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:koulutus>koulutus=insinööri, valmistumisvuosi=2010</yht:koulutus>
+            </yht:Suunnittelija>
+          </yht:suunnittelijatieto>
+          <yht:tyonjohtajatieto>
+            <yht:Tyonjohtaja>
+              <yht:tyonjohtajaRooliKoodi>vastaava työnjohtaja</yht:tyonjohtajaRooliKoodi>
+              <yht:VRKrooliKoodi>työnjohtaja</yht:VRKrooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Jaakko</yht:etunimi>
+                  <yht:sukunimi>Tarkastaja</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:kunta>Porvoo</yht:kunta>
+                  <yht:osoitenimi>
+                    <yht:teksti>Koivukatu</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:osoitenumero>1</yht:osoitenumero>
+                  <yht:postinumero>65007</yht:postinumero>
+                  <yht:postitoimipaikannimi>VAASA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>r-koulutus-1@638.fi</yht:sahkopostiosoite>
+                <yht:henkilotunnus>251057-9662</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:koulutus>koulutus=insinööri, valmistumisvuosi=2000</yht:koulutus>
+              <yht:alkamisPvm>2018-01-15</yht:alkamisPvm>
+              <yht:paatosPvm>2018-01-15</yht:paatosPvm>
+              <yht:paatostyyppi>hyväksytty</yht:paatostyyppi>
+            </yht:Tyonjohtaja>
+          </yht:tyonjohtajatieto>
+          <yht:tyonjohtajatieto>
+            <yht:Tyonjohtaja>
+              <yht:tyonjohtajaRooliKoodi>IV-työnjohtaja</yht:tyonjohtajaRooliKoodi>
+              <yht:VRKrooliKoodi>työnjohtaja</yht:VRKrooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Erkki</yht:etunimi>
+                  <yht:sukunimi>Esimerkki</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:kunta>Porvoo</yht:kunta>
+                  <yht:osoitenimi>
+                    <yht:teksti>Koivukatu</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:osoitenumero>1</yht:osoitenumero>
+                  <yht:postinumero>65007</yht:postinumero>
+                  <yht:postitoimipaikannimi>VAASA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>r-koulutus-1@638.fi</yht:sahkopostiosoite>
+                <yht:henkilotunnus>070470-987M</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:koulutus>koulutus=insinööri, valmistumisvuosi=2000</yht:koulutus>
+              <yht:alkamisPvm>2018-01-17</yht:alkamisPvm>
+              <yht:paatosPvm>2018-01-17</yht:paatosPvm>
+              <yht:paatostyyppi>hyväksytty</yht:paatostyyppi>
+            </yht:Tyonjohtaja>
+          </yht:tyonjohtajatieto>
+
+        </yht:Osapuolet>
+      </rakval:osapuolettieto>
+      <rakval:rakennuspaikkatieto>
+        <rakval:Rakennuspaikka>
+          <yht:metatieto xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset"/>
+          <yht:yksilointitieto xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">40218</yht:yksilointitieto>
+          <yht:alkuHetki xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">2018-01-15T00:00:00</yht:alkuHetki>
+          <yht:rakennuspaikanKiinteistotieto xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">
+            <yht:RakennuspaikanKiinteisto>
+              <yht:kiinteistotieto>
+                <yht:Kiinteisto>
+                  <yht:kiinteistotunnus>63800600080004</yht:kiinteistotunnus>
+                </yht:Kiinteisto>
+              </yht:kiinteistotieto>
+              <yht:kokotilaKytkin>true</yht:kokotilaKytkin>
+              <yht:hallintaperuste>oma</yht:hallintaperuste>
+            </yht:RakennuspaikanKiinteisto>
+          </yht:rakennuspaikanKiinteistotieto>
+          <yht:kaavanaste xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">asema</yht:kaavanaste>
+          <yht:kaavatilanne xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">asemakaava</yht:kaavatilanne>
+        </rakval:Rakennuspaikka>
+      </rakval:rakennuspaikkatieto>
+      <rakval:toimenpidetieto>
+        <rakval:Toimenpide>
+          <rakval:uusi/>
+          <rakval:rakennustieto>
+            <rakval:Rakennus>
+              <yht:yksilointitieto xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">37287</yht:yksilointitieto>
+              <yht:alkuHetki xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">1001-01-01T00:00:00
+              </yht:alkuHetki>
+              <rakval:sijaintitieto>
+                <rakval:Sijainti>
+                  <yht:piste xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">
+                    <gml:Point srsDimension="2" srsName="EPSG:3067" axisLabels="x y"
+                               xmlns:gml="http://www.opengis.net/gml">
+                      <gml:pos>426031.921165797 6696446.04992658</gml:pos>
+                    </gml:Point>
+                  </yht:piste>
+                </rakval:Sijainti>
+              </rakval:sijaintitieto>
+              <rakval:rakennuksenTiedot>
+                <rakval:rakennustunnus>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>63800600080004</rakval:kiinttun>
+                  <rakval:rakennusnro>006</rakval:rakennusnro>
+                  <rakval:rakennuksenSelite>1 941 talousrakennukset</rakval:rakennuksenSelite>
+                </rakval:rakennustunnus>
+                <rakval:kayttotarkoitus>941 talousrakennukset</rakval:kayttotarkoitus>
+                <rakval:tilavuus>40</rakval:tilavuus>
+                <rakval:kokonaisala>15</rakval:kokonaisala>
+                <rakval:osoite>
+                  <yht:kunta xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">Porvoo</yht:kunta>
+                  <yht:osoitenimi xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">
+                    <yht:teksti>Linnankoskenkatu</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:osoitenumero xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">48</yht:osoitenumero>
+                  <yht:postinumero xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">06100</yht:postinumero>
+                  <yht:postitoimipaikannimi xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">PORVOO
+                  </yht:postitoimipaikannimi>
+                </rakval:osoite>
+                <rakval:kerrosluku>1</rakval:kerrosluku>
+                <rakval:kerrosala>15</rakval:kerrosala>
+                <rakval:rakennusoikeudellinenKerrosala>14</rakval:rakennusoikeudellinenKerrosala>
+                <rakval:rakentamistapa>elementti</rakval:rakentamistapa>
+                <rakval:kantavaRakennusaine>
+                  <rakval:rakennusaine>puu</rakval:rakennusaine>
+                </rakval:kantavaRakennusaine>
+                <rakval:julkisivu>
+                  <rakval:julkisivumateriaali>puu</rakval:julkisivumateriaali>
+                </rakval:julkisivu>
+                <rakval:verkostoliittymat>
+                  <rakval:viemariKytkin>false</rakval:viemariKytkin>
+                  <rakval:vesijohtoKytkin>false</rakval:vesijohtoKytkin>
+                  <rakval:sahkoKytkin>true</rakval:sahkoKytkin>
+                  <rakval:maakaasuKytkin>false</rakval:maakaasuKytkin>
+                  <rakval:kaapeliKytkin>false</rakval:kaapeliKytkin>
+                </rakval:verkostoliittymat>
+                <rakval:lammitystapa>suora sähkö</rakval:lammitystapa>
+                <rakval:lammonlahde>
+                  <rakval:polttoaine>sähkö</rakval:polttoaine>
+                </rakval:lammonlahde>
+                <rakval:varusteet>
+                  <rakval:sahkoKytkin>true</rakval:sahkoKytkin>
+                  <rakval:kaasuKytkin>false</rakval:kaasuKytkin>
+                  <rakval:viemariKytkin>false</rakval:viemariKytkin>
+                  <rakval:vesijohtoKytkin>false</rakval:vesijohtoKytkin>
+                  <rakval:lamminvesiKytkin>false</rakval:lamminvesiKytkin>
+                  <rakval:aurinkopaneeliKytkin>false</rakval:aurinkopaneeliKytkin>
+                  <rakval:hissiKytkin>false</rakval:hissiKytkin>
+                  <rakval:koneellinenilmastointiKytkin>false</rakval:koneellinenilmastointiKytkin>
+                  <rakval:saunoja>0</rakval:saunoja>
+                  <rakval:uima-altaita>0</rakval:uima-altaita>
+                  <rakval:vaestonsuoja>0</rakval:vaestonsuoja>
+                </rakval:varusteet>
+              </rakval:rakennuksenTiedot>
+              <rakval:rakentajatyyppi>liiketaloudellinen</rakval:rakentajatyyppi>
+              <rakval:omistajatieto>
+                <rakval:Omistaja>
+                  <yht:henkilo xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">
+                    <yht:nimi>
+                      <yht:etunimi>Louhi</yht:etunimi>
+                      <yht:sukunimi>Palvelin</yht:sukunimi>
+                    </yht:nimi>
+                    <yht:osoite>
+                      <yht:kunta>Porvoo</yht:kunta>
+                      <yht:osoitenimi>
+                        <yht:teksti>Wolffintie</yht:teksti>
+                      </yht:osoitenimi>
+                      <yht:osoitenumero>36</yht:osoitenumero>
+                      <yht:porras>M</yht:porras>
+                      <yht:huoneisto>10</yht:huoneisto>
+                      <yht:postinumero>65200</yht:postinumero>
+                      <yht:postitoimipaikannimi>VAASA</yht:postitoimipaikannimi>
+                    </yht:osoite>
+                    <yht:henkilotunnus>151139-935S</yht:henkilotunnus>
+                  </yht:henkilo>
+                  <rakval:omistajalaji>
+                    <rakval:omistajalaji>muu yksityinen henkilö tai perikunta</rakval:omistajalaji>
+                  </rakval:omistajalaji>
+                </rakval:Omistaja>
+              </rakval:omistajatieto>
+            </rakval:Rakennus>
+          </rakval:rakennustieto>
+        </rakval:Toimenpide>
+      </rakval:toimenpidetieto>
+      <rakval:lausuntotieto>
+        <rakval:Lausunto>
+          <yht:viranomainen xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">Terveydensuojeluviranomainen
+          </yht:viranomainen>
+          <yht:pyyntoPvm xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">2018-01-14</yht:pyyntoPvm>
+          <yht:maaraPvm xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">2018-01-15</yht:maaraPvm>
+          <yht:lausuntotieto xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">
+            <yht:Lausunto>
+              <yht:lausunto>puoltaa</yht:lausunto>
+              <yht:puoltotieto>
+                <yht:Puolto>
+                  <yht:puolto>puoltaa</yht:puolto>
+                </yht:Puolto>
+              </yht:puoltotieto>
+            </yht:Lausunto>
+          </yht:lausuntotieto>
+        </rakval:Lausunto>
+      </rakval:lausuntotieto>
+      <rakval:paatostieto>
+        <yht:Paatos xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset">
+          <yht:lupamaaraykset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>loppukatselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Loppukatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>muu katselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Rakennuspaikan katselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>muu katselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Raudoituskatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>muu katselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Sijaintikatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>muu tarkastus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Hormitarkastus (vastaava työnjohtaja)
+                </yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>osittainen loppukatselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Käyttöönottokatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>pohjakatselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Pohjakatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>rakennekatselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Rakennekatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>rakennuksen paikan merkitseminen</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Sijainnin merkitseminen</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaadittuErityissuunnitelmatieto>
+              <yht:VaadittuErityissuunnitelma>
+                <yht:vaadittuErityissuunnitelma>Pohjatutkimus/perustamistapalausunto</yht:vaadittuErityissuunnitelma>
+              </yht:VaadittuErityissuunnitelma>
+            </yht:vaadittuErityissuunnitelmatieto>
+            <yht:vaadittuErityissuunnitelmatieto>
+              <yht:VaadittuErityissuunnitelma>
+                <yht:vaadittuErityissuunnitelma>Rakennepiirustukset</yht:vaadittuErityissuunnitelma>
+              </yht:VaadittuErityissuunnitelma>
+            </yht:vaadittuErityissuunnitelmatieto>
+            <yht:vaadittuErityissuunnitelmatieto>
+              <yht:VaadittuErityissuunnitelma>
+                <yht:vaadittuErityissuunnitelma>Lujuuslaskelmat</yht:vaadittuErityissuunnitelma>
+              </yht:VaadittuErityissuunnitelma>
+            </yht:vaadittuErityissuunnitelmatieto>
+            <yht:vaadittuErityissuunnitelmatieto>
+              <yht:VaadittuErityissuunnitelma>
+                <yht:vaadittuErityissuunnitelma>Ilmanvaihtosuunnitelma</yht:vaadittuErityissuunnitelma>
+              </yht:VaadittuErityissuunnitelma>
+            </yht:vaadittuErityissuunnitelmatieto>
+            <yht:vaadittuTyonjohtajatieto>
+              <yht:VaadittuTyonjohtaja>
+                <yht:tyonjohtajaRooliKoodi>vastaava työnjohtaja</yht:tyonjohtajaRooliKoodi>
+              </yht:VaadittuTyonjohtaja>
+            </yht:vaadittuTyonjohtajatieto>
+          </yht:lupamaaraykset>
+          <yht:paivamaarat>
+            <yht:aloitettavaPvm>2021-01-30</yht:aloitettavaPvm>
+            <yht:lainvoimainenPvm>2018-01-30</yht:lainvoimainenPvm>
+            <yht:voimassaHetkiPvm>2023-01-30</yht:voimassaHetkiPvm>
+            <yht:antoPvm>2018-01-15</yht:antoPvm>
+            <yht:julkipanoPvm>2018-01-15</yht:julkipanoPvm>
+          </yht:paivamaarat>
+          <yht:poytakirja>
+            <yht:paatos>Päätän maankäyttö- ja rakennuslain ja sen nojalla annettujen säännösten ja määräysten
+              perusteella myöntää haetun luvan sekä vahvistan esitetyt suunnitelmat noudatettavaksi seuraavin ehdoin:
+            </yht:paatos>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>Gustavsson</yht:paatoksentekija>
+            <yht:paatospvm>2018-01-14</yht:paatospvm>
+            <yht:pykala>1</yht:pykala>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+      <rakval:lisatiedot>
+        <rakval:Lisatiedot>
+          <rakval:asioimiskieli>suomi</rakval:asioimiskieli>
+        </rakval:Lisatiedot>
+      </rakval:lisatiedot>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>

@@ -290,7 +290,13 @@
         (let [attachments (get attachments-by-task-id id)]
           (if-not (empty? attachments)
             (doseq [att attachments]
-              (verdict-review-util/get-poytakirja! application user (now) {:type "task" :id id} att))
+              (try
+                (verdict-review-util/get-poytakirja! updated-application user (now) {:type "task" :id id} att)
+                (catch Exception e
+                  (errorf "Error when getting review attachments: task=%s attachment=%s message=%s"
+                          id
+                          (:id att)
+                          (.getMessage e)))))
             (tasks/generate-task-pdfa updated-application added-task (:user command) "fi")))))
     (cond-> {:ok update-result}
             (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))

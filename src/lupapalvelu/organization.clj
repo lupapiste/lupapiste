@@ -18,6 +18,7 @@
             [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.pate.schemas :refer [PateSavedVerdictTemplates Phrase]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.permissions :refer [defcontext] :as permissions]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.wfs :as wfs]
             [lupapiste-commons.archive-metadata-schema :as archive-schema]
@@ -815,7 +816,8 @@
 
 (defn statement-giver-in-organization
   "Pre-check that fails if the user is statementGiver but not defined
-  in the organization."
+  in the organization.
+  Note: this will reject application-authority, so make sure you use this with some-pre-check."
   [{:keys [user organization application]}]
   (when (and application
              (some #(= {:id   (:id user)
@@ -825,6 +827,21 @@
              (not (util/find-by-key :email (:email user)
                                    (:statementGivers @organization))))
     (fail :error.not-organization-statement-giver)))
+
+(defn- statement-giver-in-organization? [{user-email :email} {organization-statement-givers :statementGivers}]
+  (boolean (util/find-by-key :email user-email organization-statement-givers)))
+
+(defn- statement-giver-in-application? [{user-id :id} {application-auth :auth}]
+  (->> (filter (comp #{:statementGiver} keyword :role) application-auth)
+       (util/find-by-id user-id)
+       boolean))
+
+(defcontext organization-statement-giver-context [{:keys [user organization application]}]
+  (when (and application organization
+             (statement-giver-in-organization? user @organization)
+             (statement-giver-in-application? user application))
+    {:context-scope :organization
+     :context-roles [:statementGiver]}))
 
 (defn get-docstore-info-for-organization! [org-id]
   (-> (get-organization org-id [:docstore-info])

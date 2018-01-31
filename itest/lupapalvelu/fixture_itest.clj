@@ -10,15 +10,17 @@
 
 (mongo/connect!)
 
-(mongo/with-db db-name
-  (fixture/apply-fixture "minimal"))
+(fact "apply minimal fixture"
+  (mongo/with-db db-name
+    (fixture/apply-fixture "minimal")) => [])
 
 (fact "minimal fixture smokes"
   (mongo/with-db db-name
     (monster/mongochecks)) => ok?)
 
-(mongo/with-db db-name
-  (fixture/apply-fixture "company-application"))
+(fact "apply company-application fixture"
+  (mongo/with-db db-name
+    (fixture/apply-fixture "company-application")) => [])
 
 (fact "company-application fixture smokes"
   (mongo/with-db db-name

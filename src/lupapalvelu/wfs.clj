@@ -691,9 +691,7 @@
         :else true))))
 
 (defn get-our-capabilities []
-  (let [host (env/value :geoserver :host) ; local IP from Chef environment
-        path (env/value :geoserver :wms :path)]
-    (:body (query-get-capabilities (str host path) "WMS"))))
+  (:body (query-get-capabilities wms-url "WMS")))
 
 (def get-rekisteriyksikontietojaFeatureAddress
   (memoize

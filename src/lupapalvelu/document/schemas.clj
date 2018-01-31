@@ -805,7 +805,8 @@
                                {:name "P2/P3"}
                                {:name "P1/P2/P3"}]}]})
 
-(def rakennustunnus {:name national-building-id :type :string  :subtype :rakennustunnus :hidden true :readonly true})
+(def rakennustunnus {:name national-building-id :type :string  :subtype :rakennustunnus :hidden true :readonly false
+                     :whitelist {:permitType [:ARK] :roles [:authority] :otherwise :disabled}})
 
 (def rakennuksen-tiedot-ilman-huoneistoa [kaytto
                                           mitat

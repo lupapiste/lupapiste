@@ -4,8 +4,9 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="base-autocomplete-template">
       <div class="autocomplete-component" data-bind="css: {'has-tags': tags}">
-        <div class="autocomplete-selection-wrapper" data-bind="event: {mousedown: selectInput},
-                                                               css: {active: inputSelected(), disabled: disable}">
+        <div class="autocomplete-selection-wrapper" tabindex="0"
+             data-bind="event: {mousedown: selectInput, focus: selectInput}, css: {active: inputSelected(), disabled: disable},
+                        attr: {tabindex: function(){ return inputSelected() ? -1 : 0; }()}">
           <span class="autocomplete-selection" data-bind="css: {toggled: inputSelected()}">
             <!-- ko if: showSingleSelection -->
             <span class="caption" data-bind="visible: selectionText, text: selectionText"></span>
@@ -32,7 +33,7 @@
         <div class="autocomplete-dropdown" data-bind="visible: false, fader: dropdownVisible, duration: 100">
           <div class="search" data-bind="css: {toggled: query && query(), active: inputSelected}">
             <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"
-                   data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate, blur: blur}, attr: {placeholder: placeholder}"/>
+                   data-bind="textInput: query, hasFocus: inputSelected, event: {keyup: navigate, blur: blur}, attr: {placeholder: placeholder}"/>
             <i class="search-icon lupicon-search"></i>
             <i class="search-icon lupicon-remove toggle" data-bind="event: {mousedown: clearQuery}, attr: {title: loc('applications.filter.search.clear')}"></i>
           </div>

@@ -5,7 +5,7 @@
 //  subSchema: Schema for the group.
 //  path: Group path within the document schema.
 //  model: model for the group
-//  [remove]: {fun, testClass}. See resolveRemoveOptions in docmodel.js
+//  [remove]: {fun, attr}. See resolveRemoveOptions in docmodel.js
 //            for details.
 
 LUPAPISTE.GroupApprovalModel = function( params ) {

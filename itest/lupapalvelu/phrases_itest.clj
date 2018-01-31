@@ -37,7 +37,7 @@
                :phrase   "World"}])
         (fact "Add one more phrase"
           (command sipoo :upsert-phrase
-                   :category "vakuus"
+                   :category "yleinen"
                    :tag "Bah"
                    :phrase "Humbug") => ok?)
         (fact "Delete the first phrase"
@@ -45,7 +45,7 @@
                    :phrase-id phrase-id) => ok?)
         (fact "Check the phrases"
           (:phrases (query sipoo :organization-phrases))
-          => (just [(contains {:category "vakuus"
+          => (just [(contains {:category "yleinen"
                                :tag "Bah"
                                :phrase "Humbug"})]))))))
 
@@ -57,7 +57,7 @@
       (fact "Application organization is 753-R"
         (:organization (query-application pena app-id)) => "753-R")
       (:phrases (query sonja :application-phrases :id app-id))
-      => (just [(contains {:category "vakuus"
+      => (just [(contains {:category "yleinen"
                            :tag      "Bah"
                            :phrase   "Humbug"})])))
   (fact "No phrases for 753-YA application"

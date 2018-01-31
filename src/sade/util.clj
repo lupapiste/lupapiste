@@ -112,29 +112,8 @@
   [f coll]
   (reduce #(assoc %1 (f %2) %2) {} coll))
 
-(defn drop-nth
-  "Drops the nth item from vector, if it exists"
-  [n v]
-  (if (get v n)
-    (into (subvec v 0 n) (subvec v (inc n)))
-    v))
-
-(defn dissoc-in
-  "Dissociates an entry from a nested associative structure returning a new
-  nested structure. keys is a sequence of keys. Any empty maps that result
-  will not be present in the new structure.
-  Supports also vector index values among the keys sequence just like clojure.core/update-in does."
-  [m [k & ks :as keys]]
-  (if ks
-    (if-let [nextmap (get m k)]
-      (let [newmap (dissoc-in nextmap ks)]
-        (if (seq newmap)
-          (assoc m k newmap)
-          (dissoc m k)))
-      m)
-    (if (and (number? k) (sequential? m))
-      (drop-nth k m)
-      (dissoc m k))))
+(defalias drop-nth  shared/drop-nth)
+(defalias dissoc-in shared/dissoc-in)
 
 (defn select
   "Takes a map and a vector of keys, returns a vector of values from map."

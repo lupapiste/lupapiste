@@ -199,3 +199,29 @@
   (facts "Payer uses billing address"
     (company-address-type (schemas/get-schema {:name "maksaja" :version 1}) ["yritys"])
       => nil))
+
+(facts "whitelist"
+  (fact "value not found"
+    (validate-whitelist-properties {:k1 :foo} [:k1 [:faa]]) => nil)
+  (fact "key not found"
+    (validate-whitelist-properties {:k1 :foo} [:k2 [:foo]]) => nil)
+  (fact "found"
+    (validate-whitelist-properties {:k1 :foo} [:k1 [:foo]]) => :foo)
+  (fact "string works"
+    (validate-whitelist-properties {:k1 "foo"} [:k1 [:foo]]) => :foo)
+  (fact "string not found"
+    (validate-whitelist-properties {:k1 "faa"} [:k1 [:foo]]) => nil)
+  (fact "whitelist values must be keyword"
+    (validate-whitelist-properties {:k1 "foo"} [:k1 ["foo"]]) => (throws AssertionError))
+  (fact "roles ok"
+    (validate-whitelist-properties {:roles :authority :permitType :lol} [:roles [:authority]]) => :authority)
+  (fact "permitType ok"
+    (validate-whitelist-properties {:roles :authority :permitType :lol} [:permitType [:lol]]) => :lol)
+  (fact "mapping nil"
+    (validate-whitelist-properties nil [:permitType [:lol]]) => nil)
+  (fact "k+v nil"
+    (validate-whitelist-properties {:roles :authority :permitType :lol} nil) => nil)
+  (fact "wrong permitType"
+    (validate-whitelist-properties {:roles :authority :permitType :lol} [:permitType [:wrong]]) => nil)
+  (fact "second parameter is MapEntry pair, only k+v supported"
+    (validate-whitelist-properties {:roles :authority :permitType :lol} [:permitType [:wrong] :roles [:authority]]) => nil))

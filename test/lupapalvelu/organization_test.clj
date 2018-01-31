@@ -121,3 +121,50 @@
     (get-building-wfs ..query.. permit-type) => (just {:url "foo" :version "1"})
     (provided
       (mongo/select-one :organizations ..query.. [:krysp]) => (conf {:buildingUrl "foo" :version "1" :url "jee"}))))
+
+(facts organization-statement-giver-context
+  (fact "is statementGiver"
+    (:permissions (organization-statement-giver-context {:user         {:id "1" :email "pena@example.com"}
+                                                         :application  {:auth [{:id "1" :role "statementGiver"}]}
+                                                         :organization (delay {:statementGivers [{:email "pena@example.com"}]})}))
+    => #{:organization/give-statement}
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role :organization :statementGiver) => #{:organization/give-statement}))
+
+  (fact "statementGiver not authorized in application"
+    (:permissions (organization-statement-giver-context {:user         {:id "1" :email "pena@example.com"}
+                                                         :application  {:auth [{:id "2" :role "statementGiver"}]}
+                                                         :organization (delay {:statementGivers [{:email "pena@example.com"}]})}))
+    => empty?
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role irrelevant irrelevant) => irrelevant :times 0))
+
+  (fact "is statementGiver - multiple roles"
+    (:permissions (organization-statement-giver-context {:user         {:id "1" :email "pena@example.com"}
+                                                         :application  {:auth [{:id "1" :role "writer"} {:id "1" :role "statementGiver"}]}
+                                                         :organization (delay {:statementGivers [{:email "pena@example.com"}]})}))
+    => #{:organization/give-statement}
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role :organization :statementGiver) => #{:organization/give-statement} :times 1))
+
+  (fact "no statementGiver authorization in application"
+    (:permissions (organization-statement-giver-context {:user         {:id "1" :email "pena@example.com"}
+                                                         :application  {:auth [{:id "1" :role "writer"}]}
+                                                         :organization (delay {:statementGivers [{:email "pena@example.com"}]})}))
+    => empty?
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role irrelevant irrelevant) => irrelevant :times 0))
+
+  (fact "not statementGiver in organization"
+    (:permissions (organization-statement-giver-context {:user         {:id "1" :email "pena@example.com"}
+                                                         :application  {:auth [{:id "1" :role "statementGiver"}]}
+                                                         :organization (delay {:statementGivers [{:email "mikko@example.com"}]})}))
+    => empty?
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role irrelevant irrelevant) => irrelevant :times 0))
+
+  (fact "no application in command"
+    (:permissions (organization-statement-giver-context {:user         {:id "1" :email "pena@example.com"}}))
+    => empty?
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role irrelevant irrelevant) => irrelevant :times 0)))

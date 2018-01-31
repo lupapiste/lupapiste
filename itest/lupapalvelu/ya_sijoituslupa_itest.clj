@@ -87,7 +87,7 @@
         now-ts     (now)
         app        (query-application jussi id)
         verdicts   (:verdicts app)]
-    pena-subtype => (partial expected-failure? :error.ya-subtype-change-authority-only)
+    pena-subtype => unauthorized?
     jussi-subtype => ok?
     (:permitSubtype app) => "sijoitussopimus"
 

@@ -699,7 +699,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   // Convience functions mostly for ClojureScript's benefit
 
-  // Attachmens as plain JS and function properties removed.
+  // Attachments as plain JS and function properties removed.
   // AuthModel is replaced with auth flags: can-delete?
   self.rawAttachments = function() {
     return _.map( ko.mapping.toJS( self.attachments ),

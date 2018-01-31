@@ -47,6 +47,13 @@
           (when (and editable? (:published verdict))
             (fail! :error.verdict.not-draft)))))))
 
+(defn- verdict-filled
+  "Precheck that fails if any of the required fields is empty."
+  [{data :data :as command}]
+  (when (:verdict-id data)
+    (when-not (verdict/verdict-filled? command)
+      (fail :pate.required-fields))))
+
 (defquery application-verdict-templates
   {:description      "List of id, name, default? maps for suitable
   application verdict templates."
@@ -55,7 +62,7 @@
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :pre-checks       [pate-enabled]
-   :states           states/give-verdict-states}
+   :states           states/post-submitted-states}
   [{:keys [application organization]}]
   (ok :templates (template/application-verdict-templates @organization
                                                          application)))
@@ -69,9 +76,10 @@
    :input-validators [(partial action/non-blank-parameters [:id])]
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :application :published)]
-   :states           states/give-verdict-states}
+   :states           states/post-submitted-states}
   [command]
-  (ok (verdict/new-verdict-draft template-id command)))
+  (ok (assoc (verdict/new-verdict-draft template-id command)
+             :filled false)))
 
 (defquery pate-verdicts
   {:description      "List of verdicts. Item properties:
@@ -84,7 +92,7 @@
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :pre-checks       [pate-enabled]
-   :states           (states/all-states-but [:draft :open])}
+   :states           states/post-submitted-states}
   [{:keys [application]}]
   (ok :verdicts (map verdict/verdict-summary
                      (:pate-verdicts application))))
@@ -98,9 +106,10 @@
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
                       (verdict-exists)]
-   :states           states/give-verdict-states}
+   :states           states/post-submitted-states}
   [command]
-  (ok (verdict/open-verdict command)))
+  (ok (assoc (verdict/open-verdict command)
+             :filled (verdict/verdict-filled? command))))
 
 (defcommand delete-pate-verdict
   {:description      "Deletes verdict. Published verdicts cannot be
@@ -111,7 +120,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
                       (verdict-exists :editable?)]
-   :states           (states/all-states-but [:draft :open])}
+   :states           states/post-submitted-states}
   [command]
   (verdict/delete-verdict verdict-id command)
   (ok))
@@ -126,20 +135,27 @@
                       (partial action/vector-parameters [:path])]
    :pre-checks       [pate-enabled
                       (verdict-exists :editable?)]
-   :states           states/give-verdict-states}
+   :states           states/post-submitted-states}
   [command]
-  (ok (verdict/edit-verdict command)))
+  (let [result (verdict/edit-verdict command)]
+    (if (:modified result)
+      (ok (assoc result
+                 :filled (verdict/verdict-filled? command true)))
+      (template/error-response result))))
 
 (defcommand publish-pate-verdict
   {:description      "Publishes verdict.
-TODO: create tasks and PDF, application state change, attachments locking."
+TODO: create tasks and PDF, application state change"
    :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
-                      (verdict-exists :editable?)]
-   :states           states/give-verdict-states
+                      (verdict-exists :editable?)
+                      verdict-filled]
+   ;; As KuntaGML message is generated the application state must be
+   ;; at least :sent
+   :states           states/post-sent-states
    :notified         true
    :on-success       (notify :application-state-change)}
   [command]
@@ -152,7 +168,7 @@ TODO: create tasks and PDF, application state change, attachments locking."
    :parameters      [:id]
    :user-roles      #{:applicant :authority}
    :org-authz-roles roles/reader-org-authz-roles
-   :states          (states/all-states-but [:draft :open])
+   :states          states/post-submitted-states
    :pre-checks      [pate-enabled]}
   [_])
 
@@ -181,7 +197,7 @@ TODO: create tasks and PDF, application state change, attachments locking."
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(verdict-exists :editable?)]
-   :states           states/give-verdict-states}
+   :states           states/post-submitted-states}
   [{application :application created :created}]
   (let [today-long (tc/to-long (t/today-at-midnight))
         updates (create-bulletin application created verdict-id

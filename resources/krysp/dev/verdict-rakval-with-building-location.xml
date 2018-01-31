@@ -1,0 +1,690 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rakval:Rakennusvalvonta
+  xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset
+                      http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.3/yhteiset.xsd
+                      http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta
+                      http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.5/rakennusvalvonta.xsd
+                      http://www.opengis.net/wfs
+                      http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+  xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+  xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:wfs="http://www.opengis.net/wfs"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ppst="http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"
+  xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+  xmlns:ows="http://www.opengis.net/ows"
+  xmlns:gml="http://www.opengis.net/gml"
+  xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi>Sample</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Uusikaupunki</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2015-10-20</yht:toimitusPvm>
+    <yht:kuntakoodi>895</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+      <rakval:RakennusvalvontaAsia>
+          <rakval:kasittelynTilatieto>
+              <yht:Tilamuutos>
+                  <yht:pvm>2016-08-29</yht:pvm>
+                  <yht:tila>lopullinen loppukatselmus tehty</yht:tila>
+              </yht:Tilamuutos>
+          </rakval:kasittelynTilatieto>
+          <rakval:luvanTunnisteTiedot>
+              <yht:LupaTunnus>
+                  <yht:kuntalupatunnus>895-2015-002</yht:kuntalupatunnus>
+                  <yht:saapumisPvm>2015-05-26</yht:saapumisPvm>
+              </yht:LupaTunnus>
+          </rakval:luvanTunnisteTiedot>
+          <rakval:osapuolettieto>
+              <yht:Osapuolet>
+                  <yht:osapuolitieto>
+                      <yht:Osapuoli>
+                          <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+                          <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+                          <yht:henkilo>
+                              <yht:nimi>
+                                  <yht:etunimi>Building</yht:etunimi>
+                                  <yht:sukunimi>Owner</yht:sukunimi>
+                              </yht:nimi>
+                              <yht:osoite>
+                                  <yht:osoitenimi>
+                                      <yht:teksti xml:lang="und">Tie 3</yht:teksti>
+                                  </yht:osoitenimi>
+                                  <yht:postinumero>01380</yht:postinumero>
+                                  <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                              </yht:osoite>
+                              <yht:puhelin>09 173 42438</yht:puhelin>
+                              <yht:henkilotunnus>180559-XXXX</yht:henkilotunnus>
+                          </yht:henkilo>
+                          <yht:turvakieltoKytkin>false</yht:turvakieltoKytkin>
+                          <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+                      </yht:Osapuoli>
+                  </yht:osapuolitieto>
+                  <yht:osapuolitieto>
+                      <yht:Osapuoli>
+                          <yht:kuntaRooliKoodi>Pöytäkirjan vastaanottaja</yht:kuntaRooliKoodi>
+                          <yht:VRKrooliKoodi>lupapäätöksen toimittaminen</yht:VRKrooliKoodi>
+                          <yht:henkilo>
+                              <yht:nimi>
+                                  <yht:etunimi>Building</yht:etunimi>
+                                  <yht:sukunimi>Owner</yht:sukunimi>
+                              </yht:nimi>
+                              <yht:osoite>
+                                  <yht:osoitenimi>
+                                      <yht:teksti xml:lang="und">Tie 3</yht:teksti>
+                                  </yht:osoitenimi>
+                                  <yht:postinumero>01380</yht:postinumero>
+                                  <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                              </yht:osoite>
+                              <yht:puhelin>09 173 42438</yht:puhelin>
+                              <yht:henkilotunnus>180559-XXXX</yht:henkilotunnus>
+                          </yht:henkilo>
+                          <yht:turvakieltoKytkin>false</yht:turvakieltoKytkin>
+                          <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+                      </yht:Osapuoli>
+                  </yht:osapuolitieto>
+                  <yht:suunnittelijatieto>
+                      <yht:Suunnittelija>
+                          <yht:suunnittelijaRoolikoodi>pääsuunnittelija</yht:suunnittelijaRoolikoodi>
+                          <yht:VRKrooliKoodi>pääsuunnittelija</yht:VRKrooliKoodi>
+                          <yht:henkilo>
+                              <yht:nimi>
+                                  <yht:sukunimi>työnjohtaja</yht:sukunimi>
+                              </yht:nimi>
+                              <yht:osoite>
+                                  <yht:osoitenimi>
+                                      <yht:teksti xml:lang="und">Kuja 4</yht:teksti>
+                                  </yht:osoitenimi>
+                                  <yht:postinumero>23500</yht:postinumero>
+                                  <yht:postitoimipaikannimi>UUSIKAUPUNKI</yht:postitoimipaikannimi>
+                              </yht:osoite>
+                              <yht:sahkopostiosoite>UUSIKAUPUNKIn@uusikaupunki.fi</yht:sahkopostiosoite>
+                              <yht:puhelin>05007897559</yht:puhelin>
+                              <yht:henkilotunnus>120172-XXXX</yht:henkilotunnus>
+                          </yht:henkilo>
+                          <yht:koulutus>RA</yht:koulutus>
+                          <yht:valmistumisvuosi>0</yht:valmistumisvuosi>
+                          <yht:vaadittuPatevyysluokka>B</yht:vaadittuPatevyysluokka>
+                      </yht:Suunnittelija>
+                  </yht:suunnittelijatieto>
+                  <yht:tyonjohtajatieto>
+                      <yht:Tyonjohtaja>
+                          <yht:tyonjohtajaRooliKoodi>vastaava työnjohtaja</yht:tyonjohtajaRooliKoodi>
+                          <yht:VRKrooliKoodi>työnjohtaja</yht:VRKrooliKoodi>
+                          <yht:henkilo>
+                              <yht:nimi>
+                                  <yht:sukunimi>työnjohtaja</yht:sukunimi>
+                              </yht:nimi>
+                              <yht:osoite>
+                                  <yht:osoitenimi>
+                                      <yht:teksti xml:lang="und">Kuja 4</yht:teksti>
+                                  </yht:osoitenimi>
+                                  <yht:postinumero>23500</yht:postinumero>
+                                  <yht:postitoimipaikannimi>UUSIKAUPUNKI</yht:postitoimipaikannimi>
+                              </yht:osoite>
+                              <yht:sahkopostiosoite>UUSIKAUPUNKIn@uusikaupunki.fi</yht:sahkopostiosoite>
+                              <yht:puhelin>05007897559</yht:puhelin>
+                              <yht:henkilotunnus>120172-XXXX</yht:henkilotunnus>
+                          </yht:henkilo>
+                          <yht:vaadittuPatevyysluokka>B</yht:vaadittuPatevyysluokka>
+                          <yht:koulutus>RA</yht:koulutus>
+                          <yht:valmistumisvuosi>0</yht:valmistumisvuosi>
+                          <yht:alkamisPvm>2016-05-17</yht:alkamisPvm>
+                          <yht:paattymisPvm>2016-08-29</yht:paattymisPvm>
+                          <yht:sijaistettavaHlo />
+                          <yht:paatosPvm>2016-05-17</yht:paatosPvm>
+                          <yht:paatostyyppi>hyväksytty</yht:paatostyyppi>
+                      </yht:Tyonjohtaja>
+                  </yht:tyonjohtajatieto>
+              </yht:Osapuolet>
+          </rakval:osapuolettieto>
+          <rakval:rakennuspaikkatieto>
+              <rakval:Rakennuspaikka>
+                  <yht:yksilointitieto>195331078</yht:yksilointitieto>
+                  <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+                  <yht:rakennuspaikanKiinteistotieto>
+                      <yht:RakennuspaikanKiinteisto>
+                          <yht:kiinteistotieto>
+                              <yht:Kiinteisto>
+                                  <yht:kylanimi>Lokalahden Pitkäluoto</yht:kylanimi>
+                                  <yht:tilannimi>RIIHIRANTA</yht:tilannimi>
+                                  <yht:kiinteistotunnus>123456789</yht:kiinteistotunnus>
+                              </yht:Kiinteisto>
+                          </yht:kiinteistotieto>
+                          <yht:hallintaperuste>oma</yht:hallintaperuste>
+                      </yht:RakennuspaikanKiinteisto>
+                  </yht:rakennuspaikanKiinteistotieto>
+                  <yht:sijaintitieto>
+                      <yht:Sijainti>
+                          <yht:alue>
+                              <gml:Polygon srsName="http://www.opengis.net/gml/srs/epsg.xml#3876">
+                                  <gml:outerBoundaryIs>
+                                      <gml:LinearRing>
+                                          <gml:coordinates>22464854.301,6735383.759 22464825.926,6735453.497 22464853.149,6735461.149 22464888.109,6735472.097 22464912.337,6735430.218 22464915.750,6735424.319 22464915.326,6735423.893 22464908.405,6735416.693 22464908.195,6735416.459 22464897.748,6735404.366 22464894.978,6735401.489 22464893.398,6735399.988 22464890.387,6735397.362 22464887.243,6735394.899 22464882.328,6735391.469 22464875.543,6735387.252 22464861.650,6735379.137 22464858.338,6735376.904 22464857.374,6735376.208 22464854.301,6735383.759</gml:coordinates>
+                                      </gml:LinearRing>
+                                  </gml:outerBoundaryIs>
+                              </gml:Polygon>
+                          </yht:alue>
+                      </yht:Sijainti>
+                  </yht:sijaintitieto>
+                  <yht:kaavanaste>yleis</yht:kaavanaste>
+                  <yht:rakennusoikeusYhteensa>-14.000</yht:rakennusoikeusYhteensa>
+                  <yht:osoite>
+                      <yht:osoitenimi>
+                          <yht:teksti xml:lang="und">Pitkäkarta 48</yht:teksti>
+                      </yht:osoitenimi>
+                      <yht:postinumero>23450</yht:postinumero>
+                      <yht:postitoimipaikannimi>LOKALAHTI</yht:postitoimipaikannimi>
+                  </yht:osoite>
+                  <yht:kaavatilanne>ranta-asemakaava</yht:kaavatilanne>
+              </rakval:Rakennuspaikka>
+          </rakval:rakennuspaikkatieto>
+          <rakval:toimenpidetieto>
+              <rakval:Toimenpide>
+                  <rakval:laajennus>
+                      <rakval:laajennuksentiedot>
+                          <rakval:tilavuus>60.0</rakval:tilavuus>
+                          <rakval:kerrosala>17.0</rakval:kerrosala>
+                          <rakval:kokonaisala>17.0</rakval:kokonaisala>
+                      </rakval:laajennuksentiedot>
+                      <rakval:kuvaus>muu</rakval:kuvaus>
+                      <rakval:perusparannusKytkin>false</rakval:perusparannusKytkin>
+                      <rakval:aloitusPvm>2016-05-09</rakval:aloitusPvm>
+                      <rakval:valmistumisPvm>2016-08-29</rakval:valmistumisPvm>
+                  </rakval:laajennus>
+                  <rakval:katselmustieto>
+                      <rakval:Katselmus>
+                          <rakval:katselmuksenRakennustieto>
+                              <rakval:KatselmuksenRakennus>
+                                  <rakval:valtakunnallinenNumero>1005334384</rakval:valtakunnallinenNumero>
+                                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                                  <rakval:kiinttun>123456789</rakval:kiinttun>
+                                  <rakval:rakennusnro>004</rakval:rakennusnro>
+                                  <rakval:aanestysalue>004</rakval:aanestysalue>
+                              </rakval:KatselmuksenRakennus>
+                          </rakval:katselmuksenRakennustieto>
+                          <rakval:pitoPvm>2016-05-09</rakval:pitoPvm>
+                          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+                          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+                          <rakval:liitetieto>
+                              <rakval:Liite>
+                                  <yht:kuvaus />
+                                  <yht:linkkiliitteeseen>sample.pdf</yht:linkkiliitteeseen>
+                              </rakval:Liite>
+                          </rakval:liitetieto>
+                          <rakval:tarkastuksenTaiKatselmuksenNimi>Töiden aloitus</rakval:tarkastuksenTaiKatselmuksenNimi>
+                          <rakval:lasnaolijat />
+                      </rakval:Katselmus>
+                  </rakval:katselmustieto>
+                  <rakval:katselmustieto>
+                      <rakval:Katselmus>
+                          <rakval:katselmuksenRakennustieto>
+                              <rakval:KatselmuksenRakennus>
+                                  <rakval:valtakunnallinenNumero>1005334384</rakval:valtakunnallinenNumero>
+                                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                                  <rakval:kiinttun>123456789</rakval:kiinttun>
+                                  <rakval:rakennusnro>004</rakval:rakennusnro>
+                                  <rakval:aanestysalue>004</rakval:aanestysalue>
+                              </rakval:KatselmuksenRakennus>
+                          </rakval:katselmuksenRakennustieto>
+                          <rakval:pitoPvm>2016-06-13</rakval:pitoPvm>
+                          <rakval:pitaja>PN</rakval:pitaja>
+                          <rakval:katselmuksenLaji>rakennuksen paikan tarkastaminen</rakval:katselmuksenLaji>
+                          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+                          <rakval:liitetieto>
+                              <rakval:Liite>
+                                  <yht:kuvaus />
+                                  <yht:linkkiliitteeseen>sample.pdf</yht:linkkiliitteeseen>
+                              </rakval:Liite>
+                          </rakval:liitetieto>
+                          <rakval:tarkastuksenTaiKatselmuksenNimi>Sijaintikatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+                          <rakval:lasnaolijat />
+                      </rakval:Katselmus>
+                  </rakval:katselmustieto>
+                  <rakval:katselmustieto>
+                      <rakval:Katselmus>
+                          <rakval:katselmuksenRakennustieto>
+                              <rakval:KatselmuksenRakennus>
+                                  <rakval:valtakunnallinenNumero>1005334384</rakval:valtakunnallinenNumero>
+                                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                                  <rakval:kiinttun>123456789</rakval:kiinttun>
+                                  <rakval:rakennusnro>004</rakval:rakennusnro>
+                                  <rakval:aanestysalue>004</rakval:aanestysalue>
+                              </rakval:KatselmuksenRakennus>
+                          </rakval:katselmuksenRakennustieto>
+                          <rakval:pitoPvm>2016-08-29</rakval:pitoPvm>
+                          <rakval:pitaja>olku</rakval:pitaja>
+                          <rakval:katselmuksenLaji>rakennekatselmus</rakval:katselmuksenLaji>
+                          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+                          <rakval:liitetieto>
+                              <rakval:Liite>
+                                  <yht:kuvaus />
+                                  <yht:linkkiliitteeseen>sample.pdf</yht:linkkiliitteeseen>
+                              </rakval:Liite>
+                          </rakval:liitetieto>
+                          <rakval:tarkastuksenTaiKatselmuksenNimi>Rakennekatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+                          <rakval:lasnaolijat />
+                      </rakval:Katselmus>
+                  </rakval:katselmustieto>
+                  <rakval:katselmustieto>
+                      <rakval:Katselmus>
+                          <rakval:katselmuksenRakennustieto>
+                              <rakval:KatselmuksenRakennus>
+                                  <rakval:valtakunnallinenNumero>1005334384</rakval:valtakunnallinenNumero>
+                                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                                  <rakval:kiinttun>123456789</rakval:kiinttun>
+                                  <rakval:rakennusnro>004</rakval:rakennusnro>
+                                  <rakval:aanestysalue>004</rakval:aanestysalue>
+                              </rakval:KatselmuksenRakennus>
+                          </rakval:katselmuksenRakennustieto>
+                          <rakval:pitoPvm>2016-08-29</rakval:pitoPvm>
+                          <rakval:osittainen>lopullinen</rakval:osittainen>
+                          <rakval:pitaja>olku</rakval:pitaja>
+                          <rakval:katselmuksenLaji>loppukatselmus</rakval:katselmuksenLaji>
+                          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+                          <rakval:huomautukset>
+                              <rakval:huomautus>
+                                  <rakval:kuvaus>Sähkötarkastuspöytäkirja 4.7.2016, toimitettu 28.7.2016 heha.</rakval:kuvaus>
+                                  <rakval:toteamisHetki>1</rakval:toteamisHetki>
+                                  <rakval:toteaja>olku</rakval:toteaja>
+                              </rakval:huomautus>
+                          </rakval:huomautukset>
+                          <rakval:liitetieto>
+                              <rakval:Liite>
+                                  <yht:kuvaus />
+                                  <yht:linkkiliitteeseen>sample.pdf</yht:linkkiliitteeseen>
+                              </rakval:Liite>
+                          </rakval:liitetieto>
+                          <rakval:tarkastuksenTaiKatselmuksenNimi>Loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+                          <rakval:lasnaolijat />
+                      </rakval:Katselmus>
+                  </rakval:katselmustieto>
+                  <rakval:rakennustieto>
+                      <rakval:Rakennus>
+                          <yht:yksilointitieto>195884085</yht:yksilointitieto>
+                          <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+                          <rakval:sijaintitieto>
+                              <rakval:Sijainti>
+                                  <yht:osoite>
+                                      <yht:yksilointitieto>195884086</yht:yksilointitieto>
+                                      <yht:alkuHetki>1001-01-01T00:00:00Z</yht:alkuHetki>
+                                      <yht:kunta>Uusikaupunki</yht:kunta>
+                                      <yht:osoitenimi>
+                                          <yht:teksti xml:lang="fi">Pitkäkarta</yht:teksti>
+                                      </yht:osoitenimi>
+                                      <yht:osoitenumero>48</yht:osoitenumero>
+                                      <yht:postinumero>23450</yht:postinumero>
+                                      <yht:postitoimipaikannimi>LOKALAHTI2222</yht:postitoimipaikannimi>
+                                  </yht:osoite>
+                                  <yht:piste>
+                                      <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                                          <gml:pos>2.5301237586351E7 6740748.662049</gml:pos>
+                                      </gml:Point>
+                                  </yht:piste>
+                              </rakval:Sijainti>
+                          </rakval:sijaintitieto>
+                          <rakval:rakennuksenTiedot>
+                              <rakval:rakennustunnus>
+                                  <rakval:valtakunnallinenNumero>1005334384</rakval:valtakunnallinenNumero>
+                                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                                  <rakval:kiinttun>123456789</rakval:kiinttun>
+                                  <rakval:rakennusnro>004</rakval:rakennusnro>
+                                  <rakval:aanestysalue>004</rakval:aanestysalue>
+                              </rakval:rakennustunnus>
+                              <rakval:kayttotarkoitus>041 vapaa-ajan asuinrakennukset</rakval:kayttotarkoitus>
+                              <rakval:tilavuus>133</rakval:tilavuus>
+                              <rakval:kokonaisala>45</rakval:kokonaisala>
+                              <rakval:kellarinpinta-ala>0</rakval:kellarinpinta-ala>
+                              <rakval:osoite>
+                                  <yht:kunta>Uusikaupunki</yht:kunta>
+                                  <yht:osoitenimi>
+                                      <yht:teksti xml:lang="fi">Pitkäkarta</yht:teksti>
+                                  </yht:osoitenimi>
+                                  <yht:osoitenumero>48</yht:osoitenumero>
+                                  <yht:postinumero>23450</yht:postinumero>
+                                  <yht:postitoimipaikannimi>LOKALAHTI</yht:postitoimipaikannimi>
+                              </rakval:osoite>
+                              <rakval:kerrosluku>1</rakval:kerrosluku>
+                              <rakval:kerrosala>45</rakval:kerrosala>
+                              <rakval:rakentamistapa>paikalla</rakval:rakentamistapa>
+                              <rakval:kantavaRakennusaine>
+                                  <rakval:rakennusaine>puu</rakval:rakennusaine>
+                              </rakval:kantavaRakennusaine>
+                              <rakval:julkisivu>
+                                  <rakval:julkisivumateriaali>puu</rakval:julkisivumateriaali>
+                              </rakval:julkisivu>
+                              <rakval:verkostoliittymat>
+                                  <rakval:viemariKytkin>false</rakval:viemariKytkin>
+                                  <rakval:vesijohtoKytkin>false</rakval:vesijohtoKytkin>
+                                  <rakval:sahkoKytkin>true</rakval:sahkoKytkin>
+                                  <rakval:maakaasuKytkin>false</rakval:maakaasuKytkin>
+                                  <rakval:kaapeliKytkin>false</rakval:kaapeliKytkin>
+                              </rakval:verkostoliittymat>
+                              <rakval:paloluokka>P3</rakval:paloluokka>
+                              <rakval:lammitystapa>ei lämmitystä</rakval:lammitystapa>
+                              <rakval:lammonlahde>
+                                  <rakval:polttoaine>ei tiedossa</rakval:polttoaine>
+                              </rakval:lammonlahde>
+                              <rakval:varusteet>
+                                  <rakval:sahkoKytkin>true</rakval:sahkoKytkin>
+                                  <rakval:kaasuKytkin>false</rakval:kaasuKytkin>
+                                  <rakval:viemariKytkin>false</rakval:viemariKytkin>
+                                  <rakval:vesijohtoKytkin>false</rakval:vesijohtoKytkin>
+                                  <rakval:lamminvesiKytkin>false</rakval:lamminvesiKytkin>
+                                  <rakval:aurinkopaneeliKytkin>false</rakval:aurinkopaneeliKytkin>
+                                  <rakval:hissiKytkin>false</rakval:hissiKytkin>
+                                  <rakval:koneellinenilmastointiKytkin>false</rakval:koneellinenilmastointiKytkin>
+                                  <rakval:saunoja>0</rakval:saunoja>
+                                  <rakval:uima-altaita>0</rakval:uima-altaita>
+                                  <rakval:vaestonsuoja>0</rakval:vaestonsuoja>
+                              </rakval:varusteet>
+                              <rakval:liitettyJatevesijarjestelmaanKytkin>false</rakval:liitettyJatevesijarjestelmaanKytkin>
+                          </rakval:rakennuksenTiedot>
+                          <rakval:rakentajatyyppi>muu</rakval:rakentajatyyppi>
+                          <rakval:omistajatieto>
+                              <rakval:Omistaja>
+                                  <yht:kuntaRooliKoodi>Rakennuksen omistaja</yht:kuntaRooliKoodi>
+                                  <yht:VRKrooliKoodi>rakennuksen omistaja</yht:VRKrooliKoodi>
+                                  <yht:henkilo>
+                                      <yht:nimi>
+                                          <yht:etunimi>Building</yht:etunimi>
+                                          <yht:sukunimi>Owner</yht:sukunimi>
+                                      </yht:nimi>
+                                      <yht:osoite>
+                                          <yht:osoitenimi>
+                                              <yht:teksti xml:lang="und">Tie 3</yht:teksti>
+                                          </yht:osoitenimi>
+                                          <yht:postinumero>01380</yht:postinumero>
+                                          <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                                      </yht:osoite>
+                                      <yht:puhelin>09 173 42438</yht:puhelin>
+                                      <yht:henkilotunnus>180559-XXXX</yht:henkilotunnus>
+                                  </yht:henkilo>
+                                  <yht:turvakieltoKytkin>false</yht:turvakieltoKytkin>
+                                  <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+                                  <rakval:omistajalaji>
+                                      <rakval:omistajalaji>muu yksityinen henkilö tai perikunta</rakval:omistajalaji>
+                                  </rakval:omistajalaji>
+                              </rakval:Omistaja>
+                          </rakval:omistajatieto>
+                      </rakval:Rakennus>
+                  </rakval:rakennustieto>
+              </rakval:Toimenpide>
+          </rakval:toimenpidetieto>
+          <rakval:katselmustieto>
+              <rakval:Katselmus>
+                  <rakval:katselmuksenLaji>ei tiedossa</rakval:katselmuksenLaji>
+                  <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+                  <rakval:huomautukset>
+                      <rakval:huomautus>
+                          <rakval:kuvaus>Rakennuslaki edellyttää, että rakennushankkeeseen ryhtyvä huolehtii rakennustyön riittävästä valvonnasta. Lupa myönnetään ehdolla, että vastaava työnjohtaja ja hankkeeseen ryhtyvä huolehtivat e.m. valvonnasta asianmukaisesti sekä dokumen-</rakval:kuvaus>
+                      </rakval:huomautus>
+                  </rakval:huomautukset>
+                  <rakval:liitetieto>
+                      <rakval:Liite>
+                          <yht:kuvaus />
+                          <yht:linkkiliitteeseen>sample.pdf</yht:linkkiliitteeseen>
+                      </rakval:Liite>
+                  </rakval:liitetieto>
+                  <rakval:tarkastuksenTaiKatselmuksenNimi>Lupaehdon valvonta</rakval:tarkastuksenTaiKatselmuksenNimi>
+                  <rakval:lasnaolijat />
+              </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+              <rakval:Katselmus>
+                  <rakval:katselmuksenLaji>ei tiedossa</rakval:katselmuksenLaji>
+                  <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+                  <rakval:huomautukset>
+                      <rakval:huomautus>
+                          <rakval:kuvaus>toivat työn eri vaiheisiin liittyvät tarkastukset, suunnitelmien toteuttamiset hyvän rakennustavan mukaisesti ja muutoinkin säännösten ja määräysten noudattamisen täyttämällä OHEISEN RAKENNUSTYÖN TARKASTUSASIAKIRJAN ao. kohdat.</rakval:kuvaus>
+                      </rakval:huomautus>
+                  </rakval:huomautukset>
+                  <rakval:liitetieto>
+                      <rakval:Liite>
+                          <yht:kuvaus />
+                          <yht:linkkiliitteeseen>sample.pdf</yht:linkkiliitteeseen>
+                      </rakval:Liite>
+                  </rakval:liitetieto>
+                  <rakval:tarkastuksenTaiKatselmuksenNimi>Lupaehdon valvonta</rakval:tarkastuksenTaiKatselmuksenNimi>
+                  <rakval:lasnaolijat />
+              </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+              <rakval:Katselmus>
+                  <rakval:katselmuksenLaji>ei tiedossa</rakval:katselmuksenLaji>
+                  <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+                  <rakval:huomautukset>
+                      <rakval:huomautus>
+                          <rakval:kuvaus>Asiakirja toimitetaan rakennusvalvontatoimistoon käyttöönottokatselmusta tilattaessa.</rakval:kuvaus>
+                      </rakval:huomautus>
+                  </rakval:huomautukset>
+                  <rakval:liitetieto>
+                      <rakval:Liite>
+                          <yht:kuvaus />
+                          <yht:linkkiliitteeseen>sample.pdf</yht:linkkiliitteeseen>
+                      </rakval:Liite>
+                  </rakval:liitetieto>
+                  <rakval:tarkastuksenTaiKatselmuksenNimi>Lupaehdon valvonta</rakval:tarkastuksenTaiKatselmuksenNimi>
+                  <rakval:lasnaolijat />
+              </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+              <rakval:Katselmus>
+                  <rakval:katselmuksenLaji>ei tiedossa</rakval:katselmuksenLaji>
+                  <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+                  <rakval:huomautukset>
+                      <rakval:huomautus>
+                          <rakval:kuvaus>Rakennushankkeissa käytettyjen rakennustuotteiden kelpoisuuden toteaminen on oleellinen osa säädösten edellyttämää rakennustyön tarkastusasiakirjaa. Rakennustuotteiden suoritustasoilmoitukset arkistoidaan ja</rakval:kuvaus>
+                      </rakval:huomautus>
+                  </rakval:huomautukset>
+                  <rakval:liitetieto>
+                      <rakval:Liite>
+                          <yht:kuvaus />
+                          <yht:linkkiliitteeseen>sample.pdf</yht:linkkiliitteeseen>
+                      </rakval:Liite>
+                  </rakval:liitetieto>
+                  <rakval:tarkastuksenTaiKatselmuksenNimi>Lupaehdon valvonta</rakval:tarkastuksenTaiKatselmuksenNimi>
+                  <rakval:lasnaolijat />
+              </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+              <rakval:Katselmus>
+                  <rakval:katselmuksenLaji>ei tiedossa</rakval:katselmuksenLaji>
+                  <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+                  <rakval:huomautukset>
+                      <rakval:huomautus>
+                          <rakval:kuvaus>käytetyt tuotteet ovat jäljitettävissä (mm. CE-merkintätiedot).</rakval:kuvaus>
+                      </rakval:huomautus>
+                  </rakval:huomautukset>
+                  <rakval:liitetieto>
+                      <rakval:Liite>
+                          <yht:kuvaus />
+                          <yht:linkkiliitteeseen>sample.pdf</yht:linkkiliitteeseen>
+                      </rakval:Liite>
+                  </rakval:liitetieto>
+                  <rakval:tarkastuksenTaiKatselmuksenNimi>Lupaehdon valvonta</rakval:tarkastuksenTaiKatselmuksenNimi>
+                  <rakval:lasnaolijat />
+              </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:lausuntotieto>
+              <rakval:Lausunto>
+                  <yht:viranomainen>Mittaustoimi</yht:viranomainen>
+                  <yht:pyyntoPvm>1001-01-01</yht:pyyntoPvm>
+                  <yht:lausuntotieto>
+                      <yht:Lausunto>
+                          <yht:viranomainen>Mittaustoimi</yht:viranomainen>
+                          <yht:lausunto />
+                          <yht:lausuntoPvm>2015-05-27</yht:lausuntoPvm>
+                          <yht:puoltotieto>
+                              <yht:Puolto>
+                                  <yht:puolto>puollettu</yht:puolto>
+                              </yht:Puolto>
+                          </yht:puoltotieto>
+                      </yht:Lausunto>
+                  </yht:lausuntotieto>
+              </rakval:Lausunto>
+          </rakval:lausuntotieto>
+          <rakval:lausuntotieto>
+              <rakval:Lausunto>
+                  <yht:viranomainen>Kaupunginarkkitehti</yht:viranomainen>
+                  <yht:pyyntoPvm>1001-01-01</yht:pyyntoPvm>
+                  <yht:lausuntotieto>
+                      <yht:Lausunto>
+                          <yht:viranomainen>Kaupunginarkkitehti</yht:viranomainen>
+                          <yht:lausunto />
+                          <yht:lausuntoPvm>2015-05-27</yht:lausuntoPvm>
+                          <yht:puoltotieto>
+                              <yht:Puolto>
+                                  <yht:puolto>puollettu</yht:puolto>
+                              </yht:Puolto>
+                          </yht:puoltotieto>
+                      </yht:Lausunto>
+                  </yht:lausuntotieto>
+              </rakval:Lausunto>
+          </rakval:lausuntotieto>
+          <rakval:paatostieto>
+              <yht:Paatos>
+                  <yht:lupamaaraykset>
+                      <yht:kerrosala>45.000</yht:kerrosala>
+                      <yht:kokonaisala>45.000</yht:kokonaisala>
+                      <yht:vaaditutKatselmukset>
+                          <yht:Katselmus>
+                              <yht:katselmuksenLaji>rakennuksen paikan tarkastaminen</yht:katselmuksenLaji>
+                              <yht:tarkastuksenTaiKatselmuksenNimi>Sijaintikatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+                          </yht:Katselmus>
+                      </yht:vaaditutKatselmukset>
+                      <yht:vaaditutKatselmukset>
+                          <yht:Katselmus>
+                              <yht:katselmuksenLaji>rakennekatselmus</yht:katselmuksenLaji>
+                              <yht:tarkastuksenTaiKatselmuksenNimi>Rakennekatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+                          </yht:Katselmus>
+                      </yht:vaaditutKatselmukset>
+                      <yht:vaaditutKatselmukset>
+                          <yht:Katselmus>
+                              <yht:katselmuksenLaji>loppukatselmus</yht:katselmuksenLaji>
+                              <yht:tarkastuksenTaiKatselmuksenNimi>Loppukatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+                          </yht:Katselmus>
+                      </yht:vaaditutKatselmukset>
+                      <yht:maaraystieto>
+                          <yht:Maarays>
+                              <yht:sisalto>Rakennuslaki edellyttää, että rakennushankkeeseen ryhtyvä huolehtii rakennustyön riittävästä valvonnasta. Lupa myönnetään ehdolla, että vastaava työnjohtaja ja hankkeeseen ryhtyvä huolehtivat e.m. valvonnasta asianmukaisesti sekä dokumen-</yht:sisalto>
+                          </yht:Maarays>
+                      </yht:maaraystieto>
+                      <yht:maaraystieto>
+                          <yht:Maarays>
+                              <yht:sisalto>toivat työn eri vaiheisiin liittyvät tarkastukset, suunnitelmien toteuttamiset hyvän rakennustavan mukaisesti ja muutoinkin säännösten ja määräysten noudattamisen täyttämällä OHEISEN RAKENNUSTYÖN TARKASTUSASIAKIRJAN ao. kohdat.</yht:sisalto>
+                          </yht:Maarays>
+                      </yht:maaraystieto>
+                      <yht:maaraystieto>
+                          <yht:Maarays>
+                              <yht:sisalto>Asiakirja toimitetaan rakennusvalvontatoimistoon käyttöönottokatselmusta tilattaessa.</yht:sisalto>
+                          </yht:Maarays>
+                      </yht:maaraystieto>
+                      <yht:maaraystieto>
+                          <yht:Maarays>
+                              <yht:sisalto>Rakennushankkeissa käytettyjen rakennustuotteiden kelpoisuuden toteaminen on oleellinen osa säädösten edellyttämää rakennustyön tarkastusasiakirjaa. Rakennustuotteiden suoritustasoilmoitukset arkistoidaan ja</yht:sisalto>
+                          </yht:Maarays>
+                      </yht:maaraystieto>
+                      <yht:maaraystieto>
+                          <yht:Maarays>
+                              <yht:sisalto>käytetyt tuotteet ovat jäljitettävissä (mm. CE-merkintätiedot).</yht:sisalto>
+                          </yht:Maarays>
+                      </yht:maaraystieto>
+                      <yht:vaadittuErityissuunnitelmatieto>
+                          <yht:vaadittuErityissuunnitelma>Rakennesuunnitelmat</yht:vaadittuErityissuunnitelma>
+                      </yht:vaadittuErityissuunnitelmatieto>
+                      <yht:vaadittuTyonjohtajatieto>
+                          <yht:VaadittuTyonjohtaja>
+                              <yht:tyonjohtajaRooliKoodi>vastaava työnjohtaja</yht:tyonjohtajaRooliKoodi>
+                          </yht:VaadittuTyonjohtaja>
+                      </yht:vaadittuTyonjohtajatieto>
+                  </yht:lupamaaraykset>
+                  <yht:paivamaarat>
+                      <yht:lainvoimainenPvm>2015-07-10</yht:lainvoimainenPvm>
+                      <yht:voimassaHetkiPvm>2020-07-10</yht:voimassaHetkiPvm>
+                      <yht:antoPvm>2015-06-25</yht:antoPvm>
+                  </yht:paivamaarat>
+                  <yht:poytakirja>
+                      <yht:paatos>Päätösteksti:
+                          Päätösehdotuksen lisäteksti: </yht:paatos>
+                      <yht:paatoskoodi>hyväksytty</yht:paatoskoodi>
+                      <yht:paatoksentekija>Rakennustarkastaja</yht:paatoksentekija>
+                      <yht:paatospvm>2015-06-23</yht:paatospvm>
+                      <yht:pykala>216</yht:pykala>
+                  </yht:poytakirja>
+              </yht:Paatos>
+          </rakval:paatostieto>
+          <rakval:lisatiedot>
+              <rakval:Lisatiedot>
+                  <rakval:suoramarkkinointikieltoKytkin>false</rakval:suoramarkkinointikieltoKytkin>
+                  <rakval:rakentamisentiedot>
+                      <rakval:uusiaAsuntojaLkm>0</rakval:uusiaAsuntojaLkm>
+                      <rakval:uusiaRakennuksiaLkm>0</rakval:uusiaRakennuksiaLkm>
+                      <rakval:paloluokka>P3</rakval:paloluokka>
+                      <rakval:tilavuus>133</rakval:tilavuus>
+                  </rakval:rakentamisentiedot>
+                  <rakval:suunnittelijanVaativuustaso>
+                      <yht:suunnittelijaRoolikoodi>pääsuunnittelija</yht:suunnittelijaRoolikoodi>
+                      <yht:VRKrooliKoodi>pääsuunnittelija</yht:VRKrooliKoodi>
+                      <yht:henkilo>
+                          <yht:nimi>
+                              <yht:sukunimi>Työnjohtaja Marko</yht:sukunimi>
+                          </yht:nimi>
+                          <yht:osoite>
+                              <yht:osoitenimi>
+                                  <yht:teksti xml:lang="und">Kuja 4</yht:teksti>
+                              </yht:osoitenimi>
+                              <yht:postinumero>23500</yht:postinumero>
+                              <yht:postitoimipaikannimi>UUSIKAUPUNKI</yht:postitoimipaikannimi>
+                          </yht:osoite>
+                          <yht:sahkopostiosoite>työnjohtajan@uusikaupunki.fi</yht:sahkopostiosoite>
+                          <yht:puhelin>0500456459</yht:puhelin>
+                          <yht:henkilotunnus>120172-XXXU</yht:henkilotunnus>
+                      </yht:henkilo>
+                      <yht:koulutus>RA</yht:koulutus>
+                      <yht:valmistumisvuosi>0</yht:valmistumisvuosi>
+                      <yht:vaadittuPatevyysluokka>B</yht:vaadittuPatevyysluokka>
+                  </rakval:suunnittelijanVaativuustaso>
+                  <rakval:tyonjohtajanVaativuustaso>
+                      <yht:tyonjohtajaRooliKoodi>vastaava työnjohtaja</yht:tyonjohtajaRooliKoodi>
+                      <yht:VRKrooliKoodi>työnjohtaja</yht:VRKrooliKoodi>
+                      <yht:henkilo>
+                          <yht:nimi>
+                              <yht:sukunimi>Työnjohtaja Marko</yht:sukunimi>
+                          </yht:nimi>
+                          <yht:osoite>
+                              <yht:osoitenimi>
+                                  <yht:teksti xml:lang="und">Kuja 4</yht:teksti>
+                              </yht:osoitenimi>
+                              <yht:postinumero>23500</yht:postinumero>
+                              <yht:postitoimipaikannimi>UUSIKAUPUNKI</yht:postitoimipaikannimi>
+                          </yht:osoite>
+                          <yht:sahkopostiosoite>työnjohtaja@uusikaupunki.fi</yht:sahkopostiosoite>
+                          <yht:puhelin>050046459</yht:puhelin>
+                          <yht:henkilotunnus>120172-XXXU</yht:henkilotunnus>
+                      </yht:henkilo>
+                      <yht:vaadittuPatevyysluokka>B</yht:vaadittuPatevyysluokka>
+                      <yht:koulutus>RA</yht:koulutus>
+                      <yht:valmistumisvuosi>0</yht:valmistumisvuosi>
+                      <yht:alkamisPvm>2016-05-17</yht:alkamisPvm>
+                      <yht:paattymisPvm>2016-08-29</yht:paattymisPvm>
+                      <yht:sijaistettavaHlo />
+                      <yht:paatosPvm>2016-05-17</yht:paatosPvm>
+                      <yht:paatostyyppi>hyväksytty</yht:paatostyyppi>
+                  </rakval:tyonjohtajanVaativuustaso>
+                  <rakval:toimitustapa>postitse</rakval:toimitustapa>
+              </rakval:Lisatiedot>
+          </rakval:lisatiedot>
+          <rakval:asianTiedot>
+              <rakval:Asiantiedot>
+                  <rakval:rakennusvalvontaasianKuvaus>Lomarakennuksen laajentaminen.
+                      (2.1.; 12.a.; 14.4.)
+                  </rakval:rakennusvalvontaasianKuvaus>
+              </rakval:Asiantiedot>
+          </rakval:asianTiedot>
+          <rakval:hankkeenVaativuus>B</rakval:hankkeenVaativuus>
+      </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>

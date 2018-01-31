@@ -27,7 +27,9 @@
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
 (testable-privates lupapalvelu.application-api add-operation-allowed? validate-handler-role validate-handler-role-not-in-use validate-handler-id-in-application validate-handler-in-organization)
-(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user enrich-tos-function-name)
+
+(testable-privates lupapalvelu.application count-required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user enrich-tos-function-name enrich-single-doc-disabled-flag)
+
 (testable-privates lupapalvelu.ya validate-link-agreements-signature validate-link-agreements-state)
 
 (facts "mark-indicators-seen-updates"
@@ -38,9 +40,9 @@
                                (zipmap <> (repeat timestamp)))
         expected-attachment (assoc expected-seen-bys :_attachment_indicator_reset timestamp)
         expected-docs (assoc expected-attachment "documents.0.meta._indicator_reset.timestamp" timestamp)]
-    (mark-indicators-seen-updates {} {:id "pena"} timestamp) => expected-seen-bys
-    (mark-indicators-seen-updates {:documents []} {:id "pena", :role "authority"} timestamp) => expected-attachment
-    (mark-indicators-seen-updates {:documents [{}]} {:id "pena", :role "authority"} timestamp) => expected-docs))
+    (mark-indicators-seen-updates {:application {} :user {:id "pena"} :created timestamp :permissions #{}}) => expected-seen-bys
+    (mark-indicators-seen-updates {:application {:documents []} :user {:id "pena", :role "authority"} :created timestamp :permissions #{:document/approve :attachment/approve}}) => expected-attachment
+    (mark-indicators-seen-updates {:application {:documents [{}]} :user {:id "pena", :role "authority"} :created timestamp :permissions #{:document/approve :attachment/approve}}) => expected-docs))
 
 (defn find-by-schema? [docs schema-name]
   (domain/get-document-by-name {:documents docs} schema-name))
@@ -54,23 +56,23 @@
     (schemas/get-schema 1 "b") => {:info {:type :party :repeating false}}
     (schemas/get-schema 1 "c") => {:info {:type :foo :repeating true}}))
 
-(facts required-link-permits
+(facts count-required-link-permits
   (fact "Muutoslupa"
-    (required-link-permits {:permitSubtype "muutoslupa"}) => 1)
+    (count-required-link-permits {:permitSubtype "muutoslupa"}) => 1)
   (fact "Aloitusilmoitus"
-    (required-link-permits {:primaryOperation {:name "aloitusoikeus"}}) => 1)
+    (count-required-link-permits {:primaryOperation {:name "aloitusoikeus"}}) => 1)
   (fact "Poikkeamis"
-    (required-link-permits {:primaryOperation {:name "poikkeamis"}}) => 0)
+    (count-required-link-permits {:primaryOperation {:name "poikkeamis"}}) => 0)
   (fact "ya-jatkoaika, primary"
-    (required-link-permits {:primaryOperation {:name "ya-jatkoaika"}}) => 1)
+    (count-required-link-permits {:primaryOperation {:name "ya-jatkoaika"}}) => 1)
   (fact "ya-jatkoaika, secondary"
-    (required-link-permits {:secondaryOperations [{:name "ya-jatkoaika"}]}) => 1)
+    (count-required-link-permits {:secondaryOperations [{:name "ya-jatkoaika"}]}) => 1)
   (fact "ya-jatkoaika x 2"
-    (required-link-permits {:secondaryOperations [{:name "ya-jatkoaika"} {:name "ya-jatkoaika"}]}) => 2)
+    (count-required-link-permits {:secondaryOperations [{:name "ya-jatkoaika"} {:name "ya-jatkoaika"}]}) => 2)
   (fact "muutoslupa+ya-jatkoaika"
-    (required-link-permits {:permitSubtype "muutoslupa" :secondaryOperations [{:name "ya-jatkoaika"}]}) => 2)
+    (count-required-link-permits {:permitSubtype "muutoslupa" :secondaryOperations [{:name "ya-jatkoaika"}]}) => 2)
   (fact "muutoslupa+aloitusilmoitus+ya-jatkoaika"
-    (required-link-permits {:permitSubtype "muutoslupa" :primaryOperation {:name "aloitusoikeus"} :secondaryOperations [{:name "ya-jatkoaika"}]}) => 3))
+    (count-required-link-permits {:permitSubtype "muutoslupa" :primaryOperation {:name "aloitusoikeus"} :secondaryOperations [{:name "ya-jatkoaika"}]}) => 3))
 
 (facts get-sorted-operation-documents
   (fact "one operation - two docs"
@@ -561,3 +563,40 @@
                        :id           (make-application-id "123")}) => "12300017-1000"
       (provided
         (lupapalvelu.mongo/get-next-sequence-value anything) => 10000))))
+
+(facts "whitelist-action"
+  (let [doc {:schema-info {:name "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"}
+             :data {:mitat {:tilavuus {:value "foo"}}}}]
+    (fact "authority is passed (no restrictions added)"
+      (enrich-single-doc-disabled-flag {:role "authority"} {:permitType "R"} doc) => doc)
+    (fact "applicant gets flagged out with whitelist-acion :disabled"
+      (let [result (enrich-single-doc-disabled-flag {:role "applicant"} {:permitType "R"} doc)]
+        result =not=> doc
+        (vals (get-in result [:data :mitat])) => (has every? #(= (dissoc % :value) {:whitelist-action :disabled}))))))
+
+(facts canceled-app-context
+  (fact "app is canceled by the current user"
+    (-> (canceled-app-context {:user {:id "1"}
+                               :application {:state "canceled" :history [{:user {:id "1"} :state "open"}
+                                                                         {:user {:id "1"} :state "canceled"}]}})
+        :permissions)
+    => #{:application/undo-cancelation})
+
+  (fact "app is canceled by some other user"
+    (-> (canceled-app-context {:user {:id "1"}
+                               :application {:state "canceled" :history [{:user {:id "1"} :state "open"}
+                                                                         {:user {:id "2"} :state "canceled"}]}})
+        :permissions)
+    => empty?)
+
+  (fact "last state not canceled"
+    (-> (canceled-app-context {:user {:id "1"}
+                               :application {:state "canceled" :history [{:user {:id "1"} :state "open"}
+                                                                         {:user {:id "1"} :state "submitted"}]}})
+        :permissions)
+    => empty?)
+
+  (fact "no application in command"
+    (-> (canceled-app-context {:user {:id "1"}})
+        :permissions)
+    => empty?))

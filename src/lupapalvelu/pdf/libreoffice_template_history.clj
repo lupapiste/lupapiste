@@ -14,6 +14,8 @@
        :document (i18n/localize lang "caseFile.documentSubmitted")
        :request-statement (i18n/localize lang "caseFile.operation.statement.request")
        :request-neighbor (i18n/localize lang "caseFile.operation.neighbor.request")
+       :request-neighbor-done (i18n/localize lang "caseFile.operation.neighbor.request.done")
+       :request-neighbor-responded (i18n/localize lang "caseFile.operation.neighbor.responded")
        :request-review (i18n/localize lang "caseFile.operation.review.request")
        :review (i18n/localize lang "caseFile.operation.review")
        :tos-function-change (i18n/localize lang "caseFile.tosFunctionChange")

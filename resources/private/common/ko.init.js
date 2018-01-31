@@ -376,7 +376,7 @@
 
   var fileTemplate =
       _.template( "<a href='/api/raw/view-file?fileId"
-                  + "=<%- fileId %>' target='_blank'><%- filename %></a><br>"
+                  + "=<%- fileId %>' target='_blank' tabindex='-1'><%- filename %></a><br>"
                   + "<span class='fileinfo'><%- contentText %> <%- sizeText %></span>");
 
   // Fills the target element with:

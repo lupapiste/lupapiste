@@ -67,14 +67,14 @@
 (fact "Sonja must be able to comment!"
   (comment-application sonja app-id false) => ok?)
 
-(fact "Mikko must not be able to assign to himself!"
+(fact "Mikko (owner) must not be able to assign to himself!"
   (command mikko :upsert-application-handler :id app-id :userId mikko-id :roleId sipoo-general-handler-id) => unauthorized?)
 
-(fact "Teppo must not be able to assign to himself!"
-  (command teppo :upsert-application-handler :id app-id :userId teppo-id :roleId sipoo-general-handler-id) => unauthorized?)
+(fact "Teppo (random applicant) must not be able to assign to himself!"
+  (command teppo :upsert-application-handler :id app-id :userId teppo-id :roleId sipoo-general-handler-id) => not-accessible?)
 
-(fact "Veikko must not be able to assign to himself!"
+(fact "Veikko (authority in other organization) must not be able to assign to himself!"
   (command veikko :upsert-application-handler :id app-id :userId veikko-id :roleId sipoo-general-handler-id) => not-accessible?)
 
-(fact "Sonja must be able to assign to herself!"
+(fact "Sonja (authority) must be able to assign to herself!"
   (command sonja :upsert-application-handler :id app-id :userId sonja-id :roleId sipoo-general-handler-id) => ok?)

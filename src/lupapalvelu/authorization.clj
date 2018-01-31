@@ -5,6 +5,7 @@
             [lupapalvelu.application-schema :as aps]
             [lupapalvelu.document.tools :as doc-tools]
             [schema.core :refer [defschema] :as sc]
+            [sade.core :refer :all]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]))
@@ -19,7 +20,6 @@
   {(sc/optional-key :role)           (apply sc/enum all-authz-roles)
    (sc/optional-key :path)           sc/Str
    :email                            ssc/Email
-   (sc/optional-key :application)    aps/ApplicationId ; FIXME delete key after prod is migrated
    :created                          ssc/Timestamp
    :inviter                          usr/SummaryUser
    (sc/optional-key :documentName)   sc/Str
@@ -155,6 +155,12 @@
   "Returns true if the user is an authority in the organization that processes the application"
   [application user]
   (boolean (has-organization-authz-roles? #{:authority :approver} (:organization application) user)))
+
+(defn application-authority-pre-check
+  "Fails if user is NOT application authority"
+  [{application :application user :user}]
+  (when-not (application-authority? application user)
+    (fail :error.unauthorized)))
 
 (defn application-role [application user]
   (if (application-authority? application user) :authority :applicant))

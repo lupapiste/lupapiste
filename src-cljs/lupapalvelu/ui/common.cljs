@@ -1,9 +1,10 @@
 (ns lupapalvelu.ui.common
-  (:require [clojure.string :as s]
-            [cljs-time.format :as tf]
-            [cljs-time.coerce :as tc]
+  (:require [cljs-time.coerce :as tc]
             [cljs-time.core :as t]
-            [clojure.string :as str]))
+            [cljs-time.format :as tf]
+            [clojure.string :as s]
+            [clojure.string :as str]
+            [goog.events :as googe]))
 
 (defn get-current-language []
   (.getCurrentLanguage js/loc))
@@ -84,6 +85,21 @@
        keys
        (map name)))
 
+(defn update-css
+  "Upserts existing :class definition. Flags use css-flags semantics."
+  [attr & flags]
+  (update attr :class (fn [cls]
+                        (let [s       (s/join " " (flatten [cls]))
+                              old-map (zipmap (map keyword
+                                                   (remove s/blank?
+                                                           (s/split s #"\s+")))
+                                              (repeat true))
+                              updates (apply hash-map flags)]
+                          (->> (merge old-map updates)
+                               (into [])
+                               flatten
+                               (apply css-flags)))) ))
+
 (defn fuzzy-re
   "Simplified Clojurescript version of sade.strings.fuzzy-re.
 
@@ -97,8 +113,9 @@
 
 (def nbsp {:dangerouslySetInnerHTML {:__html "&nbsp;"}})
 
-(defn empty-label []
-  [:label nbsp])
+(defn empty-label [& cls]
+  [:label (assoc nbsp
+                 :class cls)])
 
 (defn open-oskari-map [{id :id [x y] :location municipality :municipality}]
   (let [features "addPoint=0&addArea=0&addLine=0&addCircle=0&addEllipse=0"
@@ -111,3 +128,7 @@
                   features]
         url      (str "/oskari/fullmap.html?" (str/join "&" params))]
     (js/window.open url)))
+
+;; Callthrough for goog.events.getUniqueId.
+;; Must be in the global scope.
+(def unique-id googe/getUniqueId)

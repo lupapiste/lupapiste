@@ -28,6 +28,37 @@
     (callback response)
     (hub/send "pate::verdict-templates-changed")))
 
+(defn update-changes-and-errors
+  "Returns a success callback function that updates the state according
+  to the command response (e.g., changes, removals and errors). container*
+  is a 'top-level' atom that contains the info property (including
+  modified and filled?)."
+  [container* {:keys [state path]}]
+  (fn [{:keys [modified changes errors removals filled] :as response}]
+    (swap! state (fn [state]
+                   (let [state (as-> state $
+                                 (reduce (fn [acc [k v]]
+                                           (assoc-in acc (map keyword k) v))
+                                         $
+                                         changes)
+                                 (reduce (fn [acc k]
+                                           (util/dissoc-in acc (map keyword k)))
+                                         $
+                                         removals))]
+                     (reduce (fn [acc [k v]]
+                               (assoc-in acc
+                                         (cons :_errors
+                                               (map keyword k))
+                                         v))
+                             (util/dissoc-in state
+                                             (cons :_errors
+                                                   (map keyword path)))
+                             errors))))
+    (swap! container* (fn [container]
+                        (cond-> container
+                          modified            (assoc-in [:info :modified] modified)
+                          (not (nil? filled)) (assoc-in [:info :filled?] filled))))))
+
 (defn fetch-categories [callback]
   (common/query "verdict-template-categories"
                 #(do

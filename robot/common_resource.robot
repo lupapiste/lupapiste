@@ -86,7 +86,7 @@ Open all latest emails
 
 Applications page should be open
   Location should contain  ${APPLICATIONS PATH}
-  Title should be  Lupapiste
+  Wait Until  Title should be  Lupapiste
   Wait Until  Element should be visible  xpath=//*[@data-test-id='own-applications']
 
 Authority applications page should be open

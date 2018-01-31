@@ -44,7 +44,11 @@
    (opt :approvable)  sc/Bool        ;; Authority can apporove/reject field
    (opt :codes)       [sc/Keyword]   ;;
    (opt :validator)   sc/Keyword     ;; Specific validator key for element (see model/validate-element)
-   (opt :whitelist)   {:roles [sc/Keyword] :otherwise (sc/enum :disabled :hidden)}
+   (opt :whitelist)   (sc/constrained {(opt :roles) [sc/Keyword]
+                                       (opt :permitType) [sc/Keyword]
+                                       :otherwise (sc/enum :disabled :hidden)}
+                                      #(or (not-empty (:roles %)) (not-empty (:permitType %)))
+                                      "roles or permitType require, can't be empty")
    (opt :blacklist)   [(sc/if string? (sc/eq "turvakieltoKytkin") sc/Keyword)] ;; WTF turvakieltoKytkin
    (opt :emit)        [sc/Keyword]   ;; Change in element emits events
    (opt :listen)      [sc/Keyword]   ;; Events to listen

@@ -18,6 +18,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.permissions :as permissions]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
@@ -350,7 +351,7 @@
 (defn- has-required-user-role [command {user-roles :user-roles parameters :parameters :as meta-data}]
   (let [allowed-roles (or user-roles #{})
         user-role (-> command :user :role keyword)]
-    (or (allowed-roles :anonymous) (allowed-roles user-role) (allowed-financial-authority allowed-roles user-role parameters))))
+    (or (nil? user-roles) (allowed-roles :anonymous) (allowed-roles user-role) (allowed-financial-authority allowed-roles user-role parameters))))
 
 (defn meta-data [{command :action}]
   ((get-actions) (keyword command)))
@@ -377,15 +378,6 @@
   (when (and type (not= type (:type (meta-data command))))
     (info "invalid type:" (name type))
     (fail :error.invalid-type)))
-
-(defn outside-authority-only
-  "Pre-check that fails if the current user is authority in the
-  application organisation."
-  [{:keys [user application] :as command}]
-  (when (usr/user-is-authority-in-organization? user (:organization application))
-    unauthorized))
-
-
 
 (defn missing-roles [command]
   (when-not (has-required-user-role command (meta-data command))
@@ -461,6 +453,11 @@
                           missing-parameters
                           input-validators-fail))
 
+(defn access-denied-by-insufficient-permissions [{user-permissions :permissions :as command}]
+  (let [permissions (permissions/get-required-permissions (meta-data command) command)]
+    (when-not (set/subset? (:required permissions) user-permissions)
+      unauthorized)))
+
 (defn requires-application? [{data :data}]
   (contains? data :id))
 
@@ -478,8 +475,8 @@
     (auth/user-authz? allowed-roles application user)))
 
 (defn- organization-authz? [command-meta-data application user]
-  (let [required-authz (get command-meta-data :org-authz-roles #{})]
-    (auth/has-organization-authz-roles? required-authz (:organization application) user)))
+  (let [allowed-roles (get command-meta-data :org-authz-roles #{})]
+    (auth/has-organization-authz-roles? allowed-roles (:organization application) user)))
 
 (defn- company-authz? [command-meta-data application user]
   (-> (get command-meta-data :user-authz-roles #{})
@@ -532,6 +529,16 @@
       (catch Throwable e
         (error e "post fn fail")))))
 
+(defn- enrich-default-permissions [command]
+  (->> (set/union (permissions/get-global-permissions command)
+                  (permissions/get-application-permissions command)
+                  (permissions/get-organization-permissions command)
+                  (permissions/get-company-permissions command))
+       (assoc command :permissions)))
+
+(defn- enrich-action-contexts [command]
+  (reduce (fn [cmd ctx-fn] (ctx-fn cmd)) command (:contexts (meta-data command))))
+
 (defn- run [command validators execute?]
   (try+
     (or
@@ -560,9 +567,12 @@
                          :company company
                          :application-assignments assignments}
                         (merge command)
-                        (update :user update-user-application-role application))]
+                        (update :user update-user-application-role application)
+                        enrich-default-permissions
+                        enrich-action-contexts)]
         (or
           (not-authorized-to-application command)
+          (access-denied-by-insufficient-permissions command)
           (pre-checks-fail command)
           (when execute?
             (let [status   (executed command)
@@ -623,13 +633,10 @@
   {:pre [(set? reference-set)]}
   (sc/pred (fn [x] (and (set? x) (every? reference-set x)))))
 
-(defn- skip-validation? [obj]
-  (boolean (get (meta obj) :skip-validation)))
-
 (def ActionMetaData
   {
    ; Set of user role keywords. Use :user-roles #{:anonymous} to grant access to anyone.
-   :user-roles (subset-of roles/all-user-roles)
+   (sc/optional-key :user-roles) (subset-of roles/all-user-roles)
    ; Parameters can be keywords or symbols. Symbols will be available in the action body.
    ; If a parameter is missing from request, an error will be raised.
    (sc/optional-key :parameters)  [(sc/cond-pre sc/Keyword sc/Symbol)]
@@ -654,6 +661,12 @@
    (sc/optional-key :states)      (sc/if map?
                                     {(apply sc/enum roles/all-user-roles) (subset-of states/all-states)}
                                     (subset-of states/all-states))
+   (sc/optional-key :contexts)    [(sc/pred fn? "context extender function")]
+   (sc/optional-key :permissions) (sc/constrained [{(sc/optional-key :description) sc/Str
+                                                    (sc/optional-key :context) permissions/ContextMatcher
+                                                    :required [permissions/RequiredPermission]}]
+                                                  (util/fn->> butlast (every? :context))
+                                                  "key :context is required for all but last element of permissions")
    (sc/optional-key :on-complete) (sc/cond-pre util/Fn [util/Fn])
    (sc/optional-key :on-success)  (sc/cond-pre util/Fn [util/Fn])
    (sc/optional-key :on-fail)     (sc/cond-pre util/Fn [util/Fn])
@@ -679,16 +692,19 @@
                          res
                          (select-keys meta-data (keys res)))]
 
-      (throw (AssertionError. (str "Action '" action-name "' has invalid meta data: " invalid-meta)))))
+      (throw (AssertionError. (str "Action '" action-name "' has invalid meta data: " invalid-meta ", schema-error: " res)))))
+
+  (assert (or (seq (:user-roles meta-data)) (seq (:permissions meta-data)))
+          (str "You must define :user-roles or :permissions meta data for " action-name))
 
   (assert (or (ss/ends-with ns-str "-api") (ss/ends-with ns-str "-test") (ss/starts-with (ss/suffix ns-str ".") "dummy"))
     (str "Please define actions in *-api namespaces. Offending action: " action-name " at " ns-str ":" line))
 
   (assert
     (if (some #(= % :id) (:parameters meta-data))
-      (or (seq (:states meta-data)) (seq (:pre-checks meta-data)))
+      (or (seq (:permissions meta-data)) (seq (:states meta-data)) (seq (:pre-checks meta-data)))
       true)
-    (str "You must define :states or :pre-checks meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
+    (str "You must define :permissions, :states or :pre-checks meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
 
   (assert (or  (nil? (:states meta-data)) (set? (:states meta-data)) (-> meta-data :states keys set (= (:user-roles meta-data))))
     (str "Keys of :states should match :user-roles for " action-name " when :states is defined as a map."))
@@ -699,7 +715,6 @@
     (str "Input validators must be defined for " action-name))
 
   (assert (or (empty? (:org-authz-roles meta-data))
-              (skip-validation? (:org-authz-roles meta-data)) ; :skip-validation meta for generic actions requiring org-authz-roles
               (some #{:id} (:parameters meta-data)))
           (str "org-authz-roles depends on application, can't be used outside application context - " action-name))
 
@@ -710,13 +725,15 @@
     (swap! actions assoc
       action-keyword
       (merge
-       {:user-authz-roles (if (= #{:authority} user-roles)
-                            ;; By default, authority gets authorization fron organization role
-                            #{}
-                            (roles/default-user-authz action-type))
+       {:user-authz-roles (cond
+                            (nil? user-roles) roles/all-authz-roles
+                            (= #{:authority} user-roles) #{} ;; By default, authority gets authorization fron organization role
+                            :else (roles/default-user-authz action-type))
         :org-authz-roles (cond
+                           (nil? user-roles) roles/all-org-authz-roles
                            (some user-roles [:authority :oirAuthority]) roles/default-org-authz-roles
-                           (user-roles :anonymous) roles/all-org-authz-roles)}
+                           (user-roles :anonymous) roles/all-org-authz-roles)
+        :permissions     [{:required []}]} ; no permissions required by default
         meta-data
         {:type action-type
          :ns ns-str

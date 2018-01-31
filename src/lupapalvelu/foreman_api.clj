@@ -21,11 +21,11 @@
 
 (defcommand create-foreman-application
   {:parameters [id taskId foremanRole foremanEmail]
-   :user-roles #{:applicant :authority}
    :input-validators [(partial action/email-validator :foremanEmail)]
-   :states (states/all-application-states-but states/terminal-states)
-   :pre-checks [application/validate-authority-in-drafts
-                application/validate-only-authority-before-verdict-given]
+   :permissions [{:context  {:application {:state states/pre-verdict-states}}
+                  :required [:application/create-foreman-app-in-pre-verdict-states]}
+                 {:required [:application/create-foreman-app-in-post-verdict-states]}]
+   :states (apply states/all-application-states-but :draft states/terminal-states)
    :notified   true
    :description "Creates foreman application based on current application. Foreman email can be nil."}
   [{:keys [created user application] :as command}]
@@ -44,13 +44,14 @@
     (ok :id (:id foreman-app) :auth (:auth foreman-app))))
 
 (defcommand update-foreman-other-applications
-  {:user-roles #{:applicant :authority}
-   :user-authz-roles roles/writer-roles-with-foreman
-   :states     states/all-states
-   :parameters [:id foremanHetu]
+  {:parameters [:id foremanHetu]
    :input-validators [(partial action/string-parameters [:foremanHetu])]
-   :pre-checks [foreman-app-check
-                application/validate-authority-in-drafts]}
+   :contexts    [foreman/foreman-app-context]
+   :permissions [{:context  {:application {:state #{:draft}}}
+                  :required [:application/edit-draft]}
+                 {:required [:application/edit]}]
+   :states     states/all-states
+   :pre-checks [foreman-app-check]}
   [{:keys [application user created] :as command}]
   (let [foreman-applications (seq (foreman/get-foreman-project-applications application foremanHetu))
         other-applications (map #(foreman/other-project-document % created) foreman-applications)
@@ -67,12 +68,13 @@
       (fail :error.document-not-found))))
 
 (defcommand link-foreman-task
-  {:user-roles #{:applicant :authority}
-   :states states/all-states
-   :parameters [id taskId foremanAppId]
+  {:parameters [id taskId foremanAppId]
    :input-validators [(partial action/non-blank-parameters [:id :taskId])]
-   :pre-checks [application/validate-authority-in-drafts
-                foreman/ensure-foreman-not-linked]}
+   :permissions [{:context  {:application {:state #{:draft}}}
+                  :required [:application/edit-draft]}
+                 {:required [:application/edit]}]
+   :states states/all-states
+   :pre-checks [foreman/ensure-foreman-not-linked]}
   [{:keys [created application] :as command}]
   (let [task (util/find-by-id taskId (:tasks application))]
     (if task
@@ -84,12 +86,10 @@
   {:description      "Foreman application target history in Lupapiste. If
    all parameter is true, then the whole history is returned otherwise
    just non-redundant highlights."
-   :user-roles       #{:authority}
    :states           states/all-states
-   :user-authz-roles roles/all-authz-roles
-   :org-authz-roles  roles/reader-org-authz-roles
    :parameters       [:id all]
    :input-validators [(partial action/non-blank-parameters [:all])]
+   :permissions      [{:required [:application/show-foreman-history]}]
    :pre-checks       [foreman-app-check]}
   [{application :application user :user :as command}]
   (if application
@@ -102,10 +102,8 @@
     (fail :error.application-not-found)))
 
 (defquery foreman-applications
-  {:user-roles #{:applicant :authority :oirAuthority}
-   :states           states/all-states
-   :user-authz-roles roles/all-authz-roles
-   :org-authz-roles  roles/reader-org-authz-roles
+  {:states           states/all-states
+   :permissions      [{:required [:application/read]}]
    :parameters       [id]}
   [{application :application user :user :as command}]
   (->> (foreman/get-linked-foreman-applications application)

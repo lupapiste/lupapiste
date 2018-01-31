@@ -1,7 +1,8 @@
 (ns lupapalvelu.pate.verdict-canonical-test
-  (:require [midje.sweet :refer :all]
+  (:require [lupapalvelu.pate.verdict-canonical :refer :all]
+            [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.pate.verdict-canonical :refer :all]))
+            [sade.util :as util]))
 
 (def verdict {:id "1a156dd40e40adc8ee064463"
               :data {:voimassa "23.11.2023"
@@ -23,7 +24,8 @@
                                "vv-tj"]
                      :verdict-code "myonnetty"
                      :collateral "vakuus - teksti"
-                     :conditions "muut lupaehdot - teksti"
+                     :conditions {:id1 {:condition "muut lupaehdot - teksti"}
+                                  :id2 {:condition "toinen teksti"}}
                      :rights "rakennusoikeus"
                      :plans-included true
                      :reviews ["5a156dd40e40adc8ee064463"
@@ -64,7 +66,7 @@
 
 (testable-privates lupapalvelu.pate.verdict-canonical
                    vaadittu-katselmus-canonical
-                   maarays-canonical
+                   maarays-seq-canonical
                    vaadittu-erityissuunnitelma-canonical
                    vaadittu-tyonjohtaja-canonical
                    lupamaaraykset-type-canonical
@@ -85,12 +87,18 @@
     (vaadittu-katselmus-canonical "sv" verdict "6a156dd40e40adc8ee064463")
     => {:Katselmus {:katselmuksenLaji "rakennuksen paikan merkitseminen", :tarkastuksenTaiKatselmuksenNimi "Syn2", :muuTunnustieto []}}))
 
-(facts maarays-canonical
-  (fact "text as :sisalto"
-    (maarays-canonical verdict)
-    => {:Maarays {:sisalto "muut lupaehdot - teksti", :maaraysPvm "2017-11-23", :toteutusHetki nil}})
+(facts maarays-seq-canonical
+  (fact "Two items"
+    (maarays-seq-canonical verdict)
+    => (just [{:Maarays {:sisalto "muut lupaehdot - teksti"}}
+              {:Maarays {:sisalto "toinen teksti"}}] :in-any-order))
   (fact "without text nil"
-    (maarays-canonical (assoc-in verdict [:data :conditions] "")) => nil))
+    (maarays-seq-canonical (assoc-in verdict [:data :conditions] {:foo {:condition ""}})) => nil
+    (maarays-seq-canonical (assoc-in verdict [:data :conditions] {:foo {:condition "    "}})) => nil
+    (maarays-seq-canonical (assoc-in verdict [:data :conditions] {:foo {}})) => nil
+    (maarays-seq-canonical (assoc-in verdict [:data :conditions] {:foo nil})) => nil
+    (maarays-seq-canonical (assoc-in verdict [:data :conditions] {})) => nil
+    (maarays-seq-canonical (util/dissoc-in verdict [:data :conditions])) => nil))
 
 (facts vaadittu-erityissuunnitelma-canonical
   (fact "suunnitelmat / Finnish"

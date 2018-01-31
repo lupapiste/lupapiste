@@ -34,7 +34,7 @@
             [sade.dummy-email-server]
             [sade.http :as http]
             [sade.strings :as ss]
-            [sade.threads :as threads]
+            [lupapiste-commons.threads :as threads]
             [sade.util :refer [fn-> pcond->] :as util]
             [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
             [monger.collection :as mc]

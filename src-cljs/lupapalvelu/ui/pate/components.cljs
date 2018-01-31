@@ -20,23 +20,29 @@
 
 (rum/defc pate-date-delta < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
-  [:div.pate-date-delta
-   (when (show-label? schema wrap-label?)
-     [:label.delta-label {:for (path/id (path/extend path :delta))}
-      (path/loc options)])
-   [:div.delta-editor
-    (docgen/text-edit (assoc options :path (path/extend path :delta))
-                      :input.grid-style-input
-                      {:type "number"
-                       :disabled (path/disabled? options)})
-    (common/loc (str "pate-date-delta." (-> schema :unit name)))]])
-
+  (let [required? (path/required? options)
+        delta-path (path/extend path :delta)]
+    [:div.pate-date-delta
+     (when (show-label? schema wrap-label?)
+       [:label.delta-label {:class (common/css-flags :required required?)
+                            :for (path/id delta-path)}
+        (path/loc options)])
+     [:div.delta-editor
+      (docgen/text-edit (assoc options
+                               :path delta-path
+                               :required? required?)
+                        :text
+                        {:type "number"
+                         :disabled (path/disabled? options)})
+      (common/loc (str "pate-date-delta." (-> schema :unit name)))]]))
 
 (rum/defc pate-multi-select < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
   [:div.pate-multi-select
    (when (show-label? schema wrap-label?)
-     [:h4.pate-label (path/loc options)])
+     [:h4.pate-label
+      {:class (common/css-flags :required (path/required? options))}
+      (path/loc options)])
    (let [state (path/state path state)
          items (cond->> (map (fn [item]
                                (if (:value item)
@@ -50,7 +56,7 @@
                  (not (-> schema :sort? false? )) (sort-by :text))]
 
      (for [{:keys [value text]} items
-           :let                 [item-id (path/unique-id "multi")
+           :let                 [item-id (common/unique-id "multi")
                                  checked (util/includes-as-kw? (set (rum/react state)) value)]]
        [:div.pate-checkbox-wrapper
         {:key item-id}
@@ -120,11 +126,13 @@
   [{:keys [schema] :as options} & [wrap-label?]]
   [:div.pate-unordered-list
    (when (show-label? schema wrap-label?)
-     [:h4.pate-label (path/loc options)])
+     [:h4.pate-label
+      {:class (common/css-flags :required (path/required? options))}
+      (path/loc options)])
    [:ul
     (->> (resolve-reference-list options)
          (map (fn [{text :text}]
-                [:li {:key (path/unique-id "li")}text])
+                [:li {:key (common/unique-id "li")}text])
               ))]])
 
 (rum/defc last-saved < rum/reactive
@@ -132,6 +140,14 @@
   [:span.saved-info
    (when-let [ts (path/react [:modified] info*)]
      (common/loc :pate.last-saved (js/util.finnishDateAndTime ts)))])
+
+(rum/defc required-fields-note < rum/reactive
+  ([{info* :info} note]
+   (when (false? (path/react [:filled?] info*))
+     [:div.pate-required-fields-note
+      note]))
+  ([options]
+   (required-fields-note options (common/loc :pate.required-fields))))
 
 (rum/defcs pate-phrase-text < rum/reactive
   (rum/local nil ::category)
@@ -150,11 +166,14 @@
             (path/meta-updated options))]
     (when-not @category*
       (set-category (:category schema)))
-    (let [ref-id    (path/unique-id "-ref")
-          disabled? (path/disabled? options)]
+    (let [ref-id    (common/unique-id "-ref")
+          disabled? (path/disabled? options)
+          required? (path/required? options)]
       [:div.pate-grid-12
        (when (show-label? schema wrap-label?)
-         [:h4.pate-label (path/loc options)])
+         [:h4.pate-label
+          {:class (common/css-flags :required required?)}
+          (path/loc options)])
        [:div.row
         [:div.col-3.col--full
          [:div.col--vertical
@@ -191,7 +210,7 @@
                          (or disabled?
                              (s/blank? phrase)
                              (not (re-find (re-pattern (goog.string/regExpEscape phrase))
-                                           (path/react path state)))))
+                                           (or (path/react path state) "")))))
              :on-click (fn []
                          (update-text (s/replace-first (path/value path state)
                                                        @selected*
@@ -201,17 +220,38 @@
        [:div.row
         [:div.col-12.col--full
          {:ref ref-id}
-         (components/textarea-edit (path/state path state)
-                                   {:callback update-text
-                                    :disabled disabled?})]]])))
+         (components/textarea-edit (path/value path state)
+                                   {:callback  update-text
+                                    :disabled  disabled?
+                                    :required? required?})]]])))
 
 (rum/defc pate-link < rum/reactive
   [{:keys [schema] :as options}]
-  (let [regex          #"\[(.*)\]"
-        text           (path/loc (:text-loc schema))
-        link           (last (re-find regex text))
-        ;; Split results include the
-        [before after] (remove #(= link %) (s/split text regex))]
-    [:span before
-     [:a {:on-click #((path/meta-value options (:click schema)) options)} link]
-     after]))
+  (components/text-and-link {:text-loc (:text-loc schema)
+                             :click    #((path/meta-value options (:click schema))
+                                         options)}))
+
+(rum/defc pate-button < rum/reactive
+  [{:keys [schema] :as options} & [wrap-label?]]
+  (let [{:keys [icon text? click
+                add remove]} schema
+        text?                (-> text? false? not)
+        button               (when (path/visible? options)
+                               [:button {:disabled (path/disabled? options)
+                                         :class    (path/css options)
+                                         :on-click (fn [_]
+                                                     (cond
+                                                       click
+                                                       (path/meta-value options click)
+
+                                                       (or add remove)
+                                                       (path/meta-updated options true)))}
+                                (when icon
+                                  [:i {:class icon}])
+                                (when text?
+                                  [:span (path/loc options)])])]
+    (if (show-label? options wrap-label?)
+      [:div.col--vertical
+       (common/empty-label :pate-label)
+       button]
+      button)))
