@@ -481,9 +481,9 @@
   {:parameters       [id operation]
    :states           states/pre-sent-application-states
    :permissions      [{:context  {:application {:state #{:draft}}}
-                       :required [:application/read-draft :application/edit]}
+                       :required [:application/read-draft :application/edit-operation]}
 
-                      {:required [:application/read :application/edit]}]
+                      {:required [:application/read :application/edit-operation]}]
    :input-validators [operation-validator]
    :pre-checks       [add-operation-allowed?
                       multiple-operations-supported?]}
@@ -510,9 +510,9 @@
                       (partial action/string-parameters [:desc])]
    :states     states/pre-sent-application-states
    :permissions [{:context  {:application {:state #{:draft}}}
-                  :required [:application/read-draft :application/edit]}
+                  :required [:application/read-draft :application/edit-operation]}
 
-                 {:required [:application/read :application/edit]}]}
+                 {:required [:application/read :application/edit-operation]}]}
   [{:keys [application] :as command}]
   (if (= (get-in application [:primaryOperation :id]) op-id)
     (update-application command {$set {"primaryOperation.description" desc}})
@@ -524,9 +524,9 @@
    :input-validators [(partial action/non-blank-parameters [:id :secondaryOperationId])]
    :states states/pre-sent-application-states
    :permissions [{:context  {:application {:state #{:draft}}}
-                  :required [:application/read-draft :application/edit]}
+                  :required [:application/read-draft :application/edit-operation]}
 
-                 {:required [:application/read :application/edit]}]}
+                 {:required [:application/read :application/edit-operation]}]}
   [{:keys [application] :as command}]
   (let [old-primary-op (:primaryOperation application)
         old-secondary-ops (:secondaryOperations application)
@@ -779,7 +779,7 @@
 (defcommand create-change-permit
   {:parameters ["id"]
    :states     #{:verdictGiven :constructionStarted :appealed :inUse :onHold}
-   :permissions [{:required [:application/edit]}]
+   :permissions [{:required [:application/create-change-permit]}]
    :pre-checks [(permit/validate-permit-type-is permit/R)
                 (app/reject-primary-operations #{:raktyo-aloit-loppuunsaat})]}
   [{:keys [created user application] :as command}]
@@ -856,7 +856,7 @@
 
 (defcommand create-continuation-period-permit
   {:parameters ["id"]
-   :permissions [{:required [:application/edit]}]
+   :permissions [{:required [:application/create-continuation-period-permit]}]
    :states     #{:verdictGiven :constructionStarted}
    :pre-checks [(permit/validate-permit-type-is permit/YA) validate-not-jatkolupa-app]}
   [{:keys [created user application] :as command}]
@@ -899,7 +899,7 @@
 
 (defcommand convert-to-application
   {:parameters [id]
-   :permissions [{:required [:application/edit]}]
+   :permissions [{:required [:application/convert-to-application]}]
    :states     states/all-inforequest-states
    :pre-checks [validate-new-applications-enabled]}
   [{user :user created :created {state :state op :primaryOperation tos-fn :tosFunction :as app} :application org :organization :as command}]

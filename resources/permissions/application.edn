@@ -14,6 +14,7 @@
                                       :application/undo-cancelation
                                       :application/edit
                                       :application/edit-drawings
+                                      :application/edit-operation
                                       :application/edit-permit-subtype
                                       :application/edit-permit-subtype-in-ya
                                       :application/edit-warranty-dates
@@ -31,6 +32,8 @@
                                       :application/set-urgency
                                       :application/set-authority-notice
                                       :application/read-authority-notice
+                                      :application/create-change-permit
+                                      :application/create-continuation-period-permit
                                       :application/create-foreman-app-in-pre-verdict-states
                                       :application/create-foreman-app-in-post-verdict-states
                                       :application/get-document-states
@@ -44,6 +47,7 @@
                                       :application/undo-cancelation
                                       :application/edit
                                       :application/edit-drawings
+                                      :application/edit-operation
                                       :application/edit-permit-subtype
                                       :application/edit-permit-subtype-in-ya
                                       :application/edit-warranty-dates
@@ -61,6 +65,8 @@
                                       :application/set-urgency
                                       :application/set-authority-notice
                                       :application/read-authority-notice
+                                      :application/create-change-permit
+                                      :application/create-continuation-period-permit
                                       :application/create-foreman-app-in-pre-verdict-states
                                       :application/create-foreman-app-in-post-verdict-states
                                       :application/get-document-states
@@ -84,17 +90,23 @@
                                       :application/submit
                                       :application/cancel-in-restricted-states
                                       :application/edit
+                                      :application/edit-operation
                                       :application/edit-permit-subtype
                                       :application/remove-extra-link-permit
                                       :application/change-location-in-pre-verdict-states
+                                      :application/create-change-permit
+                                      :application/create-continuation-period-permit
                                       :application/create-foreman-app-in-post-verdict-states}
                 :writer             #{:application/read-draft
                                       :application/submit
                                       :application/cancel-in-restricted-states
                                       :application/edit
+                                      :application/edit-operation
                                       :application/edit-permit-subtype
                                       :application/remove-extra-link-permit
                                       :application/change-location-in-pre-verdict-states
+                                      :application/create-change-permit
+                                      :application/create-continuation-period-permit
                                       :application/create-foreman-app-in-post-verdict-states}}
  :inforequest  {:owner              #{:application/cancel}
                 :writer             #{:application/cancel}}
