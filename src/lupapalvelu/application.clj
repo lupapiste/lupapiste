@@ -123,6 +123,9 @@
 (defn verdict-given? [{:keys [state]}]
   (boolean (states/post-verdict-states (keyword state))))
 
+(defn designer-app? [application]
+  (= :suunnittelijan-nimeaminen (-> application :primaryOperation :name keyword)))
+
 (defn- contains-primary-operation? [application op-set]
   {:pre [(set? op-set)]}
   (contains? op-set (-> application :primaryOperation :name keyword)))
@@ -197,12 +200,13 @@
 (defn- prefix-with [prefix coll]
   (conj (seq coll) prefix))
 
-(defn- enrich-single-doc-disabled-flag [{user-role :role} doc]
+(defn- enrich-single-doc-disabled-flag [{user-role :role} {permitType :permitType} doc]
   (let [doc-schema (model/get-document-schema doc)
         zip-root (tools/schema-zipper doc-schema)
-        whitelisted-paths (tools/whitelistify-schema zip-root)]
+        whitelisted-paths (tools/whitelistify-schema zip-root)
+        whitelist-validator (partial doc-persistence/validate-whitelist-properties {:roles user-role :permitType permitType})]
     (reduce (fn [new-doc [path whitelist]]
-              (if-not ((set (:roles whitelist)) (keyword user-role))
+              (if-not (every? whitelist-validator (dissoc whitelist :otherwise))
                 (tools/update-in-repeating new-doc (prefix-with :data path) merge {:whitelist-action (:otherwise whitelist)})
                 new-doc))
             doc
@@ -256,7 +260,7 @@
   (->> (validate application doc)
        (populate-operation-info (get-operations application))
        ((app-utils/person-id-masker-for-user user application))
-       (enrich-single-doc-disabled-flag user)))
+       (enrich-single-doc-disabled-flag user application)))
 
 (defn- process-documents-and-tasks [user application]
   (let [mapper (partial process-document-or-task user application)]
@@ -365,7 +369,7 @@
   [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
   (let [types     (new-attachment-types-for-operation organization operation existing-attachments-types)
         groups    (map (partial attachment-grouping-for-type operation) types)
-        metadatas (map (partial tos/metadata-for-document (:id organization) tos-function) types)]
+        metadatas (pmap (partial tos/metadata-for-document (:id organization) tos-function) types)]
     (map (partial att/make-attachment created target true false false (keyword applicationState)) groups types metadatas)))
 
 (defn multioperation-attachment-updates [operation organization attachments]
@@ -566,7 +570,7 @@
         info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest scope))]
 
-    (when-not organization-id
+    (when (ss/blank? organization-id)
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
     (if info-request?
       (when-not (:inforequest-enabled scope)

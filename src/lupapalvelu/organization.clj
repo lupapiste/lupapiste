@@ -816,7 +816,8 @@
 
 (defn statement-giver-in-organization
   "Pre-check that fails if the user is statementGiver but not defined
-  in the organization."
+  in the organization.
+  Note: this will reject application-authority, so make sure you use this with some-pre-check."
   [{:keys [user organization application]}]
   (when (and application
              (some #(= {:id   (:id user)

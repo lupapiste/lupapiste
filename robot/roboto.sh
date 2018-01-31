@@ -32,6 +32,7 @@ DEFAULT='\033[0m'
 BRIGHT='\033[1m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
+MAGENTA='\033[0;35m' # Timeout color
 
 # kill recursive all leaf processes and the given one
 recursive_kill() { # sig pid indent
@@ -288,7 +289,7 @@ check_env() {
          ;;
       "chrome" )
          CG=$(google-chrome --version)
-         echo "$CG" | grep -q "^Google Chrome \(6[1-3]\)\." || versionfail "Major version '$CG' of Chrome may not work yet. Update ${BASH_SOURCE}:${LINENO} if this is fine."
+         echo "$CG" | grep -q "^Google Chrome \(6[2-4]\)\." || versionfail "Major version '$CG' of Chrome may not work yet. Update ${BASH_SOURCE}:${LINENO} if this is fine."
          # Clean up old Chrome temp files if there
          rm -rf /tmp/.com.google.Chrome.*
          rm -rf /tmp/.org.chromium*
@@ -431,7 +432,9 @@ show_finished() {
    local STATUS=$(grep "tests total" $1 | tail -n 1)
    local COLOR=$GREEN
    local ATTEMPTS=$(grep "pybot exited with" "$1" | sed -e 's/.*round //')
+   local EXIT_CODE=$(grep "pybot exited with" "$1" | sed -E 's/.*exited with ([0-9]+) .*/\1/')
    echo "$STATUS" | grep -q "[^0-9]0 failed" || COLOR=$RED
+   test "$EXIT_CODE" -eq "124" && COLOR=$MAGENTA
    echo -e "$COLOR - $1 done: $STATUS, $ATTEMPTS runs"
    grep -E "FAIL" "$1" | head -n 1 | sed -e 's/^/      /'
    echo -n -e "$DEFAULT"

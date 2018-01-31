@@ -212,6 +212,7 @@
     (start-jetty!)))
 
 (defn start-jmx-server! []
+  (info "Starting JMX...")
   (swap! jmx-server
          (fn [old-server]
            (if (nil? old-server)

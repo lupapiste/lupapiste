@@ -15,7 +15,8 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.application-meta-fields :as meta]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.states :as states])
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :as usr])
   (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)
            (org.apache.poi.xssf.usermodel XSSFWorkbook)
            (org.apache.poi.ss.usermodel CellType)))
@@ -71,6 +72,17 @@
                 {:auth.id company-id
                  :modified {$gte (Long/parseLong start-ts 10)
                             $lte (Long/parseLong end-ts 10)}}))
+
+(defn digitized-applications-between [user start-ts end-ts]
+  (let [base-query {:permitType   "ARK"
+                    :created      {$gte (Long/parseLong start-ts 10)
+                                   $lte (Long/parseLong end-ts 10)}}
+        query      (if (usr/user-is-pure-digitizer? user)
+                     (assoc base-query :auth.id (:id user))
+                     (assoc base-query :organization {$in (usr/organization-ids-by-roles (usr/with-org-auth user) #{:digitizer :archivist :authorityAdmin})}))]
+    (mongo/select :applications
+                  query
+                  [:_id :created :attachments])))
 
 (defn- get-latest-verdict-ts [{verdicts :verdicts}]
   (->> verdicts (sort-by :timestamp) (last) :timestamp))
@@ -266,6 +278,11 @@
                                      "company.report.excel.header.applicant"
                                      "company.report.excel.header.attachment"]))
 
+(defn- digitizer-report-headers [lang]
+  (map (partial i18n/localize lang) ["digitizer.report.excel.header.applicationId"
+                                     "digitizer.report.excel.header.date"
+                                     "digitizer.report.excel.header.attachmentCount"]))
+
 
 (defn- usage [application]
   (when-let [documents (:documents application)]
@@ -338,4 +355,36 @@
                           :row-fn     foreman-row-fn
                           :data       foreman-app-row-data}
         wb (excel/create-workbook (flatten [application-data foreman-app-data]))]
+    (excel/xlsx-stream wb)))
+
+(defn digi-report-data [application]
+  {:date          (util/to-local-date (:created application))
+   :id            (:id application)
+   :attachments   (count (:attachments application))})
+
+(defn digi-report-sum [rows]
+  (->> (group-by :date rows)
+       (map (fn [row] {:date (first row)
+                       :attachments (->> row
+                                         (second)
+                                         (flatten)
+                                         (map :attachments)
+                                         (apply +))}))))
+
+(defn ^OutputStream digitized-attachments [user start-ts end-ts lang]
+  (let [org-ids       (mapv :id (usr/get-organizations user))
+        applications  (digitized-applications-between user start-ts end-ts)
+        row-data      (map #(digi-report-data %) applications)
+        sum-data      (digi-report-sum row-data)
+        sum-sheet     (i18n/localize lang "digitizer.excel.sum.sheet.name")
+        wb            (excel/create-workbook
+                        [{:sheet-name  (i18n/localize lang "digitizer.excel.data.sheet.name")
+                          :header      (digitizer-report-headers lang)
+                          :row-fn      (juxt :id :date :attachments)
+                          :data        row-data}
+                         {:sheet-name  sum-sheet
+                          :header      (rest (digitizer-report-headers lang))
+                          :row-fn      (juxt :date :attachments)
+                          :data        sum-data}])
+        sum-row       (excel/add-sum-row sum-sheet wb [(i18n/localize lang "digitizer.excel.sum") (apply + (map :attachments sum-data))])]
     (excel/xlsx-stream wb)))

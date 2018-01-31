@@ -12,11 +12,8 @@
 (defn change-email-link [lang token]
   (str (env/value :host) "/app/" (name lang) "/welcome#!/email/" token))
 
-(defn change-email-for-company-user-link [lang token]
-  (str (env/value :host) "/app/" (name lang) "/welcome#!/change-email/" token))
-
-(defn change-email-for-financial-authority-link [lang token]
-  (str (env/value :host) "/app/" (name lang) "/welcome#!/change-email-fa/" token))
+(defn change-email-simple [lang token]
+  (str (env/value :host) "/app/" (name lang) "/welcome#!/change-email-simple/" token))
 
 (notifications/defemail :change-email
   {:recipients-fn notifications/from-user
@@ -28,26 +25,23 @@
                     :expires (util/to-local-datetime expires)
                     :link    #(change-email-link % id)})))})
 
+(defn simple-email-model [{data :data} conf recipient]
+  (let [{:keys [id expires]} (:token data)]
+    (merge
+      (select-keys data [:old-email :new-email])
+      {:expires (util/to-local-datetime expires)
+       :link    #(change-email-simple % id)})))
+
 (notifications/defemail :change-email-for-company-user
   {:recipients-fn notifications/from-user
    :subject-key "change-email"
-   :model-fn (fn [{data :data} conf recipient]
-               (let [{:keys [id expires]} (:token data)]
-                 (merge
-                   (select-keys data [:old-email :new-email])
-                   {:expires (util/to-local-datetime expires)
-                    :link    #(change-email-for-company-user-link % id)})))})
+   :model-fn simple-email-model})
 
 (notifications/defemail :change-email-for-financial-authority
                         {:recipients-fn notifications/from-user
                          :subject-key "change-email"
                          :template "change-email-for-company-user.md"
-                         :model-fn (fn [{data :data} conf recipient]
-                                     (let [{:keys [id expires]} (:token data)]
-                                       (merge
-                                         (select-keys data [:old-email :new-email])
-                                         {:expires (util/to-local-datetime expires)
-                                          :link    #(change-email-for-financial-authority-link % id)})))})
+                         :model-fn simple-email-model})
 
 (notifications/defemail :email-changed
   {:recipients-fn (fn [{user :user}]
@@ -93,10 +87,11 @@
   [_]
   (change-email/change-email tokenId stamp))
 
-(defcommand change-financial-authority-email
+(defcommand change-email-simple
   {:parameters [tokenId]
    :input-validators [(partial action/non-blank-parameters [:tokenId])]
    :notified   true
+   :description "Simplified email change for known roles such as company user and financial authority."
    :user-roles #{:anonymous}}
   [_]
   (change-email/change-email tokenId nil))

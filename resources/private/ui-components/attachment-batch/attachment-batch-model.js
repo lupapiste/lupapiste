@@ -26,6 +26,10 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                                                      service.authModel.ok));
   self.isArchivingProject = service.isArchivingProject;
 
+  self.contentsPrevEntriesKey = self.disposedComputed(function() {
+    return self.isArchivingProject() ? "contents" : null;
+  });
+
   var currentHover = ko.observable();
 
   self.fillEvents = function( file, column ) {
@@ -320,6 +324,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     disableRows( true );
     self.bindFailed(false);
     self.badFiles.removeAll();
+
     var statuses = service.bindAttachments( _.map(rows(), function(data, fileId) {
       return { fileId: fileId,
                type: _.pick( data.type.value(), ["type-group", "type-id"] ),

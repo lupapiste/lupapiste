@@ -69,11 +69,39 @@
 
 (defn indexed
   "Returns a lazy sequence of [index, item] pairs, where items come
-  from 's' and indexes count up from zero.
+  from 's' and indexes count up from offset (default: 0).
 
-  (indexed '(a b c d))  =>  ([0 a] [1 b] [2 c] [3 d])"
-  [s]
-  (map vector (iterate inc 0) s))
+  (indexed '(a b c d))    =>  ([0 a] [1 b] [2 c] [3 d])
+  (indexed 1 '(a b c d))  =>  ([1 a] [2 b] [3 c] [4 d])"
+  ([s]
+   (indexed 0 s))
+  ([offset s]
+   (map vector (iterate inc offset) s)))
+
+(defn drop-nth
+  "Drops the nth item from vector, if it exists"
+  [n v]
+  (if (get v n)
+    (into (subvec v 0 n) (subvec v (inc n)))
+    v))
+
+(defn dissoc-in
+  "Dissociates an entry from a nested associative structure returning a new
+  nested structure. keys is a sequence of keys. Any empty maps that result
+  will not be present in the new structure.
+  Supports also vector index values among the keys sequence just like clojure.core/update-in does."
+  [m [k & ks :as keys]]
+  (if ks
+    (if-let [nextmap (get m k)]
+      (let [newmap (dissoc-in nextmap ks)]
+        (if (seq newmap)
+          (assoc m k newmap)
+          (dissoc m k)))
+      m)
+    (if (and (number? k) (sequential? m))
+      (drop-nth k m)
+      (dissoc m k))))
+
 
 ;; ---------------------------------------------
 ;; The following are not aliased in sade.util.

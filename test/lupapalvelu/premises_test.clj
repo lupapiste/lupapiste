@@ -3,36 +3,52 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]))
 
-(testable-privates lupapalvelu.premises csv-data->ifc-coll
+(testable-privates lupapalvelu.premises csv->header-and-data
                                         ifc-to-lupapiste-keys
-                                        premise->updates)
+                                        premise->updates
+                                        data->model-updates
+                                        pick-only-header-and-data-rows)
 
-(fact "csv-data-comes-out-as-a-key-val-map"
-  (csv-data->ifc-coll "Porras;Huoneistonumero;Huoneiston jakokirjain;Sijaintikerros;Huoneiden lukumäärä;Keittiötyyppi;Huoneistoala;Varusteena WC;Varusteena amme/suihku;Varusteena parveke;Varusteena Sauna;Varusteena lämmin vesi\nA;001;;2;2;3;56;1;1;1;1;1")
-      => [{"sijaintikerros" "2"
-           "porras" "A"
-           "varusteena amme/suihku" "1"
-           "varusteena wc" "1"
-           "huoneistonumero" "001"
-           "varusteena parveke" "1"
-           "varusteena sauna" "1"
-           "huoneistoala" "56"
-           "keittiötyyppi" "3"
-           "huoneiden lukumäärä" "2"
-           "varusteena lämmin vesi" "1"
-           "huoneiston jakokirjain" ""}])
+(fact "picking header and data rows"
+  (let [sample-data [["info-line"]
+                     ["Porras" "Huoneistonumero" "Huoneiston jakokirjain" "Sijaintikerros"
+                      "Huoneiden lukum\u00e4\u00e4r\u00e4" "Keitti\u00f6tyyppi" "Huoneistoala"
+                      "Varusteena WC" "Varusteena amme/suihku" "Varusteena parveke"
+                      "Varusteena Sauna"  "Varusteena l\u00e4mmin vesi"]
+                     ["A" "001" "" "2" "2" "3" "56" "1" "1" "1" "1" "1"]]]
+    (pick-only-header-and-data-rows sample-data)
+    => {:header [:porras :huoneistonumero :jakokirjain :sijaintikerros :huoneluku :keittionTyyppi :huoneistoala
+                 :WCKytkin :ammeTaiSuihkuKytkin :parvekeTaiTerassiKytkin :saunaKytkin :lamminvesiKytkin]
+        :data [["A" "001" "" "2" "2" "3" "56" "1" "1" "1" "1" "1"]]}))
+
+(fact "works with lupapiste labels also"
+  (let [sample-data [["test-rows"]
+                     ["info-line"]
+                     ["Huoneiston tyyppi" "Porras" "Huoneiston numero" "Jakokirjain" "Huoneluku"
+                        "Keitti\u00f6n tyyppi" "Huoneistoala m2" "WC" "Amme/ suihku" "Parveke/ terassi"
+                        "Sauna" "L\u00e4mmin vesi"]
+                     ["1" "A" "001" "" "2" "3" "56" "1" "1" "1" "1" "1"]]]
+    (pick-only-header-and-data-rows sample-data)
+    => {:header [:huoneistoTyyppi :porras :huoneistonumero :jakokirjain :huoneluku :keittionTyyppi :huoneistoala
+                 :WCKytkin :ammeTaiSuihkuKytkin :parvekeTaiTerassiKytkin :saunaKytkin :lamminvesiKytkin]
+        :data [["1" "A" "001" "" "2" "3" "56" "1" "1" "1" "1" "1"]]}))
+
+(fact "csv-data comes out as a header-data-map"
+  (csv->header-and-data "Porras;Huoneistonumero;Huoneiston jakokirjain;Sijaintikerros;Huoneiden lukum\u00e4\u00e4r\u00e4;Keitti\u00f6tyyppi;Huoneistoala;Varusteena WC;Varusteena amme/suihku;Varusteena parveke;Varusteena Sauna;Varusteena l\u00e4mmin vesi\nA;001;;2;2;3;56;1;1;1;1;1")
+      => {:header [:porras :huoneistonumero :jakokirjain :sijaintikerros :huoneluku :keittionTyyppi :huoneistoala
+                   :WCKytkin :ammeTaiSuihkuKytkin :parvekeTaiTerassiKytkin :saunaKytkin :lamminvesiKytkin]
+          :data    [["A" "001" "" "2" "2" "3" "56" "1" "1" "1" "1" "1"]]})
 
 (fact "premise data becomes updates data"
-      (let [input (csv-data->ifc-coll "Porras;Huoneistonumero;Huoneiston jakokirjain;Huoneiden lukumäärä;Keittiötyyppi;Huoneistoala;Varusteena WC;Varusteena amme/suihku;Varusteena parveke;Varusteena Sauna;Varusteena lämmin vesi\nA;001;;2;3;56;1;1;1;1;1")]
-        (set (first (map #(premise->updates % 0) input))))
-      => #{["huoneistot.0.porras" "A"]
-           ["huoneistot.0.huoneistonumero" "001"]
-           ["huoneistot.0.huoneluku" "2"]
-           ["huoneistot.0.keittionTyyppi" "keittotila"]
-           ["huoneistot.0.huoneistoala" "56"]
-           ["huoneistot.0.WCKytkin" true]
-           ["huoneistot.0.ammeTaiSuihkuKytkin" true]
-           ["huoneistot.0.parvekeTaiTerassiKytkin" true]
-           ["huoneistot.0.saunaKytkin" true]
-           ["huoneistot.0.lamminvesiKytkin" true]})
-
+      (let [{header :header data :data} (csv->header-and-data "Porras;Huoneistonumero;Huoneiston jakokirjain;Sijaintikerros;Huoneiden lukum\u00e4\u00e4r\u00e4;Keitti\u00f6tyyppi;Huoneistoala;Varusteena WC;Varusteena amme/suihku;Varusteena parveke;Varusteena Sauna;Varusteena l\u00e4mmin vesi\nA;001;;2;2;3;56;1;1;1;1;1")]
+        (set (data->model-updates header data)))
+      => #{[[:huoneistot :0 :porras] "A"]
+           [[:huoneistot :0 :huoneistonumero] "001"]
+           [[:huoneistot :0 :huoneluku] "2"]
+           [[:huoneistot :0 :keittionTyyppi] "keittotila"]
+           [[:huoneistot :0 :huoneistoala] "56"]
+           [[:huoneistot :0 :WCKytkin] true]
+           [[:huoneistot :0 :ammeTaiSuihkuKytkin] true]
+           [[:huoneistot :0 :parvekeTaiTerassiKytkin] true]
+           [[:huoneistot :0 :saunaKytkin] true]
+           [[:huoneistot :0 :lamminvesiKytkin] true]})

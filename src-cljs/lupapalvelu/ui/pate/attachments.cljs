@@ -1,11 +1,14 @@
 (ns lupapalvelu.ui.pate.attachments
   "Attachments related components and utilities for Pate."
-  (:require [clojure.string :as s]
+  (:require [clojure.set :as set]
+            [clojure.string :as s]
             [lupapalvelu.ui.attachment.components :as att]
             [lupapalvelu.ui.attachment.file-upload :as upload]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
+            [lupapalvelu.ui.pate.components :as pate-components]
+            [lupapalvelu.ui.pate.docgen :as docgen]
             [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.state :as state]
@@ -222,10 +225,10 @@
               :progress (td-progress (:progress filedata))
               [
                [:td.batch--type
-                {:key (path/unique-id "batch-type")}
+                {:key (common/unique-id "batch-type")}
                 (type-selector options filedata)]
                [:td.batch--contents
-                {:key (path/unique-id "batch-contents")}
+                {:key (common/unique-id "batch-contents")}
                 (contents-editor options filedata)]])
             [:td.td-center
              (when-not binding?
@@ -252,13 +255,16 @@
    [:br]
    (js/util.finnishDate created)])
 
-(rum/defc attachments-list < rum/reactive
+(defn attachments-refresh-mixin []
   (rum-util/hubscribe "attachmentsService::changed"
                       {}
                       (fn [state]
                         (-> state
                             :rum/react-component
-                            rum/request-render)))
+                            rum/request-render))))
+
+(rum/defc attachments-list < rum/reactive
+  (attachments-refresh-mixin)
   [{:keys [files*] :as options}]
   (when (-> files* rum/react empty?)
     (let [include?    (or (path/meta-value options :include?) identity)
@@ -278,8 +284,7 @@
                               {:on-click #(att/delete-with-confirmation attachment)}]])])]])))
 
 (rum/defc pate-attachments < rum/reactive
-  "Displays and supports adding new attachments. This cannot be
-  reactive since we want the input-id to remain somewhat constant."
+  "Displays and supports adding new attachments."
   [{:keys [schema path state] :as options}]
   (let [files*    (atom [])
         fields*   (atom {})
@@ -299,3 +304,143 @@
                                           input
                                           (add-file-label binding?*
                                                           input-id)])}))]))
+
+(defn- cmp-attachments
+  "Attachments sorting order is:
+   1. Type localization
+   2. Filename"
+  [{{a-group :type-group a-type :type-id} :type a-filename :filename}
+   {{b-group :type-group b-type :type-id} :type b-filename :filename}]
+  (let [type-cmp (compare (type-loc a-group a-type)
+                          (type-loc b-group b-type))]
+    (if (zero? type-cmp)
+      (compare a-filename b-filename)
+      type-cmp)))
+
+(defn attachment-items
+  "If grouped? is true (default false) the items are grouped by attachment
+  type groups."
+  ([grouped?]
+   (let [items (->> (service/attachments)
+                    (filter #(some-> % :latestVersion :fileId))
+                    (map #(assoc (select-keys % [:type :id])
+                                 :filename (get-in % [:latestVersion
+                                                      :filename])
+                                 :target-id (get-in % [:target :id]))))]
+     (if grouped?
+       (->> items
+            (group-by #(-> % :type :type-group))
+            (reduce-kv (fn [acc k v]
+                         (assoc acc k (sort cmp-attachments v)))
+                       {}))
+       (sort cmp-attachments items))))
+  ([] (attachment-items false)))
+
+(rum/defcs select-application-attachments < rum/reactive
+  (components/initial-value-mixin ::selected)
+  (attachments-refresh-mixin)
+  "Editor for selecting application attachments. The selection result
+  is a set of attachment ids. Parameters [optional]:
+
+  callback: Callback function that receives collection of attachment
+  ids as parameter.
+
+  [disabled?]: If true, the component is disabled.
+
+  [target-id]: Attachments matching the target-id are always
+  selected. The use case for this is the situation, where a verdict
+  attachment has been previously added. Since selection does not
+  modify attachments, we cannot allow discrepancy where a verdict
+  attachment is marked non-verdict attachment."
+  [{selected* ::selected} _ {:keys [callback disabled? target-id]}]
+  (let [group-loc       #(type-loc (get-in % [:type :type-group] %)
+                                   :_group_label)
+        targeted?       #(= (:target-id %) target-id)
+        selected?       #(or (targeted? %)
+                             (-> selected* rum/react set (contains? (:id %))))
+        att-items       (attachment-items true)
+        group-selected? #(->> (get att-items %)
+                              (remove targeted?)
+                              (every? selected?))
+        toggle          (fn [ids flag]
+                          (swap! selected*
+                                 (fn [selected]
+                                   (let [result (if flag
+                                                  (set/union (set selected)
+                                                             (set ids))
+                                                  (set/difference (set selected)
+                                                                  (set ids)))]
+                                     (callback result)
+                                     result))))
+        items           (reduce (fn [acc k]
+                                  (concat acc (cons {:group k} (get att-items k))))
+                                []
+                                (sort #(compare (group-loc %1) (group-loc %2))
+                                      (keys att-items)))]
+    (if (seq items)
+      [:div.pate-select-application-attachments
+       (for [{:keys [group type id filename] :as item} items]
+         [:div
+          {:key (or id group)}
+          (components/checkbox
+           (if group
+             {:text       (group-loc group)
+              :value      (group-selected? group)
+              :prefix     :pate-attachment-group
+              :handler-fn #(toggle (map :id (get att-items group)) %)
+              :disabled   disabled?}
+             {:text       (str (type-loc (:type-group type)
+                                         (:type-id type))
+                               ". " filename)
+              :value      (selected? item)
+              :prefix     :pate-attachment-check
+              :handler-fn #(toggle [id] %)
+              :disabled   (or disabled? (targeted? item))}))])]
+      [:span (common/loc :pate.no-attachments)])))
+
+(rum/defc pate-select-application-attachments < rum/reactive
+  [{:keys [schema path state info] :as options} & [wrap-label?]]
+  (cond->> (select-application-attachments (path/state path state)
+                                           {:callback  (partial path/meta-updated
+                                                                options)
+                                            :disabled? (path/disabled? options)
+                                            :target-id (path/value :id info)})
+    (pate-components/show-label? schema wrap-label?)
+    (docgen/docgen-label-wrap options)))
+
+
+(defn- attachments-table
+  "Items are maps with type-string and amount keys."
+  [items]
+  [:div.tabby.pate-application-attachments
+   (for [{:keys [type-string amount]} (sort-by :type-string items)]
+       [:div.tabby__row
+        {:key type-string}
+        [:div.tabby__cell type-string]
+        [:div.tabby__cell.amount amount]
+        [:div.tabby__cell (common/loc :unit.kpl)]])])
+
+(rum/defc pate-application-attachments < rum/reactive
+  (attachments-refresh-mixin)
+  [{:keys [path state info]}]
+  (let [verdict-id (path/value :id info)
+        marked     (set (path/react path state))]
+    (->> (attachment-items)
+         (filter (fn [{:keys [id target-id]}]
+                   (or (contains? marked id)
+                       (= target-id verdict-id))))
+         (group-by #(type-loc (-> % :type :type-group)
+                              (-> % :type :type-id)))
+         (map (fn [[k v]]
+                {:type-string k
+                 :amount      (count v)}))
+         attachments-table)))
+
+(rum/defc pate-frozen-application-attachments
+  "When a verdict is published its attachments list is frozen."
+  [{:keys [path state]}]
+  (->> (path/value path state)
+       (map (fn [{:keys [type-group type-id amount]}]
+          {:type-string (type-loc type-group type-id)
+           :amount      amount}))
+       attachments-table))

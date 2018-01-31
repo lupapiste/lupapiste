@@ -409,7 +409,7 @@
 
    :change-email {:depends [:common-html]
                   :js ["change-email.js"]
-                  :html ["init-email-change.html" "change-email.html" "change-email-fa.html"]}
+                  :html ["init-email-change.html" "change-email.html" "change-email-simple.html"]}
 
    :integration-error {:js [ "integration-error.js"]
                        :html ["integration-error.html"]}

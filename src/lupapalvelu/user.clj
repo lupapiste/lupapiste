@@ -26,14 +26,6 @@
 ;; User schema
 ;;
 
-(def user-skeleton
-  {:id        ""
-   :firstName ""
-   :lastName  ""
-   :role      "dummy"
-   :email     "dummy@example.com"
-   :username  "dummy@example.com"
-   :enabled   false})
 
 (defschema SearchFilter
   {:id        sc/Str
@@ -48,7 +40,7 @@
               (sc/optional-key :areas)         [sc/Str]
               (sc/optional-key :event)        [sc/Str]}})
 
-(def Id sc/Str) ; Variation of user ids in different environments is too diverse for a simple customized schema.
+(def Id (ssc/min-length-string 1)) ; Variation of user ids in different environments is too diverse for a simple customized schema.
 
 (def all-roles
   "vector of role strings that can be used in User's :role field"
@@ -343,6 +335,11 @@
   (let [archive-orgs (organization-ids-by-roles user #{:archivist})
         org-set (if organization (set/intersection #{organization} archive-orgs) archive-orgs)]
     (and (seq org-set) (org/some-organization-has-archive-enabled? org-set))))
+
+(defn user-is-pure-digitizer? [user]
+  (let [all-roles (apply set/union (vals (:orgAuthz (with-org-auth user))))]
+    (and (authority? user)
+         (every? #(= % :digitizer) all-roles))))
 
 (defn check-password-pre-check [{{:keys [password]} :data user :user}]
   (when-not (security/check-password password

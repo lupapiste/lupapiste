@@ -4,6 +4,7 @@
             [clojure.set :refer [rename-keys] :as set]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.assignment :as assignment]
@@ -37,7 +38,7 @@
             [sade.strings :as str]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs fn->>] :as util]
             [sade.validators :as v]
-            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]])
+            [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]])
   (:import [org.joda.time DateTime]))
 
 (defn drop-schema-data [document]
@@ -3665,6 +3666,47 @@
 (defmigration pate-to-matti-integration-messages
   {:apply-when (pos? (mongo/count :integration-messages {:partner "pate"}))}
   (mongo/update-by-query :integration-messages {:partner "pate"} {$set {:partner "matti"}}))
+
+(defn id-to-file-id [attachment]
+  (set/rename-keys attachment {:id :fileId}))
+
+(defmigration bulletin-comment-attachments-fileids
+  {:apply-when (pos? (mongo/count :application-bulletin-comments {:attachments.id {$exists true}}))}
+  (doseq [comment (mongo/select :application-bulletin-comments {:attachments.id {$exists true}})
+          :let [attachments (->> (:attachments comment)
+                                 (map id-to-file-id)
+                                 (map #(dissoc % :metadata)))]]
+    (when-let [err (some bulletins/comment-file-checker attachments)]
+      (throw (ex-info "bulletin-comment migration failure" {:err (pr-str err) :comment (:id comment)})))
+    (mongo/update-by-id :application-bulletin-comments (:id comment) {$set {:attachments attachments}})))
+
+(defmigration bulletin-comment-attachments-metadata
+  {:apply-when (pos? (mongo/count :application-bulletin-comments {:attachments.metadata {$exists true}}))}
+  (doseq [comment (mongo/select :application-bulletin-comments {:attachments.metadata {$exists true}})
+          :let [attachments (->> (:attachments comment)
+                                 (map #(dissoc % :metadata)))]]
+    (when-let [err (some bulletins/comment-file-checker attachments)]
+      (throw (ex-info "bulletin-comment-metadata migration failure" {:err (pr-str err) :comment (:id comment)})))
+    (mongo/update-by-id :application-bulletin-comments (:id comment) {$set {:attachments attachments}})))
+
+(defn fix-company-auth
+  "Fix some legacy company invites, which are missing 'company-role' and possibly 'id'"
+  [{:keys [type company-role invite id] :as auth}]
+  (if (and (= "company" type) (nil? company-role) (map? invite))
+    (assoc auth :company-role "admin" :id (get-in invite [:user :id] id))
+    auth))
+
+(defmigration legacy-company-auth-invites
+  {:apply-when (pos? (mongo/count :applications {:auth
+                                                 {$elemMatch
+                                                  {:type "company",
+                                                   :company-role {$exists false},
+                                                   :invite {$exists true}}}}))}
+  (update-applications-array :auth fix-company-auth {:auth
+                                                     {$elemMatch
+                                                      {:type "company",
+                                                       :company-role {$exists false},
+                                                       :invite {$exists true}}}}))
 
 ;;
 ;; ****** NOTE! ******

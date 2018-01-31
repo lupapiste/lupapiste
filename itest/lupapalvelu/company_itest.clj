@@ -20,10 +20,11 @@
 (defn register-user [email password]
   (http-token-call (token-from-email email) {:password password}))
 
-(defn check-invitation-details [email & kv]
+(defn check-invitation-details [apikey company email & kv]
   (fact {:midje/description (str "Check invitation for " email)}
-        (let [{invitations :invitations} (query kaino :company :company "solita" :users true)
+        (let [{invitations :invitations :as res} (query apikey :company :company company :users true)
               [details] (filter #(= email (:email %)) invitations)]
+          res => ok?
           details) => (contains (apply array-map kv))))
 
 (defn check-user-details [email & kv]
@@ -54,7 +55,7 @@
                 (count (:users company)) => 1))
 
         (fact "Invitation details are correct"
-              (check-invitation-details (email-for-key teppo) :role "user" :submit false :firstName "Teppo" :lastName "Nieminen"))
+              (check-invitation-details kaino "solita" (email-for-key teppo) :role "user" :submit false :firstName "Teppo" :lastName "Nieminen"))
 
         (fact "Invitation is accepted"
               (accept-invitation (email-for-key teppo)))
@@ -181,12 +182,11 @@
        (fact "Now foobar is already invited"
              (query kaino :company-search-user :email foobar) => (result :already-invited))
        (fact "Invitation details"
-             (check-invitation-details foobar :firstName "Foo" :lastName "Bar" :role "admin" :submit true))
+             (check-invitation-details kaino "solita" foobar :firstName "Foo" :lastName "Bar" :role "admin" :submit true))
        (facts "Foobar accepts invitation and registers"
               (register-user foobar "password1234"))
        (fact "User details"
              (check-user-details foobar :firstName "Foo" :lastName "Bar" :company {:role "admin" :submit true})))
-
 
 (facts* "Company details"
   (let [company-id "solita"]
@@ -572,3 +572,45 @@
     (fact "erkki sees tag he just added"
       (let [app (query-application erkki (:id app))]
         (:company-notes app) => [{:companyId "esimerkki" :tags [(:id (last esimerkki-tags))]}]))))
+
+(facts "company user change-email"                          ; LPK-2641 & LP-365695
+  (apply-remote-fixture "company-application")
+  (let [store (atom {})
+        cookie (->cookie-store store)
+        params {:cookies      {"anti-csrf-token" {:value "my-token"}}
+                :headers      {"x-anti-forgery-token" "my-token"}
+                :cookie-store cookie
+                :as :json}
+        new-email "foo2@example.com"
+        raw-ok? #(= true (get-in % [:body :ok]))]
+    (fact "Erkki adds user foobar"
+      (command erkki :company-add-user :firstName "Foo" :lastName "Bar" :email foobar :admin false :submit true) => ok?)
+    (fact "Invitation details"
+      (check-invitation-details erkki "esimerkki" foobar :firstName "Foo" :lastName "Bar" :role "user" :submit true)
+      (register-user foobar "password1234"))
+    (fact "foobar has working credentials"
+      (http-post (str (server-address) "/api/login")
+                 (assoc params
+                   :form-params
+                   {:username foobar :password "password1234"})) => raw-ok?)
+    (fact "foobar can init email-change"
+      (http-post (str (server-address) "/api/command/change-email-init")
+                 (-> params
+                     (assoc-in [:headers "content-type"] "application/json;charset=utf-8")
+                     (assoc :body (json/encode {:email new-email})))) => raw-ok?)
+    (let [token (token-from-email "foo2@example.com")]
+      (fact "foobar can change email with change-email-simple, no need for identification service"
+        (http-post (str (server-address) "/api/command/change-email-simple")
+                   (-> params
+                       (assoc-in [:headers "content-type"] "application/json;charset=utf-8")
+                       (assoc :body (json/encode {:tokenId token})))) => raw-ok?)
+      (fact "foobar can't login with old email"
+        (http-post (str (server-address) "/api/login")
+                   (assoc params
+                     :form-params
+                     {:username foobar :password "password1234"})) =not=> raw-ok?)
+      (fact "foobar can login with new email"
+        (http-post (str (server-address) "/api/login")
+                   (assoc params
+                     :form-params
+                     {:username "foo2@example.com" :password "password1234"})) => raw-ok?))))

@@ -63,6 +63,9 @@
 (defn json-coercer [schema]
   (coerce/coercer schema coerce/json-coercion-matcher))
 
+(defn json-coercer! [schema]
+  (coerce/coercer! schema coerce/json-coercion-matcher))
+
 ;;
 ;; Schemas
 ;;
