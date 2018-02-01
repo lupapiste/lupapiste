@@ -6,8 +6,9 @@
                                       :application/mark-everything-seen
                                       :application/change-location-in-pre-verdict-states
                                       :application/edit-drawings}}
- :organization {:roles/any          #{:application/mark-everything-seen}
+ :organization {:authorityAdmin     #{}
                 :authority          #{:application/read
+                                      :application/mark-everything-seen
                                       :application/submit
                                       :application/request-for-complement
                                       :application/cancel
@@ -42,6 +43,7 @@
                                       :application/check-within-archiving-time-limit}
                 :approver           #{:application/approve  ;; TODO: could this be just 'approve', as in a supplement for :authority role. Then just 'approver' role couldn't exist.
                                       :application/read
+                                      :application/mark-everything-seen
                                       :application/submit
                                       :application/request-for-complement
                                       :application/cancel
@@ -75,20 +77,26 @@
                                       :application/check-final-archiving-state
                                       :application/check-within-archiving-time-limit}
                 :commenter          #{:application/read
+                                      :application/mark-everything-seen
                                       :application/show-foreman-history
                                       :application/read-authority-notice}
                 :reader             #{:application/read
+                                      :application/mark-everything-seen
                                       :application/show-foreman-history
                                       :application/read-authority-notice}
-                :tos-editor         #{:application/edit-tos-function}
-                :archivist          #{:application/archive}
-                :digitizer          #{:application/show-authorities}
+                :tos-publisher      #{:application/mark-everything-seen}
+                :tos-editor         #{:application/edit-tos-function
+                                      :application/mark-everything-seen}
+                :archivist          #{:application/archive
+                                      :application/mark-everything-seen}
+                :digitizer          #{:application/show-authorities
+                                      :application/mark-everything-seen}
                 :statementGiver     #{:application/set-urgency
                                       :application/set-authority-notice
                                       :application/read-authority-notice}}
- :application  {:roles/any          #{:application/read
-                                      :application/accordions-open}
-                :owner              #{:application/edit-draft
+ :application  {:owner              #{:application/read
+                                      :application/accordions-open
+                                      :application/edit-draft
                                       :application/submit
                                       :application/cancel-in-restricted-states
                                       :application/edit
@@ -101,7 +109,9 @@
                                       :application/create-continuation-period-permit
                                       :application/create-foreman-app-in-post-verdict-states
                                       :application/convert-to-application}
-                :writer             #{:application/edit-draft
+                :writer             #{:application/read
+                                      :application/accordions-open
+                                      :application/edit-draft
                                       :application/submit
                                       :application/cancel-in-restricted-states
                                       :application/edit
@@ -113,7 +123,19 @@
                                       :application/create-change-permit
                                       :application/create-continuation-period-permit
                                       :application/create-foreman-app-in-post-verdict-states
-                                      :application/convert-to-application}}
+                                      :application/convert-to-application}
+                :reader             #{:application/read
+                                      :application/accordions-open}
+                :foreman            #{:application/read
+                                      :application/accordions-open}
+                :guest              #{:application/read
+                                      :application/accordions-open}
+                :guestAuthority     #{:application/read
+                                      :application/accordions-open}
+                :financialAuthority #{:application/read
+                                      :application/accordions-open}
+                :statementGiver     #{:application/read
+                                      :application/accordions-open}}
  :inforequest  {:owner              #{:application/cancel}
                 :writer             #{:application/cancel}}
  :canceled-app {:canceler           #{:application/undo-cancelation}}
