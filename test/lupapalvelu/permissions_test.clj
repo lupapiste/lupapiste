@@ -11,9 +11,7 @@
                                        :test/fail}
                   :another-test-role #{:test/fail}}
    :test-scope-b {:tester            #{:test/test
-                                       :test/do}}
-   :test-scope-c {:roles/any         #{:test/fail}
-                  :tester            #{:test/test}}})
+                                       :test/do}}})
 
 (defpermissions :test-more
   {:test-scope   {:test-role         #{:test-more/test}}})
@@ -75,16 +73,7 @@
     (get-permissions-by-role :test-scope nil) => #{})
 
   (fact "nil scope"
-    (get-permissions-by-role nil "test-role") => #{})
-
-  (fact ":roles/any with some role"
-    (get-permissions-by-role :test-scope-c "some-role") => #{:test/fail})
-
-  (fact ":roles/any with tester role"
-    (get-permissions-by-role :test-scope-c "tester") => #{:test/fail :test/test})
-
-  (fact ":roles/any is not applied if role is nil"
-    (get-permissions-by-role :test-scope-c nil) => #{}))
+    (get-permissions-by-role nil "test-role") => #{}))
 
 (facts get-global-permissions
   (fact "permissions resolved"

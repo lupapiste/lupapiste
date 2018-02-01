@@ -47,11 +47,7 @@
   `(every? (get ~command :permissions #{}) ~required-permissions))
 
 (defn get-permissions-by-role [scope role]
-  (set/union
-   (get-in @permission-tree [(keyword scope) (keyword role)] #{})
-   (when role
-     (get-in @permission-tree [(keyword scope) :roles/any]))))
-
+  (get-in @permission-tree [(keyword scope) (keyword role)] #{}))
 
 (defn get-global-permissions [{{role :role} :user}]
   (get-permissions-by-role :global (keyword role)))
