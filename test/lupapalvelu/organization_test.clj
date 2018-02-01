@@ -121,3 +121,39 @@
     (get-building-wfs ..query.. permit-type) => (just {:url "foo" :version "1"})
     (provided
       (mongo/select-one :organizations ..query.. [:krysp]) => (conf {:buildingUrl "foo" :version "1" :url "jee"}))))
+
+#_(defn bulletin-settings-for-scope
+[organization permit-type municipality]
+(let [scopes (cond->> (:scope organization)
+                      permit-type  (filter (comp #{permit-type} :permitType))
+                      municipality (filter (comp #{municipality} :municipality)))]
+  (some :bulletins scopes)))
+
+(facts "bulletin-settings-for-scope"
+  (fact "no active scope"
+    (bulletin-settings-for-scope
+      {:scope [{:permitType "R"
+                :municipality "991"
+                :bulletins false}]} "R" "991") => nil)
+  (fact "active R scope"
+    (bulletin-settings-for-scope
+      {:scope [{:permitType "R"
+                :municipality "991"
+                :bulletins {:foo :bar}}
+               {:permitType "P"
+                :municipality "991"
+                :bulletins false}]} "R" "991") => {:foo :bar}
+    (bulletin-settings-for-scope
+      {:scope [{:permitType "R"
+                :municipality "991"
+                :bulletins {:foo :bar}}
+               {:permitType "P"
+                :municipality "991"
+                :bulletins false}]} "R" "992") => nil
+    (bulletin-settings-for-scope
+      {:scope [{:permitType "R"
+                :municipality "991"
+                :bulletins {:foo :bar}}
+               {:permitType "P"
+                :municipality "991"
+                :bulletins false}]} "P" "991") => nil))

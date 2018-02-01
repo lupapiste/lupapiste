@@ -471,9 +471,10 @@
                         :kuvaus (get-text asia [:rakennusvalvontaasianKuvaus])}))
        (remove #(ss/blank? (:kuvaus %)))))
 
-(defmethod permit/read-permit-descriptions-from-xml :R
-  [_ xml]
-  (->rakval-app-descriptions xml))
+(defn read-permit-descriptions-from-xml
+  [permit-type xml]
+  (when (#{:R} (keyword permit-type))
+    (->rakval-app-descriptions xml)))
 
 (defmulti ->verdicts
   "Reads the verdicts."

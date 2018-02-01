@@ -1285,7 +1285,8 @@
              :municipality "753"
              :bulletins {:enabled true
                          :url "http://localhost:8000/dev/julkipano"
-                         :notification-email "pena@example.com"}}
+                         :notification-email "pena@example.com"
+                         :descriptions-from-backend-system true}}
             {:permitType "P"
              :municipality "753"
              :bulletins {:enabled true
@@ -1313,7 +1314,8 @@
            :municipality "753"
            :bulletins {:enabled true
                        :url "http://localhost:8000/dev/julkipano"
-                       :notification-email "pena@example.com"}}
+                       :notification-email "pena@example.com"
+                       :descriptions-from-backend-system true}}
           {:permitType "P"
            :municipality "753"
            :bulletins {:enabled true

@@ -170,17 +170,21 @@
     (ok :bulletin-scopes scopes
         :local-bulletins-page-texts texts)))
 
+(defn- bulletin-scope-settings-validator
+  [{{:keys [notificationEmail descriptionsFromBackendSystem]} :data}]
+  (when (and notificationEmail (not (v/valid-email? notificationEmail))
+             (fail! :error.email)))
+  (when (and descriptionsFromBackendSystem (not (util/boolean? descriptionsFromBackendSystem)))
+    (fail! :error.invalid-value)))
+
 (defcommand update-organization-bulletin-scope
   {:user-roles #{:authorityAdmin}
    :parameters [permitType municipality]
    :optional-parameters [notificationEmail descriptionsFromBackendSystem]
-   :input-validators [permit/permit-type-validator]
+   :input-validators [permit/permit-type-validator
+                      bulletin-scope-settings-validator]
    :pre-checks [check-bulletins-enabled]}
   [{user :user data :data}]
-  (when-not (v/valid-email? notificationEmail)
-    (fail! :error.email))
-  (when-not (util/boolean? descriptionsFromBackendSystem)
-    (fail! :error.invalid-value))
   (let [updates (merge (when (util/not-empty-or-nil? notificationEmail)
                          {:scope.$.bulletins.notification-email notificationEmail})
                        (when (contains? data :descriptionsFromBackendSystem)

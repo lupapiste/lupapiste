@@ -3689,14 +3689,6 @@
       (throw (ex-info "bulletin-comment-metadata migration failure" {:err (pr-str err) :comment (:id comment)})))
     (mongo/update-by-id :application-bulletin-comments (:id comment) {$set {:attachments attachments}})))
 
-(defmigration app-bulletin-descriptions-from-backend-false
-  {:apply-when (pos? (mongo/count :organizations
-                                  {:scope {"$elemMatch" {:bulletins {$exists true}
-                                                         :bulletins.descriptions-from-backend-system {$exists false}}}}))}
-  (mongo/update-by-query :organizations
-                         {:scope {"$elemMatch" {:bulletins {$exists true}
-                                                :bulletins.descriptions-from-backend-system {$exists false}}}}
-                         {$set {:scope.$.bulletins.descriptions-from-backend-system true}}))
 
 ;;
 ;; ****** NOTE! ******
