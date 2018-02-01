@@ -46,6 +46,13 @@
   {:pre [(every? known-permission? required-permissions)]}
   `(every? (get ~command :permissions #{}) ~required-permissions))
 
+(defn roles-in-scope-with-permissions [scope required-permissions]
+  {:pre [(every? known-permission? required-permissions)]}
+  (->> (get @permission-tree (keyword scope))
+       (keep (fn [[role permissions]]
+               (when (every? (set permissions) required-permissions) role)))
+       set))
+
 (defn get-permissions-by-role [scope role]
   (get-in @permission-tree [(keyword scope) (keyword role)] #{}))
 

@@ -2,6 +2,7 @@
   (:require [clojure.set :refer [union]]
             [lupapalvelu.user :as usr]
             [lupapalvelu.roles :refer :all]
+            [lupapalvelu.permissions :as permissions]
             [lupapalvelu.application-schema :as aps]
             [lupapalvelu.document.tools :as doc-tools]
             [schema.core :refer [defschema] :as sc]
@@ -52,6 +53,15 @@
 ;;
 ;; Auth utils
 ;;
+
+(defn get-auths-by-permissions
+  ([application permissions]
+   (get-auths-by-permissions application permissions [:application]))
+  ([{auth :auth} permissions scopes]
+   (let [roles (->> scopes
+                    (map #(permissions/roles-in-scope-with-permissions % permissions))
+                    (reduce into #{}))]
+     (filter (comp roles keyword :role) auth))))
 
 (defn get-auths-by-roles
   "Returns sequence of all auth-entries in an application with the
