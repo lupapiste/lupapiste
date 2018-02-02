@@ -11,8 +11,9 @@
             [lupapalvelu.inspection-summary :as inspection-summary]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.date :as date]
-            [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.pdf :as pdf]
+            [lupapalvelu.pate.review :as review]
+            [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.tasks :as pate-tasks]
             [lupapalvelu.pate.verdict-template :as template]
@@ -575,8 +576,10 @@
                               (map (fn [[k v]]
                                      (assoc k :amount (count v)))))))}))
 
-(defn pate-verdict->tasks [application verdict timestamp]
-  (map (partial review->task verdict timestamp) (get-in verdict [:data :reviews])))
+(defn pate-verdict->tasks [verdict timestamp]
+  (->> (get-in verdict [:data :reviews])
+       (map (partial review/review->task verdict timestamp))
+       (remove nil?)))
 
 (defn publish-verdict
   "Publishing verdict does the following:

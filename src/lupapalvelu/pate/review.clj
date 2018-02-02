@@ -1,11 +1,7 @@
 (ns lupapalvelu.pate.review
   (:require [lupapalvelu.tasks :as tasks]
-            [lupapalvelu.pate.shared :as pate-shared]))
-
-; 'meta' arg is for example:
-#_{:created timestamp
-   :assignee (user/get-user-by-id (:id owner))}
-; but 'assignee' is obsolete, created is enough
+            [lupapalvelu.pate.shared :as pate-shared]
+            [sade.shared-util :as util]))
 
 #_(defn- verdict->tasks [verdict meta application]
   (map
@@ -57,18 +53,19 @@
       ;; (debugf "katselmus->task: made task with schema-name %s, id %s, katselmuksenLaji %s" schema-name (:id task) (:katselmuksenLaji data))
       task))
 
-(defn review->task [verdict ts pate-review]
-  (let [source {:type "verdict" :id (:id verdict)}
-        data {:katselmuksenLaji   (pate-shared/review-type-map (or (keyword (:type pate-review)) :ei-tiedossa))
-              :vaadittuLupaehtona true
-              :rakennus           nil #_(merge-rakennustieto rakennustieto ; TODO get buildings after LPK-3533 is done
-                                                       (rakennus-data-from-buildings {} buildings))
-              :katselmus          {:tila nil                ; data should be empty, as this is just placeholder task
-                                   :pitaja nil
-                                   :pitoPvm nil
-                                   :lasnaolijat ""
-                                   :huomautukset {:kuvaus ""}
-                                   :poikkeamat ""}}
-        review-name (get-in pate-review [:name :fi])        ;; TODO localization should be stripped out and localized to lang defined in verdict
+(defn review->task [{{reviews :reviews} :references :as verdict} ts pate-review-id]
+  (when-some [pate-review (util/find-by-id pate-review-id reviews)]
+    (let [source {:type "verdict" :id (:id verdict)}
+          data {:katselmuksenLaji   (pate-shared/review-type-map (or (keyword (:type pate-review)) :ei-tiedossa))
+                :vaadittuLupaehtona true
+                :rakennus           {} #_(merge-rakennustieto rakennustieto ; TODO get buildings after LPK-3533 is done
+                                                               (rakennus-data-from-buildings {} buildings))
+                :katselmus          {:tila nil                ; data should be empty, as this is just placeholder task
+                                     :pitaja nil
+                                     :pitoPvm nil
+                                     :lasnaolijat ""
+                                     :huomautukset {:kuvaus ""}
+                                     :poikkeamat ""}}
+          review-name (get-in pate-review [:name :fi])        ;; TODO localization should be stripped out and localized to lang defined in verdict
         ]
-    (tasks/new-task "task-katselmus" review-name data {:created ts} source)))
+      (tasks/new-task "task-katselmus" review-name data {:created ts} source))))
