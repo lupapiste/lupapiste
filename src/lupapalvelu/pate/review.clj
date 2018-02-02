@@ -1,4 +1,4 @@
-(ns lupapalvelu.pate.tasks
+(ns lupapalvelu.pate.review
   (:require [lupapalvelu.tasks :as tasks]
             [lupapalvelu.pate.shared :as pate-shared]))
 
@@ -72,6 +72,3 @@
         review-name (get-in pate-review [:name :fi])        ;; TODO localization should be stripped out and localized to lang defined in verdict
         ]
     (tasks/new-task "task-katselmus" review-name data {:created ts} source)))
-
-(defn pate-verdict->tasks [application verdict timestamp]
-  (map (partial review->task verdict timestamp) (get-in verdict [:data :reviews])))

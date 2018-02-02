@@ -575,6 +575,9 @@
                               (map (fn [[k v]]
                                      (assoc k :amount (count v)))))))}))
 
+(defn pate-verdict->tasks [application verdict timestamp]
+  (map (partial review->task verdict timestamp) (get-in verdict [:data :reviews])))
+
 (defn publish-verdict
   "Publishing verdict does the following:
    1. Finalize and publish verdict
