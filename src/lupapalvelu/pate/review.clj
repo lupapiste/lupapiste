@@ -53,13 +53,12 @@
       ;; (debugf "katselmus->task: made task with schema-name %s, id %s, katselmuksenLaji %s" schema-name (:id task) (:katselmuksenLaji data))
       task))
 
-(defn review->task [{{reviews :reviews} :references :as verdict} ts pate-review-id]
+(defn review->task [{{reviews :reviews} :references :as verdict} buildings ts pate-review-id]
   (when-some [pate-review (util/find-by-id pate-review-id reviews)]
     (let [source {:type "verdict" :id (:id verdict)}
           data {:katselmuksenLaji   (pate-shared/review-type-map (or (keyword (:type pate-review)) :ei-tiedossa))
                 :vaadittuLupaehtona true
-                :rakennus           {} #_(merge-rakennustieto rakennustieto ; TODO get buildings after LPK-3533 is done
-                                                               (rakennus-data-from-buildings {} buildings))
+                :rakennus           (tasks/rakennus-data-from-buildings {} buildings)
                 :katselmus          {:tila nil                ; data should be empty, as this is just placeholder task
                                      :pitaja nil
                                      :pitoPvm nil

@@ -15,7 +15,6 @@
             [lupapalvelu.pate.review :as review]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared :as shared]
-            [lupapalvelu.pate.tasks :as pate-tasks]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.state-machine :as sm]
@@ -576,9 +575,9 @@
                               (map (fn [[k v]]
                                      (assoc k :amount (count v)))))))}))
 
-(defn pate-verdict->tasks [verdict timestamp]
+(defn pate-verdict->tasks [verdict buildings timestamp]
   (->> (get-in verdict [:data :reviews])
-       (map (partial review/review->task verdict timestamp))
+       (map (partial review/review->task verdict buildings timestamp))
        (remove nil?)))
 
 (defn publish-verdict
@@ -600,16 +599,16 @@
                                     (insert-section (:organization application)
                                                     created))
         next-state             (sm/verdict-given-state application)
-        tasks      (pate-tasks/pate-verdict->tasks application verdict created)
+        buildings  (->buildings-array application)
+        tasks      (pate-verdict->tasks verdict buildings command)
         {att-items :items
-         update-fn :update-fn} (attachment-items command verdict)
-        buildings-updates      {:buildings (->buildings-array application)}]
+         update-fn :update-fn} (attachment-items command verdict)]
     (verdict-update command
                     (util/deep-merge
                      {$set (merge
                             {:pate-verdicts.$.data      (update-fn (:data verdict))
                              :pate-verdicts.$.published created}
-                            buildings-updates
+                            {:buildings buildings}
                             (att/attachment-array-updates (:id application)
                                                           #(util/includes-as-kw? (map :id att-items)
                                                                                  (:id %))
