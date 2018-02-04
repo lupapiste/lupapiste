@@ -1105,6 +1105,15 @@
              :docstore-info.organizationDescription organizationDescription}})
   (ok))
 
+(defquery document-request-info
+  {:description "Obtains the organization's document request info."
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (->> user
+       usr/authority-admins-organization-id
+       org/document-request-info
+       (ok :documentRequest)))
+
 (defcommand set-document-request-info
   {:description "Updates organization's document request info. Docucment requests are made from document store."
    :parameters [enabled email instructions]
@@ -1153,5 +1162,17 @@
 
 (defquery docterminal-enabled
   {:pre-checks [check-docterminal-enabled]
+   :user-roles #{:authorityAdmin}}
+  [_])
+
+(defn- check-docstore-enabled [{user :user}]
+  (when-not (-> user
+                usr/authority-admins-organization-id
+                org/get-docstore-info-for-organization!
+                :docStoreInUse)
+    (fail :error.docstore-not-enabled)))
+
+(defquery docstore-enabled
+  {:pre-checks [check-docstore-enabled]
    :user-roles #{:authorityAdmin}}
   [_])

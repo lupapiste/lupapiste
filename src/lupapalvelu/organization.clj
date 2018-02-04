@@ -892,6 +892,11 @@
      (update-organization org-id {$addToSet {:docstore-info.allowedTerminalAttachmentTypes attachment-type}})
      (update-organization org-id {$pull {:docstore-info.allowedTerminalAttachmentTypes attachment-type}}))))
 
+(defn document-request-info [org-id]
+  (-> org-id
+      get-docstore-info-for-organization!
+      (get :documentRequest)))
+
 (defn set-document-request-info
   [org-id enabled email instructions]
   (update-organization org-id
