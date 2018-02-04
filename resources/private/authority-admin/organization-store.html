@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="organization-store-settings">
+      <navi-sidebar></navi-sidebar>
+      <div class="container container--authority-admin docstore-settings"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+        <h1 data-bind="ltext: 'auth-admin.docstore.title'"></h2>
+        <div class="document-request">
+          <toggle params="value: store.documentRequest.enabled,
+                          prefix: 'blockbox',
+                          ltext: 'auth-admin.docstore.document-request.enabled',
+                          testId: 'docstore-documentRequest-enabled',
+                          enable: store.documentRequest.isValid"></toggle>
+
+          <!-- ko if: store.documentRequest.enabled() -->
+          <h2 data-bind="ltext: 'auth-admin.docstore.document-request.email'"></h2>
+          <input type="text"
+                 class="form-input"
+                 data-bind="value: store.documentRequest.email"></input>
+
+          <h2 data-bind="ltext: 'auth-admin.docstore.document-request.instructions'"></h2>
+          <table>
+            <thead>
+              <tr>
+                <th data-bind="ltext: 'userinfo.language'"></th>
+                <th data-bind="ltext: 'auth-admin.docstore.document-request.instructions-short'"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- ko foreach: store.languages -->
+              <tr>
+                <td data-bind="ltext: 'lang.' + $data"></td>
+                <td>
+                  <textarea type="text"
+                            class="form-input textarea grid-style-input"
+                            data-bind="value: $parent.store.documentRequest.instructions[$data],
+                                       testId: sprintf( 'documentRequest-instructions-%s-%s', $parentContext.$index, $data ),
+                                       enable: $parent.store.documentRequest.isValid">
+                </td>
+              </tr>
+              <!-- /ko -->
+            </tbody>
+          </table>
+          <!-- /ko -->
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
