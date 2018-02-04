@@ -321,6 +321,27 @@
 
 (sc/validate PdfLayout (:r pdf-layouts))
 
+(defn join-non-blanks
+  "Trims and joins."
+  [separator & coll]
+  (->> coll
+       flatten
+       (map ss/trim)
+       (remove ss/blank?)
+       (ss/join separator)))
+
+(defn loc-non-blank
+  "Localized string or nil if the last part is blank."
+  [lang & parts]
+  (when-not (-> parts last ss/blank?)
+    (i18n/localize lang parts)))
+
+(defn loc-fill-non-blank
+  "Localize and fill if every value is non-blank"
+  [lang loc-key & values]
+  (when (every? (comp ss/not-blank? str) values)
+    (apply (partial i18n/localize-and-fill lang loc-key) values)))
+
 (defn applicants
   "Returns list of name, address maps for properly filled party
   documents. If a doc does not have name information it is omitted."
@@ -328,25 +349,23 @@
   (->> (domain/get-applicant-documents (:documents app))
        (map :data)
        (map (fn [{:keys [_selected henkilo yritys]}]
-              (if (util/=as-kw :yritys)
+              (if (util/=as-kw :yritys _selected)
                 yritys
                 henkilo)))
        (map (fn [{:keys [yritysnimi henkilotiedot osoite]}]
-              {:name (ss/trim (or yritysnimi
-                                  (format "%s %s"
+              {:name (or (-> yritysnimi ss/trim not-empty)
+                         (join-non-blanks " "
                                           (:etunimi henkilotiedot)
-                                          (:sukunimi henkilotiedot))))
+                                          (:sukunimi henkilotiedot)))
                :address (let [{:keys [katu postinumero postitoimipaikannimi
                                       maa]} osoite]
                           (->> [katu (str postinumero " " postitoimipaikannimi)
                                 (when (util/not=as-kw maa :FIN)
                                   (i18n/localize lang :country maa))]
-                               (remove ss/blank?)
-                               (map ss/trim)
-                               (ss/join ", ")))}))
+                               (join-non-blanks ", ")))}))
        (remove (util/fn-> :name ss/blank?))))
 
-(defn- pathify [kw-path]
+(defn pathify [kw-path]
   (map keyword (ss/split (name kw-path) #"\.")))
 
 (defn doc-value [application doc-name kw-path]
@@ -376,11 +395,13 @@
            (dict-value verdict :complexity-text)]))
 
 (defn property-id [application]
-  (->> [(-> application :propertyId
-            property/to-human-readable-property-id)
-        (doc-value application :rakennuspaikka :kiinteisto.maaraalaTunnus)]
-       (remove ss/blank?)
-       (ss/join "-")))
+  (join-non-blanks "-"
+                   [(-> application :propertyId
+                        property/to-human-readable-property-id)
+                    (util/pcond->> (doc-value application
+                                              :rakennuspaikka
+                                              :kiinteisto.maaraalaTunnus)
+                                   ss/not-blank? (str "M"))]))
 
 (defn value-or-other [lang value other & loc-keys]
   (if (util/=as-kw value :other)
@@ -390,7 +411,7 @@
       value)))
 
 (defn designers [{lang :lang app :application}]
-  (let [role-keys [:osapuoli :suunnittelija :kuntaRoolikoodi]
+  (let [role-keys [:pdf :kuntaRoolikoodi]
         head-loc (i18n/localize lang role-keys "p\u00e4\u00e4suunnittelija")
         heads    (->> (domain/get-documents-by-name app :paasuunnittelija)
                       (map :data)
@@ -404,12 +425,10 @@
                     difficulty   :suunnittelutehtavanVaativuusluokka
                     info         :henkilotiedot
                     skills       :patevyys
-                    degree       :koulutusvalinta
-                    other-degree :koulutus
                     role         :role}]
-                (let [designer-name (format "%s %s"
-                                      (or (:etunimi info) "")
-                                      (or (:sukunimi info) ""))]
+                (let [designer-name (join-non-blanks " "
+                                                     [(:etunimi info)
+                                                      (:sukunimi info)])]
                   (when-not (ss/blank? designer-name)
                     {:role       (or role
                                      (value-or-other lang
@@ -420,12 +439,10 @@
                                    (value-or-other lang
                                                    (:koulutusvalinta skills)
                                                    (:koulutus skills))]
-                                  (map ss/trim)
-                                  (remove ss/blank?)
-                                  (ss/join ", "))}))))
+                                  (join-non-blanks ", "))}))))
          (remove nil?)
          (sort (fn [a b]
-                 (if (= a head-loc) -1 1))))))
+                 (if (= (:role a) head-loc) -1 1))))))
 
 (defn resolve-source
   [{:keys [application verdict] :as data} {doc-source  :doc
@@ -514,24 +531,6 @@
     (->> (map (comp keyword :id) (operation-infos application))
          (map #(get buildings %))
          (remove nil?))))
-
-(defn join-non-blanks [separator & coll]
-  (->> coll
-       flatten
-       (remove ss/blank?)
-       (ss/join separator)))
-
-(defn loc-non-blank
-  "Localized string or nil if the last part is blank."
-  [lang & parts]
-  (when-not (-> parts last ss/blank?)
-    (i18n/localize lang parts)))
-
-(defn loc-fill-non-blank
-  "Localize and fill if every value is non-blank"
-  [lang loc-key & values]
-  (when (every? (comp ss/not-blank? str) values)
-    (apply (partial i18n/localize-and-fill lang loc-key) values)))
 
 (defn building-parking [lang {:keys [description tag building-id]
                               :as building}]
