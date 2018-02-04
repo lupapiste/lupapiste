@@ -252,11 +252,11 @@
                     [{:loc    :pate-deviations
                       :source {:dict :deviations}
                       :styles :pad-before}]
-                    [{:loc :statement.lausunto
+                    [{:loc      :statement.lausunto
                       :loc-many :pate-statements
-                      :source :statements
-                      :styles [:bold :border-top]}]
-                    [{:loc :phrase.category.naapurit
+                      :source   :statements
+                      :styles   [:bold :border-top]}]
+                    [{:loc    :phrase.category.naapurit
                       :source {:dict :neighbors}
                       :styles [:bold :pad-before]}]
                     [{:loc      :pdf.attachment
@@ -294,6 +294,27 @@
                       :loc-many :pdf.conditions
                       :source   :conditions
                       :styles   [:pad-before :spaced]}]
+                    [{:loc    :pate-collateral
+                      :source :collateral
+                      :styles :pad-before}]
+                    [{:loc :empty
+                      :source {:dict :verdict-date}
+                      :styles :pad-before}]
+                    [{:loc :empty
+                      :source :verdict-giver
+                      :styles :pad-before}]
+                    [{:loc :empty
+                      :source :organization
+                      :styles :pad-after}]
+                    [{:loc :pdf.julkipano
+                      :source {:dict :julkipano}}]
+                    [{:loc :pdf.anto
+                      :source {:dict :anto}}]
+                    [{:loc :pdf.muutoksenhaku
+                      :source :muutoksenhaku}]
+                    [{:loc :pdf.vomassa
+                      :source :vomassaolo}]
+                    ;; Page break
                     [{:loc    :pate-verdict.muutoksenhaku
                       :source {:dict :appeal}
                       :styles [:bold :page-break]}]]}})
@@ -335,12 +356,17 @@
 (defn dict-value [verdict kw-path]
   (get-in verdict (cons :data (pathify kw-path))))
 
-(defn add-unit [lang unit v]
-  (case unit
-    :ha  (str v " " (i18n/localize lang :unit.hehtaaria))
-    :m2  [:span v " m" [:sup 2]]
-    :m3  [:span v " m" [:sup 3]]
-    :kpl (str v " " (i18n/localize lang :unit.kpl)) ))
+(defn add-unit
+  "Result is nil for blank value."
+  [lang unit v]
+  (when-not (ss/blank? (str v))
+    (case unit
+      :ha      (str v " " (i18n/localize lang :unit.hehtaaria))
+      :m2      [:span v " m" [:sup 2]]
+      :m3      [:span v " m" [:sup 3]]
+      :kpl     (str v " " (i18n/localize lang :unit.kpl))
+      :section (str "\u00a7" v)
+      :eur     (str v "\u20ac"))))
 
 (defn complexity [lang verdict]
   (remove nil?
@@ -495,6 +521,18 @@
        (remove ss/blank?)
        (ss/join separator)))
 
+(defn loc-non-blank
+  "Localized string or nil if the last part is blank."
+  [lang & parts]
+  (when-not (-> parts last ss/blank?)
+    (i18n/localize lang parts)))
+
+(defn loc-fill-non-blank
+  "Localize and fill if every value is non-blank"
+  [lang loc-key & values]
+  (when (every? (comp ss/not-blank? str) values)
+    (apply (partial i18n/localize-and-fill lang loc-key) values)))
+
 (defn building-parking [lang {:keys [description tag building-id]
                               :as building}]
   (letfn [(park [kw]
@@ -545,7 +583,7 @@
   "Timestamp in the Finnish date format without zero-padding.
   For example, 30.1.2018."
   [timestamp]
-  (util/format-timestamp-local-tz timestamp "D.M.YYYY"))
+  (util/format-timestamp-local-tz timestamp "d.M.YYYY"))
 
 (defn statements [lang {statements :statements}]
   (->> statements
@@ -555,6 +593,16 @@
                                (:text person)
                                (finnish-date given)
                                (i18n/localize lang :statement status))))))
+
+(defn collateral [lang verdict]
+  (join-non-blanks ", "
+                   [(add-unit lang :eur (dict-value verdict :collateral))
+                    (loc-non-blank lang :pate.collateral-type
+                                   (dict-value verdict :collateral-type))
+                    (dict-value verdict :collateral-date)]))
+
+(defn organization-name [lang {organization :organization}]
+  (org/get-organization-name organization lang))
 
 (defmulti verdict-body (util/fn-> :verdict :category keyword))
 
@@ -587,23 +635,43 @@
                     :reviews (references lang verdict :reviews)
                     :plans   (references lang verdict :plans)
                     :conditions (conditions verdict)
-                    :statements (statements lang application))
+                    :statements (statements lang application)
+                    :collateral (collateral lang verdict)
+                    :verdict-giver (or (some-> verdict :references :boardname)
+                                       (dict-value verdict :contact))
+                    :organization (organization-name lang application)
+                    :muutoksenhaku (loc-fill-non-blank lang
+                                                       :pdf.not-later-than
+                                                       (dict-value verdict
+                                                                   :muutoksenhaku))
+                    :voimassaolo (loc-fill-non-blank lang
+                                                     :pdf.voimassa.text
+                                                     (dict-value verdict
+                                                                 :aloitettava)
+                                                     (dict-value verdict
+                                                                 :voimassa)))
              (:r pdf-layouts))))
 
 (defn verdict-header
-  [lang {:keys [organization]} {:keys [published category data]}]
+  [lang application {:keys [category] :as verdict}]
   [:div.header
    [:div.section.header
     [:div.row.pad-after
-     [:div.cell.cell--30 (org/get-organization-name organization lang)]
+     [:div.cell.cell--30
+      (organization-name lang application)
+      (when-let [boardname (some-> verdict :references :boardname)]
+        [:div boardname])]
      [:div.cell.cell--40.center
+      ;; TODO: Preview if not published (red span)
       [:div (i18n/localize lang :attachmentType.paatoksenteko.paatos)]]
      [:div.cell.cell--30.right
       [:div.permit (i18n/localize lang :pdf category :permit)]]]
     [:div.row
-     [:div.cell.cell--30 (:verdict-section data)]
-     [:div.cell.cell--40.center [:div (util/to-local-date published)]]
-     [:div.cell.cell--30.right "Sivu " [:span#page-number "sivu"]]]]])
+     [:div.cell.cell--30
+      (add-unit lang :section (dict-value verdict :verdict-section))]
+     [:div.cell.cell--40.center
+      [:div (dict-value verdict :verdict-date)]]
+     [:div.cell.cell--30.right (i18n/localize lang :pdf.page) " " [:span#page-number ""]]]]])
 
 (defn verdict-footer []
   [:div.footer
