@@ -1,4 +1,4 @@
-(ns lupapalvelu.pate-test
+(ns lupapalvelu.pate.pate-test
   (:require [clj-time.core :as time]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pate.date :as date]

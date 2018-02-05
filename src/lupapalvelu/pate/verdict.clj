@@ -383,10 +383,13 @@
                            ss/->plain-string))))
                {})))
 
-(defn ->buildings-array [application]
-  "Construction of the application-buildings array. This should be equivalent to ->buildings-summary function in
-   lupapalvelu.xml.krysp.building-reader the namespace, but instead of the message from backing system,
-   here all the input data is originating from PATE verdict."
+(defn ->buildings-array
+  "Construction of the application-buildings array. This should be
+  equivalent to ->buildings-summary function in
+  lupapalvelu.xml.krysp.building-reader the namespace, but instead of
+  the message from backing system, here all the input data is
+  originating from PATE verdict."
+  [application]
   (->> application
        app-documents-having-buildings
        (util/indexed 1)
@@ -595,11 +598,12 @@
         next-state             (sm/verdict-given-state application)
         {att-items :items
          update-fn :update-fn} (attachment-items command verdict)
-        buildings-updates      {:buildings (->buildings-array application)}]
+        buildings-updates      {:buildings (->buildings-array application)}
+        verdict                (update verdict :data update-fn)]
     (verdict-update command
                     (util/deep-merge
                      {$set (merge
-                            {:pate-verdicts.$.data      (update-fn (:data verdict))
+                            {:pate-verdicts.$.data      (:data verdict)
                              :pate-verdicts.$.published created}
                             buildings-updates
                             (att/attachment-array-updates (:id application)
