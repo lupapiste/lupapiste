@@ -56,7 +56,7 @@
                  (not (-> schema :sort? false? )) (sort-by :text))]
 
      (for [{:keys [value text]} items
-           :let                 [item-id (path/unique-id "multi")
+           :let                 [item-id (common/unique-id "multi")
                                  checked (util/includes-as-kw? (set (rum/react state)) value)]]
        [:div.pate-checkbox-wrapper
         {:key item-id}
@@ -132,7 +132,7 @@
    [:ul
     (->> (resolve-reference-list options)
          (map (fn [{text :text}]
-                [:li {:key (path/unique-id "li")}text])
+                [:li {:key (common/unique-id "li")}text])
               ))]])
 
 (rum/defc last-saved < rum/reactive
@@ -166,7 +166,7 @@
             (path/meta-updated options))]
     (when-not @category*
       (set-category (:category schema)))
-    (let [ref-id    (path/unique-id "-ref")
+    (let [ref-id    (common/unique-id "-ref")
           disabled? (path/disabled? options)
           required? (path/required? options)]
       [:div.pate-grid-12

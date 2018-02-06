@@ -159,7 +159,7 @@
   (field sc/Str "Organisaation tunnus"))
 
 (sc/defschema ApplicationId
-  (field sc/Str "LP-tunnus"))
+  (field ssc/ApplicationId "LP-tunnus"))
 
 (sc/defschema OperationId
   (field ssc/ObjectIdStr "Toimenpiteen tunnus"))

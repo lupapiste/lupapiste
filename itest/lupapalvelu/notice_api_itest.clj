@@ -80,18 +80,18 @@
           (query ronja :authority-notice :id id) => ok?
           (query luukas :authority-notice :id id) => ok?
           (query jussi :authority-notice :id id) => ok?
-          (query teppo :authority-notice :id id) => err)
+          (query teppo :authority-notice :id id) => unauthorized?)
         (facts "Change urgency"
           (change-application-urgency jussi id "normal") => ok?
-          (change-application-urgency teppo id "pending") => err)
+          (change-application-urgency teppo id "pending") => unauthorized?)
         (facts "Add tags"
           (command jussi :add-application-tags :id id
                    :tags ["123000000000000000000000"])=> ok?
           (command teppo :add-application-tags :id id
-                   :tags ["321000000000000000000000"]) => err)
+                   :tags ["321000000000000000000000"]) => unauthorized?)
         (facts "Add authority notice"
           (add-authority-notice jussi id "Hello world!") => ok?
-          (add-authority-notice teppo id "Foo bar") => err)
+          (add-authority-notice teppo id "Foo bar") => unauthorized?)
         (facts "Read authority notice"
           (application-notice "sonja" id "Hello world!")
           (application-notice "jussi" id "Hello world!")

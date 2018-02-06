@@ -4,10 +4,19 @@
             [sade.env :as env]
             [sade.core :refer [now fail fail!]]
             [sade.strings :as ss]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.permissions :refer [defcontext]]
             [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.notifications :as notifications]))
+
+(defcontext inforequest-context [{{user-id :id} :user application :application}]
+  ;; Some permissions are added in inforequests by user application role
+  (when (:infoRequest application)
+    {:context-scope :inforequest
+     :context-roles (->> (auth/get-auths application user-id)
+                         (map :role))}))
 
 (defn- base-email-model [{{token :token-id} :data :as command} _ recipient]
   (assoc

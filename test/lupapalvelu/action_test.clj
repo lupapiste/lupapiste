@@ -106,6 +106,7 @@
       (get-actions) => {:test-command-auth {:parameters [:id]
                                             :user-roles #{:authority}
                                             :org-authz-roles #{:authority}
+                                            :permissions [{:required []}]
                                             :states     states/all-states}}
       (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :include-canceled-apps? true) =>  {:state "submitted" :organization "ankkalinna"}
       (domain/get-application-as "123" {:id "user123" :organizations ["hanhivaara"] :orgAuthz {:hanhivaara #{:authority}} :role :authority} :include-canceled-apps? true) =>  nil)
@@ -124,11 +125,13 @@
       (get-actions) => {:test-command-auth  {:parameters       [:id]
                                              :user-roles       #{:authority}
                                              :org-authz-roles  #{:authority}
+                                             :permissions      [{:required []}]
                                              :states           states/all-states
                                              :user-authz-roles #{:someRole}}
                         :with-default-roles {:parameters       [:id]
                                              :user-roles       #{:authority}
                                              :org-authz-roles  #{:authority}
+                                             :permissions      [{:required []}]
                                              :states           states/all-states
                                              :user-authz-roles roles/default-authz-writer-roles}}
       (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :orgAuthz {:999-R #{:authority}} :role :authority} :include-canceled-apps? true) => {:organization "999-R"
@@ -174,17 +177,61 @@
 
     )
 
+  (facts access-denied-by-insufficient-permissions
+    (fact "no required permissions - default case when :permissions is not defined for action"
+      (access-denied-by-insufficient-permissions {:action :test-action :permissions #{}}) => falsey
+
+      (provided (meta-data {:action :test-action :permissions #{}}) => {:permissions [{:required #{}}]}))
+
+    (fact "insufficient permissions"
+      (access-denied-by-insufficient-permissions {:action :test-action :permissions #{}}) => unauthorized
+
+      (provided (meta-data {:action :test-action :permissions #{}}) => {:permissions [{:required [:global/test]}]}))
+
+    (fact "has required permissions"
+      (access-denied-by-insufficient-permissions {:action :test-action :permissions #{:global/test}}) => falsey
+
+      (provided (meta-data {:action :test-action :permissions #{:global/test}}) => {:permissions [{:required [:global/test]}]})))
+
   (facts "Parameter validation"
     (against-background (get-actions) => {:test-command {:parameters [:id]}})
     (fact  (missing-parameters {:action "test-command" :data {}})           => { :ok false :parameters ["id"] :text "error.missing-parameters"})
     (fact  (missing-parameters {:action "test-command" :data {:id 1}})      => nil)
     (fact  (missing-parameters {:action "test-command" :data {:id 1 :_ 2}}) => nil))
 
+  (facts "Permissions check is run"
+    (against-background
+      (get-actions) => {:test-command1 {:pre-checks [(constantly nil)], :user-roles #{:authority}, :org-authz-roles #{:authority} :permissions [{:required [:test/do]}]}
+                        :test-command2 {:pre-checks [(constantly nil)], :user-roles #{:authority}, :org-authz-roles #{:authority} :permissions [{:required [:test/fail :test/do]}]}
+                        :test-command3 {:pre-checks [(constantly nil)], :user-roles #{:authority}, :org-authz-roles #{:authority} :permissions [{:required []}]}}
+      (domain/get-application-as "123" {:id "user123" :orgAuthz {:ankkalinna #{:authority}} :role :authority} :include-canceled-apps? true) => {:organization "ankkalinna" :state "submitted"})
+
+    (fact "test-command1 - has required permissions"
+      (execute {:action "test-command1" :user {:id "user123" :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}})
+      => ok?
+
+      (provided (lupapalvelu.permissions/get-permissions-by-role :global :authority) => #{})
+      (provided (lupapalvelu.permissions/get-permissions-by-role :organization :authority) => #{:test/do}))
+
+    (fact "test-command2 - missing required permission"
+      (execute {:action "test-command2" :user {:id "user123" :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}})
+      => {:ok false :text "error.unauthorized"}
+
+      (provided (lupapalvelu.permissions/get-permissions-by-role :global :authority) => #{})
+      (provided (lupapalvelu.permissions/get-permissions-by-role :organization :authority) => #{:test/do}))
+
+    (fact "test-command3 - no required permissions for command"
+      (execute {:action "test-command3" :user {:id "user123" :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}})
+      => ok?
+
+      (provided (lupapalvelu.permissions/get-permissions-by-role :global :authority) => #{})
+      (provided (lupapalvelu.permissions/get-permissions-by-role :organization :authority) => #{:test/do})))
+
   (facts "Custom pre-check is run"
     (against-background
-      (get-actions) => {:test-command1 {:pre-checks [(constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority}}
-                        :test-command2 {:pre-checks [(constantly nil)], :user-roles #{:authority}, :org-authz-roles #{:authority}}
-                        :test-command3 {:pre-checks [(constantly nil) (constantly nil) (constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority}}}
+      (get-actions) => {:test-command1 {:pre-checks [(constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority} :permissions [{:required []}]}
+                        :test-command2 {:pre-checks [(constantly nil)], :user-roles #{:authority}, :org-authz-roles #{:authority} :permissions [{:required []}]}
+                        :test-command3 {:pre-checks [(constantly nil) (constantly nil) (constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority} :permissions [{:required []}]}}
       (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :include-canceled-apps? true) =>  {:organization "ankkalinna" :state "submitted"})
 
     (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
@@ -193,9 +240,9 @@
 
   (facts "Custom input-validator is run"
     (against-background
-      (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority}}
-                        :test-command2 {:input-validators [(constantly nil)], :user-roles #{:authority}, :org-authz-roles #{:authority}}
-                        :test-command3 {:input-validators [(constantly nil) (constantly nil) (constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority}}}
+      (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority} :permissions [{:required []}]}
+                        :test-command2 {:input-validators [(constantly nil)], :user-roles #{:authority}, :org-authz-roles #{:authority} :permissions [{:required []}]}
+                        :test-command3 {:input-validators [(constantly nil) (constantly nil) (constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority} :permissions [{:required []}]}}
       (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :include-canceled-apps? true) =>  {:organization "ankkalinna" :state "submitted"})
 
     (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
@@ -204,43 +251,43 @@
 
   (facts "Input-validator is not run during auth check"
     (against-background
-      (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority}}}
+      (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority} :permissions [{:required []}]}}
       (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :include-canceled-apps? true) =>  {:organization "ankkalinna" :state "submitted"})
     (validate {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}}) => ok?)
 
   (facts "Defined querys work only in query pipelines"
-    (against-background (get-actions) => {:test-command {:type :query :user-roles #{:anonymous}}})
+    (against-background (get-actions) => {:test-command {:type :query :user-roles #{:anonymous} :permissions [{:required []}]}})
     (fact  (execute {:action "test-command"})                 => ok?)
     (fact  (execute {:action "test-command" :type :query})    => ok?)
     (fact  (execute {:action "test-command" :type :command})  => {:ok false, :text "error.invalid-type"})
     (fact  (execute {:action "test-command" :type :raw})      => {:ok false, :text "error.invalid-type"}))
 
   (facts "Defined commands work only in command pipelines"
-    (against-background (get-actions) => {:test-command {:type :command :user-roles #{:anonymous}}})
+    (against-background (get-actions) => {:test-command {:type :command :user-roles #{:anonymous} :permissions [{:required []}]}})
     (fact  (execute {:action "test-command"})                 => ok?)
     (fact  (execute {:action "test-command" :type :query})    => {:ok false, :text "error.invalid-type"})
     (fact  (execute {:action "test-command" :type :command})  => ok?)
     (fact  (execute {:action "test-command" :type :raw})      => {:ok false, :text "error.invalid-type"}))
 
   (facts "Defined raws work only in raw pipelines"
-    (against-background (get-actions) => {:test-command {:type :raw :user-roles #{:anonymous}}})
+    (against-background (get-actions) => {:test-command {:type :raw :user-roles #{:anonymous} :permissions [{:required []}]}})
     (fact  (execute {:action "test-command"})                 => ok?)
     (fact  (execute {:action "test-command" :type :query})    => {:ok false, :text "error.invalid-type"})
     (fact  (execute {:action "test-command" :type :command})  => {:ok false, :text "error.invalid-type"})
     (fact  (execute {:action "test-command" :type :raw})      => ok?))
 
   (fact "fail! stops the press"
-    (against-background (get-actions) => {:failing {:handler (fn [_] (fail! "kosh")) :user-roles #{:anonymous}}})
+    (against-background (get-actions) => {:failing {:handler (fn [_] (fail! "kosh")) :user-roles #{:anonymous} :permissions [{:required []}]}})
     (binding [*err* (NullWriter.)]
       (execute {:action "failing"})) => {:ok false :text "kosh"})
 
   (fact "exception details are not returned"
-    (against-background (get-actions) => {:failing {:handler (fn [_] (throw (RuntimeException. "kosh"))) :user-roles #{:anonymous}}})
+    (against-background (get-actions) => {:failing {:handler (fn [_] (throw (RuntimeException. "kosh"))) :user-roles #{:anonymous} :permissions [{:required []}]}})
     (binding [*err* (NullWriter.)]
       (execute {:action "failing"})) => {:ok false :text "error.unknown"})
 
    (fact "schema exception"
-     (against-background (get-actions) => {:failing {:handler (fn [_] (sc/validate sc/Str 1)) :user-roles #{:anonymous}}})
+     (against-background (get-actions) => {:failing {:handler (fn [_] (sc/validate sc/Str 1)) :user-roles #{:anonymous} :permissions [{:required []}]}})
      (binding [*err* (NullWriter.)]
        (execute {:action "failing"})) => {:ok false :text "error.illegal-value:schema-validation"})
 
@@ -300,7 +347,7 @@
 
   (facts "feature requirements"
    (against-background
-     (get-actions) => {:test-command1 {:feature :abba :user-roles #{:anonymous}}})
+     (get-actions) => {:test-command1 {:feature :abba :user-roles #{:anonymous} :permissions [{:required []}]}})
 
    (fact "without correct feature error is given"
      (execute {:action "test-command1"}) => {:ok false, :text "error.missing-feature"}

@@ -1,13 +1,8 @@
 (ns lupapalvelu.application-schema
   (:require [schema.core :refer [defschema] :as sc]
             [sade.schemas :as ssc]
-            [sade.validators :as validators]
             [lupapalvelu.states :as states]
             [lupapalvelu.permit :as permit]))
-
-(defschema ApplicationId
-  (sc/constrained sc/Str validators/application-id? "Application id"))
-
 
 (defschema Operation
   {:id                            ssc/ObjectIdStr
@@ -16,7 +11,7 @@
    (sc/optional-key :description) (sc/maybe sc/Str)})
 
 (defschema Application                                      ; WIP, used initially in state-change JSON
-  {:id             ApplicationId
+  {:id             ssc/ApplicationId
    :operations     [Operation]
    :propertyId     sc/Str
    :municipality   sc/Str

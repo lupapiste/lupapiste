@@ -27,6 +27,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as op]
+            [lupapalvelu.permissions :refer [defcontext] :as permissions]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as usr]
@@ -41,6 +42,12 @@
             [sade.strings :as ss]
             [lupapalvelu.application-utils :as app-utils]))
 
+(defcontext canceled-app-context [{{user-id :id} :user application :application}]
+  (let [last-history-entry (app-state/last-history-item application)]
+    (when (and (= user-id (get-in last-history-entry [:user :id]))
+               (-> last-history-entry :state keyword (= :canceled)))
+      {:context-scope :canceled-app
+       :context-roles [:canceler]})))
 
 (defn get-operations [application]
   (remove nil? (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
@@ -78,29 +85,19 @@
   (count (or (:linkPermitData application)
              (:linkPermitData (meta-fields/enrich-with-link-permit-data application)))))
 
-(defn- required-link-permits [application]
+(defn- count-required-link-permits [application]
   (let [muutoslupa? (= :muutoslupa (keyword (:permitSubtype application)))]
     (->> (get-operations application)
          (map :name)
          (map op/required-link-permits)
          (reduce + (if muutoslupa? 1 0)))))
 
+(defn extra-link-permits? [application]
+  (< (count-required-link-permits application) (count-link-permits application)))
+
 (defn validate-link-permits [application]
-  (when (> (required-link-permits application) (count-link-permits application))
+  (when (> (count-required-link-permits application) (count-link-permits application))
     (fail :error.permit-must-have-link-permit)))
-
-(defn authorized-to-remove-link-permit [{user :user application :application}]
-  (when (and (not (usr/authority? user))
-             (>= (required-link-permits application) (count-link-permits application)))
-    unauthorized))
-
-(defn validate-only-authority-before-verdict-given
-  "Validator: Restrict applicant access before the application verdict
-  is given. To be used in commands' :pre-checks vector"
-  [{user :user app :application}]
-  (when-not (or (states/post-verdict-states (keyword (:state app)))
-                (usr/authority? user))
-    unauthorized))
 
 (defn validate-authority-in-drafts
   "Validator: Restrict authority access in draft application.
@@ -193,11 +190,11 @@
   {:pre [(collections-to-be-seen collection) id timestamp]}
   {(str "_" collection "-seen-by." id) timestamp})
 
-(defn mark-indicators-seen-updates [application user timestamp]
+(defn mark-indicators-seen-updates [{application :application user :user timestamp :created :as command}]
   (merge
     (apply merge (map (partial mark-collection-seen-update user timestamp) collections-to-be-seen))
-    (when (usr/authority? user) (model/mark-approval-indicators-seen-update application timestamp))
-    (when (usr/authority? user) {:_attachment_indicator_reset timestamp})))
+    (when (permissions/permissions? command [:document/approve]) (model/mark-approval-indicators-seen-update application timestamp))
+    (when (permissions/permissions? command [:attachment/approve]) {:_attachment_indicator_reset timestamp})))
 
 ; whitelist-action
 (defn- prefix-with [prefix coll]
@@ -372,7 +369,7 @@
   [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
   (let [types     (new-attachment-types-for-operation organization operation existing-attachments-types)
         groups    (map (partial attachment-grouping-for-type operation) types)
-        metadatas (map (partial tos/metadata-for-document (:id organization) tos-function) types)]
+        metadatas (pmap (partial tos/metadata-for-document (:id organization) tos-function) types)]
     (map (partial att/make-attachment created target true false false (keyword applicationState)) groups types metadatas)))
 
 (defn multioperation-attachment-updates [operation organization attachments]

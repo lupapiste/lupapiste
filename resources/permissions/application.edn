@@ -1,0 +1,124 @@
+{:global       {:applicant          #{:application/create}
+                :authority          #{:application/create}
+                :oirAuthority       #{:application/read
+                                      :application/show-inforequest-markers
+                                      :application/cancel
+                                      :application/mark-everything-seen
+                                      :application/change-location-in-pre-verdict-states
+                                      :application/edit-drawings}}
+ :organization {:roles/any          #{:application/mark-everything-seen}
+                :authority          #{:application/read
+                                      :application/submit
+                                      :application/request-for-complement
+                                      :application/cancel
+                                      :application/undo-cancelation
+                                      :application/edit
+                                      :application/edit-drawings
+                                      :application/edit-operation
+                                      :application/edit-permit-subtype
+                                      :application/edit-permit-subtype-in-ya
+                                      :application/edit-warranty-dates
+                                      :application/edit-handlers
+                                      :application/remove-link-permit
+                                      :application/remove-extra-link-permit
+                                      :application/access-backend
+                                      :application/show-authorities
+                                      :application/show-commenters
+                                      :application/show-foreman-history
+                                      :application/show-inforequest-markers
+                                      :application/change-location-in-pre-verdict-states
+                                      :application/change-location-in-post-verdict-states
+                                      :application/change-state
+                                      :application/set-urgency
+                                      :application/set-authority-notice
+                                      :application/read-authority-notice
+                                      :application/create-change-permit
+                                      :application/create-continuation-period-permit
+                                      :application/create-foreman-app-in-pre-verdict-states
+                                      :application/create-foreman-app-in-post-verdict-states
+                                      :application/convert-to-application
+                                      :application/get-document-states
+                                      :application/check-final-archiving-state
+                                      :application/check-within-archiving-time-limit}
+                :approver           #{:application/approve  ;; TODO: could this be just 'approve', as in a supplement for :authority role. Then just 'approver' role couldn't exist.
+                                      :application/read
+                                      :application/submit
+                                      :application/request-for-complement
+                                      :application/cancel
+                                      :application/undo-cancelation
+                                      :application/edit
+                                      :application/edit-drawings
+                                      :application/edit-operation
+                                      :application/edit-permit-subtype
+                                      :application/edit-permit-subtype-in-ya
+                                      :application/edit-warranty-dates
+                                      :application/edit-handlers
+                                      :application/remove-link-permit
+                                      :application/remove-extra-link-permit
+                                      :application/access-backend
+                                      :application/show-authorities
+                                      :application/show-commenters
+                                      :application/show-foreman-history
+                                      :application/show-inforequest-markers
+                                      :application/change-location-in-pre-verdict-states
+                                      :application/change-location-in-post-verdict-states
+                                      :application/change-state
+                                      :application/set-urgency
+                                      :application/set-authority-notice
+                                      :application/read-authority-notice
+                                      :application/create-change-permit
+                                      :application/create-continuation-period-permit
+                                      :application/create-foreman-app-in-pre-verdict-states
+                                      :application/create-foreman-app-in-post-verdict-states
+                                      :application/convert-to-application
+                                      :application/get-document-states
+                                      :application/check-final-archiving-state
+                                      :application/check-within-archiving-time-limit}
+                :commenter          #{:application/read
+                                      :application/show-foreman-history
+                                      :application/read-authority-notice}
+                :reader             #{:application/read
+                                      :application/show-foreman-history
+                                      :application/read-authority-notice}
+                :tos-editor         #{:application/edit-tos-function}
+                :archivist          #{:application/archive}
+                :digitizer          #{:application/show-authorities}
+                :statementGiver     #{:application/set-urgency
+                                      :application/set-authority-notice
+                                      :application/read-authority-notice}}
+ :application  {:roles/any          #{:application/read
+                                      :application/accordions-open}
+                :owner              #{:application/edit-draft
+                                      :application/submit
+                                      :application/cancel-in-restricted-states
+                                      :application/edit
+                                      :application/edit-drawings
+                                      :application/edit-operation
+                                      :application/edit-permit-subtype
+                                      :application/remove-extra-link-permit
+                                      :application/change-location-in-pre-verdict-states
+                                      :application/create-change-permit
+                                      :application/create-continuation-period-permit
+                                      :application/create-foreman-app-in-post-verdict-states
+                                      :application/convert-to-application}
+                :writer             #{:application/edit-draft
+                                      :application/submit
+                                      :application/cancel-in-restricted-states
+                                      :application/edit
+                                      :application/edit-drawings
+                                      :application/edit-operation
+                                      :application/edit-permit-subtype
+                                      :application/remove-extra-link-permit
+                                      :application/change-location-in-pre-verdict-states
+                                      :application/create-change-permit
+                                      :application/create-continuation-period-permit
+                                      :application/create-foreman-app-in-post-verdict-states
+                                      :application/convert-to-application}}
+ :inforequest  {:owner              #{:application/cancel}
+                :writer             #{:application/cancel}}
+ :canceled-app {:canceler           #{:application/undo-cancelation}}
+ :foreman-app  {:foreman            #{:application/edit-draft
+                                      :application/submit
+                                      :application/cancel-in-restricted-states
+                                      :application/edit
+                                      :application/edit-permit-subtype}}}

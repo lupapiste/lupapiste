@@ -40,7 +40,7 @@
 
 (apply-remote-minimal)
 
-(testable-privates lupapalvelu.application required-link-permits)
+(testable-privates lupapalvelu.application count-required-link-permits)
 
 (def VRKLupatunnus-path [:LupaTunnus :VRKLupatunnus])
 
@@ -72,12 +72,13 @@
                  :height "12"}])
 
 (defn- add-drawings [application]
-       (command pena :save-application-drawings
-                :id (:id application)
-                :drawings drawings))
+  (fact {:midje/description (format "pena adds drawings, permitType: %s, primaryOperation: %s" (:permitType application) (:name (:primaryOperation application)))}
+      (command pena :save-application-drawings
+               :id (:id application)
+               :drawings drawings) => ok?))
 
 (defn- generate-link-permit [{id :id :as application} apikey]
-  (when (pos? (required-link-permits application))
+  (when (pos? (count-required-link-permits application))
     (fact "Add required link permit"
       (command apikey :add-link-permit :id id :linkPermitId "Kuntalupatunnus 123") => ok?)))
 

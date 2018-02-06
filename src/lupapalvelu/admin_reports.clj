@@ -381,16 +381,24 @@
       local/to-local-date-time
       tc/to-long))
 
+(defn- following-month-start-as-timestamp [month year]
+  (-> (t/date-time year month 1)
+      (t/plus (t/days (t/number-of-days-in-the-month year month)))
+      local/to-local-date-time
+      tc/to-long))
+
 (defn applications-per-month-query [month year group-clause filter-query timestamp-key]
   (let [start-ts (month-start-as-timestamp month year)
-        end-ts   (month-start-as-timestamp (inc month) year)
+        end-ts   (following-month-start-as-timestamp month year)
         match-query {$and [{timestamp-key {$gt start-ts}}
                            {timestamp-key {$lt end-ts}}]}
         aggregate  (remove nil?
                      [{"$match" match-query}
                       (when filter-query
                         {"$match" filter-query})
-                      {"$project" {:primaryOperation 1 :permitType 1 :nbrOfOperations {"$sum" [1 {"$size" "$secondaryOperations"}]}}}
+                      {"$project" {:primaryOperation 1
+                                   :permitType 1
+                                   :nbrOfOperations {"$sum" [1 {"$size" {"$ifNull" ["$secondaryOperations", []]}}]}}}
                       {"$group" group-clause}])]
     (collection/aggregate (mongo/get-db) "applications" aggregate)))
 

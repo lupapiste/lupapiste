@@ -62,7 +62,6 @@ Basic can change email
   Open last email
   Click link  xpath=//a[contains(@href,'change-email-simple')]
   # land on change-email-simple page and sees success button
-  Debug
   Element should be visible by test id  login-new-email-simple
   # no vetuma button as this is company user LPK-2641 & LP-365695
   Wait until  Element should not be visible  vetuma-init-email

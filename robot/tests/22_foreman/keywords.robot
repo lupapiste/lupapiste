@@ -101,7 +101,7 @@ Open application by id
   [Arguments]  ${appId}
   ${user-role} =  Get role
   Go to  ${SERVER}/app/fi/${user-role}#!/application/${appId}
-  Wait until  Javascript?  $("span[data-test-id=application-id]").text() === "${appId}"
+  Wait until  Element text should be  xpath=//span[@data-test-id='application-id']  ${appId}
 
 Project application is open
   ${appId} =   Get From List  ${applicationIds}  0

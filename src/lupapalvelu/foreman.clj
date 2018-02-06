@@ -15,9 +15,19 @@
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as op]
+            [lupapalvelu.permissions :refer [defcontext]]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [monger.operators :refer :all]))
+
+(defn foreman-app? [application] (= :tyonjohtajan-nimeaminen-v2 (-> application :primaryOperation :name keyword)))
+
+(defcontext foreman-app-context [{{user-id :id} :user application :application}]
+  ;; Some permissions are added in foreman applicatons by user application role
+  (when (foreman-app? application)
+    {:context-scope :foreman-app
+     :context-roles (->> (auth/get-auths application user-id)
+                         (map :role))}))
 
 (defn ensure-foreman-not-linked [{{foreman-app-id :foremanAppId task-id :taskId} :data {:keys [tasks]} :application}]
   (when (and (not (ss/blank? foreman-app-id))
@@ -152,8 +162,6 @@
         applications (mongo/select :applications {:_id {$in foreman-application-ids}} [:id :state :auth :documents])
         mapped-applications (map foreman-application-info applications)]
     (sort-by :id mapped-applications)))
-
-(defn foreman-app? [application] (= :tyonjohtajan-nimeaminen-v2 (-> application :primaryOperation :name keyword)))
 
 (defn allow-foreman-only-in-foreman-app
   "If user has :foreman role in current application, check that the application is a forman application."

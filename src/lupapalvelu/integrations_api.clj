@@ -121,7 +121,7 @@
                         (assoc :handlers handlers)
                         (app/post-process-app-for-krysp @organization))
         mongo-query {:state {$in ["submitted" "complementNeeded"]}}
-        indicator-updates (app/mark-indicators-seen-updates application user created)
+        indicator-updates (app/mark-indicators-seen-updates command)
         transfer (get-transfer-item :exported-to-backing-system {:created created :user user})
         do-update (fn [attachments-updates]
                     (update-application (assoc command :application application)
@@ -322,7 +322,7 @@
         all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
         app-updates {:modified created,
                      :handlers (ensure-general-handler-is-set (:handlers application) user @org)}
-        indicator-updates (app/mark-indicators-seen-updates application user created)
+        indicator-updates (app/mark-indicators-seen-updates command)
         file-ids (ah/save-as-asianhallinta application lang submitted-application @org) ; Writes to disk
         attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments file-ids created) {})
         transfer (get-transfer-item :exported-to-asianhallinta command)]
