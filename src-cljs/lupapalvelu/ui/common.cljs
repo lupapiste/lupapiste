@@ -4,7 +4,8 @@
             [cljs-time.format :as tf]
             [clojure.string :as s]
             [clojure.string :as str]
-            [goog.events :as googe]))
+            [goog.events :as googe]
+            [goog.object :as googo]))
 
 (defn get-current-language []
   (.getCurrentLanguage js/loc))
@@ -132,3 +133,9 @@
 ;; Callthrough for goog.events.getUniqueId.
 ;; Must be in the global scope.
 (def unique-id googe/getUniqueId)
+
+(defn oget
+  "Convenience wrapper for goog.object/get. k can be either string or
+  keyword."
+  [obj k]
+  (googo/get obj (name k)))
