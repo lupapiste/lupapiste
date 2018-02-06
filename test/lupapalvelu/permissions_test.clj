@@ -147,7 +147,26 @@
     => #{:test/test :test/do-anything}
 
     (provided (get-permissions-by-role :organization "org-mighty")  => #{:test/do-anything :test/test})
-    (provided (get-permissions-by-role :organization "org-nocando") => #{})))
+    (provided (get-permissions-by-role :organization "org-nocando") => #{}))
+
+  (fact "without application"
+    (get-organization-permissions {:user {:orgAuthz {:123-T ["org-tester"]}}})
+    => #{:test/do}
+
+    (provided (get-permissions-by-role :organization "org-tester") => #{:test/do}))
+
+  (fact "without application - two orgs"
+    (get-organization-permissions {:user {:orgAuthz {:123-T ["org-tester"] :321-T ["archiver"]}}})
+    => #{:test/do :test/archive}
+
+    (provided (get-permissions-by-role :organization "org-tester") => #{:test/do}
+              (get-permissions-by-role :organization "archiver") => #{:test/archive}))
+
+  (fact "without application - no orgs"
+    (get-organization-permissions {:user {:orgAuthz {}}})
+    => #{}
+
+    (provided (get-permissions-by-role :organization irrelevant) => irrelevant :times 0)))
 
 (testable-privates lupapalvelu.permissions apply-company-restrictions)
 
