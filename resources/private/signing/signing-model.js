@@ -31,7 +31,7 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
           .filter(function(a) {return a.versions && a.versions.length;})
           .map(normalizeAttachment).value();
 
-    self.applicationId = application.id();
+    self.applicationId = ko.unwrap(application.id);
     self.password("");
     self.processing(false);
     self.pending(false);
@@ -50,8 +50,7 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
         .pending(self.pending)
         .success(function() {
           self.password("");
-          repository.load(id);
-          hub.send("attachments-signed", {id: id, attachments: attachmentIds});
+          hub.send("attachments-signed", {id: id, attachments: attachmentIds, currentPage: pageutil.getPage()});
           LUPAPISTE.ModalDialog.close();
           if (self.confirmSuccess) {
             LUPAPISTE.ModalDialog.showDynamicOk(loc("application.signAttachments"), loc("signAttachment.ok"));
@@ -69,10 +68,13 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
   self.selectAll = _.partial(selectAllAttachments, true);
   self.selectNone = _.partial(selectAllAttachments, false);
 
-  var hubId = hub.subscribe( "sign-attachments", function(event) {
+  // FIXME: ugly if clause. 'dialogSelector' needs a rewrite, as this model is initialized two times,
+  // thus resulting a duplicate hub subscription without this. This if clause prevents double subscription for now.
+  if (dialogSelector === "#dialog-sign-attachments") {
+    var hubId = hub.subscribe( "sign-attachments", function(event) {
       self.init(event.application, event.attachments);
-  });
-
-  self.dispose = _.partial(hub.unsubscribe, hubId);
+    });
+    self.dispose = _.partial(hub.unsubscribe, hubId);
+  }
 
 };
