@@ -1,9 +1,10 @@
 (ns lupapalvelu.ui.attachment.components
-  (:require [rum.core :as rum]
-            [lupapalvelu.ui.util :as jsutil]
+  (:require [lupapalvelu.ui.attachment.file-upload :as upload]
+            [lupapalvelu.ui.common :as common]
+            [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.rum-util :as rum-util]
-            [lupapalvelu.ui.attachment.file-upload :as upload]
-            [lupapalvelu.ui.hub :as hub]))
+            [lupapalvelu.ui.util :as jsutil]
+            [rum.core :as rum]))
 
 (defn- destroy-file-upload-subscriptions [state]
   (hub/send "fileuploadService::destroy" {:input (::input-id state)})
@@ -77,7 +78,7 @@
              :data-test-id "upload-link"}
      [:i.lupicon-circle-plus]
      [:i.wait.spin.lupicon-refresh]
-     [:span (js/loc "attachment.addFile")]]]])
+     [:span (common/loc "attachment.addFile")]]]])
 
 (defn dropzone
   "ClojureScript version of the legacy (Knockout) DropZone component."
@@ -85,7 +86,7 @@
   [:drop-zone
    [:div.drop-zone-placeholder
     [:i.lupicon-upload]
-    [:div (js/loc "dropzone.placeholder")]]])
+    [:div (common/loc "dropzone.placeholder")]]])
 
 (rum/defcs upload-wrapper < (upload-mixin)
   "Convenience wrapper file upload components. The idea is that the
@@ -133,7 +134,7 @@
     [:div.download
      [:a {:href (str "/api/raw/download-attachment?attachment-id=" (:fileId latest-version))}
       [:i.lupicon-download.btn-small]
-      [:span (js/loc "download-file")]]]])
+      [:span (common/loc "download-file")]]]])
 
 (rum/defc view-with-download-small-inline < {:key-fn #(str "view-with-download-inline-" (:fileId %))}
   [latest-version]
@@ -169,4 +170,4 @@
   [:div.inline.right
    [:a {:on-click #(delete-with-confirmation attachment)
         :data-test-id "delete-attachment-link"}
-    (str "[" (js/loc "remove") "]")]])
+    (str "[" (common/loc "remove") "]")]])

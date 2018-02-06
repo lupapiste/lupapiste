@@ -1326,13 +1326,25 @@
                                        :attachmentId regular-id)
                               => fail?)
 
+                            (fact "Attachment details have changed"
+                              (let [details {:readOnly true
+                                             :locked true
+                                             :target {:type "verdict"
+                                                      :id verdict-id}}
+                                    atts (:attachments (query-application sonja app-id))]
+                                (util/find-by-id attachment-id atts)
+                                => (contains (assoc details :id attachment-id))
+                                (util/find-by-id regular-id atts)
+                                => (contains (assoc details :id regular-id))))
+
                             (check-kuntagml application verdict-date)
                             => fail?
                             (fact "Verdict PDF attachment has been created"
-                              (util/find-first (fn [{:keys [id target]}]
+                              #_(util/find-first (fn [{:keys [id target]}]
                                                  (and (not= id attachment-id)
                                                       (= (:id target) verdict-id)))
                                                (:attachments (query-application sonja app-id)))
+                              (last (:attachments (query-application sonja app-id)))
                               => (contains {:readOnly         true
                                             :locked           true
                                             :contents         "P\u00e4\u00e4t\u00f6s"
