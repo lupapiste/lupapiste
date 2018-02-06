@@ -11,7 +11,7 @@
           </div>
           <div class="dialog-content">
             <p data-bind="ltext: 'verdict.sign-dialog.contentDescription'"></p>
-
+          <form data-bind="submit: sign">
             <label for="signVerdictPassword" data-bind="ltext: 'verdict.sign-dialog.verifyPassword'"class="form-label"></label>
             <input id="signVerdictPassword" data-test-id="sign-verdict-password" type="password" data-bind="textInput: password"class="form-input text"/>
 
@@ -23,7 +23,7 @@
               <span data-bind="ltext: 'verdict.sign-dialog.signButton'"></span>
               <em data-bind="visible: pending" class="button-loader"></em>
             </button>
-
+          </form>
             <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#"></a>
           </div>
         </div>
@@ -37,7 +37,7 @@
           </div>
           <div class="dialog-content">
             <p data-bind="lhtml: 'signAttachment.description'"></p>
-
+          <form data-bind="submit: sign">
             <label for="signSingleAttachmentPassword" data-bind="ltext: 'signAttachment.verifyPassword'" class="form-label"></label>
             <input id="signSingleAttachmentPassword" data-test-id="signSingleAttachmentPassword" type="password" data-bind="textInput: password" class="form-input text">
 
@@ -45,12 +45,13 @@
               <div data-bind="ltext: errorMessage" class="context-error"></div>
             </div>
 
-            <button data-bind="click: sign, enable: $root.authorization.ok('sign-attachments') && password() && !processing()" class="btn btn-primary btn-dialog" style="width:20em"
+            <button data-bind="click: sign, enable: $root.authorization.ok('sign-attachments') && password() && !processing()"
+                    class="btn btn-primary btn-dialog" style="width:20em" type="submit"
                     data-test-id="do-sign-attachment">
               <span data-bind="ltext: 'attachment.signLatest'"></span>
               <em data-bind="visible: pending" class="button-loader"></em>
             </button>
-
+          </form>
             <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#"></a>
           </div>
         </div>
@@ -111,7 +112,7 @@
                 </tfoot>
               </table>
             </div>
-
+          <form data-bind="submit: sign">
             <label for="signAttachmentPassword" data-bind="ltext: 'signAttachment.verifyPassword'" class="form-label"></label>
             <input id="signAttachmentPassword" data-test-id="signAttachmentPassword" type="password" data-bind="textInput: password" class="form-input text ">
 
@@ -119,12 +120,12 @@
               <div data-bind="ltext: errorMessage" class="context-error"></div>
             </div>
 
-            <button data-bind="click: sign, enable: $root.authorization.ok('sign-attachments') && password() && !processing()" class="btn btn-primary btn-dialog" style="width:20em;"
+            <button data-bind="click: sign, enable: $root.authorization.ok('sign-attachments') && password() && !processing()" class="btn btn-primary btn-dialog" type="submit" style="width:20em;"
                     data-test-id="do-sign-attachments">
               <span data-bind="ltext: 'signAttachment.sign'"></span>
               <em data-bind="visible: pending" class="button-loader"></em>
             </button>
-
+          </form>
             <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#"></a>
 
           </div>
