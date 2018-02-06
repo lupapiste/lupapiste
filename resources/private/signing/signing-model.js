@@ -31,7 +31,7 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
           .filter(function(a) {return a.versions && a.versions.length;})
           .map(normalizeAttachment).value();
 
-    self.applicationId = application.id();
+    self.applicationId = ko.unwrap(application.id);
     self.password("");
     self.processing(false);
     self.pending(false);
