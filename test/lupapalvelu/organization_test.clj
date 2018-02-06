@@ -122,14 +122,16 @@
     (provided
       (mongo/select-one :organizations ..query.. [:krysp]) => (conf {:buildingUrl "foo" :version "1" :url "jee"}))))
 
-#_(defn bulletin-settings-for-scope
-[organization permit-type municipality]
-(let [scopes (cond->> (:scope organization)
-                      permit-type  (filter (comp #{permit-type} :permitType))
-                      municipality (filter (comp #{municipality} :municipality)))]
-  (some :bulletins scopes)))
-
 (facts "bulletin-settings-for-scope"
+  (fact "validation"
+    (bulletin-settings-for-scope
+      {:scope [{:permitType "R"
+                :municipality "991"
+                :bulletins false}]} "R" nil) => (throws AssertionError)
+    (bulletin-settings-for-scope
+      {:scope [{:permitType "R"
+                :municipality "991"
+                :bulletins false}]} nil "991") => (throws AssertionError))
   (fact "no active scope"
     (bulletin-settings-for-scope
       {:scope [{:permitType "R"

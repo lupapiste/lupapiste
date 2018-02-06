@@ -816,6 +816,7 @@
 
 (defn bulletin-settings-for-scope
   [organization permit-type municipality]
+  {:pre [(not-any? nil? [permit-type municipality])]}
   (let [scopes (cond->> (:scope organization)
                         permit-type  (filter (comp #{permit-type} :permitType))
                         municipality (filter (comp #{municipality} :municipality)))]
