@@ -68,10 +68,13 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
   self.selectAll = _.partial(selectAllAttachments, true);
   self.selectNone = _.partial(selectAllAttachments, false);
 
-  var hubId = hub.subscribe( "sign-attachments", function(event) {
+  // FIXME: ugly if clause. 'dialogSelector' needs a rewrite, as this model is initialized two times,
+  // thus resulting a duplicate hub subscription without this. This if clause prevents double subscription for now.
+  if (dialogSelector === "#dialog-sign-attachments") {
+    var hubId = hub.subscribe( "sign-attachments", function(event) {
       self.init(event.application, event.attachments);
-  });
-
-  self.dispose = _.partial(hub.unsubscribe, hubId);
+    });
+    self.dispose = _.partial(hub.unsubscribe, hubId);
+  }
 
 };
