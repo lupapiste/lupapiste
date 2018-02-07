@@ -334,7 +334,8 @@
 (defn serializable-actions []
   (into {} (for [[k v] (get-actions)]
              [k (-> v
-                  (dissoc :handler :pre-checks :input-validators :on-success)
+                  (dissoc :handler :pre-checks :input-validators :on-success
+                          :contexts :permissions)           ; FIXME serialize permissions
                   (assoc :name k))])))
 
 ;;

@@ -697,6 +697,10 @@ LUPAPISTE.AttachmentsService = function() {
     self.queryTagGroupsAndFilters();
   });
 
+  hub.subscribe({eventType: "attachments-signed", currentPage: "application"}, function() {
+    self.queryAll();
+  });
+
   // Convience functions mostly for ClojureScript's benefit
 
   // Attachments as plain JS and function properties removed.

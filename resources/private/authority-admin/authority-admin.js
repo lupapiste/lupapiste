@@ -384,9 +384,9 @@
     self.canEdit = ko.computed( _.wrap("update-organization-bulletin-scope",
                                        lupapisteApp.models.globalAuthModel.ok));
 
-    self.save = function(setting) {
+    self.saveScope = function(data) {
       ajax
-        .command("update-organization-bulletin-scope", _.pick(ko.toJS(setting), ["permitType","municipality","notificationEmail"]))
+        .command("update-organization-bulletin-scope", data)
         .success(util.showSavedIndicator)
         .error(util.showSavedIndicator)
         .call();
@@ -437,8 +437,13 @@
       ajax.query("user-organization-bulletin-settings")
         .success(function(data) {
           self.scopes(_.map(data["bulletin-scopes"], function(setting) {
-            return _.set(setting, "notificationEmail", ko.observable(_.get(setting, ["bulletins", "notification-email"])));
+            _.merge(setting, {notificationEmail: ko.observable(_.get(setting, ["bulletins", "notification-email"])),
+                              descriptionsFromBackendSystem: ko.observable(_.get(setting, ["bulletins", "descriptions-from-backend-system"]))});
+            setting.notificationEmail.subscribe(function(s) { self.saveScope({permitType: setting.permitType, municipality: setting.municipality, notificationEmail: s}); });
+            setting.descriptionsFromBackendSystem.subscribe(function(s) { self.saveScope({permitType: setting.permitType, municipality: setting.municipality, descriptionsFromBackendSystem: s}); });
+            return setting;
           }));
+
           var koMappedTexts = ko.mapping.fromJS(data["local-bulletins-page-texts"]);
 
           _.map(loc.getSupportedLanguages(), function(lang) {

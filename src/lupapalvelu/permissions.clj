@@ -57,7 +57,9 @@
   (get-permissions-by-role :global (keyword role)))
 
 (defn get-organization-permissions [{{org-authz :orgAuthz} :user {org-id :organization} :application}]
-  (->> (get org-authz (keyword org-id))
+  (->> (if org-id
+         (get org-authz (keyword org-id))
+         (mapcat val org-authz))
        (map (partial get-permissions-by-role :organization))
        (reduce into #{})))
 

@@ -370,6 +370,10 @@
   (when-not (and organization (org/bulletins-enabled? @organization permit-type municipality))
     (fail :error.bulletins-not-enebled-for-scope)))
 
+(defn- check-bulletin-op-description-required [{organization :organization {permit-type :permitType municipality :municipality} :application}]
+  (when (and organization (:descriptions-from-backend-system (org/bulletin-settings-for-scope @organization permit-type municipality)))
+    unauthorized))
+
 (defquery bulletin-for-application-verdict-enabled
   {:description ""
    :parameters  [id]
@@ -385,6 +389,14 @@
    :states      #{:submitted :complementNeeded}
    :pre-checks  [(permit/validate-permit-type-is-not permit/YI permit/YL permit/YM permit/VVVL permit/MAL)
                  check-bulletins-enabled]})
+
+(defquery app-bulletin-op-description-required
+  {:description "Pseudoquery that controls whether or not a descriptive title for verdict bulletins is mandatory before approve-application"
+   :parameters  [id]
+   :user-roles  #{:authority}
+   :states      #{:submitted :complementNeeded}
+   :pre-checks  [(permit/validate-permit-type-is-not permit/YI permit/YL permit/YM permit/VVVL permit/MAL)
+                 check-bulletin-op-description-required]})
 
 (defcommand update-app-bulletin-op-description
   {:parameters [id description]

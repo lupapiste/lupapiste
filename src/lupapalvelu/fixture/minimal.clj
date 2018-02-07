@@ -819,7 +819,8 @@
                                 :new-application-enabled true
                                 :bulletins {:enabled true
                                             :url "http://localhost:8000/dev/julkipano"
-                                            :notification-email "sonja.sibbo@sipoo.fi"}}
+                                            :notification-email "sonja.sibbo@sipoo.fi"
+                                            :descriptions-from-backend-system false}}
                                {:municipality "753" :permitType "P" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "YM" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "YI" :inforequest-enabled true :new-application-enabled true}

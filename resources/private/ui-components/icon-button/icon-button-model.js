@@ -39,6 +39,4 @@ LUPAPISTE.IconButtonModel = function( params ) {
   });
 
   self.buttonText = params.ltext ? loc( params.ltext ) : params.text;
-
-
 };

@@ -122,6 +122,44 @@
     (provided
       (mongo/select-one :organizations ..query.. [:krysp]) => (conf {:buildingUrl "foo" :version "1" :url "jee"}))))
 
+(facts "bulletin-settings-for-scope"
+  (fact "validation"
+    (bulletin-settings-for-scope
+      {:scope [{:permitType "R"
+                :municipality "991"
+                :bulletins false}]} "R" nil) => (throws AssertionError)
+    (bulletin-settings-for-scope
+      {:scope [{:permitType "R"
+                :municipality "991"
+                :bulletins false}]} nil "991") => (throws AssertionError))
+  (fact "no active scope"
+    (bulletin-settings-for-scope
+      {:scope [{:permitType "R"
+                :municipality "991"
+                :bulletins false}]} "R" "991") => nil)
+  (fact "active R scope"
+    (bulletin-settings-for-scope
+      {:scope [{:permitType "R"
+                :municipality "991"
+                :bulletins {:foo :bar}}
+               {:permitType "P"
+                :municipality "991"
+                :bulletins false}]} "R" "991") => {:foo :bar}
+    (bulletin-settings-for-scope
+      {:scope [{:permitType "R"
+                :municipality "991"
+                :bulletins {:foo :bar}}
+               {:permitType "P"
+                :municipality "991"
+                :bulletins false}]} "R" "992") => nil
+    (bulletin-settings-for-scope
+      {:scope [{:permitType "R"
+                :municipality "991"
+                :bulletins {:foo :bar}}
+               {:permitType "P"
+                :municipality "991"
+                :bulletins false}]} "P" "991") => nil))
+
 (facts organization-statement-giver-context
   (fact "is statementGiver"
     (:permissions (organization-statement-giver-context {:user         {:id "1" :email "pena@example.com"}
@@ -168,3 +206,4 @@
     => empty?
 
     (provided (lupapalvelu.permissions/get-permissions-by-role irrelevant irrelevant) => irrelevant :times 0)))
+

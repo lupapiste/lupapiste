@@ -106,10 +106,7 @@
   [local-key]
   (letfn [(update-state [state]
             (let [value (-> state :rum/args first)]
-              (assoc state local-key (if (or (instance? Atom value)
-                                             (instance? rum.cursor.Cursor value))
-                                       value
-                                       (atom value)))))]
+              (assoc state local-key (common/atomize value))))]
     {:will-mount  update-state
      :did-remount #(update-state %2)}))
 
@@ -329,7 +326,7 @@
     term*     ::term
     current*  ::current
     open?*    ::open?
-    :as       local-state} initial {:keys [items clear? callback disabled?]
+    :as       local-state} _ {:keys [items clear? callback disabled?]
                                     :as options}]
   (let [{:keys [text-edit
                 menu-items
@@ -422,3 +419,32 @@
         ;; Split results include the link
         [before after] (remove #(= link %) (s/split text regex))]
     [:span before [:a {:on-click click} link] after]))
+
+;; Button with optional icon and waiting support
+;; Options (text and text-loc are mutually exclusive) [optional]
+;;   text Button text
+;;   text-loc Localisation key for text
+;;   [icon] Icon class for the button (e.g., :lupicon-save)
+;;
+;;   [wait?] If true the button is disabled and the wait icon is
+;;   shown (if the icon has been given). Can be either value or
+;;   atom. Atom makes the most sense for the typical use cases.
+;;
+;;   [disabled?] If true, button is disabled. Can be either value or
+;;   atom.
+;;
+;; Any other options are passed to the :button
+;; tag (e.g, :class, :on-click). The only exception is :disabled,
+;; since it is overridden with :disabled?
+(rum/defc icon-button < rum/reactive
+  [{:keys [text text-loc icon wait? disabled?] :as options}]
+  (let [waiting? (rum/react (common/atomize wait?))]
+    [:button
+     (assoc (dissoc options :text :text-loc :icon :wait? :disabled?)
+            :disabled (or (rum/react (common/atomize disabled?))
+                          waiting?))
+     (when icon
+       [:i {:class (common/css (if waiting?
+                                 [:icon-spin :lupicon-refresh]
+                                 icon))}])
+     [:span (or text (common/loc text-loc))]]))
