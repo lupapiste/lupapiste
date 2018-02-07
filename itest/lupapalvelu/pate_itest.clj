@@ -1340,10 +1340,6 @@
                             (check-kuntagml application verdict-date)
                             => fail?
                             (fact "Verdict PDF attachment has been created"
-                              #_(util/find-first (fn [{:keys [id target]}]
-                                                 (and (not= id attachment-id)
-                                                      (= (:id target) verdict-id)))
-                                               (:attachments (query-application sonja app-id)))
                               (last (:attachments (query-application sonja app-id)))
                               => (contains {:readOnly         true
                                             :locked           true

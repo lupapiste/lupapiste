@@ -99,6 +99,26 @@
   [options _]
   (verdict-section-header options))
 
+(rum/defc toggle-all < rum/reactive
+  [{:keys [schema _meta] :as options}]
+  (when (path/enabled? options)
+    (let [all-sections  (map :id (:sections schema))
+          meta-map (rum/react _meta)
+          open-sections (filter #(get meta-map (util/kw-path % :editing?))
+                                all-sections)]
+      [:a.pate-left-space
+       {:on-click #(swap! _meta (fn [m]
+                                  (->> (or (not-empty open-sections)
+                                           all-sections)
+                                       (map (fn [id]
+                                              [(util/kw-path id :editing?)
+                                               (empty? open-sections)]))
+                                       (into {})
+                                       (merge m))))}
+       (common/loc (if (seq open-sections)
+                     :pate.close-all
+                     :pate.open-all))])))
+
 (rum/defcs verdict < rum/reactive
   (rum/local false ::wait?)
   [{wait?* ::wait?} {:keys [schema state info _meta] :as options}]
@@ -138,6 +158,7 @@
          [:div.col-1
           (pate-components/required-fields-note options)]
          [:div.col-1.col--right
+          (toggle-all options)
           (pate-components/last-saved options)]])]
      (sections/sections options :verdict)]))
 
