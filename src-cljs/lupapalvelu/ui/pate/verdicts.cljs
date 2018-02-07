@@ -99,26 +99,35 @@
   [options _]
   (verdict-section-header options))
 
-(rum/defc verdict < rum/reactive
-  [{:keys [schema state info] :as options}]
-  (let [published (path/value :published info)]
+(rum/defcs verdict < rum/reactive
+  (rum/local false ::wait?)
+  [{wait?* ::wait?} {:keys [schema state info _meta] :as options}]
+  (let [published (path/react :published info)
+        yes-fn (fn []
+                 (reset! wait?* true)
+                 (reset! (rum/cursor-in _meta [:enabled?]) false)
+                 (service/publish-and-reopen-verdict  @state/application-id
+                                                      (path/value :id info)
+                                                      reset-verdict))]
     [:div.pate-verdict
      [:div.pate-grid-2
-      (when (path/enabled? options)
+      (when (and (or (path/enabled? options)
+                     (rum/react wait?*))
+                 (not published))
         [:div.row
          [:div.col-2.col--right
-          [:button.primary.outline
-           {:disabled (false? (path/react :filled? info))
-            :on-click (fn []
-                        (hub/send "show-dialog"
-                                  {:ltitle "areyousure"
-                                   :size "medium"
-                                   :component "yes-no-dialog"
-                                   :componentParams {:ltext "verdict.confirmpublish"
-                                                     :yesFn #(service/publish-and-reopen-verdict  @state/application-id
-                                                                                                  (path/value :id info)
-                                                                                                  reset-verdict)}}))}
-           (path/loc :verdict.submit)]]])
+          (components/icon-button {:text-loc :verdict.submit
+                                   :class (common/css :primary)
+                                   :icon :lupicon-circle-section-sign
+                                   :wait? wait?*
+                                   :disabled? (false? (path/react :filled? info))
+                                   :on-click (fn []
+                                               (hub/send "show-dialog"
+                                                         {:ltitle "areyousure"
+                                                          :size "medium"
+                                                          :component "yes-no-dialog"
+                                                          :componentParams {:ltext "verdict.confirmpublish"
+                                                                            :yesFn yes-fn}}))})]])
       (if published
         [:div.row
          [:div.col-2.col--right

@@ -610,7 +610,9 @@
                                                           #(util/includes-as-kw? (map :id att-items)
                                                                                  (:id %))
                                                           :readOnly true
-                                                          :locked   true))}
+                                                          :locked   true
+                                                          :target {:type "verdict"
+                                                                   :id   (:id verdict)}))}
                      (app-state/state-transition-update next-state
                                                         created
                                                         application

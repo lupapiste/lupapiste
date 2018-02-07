@@ -4,7 +4,8 @@
             [cljs-time.format :as tf]
             [clojure.string :as s]
             [clojure.string :as str]
-            [goog.events :as googe]))
+            [goog.events :as googe]
+            [goog.object :as googo]))
 
 (defn get-current-language []
   (.getCurrentLanguage js/loc))
@@ -76,6 +77,11 @@
 (defn feature? [feature]
   (boolean (js/features.enabled (name feature))))
 
+(defn css
+  "Convenience function for :class defintions."
+  [& classes]
+  (->> classes flatten (remove nil?) (map name)))
+
 (defn css-flags
   "List of keys with truthy values.
   (css-flags :foo true :bar false) => '(\"foo\")"
@@ -83,7 +89,7 @@
   (->> (apply hash-map flags)
        (filter (fn [[k v]] v))
        keys
-       (map name)))
+       css))
 
 (defn update-css
   "Upserts existing :class definition. Flags use css-flags semantics."
@@ -132,3 +138,18 @@
 ;; Callthrough for goog.events.getUniqueId.
 ;; Must be in the global scope.
 (def unique-id googe/getUniqueId)
+
+(defn oget
+  "Convenience wrapper for goog.object/get. k can be either string or
+  keyword."
+  [obj k]
+  (googo/get obj (name k)))
+
+(defn atomize
+  "Wraps value into atom. If the value already is either atom or cursor
+  it is returned as such."
+  [value]
+  (if (or (instance? Atom value)
+          (instance? rum.cursor.Cursor value))
+    value
+    (atom value)))

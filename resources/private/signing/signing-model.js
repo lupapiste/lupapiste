@@ -3,7 +3,7 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
   var self = this;
   self.dialogSelector = dialogSelector;
   self.confirmSuccess = confirmSuccess;
-  self.application = null;
+  self.applicationId = null;
   self.password = ko.observable("");
   self.attachments = ko.observable([]);
   self.selectedAttachments = ko.computed(function() { return _.filter(self.attachments(), function(a) {return a.selected();}); });
@@ -27,12 +27,11 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
   }
 
   self.init = function(application, atts) {
-    var app = ko.toJS(application);
     var normalizedAttachments = _(ko.mapping.toJS(atts))
           .filter(function(a) {return a.versions && a.versions.length;})
           .map(normalizeAttachment).value();
 
-    self.application = app;
+    self.applicationId = ko.unwrap(application.id);
     self.password("");
     self.processing(false);
     self.pending(false);
@@ -43,7 +42,7 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
 
   self.sign = function() {
     self.errorMessage("");
-    var id = self.application.id;
+    var id = self.applicationId;
     var attachmentIds = _.map(self.selectedAttachments(), "id");
     if (attachmentIds && attachmentIds.length) {
       ajax.command("sign-attachments", {id: id, attachmentIds: attachmentIds, password: self.password()})
@@ -51,8 +50,7 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
         .pending(self.pending)
         .success(function() {
           self.password("");
-          repository.load(id);
-          hub.send("attachments-signed", {id: id, attachments: attachmentIds});
+          hub.send("attachments-signed", {id: id, attachments: attachmentIds, currentPage: pageutil.getPage()});
           LUPAPISTE.ModalDialog.close();
           if (self.confirmSuccess) {
             LUPAPISTE.ModalDialog.showDynamicOk(loc("application.signAttachments"), loc("signAttachment.ok"));
@@ -70,10 +68,13 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
   self.selectAll = _.partial(selectAllAttachments, true);
   self.selectNone = _.partial(selectAllAttachments, false);
 
-  var hubId = hub.subscribe( "sign-attachments", function(event) {
+  // FIXME: ugly if clause. 'dialogSelector' needs a rewrite, as this model is initialized two times,
+  // thus resulting a duplicate hub subscription without this. This if clause prevents double subscription for now.
+  if (dialogSelector === "#dialog-sign-attachments") {
+    var hubId = hub.subscribe( "sign-attachments", function(event) {
       self.init(event.application, event.attachments);
-  });
-
-  self.dispose = _.partial(hub.unsubscribe, hubId);
+    });
+    self.dispose = _.partial(hub.unsubscribe, hubId);
+  }
 
 };

@@ -160,6 +160,10 @@
        (map (partial verdict-attachments application user timestamp))
        (filter seq)))
 
+
+(defn- get-app-descriptions [{:keys [permitType] :as application} xml]
+  (krysp-reader/read-permit-descriptions-from-xml permitType (cr/strip-xml-namespaces xml)))
+
 (defn- get-task-updates [application created verdicts app-xml]
   (when (not-any? (comp #{"verdict"} :type :source) (:tasks application))
     {$set {:tasks (-> (assoc application
@@ -306,12 +310,13 @@
   [{:keys [application] :as command} app-xml]
   (appeal-common/delete-all command)
   (let [updates (find-verdicts-from-xml command app-xml)
+        app-descriptions (get-app-descriptions application app-xml)
         verdicts (get-in updates [$set :verdicts])]
     (when updates
       (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
         (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
         (delete-deprecated-verdict-attachments! (:id application))
-        (bulletins/process-check-for-verdicts-result command verdicts)
+        (bulletins/process-check-for-verdicts-result command verdicts app-descriptions)
         (t/mark-app-and-attachments-final! (:id application) (:created command))))
     (ok :verdicts verdicts
         :tasks (get-in updates [$set :tasks])

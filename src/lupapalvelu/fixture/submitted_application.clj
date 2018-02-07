@@ -1,15 +1,17 @@
-(ns lupapalvelu.fixture.company-application
-  (:require [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.fixture.core :refer [deffixture]]
-            [lupapalvelu.fixture.minimal :as minimal]))
+(ns lupapalvelu.fixture.submitted-application
+  (:require [lupapalvelu.fixture.core :refer :all]
+            [lupapalvelu.fixture.minimal :as minimal]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.user :as usr]
+            [sade.shared-util :as util]))
 
-(def users (filter (comp #{"admin" "sonja" "pena" "kaino@solita.fi" "erkki@example.com"} :username) minimal/users))
+(def users (filter (comp #{"admin" "sonja" "pena"} :username) minimal/users))
+(def pena (util/find-by-key :username "pena" users))
 
 (def organizations (filter (comp (set (mapcat (comp keys :orgAuthz) users)) keyword :id) minimal/organizations))
 
-(def companies minimal/companies)
-
 (def created 1514877090000)
+(def submitted (+ 100 created))
 
 (def applications [{:id "LP-753-2018-90001"
                     :startedBy {}
@@ -20,7 +22,7 @@
                            :added false}
                     :started nil
                     :closed nil
-                    :address "Latokuja 3"
+                    :address "Penakuja 3"
                     :primaryOperation {:id "5a4b30a988c5cbc9a3a61782"
                                        :name "kerrostalo-rivitalo"
                                        :description nil
@@ -66,39 +68,27 @@
                     :infoRequest false
                     :history [{:state "draft"
                                :ts created
-                               :user {:id "kainosolita"
-                                      :username "kaino@solita.fi"
-                                      :firstName "Kaino"
-                                      :lastName "Solita"
-                                      :role "applicant"}}]
+                               :user (usr/summary pena)}
+                              {:state "submitted"
+                               :ts submitted
+                               :user (usr/summary pena)}]
                     :created created
+                    :submitted submitted
+                    :modified submitted
                     :municipality "753"
-                    :state "draft"
-                    :opened nil
+                    :state "submitted"
+                    :opened submitted
                     :permitType "R"
                     :organization "753-R"
                     :warrantyEnd nil
                     :handlers []
                     :finished nil
-                    :auth [{:role "owner"
-                            :username "kaino@solita.fi"
-                            :firstName "Kaino"
-                            :type "owner"
-                            :unsubscribed false
-                            :id "kainosolita"
-                            :lastName "Solita"}
-                           {:id "solita"
-                            :name "Solita Oy"
-                            :y "1060155-5"
-                            :role "writer"
-                            :type "company"
-                            :username "1060155-5"
-                            :firstName "Solita Oy"
-                            :lastName ""}]
-                    :modified created
+                    :auth [(-> pena
+                               (usr/summary)
+                               (assoc :role "owner"
+                                      :unsubscribed false))]
                     :urgency "normal"
                     :sent nil
-                    :submitted nil
                     :title "Latokuja 3"
                     :_attachment_indicator_reset nil
                     :tasks []
@@ -244,7 +234,7 @@
                     :location-wgs84 [25.266
                                      60.36938]
                     :foremanRole ""
-                    :applicant "Solita Kaino"
+                    :applicant "Pena Pansku"
                     :transfers []
                     :_verdicts-seen-by {}
                     :options {}
@@ -262,14 +252,11 @@
                     :_statements-seen-by {}
                     :appeals []
                     :convertedToApplication nil
-                    :statements []
-                    :company-notes [{:companyId "solita"
-                                     :tags ["7a67a67a67a67a67a67a67a6"]}]}])
+                    :statements []}])
 
-(deffixture "company-application" {}
+(deffixture "submitted-application" {}
   (mongo/clear!)
   (mongo/insert-batch :users users)
-  (mongo/insert-batch :companies companies)
   (mongo/insert-batch :organizations organizations)
   (mongo/insert-batch :applications applications)
   (mongo/insert :sequences {:_id "applications-753-2018" :count 1}))

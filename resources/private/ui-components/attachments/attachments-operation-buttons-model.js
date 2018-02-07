@@ -42,7 +42,9 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function(params) {
   };
 
   self.signAttachments = function() {
-    hub.send("sign-attachments", {application: appModel, attachments: attachments});
+    var filterSet = service.getFilters( "attachments-listing" );
+    var filteredAttachments = filterSet.apply(attachments());
+    hub.send("sign-attachments", {application: appModel, attachments: filteredAttachments});
   };
 
   self.canSign = function() {
