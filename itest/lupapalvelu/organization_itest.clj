@@ -1226,8 +1226,17 @@
     => (partial expected-failure? :error.unauthorized))
 
   (fact "email must be valid"
-        (command sipoo :set-document-request-info :enabled false :email "not-valid-email" :instructions "Instructions")
-        => (partial expected-failure? :error.email)))
+    (command sipoo :set-document-request-info :enabled false :email "not-valid-email" :instructions "Instructions")
+    => (partial expected-failure? :error.email))
+
+  (fact "setting works"
+    (command sipoo :set-document-request-info :enabled true :email "a@b.c"
+             :instructions {:en "Instructions" :fi "Ohjeet" :sv "Anvisningar"}) => ok?
+    (-> (query sipoo :document-request-info)
+        :documentRequest)
+    => {:enabled true
+        :email "a@b.c"
+        :instructions {:en "Instructions" :fi "Ohjeet" :sv "Anvisningar"}}))
 
 (fact "organizations bulletin settings"
   (facts "query setting"
