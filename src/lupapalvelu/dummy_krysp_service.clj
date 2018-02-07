@@ -35,6 +35,7 @@
 
   (def default-dummy-verdicts [{:type-name "rakval:ValmisRakennus", :kuntalupatunnus nil, :template-file "krysp/dev/building.xml"}
                                {:type-name "rakval:RakennusvalvontaAsia", :kuntalupatunnus nil, :template-file "krysp/dev/verdict.xml"}
+                               {:type-name "rakval:RakennusvalvontaAsia", :kuntalupatunnus "14-0241-R 3", :template-file "krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml"}
                                {:type-name "rakval:RakennusvalvontaAsia", :kuntalupatunnus "895-2015-001", :template-file "krysp/dev/verdict-rakval-with-area-like-location.xml"}
                                {:type-name "rakval:RakennusvalvontaAsia", :kuntalupatunnus "895-2015-002", :template-file "krysp/dev/verdict-rakval-with-building-location.xml"}
                                {:type-name "rakval:RakennusvalvontaAsia", :kuntalupatunnus "475-2016-001", :template-file "krysp/dev/verdict-rakval-missing-location.xml"}
@@ -75,9 +76,9 @@
                    overrides (-> (json/decode overrides)
                                  (clojure.walk/keywordize-keys))]
                (cond
+                 (not-empty overrides) (resp/content-type "application/xml; charset=utf-8" (override-xml (io/resource (verdict-xml typeName)) overrides))
                  (and (#{:kuntalupatunnus :asiointitunnus} search-key) search-literal)
                    (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (verdict-xml typeName :kuntalupatunnus search-literal))))
-                 (not-empty overrides) (resp/content-type "application/xml; charset=utf-8" (override-xml (io/resource (verdict-xml typeName)) overrides))
                  :else (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (verdict-xml typeName))))))
              (when (= r "GetCapabilities")
                (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/capabilities.xml"))))))
