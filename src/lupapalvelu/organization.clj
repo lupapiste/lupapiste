@@ -114,14 +114,20 @@
    :docTerminalInUse               sc/Bool
    :allowedTerminalAttachmentTypes [DocTerminalAttachmentType]
    :documentPrice                  sssc/Nat
-   :organizationDescription        (i18n/lenient-localization-schema sc/Str)})
+   :organizationDescription        (i18n/lenient-localization-schema sc/Str)
+   :documentRequest {:enabled      sc/Bool
+                     :email        ssc/OptionalEmail
+                     :instructions (i18n/lenient-localization-schema sc/Str)}})
 
 (def default-docstore-info
   {:docStoreInUse                  false
    :docTerminalInUse               false
    :allowedTerminalAttachmentTypes []
    :documentPrice                  0
-   :organizationDescription (i18n/supported-langs-map (constantly ""))})
+   :organizationDescription        (i18n/supported-langs-map (constantly ""))
+   :documentRequest {:enabled      false
+                     :email        ""
+                     :instructions (i18n/supported-langs-map (constantly ""))}})
 
 (sc/defschema PermitType
   (apply sc/enum (keys (permit/permit-types))))
@@ -894,3 +900,15 @@
     (if allowed?
      (update-organization org-id {$addToSet {:docstore-info.allowedTerminalAttachmentTypes attachment-type}})
      (update-organization org-id {$pull {:docstore-info.allowedTerminalAttachmentTypes attachment-type}}))))
+
+(defn document-request-info [org-id]
+  (-> org-id
+      get-docstore-info-for-organization!
+      (get :documentRequest)))
+
+(defn set-document-request-info
+  [org-id enabled email instructions]
+  (update-organization org-id
+                       {$set {:docstore-info.documentRequest.enabled enabled
+                              :docstore-info.documentRequest.instructions instructions
+                              :docstore-info.documentRequest.email email}}))
