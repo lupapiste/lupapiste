@@ -24,7 +24,8 @@
             [clj-time.core :as t]
             [lupapalvelu.states :as states]
             [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.application :as app]))
+            [lupapalvelu.application :as app]
+            [lupapalvelu.application-bulletin-utils :as bulletin-utils]))
 
 (def bulletin-page-size 10)
 
@@ -136,7 +137,7 @@
     (ok :states states)))
 
 (defn- bulletin-version-is-latest [bulletin bulletin-version-id]
-  (let [latest-version-id (:id (last (filter bulletins/bulletin-version-date-valid? (:versions bulletin))))]
+  (let [latest-version-id (:id (last (filter bulletin-utils/bulletin-version-date-valid? (:versions bulletin))))]
     (when-not (= bulletin-version-id latest-version-id)
       (fail :error.invalid-version-id))))
 
@@ -254,7 +255,7 @@
   [command]
   (if-let [bulletin (bulletins/get-bulletin bulletinId)]
     (let [latest-version       (->> bulletin :versions
-                                    (filter (partial bulletins/bulletin-version-date-valid? (:created command))) last)
+                                    (filter (partial bulletin-utils/bulletin-version-date-valid? (:created command))) last)
           bulletin-version     (assoc latest-version :versionId (:id latest-version)
                                                      :id (:id bulletin))
           append-schema-fn     (fn [{schema-info :schema-info :as doc}]
