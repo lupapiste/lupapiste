@@ -42,6 +42,11 @@
                 </yht:muuTunnustieto>
             </yht:LupaTunnus>
         </rakval:viitelupatieto>
+        <rakval:asianTiedot>
+            <rakval:Asiantiedot>
+                <rakval:rakennusvalvontaasianKuvaus>Kuvaus 999-2016-999</rakval:rakennusvalvontaasianKuvaus>
+            </rakval:Asiantiedot>
+        </rakval:asianTiedot>
     </rakval:RakennusvalvontaAsia>
 </gml:featureMember><gml:featureMember>
     <rakval:RakennusvalvontaAsia>
@@ -70,5 +75,10 @@
                 <yht:saapumisPvm>2016-12-07</yht:saapumisPvm>
             </yht:LupaTunnus>
         </rakval:luvanTunnisteTiedot>
+        <rakval:asianTiedot>
+            <rakval:Asiantiedot>
+                <rakval:rakennusvalvontaasianKuvaus>Kuvaus 999-2017-11</rakval:rakennusvalvontaasianKuvaus>
+            </rakval:Asiantiedot>
+        </rakval:asianTiedot>
     </rakval:RakennusvalvontaAsia>
 </gml:featureMember></wfs:FeatureCollection>

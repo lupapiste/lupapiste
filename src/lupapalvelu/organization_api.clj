@@ -170,17 +170,29 @@
     (ok :bulletin-scopes scopes
         :local-bulletins-page-texts texts)))
 
+(defn- bulletin-scope-settings-validator
+  [{{:keys [notificationEmail descriptionsFromBackendSystem]} :data}]
+  (when (and notificationEmail (not (v/valid-email? notificationEmail))
+             (fail! :error.email)))
+  (when (and descriptionsFromBackendSystem (not (util/boolean? descriptionsFromBackendSystem)))
+    (fail! :error.invalid-value)))
+
 (defcommand update-organization-bulletin-scope
   {:user-roles #{:authorityAdmin}
-   :parameters [permitType municipality notificationEmail]
+   :parameters [permitType municipality]
+   :optional-parameters [notificationEmail descriptionsFromBackendSystem]
    :input-validators [permit/permit-type-validator
-                      (partial action/email-validator :notificationEmail)]
+                      bulletin-scope-settings-validator]
    :pre-checks [check-bulletins-enabled]}
-  [{user :user}]
-  (mongo/update-by-query :organizations
-      {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
-      {$set {:scope.$.bulletins.notification-email notificationEmail}})
-  (ok))
+  [{user :user data :data}]
+  (let [updates (merge (when (util/not-empty-or-nil? notificationEmail)
+                         {:scope.$.bulletins.notification-email notificationEmail})
+                       (when (contains? data :descriptionsFromBackendSystem)
+                         {:scope.$.bulletins.descriptions-from-backend-system descriptionsFromBackendSystem}))]
+    (when updates
+      (mongo/update-by-query :organizations
+        {:scope {$elemMatch {:permitType permitType :municipality municipality}}}  {$set updates}))
+    (ok)))
 
 (defcommand remove-organization-local-bulletins-caption
   {:user-roles #{:authorityAdmin}
