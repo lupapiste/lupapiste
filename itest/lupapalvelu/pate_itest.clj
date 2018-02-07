@@ -912,7 +912,6 @@
                                    :neighbor-states  []
                                    :reviews-included true
                                    :reviews          [(:id review)]
-                                   :statements       ""
                                    :deviations       "Deviation from mean."})
                 (fact "Attachments cannot be added to the verdict"
                   (edit-verdict :attachments ["foobar"]) => fail?)
@@ -939,6 +938,14 @@
                       (check-verdict-conditions app-id verdict-id
                                                 good-id "Good condition"
                                                 other-id "Other condition"))))
+                (fact "Statements in the verdict draft"
+                  (:statements data) => (just [(just {:text   "Paloviranomainen"
+                                                      :given  pos?
+                                                      :status "puollettu"})
+                                               {:text   "Stakeholder"
+                                                :given  nil
+                                                :status nil}]
+                                              :in-any-order))
                 (fact "No section"
                   (:section data) => nil?)
                 (fact "New verdict is not filled"
@@ -1182,9 +1189,16 @@
                     (fact "Sonja can publish the verdict"
                       (command sonja :publish-pate-verdict :id app-id
                                :verdict-id verdict-id) => ok?)
-                    (fact "Verdict's section is one"
-                      (-> (open-verdict) :verdict :data :verdict-section)
-                      => "1")
+                    (facts "Verdict has been published"
+                      (let [data (-> (open-verdict) :verdict :data)]
+                        (fact "Verdict's section is one"
+                          (:verdict-section data) => "1")
+                        (fact "Only given statements are included"
+                          (-> data :statements count) => 1
+                          (-> data :statements first)
+                          => (just {:text   "Paloviranomainen"
+                                    :given  pos?
+                                    :status "puollettu"}))))
                     (facts "Modify template"
                       (letfn [(edit-template [path value]
                                 (fact {:midje/description (format "Template draft %s -> %s" path value)}
@@ -1192,8 +1206,8 @@
                                            :template-id template-id
                                            :path (map name (flatten [path]))
                                            :value value) => ok?))]
-                        (fact "Disable julkipano, muutoksenhaku, lainvoimainen and aloitettava"
-                          (edit-template [:verdict-dates] ["anto" "voimassa"]))
+                        (fact "Disable julkipano, lainvoimainen and aloitettava"
+                          (edit-template [:verdict-dates] ["anto" "muutoksenhaku" "voimassa"]))
                         (fact "Remove all the other sections except buildings and attachments (and verdict)"
                           (edit-template [:removed-sections :foremen] true)
                           (edit-template [:removed-sections :plans] true)
@@ -1229,6 +1243,7 @@
                         data => {:voimassa              ""
                                  :verdict-text          "Verdict text."
                                  :anto                  ""
+                                 :muutoksenhaku         ""
                                  :foremen-included      false
                                  :foremen               ["iv-tj" "erityis-tj"]
                                  :verdict-code          "ehdollinen"
@@ -1270,11 +1285,8 @@
                             (edit-verdict :verdict-date "8.1.2018") => no-errors?)
                           (fact "Calculate muutoksenhaku date automatically"
                             (check-changes (edit-verdict :automatic-verdict-dates true)
-                                           [[["julkipano"] "9.1.2018"]
-                                            [["anto"] "11.1.2018"]
+                                           [[["anto"] "11.1.2018"]
                                             [["muutoksenhaku"] "22.1.2018"]
-                                            [["lainvoimainen"] "26.1.2018"]
-                                            [["aloitettava"] "28.1.2019"]
                                             [["voimassa"] "28.1.2021"]])))
                         (facts "Add attachment to verdict draft"
                           (let [attachment-id (add-verdict-attachment app-id verdict-id "Paatosote")]
@@ -1328,10 +1340,10 @@
 
                             (fact "Attachment details have changed"
                               (let [details {:readOnly true
-                                             :locked true
-                                             :target {:type "verdict"
-                                                      :id verdict-id}}
-                                    atts (:attachments (query-application sonja app-id))]
+                                             :locked   true
+                                             :target   {:type "verdict"
+                                                        :id   verdict-id}}
+                                    atts    (:attachments (query-application sonja app-id))]
                                 (util/find-by-id attachment-id atts)
                                 => (contains (assoc details :id attachment-id))
                                 (util/find-by-id regular-id atts)

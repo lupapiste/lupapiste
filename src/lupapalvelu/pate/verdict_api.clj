@@ -144,8 +144,7 @@
       (template/error-response result))))
 
 (defcommand publish-pate-verdict
-  {:description      "Publishes verdict.
-TODO: create tasks and PDF, application state change"
+  {:description      "Publishes verdict."
    :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]

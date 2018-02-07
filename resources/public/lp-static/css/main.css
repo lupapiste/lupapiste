@@ -29074,6 +29074,18 @@ div.pate-autocomplete .ac__menu ul.ac__items li.ac--grouped {
   max-width: 90%;
 }
 
+.tabby.statements {
+  margin: 0;
+  width: initial;
+}
+
+.tabby.statements .tabby__row.statement > .tabby__cell {
+  vertical-align: top;
+  padding-top: 0;
+  padding-bottom: 0;
+  white-space: nowrap;
+}
+
 .neighbor-states {
   margin: 0;
 }

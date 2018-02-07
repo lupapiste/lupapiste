@@ -140,14 +140,14 @@
 
 (facts "designers"
   (let [head1 (head-designer "Head" "Designer" "B"
-                             "Insinööri" nil)
+                             "Insin\u00f6\u00f6ri" nil)
         head2 (head-designer "Second" "Header" "A"
                              "other" "Hobbyist")
         des1  (designer "Andy" "Aardvark" "GEO-suunnittelija"
                         nil "AA" "sisustusarkkitehti" nil)
         des2  (designer "Betty" "Bopper" "other" "Builder"
                         "ei tiedossa" "other" "Maker")
-        head3 (designer "Heddy" "Haughty" "pääsuunnittelija" "Builder"
+        head3 (designer "Heddy" "Haughty" "p\u00e4\u00e4suunnittelija" "Builder"
                         "C" "arkkitehti" "Maker")
         des3  (designer "Charlie" "Crooked" "ei tiedossa" "Builder"
                         "A" "arkkitehtiylioppilas" nil)
@@ -163,13 +163,13 @@
     (fact "No empty designers"
       (count infos) => 7)
     (fact "Head designers are first"
-      (take 3 infos) => (just [{:role       "Pääsuunnittelija"
+      (take 3 infos) => (just [{:role       "P\u00e4\u00e4suunnittelija"
                                 :difficulty "B"
-                                :person     "Head Designer, Insinööri"}
-                               {:role       "Pääsuunnittelija"
+                                :person     "Head Designer, Insin\u00f6\u00f6ri"}
+                               {:role       "P\u00e4\u00e4suunnittelija"
                                 :difficulty "A"
                                 :person     "Second Header, Hobbyist"}
-                               {:role       "Pääsuunnittelija"
+                               {:role       "P\u00e4\u00e4suunnittelija"
                                 :difficulty "C"
                                 :person     "Heddy Haughty, arkkitehti"}]
                              :in-any-order))
@@ -195,8 +195,31 @@
   (pdf/collateral :fi {:data {:collateral "20 000"
                               :collateral-type "shekki"
                               :collateral-date "5.2.2018"}})
-  => "20 000€, Shekki, 5.2.2018"
+  => "20 000\u20ac, Shekki, 5.2.2018"
   (pdf/collateral :fi {:data {:collateral "20 000"}})
-  => "20 000€"
+  => "20 000\u20ac"
   (pdf/collateral :fi {:data {}})
   => "")
+
+(fact "complexity"
+  (pdf/complexity :fi {:data {}})
+  => nil
+  (pdf/complexity :fi {:data {:complexity "large"}})
+  => ["Vaativa"]
+  (pdf/complexity :fi {:data {:complexity-text "Tai nan le."}})
+  => ["Tai nan le."]
+  (pdf/complexity :fi {:data {:complexity-text "Tai nan le."
+                              :complexity "large"}})
+  => ["Vaativa" "Tai nan le."])
+
+(fact "statements"
+  (pdf/statements :fi {:data {}})
+  => nil
+  (pdf/statements :fi {:data {:statements [{:given 1518017023967
+                                            :text "Stakeholder"
+                                            :status "ei-huomautettavaa"}
+                                           {:given 1517930824494
+                                            :text "Interested"
+                                            :status "ehdollinen"}]}})
+  => ["Stakeholder, 7.2.2018, Ei huomautettavaa"
+      "Interested, 6.2.2018, Ehdollinen"])

@@ -22,6 +22,9 @@
 (defn- can-view? []
   (state/auth? :pate-verdicts))
 
+(defn- can-publish? []
+  (state/auth? :publish-pate-verdict))
+
 (defn updater
   ([{:keys [state path] :as options} value]
    (service/edit-verdict @state/application-id
@@ -43,16 +46,17 @@
             {:state (:data verdict)
              :info  (assoc (dissoc verdict :data)
                            :filled? filled)
-             :_meta {:updated              updater
-                     :highlight-required?  (-> verdict :published not)
-                     :enabled?             (can-edit-verdict? verdict)
-                     :upload.filedata (fn [_ filedata & kvs]
-                                             (apply assoc filedata
-                                                    :target {:type :verdict
-                                                             :id   (:id verdict)}
-                                                    kvs))
-                     :upload.include? (fn [_ {target :target :as att}]
-                                             (= (:id target) (:id verdict)))}}))
+             :_meta {:updated             updater
+                     :highlight-required? (-> verdict :published not)
+                     :enabled?            (can-edit-verdict? verdict)
+                     :published?          (:published verdict)
+                     :upload.filedata     (fn [_ filedata & kvs]
+                                            (apply assoc filedata
+                                                   :target {:type :verdict
+                                                            :id   (:id verdict)}
+                                                   kvs))
+                     :upload.include?     (fn [_ {target :target :as att}]
+                                            (= (:id target) (:id verdict)))}}))
   (reset! state/references references)
   (reset! state/current-view (if verdict ::verdict ::list)))
 
@@ -140,7 +144,8 @@
                                    :class (common/css :primary)
                                    :icon :lupicon-circle-section-sign
                                    :wait? wait?*
-                                   :disabled? (false? (path/react :filled? info))
+                                   :enabled? (and (path/react :filled? info)
+                                                  (can-publish?))
                                    :on-click (fn []
                                                (hub/send "show-dialog"
                                                          {:ltitle "areyousure"

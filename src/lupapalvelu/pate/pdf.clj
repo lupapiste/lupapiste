@@ -388,11 +388,11 @@
       :eur     (str v "\u20ac"))))
 
 (defn complexity [lang verdict]
-  (remove nil?
-          [(i18n/localize lang
-                          :pate.complexity
-                          (dict-value verdict :complexity))
-           (dict-value verdict :complexity-text)]))
+  (not-empty (remove nil?
+                     [(loc-non-blank lang
+                                     :pate.complexity
+                                     (dict-value verdict :complexity))
+                      (dict-value verdict :complexity-text)])))
 
 (defn property-id [application]
   (join-non-blanks "-"
@@ -584,14 +584,15 @@
   [timestamp]
   (util/format-timestamp-local-tz timestamp "d.M.YYYY"))
 
-(defn statements [lang {statements :statements}]
-  (->> statements
+(defn statements [lang verdict]
+  (->> (dict-value verdict :statements)
        (filter :given)
-       (map (fn [{:keys [given person status]}]
+       (map (fn [{:keys [given text status]}]
               (join-non-blanks ", "
-                               (:text person)
+                               text
                                (finnish-date given)
-                               (i18n/localize lang :statement status))))))
+                               (i18n/localize lang :statement status))))
+       not-empty))
 
 (defn collateral [lang verdict]
   (join-non-blanks ", "
@@ -634,7 +635,7 @@
                     :reviews (references lang verdict :reviews)
                     :plans   (references lang verdict :plans)
                     :conditions (conditions verdict)
-                    :statements (statements lang application)
+                    :statements (statements lang verdict)
                     :collateral (collateral lang verdict)
                     :verdict-giver (or (some-> verdict :references :boardname)
                                        (dict-value verdict :contact))

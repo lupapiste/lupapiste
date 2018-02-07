@@ -430,18 +430,27 @@
 ;;   shown (if the icon has been given). Can be either value or
 ;;   atom. Atom makes the most sense for the typical use cases.
 ;;
-;;   [disabled?] If true, button is disabled. Can be either value or
+;;  [disabled?] If true, button is disabled. Can be either value or
 ;;   atom.
+;;
+;;  [enabled?] If false, button is enabled. Can be either value or
+;;  atom. Nil value is ignored.
+;;
+;;  If both disabled? and enabled? are given, the button is disabled
+;;  if either condition results in disabled state.
 ;;
 ;; Any other options are passed to the :button
 ;; tag (e.g, :class, :on-click). The only exception is :disabled,
 ;; since it is overridden with :disabled?
 (rum/defc icon-button < rum/reactive
-  [{:keys [text text-loc icon wait? disabled?] :as options}]
+  [{:keys [text text-loc icon wait? disabled? enabled?] :as options}]
   (let [waiting? (rum/react (common/atomize wait?))]
     [:button
-     (assoc (dissoc options :text :text-loc :icon :wait? :disabled?)
+     (assoc (dissoc options
+                    :text :text-loc :icon :wait?
+                    :disabled? :enabled?)
             :disabled (or (rum/react (common/atomize disabled?))
+                          (some-> enabled? common/atomize rum/react false?)
                           waiting?))
      (when icon
        [:i {:class (common/css (if waiting?
