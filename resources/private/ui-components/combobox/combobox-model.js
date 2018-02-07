@@ -29,17 +29,18 @@ LUPAPISTE.ComboboxModel = function( params ) {
   // Textinput focus
   self.hasFocus = ko.observable();
 
-  function rememberEntry(newContents) {
+  function rememberEntry(newContents, replacePrevious) {
     // Store entries to field in local storage for later reuse
-    if (newContents && window.localStorage) {
+    if (ko.unwrap(self.localStorageKey) && newContents && newContents.length > 0 &&
+      ko.unwrap(self.list).length === 0 && window.localStorage) {
       var prevData = window.localStorage.getItem(ko.unwrap(self.localStorageKey));
       var items;
       if (prevData) {
         var parsed = JSON.parse(prevData);
         if (_.isArray(parsed)) {
-          parsed.unshift(newContents);
+          parsed.splice(0, replacePrevious ? 1 : 0, newContents);
           // Keep max 20 latest entries
-          items = _.uniq(parsed).slice(0,20);
+          items = _.uniq(parsed).slice(0,100);
         } else {
           items = [newContents];
         }
@@ -54,10 +55,7 @@ LUPAPISTE.ComboboxModel = function( params ) {
   self.disposedSubscribe( self.hasFocus, function( flag ) {
     if( hadFocus && !flag ) {
       outsideValue( self.textInput());
-      if (ko.unwrap(self.localStorageKey) && ko.unwrap(self.textInput) && ko.unwrap(self.textInput).length > 0 &&
-        ko.unwrap(self.list).length === 0) {
-        rememberEntry(self.textInput());
-      }
+      rememberEntry(ko.unwrap(self.textInput), false);
     }
     hadFocus = flag;
   });
@@ -147,5 +145,6 @@ LUPAPISTE.ComboboxModel = function( params ) {
 
   self.select = function( data ) {
     outsideValue( data );
+    rememberEntry(ko.unwrap(data), true);
   };
 };
