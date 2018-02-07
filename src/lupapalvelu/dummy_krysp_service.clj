@@ -146,7 +146,7 @@
                  (if (ss/starts-with body-str "<?xml")
                    (do
                      (imessages/save {:id           (mongo/create-id) :direction "in" :messageType (str "KuntaGML " path)
-                                      :transferType "http" :format "xml" :created (t/now)
+                                      :transferType "http" :format "xml" :created (sade.core/now)
                                       :status       "received" :data body-str
                                       :application  {:id (re-find #"L[PX]-\d{3}-\d{4}-\d{5}" body-str)}})
                      (resp/status 200 "OK"))
