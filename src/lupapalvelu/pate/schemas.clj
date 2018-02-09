@@ -2,6 +2,7 @@
   (:require [clojure.set :as set]
             [lupapalvelu.document.schemas :as doc-schemas]
             [lupapalvelu.document.tools :refer [body] :as tools]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.shared :as shared]
@@ -55,6 +56,10 @@
                       :type :select
                       :body [{:name "shekki"}
                              {:name "panttaussitoumus"}]})
+
+(def languages {:name "pate-languages"
+                :type :select
+                :body (map #(hash-map :name (name %)) i18n/languages)})
 
 (defschema PateCategory
   {:id       ssc/ObjectIdStr
@@ -117,7 +122,7 @@
   pdf-export-test/ignored-schemas."
   [pate-string verdict-section verdict-text verdict-contact
    verdict-check in-verdict verdict-giver automatic-vs-manual
-   complexity date collateral-type])
+   complexity date collateral-type languages])
 
 (doc-schemas/defschemas 1
   (map (fn [m]
@@ -136,14 +141,6 @@
 
 ;; Verdicts
 
-#_(defschema Exclusions
-  "Excluded dicts are removed from the verdict dictionary prior to
-  validation. Rationale: the verdict should enforce the constraints
-  selected in the verdict template."
-  {(sc/optional-key sc/Keyword) (sc/conditional
-                                 map? (sc/recursive #'Exclusions)
-                                 :else true)})
-
 (defschema PateVerdict
   (merge PateCategory
          {;; Verdict is draft until it is published
@@ -151,9 +148,7 @@
           :modified                     ssc/Timestamp
           :data                         sc/Any
           (sc/optional-key :references) PatePublishedSettings
-          :template                     sc/Any
-          ;;(sc/optional-key :exclusions) Exclusions
-          }))
+          :template                     sc/Any}))
 
 ;; Schema utils
 

@@ -468,7 +468,8 @@
 
 ;; TODO: access via category
 (def default-verdict-template
-  {:dictionary {:verdict-dates             {:multi-select {:items           verdict-dates
+  {:dictionary {:language                  {:docgen "pate-languages"}
+                :verdict-dates             {:multi-select {:items           verdict-dates
                                                            :sort?           false
                                                            :i18nkey         :pate-verdict-dates
                                                            :item-loc-prefix :pate-verdict}}
@@ -537,7 +538,10 @@
    :sections [{:id         "verdict"
                :loc-prefix :pate-verdict
                :grid       {:columns 12
-                            :rows    [[{:col  12
+                            :rows    [[{:col 6
+                                        :id "language"
+                                        :dict :language}]
+                                      [{:col  12
                                         :dict :verdict-dates}]
                                       [{:col  3
                                         :id   :giver
@@ -710,7 +714,8 @@
   {:r
    {:dictionary
     (merge
-     {:verdict-date            (req {:docgen "pate-date"})
+     {:language                (req {:docgen "pate-languages"})
+      :verdict-date            (req {:docgen "pate-date"})
       :automatic-verdict-dates {:docgen {:name "pate-verdict-check"}}}
      (->> [:julkipano :anto :muutoksenhaku :lainvoimainen :aloitettava :voimassa]
           (map (fn [kw]
@@ -798,7 +803,11 @@
     :sections
     [{:id   "pate-dates"
       :grid {:columns 7
-             :rows    [[{:id   "verdict-date"
+             :rows    [[{:col 7
+                         :loc-prefix :pate-verdict.language
+                         :dict :language
+                         :hide? :_meta.published?}]
+                       [{:id   "verdict-date"
                          :dict :verdict-date}
                         {:id    "automatic-verdict-dates"
                          :col   2

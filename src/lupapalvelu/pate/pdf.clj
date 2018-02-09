@@ -684,20 +684,23 @@
     [:div.row.pad-after.pad-before
      [:cell.cell--100 {:dangerouslySetInnerHTML {:__html "&nbsp;"}}]]]])
 
-(defn verdict-pdf [lang application {:keys [published] :as verdict}]
+(defn language [verdict]
+  (-> verdict :data :language))
+
+(defn verdict-pdf [application {:keys [published] :as verdict}]
   (html-pdf/create-and-upload-pdf
    application
    "pate-verdict"
-   (html (verdict-body {:lang        lang
+   (html (verdict-body {:lang        (language verdict)
                         :application (tools/unwrapped application)
                         :verdict     verdict}))
-   {:filename (i18n/localize-and-fill lang
+   {:filename (i18n/localize-and-fill (language verdict)
                                       (if published
                                         :pdf.filename
                                         :pdf.draft)
                                       (:id application)
                                       (util/to-local-datetime (or published (now))))
-    :header   (html (verdict-header lang application verdict) true)
+    :header   (html (verdict-header (language verdict) application verdict) true)
     :footer   (html (verdict-footer))}))
 
 
@@ -705,8 +708,8 @@
   "1. Create PDF file for the verdict.
    2. Create verdict attachment.
    3. Bind 1 into 2."
-  [{:keys [lang application created] :as command} verdict]
-  (let [{:keys [file-id]}          (verdict-pdf lang application verdict)
+  [{:keys [application created] :as command} verdict]
+  (let [{:keys [file-id]}          (verdict-pdf application verdict)
         _                          (when-not file-id
                                      (fail! :pate.pdf-verdict-error))
         {attachment-id :id
@@ -720,7 +723,7 @@
                                                          :id   (:id verdict)}
                                      :locked            true
                                      :read-only         true
-                                     :contents          (i18n/localize lang
+                                     :contents          (i18n/localize (language verdict)
                                                                        :pate-verdict)})]
     (bind/bind-single-attachment! (update-in command
                                              [:application :attachments]
@@ -733,5 +736,5 @@
 (defn create-verdict-preview
   "Creates draft version of the verdict PDF. Returns file-id or fails."
   [{:keys [lang application] :as command} verdict]
-  (or (:file-id (verdict-pdf lang application verdict))
+  (or (:file-id (verdict-pdf application verdict))
       (fail! :pate.pdf-verdict-error)))

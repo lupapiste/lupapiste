@@ -1,5 +1,7 @@
 (ns lupapalvelu.pate-itest
-  (:require [lupapalvelu.factlet :refer :all]
+  (:require [clojure.data.xml :as cxml]
+            [clojure.java.io :as io]
+            [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.pate-itest-util :refer :all]
             [lupapalvelu.permit :as permit]
@@ -9,9 +11,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.xml :as xml]
-            [clojure.java.io :as io]
-            [clojure.data.xml :as cxml]))
+            [sade.xml :as xml]))
 
 (apply-remote-minimal)
 
@@ -795,6 +795,7 @@
                :name "Full template") => ok?)
 
     (set-template-draft-values template-id
+                               :language "fi"
                                :verdict-dates ["julkipano" "anto"
                                                "muutoksenhaku" "lainvoimainen"
                                                "aloitettava" "voimassa"]
@@ -896,7 +897,8 @@
                                                            :error.invalid-value))
                                     (fact "No errors"
                                       errors => nil)))]
-                data => (contains {:appeal           "Humble appeal."
+                data => (contains {:language         "fi"
+                                   :appeal           "Humble appeal."
                                    :purpose          ""
                                    :verdict-text     "Verdict text."
                                    :anto             ""
@@ -1197,6 +1199,11 @@
                       (:headers (raw sonja :preview-pate-verdict :id app-id
                                      :verdict-id verdict-id))
                       => (contains {"Content-Disposition" (contains "P\u00e4\u00e4t\u00f6sluonnos")}))
+                    (fact "PDF language is the same as the verdict language"
+                      (edit-verdict :language :sv) => ok?
+                      (:headers (raw sonja :preview-pate-verdict :id app-id
+                                     :verdict-id verdict-id))
+                      => (contains {"Content-Disposition" (contains "Beslututkast")}))
                     (fact "Sonja approves the application again"
                       (command sonja :approve-application :id app-id :lang :fi)
                       => ok?)
@@ -1258,7 +1265,8 @@
                              {open-verdict  :open
                               edit-verdict  :edit
                               check-changes :check-changes} (verdict-fn-factory verdict-id)]
-                        data => {:voimassa              ""
+                        data => {:language              "fi"
+                                 :voimassa              ""
                                  :verdict-text          "Verdict text."
                                  :anto                  ""
                                  :muutoksenhaku         ""
