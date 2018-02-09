@@ -5,7 +5,8 @@
             [clojure.string :as s]
             [clojure.string :as str]
             [goog.events :as googe]
-            [goog.object :as googo]))
+            [goog.object :as googo]
+            [rum.core :as rum]))
 
 (defn get-current-language []
   (.getCurrentLanguage js/loc))
@@ -61,11 +62,15 @@
 
 
 (defn reset-if-needed!
-  "Resets atom with value if needed. True if reset."
-  [atom* value]
-  (when (not= @atom* value)
-    (do (reset! atom* value)
-        true)))
+  "Resets atom with value if needed. Optional parameter value-fn
+  transforms values (default identity). True if reset."
+  ([atom* value value-fn]
+   (let [v (value-fn value)]
+     (when (not= (value-fn @atom*) v)
+      (do (reset! atom* v)
+          true))))
+  ([atom* value]
+   (reset-if-needed! atom* value identity)))
 
 (defn event->state [state]
   #(reset-if-needed! state (.. % -target -value)))
@@ -153,3 +158,26 @@
           (instance? rum.cursor.Cursor value))
     value
     (atom value)))
+
+(defn resolve-text
+  "Resolves textual representation based on two mutually exclusive
+  options:
+     text     Text as it is
+     text-loc Localisation key for text"
+  [{:keys [text text-loc]}]
+  (or text (loc text-loc)))
+
+(defn resolve-disabled
+  "Resolves disabled status based on disabled? and enabled?
+  options. True if disabled. Both options are optional:
+
+  disabled? If true, button is disabled. Can be either value or atom.
+
+  enabled? If false, button is enabled. Can be either value or
+  atom. Nil value is ignored.
+
+  If both disabled? and enabled? are given, the button is disabled if
+  either condition results in disabled state."
+  [{:keys [enabled? disabled?] :as options}]
+  (or (rum/react (atomize disabled?))
+      (some-> enabled? atomize rum/react false?)))

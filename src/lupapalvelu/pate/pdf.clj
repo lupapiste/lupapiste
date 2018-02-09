@@ -129,16 +129,20 @@
                       [[:* {:font-family "'Carlito', sans-serif"}]
                        [:.permit {:text-transform :uppercase
                                   :font-weight    :bold}]
+                       [:.preview {:text-transform :uppercase
+                                   :color          :red
+                                   :font-weight    :bold
+                                   :letter-spacing "0.2em"}]
                        [:div.header {:padding-bottom "1em"}]
                        [:div.footer {:padding-top "1em"}]
                        [:.page-break {:page-break-before :always}]
                        [:.section {:display :table
                                    :width   "100%"}
-                        [:&.border-top {:margin-top "1em"
-                                        :border-top "1px solid black"
+                        [:&.border-top {:margin-top  "1em"
+                                        :border-top  "1px solid black"
                                         :padding-top "1em"}]
-                        [:&.border-bottom {:margin-bottom "1em"
-                                           :border-bottom "1px solid black"
+                        [:&.border-bottom {:margin-bottom  "1em"
+                                           :border-bottom  "1px solid black"
                                            :padding-bottom "1em"}]
                         [:&.header {:padding       0
                                     :border-bottom "1px solid black"}]
@@ -653,7 +657,7 @@
              (:r pdf-layouts))))
 
 (defn verdict-header
-  [lang application {:keys [category] :as verdict}]
+  [lang application {:keys [category published] :as verdict}]
   [:div.header
    [:div.section.header
     [:div.row.pad-after
@@ -662,8 +666,9 @@
       (when-let [boardname (some-> verdict :references :boardname)]
         [:div boardname])]
      [:div.cell.cell--40.center
-      ;; TODO: Preview if not published (red span)
-      [:div (i18n/localize lang :attachmentType.paatoksenteko.paatos)]]
+      [:div (if published
+              (i18n/localize lang :attachmentType.paatoksenteko.paatos)
+              [:span.preview (i18n/localize lang :pdf.preview)])]]
      [:div.cell.cell--30.right
       [:div.permit (i18n/localize lang :pdf category :permit)]]]
     [:div.row
@@ -687,9 +692,11 @@
                         :application (tools/unwrapped application)
                         :verdict     verdict}))
    {:filename (i18n/localize-and-fill lang
-                                      :pate.pdf-filename
+                                      (if published
+                                        :pdf.filename
+                                        :pdf.draft)
                                       (:id application)
-                                      (util/to-local-datetime published))
+                                      (util/to-local-datetime (or published (now))))
     :header   (html (verdict-header lang application verdict) true)
     :footer   (html (verdict-footer))}))
 
@@ -698,23 +705,23 @@
   "1. Create PDF file for the verdict.
    2. Create verdict attachment.
    3. Bind 1 into 2."
-  [{:keys [lang application user created] :as command} verdict]
-  (let [{:keys [file-id mongo-file]} (verdict-pdf lang application verdict)
-        _                            (when-not file-id
-                                       (fail! :pate.pdf-verdict-error))
+  [{:keys [lang application created] :as command} verdict]
+  (let [{:keys [file-id]}          (verdict-pdf lang application verdict)
+        _                          (when-not file-id
+                                     (fail! :pate.pdf-verdict-error))
         {attachment-id :id
-         :as           attachment}   (att/create-attachment!
-                                      application
-                                      {:created           created
-                                       :set-app-modified? false
-                                       :attachment-type   {:type-group "paatoksenteko"
-                                                           :type-id    "paatos"}
-                                       :target            {:type "verdict"
-                                                           :id   (:id verdict)}
-                                       :locked            true
-                                       :read-only         true
-                                       :contents          (i18n/localize lang
-                                                                         :pate-verdict)})]
+         :as           attachment} (att/create-attachment!
+                                    application
+                                    {:created           created
+                                     :set-app-modified? false
+                                     :attachment-type   {:type-group "paatoksenteko"
+                                                         :type-id    "paatos"}
+                                     :target            {:type "verdict"
+                                                         :id   (:id verdict)}
+                                     :locked            true
+                                     :read-only         true
+                                     :contents          (i18n/localize lang
+                                                                       :pate-verdict)})]
     (bind/bind-single-attachment! (update-in command
                                              [:application :attachments]
                                              #(conj % attachment))
@@ -722,3 +729,9 @@
                                   {:fileId       file-id
                                    :attachmentId attachment-id}
                                   nil)))
+
+(defn create-verdict-preview
+  "Creates draft version of the verdict PDF. Returns file-id or fails."
+  [{:keys [lang application] :as command} verdict]
+  (or (:file-id (verdict-pdf lang application verdict))
+      (fail! :pate.pdf-verdict-error)))

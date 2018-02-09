@@ -954,6 +954,10 @@
                   (command sonja :publish-pate-verdict :id app-id
                            :verdict-id verdict-id)
                   => (err :pate.required-fields))
+                (fact "Ditto for preview"
+                  (decode-body (raw sonja :preview-pate-verdict :id app-id
+                                    :verdict-id verdict-id))
+                  => (err :pate.required-fields))
                 (fact "Building info is mostly empty but contains the template fields"
                   data => (contains {:buildings {op-id {:description            ""
                                                         :show-building          true
@@ -1185,10 +1189,20 @@
                                           :tag                    "Hao"
                                           :autopaikat-yhteensa    ""
                                           :paloluokka             ""}})
-
+                    (fact "Cannot publish in the complementNeeded state"
+                      (command sonja :publish-pate-verdict :id app-id
+                               :verdict-id verdict-id)
+                      => fail?)
+                    (fact "Preview fetch works, though"
+                      (:headers (raw sonja :preview-pate-verdict :id app-id
+                                     :verdict-id verdict-id))
+                      => (contains {"Content-Disposition" (contains "P\u00e4\u00e4t\u00f6sluonnos")}))
+                    (fact "Sonja approves the application again"
+                      (command sonja :approve-application :id app-id :lang :fi)
+                      => ok?)
                     (fact "Sonja can publish the verdict"
                       (command sonja :publish-pate-verdict :id app-id
-                               :verdict-id verdict-id) => ok?)
+                               :verdict-id verdict-id)=> ok?)
                     (facts "Verdict has been published"
                       (let [data (-> (open-verdict) :verdict :data)]
                         (fact "Verdict's section is one"
@@ -1199,6 +1213,10 @@
                           => (just {:text   "Paloviranomainen"
                                     :given  pos?
                                     :status "puollettu"}))))
+                    (fact "Published verdict can no longer be previewed"
+                      (raw sonja :preview-pate-verdict :id app-id
+                           :verdict-id verdict-id)
+                      => fail?)
                     (facts "Modify template"
                       (letfn [(edit-template [path value]
                                 (fact {:midje/description (format "Template draft %s -> %s" path value)}

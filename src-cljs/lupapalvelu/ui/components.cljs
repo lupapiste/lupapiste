@@ -412,9 +412,9 @@
 ;;   text-loc Localization key for text.
 ;;   click Function to be called when the link is clicked
 (rum/defc text-and-link < rum/reactive
-  [{:keys [text text-loc click]}]
+  [{:keys [click] :as options}]
   (let [regex          #"\[(.*)\]"
-        text           (or text (common/loc text-loc))
+        text           (common/resolve-text options)
         link           (last (re-find regex text))
         ;; Split results include the link
         [before after] (remove #(= link %) (s/split text regex))]
@@ -422,38 +422,49 @@
 
 ;; Button with optional icon and waiting support
 ;; Options (text and text-loc are mutually exclusive) [optional]
-;;   text Button text
-;;   text-loc Localisation key for text
+;;
+;;   text or text-loc See resolve-text
+;;
 ;;   [icon] Icon class for the button (e.g., :lupicon-save)
 ;;
 ;;   [wait?] If true the button is disabled and the wait icon is
 ;;   shown (if the icon has been given). Can be either value or
 ;;   atom. Atom makes the most sense for the typical use cases.
 ;;
-;;  [disabled?] If true, button is disabled. Can be either value or
-;;   atom.
-;;
-;;  [enabled?] If false, button is enabled. Can be either value or
-;;  atom. Nil value is ignored.
-;;
-;;  If both disabled? and enabled? are given, the button is disabled
-;;  if either condition results in disabled state.
+;;   [disabled?] See resolve-disabled function above
+;;   [enabled?]  See resolve-disabled function above
 ;;
 ;; Any other options are passed to the :button
 ;; tag (e.g, :class, :on-click). The only exception is :disabled,
 ;; since it is overridden with :disabled?
 (rum/defc icon-button < rum/reactive
-  [{:keys [text text-loc icon wait? disabled? enabled?] :as options}]
+  [{:keys [icon wait?] :as options}]
   (let [waiting? (rum/react (common/atomize wait?))]
     [:button
      (assoc (dissoc options
                     :text :text-loc :icon :wait?
                     :disabled? :enabled?)
-            :disabled (or (rum/react (common/atomize disabled?))
-                          (some-> enabled? common/atomize rum/react false?)
+            :disabled (or (common/resolve-disabled options)
                           waiting?))
      (when icon
        [:i {:class (common/css (if waiting?
                                  [:icon-spin :lupicon-refresh]
                                  icon))}])
-     [:span (or text (common/loc text-loc))]]))
+     [:span (common/resolve-text options)]]))
+
+;; Link that is rendered as button.
+;; Options:
+;;   url: Link url
+;;
+;; In addition, text, text-loc, enabled? and disabled? options are
+;; supported.
+(rum/defc link-button < rum/reactive
+  [{:keys [url] :as options}]
+  (let [disabled? (common/resolve-disabled options)
+        text      (common/resolve-text options)]
+    (if disabled?
+      [:span.btn.primary.outline.disabled text]
+      [:a.btn.primary.outline
+       {:href   url
+        :target :_blank}
+       text])))

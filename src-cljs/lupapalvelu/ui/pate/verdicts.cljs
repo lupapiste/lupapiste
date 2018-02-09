@@ -127,12 +127,12 @@
   (rum/local false ::wait?)
   [{wait?* ::wait?} {:keys [schema state info _meta] :as options}]
   (let [published (path/react :published info)
-        yes-fn (fn []
-                 (reset! wait?* true)
-                 (reset! (rum/cursor-in _meta [:enabled?]) false)
-                 (service/publish-and-reopen-verdict  @state/application-id
-                                                      (path/value :id info)
-                                                      reset-verdict))]
+        yes-fn    (fn []
+                    (reset! wait?* true)
+                    (reset! (rum/cursor-in _meta [:enabled?]) false)
+                    (service/publish-and-reopen-verdict  @state/application-id
+                                                         (path/value :id info)
+                                                         reset-verdict))]
     [:div.pate-verdict
      [:div.pate-grid-2
       (when (and (or (path/enabled? options)
@@ -141,18 +141,24 @@
         [:div.row
          [:div.col-2.col--right
           (components/icon-button {:text-loc :verdict.submit
-                                   :class (common/css :primary)
-                                   :icon :lupicon-circle-section-sign
-                                   :wait? wait?*
+                                   :class    (common/css :primary :pate-left-space)
+                                   :icon     :lupicon-circle-section-sign
+                                   :wait?    wait?*
                                    :enabled? (and (path/react :filled? info)
                                                   (can-publish?))
                                    :on-click (fn []
                                                (hub/send "show-dialog"
-                                                         {:ltitle "areyousure"
-                                                          :size "medium"
-                                                          :component "yes-no-dialog"
+                                                         {:ltitle          "areyousure"
+                                                          :size            "medium"
+                                                          :component       "yes-no-dialog"
                                                           :componentParams {:ltext "verdict.confirmpublish"
-                                                                            :yesFn yes-fn}}))})]])
+                                                                            :yesFn yes-fn}}))})
+          (components/link-button {:url      (js/sprintf "/api/raw/preview-pate-verdict?id=%s&verdict-id=%s"
+                                                         @state/application-id
+                                                         (path/value :id info))
+                                   :enabled? (path/react :filled? info)
+                                   :disabled published
+                                   :text-loc :pdf.preview})]])
       (if published
         [:div.row
          [:div.col-2.col--right
