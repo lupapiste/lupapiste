@@ -3715,6 +3715,11 @@
                          {$set {:docstore-info.documentRequest.enabled false
                                 :docstore-info.documentRequest.email ""
                                 :docstore-info.documentRequest.instructions (i18n/supported-langs-map (constantly ""))}}))
+
+(defmigration remove-foreman-app-bulletins
+  {:apply-when (pos? (mongo/count :application-bulletins {:versions.primaryOperation.name "tyonjohtajan-nimeaminen-v2"}))}
+  (mongo/remove-many :application-bulletins {:versions.primaryOperation.name "tyonjohtajan-nimeaminen-v2"}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

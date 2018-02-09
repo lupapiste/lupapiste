@@ -29,6 +29,13 @@
       (fact "description is set"
         (-> bulletins first :bulletinOpDescription) => op-description)))
 
+  (fact "foreman verdict"
+    (let [foreman-app-id (create-foreman-application app-id mikko pena-id "vastaava ty\u00F6njohtaja" "A")
+          _ (finalize-foreman-app mikko sonja foreman-app-id true)
+          bulletins (:data (datatables mikko :application-bulletins :municipality sonja-muni :searchText "" :state "" :page 1 :sort ""))]
+      (fact "bulletin was not generated"
+        (util/find-by-key :application-id foreman-app-id bulletins) => empty?)))
+
   (fact "Fetch bulletin app-description from backend"
     (command sipoo :update-organization-bulletin-scope
              :permitType "R"

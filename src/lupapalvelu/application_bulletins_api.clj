@@ -22,7 +22,10 @@
             [monger.collection :as collection]
             [clj-time.coerce :as tc]
             [clj-time.core :as t]
-            [lupapalvelu.states :as states]))
+            [lupapalvelu.states :as states]
+            [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.application :as app]
+            [lupapalvelu.application-bulletin-utils :as bulletin-utils]))
 
 (def bulletin-page-size 10)
 
@@ -134,7 +137,7 @@
     (ok :states states)))
 
 (defn- bulletin-version-is-latest [bulletin bulletin-version-id]
-  (let [latest-version-id (:id (last (filter bulletins/bulletin-version-date-valid? (:versions bulletin))))]
+  (let [latest-version-id (:id (last (filter bulletin-utils/bulletin-version-date-valid? (:versions bulletin))))]
     (when-not (= bulletin-version-id latest-version-id)
       (fail :error.invalid-version-id))))
 
@@ -252,7 +255,7 @@
   [command]
   (if-let [bulletin (bulletins/get-bulletin bulletinId)]
     (let [latest-version       (->> bulletin :versions
-                                    (filter (partial bulletins/bulletin-version-date-valid? (:created command))) last)
+                                    (filter (partial bulletin-utils/bulletin-version-date-valid? (:created command))) last)
           bulletin-version     (assoc latest-version :versionId (:id latest-version)
                                                      :id (:id bulletin))
           append-schema-fn     (fn [{schema-info :schema-info :as doc}]
@@ -366,8 +369,9 @@
    :user-roles #{:authority :applicant}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]})
 
-(defn- check-bulletins-enabled [{organization :organization {permit-type :permitType municipality :municipality} :application}]
-  (when-not (and organization (org/bulletins-enabled? @organization permit-type municipality))
+(defn- check-bulletins-enabled [{organization :organization {permit-type :permitType municipality :municipality :as app} :application}]
+  (when (and organization (or (not (org/bulletins-enabled? @organization permit-type municipality))
+                              (not (bulletins/bulletin-enabled-for-application-operation? app))))
     (fail :error.bulletins-not-enebled-for-scope)))
 
 (defn- check-bulletin-op-description-required [{organization :organization {permit-type :permitType municipality :municipality} :application}]
@@ -396,6 +400,7 @@
    :user-roles  #{:authority}
    :states      #{:submitted :complementNeeded}
    :pre-checks  [(permit/validate-permit-type-is-not permit/YI permit/YL permit/YM permit/VVVL permit/MAL)
+                 check-bulletins-enabled
                  check-bulletin-op-description-required]})
 
 (defcommand update-app-bulletin-op-description

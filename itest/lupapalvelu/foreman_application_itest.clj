@@ -23,15 +23,6 @@
      (command apikey :approve-invite :id application-id) => ok?)
    (query-application apikey foreman-application-id)))
 
-(defn finalize-foreman-app [apikey authority foreman-app-id application?]
-  (facts "Finalize foreman application"
-         (command apikey :change-permit-sub-type :id foreman-app-id
-                  :permitSubtype (if application?  "tyonjohtaja-hakemus" "tyonjohtaja-ilmoitus")) => ok?
-         (command apikey :submit-application :id foreman-app-id) => ok?
-         (if application?
-           (command authority :check-for-verdict :id foreman-app-id)
-           (command authority :approve-application :lang :fi :id foreman-app-id)) => ok?))
-
 (defn add-invites [apikey application-id]
   (let [{hakija1 :doc}               (command apikey :create-doc :id application-id :schemaName "hakija-r")
         {hakija-no-auth :doc}        (command apikey :create-doc :id application-id :schemaName "hakija-r")
