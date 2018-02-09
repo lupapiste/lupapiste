@@ -371,8 +371,7 @@
 
 (defn- check-bulletins-enabled [{organization :organization {permit-type :permitType municipality :municipality :as app} :application}]
   (when (and organization (or (not (org/bulletins-enabled? @organization permit-type municipality))
-                              (foreman/foreman-app? app)
-                              (app/designer-app? app)))
+                              (not (bulletins/bulletin-enabled-for-application-operation? app))))
     (fail :error.bulletins-not-enebled-for-scope)))
 
 (defn- check-bulletin-op-description-required [{organization :organization {permit-type :permitType municipality :municipality} :application}]

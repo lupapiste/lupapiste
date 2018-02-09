@@ -55,6 +55,11 @@
                     states/terminal-states)    :verdictGiven
     #{:final}                                  :final))
 
+(defn bulletin-enabled-for-application-operation?
+  [application]
+  (and (not (foreman/foreman-app? application))
+       (not (app/designer-app? application))))
+
 ;; Query/Projection fields
 
 (defn versions-elemMatch
@@ -271,10 +276,9 @@
   [{{old-verdicts :verdicts applicationId :id :keys [organization permitType municipality] :as application} :application
     created :created :as command} new-verdicts app-descriptions]
   (let [{:keys [enabled descriptions-from-backend-system]} (org/bulletin-settings-for-scope (org/get-organization organization) permitType municipality)]
-    (when (and (not (permit/ymp-permit-type? (:permitType application)))
-               enabled
-               (not (foreman/foreman-app? application))
-               (not (app/designer-app? application)))
+    (when (and enabled
+               (not (permit/ymp-permit-type? (:permitType application)))
+               (bulletin-enabled-for-application-operation? application))
       (let [old-verdict-ids          (map :id (remove :draft old-verdicts))
             new-verdict-ids          (map :id (remove :draft new-verdicts))
             removed-verdict-ids      (set/difference (set old-verdict-ids) (set new-verdict-ids))]
