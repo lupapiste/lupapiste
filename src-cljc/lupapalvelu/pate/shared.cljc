@@ -276,7 +276,8 @@
 (defschema PatePlaceholder
   "Placholder for external (filled by backend) data."
   (merge PateComponent
-         {:type (sc/enum :neighbors :application-id :building)}))
+         {:type (sc/enum :neighbors :application-id
+                         :building :statements)}))
 
 (defschema KeyMap
   "Map with the restricted set of keys. In other words, no new keys
@@ -764,6 +765,7 @@
                                   :i18nkey :pate-conditions.add
                                   :css     :positive
                                   :add     :conditions}}
+      :statements       {:placeholder {:type :statements}}
       :neighbors        {:phrase-text {:i18nkey  :phrase.category.naapurit
                                        :category :naapurit}}
       :neighbor-states  {:placeholder {:type :neighbors}}
@@ -894,6 +896,12 @@
                                       {:col  2
                                        :id   :collateral-type
                                        :dict :collateral-type}]}]}}
+     {:id    "statements"
+      :show? :?.statements
+      :loc-prefix :pate-statements
+      :buttons? false
+      :grid  {:columns 1
+              :rows    [[{:dict :statements}]]}}
      {:id    "neighbors"
       :show? :?.neighbors
       :grid  {:columns 12
@@ -901,6 +909,7 @@
                           :id   "neighbor-notes"
                           :dict :neighbors}
                          {:col   4
+                          :hide? :_meta.published?
                           :id    "neighbor-states"
                           :align :right
                           :dict  :neighbor-states}]
@@ -924,18 +933,18 @@
                               :row   [{:col        6
                                        :loc-prefix :phrase.category.kaava
                                        :dict       :purpose}]}]}}
-     {:id "extra-info"
+     {:id         "extra-info"
       :loc-prefix :pate-extra-info
-      :show? :?.extra-info
-      :grid {:columns 7
-             :rows [[{:col 6
-                      :dict :extra-info}]]}}
-     {:id "deviations"
+      :show?      :?.extra-info
+      :grid       {:columns 7
+                   :rows    [[{:col  6
+                               :dict :extra-info}]]}}
+     {:id         "deviations"
       :loc-prefix :pate-deviations
-      :show? :?.extra-info
-      :grid {:columns 7
-             :rows [[{:col 6
-                      :dict :deviations}]]}}
+      :show?      :?.extra-info
+      :grid       {:columns 7
+                   :rows    [[{:col  6
+                               :dict :deviations}]]}}
      {:id    "buildings"
       :show? :?.buildings
       :grid  {:columns 7
@@ -968,6 +977,7 @@
              :rows    [[{:col  6
                          :dict :attachments}]]}}
      {:id       "upload"
+      :hide?    :_meta.published?
       :css      :pate-section--no-border
       :buttons? false
       :grid     {:columns 7

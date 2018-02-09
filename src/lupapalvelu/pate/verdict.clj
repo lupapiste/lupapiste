@@ -274,7 +274,11 @@
                                           {}
                                           changes)})))
 
-(defn update-automatic-verdict-dates [{:keys [category references verdict-data]}]
+(defn update-automatic-verdict-dates
+  "Returns map of dates. While the calculation takes every date into
+  account, the result only includes the dates included in the
+  template."
+  [{:keys [category template references verdict-data]}]
   (let [datestring  (:verdict-date verdict-data)
         dictionary  (-> shared/settings-schemas category :dictionary)
         date-deltas (:date-deltas references)
@@ -284,7 +288,7 @@
              [kw & kws] shared/verdict-dates
              latest     datestring]
         (if (nil? kw)
-          dates
+          (apply dissoc dates (-> template :exclusions keys))
           (let [unit   (-> dictionary  kw :date-delta :unit)
                 result (date/parse-and-forward latest
                                                ;; Delta could be empty.
@@ -479,17 +483,30 @@
 (defn command->category [{app :application}]
   (shared/permit-type->category (:permitType app)))
 
+(defn statements
+  "List of maps with given (timestamp), text (string) and
+  status (loc-key part) keys."
+  [{statements :statements} given-only?]
+  (map (fn [{:keys [given person status]}]
+         {:text   (:text person)
+          :given  given
+          :status status})
+       (if given-only?
+         (filter :given statements)
+         statements)))
+
 (defmulti enrich-verdict
   "Augments verdict data, but MUST NOT update mongo (this is called from
   query actions, too)."
   (fn [command & _]
     (command->category command)))
 
-(defmethod enrich-verdict :default [_ verdict _]
+(defmethod enrich-verdict :default [_ verdict & _]
   verdict)
 
 (defmethod enrich-verdict :r
-  [{:keys [application]} {:keys [data template]:as verdict}]
+  ;; If final? is truthy than the enrichment is part of publishing.
+  [{:keys [application]} {:keys [data template]:as verdict} & [final?]]
   (let [{:keys [exclusions]} template
         addons (merge
                 ;; Buildings added only if the buildings section is in
@@ -501,7 +518,9 @@
                                                defaults)})
                 ;; Neighbors added if in the template
                 (when-not (:neighbors exclusions)
-                  {:neighbor-states (neighbor-states application)}))]
+                  {:neighbor-states (neighbor-states application)})
+                (when-not (:statements exclusions)
+                  {:statements (statements application final?)}))]
     (assoc-in verdict [:data] (merge data addons))))
 
 (defn open-verdict [{:keys [application] :as command}]
@@ -586,15 +605,15 @@
    5. Construct buildings array
    6. Freeze (locked and read-only) verdict attachments and update TOS details
    7. TODO: Create tasks
-   8. Generate section
+   8. Generate section (for non-board verdicts)
    9. Create PDF/A for the verdict
   10. Generate KuntaGML
   11. TODO: Assignments?"
   [{:keys [created application user organization] :as command}]
-  (let [verdict                (->> (command->verdict command)
-                                    (enrich-verdict command)
-                                    (insert-section (:organization application)
-                                                    created))
+  (let [verdict                (-<>> (command->verdict command)
+                                     (enrich-verdict command <> true)
+                                     (insert-section (:organization application)
+                                                     created))
         next-state             (sm/verdict-given-state application)
         {att-items :items
          update-fn :update-fn} (attachment-items command verdict)
@@ -631,3 +650,19 @@
       (-> (assoc command :application (domain/get-application-no-access-checking (:id application)))
           (krysp/verdict-as-kuntagml verdict))
       nil)))
+
+(defn preview-verdict
+  "Preview version of the verdict.
+  1. Finalize verdict but do not store the changes.
+  2. Generate PDF and return it."
+  [{session :session :as command}]
+  (let [{:keys [size contentType
+                filename content]} (-<>> (command->verdict command)
+                                         (enrich-verdict command <> true)
+                                         (pdf/create-verdict-preview command)
+                                         mongo/download)]
+    {:status  200
+     :headers {"Content-Type"        contentType
+               "Content-Disposition" (format "filename=\"%s\"" filename)
+               "Content-Length"      size}
+     :body    (content)}))

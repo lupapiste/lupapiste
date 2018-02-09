@@ -35,7 +35,8 @@
                    (map (fn [n] {:value n :text (category-text n)}))
                    (sort-by :text))
         select (fn [value]
-                 (when (common/reset-if-needed! selected* value)
+                 ;; Nil and "" are treated as equal.
+                 (when (common/reset-if-needed! selected* value not-empty)
                    (callback value)))]
     (when-not (util/includes-as-kw? (map :value items) @selected*)
       (select (-> items first :value)))

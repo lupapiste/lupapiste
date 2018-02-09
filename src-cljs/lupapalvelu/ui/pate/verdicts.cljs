@@ -22,6 +22,9 @@
 (defn- can-view? []
   (state/auth? :pate-verdicts))
 
+(defn- can-publish? []
+  (state/auth? :publish-pate-verdict))
+
 (defn updater
   ([{:keys [state path] :as options} value]
    (service/edit-verdict @state/application-id
@@ -43,16 +46,17 @@
             {:state (:data verdict)
              :info  (assoc (dissoc verdict :data)
                            :filled? filled)
-             :_meta {:updated              updater
-                     :highlight-required?  (-> verdict :published not)
-                     :enabled?             (can-edit-verdict? verdict)
-                     :upload.filedata (fn [_ filedata & kvs]
-                                             (apply assoc filedata
-                                                    :target {:type :verdict
-                                                             :id   (:id verdict)}
-                                                    kvs))
-                     :upload.include? (fn [_ {target :target :as att}]
-                                             (= (:id target) (:id verdict)))}}))
+             :_meta {:updated             updater
+                     :highlight-required? (-> verdict :published not)
+                     :enabled?            (can-edit-verdict? verdict)
+                     :published?          (:published verdict)
+                     :upload.filedata     (fn [_ filedata & kvs]
+                                            (apply assoc filedata
+                                                   :target {:type :verdict
+                                                            :id   (:id verdict)}
+                                                   kvs))
+                     :upload.include?     (fn [_ {target :target :as att}]
+                                            (= (:id target) (:id verdict)))}}))
   (reset! state/references references)
   (reset! state/current-view (if verdict ::verdict ::list)))
 
@@ -99,16 +103,36 @@
   [options _]
   (verdict-section-header options))
 
+(rum/defc toggle-all < rum/reactive
+  [{:keys [schema _meta] :as options}]
+  (when (path/enabled? options)
+    (let [all-sections  (map :id (:sections schema))
+          meta-map (rum/react _meta)
+          open-sections (filter #(get meta-map (util/kw-path % :editing?))
+                                all-sections)]
+      [:a.pate-left-space
+       {:on-click #(swap! _meta (fn [m]
+                                  (->> (or (not-empty open-sections)
+                                           all-sections)
+                                       (map (fn [id]
+                                              [(util/kw-path id :editing?)
+                                               (empty? open-sections)]))
+                                       (into {})
+                                       (merge m))))}
+       (common/loc (if (seq open-sections)
+                     :pate.close-all
+                     :pate.open-all))])))
+
 (rum/defcs verdict < rum/reactive
   (rum/local false ::wait?)
   [{wait?* ::wait?} {:keys [schema state info _meta] :as options}]
   (let [published (path/react :published info)
-        yes-fn (fn []
-                 (reset! wait?* true)
-                 (reset! (rum/cursor-in _meta [:enabled?]) false)
-                 (service/publish-and-reopen-verdict  @state/application-id
-                                                      (path/value :id info)
-                                                      reset-verdict))]
+        yes-fn    (fn []
+                    (reset! wait?* true)
+                    (reset! (rum/cursor-in _meta [:enabled?]) false)
+                    (service/publish-and-reopen-verdict  @state/application-id
+                                                         (path/value :id info)
+                                                         reset-verdict))]
     [:div.pate-verdict
      [:div.pate-grid-2
       (when (and (or (path/enabled? options)
@@ -117,17 +141,24 @@
         [:div.row
          [:div.col-2.col--right
           (components/icon-button {:text-loc :verdict.submit
-                                   :class (common/css :primary)
-                                   :icon :lupicon-circle-section-sign
-                                   :wait? wait?*
-                                   :disabled? (false? (path/react :filled? info))
+                                   :class    (common/css :primary :pate-left-space)
+                                   :icon     :lupicon-circle-section-sign
+                                   :wait?    wait?*
+                                   :enabled? (and (path/react :filled? info)
+                                                  (can-publish?))
                                    :on-click (fn []
                                                (hub/send "show-dialog"
-                                                         {:ltitle "areyousure"
-                                                          :size "medium"
-                                                          :component "yes-no-dialog"
+                                                         {:ltitle          "areyousure"
+                                                          :size            "medium"
+                                                          :component       "yes-no-dialog"
                                                           :componentParams {:ltext "verdict.confirmpublish"
-                                                                            :yesFn yes-fn}}))})]])
+                                                                            :yesFn yes-fn}}))})
+          (components/link-button {:url      (js/sprintf "/api/raw/preview-pate-verdict?id=%s&verdict-id=%s"
+                                                         @state/application-id
+                                                         (path/value :id info))
+                                   :enabled? (path/react :filled? info)
+                                   :disabled published
+                                   :text-loc :pdf.preview})]])
       (if published
         [:div.row
          [:div.col-2.col--right
@@ -138,6 +169,7 @@
          [:div.col-1
           (pate-components/required-fields-note options)]
          [:div.col-1.col--right
+          (toggle-all options)
           (pate-components/last-saved options)]])]
      (sections/sections options :verdict)]))
 
