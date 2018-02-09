@@ -156,7 +156,8 @@
           (components/link-button {:url      (js/sprintf "/api/raw/preview-pate-verdict?id=%s&verdict-id=%s"
                                                          @state/application-id
                                                          (path/value :id info))
-                                   :enabled? (path/react :filled? info)
+                                   :enabled? (and (path/enabled? options)
+                                                  (path/react :filled? info))
                                    :disabled published
                                    :text-loc :pdf.preview})]])
       (if published

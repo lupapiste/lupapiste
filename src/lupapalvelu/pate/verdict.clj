@@ -91,7 +91,8 @@
 (defmethod initial-draft :r
   [{snapshot :published} application]
   {:data       (data-draft
-                (merge {:verdict-code          :verdict-code
+                (merge {:language              :language
+                        :verdict-code          :verdict-code
                         :verdict-text          :paatosteksti
                         :bulletinOpDescription :bulletinOpDescription}
                        (reduce (fn [acc kw]
