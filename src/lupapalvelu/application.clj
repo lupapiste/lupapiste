@@ -489,10 +489,11 @@
            {:permitSubtype (first (resolve-valid-subtypes classification))})))
 
 (defn application-auth [user operation-name]
-  (let [user    (usr/user-in-role user :writer)
-        company (some-> user :company :id com/find-company-by-id com/company->auth)]
-    (-> (or company user)
-        (assoc :unsubscribe (boolean (get-in op/operations [(keyword operation-name) :unsubscribe-notifications]))))))
+  (let [user-auth    (usr/user-in-role user :writer)
+        company-auth (some-> user :company :id com/find-company-by-id com/company->auth)]
+    (-> (or company-auth user-auth)
+        (assoc :unsubscribe (boolean (get-in op/operations [(keyword operation-name) :unsubscribe-notifications])))
+        (vector))))
 
 (defn application-comments [user messages open-inforequest? created]
   (let [comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])]
