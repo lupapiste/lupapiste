@@ -67,7 +67,8 @@
       (fact "element exists"
         (xml/select1 xml [:paatostieto]) => truthy)
       (fact "paatosPvm"
-        (xml/get-text xml [:paatostieto :poytakirja :paatospvm]) => (util/to-xml-date-from-string verdict-date)))))
+        (xml/get-text xml [:paatostieto :poytakirja :paatospvm]) => (util/to-xml-date-from-string verdict-date)))
+    xml))
 
 (facts "Pate enabled"
   (fact "Disable Pate in Sipoo"
@@ -576,11 +577,11 @@
         (fact "Swedish and English names"
           (command sipoo :update-verdict-template-plan
                    :plan-id id
-                   :sv "Stockholm" :en "London")
+                   :sv "Malm\u00f6" :en "Washington")
           => (contains {:plan (contains {:id id
                                          :name {:fi "Moro"
-                                                :sv "Stockholm"
-                                                :en "London"}})}))
+                                                :sv "Malm\u00f6"
+                                                :en "Washington"}})}))
         (fact "Unsupported params"
           (command sipoo :update-verdict-template-plan
                    :plan-id id
@@ -1336,6 +1337,8 @@
                             (fact "Unpublished verdict has only attachment ids"
                               (-> (open-verdict) :verdict :data :attachments)
                               => (just [regular-id "bogus-id" pseudo-id] :in-any-order))
+                            (fact "Verdict language is changed to English"
+                              (edit-verdict :language :en) => no-errors?)
                             (fact "Publish verdict"
                               (command sonja :publish-pate-verdict
                                        :id app-id
@@ -1375,17 +1378,27 @@
                                 (util/find-by-id regular-id atts)
                                 => (contains (assoc details :id regular-id))))
 
-                            (check-kuntagml application verdict-date)
-                            => fail?
+                            (facts "KuntaGML"
+                              (let [xml (check-kuntagml application verdict-date)]
+                                (fact "Aloituskokous is London"
+                                     (xml/get-text xml [:katselmuksenLaji])
+                                     => "aloituskokous"
+                                     (xml/get-text xml [:tarkastuksenTaiKatselmuksenNimi])
+                                     => "London")
+                                (fact "Plan is Washington"
+                                  (xml/get-text xml [:vaadittuErityissuunnitelma])
+                                  => "Washington")))
+
                             (fact "Verdict PDF attachment has been created"
                               (last (:attachments (query-application sonja app-id)))
                               => (contains {:readOnly         true
                                             :locked           true
-                                            :contents         "P\u00e4\u00e4t\u00f6s"
+                                            :contents         "Verdict"
                                             :type             {:type-group "paatoksenteko"
                                                                :type-id    "paatos"}
                                             :applicationState "verdictGiven"
-                                            :latestVersion    (contains {:contentType "application/pdf"})}))))
+                                            :latestVersion    (contains {:contentType "application/pdf"
+                                                                         :filename    (contains "Verdict")})}))))
                         (fact "Editing no longer allowed"
                           (edit-verdict :verdict-text "New verdict text")
                           => (err :error.verdict.not-draft))
