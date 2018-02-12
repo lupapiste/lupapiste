@@ -971,7 +971,8 @@
                                                         :rakennetut-autopaikat  ""
                                                         :tag                    ""
                                                         :autopaikat-yhteensa    ""
-                                                        :paloluokka             ""}}}))
+                                                        :paloluokka             ""
+                                                        :order                  "0"}}}))
                 (fact "Since the verdict is regular (official) we can set contact"
                   (edit-verdict "contact" "Authority Sonja Sibbo") => no-errors?)
                 (fact "... but cannot set section"
@@ -1108,7 +1109,8 @@
                           :rakennetut-autopaikat  ""
                           :tag                    ""
                           :autopaikat-yhteensa    ""
-                          :paloluokka             ""})
+                          :paloluokka             ""
+                          :order                  "0"})
                     (fact "Change building id to manual"
                       (command sonja :update-doc :id app-id
                                :doc doc-id
@@ -1139,7 +1141,8 @@
                                           :rakennetut-autopaikat  ""
                                           :tag                    ""
                                           :autopaikat-yhteensa    ""
-                                          :paloluokka             ""}
+                                          :paloluokka             ""
+                                          :order                  "0"}
                           op-id-pientalo {:description            ""
                                           :show-building          true
                                           :vss-luokka             ""
@@ -1149,7 +1152,8 @@
                                           :rakennetut-autopaikat  ""
                                           :tag                    ""
                                           :autopaikat-yhteensa    ""
-                                          :paloluokka             ""}})
+                                          :paloluokka             ""
+                                          :order                  "1"}})
                     (fact "Add tag and description to pientalo"
                       (command sonja :update-doc :id app-id
                                :doc doc-id
@@ -1170,6 +1174,9 @@
                     (fact "Cannot edit non-existent building"
                       (edit-verdict [:buildings "bad-building" :paloluokka] "foo")
                       => fail?)
+                    (fact "Change primary operation"
+                      (command sonja :change-primary-operation :id app-id
+                               :secondaryOperationId op-id-pientalo) => ok?)
                     (fact "Buildings updated"
                       (-> (open-verdict) :verdict :data :buildings)
                       => {op-id          {:description            "Hello world!"
@@ -1181,7 +1188,8 @@
                                           :rakennetut-autopaikat  ""
                                           :tag                    ""
                                           :autopaikat-yhteensa    ""
-                                          :paloluokka             ""}
+                                          :paloluokka             ""
+                                          :order                  "1"}
                           op-id-pientalo {:description            "Hen piaoliang!"
                                           :show-building          true
                                           :vss-luokka             ""
@@ -1191,7 +1199,8 @@
                                           :rakennetut-autopaikat  ""
                                           :tag                    "Hao"
                                           :autopaikat-yhteensa    ""
-                                          :paloluokka             ""}})
+                                          :paloluokka             ""
+                                          :order                  "0"}})
                     (fact "Cannot publish in the complementNeeded state"
                       (command sonja :publish-pate-verdict :id app-id
                                :verdict-id verdict-id)
@@ -1205,6 +1214,9 @@
                       (:headers (raw sonja :preview-pate-verdict :id app-id
                                      :verdict-id verdict-id))
                       => (contains {"Content-Disposition" (contains "Beslututkast")}))
+                    (fact "Change primary operation back"
+                      (command sonja :change-primary-operation :id app-id
+                                       :secondaryOperationId op-id) => ok?)
                     (fact "Sonja approves the application again"
                       (command sonja :approve-application :id app-id :lang :fi)
                       => ok?)
@@ -1285,13 +1297,15 @@
                                                   :building-id   "789"
                                                   :operation     "sisatila-muutos"
                                                   :tag           ""
-                                                  :paloluokka    ""}
+                                                  :paloluokka    ""
+                                                  :order         "0"}
                                   op-id-pientalo {:description   "Hen piaoliang!"
                                                   :show-building true
                                                   :building-id   "1234567881"
                                                   :operation     "pientalo"
                                                   :tag           "Hao"
-                                                  :paloluokka    ""}}
+                                                  :paloluokka    ""
+                                                  :order         "1"}}
                                  :attachments           []}
                         (facts "Cannot edit verdict values not in the template"
                           (let [check-fn (fn [kwp value]

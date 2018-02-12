@@ -367,8 +367,8 @@
 (defn buildings
   "Map of building infos: operation id is key and value map contains
   operation (loc-key), building-id (either national or manual id),
-  tag (tunnus) and description."
-  [application]
+  tag (tunnus), description and order (primary operation is the first)."
+  [{primary-op :primaryOperation :as application}]
   (->> application
        app-documents-having-buildings
        (reduce (fn [acc {:keys [schema-info data]}]
@@ -384,7 +384,8 @@
                                               (select-keys data)
                                               vals
                                               (util/find-first ss/not-blank?))
-                            :tag         (:tunnus data)}
+                            :tag         (:tunnus data)
+                            :order (if (= id (:id primary-op)) 0 1)}
                            ss/->plain-string))))
                {})))
 
