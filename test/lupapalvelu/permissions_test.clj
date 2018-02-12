@@ -73,7 +73,7 @@
     (roles-in-scope-with-permissions :unknown [:test/fail]) => #{})
 
   (fact "unknown permission"
-    (roles-in-scope-with-permissions :test-scope [:test/unknown]) => #{})
+    (roles-in-scope-with-permissions :test-scope [:test/unknown]) => (throws java.lang.AssertionError))
 
   (fact "nil scope"
     (roles-in-scope-with-permissions nil [:test/fail]) => #{})

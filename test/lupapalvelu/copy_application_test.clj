@@ -138,10 +138,10 @@
                  (= (dissoc-ids-and-timestamps (select-keys new-app [:attachments]))
                     (dissoc-ids-and-timestamps (select-keys raw-new-app [:attachments])))  => true?)
 
-           (fact "user is the owner of the new application, previous owner invited as writer"
-             (:auth source-app) => [(assoc source-user :role :owner :type :owner :unsubscribed false)
+           (fact "user has writer role in application, previous writers are invited with writer role"
+             (:auth source-app) => [(assoc source-user :role :writer :unsubscribed false)
                                     invitation]
-             (:auth new-app) => [(assoc user :role :owner :type :owner :unsubscribed false)
+             (:auth new-app) => [(assoc user :role :writer :unsubscribed false)
                                  (assoc source-user
                                         :role :reader
                                         :invite {:created created

@@ -40,7 +40,7 @@
    :firstName                        sc/Str
    :lastName                         sc/Str
    :role                             (apply sc/enum all-authz-roles)
-   (sc/optional-key :type)           (sc/enum :company :owner)
+   (sc/optional-key :type)           (sc/enum :company)
    (sc/optional-key :company-role)   (sc/enum :admin :user)
    (sc/optional-key :name)           sc/Str
    (sc/optional-key :y)              ssc/FinnishY
@@ -106,7 +106,7 @@
          user-or-user-id
          (usr/get-user-by-id user-or-user-id))
        (get-company-auths application)
-       (util/find-first (comp #{"writer" "owner"} :role))))
+       (util/find-first (comp #{"writer"} :role))))
 
 (defn has-auth-via-company? [application user-id]
   (or (auth-via-company application user-id) false))

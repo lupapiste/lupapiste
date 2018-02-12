@@ -96,23 +96,7 @@
                 :statementGiver     #{:application/set-urgency
                                       :application/set-authority-notice
                                       :application/read-authority-notice}}
- :application  {:owner              #{:application/read
-                                      :application/accordions-open
-                                      :application/edit-draft
-                                      :application/invite
-                                      :application/submit
-                                      :application/cancel-in-restricted-states
-                                      :application/edit
-                                      :application/edit-drawings
-                                      :application/edit-operation
-                                      :application/edit-permit-subtype
-                                      :application/remove-extra-link-permit
-                                      :application/change-location-in-pre-verdict-states
-                                      :application/create-change-permit
-                                      :application/create-continuation-period-permit
-                                      :application/create-foreman-app-in-post-verdict-states
-                                      :application/convert-to-application}
-                :writer             #{:application/read
+ :application  {:writer             #{:application/read
                                       :application/accordions-open
                                       :application/edit-draft
                                       :application/invite
@@ -140,8 +124,7 @@
                                       :application/accordions-open}
                 :statementGiver     #{:application/read
                                       :application/accordions-open}}
- :inforequest  {:owner              #{:application/cancel}
-                :writer             #{:application/cancel}}
+ :inforequest  {:writer             #{:application/cancel}}
  :canceled-app {:canceler           #{:application/undo-cancelation}}
  :foreman-app  {:foreman            #{:application/edit-draft
                                       :application/submit

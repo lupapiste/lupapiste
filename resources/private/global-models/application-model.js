@@ -560,10 +560,6 @@ LUPAPISTE.ApplicationModel = function() {
     return false;
   };
 
-  self.isNotOwner = function(model) {
-    return model.role() !== "owner";
-  };
-
   self.userHasRole = function(userModel, role) {
     return _(util.getIn(self.roles()))
       .filter(function(r) { return r.id() === util.getIn(userModel, ["id"]); })

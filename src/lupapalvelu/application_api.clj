@@ -48,18 +48,18 @@
     :text text))
 
 (defn return-to-draft-recipients
-  "the notification is sent to applicants in auth array and application owners"
+  "the notification is sent to applicants in auth array and application writers"
   [{{:keys [auth documents] :as application} :application}]
   (let [applicant-in-auth? (->> auth (remove :invite) (remove :unsubscribed) (map :id) set)
         applicant-ids (->> (domain/get-applicant-documents documents)
                            (map (comp :value :userId :henkilo :data))
                            (filter applicant-in-auth?))
-        owner-ids (->> (auth/get-auths-by-role application :owner)
-                       (remove :invite)
-                       (remove :unsubscribed)
-                       (map :id))]
+        writer-ids (->> (auth/get-auths-by-role application :writer)
+                        (remove :invite)
+                        (remove :unsubscribed)
+                        (map :id))]
     (map (comp usr/non-private usr/get-user-by-id)
-         (distinct (remove nil? (concat applicant-ids owner-ids))))))
+         (distinct (remove nil? (concat applicant-ids writer-ids))))))
 
 (notifications/defemail :application-return-to-draft
   {:subject-key "return-to-draft"
@@ -375,10 +375,7 @@
      :title     (:title app)
      :location  {:x (first location) :y (second location)}
      :operation (app-utils/operation-description app lang)
-     :authName  (-> app
-                    (auth/get-auths-by-role :owner)
-                    first
-                    (#(str (:firstName %) " " (:lastName %))))
+     :authName  (get app :applicant "")
      :comments  (->> (:comments app)
                      (filter #(not (= "system" (:type %))))
                      (map #(identity {:name (str (-> % :user :firstName) " " (-> % :user :lastName))

@@ -15,8 +15,6 @@
  ; old comment-user-authz-roles
  :application  {:writer             #{:comment/add
                                       :comment/read}
-                :owner              #{:comment/add
-                                      :comment/read}
                 :foreman            #{:comment/read}
                 :statementGiver     #{:comment/add
                                       :comment/read}

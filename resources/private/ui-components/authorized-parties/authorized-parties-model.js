@@ -65,10 +65,6 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     return info;
   };
 
-  self.isNotOwner = function( role ) {
-    return application().isNotOwner( role );
-  };
-
   self.isNotFinancialAuthority = function ( model ) {
     return model.role() !== "financialAuthority";
   };
@@ -135,7 +131,7 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
   };
 
   self.showRemove = function( role ) {
-    return hasAuth( "remove-auth") && self.isNotOwner( role ) && self.isNotFinancialAuthority ( role );
+    return hasAuth( "remove-auth") && self.isNotFinancialAuthority ( role );
   };
 
   self.showSubscriptionStatus = function( role ) {

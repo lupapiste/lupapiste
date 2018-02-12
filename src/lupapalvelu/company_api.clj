@@ -29,7 +29,7 @@
          set-user-to-document command. Basically this includes all users in companies that have been
          authorised to the application."
    :user-roles  #{:applicant :authority}
-   :pre-checks  [(some-pre-check domain/validate-owner-or-write-access
+   :pre-checks  [(some-pre-check domain/validate-write-access
                                  auth/application-authority-pre-check)]
    :parameters  [id]}
   [{{auth :auth} :application}]

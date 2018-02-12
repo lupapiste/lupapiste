@@ -80,14 +80,7 @@
                     :warrantyEnd nil
                     :handlers []
                     :finished nil
-                    :auth [{:role "owner"
-                            :username "kaino@solita.fi"
-                            :firstName "Kaino"
-                            :type "owner"
-                            :unsubscribed false
-                            :id "kainosolita"
-                            :lastName "Solita"}
-                           {:id "solita"
+                    :auth [{:id "solita"
                             :name "Solita Oy"
                             :y "1060155-5"
                             :role "writer"
