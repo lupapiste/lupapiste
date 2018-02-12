@@ -5,7 +5,8 @@
             [clj-time.format :as ctf]
             [schema.core :refer [defschema] :as sc]
             [schema.coerce :as coerce]
-            [sade.shared-schemas :as sssc])
+            [sade.shared-schemas :as sssc]
+            [sade.coordinate :as coord])
   (:import  [org.joda.time IllegalFieldValueException]))
 
 ;;
@@ -117,6 +118,13 @@
 
 (defschema Maaraalatunnus
   (sc/constrained sc/Str (partial re-matches validators/maara-alatunnus-pattern) "Finnish property partition id"))
+
+(defschema LocationX (sc/constrained sc/Num coord/valid-x? "Invalid x coordinate"))
+(defschema LocationY (sc/constrained sc/Num coord/valid-y? "Invalid y coordinate"))
+
+(defschema Location "ETRS-TM35FIN location map"
+  {:x LocationX
+   :y LocationY})
 
 (defschema BlankStr
   "A schema for empty or nil valued string"

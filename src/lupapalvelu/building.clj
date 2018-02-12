@@ -1,8 +1,10 @@
 (ns lupapalvelu.building
   (:require [monger.operators :refer :all]
-            [taoensso.timbre :refer [info]]
+            [taoensso.timbre :refer [info warnf]]
+            [schema.core :as sc]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
+            [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]))
 
@@ -57,6 +59,19 @@
                                 (comp #{op-id} :operationId)
                                 "nationalId"
                                 buildingId))
+
+(defn buildings-array-location-updates-for-operation
+  "Generates location.x location.y updates to buildings array regarding operation.
+   Example update: {buildings.1.location [5232.12 1234.12]}"
+  [{:keys [buildings]} {:keys [x y] :as location-map} op-id]
+  (when location-map
+    (if-not (sc/check ssc/Location location-map)
+      (mongo/generate-array-updates :buildings
+                                    buildings
+                                    (comp #{op-id} :operationId)
+                                    "location"
+                                    [x y])
+      (warnf "Invalid location update to buildings array, x: %s, y: %s" x y))))
 
 (defn- operation-building-updates [operation-buildings application]
   (remove
