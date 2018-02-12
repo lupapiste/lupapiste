@@ -4,6 +4,7 @@
             [schema.core :as sc]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
+            [sade.coordinate :as coord]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]))
@@ -66,11 +67,17 @@
   [{:keys [buildings]} {:keys [x y] :as location-map} op-id]
   (when location-map
     (if-not (sc/check ssc/Location location-map)
-      (mongo/generate-array-updates :buildings
-                                    buildings
-                                    (comp #{op-id} :operationId)
-                                    "location"
-                                    [x y])
+      (merge
+        (mongo/generate-array-updates :buildings
+                                      buildings
+                                      (comp #{op-id} :operationId)
+                                      "location"
+                                      [x y])
+        (mongo/generate-array-updates :buildings
+                                      buildings
+                                      (comp #{op-id} :operationId)
+                                      "location-wgs84"
+                                      (coord/convert "EPSG:3067" :WGS84 5 [x y])))
       (warnf "Invalid location update to buildings array, x: %s, y: %s" x y))))
 
 (defn- operation-building-updates [operation-buildings application]

@@ -7,7 +7,8 @@
             [lupapalvelu.rest.applications-data :as applications-data]
             [lupapalvelu.rest.schemas :refer :all]
             [sade.schema-generators :as ssg]
-            [sade.schemas :as ssc]))
+            [sade.schemas :as ssc]
+            [sade.coordinate :as coord]))
 
 (testable-privates lupapalvelu.rest.applications-data process-applications operation-operation-building-updates)
 
@@ -56,7 +57,8 @@
                 "buildings.2.nationalId" "123456789A"}})
 
   (facts "with location"
-    (let [location-map (ssg/generate ssc/Location)]
+    (let [location-map (ssg/generate ssc/Location)
+          wgs-coords   (coord/convert "EPSG:3067" "WGS84" 5 [(:x location-map) (:y location-map)])]
       (fact "no document"
         (operation-building-updates {:documents [{:id "doc-id" :schema-info {:name "uusiRakennus" :op {:id "op-id"}}}]}
                                     "unknown-op-id" "123456789A" location-map) => nil)
@@ -73,7 +75,8 @@
                                     "op-id-c" "123456789A" location-map)
         => {"$set" {"documents.0.data.valtakunnallinenNumero.value" "123456789A"
                     "buildings.2.nationalId" "123456789A"
-                    "buildings.2.location" [(:x location-map) (:y location-map)]}})
+                    "buildings.2.location" [(:x location-map) (:y location-map)]
+                    "buildings.2.location-wgs84" wgs-coords}})
       (fact "with wrong buildings"
         (operation-building-updates {:documents [{:id "doc-id" :schema-info {:name "uusiRakennus" :op {:id "op-id-c"}}}]
                                      :buildings [{:operationId "op-id-a"}]}
@@ -90,7 +93,8 @@
                                     "op-id3" "123456789A" location-map)
         => {"$set" {"documents.2.data.valtakunnallinenNumero.value" "123456789A"
                     "buildings.3.nationalId" "123456789A"
-                    "buildings.3.location" [(:x location-map) (:y location-map)]}})
+                    "buildings.3.location" [(:x location-map) (:y location-map)]
+                    "buildings.3.location-wgs84" wgs-coords}})
       (fact "nil location is discarded"
         (operation-building-updates {:documents [{:id "doc-id" :schema-info {:name "uusiRakennus" :op {:id "op-id-c"}}}]
                                      :buildings [{:operationId "op-id-a"}
