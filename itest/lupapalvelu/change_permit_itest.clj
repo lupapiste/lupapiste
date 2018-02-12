@@ -68,7 +68,7 @@
                new-ids (set (map :id (:documents change-app)))]
            (intersection new-ids old-ids) => empty?))
        (fact "No statement givers"
-         (map :role (:auth change-app)) => ["owner"])
+         (map :role (:auth change-app)) => ["writer"])
        (fact "No approval information in documents"
          (->> (:documents change-app)
               (map :meta)

@@ -86,7 +86,7 @@
 (facts "Teppo cannot submit even his own applications"
        (let [application-id (create-app-id teppo :propertyId sipoo-property-id :address "Xi Dawang Lu 8")]
          (fact "Query says can't submit"
-               (query teppo :application-submittable :id application-id) => (partial expected-failure? :company.user.cannot.submit))
+           (query teppo :application-submittable :id application-id) => unauthorized?)
          (fact "Submit application fails"
                (command teppo :submit-application :id application-id) => fail?)))
 
@@ -217,8 +217,7 @@
   (fact "Before kickban, Teppo sees company application"
     (let [apps (-> (datatables teppo :applications-search :searchText "")
                    (get-in [:data :applications]))]
-      (count apps) => 2
-      (map :applicant apps) => (just "Nieminen Teppo" "Intonen Mikko")))
+      (count apps) => 2))
 
   (fact "Kaino deletes Teppo from company"
     (command kaino :company-user-delete :user-id teppo-id) => ok?
@@ -234,8 +233,7 @@
     (fact "Teppo can't no longer see company applications"
       (let [apps (-> (datatables teppo :applications-search :searchText "")
                      (get-in [:data :applications]))]
-        (count apps) => 1
-        (map :applicant apps) => (just "Nieminen Teppo")))))
+        (count apps) => 0))))
 
 (facts "Authed dummy into company"
   (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kustukatu 13")
@@ -306,7 +304,7 @@
                             (assoc :body (json/encode {:searchText ""})
                                    :as :json)))
              :body :data :applications
-             (map :applicant)) => (just ["Nieminen Teppo" "Intonen Mikko" "Bar Foo" "Intonen Mikko"] :in-any-order)))))
+             count) => 4))))
 
 (def locked-err {:ok false :text "error.company-locked"})
 
@@ -321,11 +319,11 @@
        (fact "Companies listing no longer includes Solita"
              (:companies (query pena :companies)) => (just [(contains {:id "esimerkki"})]))
        (fact "Company is not authed to new applications"
-             (let [{auth :auth} (create-application kaino
-                                         :propertyId sipoo-property-id
-                                         :address "Sanyuanqiao") => ok?]
+         (let [{auth :auth} (create-application kaino
+                                                :propertyId sipoo-property-id
+                                                :address "Sanyuanqiao") => ok?]
                (count auth) => 1
-               auth => (just [(contains {:type "owner"})])))
+               (map :role auth) => ["writer"]))
        (fact "Company can be queried"
              (query kaino :company :company "solita" :users true) => ok?)
        (fact "Company cannot be updated"
@@ -370,8 +368,7 @@
              (let [{auth :auth} (create-application kaino
                                          :propertyId sipoo-property-id
                                          :address "Dongzhimen") => ok?]
-               (count auth) => 2
-               (map :type auth) => (just ["owner" "company"] :in-any-order)))
+               (map :type auth) => ["company"]))
        (fact "Company can now be updated"
              (command kaino :company-update :company "solita" :updates {:po "Beijing"}) => ok?)
        (fact "Nuking is not an option for unlocked company"
@@ -463,7 +460,7 @@
                           (assoc :body (json/encode {:searchText ""})
                                  :as :json)))
            :body :data :applications
-           (map :applicant)) => (just ["Intonen Mikko" "Bar Foo"] :in-any-order))))
+           count) => 1)))
 
 (apply-remote-minimal)
 

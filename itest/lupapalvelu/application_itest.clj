@@ -36,9 +36,7 @@
     (first (:auth app)) => (contains
                              {:firstName "Pena"
                               :lastName "Panaani"
-                              :type "owner"
-                              :role "owner"})
-    (fact "has applicant" (:applicant app) => "Panaani Pena")
+                              :role "writer"})
     (fact "has allowedAttachmentTypes" (:allowedAttachmentTypes app) => seq)
 
     (fact "Draft is not returned by latest-applications"
@@ -378,7 +376,7 @@
       (command teppo :cancel-application :id application-id :text "I want it canceled!" :lang "fi") => ok?
       (:state (query-application teppo application-id)) => "canceled")
 
-    (fact "Pena can't undo Teppos cancelation, although he is the owner"
+    (fact "Pena can't undo Teppos cancelation, although he is the writer"
       (command pena :undo-cancellation :id application-id) => unauthorized?)
 
     (fact "Sonja can undo cancellation"
@@ -862,7 +860,7 @@
       (command pena :submit-application :id application-id) => ok?
       (command sonja :check-for-verdict :id application-id)
       (return-to-draft sonja application-id) => (partial expected-failure? :error.command-illegal-state)))
-  (fact "The applicants and owners are notified of the return to draft"
+  (fact "The applicants and witers are notified of the return to draft"
     (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
           application    (query-application pena application-id)
           hakija         (domain/get-applicant-document (:documents application))]
@@ -875,21 +873,24 @@
 
       (return-to-draft sonja application-id)
       (let [emails (sent-emails)]
-        (count emails) => 2
-        emails => (partial every? (comp (partial re-find #"hankkeen Asuinkerrostalon tai rivitalon rakentaminen osoitteessa") :html :body))
-        emails => (partial every? (comp (partial re-find #"comment-text") :html :body))
-        emails => (partial some (comp (partial re-find (re-pattern (email-for-key pena))) :to))
-        emails => (partial some (comp (partial re-find (re-pattern (email-for-key mikko))) :to)))))
-  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
-    (command pena :submit-application :id application-id)
+        (fact "only mikko gets email, since pena is company user and does not have personal authorization"
+          (count emails) => 1
+          emails => (partial every? (comp (partial re-find #"hankkeen Asuinkerrostalon tai rivitalon rakentaminen osoitteessa") :html :body))
+          emails => (partial every? (comp (partial re-find #"comment-text") :html :body))
+          emails => (partial some (comp (partial re-find (re-pattern (email-for-key mikko))) :to))))))
+  (let [application-id (create-app-id teppo :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
+    (command teppo :submit-application :id application-id)
     (return-to-draft sonja application-id)
 
+      (println "\n\n\n\n\n" (:auth (query-application teppo application-id)) "\n\n\n\n\n")
+
     (let [email (last-email)]
-      (:to email) => (contains "pena")
+      (println "\n\n\n\n\n" email "\n\n\n\n\n")
+      (:to email) => (contains "teppo")
       (:subject email) => (contains "Hakemus palautettiin Luonnos-tilaan")
       (get-in email [:body :plain]) => (contains "comment-text"))
 
-    (let [application (query-application pena application-id)]
+    (let [application (query-application teppo application-id)]
       (fact "The return to draft can be seen in application history"
         (:state application) => "draft"
         (-> application :history last :state) => "draft")
@@ -906,11 +907,11 @@
              {:keys [state]} (query-application luukas application-id)]
          (fact "Application state is draft (not open)"
                state => "draft")
-         (facts "As an application owner, authority can use applicant commands"
+         (facts "As an application writer, authority can use applicant commands"
                 (doseq [cmd [:submit-application :cancel-application]]
                   (fact {:midje/description cmd}
                         luukas => (allowed? cmd :id application-id))))
-         (fact "Owner submits application"
+         (fact "Writer submits application"
                (command luukas :submit-application :id application-id) => ok?)
          (fact "Outside authority cannot use authority commands"
                (command luukas :approve-application :id application-id :lang "fi") => unauthorized?

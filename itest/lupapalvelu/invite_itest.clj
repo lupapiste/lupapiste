@@ -137,12 +137,12 @@
       (fact "application stays in submitted state"
         (:state (query-application teppo application-id)) => "submitted"))
 
-    (fact "Mikko is the applicant"
+    (fact "No applicants"
       (let [application  (query-application mikko application-id)
             first-hakija (domain/get-applicant-document (:documents application))]
         (:id first-hakija) =not=> hakija-doc
         (get-in first-hakija [:data :henkilo :henkilotiedot :etunimi :value]) => ""
-        (:applicant application ) => "Intonen Mikko"))
+        (:applicant application ) => nil))
 
     (fact "Mikko sets Teppo as co-applicant"
       (command mikko :set-user-to-document :id application-id :documentId hakija-doc :userId teppo-id :path "henkilo") => ok?
