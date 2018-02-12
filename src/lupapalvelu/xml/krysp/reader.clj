@@ -594,9 +594,9 @@
   (let [x (first coordinates)
         y (last coordinates)
         response (-> {:params {:x x :y y}}
-                     proxy-services/property-id-by-point-proxy
-                     :body)]
-    (json/parse-string response true)))
+                     proxy-services/property-id-by-point-proxy)]
+    (if-not (#{400 503} (:status response))
+      (json/parse-string (:body response) true))))
 
 (defn resolve-coordinate-type [xml]
   (cond
