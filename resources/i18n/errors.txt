@@ -332,7 +332,7 @@
 "error.illegal-value:required" "fi" "Arvo on pakollinen"
 "error.illegal-value:required" "sv" "Värdet är obligatoriskt"
 "error.illegal-value:schema-validation" "en" "Oh, an unexpected error occurred. We will try to fix the error as soon as possible. If the problem persists please contact tuki@lupapiste.fi and describe the situation when the error occured."
-"error.illegal-value:schema-validation!" "fi" "Hups, tapahtui odottamaton virhe! Yritämme korjata ongelman mahdollisimman pian. Jos ongelma jatkuu, olethan yhteydessä tuki@lupapiste.fi ja kerrot, missä tilanteessa virhe ilmeni."
+"error.illegal-value:schema-validation" "fi" "Hups, tapahtui odottamaton virhe! Yritämme korjata ongelman mahdollisimman pian. Jos ongelma jatkuu, olethan yhteydessä tuki@lupapiste.fi ja kerrot, missä tilanteessa virhe ilmeni."
 "error.illegal-value:schema-validation" "sv" "Ojdå, något gick fel! Vi försöker korrigera felet så snabbt som möjligt. Vid fortsatt problem vänligen kontakta tuki@lupapiste.fi och beskriv i vilken situation felet uppstod."
 "error.illegal-value:select" "en" "The value is not from an allowable value group"
 "error.illegal-value:select" "fi" "Arvo ei ole sallitusta arvojoukosta"
