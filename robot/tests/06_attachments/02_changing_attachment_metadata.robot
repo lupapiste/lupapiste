@@ -105,6 +105,13 @@ Authority opens attachment details
   Open attachment details  muut.muu
   Assert file latest version  ${PDF_TESTFILE_NAME}  1.0
 
+Authority rotates PDF
+  Click by test id  file-preview
+  Wait until  Element should not be visible  jquery=iframe#file-preview-iframe[src="/lp-static/img/ajax-loader.gif"]
+  Click element  jquery=i.lupicon-rotate-left
+  Wait until  Element should be visible  jquery=iframe#file-preview-iframe[src="/lp-static/img/ajax-loader.gif"]
+  Wait until  Element should not be visible  jquery=iframe#file-preview-iframe[src="/lp-static/img/ajax-loader.gif"]
+
 Open archive metadata editor
   Click enabled by test id  show-attachment-tos-metadata
   Click by test id  edit-metadata
