@@ -7,7 +7,7 @@
 
 (defn check-count-and-last-state [id msg-count state]
   (count (integration-messages id)) => msg-count
-  (get-in (last (integration-messages id)) [:data :state]) => state)
+  (get-in (last (integration-messages id)) [:data :toState :name]) => state)
 
 (facts* "R"
   (let [app-id (create-app-id pena :propertyId sipoo-property-id)
