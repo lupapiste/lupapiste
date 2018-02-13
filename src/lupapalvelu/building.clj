@@ -38,7 +38,7 @@
   (let [schema-body (:body (schemas/get-schema info))]
     (when (and op
                (:id op)
-               (some #(= (:name %) "valtakunnallinenNumero") schema-body))
+               (some #(= (:name %) schemas/national-building-id) schema-body))
       (= (:id op) op-id))))
 
 (defn document-buildingid-updates-for-operation

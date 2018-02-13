@@ -11,7 +11,8 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.xml :as xml]))
+            [sade.xml :as xml]
+            [sade.coordinate :as coord]))
 
 (apply-remote-minimal)
 
@@ -1159,11 +1160,17 @@
                                :op-id op-id-pientalo
                                :desc "Hen piaoliang!") => ok?)
                     (fact "national-id update pre-verdict"
-                      (api-update-national-building-id-call app-id {:form-params {:applicationId app-id :operationId (name op-id-pientalo) :nationalBuildingId "1234567881"}
-                                                                    :as          :json :basic-auth ["sipoo-r-backend" "sipoo"]}) => http200?
+                      (api-update-building-data-call app-id {:form-params {:operationId (name op-id-pientalo)
+                                                                           :nationalBuildingId "1234567881"
+                                                                           :location {:x 406216.0 :y 6686856.0}}
+                                                             :content-type :json
+                                                             :as          :json
+                                                             :basic-auth ["sipoo-r-backend" "sipoo"]}) => http200?
                       (->> (query-application sonja app-id) :documents
                            (util/find-by-id doc-id)
-                           :data :valtakunnallinenNumero :value) => "1234567881")
+                           :data :valtakunnallinenNumero :value) => "1234567881"
+                      ; TODO after LPK-3598, add test case here that data is saved to buildings-array also before publish-pate-verdict
+                      )
                     (fact "Set kiinteiston-autopaikat for pientalo"
                       (check-error (edit-verdict [:buildings op-id-pientalo :kiinteiston-autopaikat]
                                                  "8")))
@@ -1225,6 +1232,11 @@
                       (raw sonja :preview-pate-verdict :id app-id
                            :verdict-id verdict-id)
                       => fail?)
+                    ; TODO LPK-3598,
+                    ; add test case here that data in buildings-array, which was created in above 'todo'
+                    ; does look correct, ie:
+                    ; - the coordinates received via api-call are still existing in buildings-array
+                    ; - count of buildings array is correct (that no duplicate buildings were added after 'publish-pate-verdict'
                     (facts "Modify template"
                       (letfn [(edit-template [path value]
                                 (fact {:midje/description (format "Template draft %s -> %s" path value)}
@@ -1412,11 +1424,32 @@
                         (first buildings) => (contains {:index        "1"
                                                         :localShortId "002"
                                                         :description  "Hello world!"}))
-                      (fact "national-id update post-verdict is reflected to buildings array as well"
-                        (api-update-national-building-id-call id {:form-params {:applicationId id :operationId operation-id :nationalBuildingId "1234567892"}
-                                                                  :as          :json
-                                                                  :basic-auth  ["sipoo-r-backend" "sipoo"]}) => http200?
-                        (-> (query-application sonja app-id) :buildings first :nationalId) => "1234567892"))))
+                      (facts "building-data update post-verdict is reflected to buildings array as well"
+                        (api-update-building-data-call id {:form-params {:operationId operation-id
+                                                                         :nationalBuildingId "1234567892"
+                                                                         :location {:x 406216.0 :y 6686856.0}}
+                                                           :content-type :json
+                                                           :as          :json
+                                                           :basic-auth  ["sipoo-r-backend" "sipoo"]}) => http200?
+                        (let [{:keys [buildings]} (query-application sonja app-id)]
+                          (fact "pientalo VTJ-PRT still same"
+                            (->> (query-application sonja app-id) :documents
+                                 (util/find-by-id doc-id)
+                                 :data :valtakunnallinenNumero :value) => "1234567881")
+                          (fact "primary-op VTJ-PRT updated to doc"
+                            (->> (query-application sonja app-id) :documents
+                                 (util/find-first #(= (get-in % [:schema-info :op :id]) operation-id))
+                                 :data :valtakunnallinenNumero :value) => "1234567892")
+                          (facts "buildings"
+                            (count buildings) => 2
+                            (fact "first (primaryOperation sisatila-muutos)"
+                              (-> buildings first :nationalId) => "1234567892"
+                              (-> buildings first :location) => [406216.0 6686856.0]
+                              (-> buildings first :location-wgs84) => (coord/convert "EPSG:3067" "WGS84" 5 [406216.0 6686856.0]))
+                            (fact "second (secondaryOperation pientalo"
+                              (-> buildings second :nationalId) => "1234567881"
+                              (-> buildings second :location) => nil ; TODO should return location after LPK-3598 (from the first api-update call beginning of this test
+                              (-> buildings second :location-wgs84) => nil)))))))
                 (fact "Verdict draft to be deleted"
                   (let  [{verdict :verdict} (command sonja :new-pate-verdict-draft
                                                      :id app-id
