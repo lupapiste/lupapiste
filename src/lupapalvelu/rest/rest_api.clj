@@ -7,7 +7,7 @@
             [ring.swagger.swagger2 :as rs]
             [ring.swagger.ui :as ui]
             [schema.core :as sc]
-            [sade.core :refer [fail]]
+            [sade.core :refer [fail ok]]
             [sade.env :as env]
             [lupapalvelu.action :as action]
             [lupapalvelu.api-common :refer :all]
@@ -105,7 +105,7 @@
   (let [{org-id :organization :as app} (domain/get-application-as application-id user)]
     (if (and (usr/user-is-authority-in-organization? user org-id)
              (applications-data/update-building! app operationId nationalBuildingId nil))
-      (resp/status 200 {})
+      (resp/status 200 (ok))
       (resp/status 404 "Not found"))))
 
 (defendpoint [:post "/rest/application/:application-id/update-building-data"]
@@ -116,7 +116,7 @@
   (let [{org-id :organization :as app} (domain/get-application-as application-id user)]
     (if (and (usr/user-is-authority-in-organization? user org-id)
              (applications-data/update-building! app operationId nationalBuildingId location))
-      (resp/status 200 {})
+      (resp/status 200 (ok))
       (resp/status 404 "Not found"))))
 
 (defendpoint "/rest/submitted-applications"
