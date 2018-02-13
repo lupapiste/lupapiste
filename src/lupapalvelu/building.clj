@@ -1,8 +1,11 @@
 (ns lupapalvelu.building
   (:require [monger.operators :refer :all]
-            [taoensso.timbre :refer [info]]
+            [taoensso.timbre :refer [info warnf]]
+            [schema.core :as sc]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
+            [sade.coordinate :as coord]
+            [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]))
 
@@ -35,7 +38,7 @@
   (let [schema-body (:body (schemas/get-schema info))]
     (when (and op
                (:id op)
-               (some #(= (:name %) "valtakunnallinenNumero") schema-body))
+               (some #(= (:name %) schemas/national-building-id) schema-body))
       (= (:id op) op-id))))
 
 (defn document-buildingid-updates-for-operation
@@ -57,6 +60,25 @@
                                 (comp #{op-id} :operationId)
                                 "nationalId"
                                 buildingId))
+
+(defn buildings-array-location-updates-for-operation
+  "Generates location.x location.y updates to buildings array regarding operation.
+   Example update: {buildings.1.location [5232.12 1234.12]}"
+  [{:keys [buildings]} {:keys [x y] :as location-map} op-id]
+  (when location-map
+    (if-not (sc/check ssc/Location location-map)
+      (merge
+        (mongo/generate-array-updates :buildings
+                                      buildings
+                                      (comp #{op-id} :operationId)
+                                      "location"
+                                      [x y])
+        (mongo/generate-array-updates :buildings
+                                      buildings
+                                      (comp #{op-id} :operationId)
+                                      "location-wgs84"
+                                      (coord/convert "EPSG:3067" :WGS84 5 [x y])))
+      (warnf "Invalid location update to buildings array, x: %s, y: %s" x y))))
 
 (defn- operation-building-updates [operation-buildings application]
   (remove

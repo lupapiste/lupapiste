@@ -652,8 +652,8 @@
 
 ;; VTJ-PRT
 
-(defn api-update-national-building-id-call [application-id params]
-  (http-post (format "%s/rest/application/%s/update-national-building-id" (server-address) application-id)
+(defn api-update-building-data-call [application-id params]
+  (http-post (format "%s/rest/application/%s/update-building-data" (server-address) application-id)
              (merge params {:throw-exceptions false})))
 
 ;; attachments
