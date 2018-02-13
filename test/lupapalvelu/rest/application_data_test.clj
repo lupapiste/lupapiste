@@ -10,7 +10,7 @@
             [sade.schemas :as ssc]
             [sade.coordinate :as coord]))
 
-(testable-privates lupapalvelu.rest.applications-data process-applications operation-operation-building-updates)
+(testable-privates lupapalvelu.rest.applications-data process-applications operation-building-updates)
 
 (facts "Open application data tests"
   (let [rl (select-keys application-rakennuslupa applications-data/required-fields-from-db)]
