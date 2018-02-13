@@ -261,7 +261,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
                                            ? self.previewUrl()
                                            : "/lp-static/img/ajax-loader.gif");
     }
-  };
+  }
 
   self.isArchived = self.disposedComputed(function() {
     return util.getIn(self.attachment(), ["metadata", "tila"]) === "arkistoitu";
