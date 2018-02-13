@@ -32,6 +32,7 @@ DEFAULT='\033[0m'
 BRIGHT='\033[1m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
+MAGENTA='\033[0;35m' # Timeout color
 
 # kill recursive all leaf processes and the given one
 recursive_kill() { # sig pid indent
@@ -431,8 +432,11 @@ show_finished() {
    local STATUS=$(grep "tests total" $1 | tail -n 1)
    local COLOR=$GREEN
    local ATTEMPTS=$(grep "pybot exited with" "$1" | sed -e 's/.*round //')
+   local EXIT_CODE=$(grep "pybot exited with" "$1" | sed -E 's/.*exited with ([0-9]+) .*/\1/')
+   local REASON=
    echo "$STATUS" | grep -q "[^0-9]0 failed" || COLOR=$RED
-   echo -e "$COLOR - $1 done: $STATUS, $ATTEMPTS runs"
+   test "$EXIT_CODE" -eq "124" && COLOR=$MAGENTA && REASON=" - TIMEOUT [value=$TIMEOUT]"
+   echo -e "$COLOR$REASON - $1 done: $STATUS, $ATTEMPTS runs"
    grep -E "FAIL" "$1" | head -n 1 | sed -e 's/^/      /'
    echo -n -e "$DEFAULT"
 }

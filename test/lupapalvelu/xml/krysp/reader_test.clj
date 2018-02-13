@@ -15,7 +15,8 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
 
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
@@ -502,7 +503,10 @@
 
     (fact "kuntalupatunnus" kuntalupatunnus => "14-0241-R 3")
     (fact "municipality" municipality => "186")
-    (fact "rakennusvalvontaasianKuvaus" rakennusvalvontaasianKuvaus => "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto.")
+    (fact "rakennusvalvontaasianKuvaus"
+      rakennusvalvontaasianKuvaus => "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto."
+      (krysp-reader/read-permit-descriptions-from-xml :R (cr/strip-xml-namespaces xml)) => (just {:kuntalupatunnus "14-0241-R 3"
+                                                                                                  :kuvaus          "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto."}))
     (fact "vahainenPoikkeaminen" vahainenPoikkeaminen => "Poikekkaa meill\u00e4!")
     (facts "hakijat"
       (fact "count" (count hakijat) => 6)
@@ -515,6 +519,15 @@
         (fact "y" y => #(and (instance? Double %) (= 6707228.994 %)))
         (fact "address" address => "Kylykuja 3-5 D 35b-c")
         (fact "propertyId" propertyId => "18600303560006")))))
+
+(facts "Multiple features with different descriptions in the same XML file"
+  (let [xml (xml/parse (slurp "resources/krysp/dev/feature-collection-with-many-featureMember-elems.xml"))]
+   (fact "rakennusvalvontaasianKuvaus"
+         (set (krysp-reader/read-permit-descriptions-from-xml :R (cr/strip-xml-namespaces xml))) =>
+         #{{:kuntalupatunnus "999-2017-11"
+            :kuvaus "Kuvaus 999-2017-11"}
+           {:kuntalupatunnus "999-2016-999"
+            :kuvaus "Kuvaus 999-2016-999"}})))
 
 (facts "Testing area like location information for application creation"
   (against-background

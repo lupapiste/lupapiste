@@ -1,0 +1,12 @@
+{:global       {:admin              #{:organization/convert-inforequests}
+                :authorityAdmin     #{:organization/check-permanent-archive-enabled}}
+ :organization {:authority          #{:organization/check-permanent-archive-enabled}
+                :approver           #{:organization/check-permanent-archive-enabled}
+                :archivist          #{:organization/get-archiving-status}}
+ :application  {:owner              #{:organization/check-permanent-archive-enabled}
+                :writer             #{:organization/check-permanent-archive-enabled}
+                :reader             #{:organization/check-permanent-archive-enabled}
+                :foreman            #{:organization/check-permanent-archive-enabled}
+                :guest              #{:organization/check-permanent-archive-enabled}
+                :guestAuthority     #{:organization/check-permanent-archive-enabled}
+                :financialAuthority #{:organization/check-permanent-archive-enabled}}}

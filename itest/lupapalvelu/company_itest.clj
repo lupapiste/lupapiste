@@ -143,7 +143,7 @@
 
     (facts "Teppo cannot submit application"
            (fact "Query says can't submit"
-                 (query teppo :application-submittable :id application-id) => (partial expected-failure? :company.user.cannot.submit))
+                 (query teppo :application-submittable :id application-id) => unauthorized?)
            (fact "Submit application fails"
                  (command teppo :submit-application :id application-id) => fail?))
     (fact "Teppo cannot edit his company user details"

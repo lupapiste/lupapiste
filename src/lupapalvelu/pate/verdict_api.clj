@@ -1,6 +1,6 @@
 (ns lupapalvelu.pate.verdict-api
   (:require [clojure.set :as set]
-            [lupapalvelu.action :refer [defquery defcommand notify] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw notify] :as action]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.verdict :as verdict]
@@ -144,8 +144,7 @@
       (template/error-response result))))
 
 (defcommand publish-pate-verdict
-  {:description      "Publishes verdict.
-TODO: create tasks and PDF, application state change"
+  {:description      "Publishes verdict."
    :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
@@ -155,11 +154,24 @@ TODO: create tasks and PDF, application state change"
                       verdict-filled]
    ;; As KuntaGML message is generated the application state must be
    ;; at least :sent
-   :states           states/post-sent-states
+   :states            (set/difference states/post-sent-states #{:complementNeeded})
    :notified         true
    :on-success       (notify :application-state-change)}
   [command]
   (ok (verdict/publish-verdict command)))
+
+(defraw preview-pate-verdict
+  {:description      "Generate preview version of the verdict PDF."
+   :feature          :pate
+   :user-roles       #{:authority}
+   :parameters       [id verdict-id]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :pre-checks       [pate-enabled
+                      (verdict-exists :editable?)
+                      verdict-filled]
+   :states           states/post-submitted-states}
+  [command]
+  (verdict/preview-verdict command))
 
 (defquery pate-verdict-tab
   {:description     "Pseudo-query that fails if the Pate verdicts tab
@@ -196,7 +208,8 @@ TODO: create tasks and PDF, application state change"
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-exists :editable?)]
+   :pre-checks       [pate-enabled
+                      (verdict-exists :editable?)]
    :states           states/post-submitted-states}
   [{application :application created :created}]
   (let [today-long (tc/to-long (t/today-at-midnight))

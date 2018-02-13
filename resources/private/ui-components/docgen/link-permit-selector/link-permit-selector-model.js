@@ -12,7 +12,8 @@ LUPAPISTE.LinkPermitSelectorModel = function(params) {
   var allLinkPermits = lupapisteApp.models.application.linkPermitData;
 
   var validOperations = ko.observableArray();
-  ajax.query("all-operations-in", {path: self.schema.operationsPath.join(".") })
+  ajax.query("all-operations-in", {id: ko.unwrap(params.applicationId),
+                                   path: self.schema.operationsPath.join(".")})
     .success(function(res) {
       validOperations(res.operations);
     })

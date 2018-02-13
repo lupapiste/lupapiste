@@ -151,3 +151,57 @@
     (select-latest-verdict-status {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm (- (now) 9999) :paatoskoodi "oldest koodi"}
                                                                           {:paatospvm (- (now) 999)  :paatoskoodi "newest effective koodi"}
                                                                           {:paatospvm (+ (now) 9999) :paatoskoodi "future koodi"}]}]}]}) => "newest effective koodi"))
+
+(facts foreman-app-context
+  (fact "foreman in foreman application"
+    (-> (f/foreman-app-context {:user {:id "1"}
+                                :application {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
+                                              :auth [{:id "1" :role "foreman"} {:id "2" :role "writer"}]}})
+        :permissions)
+    => #{:foreman-app/test}
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role :foreman-app "foreman") => #{:foreman-app/test}))
+
+  (fact "non-foreman in foreman application"
+    (-> (f/foreman-app-context {:user {:id "2"}
+                                :application {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
+                                              :auth [{:id "1" :role "foreman"} {:id "2" :role "writer"}]}})
+        :permissions)
+    => empty?
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role :foreman-app "writer") => #{}))
+
+  (fact "foreman in non-foreman application"
+    (-> (f/foreman-app-context {:user {:id "1"}
+                                :application {:primaryOperation {:name "kerrostalo-rivitalo"}
+                                              :auth [{:id "1" :role "foreman"} {:id "2" :role "writer"}]}})
+        :permissions)
+    => empty?
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role irrelevant irrelevant) => irrelevant :times 0))
+
+  (fact "user not in application auths"
+    (-> (f/foreman-app-context {:user {:id "3"}
+                                :application {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
+                                              :auth [{:id "1" :role "foreman"} {:id "2" :role "writer"}]}})
+        :permissions)
+    => empty?
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role irrelevant irrelevant) => irrelevant :times 0))
+
+  (fact "authority user not in application auths"
+    (-> (f/foreman-app-context {:user {:id "3" :orgAuthz {:123-T ["authority"]}}
+                                :application {:organization "123-T"
+                                              :primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
+                                              :auth [{:id "1" :role "foreman"} {:id "2" :role "writer"}]}})
+        :permissions)
+    => empty?
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role irrelevant irrelevant) => irrelevant :times 0))
+
+  (fact "no application in command"
+    (-> (f/foreman-app-context {:user {:id "1"}})
+        :permissions)
+    => empty?
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role irrelevant irrelevant) => irrelevant :times 0)))

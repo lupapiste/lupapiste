@@ -174,49 +174,51 @@
          [:h4.pate-label
           {:class (common/css-flags :required required?)}
           (path/loc options)])
-       [:div.row
-        [:div.col-3.col--full
-         [:div.col--vertical
-          [:label (common/loc :phrase.add)]
-          (phrases/phrase-category-select @category*
-                                          set-category
-                                          {:disabled? disabled?})]]
-        [:div.col-5
-         [:div.col--vertical
-          (common/empty-label)
-          (components/autocomplete selected*
-                                   {:items     (phrases/phrase-list-for-autocomplete (rum/react category*))
-                                    :callback  #(let [text-node (.-firstChild (rum/ref local-state ref-id) )
-                                                      sel-start (.-selectionStart text-node)
-                                                      sel-end   (.-selectionEnd text-node)
-                                                      old-text  (or (path/value path state) "")]
-                                                  (reset! replaced* (subs old-text sel-start sel-end))
-                                                  (update-text (s/join (concat (take sel-start old-text)
-                                                                               %
-                                                                               (drop sel-end old-text)))))
-                                    :disabled? disabled?})]]
-        [:div.col-4.col--right
-         [:div.col--vertical
-          (common/empty-label)
-          [:div.inner-margins
-           [:button.primary.outline
-            {:on-click (fn []
-                         (update-text "")
-                         (reset! selected* ""))
-             :disabled disabled?}
-            (common/loc :pate.clear)]
-           [:button.primary.outline
-            {:disabled (let [phrase (rum/react selected*)]
-                         (or disabled?
-                             (s/blank? phrase)
-                             (not (re-find (re-pattern (goog.string/regExpEscape phrase))
-                                           (or (path/react path state) "")))))
-             :on-click (fn []
-                         (update-text (s/replace-first (path/value path state)
-                                                       @selected*
-                                                       @replaced*))
-                         (reset! selected* ""))}
-            (common/loc :phrase.undo)]]]]]
+       (when (seq (phrases/non-empty-categories))
+         [:div.row
+          [:div.col-3.col--full
+           [:div.col--vertical
+            [:label (common/loc :phrase.add)]
+            (phrases/phrase-category-select @category*
+                                            set-category
+                                            {:disabled? disabled?})]]
+          [:div.col-5
+           [:div.col--vertical
+            (common/empty-label)
+            (components/autocomplete
+             selected*
+             {:items     (phrases/phrase-list-for-autocomplete (rum/react category*))
+              :callback  #(let [text-node (.-firstChild (rum/ref local-state ref-id) )
+                                sel-start (.-selectionStart text-node)
+                                sel-end   (.-selectionEnd text-node)
+                                old-text  (or (path/value path state) "")]
+                            (reset! replaced* (subs old-text sel-start sel-end))
+                            (update-text (s/join (concat (take sel-start old-text)
+                                                         %
+                                                         (drop sel-end old-text)))))
+              :disabled? disabled?})]]
+          [:div.col-4.col--right
+           [:div.col--vertical
+            (common/empty-label)
+            [:div.inner-margins
+             [:button.primary.outline
+              {:on-click (fn []
+                           (update-text "")
+                           (reset! selected* ""))
+               :disabled disabled?}
+              (common/loc :pate.clear)]
+             [:button.primary.outline
+              {:disabled (let [phrase (rum/react selected*)]
+                           (or disabled?
+                               (s/blank? phrase)
+                               (not (re-find (re-pattern (goog.string/regExpEscape phrase))
+                                             (or (path/react path state) "")))))
+               :on-click (fn []
+                           (update-text (s/replace-first (path/value path state)
+                                                         @selected*
+                                                         @replaced*))
+                           (reset! selected* ""))}
+              (common/loc :phrase.undo)]]]]])
        [:div.row
         [:div.col-12.col--full
          {:ref ref-id}

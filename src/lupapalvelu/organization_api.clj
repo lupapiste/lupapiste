@@ -30,6 +30,7 @@
             [sade.municipality :as muni]
             [sade.property :as p]
             [sade.shared-schemas :as sssc]
+            [sade.schemas :as ssc]
             [sade.schema-utils :as ssu]
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]
@@ -170,17 +171,29 @@
     (ok :bulletin-scopes scopes
         :local-bulletins-page-texts texts)))
 
+(defn- bulletin-scope-settings-validator
+  [{{:keys [notificationEmail descriptionsFromBackendSystem]} :data}]
+  (when (and notificationEmail (not (v/valid-email? notificationEmail))
+             (fail! :error.email)))
+  (when (and descriptionsFromBackendSystem (not (util/boolean? descriptionsFromBackendSystem)))
+    (fail! :error.invalid-value)))
+
 (defcommand update-organization-bulletin-scope
   {:user-roles #{:authorityAdmin}
-   :parameters [permitType municipality notificationEmail]
+   :parameters [permitType municipality]
+   :optional-parameters [notificationEmail descriptionsFromBackendSystem]
    :input-validators [permit/permit-type-validator
-                      (partial action/email-validator :notificationEmail)]
+                      bulletin-scope-settings-validator]
    :pre-checks [check-bulletins-enabled]}
-  [{user :user}]
-  (mongo/update-by-query :organizations
-      {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
-      {$set {:scope.$.bulletins.notification-email notificationEmail}})
-  (ok))
+  [{user :user data :data}]
+  (let [updates (merge (when (util/not-empty-or-nil? notificationEmail)
+                         {:scope.$.bulletins.notification-email notificationEmail})
+                       (when (contains? data :descriptionsFromBackendSystem)
+                         {:scope.$.bulletins.descriptions-from-backend-system descriptionsFromBackendSystem}))]
+    (when updates
+      (mongo/update-by-query :organizations
+        {:scope {$elemMatch {:permitType permitType :municipality municipality}}}  {$set updates}))
+    (ok)))
 
 (defcommand remove-organization-local-bulletins-caption
   {:user-roles #{:authorityAdmin}
@@ -1092,19 +1105,38 @@
   {:description      "Updates organization's document store information"
    :parameters       [org-id docStoreInUse docTerminalInUse documentPrice organizationDescription]
    :user-roles       #{:admin}
-   :input-validators [(partial boolean-parameters [:docStoreInUse])
-                      (partial number-parameters [:documentPrice])
-                      (fn [{{price :documentPrice} :data}]
-                        (when (sc/check sssc/Nat price)
-                          (fail :error.illegal-number)))
+   :input-validators [(partial boolean-parameters [:docStoreInUse :docTerminalInUse])
+                      (partial parameters-matching-schema [:documentPrice] sssc/Nat :error.illegal-number)
                       (partial localization-parameters [:organizationDescription])]}
-  [{user :user created :created}]
+  [_]
   (mongo/update-by-query :organizations
       {:_id org-id}
       {$set {:docstore-info.docStoreInUse docStoreInUse
              :docstore-info.docTerminalInUse docTerminalInUse
              :docstore-info.documentPrice documentPrice
              :docstore-info.organizationDescription organizationDescription}})
+  (ok))
+
+(defquery document-request-info
+  {:description "Obtains the organization's document request info."
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (->> user
+       usr/authority-admins-organization-id
+       org/document-request-info
+       (ok :documentRequest)))
+
+(defcommand set-document-request-info
+  {:description "Updates organization's document request info. Docucment requests are made from document store."
+   :parameters [enabled email instructions]
+   :user-roles #{:authorityAdmin}
+   :input-validators [(partial boolean-parameters [:enabled])
+                      (partial parameters-matching-schema [:email] ssc/OptionalEmail :error.email)
+                      (partial localization-parameters [:instructions])]}
+  [{user :user}]
+  (-> user
+      usr/authority-admins-organization-id
+      (org/set-document-request-info enabled email instructions))
   (ok))
 
 (defquery docterminal-attachment-types
@@ -1142,5 +1174,17 @@
 
 (defquery docterminal-enabled
   {:pre-checks [check-docterminal-enabled]
+   :user-roles #{:authorityAdmin}}
+  [_])
+
+(defn- check-docstore-enabled [{user :user}]
+  (when-not (-> user
+                usr/authority-admins-organization-id
+                org/get-docstore-info-for-organization!
+                :docStoreInUse)
+    (fail :error.docstore-not-enabled)))
+
+(defquery docstore-enabled
+  {:pre-checks [check-docstore-enabled]
    :user-roles #{:authorityAdmin}}
   [_])

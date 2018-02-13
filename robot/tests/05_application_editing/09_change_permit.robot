@@ -1,28 +1,22 @@
 *** Settings ***
 
 Documentation   On R type of application, applying a change permit
+Suite Setup     Apply submitted-application fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
-Sonja prepares the application
+Sonja opens Pena's application
   Sonja logs in
-  ${secs} =  Get Time  epoch
-  Set Suite Variable  ${appname}  Base_app_for_change_permit_${secs}
-  Set Suite Variable  ${propertyid}  753-423-2-41
-  Create application the fast way  ${appname}  ${propertyid}  kerrostalo-rivitalo
+  Set Suite Variable  ${appname}  Penakuja 3
+  Set Suite Variable  ${propertyid}  753-416-55-7
+  Set Suite Variable  ${applicationid}  LP-753-2018-90001
 
-  Wait until  Application state should be  open
-  ${applicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
-  Set Suite Variable  ${applicationid}
+  Open application  ${appname}  ${propertyid}
+  Wait until  Application state should be  submitted
 
-Sonja submits the application and gives it a verdict
-  Submit application
-  Wait until  Element should be visible  //div[@id='application-requiredFieldSummary-tab']
-  ${BULLETIN_DESCR_VISIBLE}=  Run Keyword And Return Status  Test id visible  bulletin-op-description-summaryTab
-  Run Keyword If  ${BULLETIN_DESCR_VISIBLE}  Fill test id  bulletin-op-description-summaryTab  Toimenpideotsikko julkipanoon
-  Wait until  Element should be visible  xpath=//button[@data-test-id="approve-application-summaryTab"]
+Sonja gives it a verdict
   Element should not be visible  xpath=//*[@data-test-id='change-permit-create-btn']
   Open tab  verdict
   Fetch verdict
@@ -59,4 +53,3 @@ Sonja creates a change permit
   Wait Until  Element should not be visible  xpath=//*[@data-test-id='test-application-link-permit-lupapistetunnus']
   Wait Until  Element should be visible  xpath=//*[@data-test-id='test-application-app-linking-to-us']
   Element Text Should Be  xpath=//*[@data-test-id='test-application-app-linking-to-us']  ${newApplicationid} - Asuinkerrostalon tai rivitalon rakentaminen Muutoslupa
-

@@ -18,6 +18,7 @@
             [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.pate.schemas :refer [PateSavedVerdictTemplates Phrase]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.permissions :refer [defcontext] :as permissions]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.wfs :as wfs]
             [lupapiste-commons.archive-metadata-schema :as archive-schema]
@@ -113,14 +114,20 @@
    :docTerminalInUse               sc/Bool
    :allowedTerminalAttachmentTypes [DocTerminalAttachmentType]
    :documentPrice                  sssc/Nat
-   :organizationDescription        (i18n/lenient-localization-schema sc/Str)})
+   :organizationDescription        (i18n/lenient-localization-schema sc/Str)
+   :documentRequest {:enabled      sc/Bool
+                     :email        ssc/OptionalEmail
+                     :instructions (i18n/lenient-localization-schema sc/Str)}})
 
 (def default-docstore-info
   {:docStoreInUse                  false
    :docTerminalInUse               false
    :allowedTerminalAttachmentTypes []
    :documentPrice                  0
-   :organizationDescription (i18n/supported-langs-map (constantly ""))})
+   :organizationDescription        (i18n/supported-langs-map (constantly ""))
+   :documentRequest {:enabled      false
+                     :email        ""
+                     :instructions (i18n/supported-langs-map (constantly ""))}})
 
 (sc/defschema PermitType
   (apply sc/enum (keys (permit/permit-types))))
@@ -138,7 +145,8 @@
                                       (sc/optional-key :ftpUser) sc/Str}
    (sc/optional-key :bulletins) {:enabled sc/Bool
                                  :url sc/Str
-                                 (sc/optional-key :notification-email) sc/Str}})
+                                 (sc/optional-key :notification-email) sc/Str
+                                 (sc/optional-key :descriptions-from-backend-system) sc/Bool}})
 
 (def permit-types (map keyword (keys (permit/permit-types))))
 
@@ -813,6 +821,14 @@
                  municipality (filter (comp #{municipality} :municipality)))]
     (boolean (some (comp :enabled :bulletins) scopes))))
 
+(defn bulletin-settings-for-scope
+  [organization permit-type municipality]
+  {:pre [(not-any? nil? [permit-type municipality])]}
+  (let [scopes (cond->> (:scope organization)
+                        permit-type  (filter (comp #{permit-type} :permitType))
+                        municipality (filter (comp #{municipality} :municipality)))]
+    (some :bulletins scopes)))
+
 (defn statement-giver-in-organization
   "Pre-check that fails if the user is statementGiver but not defined
   in the organization.
@@ -826,6 +842,21 @@
              (not (util/find-by-key :email (:email user)
                                    (:statementGivers @organization))))
     (fail :error.not-organization-statement-giver)))
+
+(defn- statement-giver-in-organization? [{user-email :email} {organization-statement-givers :statementGivers}]
+  (boolean (util/find-by-key :email user-email organization-statement-givers)))
+
+(defn- statement-giver-in-application? [{user-id :id} {application-auth :auth}]
+  (->> (filter (comp #{:statementGiver} keyword :role) application-auth)
+       (util/find-by-id user-id)
+       boolean))
+
+(defcontext organization-statement-giver-context [{:keys [user organization application]}]
+  (when (and application organization
+             (statement-giver-in-organization? user @organization)
+             (statement-giver-in-application? user application))
+    {:context-scope :organization
+     :context-roles [:statementGiver]}))
 
 (defn get-docstore-info-for-organization! [org-id]
   (-> (get-organization org-id [:docstore-info])
@@ -869,3 +900,15 @@
     (if allowed?
      (update-organization org-id {$addToSet {:docstore-info.allowedTerminalAttachmentTypes attachment-type}})
      (update-organization org-id {$pull {:docstore-info.allowedTerminalAttachmentTypes attachment-type}}))))
+
+(defn document-request-info [org-id]
+  (-> org-id
+      get-docstore-info-for-organization!
+      (get :documentRequest)))
+
+(defn set-document-request-info
+  [org-id enabled email instructions]
+  (update-organization org-id
+                       {$set {:docstore-info.documentRequest.enabled enabled
+                              :docstore-info.documentRequest.instructions instructions
+                              :docstore-info.documentRequest.email email}}))

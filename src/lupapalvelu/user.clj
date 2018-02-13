@@ -6,6 +6,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.permissions :refer [defcontext] :as permissions]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.security :as security]
             [lupapalvelu.user-enums :as user-enums]
@@ -147,6 +148,12 @@
 ;; Utils:
 ;; ==============================================================================
 ;;
+
+(defcontext without-application-context [{{org-authz :orgAuthz} :user application :application}]
+  (when-not application
+    {:context-scope :organization
+     :context-roles (->> (vals org-authz)
+                         (reduce into #{}))}))
 
 (defn full-name [{:keys [firstName lastName]}] (str firstName " " lastName))
 
@@ -301,16 +308,6 @@
 (defn user-has-role-in-organization? [user organization-id valid-org-authz-roles]
   (let [org-set (organization-ids-by-roles user (set valid-org-authz-roles))]
     (contains? org-set organization-id)))
-
-(defn validate-authority-in-organization
-  "Validator: current user must be an authority. To be used in commands'
-   :pre-check vectors."
-  [{:keys [user application]}]
-  (when-let [organization-id (:organization application)]
-    (when-not (user-is-authority-in-organization? user organization-id)
-      (fail! :error.unauthorized
-             :desc "user is not an authority in applications organization"))))
-
 
 (defn org-authz-match [organization-ids & [role]]
   {$or (for [org-id organization-ids] {(str "orgAuthz." (name org-id)) (or role {$exists true})})})
