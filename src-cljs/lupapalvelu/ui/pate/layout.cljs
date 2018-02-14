@@ -62,7 +62,7 @@
     [align] column alignment (:left, :right, :center or :full)
     [label]  keyword -> localization key
              string  -> label string
-             Default is nbsp (see above)"
+             Default is common/nbsp (non-breaking space)"
   ([component]
    (vertical {} component))
   ([{:keys [col align label]} component]
@@ -111,6 +111,7 @@
          :multi-select   pate-components/pate-multi-select
          :phrase-text    pate-components/pate-phrase-text
          :button         pate-components/pate-button
+         :application-attachments pate-att/pate-select-application-attachments
          ;; The rest are always displayed as view components
          (partial view-component cell-type)) options wrap-label?)
       (view-component cell-type options wrap-label?))))
@@ -192,6 +193,15 @@
       (docgen/docgen-label-wrap options elem)
       elem)))
 
+(defmethod view-component :application-attachments
+  [_ {:keys [schema info] :as options} & [wrap-label?]]
+  (let [elem ((if (path/value :published info)
+                pate-att/pate-frozen-application-attachments
+                pate-att/pate-application-attachments) options)]
+    (if (pate-components/show-label? schema wrap-label?)
+      (docgen/docgen-label-wrap options elem)
+      elem)))
+
 ;; -------------------------------
 ;; Containers
 ;; -------------------------------
@@ -214,6 +224,19 @@
                          (instantiate (path/dict-options item-options)
                                       (-> schema :labels? false? not)))])))
                 (:items schema))])
+
+(defn- repeating-keys
+  "The repeating keys (keys within the state that correspond to a
+  repeating schema). Sorted by :sort-by if given within schema."
+  [{:keys [dictionary path state] :as options} repeating]
+  (let [r-map    (path/react repeating state)
+        sort-key (get-in dictionary (path/extend path repeating :sort-by))]
+    (if sort-key
+      (->> r-map
+           (sort-by (fn [[_ a] [_ b]]
+                      (compare (sort-key a) (sort-key b))))
+           (map first))
+      (keys r-map))))
 
 (rum/defc pate-grid < rum/reactive
   {:key-fn #(-> % :path path/id)}
@@ -255,7 +278,7 @@
     (if-let [repeating (:repeating schema)]
       [:div (map (fn [k]
                    (pate-grid (assoc options
-                                :schema (dissoc schema :repeating)
-                                :path (path/extend path repeating k))))
-                 (keys (path/react repeating state)))]
+                                     :schema (dissoc schema :repeating)
+                                     :path (path/extend path repeating k))))
+                 (repeating-keys options repeating))]
       (grid options))))

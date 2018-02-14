@@ -298,12 +298,29 @@ var util = (function($) {
 
   function filterDataByQuery(options) {
     options = _.defaults(options, defaultOptions);
-    return _.filter(options.data, function(item) {
-      return _.reduce(options.query.split(" "), function(result, word) {
-        var dataForLabel = ko.unwrap(item[options.label]);
-        var isSelected = _.isArray(options.selected) ? _.some(options.selected, item) : options.selected === item;
-        return !isSelected && dataForLabel !== undefined && _.includes(dataForLabel.toUpperCase(), word.toUpperCase()) && result;
-      }, true);
+    var filtered = _.filter(options.data, function(item) {
+        return _.reduce(options.query.split(" "), function(result, word) {
+          var dataForLabel = ko.unwrap(item[options.label]);
+          var isSelected = _.isArray(options.selected) ? _.some(options.selected, item) : options.selected === item;
+          return !isSelected && dataForLabel !== undefined && _.includes(dataForLabel.toUpperCase(), word.toUpperCase()) && result;
+        }, true);
+      });
+    // The options are sorted so that titles beginning with the user input string are first, and if several options
+    // begin with the input, shorter options are preferred. I.e. for search string "appl" the first match will be
+    // "Application".
+    return filtered.sort(function (a, b) {
+      var labelA = ko.unwrap(a[options.label]).toUpperCase();
+      var labelB = ko.unwrap(b[options.label]).toUpperCase();
+      var query = options.query.toUpperCase();
+      if (_.startsWith(labelA, query) && _.startsWith(labelB, query)) {
+        return labelA.length - labelB.length;
+      } else if (_.startsWith(labelA, query)) {
+        return -1;
+      } else if (_.startsWith(labelB, query)) {
+        return 1;
+      } else {
+        return 0;
+      }
     });
   }
 

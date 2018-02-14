@@ -6713,6 +6713,20 @@ input:checked + .arrow-label:hover.arrow-label:before {
   color: #fbc732;
 }
 
+input:focus + .arrow-label:before {
+  color: #fbc732 !important;
+}
+
+.attachment-batch-table input:focus + .arrow-label:before {
+  padding: 3px 3px 4px 3px;
+  border: 2px solid #fbc732;
+  border-radius: 16px;
+}
+
+.attachment-batch-table input:focus + label.arrow-label {
+  padding: 0 !important;
+}
+
 input:checked + .arrow-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6794,6 +6808,20 @@ label.checkbox-label {
 .checkbox-label:hover.checkbox-label:before,
 input:checked + .checkbox-label:hover.checkbox-label:before {
   color: #fbc732;
+}
+
+input:focus + .checkbox-label:before {
+  color: #fbc732 !important;
+}
+
+.attachment-batch-table input:focus + .checkbox-label:before {
+  padding: 3px 3px 4px 3px;
+  border: 2px solid #fbc732;
+  border-radius: 16px;
+}
+
+.attachment-batch-table input:focus + label.checkbox-label {
+  padding: 0 !important;
 }
 
 input:checked + .checkbox-label:before {
@@ -6879,6 +6907,20 @@ input:checked + .blockbox-label:hover.blockbox-label:before {
   color: #fbc732;
 }
 
+input:focus + .blockbox-label:before {
+  color: #fbc732 !important;
+}
+
+.attachment-batch-table input:focus + .blockbox-label:before {
+  padding: 3px 3px 4px 3px;
+  border: 2px solid #fbc732;
+  border-radius: 16px;
+}
+
+.attachment-batch-table input:focus + label.blockbox-label {
+  padding: 0 !important;
+}
+
 input:checked + .blockbox-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6960,6 +7002,20 @@ label.docgen-checkbox-label {
 .docgen-checkbox-label:hover.docgen-checkbox-label:before,
 input:checked + .docgen-checkbox-label:hover.docgen-checkbox-label:before {
   color: #fbc732;
+}
+
+input:focus + .docgen-checkbox-label:before {
+  color: #fbc732 !important;
+}
+
+.attachment-batch-table input:focus + .docgen-checkbox-label:before {
+  padding: 3px 3px 4px 3px;
+  border: 2px solid #fbc732;
+  border-radius: 16px;
+}
+
+.attachment-batch-table input:focus + label.docgen-checkbox-label {
+  padding: 0 !important;
 }
 
 input:checked + .docgen-checkbox-label:before {
@@ -7050,6 +7106,20 @@ input:checked + .sectionbox-label:hover.sectionbox-label:before {
   color: #fbc732;
 }
 
+input:focus + .sectionbox-label:before {
+  color: #fbc732 !important;
+}
+
+.attachment-batch-table input:focus + .sectionbox-label:before {
+  padding: 3px 3px 4px 3px;
+  border: 2px solid #fbc732;
+  border-radius: 16px;
+}
+
+.attachment-batch-table input:focus + label.sectionbox-label {
+  padding: 0 !important;
+}
+
 input:checked + .sectionbox-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -7131,6 +7201,20 @@ label.stampbox-label {
 .stampbox-label:hover.stampbox-label:before,
 input:checked + .stampbox-label:hover.stampbox-label:before {
   color: #fbc732;
+}
+
+input:focus + .stampbox-label:before {
+  color: #fbc732 !important;
+}
+
+.attachment-batch-table input:focus + .stampbox-label:before {
+  padding: 3px 3px 4px 3px;
+  border: 2px solid #fbc732;
+  border-radius: 16px;
+}
+
+.attachment-batch-table input:focus + label.stampbox-label {
+  padding: 0 !important;
 }
 
 input:checked + .stampbox-label:before {
@@ -7220,6 +7304,20 @@ input:checked + .signbox-label:hover.signbox-label:before {
   color: #fbc732;
 }
 
+input:focus + .signbox-label:before {
+  color: #fbc732 !important;
+}
+
+.attachment-batch-table input:focus + .signbox-label:before {
+  padding: 3px 3px 4px 3px;
+  border: 2px solid #fbc732;
+  border-radius: 16px;
+}
+
+.attachment-batch-table input:focus + label.signbox-label {
+  padding: 0 !important;
+}
+
 input:checked + .signbox-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -7307,6 +7405,20 @@ input:checked + .radio-label:hover.radio-label:before {
   color: #fbc732;
 }
 
+input:focus + .radio-label:before {
+  color: #fbc732 !important;
+}
+
+.attachment-batch-table input:focus + .radio-label:before {
+  padding: 3px 3px 4px 3px;
+  border: 2px solid #fbc732;
+  border-radius: 16px;
+}
+
+.attachment-batch-table input:focus + label.radio-label {
+  padding: 0 !important;
+}
+
 input:checked + .radio-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -7388,6 +7500,20 @@ label.radio-field-label {
 .radio-field-label:hover.radio-field-label:before,
 input:checked + .radio-field-label:hover.radio-field-label:before {
   color: #fbc732;
+}
+
+input:focus + .radio-field-label:before {
+  color: #fbc732 !important;
+}
+
+.attachment-batch-table input:focus + .radio-field-label:before {
+  padding: 3px 3px 4px 3px;
+  border: 2px solid #fbc732;
+  border-radius: 16px;
+}
+
+.attachment-batch-table input:focus + label.radio-field-label {
+  padding: 0 !important;
 }
 
 input:checked + .radio-field-label:before {
@@ -7483,6 +7609,20 @@ label.filter-label {
 .filter-label:hover.filter-label:before,
 input:checked + .filter-label:hover.filter-label:before {
   color: #fbc732;
+}
+
+input:focus + .filter-label:before {
+  color: #fbc732 !important;
+}
+
+.attachment-batch-table input:focus + .filter-label:before {
+  padding: 3px 3px 4px 3px;
+  border: 2px solid #fbc732;
+  border-radius: 16px;
+}
+
+.attachment-batch-table input:focus + label.filter-label {
+  padding: 0 !important;
 }
 
 input:checked + .filter-label:before {
@@ -28379,6 +28519,20 @@ input:checked + .pate-checkbox-label:hover.pate-checkbox-label:before {
   color: #fbc732;
 }
 
+input:focus + .pate-checkbox-label:before {
+  color: #fbc732 !important;
+}
+
+.attachment-batch-table input:focus + .pate-checkbox-label:before {
+  padding: 3px 3px 4px 3px;
+  border: 2px solid #fbc732;
+  border-radius: 16px;
+}
+
+.attachment-batch-table input:focus + label.pate-checkbox-label {
+  padding: 0 !important;
+}
+
 input:checked + .pate-checkbox-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -28426,6 +28580,10 @@ input:disabled + .pate-checkbox-label:hover.pate-checkbox-label:before {
   background-color: #f6f6f6;
 }
 
+.pate-checkbox-wrapper {
+  border: none;
+}
+
 label.pate-radio-label {
   width: 100%;
   display: inline-block;
@@ -28460,6 +28618,20 @@ label.pate-radio-label {
 .pate-radio-label:hover.pate-radio-label:before,
 input:checked + .pate-radio-label:hover.pate-radio-label:before {
   color: #fbc732;
+}
+
+input:focus + .pate-radio-label:before {
+  color: #fbc732 !important;
+}
+
+.attachment-batch-table input:focus + .pate-radio-label:before {
+  padding: 3px 3px 4px 3px;
+  border: 2px solid #fbc732;
+  border-radius: 16px;
+}
+
+.attachment-batch-table input:focus + label.pate-radio-label {
+  padding: 0 !important;
 }
 
 input:checked + .pate-radio-label:before {
@@ -28507,10 +28679,6 @@ input:disabled + .pate-radio-label:hover.pate-radio-label:before {
 
 .pate-radio-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
-}
-
-.pate-checkbox-wrapper {
-  border: none;
 }
 
 .pate-radio-wrapper {
@@ -28688,6 +28856,10 @@ div.pate-verdict div.pate-section div.section-header {
   border: none;
   border-top: 1px solid #dddddd;
   padding: 0;
+}
+
+div.pate-verdict div.pate-section div.section-header.pate-section--no-border {
+  border-top: none;
 }
 
 div.pate-verdict div.pate-section div.section-header div.verdict-buttons {
@@ -28918,6 +29090,18 @@ div.pate-autocomplete .ac__menu ul.ac__items li.ac--grouped {
   max-width: 90%;
 }
 
+.tabby.statements {
+  margin: 0;
+  width: initial;
+}
+
+.tabby.statements .tabby__row.statement > .tabby__cell {
+  vertical-align: top;
+  padding-top: 0;
+  padding-bottom: 0;
+  white-space: nowrap;
+}
+
 .neighbor-states {
   margin: 0;
 }
@@ -29091,6 +29275,235 @@ div.pate-required-fields-note:after {
 
 div.pate-unordered-list ul {
   list-style-type: square;
+}
+
+div.pate-select-application-attachments {
+  margin-top: 6px;
+  border: solid 1px #eeeeee;
+  display: inline-block;
+  padding: 6px;
+}
+
+label.pate-attachment-group-label {
+  width: 100%;
+  display: inline-block;
+  color: #333333;
+  padding-left: 7px;
+  padding-right: 7px;
+  padding-bottom: 7px;
+  padding-top: 7px;
+}
+
+.pate-attachment-group-label:before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'lupapiste' !important;
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\e603";
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: top;
+  color: #f39129;
+  cursor: pointer;
+}
+
+.pate-attachment-group-label:hover.pate-attachment-group-label:before,
+input:checked + .pate-attachment-group-label:hover.pate-attachment-group-label:before {
+  color: #fbc732;
+}
+
+input:focus + .pate-attachment-group-label:before {
+  color: #fbc732 !important;
+}
+
+.attachment-batch-table input:focus + .pate-attachment-group-label:before {
+  padding: 3px 3px 4px 3px;
+  border: 2px solid #fbc732;
+  border-radius: 16px;
+}
+
+.attachment-batch-table input:focus + label.pate-attachment-group-label {
+  padding: 0 !important;
+}
+
+input:checked + .pate-attachment-group-label:before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'lupapiste' !important;
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\e604";
+  color: #f39129;
+}
+
+input:disabled + .pate-attachment-group-label:before,
+input:disabled + .pate-attachment-group-label:hover.pate-attachment-group-label:before {
+  cursor: initial;
+  color: #bbbbbb;
+}
+
+.no-label-text.pate-attachment-group-label:before {
+  margin-right: 0;
+}
+
+.pate-attachment-group-wrapper {
+  display: inline-block;
+  box-sizing: border-box;
+  border: 1px solid #dddddd;
+}
+
+.pate-attachment-group-wrapper input[type=checkbox], .pate-attachment-group-wrapper input[type=radio] {
+  display: block;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  position: absolute;
+  font-size: 0;
+}
+
+.pate-attachment-group-wrapper.wrapper--disabled {
+  background-color: #f6f6f6;
+}
+
+.pate-attachment-group-wrapper {
+  border: none;
+}
+
+.pate-attachment-group-wrapper .pate-attachment-group-label {
+  font-weight: bold;
+}
+
+label.pate-attachment-check-label {
+  width: 100%;
+  display: inline-block;
+  color: #333333;
+  padding-left: 7px;
+  padding-right: 7px;
+  padding-bottom: 7px;
+  padding-top: 7px;
+}
+
+.pate-attachment-check-label:before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'lupapiste' !important;
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\e603";
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: top;
+  color: #f39129;
+  cursor: pointer;
+}
+
+.pate-attachment-check-label:hover.pate-attachment-check-label:before,
+input:checked + .pate-attachment-check-label:hover.pate-attachment-check-label:before {
+  color: #fbc732;
+}
+
+input:focus + .pate-attachment-check-label:before {
+  color: #fbc732 !important;
+}
+
+.attachment-batch-table input:focus + .pate-attachment-check-label:before {
+  padding: 3px 3px 4px 3px;
+  border: 2px solid #fbc732;
+  border-radius: 16px;
+}
+
+.attachment-batch-table input:focus + label.pate-attachment-check-label {
+  padding: 0 !important;
+}
+
+input:checked + .pate-attachment-check-label:before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'lupapiste' !important;
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\e604";
+  color: #f39129;
+}
+
+input:disabled + .pate-attachment-check-label:before,
+input:disabled + .pate-attachment-check-label:hover.pate-attachment-check-label:before {
+  cursor: initial;
+  color: #bbbbbb;
+}
+
+.no-label-text.pate-attachment-check-label:before {
+  margin-right: 0;
+}
+
+.pate-attachment-check-wrapper {
+  display: inline-block;
+  box-sizing: border-box;
+  border: 1px solid #dddddd;
+}
+
+.pate-attachment-check-wrapper input[type=checkbox], .pate-attachment-check-wrapper input[type=radio] {
+  display: block;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  position: absolute;
+  font-size: 0;
+}
+
+.pate-attachment-check-wrapper.wrapper--disabled {
+  background-color: #f6f6f6;
+}
+
+.pate-attachment-check-wrapper {
+  border: none;
+}
+
+.pate-attachment-check-wrapper .pate-attachment-check-label {
+  padding-left: 36px;
+}
+
+.tabby.pate-application-attachments {
+  display: inline-block;
+}
+
+.tabby.pate-application-attachments div.amount {
+  text-align: right;
+}
+
+.pate-left-space {
+  margin-left: 12px;
 }
 
 .order-grid-1 {
@@ -35219,6 +35632,10 @@ body.authority-admin .header-menu {
 
 table.default-digitalization-location {
   width: auto;
+}
+
+#organization-bulletins .checkbox-wrapper {
+  border: none;
 }
 
 #neighbor-show .pending {

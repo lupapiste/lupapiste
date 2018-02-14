@@ -3,14 +3,12 @@
             [midje.util :refer [testable-privates]]
             [monger.operators :refer :all]
             [sade.core :refer [fail?]]
-            [schema.core :as sc]
-            [lupapalvelu.generators.user :as gen-user]
+            [lupapalvelu.generators.user]
             [lupapalvelu.itest-util :refer [expected-failure? unauthorized?]]
             [lupapalvelu.test-util :refer [catch-all passing-quick-check]]
             [lupapalvelu.user :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
-            [lupapalvelu.activation :as activation]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check :refer [quick-check]]
             [clojure.test.check.properties :as prop]
@@ -135,21 +133,6 @@
 (fact :qc user-is-authority-in-organization?-spec
   (quick-check 100 user-is-authority-in-organization-prop :max-size 50)
   => passing-quick-check)
-
-(def validate-authority-in-organization-prop
-  (prop/for-all [{:keys [user organization-id]} user-and-organization-id-generator]
-    (let [org-id (name organization-id)
-          command {:user user
-                   :application {:organization org-id}}
-          result (catch-all (validate-authority-in-organization command))]
-      (if (user-is-authority-in-organization? user org-id)
-        (nil? result)
-        (fail? result)))))
-
-(fact :qc validate-authority-in-organization-spec
-  (quick-check 100 validate-authority-in-organization-prop :max-size 50)
-  => passing-quick-check)
-
 
 (facts municipality-name->system-user-email
   (fact "srting with caps"
@@ -442,47 +425,6 @@
   (fact "fails with uneven optional parameter pairs"
     (user-in-role {:id 1 :role :applicant} :reader :age) => (throws Exception)))
 
-;; ==========================================
-;; User schema
-;; =========================================
-
-
-
-(facts "User validation"
-  (fact "user skeleton is valid" (sc/check User user-skeleton) => nil)
-  (fact "id should exist"        (sc/check User (dissoc user-skeleton :id)) => {:id 'missing-required-key})
-  (fact "required keys should exist"
-        (sc/check User (dissoc user-skeleton :username :email :role :enabled :firstName :lastName))
-        => {:firstName 'missing-required-key
-            :lastName 'missing-required-key
-            :email 'missing-required-key
-            :role 'missing-required-key
-            :enabled 'missing-required-key
-            :username 'missing-required-key})
-  (fact "unknown key is not valid"        (sc/check User (assoc user-skeleton :unknown "nope")) => {:unknown 'disallowed-key})
-
-  (fact "invalid email is not valid" (-> (sc/check User (assoc user-skeleton :email "invalid")) :email) =not=> nil)
-  (fact "role is enumerated" (-> (sc/check User (assoc user-skeleton :role "wrong")) :role) =not=> nil)
-  (fact "role applicant is allowed" (sc/check User (assoc user-skeleton :role "applicant")) => nil)
-
-  (fact "enabled can only be bool" (and
-                                     (nil? (sc/check User (assoc user-skeleton :enabled false))) ; true
-                                     (:enabled (sc/check User (assoc user-skeleton :enabled "false")))) => truthy) ; false
-  (fact "only valid finnish zips" (and
-                                    (nil? (sc/check User (assoc user-skeleton :zip "33100"))) ; true
-                                    (:zip (sc/check User (assoc user-skeleton :zip 33100)))
-                                    (:zip (sc/check User (assoc user-skeleton :zip "123")))) => truthy)
-  (fact "only valid finnish personids" (and
-                                         (nil? (sc/check User (assoc user-skeleton :personId "090615-690S"))) ; true
-                                         (:personId (sc/check User (assoc user-skeleton :personId "090615-690X")))) => truthy)
-  (fact "only valid finnish companyIds" (and
-                                          (nil? (sc/check User (assoc user-skeleton :companyId "3856417-8"))) ; true
-                                          (:companyId (sc/check User (assoc user-skeleton :companyId "3856417-7")))) => truthy)
-
-  (fact "degree is enumerated"
-        (-> (sc/check User (assoc user-skeleton :degree "wrong")) :degree) =not=> nil
-        (-> (sc/check User (assoc user-skeleton :degree "arkkitehti")) :degree) => nil
-        (-> (sc/check User (assoc user-skeleton :degree "Arkkitehti")) :degree) =not=> nil))
 
 (facts "email-recipient?"
   (email-recipient? {}) => true
@@ -510,3 +452,40 @@
   (email-recipient? {:id 8}) => true
   (provided
     (find-user {:id 8}) => {:id 8 :dummy false :enabled true, :private {:password ""}}))
+
+(facts without-application-context
+  (fact "single org-authz role"
+    (:permissions (without-application-context {:user {:role "authority" :orgAuthz {:123-T ["commenter"]}}}))
+    => #{:test/do :test/comment}
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role :organization "commenter") => #{:test/do :test/comment}))
+
+  (fact "no org-authz roles"
+    (:permissions (without-application-context {:user {:role "authority" :orgAuthz {}}}))
+    => empty?
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role irrelevant irrelevant) => irrelevant :times 0))
+
+  (fact "multiple org-authz roles"
+    (:permissions (without-application-context {:user {:role "authority" :orgAuthz {:123-T ["commenter" "approver"]}}}))
+    => #{:test/do :test/comment :test/approve}
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role :organization "commenter") => #{:test/do :test/comment})
+    (provided (lupapalvelu.permissions/get-permissions-by-role :organization "approver") => #{:test/do :test/approve}))
+
+  (fact "multiple org-authz roles in multiple organizations"
+    (:permissions (without-application-context {:user {:role "authority" :orgAuthz {:123-T ["commenter" "approver"]
+                                                                                    :456-T ["commenter" "tester"]}}}))
+    => #{:test/do :test/comment :test/approve :test/test}
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role :organization "commenter") => #{:test/do :test/comment})
+    (provided (lupapalvelu.permissions/get-permissions-by-role :organization "approver") => #{:test/do :test/approve})
+    (provided (lupapalvelu.permissions/get-permissions-by-role :organization "tester") => #{:test/do :test/test}))
+
+  (fact "application in command"
+    (:permissions (without-application-context {:user {:role "authority" :orgAuthz {:123-T ["commenter" "approver"]
+                                                                                    :456-T ["commenter" "tester"]}}
+                                                :application {:organization "123-T"}}))
+    => empty?
+
+    (provided (lupapalvelu.permissions/get-permissions-by-role irrelevant irrelevant) => irrelevant :times 0)))

@@ -16,7 +16,8 @@
             [clojure.set :refer [difference]]
             [sade.strings :as ss]
             [sade.schemas :as ssc]
-            [schema.core :as sc])
+            [schema.core :as sc]
+            [sade.shared-util :as util])
   (:import [schema.utils.ErrorContainer]))
 
 (defn- validate-doc [ignored-errors application {:keys [id schema-info data] :as doc}]
@@ -74,10 +75,23 @@
        :error "Not valid auth"
        :coercion-result coercion-result})))
 
+
+(defn validate-duplicate-auths [auths]
+  (->> auths            ; check duplicate IDs without statementGivers
+       (remove #(= "statementGiver" (:role %)))
+       (remove #(= "company" (:type %)))       ; remove companies, but FIXME after LPK-3564
+       (map :id)
+       (frequencies)
+       (reduce (fn [acc [k v]]
+                 (cond-> acc
+                   (> v 1) (conj {:auth-id k :error "Duplicate auth id"})))
+               [])))
+
 (defn validate-auth-array [{auths :auth}]
-  (->> (map validate-auth-against-schema auths)
+  (->> (concat (map validate-auth-against-schema auths)
+               #_(validate-duplicate-auths auths))          ; FIXME enable duplicate validation after LPK-3564
        (remove nil?)
-       seq))
+       (seq)))
 
 ;; All auths are valid
 (mongocheck :applications validate-auth-array :auth)
@@ -123,7 +137,6 @@
          :attachment-id id
          :application-ops op-ids
          :attachment-ops (map :id op)}))))
-
 
 
 (defn validate-attachments

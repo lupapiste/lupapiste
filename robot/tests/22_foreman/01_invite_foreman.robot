@@ -146,6 +146,7 @@ Solita opens the foreman application and dismisses invitation dialog
 Solita accepts invitation via sidebar button
   Click visible test id  accept-invite-button
   No such test id  accept-invite-button
+  Sleep  0.5s
 
 Solita returns to applications and the invitation is gone
   Click link  jquery=div.nav-top div.header-box a[title=Hankkeet]

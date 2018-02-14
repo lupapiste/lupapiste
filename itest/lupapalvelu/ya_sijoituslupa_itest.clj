@@ -33,7 +33,24 @@
     (let [app-with-verdict (query-application pena id)]
       (:permitSubtype app-with-verdict) => "sijoituslupa"
       (fact "Sijoituslupa verdict state"
-        (:state app-with-verdict) => "verdictGiven"))))
+        (:state app-with-verdict) => "verdictGiven"))
+
+    (facts "saving another verdict draft with agreement"
+      (let [verdict-draft (:verdictId (command jussi :new-verdict-draft :id id))]
+        (command jussi :save-verdict-draft
+                 :id id
+                 :verdictId verdict-draft
+                 :backendId "321"
+                 :status 1
+                 :name "Juice"
+                 :given now-ts
+                 :official now-ts
+                 :text "should not be published"
+                 :agreement true :section "" :lang "fi") => ok?
+        (fact "subtype is not changed, because there is already published verdict"
+          (let [app (query-application pena id)]
+            (:permitSubtype app) => "sijoituslupa"
+            (:state app) => "verdictGiven"))))))
 
 (facts "YA Sijoitussopimus happy case"
   (let [{:keys [id permitSubtype]} (create-and-submit-application pena
@@ -87,7 +104,7 @@
         now-ts     (now)
         app        (query-application jussi id)
         verdicts   (:verdicts app)]
-    pena-subtype => (partial expected-failure? :error.ya-subtype-change-authority-only)
+    pena-subtype => unauthorized?
     jussi-subtype => ok?
     (:permitSubtype app) => "sijoitussopimus"
 

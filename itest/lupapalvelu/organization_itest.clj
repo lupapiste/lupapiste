@@ -1174,7 +1174,10 @@
         :docTerminalInUse false
         :allowedTerminalAttachmentTypes []
         :documentPrice 100
-        :organizationDescription {:fi "Kuvaus" :sv "Beskrivning" :en "Description"}})
+        :organizationDescription {:fi "Kuvaus" :sv "Beskrivning" :en "Description"}
+        :documentRequest {:enabled false
+                          :email ""
+                          :instructions {:en "" :fi "" :sv ""}}})
 
   (fact "can't set negative document price"
     (update-docstore-info "753-R" true false -100 "Description")
@@ -1217,6 +1220,24 @@
     (query sipoo :docterminal-enabled)
     => ok?))
 
+(fact "Document request info"
+  (fact "only authority admin can call"
+    (command sonja :set-document-request-info :enabled false :email "a@b.c" :instructions "Instructions")
+    => (partial expected-failure? :error.unauthorized))
+
+  (fact "email must be valid"
+    (command sipoo :set-document-request-info :enabled false :email "not-valid-email" :instructions "Instructions")
+    => (partial expected-failure? :error.email))
+
+  (fact "setting works"
+    (command sipoo :set-document-request-info :enabled true :email "a@b.c"
+             :instructions {:en "Instructions" :fi "Ohjeet" :sv "Anvisningar"}) => ok?
+    (-> (query sipoo :document-request-info)
+        :documentRequest)
+    => {:enabled true
+        :email "a@b.c"
+        :instructions {:en "Instructions" :fi "Ohjeet" :sv "Anvisningar"}}))
+
 (fact "organizations bulletin settings"
   (facts "query setting"
     (fact "sipoo"
@@ -1226,7 +1247,8 @@
                                             :municipality "753"
                                             :bulletins {:enabled true
                                                         :url "http://localhost:8000/dev/julkipano"
-                                                        :notification-email "sonja.sibbo@sipoo.fi"}}]))
+                                                        :notification-email "sonja.sibbo@sipoo.fi"
+                                                        :descriptions-from-backend-system false}}]))
 
     (facts "oulu"
       (query oulu :user-organization-bulletin-settings)
@@ -1242,12 +1264,17 @@
                :municipality "753"
                :notificationEmail "pena@example.com") => ok?
 
-      (:bulletin-scopes (query sipoo :user-organization-bulletin-settings))
-      => [{:permitType "R"
-           :municipality "753"
-           :bulletins {:enabled true
-                       :url "http://localhost:8000/dev/julkipano"
-                       :notification-email "pena@example.com"}}])
+      (command sipoo :update-organization-bulletin-scope
+               :permitType "R"
+               :municipality "753"
+               :descriptionsFromBackendSystem "foobar") => (partial expected-failure? :error.invalid-value)
+
+      (command sipoo :update-organization-bulletin-scope
+               :permitType "R"
+               :municipality "753"
+               :descriptionsFromBackendSystem true) => ok?
+
+      (map :permitType (:bulletin-scopes (query sipoo :user-organization-bulletin-settings))) => ["R"])
 
     (fact "sipoo P"
       (command sipoo :update-organization-bulletin-scope
@@ -1256,12 +1283,7 @@
                :notificationEmail "pena@example.com")
       => (partial expected-failure? :error.bulletins-not-enebled-for-scope)
 
-      (:bulletin-scopes (query sipoo :user-organization-bulletin-settings))
-      => [{:permitType "R"
-           :municipality "753"
-           :bulletins {:enabled true
-                       :url "http://localhost:8000/dev/julkipano"
-                       :notification-email "pena@example.com"}}]))
+      (map :permitType (:bulletin-scopes (query sipoo :user-organization-bulletin-settings))) => ["R"]))
 
   (facts "enable organization bulletins"
 
@@ -1284,7 +1306,8 @@
              :municipality "753"
              :bulletins {:enabled true
                          :url "http://localhost:8000/dev/julkipano"
-                         :notification-email "pena@example.com"}}
+                         :notification-email "pena@example.com"
+                         :descriptions-from-backend-system true}}
             {:permitType "P"
              :municipality "753"
              :bulletins {:enabled true
@@ -1312,7 +1335,8 @@
            :municipality "753"
            :bulletins {:enabled true
                        :url "http://localhost:8000/dev/julkipano"
-                       :notification-email "pena@example.com"}}
+                       :notification-email "pena@example.com"
+                       :descriptions-from-backend-system true}}
           {:permitType "P"
            :municipality "753"
            :bulletins {:enabled true
@@ -1354,12 +1378,7 @@
                  :notificationEmail "pena@example.com")
         => (partial expected-failure? :error.bulletins-not-enebled-for-scope)
 
-        (:bulletin-scopes (query sipoo :user-organization-bulletin-settings))
-        => [{:permitType "R"
-             :municipality "753"
-             :bulletins {:enabled true
-                         :url "http://localhost:8000/dev/julkipano"
-                         :notification-email "pena@example.com"}}]))))
+        (map :permitType (:bulletin-scopes (query sipoo :user-organization-bulletin-settings))) => ["R"]))))
 
 (facts "update-organization-backend-systems"
   (fact "Empty backend systems parameter is not allowed"

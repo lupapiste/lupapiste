@@ -79,14 +79,24 @@
        query-applications
        process-applications))
 
-(defn- national-building-id-updates [application operation-id national-building-id]
+(defn- operation-building-updates
+  "Generates single mongo update clause from three parts:
+  1. Document updates for national-building-id (valtakunnallinenNumero)
+  2. Buildings-array updates for national-building-id (valtakunnallinenNumero)
+  3. Buildings-array updates for building location (x+y)."
+  [application operation-id national-building-id location-map]
   (util/assoc-when-pred
       nil not-empty
       $set (merge
             (building/document-buildingid-updates-for-operation application national-building-id operation-id)
-            (building/buildings-array-buildingid-updates-for-operation application national-building-id operation-id))))
+            (building/buildings-array-buildingid-updates-for-operation application national-building-id operation-id)
+            (building/buildings-array-location-updates-for-operation application location-map operation-id))))
 
-(defn update-national-building-id! [application operation-id national-building-id]
-  (when-let [updates (national-building-id-updates application operation-id national-building-id)]
+(defn update-building!
+  "Updates building data from REST API to application.
+  Updates national-building-id to document and buildings-array.
+  Updates building location (x+y) to buildings array."
+  [application operation-id national-building-id location-map]
+  (when-let [updates (operation-building-updates application operation-id national-building-id location-map)]
     (action/update-application (action/application->command application) updates)
     true))

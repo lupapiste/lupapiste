@@ -85,7 +85,7 @@
 (rum/defc docgen-checkbox < rum/reactive
   [{:keys [schema state path] :as options}]
   (let [state*    (path/state path state)
-        input-id  (path/unique-id "checkbox-input")]
+        input-id  (common/unique-id "checkbox-input")]
     [:div.pate-checkbox-wrapper (docgen-attr options)
      [:input (docgen-attr options
                           :type    "checkbox"

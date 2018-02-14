@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.attachment.file-upload
-  (:require [lupapalvelu.ui.hub :as hub]))
+  (:require [lupapalvelu.ui.common :as common]
+            [lupapalvelu.ui.hub :as hub]))
 
 (defn bindToElem [options]
   (.bindFileInput js/lupapisteApp.services.fileUploadService options))
@@ -41,21 +42,20 @@
                {:success callback})))
 
 (defn- message-filedata [message]
-  (if-let [file (.-file message)]
-    {:last-modified (.-lastModified file)
-     :filename      (.-name file)
-     :size          (.-size file)
-     :type          (.-type file)
-     :file-id       (.-fileId file)
+  (if-let [file (common/oget message :file)]
+    {:last-modified (common/oget file :lastModified)
+     :filename      (common/oget file :name)
+     :size          (common/oget file :size)
+     :type          (common/oget file :type)
+     :file-id       (common/oget file :fileId)
      ;; The following are not filedata but available only for single
      ;; files.
-     :message       (.-message message)
-     :progress      (.-progress message)}
-    (do
-      (->> (.-files message)
-           (map (fn [file]
-                  {:filename (.-filename file)
-                   :file-id  (.-fileId file)}))))))
+     :message       (common/oget message :message)
+     :progress      (common/oget message :progress)}
+    (map (fn [file]
+           {:filename (common/oget file :filename)
+            :file-id  (common/oget file :fileId)})
+         (common/oget message :files))))
 
 
 (defn file-monitors

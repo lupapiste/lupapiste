@@ -17,7 +17,8 @@
       reservationTypesModel,
       reservationPropertiesModel,
       bulletinsModel,
-      docterminalModel;
+      docterminalModel,
+      docstoreModel;
 
   function toAttachmentData(groupId, attachmentId) {
     return {
@@ -383,9 +384,9 @@
     self.canEdit = ko.computed( _.wrap("update-organization-bulletin-scope",
                                        lupapisteApp.models.globalAuthModel.ok));
 
-    self.save = function(setting) {
+    self.saveScope = function(data) {
       ajax
-        .command("update-organization-bulletin-scope", _.pick(ko.toJS(setting), ["permitType","municipality","notificationEmail"]))
+        .command("update-organization-bulletin-scope", data)
         .success(util.showSavedIndicator)
         .error(util.showSavedIndicator)
         .call();
@@ -436,8 +437,13 @@
       ajax.query("user-organization-bulletin-settings")
         .success(function(data) {
           self.scopes(_.map(data["bulletin-scopes"], function(setting) {
-            return _.set(setting, "notificationEmail", ko.observable(_.get(setting, ["bulletins", "notification-email"])));
+            _.merge(setting, {notificationEmail: ko.observable(_.get(setting, ["bulletins", "notification-email"])),
+                              descriptionsFromBackendSystem: ko.observable(_.get(setting, ["bulletins", "descriptions-from-backend-system"]))});
+            setting.notificationEmail.subscribe(function(s) { self.saveScope({permitType: setting.permitType, municipality: setting.municipality, notificationEmail: s}); });
+            setting.descriptionsFromBackendSystem.subscribe(function(s) { self.saveScope({permitType: setting.permitType, municipality: setting.municipality, descriptionsFromBackendSystem: s}); });
+            return setting;
           }));
+
           var koMappedTexts = ko.mapping.fromJS(data["local-bulletins-page-texts"]);
 
           _.map(loc.getSupportedLanguages(), function(lang) {
@@ -534,6 +540,66 @@
     };
   }
 
+  function DocstoreModel() {
+    var self = this;
+    ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+
+    self.languages = loc.getSupportedLanguages();
+
+    self.documentRequest = {
+      enabled: ko.observable(false),
+      email: ko.observable("").extend({email: true}),
+      instructions: _.zipObject(self.languages,
+                                _.map(self.languages, function () {
+                                  return ko.observable("");
+                                }))
+    };
+
+    self.documentRequest.isValid = ko.pureComputed(function() {
+      return self.documentRequest.email.isValid();
+    });
+
+    function save() {
+      var first = true;
+      return function() {
+        if (first) {
+          first = false;
+        } else if (self.documentRequest.isValid()) {
+          ajax.command("set-document-request-info",
+                       {enabled: self.documentRequest.enabled(),
+                        email: self.documentRequest.email(),
+                        instructions: _.zipObject(self.languages,
+                                                  _.map(self.languages,
+                                                        function (language) {
+                                                          return self.documentRequest.instructions[language]();
+                                                        }))})
+            .success(util.showSavedIndicator)
+            .error(util.showSavedIndicator)
+            .call();
+        }
+      };
+    }
+
+    // Attach autosave to observables
+    self.documentRequest.enabled.subscribe(save());
+    self.documentRequest.email.subscribe(save());
+    _.forEach(self.documentRequest.instructions, function(value) {
+      value.subscribe(save());
+    });
+
+    self.load = function () {
+      ajax.query("document-request-info")
+        .success(function(data) {
+          self.documentRequest.enabled(data.documentRequest.enabled);
+          self.documentRequest.email(data.documentRequest.email);
+          _.forEach(data.documentRequest.instructions, function(value, key) {
+            self.documentRequest.instructions[key](value);
+          });
+        })
+        .call();
+    };
+  }
+
   organizationModel = new LUPAPISTE.OrganizationModel();
   organizationUsers = new LUPAPISTE.OrganizationUserModel(organizationModel);
   editSelectedOperationsModel = new EditSelectedOperationsModel();
@@ -552,6 +618,7 @@
   editRolesDialogModel = new LUPAPISTE.EditRolesDialogModel(organizationModel);
   bulletinsModel = new BulletinsModel();
   docterminalModel = new DocterminalModel();
+  docstoreModel = new DocstoreModel();
 
   var usersTableConfig = {
       hideRoleFilter: true,
@@ -638,6 +705,11 @@
       self.authUserIdObservable("");
   });
 
+  hub.onPageLoad("organization-store-settings", function() {
+    docstoreModel.load();
+
+  });
+
   $(function() {
     organizationModel.load();
     $("#navi-toolbar").applyBindings({});
@@ -714,7 +786,12 @@
     $("#userpage").applyBindings({
         authorization: lupapisteApp.models.globalAuthModel,
         authUserIdObservable: self.authUserIdObservable,
-        backToUsers: function() { pageutil.openPage("users"); }
+        backToUsers: function () { pageutil.openPage("users"); }
+    });
+    $("#organization-store-settings").applyBindings({
+      organization: organizationModel,
+      authorization: lupapisteApp.models.globalAuthModel,
+      store: docstoreModel
     });
 
     LUPAPISTE.ModalDialog.init();

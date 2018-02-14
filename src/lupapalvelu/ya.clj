@@ -20,6 +20,8 @@
             (true?))))
 
 (def agreement-subtype "sijoitussopimus")
+(assert (some #{(keyword agreement-subtype)} op/ya-sijoituslupa-subtypes) (str "agreement-subtype '" agreement-subtype "' is unknown"))
+
 (defn agreement-subtype? [app] (= (:permitSubtype app) agreement-subtype))
 
 (defn check-ya-sijoituslupa-subtype [{{:keys [verdictId]} :data app :application}]
@@ -33,11 +35,6 @@
     (when-let [verdict (util/find-by-id verdictId (:verdicts app))]
       (when (and (not (:sopimus verdict)) (agreement-subtype? app))
         (fail :error.ya-sijoitussopimus-invalid-subtype)))))
-
-(defn authority-only [{app :application user :user}]
-  (when (and (= (:permitType app) permit/YA)
-             (not (usr/user-is-authority-in-organization? user (:organization app))))
-    (fail :error.ya-subtype-change-authority-only)))
 
 (defn- validate-link-agreements-state [link-permit]
   (when-not (app/verdict-given? link-permit)

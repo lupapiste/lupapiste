@@ -1,11 +1,12 @@
 (ns lupapalvelu.xml.krysp.reader-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [net.cgrand.enlive-html :as enlive]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [clj-time.coerce :as coerce]
             [sade.xml :as xml]
-            [lupapalvelu.xml.krysp.reader :refer [->verdicts get-app-info-from-message application-state resolve-property-id-by-point]]
-            [lupapalvelu.xml.krysp.common-reader :refer [rakval-case-type property-equals property-in wfs-krysp-url]]
+            [lupapalvelu.xml.krysp.reader :refer [->verdicts get-app-info-from-message application-state resolve-property-id-by-point resolve-coordinate-type resolve-coordinates]]
+            [lupapalvelu.xml.krysp.common-reader :refer [rakval-case-type property-equals property-in wfs-krysp-url case-elem-selector]]
             [lupapalvelu.xml.krysp.review-reader :as review-reader]
             [lupapalvelu.xml.validator :as xml-validator]
             [lupapalvelu.krysp-test-util :refer [build-multi-app-xml]]
@@ -14,7 +15,8 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
 
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
@@ -501,7 +503,10 @@
 
     (fact "kuntalupatunnus" kuntalupatunnus => "14-0241-R 3")
     (fact "municipality" municipality => "186")
-    (fact "rakennusvalvontaasianKuvaus" rakennusvalvontaasianKuvaus => "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto.")
+    (fact "rakennusvalvontaasianKuvaus"
+      rakennusvalvontaasianKuvaus => "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto."
+      (krysp-reader/read-permit-descriptions-from-xml :R (cr/strip-xml-namespaces xml)) => (just {:kuntalupatunnus "14-0241-R 3"
+                                                                                                  :kuvaus          "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto."}))
     (fact "vahainenPoikkeaminen" vahainenPoikkeaminen => "Poikekkaa meill\u00e4!")
     (facts "hakijat"
       (fact "count" (count hakijat) => 6)
@@ -514,6 +519,15 @@
         (fact "y" y => #(and (instance? Double %) (= 6707228.994 %)))
         (fact "address" address => "Kylykuja 3-5 D 35b-c")
         (fact "propertyId" propertyId => "18600303560006")))))
+
+(facts "Multiple features with different descriptions in the same XML file"
+  (let [xml (xml/parse (slurp "resources/krysp/dev/feature-collection-with-many-featureMember-elems.xml"))]
+   (fact "rakennusvalvontaasianKuvaus"
+         (set (krysp-reader/read-permit-descriptions-from-xml :R (cr/strip-xml-namespaces xml))) =>
+         #{{:kuntalupatunnus "999-2017-11"
+            :kuvaus "Kuvaus 999-2017-11"}
+           {:kuntalupatunnus "999-2016-999"
+            :kuvaus "Kuvaus 999-2016-999"}})))
 
 (facts "Testing area like location information for application creation"
   (against-background
@@ -574,6 +588,53 @@
            :coordinates
            (first)
            (first)) => [21.355934608866 60.728233303])))
+
+(facts "Testing information parsed from verdict xml without location information"
+  (against-background
+    (resolve-property-id-by-point anything) => "47540208780003")
+  (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-missing-location.xml"))
+        info (get-app-info-from-message xml "475-2016-001")
+        rakennuspaikka (:rakennuspaikka info)]
+
+    (let [{:keys [x y address propertyId] :as rakennuspaikka} rakennuspaikka]
+      (fact "contains all the needed keys" (every? (-> rakennuspaikka keys set) [:x :y :address :propertyId]))
+
+      (fact "Location point coordinates is taken from first building location"
+        x => #(and (instance? Double %) (= 219934.582 %))
+        y => #(and (instance? Double %) (= 6997077.973 %)))
+
+      (fact "Address is not changed, it's same as in xml"
+        address => "Granorsvagen 32")
+
+      (fact "Property id is fetched from service"
+        propertyId => "47540208780003")
+
+      (fact "There should not be drawing when location is point"
+        (:drawings info) => nil?))))
+
+(defn- prepare-xml [xml]
+  (enlive/select (cr/strip-xml-namespaces xml) case-elem-selector))
+
+(facts "Tests for resolving coordinates from xml"
+  (let [point-xml     (prepare-xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml")))
+        building-xml  (prepare-xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-with-building-location.xml")))
+        area-xml      (prepare-xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-with-area-like-location.xml")))
+        invalid-xml   (prepare-xml (xml/parse (slurp "resources/krysp/dev/verdict-p.xml")))
+        inv-area-xml  (prepare-xml (xml/parse "<rakval:Rakennusvalvonta><rakval:rakennusvalvontaAsiatieto><rakval:RakennusvalvontaAsia><rakval:rakennuspaikkatieto><rakval:Rakennuspaikka><yht:sijaintitieto><yht:Sijainti><yht:alue><gml:Polygon srsName=\"http://www.opengis.net/gml/srs/epsg.xml#3876\"><gml:outerBoundaryIs><gml:LinearRing><gml:coordinates>22464854.301,6735383.759 22464825.926,6735453.497</gml:coordinates></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon></yht:alue></yht:Sijainti></yht:sijaintitieto></rakval:Rakennuspaikka></rakval:rakennuspaikkatieto></rakval:RakennusvalvontaAsia></rakval:rakennusvalvontaAsiatieto></rakval:Rakennusvalvonta>"))]
+
+    (fact "Should resolve coordinate type"
+      (resolve-coordinate-type point-xml) => :point
+      (resolve-coordinate-type building-xml) => :building
+      (resolve-coordinate-type area-xml) => :area
+      (resolve-coordinate-type invalid-xml) => nil
+      )
+
+    (fact "Should resolve coordinates"
+      (resolve-coordinates point-xml "14-0241-R 3") => [393033.614 6707228.994]
+      (resolve-coordinates building-xml  "895-2015-002") => [192413.401 6745769.046]
+      (resolve-coordinates area-xml "895-2015-001") => [192416.901187 6745788.046445]
+      (resolve-coordinates invalid-xml "895-2015-001") => nil
+      (resolve-coordinates inv-area-xml "895-2015-001") => nil)))
 
 
 (facts* "Tests for TJ/suunnittelijan verdicts parsing"

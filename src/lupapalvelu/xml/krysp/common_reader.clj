@@ -171,7 +171,8 @@
           (throw (Exception. (str "No coordinate source projection could be parsed from string '" source-projection-attr "'"))))))))
 
 (defn ->polygon-source-projection [xml]
-  (let [source-projection-attr (ss/upper-case (sxml/select1-attribute-value xml [:Polygon] :srsName))]
+  (let [coordinates-array-xml  (select1 xml [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :alue])
+        source-projection-attr (ss/upper-case (sxml/select1-attribute-value coordinates-array-xml [:Polygon] :srsName))]
     (when source-projection-attr
       (let [projection-name-index (.lastIndexOf source-projection-attr "EPSG")
             source-projection (when (> projection-name-index -1)

@@ -1,4 +1,4 @@
-(ns lupapalvelu.pate-test
+(ns lupapalvelu.pate.pate-test
   (:require [clj-time.core :as time]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pate.date :as date]
@@ -63,7 +63,8 @@
                                                                     :remove-top {:button {:remove :dynamic}}}}
                                           :add-sub     {:button {:add :sublevel}}
                                           :bad-add     {:button {:add :dynamic}}}}
-                :add-item    {:button {:add :dynamic}}}
+                :add-item    {:button {:add :dynamic}}
+                :attachments {:application-attachments {}}}
    :name       "test"
    :sections   [{:id   "one"
                  :grid {:columns 4
@@ -105,7 +106,10 @@
                                            :repeating :dynamic
                                            :rows      [[{:dict :text}
                                                         {:dict :remove-item}]]}}]
-                                  [{:dict :add-item}]]}}]})
+                                  [{:dict :add-item}]]}}
+                {:id "attachments"
+                 :grid {:columns 1
+                        :rows [[{:dict :attachments}]]}}]})
 
 (facts "Test template is valid"
   (sc/validate shared/PateVerdictTemplate test-template)
@@ -262,7 +266,18 @@
     (validate-path-value [:add-item] true)
     => nil
     (validate-path-value [:add-item :bad] true)
-    => :error.invalid-value-path))
+    => :error.invalid-value-path)
+  (facts "Application attachments"
+    (validate-path-value [:attachments] nil) => nil
+    (validate-path-value [:attachments] []) => nil
+    (validate-path-value [:attachments] 8)
+    => :error.invalid-value
+    (validate-path-value [:attachments] [8])
+    => :error.invalid-value
+    (validate-path-value [:attachments] "hello")
+    => :error.invalid-value
+    (validate-path-value [:attachments] ["hello"]) => nil
+    (validate-path-value [:attachments] ["" "foo" "bar"]) => nil))
 
 (defn validate-and-process-value [path value old-data & [references]]
   (schemas/validate-and-process-value test-template

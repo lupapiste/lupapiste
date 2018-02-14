@@ -376,7 +376,7 @@
        (query-application sonja application-id) => truthy)
 
      (fact "but admin doesn't"
-       (-> query-as-admin decode-response :body) => unauthorized?)
+       (-> query-as-admin decode-response :body) => not-accessible?)
 
      (fact "succeeds with correct password"
        (impersonate "admin") => ok?)
