@@ -3726,7 +3726,7 @@
   (mongo/update-by-query :users
                          {:notification.title   "Muutos Lupapisteen rekisteri- ja tietosuojaselosteeseen"
                           :notification.message #"liiketoimintajohtaja"}
-                         {$set {:notification.message "Lupapisteen henkilörekisterin pitäjä vaihtui 1.5.2017 Solita Oy:stä Evolta Oy:ksi. Muutos ei vaikuta käyttöehtoihin. Lisätietoja asiasta antaa Niina Syrjärinne, puh. 0400 613 756."}}))
+                         {$set {:notification.message "Lupapisteen henkil\u00f6rekisterin pit\u00e4j\u00e4 vaihtui 1.5.2017 Solita Oy:st\u00e4 Evolta Oy:ksi. Muutos ei vaikuta k\u00e4ytt\u00f6ehtoihin. Lis\u00e4tietoja asiasta antaa Niina Syrj\u00e4rinne, puh. 0400 613 756."}}))
 
 ;;
 ;; ****** NOTE! ******

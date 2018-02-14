@@ -204,3 +204,70 @@
 
      (fact "Company doesnt have authorization for application and user invitation is denied"
        (com/company-denies-invitations? app-with-auths-2 {:company {:id "denied"}}) => true))))
+
+(facts "company-info"
+  (let [firm {:id       "firm"
+              :name     "Firm"
+              :y        "000000-0"
+              :address1 "Billing Street"
+              :zip      "12345"
+              :po       "Dollarville"
+              :netbill  "foo"}
+        shop {:id             "shop"
+              :name           "Shop"
+              :y              "888888-8"
+              :contactAddress "Contact Road"
+              :contactZip     "98765"
+              :contactPo      "Shoptown"
+              :netbill        "bar"}
+        corp {:id             "corporation"
+              :name           "Corporation"
+              :y              "1234567-8"
+              :address1       "Money Main"
+              :zip            "12123"
+              :po             "Headquarters"
+              :contactAddress "Park View"
+              :contactZip     "33333"
+              :contactPo      "Another HQ"
+              :netbill        "baz"}]
+    (com/company-info firm) => (dissoc firm :netbill)
+    (com/company-info (assoc firm :contactPo "Foobar"))
+    => {:id       "firm"
+        :name     "Firm"
+        :y        "000000-0"
+        :address1 "Billing Street"
+        :zip      "12345"
+        :po       "Foobar"}
+    (com/company-info (dissoc firm :zip))
+    => {:id       "firm"
+        :name     "Firm"
+        :y        "000000-0"
+        :address1 "Billing Street"
+        :po       "Dollarville"}
+    (com/company-info shop) => {:id       "shop"
+                                :name     "Shop"
+                                :y        "888888-8"
+                                :address1 "Contact Road"
+                                :zip      "98765"
+                                :po       "Shoptown"}
+    (com/company-info (merge firm shop))
+    => {:id       "shop"
+        :name     "Shop"
+        :y        "888888-8"
+        :address1 "Contact Road"
+        :zip      "98765"
+        :po       "Shoptown"}
+    (com/company-info corp)
+    => {:id       "corporation"
+        :name     "Corporation"
+        :y        "1234567-8"
+        :address1 "Park View"
+        :zip      "33333"
+        :po       "Another HQ"}
+    (com/company-info (assoc corp :contactPo "  "))
+    => {:id       "corporation"
+        :name     "Corporation"
+        :y        "1234567-8"
+        :address1 "Park View"
+        :zip      "33333"
+        :po       "Headquarters"}))
