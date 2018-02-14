@@ -47,10 +47,10 @@ var users = (function($) {
     self.toOps = function(td, sData, oData) {
       var user = oData.user,
           td$ = $(td);
-      _.each(opts.ops, function(op) {
+      td$.attr("class", "users-table-actions");
+      td$.append(_.each(opts.ops, function(op) {
         if (op.showFor(user)) {
-          td$.append($("<a>")
-            .attr("href", "#")
+          td$.append($("<button>")
             .attr("class", op.button)
             .attr("data-op", op.name)
               .append($("<i>")
@@ -58,7 +58,7 @@ var users = (function($) {
               .append($("<span>")
                   .text(loc(["users.op", op.name]))));
         }
-      });
+      }));
     };
 
     self.userToRow = function(user) {

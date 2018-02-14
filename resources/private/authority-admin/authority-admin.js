@@ -557,7 +557,7 @@
       hideRoleFilter: true,
       hideEnabledFilter: true,
       ops: [{name: "removeFromOrg",
-             button: "btn secondary",
+             button: "secondary",
              icon: "lupicon-remove",
              showFor: _.partial(lupapisteApp.models.globalAuthModel.ok, "remove-user-organization"),
              operation: function(email, callback) {
@@ -567,7 +567,7 @@
                             .call();
             }},
             {name: "editUser",
-             button: "btn positive",
+             button: "positive",
              icon: "lupicon-pen",
              showFor: _.partial(lupapisteApp.models.globalAuthModel.ok, "update-user-roles"),
              rowOperationFn: function (row) {

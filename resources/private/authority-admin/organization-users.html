@@ -99,7 +99,10 @@
                                testId: 'statement-giver-' + email() + '-email'"></td>
                 <td>
                   <span data-bind="visible: lupapisteApp.models.globalAuthModel.ok('delete-statement-giver')">
-                    [<a href="#" data-bind="click: $root.statementGivers.delete, ltext: 'remove'" data-test-id="remove-statement-giver" class="modal"></a>]
+                    <button class="modal secondary" data-bind="click: $root.statementGivers.delete" data-test-id="remove-statement-giver">
+                      <i class="lupicon-remove"></i>
+                      <span data-bind="ltext: 'remove'"></span>
+                    </button>
                   </span>
                 </td>
               </tr>
