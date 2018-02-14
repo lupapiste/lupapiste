@@ -29,3 +29,4 @@
 
 (defn get-user-field [fieldName]
   (js/util.getIn js/lupapisteApp.models.currentUser #js [(name fieldName)]))
+ 

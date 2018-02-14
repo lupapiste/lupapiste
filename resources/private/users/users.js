@@ -48,7 +48,7 @@ var users = (function($) {
       var user = oData.user,
           td$ = $(td);
       td$.attr("class", "users-table-actions");
-      td$.append(_.each(opts.ops, function(op) {
+      _.each(opts.ops, function(op) {
         if (op.showFor(user)) {
           td$.append($("<button>")
             .attr("class", op.button)
@@ -58,7 +58,7 @@ var users = (function($) {
               .append($("<span>")
                   .text(loc(["users.op", op.name]))));
         }
-      }));
+      });
     };
 
     self.userToRow = function(user) {

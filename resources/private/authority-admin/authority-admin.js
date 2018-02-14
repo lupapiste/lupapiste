@@ -628,17 +628,17 @@
              icon: "lupicon-remove",
              showFor: _.partial(lupapisteApp.models.globalAuthModel.ok, "remove-user-organization"),
              operation: function(email, callback) {
-                          ajax
-                            .command("remove-user-organization", {email: email})
-                            .success(function() { callback(true); })
-                            .call();
+               ajax
+                 .command("remove-user-organization", {email: email})
+                 .success(function() { callback(true); })
+                 .call();
             }},
             {name: "editUser",
              button: "positive",
              icon: "lupicon-pen",
              showFor: _.partial(lupapisteApp.models.globalAuthModel.ok, "update-user-roles"),
              rowOperationFn: function (row) {
-               pageutil.openPage("userpage", row.user._id);
+               pageutil.openPage("edit-authority", row.user._id);
              }}]
   };
 
@@ -695,14 +695,14 @@
     docterminalModel.load();
   });
 
-  self.authUserIdObservable = ko.observable();
+  self.authorityIdObservable = ko.observable();
 
-  hub.onPageLoad("userpage", function () {
-      self.authUserIdObservable(_.head(pageutil.getPagePath()));
+  hub.onPageLoad("edit-authority", function () {
+      self.authorityIdObservable(_.head(pageutil.getPagePath()));
   });
 
-  hub.onPageUnload("userpage", function () {
-      self.authUserIdObservable("");
+  hub.onPageUnload("edit-authority", function () {
+      self.authorityIdObservable("");
   });
 
   hub.onPageLoad("organization-store-settings", function() {
@@ -783,10 +783,13 @@
       authorization:       lupapisteApp.models.globalAuthModel,
       attachmentTypes:     docterminalModel
     });
-    $("#userpage").applyBindings({
+    $("#edit-authority").applyBindings({
         authorization: lupapisteApp.models.globalAuthModel,
-        authUserIdObservable: self.authUserIdObservable,
-        backToUsers: function () { pageutil.openPage("users"); }
+        authorityIdObservable: self.authorityIdObservable,
+        backToUsers: function () {
+          pageutil.openPage("users");
+          usersList.redraw();
+        }
     });
     $("#organization-store-settings").applyBindings({
       organization: organizationModel,
@@ -794,6 +797,7 @@
       store: docstoreModel
     });
 
+    // Init the dynamically created dialogs
     LUPAPISTE.ModalDialog.init();
   });
 

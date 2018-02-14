@@ -35638,6 +35638,10 @@ table.default-digitalization-location {
   border: none;
 }
 
+.edit-user-info-label {
+  display: block;
+}
+
 #neighbor-show .pending {
   width: 100%;
   height: 100px;

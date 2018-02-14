@@ -97,12 +97,12 @@
   [{caller :user {params :params} :data}]
   (ok :data (usr/users-for-datatables caller params)))
 
-(defquery user-for-userpage
+(defquery user-for-edit-authority
   {:user-roles #{:authorityAdmin}}
-  [{auth-admin :user {auth-user-id :auth-user-id} :data}]
+  [{auth-admin :user {authority-id :authority-id} :data}]
   (let [{:keys [username firstName lastName email orgAuthz]
-         :as auth-user}  (usr/get-user-by-id auth-user-id)
-        valid-auth?      (uu/auth-admin-can-view-auth-user auth-user auth-admin)
+         :as authority}  (usr/get-user-by-id authority-id)
+        valid-auth?      (uu/auth-admin-can-view-authority authority auth-admin)
         data             {:email     email
                           :username  username
                           :firstName firstName
@@ -397,10 +397,10 @@
         actual-roles    (organization/filter-valid-user-roles-in-organization organization-id roles)]
     (usr/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})))
 
-(defn- change-auth-user-email [auth-user email data]
+(defn- change-authority-email [authority email data]
   (let [new-email (:email data)]
-    (change-email/update-email-in-application-auth! (:id auth-user) email new-email)
-    (change-email/update-email-in-invite-auth! (:id auth-user) email new-email)
+    (change-email/update-email-in-application-auth! (:id authority) email new-email)
+    (change-email/update-email-in-invite-auth! (:id authority) email new-email)
     (usr/update-user-by-email email {$set data})))
 
 (defcommand update-auth-info
@@ -409,18 +409,18 @@
                       action/email-validator]
    :user-roles        #{:authorityAdmin}}
   [{auth-admin :user}]
-  (let [auth-user           (usr/find-user {:email email})
-        valid-org?          (uu/auth-admin-can-view-auth-user auth-user auth-admin)
-        valid-domain?       (uu/admin-and-user-have-same-email-domain auth-user auth-admin)
-        user-info-editable? (uu/auth-user-has-only-one-org auth-user)
+  (let [authority           (usr/find-user {:email email})
+        valid-org?          (uu/auth-admin-can-view-authority authority auth-admin)
+        valid-domain?       (uu/admin-and-user-have-same-email-domain authority auth-admin)
+        user-info-editable? (uu/authority-has-only-one-org authority)
         data                {:email     new-email
                              :username  new-email
                              :firstName firstName
                              :lastName  lastName}]
     (cond
-      (and valid-org? valid-domain? user-info-editable?) (change-auth-user-email auth-user email data)
-      (not valid-domain?) (fail :error.auth-admin-and-auth-user-have-different-domains)
-      (not user-info-editable?) (fail :error.auth-user-has-multiple-orgs)
+      (and valid-org? valid-domain? user-info-editable?) (change-authority-email authority email data)
+      (not valid-domain?) (fail :error.auth-admin-and-authority-have-different-domains)
+      (not user-info-editable?) (fail :error.authority-has-multiple-orgs)
       (not valid-org?) (fail :error.unauthorized)
       :else (fail :error.unknown))))
 

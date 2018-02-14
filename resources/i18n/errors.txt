@@ -928,5 +928,5 @@
 "permanent-archive-disabled" "en" "Municipality's PDF/A conversion was unavailable when the file was uploaded."
 "permanent-archive-disabled" "fi" "Kunnan PDF/A-konversio ei ollut käytettävissä tiedoston lisäyshetkellä."
 "permanent-archive-disabled" "sv" "Kommunens PDF/A-konvertering var inte i bruk när filen lades till."
-"error.auth-admin-and-auth-user-have-different-domains" "fi" "Sinulla ei ole valtuuksia vaihtaa käyttäjän tietoja. Ota yhteyttä Lupapisteen tukeen."
-"error.auth-user-has-multiple-orgs" "fi" "Käyttäjä on viranomaisena myös toisessa organisaatiossa. Ota yhteyttä Lupapisteen tukeen."
+"error.auth-admin-and-authority-have-different-domains" "fi" "Sinulla ei ole valtuuksia vaihtaa käyttäjän tietoja. Ota yhteyttä Lupapisteen tukeen."
+"error.authority-has-multiple-orgs" "fi" "Käyttäjä on viranomaisena myös toisessa organisaatiossa. Ota yhteyttä Lupapisteen tukeen."
