@@ -319,7 +319,27 @@
        (fact "Locked pseudo-query succeeds"
              (query kaino :user-company-locked) => ok?)
        (fact "Companies listing no longer includes Solita"
-             (:companies (query pena :companies)) => (just [(contains {:id "esimerkki"})]))
+         (:companies (query pena :companies))
+         => (just [{:id "esimerkki"
+                    :name "Esimerkki Oy"
+                    :y "7208863-8"
+                    :address1 "Merkintie 88"
+                    :zip "12345"
+                    :po "Humppila"}]))
+       (fact "Erkki updates Esimerkki company contact info"
+         (command erkki :company-update
+                  :company "esimerkki"
+                  :updates {:contactAddress "Street"
+                            :contactZip     "88888"
+                            :contactPo      "Town"}) => ok?)
+       (fact "Companies listing changes accordingly"
+         (:companies (query pena :companies))
+         => (just [{:id "esimerkki"
+                    :name "Esimerkki Oy"
+                    :y "7208863-8"
+                    :address1 "Street"
+                    :zip "88888"
+                    :po "Town"}]))
        (fact "Company is not authed to new applications"
              (let [{auth :auth} (create-application kaino
                                          :propertyId sipoo-property-id
