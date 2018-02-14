@@ -20,6 +20,8 @@
             (true?))))
 
 (def agreement-subtype "sijoitussopimus")
+(assert (some #{(keyword agreement-subtype)} op/ya-sijoituslupa-subtypes) (str "agreement-subtype '" agreement-subtype "' is unknown"))
+
 (defn agreement-subtype? [app] (= (:permitSubtype app) agreement-subtype))
 
 (defn check-ya-sijoituslupa-subtype [{{:keys [verdictId]} :data app :application}]

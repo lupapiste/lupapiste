@@ -104,6 +104,7 @@
   [{:keys [application created data] :as command}]
   (let [paatos-id (-> (find-verdict application verdictId) :paatokset first :id)
         ya-agreement? (and agreement (ya/sijoittaminen? application))
+        has-verdict?  (not-every? :draft (:verdicts application))
         verdict (domain/->paatos
                   (merge
                     (select-keys data [:verdictId :backendId :status :name :section :agreement :text :given :official])
@@ -116,7 +117,7 @@
                "verdicts.$.timestamp" created
                "verdicts.$.sopimus" (:sopimus verdict)
                "verdicts.$.paatokset" (:paatokset verdict)}
-              :permitSubtype (when ya-agreement? ya/agreement-subtype))})))
+              :permitSubtype (when (and ya-agreement? (not has-verdict?)) ya/agreement-subtype))})))
 
 (defn- create-verdict-pdfa! [user application verdict-id lang]
   (let [application (domain/get-application-no-access-checking (:id application))]
