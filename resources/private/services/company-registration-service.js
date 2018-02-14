@@ -183,6 +183,9 @@ LUPAPISTE.CompanyRegistrationService = function() {
     if( campaign.code ) {
       _.set( reg, "campaign", campaign.code );
     }
+    _.map( requiredFields(), function( field ) {
+      _.set( reg, field, _.trim(self.registration[field]()));
+    });
     var params = {lang: reg.language,
                   company: _.pick( reg,
                                    ["accountType", "name", "y", "address1",

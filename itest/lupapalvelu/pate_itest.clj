@@ -1,5 +1,7 @@
 (ns lupapalvelu.pate-itest
-  (:require [lupapalvelu.factlet :refer :all]
+  (:require [clojure.data.xml :as cxml]
+            [clojure.java.io :as io]
+            [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.pate-itest-util :refer :all]
             [lupapalvelu.permit :as permit]
@@ -10,8 +12,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.xml :as xml]
-            [clojure.java.io :as io]
-            [clojure.data.xml :as cxml]))
+            [sade.coordinate :as coord]))
 
 (apply-remote-minimal)
 
@@ -67,7 +68,8 @@
       (fact "element exists"
         (xml/select1 xml [:paatostieto]) => truthy)
       (fact "paatosPvm"
-        (xml/get-text xml [:paatostieto :poytakirja :paatospvm]) => (util/to-xml-date-from-string verdict-date)))))
+        (xml/get-text xml [:paatostieto :poytakirja :paatospvm]) => (util/to-xml-date-from-string verdict-date)))
+    xml))
 
 (facts "Pate enabled"
   (fact "Disable Pate in Sipoo"
@@ -576,11 +578,11 @@
         (fact "Swedish and English names"
           (command sipoo :update-verdict-template-plan
                    :plan-id id
-                   :sv "Stockholm" :en "London")
+                   :sv "Malm\u00f6" :en "Washington")
           => (contains {:plan (contains {:id id
                                          :name {:fi "Moro"
-                                                :sv "Stockholm"
-                                                :en "London"}})}))
+                                                :sv "Malm\u00f6"
+                                                :en "Washington"}})}))
         (fact "Unsupported params"
           (command sipoo :update-verdict-template-plan
                    :plan-id id
@@ -795,6 +797,7 @@
                :name "Full template") => ok?)
 
     (set-template-draft-values template-id
+                               :language "fi"
                                :verdict-dates ["julkipano" "anto"
                                                "muutoksenhaku" "lainvoimainen"
                                                "aloitettava" "voimassa"]
@@ -896,7 +899,8 @@
                                                            :error.invalid-value))
                                     (fact "No errors"
                                       errors => nil)))]
-                data => (contains {:appeal           "Humble appeal."
+                data => (contains {:language         "fi"
+                                   :appeal           "Humble appeal."
                                    :purpose          ""
                                    :verdict-text     "Verdict text."
                                    :anto             ""
@@ -912,7 +916,6 @@
                                    :neighbor-states  []
                                    :reviews-included true
                                    :reviews          [(:id review)]
-                                   :statements       ""
                                    :deviations       "Deviation from mean."})
                 (fact "Attachments cannot be added to the verdict"
                   (edit-verdict :attachments ["foobar"]) => fail?)
@@ -939,6 +942,14 @@
                       (check-verdict-conditions app-id verdict-id
                                                 good-id "Good condition"
                                                 other-id "Other condition"))))
+                (fact "Statements in the verdict draft"
+                  (:statements data) => (just [(just {:text   "Paloviranomainen"
+                                                      :given  pos?
+                                                      :status "puollettu"})
+                                               {:text   "Stakeholder"
+                                                :given  nil
+                                                :status nil}]
+                                              :in-any-order))
                 (fact "No section"
                   (:section data) => nil?)
                 (fact "New verdict is not filled"
@@ -946,6 +957,10 @@
                 (fact "Verdict cannot be published since required fields are missing"
                   (command sonja :publish-pate-verdict :id app-id
                            :verdict-id verdict-id)
+                  => (err :pate.required-fields))
+                (fact "Ditto for preview"
+                  (decode-body (raw sonja :preview-pate-verdict :id app-id
+                                    :verdict-id verdict-id))
                   => (err :pate.required-fields))
                 (fact "Building info is mostly empty but contains the template fields"
                   data => (contains {:buildings {op-id {:description            ""
@@ -957,7 +972,8 @@
                                                         :rakennetut-autopaikat  ""
                                                         :tag                    ""
                                                         :autopaikat-yhteensa    ""
-                                                        :paloluokka             ""}}}))
+                                                        :paloluokka             ""
+                                                        :order                  "0"}}}))
                 (fact "Since the verdict is regular (official) we can set contact"
                   (edit-verdict "contact" "Authority Sonja Sibbo") => no-errors?)
                 (fact "... but cannot set section"
@@ -1094,7 +1110,8 @@
                           :rakennetut-autopaikat  ""
                           :tag                    ""
                           :autopaikat-yhteensa    ""
-                          :paloluokka             ""})
+                          :paloluokka             ""
+                          :order                  "0"})
                     (fact "Change building id to manual"
                       (command sonja :update-doc :id app-id
                                :doc doc-id
@@ -1125,7 +1142,8 @@
                                           :rakennetut-autopaikat  ""
                                           :tag                    ""
                                           :autopaikat-yhteensa    ""
-                                          :paloluokka             ""}
+                                          :paloluokka             ""
+                                          :order                  "0"}
                           op-id-pientalo {:description            ""
                                           :show-building          true
                                           :vss-luokka             ""
@@ -1135,7 +1153,8 @@
                                           :rakennetut-autopaikat  ""
                                           :tag                    ""
                                           :autopaikat-yhteensa    ""
-                                          :paloluokka             ""}})
+                                          :paloluokka             ""
+                                          :order                  "1"}})
                     (fact "Add tag and description to pientalo"
                       (command sonja :update-doc :id app-id
                                :doc doc-id
@@ -1145,17 +1164,26 @@
                                :op-id op-id-pientalo
                                :desc "Hen piaoliang!") => ok?)
                     (fact "national-id update pre-verdict"
-                      (api-update-national-building-id-call app-id {:form-params {:applicationId app-id :operationId (name op-id-pientalo) :nationalBuildingId "1234567881"}
-                                                                    :as          :json :basic-auth ["sipoo-r-backend" "sipoo"]}) => http200?
+                      (api-update-building-data-call app-id {:form-params {:operationId (name op-id-pientalo)
+                                                                           :nationalBuildingId "1234567881"
+                                                                           :location {:x 406216.0 :y 6686856.0}}
+                                                             :content-type :json
+                                                             :as          :json
+                                                             :basic-auth ["sipoo-r-backend" "sipoo"]}) => http200?
                       (->> (query-application sonja app-id) :documents
                            (util/find-by-id doc-id)
-                           :data :valtakunnallinenNumero :value) => "1234567881")
+                           :data :valtakunnallinenNumero :value) => "1234567881"
+                      ; TODO after LPK-3598, add test case here that data is saved to buildings-array also before publish-pate-verdict
+                      )
                     (fact "Set kiinteiston-autopaikat for pientalo"
                       (check-error (edit-verdict [:buildings op-id-pientalo :kiinteiston-autopaikat]
                                                  "8")))
                     (fact "Cannot edit non-existent building"
                       (edit-verdict [:buildings "bad-building" :paloluokka] "foo")
                       => fail?)
+                    (fact "Change primary operation"
+                      (command sonja :change-primary-operation :id app-id
+                               :secondaryOperationId op-id-pientalo) => ok?)
                     (fact "Buildings updated"
                       (-> (open-verdict) :verdict :data :buildings)
                       => {op-id          {:description            "Hello world!"
@@ -1167,7 +1195,8 @@
                                           :rakennetut-autopaikat  ""
                                           :tag                    ""
                                           :autopaikat-yhteensa    ""
-                                          :paloluokka             ""}
+                                          :paloluokka             ""
+                                          :order                  "1"}
                           op-id-pientalo {:description            "Hen piaoliang!"
                                           :show-building          true
                                           :vss-luokka             ""
@@ -1177,14 +1206,49 @@
                                           :rakennetut-autopaikat  ""
                                           :tag                    "Hao"
                                           :autopaikat-yhteensa    ""
-                                          :paloluokka             ""}})
-
+                                          :paloluokka             ""
+                                          :order                  "0"}})
+                    (fact "Cannot publish in the complementNeeded state"
+                      (command sonja :publish-pate-verdict :id app-id
+                               :verdict-id verdict-id)
+                      => fail?)
+                    (fact "Preview fetch works, though"
+                      (:headers (raw sonja :preview-pate-verdict :id app-id
+                                     :verdict-id verdict-id))
+                      => (contains {"Content-Disposition" (contains "P\u00e4\u00e4t\u00f6sluonnos")}))
+                    (fact "PDF language is the same as the verdict language"
+                      (edit-verdict :language :sv) => ok?
+                      (:headers (raw sonja :preview-pate-verdict :id app-id
+                                     :verdict-id verdict-id))
+                      => (contains {"Content-Disposition" (contains "Beslututkast")}))
+                    (fact "Change primary operation back"
+                      (command sonja :change-primary-operation :id app-id
+                                       :secondaryOperationId op-id) => ok?)
+                    (fact "Sonja approves the application again"
+                      (command sonja :approve-application :id app-id :lang :fi)
+                      => ok?)
                     (fact "Sonja can publish the verdict"
                       (command sonja :publish-pate-verdict :id app-id
-                               :verdict-id verdict-id) => ok?)
-                    (fact "Verdict's section is one"
-                      (-> (open-verdict) :verdict :data :verdict-section)
-                      => "1")
+                               :verdict-id verdict-id)=> ok?)
+                    (facts "Verdict has been published"
+                      (let [data (-> (open-verdict) :verdict :data)]
+                        (fact "Verdict's section is one"
+                          (:verdict-section data) => "1")
+                        (fact "Only given statements are included"
+                          (-> data :statements count) => 1
+                          (-> data :statements first)
+                          => (just {:text   "Paloviranomainen"
+                                    :given  pos?
+                                    :status "puollettu"}))))
+                    (fact "Published verdict can no longer be previewed"
+                      (raw sonja :preview-pate-verdict :id app-id
+                           :verdict-id verdict-id)
+                      => fail?)
+                    ; TODO LPK-3598,
+                    ; add test case here that data in buildings-array, which was created in above 'todo'
+                    ; does look correct, ie:
+                    ; - the coordinates received via api-call are still existing in buildings-array
+                    ; - count of buildings array is correct (that no duplicate buildings were added after 'publish-pate-verdict'
                     (facts "Modify template"
                       (letfn [(edit-template [path value]
                                 (fact {:midje/description (format "Template draft %s -> %s" path value)}
@@ -1192,8 +1256,8 @@
                                            :template-id template-id
                                            :path (map name (flatten [path]))
                                            :value value) => ok?))]
-                        (fact "Disable julkipano, muutoksenhaku, lainvoimainen and aloitettava"
-                          (edit-template [:verdict-dates] ["anto" "voimassa"]))
+                        (fact "Disable julkipano, lainvoimainen and aloitettava"
+                          (edit-template [:verdict-dates] ["anto" "muutoksenhaku" "voimassa"]))
                         (fact "Remove all the other sections except buildings and attachments (and verdict)"
                           (edit-template [:removed-sections :foremen] true)
                           (edit-template [:removed-sections :plans] true)
@@ -1226,9 +1290,11 @@
                              {open-verdict  :open
                               edit-verdict  :edit
                               check-changes :check-changes} (verdict-fn-factory verdict-id)]
-                        data => {:voimassa              ""
+                        data => {:language              "fi"
+                                 :voimassa              ""
                                  :verdict-text          "Verdict text."
                                  :anto                  ""
+                                 :muutoksenhaku         ""
                                  :foremen-included      false
                                  :foremen               ["iv-tj" "erityis-tj"]
                                  :verdict-code          "ehdollinen"
@@ -1243,13 +1309,15 @@
                                                   :building-id   "789"
                                                   :operation     "sisatila-muutos"
                                                   :tag           ""
-                                                  :paloluokka    ""}
+                                                  :paloluokka    ""
+                                                  :order         "0"}
                                   op-id-pientalo {:description   "Hen piaoliang!"
                                                   :show-building true
                                                   :building-id   "1234567881"
                                                   :operation     "pientalo"
                                                   :tag           "Hao"
-                                                  :paloluokka    ""}}
+                                                  :paloluokka    ""
+                                                  :order         "1"}}
                                  :attachments           []}
                         (facts "Cannot edit verdict values not in the template"
                           (let [check-fn (fn [kwp value]
@@ -1270,11 +1338,8 @@
                             (edit-verdict :verdict-date "8.1.2018") => no-errors?)
                           (fact "Calculate muutoksenhaku date automatically"
                             (check-changes (edit-verdict :automatic-verdict-dates true)
-                                           [[["julkipano"] "9.1.2018"]
-                                            [["anto"] "11.1.2018"]
+                                           [[["anto"] "11.1.2018"]
                                             [["muutoksenhaku"] "22.1.2018"]
-                                            [["lainvoimainen"] "26.1.2018"]
-                                            [["aloitettava"] "28.1.2019"]
                                             [["voimassa"] "28.1.2021"]])))
                         (facts "Add attachment to verdict draft"
                           (let [attachment-id (add-verdict-attachment app-id verdict-id "Paatosote")]
@@ -1298,6 +1363,8 @@
                             (fact "Unpublished verdict has only attachment ids"
                               (-> (open-verdict) :verdict :data :attachments)
                               => (just [regular-id "bogus-id" pseudo-id] :in-any-order))
+                            (fact "Verdict language is changed to English"
+                              (edit-verdict :language :en) => no-errors?)
                             (fact "Publish verdict"
                               (command sonja :publish-pate-verdict
                                        :id app-id
@@ -1326,20 +1393,38 @@
                                        :attachmentId regular-id)
                               => fail?)
 
-                            (check-kuntagml application verdict-date)
-                            => fail?
+                            (fact "Attachment details have changed"
+                              (let [details {:readOnly true
+                                             :locked   true
+                                             :target   {:type "verdict"
+                                                        :id   verdict-id}}
+                                    atts    (:attachments (query-application sonja app-id))]
+                                (util/find-by-id attachment-id atts)
+                                => (contains (assoc details :id attachment-id))
+                                (util/find-by-id regular-id atts)
+                                => (contains (assoc details :id regular-id))))
+
+                            (facts "KuntaGML"
+                              (let [xml (check-kuntagml application verdict-date)]
+                                (fact "Aloituskokous is London"
+                                     (xml/get-text xml [:katselmuksenLaji])
+                                     => "aloituskokous"
+                                     (xml/get-text xml [:tarkastuksenTaiKatselmuksenNimi])
+                                     => "London")
+                                (fact "Plan is Washington"
+                                  (xml/get-text xml [:vaadittuErityissuunnitelma])
+                                  => "Washington")))
+
                             (fact "Verdict PDF attachment has been created"
-                              (util/find-first (fn [{:keys [id target]}]
-                                                 (and (not= id attachment-id)
-                                                      (= (:id target) verdict-id)))
-                                               (:attachments (query-application sonja app-id)))
+                              (last (:attachments (query-application sonja app-id)))
                               => (contains {:readOnly         true
                                             :locked           true
-                                            :contents         "P\u00e4\u00e4t\u00f6s"
+                                            :contents         "Verdict"
                                             :type             {:type-group "paatoksenteko"
                                                                :type-id    "paatos"}
                                             :applicationState "verdictGiven"
-                                            :latestVersion    (contains {:contentType "application/pdf"})}))))
+                                            :latestVersion    (contains {:contentType "application/pdf"
+                                                                         :filename    (contains "Verdict")})}))))
                         (fact "Editing no longer allowed"
                           (edit-verdict :verdict-text "New verdict text")
                           => (err :error.verdict.not-draft))
@@ -1353,11 +1438,32 @@
                         (first buildings) => (contains {:index        "1"
                                                         :localShortId "002"
                                                         :description  "Hello world!"}))
-                      (fact "national-id update post-verdict is reflected to buildings array as well"
-                        (api-update-national-building-id-call id {:form-params {:applicationId id :operationId operation-id :nationalBuildingId "1234567892"}
-                                                                  :as          :json
-                                                                  :basic-auth  ["sipoo-r-backend" "sipoo"]}) => http200?
-                        (-> (query-application sonja app-id) :buildings first :nationalId) => "1234567892"))))
+                      (facts "building-data update post-verdict is reflected to buildings array as well"
+                        (api-update-building-data-call id {:form-params {:operationId operation-id
+                                                                         :nationalBuildingId "1234567892"
+                                                                         :location {:x 406216.0 :y 6686856.0}}
+                                                           :content-type :json
+                                                           :as          :json
+                                                           :basic-auth  ["sipoo-r-backend" "sipoo"]}) => http200?
+                        (let [{:keys [buildings]} (query-application sonja app-id)]
+                          (fact "pientalo VTJ-PRT still same"
+                            (->> (query-application sonja app-id) :documents
+                                 (util/find-by-id doc-id)
+                                 :data :valtakunnallinenNumero :value) => "1234567881")
+                          (fact "primary-op VTJ-PRT updated to doc"
+                            (->> (query-application sonja app-id) :documents
+                                 (util/find-first #(= (get-in % [:schema-info :op :id]) operation-id))
+                                 :data :valtakunnallinenNumero :value) => "1234567892")
+                          (facts "buildings"
+                            (count buildings) => 2
+                            (fact "first (primaryOperation sisatila-muutos)"
+                              (-> buildings first :nationalId) => "1234567892"
+                              (-> buildings first :location) => [406216.0 6686856.0]
+                              (-> buildings first :location-wgs84) => (coord/convert "EPSG:3067" "WGS84" 5 [406216.0 6686856.0]))
+                            (fact "second (secondaryOperation pientalo"
+                              (-> buildings second :nationalId) => "1234567881"
+                              (-> buildings second :location) => nil ; TODO should return location after LPK-3598 (from the first api-update call beginning of this test
+                              (-> buildings second :location-wgs84) => nil)))))))
                 (fact "Verdict draft to be deleted"
                   (let  [{verdict :verdict} (command sonja :new-pate-verdict-draft
                                                      :id app-id

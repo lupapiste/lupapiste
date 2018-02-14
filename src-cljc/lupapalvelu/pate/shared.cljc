@@ -276,7 +276,8 @@
 (defschema PatePlaceholder
   "Placholder for external (filled by backend) data."
   (merge PateComponent
-         {:type (sc/enum :neighbors :application-id :building)}))
+         {:type (sc/enum :neighbors :application-id
+                         :building :statements)}))
 
 (defschema KeyMap
   "Map with the restricted set of keys. In other words, no new keys
@@ -335,7 +336,9 @@
                :keymap         {:keymap KeyMap}
                :attachments    {:attachments PateAttachments}
                :application-attachments {:application-attachments PateComponent}
-               :repeating      {:repeating (sc/recursive #'SchemaTypes)})})
+               :repeating      {:repeating (sc/recursive #'SchemaTypes)
+                                ;; The value is a key in the repeating dictionary.
+                                (sc/optional-key :sort-by) sc/Keyword})})
 
 (defschema Dictionary
   "Id to schema mapping."
@@ -364,8 +367,8 @@
          CellConfig
          {:list (merge PateCss
                        {(sc/optional-key :title)   sc/Str
-                        ;; By default, items always have labels, if
-                        ;; when they are just empty strings. Otherwise
+                        ;; By default, items always have labels, even
+                        ;; if they are just empty strings. Otherwise
                         ;; the vertical alignment could be
                         ;; off. If :labels? is false, then the labels
                         ;; are not laid out at all. This is useful,
@@ -467,7 +470,8 @@
 
 ;; TODO: access via category
 (def default-verdict-template
-  {:dictionary {:verdict-dates             {:multi-select {:items           verdict-dates
+  {:dictionary {:language                  {:docgen "pate-languages"}
+                :verdict-dates             {:multi-select {:items           verdict-dates
                                                            :sort?           false
                                                            :i18nkey         :pate-verdict-dates
                                                            :item-loc-prefix :pate-verdict}}
@@ -536,7 +540,10 @@
    :sections [{:id         "verdict"
                :loc-prefix :pate-verdict
                :grid       {:columns 12
-                            :rows    [[{:col  12
+                            :rows    [[{:col 6
+                                        :id "language"
+                                        :dict :language}]
+                                      [{:col  12
                                         :dict :verdict-dates}]
                                       [{:col  3
                                         :id   :giver
@@ -709,7 +716,8 @@
   {:r
    {:dictionary
     (merge
-     {:verdict-date            (req {:docgen "pate-date"})
+     {:language                (req {:docgen "pate-languages"})
+      :verdict-date            (req {:docgen "pate-date"})
       :automatic-verdict-dates {:docgen {:name "pate-verdict-check"}}}
      (->> [:julkipano :anto :muutoksenhaku :lainvoimainen :aloitettava :voimassa]
           (map (fn [kw]
@@ -764,6 +772,7 @@
                                   :i18nkey :pate-conditions.add
                                   :css     :positive
                                   :add     :conditions}}
+      :statements       {:placeholder {:type :statements}}
       :neighbors        {:phrase-text {:i18nkey  :phrase.category.naapurit
                                        :category :naapurit}}
       :neighbor-states  {:placeholder {:type :neighbors}}
@@ -785,7 +794,8 @@
                                      :autopaikat-yhteensa    {:docgen "pate-string"}
                                      :vss-luokka             {:docgen "pate-string"}
                                      :paloluokka             {:docgen "pate-string"}
-                                     :show-building          {:docgen "required-in-verdict"}}}
+                                     :show-building          {:docgen "required-in-verdict"}}
+                         :sort-by :order}
       :upload           {:attachments {:i18nkey    :application.verdict-attachments
                                        :label?     false
                                        :type-group #"paatoksenteko"
@@ -796,7 +806,11 @@
     :sections
     [{:id   "pate-dates"
       :grid {:columns 7
-             :rows    [[{:id   "verdict-date"
+             :rows    [[{:col 7
+                         :loc-prefix :pate-verdict.language
+                         :dict :language
+                         :hide? :_meta.published?}]
+                       [{:id   "verdict-date"
                          :dict :verdict-date}
                         {:id    "automatic-verdict-dates"
                          :col   2
@@ -894,6 +908,12 @@
                                       {:col  2
                                        :id   :collateral-type
                                        :dict :collateral-type}]}]}}
+     {:id    "statements"
+      :show? :?.statements
+      :loc-prefix :pate-statements
+      :buttons? false
+      :grid  {:columns 1
+              :rows    [[{:dict :statements}]]}}
      {:id    "neighbors"
       :show? :?.neighbors
       :grid  {:columns 12
@@ -901,6 +921,7 @@
                           :id   "neighbor-notes"
                           :dict :neighbors}
                          {:col   4
+                          :hide? :_meta.published?
                           :id    "neighbor-states"
                           :align :right
                           :dict  :neighbor-states}]
@@ -924,18 +945,18 @@
                               :row   [{:col        6
                                        :loc-prefix :phrase.category.kaava
                                        :dict       :purpose}]}]}}
-     {:id "extra-info"
+     {:id         "extra-info"
       :loc-prefix :pate-extra-info
-      :show? :?.extra-info
-      :grid {:columns 7
-             :rows [[{:col 6
-                      :dict :extra-info}]]}}
-     {:id "deviations"
+      :show?      :?.extra-info
+      :grid       {:columns 7
+                   :rows    [[{:col  6
+                               :dict :extra-info}]]}}
+     {:id         "deviations"
       :loc-prefix :pate-deviations
-      :show? :?.extra-info
-      :grid {:columns 7
-             :rows [[{:col 6
-                      :dict :deviations}]]}}
+      :show?      :?.extra-info
+      :grid       {:columns 7
+                   :rows    [[{:col  6
+                               :dict :deviations}]]}}
      {:id    "buildings"
       :show? :?.buildings
       :grid  {:columns 7
@@ -968,6 +989,7 @@
              :rows    [[{:col  6
                          :dict :attachments}]]}}
      {:id       "upload"
+      :hide?    :_meta.published?
       :css      :pate-section--no-border
       :buttons? false
       :grid     {:columns 7

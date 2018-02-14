@@ -24,7 +24,7 @@
                 (map #(.getName %) (util/get-files-by-regex "resources/permissions/" #".+\.edn$")))]
     (reset! permission-tree {})
     (doseq [file files]
-      (defpermissions (->> file (re-find #"(.*)(.edn)") second) (util/read-edn-file (io/resource (str "permissions/" file)))))))
+      (defpermissions (->> file (re-find #"(.*)(.edn)") second) (util/read-edn-resource (str "permissions/" file))))))
 
 (load-permissions!)
 
@@ -47,17 +47,15 @@
   `(every? (get ~command :permissions #{}) ~required-permissions))
 
 (defn get-permissions-by-role [scope role]
-  (set/union
-   (get-in @permission-tree [(keyword scope) (keyword role)] #{})
-   (when role
-     (get-in @permission-tree [(keyword scope) :roles/any]))))
-
+  (get-in @permission-tree [(keyword scope) (keyword role)] #{}))
 
 (defn get-global-permissions [{{role :role} :user}]
   (get-permissions-by-role :global (keyword role)))
 
 (defn get-organization-permissions [{{org-authz :orgAuthz} :user {org-id :organization} :application}]
-  (->> (get org-authz (keyword org-id))
+  (->> (if org-id
+         (get org-authz (keyword org-id))
+         (mapcat val org-authz))
        (map (partial get-permissions-by-role :organization))
        (reduce into #{})))
 

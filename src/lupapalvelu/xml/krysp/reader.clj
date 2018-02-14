@@ -465,6 +465,17 @@
        (map ->kuntalupatunnus)
        (remove ss/blank?)))
 
+(defn ->rakval-app-descriptions [xml]
+  (->> (enlive/select (cr/strip-xml-namespaces xml) common/case-elem-selector)
+       (map (fn [asia] {:kuntalupatunnus (->kuntalupatunnus asia)
+                        :kuvaus (get-text asia [:rakennusvalvontaasianKuvaus])}))
+       (remove #(ss/blank? (:kuvaus %)))))
+
+(defn read-permit-descriptions-from-xml
+  [permit-type xml]
+  (when (#{:R} (keyword permit-type))
+    (->rakval-app-descriptions xml)))
+
 (defmulti ->verdicts
   "Reads the verdicts."
   {:arglists '([xml permit-type reader & reader-args])}
@@ -583,9 +594,9 @@
   (let [x (first coordinates)
         y (last coordinates)
         response (-> {:params {:x x :y y}}
-                     proxy-services/property-id-by-point-proxy
-                     :body)]
-    (json/parse-string response true)))
+                     proxy-services/property-id-by-point-proxy)]
+    (if-not (#{400 503} (:status response))
+      (json/parse-string (:body response) true))))
 
 (defn resolve-coordinate-type [xml]
   (cond

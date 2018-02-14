@@ -1,6 +1,7 @@
 (ns lupapalvelu.pate-itest-util
-  (:require [midje.sweet :refer :all]
-            [lupapalvelu.itest-util :refer :all]))
+  (:require [lupapalvelu.itest-util :refer :all]
+            [midje.sweet :refer :all]
+            [sade.util :as util]))
 
 (defn init-verdict-template [as-user category]
   (let [{id :id :as template} (command as-user :new-verdict-template :category category)]
@@ -84,4 +85,28 @@
         (command sonja :remove-doc
                  :id app-id
                  :docId (get doc-map s)
-                 :collection "documents") => ok?))))
+                 :collection "documents") => ok?))
+    (fact "Request two statements"
+      (command sonja :request-for-statement
+               :id app-id
+               :functionCode nil
+               :selectedPersons [{:id    "516560d6c2e6f603beb85147" ;; from minimal
+                                  :email "sonja.sibbo@sipoo.fi"
+                                  :name  "Sonja Sibbo"
+                                  :text  "Paloviranomainen"}
+                                 {:email "stake.holder@example.com"
+                                  :name  "Stake Holder"
+                                  :text  "Stakeholder"}]
+               :saateText "Qing shuo!") => ok?)
+    (fact "Sonja gives statement"
+      (let [statement-id (->> (query-application sonja app-id)
+                              :statements
+                              (util/find-first #(= (get-in % [:person :id])
+                                                   "516560d6c2e6f603beb85147"))
+                              :id)]
+        (command sonja :give-statement
+                 :id app-id
+                 :lang "fi"
+                 :statementId statement-id
+                 :status "puollettu"
+                 :text "All righty then.") => ok?))))

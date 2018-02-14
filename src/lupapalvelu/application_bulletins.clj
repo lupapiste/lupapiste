@@ -3,7 +3,7 @@
             [monger.operators :refer :all]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
-            [clojure.set :refer [difference]]
+            [clojure.set :as set]
             [sade.util :refer [fn->] :as util]
             [sade.core :refer :all]
             [lupapalvelu.attachment.metadata :as metadata]
@@ -12,12 +12,15 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.application-bulletin-utils :refer :all]
             [schema.core :as sc]
             [sade.schemas :as ssc]
             [clj-time.coerce :as tc]
             [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.application :as app]))
 
 (sc/defschema ApplicationBulletin
   {:id             sc/Str
@@ -47,10 +50,15 @@
 
 (defn bulletin-state [app-state]
   (condp contains? (keyword app-state)
-    states/pre-verdict-states              :proclaimed
-    (difference states/post-verdict-states
-                states/terminal-states)    :verdictGiven
-    #{:final}                              :final))
+    states/pre-verdict-states                  :proclaimed
+    (set/difference states/post-verdict-states
+                    states/terminal-states)    :verdictGiven
+    #{:final}                                  :final))
+
+(defn bulletin-enabled-for-application-operation?
+  [application]
+  (and (not (foreman/foreman-app? application))
+       (not (app/designer-app? application))))
 
 ;; Query/Projection fields
 
@@ -237,19 +245,6 @@
     (when-not (< start end)
       (fail :error.startdate-before-enddate))))
 
-(defn bulletin-version-date-valid?
-  "Verify that bulletin visibility date is valid at the given (or current) point of time"
-  ([bulletin-version]
-   (bulletin-version-date-valid? (now) bulletin-version))
-  ([now {state :bulletinState :as bulletin-version}]
-   (case (keyword state)
-     :proclaimed   (and (< (:proclamationStartsAt bulletin-version) now)
-                        (> (:proclamationEndsAt bulletin-version) now))
-     :verdictGiven (and (< (:appealPeriodStartsAt bulletin-version) now)
-                        (> (:appealPeriodEndsAt bulletin-version) now))
-     :final        (and (< (:officialAt bulletin-version) now)
-                        (> (tc/to-long (t/plus (tc/from-long now) (t/days 14))))))))
-
 (defn verdict-given-bulletin-exists? [app-id]
   (mongo/any? :application-bulletins {:_id app-id :versions {"$elemMatch" {:bulletinState "verdictGiven"}}}))
 
@@ -277,22 +272,27 @@
   (mongo/remove :application-bulletins (str applicationId "_" verdictId)))
 
 (defn process-check-for-verdicts-result
-  [{{old-verdicts :verdicts applicationId :id :keys [organization permitType municipality] :as application} :application
-    created :created :as command} new-verdicts]
   "For (non-YMP) organizations with bulletins enabled, update bulletins to match with verdicts retrieved from backing system"
-  (when (and (not (permit/ymp-permit-type? (:permitType application)))
-             (org/bulletins-enabled? (org/get-organization organization) permitType municipality))
-    (let [old-verdict-ids          (map :id (remove :draft old-verdicts))
-          new-verdict-ids          (map :id (remove :draft new-verdicts))
-          removed-verdict-ids      (clojure.set/difference (set old-verdict-ids) (set new-verdict-ids))]
-      (doseq [vid removed-verdict-ids] ; Delete bulletins related to removed verdicts
-        (process-delete-verdict applicationId vid))
-      (doseq [{vid :id :as verdict} new-verdicts]
-        (infof "Upserting the bulletin for verdict %s" vid)
-        (upsert-bulletin-by-id (str applicationId "_" vid)
-          (create-bulletin (assoc application :state :verdictGiven
-                                            :verdicts [verdict])
-                         created
-                         {:verdictGivenAt (-> verdict :paatokset first :paivamaarat :anto)
-                          :appealPeriodStartsAt (or (-> verdict :paatokset first :paivamaarat :julkipano) (now))
-                          :appealPeriodEndsAt   (or (-> verdict :paatokset first :paivamaarat :viimeinenValitus) (now))}))))))
+  [{{old-verdicts :verdicts applicationId :id :keys [organization permitType municipality] :as application} :application
+    created :created :as command} new-verdicts app-descriptions]
+  (let [{:keys [enabled descriptions-from-backend-system]} (org/bulletin-settings-for-scope (org/get-organization organization) permitType municipality)]
+    (when (and enabled
+               (not (permit/ymp-permit-type? (:permitType application)))
+               (bulletin-enabled-for-application-operation? application))
+      (let [old-verdict-ids          (map :id (remove :draft old-verdicts))
+            new-verdict-ids          (map :id (remove :draft new-verdicts))
+            removed-verdict-ids      (set/difference (set old-verdict-ids) (set new-verdict-ids))]
+        (doseq [vid removed-verdict-ids] ; Delete bulletins related to removed verdicts
+          (process-delete-verdict applicationId vid))
+        (doseq [{vid :id kuntalupatunnus :kuntalupatunnus :as verdict} new-verdicts]
+          (infof "Upserting the bulletin for verdict %s %s" vid kuntalupatunnus)
+          (upsert-bulletin-by-id (str applicationId "_" vid)
+            (create-bulletin (util/assoc-when-pred application util/not-empty-or-nil?
+                                                   :state :verdictGiven
+                                                   :bulletinOpDescription (when descriptions-from-backend-system
+                                                                            (:kuvaus (util/find-by-key :kuntalupatunnus kuntalupatunnus app-descriptions)))
+                                                   :verdicts [verdict])
+                                                   created
+                             {:verdictGivenAt (-> verdict :paatokset first :paivamaarat :anto)
+                              :appealPeriodStartsAt (or (-> verdict :paatokset first :paivamaarat :julkipano) created)
+                              :appealPeriodEndsAt   (or (-> verdict :paatokset first :paivamaarat :viimeinenValitus) created)})))))))

@@ -61,8 +61,10 @@ Pena logs in and sees the non-admin view of the company
 Pena opens application and could not submit application
   Open application  ${appname}  ${propertyId}
   Open tab  requiredFieldSummary
-  Test id disabled  application-submit-btn
-  Submit application errors count is  1
+  Wait until  Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//h1
+  No such test id  application-submit-btn
+  # After permission :application/submit it's no longer viable to show errors in case of company non-submitting user
+  #Submit application errors count is  1
   Logout
 
 Mikko logs in and invites Pena directly

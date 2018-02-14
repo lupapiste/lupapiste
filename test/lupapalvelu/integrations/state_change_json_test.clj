@@ -62,6 +62,11 @@
      :location-wgs84   wgs
      :documents        documents}))
 
+(def initial-state (-> (app-with-docs [new-building-data])
+                       (sm/application-state-seq)
+                       (first)
+                       (name)))
+
 (facts "state-changes for R app"
   (letfn
     [(valid-fn
@@ -87,6 +92,9 @@
                                                          [:buildingId
                                                           (get-in old-building-manuaalinen-rakennusnumero
                                                                   [:data :manuaalinen_rakennusnro :value])]])))
+     (building-not-present [data]
+       (fact "building key not present"
+         (not-any? #(contains? (set (keys %)) :building) (:operations data)) => true))
      (run-test
        [app test-fn]
        (when-let [new-state (sm/next-state app)]
@@ -97,13 +105,16 @@
 
     (facts "existing buildings"
       (let [app (app-with-docs [old-building-test-doc])]
-        (run-test (assoc app :state (name (first (sm/application-state-seq app)))) existing-building-test)))
+        (run-test (assoc app :state initial-state) existing-building-test)))
     (facts "new buildings"
       (let [app (app-with-docs [new-building-data])]
-        (run-test (assoc app :state (name (first (sm/application-state-seq app)))) new-building-test )))
+        (run-test (assoc app :state initial-state) new-building-test )))
     (fact "manuaal building id"
       (let [app (app-with-docs [old-building-manuaalinen-rakennusnumero])]
-        (run-test (assoc app :state (name (first (sm/application-state-seq app)))) manual-building-id-test)))))
+        (run-test (assoc app :state initial-state) manual-building-id-test)))
+    (fact "permitType P"
+      (let [app (app-with-docs [new-building-data])]
+        (run-test (assoc app :state initial-state :permitType "P") building-not-present)))))
 
 (fact "permitSubtype"
   (fact "if no key, nil"

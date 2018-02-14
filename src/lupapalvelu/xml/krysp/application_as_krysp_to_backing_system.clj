@@ -221,7 +221,10 @@
                           (->> attachments (map :fileId) (remove nil?)))
                         #(writer/write-to-disk %1 application %2 output-dir nil nil "verdict"))
 
-        mapping-result (permit/verdict-krysp-mapper filtered-app verdict (name i18n/*lang*) krysp-version begin-of-link)]
+        mapping-result (permit/verdict-krysp-mapper filtered-app verdict
+                                                    (get-in verdict [:data :language])
+                                                    krysp-version
+                                                    begin-of-link)]
     (if-some [{:keys [xml attachments]} mapping-result]
       (-> (data-xml/emit-str xml)
           (validator/validate-integration-message! permit-type krysp-version)

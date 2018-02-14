@@ -216,12 +216,12 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   // Signatures
   self.hasSignature = function() { return !_.isEmpty(self.attachment().signatures); };
-  self.sign = function() {
+  self.beginSign = function() {
     self.disablePreview(true);
     self.signingModel.init({id: self.applicationId}, [self.attachment]);
   };
   self.signingAllowed = function() { return authModel.ok("sign-attachments"); };
-  self.addHubListener({eventType: "attachments-signed", id: self.applicationId}, function(params) {
+  self.addHubListener({eventType: "attachments-signed", id: self.applicationId, currentPage: "attachment"}, function(params) {
     if (_.includes(params.attachments, self.id)) {
       querySelf();
     }
@@ -254,15 +254,27 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     return "/api/raw/latest-attachment-version?attachment-id=" + self.id;
   });
 
+  function togglePreview( showPreview ) {
+    if (self.showPreview()) {
+      $("#file-preview-iframe").attr("src",
+                                     showPreview
+                                           ? self.previewUrl()
+                                           : "/lp-static/img/ajax-loader.gif");
+    }
+  }
+
   self.isArchived = self.disposedComputed(function() {
     return util.getIn(self.attachment(), ["metadata", "tila"]) === "arkistoitu";
   });
 
   self.rotate = function(rotation) {
-    $("#file-preview-iframe").attr("src","/lp-static/img/ajax-loader.gif");
+    togglePreview( false );
     service.rotatePdf(self.id, rotation);
   };
-  addUpdateListener("rotate-pdf", {ok: true}, _.ary(querySelf, 0));
+  addUpdateListener("rotate-pdf", {ok: true}, function() {
+    querySelf();
+    togglePreview( true );
+  });
 
   self.disposedSubscribe(self.showPreview, function(val) {
     if (val) {
@@ -270,13 +282,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     }
   });
 
-  self.disposedSubscribe(self.previewUrl, function(url) {
-    if (self.showPreview()) {
-      $("#file-preview-iframe").attr("src", url);
-    }
-  });
-
-  // Common hub listeners
+ // Common hub listeners
   self.addHubListener("dialog-close", _.partial(self.disablePreview, false));
 
   self.addHubListener("side-panel-open", _.partial(self.disablePreview, true));

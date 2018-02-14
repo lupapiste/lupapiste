@@ -16,6 +16,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.integrations.messages :as messages]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]))
 
 (def displayName {:displayName (zipmap i18n/supported-langs (repeat sc/Str))})
@@ -73,11 +74,13 @@
       {:new false :buildingId (get-building-id select-value unwrapped)}
       {:new true})))
 
-(defn enrich-operation-with-building [{:keys [documents]} operation]
-  (if-let [op-doc (->> documents
-                       (util/find-first
-                         #(= (:id operation)
-                             (get-in % [:schema-info :op :id]))))]
+(defn enrich-operation-with-building [{:keys [documents] :as app} operation]
+  (if-let [op-doc (and
+                    (util/=as-kw (permit/permit-type app) :R)
+                    (->> documents
+                         (util/find-first
+                           #(= (:id operation)
+                               (get-in % [:schema-info :op :id])))))]
     (util/assoc-when operation :building (get-building-data op-doc))
     operation))
 

@@ -227,10 +227,13 @@
                               empty?
                               :error.empty-map-parameters)))
 
-(defn parameters-matching-schema [params schema command]
-  (filter-params-of-command params command
-                            (partial sc/check schema)
-                            "error.illegal-value:schema-validation"))
+(defn parameters-matching-schema
+  ([params schema command]
+   (parameters-matching-schema params schema "error.illegal-value:schema-validation" command))
+  ([params schema error-msg command]
+   (filter-params-of-command params command
+                             (partial sc/check schema)
+                             error-msg)))
 
 (defn valid-db-key
   "Input-validator to check that given parameter is valid db key"
@@ -331,7 +334,8 @@
 (defn serializable-actions []
   (into {} (for [[k v] (get-actions)]
              [k (-> v
-                  (dissoc :handler :pre-checks :input-validators :on-success)
+                  (dissoc :handler :pre-checks :input-validators :on-success
+                          :contexts :permissions)           ; FIXME serialize permissions
                   (assoc :name k))])))
 
 ;;
