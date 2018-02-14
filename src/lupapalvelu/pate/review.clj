@@ -65,6 +65,5 @@
                                      :lasnaolijat ""
                                      :huomautukset {:kuvaus ""}
                                      :poikkeamat ""}}
-          review-name (get-in pate-review [:name :fi])        ;; TODO localization should be stripped out and localized to lang defined in verdict
-        ]
+          review-name (get-in pate-review [:name (keyword (get-in verdict [:data :language] "fi"))])]
       (tasks/new-task "task-katselmus" review-name data {:created ts} source))))
