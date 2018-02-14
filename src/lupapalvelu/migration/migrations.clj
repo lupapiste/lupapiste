@@ -3720,6 +3720,14 @@
   {:apply-when (pos? (mongo/count :application-bulletins {:versions.primaryOperation.name "tyonjohtajan-nimeaminen-v2"}))}
   (mongo/remove-many :application-bulletins {:versions.primaryOperation.name "tyonjohtajan-nimeaminen-v2"}))
 
+(defmigration registry-notification-change
+  {:apply-when (pos? (mongo/count :users {:notification.title   "Muutos Lupapisteen rekisteri- ja tietosuojaselosteeseen"
+                                          :notification.message #"liiketoimintajohtaja"}))}
+  (mongo/update-by-query :users
+                         {:notification.title   "Muutos Lupapisteen rekisteri- ja tietosuojaselosteeseen"
+                          :notification.message #"liiketoimintajohtaja"}
+                         {$set {:notification.message "Lupapisteen henkilörekisterin pitäjä vaihtui 1.5.2017 Solita Oy:stä Evolta Oy:ksi. Muutos ei vaikuta käyttöehtoihin. Lisätietoja asiasta antaa Niina Syrjärinne, puh. 0400 613 756."}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
