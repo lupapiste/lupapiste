@@ -12,7 +12,6 @@
       asianhallintaModel,
       linkToVendorBackendModel,
       usersList = null,
-      editRolesDialogModel,
       calendarsModel,
       reservationTypesModel,
       reservationPropertiesModel,
@@ -615,7 +614,6 @@
   kopiolaitosModel = new KopiolaitosModel();
   asianhallintaModel = new AsianhallintaModel();
   linkToVendorBackendModel = new LinkToVendorBackendModel();
-  editRolesDialogModel = new LUPAPISTE.EditRolesDialogModel(organizationModel);
   bulletinsModel = new BulletinsModel();
   docterminalModel = new DocterminalModel();
   docstoreModel = new DocstoreModel();
@@ -716,8 +714,7 @@
     $("#users").applyBindings({
       organizationUsers:   organizationUsers,
       statementGivers:    statementGiversModel,
-      createStatementGiver: createStatementGiverModel,
-      editRoles:           editRolesDialogModel
+      createStatementGiver: createStatementGiverModel
       });
     $("#applications").applyBindings({
       organization:        organizationModel,

@@ -469,7 +469,7 @@
                                    :accordion :mypage :calendar-view :header :debug :analytics :proj4 :ol :footer
                                    :ui-components :authority-admin-components]
                          :js [schema-versions-by-permit-type "organization-model.js" "wfsmodel.js" "organization-user.js"
-                              "organization-reports.js" "edit-roles-dialog-model.js"
+                              "organization-reports.js"
                               "calendars-model.js" "organization-reservation-types-model.js"
                               "organization-reservation-properties-model.js"
                               "municipality-maps-service.js" "authority-admin.js"]

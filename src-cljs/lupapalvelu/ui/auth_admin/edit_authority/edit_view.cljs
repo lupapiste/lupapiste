@@ -24,8 +24,8 @@
    ]
   (let [user (rum/react state/authority)]
     [:div
-     [:h1 (str (loc "edit-authority.title") ", " (:firstName user) " " (:lastName user))]
-     [:div (loc "edit-authority.desc")]
+     [:h1 (str (loc "auth-admin.edit-authority.title") ", " (:firstName user) " " (:lastName user))]
+     [:div (loc "auth-admin.edit-authority.desc")]
      (roles/edit-authority-roles)
      [:div.hr]
      (info/edit-authority-info)]))

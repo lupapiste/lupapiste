@@ -55,7 +55,7 @@
                          :email     (:email user)})
         disabled (auth-admin-can-edit-authority-info? user)]
     [:div
-     [:h2 (loc "edit-authority.user-info-title")]
+     [:h2 (loc "auth-admin.edit-authority.user-info-title")]
      (map #(info-textfield user-info % (get user %)) [:firstName :lastName :email])
      [:button.primary {:disabled disabled
                        :on-click #(update-user-info user-info)}

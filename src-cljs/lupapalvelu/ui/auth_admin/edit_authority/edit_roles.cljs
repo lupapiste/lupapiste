@@ -39,7 +39,7 @@
                         (-> current-authority :orgAuthz (get @state/org-id) (set)))
         saving? (rum/react state/saving-roles?)]
     [:div
-     [:h2 (loc "edit-authority.roles-title")]
+     [:h2 (loc "auth-admin.edit-authority.roles-title")]
      (for [role (rum/react state/allowed-roles)]
        (role-checkbox current-roles-set role))
      [:button.primary {:disabled disabled?
