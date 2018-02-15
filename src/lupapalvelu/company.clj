@@ -182,6 +182,7 @@
   ([] (find-companies {}))
   ([query]
    (mongo/select :companies query [:name :y :address1 :zip :po :accountType
+                                   :contactAddress :contactZip :contactPo
                                    :customAccountLimit :created :pop :ovt
                                    :netbill :reference :document :locked] (array-map :name 1))))
 
@@ -476,6 +477,21 @@
                    (= company-id (some-> % :invite :user :id))) auth)
     (fail :company.already-invited)))
 
+(defn company-info
+  "Map with :id, :name, :y, :address1, :zip and :po. Contact information
+  overrides billing info."
+  [company]
+  (letfn [(address [c] (reduce-kv (fn [acc k v]
+                                    (cond-> acc
+                                      (ss/not-blank? v) (assoc k v)))
+                                  {}
+                                  (select-keys c [:address1 :zip :po])))]
+    (merge (select-keys company [:id :name :y])
+           (address company)
+           (address (set/rename-keys company
+                                     {:contactAddress :address1
+                                      :contactZip     :zip
+                                      :contactPo      :po})))))
 
 (defn company-invite [caller application company-id]
   {:pre [(map? caller) (map? application) (string? company-id)]}

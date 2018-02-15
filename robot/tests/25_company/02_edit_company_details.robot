@@ -32,3 +32,6 @@ Change eInvoice operator
   Select From List  xpath=//div[@data-test-id="company-pop"]//select  Nordea (NDEAFIHH)
   Click enabled by test id  company-details-save
   Wait Until  Element should be disabled  //div[@id='company-content']//button[@data-test-id='company-details-save']
+
+Frontend errors
+  There are no frontend errors

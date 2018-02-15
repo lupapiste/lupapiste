@@ -90,12 +90,14 @@
 (defn- ensure-bulletin-op-description-is-set-if-needed
   [{{organizationId :organization permit-type :permitType municipality :municipality primaryOperation :primaryOperation
      bulletinOpDescription :bulletinOpDescription :as application} :application}]
-  (when (and organizationId
-             (org/bulletins-enabled? (org/get-organization organizationId) permit-type municipality)
-             (not (foreman/foreman-app? application))
-             (not (= (:name primaryOperation) "suunnittelijan-nimeaminen"))
-             (ss/blank? bulletinOpDescription))
-    (fail :error.invalid-value)))
+  (when organizationId
+    (let [{:keys [enabled descriptions-from-backend-system]} (org/bulletin-settings-for-scope (org/get-organization organizationId) permit-type municipality)]
+      (when (and enabled
+                 (not descriptions-from-backend-system)
+                 (not (foreman/foreman-app? application))
+                 (not (= (:name primaryOperation) "suunnittelijan-nimeaminen"))
+                 (ss/blank? bulletinOpDescription))
+        (fail :error.invalid-value)))))
 
 (defcommand approve-application
   {:parameters       [id lang]
@@ -119,7 +121,7 @@
                         (assoc :handlers handlers)
                         (app/post-process-app-for-krysp @organization))
         mongo-query {:state {$in ["submitted" "complementNeeded"]}}
-        indicator-updates (app/mark-indicators-seen-updates application user created)
+        indicator-updates (app/mark-indicators-seen-updates command)
         transfer (get-transfer-item :exported-to-backing-system {:created created :user user})
         do-update (fn [attachments-updates]
                     (update-application (assoc command :application application)
@@ -320,7 +322,7 @@
         all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
         app-updates {:modified created,
                      :handlers (ensure-general-handler-is-set (:handlers application) user @org)}
-        indicator-updates (app/mark-indicators-seen-updates application user created)
+        indicator-updates (app/mark-indicators-seen-updates command)
         file-ids (ah/save-as-asianhallinta application lang submitted-application @org) ; Writes to disk
         attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments file-ids created) {})
         transfer (get-transfer-item :exported-to-asianhallinta command)]

@@ -1,0 +1,2 @@
+{:organization {:authority          #{:document/approve}
+                :approver           #{:document/approve}}}

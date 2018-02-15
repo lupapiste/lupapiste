@@ -27,4 +27,21 @@
       (-> bulletins first :bulletinState) => "verdictGiven"
       ;TODO ensure bulletin dates looks correct
       (fact "description is set"
-        (-> bulletins first :bulletinOpDescription) => op-description))))
+        (-> bulletins first :bulletinOpDescription) => op-description)))
+
+  (fact "foreman verdict"
+    (let [foreman-app-id (create-foreman-application app-id mikko pena-id "vastaava ty\u00F6njohtaja" "A")
+          _ (finalize-foreman-app mikko sonja foreman-app-id true)
+          bulletins (:data (datatables mikko :application-bulletins :municipality sonja-muni :searchText "" :state "" :page 1 :sort ""))]
+      (fact "bulletin was not generated"
+        (util/find-by-key :application-id foreman-app-id bulletins) => empty?)))
+
+  (fact "Fetch bulletin app-description from backend"
+    (command sipoo :update-organization-bulletin-scope
+             :permitType "R"
+             :municipality "753"
+             :descriptionsFromBackendSystem true) => ok?
+    (command sonja :check-for-verdict :id app-id) => ok?)
+    (let [bulletins (:data (datatables mikko :application-bulletins :municipality sonja-muni :searchText "" :state "" :page 1 :sort ""))]
+      (fact "description is set according to the backend verdict"
+        (-> bulletins first :bulletinOpDescription) => "Uudisrakennuksen ja talousrakennuksen 15 m2 rakentaminen. Yhden huoneiston erillistalo.")))

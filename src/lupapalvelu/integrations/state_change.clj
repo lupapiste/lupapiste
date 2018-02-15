@@ -16,6 +16,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.integrations.messages :as messages]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]))
 
 (def displayName {:displayName (zipmap i18n/supported-langs (repeat sc/Str))})
@@ -73,11 +74,13 @@
       {:new false :buildingId (get-building-id select-value unwrapped)}
       {:new true})))
 
-(defn enrich-operation-with-building [{:keys [documents]} operation]
-  (if-let [op-doc (->> documents
-                       (util/find-first
-                         #(= (:id operation)
-                             (get-in % [:schema-info :op :id]))))]
+(defn enrich-operation-with-building [{:keys [documents] :as app} operation]
+  (if-let [op-doc (and
+                    (util/=as-kw (permit/permit-type app) :R)
+                    (->> documents
+                         (util/find-first
+                           #(= (:id operation)
+                               (get-in % [:schema-info :op :id])))))]
     (util/assoc-when operation :building (get-building-data op-doc))
     operation))
 
@@ -112,10 +115,13 @@
       (assoc :toState (state-map new-state))
       (assoc :messageType "state-change")))
 
-(def valid-states (states/all-application-states-but :draft :open))
+(defn valid-states [new-state old-state]
+  (or ((states/all-application-states-but :draft :open) (keyword new-state))
+      (and (#{:submitted} (keyword old-state))
+           (#{:draft} (keyword new-state)))))
 
 (defn trigger-state-change [command new-state]
-  (when (valid-states (keyword new-state))
+  (when (valid-states new-state (get-in command [:application :state]))
     (when-let [outgoing-data (state-change-data (:application command) new-state)]
       (let [message-id (messages/create-id)
             app (:application command)

@@ -48,3 +48,16 @@
                            building-id]
                           (remove s/blank?)
                           (s/join " \u2013 "))]))
+
+(defmethod placeholder :statements
+  [{:keys [state path]}]
+  [:div.tabby.statements
+   (map (fn [{:keys [given text status]}]
+          [:div.tabby__row.statement
+           [:div.tabby__cell text]
+           [:div.tabby__cell (when given
+                               (js/util.finnishDate given))]
+           [:div.tabby__cell (if status
+                               (path/loc :statement status)
+                               (path/loc :application.statement.requested))]])
+        (path/value path state))])

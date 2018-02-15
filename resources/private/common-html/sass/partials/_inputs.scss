@@ -65,16 +65,16 @@
                       $input-display: block,
                       $label-display: inline-block) {
   label.#{$cls}-label {
-  width: 100%;
-  display: $label-display;
-  color: $color;
-  padding: {
-    left: 7px;
-    right: 7px;
-    bottom: 7px;
-    top: 7px;
+    width: 100%;
+    display: $label-display;
+    color: $color;
+    padding: {
+      left: 7px;
+      right: 7px;
+      bottom: 7px;
+      top: 7px;
+    }
   }
-}
   .#{$cls}-label:before {
     @include lupicon-font( $size );
     content: unicode($off);
@@ -88,6 +88,20 @@
   .#{$cls}-label:hover.#{$cls}-label:before,
   input:checked + .#{$cls}-label:hover.#{$cls}-label:before {
     color: $hover;
+  }
+
+  input:focus + .#{$cls}-label:before {
+    color: $hover !important;
+  }
+
+  .attachment-batch-table input:focus + .#{$cls}-label:before {
+    padding: 3px 3px 4px 3px;
+    border: 2px solid $hover;
+    border-radius: 16px;
+  }
+
+  .attachment-batch-table input:focus + label.#{$cls}-label {
+    padding: 0 !important;
   }
 
   input:checked + .#{$cls}-label:before {

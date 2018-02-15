@@ -10,18 +10,9 @@
 
 (mongo/connect!)
 
-(fact "apply minimal fixture"
+(facts "fixtures smoke"
   (mongo/with-db db-name
-    (fixture/apply-fixture "minimal")) => [])
-
-(fact "minimal fixture smokes"
-  (mongo/with-db db-name
-    (monster/mongochecks)) => ok?)
-
-(fact "apply company-application fixture"
-  (mongo/with-db db-name
-    (fixture/apply-fixture "company-application")) => [])
-
-(fact "company-application fixture smokes"
-  (mongo/with-db db-name
-    (monster/mongochecks)) => ok?)
+    (doseq [fixture-name (keys @fixture/fixtures)]
+      (facts {:midje/description fixture-name}
+        (fact "apply fixture" (fixture/apply-fixture (name fixture-name)) => [])
+        (fact "smoketest fixture" (monster/mongochecks) => ok?)))))

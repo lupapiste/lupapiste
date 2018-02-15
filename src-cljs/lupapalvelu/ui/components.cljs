@@ -1,6 +1,6 @@
 (ns lupapalvelu.ui.components
-  (:require [clojure.string :as s]
-            [cljs.pprint :refer [pprint]]
+  (:require [cljs.pprint :refer [pprint]]
+            [clojure.string :as s]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components.datepicker :as datepicker]
             [lupapalvelu.ui.hub :as hub]
@@ -71,19 +71,33 @@
             [:i.lupicon-pen]])])))
 
 (rum/defc checkbox
-  [{:keys [label value handler-fn disabled negate?]}]
-  (let [input-id (str "input-" (rand-int 10000))
+  "Checkbox component (using checkbox wrapper mechanism).
+   Parameters [optional]:
+   label:      Localization key. Overrides label if both given.
+   text:       'Raw label text'.
+   value:      Initial value
+   handler-fn: Toggle callback function.
+   [negate?]:  If true, the value is negated (default false)
+   [disabled]: Is the checkbox disabled (default false)
+   [prefix]:   Wrapper class prefix (default :pate-checkbox)"
+  [{:keys [label text value handler-fn disabled negate? prefix]}]
+  (let [input-id (str "input-" (common/unique-id "check"))
         value-fn (if negate? not identity)
-        value (value-fn value)]
-    [:div.pate-checkbox-wrapper
+        value    (value-fn value)
+        label    (or (if label (common/loc label) text) "")
+        prefix   (name (or prefix :pate-checkbox))]
+    [:div
+     {:class (str prefix "-wrapper")
+      :key   input-id}
      [:input {:type     "checkbox"
               :disabled disabled
               :checked  value
               :id       input-id}]
-     [:label.pate-checkbox-label
-      {:for      input-id
+     [:label
+      {:class    (str prefix "-label")
+       :for      input-id
        :on-click #(handler-fn (not (value-fn value)))}
-      (common/loc label)]]))
+      label]]))
 
 (defn initial-value-mixin
   "Assocs to component's local state local-key with atom that is
@@ -92,10 +106,7 @@
   [local-key]
   (letfn [(update-state [state]
             (let [value (-> state :rum/args first)]
-              (assoc state local-key (if (or (instance? Atom value)
-                                             (instance? rum.cursor.Cursor value))
-                                       value
-                                       (atom value)))))]
+              (assoc state local-key (common/atomize value))))]
     {:will-mount  update-state
      :did-remount #(update-state %2)}))
 
@@ -146,7 +157,7 @@
     [:textarea.grid-style-input
      (text-options text* options)]))
 
-(defn- default-items-fn [items]
+(defn default-items-fn [items]
   (fn [term]
     (let [fuzzy (common/fuzzy-re term)]
       (filter #(re-find fuzzy (:text %)) items))))
@@ -315,7 +326,7 @@
     term*     ::term
     current*  ::current
     open?*    ::open?
-    :as       local-state} initial {:keys [items clear? callback disabled?]
+    :as       local-state} _ {:keys [items clear? callback disabled?]
                                     :as options}]
   (let [{:keys [text-edit
                 menu-items
@@ -401,10 +412,59 @@
 ;;   text-loc Localization key for text.
 ;;   click Function to be called when the link is clicked
 (rum/defc text-and-link < rum/reactive
-  [{:keys [text text-loc click]}]
+  [{:keys [click] :as options}]
   (let [regex          #"\[(.*)\]"
-        text           (or text (common/loc text-loc))
+        text           (common/resolve-text options)
         link           (last (re-find regex text))
         ;; Split results include the link
         [before after] (remove #(= link %) (s/split text regex))]
     [:span before [:a {:on-click click} link] after]))
+
+;; Button with optional icon and waiting support
+;; Options (text and text-loc are mutually exclusive) [optional]
+;;
+;;   text or text-loc See resolve-text
+;;
+;;   [icon] Icon class for the button (e.g., :lupicon-save)
+;;
+;;   [wait?] If true the button is disabled and the wait icon is
+;;   shown (if the icon has been given). Can be either value or
+;;   atom. Atom makes the most sense for the typical use cases.
+;;
+;;   [disabled?] See resolve-disabled function above
+;;   [enabled?]  See resolve-disabled function above
+;;
+;; Any other options are passed to the :button
+;; tag (e.g, :class, :on-click). The only exception is :disabled,
+;; since it is overridden with :disabled?
+(rum/defc icon-button < rum/reactive
+  [{:keys [icon wait?] :as options}]
+  (let [waiting? (rum/react (common/atomize wait?))]
+    [:button
+     (assoc (dissoc options
+                    :text :text-loc :icon :wait?
+                    :disabled? :enabled?)
+            :disabled (or (common/resolve-disabled options)
+                          waiting?))
+     (when icon
+       [:i {:class (common/css (if waiting?
+                                 [:icon-spin :lupicon-refresh]
+                                 icon))}])
+     [:span (common/resolve-text options)]]))
+
+;; Link that is rendered as button.
+;; Options:
+;;   url: Link url
+;;
+;; In addition, text, text-loc, enabled? and disabled? options are
+;; supported.
+(rum/defc link-button < rum/reactive
+  [{:keys [url] :as options}]
+  (let [disabled? (common/resolve-disabled options)
+        text      (common/resolve-text options)]
+    (if disabled?
+      [:span.btn.primary.outline.disabled text]
+      [:a.btn.primary.outline
+       {:href   url
+        :target :_blank}
+       text])))

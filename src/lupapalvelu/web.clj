@@ -43,6 +43,7 @@
             [lupapalvelu.calendars-api :as calendars]
             [lupapalvelu.control-api :as control]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.dummy-krysp-service]
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
             [lupapalvelu.ident.dummy]
             [lupapalvelu.ident.suomifi]
@@ -601,81 +602,6 @@
 
 ;; Static error responses for testing
 (defpage [:get ["/dev/:status"  :status #"[45]0\d"]] {status :status} (resp/status (util/->int status) status))
-
-(when (env/feature? :dummy-krysp)
-  (defn override-xml [xml-file overrides]
-    (let [xml            (enlive/xml-resource xml-file)
-          overridden-xml (reduce (fn [nodes override]
-                                   (enlive/transform nodes
-                                                     (->> (:selector override)
-                                                          (map keyword))
-                                                     (enlive/content (:value override))))
-                                 xml overrides)]
-      (apply str (enlive/emit* overridden-xml))))
-
-  (defpage "/dev/krysp" {typeName :typeName r :request filter :filter overrides :overrides}
-    (if-not (s/blank? typeName)
-      (let [filter-type-name (-> filter sade.xml/parse (sade.common-reader/all-of [:PropertyIsEqualTo :PropertyName]))
-            search-literal (-> filter sade.xml/parse (sade.common-reader/all-of [:PropertyIsEqualTo :Literal]))
-            typeName (if (ss/starts-with typeName "kiito:") "kiito:every-type" typeName)
-            xmls {"rakval:ValmisRakennus"                         "krysp/dev/building.xml"
-                  "rakval:RakennusvalvontaAsia"                   "krysp/dev/verdict.xml"
-                  "ymy:Ymparistolupa"                             "krysp/dev/verdict-yl.xml"
-                  "ymm:MaaAineslupaAsia"                          "krysp/dev/verdict-mal.xml"
-                  "ymv:Vapautus"                                  "krysp/dev/verdict-vvvl.xml"
-                  "ppst:Poikkeamisasia,ppst:Suunnittelutarveasia" "krysp/dev/verdict-p.xml"
-                  "kiito:every-type"                              "krysp/dev/verdict-kt.xml"}
-            overrides (-> (json/decode overrides)
-                          (clojure.walk/keywordize-keys))]
-        ;; Use different xml for rakval query with kuntalupatunnus type of filter.
-        (cond
-          (and (= "rakval:RakennusvalvontaAsia" typeName)
-               (= "rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:kuntalupatunnus" filter-type-name))
-              (case search-literal
-                "895-2015-001" (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/verdict-rakval-with-area-like-location.xml")))
-                "895-2015-002" (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/verdict-rakval-with-building-location.xml")))
-                (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml"))))
-          (not-empty overrides) (resp/content-type "application/xml; charset=utf-8" (override-xml (io/resource (xmls typeName)) overrides))
-          :else (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (xmls typeName))))))
-      (when (= r "GetCapabilities")
-        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/capabilities.xml"))))))
-
-  (defpage [:post "/dev/krysp"] {}
-    (let [xml (sade.xml/parse (slurp (:body (request/ring-request))))
-          xml-no-ns (sade.common-reader/strip-xml-namespaces xml)
-          typeName (sade.xml/select1-attribute-value xml-no-ns [:Query] :typeName)]
-      (when (= typeName "yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa")
-        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/verdict-ya.xml"))))))
-
-  (defn krysp-endpoint-authentication
-    [request]
-    (let [[u p] (http/decode-basic-auth request)]
-      (debug (str
-               u
-               " requesting krysp receiver endpoint, db cookie being: "
-               (get-in request [:cookies "test_db_name" :value])))
-      (and (= u "kuntagml") (= p "kryspi"))))
-
-  (defpage [:post "/dev/krysp/receiver/:path"] {path :path}
-    (let [request (request/ring-request)]
-      (if (krysp-endpoint-authentication request)
-        (let [body-str (ring-request/body-string request)]
-          (if (ss/starts-with body-str "<?xml")
-            (do
-              (imessages/save {:id (mongo/create-id) :direction  "in" :messageType (str "KuntaGML " path)
-                               :transferType "http" :format "xml" :created (now)
-                               :status "received" :data body-str
-                               :application {:id (re-find #"L[PX]-\d{3}-\d{4}-\d{5}" body-str)}})
-              (resp/status 200 "OK"))
-            (resp/status 400 "Not XML")))
-        basic-401)))
-
-  (defpage [:get "/dev/private-krysp"] []
-    (let [request (request/ring-request)
-          [u p] (http/decode-basic-auth request)]
-      (if (= u p "pena")
-        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/capabilities.xml")))
-        basic-401))))
 
 (env/in-dev
   (defjson [:any "/dev/spy"] []

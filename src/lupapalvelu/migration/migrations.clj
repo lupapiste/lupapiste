@@ -38,7 +38,7 @@
             [sade.strings :as str]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs fn->>] :as util]
             [sade.validators :as v]
-            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]])
+            [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]])
   (:import [org.joda.time DateTime]))
 
 (defn drop-schema-data [document]
@@ -3688,6 +3688,45 @@
     (when-let [err (some bulletins/comment-file-checker attachments)]
       (throw (ex-info "bulletin-comment-metadata migration failure" {:err (pr-str err) :comment (:id comment)})))
     (mongo/update-by-id :application-bulletin-comments (:id comment) {$set {:attachments attachments}})))
+
+(defn fix-company-auth
+  "Fix some legacy company invites, which are missing 'company-role' and possibly 'id'"
+  [{:keys [type company-role invite id] :as auth}]
+  (if (and (= "company" type) (nil? company-role) (map? invite))
+    (assoc auth :company-role "admin" :id (get-in invite [:user :id] id))
+    auth))
+
+(defmigration legacy-company-auth-invites
+  {:apply-when (pos? (mongo/count :applications {:auth
+                                                 {$elemMatch
+                                                  {:type "company",
+                                                   :company-role {$exists false},
+                                                   :invite {$exists true}}}}))}
+  (update-applications-array :auth fix-company-auth {:auth
+                                                     {$elemMatch
+                                                      {:type "company",
+                                                       :company-role {$exists false},
+                                                       :invite {$exists true}}}}))
+
+(defmigration add-document-request-info
+  {:apply-when (pos? (mongo/count :organizations {:docstore-info.documentRequest {$exists false}}))}
+  (mongo/update-by-query :organizations
+                         {:docstore-info.documentRequest {$exists false}}
+                         {$set {:docstore-info.documentRequest.enabled false
+                                :docstore-info.documentRequest.email ""
+                                :docstore-info.documentRequest.instructions (i18n/supported-langs-map (constantly ""))}}))
+
+(defmigration remove-foreman-app-bulletins
+  {:apply-when (pos? (mongo/count :application-bulletins {:versions.primaryOperation.name "tyonjohtajan-nimeaminen-v2"}))}
+  (mongo/remove-many :application-bulletins {:versions.primaryOperation.name "tyonjohtajan-nimeaminen-v2"}))
+
+(defmigration registry-notification-change
+  {:apply-when (pos? (mongo/count :users {:notification.title   "Muutos Lupapisteen rekisteri- ja tietosuojaselosteeseen"
+                                          :notification.message #"liiketoimintajohtaja"}))}
+  (mongo/update-by-query :users
+                         {:notification.title   "Muutos Lupapisteen rekisteri- ja tietosuojaselosteeseen"
+                          :notification.message #"liiketoimintajohtaja"}
+                         {$set {:notification.message "Lupapisteen henkil\u00f6rekisterin pit\u00e4j\u00e4 vaihtui 1.5.2017 Solita Oy:st\u00e4 Evolta Oy:ksi. Muutos ei vaikuta k\u00e4ytt\u00f6ehtoihin. Lis\u00e4tietoja asiasta antaa Niina Syrj\u00e4rinne, puh. 0400 613 756."}}))
 
 ;;
 ;; ****** NOTE! ******

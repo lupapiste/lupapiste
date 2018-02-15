@@ -23,7 +23,7 @@
      :username email}))
 
 (defraw openinforequest
-  {:user-roles #{:anonymous}}
+  {:permissions [{:required []}]}
   [{{token-id :token-id} :data lang :lang created :created :as command}]
   (let [token (mongo/by-id :open-inforequest-token token-id)
         url   (str (env/value :host) "/app/" (name lang) "/oir#!/inforequest/" (:application-id token))]
@@ -36,7 +36,7 @@
 (defcommand convert-to-normal-inforequests
   {:parameters [organizationId]
    :description "Converts organizations inforequests to normal inforequests and deletes all organizations inforequest tokens."
-   :user-roles #{:admin}
+   :permissions [{:required [:organization/convert-inforequests]}]
    :input-validators [(partial action/non-blank-parameters [:organizationId])
                       (fn [{data :data}]
                         (if-let [organization (organization/get-organization (:organizationId data))]

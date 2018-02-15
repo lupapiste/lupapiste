@@ -3,7 +3,7 @@
             [lupapalvelu.fixture.core :refer [deffixture]]
             [lupapalvelu.fixture.minimal :as minimal]))
 
-(def users (filter (comp #{:admin "sonja" "pena" "kaino@solita.fi" "erkki@example.com"} :username) minimal/users))
+(def users (filter (comp #{"admin" "sonja" "pena" "kaino@solita.fi" "erkki@example.com"} :username) minimal/users))
 
 (def organizations (filter (comp (set (mapcat (comp keys :orgAuthz) users)) keyword :id) minimal/organizations))
 
@@ -271,4 +271,5 @@
   (mongo/insert-batch :users users)
   (mongo/insert-batch :companies companies)
   (mongo/insert-batch :organizations organizations)
-  (mongo/insert-batch :applications applications))
+  (mongo/insert-batch :applications applications)
+  (mongo/insert :sequences {:_id "applications-753-2018" :count 1}))

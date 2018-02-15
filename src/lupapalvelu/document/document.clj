@@ -24,7 +24,6 @@
 ;; Validators
 ;;
 
-
 (defn state-valid-by-schema? [schema schema-states-key default-states state]
   (-> (get-in schema [:info (keyword schema-states-key)])
       (or default-states)

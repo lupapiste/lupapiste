@@ -409,7 +409,7 @@
 
    :change-email {:depends [:common-html]
                   :js ["change-email.js"]
-                  :html ["init-email-change.html" "change-email.html" "change-email-fa.html"]}
+                  :html ["init-email-change.html" "change-email.html" "change-email-simple.html"]}
 
    :integration-error {:js [ "integration-error.js"]
                        :html ["integration-error.html"]}
@@ -476,7 +476,7 @@
                          :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"
                                 "organization-reports.html" "organization-calendars.html" "calendar-admin.html" "assignments.html" "stamp-editor.html"
                                 "pate-verdict-templates.html" "archiving.html" "organization-bulletins.html"
-                                "organization-terminal.html"]}
+                                "organization-store.html" "organization-terminal.html"]}
 
    :admin-app {:depends []
                :js ["admin.js"]}

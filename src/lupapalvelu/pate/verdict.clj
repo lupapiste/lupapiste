@@ -38,27 +38,36 @@
        neighbors))
 
 (defn data-draft
-  "Kmap keys are draft targets (kw-paths). Values are either kw-paths or
-  maps with :fn and :skip-nil? properties. :fn is the source
-  (full) data handler function. If :skip-nil? is true the nil value
-  entries are skipped (default false and nil value is substituted with
-  empty string). The second argument is the published template
-  snapshot."
+  "Kmap keys are draft targets (kw-paths). Each value is either
+
+   1. kw-path: Path into template value to be taken as the initial value.
+
+   2. Maps with :fn and :skip-nil? properties. :fn is the source
+  (full) data handler function. If :skip-nil? is true then nil value
+  entries are skipped.
+
+   3. Anything else is used as an initial value as is.
+
+  Nil values are substituted with empty string (unless :skip-nil? is
+  true in 2).
+
+  The second argument is the published template snapshot."
   [kmap {data :data}]
-  (reduce (fn [acc [k v]]
-            (let [v-fn   (get v :fn identity)
-                  value  (if-let [v-fn (get v :fn)]
-                           (v-fn data)
-                           (get-in data (util/split-kw-path v)))]
-              (if (and (nil? value) (:skip-nil? v))
-                acc
-                (assoc-in acc
-                          (util/split-kw-path k)
-                          (if (nil? value)
-                            ""
-                            value)))))
-          {}
-          kmap))
+  (reduce-kv (fn [acc k v]
+               (let [v-fn  (get v :fn)
+                     value (cond
+                             v-fn         (v-fn data)
+                             (keyword? v) (get-in data (util/split-kw-path v))
+                             :else v)]
+                 (if (and (nil? value) (:skip-nil? v))
+                   acc
+                   (assoc-in acc
+                             (util/split-kw-path k)
+                             (if (nil? value)
+                               ""
+                               value)))))
+             {}
+             kmap))
 
 (defn- map-unremoved-section
   "Map (for data-draft) section only it has not been removed. If
@@ -82,7 +91,8 @@
 (defmethod initial-draft :r
   [{snapshot :published} application]
   {:data       (data-draft
-                (merge {:verdict-code          :verdict-code
+                (merge {:language              :language
+                        :verdict-code          :verdict-code
                         :verdict-text          :paatosteksti
                         :bulletinOpDescription :bulletinOpDescription}
                        (reduce (fn [acc kw]
@@ -103,7 +113,8 @@
                                  (merge acc (map-unremoved-section (:data snapshot) k)))
                                {}
                                [:neighbors :appeal :statements :collateral
-                                :complexity :rights :purpose])
+                                :complexity :rights :purpose :extra-info
+                                :attachments])
                        ;; List of conditions to conditions map where keys are ids.
                        (when (map-unremoved-section (:data snapshot) :conditions)
                          {:conditions {:fn        (fn [{:keys [conditions]}]
@@ -113,8 +124,14 @@
                                                                         condition))
                                                             {}
                                                             conditions))
-                                       :skip-nil? true}}
-                         ))
+                                       :skip-nil? true}})
+                       (when (map-unremoved-section (:data snapshot) :deviations)
+                         {:deviations (-> (domain/get-document-by-name application
+                                                                       "hankkeen-kuvaus")
+                                          :data :poikkeamat :value
+                                          (or ""))})
+                       (when (map-unremoved-section (:data snapshot) :attachments)
+                         {:attachments []}))
                 snapshot)
    :references (:settings snapshot)})
 
@@ -146,7 +163,8 @@
                               flatten
                               (remove nil?))
         exclusions       (-<>> [(filter removed? [:appeal :statements
-                                                  :collateral :rights :purpose])
+                                                  :collateral :rights :purpose
+                                                  :extra-info :deviations])
                                 (when (removed? :conditions)
                                   [:conditions :add-condition])
                                 (when (removed? :collateral)
@@ -155,6 +173,11 @@
                                   [:neighbors :neighbor-states])
                                 (when (removed? :complexity)
                                   [:complexity :complexity-text])
+                                (let [no-attachments? (removed? :attachments)]
+                                  [(when no-attachments?
+                                     :attachments)
+                                   (when (or no-attachments? (not (:upload data)))
+                                     :upload)])
                                 (util/difference-as-kw shared/verdict-dates
                                                        (:verdict-dates data))
                                 (if (-> snapshot :settings :boardname)
@@ -252,7 +275,11 @@
                                           {}
                                           changes)})))
 
-(defn update-automatic-verdict-dates [{:keys [category references verdict-data]}]
+(defn update-automatic-verdict-dates
+  "Returns map of dates. While the calculation takes every date into
+  account, the result only includes the dates included in the
+  template."
+  [{:keys [category template references verdict-data]}]
   (let [datestring  (:verdict-date verdict-data)
         dictionary  (-> shared/settings-schemas category :dictionary)
         date-deltas (:date-deltas references)
@@ -262,7 +289,7 @@
              [kw & kws] shared/verdict-dates
              latest     datestring]
         (if (nil? kw)
-          dates
+          (apply dissoc dates (-> template :exclusions keys))
           (let [unit   (-> dictionary  kw :date-delta :unit)
                 result (date/parse-and-forward latest
                                                ;; Delta could be empty.
@@ -340,8 +367,8 @@
 (defn buildings
   "Map of building infos: operation id is key and value map contains
   operation (loc-key), building-id (either national or manual id),
-  tag (tunnus) and description."
-  [application]
+  tag (tunnus), description and order (primary operation is the first)."
+  [{primary-op :primaryOperation :as application}]
   (->> application
        app-documents-having-buildings
        (reduce (fn [acc {:keys [schema-info data]}]
@@ -357,14 +384,18 @@
                                               (select-keys data)
                                               vals
                                               (util/find-first ss/not-blank?))
-                            :tag         (:tunnus data)}
+                            :tag         (:tunnus data)
+                            :order (if (= id (:id primary-op)) 0 1)}
                            ss/->plain-string))))
                {})))
 
-(defn ->buildings-array [application]
-  "Construction of the application-buildings array. This should be equivalent to ->buildings-summary function in
-   lupapalvelu.xml.krysp.building-reader the namespace, but instead of the message from backing system,
-   here all the input data is originating from PATE verdict."
+(defn ->buildings-array
+  "Construction of the application-buildings array. This should be
+  equivalent to ->buildings-summary function in
+  lupapalvelu.xml.krysp.building-reader the namespace, but instead of
+  the message from backing system, here all the input data is
+  originating from PATE verdict."
+  [application]
   (->> application
        app-documents-having-buildings
        (util/indexed 1)
@@ -377,7 +408,7 @@
                   :location-wgs84 nil
                   :location nil
                   :area (:kokonaisala mitat)
-                  :index n
+                  :index (str n)
                   :description (ss/join ": " description-parts)
                   :operationId (:id op)
                   :usage (or (:kayttotarkoitus kaytto) "")})))))
@@ -451,18 +482,33 @@
         (assoc (zipmap subkeys (repeat ""))
                :show-building true)))))
 
+(defn command->category [{app :application}]
+  (shared/permit-type->category (:permitType app)))
+
+(defn statements
+  "List of maps with given (timestamp), text (string) and
+  status (loc-key part) keys."
+  [{statements :statements} given-only?]
+  (map (fn [{:keys [given person status]}]
+         {:text   (:text person)
+          :given  given
+          :status status})
+       (if given-only?
+         (filter :given statements)
+         statements)))
 
 (defmulti enrich-verdict
   "Augments verdict data, but MUST NOT update mongo (this is called from
   query actions, too)."
-  (fn [{app :application} & _]
-    (shared/permit-type->category (:permitType app))))
+  (fn [command & _]
+    (command->category command)))
 
-(defmethod enrich-verdict :default [_ verdict _]
+(defmethod enrich-verdict :default [_ verdict & _]
   verdict)
 
 (defmethod enrich-verdict :r
-  [{:keys [application]} {:keys [data template]:as verdict}]
+  ;; If final? is truthy than the enrichment is part of publishing.
+  [{:keys [application]} {:keys [data template]:as verdict} & [final?]]
   (let [{:keys [exclusions]} template
         addons (merge
                 ;; Buildings added only if the buildings section is in
@@ -474,7 +520,9 @@
                                                defaults)})
                 ;; Neighbors added if in the template
                 (when-not (:neighbors exclusions)
-                  {:neighbor-states (neighbor-states application)}))]
+                  {:neighbor-states (neighbor-states application)})
+                (when-not (:statements exclusions)
+                  {:statements (statements application final?)}))]
     (assoc-in verdict [:data] (merge data addons))))
 
 (defn open-verdict [{:keys [application] :as command}]
@@ -510,28 +558,69 @@
                                                                  created
                                                                  giver)))))
 
+(defn- verdict-attachment-items
+  "Type-groups, type-ids and ids of the verdict attachments. These
+  include the new, added verdict attachments and the attachments
+  corresponding to the given attachments dict.
+  Note: Empty attachments are ignored."
+  [{:keys [application]} {verdict-id :id data :data} attachments-dict]
+  (let [ids (set (attachments-dict data))]
+    (->> (:attachments application)
+         (filter #(some-> % :latestVersion :fileId ss/not-blank?))
+         (filter (fn [{:keys [id target]}]
+                   (or (= verdict-id (:id target))
+                       (contains? ids id))))
+         (map (fn [{:keys [type id]}]
+                {:type-group (keyword (:type-group type))
+                 :type-id    (keyword (:type-id type))
+                 :id         id})))))
+
+;; Each method returns a map with the following properties
+;;  items: Attachment items (verdict-attachment-items result)
+;;  update-fn: Function that takes verdict data as argument and updates it.
+(defmulti attachment-items (fn [command _]
+                             (command->category command)))
+
+(defmethod attachment-items :r
+  [command verdict]
+  (let [items (verdict-attachment-items command
+                                        verdict
+                                        :attachments)]
+    {:items     items
+     :update-fn (fn [data]
+                  (assoc data
+                         :attachments
+                         (->> (cons {:type-group :paatoksenteko
+                                     :type-id    :paatos}
+                                    items)
+                              (group-by #(select-keys % [:type-group
+                                                         :type-id]))
+                              (map (fn [[k v]]
+                                     (assoc k :amount (count v)))))))}))
+
 (defn publish-verdict
   "Publishing verdict does the following:
    1. Finalize and publish verdict
    2. Update application state
    3. Inspection summaries
    4. Other document updates (e.g., waste plan -> waste report)
-   4a. Construct buildings array
-   5. Freeze (locked and read-only) verdict attachments and update TOS details
-   6. TODO: Create tasks
-   7. Generate section
-   8. Create PDF/A for the verdict
-   9. Generate KuntaGML
-  10. TODO: Assignments?"
+   5. Construct buildings array
+   6. Freeze (locked and read-only) verdict attachments and update TOS details
+   7. TODO: Create tasks
+   8. Generate section (for non-board verdicts)
+   9. Create PDF/A for the verdict
+  10. Generate KuntaGML
+  11. TODO: Assignments?"
   [{:keys [created application user organization] :as command}]
-  (let [verdict    (->> (command->verdict command)
-                        (enrich-verdict command)
-                        (insert-section (:organization application) created))
-        next-state (sm/verdict-given-state application)
-        att-ids    (->> (:attachments application)
-                        (filter #(= (-> % :target :id) (:id verdict)))
-                        (map :id))
-        buildings-updates {:buildings (->buildings-array application)}]
+  (let [verdict                (-<>> (command->verdict command)
+                                     (enrich-verdict command <> true)
+                                     (insert-section (:organization application)
+                                                     created))
+        next-state             (sm/verdict-given-state application)
+        {att-items :items
+         update-fn :update-fn} (attachment-items command verdict)
+        buildings-updates      {:buildings (->buildings-array application)}
+        verdict                (update verdict :data update-fn)]
     (verdict-update command
                     (util/deep-merge
                      {$set (merge
@@ -539,9 +628,12 @@
                              :pate-verdicts.$.published created}
                             buildings-updates
                             (att/attachment-array-updates (:id application)
-                                                          (comp #{(:id verdict)} :id :target)
+                                                          #(util/includes-as-kw? (map :id att-items)
+                                                                                 (:id %))
                                                           :readOnly true
-                                                          :locked   true))}
+                                                          :locked   true
+                                                          :target {:type "verdict"
+                                                                   :id   (:id verdict)}))}
                      (app-state/state-transition-update next-state
                                                         created
                                                         application
@@ -560,3 +652,19 @@
       (-> (assoc command :application (domain/get-application-no-access-checking (:id application)))
           (krysp/verdict-as-kuntagml verdict))
       nil)))
+
+(defn preview-verdict
+  "Preview version of the verdict.
+  1. Finalize verdict but do not store the changes.
+  2. Generate PDF and return it."
+  [{session :session :as command}]
+  (let [{:keys [size contentType
+                filename content]} (-<>> (command->verdict command)
+                                         (enrich-verdict command <> true)
+                                         (pdf/create-verdict-preview command)
+                                         mongo/download)]
+    {:status  200
+     :headers {"Content-Type"        contentType
+               "Content-Disposition" (format "filename=\"%s\"" filename)
+               "Content-Length"      size}
+     :body    (content)}))

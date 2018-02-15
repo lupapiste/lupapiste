@@ -159,13 +159,16 @@
   (field sc/Str "Organisaation tunnus"))
 
 (sc/defschema ApplicationId
-  (field sc/Str "LP-tunnus"))
+  (field ssc/ApplicationId "LP-tunnus"))
 
 (sc/defschema OperationId
   (field ssc/ObjectIdStr "Toimenpiteen tunnus"))
 
 (sc/defschema NationalBuildingId
   (field ssc/Rakennustunnus "Pysyv\u00e4 rakennustunnus"))
+
+(sc/defschema Location
+  (field ssc/Location "Sijaintipiste ETRS-TM35FIN koordinaatistossa"))
 
 (sc/defschema Configuration
   (field config/Configuration "Konfiguraatioarvot"))
