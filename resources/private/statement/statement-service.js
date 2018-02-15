@@ -38,6 +38,7 @@ LUPAPISTE.StatementService = function(params) {
           person: {},
           text: null,
           status: null,
+          "in-attachment": false,
           reply: { saateText: null,
                    text: null,
                    nothingToAdd: null }
@@ -57,7 +58,11 @@ LUPAPISTE.StatementService = function(params) {
   function getCommandParams(statementId, tab) {
     var statement = statements()[statementId];
     var params = {
-      statement: {text: util.getIn(statement, ["text"]), status: util.getIn(statement, ["status"])},
+      statement: {
+        text: util.getIn(statement, ["text"]),
+        status: util.getIn(statement, ["status"]),
+        "in-attachment": util.getIn(statement, ["in-attachment"])
+      },
       reply: {text: util.getIn(statement, ["reply", "text"]), "nothing-to-add": util.getIn(statement, ["reply", "nothing-to-add"])},
       "reply-request": {text: util.getIn(statement, ["reply", "saateText"])}
     };

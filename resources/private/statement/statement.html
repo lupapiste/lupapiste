@@ -30,7 +30,8 @@
                                                applicationId: $root.service.applicationId,
                                                data: $root.service.data,
                                                commands: $root.service.commands['statement'],
-                                               authModel: $root.authModel } },
+                                               authModel: $root.authModel,
+                                               target: $root.targeted.defaults.target} },
                         visible: $root.selectedTab() === 'statement'"></div>
         <div data-bind="component: { name: 'statement-reply-request',
                                      params: { applicationTitle: $root.service.applicationTitle,

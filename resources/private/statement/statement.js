@@ -7,6 +7,8 @@
   var authModel = authorization.create();
   var service = new LUPAPISTE.StatementService({statementId: statementId, application: application});
 
+  var defaultAttachmentType = {"type-group": "ennakkoluvat_ja_lausunnot", "type-id": "lausunnon_liite"};
+
   var tabs = ko.pureComputed(function() {
     if (authModel.ok("statement-is-replyable")) {
       return ["statement", "reply"];
@@ -29,10 +31,16 @@
   var targeted = {
     defaults: {
       target: ko.observable(),
-      type: ko.observable({"type-group": "ennakkoluvat_ja_lausunnot", "type-id": "lausunnon_liite"}),
+      type: ko.pureComputed(function() {
+        if (util.getIn(service, ["data", "in-attachment"])) {
+          return {"type-group": "ennakkoluvat_ja_lausunnot", "type-id": "lausunto"};
+        } else {
+          return defaultAttachmentType;
+        }
+      }),
       contents: ko.pureComputed(function() {
         var t = util.getIn(service, ["data", "person", "text"]);
-        if (t) {
+        if (t && !util.getIn(service, ["data", "in-attachment"])) {
           t += ", " + loc("liite");
         }
         return t;
