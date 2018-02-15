@@ -115,10 +115,13 @@
       (assoc :toState (state-map new-state))
       (assoc :messageType "state-change")))
 
-(def valid-states (states/all-application-states-but :draft :open))
+(defn valid-states [new-state old-state]
+  (or ((states/all-application-states-but :draft :open) (keyword new-state))
+      (and (#{:submitted} (keyword old-state))
+           (#{:draft} (keyword new-state)))))
 
 (defn trigger-state-change [command new-state]
-  (when (valid-states (keyword new-state))
+  (when (valid-states new-state (get-in command [:application :state]))
     (when-let [outgoing-data (state-change-data (:application command) new-state)]
       (let [message-id (messages/create-id)
             app (:application command)
