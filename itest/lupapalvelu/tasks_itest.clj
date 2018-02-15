@@ -308,3 +308,41 @@
             (fact "Attachment file is stored and available"
               (decode-body (http-get (str url (-> ak :faulty :files first :originalFileId)) {}))
               => (contains {:application application-id}))))))))
+
+(facts "Reviews with PATE"
+  (let [application-1    (create-and-submit-application pena :propertyId sipoo-property-id)
+        application-2    (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+        app-id-1         (:id application-1)
+        app-id-2         (:id application-2)
+        _                (give-verdict sonja app-id-1 :verdictId "753-2018-PATE")
+        _                (give-verdict raktark-jarvenpaa app-id-2 :verdictId "186-2018-0001")]
+
+    (fact "First review marked done should change state when PATE in use"
+     (let [result  (command sonja :create-task :id app-id-1 :taskName "Aloituskokous" :schemaName "task-katselmus" :taskSubtype "aloituskokous") => ok?
+           task-id (:taskId result)]
+       (command sonja :update-task :id app-id-1 :doc task-id :updates [["katselmus.tila" "lopullinen"] ["katselmus.pitoPvm" "15.02.2018"] ["katselmus.pitaja" "Auburn Authority"]]) => ok?
+       (command sonja :review-done :id app-id-1 :lang "fi" :taskId task-id) => ok?
+       (count (:tasks (query-application pena app-id-1))) => 1
+       (:state (query-application pena app-id-1)) => "constructionStarted"))
+
+    (fact "And send message"
+      (get-in (last (integration-messages app-id-1)) [:data :toState :name]) => "constructionStarted")
+
+    (fact "Second done review should change state"
+     (command sonja :change-application-state :id app-id-1 :state "appealed") => ok?
+     (command sonja :change-application-state :id app-id-1 :state "verdictGiven") => ok?
+     (:state (query-application sonja app-id-1)) => "verdictGiven"
+     (let [result  (command sonja :create-task :id app-id-1 :taskName "Loppukatselmus" :schemaName "task-katselmus" :taskSubtype "loppukatselmus") => ok?
+           task-id (:taskId result)]
+     (command sonja :update-task :id app-id-1 :doc task-id :updates [["katselmus.tila" "lopullinen"] ["katselmus.pitoPvm" "15.02.2018"] ["katselmus.pitaja" "Auburn Authority"]]) => ok?
+     (command sonja :review-done :id app-id-1 :lang "fi" :taskId task-id) => ok?
+     (count (:tasks (query-application pena app-id-1))) => 2
+     (:state (query-application pena app-id-1)) => "verdictGiven"))
+
+   (fact "First review marked done without PATE shouldnt change state"
+     (let [result  (command raktark-jarvenpaa :create-task :id app-id-2 :taskName "Aloituskokous" :schemaName "task-katselmus" :taskSubtype "aloituskokous") => ok?
+           task-id (:taskId result)]
+       (command raktark-jarvenpaa :update-task :id app-id-2 :doc task-id :updates [["katselmus.tila" "lopullinen"] ["katselmus.pitoPvm" "15.02.2018"] ["katselmus.pitaja" "Auburn Authority"]]) => ok?
+       (command raktark-jarvenpaa :review-done :id app-id-2 :lang "fi" :taskId task-id) => ok?
+       (count (:tasks (query-application pena app-id-2))) => 1
+       (:state (query-application pena app-id-2)) => "verdictGiven"))))
