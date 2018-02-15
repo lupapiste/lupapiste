@@ -41,7 +41,7 @@
     canAdd: ko.pureComputed(function() {
       return authModel.ok("statement-attachment-allowed");
     }),
-    typeGroups: ko.observableArray(["ennakkoluvat_ja_lausunnot"]),
+    typeGroups: ko.observableArray(["ennakkoluvat_ja_lausunnot", "erityissuunnitelmat"]),
     dropZoneSectionId: "statement"};
 
   repository.loaded(["statement"], function(app) {
