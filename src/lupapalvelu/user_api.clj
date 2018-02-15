@@ -405,20 +405,21 @@
 
 (defcommand update-auth-info
   {:parameters       [firstName lastName email new-email]
-   :input-validators [(partial action/non-blank-parameters [:firstName :lastName :email :new-email])
-                      action/email-validator]
+   :input-validators [(partial action/non-blank-parameters [:firstName :lastName :email :new-email])]
    :user-roles        #{:authorityAdmin}}
   [{auth-admin :user}]
   (let [authority           (usr/find-user {:email email})
         valid-org?          (uu/auth-admin-can-view-authority authority auth-admin)
         valid-domain?       (uu/admin-and-user-have-same-email-domain authority auth-admin)
+        email-not-in-use?   (not (usr/email-in-use? new-email))
         user-info-editable? (uu/authority-has-only-one-org authority)
         data                {:email     new-email
                              :username  new-email
                              :firstName firstName
                              :lastName  lastName}]
     (cond
-      (and valid-org? valid-domain? user-info-editable?) (change-authority-email authority email data)
+      (and valid-org? valid-domain? email-not-in-use? user-info-editable?) (change-authority-email authority email data)
+      (not email-not-in-use?) (fail :error.duplicate-email)
       (not valid-domain?) (fail :error.auth-admin-and-authority-have-different-domains)
       (not user-info-editable?) (fail :error.authority-has-multiple-orgs)
       (not valid-org?) (fail :error.unauthorized)

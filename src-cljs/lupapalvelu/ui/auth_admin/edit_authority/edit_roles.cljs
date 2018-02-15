@@ -43,8 +43,8 @@
      (for [role (rum/react state/allowed-roles)]
        (role-checkbox current-roles-set role))
      [:button.primary {:disabled disabled?
-                       :on-click #(update-roles current-roles-set)}
-      (if saving?
-        [:i.lupicon.wait.spin.lupicon-refresh]
-        [:i.lupicon-save])
+                       :on-click #(update-roles current-roles-set)
+                       :class (when saving? "waiting")}
+      [:i.lupicon-save]
+      [:i.wait.spin.lupicon-refresh]
       [:span (loc "save")]]]))

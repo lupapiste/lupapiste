@@ -21,18 +21,18 @@
   (let [success-fn (fn []
                      (reset! state/saving-info? false)
                      (util/get-authority))
-        params {:command               "update-auth-info"
-                :show-saved-indicator? true
-                :success               success-fn}
-        firstName (:firstName @user-info)
-        lastName (:lastName @user-info)
-        email (:email @state/authority)
-        new-email (:email @user-info)]
+        params     {:command               "update-auth-info"
+                    :show-saved-indicator? true
+                    :success               success-fn}
+        firstName  (:firstName @user-info)
+        lastName   (:lastName @user-info)
+        email      (:email @state/authority)
+        new-email  (:email @user-info)]
     (reset! state/saving-info? true)
     (command params :firstName firstName
-             :lastName lastName
-             :email email
-             :new-email new-email)))
+                    :lastName lastName
+                    :email email
+                    :new-email new-email)))
 
 (defn- admin-and-user-have-same-email-domain [authority]
   (let [auth-admin-email (get-user-field "email")
@@ -58,8 +58,8 @@
      [:h2 (loc "auth-admin.edit-authority.user-info-title")]
      (map #(info-textfield user-info % (get user %)) [:firstName :lastName :email])
      [:button.primary {:disabled disabled
-                       :on-click #(update-user-info user-info)}
-      (if saving?
-        [:i.wait.spin.lupicon-refresh]
-        [:i.lupicon-save])
+                       :on-click #(update-user-info user-info)
+                       :class (when saving? "waiting")}
+      [:i.lupicon-save]
+      [:i.wait.spin.lupicon-refresh]
       [:span (loc "save")]]]))
