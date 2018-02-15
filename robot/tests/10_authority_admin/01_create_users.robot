@@ -21,8 +21,8 @@ Authority admin creates two users
 
 Authority admin removes Heikki
   ${userCount} =  Get Matching Xpath Count  ${userRowXpath}
-  Element should be visible  xpath=//div[contains(@class, 'admin-users-table')]//tr[@data-user-email='heikki.virtanen@example.com']//a[@data-op='removeFromOrg']
-  Click element  xpath=//div[contains(@class, 'admin-users-table')]//tr[@data-user-email='heikki.virtanen@example.com']//a[@data-op='removeFromOrg']
+  Element should be visible  xpath=//div[contains(@class, 'admin-users-table')]//tr[@data-user-email='heikki.virtanen@example.com']//button[@data-op='removeFromOrg']
+  Click element  xpath=//div[contains(@class, 'admin-users-table')]//tr[@data-user-email='heikki.virtanen@example.com']//button[@data-op='removeFromOrg']
   Confirm  dynamic-yes-no-confirm-dialog
   ${userCountAfter} =  Evaluate  ${userCount} - 1
   User count is  ${userCountAfter}
