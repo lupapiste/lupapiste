@@ -17,7 +17,7 @@ LUPAPISTE.TargetedAttachmentsModel = function( params ) {
   var service = lupapisteApp.services.attachmentsService;
 
   var readOnly = self.disposedComputed( function() {
-    return !(canAdd && service.authModel.ok( "bind-attachment"));
+    return !(ko.unwrap(canAdd) && service.authModel.ok( "bind-attachment"));
   });
 
   self.upload = new LUPAPISTE.UploadModel(self,

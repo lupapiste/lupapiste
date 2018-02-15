@@ -118,8 +118,8 @@
   (when-not (->> (get-statement application statement-id) :state keyword pre-repliable-states)
     (fail :error.statement-reply-is-already-visible)))
 
-(defn statement-not-given [{{:keys [statementId]} :data application :application}]
-  (when-not (->> statementId (get-statement application) :state keyword pre-given-states)
+(defn statement-not-given [{{:keys [statementId target]} :data application :application}]
+  (when-not (->> (or statementId (:id target)) (get-statement application) :state keyword pre-given-states)
     (fail :error.statement-already-given)))
 
 (defn statement-given [{{:keys [statementId]} :data application :application}]
@@ -147,6 +147,7 @@
 
 (defmethod att/upload-to-target-allowed :statement [{{:keys [state]} :application :as command}]
   (or (statement-in-sent-state-allowed command)
+      (statement-not-given command)
       (statement-owner command)))
 
 (defmethod att/edit-allowed-by-target :statement [{{attachment-id :attachmentId} :data user :user {:keys [statements] :as application} :application}]
