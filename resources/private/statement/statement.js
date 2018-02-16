@@ -50,7 +50,9 @@
       return authModel.ok("statement-attachment-allowed");
     }),
     typeGroups: ko.observableArray(["ennakkoluvat_ja_lausunnot", "erityissuunnitelmat"]),
-    dropZoneSectionId: "statement"};
+    dropZoneSectionId: "statement",
+    template: "targeted-attachments-statement"
+  };
 
   repository.loaded(["statement"], function(app) {
     if (applicationId() === app.id) {
