@@ -411,7 +411,7 @@
   (let [authority           (usr/find-user {:email email})
         valid-org?          (uu/auth-admin-can-view-authority authority auth-admin)
         valid-domain?       (uu/admin-and-user-have-same-email-domain authority auth-admin)
-        email-not-in-use?   (not (usr/email-in-use? new-email))
+        email-not-in-use?   (if (= email new-email) true (not (usr/email-in-use? new-email)))
         user-info-editable? (uu/authority-has-only-one-org authority)
         data                {:email     new-email
                              :username  new-email

@@ -5,11 +5,13 @@
             [rum.core :as rum]))
 
 (defn- role-checkbox [current-roles label]
-  [:div {:key (str "role-check-box-" label)}
-   [:label
-    [:input {:type      "checkbox"
-             :checked   (@current-roles label)
-             :on-change #(swap! current-roles util/set-toggle label)}]
+  [:div.checkbox-wrapper {:key (str "role-check-box-" label)}
+   [:input {:type "checkbox"
+            :checked   (some? (@current-roles label))
+            :on-change #(swap! current-roles util/set-toggle label)
+            :id (str "role-check-box-" label)}]
+   [:label.checkbox-label {:for (str "role-check-box-" label)}
+
     [:span (loc (str "authorityrole." label))]]])
 
 (defn- update-roles [roles]
@@ -35,15 +37,12 @@
   []
   (let [current-authority (rum/react state/authority)
         current-roles-set (atom (current-authority-roles-as-set current-authority))
-        disabled? (not= @current-roles-set
-                        (-> current-authority :orgAuthz (get @state/org-id) (set)))
         saving? (rum/react state/saving-roles?)]
-    [:div
+    [:div.edit-authority-roles
      [:h2 (loc "auth-admin.edit-authority.roles-title")]
      (for [role (rum/react state/allowed-roles)]
        (role-checkbox current-roles-set role))
-     [:button.primary {:disabled disabled?
-                       :on-click #(update-roles current-roles-set)
+     [:button.primary {:on-click #(update-roles current-roles-set)
                        :class (when saving? "waiting")}
       [:i.lupicon-save]
       [:i.wait.spin.lupicon-refresh]

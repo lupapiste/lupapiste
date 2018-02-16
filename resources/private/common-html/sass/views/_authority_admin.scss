@@ -360,6 +360,24 @@ table.default-digitalization-location {
   border: none;
 }
 
-.edit-user-info-label {
-  display: block;
+.edit-authority-roles {
+  width: 60%;
+
+  button {
+    margin-top: 12px;
+  }
 }
+
+.edit-authority-info {
+
+  label {
+    display: block;
+  }
+
+  p {
+    margin-left: 0px;
+    margin-top: 12px;
+  }
+
+}
+

@@ -34,32 +34,34 @@
                     :email email
                     :new-email new-email)))
 
-(defn- admin-and-user-have-same-email-domain [authority]
-  (let [auth-admin-email (get-user-field "email")
-        authority-email (:email authority)
+(defn- admin-and-user-have-different-email-domain [authority]
+  (let [auth-admin-email    (get-user-field "email")
+        authority-email     (:email authority)
         email-domain-picker (fn [email] (-> email (s/split #"@") (last)))]
-    (= (email-domain-picker authority-email)
-       (email-domain-picker auth-admin-email))))
-
-(defn- auth-admin-can-edit-authority-info? [authority]
-  (let [user-has-one-org? (-> authority :orgAuthz (keys) (count) (= 1))
-        same-domain? (admin-and-user-have-same-email-domain authority)]
-    (not (and user-has-one-org? same-domain?))))
+    (not= (email-domain-picker authority-email)
+          (email-domain-picker auth-admin-email))))
 
 (rum/defc edit-authority-info < rum/reactive
   []
-  (let [user (rum/react state/authority)
-        saving? (rum/react state/saving-info?)
-        user-info (atom {:firstName (:firstName user)
-                         :lastName  (:lastName user)
-                         :email     (:email user)})
-        disabled (auth-admin-can-edit-authority-info? user)]
-    [:div
+  (let [user               (rum/react state/authority)
+        saving?            (rum/react state/saving-info?)
+        user-info          (atom {:firstName (:firstName user)
+                                  :lastName  (:lastName user)
+                                  :email     (:email user)})
+        multiple-org-user? (-> @state/authority :orgAuthz (keys) (count) (> 1))
+        not-same-domain?   (admin-and-user-have-different-email-domain @state/authority)
+        disabled?          (or multiple-org-user? not-same-domain?)]
+    [:div.edit-authority-info
      [:h2 (loc "auth-admin.edit-authority.user-info-title")]
      (map #(info-textfield user-info % (get user %)) [:firstName :lastName :email])
-     [:button.primary {:disabled disabled
+     [:button.primary {:disabled disabled?
                        :on-click #(update-user-info user-info)
                        :class (when saving? "waiting")}
       [:i.lupicon-save]
       [:i.wait.spin.lupicon-refresh]
-      [:span (loc "save")]]]))
+      [:span (loc "save")]]
+     (when disabled?
+       [:p.error-message.edit-info
+        (if multiple-org-user?
+          (loc :error.authority-has-multiple-orgs)
+          (loc :error.auth-admin-and-authority-have-different-domains))])]))

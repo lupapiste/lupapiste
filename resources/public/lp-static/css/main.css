@@ -35638,8 +35638,21 @@ table.default-digitalization-location {
   border: none;
 }
 
-.edit-user-info-label {
+.edit-authority-roles {
+  width: 60%;
+}
+
+.edit-authority-roles button {
+  margin-top: 12px;
+}
+
+.edit-authority-info label {
   display: block;
+}
+
+.edit-authority-info p {
+  margin-left: 0px;
+  margin-top: 12px;
 }
 
 #neighbor-show .pending {
