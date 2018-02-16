@@ -35,12 +35,6 @@
              :path "pate-enabled"
              :value flag) => ok?))
 
-(defn no-errors? [{:keys [errors ok]}]
-  (and (nil? errors) (true? ok)))
-
-(defn invalid-value? [{:keys [errors]}]
-  (util/=as-kw (-> errors first last) :error.invalid-value))
-
 (defn check-kuntagml [{:keys [organization permitType id]} verdict-date]
   (let [organization (organization-from-minimal-by-id organization)
         permit-type (keyword permitType)
