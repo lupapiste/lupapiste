@@ -22,8 +22,16 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   //var authModel = lupapisteApp.models.applicationAuthModel;
   self.showConstruction = self.disposedPureComputed( _.wrap( "set-attachment-as-construction-time",
                                                              service.authModel.ok));
-  self.showSign = self.disposedPureComputed( _.wrap( "sign-attachments",
-                                                     service.authModel.ok));
+  self.showSign = self.disposedPureComputed(function() {
+    var dc = ko.unwrap(defaults.disabledCols);
+    return service.authModel.ok("sign-attachments") && (!_.isArray(dc) || !_.includes(dc, "sign"));
+  });
+
+  self.showDrawing = self.disposedPureComputed(function() {
+    var dc = ko.unwrap(defaults.disabledCols);
+    return !_.isArray(dc) || !_.includes(dc, "drawing");
+  });
+
   self.isArchivingProject = service.isArchivingProject;
 
   self.contentsPrevEntriesKey = self.disposedComputed(function() {
@@ -40,7 +48,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   };
 
   self.colspan = self.disposedPureComputed(function() {
-    var span = 5;
+    var span = 4;
     if (self.isArchivingProject()) {
       span = span + 2;
     }
@@ -48,6 +56,9 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
       span = span + 1;
     }
     if (self.showConstruction()) {
+      span = span + 1;
+    }
+    if (self.showDrawing()) {
       span = span + 1;
     }
     return span;
