@@ -116,6 +116,7 @@
                                                                          first
                                                                          :name)
                                                                      (keyword (:language verdict-data))))
+          (fact "vaadittuLupaehtona" (get-in aloituskokous [:data :vaadittuLupaehtona :value]) =>  true)
           (fact "Buildings"
             (fact "has one" (count (keys (get-in aloituskokous [:data :rakennus]))) => 1)
             (fact "VTJ-PRT" (get-in aloituskokous [:data :rakennus :0 :rakennus :valtakunnallinenNumero :value]) => "1234567881")))
@@ -127,6 +128,9 @@
                                                                           second
                                                                           :name)
                                                                       (keyword (:language verdict-data))))
+          (fact "vaadittuLupaehtona" (get-in loppukatselmus [:data :vaadittuLupaehtona :value]) =>  true)
           (fact "Buildings"
             (fact "has one" (count (keys (get-in loppukatselmus [:data :rakennus]))) => 1)
-            (fact "VTJ-PRT" (get-in loppukatselmus [:data :rakennus :0 :rakennus :valtakunnallinenNumero :value]) => "1234567881")))))))
+            (fact "VTJ-PRT" (get-in loppukatselmus [:data :rakennus :0 :rakennus :valtakunnallinenNumero :value]) => "1234567881")))
+        (fact "can't delete because vaadittuLupaehtona"
+          (command sonja :delete-task :id app-id :taskId (:id aloituskokous)) => (partial expected-failure? :error.task-is-required))))))

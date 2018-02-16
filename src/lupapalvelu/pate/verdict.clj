@@ -635,7 +635,7 @@
                             {:pate-verdicts.$.data      (:data verdict)
                              :pate-verdicts.$.published created}
                             {:buildings buildings}
-                            (when (seq tasks) {:tasks tasks})
+                            (when (seq tasks) {:tasks tasks}) ; in re-publish situation, old tasks are nuked and new ones generated
                             (att/attachment-array-updates (:id application)
                                                           #(util/includes-as-kw? (map :id att-items)
                                                                                  (:id %))
