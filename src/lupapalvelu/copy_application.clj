@@ -287,11 +287,7 @@
 (defn create-company-auth [old-company-auth]
   (when-let [company-id (auth-id old-company-auth)]
     (when-let [company (company/find-company-by-id company-id)]
-      (assoc
-       (company/company->auth company)
-       :id "" ; prevents access to application before accepting invite
-       :role (:role old-company-auth)
-       :invite {:user {:id company-id}}))))
+      (company/company->auth company (:role old-company-auth)))))
 
 (defn create-user-auth [old-user-auth role inviter application-id timestamp & [text document-name document-id path]]
   (when-let [user (usr/get-user-by-id (:id old-user-auth))]

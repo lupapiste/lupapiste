@@ -450,16 +450,29 @@
   (ok))
 
 (defn company->auth
-  "No auth if company is currently locked."
-  [company]
-  (when-not (locked? company (now))
-      (some-> company
-           (select-keys [:id :name :y])
-           (assoc :role      "writer"
-                  :type      "company"
-                  :username  (-> company :y ss/trim ss/lower-case) ; usernames are always in lower case
-                  :firstName (:name company)
-                  :lastName  ""))))
+  "No auth if company is currently locked. The default role is
+  writer. However, if invite-role is given, the resulting auth is in
+  the invite format: only company-admin can read the application and
+  accept the invitation."
+  ([company invite-role]
+   (when-not (locked? company (now))
+     (when-let [auth (some-> company
+                             (select-keys [:id :name :y])
+                             (assoc :type      "company"
+                                    ;; usernames are always in lower case
+                                    :username  (-> company :y ss/trim ss/lower-case)
+                                    :firstName (:name company)
+                                    :lastName  ""))]
+       (if invite-role
+         (assoc auth
+                :role "reader"
+                :company-role :admin
+                :invite {:user    {:id (:id company)}
+                         :created (now)
+                         :role    invite-role})
+         (assoc auth :role "writer")))))
+  ([company]
+   (company->auth company nil)))
 
 (defn company-invitation-token [caller company-id application-id]
   (token/make-token
@@ -495,26 +508,20 @@
 
 (defn company-invite [caller application company-id]
   {:pre [(map? caller) (map? application) (string? company-id)]}
-  (let [company   (find-company! {:id company-id})
-        auth      (assoc (company->auth company)
-                    :id      company-id
-                    :role    "reader"
-                    :company-role :admin
-                    :inviter (usr/summary caller)
-                    :invite  {:user {:id company-id}
-                              :created (now)
-                              :role "writer"})
-        admins    (find-company-admins company-id)
+  (let [company        (find-company! {:id company-id})
+        auth           (assoc (company->auth company :writer)
+                              :inviter (usr/summary caller))
+        admins         (find-company-admins company-id)
         application-id (:id application)
-        update-count (update-application
-                       (application->command application)
-                       {:auth {$not {$elemMatch {:invite.user.id company-id}}}}
-                       {$push {:auth auth}, $set  {:modified (now)}}
-                       :return-count? true)]
+        update-count   (update-application
+                        (application->command application)
+                        {:auth {$not {$elemMatch {:invite.user.id company-id}}}}
+                        {$push {:auth auth}, $set {:modified (now)}}
+                        :return-count? true)]
     (when (pos? update-count)
-      (notif/notify! :accept-company-invitation {:admins     admins
-                                                 :inviter    caller
-                                                 :company    company
+      (notif/notify! :accept-company-invitation {:admins      admins
+                                                 :inviter     caller
+                                                 :company     company
                                                  :application application}))))
 
 (notif/defemail :accept-company-invitation {:subject-key   "accept-company-invitation.subject"
