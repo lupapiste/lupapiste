@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.verdict
   (:require [clj-time.core :as time]
+            [taoensso.timbre :refer [warnf]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
@@ -18,6 +19,7 @@
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.state-machine :as sm]
+            [lupapalvelu.tasks :as tasks]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp]
             [monger.operators :refer :all]
@@ -604,6 +606,16 @@
        (map (partial review/review->task verdict buildings ts))
        (remove nil?)))
 
+(defn log-task-katselmus-errors [tasks]
+  (when-let [errs (seq (mapv (partial tasks/task-doc-validation "task-katselmus") tasks))]
+    (doseq [err errs
+            :when (seq err)
+            sub-error err]
+      (warnf "PATE task (%s) validation warning - elem locKey: %s, results: %s"
+             (get-in sub-error [:document :id])
+             (get-in sub-error [:element :locKey])
+             (get-in sub-error [:result])))))
+
 (defn publish-verdict
   "Publishing verdict does the following:
    1. Finalize and publish verdict
@@ -625,10 +637,11 @@
         next-state             (sm/verdict-given-state application)
         buildings  (->buildings-array application)
         tasks      (pate-verdict->tasks verdict buildings command)
-        ; TODO validate tasks
         {att-items :items
          update-fn :update-fn} (attachment-items command verdict)
         verdict                (update verdict :data update-fn)]
+
+    (log-task-katselmus-errors tasks) ; TODO cancel publishing if validation errors?
     (verdict-update command
                     (util/deep-merge
                      {$set (merge
