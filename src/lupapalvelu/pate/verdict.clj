@@ -599,9 +599,9 @@
                               (map (fn [[k v]]
                                      (assoc k :amount (count v)))))))}))
 
-(defn pate-verdict->tasks [verdict buildings timestamp]
+(defn pate-verdict->tasks [verdict buildings {ts :created}]
   (->> (get-in verdict [:data :reviews])
-       (map (partial review/review->task verdict buildings timestamp))
+       (map (partial review/review->task verdict buildings ts))
        (remove nil?)))
 
 (defn publish-verdict
@@ -612,7 +612,7 @@
    4. Other document updates (e.g., waste plan -> waste report)
    5. Construct buildings array
    6. Freeze (locked and read-only) verdict attachments and update TOS details
-   7. TODO: Create tasks
+   7. Create tasks (old ones will be overwritten)
    8. Generate section (for non-board verdicts)
    9. Create PDF/A for the verdict
   10. Generate KuntaGML
@@ -625,6 +625,7 @@
         next-state             (sm/verdict-given-state application)
         buildings  (->buildings-array application)
         tasks      (pate-verdict->tasks verdict buildings command)
+        ; TODO validate tasks
         {att-items :items
          update-fn :update-fn} (attachment-items command verdict)
         verdict                (update verdict :data update-fn)]
@@ -634,6 +635,7 @@
                             {:pate-verdicts.$.data      (:data verdict)
                              :pate-verdicts.$.published created}
                             {:buildings buildings}
+                            (when (seq tasks) {:tasks tasks})
                             (att/attachment-array-updates (:id application)
                                                           #(util/includes-as-kw? (map :id att-items)
                                                                                  (:id %))
