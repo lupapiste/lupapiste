@@ -1,6 +1,7 @@
 // Parameters [optional]:
 // upload:       Upload model
 // [typeGroups]: Type groups available in the type selector (default all).
+// [disabledCols]: Columns that won't be shown. Supported values: drawing, sign
 // [defaults]: Default binding values (all optional): target, type,
 // group. Values can be observables.
 LUPAPISTE.AttachmentBatchModel = function(params) {
@@ -13,28 +14,26 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   var service = lupapisteApp.services.attachmentsService;
 
-  self.upload     = params.upload;
-  self.typeGroups = params.typeGroups;
-  var defaults    = params.defaults || {};
+  self.upload      = params.upload;
+  self.typeGroups  = params.typeGroups;
+  var defaults     = params.defaults || {};
+  var disabledCols = params.disabledCols;
 
   self.password = ko.observable();
 
-  //var authModel = lupapisteApp.models.applicationAuthModel;
   self.showConstruction = self.disposedPureComputed( _.wrap( "set-attachment-as-construction-time",
                                                              service.authModel.ok));
   self.showSign = self.disposedPureComputed(function() {
-    var dc = ko.unwrap(defaults.disabledCols);
-    return service.authModel.ok("sign-attachments") && (!_.isArray(dc) || !_.includes(dc, "sign"));
+    return service.authModel.ok("sign-attachments") && (!_.isArray(disabledCols) || !_.includes(disabledCols, "sign"));
   });
 
   self.showDrawing = self.disposedPureComputed(function() {
-    var dc = ko.unwrap(defaults.disabledCols);
-    return !_.isArray(dc) || !_.includes(dc, "drawing");
+    return !_.isArray(disabledCols) || !_.includes(disabledCols, "drawing");
   });
 
   self.isArchivingProject = service.isArchivingProject;
 
-  self.contentsPrevEntriesKey = self.disposedComputed(function() {
+  self.contentsPrevEntriesKey = self.disposedPureComputed(function() {
     return self.isArchivingProject() ? "contents" : null;
   });
 

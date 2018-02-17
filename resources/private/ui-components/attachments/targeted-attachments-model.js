@@ -14,6 +14,7 @@ LUPAPISTE.TargetedAttachmentsModel = function( params ) {
   self.componentTemplate = params.template || "targeted-attachments-default";
   self.defaults = params.defaults;
   self.typeGroups = params.typeGroups;
+  self.disabledCols = params.disabledCols;
   var canAdd = _.isUndefined( params.canAdd ) || params.canAdd;
 
   var service = lupapisteApp.services.attachmentsService;

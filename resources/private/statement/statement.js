@@ -44,9 +44,9 @@
           t += ", " + loc("liite");
         }
         return t;
-      }),
-      disabledCols: ["sign", "drawing"]
+      })
     },
+    disabledCols: ["sign", "drawing"],
     canAdd: ko.pureComputed(function() {
       return authModel.ok("statement-attachment-allowed");
     }),
