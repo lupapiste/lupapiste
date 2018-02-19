@@ -196,6 +196,7 @@ jQuery(document).ready(function() {
     {name: "register-company-buttons"},
     {name: "register-company-account-type"},
     {name: "register-company-info"},
+    {name: "register-company-summary"},
     {name: "cell-invoice-operator"},
     {name: "register-company-sign"},
     {name: "set-password"},

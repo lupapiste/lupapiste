@@ -10,7 +10,7 @@
     <!-- /ko -->
     <div class="tabby">
       <div class="tabby__row"
-           data-bind="foreach: stepNames">
+           data-bind="foreach: stepNames"> <!-- Row for names -->
         <!-- ko if: $index -->
         <div class="tabby__cell tabby--33">
         </div>
@@ -21,7 +21,7 @@
         </div>
       </div>
       <div class="tabby__row"
-           data-bind="foreach: stepNames">
+           data-bind="foreach: stepNames"> <!-- Row for number circles -->
         <!-- ko if: $index -->
         <div class="tabby__cell">
           <div class="edge"

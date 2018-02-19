@@ -222,12 +222,15 @@ LUPAPISTE.CompanyRegistrationService = function() {
                      {component: "register-company-info",
                       continueEnable: fieldsOk,
                       continueClick: initSign},
+                     {component: "register-company-summary",
+                      continueEnable: _.constant(true),
+                      continueClick: nextStep},
                      {component: "register-company-sign",
                       noButtons: true}];
 
-  self.currentConfig = function() {
-    return stepConfigs[self.currentStep()];
-  };
+  self.currentConfig = ko.pureComputed(function() {
+    return self.stepConfigs[self.currentStep()];
+  });
 
   // Save the current step and registration data to session
   // storage. This is needed, when the user signs in and the page is
