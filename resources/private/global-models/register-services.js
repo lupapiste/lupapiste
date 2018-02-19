@@ -38,5 +38,6 @@
   lupapisteApp.services.triggersTargetService = new LUPAPISTE.TriggerTargetService();
   lupapisteApp.services.triggerService = new LUPAPISTE.TriggerService();
   lupapisteApp.services.naviSidebarService = new LUPAPISTE.NaviSidebarService();
+  lupapisteApp.services.batchService = new LUPAPISTE.BatchService();
 
 })();
