@@ -773,9 +773,9 @@ Do prepare new request
   Textfield Value Should Be  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']  ${propertyId}
   Wait Until  Selected Municipality Is  ${municipality}
   Wait Until  Address is not blank
-  Execute Javascript  $("div[id='popup-id'] input[data-test-id='create-address']").val("${address}").change();
+  Sleep  1s
+  Input Text  //div[@id='popup-id']//input[@data-test-id='create-address']  ${address}
   Set animations off
-
   ${path} =   Set Variable  xpath=//div[@id="popup-id"]//button[@data-test-id="create-continue"]
   Wait until  Element should be enabled  ${path}
   Click element  ${path}
