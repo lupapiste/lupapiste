@@ -23,7 +23,7 @@
             [lupapalvelu.attachment.ram :as ram]
             [lupapalvelu.attachment.stamping :as stamping]
             [lupapalvelu.attachment.conversion :as conversion]
-            [lupapalvelu.attachment.stamp-schema :refer [StampTemplate]]
+            [lupapalvelu.attachment.stamp-schema :refer [StampTemplate Stamp JSONStampSchema]]
             [lupapalvelu.building :as building]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
@@ -645,21 +645,11 @@
   [{user :user application :application app-org :organization user-orgs :user-organizations}]
   (ok :stamps (stamps/stamps @app-org application user)))
 
-(sc/defschema StampSchema
-  {:id   ssc/ObjectIdStr
-   :name sc/Str
-   :position {:x sc/Int :y sc/Int}
-   :background sc/Int
-   :page (sc/enum "all" "last" "first")
-   :qrCode sc/Bool
-   :rows [[{:type sc/Str
-            (sc/optional-key :value) (sc/maybe sc/Str)}]]})
-
 (defcommand stamp-attachments
   {:parameters [:id timestamp files lang stamp]
    :categories #{:attachments}
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])
-                      (partial action/parameters-matching-schema [:stamp] StampSchema)
+                      (partial action/parameters-matching-schema [:stamp] JSONStampSchema)
                       (partial action/supported-lang :lang)]
    :pre-checks [any-attachment-has-version
                 no-attachment-is-archived]
