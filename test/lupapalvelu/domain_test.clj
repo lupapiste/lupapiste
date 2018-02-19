@@ -45,7 +45,7 @@
         invite2 {:email "kiss@example.com"}
         app     {:auth [{:role "writer" :invite invite1}
                         {:role "writer" :invite invite2 :type :company :inviter "inviter2"}
-                        {:role "owner"}]}]
+                        {:role "writer"}]}]
     (fact "has two invites" (invites app) => (just (assoc invite1 :type nil :inviter "inviter1")
                                                    (assoc invite2 :type :company :inviter "inviter2")))))
 

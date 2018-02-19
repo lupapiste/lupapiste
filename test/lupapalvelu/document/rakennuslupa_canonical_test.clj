@@ -513,7 +513,7 @@
            :lastName "Panaani"
            :username "pena"
            :type "owner"
-           :role "owner"}]
+           :role "writer"}]
    :state "submitted"
    :opened 1354532324658
    :submitted 1354532324658
@@ -1844,8 +1844,7 @@
    :auth [{:lastName "Panaani",
            :firstName "Pena",
            :username "pena",
-           :type "owner",
-           :role "owner",
+           :role "writer",
            :id "777777777777777777000020"}],
    :submitted 1384167310181,
    :state "submitted",
@@ -2041,8 +2040,7 @@
      :auth [{:lastName "Panaani",
              :firstName "Pena",
              :username "pena",
-             :type "owner",
-             :role "owner",
+             :role "writer",
              :id "777777777777777777000020"}],
      :submitted 1388665814105,
      :state "submitted",
