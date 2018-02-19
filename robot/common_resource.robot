@@ -833,6 +833,18 @@ Upload verdict or task attachment
   Click enabled by test id  batch-ready
   Wait until  No such test id  batch-ready
 
+Upload attachment with default type
+  [Arguments]  ${path}  ${testId}=upload-button-input
+  Test id visible  upload-button-label
+  Expose file input  input[data-test-id=${testId}]
+  Choose file  jquery=input[data-test-id=${testId}]  ${path}
+  Hide file input  input[data-test-id=${testId}]
+  Wait Until  Element should be visible  jquery=div.upload-progress--finished
+  Wait test id visible  batch-ready
+  Scroll to bottom
+  Click enabled by test id  batch-ready
+  Wait until  No such test id  batch-ready
+
 Upload attachment
   [Arguments]  ${path}  ${type}  ${contents}  ${grouping}
   Test id visible  add-attachments-label
