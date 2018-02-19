@@ -600,3 +600,64 @@
     (-> (canceled-app-context {:user {:id "1"}})
         :permissions)
     => empty?))
+
+(facts "copying documents and attachments when replacing primary operation"
+  (let [old-docs [{:schema-info {:name "uusiRakennus"}
+                   :data {:kaytto {:kayttotarkoitus {:value "very big house in the country"}}}}
+                  {:schema-info {:name "hakija-r"}
+                   :data {:henkilo {:henkilotiedot {:etunimi "city dweller"
+                                                    :sukunimi "successfull fella"}}}}]
+        new-docs [{:schema-info {:name "kaupunkikuvatoimenpide"}
+                   :data {:kayttotarkoitus nil}}
+                  {:schema-info {:name "hakija-r"}
+                   :data {:henkilo {:henkilotiedot {:etunimi nil
+                                                    :sukunimi nil}}}}]]
+    (fact "documents copy as they should"
+      (copy-docs-from-old-op-to-new old-docs new-docs)
+      => [{:schema-info {:name "kaupunkikuvatoimenpide"}
+           :data {:kayttotarkoitus nil}}
+          {:schema-info {:name "hakija-r"}
+           :data {:henkilo {:henkilotiedot {:etunimi "city dweller"
+                                            :sukunimi "successfull fella"}}}}]))
+  (let [old-attachments [{:type {:type-id "asemapiirros"
+                                 :type-group "paapiirustus"}
+                          :versions [{:version {:major 0
+                                                :minor 1}}
+                                     {:version {:major 1
+                                                :minor 1}}]
+                          :id "1"}
+                         {:type {:type-id "valtakirja"
+                                 :type-group "hakija"}
+                          :versions {:version {:major 0
+                                               :minor 1}}
+                          :id "2"}
+                         {:type {:type-id "paatos"
+                                 :type-group "paatoksenteko"}
+                          :versions []
+                          :id "3"}]
+        new-attachments [{:type {:type-id "valtakirja"
+                                 :type-group "hakija"}
+                          :versions []
+                          :id "4"}
+                         {:type {:type-id "tutkintotodistus"
+                                 :type-group "osapuolet"}
+                          :versions []
+                          :id "5"}]]
+    (fact "attachments copy as they should"
+      (copy-attachments-from-old-op-to-new old-attachments new-attachments)
+      => [{:type {:type-id "valtakirja"
+                  :type-group "hakija"}
+           :versions {:version {:major 0
+                                :minor 1}}
+           :id "2"}
+          {:type {:type-id "tutkintotodistus"
+                  :type-group "osapuolet"}
+           :versions []
+           :id "5"}
+          {:type {:type-id "asemapiirros"
+                  :type-group "paapiirustus"}
+           :versions [{:version {:major 0
+                                 :minor 1}}
+                      {:version {:major 1
+                                 :minor 1}}]
+           :id "1"}])))
