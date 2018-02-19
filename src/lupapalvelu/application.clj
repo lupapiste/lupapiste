@@ -686,6 +686,39 @@
   (->> (usr/find-authorized-users-in-org org-id org-authz)
        (map #(select-keys % [:id :firstName :lastName]))))
 
+(defn copy-docs-from-old-op-to-new [old-op-docs new-op-docs]
+  (let [doc-name-matcher (fn [new-doc old-doc] (= (-> new-doc :schema-info :name)
+                                                  (-> old-doc :schema-info :name)))]
+    (loop [acc []
+           old-docs old-op-docs
+           new-docs new-op-docs]
+      (if (empty? new-docs)
+        acc
+        (let [new-doc (first new-docs)
+              matching-old-docs (filter #(doc-name-matcher new-doc %) old-docs)]
+          (recur (concat acc (if (empty? matching-old-docs)
+                               [new-doc]
+                               matching-old-docs))
+                 (remove #(doc-name-matcher new-doc %) old-docs)
+                 (rest new-docs)))))))
+
+(defn copy-attachments-from-old-op-to-new [old-attachments new-attachments]
+  (let [type-matcher (fn [new-att old-att] (= (:type old-att) (:type new-att)))]
+    (loop [acc []
+           old-attachments old-attachments
+           new-attachments new-attachments]
+      (if (empty? new-attachments)
+        (if (empty? old-attachments)
+          acc
+          (concat acc (remove #(-> % :versions (empty?)) old-attachments)))
+        (let [new-attachment (first new-attachments)
+              old-atts-of-the-new-att-type (filter #(type-matcher new-attachment %) old-attachments)]
+          (recur (concat acc (if (empty? old-atts-of-the-new-att-type)
+                               [new-attachment]
+                               old-atts-of-the-new-att-type))
+                 (remove #(type-matcher new-attachment %) old-attachments)
+                 (rest new-attachments)))))))
+
 ;; Cancellation
 
 (defn- remove-app-links [id]
