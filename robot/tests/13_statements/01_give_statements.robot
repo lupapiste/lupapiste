@@ -216,13 +216,15 @@ Veikko cannot delete statement requests
   Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-1']
   Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-3']
 
-Veikko from Tampere can give statement (and attach something to it as well)
+Veikko from Tampere can give statement as attachment
   Open statement  veikko.viranomainen@tampere.fi
   Wait Until  element should be enabled  statement-text
-  Input text  statement-text  uittotunnelin vieressa on tilaa.
-  Upload attachment with default type  ${TXT_TESTFILE_PATH}
-  Wait Until  Element should contain  xpath=//table[@data-test-id="targetted-attachments-table"]//span  Tampereen luvat, liite
+  Click label by test id  statement-provided-as-attachment-label
   Select From List By Value  statement-type-select  ehdollinen
+  Wait until  Element Should Be Disabled  statement-submit
+  Upload attachment with default type  ${TXT_TESTFILE_PATH}
+  Wait Until  Element should contain  xpath=//table[@data-test-id="targetted-attachments-table"]//span  Tampereen luvat
+  Element should contain  xpath=//table[@data-test-id="targetted-attachments-table"]//td  Lausunto
   Wait until  Element Should Be Enabled  statement-submit
   Scroll to  \#statement-submit
   Click Element  statement-submit
