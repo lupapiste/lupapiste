@@ -215,8 +215,8 @@ LUPAPISTE.CompanyRegistrationService = function() {
 
   // Definitions for the first three wizard steps. The last step
   // (Activation) is accessed via an email link and does not use the
-  // service.
-  var stepConfigs = [{component: "register-company-account-type",
+  // service. ---> Why not??? :)
+  self.stepConfigs = [{component: "register-company-account-type",
                       continueEnable: self.registration.accountType,
                       continueClick: nextStep},
                      {component: "register-company-info",

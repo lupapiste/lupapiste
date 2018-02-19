@@ -18,7 +18,7 @@ LUPAPISTE.RegisterCompanyStepsModel = function( params ) {
 
   self.currentStep = params.step ? ko.observable( params.step ) : service.currentStep;
 
-  self.stepNames = _.map( _.range(1, 5),
+  self.stepNames = _.map( _.range(1, service.stepConfigs.length + 1 + 1), // + 1 to be inclusive + 1 is for success/fail page, which is not handled 'normally'
                           _.partial( sprintf, "register.company.phase.%s"));
 
   self.isLast = function( index ) {
