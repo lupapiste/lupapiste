@@ -112,10 +112,6 @@
                                       :application/create-continuation-period-permit
                                       :application/create-foreman-app-in-post-verdict-states
                                       :application/convert-to-application}
-                :writer             #{:application/read
-                                      :application/accordions-open
-                                      :application/edit-draft
-                                      :application/convert-to-application}
                 :reader             #{:application/read
                                       :application/accordions-open}
                 :foreman            #{:application/read
