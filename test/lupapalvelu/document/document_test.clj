@@ -111,7 +111,7 @@
 (facts "document user-authz-roles validation"
   (let [command {:application
                  {:auth [{:id "1" :role "guest"}
-                         {:id "2" :role "owner"}
+                         {:id "2" :role "writer"}
                          {:id "3" :role "writer"}
                          {:id "4" :role "foreman"}]
                   :organization "000-R"
@@ -121,10 +121,6 @@
     (fact "guest does not have access to docs"
       (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "1"), (assoc-in [:user :id] "1"))) => unauthorized?
       (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "1"))) => unauthorized?)
-
-    (fact "owner has access to docs"
-      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "1"), (assoc-in [:user :id] "2"))) => nil
-      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "2"))) => nil)
 
     (fact "writer has access to docs"
       (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "1"), (assoc-in [:user :id] "3"))) => nil

@@ -58,7 +58,7 @@
 
       (fact "For Sonja, invited candidates are Pena, Mikko, Teppo and Solita"
         (:candidates (query sonja :copy-application-invite-candidates :source-application-id app-id))
-        => (just [(assoc (select-keys pena-user [:firstName :lastName :id])  :email nil :role "owner" :roleSource "auth")
+        => (just [(assoc (select-keys pena-user [:firstName :lastName :id])  :email nil :role "writer" :roleSource "auth")
                   (assoc (select-keys mikko-user [:firstName :lastName :id]) :email nil :role "hakija" :roleSource "document")
                   (assoc (select-keys teppo-user [:firstName :lastName :id]) :email "teppo@example.com" :role "writer" :roleSource "auth")
                   (assoc {:firstName (:name solita-company)
@@ -68,7 +68,7 @@
 
       (fact "For Kaino, invited candidates are Pena, Mikko and Teppo, but not Solita (automatically invited)"
         (:candidates (query kaino :copy-application-invite-candidates :source-application-id app-id))
-        => (just [(assoc (select-keys pena-user [:firstName :lastName :id])  :email nil :role "owner" :roleSource "auth")
+        => (just [(assoc (select-keys pena-user [:firstName :lastName :id])  :email nil :role "writer" :roleSource "auth")
                   (assoc (select-keys mikko-user [:firstName :lastName :id]) :email nil :role "hakija" :roleSource "document")
                   (assoc (select-keys teppo-user [:firstName :lastName :id]) :email "teppo@example.com" :role "writer" :roleSource "auth")]
                  :in-any-order))))
@@ -101,7 +101,7 @@
                                               :address "Testitie 1"
                                               :auth-invites [pena-id (:id solita-company) teppo-id]
                                               :propertyId property-id) => ok?
-                                              copy-app (query-application sonja copy-app-id)]
+          copy-app (query-application sonja copy-app-id)]
 
       (fact "primaryOperation is copied, but id is new"
         (dissoc (:primaryOperation copy-app) :id)
@@ -118,9 +118,9 @@
         (:propertyId copy-app) => property-id
         (:municipality copy-app) => (prop/municipality-id-by-property-id property-id))
 
-      (fact "Sonja is new owner, Pena (previous owner) is invited as writer, Teppo's pending invitation has been transferred successfully"
+      (fact "Sonja is authorized to application, Pena is invited as writer, Teppo's pending invitation has been transferred successfully"
         (count (:auth copy-app)) => 4
-        (-> copy-app :auth (first) ((juxt :id :role))) => [(:id sonja-user) "owner"]
+        (-> copy-app :auth (first) ((juxt :id :role))) => [(:id sonja-user) "writer"]
         (-> copy-app :auth (second) ((juxt :id (comp :role :invite)))) => [pena-id "writer"]
         (-> copy-app :auth (get 2) ((juxt :name :type))) => [(:name solita-company) "company"]
         (let [teppo-auth (-> copy-app :auth last)]
@@ -148,8 +148,8 @@
       (fact "Only auths with ids in auth-invites are copied from old app"
         (let [{copy-app-id :id} (copy-application sonja app-id
                                                   :auth-invites []) => ok?
-                                                  copy-app (query-application sonja copy-app-id)]
-          (-> copy-app :auth (first) ((juxt :id :role))) => [(:id sonja-user) "owner"]
+              copy-app (query-application sonja copy-app-id)]
+          (-> copy-app :auth (first) ((juxt :id :role))) => [(:id sonja-user) "writer"]
           (-> copy-app :auth count) => 1))
       (fact "Copying fails if some of provided auth-invites don't exist in source application"
         (copy-application sonja app-id :auth-invites ["nonexistent" pena-id])

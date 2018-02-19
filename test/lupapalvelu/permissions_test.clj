@@ -53,6 +53,37 @@
   (fact "no permissions in command"
     (permissions? {} [:application/submit :comment/set-target]) => false))
 
+(facts roles-in-scope-with-permissions
+  (fact "test/test"
+    (roles-in-scope-with-permissions :test-scope [:test/test]) => #{:test-role})
+
+  (fact "test/test - string scope"
+    (roles-in-scope-with-permissions "test-scope" [:test/test]) => #{:test-role})
+
+  (fact "test/fail"
+    (roles-in-scope-with-permissions :test-scope [:test/fail]) => #{:test-role :another-test-role})
+
+  (fact "test/test + test/fail"
+    (roles-in-scope-with-permissions :test-scope [:test/test :test/fail]) => #{:test-role})
+
+  (fact "test/test + test/fail + test/do"
+    (roles-in-scope-with-permissions :test-scope [:test/test :test/fail :test/do]) => #{})
+
+  (fact "unknown scope"
+    (roles-in-scope-with-permissions :unknown [:test/fail]) => #{})
+
+  (fact "unknown permission"
+    (roles-in-scope-with-permissions :test-scope [:test/unknown]) => (throws java.lang.AssertionError))
+
+  (fact "nil scope"
+    (roles-in-scope-with-permissions nil [:test/fail]) => #{})
+
+  (fact "nil permissions"
+    (roles-in-scope-with-permissions :test-scope nil) => #{:test-role :another-test-role})
+
+  (fact "empty permissions"
+    (roles-in-scope-with-permissions :test-scope []) => #{:test-role :another-test-role}))
+
 (facts get-permissions-by-role
   (fact "existing scope and role"
     (get-permissions-by-role :test-scope "test-role") => #{:test/test :test/fail :test-more/test})

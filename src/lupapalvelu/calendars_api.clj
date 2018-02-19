@@ -377,7 +377,7 @@
     (when (and (usr/applicant? user) (not (= clientId userId)))
       (error "applicant trying to impersonate as " clientId " , failing reservation")
       (fail! :error.unauthorized))
-    (when (and (usr/authority? user) (not (domain/owner-or-write-access? application clientId)))
+    (when (and (usr/authority? user) (not (domain/write-access? application clientId)))
       (error "authority trying to invite " clientId "  not satisfying the owner-or-write-access rule, failing reservation")
       (fail! :error.unauthorized))
     (when (not (= (:organizationCode slot) organization))

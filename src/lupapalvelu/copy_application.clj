@@ -315,9 +315,6 @@
   {:auth (concat (app/application-auth inviter op-name)
                  (->> auth
                       (remove #(= (:id inviter) (:id %)))
-                      (map #(if (= (keyword (:role %)) :owner)
-                              (assoc % :role :writer)
-                              %))
                       (mapv #(auth->invite % inviter id created))))})
 
 
@@ -471,9 +468,8 @@
        (= :tyonjohtajan-nimeaminen-v2 (-> application :primaryOperation :name keyword))))
 
 (defn- notify-of-invite! [app command invite-type recipients]
-  (let [recipients (map (fn [{{:keys [email user]} :invite}]
-                          (usr/get-user-by-email email))
-                        recipients)]
+  (let [recipients (->> (filter :invite recipients)
+                        (map (comp usr/get-user-by-email :email :invite)))]
     (notif/notify! invite-type
                    (assoc command
                           :application app
@@ -499,7 +495,7 @@
 
 (defn send-invite-notifications! [{:keys [auth] :as application} {:keys [user] :as command}]
   (let [[users companies] ((juxt remove filter) (comp #{"company"} :type)
-                                                (remove (comp #{:owner :statementGiver} keyword :role)
+                                                (remove (comp #{:statementGiver} keyword :role)
                                                         auth))]
     ;; Non-company invites
     (user-invite-notifications! application command users)

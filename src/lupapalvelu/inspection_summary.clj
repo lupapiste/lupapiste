@@ -53,7 +53,7 @@
   [{application :application organization :organization {user-id :id} :user}]
   (when-not (and organization
                  (-> @organization :inspection-summaries-enabled)
-                 (domain/owner-or-write-access? application user-id))
+                 (domain/write-access? application user-id))
     unauthorized))
 
 (defn application-has-R-permit-type-pre-check

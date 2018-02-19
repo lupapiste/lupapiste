@@ -354,7 +354,7 @@
     (:paatokset verdict)))
 
 (defn verdicts->tasks [application timestamp]
-  (let [owner (first (auth/get-auths-by-role application :owner))
+  (let [owner (first (auth/get-auths-by-role application :writer))
         meta {:created timestamp
               :assignee (user/get-user-by-id (:id owner))}]
     (flatten (map #(verdict->tasks % meta application) (:verdicts application)))))

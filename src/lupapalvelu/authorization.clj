@@ -2,6 +2,7 @@
   (:require [clojure.set :refer [union]]
             [lupapalvelu.user :as usr]
             [lupapalvelu.roles :refer :all]
+            [lupapalvelu.permissions :as permissions]
             [lupapalvelu.application-schema :as aps]
             [lupapalvelu.document.tools :as doc-tools]
             [schema.core :refer [defschema] :as sc]
@@ -39,7 +40,7 @@
    :firstName                        sc/Str
    :lastName                         sc/Str
    :role                             (apply sc/enum all-authz-roles)
-   (sc/optional-key :type)           (sc/enum :company :owner)
+   (sc/optional-key :type)           (sc/enum :company)
    (sc/optional-key :company-role)   (sc/enum :admin :user)
    (sc/optional-key :name)           sc/Str
    (sc/optional-key :y)              ssc/FinnishY
@@ -52,6 +53,15 @@
 ;;
 ;; Auth utils
 ;;
+
+(defn get-auths-by-permissions
+  ([application permissions]
+   (get-auths-by-permissions application permissions [:application]))
+  ([{auth :auth} permissions scopes]
+   (let [roles (->> scopes
+                    (map #(permissions/roles-in-scope-with-permissions % permissions))
+                    (reduce into #{}))]
+     (filter (comp roles keyword :role) auth))))
 
 (defn get-auths-by-roles
   "Returns sequence of all auth-entries in an application with the
@@ -96,7 +106,7 @@
          user-or-user-id
          (usr/get-user-by-id user-or-user-id))
        (get-company-auths application)
-       (util/find-first (comp #{"writer" "owner"} :role))))
+       (util/find-first (comp #{"writer"} :role))))
 
 (defn has-auth-via-company? [application user-id]
   (or (auth-via-company application user-id) false))

@@ -21,11 +21,6 @@
 (defn- full-name [first-name last-name]
   (ss/trim (str last-name \space first-name)))
 
-(defn- applicant-name-from-auth [application]
-  (let [owner (first (auth/get-auths-by-role application :owner))
-        {first-name :firstName last-name :lastName} owner]
-    (full-name first-name last-name)))
-
 (defn applicant-name-from-doc-first-last [document]
   (when-let [body (:data document)]
     (if (= (get-in body [:_selected :value]) "yritys")
@@ -42,11 +37,10 @@
 
 (defn applicant-index [application]
   (let [applicants (remove ss/blank? (map applicant-name-from-doc (domain/get-applicant-documents (:documents application))))
-        applicant (or (first applicants) (applicant-name-from-auth application))
-        index (if (seq applicants) applicants [applicant])]
-    (tracef "applicant: '%s', applicant-index: %s" applicant index)
+        applicant  (first applicants)]
+    (tracef "applicant: '%s', applicant-index: %s" applicant applicants)
     {:applicant applicant
-     :_applicantIndex index}))
+     :_applicantIndex applicants}))
 
 (defn applicant-index-update [application]
   {$set (applicant-index application)})
@@ -67,9 +61,11 @@
   {$set (designers-index application)})
 
 (defn get-applicant-phone [_ app]
-  (let [owner (first (auth/get-auths-by-role app :owner))
-        user (usr/get-user-by-id (:id owner))]
-    (:phone user)))
+  (let [applicant-auth (first (auth/get-auths-by-role app :writer))]
+    (->> (if (= :company (keyword (:type applicant-auth)))
+           (usr/get-user {:company.id (:id applicant-auth) :company.role "admin"})
+           (usr/get-user-by-id (:id applicant-auth)))
+         :phone)))
 
 (defn get-applicant-companies [_ app]
   (let [companies (auth/get-company-auths app)]

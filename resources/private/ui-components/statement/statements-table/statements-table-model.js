@@ -74,7 +74,7 @@ LUPAPISTE.StatementsTableModel = function(params) {
 
   self.showReplyState = function(statement) {
     var user = lupapisteApp.models.currentUser;
-    if (self.application.userHasRole(user, "owner")) {
+    if (self.application.userHasRole(user, "writer")) {
       return _.includes(["replied"], util.getIn(statement, ["state"]));
     } else {
       return _.includes(["replyable", "replied"], util.getIn(statement, ["state"]));
