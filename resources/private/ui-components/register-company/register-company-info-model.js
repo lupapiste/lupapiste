@@ -26,13 +26,13 @@ LUPAPISTE.RegisterCompanyInfoModel = function() {
 
   var emailWarning = service.field( "email" ).warning;
 
-  self.showLogin = self.disposedComputed( function() {
+  self.showLogin = self.disposedPureComputed( function() {
     return  !self.loggedIn() && emailWarning() === "email-in-use";
   });
 
 
   self.loginCallback = function() {
-    pageutil.showAjaxWait();
+    pageutil.showAjaxWait(loc("register.autologin"));
     var user = lupapisteApp.models.currentUser;
     var isAuth = user.isAuthority();
     var isCom = user.company.id();
