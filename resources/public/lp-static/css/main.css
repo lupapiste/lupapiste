@@ -35882,7 +35882,7 @@ div.register-company-wizard register-company-buttons .register-company-buttons-g
 
 div.register-company-wizard div.form-grid {
   margin-top: 2em;
-  border: 1px solid #eeeeee;
+  border: 1px solid #dddddd;
 }
 
 div.register-company-wizard div.form-grid h3 {
@@ -35907,7 +35907,7 @@ div.register-company-wizard .existing-user-sign-in {
 
 div.register-company-wizard div.register-company-container {
   margin-top: 0;
-  border: 1px solid #eeeeee;
+  border: 1px solid #dddddd;
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 20px;
@@ -35945,6 +35945,15 @@ div.register-company-wizard div.register-company-container img.logo {
 
 .login--error {
   color: #df3215;
+}
+
+.register-company-summary .tabby__row:last-child .tabby__cell {
+  border-top: 2px dotted #dddddd;
+  padding-top: 12px;
+}
+
+.register-company-summary .tabby__row:nth-last-child(2) .tabby__cell {
+  padding-bottom: 20px;
 }
 
 #login h1 {

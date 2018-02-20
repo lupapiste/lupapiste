@@ -229,7 +229,7 @@ div.register-company-wizard {
   }
   div.form-grid {
     margin-top: 2em;
-    border: 1px solid $gray238;
+    border: 1px solid $gray221;
     h3 {
       font-weight: bold;
       font-size: 1.5em;
@@ -250,7 +250,7 @@ div.register-company-wizard {
   }
   div.register-company-container {
     margin-top: 0;
-    border: 1px solid $gray238;
+    border: 1px solid $gray221;
     padding: {
       left: 20px;
       right: 20px;
@@ -285,4 +285,20 @@ div.register-company-wizard {
 
 .login--error {
   color: $negative;
+}
+
+.register-company-summary {
+  .tabby__row {
+    &:last-child {
+      .tabby__cell {
+        border-top: 2px dotted $gray221;
+        padding-top: $marginM;
+      }
+    }
+    &:nth-last-child(2) {
+      .tabby__cell {
+        padding-bottom: 20px;
+      }
+    }
+  }
 }
