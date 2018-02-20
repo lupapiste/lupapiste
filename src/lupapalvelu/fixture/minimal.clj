@@ -1457,6 +1457,7 @@
 
 (def companies [{:id "solita"
                  :accountType "account5"
+                 :billingType "monthly"
                  :customAccountLimit nil
                  :created 1412959886600
                  :name "Solita Oy"
@@ -1474,6 +1475,7 @@
                          :label "Projekti1"}]}
                 {:id "esimerkki"
                  :accountType "account5"
+                 :billingType "monthly"
                  :customAccountLimit nil
                  :created 1493200035783
                  :name "Esimerkki Oy"

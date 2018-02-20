@@ -29,13 +29,20 @@
 
 (def account-types [{:name :account5
                      :limit 5
-                     :price 59}
+                     :price {:monthly 69
+                             :yearly 792}}
                     {:name :account15
                      :limit 15
-                     :price 79}
+                     :price {:monthly 89
+                             :yearly 1020}}
                     {:name :account30
                      :limit 30
-                     :price 99}])
+                     :price {:monthly 109
+                             :yearly 1236}}])
+
+(def billing-types (->> account-types
+                        (mapcat (comp keys :price))         ; all keys under :price
+                        (distinct)))
 
 (defn user-limit-for-account-type [account-name]
   (let [account-type (some #(if (= (:name %) account-name) %) account-types)]
@@ -45,6 +52,7 @@
               :name                                (ssc/min-max-length-string 1 64)
               :y                                   ssc/FinnishY
               :accountType                         (apply sc/enum "custom" (map (comp name :name) account-types))
+              :billingType                         (apply sc/enum (map name billing-types))
               :customAccountLimit                  (sc/maybe sc/Int)
               (sc/optional-key :reference)         (sc/maybe (ssc/max-length-string 64))
               :address1                            (sc/maybe (ssc/max-length-string 64))
@@ -260,6 +268,11 @@
        (or (= :custom (keyword old-type))
            (= :custom (keyword new-type)))))
 
+(defn changing-billing-type?
+  "True if company :billingType was changed"
+  [{old :billingType} {new :billingType}]
+  (boolean (when new (not= old new))))
+
 (defn- changes [old new]
   (let [[in-old in-new _] (diff old new)
         keyset (set/union (-> in-old keys set) (-> in-new keys set))
@@ -278,7 +291,8 @@
         limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (validate! updated)
     (when (and (not (usr/admin? caller))
-               (account-type-changing-with-custom? company updates)) ; only admins are allowed to change account type to/from 'custom'
+               (or (account-type-changing-with-custom? company updates)
+                   (changing-billing-type? company updates))) ; only admins are allowed to change account type to/from 'custom'
       (fail! :error.unauthorized))
     (when (and (not (usr/admin? caller)) (not (custom-account? company)) (< limit old-limit))
       (fail! :company.account-type-not-downgradable))

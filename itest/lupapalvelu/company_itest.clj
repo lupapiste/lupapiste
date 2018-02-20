@@ -211,6 +211,11 @@
       (fact "Solita admin can set account to be 'custom', customAccountLimit needs to be set"
         (command admin :company-update :company company-id :updates {:accountType "custom"}) => (partial expected-failure? "company.missing.custom-limit")
         (command admin :company-update :company company-id :updates {:accountType "custom" :customAccountLimit 3}) => ok?))
+    (facts "billingType"
+      (fact "Solita admin can change"
+        (command admin :company-update :company company-id :updates {:billingType "yearly"}) => ok?)
+      (fact "Kaino can't change"
+        (command kaino :company-update :company company-id :updates {:billingType "yearly"}) => unauthorized?))
 
     (fact "When company has max count of users, new member can't be invited"
       (command kaino :company-invite-user :email "pena@example.com" :admin false :submit true) => (partial expected-failure? "error.company-user-limit-exceeded"))))

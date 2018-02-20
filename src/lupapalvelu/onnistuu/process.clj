@@ -139,12 +139,13 @@
         [content-type ((:content pdf))])
       (let [filename (str "yritystilisopimus-" (-> process :company :name) ".pdf")
             account-type (keyword (get-in process [:company :accountType]))
+            billing-type (keyword (get-in process [:company :billingType]))
+            selected-account (util/find-by-key :name account-type c/account-types)
             account {:type  (i18n/localize "fi" :register :company account-type :title)
                      :price (i18n/localize-and-fill "fi"
-                                                    [:register :company :price]
-                                                    (:price (util/find-by-key :name
-                                                                              account-type
-                                                                              c/account-types)))}
+                                                    [:register :company :billing billing-type :price]
+                                                    (get-in selected-account [:price billing-type]))
+                     :billingType (ss/lower-case (i18n/localize "fi" :register :company :billing billing-type :title))}
             pdf (docx/yritystilisopimus (:company process) (:signer process) account ts)
             sha256 (pandect/sha256 pdf)]
         (debug "sign:fetch-document:upload-to-mongo")

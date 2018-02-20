@@ -17,6 +17,9 @@ LUPAPISTE.CompanyRegistrationService = function() {
   // Property names are the same as used by the backend.
   function newRegistration() {
     return {
+      billingType: ko.observable().extend({
+        limited: {values: ["monthly", "yearly"], defaultValue: "yearly"}
+      }),
       accountType: ko.observable(),
       name: ko.observable(),
       y: ko.observable(),
@@ -128,13 +131,13 @@ LUPAPISTE.CompanyRegistrationService = function() {
             testId: "register-company-" + fieldName};
   };
 
-  self.accountTypes = ko.computed( function() {
+  self.accountTypes = ko.pureComputed(function() {
+    var billingType = self.registration.billingType();
     return _.map( LUPAPISTE.config.accountTypes, function( account ) {
       return { id: account.name,
                title: loc( sprintf( "register.company.%s.title",
                                     account.name )),
-               price: loc(  "register.company.price",
-                            account.price),
+               price: loc("register.company.price", _.get(account.price, billingType)),
                description: loc( "register.company.account.description",
                                  account.limit )};
     });
@@ -191,7 +194,8 @@ LUPAPISTE.CompanyRegistrationService = function() {
                                    ["accountType", "name", "y", "address1",
                                     "zip", "po", "country", "netbill",
                                     "pop", "reference", "campaign", "contactAddress",
-                                   "contactZip", "contactPo", "contactCountry"]),
+                                    "contactZip", "contactPo", "contactCountry",
+                                    "billingType"]),
                   signer: _.pick( reg,
                                  ["firstName", "lastName", "email",
                                   "personId", "language"])};
@@ -221,10 +225,10 @@ LUPAPISTE.CompanyRegistrationService = function() {
                       continueClick: nextStep},
                      {component: "register-company-info",
                       continueEnable: fieldsOk,
-                      continueClick: initSign},
+                      continueClick: nextStep},
                      {component: "register-company-summary",
                       continueEnable: _.constant(true),
-                      continueClick: nextStep},
+                      continueClick: initSign},
                      {component: "register-company-sign",
                       noButtons: true}];
 
