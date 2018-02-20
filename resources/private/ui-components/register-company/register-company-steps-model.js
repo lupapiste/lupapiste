@@ -25,6 +25,16 @@ LUPAPISTE.RegisterCompanyStepsModel = function( params ) {
     return index === _.size( self.stepNames ) - 1;
   };
 
+  var tabbyClasses = [10, 20, 25, 33, 40, 50, 75, 80, 90, 100]; // defined in _tables.scss
+
+  self.dynamicLineCss = self.disposedPureComputed(function() { // returns correct class depending on amount of 'steps' to be shown
+    var divider = (100 / (self.stepNames.length || 1));
+    var selectedClass = _.reduce(tabbyClasses, function(acc, item) {
+      return acc < divider ? item : acc;
+    });
+    return _.set({"tabby__cell": true}, "tabby--" + selectedClass, true);
+  });
+
   self.stepCss = function( index ) {
     var step = self.currentStep();
     index = ko.unwrap( index );

@@ -12,7 +12,7 @@
       <div class="tabby__row"
            data-bind="foreach: stepNames"> <!-- Row for names -->
         <!-- ko if: $index -->
-        <div class="tabby__cell tabby--33">
+        <div data-bind="css: $parent.dynamicLineCss">
         </div>
         <!-- /ko -->
         <div class="tabby__cell">
