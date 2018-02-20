@@ -151,7 +151,7 @@
     company))
 
 (defn find-company
-  "Returns company mathing the provided query, or nil"
+  "Returns company matching the provided query, or nil"
   ([q]
    (when (seq q)
      (some->> q (mongo/with-_id) (mongo/select-one :companies))))
@@ -160,7 +160,7 @@
      (mongo/select-one :companies (mongo/with-_id query) projection))))
 
 (defn find-company!
-  "Returns company mathing the provided query. Throws if not found."
+  "Returns company matching the provided query. Throws if not found."
   ([q]
    (or (find-company q) (fail! :company.not-found)))
   ([query projection]
@@ -512,7 +512,6 @@
         auth           (assoc (company->auth company :writer)
                               :inviter (usr/summary caller))
         admins         (find-company-admins company-id)
-        application-id (:id application)
         update-count   (update-application
                         (application->command application)
                         {:auth {$not {$elemMatch {:invite.user.id company-id}}}}
@@ -530,11 +529,13 @@
                                                              (merge (notif/create-app-model model nil recipient)
                                                                     model))})
 
-(defmethod auth/approve-invite-auth :company [{invite :invite :as auth} {{company-id :id} :company :as user} accepted-ts]
+(defmethod auth/approve-invite-auth :company
+  [{invite :invite :as auth} {{company-id :id} :company :as user} accepted-ts]
   (when invite
     (some-> (find-company! {:id company-id})
             company->auth
             (util/assoc-when-pred util/not-empty-or-nil?
+              :role (:role invite)
               :inviter (:inviter auth)
               :inviteAccepted accepted-ts))))
 

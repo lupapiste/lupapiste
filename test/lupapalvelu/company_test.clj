@@ -1,10 +1,11 @@
 (ns lupapalvelu.company-test
-  (:require [midje.sweet :refer :all]
+  (:require [lupapalvelu.authorization :as auth]
             [lupapalvelu.company :as com]
+            [lupapalvelu.itest-util :refer [expected-failure?]]
             [lupapalvelu.mongo :as mongo]
+            [midje.sweet :refer :all]
             [sade.core :as core]
-            [sade.util :as util]
-            [lupapalvelu.itest-util :refer [expected-failure?]]))
+            [sade.util :as util]))
 
 (facts create-company
   (fact
@@ -280,4 +281,21 @@
         :y        "1234567-8"
         :address1 "Park View"
         :zip      "33333"
-        :po       "Headquarters"}))
+        :po       "Headquarters"}
+    (fact "Accept company invitation"
+      (auth/approve-invite-auth (assoc (com/company->auth firm :wizard)
+                                       :inviter {:name "hello"})
+                                {:company firm}
+                                12345678)
+      => {:type           "company"
+          :role           :wizard
+          :inviter        {:name "hello"}
+          :inviteAccepted 12345678
+          :username       (:y firm)
+          :firstName      "Firm"
+          :lastName       ""
+          :y              (:y firm)
+          :name           "Firm"
+          :id             "firm"}
+      (provided
+       (com/find-company! {:id "firm"}) => firm))))
