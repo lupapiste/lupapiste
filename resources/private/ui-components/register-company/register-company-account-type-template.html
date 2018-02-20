@@ -6,13 +6,21 @@
            data-bind="foreach: accountTypes">
         <div class="tabby__cell tabby--33">
           <div class="account-type-box"
-               data-bind="click: _.wrap( id, $parent.selected ),
-                          css: $parent.selectedCss( id ),
+               data-bind="click: _.wrap( id, $component.selected ),
+                          css: $component.selectedCss( id ),
                           testId: 'account-type-' + id">
             <h3 data-bind="text: title"></h3>
             <div class="account-type-price"
-                 data-bind="text: $parent.price( $data ),
+                 data-bind="text: $component.price( $data ),
                             testId: id + '-price'"></div>
+            <div class="account-billing-type-description">
+              <span data-bind="ltext: 'register.company.billing.' + $component.billingType() + '.description'">
+            </div>
+            <!-- ko if: $data.isYearly -->
+            <div class="overstrike-price"
+                 data-bind="text: normalYearPrice,
+                            testId: id + '-old-price'"></div>
+            <!-- /ko -->
             <div class="account-type-description"
                  data-bind="text: description"></div>
           </div>

@@ -181,13 +181,22 @@ div.register-company-wizard {
       }
       > .account-type-price {
         margin-top: 0.5em;
-        margin-bottom: 1em;
+        margin-bottom: 0.5em;
         font-size: 4em;
         font-weight: bold;
         color: $orange-dark;
         white-space: nowrap;
         &.campaign {
           margin-bottom: 0;
+        }
+      }
+      > .account-billing-type-description {
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+        span {
+          font-weight: bold;
+          font-size: $baseline;
+          color: $gray153;
         }
       }
       > .account-type-description {

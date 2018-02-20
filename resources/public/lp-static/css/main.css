@@ -35827,7 +35827,7 @@ div.register-company-wizard div.account-type-boxes div.account-type-box > h3 {
 
 div.register-company-wizard div.account-type-boxes div.account-type-box > .account-type-price {
   margin-top: 0.5em;
-  margin-bottom: 1em;
+  margin-bottom: 0.5em;
   font-size: 4em;
   font-weight: bold;
   color: #f39129;
@@ -35836,6 +35836,17 @@ div.register-company-wizard div.account-type-boxes div.account-type-box > .accou
 
 div.register-company-wizard div.account-type-boxes div.account-type-box > .account-type-price.campaign {
   margin-bottom: 0;
+}
+
+div.register-company-wizard div.account-type-boxes div.account-type-box > .account-billing-type-description {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+div.register-company-wizard div.account-type-boxes div.account-type-box > .account-billing-type-description span {
+  font-weight: bold;
+  font-size: 24px;
+  color: #999999;
 }
 
 div.register-company-wizard div.account-type-boxes div.account-type-box > .account-type-description {

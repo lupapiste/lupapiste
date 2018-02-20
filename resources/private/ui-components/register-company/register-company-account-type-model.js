@@ -11,6 +11,8 @@ LUPAPISTE.RegisterCompanyAccountTypeModel = function() {
 
   self.selected = service.registration.accountType;
 
+  self.billingType = service.registration.billingType;
+
   self.selectedCss = function( id ) {
     var isSelected = id === self.selected();
     return {selected: isSelected,
