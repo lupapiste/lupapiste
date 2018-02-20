@@ -30,15 +30,15 @@
 (def account-types [{:name :account5
                      :limit 5
                      :price {:monthly 69
-                             :yearly 792}}
+                             :yearly 786}}
                     {:name :account15
                      :limit 15
                      :price {:monthly 89
-                             :yearly 1020}}
+                             :yearly 1014}}
                     {:name :account30
                      :limit 30
                      :price {:monthly 109
-                             :yearly 1236}}])
+                             :yearly 1242}}])
 
 (def billing-types (->> account-types
                         (mapcat (comp keys :price))         ; all keys under :price
