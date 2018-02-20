@@ -10,11 +10,8 @@ LUPAPISTE.RegisterCompanyStepsModel = function( params ) {
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
   var service = lupapisteApp.services.companyRegistrationService;
-  var campService = lupapisteApp.services.campaignService;
 
-  var regularTexts = {title: "register.company.title"};
-
-  self.campaign = lupapisteApp.services.campaignService.campaign;
+  var regularTexts = {title: "register.company.title"}; // supports also 'subttitle'
 
   self.currentStep = params.step ? ko.observable( params.step ) : service.currentStep;
 
@@ -42,8 +39,5 @@ LUPAPISTE.RegisterCompanyStepsModel = function( params ) {
             past: step > index };
   };
 
-  self.texts = self.disposedPureComputed( function() {
-    var txt = campService.campaignTexts() || regularTexts;
-    return self.currentStep() ? _.omit( txt, "subtitle") : txt;
-  });
+  self.texts = regularTexts;
 };
