@@ -284,14 +284,11 @@
   (if (empty? documents)
     (app/application-documents-map copied-application user organization manual-schema-datas)))
 
-(defn create-company-auth [old-company-auth]
+(defn create-company-auth [{:keys [role invite] :as old-company-auth} inviter]
   (when-let [company-id (auth-id old-company-auth)]
     (when-let [company (company/find-company-by-id company-id)]
-      (assoc
-       (company/company->auth company)
-       :id "" ; prevents access to application before accepting invite
-       :role (:role old-company-auth)
-       :invite {:user {:id company-id}}))))
+      (assoc (company/company->auth company (get invite :role role))
+             :inviter inviter))))
 
 (defn create-user-auth [old-user-auth role inviter application-id timestamp & [text document-name document-id path]]
   (when-let [user (usr/get-user-by-id (:id old-user-auth))]
@@ -304,8 +301,10 @@
   "Create an invite from existing auth entry."
   [old-auth inviter application-id timestamp]
   (if (= (:type old-auth) "company")
-    (create-company-auth old-auth)
-    (create-user-auth old-auth (:role old-auth) inviter application-id timestamp)))
+    (create-company-auth old-auth inviter)
+    (create-user-auth old-auth
+                      (get-in old-auth [:invite :role] (:role old-auth))
+                      inviter application-id timestamp)))
 
 (defn- new-auth-map [{auth           :auth
                      id              :id
