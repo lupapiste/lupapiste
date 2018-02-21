@@ -138,8 +138,9 @@ LUPAPISTE.CompanyRegistrationService = function() {
                title: loc( sprintf( "register.company.%s.title",
                                     account.name )),
                price: loc("register.company.price", _.get(account.price, billingType)),
+               priceRaw: account.price,
                isYearly: billingType === "yearly",
-               normalYearPrice: (_.get(account.price, "monthly") * 12) + " \u20AC",
+               normalYearPrice: (_.get(account.price, "monthly") * 12),
                description: loc( "register.company.account.description",
                                  account.limit )};
     });

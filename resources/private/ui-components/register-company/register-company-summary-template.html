@@ -9,12 +9,23 @@
         <span data-bind="ltext: 'register.company.billing.' + billingType() + '.description'"></span>
       </div>
       <div class="tabby__cell">
-        <span data-bind="text: totalPriceText"></span>
+        <span data-bind="text: normalPriceText"></span>
       </div>
     </div>
     <div class="tabby__row">
       <div class="tabby__cell">
-        <span class="inline-col" data-bind="text: selectedAccount().description"></span>
+        <span data-bind="text: selectedAccount().description"></span>
+      </div>
+
+      <div class="tabby__cell">
+        <!-- ko if: selectedAccount().isYearly -->
+        <span class="discount" data-bind="ltext: 'register.company.billing.discount'"></span>
+        <!-- /ko -->
+      </div>
+      <div class="tabby__cell">
+        <!-- ko if: selectedAccount().isYearly -->
+        <span class="discount" data-bind="text: yearlyPriceReductionText"></span>
+        <!-- /ko -->
       </div>
     </div>
     <div class="tabby__row total-row">

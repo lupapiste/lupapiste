@@ -317,6 +317,11 @@ div.register-company-wizard {
 
 .register-company-summary {
   .tabby__row {
+    .tabby__cell {
+      &:last-child {
+        text-align: right;
+      }
+    }
     &:last-child {
       .tabby__cell {
         border-top: 2px dotted $gray221;
@@ -328,5 +333,8 @@ div.register-company-wizard {
         padding-bottom: 20px;
       }
     }
+  }
+  span.discount {
+    color: $positive;
   }
 }

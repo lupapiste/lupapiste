@@ -16,7 +16,17 @@ LUPAPISTE.RegisterCompanySummaryModel = function() {
   });
 
   self.totalPriceText = self.disposedPureComputed(function() {
-    return self.selectedAccount().price;
+    return self.selectedAccount().price; // price is actually localized text (see service)
+  });
+
+  self.normalPriceText = self.disposedPureComputed(function() {
+    var acc = self.selectedAccount();
+    return (acc.isYearly ? acc.normalYearPrice : acc.priceRaw.monthly) + " \u20AC";
+  });
+
+  self.yearlyPriceReductionText = self.disposedPureComputed(function() {
+    var acc = self.selectedAccount();
+    return "- " + (acc.normalYearPrice - acc.priceRaw.yearly) + " \u20AC";
   });
 
 };
