@@ -21,7 +21,7 @@ LUPAPISTE.StatementEditModel = function(params) {
   var initSubscription = self.data.subscribe(function() {
     self.selectedStatus(util.getIn(self.data, ["status"]));
     self.text(util.getIn(self.data, ["text"]));
-    self.inAttachment(util.getIn(self.data, ["in-attachment"]))
+    self.inAttachment(util.getIn(self.data, ["in-attachment"]));
   });
 
   var commands = params.commands;
