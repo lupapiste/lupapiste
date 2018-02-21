@@ -145,6 +145,12 @@ LUPAPISTE.CompanyRegistrationService = function() {
     });
   });
 
+  self.selectedAccount = ko.pureComputed(function() {
+    return _.find(self.accountTypes(), function(account) {
+      return account.id === self.registration.accountType();
+    });
+  });
+
   // Guard makes sure that components are disposed, when they are
   // located within suitable if.
   function reset() {
