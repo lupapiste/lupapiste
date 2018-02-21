@@ -23,4 +23,8 @@ LUPAPISTE.RegisterCompanyAccountTypeModel = function() {
   self.price = function( data ) {
     return data.price;
   };
+
+  self.toggleBilling = function(type) { // toggles selected billing type defined in companyRegistrationService
+    self.billingType(type);
+  };
 };

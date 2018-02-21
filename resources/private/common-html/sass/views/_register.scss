@@ -224,6 +224,24 @@ div.register-company-wizard {
       }
     }
   }
+  .account-billing-type-select {
+    div.button-container {
+      display: inline-block;
+      button {
+        margin: $marginM 0;
+        padding: $marginM;
+        background-color: $gray246;
+        span {
+          display: block;
+          text-align: center;
+        }
+        &.selected {
+          border: 4px solid $orange-dark;
+        }
+      }
+    }
+  }
+
   register-company-buttons {
     display: block;
     text-align: center;
