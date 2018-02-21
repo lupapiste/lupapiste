@@ -309,32 +309,50 @@ div.register-company-wizard {
       height: auto;
     }
   }
+  div.register-company-summary {
+    .tabby__row {
+      .tabby__cell {
+        &:last-child {
+          text-align: right;
+        }
+      }
+      &:last-child {
+        .tabby__cell {
+          border-top: 2px dotted $gray221;
+          padding-top: $marginM;
+        }
+      }
+      &:nth-last-child(2) {
+        .tabby__cell {
+          padding-bottom: 20px;
+        }
+      }
+    }
+    span.discount {
+      color: $positive;
+    }
+  }
+  div.register-company-confirmation {
+    display: block;
+    margin: $marginL 0;
+    padding: 0;
+    border: 1px solid $orange-dark;
+    i, span {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    i {
+      color: white;
+      background-color: $orange-dark;
+      margin-bottom: 0;
+      padding: $marginM;
+    }
+    span {
+      padding-left: $marginS;
+    }
+  }
 }
 
 .login--error {
   color: $negative;
-}
-
-.register-company-summary {
-  .tabby__row {
-    .tabby__cell {
-      &:last-child {
-        text-align: right;
-      }
-    }
-    &:last-child {
-      .tabby__cell {
-        border-top: 2px dotted $gray221;
-        padding-top: $marginM;
-      }
-    }
-    &:nth-last-child(2) {
-      .tabby__cell {
-        padding-bottom: 20px;
-      }
-    }
-  }
-  span.discount {
-    color: $positive;
-  }
 }

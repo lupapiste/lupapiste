@@ -35971,25 +35971,48 @@ div.register-company-wizard div.register-company-container img.logo {
   height: auto;
 }
 
-.login--error {
-  color: #df3215;
-}
-
-.register-company-summary .tabby__row .tabby__cell:last-child {
+div.register-company-wizard div.register-company-summary .tabby__row .tabby__cell:last-child {
   text-align: right;
 }
 
-.register-company-summary .tabby__row:last-child .tabby__cell {
+div.register-company-wizard div.register-company-summary .tabby__row:last-child .tabby__cell {
   border-top: 2px dotted #dddddd;
   padding-top: 12px;
 }
 
-.register-company-summary .tabby__row:nth-last-child(2) .tabby__cell {
+div.register-company-wizard div.register-company-summary .tabby__row:nth-last-child(2) .tabby__cell {
   padding-bottom: 20px;
 }
 
-.register-company-summary span.discount {
+div.register-company-wizard div.register-company-summary span.discount {
   color: #2ca92c;
+}
+
+div.register-company-wizard div.register-company-confirmation {
+  display: block;
+  margin: 24px 0;
+  padding: 0;
+  border: 1px solid #f39129;
+}
+
+div.register-company-wizard div.register-company-confirmation i, div.register-company-wizard div.register-company-confirmation span {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+div.register-company-wizard div.register-company-confirmation i {
+  color: white;
+  background-color: #f39129;
+  margin-bottom: 0;
+  padding: 12px;
+}
+
+div.register-company-wizard div.register-company-confirmation span {
+  padding-left: 6px;
+}
+
+.login--error {
+  color: #df3215;
 }
 
 #login h1 {
