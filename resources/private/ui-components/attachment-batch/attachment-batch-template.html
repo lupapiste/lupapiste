@@ -29,7 +29,7 @@
         <th class="td-center" data-bind="ltext:'remove'"></th>
         </tr>
       </thead>
-      <tbody data-bind="foreach: upload.files">
+      <tbody data-bind="foreach: fileList">
         <tr class="file">
           <td data-bind="attr: {colspan: $component.colspan}">
             <span data-bind="file: $data"></span>
@@ -164,7 +164,7 @@
         <td class="td-center">
           <!-- ko ifnot: $parent.rowDisabled( $data ) -->
           <i class="lupicon-remove primary"
-             data-bind="click: $parent.upload.removeFile,
+             data-bind="click: $parent.removeFile,
                         testId: 'batch-remove-' + $index()"></i>
           <!-- /ko -->
           <!-- ko if: $parent.rowDisabled( $data ) -->
