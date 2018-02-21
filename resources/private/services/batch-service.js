@@ -5,12 +5,21 @@ LUPAPISTE.BatchService = function() {
 
   var stored = {};
 
+  // Generates batchId based on the current page path.
+  self.pageBatchId = function() {
+    return pageutil.getPagePath().join( "-" );
+  };
+
+  function filesObs( batchId ) {
+    return _.get( stored, batchId );
+  }
+
   self.files = function( batchId ) {
-    var files =  _.get( stored, batchId);
-    if( !files ) {
-      _.set( stored, batchId, []);
+    var fobs = filesObs( batchId );
+    if( !fobs ) {
+      _.set( stored, batchId, ko.observableArray());
     }
-    return files || _.get( stored, batchId );
+    return ko.unwrap( fobs || filesObs( batchId ));
   };
 
   self.storeFile = function( batchId, file ) {
@@ -25,16 +34,31 @@ LUPAPISTE.BatchService = function() {
   };
 
   self.clearBatch = function( batchId ) {
+    var files =  stored[batchId];
+    if( files ) {
+      files.removeAll();
+    }
     delete stored[batchId];
   };
 
   self.deleteFile = function( batchId, fileId ) {
-    _.remove( _.get( stored, batchId), {fileId: fileId});
+    var fobs = filesObs( batchId );
+    if( fobs ) {
+      fobs.remove( function( file ) {
+        return file.fileId === fileId;
+      });
+    }
   };
 
-  hub.subscribe( "ContextService::leave",
+  self.batchEmpty = function( batchId, upload ) {
+    batchId = batchId || self.pageBatchId();
+    return _.isEmpty( self.files( batchId ))
+        && _.isEmpty( _.get( upload, "files", _.noop)());
+  };
+
+  hub.subscribe( "contextService::leave",
                function() {
-                 stored = {};
+                 _.each( _.keys( stored ), self.clearBatch );
                });
 
 };

@@ -18,18 +18,19 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   var service = lupapisteApp.services.attachmentsService;
   var batchService = lupapisteApp.services.batchService;
-  var batchId = params.batchId || pageutil.getPagePath().join( "-" );
+  var batchId = params.batchId || batchService.pageBatchId();
 
   self.upload      = params.upload;
   self.typeGroups  = params.typeGroups;
   var defaults     = params.defaults || {};
   var disabledCols = params.disabledCols;
+  var rememberBatch = params.remember !== false;
 
   self.password = ko.observable();
 
-  var uploadedFiles = ko.observableArray( params.remember === false
-                                        ? []
-                                        : _.cloneDeep(batchService.files( batchId )));
+  var uploadedFiles = ko.observableArray( rememberBatch
+                                        ? _.cloneDeep(batchService.files( batchId ))
+                                        : []);
 
   // Access from the template.
   self.fileList = uploadedFiles;
@@ -46,12 +47,20 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                           });
                         });
 
-  self.removeFile = function( data ) {
-    batchService.deleteFile( batchId, data.fileId );
+  function clearFile( fileId, remove ) {
+    batchService.deleteFile( batchId, fileId );
     uploadedFiles.remove( function( file ) {
-      return file.fileId === data.fileId;
+      return file.fileId === fileId;
     });
-    self.upload.removeFile( data );
+    if( remove ) {
+      self.upload.removeFile( {fileId: fileId} );
+    } else {
+      self.upload.clearFile( fileId );
+    }
+  }
+
+  self.removeFile = function( data ) {
+    clearFile( data.fileId, true );
   };
 
   //var authModel = lupapisteApp.models.applicationAuthModel;
@@ -152,10 +161,15 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   function newRow(initialType, initialContents, drawingNumber,
                   group, initialBackendId, target, stored ) {
-    var defaultType = titledDefaultType(defaults.type);
+    stored = stored || {};
+    var defaultType = titledDefaultType(defaults.type) || {};
     var type = ko.observable(stored.type || initialType || defaultType );
-    var grouping = ko.observable(stored.grouping || group || ko.unwrap(defaults.group) || {});
-    var backendId = ko.observable(stored.backendId || initialBackendId || ko.unwrap(service.getDefaultBackendId()));
+    var grouping = ko.observable(stored.grouping || group
+                                                 || ko.unwrap(defaults.group)
+                                                 || {});
+    var backendId = ko.observable(stored.backendId
+                                || initialBackendId
+                                || ko.unwrap(service.getDefaultBackendId()));
     var contentsValue = ko.observable(stored.contents || initialContents);
     var contentsList = ko.observableArray();
     if (ko.unwrap(defaults.contents)) {
@@ -188,22 +202,24 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   }
 
   function storeRow( fileId, row ) {
-    _.each( row, function( v, i ) {
-      var obs = null;
-      if( v instanceof Cell) {
-        obs = v.value;
-      }
-      if( ko.isObservable( v ) ) {
-        obs = v;
-      }
-      if( obs ) {
-        self.disposedSubscribe( obs,
-                                _.partial( batchService.storeProperty,
-                                           batchId, fileId, i ));
-      } else {
-        batchService.storeProperty( batchId, fileId, i, v );
-      }
-    });
+    if( rememberBatch ) {
+      _.each( row, function( v, i ) {
+        var obs = null;
+        if( v instanceof Cell) {
+          obs = v.value;
+        }
+        if( ko.isObservable( v ) ) {
+          obs = v;
+        }
+        if( obs ) {
+          self.disposedSubscribe( obs,
+                                  _.partial( batchService.storeProperty,
+                                             batchId, fileId, i ));
+        } else {
+          batchService.storeProperty( batchId, fileId, i, v );
+        }
+      });
+    }
   }
 
 
@@ -391,7 +407,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   self.disposedComputed(function() {
     _.forEach(jobStatuses(), function(status, fileId) {
       if (status() === service.JOB_DONE) {
-        self.upload.clearFile( fileId );
+        clearFile( fileId );
       } else if ( service.pollJobStatusFinished(status) ) {
         self.bindFailed(true);
         if (rows()[fileId] !== undefined && rows()[fileId] !== null) {
@@ -432,6 +448,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   self.cancel = function() {
     self.upload.cancel();
     self.badFiles.removeAll();
+    uploadedFiles.removeAll();
     rows( {});
     batchService.clearBatch( batchId );
   };
