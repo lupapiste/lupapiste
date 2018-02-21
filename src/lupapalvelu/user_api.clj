@@ -98,11 +98,13 @@
   (ok :data (usr/users-for-datatables caller params)))
 
 (defquery user-for-edit-authority
-  {:user-roles #{:authorityAdmin}}
-  [{auth-admin :user {authority-id :authority-id} :data}]
+  {:user-roles #{:authorityAdmin}
+   :parameters [authority-id]
+   :input-validators [(partial action/non-blank-parameters [:authority-id])]}
+  [{auth-admin :user}]
   (let [{:keys [username firstName lastName email orgAuthz]
          :as authority}  (usr/get-user-by-id authority-id)
-        valid-auth?      (uu/auth-admin-can-view-authority authority auth-admin)
+        valid-auth?      (uu/auth-admin-can-view-authority? authority auth-admin)
         data             {:email     email
                           :username  username
                           :firstName firstName
@@ -406,13 +408,14 @@
 (defcommand update-auth-info
   {:parameters       [firstName lastName email new-email]
    :input-validators [(partial action/non-blank-parameters [:firstName :lastName :email :new-email])]
-   :user-roles        #{:authorityAdmin}}
+   :user-roles        #{:authorityAdmin}
+   :pre-checks       [action/disallow-impersonation]}
   [{auth-admin :user}]
   (let [authority           (usr/find-user {:email email})
-        valid-org?          (uu/auth-admin-can-view-authority authority auth-admin)
-        valid-domain?       (uu/admin-and-user-have-same-email-domain authority auth-admin)
+        valid-org?          (uu/auth-admin-can-view-authority? authority auth-admin)
+        valid-domain?       (uu/admin-and-user-have-same-email-domain? authority auth-admin)
         email-not-in-use?   (if (= email new-email) true (not (usr/email-in-use? new-email)))
-        user-info-editable? (uu/authority-has-only-one-org authority)
+        user-info-editable? (uu/authority-has-only-one-org? authority)
         data                {:email     new-email
                              :username  new-email
                              :firstName firstName

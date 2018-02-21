@@ -693,7 +693,7 @@
     docterminalModel.load();
   });
 
-  self.authorityIdObservable = ko.observable();
+  self.authorityIdObservable = ko.observable("");
 
   hub.onPageLoad("edit-authority", function () {
       self.authorityIdObservable(_.head(pageutil.getPagePath()));

@@ -3,6 +3,7 @@
             [lupapalvelu.ui.auth-admin.edit-authority.state :as state]
             [lupapalvelu.ui.auth-admin.edit-authority.util :as util]
             [lupapalvelu.ui.common :refer [loc query command]]
+            [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.util :refer [get-user-field]]
             [rum.core :as rum]))
 
@@ -44,7 +45,6 @@
 (rum/defc edit-authority-info < rum/reactive
   []
   (let [user               (rum/react state/authority)
-        saving?            (rum/react state/saving-info?)
         user-info          (atom {:firstName (:firstName user)
                                   :lastName  (:lastName user)
                                   :email     (:email user)})
@@ -54,12 +54,12 @@
     [:div.edit-authority-info
      [:h2 (loc "auth-admin.edit-authority.user-info-title")]
      (map #(info-textfield user-info % (get user %)) [:firstName :lastName :email])
-     [:button.primary {:disabled disabled?
-                       :on-click #(update-user-info user-info)
-                       :class (when saving? "waiting")}
-      [:i.lupicon-save]
-      [:i.wait.spin.lupicon-refresh]
-      [:span (loc "save")]]
+     (components/icon-button {:icon :lupicon-save
+                              :wait? state/saving-info?
+                              :on-click #(update-user-info user-info)
+                              :disabled? disabled?
+                              :text-loc "save"
+                              :class "primary"})
      (when disabled?
        [:p.error-message.edit-info
         (if multiple-org-user?

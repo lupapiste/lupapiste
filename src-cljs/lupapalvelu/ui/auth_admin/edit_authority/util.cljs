@@ -21,10 +21,9 @@
                (save-org-info-to-state)))))
 
 (defn- get-authority []
-  (let [authority-id (.unwrap js/ko @state/authority-id-observable)]
-    (query "user-for-edit-authority"
-           (fn [result]
-             (->> result
-                  :data
-                  (reset! state/authority)))
-           :authority-id authority-id)))
+  (query "user-for-edit-authority"
+         (fn [result]
+           (->> result
+                :data
+                (reset! state/authority)))
+         :authority-id @state/authority-id))

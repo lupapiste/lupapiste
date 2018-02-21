@@ -7,5 +7,5 @@
 (def saving-info? (rum/cursor-in component-state [:saving-info?]))
 (def authority (rum/cursor-in component-state [:authority]))
 (def org-id (rum/cursor-in component-state [:org-id]))
-(def authority-id-observable (rum/cursor-in component-state [:authority-id-observable]))
+(def authority-id (rum/cursor-in component-state [:authority-id]))
 (def allowed-roles (rum/cursor-in component-state [:allowed-roles]))

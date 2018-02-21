@@ -77,15 +77,15 @@
                                               (create-and-notify-user caller)
                                               :user))))
 
-(defn admin-and-user-have-same-email-domain [authority auth-admin]
+(defn admin-and-user-have-same-email-domain? [authority auth-admin]
    (let [email-domain-picker (fn [email] (-> email (ss/split #"@") (last)))]
      (= (-> authority :email email-domain-picker)
         (-> auth-admin :email email-domain-picker))))
 
-(defn auth-admin-can-view-authority [authority auth-admin]
+(defn auth-admin-can-view-authority? [authority auth-admin]
   (let [authority-orgs (-> authority :orgAuthz (keys) (set))]
     (-> auth-admin :orgAuthz (keys) (first) (authority-orgs) (nil?) (not))))
 
-(defn authority-has-only-one-org [authority]
+(defn authority-has-only-one-org? [authority]
   (let [authority-orgs (-> authority :orgAuthz (keys))]
     (= (count authority-orgs) 1)))
