@@ -686,9 +686,13 @@
   (->> (usr/find-authorized-users-in-org org-id org-authz)
        (map #(select-keys % [:id :firstName :lastName]))))
 
-(defn copy-docs-from-old-op-to-new [old-op-docs new-op-docs]
-  (let [doc-name-matcher (fn [new-doc old-doc] (= (-> new-doc :schema-info :name)
-                                                  (-> old-doc :schema-info :name)))]
+(defn copy-docs-from-old-op-to-new [old-primary-op old-op-docs new-op-docs]
+  (let [doc-name-matcher (fn [new-doc old-doc]
+                           (if (= (-> old-doc :schema-info :op :name)
+                                  (:name old-primary-op))
+                             false?
+                             (= (-> new-doc :schema-info :name)
+                                (-> old-doc :schema-info :name))))]
     (loop [acc []
            old-docs old-op-docs
            new-docs new-op-docs]

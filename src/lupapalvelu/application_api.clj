@@ -554,7 +554,9 @@
    created :created :as command}]
   (let [new-primary-op        (:primaryOperation (assoc-in application [:primaryOperation :name] newOperation))
         new-docs-blank        (app/make-documents nil created @organization new-primary-op application)
-        new-docs              (app/copy-docs-from-old-op-to-new (:documents application) new-docs-blank)
+        new-docs              (app/copy-docs-from-old-op-to-new (:primaryOperation application)
+                                                                (:documents application)
+                                                                new-docs-blank)
         new-attachments-blank (app/make-attachments created new-primary-op @organization app-state tos-function)
         new-attachments       (app/copy-attachments-from-old-op-to-new (:attachments application) new-attachments-blank)]
     (if new-primary-op
