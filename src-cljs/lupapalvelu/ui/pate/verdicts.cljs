@@ -129,9 +129,7 @@
 (rum/defcs verdict < rum/reactive
   (rum/local false ::wait?)
   [{wait?* ::wait?} {:keys [schema state info _meta] :as options}]
-  (let [_ (println "Verdict!??? " schema)
-        _ (println (path/react :filled? info))
-        published (path/react :published info)
+  (let [published (path/react :published info)
         yes-fn    (fn []
                     (reset! wait?* true)
                     (reset! (rum/cursor-in _meta [:enabled?]) false)

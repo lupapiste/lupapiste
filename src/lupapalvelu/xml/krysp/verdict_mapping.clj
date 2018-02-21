@@ -27,20 +27,13 @@
                         attachments-canonical)
               (xml-emit/element-to-xml (r-mapping/get-rakennuslupa-mapping krysp-version)))}))
 
-(defn printteri [value]
-  (println " ******************* ")
-  (clojure.pprint/pprint value)
-  (println " ******************* ")
-  value)
-
 (defmethod permit/verdict-krysp-mapper :P [application verdict lang krysp-version begin-of-link]
   (let [attachments-canonical (att-canonical/get-attachments-as-canonical application begin-of-link (comp #{(:id verdict)} :id :target))
-        verdict (canonical/verdict-canonical application lang verdict)
-        _ (clojure.pprint/pprint verdict)
-        _ (clojure.pprint/pprint (p-canoncial/poikkeus-application-to-canonical application lang))]
+        raw-verdict (canonical/verdict-canonical application lang verdict)
+        verdict (assoc raw-verdict :Paatos (dissoc (:Paatos raw-verdict) :lupamaaraykset))
+        _ (println verdict)]
 
     {:attachment attachments-canonical
      :xml (-> (p-canoncial/poikkeus-application-to-canonical application lang)
               (assoc-in [:Popast :poikkeamisasiatieto :Poikkeamisasia :paatostieto] verdict)
-              (xml-emit/element-to-xml (p-mapping/get-mapping krysp-version))
-              (printteri))}))
+              (xml-emit/element-to-xml (p-mapping/get-mapping krysp-version)))}))

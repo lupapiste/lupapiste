@@ -289,9 +289,7 @@
 
 (defn new-verdict-draft [template-id {:keys [application organization created]
                                       :as   command}]
-  (let [_ (println "Here we go  :: " template-id)
-        template (template/verdict-template @organization template-id)
-        _ (println "Template ::: " template)
+  (let [template (template/verdict-template @organization template-id)
         draft    (assoc (initial-draft template application)
                         :template (template-info template)
                         :id       (mongo/create-id)
