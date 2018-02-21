@@ -1,6 +1,7 @@
 // Parameters [optional]:
 // upload:       Upload model
 // [typeGroups]: Type groups available in the type selector (default all).
+// [disabledCols]: Columns that won't be shown. Supported values: drawing, sign
 // [defaults]: Default binding values (all optional): target, type,
 // group. Values can be observables.
 LUPAPISTE.AttachmentBatchModel = function(params) {
@@ -13,20 +14,26 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   var service = lupapisteApp.services.attachmentsService;
 
-  self.upload     = params.upload;
-  self.typeGroups = params.typeGroups;
-  var defaults    = params.defaults || {};
+  self.upload      = params.upload;
+  self.typeGroups  = params.typeGroups;
+  var defaults     = params.defaults || {};
+  var disabledCols = params.disabledCols;
 
   self.password = ko.observable();
 
-  //var authModel = lupapisteApp.models.applicationAuthModel;
   self.showConstruction = self.disposedPureComputed( _.wrap( "set-attachment-as-construction-time",
                                                              service.authModel.ok));
-  self.showSign = self.disposedPureComputed( _.wrap( "sign-attachments",
-                                                     service.authModel.ok));
+  self.showSign = self.disposedPureComputed(function() {
+    return service.authModel.ok("sign-attachments") && (!_.isArray(disabledCols) || !_.includes(disabledCols, "sign"));
+  });
+
+  self.showDrawing = self.disposedPureComputed(function() {
+    return !_.isArray(disabledCols) || !_.includes(disabledCols, "drawing");
+  });
+
   self.isArchivingProject = service.isArchivingProject;
 
-  self.contentsPrevEntriesKey = self.disposedComputed(function() {
+  self.contentsPrevEntriesKey = self.disposedPureComputed(function() {
     return self.isArchivingProject() ? "contents" : null;
   });
 
@@ -40,7 +47,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   };
 
   self.colspan = self.disposedPureComputed(function() {
-    var span = 5;
+    var span = 4;
     if (self.isArchivingProject()) {
       span = span + 2;
     }
@@ -48,6 +55,9 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
       span = span + 1;
     }
     if (self.showConstruction()) {
+      span = span + 1;
+    }
+    if (self.showDrawing()) {
       span = span + 1;
     }
     return span;
@@ -98,12 +108,26 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                    });
   }
 
+  function titledDefaultType(type) {
+    var t = ko.unwrap(type);
+    if (t && !t.title) {
+      t.title = loc(["attachmentType", t["type-group"], t["type-id"]]);
+    }
+    return t;
+  }
+
   function newRow(initialType, initialContents, drawingNumber, group, initialBackendId, target) {
-    var type = ko.observable(initialType || ko.unwrap(defaults.type) );
+    var defaultType = titledDefaultType(defaults.type);
+    var type = ko.observable(initialType || defaultType );
     var grouping = ko.observable(group || ko.unwrap(defaults.group) || {});
     var backendId = ko.observable(initialBackendId || ko.unwrap(service.getDefaultBackendId()));
     var contentsValue = ko.observable(initialContents);
     var contentsList = ko.observableArray();
+    if (ko.unwrap(defaults.contents)) {
+      contentsValue(ko.unwrap(defaults.contents));
+    } else if (defaultType.title) {
+      contentsValue(defaultType.title);
+    }
     self.disposedSubscribe( type, function( type ) {
       var contents = service.contentsData( type );
       contentsList( contents.list );

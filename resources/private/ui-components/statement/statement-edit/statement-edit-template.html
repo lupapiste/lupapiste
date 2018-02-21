@@ -52,11 +52,22 @@
           <textarea
              data-bind="attr: {placeholder: loc('statement.' + tab + '.message.placeholder')},
                         textInput: text,
-                        readonly: !enabled()"
+                        readonly: !enabled() || inAttachment()"
              id="statement-text"
              rows="15"
              class="grid-style-input really-high">
           </textarea>
+        </div>
+        <div>
+          <div class="checkbox-wrapper">
+            <input type="checkbox"
+                    id="statement-provided-as-attachment"
+                    data-bind="checked: inAttachment, disable: !enabled()">
+            <label for="statement-provided-as-attachment"
+                   class="checkbox-label"
+                   data-test-id="statement-provided-as-attachment-label"
+                   data-bind="ltext: 'statement.statement-in-attachment'"></label>
+          </div>
         </div>
       </form>
     </div>

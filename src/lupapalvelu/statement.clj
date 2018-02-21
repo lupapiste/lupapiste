@@ -79,7 +79,8 @@
    (sc/optional-key :reply)         Reply
    :person                          StatementGiver
    (sc/optional-key :external)      ExternalData
-   (sc/optional-key :metadata)      {sc/Any sc/Any}})
+   (sc/optional-key :metadata)      {sc/Any sc/Any}
+   (sc/optional-key :in-attachment) sc/Bool})
 
 (defn create-statement [now saate-text due-date person & [metadata external]]
   (sc/validate Statement
@@ -118,8 +119,8 @@
   (when-not (->> (get-statement application statement-id) :state keyword pre-repliable-states)
     (fail :error.statement-reply-is-already-visible)))
 
-(defn statement-not-given [{{:keys [statementId]} :data application :application}]
-  (when-not (->> statementId (get-statement application) :state keyword pre-given-states)
+(defn statement-not-given [{{:keys [statementId target]} :data application :application}]
+  (when-not (->> (or statementId (:id target)) (get-statement application) :state keyword pre-given-states)
     (fail :error.statement-already-given)))
 
 (defn statement-given [{{:keys [statementId]} :data application :application}]
@@ -129,6 +130,18 @@
 (defn not-ely-statement [{{:keys [statementId]} :data application :application}]
   (when (= "ely" (->> statementId (get-statement application) :external :partner))
     (fail :error.ely-statement)))
+
+(defn text-or-attachment-provided [{{:keys [text in-attachment statementId]} :data application :application}]
+  (cond
+    (and in-attachment
+         (->> (att/get-attachments-by-target-type-and-id application {:type "statement" :id statementId})
+              (not-any? #(= (att/attachment-type-coercer (:type %))
+                            {:type-group :ennakkoluvat_ja_lausunnot :type-id :lausunto}))))
+    (fail :error.statement-attachment-missing)
+
+    (and (not in-attachment)
+         (ss/blank? text))
+    (fail :error.statement-text-or-attachment-required)))
 
 (defn replies-enabled [{{permit-type :permitType} :application}]
   (when-not (#{"YM" "YL" "VVVL" "MAL" "YI"} permit-type) ; FIXME set in permit meta data
@@ -147,6 +160,7 @@
 
 (defmethod att/upload-to-target-allowed :statement [{{:keys [state]} :application :as command}]
   (or (statement-in-sent-state-allowed command)
+      (statement-not-given command)
       (statement-owner command)))
 
 (defmethod att/edit-allowed-by-target :statement [{{attachment-id :attachmentId} :data user :user {:keys [statements] :as application} :application}]
@@ -161,11 +175,22 @@
   (when (-> (att/get-attachment-info application attachment-id) (get-in [:target :id]) (util/find-by-id statements) :state #{:given})
     (fail :error.statement-already-given)))
 
-(defn update-draft [statement text status modify-id editor-id]
-  (update-statement statement modify-id :state :draft :text text :status status :editor-id editor-id))
+(defn update-draft [statement text status modify-id editor-id in-attachment]
+  (update-statement statement modify-id
+                    :state :draft
+                    :text text
+                    :status status
+                    :editor-id editor-id
+                    :in-attachment in-attachment))
 
-(defn give-statement [statement text status modify-id editor-id]
-  (update-statement statement modify-id :state :given :text text :status status :given (now) :editor-id editor-id))
+(defn give-statement [statement text status modify-id editor-id in-attachment]
+  (update-statement statement modify-id
+                    :state :given
+                    :text text
+                    :status status
+                    :given (now)
+                    :editor-id editor-id
+                    :in-attachment in-attachment))
 
 (defn update-reply-draft [{reply :reply :as statement} text nothing-to-add modify-id editor-id]
   (->> (assoc reply :text text :nothing-to-add (boolean nothing-to-add) :editor-id editor-id)

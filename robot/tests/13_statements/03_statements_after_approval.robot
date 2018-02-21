@@ -53,9 +53,8 @@ Ronja logs in and adds attachment to statement draft
   Open application  ${appname}  ${appPropertyId}
   Open tab  statement
   Open statement  ronja.sibbo@sipoo.fi
-  Wait test id visible  statement-attachments-no-attachments
-  Add attachment  statement  ${TXT_TESTFILE_PATH}  Important note
-  Wait Until  Element should contain  jquery=table[data-test-id=statement-attachments-table] span  Important note
+  Upload attachment with default type  ${TXT_TESTFILE_PATH}
+  Wait Until  Element should contain  xpath=//table[@data-test-id="targetted-attachments-table"]//span  Pelastusviranomainen, liite
   [Teardown]  Logout
 
 Mikko logs in and submits application
@@ -83,12 +82,12 @@ Ronja logs in and edits draft
   Wait Until  Text area should contain  statement-text  typed in statement text but not gonna submit the statement.
 
 Ronja can delete and add attachment
-  Scroll to test id  add-statement-attachment
-  Click element  jquery=table[data-test-id=statement-attachments-table] i.lupicon-remove
+  Scroll to test id  targetted-attachments-table
+  Click element  jquery=table[data-test-id=targetted-attachments-table] i.lupicon-remove
   Confirm  dynamic-yes-no-confirm-dialog
-  Wait until  Element Should Not Be Visible  jquery=table[data-test-id=statement-attachments-table]
-  Add attachment  statement  ${TXT_TESTFILE_PATH}  New information
-  Wait Until  Element should contain  jquery=table[data-test-id=statement-attachments-table] span  New information
+  Wait until  Element Should Not Be Visible  //table[@data-test-id="targetted-attachments-table"]
+  Upload attachment with default type  ${TXT_TESTFILE_PATH}
+  Wait Until  Element should contain  xpath=//table[@data-test-id="targetted-attachments-table"]//span  Pelastusviranomainen, liite
 
 Ronja submits statement
   Wait and click  statement-submit

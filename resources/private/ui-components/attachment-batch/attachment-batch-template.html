@@ -12,7 +12,9 @@
         </th>
         <th><span class="batch-required"
                   data-bind="ltext:'application.attachmentContents'"></span></th>
+        <!-- ko if: $component.showDrawing -->
         <th><span data-bind="ltext:'attachment.drawing-number'"></span></th>
+        <!-- /ko -->
         <th><span data-bind="ltext:'attachment.label.operation'"></span></th>
         <!-- ko if: $component.isArchivingProject -->
         <th><span data-bind="ltext:'digitizer.backendId'"></span></th>
@@ -79,6 +81,7 @@
                          class="fill-down"></icon-button>
           </div>
         </td>
+        <!-- ko if: $component.showDrawing -->
         <td>
           <div class="fill-pin"
                data-bind="event: $parent.fillEvents( $data, 'drawing')">
@@ -97,6 +100,7 @@
                          class="fill-down"></icon-button>
           </div>
         </td>
+        <!-- /ko -->
         <td>
           <div class="fill-pin"
                data-bind="event: $parent.fillEvents( $data, 'grouping'),
