@@ -35876,14 +35876,12 @@ div.register-company-wizard div.account-type-boxes div.account-type-box > .overs
   margin-bottom: 1em;
 }
 
-div.register-company-wizard .account-billing-type-select div.button-container {
-  display: inline-block;
-}
-
 div.register-company-wizard .account-billing-type-select div.button-container button {
-  margin: 12px 0;
-  padding: 12px;
+  margin: 12px auto;
+  padding: 24px;
   background-color: #f6f6f6;
+  line-height: 0;
+  border: 4px solid transparent;
 }
 
 div.register-company-wizard .account-billing-type-select div.button-container button span {
