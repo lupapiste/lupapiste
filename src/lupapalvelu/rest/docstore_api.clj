@@ -137,6 +137,7 @@
     {:ok true :data (->> (building-reader/building-info-list url credentials propertyId)
                          (map #(select-keys % [:usage :nationalId]))
                          (remove (comp nil? :nationalId))
-                         sort
+                         (map #(merge {:usage nil} %))
+                         (sort-by :nationalId)
                          vec)}
     {:ok true :data []}))
