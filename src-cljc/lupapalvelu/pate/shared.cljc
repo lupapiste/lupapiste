@@ -688,7 +688,8 @@
                               :rows    [[{:dict :reviews}]]}}]})
 
 (def settings-schemas
-  {:r r-settings})
+  {:r r-settings
+   :p r-settings})
 
 (sc/validate PateSettings r-settings)
 
@@ -992,7 +993,288 @@
       :buttons? false
       :grid     {:columns 7
                  :rows    [[{:col  6
-                             :dict :upload}]]}}]}})
+                             :dict :upload}]]}}]}
+   :p {:dictionary
+       (merge
+         {:language                (req {:docgen "pate-languages"})
+          :verdict-date            (req {:docgen "pate-date"})
+          :automatic-verdict-dates {:docgen {:name "pate-verdict-check"}}}
+         (->> [:julkipano :anto :muutoksenhaku :lainvoimainen :aloitettava :voimassa]
+              (map (fn [kw]
+                     [kw (req {:docgen {:name      "pate-date"
+                                        :disabled? :automatic-verdict-dates}})]))
+              (into {}))
+         {:contact-ref           {:reference {:path :contact}}
+          :boardname             {:reference {:path :*ref.boardname}}
+          :contact               (req {:docgen "pate-verdict-contact"})
+          :verdict-section       (req {:docgen "pate-verdict-section"})
+          :verdict-code          (req {:reference-list {:path       :verdict-code
+                                                        :type       :select
+                                                        :loc-prefix :pate-r.verdict-code}})
+          :verdict-text          (req {:phrase-text {:category :paatosteksti}})
+          :bulletinOpDescription {:phrase-text {:category :toimenpide-julkipanoon
+                                                :i18nkey  :phrase.category.toimenpide-julkipanoon}}
+          :verdict-text-ref      (req {:reference {:path :verdict-text}})
+          :application-id        {:placeholder {:type :application-id}}}
+         (reduce (fn [acc [loc-prefix kw term? separator?]]
+                   (let [included (keyword (str (name kw) "-included"))
+                         path     kw]
+                     (assoc acc
+                       (util/kw-path kw)
+                       {:reference-list
+                        (merge {:enabled?   included
+                                :loc-prefix loc-prefix
+                                :path       path
+                                :type       :multi-select}
+                               (when term?
+                                 {:item-key :id
+                                  :term     {:path       path
+                                             :extra-path :name
+                                             :match-key  :id}})
+                               (when separator?
+                                 {:separator " \u2013 "}))}
+                       ;; Included checkbox
+                       included
+                       {:docgen "required-in-verdict"})))
+                 {}
+                 [[:pate-r.foremen :foremen false false]
+                  [:pate-plans :plans true false]
+                  [:pate-reviews :reviews true true]])
+         {:conditions-title {:loc-text :phrase.category.lupaehdot}
+          :conditions       {:repeating {:condition        {:phrase-text {:label?   false
+                                                                          :category :lupaehdot}}
+                                         :remove-condition {:button {:i18nkey :remove
+                                                                     :label?  false
+                                                                     :icon    :lupicon-remove
+                                                                     :css     :secondary
+                                                                     :remove  :conditions}}}}
+          :add-condition    {:button {:icon    :lupicon-circle-plus
+                                      :i18nkey :pate-conditions.add
+                                      :css     :positive
+                                      :add     :conditions}}
+          :statements       {:placeholder {:type :statements}}
+          :neighbors        {:phrase-text {:i18nkey  :phrase.category.naapurit
+                                           :category :naapurit}}
+          :neighbor-states  {:placeholder {:type :neighbors}}
+          :collateral       {:docgen "pate-string"}
+          :collateral-date  {:docgen "pate-date"}
+          :collateral-type  {:docgen "collateral-type"}
+          :appeal           {:phrase-text {:category :muutoksenhaku}}
+          :complexity       {:docgen "pate-complexity"}
+          :complexity-text  {:phrase-text {:label?   false
+                                           :category :vaativuus}}
+          :extra-info       {:phrase-text {:category :yleinen}}
+          :deviations       {:phrase-text {:category :yleinen}}
+          :rights           {:phrase-text {:category :rakennusoikeus}}
+          :purpose          {:phrase-text {:category :kaava}}
+          :buildings        {:repeating {:building-name          {:placeholder {:label? false
+                                                                                :type   :building}}
+                                         :rakennetut-autopaikat  {:docgen "pate-string"}
+                                         :kiinteiston-autopaikat {:docgen "pate-string"}
+                                         :autopaikat-yhteensa    {:docgen "pate-string"}
+                                         :vss-luokka             {:docgen "pate-string"}
+                                         :paloluokka             {:docgen "pate-string"}
+                                         :show-building          {:docgen "required-in-verdict"}}
+                             :sort-by :order}
+          :upload           {:attachments {:i18nkey    :application.verdict-attachments
+                                           :label?     false
+                                           :type-group #"paatoksenteko"
+                                           :default    :paatoksenteko.paatosote
+                                           :dropzone   "#application-pate-verdict-tab"
+                                           :multiple?  true}}
+          :attachments      {:application-attachments {:i18nkey :application.verdict-attachments}}})
+       :sections
+       [{:id   "pate-dates"
+         :grid {:columns 7
+                :rows    [[{:col 7
+                            :loc-prefix :pate-verdict.language
+                            :dict :language
+                            :hide? :_meta.published?}]
+                          [{:id   "verdict-date"
+                            :dict :verdict-date}
+                           {:id    "automatic-verdict-dates"
+                            :col   2
+                            :show? [:AND :_meta.editing?
+                                    (cons :OR (map #(util/kw-path :? %) verdict-dates))]
+                            :dict  :automatic-verdict-dates}]
+                          {:id         "deltas"
+                           :css        [:pate-date]
+                           :loc-prefix :pate-verdict
+                           :row        (map (fn [kw]
+                                              (let [id (name kw)]
+                                                {:show?     (util/kw-path :? kw)
+                                                 :disabled? :automatic-verdict-dates
+                                                 :id        id
+                                                 :dict      kw}))
+                                            verdict-dates)}]}}
+        {:id   "pate-verdict"
+         :grid {:columns 7
+                :rows    [[{:col        2
+                            :loc-prefix :pate-verdict.giver
+                            :hide?      :*ref.boardname
+                            :dict       :contact}
+                           {:col        2
+                            :loc-prefix :pate-verdict.giver
+                            :hide?      :_meta.editing?
+                            :show?      :*ref.boardname
+                            :dict       :boardname}
+                           {:col        1
+                            :show?      [:OR :*ref.boardname :verdict-section]
+                            :loc-prefix :pate-verdict.section
+                            :dict       :verdict-section}
+                           {:hide? :verdict-section}
+                           {:col   2
+                            :align :full
+                            :dict  :verdict-code}]
+                          [{:col   5
+                            :id    "paatosteksti"
+                            :show? :_meta.editing?
+                            :dict  :verdict-text}
+                           {:col   3
+                            :hide? :_meta.editing?
+                            :dict  :verdict-text-ref}
+                           {:col   2
+                            :id    "application-id"
+                            :hide? :_meta.editing?
+                            :dict  :application-id}]]}}
+        {:id         "bulletin"
+         :loc-prefix :bulletin
+         :show?      :?.bulletin-op-description
+         :grid       {:columns 1
+                      :rows    [[{:col  1
+                                  :id   "toimenpide-julkipanoon"
+                                  :dict :bulletinOpDescription}]]}}
+        {:id   "requirements"
+         :grid {:columns 7
+                :rows    (map (fn [dict]
+                                (let [check-path (keyword (str (name dict) "-included"))]
+                                  {:show? [:OR :_meta.editing? check-path]
+                                   :row   [{:col  4
+                                            :dict dict}
+                                           {:col   2
+                                            :align :right
+                                            :show? :_meta.editing?
+                                            :id    "included"
+                                            :dict  check-path}]}))
+                              [:foremen :plans :reviews])}}
+        {:id   "conditions"
+         :grid {:columns 1
+                :show?   :?.conditions
+                :rows    [[{:css  :pate-label
+                            :dict :conditions-title}]
+                          [{:grid {:columns   9
+                                   :repeating :conditions
+                                   :rows      [[{:col  7
+                                                 :dict :condition}
+                                                {:align :right
+                                                 :dict  :remove-condition}]]}}]
+                          [{:dict :add-condition}]]}}
+
+        {:id    "appeal"
+         :show? [:OR :?.appeal :?.collateral]
+         :grid  {:columns 7
+                 :rows    [{:show? :?.appeal
+                            :row   [{:col        6
+                                     :loc-prefix :verdict.muutoksenhaku
+                                     :dict       :appeal}]}
+                           {:show?      :?.collateral
+                            :loc-prefix :pate
+                            :row        [{:col  2
+                                          :id   :collateral-date
+                                          :dict :collateral-date}
+                                         {:col  2
+                                          :id   :collateral
+                                          :dict :collateral}
+                                         {:col  2
+                                          :id   :collateral-type
+                                          :dict :collateral-type}]}]}}
+        {:id    "statements"
+         :show? :?.statements
+         :loc-prefix :pate-statements
+         :buttons? false
+         :grid  {:columns 1
+                 :rows    [[{:dict :statements}]]}}
+        {:id    "neighbors"
+         :show? :?.neighbors
+         :grid  {:columns 12
+                 :rows    [[{:col  7
+                             :id   "neighbor-notes"
+                             :dict :neighbors}
+                            {:col   4
+                             :hide? :_meta.published?
+                             :id    "neighbor-states"
+                             :align :right
+                             :dict  :neighbor-states}]
+                           ]}}
+        {:id         "complexity"
+         :loc-prefix :pate.complexity
+         :show?      [:OR :?.complexity :?.rights :?.purpose]
+         :grid       {:columns 7
+                      :rows    [{:show? :?.complexity
+                                 :row   [{:col  3
+                                          :dict :complexity}]}
+                                {:show? :?.complexity
+                                 :row   [{:col  6
+                                          :id   "text"
+                                          :dict :complexity-text}]}
+                                {:show? :?.rights
+                                 :row   [{:col        6
+                                          :loc-prefix :pate-rights
+                                          :dict       :rights}]}
+                                {:show? :?.purpose
+                                 :row   [{:col        6
+                                          :loc-prefix :phrase.category.kaava
+                                          :dict       :purpose}]}]}}
+        {:id         "extra-info"
+         :loc-prefix :pate-extra-info
+         :show?      :?.extra-info
+         :grid       {:columns 7
+                      :rows    [[{:col  6
+                                  :dict :extra-info}]]}}
+        {:id         "deviations"
+         :loc-prefix :pate-deviations
+         :show?      :?.extra-info
+         :grid       {:columns 7
+                      :rows    [[{:col  6
+                                  :dict :deviations}]]}}
+        {:id    "buildings"
+         :show? :?.buildings
+         :grid  {:columns 7
+                 :rows    [[{:col  7
+                             :grid {:columns    6
+                                    :loc-prefix :pate-buildings.info
+                                    :repeating  :buildings
+                                    :rows       [{:css   [:row--tight]
+                                                  :show? [:OR :_meta.editing? :+.show-building]
+                                                  :row   [{:col  6
+                                                           :dict :building-name}]}
+                                                 {:show? [:OR :_meta.editing? :+.show-building]
+                                                  :css   [:row--indent]
+                                                  :row   [{:col  5
+                                                           :list {:css   :list--sparse
+                                                                  :items (map #(hash-map :id %
+                                                                                         :dict %
+                                                                                         :show? (util/kw-path :?+ %)
+                                                                                         :enabled? :-.show-building)
+                                                                              [:rakennetut-autopaikat
+                                                                               :kiinteiston-autopaikat
+                                                                               :autopaikat-yhteensa
+                                                                               :vss-luokka
+                                                                               :paloluokka])}}
+                                                          {:dict  :show-building
+                                                           :show? :_meta.editing?}]}
+                                                 ]}}]]}}
+        {:id   "attachments"
+         :grid {:columns 7
+                :rows    [[{:col  6
+                            :dict :attachments}]]}}
+        {:id       "upload"
+         :hide?    :_meta.published?
+         :css      :pate-section--no-border
+         :buttons? false
+         :grid     {:columns 7
+                    :rows    [[{:col  6
+                                :dict :upload}]]}}]}})
 
 (sc/validate PateVerdict (:r verdict-schemas))
 

@@ -206,25 +206,27 @@
 
 (defn verdict-as-kuntagml
   [{:keys [application organization user]} verdict]
-  (let [organization  (if (delay? organization) @organization organization)
-        permit-type   (permit/permit-type application)
+  (let [organization (if (delay? organization) @organization organization)
+        permit-type (permit/permit-type application)
         krysp-version (resolve-krysp-version organization permit-type)
         begin-of-link (get-begin-of-link permit-type organization)
-        filtered-app  (-> application
-                           #_(filter-attachments-by-state current-state)
-                           (dissoc :attachments)            ; TODO: should application attachment be included in verdict XML?
-                           remove-non-approved-designers)
-        output-dir    (resolve-output-directory organization permit-type)
-        output-fn     (if-some [http-conf (http-conf organization permit-type)]
-                        (fn [xml attachments]
-                          (krysp-http/send-xml application user :verdict xml http-conf)
-                          (->> attachments (map :fileId) (remove nil?)))
-                        #(writer/write-to-disk %1 application %2 output-dir nil nil "verdict"))
+        filtered-app (-> application
+                         #_(filter-attachments-by-state current-state)
+                         (dissoc :attachments)              ; TODO: should application attachment be included in verdict XML?
+                         remove-non-approved-designers)
+        output-dir (resolve-output-directory organization permit-type)
+        output-fn (if-some [http-conf (http-conf organization permit-type)]
+                    (fn [xml attachments]
+                      (krysp-http/send-xml application user :verdict xml http-conf)
+                      (->> attachments (map :fileId) (remove nil?)))
+                    #(writer/write-to-disk %1 application %2 output-dir nil nil "verdict"))
 
         mapping-result (permit/verdict-krysp-mapper filtered-app verdict
                                                     (get-in verdict [:data :language])
                                                     krysp-version
-                                                    begin-of-link)]
+                                                    begin-of-link)
+        ;;_ (clojure.pprint/pprint mapping-result)
+        ]
     (if-some [{:keys [xml attachments]} mapping-result]
       (-> (data-xml/emit-str xml)
           (validator/validate-integration-message! permit-type krysp-version)

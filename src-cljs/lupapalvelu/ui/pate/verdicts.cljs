@@ -14,6 +14,8 @@
             [rum.core :as rum]
             [sade.shared_util :as util]))
 
+(enable-console-print!)
+
 (defonce args (atom {}))
 
 (defn- can-edit? []
@@ -41,6 +43,7 @@
        (not published)))
 
 (defn reset-verdict [{:keys [verdict references filled]}]
+  (println " RESET ::: " verdict)
   (reset! state/current-verdict
           (when verdict
             {:state (:data verdict)
@@ -126,7 +129,9 @@
 (rum/defcs verdict < rum/reactive
   (rum/local false ::wait?)
   [{wait?* ::wait?} {:keys [schema state info _meta] :as options}]
-  (let [published (path/react :published info)
+  (let [_ (println "Verdict!??? " schema)
+        _ (println (path/react :filled? info))
+        published (path/react :published info)
         yes-fn    (fn []
                     (reset! wait?* true)
                     (reset! (rum/cursor-in _meta [:enabled?]) false)
@@ -264,6 +269,7 @@
   (when (common/feature? :pate)
     (swap! args assoc
            :dom-id (name domId))
+
     (service/fetch-schemas)
     (reset-verdict nil)
     (mount-component)))

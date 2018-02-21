@@ -138,6 +138,53 @@
                 snapshot)
    :references (:settings snapshot)})
 
+(defmethod initial-draft :p
+  [{snapshot :published} application]
+  {:data       (data-draft
+                 (merge {:language              :language
+                         :verdict-code          :verdict-code
+                         :verdict-text          :paatosteksti
+                         :bulletinOpDescription :bulletinOpDescription}
+                        (reduce (fn [acc kw]
+                                  (assoc acc
+                                    kw kw
+                                    (kw-format "%s-included" kw)
+                                    {:fn (util/fn-> (get-in [:removed-sections kw]) not)}))
+                                {}
+                                [:foremen :plans :reviews])
+                        (reduce (fn [acc kw]
+                                  (assoc acc
+                                    kw  {:fn        #(when (util/includes-as-kw? (:verdict-dates %) kw)
+                                                       "")
+                                         :skip-nil? true}))
+                                {}
+                                shared/verdict-dates)
+                        (reduce (fn [acc k]
+                                  (merge acc (map-unremoved-section (:data snapshot) k)))
+                                {}
+                                [:neighbors :appeal :statements :collateral
+                                 :complexity :rights :purpose :extra-info
+                                 :attachments])
+                        ;; List of conditions to conditions map where keys are ids.
+                        (when (map-unremoved-section (:data snapshot) :conditions)
+                          {:conditions {:fn        (fn [{:keys [conditions]}]
+                                                     (reduce (fn [acc condition]
+                                                               (assoc-in acc
+                                                                         [(keyword (mongo/create-id)) :condition]
+                                                                         condition))
+                                                             {}
+                                                             conditions))
+                                        :skip-nil? true}})
+                        (when (map-unremoved-section (:data snapshot) :deviations)
+                          {:deviations (-> (domain/get-document-by-name application
+                                                                        "hankkeen-kuvaus")
+                                           :data :poikkeamat :value
+                                           (or ""))})
+                        (when (map-unremoved-section (:data snapshot) :attachments)
+                          {:attachments []}))
+                 snapshot)
+   :references (:settings snapshot)})
+
 (declare enrich-verdict)
 
 (defmulti template-info
@@ -196,9 +243,55 @@
     {:giver      (:giver data)
      :exclusions exclusions}))
 
+(defmethod template-info :p
+  [{snapshot :published}]
+  (let [data             (:data snapshot)
+        removed?         #(boolean (get-in data [:removed-sections %]))
+        building-details (->> [(when-not (:autopaikat data)
+                                 [:rakennetut-autopaikat
+                                  :kiinteiston-autopaikat
+                                  :autopaikat-yhteensa])
+                               (map  (fn [kw]
+                                       (when-not (kw data) kw))
+                                     [:vss-luokka :paloluokka])]
+                              flatten
+                              (remove nil?))
+        exclusions       (-<>> [(filter removed? [:appeal :statements
+                                                  :collateral :rights :purpose
+                                                  :extra-info :deviations])
+                                (when (removed? :conditions)
+                                  [:conditions :add-condition])
+                                (when (removed? :collateral)
+                                  [:collateral :collateral-date :collateral-type])
+                                (when (removed? :neighbors)
+                                  [:neighbors :neighbor-states])
+                                (when (removed? :complexity)
+                                  [:complexity :complexity-text])
+                                (let [no-attachments? (removed? :attachments)]
+                                  [(when no-attachments?
+                                     :attachments)
+                                   (when (or no-attachments? (not (:upload data)))
+                                     :upload)])
+                                (util/difference-as-kw shared/verdict-dates
+                                                       (:verdict-dates data))
+                                (if (-> snapshot :settings :boardname)
+                                  :contact
+                                  :verdict-section)]
+                               flatten
+                               (remove nil?)
+                               (zipmap <> (repeat true))
+                               (util/assoc-when <> :buildings (or (removed? :buildings)
+                                                                  (zipmap building-details
+                                                                          (repeat true))))
+                               not-empty)]
+    {:giver      (:giver data)
+     :exclusions exclusions}))
+
 (defn new-verdict-draft [template-id {:keys [application organization created]
                                       :as   command}]
-  (let [template (template/verdict-template @organization template-id)
+  (let [_ (println "Here we go  :: " template-id)
+        template (template/verdict-template @organization template-id)
+        _ (println "Template ::: " template)
         draft    (assoc (initial-draft template application)
                         :template (template-info template)
                         :id       (mongo/create-id)
@@ -615,6 +708,23 @@
              (get-in sub-error [:document :id])
              (get-in sub-error [:element :locKey])
              (get-in sub-error [:result])))))
+
+(defmethod attachment-items :p
+  [command verdict]
+  (let [items (verdict-attachment-items command
+                                        verdict
+                                        :attachments)]
+    {:items     items
+     :update-fn (fn [data]
+                  (assoc data
+                    :attachments
+                    (->> (cons {:type-group :paatoksenteko
+                                :type-id    :paatos}
+                               items)
+                         (group-by #(select-keys % [:type-group
+                                                    :type-id]))
+                         (map (fn [[k v]]
+                                (assoc k :amount (count v)))))))}))
 
 (defn publish-verdict
   "Publishing verdict does the following:

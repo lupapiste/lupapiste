@@ -35,6 +35,7 @@
                                                                                            kerrosalatieto
                                                                                            {:tag :tavoitetilatieto :child [tavoitetila-212]}]}]}
                                   {:tag :lausuntotieto :child [mapping-common/lausunto_211]}
+                                  {:tag :paatostieto :child [mapping-common/paatokset_218]}
                                   {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_211}]}
                                   {:tag :lisatietotieto :child [{:tag :Lisatieto :child [{:tag :asioimiskieli}]}]}
                                   {:tag :asianTiedot :child [{:tag :Asiantiedot :child [{:tag :vahainenPoikkeaminen}
@@ -135,7 +136,7 @@
                      {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child poikkeamisasia-223}]}
                      {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child suunnittelutarveasia-223}]}])))
 
-(defn- get-mapping [krysp-version]
+(defn get-mapping [krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
     "2.1.2" poikkeamis_to_krysp_212

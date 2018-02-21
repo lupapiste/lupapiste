@@ -2,10 +2,12 @@
   (:require [lupapalvelu.document.attachments-canonical :as att-canonical]
             [lupapalvelu.pate.verdict-canonical :as canonical]
             [lupapalvelu.document.rakennuslupa-canonical :as r-canonical]
+            [lupapalvelu.document.poikkeamis-canonical :as p-canoncial]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.emit :as xml-emit]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as r-mapping]))
+            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as r-mapping]
+            [lupapalvelu.xml.krysp.poikkeamis-mapping :as p-mapping]))
 
 (def kayttotapaus "Uusi paatos")
 
@@ -24,3 +26,21 @@
               (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
                         attachments-canonical)
               (xml-emit/element-to-xml (r-mapping/get-rakennuslupa-mapping krysp-version)))}))
+
+(defn printteri [value]
+  (println " ******************* ")
+  (clojure.pprint/pprint value)
+  (println " ******************* ")
+  value)
+
+(defmethod permit/verdict-krysp-mapper :P [application verdict lang krysp-version begin-of-link]
+  (let [attachments-canonical (att-canonical/get-attachments-as-canonical application begin-of-link (comp #{(:id verdict)} :id :target))
+        verdict (canonical/verdict-canonical application lang verdict)
+        _ (clojure.pprint/pprint verdict)
+        _ (clojure.pprint/pprint (p-canoncial/poikkeus-application-to-canonical application lang))]
+
+    {:attachment attachments-canonical
+     :xml (-> (p-canoncial/poikkeus-application-to-canonical application lang)
+              (assoc-in [:Popast :poikkeamisasiatieto :Poikkeamisasia :paatostieto] verdict)
+              (xml-emit/element-to-xml (p-mapping/get-mapping krysp-version))
+              (printteri))}))
