@@ -630,7 +630,8 @@
               command (-> app
                           action/application->command
                           (assoc :user user, :created (now)))]
-          (doc-persistence/do-set-user-to-document app (:id applicant-doc) (:id user) "henkilo" (now))
+          (when applicant-doc
+            (doc-persistence/do-set-user-to-document app (:id applicant-doc) (:id user) "henkilo" (now)))
           (cond
             (= state "submitted")
             (app/submit command)
