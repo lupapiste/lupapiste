@@ -3914,3 +3914,6 @@
 "operations.replace" "en" ""
 "operations.replace" "fi" "Vaihda toimenpide"
 "operations.replace" "sv" ""
+"operations.replaceOperationWarningText" "en" ""
+"operations.replaceOperationWarningText" "fi" "Huom! Päätoimenpiteen vaihtaminen poistaa vanhan päätoimenpiteen."
+"operations.replaceOperationWarningText" "sv" ""
