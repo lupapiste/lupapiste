@@ -8,6 +8,14 @@
   var service = new LUPAPISTE.StatementService({statementId: statementId, application: application});
 
   var defaultAttachmentType = {"type-group": "ennakkoluvat_ja_lausunnot", "type-id": "lausunnon_liite"};
+  var availableGroups = [
+    "ennakkoluvat_ja_lausunnot",
+    "erityissuunnitelmat",
+    "rakennuspaikka",
+    "pelastusviranomaiselle_esitettavat_suunnitelmat",
+    "yleiset-alueet",
+    "muut"
+  ];
 
   var tabs = ko.pureComputed(function() {
     if (authModel.ok("statement-is-replyable")) {
@@ -50,7 +58,7 @@
     canAdd: ko.pureComputed(function() {
       return authModel.ok("statement-attachment-allowed");
     }),
-    typeGroups: ko.observableArray(["ennakkoluvat_ja_lausunnot", "erityissuunnitelmat"]),
+    typeGroups: ko.observableArray(availableGroups),
     dropZoneSectionId: "statement",
     template: "targeted-attachments-statement"
   };
