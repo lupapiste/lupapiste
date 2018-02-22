@@ -232,9 +232,9 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
   self.maxHeight = params.maxHeight || ko.pureComputed(function() {
     var windowHeight = lupapisteWindow.windowHeight();
     if ( windowHeight ) {
-      return windowHeight / 2 + "px"; // magic number 2, seems to work pretty well with different window sizes (zoom levels)
+      return Math.min(300, windowHeight / 3) + "px";
     } else {
-      return 800 + "px";
+      return 300 + "px";
     }
   });
 
