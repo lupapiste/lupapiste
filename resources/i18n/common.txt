@@ -3907,4 +3907,7 @@
 "Konvertoi PDF/A-muotoon" "sv" "Konvertera till PDF/A-form"
 "statement.statement-in-attachment" "fi" "Lausunto on liitteenä"
 "statement.statement-in-attachment" "sv" ""
-"statement.statement-in-attachment" "en" ""
+"statement.statement-in-attachment" "en" "Statement is attached"
+"statement.statement-attachment-guide" "fi" "Lisää liitteeksi ainakin yksi lausunto-tyyppinen liite."
+"statement.statement-attachment-guide" "sv" ""
+"statement.statement-attachment-guide" "en" "Please add at least one attachment with statement type."

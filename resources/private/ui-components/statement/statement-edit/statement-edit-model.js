@@ -39,9 +39,20 @@ LUPAPISTE.StatementEditModel = function(params) {
       });
   });
 
+  function attachmentsContainsStatement() {
+    return _.some(self.attachments(), function(a) {
+      var type = util.getIn(a, ["type"]);
+      return _.isEqual(type, {"type-group": "ennakkoluvat_ja_lausunnot", "type-id": "lausunto"});
+    });
+  }
+
   var submitAllowed = ko.pureComputed(function() {
-    var noTextNeeded = self.inAttachment() && self.attachments().length > 0;
-    return !!self.selectedStatus() && (noTextNeeded || !!self.text() && !_.isEmpty(self.text()));
+    var inAttachmentOk = self.inAttachment() && self.attachments().length > 0 && attachmentsContainsStatement();
+    return !!self.selectedStatus() && (inAttachmentOk || (!self.inAttachment() && !!self.text() && !_.isEmpty(self.text())));
+  });
+
+  self.showAttachmentGuide = self.disposedPureComputed(function() {
+    return self.inAttachment() && (self.attachments().length === 0 || !attachmentsContainsStatement());
   });
 
   self.enabled = ko.pureComputed(function() {

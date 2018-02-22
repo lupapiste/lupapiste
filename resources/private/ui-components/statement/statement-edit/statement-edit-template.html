@@ -59,7 +59,7 @@
           </textarea>
         </div>
         <div>
-          <div class="checkbox-wrapper">
+          <div class="checkbox-wrapper spacerM">
             <input type="checkbox"
                     id="statement-provided-as-attachment"
                     data-bind="checked: inAttachment, disable: !enabled()">
@@ -67,6 +67,9 @@
                    class="checkbox-label"
                    data-test-id="statement-provided-as-attachment-label"
                    data-bind="ltext: 'statement.statement-in-attachment'"></label>
+          </div>
+          <div data-bind="if: showAttachmentGuide">
+            <i data-bind="ltext: 'statement.statement-attachment-guide'"></i>
           </div>
         </div>
       </form>
