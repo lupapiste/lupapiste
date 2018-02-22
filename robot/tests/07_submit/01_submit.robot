@@ -107,16 +107,22 @@ Mikko fills up a field marked with a VRK warning
   Select From List By Value  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='lammitys.lammitystapa']  ilmakeskus
   Select From List By Value  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='lammitys.lammonlahde']  kaasu
 
-Mikko fills up first name for the hakija party in the parties tab
+Mikko removes last name for the hakija party in the parties tab
   Open tab  parties
   Open accordions  parties
   ${hakija-etunimi-path} =  Set Variable  //div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']
+  ${hakija-sukunimi-path} =  Set Variable  //div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']
   Wait until  Element should be visible  xpath=${hakija-etunimi-path}
   Scroll to test id  application-invite-hakija-r
-  Execute Javascript  $('#application-parties-tab').find('section[data-doc-type="hakija-r"]').find('input[data-docgen-path="henkilo.henkilotiedot.etunimi"]').val("Elmeri").change().blur();
-  Wait Until  Textfield value should be  xpath=${hakija-etunimi-path}  Elmeri
+  # Applicant is filled by default
+  Wait Until  Textfield value should be  xpath=${hakija-etunimi-path}  Mikko
+  Wait Until  Textfield value should be  xpath=${hakija-sukunimi-path}  Intonen
+  # ok, lets remove lastname to get validation error
+  Edit party name  hakija-r  Mikko  ${EMPTY}  henkilo.henkilotiedot
   Focus  xpath=//div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']
   Wait until  Element should be visible  xpath=//span[contains(@class,'form-input-saved')]
+  Wait Until  Textfield value should be  xpath=${hakija-etunimi-path}  Mikko
+  Wait Until  Textfield value should be  xpath=${hakija-sukunimi-path}  ${EMPTY}
 
 The filled-up warning field and party info plus the added attachment cause corresponding items to disappear from the "missing required" list in the requiredFieldSummary tab
   Open tab  requiredFieldSummary

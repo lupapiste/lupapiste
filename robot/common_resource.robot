@@ -270,9 +270,9 @@ Check accordion text
   Test id text is  ${id}-accordion-description-text  ${text}
 
 Edit party name
-  [Arguments]  ${party}  ${firstname}  ${lastname}
-  Input text with jQuery  section[data-doc-type='${party}'] input[data-docgen-path='henkilotiedot.etunimi']  ${firstname}
-  Input text with jQuery  section[data-doc-type='${party}'] input[data-docgen-path='henkilotiedot.sukunimi']  ${lastname}
+  [Arguments]  ${party}  ${firstname}  ${lastname}  ${henkilotiedot-path}=henkilotiedot
+  Input text with jQuery  section[data-doc-type='${party}'] input[data-docgen-path='${henkilotiedot-path}.etunimi']  ${firstname}
+  Input text with jQuery  section[data-doc-type='${party}'] input[data-docgen-path='${henkilotiedot-path}.sukunimi']  ${lastname}
 
 Positive indicator should be visible
   Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
