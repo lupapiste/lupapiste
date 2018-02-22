@@ -375,7 +375,7 @@
      :title     (:title app)
      :location  {:x (first location) :y (second location)}
      :operation (app-utils/operation-description app lang)
-     :authName  (get app :applicant "")
+     :authName  (usr/full-name (:creator app))
      :comments  (->> (:comments app)
                      (filter #(not (= "system" (:type %))))
                      (map #(identity {:name (str (-> % :user :firstName) " " (-> % :user :lastName))
@@ -400,7 +400,7 @@
                                            (merge
                                              (domain/application-query-for user)
                                              {:infoRequest true})
-                                           [:title :auth :location :primaryOperation :secondaryOperations :comments])
+                                           [:title :auth :creator :location :primaryOperation :secondaryOperations :comments])
 
                 same-location-irs (filter
                                     #(and (== x (-> % :location first)) (== y (-> % :location second)))
