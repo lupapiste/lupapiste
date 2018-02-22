@@ -36,16 +36,25 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   self.fileList = uploadedFiles;
 
   self.disposedSubscribe( self.upload.files,
-                        function( files ) {
-                          _.each( files, function( file ) {
-                            if( !_.find( uploadedFiles(), {fileId: file.fileId} )) {
-                              var newFile = _ .pick ( file, ["fileId", "filename",
-                                                             "contentType", "size"]);
-                              batchService.storeFile( batchId, newFile );
-                              uploadedFiles.push( newFile );
-                            }
+                          function( files ) {
+                            _.each( files, function( file ) {
+                              if( !_.find( uploadedFiles(), {fileId: file.fileId} )) {
+                                // The properties are combination of
+                                // file upload and upload model proxy
+                                // properties.
+                                var newFile = _( file )
+                                              .pick (["fileId", "filename",
+                                                      "type", "contents",
+                                                      "drawingNumber", "group",
+                                                      "backendId", "target",
+                                                      "contentType", "size"])
+                                              .mapValues( ko.unwrap)
+                                              .value();
+                                batchService.storeFile( batchId, newFile );
+                                uploadedFiles.push( newFile );
+                              }
+                            });
                           });
-                        });
 
   function clearFile( fileId, remove ) {
     batchService.deleteFile( batchId, fileId );
@@ -170,13 +179,11 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     var backendId = ko.observable(stored.backendId
                                 || initialBackendId
                                 || ko.unwrap(service.getDefaultBackendId()));
-    var contentsValue = ko.observable(stored.contents || initialContents);
+    var contentsValue = ko.observable(stored.contents
+                                    || ko.unwrap(defaults.contents)
+                                    || defaultType.title
+                                    || initialContents);
     var contentsList = ko.observableArray();
-    if (ko.unwrap(defaults.contents)) {
-      contentsValue(ko.unwrap(defaults.contents));
-    } else if (defaultType.title) {
-      contentsValue(defaultType.title);
-    }
     self.disposedSubscribe( type, function( type ) {
       var contents = service.contentsData( type );
       contentsList( contents.list );

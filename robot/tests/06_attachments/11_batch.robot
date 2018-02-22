@@ -234,6 +234,16 @@ Upload attachments results: still empty
   Empty attachment  pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma
   Empty attachment  paapiirustus.pohjapiirustus
 
+Add paapiirustus.pohjapiirustus file
+  Add attachment file  tr[data-test-type='paapiirustus.pohjapiirustus']  ${PNG_TESTFILE_PATH}  Doodle
+  Wait test id visible  batch-ready
+  Type is  0  Pohjapiirustus
+  Contents is  0  Doodle
+  Grouping is  0  Asuinkerrostalon tai rivitalon rakentaminen
+
+Cancel batch
+  Click visible test id  batch-cancel
+
 Upload attachments results: signed
   jQuery should match X times  i[data-test-icon=signed-icon]  2
 
