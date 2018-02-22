@@ -227,6 +227,7 @@ div.register-company-wizard {
   .account-billing-type-select {
     div.button-container {
       button {
+        display: block;
         margin: $marginM auto;
         padding: $marginL;
         background-color: $gray246;
@@ -238,6 +239,34 @@ div.register-company-wizard {
         }
         &.selected {
           border: 4px solid $orange-dark;
+        }
+      }
+      &.yearly {
+        button {
+          margin-bottom: 0;
+          &:not(.selected) {
+            border-top: 1px dashed black;
+            border-right: 1px dashed black;
+            border-left: 1px dashed black;
+            padding-top: $marginL + 3px;
+            padding-bottom: $marginL;
+            padding-left: $marginL + 3px;
+            padding-right: $marginL + 3px;
+
+          }
+        }
+      }
+      div.discount {
+        display: block;
+        color: $positive;
+        border-right: 1px dashed black;
+        border-bottom: 1px dashed black;
+        border-left: 1px dashed black;
+        padding: $baseline * 0.75;
+        line-height: 0;
+        span {
+          text-align: center;
+          display: block;
         }
       }
     }

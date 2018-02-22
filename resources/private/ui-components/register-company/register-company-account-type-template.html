@@ -4,19 +4,24 @@
     <div class="account-billing-type-select pate-grid-4">
       <div class="row">
         <div class="col-1"></div>
-        <div class="button-container col-1 col--center">
+        <div class="button-container col-1 col--center monthly">
           <button class="h2"
                   data-bind="click: _.partial(toggleBilling, 'monthly'),
                              css: {selected: billingType() === 'monthly'}">
             <span data-bind="ltext: 'register.company.billing.monthly.title'"></span>
           </button>
         </div>
-        <div class="button-container col-1 col--center">
-          <button class="h2"
-                  data-bind="click: _.partial(toggleBilling, 'yearly'),
-                             css: {selected: billingType() === 'yearly'}">
-            <span data-bind="ltext: 'register.company.billing.yearly.title'"></span>
-          </button>
+        <div class="button-container col-1 col--center yearly">
+          <div>
+            <button class="h2"
+                    data-bind="click: _.partial(toggleBilling, 'yearly'),
+                               css: {selected: billingType() === 'yearly'}">
+              <span data-bind="ltext: 'register.company.billing.yearly.title'"></span>
+            </button>
+            <div class="like-btn discount">
+              <span data-bind="ltext: 'register.company.save5'"></span>
+            </div>
+          </div>
         </div>
         <div class="col-1"></div>
       </div>

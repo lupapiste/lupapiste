@@ -35877,6 +35877,7 @@ div.register-company-wizard div.account-type-boxes div.account-type-box > .overs
 }
 
 div.register-company-wizard .account-billing-type-select div.button-container button {
+  display: block;
   margin: 12px auto;
   padding: 24px;
   background-color: #f6f6f6;
@@ -35891,6 +35892,35 @@ div.register-company-wizard .account-billing-type-select div.button-container bu
 
 div.register-company-wizard .account-billing-type-select div.button-container button.selected {
   border: 4px solid #f39129;
+}
+
+div.register-company-wizard .account-billing-type-select div.button-container.yearly button {
+  margin-bottom: 0;
+}
+
+div.register-company-wizard .account-billing-type-select div.button-container.yearly button:not(.selected) {
+  border-top: 1px dashed black;
+  border-right: 1px dashed black;
+  border-left: 1px dashed black;
+  padding-top: 27px;
+  padding-bottom: 24px;
+  padding-left: 27px;
+  padding-right: 27px;
+}
+
+div.register-company-wizard .account-billing-type-select div.button-container div.discount {
+  display: block;
+  color: #2ca92c;
+  border-right: 1px dashed black;
+  border-bottom: 1px dashed black;
+  border-left: 1px dashed black;
+  padding: 18px;
+  line-height: 0;
+}
+
+div.register-company-wizard .account-billing-type-select div.button-container div.discount span {
+  text-align: center;
+  display: block;
 }
 
 div.register-company-wizard register-company-buttons {
