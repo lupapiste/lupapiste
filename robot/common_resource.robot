@@ -3,6 +3,7 @@
 Documentation  Common stuff for the Lupapiste Functional Tests.
 Library        CustomSeleniumLibrary.py  timeout=12  run_on_failure=Nothing
 Library        String
+Library        Collections
 Library        OperatingSystem
 Library        DebugLibrary
 
@@ -1812,3 +1813,20 @@ Permit subtype is
   ${SELECT_VISIBLE}=  Run Keyword And Return Status  Element should be visible  permitSubtypeSelect
   Run keyword If  ${SELECT_VISIBLE}  List Selection Should Be  permitSubtypeSelect  ${localizedPermitSubtype}
   Run keyword unless  ${SELECT_VISIBLE}  Element text should be  xpath=//section[@id='application']//span[@data-test-id='permit-subtype-text']  ${localizedPermitSubtype}
+
+Check expected required fields and warnings
+  [Arguments]  ${EXPECTED-TEST-IDS}
+  Wait for jQuery
+  ${ELEMENTS}=  Get Webelements  xpath=//div[contains(@class,'info-line')]//span[contains(@class, 'required-field-error-element-name')]
+  ${FOUND-TEST-IDS}=  Create List
+  ${NOT-FOUND-TEST-IDS}=  Create List
+  :FOR  ${elem}  IN  @{ELEMENTS}
+  \  ${TEST-ID}=  Get Element Attribute  ${elem}  data-test-id
+  \  ${EXPECTED-IDX}=  Get Index From List  ${EXPECTED-TEST-IDS}  ${TEST-ID}
+  \  Run keyword if  ${EXPECTED-IDX} >= 0  Remove From List  ${EXPECTED-TEST-IDS}  ${EXPECTED-IDX}
+  \  Run keyword if  ${EXPECTED-IDX} < 0  Append to list  ${NOT-FOUND-TEST-IDS}  ${TEST-ID}
+
+  ${EXPECTED-LENGTH}=  Get Length  ${EXPECTED-TEST-IDS}
+  ${NOT-FOUND-LENGTH}=  Get Length  ${NOT-FOUND-TEST-IDS}
+  Should Be Equal As Integers  0  ${EXPECTED-LENGTH}  Expected errors were not found: ${EXPECTED-TEST-IDS}
+  Should Be Equal As Integers  0  ${NOT-FOUND-LENGTH}  Errors were not expected: ${NOT-FOUND-TEST-IDS}
