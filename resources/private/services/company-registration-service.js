@@ -53,7 +53,30 @@ LUPAPISTE.CompanyRegistrationService = function() {
 
   // Guard makes sure that the wizard components are disposed.
   self.guard = ko.observable( true );
-  self.registration = newRegistration();
+  self.registration = {
+      billingType: ko.observable().extend({
+        limited: {values: ["monthly", "yearly"], defaultValue: "yearly"}
+      }),
+      accountType: ko.observable(),
+      name: ko.observable(),
+      y: ko.observable(),
+      address1: ko.observable(),
+      zip: ko.observable(),
+      po: ko.observable(),
+      country: ko.observable(),
+      netbill: ko.observable(),
+      pop: ko.observable(),
+      reference: ko.observable(),
+      firstName: ko.observable(),
+      lastName: ko.observable(),
+      email: ko.observable(),
+      personId: ko.observable(),
+      language: ko.observable( loc.currentLanguage ),
+      contactAddress: ko.observable(),
+      contactZip: ko.observable(),
+      contactPo: ko.observable(),
+      contactCountry: ko.observable()
+    };
   // Current step [0-3] in the registration wizard.
   self.currentStep = ko.observable( 0 );
 
@@ -154,7 +177,6 @@ LUPAPISTE.CompanyRegistrationService = function() {
   // located within suitable if.
   function reset() {
     self.guard( false );
-    self.registration = newRegistration() ;
     updateRegistrationUserInfo();
     self.currentStep( 0 );
     self.guard( true );
