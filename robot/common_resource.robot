@@ -820,7 +820,8 @@ Upload batch file
   Wait Until  Element should be visible  jquery=div.upload-progress--finished
   Wait test id visible  batch-ready
   Scroll to bottom
-  Select From Autocomplete  div.batch-autocomplete[data-test-id=batch-type-${index}]  ${type}
+  ${alreadySelected}=  Run keyword and return status  Autocomplete selection is  div[contains(@class, 'batch-autocomplete') and @data-test-id='batch-type-${index}']  ${type}
+  Run keyword unless  ${alreadySelected}  Select from autocomplete  div.batch-autocomplete[data-test-id=batch-type-${index}]  ${type}
   Run keyword unless  '${contents}' == '${EMPTY}'  Fill test id  batch-contents-${index}  ${contents}
   ${group-is-selected}=  Run Keyword and Return Status  Autocomplete selection by test id contains  batch-grouping-${index}  ${grouping}
   Run keyword unless  ${group-is-selected}  Clear autocomplete selections by test id  batch-grouping-${index}
