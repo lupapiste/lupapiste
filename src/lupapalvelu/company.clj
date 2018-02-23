@@ -189,10 +189,12 @@
   company."
   ([] (find-companies {}))
   ([query]
-   (mongo/select :companies query [:name :y :address1 :zip :po :accountType
-                                   :contactAddress :contactZip :contactPo
-                                   :customAccountLimit :created :pop :ovt
-                                   :netbill :reference :document :locked] (array-map :name 1))))
+    (find-companies query [:name :y :address1 :zip :po :accountType
+                           :contactAddress :contactZip :contactPo
+                           :customAccountLimit :created :pop :ovt
+                           :netbill :reference :document :locked]))
+  ([query projection]
+   (mongo/select :companies query projection (array-map :name 1))))
 
 (defn find-company-users [company-id]
   (usr/get-users {:company.id company-id} {:lastName 1}))
@@ -386,7 +388,9 @@
                                             :link       #(str (env/value :host) "/app/" (name %) "/welcome#!/new-company-user/" token-id)})
     token-id))
 
-(defn add-user! [user company role submit]
+(defn add-user!
+  "Adds creates :new-company-user token and sends email to new user. Returns token-id."
+  [user company role submit]
   (let [user (update-in user [:email] ss/canonize-email)
         token-id (token/make-token :new-company-user nil {:user user
                                                           :company company

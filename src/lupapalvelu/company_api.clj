@@ -58,7 +58,8 @@
                           [(-> company-admins first :company :id), (map usr/summary company-admins)]))
                    (into {}))]
       (ok :companies (map (fn [company] (assoc company :admins (get admins (:id company) []))) (com/find-companies))))
-    (ok :companies (map com/company-info (com/find-companies {:locked {$not {$lt created}}})))))
+    (ok :companies (->> (com/find-companies {:locked {$not {$lt created}}} [:name :y :address1 :zip :po :contactAddress :contactZip :contactPo])
+                        (map com/company-info)))))
 
 (defcommand company-update
   {:parameters [company updates]
