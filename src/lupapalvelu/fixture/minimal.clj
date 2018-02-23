@@ -5,8 +5,11 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.i18n :as i18n]
             [sade.core :refer :all]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [clj-time.coerce :as tc]
+            [clj-time.core :as t]))
 
+(def now-year (t/year (tc/from-long (now))))
 (def- local-krysp "http://localhost:8000/dev/krysp")
 (def- local-3d-map "http://localhost:8000/dev/3dmap")
 (def- local-krysp-receiver (str (env/server-address) "/dev/krysp/receiver"))

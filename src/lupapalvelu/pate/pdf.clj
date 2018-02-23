@@ -582,19 +582,13 @@
        (sort-by :id)
        (map :text)))
 
-(defn finnish-date
-  "Timestamp in the Finnish date format without zero-padding.
-  For example, 30.1.2018."
-  [timestamp]
-  (util/format-timestamp-local-tz timestamp "d.M.YYYY"))
-
 (defn statements [lang verdict]
   (->> (dict-value verdict :statements)
        (filter :given)
        (map (fn [{:keys [given text status]}]
               (join-non-blanks ", "
                                text
-                               (finnish-date given)
+                               (util/to-finnish-date given)
                                (i18n/localize lang :statement status))))
        not-empty))
 
