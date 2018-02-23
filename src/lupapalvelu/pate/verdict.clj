@@ -679,14 +679,12 @@
   "Preview version of the verdict.
   1. Finalize verdict but do not store the changes.
   2. Generate PDF and return it."
-  [{session :session :as command}]
-  (let [{:keys [size contentType
-                filename content]} (-<>> (command->verdict command)
-                                         (enrich-verdict command <> true)
-                                         (pdf/create-verdict-preview command)
-                                         mongo/download)]
+  [{:keys [application created] :as command}]
+  (let [{:keys [pdf-file-stream
+                filename]} (-<>> (command->verdict command)
+                                 (enrich-verdict command <> true)
+                                 (pdf/create-verdict-preview command))]
     {:status  200
-     :headers {"Content-Type"        contentType
-               "Content-Disposition" (format "filename=\"%s\"" filename)
-               "Content-Length"      size}
-     :body    (content)}))
+     :headers {"Content-Type"        "application/pdf"
+               "Content-Disposition" (format "filename=\"%s\"" filename)}
+     :body    pdf-file-stream}))
