@@ -25,7 +25,7 @@
                         :paatosteksti "Ver Dict",
                         :upload true,
                         :paloluokka true},
-                :name "Päätöspohja",
+                :name "P\u00e4\u00e4t\u00f6spohja",
                 :category "r",
                 :modified created,
                 :deleted false,
@@ -62,7 +62,7 @@
                                                   :type "muu-katselmus"}]}}}
                {:id "5a7c4f33d98b0fe901eee1e6",
                 :draft {},
-                :name "Päätöspohja",
+                :name "P\u00e4\u00e4t\u00f6spohja",
                 :category "r",
                 :modified created,
                 :deleted false}],
