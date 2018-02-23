@@ -3748,6 +3748,10 @@
     (->> (mongo/select collection {} [:auth])
          (run! (partial update-application-owner-to-writer collection)))))
 
+(defmigration company-default-billing-type
+  {:apply-when (pos? (mongo/count :companies {:billingType {$exists false}}))}
+  (mongo/update-by-query :companies {:billingType {$exists false}} {$set {:billingType "monthly"}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
