@@ -224,11 +224,12 @@ div.register-company-wizard {
         margin-bottom: 1em;
       }
       > .ribbon span {
-        color: $positive;
+        color: white;
+        background-color: $orange-dark;
         font-size: $font-size * 1.2;
         line-height: 32px;
-        border-top: 1px solid $positive;
-        border-bottom: 1px solid $positive;
+        border-top: 1px solid $orange-dark;
+        border-bottom: 1px solid $orange-dark;
       }
     }
   }

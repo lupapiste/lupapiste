@@ -32720,10 +32720,8 @@ div.printing-order-footer div.pricelist-panel .arrow:after {
   position: absolute;
   z-index: 1;
   overflow: hidden;
-  width: 15vw;
-  height: 15vw;
-  max-width: 50%;
-  max-height: 50%;
+  width: 50%;
+  padding-bottom: 50%;
   text-align: right;
 }
 
@@ -35921,11 +35919,12 @@ div.register-company-wizard div.account-type-boxes div.account-type-box > .overs
 }
 
 div.register-company-wizard div.account-type-boxes div.account-type-box > .ribbon span {
-  color: #2ca92c;
+  color: white;
+  background-color: #f39129;
   font-size: 19.2px;
   line-height: 32px;
-  border-top: 1px solid #2ca92c;
-  border-bottom: 1px solid #2ca92c;
+  border-top: 1px solid #f39129;
+  border-bottom: 1px solid #f39129;
 }
 
 div.register-company-wizard .account-billing-type-select div.button-container button {
