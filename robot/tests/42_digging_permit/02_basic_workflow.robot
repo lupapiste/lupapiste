@@ -18,7 +18,7 @@ Mikko invites Solita Oy to the application, Solita Oy accepts the invitation
 Mikko selects Solita Oy as applicant for the application
   Open tab  parties
   Open accordions  parties
-  # Execute Javascript  $("input[value='yritys']").click();
+  Scroll and click input  section[data-doc-type=hakija-ya] input[value=yritys]
   Select From List  //section[@data-doc-type="hakija-ya"]//select[@name="company-select"]  Solita Oy (1060155-5)
   Wait Until  Javascript?  $("section[data-doc-type=hakija-ya] input[data-docgen-path='yritys.yritysnimi']").val() == "Solita Oy"
 
