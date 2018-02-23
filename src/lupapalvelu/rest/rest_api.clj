@@ -7,12 +7,13 @@
             [ring.swagger.swagger2 :as rs]
             [ring.swagger.ui :as ui]
             [schema.core :as sc]
-            [sade.core :refer [fail ok]]
+            [sade.core :refer [fail ok now]]
             [sade.env :as env]
             [lupapalvelu.action :as action]
             [lupapalvelu.api-common :refer :all]
             [lupapalvelu.autologin :as autologin]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.rest.config :as config]
             [lupapalvelu.rest.schemas :refer :all]
             [lupapalvelu.rest.applications-data :as applications-data]
@@ -108,15 +109,38 @@
       (resp/status 200 (ok))
       (resp/status 404 "Not found"))))
 
+
+(defn- save-building-data-message! [user status data]
+  (let [message-id (messages/create-id)]
+    (messages/save {:id message-id
+                    :direction "in"
+                    :messageType "update-building-data"
+                    :format "json"
+                    :created (now)
+                    :partner "matti"
+                    :status  status
+                    :application {:id (:application-id data)}
+                    :initator (select-keys user [:id :username])
+                    :action "update-building-data"
+                    :data data})
+    message-id))
+
+
 (defendpoint [:post "/rest/application/:application-id/update-building-data"]
   {:parameters       [:application-id     ApplicationId
                       :operationId        OperationId
                       :nationalBuildingId NationalBuildingId
                       :location           Location]}
-  (let [{org-id :organization :as app} (domain/get-application-as application-id user)]
+  (let [data {:application-id     application-id
+              :operationId        operationId
+              :nationalBuildingId nationalBuildingId
+              :location           location}
+        message-id (save-building-data-message! user "processing" data)
+        {org-id :organization :as app} (domain/get-application-as application-id user)]
     (if (and (usr/user-is-authority-in-organization? user org-id)
              (applications-data/update-building! app operationId nationalBuildingId location))
-      (resp/status 200 (ok))
+      (do (messages/set-message-status message-id "processed")
+          (resp/status 200 (ok)))
       (resp/status 404 "Not found"))))
 
 (defendpoint "/rest/submitted-applications"

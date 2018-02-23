@@ -44,6 +44,13 @@
          :data
          :valtakunnallinenNumero
          :value) => "1234567892")
+
+  (fact "integration message is added"
+        (->(integration-messages (:id application))
+           last
+           (select-keys [:messageType :status]))
+        => {:messageType "update-building-data" :status "processed"})
+
   #_(facts "building array has correct data"                ; TODO fix in LPK-3598
     (let [{:keys [buildings]} (query sonja :application :id (:id application))
           building (first buildings)]
