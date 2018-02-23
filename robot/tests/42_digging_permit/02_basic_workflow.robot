@@ -74,6 +74,8 @@ Mikko creates another digging application from the same sijoitus application
   Open the request at index  sijoitus-app  2
   Wait until  Element should be visible by test id  create-digging-permit-button
   Click by test id  create-digging-permit-button
+  Sleep  1s
+  Wait until  Element should be visible  xpath=//section[@id="create-digging-permit"]//div[contains(@class,"tree-link")]
   Select digging operations path YA kayttolupa kaivu
   Click by test id  create-digging-permit
   Wait until  Element Should Be Visible  application
