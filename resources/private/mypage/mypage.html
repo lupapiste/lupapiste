@@ -310,7 +310,7 @@
             <label data-bind="ltext: 'userInfo.company.y'" class="form-label"></label>
             <span data-bind="text: company.y" class="form-input" data-test-id="my-company-id"></span>
 
-            <div data-bind="if: company.document()">
+            <div class="spacerM" data-bind="if: company.document()">
               <label data-bind="ltext: 'userInfo.company.contract'" class="form-label"></label>
               <a data-bind="text: company.document, attr: {href: company.document}" target="_blank"></a>
             </div>
