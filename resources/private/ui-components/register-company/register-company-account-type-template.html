@@ -35,6 +35,11 @@
                data-bind="click: _.wrap( id, $component.selected ),
                           css: $component.selectedCss( id ),
                           testId: 'account-type-' + id">
+            <!-- ko if: $data.isYearly -->
+            <div class="ribbon ribbon--right"">
+              <span data-bind="ltext: 'register.company.save5'"></span>
+            </div>
+            <!-- /ko -->
             <h3 data-bind="text: title"></h3>
             <div class="account-type-price"
                  data-bind="text: $component.price( $data ),

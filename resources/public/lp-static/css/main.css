@@ -32716,6 +32716,49 @@ div.printing-order-footer div.pricelist-panel .arrow:after {
   margin-left: -16px;
 }
 
+.ribbon {
+  position: absolute;
+  z-index: 1;
+  overflow: hidden;
+  width: 15vw;
+  height: 15vw;
+  max-width: 50%;
+  max-height: 50%;
+  text-align: right;
+}
+
+.ribbon.ribbon--right {
+  right: 0;
+  top: 0;
+}
+
+.ribbon.ribbon--right span {
+  right: -45%;
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+}
+
+.ribbon.ribbon--left {
+  left: 0;
+  top: 0;
+}
+
+.ribbon.ribbon--left span {
+  left: -45%;
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  -moz-transform: rotate(-45deg);
+}
+
+.ribbon span {
+  text-align: center;
+  width: 150%;
+  display: block;
+  position: absolute;
+  top: 22%;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {
@@ -35791,6 +35834,7 @@ div.register-company-wizard div.account-type-boxes {
 }
 
 div.register-company-wizard div.account-type-boxes div.account-type-box {
+  position: relative;
   text-align: center;
   background-color: #f6f6f6;
   border: 4px solid white;
@@ -35876,6 +35920,14 @@ div.register-company-wizard div.account-type-boxes div.account-type-box > .overs
   margin-bottom: 1em;
 }
 
+div.register-company-wizard div.account-type-boxes div.account-type-box > .ribbon span {
+  color: #2ca92c;
+  font-size: 19.2px;
+  line-height: 32px;
+  border-top: 1px solid #2ca92c;
+  border-bottom: 1px solid #2ca92c;
+}
+
 div.register-company-wizard .account-billing-type-select div.button-container button {
   display: block;
   margin: 12px auto;
@@ -35919,6 +35971,7 @@ div.register-company-wizard .account-billing-type-select div.button-container di
 }
 
 div.register-company-wizard .account-billing-type-select div.button-container div.discount span {
+  font-size: 19.2px;
   text-align: center;
   display: block;
 }

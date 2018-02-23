@@ -150,6 +150,7 @@ div.register-company-wizard {
   div.account-type-boxes {
     margin-top: 1em;
     div.account-type-box {
+      position: relative;
       text-align: center;
       background-color: $gray246;
       border: 4px solid white;
@@ -222,6 +223,13 @@ div.register-company-wizard {
         margin-top: 1em;
         margin-bottom: 1em;
       }
+      > .ribbon span {
+        color: $positive;
+        font-size: $font-size * 1.2;
+        line-height: 32px;
+        border-top: 1px solid $positive;
+        border-bottom: 1px solid $positive;
+      }
     }
   }
   .account-billing-type-select {
@@ -265,6 +273,7 @@ div.register-company-wizard {
         padding: $baseline * 0.75;
         line-height: 0;
         span {
+          font-size: $font-size * 1.2;
           text-align: center;
           display: block;
         }
