@@ -1,3 +1,5 @@
+// Container component for company registration summary page.
+// The page shows summary of selected account and billing types, and the total amount.
 LUPAPISTE.RegisterCompanySummaryModel = function() {
   "use strict";
   var self = this;
@@ -16,7 +18,7 @@ LUPAPISTE.RegisterCompanySummaryModel = function() {
   });
 
   self.totalPriceText = self.disposedPureComputed(function() {
-    return self.selectedAccount().price; // price is actually localized text (see service)
+    return loc("register.company.price", self.selectedAccount().price);
   });
 
   self.normalPriceText = self.disposedPureComputed(function() {

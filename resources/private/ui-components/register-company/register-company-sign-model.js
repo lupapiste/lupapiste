@@ -16,10 +16,9 @@ LUPAPISTE.RegisterCompanySignModel = function() {
   self.confirmationText = self.disposedPureComputed(function() {
     var acc = service.selectedAccount();
     var billingType = service.registration.billingType();
-    var priceText = acc.price;
     var accountType = acc.title;
     return loc("register.company.billing." + billingType + ".confirmation",
                accountType,
-               priceText);
+               acc.price);
   });
 };

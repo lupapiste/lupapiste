@@ -57,11 +57,11 @@ LUPAPISTE.CampaignService = function() {
   };
 
   self.campaignSmallPrint = function( id ) {
+    var account = _.find(LUPAPISTE.config.accountTypes, {name: id});
     return loc( "company.campaign.small-print",
                 finnishFormat( moment( moments.lastDiscountDate)
                                .add( 1, "days")),
-                _.find( LUPAPISTE.config.accountTypes,
-                        {name: id}).price,
+                loc("register.company.price", account.price),
                 self.campaign().lastDiscountDate);
 
   };

@@ -292,7 +292,8 @@
     (validate! updated)
     (when (and (not (usr/admin? caller))
                (or (account-type-changing-with-custom? company updates)
-                   (changing-billing-type? company updates))) ; only admins are allowed to change account type to/from 'custom'
+                   ; only admins are allowed to change account type to/from 'custom'
+                   (changing-billing-type? company updates)))
       (fail! :error.unauthorized))
     (when (and (not (usr/admin? caller)) (not (custom-account? company)) (< limit old-limit))
       (fail! :company.account-type-not-downgradable))

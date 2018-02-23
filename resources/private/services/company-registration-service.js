@@ -137,7 +137,7 @@ LUPAPISTE.CompanyRegistrationService = function() {
       return { id: account.name,
                title: loc( sprintf( "register.company.%s.title",
                                     account.name )),
-               price: loc("register.company.price", _.get(account.price, billingType)),
+               price: _.get(account.price, billingType),
                priceRaw: account.price,
                isYearly: billingType === "yearly",
                normalYearPrice: (_.get(account.price, "monthly") * 12),
@@ -147,9 +147,7 @@ LUPAPISTE.CompanyRegistrationService = function() {
   });
 
   self.selectedAccount = ko.pureComputed(function() {
-    return _.find(self.accountTypes(), function(account) {
-      return account.id === self.registration.accountType();
-    });
+    return _.find(self.accountTypes(), {id: self.registration.accountType()});
   });
 
   // Guard makes sure that components are disposed, when they are

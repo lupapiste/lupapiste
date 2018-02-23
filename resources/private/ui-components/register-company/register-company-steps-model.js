@@ -15,7 +15,8 @@ LUPAPISTE.RegisterCompanyStepsModel = function( params ) {
 
   self.currentStep = params.step ? ko.observable( params.step ) : service.currentStep;
 
-  self.stepNames = _.map( _.range(1, service.stepConfigs.length + 1 + 1), // + 1 to be inclusive + 1 is for success/fail page, which is not handled 'normally'
+  // + 1 to be inclusive and another + 1 is for success/fail page, which is not handled 'normally' :(
+  self.stepNames = _.map( _.range(1, service.stepConfigs.length + 1 + 1),
                           _.partial( sprintf, "register.company.phase.%s"));
 
   self.isLast = function( index ) {
@@ -24,7 +25,8 @@ LUPAPISTE.RegisterCompanyStepsModel = function( params ) {
 
   var tabbyClasses = [10, 20, 25, 33, 40, 50, 75, 80, 90, 100]; // defined in _tables.scss
 
-  self.dynamicLineCss = self.disposedPureComputed(function() { // returns correct class depending on amount of 'steps' to be shown
+  // returns correct class depending on amount of 'steps' to be shown
+  self.dynamicLineCss = self.disposedPureComputed(function() {
     var divider = (100 / (self.stepNames.length || 1));
     var selectedClass = _.reduce(tabbyClasses, function(acc, item) {
       return acc < divider ? item : acc;

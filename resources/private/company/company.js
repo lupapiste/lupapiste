@@ -335,7 +335,7 @@
     var mappedAccountTypes = _.map(LUPAPISTE.config.accountTypes, function(type) {
       type.disable = ko.observable(accountType() ? type.limit < accountType().limit : false);
       var serviceAccountType = _.find( serviceAccountTypes, {id: type.name});
-      type.displayName = sprintf( "%s (%s)", serviceAccountType.title, serviceAccountType.price );
+      type.displayName = sprintf("%s (%s)", serviceAccountType.title, loc("register.company.price", serviceAccountType.price));
       return type;
     });
     this.accountTypes([]);
