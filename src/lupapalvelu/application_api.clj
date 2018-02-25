@@ -544,25 +544,29 @@
     (ok)))
 
 (defcommand replace-primary-operation
-  {:parameters       [id newOperation]
-   :input-validators [(partial action/non-blank-parameters [:id :newOperation])]
+  {:parameters       [id op-id newOperation]
+   :input-validators [(partial action/non-blank-parameters [:id :op-id :newOperation])]
    :states           states/pre-sent-application-states
    :permissions      [{:context  {:application {:state #{:draft}}}
-                       :required [:application/edit-draft :application/edit-operation]}]}
+                       :required [:application/edit-draft :application/edit-operation]}
+                      {:required [:application/edit-operation]}]}
   [{{app-state :state tos-function :tosFunction :as application} :application
    organization :organization
    created :created :as command}]
-  (let [new-primary-op        (:primaryOperation (assoc-in application [:primaryOperation :name] newOperation))
-        new-docs-blank        (app/make-documents nil created @organization new-primary-op application)
-        new-docs              (app/copy-docs-from-old-op-to-new (:primaryOperation application)
-                                                                (:documents application)
-                                                                new-docs-blank)
-        new-attachments-blank (app/make-attachments created new-primary-op @organization app-state tos-function)
-        new-attachments       (app/copy-attachments-from-old-op-to-new (:attachments application) new-attachments-blank)]
-    (if new-primary-op
-      (update-application command {$set {:primaryOperation new-primary-op
-                                         :documents new-docs
-                                         :attachments new-attachments}}))
+  (let [primary-op?           (= op-id (-> application :primaryOperation :id))
+        old-op                (app/get-operation application primary-op? op-id)
+        new-op                (assoc old-op :name newOperation)
+        new-operations        (->> application (app/get-operations) (remove #(= op-id (:id %))) (cons new-op))
+        new-op-docs           (app/make-documents nil created @organization new-op application)
+        new-docs              (app/copy-docs-from-old-op-to-new application new-operations new-op-docs)
+        new-attachments-blank (app/make-attachments created new-op @organization app-state tos-function)
+        new-attachments       (app/copy-attachments-from-old-op-to-new application old-op new-op new-attachments-blank)
+        update-query          (app/build-replace-operation-query application
+                                                                 primary-op?
+                                                                 new-op
+                                                                 new-docs
+                                                                 new-attachments)]
+    (update-application command {$set update-query})
     (ok)))
 
 (defcommand change-permit-sub-type

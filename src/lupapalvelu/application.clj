@@ -686,42 +686,95 @@
   (->> (usr/find-authorized-users-in-org org-id org-authz)
        (map #(select-keys % [:id :firstName :lastName]))))
 
-(defn copy-docs-from-old-op-to-new [old-primary-op old-op-docs new-op-docs]
-  (let [doc-name-matcher (fn [new-doc old-doc]
-                           (if (= (-> old-doc :schema-info :op :name)
-                                  (:name old-primary-op))
-                             false?
-                             (= (-> new-doc :schema-info :name)
-                                (-> old-doc :schema-info :name))))]
-    (loop [acc []
-           old-docs old-op-docs
-           new-docs new-op-docs]
-      (if (empty? new-docs)
-        acc
-        (let [new-doc (first new-docs)
-              matching-old-docs (filter #(doc-name-matcher new-doc %) old-docs)]
-          (recur (concat acc (if (empty? matching-old-docs)
-                               [new-doc]
-                               matching-old-docs))
-                 (remove #(doc-name-matcher new-doc %) old-docs)
-                 (rest new-docs)))))))
+(defn- get-operation-schemas [op-name]
+  (->> op-name
+       (keyword)
+       (get op/operations)
+       ((fn [op-metadata] (concat (:required op-metadata)
+                                  (:org-required-schemas op-metadata)
+                                  (:optional op-metadata)
+                                  [(:applicant-doc-schema op-metadata)])))))
 
-(defn copy-attachments-from-old-op-to-new [old-attachments new-attachments]
-  (let [type-matcher (fn [new-att old-att] (= (:type old-att) (:type new-att)))]
+(defn- get-relevant-documents-for-all-operations [new-ops]
+  (->> new-ops
+       (map #(get-operation-schemas (:name %)))
+       (apply concat)
+       (set)))
+
+(defn- get-operation-names-from-operation-schema-docs [op-docs]
+  (->> op-docs
+       (map #(-> % :schema-info :op :name))
+       (remove nil?)
+       (set)))
+
+(defn- pick-relevant-docs-from-old-docs [new-op-docs documents doc-name]
+  (let [existing-docs (filter #(= doc-name (-> % :schema-info :name)) documents)]
+    (if (seq existing-docs)
+      existing-docs
+      (filter #(= doc-name (-> % :schema-info :name)) new-op-docs))))
+
+(defn copy-docs-from-old-op-to-new [{:keys [documents]} new-ops new-op-docs]
+  (let [docs-for-new-ops        (get-relevant-documents-for-all-operations new-ops)
+        new-op-doc-names        (get-operation-names-from-operation-schema-docs new-op-docs)
+        new-operation-documents (filter #(new-op-doc-names (-> % :schema-info :op :name)) new-op-docs)]
+    (->> docs-for-new-ops
+         (map (partial pick-relevant-docs-from-old-docs new-op-docs documents))
+         (apply concat)
+         (remove nil?)
+         (concat new-operation-documents))))
+
+(defn- get-attachment-types [attachments]
+  (->> attachments
+       (map :type)
+       (set)))
+
+(defn- change-operation-in-attachment [old-op new-op att]
+  (let [new-ops (for [op (:op att)]
+                  (if (= (:id op) old-op)
+                    (assoc op :id new-op)
+                    op))]
+    (assoc att :op new-ops)))
+
+(defn- change-operation-in-attachments [old-op new-op attachments]
+  (map (partial change-operation-in-attachment old-op new-op) attachments))
+
+(defn copy-attachments-from-old-op-to-new [{:keys [attachments]} old-op new-op new-attachments]
+  (let [new-attachment-types (get-attachment-types new-attachments)]
     (loop [acc []
-           old-attachments old-attachments
+           old-attachments attachments
            new-attachments new-attachments]
       (if (empty? new-attachments)
         (if (empty? old-attachments)
           acc
-          (concat acc (remove #(-> % :versions (empty?)) old-attachments)))
+          (->> old-attachments
+               (remove #(-> % :versions (empty?)))
+               (partial change-operation-in-attachments old-op new-op)
+               (concat acc)))
         (let [new-attachment (first new-attachments)
-              old-atts-of-the-new-att-type (filter #(type-matcher new-attachment %) old-attachments)]
+              old-atts-of-the-new-att-type (filter #(new-attachment-types (:type %)) old-attachments)]
           (recur (concat acc (if (empty? old-atts-of-the-new-att-type)
                                [new-attachment]
-                               old-atts-of-the-new-att-type))
-                 (remove #(type-matcher new-attachment %) old-attachments)
+                               (change-operation-in-attachments old-op new-op old-atts-of-the-new-att-type)))
+                 (remove #(new-attachment-types (:type %)) old-attachments)
                  (rest new-attachments)))))))
+
+(defn get-operation [application primary? op-id]
+  (if primary?
+    (:primaryOperation application)
+    (-> application
+        :secondaryOperations
+        (filter #(= op-id (:id %)))
+        (first))))
+
+(defn build-replace-operation-query [application primary-op? new-op new-docs new-attachments]
+  (let [base-query {:attachments new-attachments
+                    :documents   new-docs}]
+    (if primary-op?
+      (assoc base-query :primaryOperation new-op)
+      (assoc base-query :secondaryOperations (->> application
+                                                  :secondaryOperations
+                                                  (remove #(= (:id new-op) (:id %)))
+                                                  (cons new-op))))))
 
 ;; Cancellation
 
