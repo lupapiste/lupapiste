@@ -40,12 +40,6 @@
                 <span data-bind="ltext: 'application.addOperation'"></span>
             </button>
             <button class="function"
-                    data-bind="click: replacePrimaryOperation, visible: $root.authorization.ok('add-operation'), enable: !processing() && $root.authorization.ok('add-operation')"
-                    data-test-id="replace-primary-operation">
-                <i class="lupicon-circle-pen"></i>
-                <span data-bind="ltext: 'application.replacePrimaryOperation'"></span>
-            </button>
-            <button class="function"
                     data-bind="click: exportPdf, visible: $root.authorization.ok('pdf-export'), enable: !processing() && $root.authorization.ok('pdf-export')"
                     data-test-id="application-pdf-btn">
                 <i class="lupicon-print"></i>

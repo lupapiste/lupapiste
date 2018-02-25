@@ -28,7 +28,11 @@
 
 (testable-privates lupapalvelu.application-api add-operation-allowed? validate-handler-role validate-handler-role-not-in-use validate-handler-id-in-application validate-handler-in-organization)
 
-(testable-privates lupapalvelu.application count-required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user enrich-tos-function-name enrich-single-doc-disabled-flag)
+(testable-privates lupapalvelu.application count-required-link-permits new-attachment-types-for-operation
+                   attachment-grouping-for-type person-id-masker-for-user enrich-tos-function-name
+                   enrich-single-doc-disabled-flag get-operation-schemas get-relevant-documents-for-all-operations
+                   get-operation-names-from-operation-schema-docs pick-relevant-docs-from-old-docs
+                   get-attachment-types change-operation-in-attachments)
 
 (testable-privates lupapalvelu.ya validate-link-agreements-signature validate-link-agreements-state)
 
@@ -602,62 +606,168 @@
     => empty?))
 
 (facts "copying documents and attachments when replacing primary operation"
-  (let [old-docs [{:schema-info {:name "uusiRakennus"}
-                   :data {:kaytto {:kayttotarkoitus {:value "very big house in the country"}}}}
+  (let [old-op   {:name "kerrostalo-rivitalo"
+                   :id "vanha"}
+        old-docs [{:schema-info {:name        "uusiRakennus"
+                                 :op          {:name "kerrostalo-rivitalo"}
+                                 :description "vanha"}
+                   :data        {:kaytto {:kayttotarkoitus
+                                          {:value "very big house in the country"}}}}
+                  {:schema-info {:name        "hakija-r"
+                                 :description "vanha"}
+                   :data        {:henkilo {:henkilotiedot {:etunimi "city dweller"
+                                                           :sukunimi "successfull fella"}}}}
+                  {:schema-info {:name "kaupunkikuvatoimenpide"
+                                 :op {:name "auto-katos"}}
+                   :data        {:kayttotarkoitus nil}}
+                  {:schema-info {:name "hankkeen-kuvaus"
+                                 :description "vanha"}}]
+        new-ops  [{:name "teollisuusrakennus"
+                   :id "uusi"}
+                  {:name "auto-katos"
+                   :id "uusi"}]
+        new-docs [{:schema-info {:name "uusiRakennus"
+                                 :op {:name "teollisuusrakennus"}}}
+                  {:schema-info {:name "kaupunkikuvatoimenpide"
+                                 :op {:name "auto-katos"}}
+                   :data        {:kayttotarkoitus nil}}
+                  {:schema-info {:name "hankkeen-kuvaus"}}
+                  {:schema-info {:name "paatoksen-toimitus-rakval"}}
+                  {:schema-info {:name "kaupunkikuvatoimenpide"}}
                   {:schema-info {:name "hakija-r"}
-                   :data {:henkilo {:henkilotiedot {:etunimi "city dweller"
-                                                    :sukunimi "successfull fella"}}}}]
-        new-docs [{:schema-info {:name "kaupunkikuvatoimenpide"}
-                   :data {:kayttotarkoitus nil}}
-                  {:schema-info {:name "hakija-r"}
-                   :data {:henkilo {:henkilotiedot {:etunimi nil
+                   :data        {:henkilo {:henkilotiedot {:etunimi nil
                                                     :sukunimi nil}}}}]]
-    (fact "documents copy as they should"
-      (copy-docs-from-old-op-to-new old-docs new-docs)
-      => [{:schema-info {:name "kaupunkikuvatoimenpide"}
-           :data {:kayttotarkoitus nil}}
-          {:schema-info {:name "hakija-r"}
-           :data {:henkilo {:henkilotiedot {:etunimi "city dweller"
-                                            :sukunimi "successfull fella"}}}}]))
+
+    (fact "get operation schemas by name"
+      (set (get-operation-schemas "kerrostalo-rivitalo"))
+      => #{"hakija-r" "hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "hakijan-asiamies"}
+
+      (set (get-operation-schemas "aloitusoikeus"))
+      => #{"maksaja" "hakija-r"})
+
+    (fact "multiple operations need lots of documents"
+      (get-relevant-documents-for-all-operations new-ops)
+      => (clojure.set/union #{"hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "hakijan-asiamies"}
+                            #{"hakija-r" "hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "hakijan-asiamies"}))
+
+    (fact "picking operation names from docs concerning operations"
+      (get-operation-names-from-operation-schema-docs new-docs)
+      => #{"auto-katos" "teollisuusrakennus"})
+
+    (fact "picking relevant docs from old docs"
+      (pick-relevant-docs-from-old-docs new-docs old-docs "hakija-r")
+      => [{:schema-info {:name        "hakija-r"
+                         :description "vanha"}
+           :data        {:henkilo {:henkilotiedot {:etunimi "city dweller"
+                                                   :sukunimi "successfull fella"}}}}])
+
+    (fact "merging relevant old documents to new"
+      (let [merged-docs (copy-docs-from-old-op-to-new {:documents old-docs} new-ops new-docs)
+            expected    [{:schema-info {:name "uusiRakennus"
+                                        :op   {:name "teollisuusrakennus"}}}
+                         {:schema-info {:name "kaupunkikuvatoimenpide"
+                                        :op   {:name "auto-katos"}}
+                          :data        {:kayttotarkoitus nil}}
+                         {:schema-info {:name        "hakija-r"
+                                        :description "vanha"}
+                          :data        {:henkilo {:henkilotiedot {:etunimi  "city dweller"
+                                                                  :sukunimi "successfull fella"}}}}
+                         {:schema-info {:name "paatoksen-toimitus-rakval"}}
+                         {:schema-info {:name "hankkeen-kuvaus"
+                                        :description "vanha"}}]]
+        merged-docs => expected))
+
   (let [old-attachments [{:type {:type-id "asemapiirros"
                                  :type-group "paapiirustus"}
                           :versions [{:version {:major 0
                                                 :minor 1}}
                                      {:version {:major 1
                                                 :minor 1}}]
-                          :id "1"}
+                          :id "1"
+                          :op nil}
                          {:type {:type-id "valtakirja"
                                  :type-group "hakija"}
-                          :versions {:version {:major 0
-                                               :minor 1}}
-                          :id "2"}
-                         {:type {:type-id "paatos"
-                                 :type-group "paatoksenteko"}
-                          :versions []
-                          :id "3"}]
+                          :versions [{:version {:major 0
+                                               :minor 1}}]
+                          :id "2"
+                          :op [{:name "kerrostalo-rivitalo"
+                                :id "vanha"}]}
+                         {:type {:type-id "muu"
+                                 :type-group "muut"}
+                          :versions [{:version {:major 0
+                                                :minor 1}}]
+                          :id "3"
+                          :op nil}]
         new-attachments [{:type {:type-id "valtakirja"
                                  :type-group "hakija"}
                           :versions []
-                          :id "4"}
+                          :id "4"
+                          :op nil}
                          {:type {:type-id "tutkintotodistus"
                                  :type-group "osapuolet"}
                           :versions []
-                          :id "5"}]]
-    (fact "attachments copy as they should"
-      (copy-attachments-from-old-op-to-new old-attachments new-attachments)
-      => [{:type {:type-id "valtakirja"
-                  :type-group "hakija"}
-           :versions {:version {:major 0
-                                :minor 1}}
-           :id "2"}
-          {:type {:type-id "tutkintotodistus"
-                  :type-group "osapuolet"}
-           :versions []
-           :id "5"}
-          {:type {:type-id "asemapiirros"
+                          :id "5"
+                          :op nil}]]
+
+    (fact "getting attachment types"
+      (get-attachment-types old-attachments)
+      => #{{:type-id "asemapiirros"
+            :type-group "paapiirustus"}
+           {:type-id "valtakirja"
+            :type-group "hakija"}
+           {:type-id    "muu"
+            :type-group "muut"}})
+
+    (fact "changing operation in attachment"
+      (change-operation-in-attachments old-op (first new-ops) old-attachments)
+      => [{:type {:type-id    "asemapiirros"
                   :type-group "paapiirustus"}
            :versions [{:version {:major 0
                                  :minor 1}}
                       {:version {:major 1
                                  :minor 1}}]
-           :id "1"}])))
+           :id "1"
+           :op nil}
+          {:type {:type-id "valtakirja"
+                  :type-group "hakija"}
+           :versions [{:version {:major 0
+                                :minor 1}}]
+           :id "2"
+           :op [{:name "teollisuusrakennus"
+                 :id "uusi"}]}
+          {:type     {:type-id    "muu"
+                      :type-group "muut"}
+           :versions [{:version {:major 0
+                                 :minor 1}}]
+           :id       "3"
+           :op       nil}])
+
+
+    (fact "attachments copy as they should"
+      (sort-by :id (copy-attachments-from-old-op-to-new {:attachments old-attachments} old-op (first new-ops) new-attachments))
+      => [{:type     {:type-id    "asemapiirros"
+                      :type-group "paapiirustus"}
+           :versions [{:version {:major 0
+                                 :minor 1}}
+                      {:version {:major 1
+                                 :minor 1}}]
+           :id       "1"
+           :op       nil}
+          {:type     {:type-id    "valtakirja"
+                      :type-group "hakija"}
+           :versions [{:version {:major 0
+                                 :minor 1}}]
+           :id       "2"
+           :op       [{:name "teollisuusrakennus"
+                       :id   "uusi"}]}
+          {:type     {:type-id    "muu"
+                      :type-group "muut"}
+           :versions [{:version {:major 0
+                                 :minor 1}}]
+           :id       "3"
+           :op       nil}
+          {:type     {:type-id    "tutkintotodistus"
+                      :type-group "osapuolet"}
+           :versions []
+           :id       "5"
+           :op       nil}]))))

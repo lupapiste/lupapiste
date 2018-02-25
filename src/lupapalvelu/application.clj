@@ -729,10 +729,12 @@
        (set)))
 
 (defn- change-operation-in-attachment [old-op new-op att]
-  (let [new-ops (for [op (:op att)]
-                  (if (= (:id op) old-op)
-                    (assoc op :id new-op)
-                    op))]
+  (let [new-ops (when (not-empty (:op att))
+                  (for [op (:op att)]
+                    (if (= (:id op) (:id old-op))
+                      (assoc op :id (:id new-op)
+                                :name (:name new-op))
+                      op)))]
     (assoc att :op new-ops)))
 
 (defn- change-operation-in-attachments [old-op new-op attachments]
@@ -748,7 +750,7 @@
           acc
           (->> old-attachments
                (remove #(-> % :versions (empty?)))
-               (partial change-operation-in-attachments old-op new-op)
+               (change-operation-in-attachments old-op new-op)
                (concat acc)))
         (let [new-attachment (first new-attachments)
               old-atts-of-the-new-att-type (filter #(new-attachment-types (:type %)) old-attachments)]

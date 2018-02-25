@@ -1056,13 +1056,13 @@
                         <p data-bind="ltext: 'invite.desc'" class="dialog-desc"> </p>
                         <form data-bind="with: $root.invite">
                             <!-- label data-bind="ltext: 'userinfo.role'" class="form-label" for="invite-document"></label -->
-                            <input class="form-input text long" id="invite-document-name" disabled="disabled" type="hidden" data-bind="value: documentName" />
-                            <input class="form-input text long" id="invite-document-id" disabled="disabled" type="hidden" data-bind="value: documentId" />
-                            <input class="form-input text long" id="invite-document-path" disabled="disabled" type="hidden" data-bind="value: path" />
-                            <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email"></label>
-                            <input class="form-input text long" id="invite-email" type="text" data-bind="textInput: email" />
-                            <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
-                            <textarea id="invite-text" rows=10 class="form-input textarea really-long high" data-bind="textInput: text"></textarea>
+                            <input class="form-input text long" id="invite-document-name-valtuutus" disabled="disabled" type="hidden" data-bind="value: documentName" />
+                            <input class="form-input text long" id="invite-document-id-valtuutus" disabled="disabled" type="hidden" data-bind="value: documentId" />
+                            <input class="form-input text long" id="invite-document-path-valtuutus" disabled="disabled" type="hidden" data-bind="value: path" />
+                            <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email-valtuutus"></label>
+                            <input class="form-input text long" id="invite-email-valtuutus" type="text" data-bind="textInput: email" />
+                            <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text-valtuutus"></label>
+                            <textarea id="invite-text-valtuutus" rows=10 class="form-input textarea really-long high" data-bind="textInput: text"></textarea>
                             <div data-bind="visible: error" >
                                 <div data-bind="text: error" class="context-error"></div>
                             </div>
@@ -1083,13 +1083,13 @@
                     <p data-bind="ltext: 'document.party.person-select.designer.areyousure'" class="dialog-desc"></p>
                     <p>&nbsp;</p>
                     <form data-bind="with: $root.invite">
-                      <input class="form-input text long" id="invite-document-name" disabled="disabled" type="hidden" data-bind="value: documentName" />
-                      <input class="form-input text long" id="invite-document-id" disabled="disabled" type="hidden" data-bind="value: documentId" />
-                      <input class="form-input text long" id="invite-document-path" disabled="disabled" type="hidden" data-bind="value: path" />
-                      <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email"></label>
-                      <input class="form-input text long" id="invite-email" type="text" disabled="disabled" data-bind="textInput: email" />
-                      <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
-                      <textarea id="invite-text" rows=10 class="form-input textarea really-long high" data-bind="textInput: text"></textarea>
+                      <input class="form-input text long" id="invite-document-name-valtuutus-yrityskayttaja" disabled="disabled" type="hidden" data-bind="value: documentName" />
+                      <input class="form-input text long" id="invite-document-id-valtuutus-yrityskayttaja" disabled="disabled" type="hidden" data-bind="value: documentId" />
+                      <input class="form-input text long" id="invite-document-path-valtuutus-yrityskayttaja" disabled="disabled" type="hidden" data-bind="value: path" />
+                      <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email-valtuutus-yrityskayttaja"></label>
+                      <input class="form-input text long" id="invite-email-valtuutus-yrityskayttaja" type="text" disabled="disabled" data-bind="textInput: email" />
+                      <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text-valtuutus-yrityskayttaja"></label>
+                      <textarea id="invite-text-valtuutus-yrityskayttaja" rows=10 class="form-input textarea really-long high" data-bind="textInput: text"></textarea>
                       <div data-bind="visible: error" >
                         <div data-bind="text: error" class="context-error"></div>
                       </div>

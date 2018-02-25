@@ -598,12 +598,6 @@ LUPAPISTE.ApplicationModel = function() {
     return false;
   };
 
-  self.replacePrimaryOperation = function() {
-    pageutil.openPage("replace-primary-operation", self.id());
-    hub.send("track-click", {category:"Application", label:"", event:"replacePrimaryOperation"});
-    return false;
-  };
-
   self.cancelInforequest = function() {
     if (!self.stateChanged()) {
       hub.send("track-click", {category:"Inforequest", label:"", event:"cancelInforequest"});
