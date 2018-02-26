@@ -86,7 +86,9 @@
 (facts "Teppo cannot submit even his own applications"
        (let [application-id (create-app-id teppo :propertyId sipoo-property-id :address "Xi Dawang Lu 8")]
          (fact "Query says can't submit"
-           (query teppo :application-submittable :id application-id) => unauthorized?)
+           (query teppo :application-submittable :id application-id) => {:ok false
+                                                                         :text "error.cannot-submit-application"
+                                                                         :errors [{:ok false :text "company.user.cannot.submit"}]})
          (fact "Submit application fails"
                (command teppo :submit-application :id application-id) => fail?)))
 
@@ -143,7 +145,9 @@
 
     (facts "Teppo cannot submit application"
            (fact "Query says can't submit"
-                 (query teppo :application-submittable :id application-id) => unauthorized?)
+                 (query teppo :application-submittable :id application-id) => {:ok false
+                                                                               :text "error.cannot-submit-application"
+                                                                               :errors [{:ok false :text "company.user.cannot.submit"}]})
            (fact "Submit application fails"
                  (command teppo :submit-application :id application-id) => fail?))
     (fact "Teppo cannot edit his company user details"
