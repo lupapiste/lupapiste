@@ -59,6 +59,8 @@
                    => (partial expected-failure? :error.ram-not-allowed)))
 
            (fact "Delete verdict"
+                 (command sonja :change-application-state :id application-id :state "appealed") => ok?
+                 (command sonja :change-application-state :id application-id :state "verdictGiven") => ok?
                  (command sonja :delete-verdict :id application-id :verdictId (-> root :source :id)) => ok?)
 
            (fact "Sent review still exists"
