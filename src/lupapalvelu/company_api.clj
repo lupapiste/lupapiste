@@ -53,11 +53,12 @@
   [{user :user created :created}]
   (if (usr/admin? user)
     (let [admins (->> (usr/find-users {"company.role" "admin"})
-                   (partition-by (comp :id :company))
-                   (map (fn [company-admins]
-                          [(-> company-admins first :company :id), (map usr/summary company-admins)]))
-                   (into {}))]
-      (ok :companies (map (fn [company] (assoc company :admins (get admins (:id company) []))) (com/find-companies))))
+                      (map #(assoc (usr/summary %) :company (:company %)))
+                      (group-by (comp :id :company)))]
+      (ok :companies (->> (com/find-companies)
+                          (map (fn [company]
+                                 (assoc company :admins (->> (get admins (:id company) [])
+                                                             (map #(dissoc % :company)))))))))
     (ok :companies (->> (com/find-companies {:locked {$not {$lt created}}} [:name :y :address1 :zip :po :contactAddress :contactZip :contactPo])
                         (map com/company-info)))))
 
