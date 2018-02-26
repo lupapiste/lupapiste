@@ -29,7 +29,7 @@
          set-user-to-document command. Basically this includes all users in companies that have been
          authorised to the application."
    :user-roles  #{:applicant :authority}
-   :pre-checks  [(some-pre-check domain/validate-owner-or-write-access
+   :pre-checks  [(some-pre-check domain/validate-write-access
                                  auth/application-authority-pre-check)]
    :parameters  [id]}
   [{{auth :auth} :application}]
@@ -53,12 +53,14 @@
   [{user :user created :created}]
   (if (usr/admin? user)
     (let [admins (->> (usr/find-users {"company.role" "admin"})
-                   (partition-by (comp :id :company))
-                   (map (fn [company-admins]
-                          [(-> company-admins first :company :id), (map usr/summary company-admins)]))
-                   (into {}))]
-      (ok :companies (map (fn [company] (assoc company :admins (get admins (:id company) []))) (com/find-companies))))
-    (ok :companies (map (fn [company] (select-keys company [:id :name :y :address1 :zip :po])) (com/find-companies {:locked {$not {$lt created}}})))))
+                      (map #(assoc (usr/summary %) :company (:company %)))
+                      (group-by (comp :id :company)))]
+      (ok :companies (->> (com/find-companies)
+                          (map (fn [company]
+                                 (assoc company :admins (->> (get admins (:id company) [])
+                                                             (map #(dissoc % :company)))))))))
+    (ok :companies (->> (com/find-companies {:locked {$not {$lt created}}} [:name :y :address1 :zip :po :contactAddress :contactZip :contactPo])
+                        (map com/company-info)))))
 
 (defcommand company-update
   {:parameters [company updates]

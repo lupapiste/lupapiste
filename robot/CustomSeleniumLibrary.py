@@ -14,6 +14,7 @@ class CustomSeleniumLibrary(SeleniumLibrary):
             options.add_argument("--allow-running-insecure-content")
             options.add_argument("--safebrowsing-disable-extension-blacklist")
             options.add_argument("--safebrowsing-disable-download-protection")
+            options.add_argument("--dns-prefetch-disable")
             prefs = {'safebrowsing.enabled': True,
                      'credentials_enable_service': False,
                      'profile.password_manager_enabled': False}

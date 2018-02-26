@@ -27,5 +27,5 @@
    ;;                    (distinct)
    ;;                    (apply sc/enum)))
    ;; but requiring lupapalvelu.operation results in dependency cycle...
-   :applicant      sc/Str
+   :applicant      (sc/maybe sc/Str)
    :infoRequest    sc/Bool})

@@ -188,9 +188,6 @@
                                 :person     "Diana Dreamer, rakennusarkkitehti"}]
                        :in-any-order))))
 
-(fact "finnish-date"
-  (pdf/finnish-date 1517838282483) => "5.2.2018")
-
 (fact "collateral"
   (pdf/collateral :fi {:data {:collateral "20 000"
                               :collateral-type "shekki"

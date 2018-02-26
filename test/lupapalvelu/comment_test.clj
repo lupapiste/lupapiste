@@ -26,12 +26,12 @@
 
 (facts enrich-user-information
   (fact "application role determined by auth role"
-    (let [auth    [{:id "user-id1" :role :owner :party-roles []}]
+    (let [auth    [{:id "user-id1" :role :foreman :party-roles []}]
           comment {:text "comment text" :user {:id "user-id1" :role :applicant}}]
       (enrich-user-information auth comment) => {:text "comment text"
                                                  :user {:id "user-id1"
                                                         :role :applicant
-                                                        :application-role :owner}}))
+                                                        :application-role :foreman}}))
 
   (fact "application role determined by party-role"
     (let [auth    [{:id "user-id1" :role :owner :party-roles [:clown :batman]}]

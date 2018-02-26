@@ -109,7 +109,9 @@
         (:state updated-task) => "requires_user_action"))
 
     (fact "Review cannot be rejected"
-      (command sonja :reject-task :id application-id :taskId review-id) => (partial expected-failure? "error.invalid-task-type")))
+      (command sonja :reject-task :id application-id :taskId review-id) => (partial expected-failure? "error.invalid-task-type"))
+    (fact "Review can't be deleted, because Vaadittu lupaehtona"
+      (command sonja :delete-task :id application-id :taskId review-id) => (partial expected-failure? :error.task-is-required)))
 
   (facts "create task"
     (fact "Applicant can't create tasks"
@@ -308,3 +310,44 @@
             (fact "Attachment file is stored and available"
               (decode-body (http-get (str url (-> ak :faulty :files first :originalFileId)) {}))
               => (contains {:application application-id}))))))))
+
+(facts "Reviews with PATE"
+  (let [sipoo-application        (create-and-submit-application pena :propertyId sipoo-property-id)
+        jarvenpaa-application    (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+        sipoo-app-id             (:id sipoo-application)
+        jarvenpaa-app-id         (:id jarvenpaa-application)
+        _                        (give-verdict sonja sipoo-app-id :verdictId "753-2018-PATE")
+        _                        (give-verdict raktark-jarvenpaa jarvenpaa-app-id :verdictId "186-2018-0001")]
+
+    (fact "Application should be in verdict given state"
+      (:state (query-application pena sipoo-app-id)) => "verdictGiven")
+
+    (fact "First review marked done should change state when PATE in use"
+     (let [result  (command sonja :create-task :id sipoo-app-id :taskName "Aloituskokous" :schemaName "task-katselmus" :taskSubtype "aloituskokous") => ok?
+           task-id (:taskId result)]
+       (command sonja :update-task :id sipoo-app-id :doc task-id :updates [["katselmus.tila" "lopullinen"] ["katselmus.pitoPvm" "15.02.2018"] ["katselmus.pitaja" "Auburn Authority"]]) => ok?
+       (command sonja :review-done :id sipoo-app-id :lang "fi" :taskId task-id) => ok?
+       (count (:tasks (query-application pena sipoo-app-id))) => 1
+       (:state (query-application pena sipoo-app-id)) => "constructionStarted"))
+
+    (fact "And send message"
+      (get-in (last (integration-messages sipoo-app-id)) [:data :toState :name]) => "constructionStarted")
+
+    (fact "Second done review should change state"
+     (command sonja :change-application-state :id sipoo-app-id :state "appealed") => ok?
+     (command sonja :change-application-state :id sipoo-app-id :state "verdictGiven") => ok?
+     (:state (query-application sonja sipoo-app-id)) => "verdictGiven"
+     (let [result  (command sonja :create-task :id sipoo-app-id :taskName "Loppukatselmus" :schemaName "task-katselmus" :taskSubtype "loppukatselmus") => ok?
+           task-id (:taskId result)]
+     (command sonja :update-task :id sipoo-app-id :doc task-id :updates [["katselmus.tila" "lopullinen"] ["katselmus.pitoPvm" "15.02.2018"] ["katselmus.pitaja" "Auburn Authority"]]) => ok?
+     (command sonja :review-done :id sipoo-app-id :lang "fi" :taskId task-id) => ok?
+     (count (:tasks (query-application pena sipoo-app-id))) => 2
+     (:state (query-application pena sipoo-app-id)) => "verdictGiven"))
+
+   (fact "First review marked done without PATE shouldnt change state"
+     (let [result  (command raktark-jarvenpaa :create-task :id jarvenpaa-app-id :taskName "Aloituskokous" :schemaName "task-katselmus" :taskSubtype "aloituskokous") => ok?
+           task-id (:taskId result)]
+       (command raktark-jarvenpaa :update-task :id jarvenpaa-app-id :doc task-id :updates [["katselmus.tila" "lopullinen"] ["katselmus.pitoPvm" "15.02.2018"] ["katselmus.pitaja" "Auburn Authority"]]) => ok?
+       (command raktark-jarvenpaa :review-done :id jarvenpaa-app-id :lang "fi" :taskId task-id) => ok?
+       (count (:tasks (query-application pena jarvenpaa-app-id))) => 1
+       (:state (query-application pena jarvenpaa-app-id)) => "verdictGiven"))))

@@ -83,7 +83,7 @@
   command in authorization_api is not feasible, since the rights are
   different for guests."
    :user-roles       #{:applicant :authority}
-   :user-authz-roles #{:guest :guestAuthority :writer :owner :foreman}
+   :user-authz-roles #{:guest :guestAuthority :writer :foreman}
    :parameters       [:id :username :unsubscribe]
    :input-validators [(partial action/non-blank-parameters [:username])]
    :pre-checks       [foreman/allow-foreman-only-in-foreman-app]

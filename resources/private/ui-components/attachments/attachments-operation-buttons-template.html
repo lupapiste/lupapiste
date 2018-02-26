@@ -1,7 +1,7 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="attachments-operation-buttons-template">
   <div class="operation-button-row">
-    <div class="stacked--inline" data-bind="visible: upload.batchListHidden">
+    <div class="stacked--inline" data-bind="visible: batchEmpty">
       <button class="positive caps"
               data-bind="click: $data.attachmentTemplatesAdd,
                          visible: $data.authModel.ok('create-attachments')"
@@ -17,7 +17,7 @@
                          testId: 'add-attachments'"></upload-zone>
   </div>
 
-  <!-- ko if: upload.batchListHidden -->
+  <!-- ko if: batchEmpty -->
   <div data-bind="component: { name: 'attachments-require-bubble',
                   params: { bubbleVisible: requireAttachmentsBubbleVisible } }"
        class="operation-bubble"></div>

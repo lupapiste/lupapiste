@@ -12,4 +12,13 @@ LUPAPISTE.RegisterCompanySignModel = function() {
     return sprintf( "/api/sign/document/%s", util.getIn( self.form, ["processId"]) );
   });
   self.cancelClick = service.cancel;
+
+  self.confirmationText = self.disposedPureComputed(function() {
+    var acc = service.selectedAccount();
+    var billingType = service.registration.billingType();
+    var accountType = acc.title;
+    return loc("register.company.billing." + billingType + ".confirmation",
+               accountType,
+               acc.price);
+  });
 };

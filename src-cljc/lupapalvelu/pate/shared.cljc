@@ -656,9 +656,7 @@
                  :loc-prefix :pate-verdict-dates
                  :grid       {:columns    17
                               :loc-prefix :pate-verdict
-                              :rows       [(date-delta-row [:julkipano :anto
-                                                            :muutoksenhaku :lainvoimainen
-                                                            :aloitettava :voimassa])]
+                              :rows       [(date-delta-row verdict-dates)]
                               }}
                 {:id         "verdict"
                  :required?  true

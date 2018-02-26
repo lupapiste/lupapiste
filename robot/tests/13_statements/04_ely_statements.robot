@@ -10,7 +10,7 @@ Variables       ../../common_variables.py
 *** Test Cases ***
 
 Sonja sets up application by filling person details and submitting
-  Sonja logs in
+  Sonja logs in  False
   Create application the fast way  ely-statements  753-416-25-22  kerrostalo-rivitalo
   ${id}=  Get Text  xpath=//section[@id='application']//span[@data-test-id='application-id']
   Set Suite Variable  ${appId}  ${id}
@@ -76,7 +76,7 @@ Open statement, has data
   Element should be disabled  statement-type-select
   Element should be disabled  statement-text
   Textarea value should be  statement-text  Hyvä homma
-  Xpath should match X times  //table[@data-test-id='statement-attachments-table']/tbody//tr  1
+  Xpath should match X times  //table[@data-test-id='targetted-attachments-table']/tbody//tr  1
   Element should not be visible  xpath=//table[@data-test-id='statement-attachments-table']/tbody//tr//td[contains(@class, 'remove-col')]//i
 
 Frontend errors

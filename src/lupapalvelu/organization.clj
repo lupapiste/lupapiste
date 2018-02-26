@@ -252,7 +252,8 @@
    (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}
    (sc/optional-key :pate-enabled)                 sc/Bool
    (sc/optional-key :multiple-operations-supported) sc/Bool
-   (sc/optional-key :local-bulletins-page-settings) LocalBulletinsPageSettings})
+   (sc/optional-key :local-bulletins-page-settings) LocalBulletinsPageSettings
+   (sc/optional-key :default-digitalization-location) {:x sc/Str :y sc/Str}})
 
 
 (sc/defschema SimpleOrg

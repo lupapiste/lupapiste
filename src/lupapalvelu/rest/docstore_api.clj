@@ -124,7 +124,7 @@
 
 
 (sc/defschema BuildingsResponse
-  (assoc ApiResponse :data [sc/Str]))
+  (assoc ApiResponse :data [{:nationalId sc/Str :usage (sc/maybe sc/Str)}]))
 
 (defendpoint-for usr/docstore-user? "/rest/docstore/property-building-ids" false
   {:summary "Given address or property id, return a list of buildings in the given property."
@@ -135,7 +135,9 @@
   (if-let [{url :url credentials :credentials} (org/get-building-wfs {:organization organization
                                                                       :permitType "R"})]
     {:ok true :data (->> (building-reader/building-info-list url credentials propertyId)
-                         (mapv :nationalId)
-                         (remove nil?)
-                         sort)}
+                         (map #(select-keys % [:usage :nationalId]))
+                         (remove (comp nil? :nationalId))
+                         (map #(merge {:usage nil} %))
+                         (sort-by :nationalId)
+                         vec)}
     {:ok true :data []}))

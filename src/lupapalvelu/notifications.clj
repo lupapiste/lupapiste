@@ -109,6 +109,8 @@
   [{:keys [application]}]
   (get-email-recipients-for-application application roles/comment-user-authz-roles [:statementGiver :financialAuthority]))
 
+(defn application-state-reminder-recipients-fn [{:keys [application]}]
+  (get-email-recipients-for-application application #{:writer} #{}))
 
 ;;
 ;; Configuration for generic notifications

@@ -76,7 +76,7 @@
                  :postVerdictStates     states/post-verdict-states
                  :loggedInUploadMaxSize (env/value :file-upload :max-size :logged-in)
                  :anonymousUploadMaxSize (env/value :file-upload :max-size :anonymous)
-                 :writerRoles           domain/owner-or-write-roles
+                 :writerRoles           domain/write-roles
                  :stampableMimes        (filter identity (map mime/mime-types file-types))
                  :foremanRoles          (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
                  :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]
@@ -227,7 +227,8 @@
                    "company-registration-service.js"
                    "triggers-target-service.js"
                    "trigger-service.js"
-                   "navi-sidebar-service.js"]}
+                   "navi-sidebar-service.js"
+                   "batch-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}

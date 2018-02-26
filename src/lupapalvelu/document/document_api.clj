@@ -305,7 +305,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks [(document-in-application-validator :documentId)
                 (editable-by-state? :documentId states/update-doc-states)
-                domain/validate-owner-or-write-access
+                domain/validate-write-access
                 validate-user-authz-by-document-id
                 application/validate-authority-in-drafts
                 (doc-disabled-validator :documentId)]}

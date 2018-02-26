@@ -52,8 +52,7 @@
    :auth [{:lastName "Panaani",
              :firstName "Pena",
              :username "pena",
-             :type "owner",
-             :role "owner",
+             :role "writer",
              :id "777777777777777777000020"}]
    :handlers [(assoc sonja :general true)],
    :permitType "YA",

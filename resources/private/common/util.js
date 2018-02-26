@@ -296,12 +296,22 @@ var util = (function($) {
     label: "label"
   };
 
+  var compareItems = _.curry(function(a, b) {
+    var ua = ko.toJS(a);
+    var ub = ko.toJS(b);
+    if (ua && ub && ua["type-group"] && ua["type-id"]) {
+      return ua["type-group"] === ub["type-group"] && ua["type-id"] === ub["type-id"];
+    } else {
+      return ua === ub;
+    }
+  });
+
   function filterDataByQuery(options) {
     options = _.defaults(options, defaultOptions);
     var filtered = _.filter(options.data, function(item) {
         return _.reduce(options.query.split(" "), function(result, word) {
           var dataForLabel = ko.unwrap(item[options.label]);
-          var isSelected = _.isArray(options.selected) ? _.some(options.selected, item) : options.selected === item;
+          var isSelected = _.isArray(options.selected) ? _.some(options.selected, compareItems(item)) : compareItems(options.selected, item);
           return !isSelected && dataForLabel !== undefined && _.includes(dataForLabel.toUpperCase(), word.toUpperCase()) && result;
         }, true);
       });

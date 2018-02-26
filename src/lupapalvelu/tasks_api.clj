@@ -4,15 +4,19 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.env :as env]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application]]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.tasks :as tasks]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
+            [lupapalvelu.state-machine :as sm]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]))
 
@@ -98,7 +102,8 @@
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :user-roles #{:authority}
    :states     valid-states
-   :pre-checks [(task-state-assertion (tasks/all-states-but :sent :faulty_review_task))]}
+   :pre-checks [(task-state-assertion (tasks/all-states-but :sent :faulty_review_task))
+                tasks/deny-removal-of-vaadittu-lupaehtona]}
   [{:keys [application created] :as command}]
   (attachment/delete-attachments! application (map :id (tasks/task-attachments application taskId)))
   (update-application command
@@ -169,6 +174,12 @@
     (if (= "task" type)
       (recur application (util/find-by-id id (:tasks application)))
       task)))
+
+(defn no-sent-reviews-yet? [tasks]
+  (->> (filter #(tasks/task-is-review? %) tasks)
+       (filter #(= :sent (keyword (:state %))))
+       (count)
+       (zero?)))
 
 (defquery review-can-be-marked-done
   {:description "Review can be marked done by authorities"
@@ -245,6 +256,12 @@
           (doc-persistence/persist-model-updates application "tasks" root-task updates created)))
 
       :nop)
+
+    (when (and (env/feature? :pate-json)
+               (org/pate-org? (:id @organization))
+               (no-sent-reviews-yet? (:tasks application))
+               (= :constructionStarted (sm/next-state application)))
+      (update-application command (app-state/state-transition-update :constructionStarted created application user)))
 
     (ok :integrationAvailable sent-to-krysp?)))
 

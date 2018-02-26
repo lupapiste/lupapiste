@@ -134,7 +134,7 @@
   [{:type     :hakemus
     :category :document
     :ts       (:created application)
-    :user     (:applicant application)
+    :user     (or (:applicant application) "")
     :id       (str (:id application) "-application")}])
 
 (defn- get-attachments-from-application [application]

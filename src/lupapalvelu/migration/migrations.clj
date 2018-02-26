@@ -3726,7 +3726,31 @@
   (mongo/update-by-query :users
                          {:notification.title   "Muutos Lupapisteen rekisteri- ja tietosuojaselosteeseen"
                           :notification.message #"liiketoimintajohtaja"}
-                         {$set {:notification.message "Lupapisteen henkilörekisterin pitäjä vaihtui 1.5.2017 Solita Oy:stä Evolta Oy:ksi. Muutos ei vaikuta käyttöehtoihin. Lisätietoja asiasta antaa Niina Syrjärinne, puh. 0400 613 756."}}))
+                         {$set {:notification.message "Lupapisteen henkil\u00f6rekisterin pit\u00e4j\u00e4 vaihtui 1.5.2017 Solita Oy:st\u00e4 Evolta Oy:ksi. Muutos ei vaikuta k\u00e4ytt\u00f6ehtoihin. Lis\u00e4tietoja asiasta antaa Niina Syrj\u00e4rinne, puh. 0400 613 756."}}))
+
+(defn application-owner-as-creator [{auth :auth :as application}]
+  (-> (util/find-first (comp #{"owner"} :role) auth)
+      (usr/summary)
+      (dissoc :role :type)))
+
+(defn owner-auth-as-writer [{role :role type :type :as auth-entry}]
+  (cond-> auth-entry
+    (= "owner" role) (assoc :role "writer")
+    (= "owner" type) (dissoc :type)))
+
+(defn update-application-owner-to-writer [collection {app-id :id :as application}]
+  (mongo/update-by-id collection app-id {$set {:creator (application-owner-as-creator application)
+                                               :auth    (map owner-auth-as-writer (:auth application))}}))
+
+(defmigration applications-owner-to-writer
+  {:apply-when (pos? (mongo/count :applications {:auth.role "owner"}))}
+  (doseq [collection [:applications :submitted-applications]]
+    (->> (mongo/select collection {} [:auth])
+         (run! (partial update-application-owner-to-writer collection)))))
+
+(defmigration company-default-billing-type
+  {:apply-when (pos? (mongo/count :companies {:billingType {$exists false}}))}
+  (mongo/update-by-query :companies {:billingType {$exists false}} {$set {:billingType "yearly"}}))
 
 ;;
 ;; ****** NOTE! ******

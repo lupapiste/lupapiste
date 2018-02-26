@@ -12,7 +12,9 @@
         </th>
         <th><span class="batch-required"
                   data-bind="ltext:'application.attachmentContents'"></span></th>
+        <!-- ko if: $component.showDrawing -->
         <th><span data-bind="ltext:'attachment.drawing-number'"></span></th>
+        <!-- /ko -->
         <th><span data-bind="ltext:'attachment.label.operation'"></span></th>
         <!-- ko if: $component.isArchivingProject -->
         <th><span data-bind="ltext:'digitizer.backendId'"></span></th>
@@ -27,7 +29,7 @@
         <th class="td-center" data-bind="ltext:'remove'"></th>
         </tr>
       </thead>
-      <tbody data-bind="foreach: upload.files">
+      <tbody data-bind="foreach: fileList">
         <tr class="file">
           <td data-bind="attr: {colspan: $component.colspan}">
             <span data-bind="file: $data"></span>
@@ -79,6 +81,7 @@
                          class="fill-down"></icon-button>
           </div>
         </td>
+        <!-- ko if: $component.showDrawing -->
         <td>
           <div class="fill-pin"
                data-bind="event: $parent.fillEvents( $data, 'drawing')">
@@ -97,6 +100,7 @@
                          class="fill-down"></icon-button>
           </div>
         </td>
+        <!-- /ko -->
         <td>
           <div class="fill-pin"
                data-bind="event: $parent.fillEvents( $data, 'grouping'),
@@ -160,7 +164,7 @@
         <td class="td-center">
           <!-- ko ifnot: $parent.rowDisabled( $data ) -->
           <i class="lupicon-remove primary"
-             data-bind="click: $parent.upload.removeFile,
+             data-bind="click: $parent.removeFile,
                         testId: 'batch-remove-' + $index()"></i>
           <!-- /ko -->
           <!-- ko if: $parent.rowDisabled( $data ) -->
