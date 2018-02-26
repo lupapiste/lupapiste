@@ -1,6 +1,7 @@
 (ns lupapalvelu.smoketest.user-smoke-tests
   (:require [lupapiste.mongocheck.core :refer [mongocheck]]
             [schema.core :as sc]
+            [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]))
 
@@ -28,6 +29,13 @@
   #(when (and (= "dummy" (:role %)) (not (:enabled %)) (-> % :private :password))
      (format "Dummy user %s has password" (:username %)))
   :role :private :username :enabled)
+
+(mongocheck :users
+  (fn [{:keys [company username]}]
+    (when (ss/not-blank? (:id company))
+      (when-not (pos? (mongo/count :companies {:_id (:id company)}))
+        (format "User %s has orphan company id: %s" username (:id company)))))
+  :username :company)
 
 (mongocheck :companies
             (fn [{company-id :_id}]
