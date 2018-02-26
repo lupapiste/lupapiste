@@ -22,9 +22,13 @@
   (let [success-fn (fn []
                      (reset! state/saving-info? false)
                      (util/get-authority))
+        error-fn   (fn [call]
+                     (reset! state/saving-info? false)
+                     (.ajaxError js/notify (clj->js call)))
         params     {:command               "update-auth-info"
                     :show-saved-indicator? true
-                    :success               success-fn}
+                    :success               success-fn
+                    :error                 error-fn}
         firstName  (:firstName @user-info)
         lastName   (:lastName @user-info)
         email      (:email @state/authority)

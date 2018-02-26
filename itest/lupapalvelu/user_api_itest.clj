@@ -289,6 +289,10 @@
 
     (fact "Sipoo can edit authority info"
       (command sipoo :update-auth-info command-data) => ok?)
+
+    (fact "Sipoo can't change email if it's already in use"
+      (command sipoo :update-auth-info (assoc command-data :new-email "sonja.sibbo@sipoo.fi")) =not=> ok?)
+
     (fact "Sipoo can give authz to Pekka Borga but can not edit info"
       (let [pekka {:firstName "Pekka"
                    :lastName "Borga"
@@ -301,7 +305,7 @@
         =not=> ok?))
     (fact "Sonja can not edit authority info"
       (command sonja :update-auth-info command-data) =not=> ok?)
-    (fact "Järvenpää can not edit info of authority in Sipoo"
+    (fact "Järvenpaa can not edit info of authority in Sipoo"
       (command jarvenpaa :update-auth-info command-data) =not=> ok?)))
 
 ;;
