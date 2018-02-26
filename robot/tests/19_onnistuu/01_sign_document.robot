@@ -18,7 +18,7 @@ There are accounts available
   Xpath Should Match X Times  //div[contains(@class, 'account-type-boxes')]//div[contains(@class, 'account-type-box')]  3
 
 Bob sees that yearly subscription is selected by default
-  Element should be visible  xpath=//button[@data-test-id='yearly-billing' and contains(@class, 'selected')]
+  Company yearly billing is selected
   # Each has 'save5' ribbons LPK-3430
   Xpath Should Match X Times  //div[contains(@class, 'account-type-boxes')]//span[@data-test-id='save-5-ribbon']  3
   # Each have discounted price visible LPK-3430
@@ -27,9 +27,9 @@ Bob sees that yearly subscription is selected by default
 Also monthly billing is an option
   Test id visible  monthly-billing
 
-Bob selects account5 to continue
+Bob selects account15 with yearly billing to continue
   Test id disabled  register-company-continue
-  Select account type  account5
+  Select account type  account15
   Click by test id  register-company-continue
 
 Bob checks that input validation works
@@ -41,7 +41,21 @@ Bob checks that input validation works
 Existing user email cannot be used
   Validate input  register-company-email  pena@example.com  bob@example.org
 
-Bobo changes his mind
+Bob sees that he is entitled to discount in summary page
+  # .. after he enters all required fields :D
+  Input text by test id  register-company-name        Bobin rakennus Oy
+  Input text by test id  register-company-firstName   Bob
+  Input text by test id  register-company-lastName    Dylan
+  Input text by test id  register-company-address1    Katukatu
+  Input text by test id  register-company-po          Kunta
+  Click by test id  register-company-continue
+  # Ok, summary page now:
+  Wait until  Element should be visible  xpath=//div[contains(@class, 'register-company-summary')]
+  Element should contain  xpath=//strong[@data-test-id='summary-account-text']  Yritystili 15
+  Element should be visible  xpath=//*[@data-test-id='reduction-price']
+
+Bob changes his mind
+  Click by test id  register-company-cancel
   Click by test id  register-company-cancel
   Test id enabled  register-company-continue
   Click by test id  register-company-cancel
@@ -161,9 +175,10 @@ Validate input
   No such test id  ${tid}-warning
 
 Register wizard until signing
-  [Arguments]  ${lang}=fi  ${billing}=monthly
+  [Arguments]  ${lang}=fi  ${billing}=monthly  ${account}=account5
   Click by test id  ${billing}-billing
-  Select account type  account5
+  Company ${billing} billing is selected
+  Select account type  ${account}
   Click enabled by test id  register-company-continue
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-continue']
   Input text by test id  register-company-name        Peten rakennus Oy
@@ -181,7 +196,9 @@ Register wizard until signing
   Select From test id  register-company-pop  Basware Oyj (BAWCFI22)
   Click enabled by test id  register-company-continue
   Wait until  Element should be visible  xpath=//div[contains(@class, 'register-company-summary')]
-  Element should contain  xpath=//strong[@data-test-id='summary-account-text']  Yritystili 5
+  Run Keyword If  '${account}' == 'account5'  Element should contain  xpath=//strong[@data-test-id='summary-account-text']  Yritystili 5
+  Run Keyword If  '${account}' == 'account15'  Element should contain  xpath=//strong[@data-test-id='summary-account-text']  Yritystili 15
+  Run Keyword If  '${account}' == 'account30'  Element should contain  xpath=//strong[@data-test-id='summary-account-text']  Yritystili 30
   Click enabled by test id  register-company-continue
   Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-sign']
   Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel']
