@@ -13,6 +13,21 @@ Setup
 Bob decides to register his company (he will change his mind later)
   Wait and click  register-button
   Wait and click  xpath=//*[@data-test-id='register-company-start']
+
+There are accounts available
+  Xpath Should Match X Times  //div[contains(@class, 'account-type-boxes')]//div[contains(@class, 'account-type-box')]  3
+
+Bob sees that yearly subscription is selected by default
+  Element should be visible  xpath=//button[@data-test-id='yearly-billing' and contains(@class, 'selected')]
+  # Each has 'save5' ribbons LPK-3430
+  Xpath Should Match X Times  //div[contains(@class, 'account-type-boxes')]//span[@data-test-id='save-5-ribbon']  3
+  # Each have discounted price visible LPK-3430
+  Xpath Should Match X Times  //div[contains(@class, 'account-type-boxes')]//div[@data-test-id='normal-yearly-price']  3
+
+Also monthly billing is an option
+  Test id visible  monthly-billing
+
+Bob selects account5 to continue
   Test id disabled  register-company-continue
   Select account type  account5
   Click by test id  register-company-continue
@@ -32,9 +47,13 @@ Bobo changes his mind
   Click by test id  register-company-cancel
   Test id enabled  register-company-continue
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-start']
+  Wait and click  xpath=//*[@data-test-id='register-company-start']
 
 Bob decides to register his company after all, but still chickens out
   Register wizard until signing
+  # Now at sign page
+  Click by test id  register-company-cancel
+  # Now at fill page
   Click by test id  register-company-cancel
   Test id select is  register-company-language  fi
   Click by test id  register-company-cancel
@@ -43,6 +62,8 @@ Bob decides to register his company after all, but still chickens out
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-start']
 
 Bob's first attempt for proper registration fails during signing
+  Wait and click  xpath=//*[@data-test-id='register-company-start']
+  Account type selected  account5
   Register wizard until signing
   Click Element  xpath=//*[@data-test-id='register-company-sign']
   Click by test id  onnistuu-dummy-fail
@@ -51,6 +72,8 @@ Bob's first attempt for proper registration fails during signing
   Wait and click  register-button
 
 Bob decides to register his company after all, and this time he means it
+  Wait and click  xpath=//*[@data-test-id='register-company-start']
+  Account type not selected
   Register wizard until signing  sv
   Click Element  xpath=//*[@data-test-id='register-company-sign']
 
@@ -106,7 +129,7 @@ Company details include company name, identifier and PDF link
 
 Company info page has the registered information
   Click by test id  company-edit-info
-  Test id select text is  company-account-select  Företagskonto 5 (59 €/månad)
+  Test id select text is  company-account-select  Företagskonto 5 (69 €/månad)
   Test id input is  edit-company-name        Peten rakennus Oy
   Test id input is  edit-company-y           2341528-4
   Test id input is  edit-company-address1    Katukatu
@@ -138,9 +161,8 @@ Validate input
   No such test id  ${tid}-warning
 
 Register wizard until signing
-  [Arguments]  ${lang}=fi
-  Wait and click  xpath=//*[@data-test-id='register-company-start']
-  Account type not selected
+  [Arguments]  ${lang}=fi  ${billing}=monthly
+  Click by test id  ${billing}-billing
   Select account type  account5
   Click enabled by test id  register-company-continue
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-continue']
@@ -158,8 +180,13 @@ Register wizard until signing
   Run Keyword If  '${lang}' <> 'fi'  Select from test id  register-company-language  ${lang}
   Select From test id  register-company-pop  Basware Oyj (BAWCFI22)
   Click enabled by test id  register-company-continue
+  Wait until  Element should be visible  xpath=//div[contains(@class, 'register-company-summary')]
+  Element should contain  xpath=//strong[@data-test-id='summary-account-text']  Yritystili 5
+  Click enabled by test id  register-company-continue
   Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-sign']
   Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel']
+  Run Keyword If  '${lang}' == 'fi' and '${billing}' == 'monthly'  Element should contain  register-confirmation-text  €/kuukausi
+  Run Keyword If  '${lang}' == 'fi' and '${billing}' == 'yearly'  Element should contain  register-confirmation-text  €/vuosi
   Toggle not Selected  register-company-agree
   Toggle toggle  register-company-agree
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-sign']

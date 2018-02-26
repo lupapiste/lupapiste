@@ -7,7 +7,8 @@
         <div class="button-container col-1 col--center monthly">
           <button class="h2"
                   data-bind="click: _.partial(toggleBilling, 'monthly'),
-                             css: {selected: billingType() === 'monthly'}">
+                             css: {selected: billingType() === 'monthly'},
+                             testId: 'monthly-billing'">
             <span data-bind="ltext: 'register.company.billing.monthly.title'"></span>
           </button>
         </div>
@@ -15,7 +16,8 @@
           <div>
             <button class="h2"
                     data-bind="click: _.partial(toggleBilling, 'yearly'),
-                               css: {selected: billingType() === 'yearly'}">
+                               css: {selected: billingType() === 'yearly'},
+                               testId: 'yearly-billing'">
               <span data-bind="ltext: 'register.company.billing.yearly.title'"></span>
             </button>
             <div class="like-btn discount">
@@ -37,7 +39,7 @@
                           testId: 'account-type-' + id">
             <!-- ko if: $data.isYearly -->
             <div class="ribbon ribbon--right"">
-              <span data-bind="ltext: 'register.company.save5'"></span>
+              <span data-test-id="save-5-ribbon" data-bind="ltext: 'register.company.save5'"></span>
             </div>
             <!-- /ko -->
             <h3 data-bind="text: title"></h3>
@@ -50,7 +52,7 @@
             <!-- ko if: $data.isYearly -->
             <div class="overstrike-price"
                  data-bind="text: normalYearPrice + ' \u20AC',
-                            testId: id + '-old-price'"></div>
+                            testId: 'normal-yearly-price'"></div>
             <!-- /ko -->
             <div class="account-type-description"
                  data-bind="text: description"></div>
