@@ -338,7 +338,7 @@
 "register.company.billing.monthly.price" "fi" "{0} €/kk"
 "register.company.billing.monthly.price" "sv" "{0} €/månad"
 "register.company.billing.select-type" "en" ""
-"register.company.billing.select-type" "fi" "Valitse haluamasi laskutusjakso"
+"register.company.billing.select-type" "fi" "Valitse haluamasi laskutuskausi"
 "register.company.billing.select-type" "sv" ""
 "register.company.billing.yearly.confirmation" "en" ""
 "register.company.billing.yearly.confirmation" "fi" "Olet tilaamassa tuotetta {0}, josta veloitetaan {1} €/vuosi. Laskutus alkaa seuraavan kuukauden alusta."
