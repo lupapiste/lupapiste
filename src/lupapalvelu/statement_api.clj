@@ -20,7 +20,8 @@
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
-            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]))
+            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [lupapalvelu.attachment :as att]))
 
 ;;
 ;; Authority Admin operations
@@ -200,19 +201,21 @@
    :user-roles       #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
    :description "statement owners can save statements as draft before giving final statement."}
-  [{application :application user :user {:keys [text status modify-id]} :data :as command}]
+  [{application :application user :user {:keys [text status modify-id in-attachment]} :data :as command}]
   (when (and status (not ((statement/possible-statement-statuses command) status)))
     (fail! :error.unknown-statement-status))
-  (let [statement (-> (util/find-by-id statementId (:statements application))
-                      (statement/update-draft text status modify-id (:id user)))]
+  (let [
+        statement (-> (util/find-by-id statementId (:statements application))
+                      (statement/update-draft text status modify-id (:id user) in-attachment))]
     (update-application command
                         {:statements {$elemMatch {:id statementId}}}
                         {$set {:statements.$ statement}})
     (ok :modify-id (:modify-id statement))))
 
 (defcommand give-statement
-  {:parameters  [:id statementId status text :lang]
-   :input-validators [(partial action/non-blank-parameters [:id :statementId :status :text :lang])]
+  {:parameters  [:id statementId status :lang]
+   :optional-parameters [text in-attachment]
+   :input-validators [(partial action/non-blank-parameters [:id :statementId :status :lang])]
    :pre-checks  [statement/statement-owner
                  statement/statement-not-given
                  statement/statement-in-sent-state-allowed
@@ -224,18 +227,36 @@
    :on-success  [(fn [command _] (notifications/notify! :new-comment command))]
    :description "statement owners can give statements - notifies via comment."}
   [{:keys [application user created lang] {:keys [modify-id]} :data :as command}]
-  (when-not ((statement/possible-statement-statuses command) status)
-    (fail! :error.unknown-statement-status))
+  (cond
+    (not ((statement/possible-statement-statuses command) status))
+    (fail! :error.unknown-statement-status)
+
+    (and in-attachment
+         (->> (att/get-attachments-by-target-type-and-id application {:type "statement" :id statementId})
+              (not-any? #(= (att/attachment-type-coercer (:type %))
+                            {:type-group :ennakkoluvat_ja_lausunnot :type-id :lausunto}))))
+    (fail! :error.statement-attachment-missing)
+
+    (and (not in-attachment)
+         (ss/blank? text))
+    (fail! :error.statement-text-or-attachment-required))
+
   (let [comment-text (i18n/loc "statement.given")
         comment-target {:type :statement :id statementId}
         comment-model  (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil created)
+        content-text (or text (i18n/localize lang :statement.statement-in-attachment))
         statement   (-> (util/find-by-id statementId (:statements application))
-                        (statement/give-statement text status modify-id (:id user)))
+                        (statement/give-statement content-text status modify-id (:id user) in-attachment))
         attachment-updates (statement/attachments-readonly-updates application statementId)]
     (update-application command
       {:statements {$elemMatch {:id statementId}}}
       (util/deep-merge comment-model attachment-updates {$set {:statements.$ statement}}))
-    (child-to-attachment/create-attachment-from-children user (domain/get-application-no-access-checking (:id application)) :statements statementId lang)
+    (when-not in-attachment
+      (child-to-attachment/create-attachment-from-children user
+                                                           (domain/get-application-no-access-checking (:id application))
+                                                           :statements
+                                                           statementId
+                                                           lang))
     (ok :modify-id (:modify-id statement))))
 
 (defcommand request-for-statement-reply

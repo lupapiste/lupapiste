@@ -4,6 +4,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.company :as com]
             [lupapalvelu.copy-application :refer :all]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -138,10 +139,10 @@
                  (= (dissoc-ids-and-timestamps (select-keys new-app [:attachments]))
                     (dissoc-ids-and-timestamps (select-keys raw-new-app [:attachments])))  => true?)
 
-           (fact "user is the owner of the new application, previous owner invited as writer"
-             (:auth source-app) => [(assoc source-user :role :owner :type :owner :unsubscribed false)
+           (fact "user has writer role in application, previous writers are invited with writer role"
+             (:auth source-app) => [(assoc source-user :role :writer :unsubscribed false)
                                     invitation]
-             (:auth new-app) => [(assoc user :role :owner :type :owner :unsubscribed false)
+             (:auth new-app) => [(assoc user :role :writer :unsubscribed false)
                                  (assoc source-user
                                         :role :reader
                                         :invite {:created created
@@ -266,3 +267,127 @@
        => (contains {:text "error.operations.copying-not-allowed"})
        (check-valid-source-application {:primaryOperation {:name "jatkoaika"}})
        => (contains {:text "error.operations.copying-not-allowed"})))))
+
+(facts "Company auths"
+  (let [{firm-id   :id
+         firm-y    :y
+         firm-name :name
+         :as       firm} {:id       "firm"
+                          :name     "Firm"
+                          :y        "000000-0"
+                          :address1 "Billing Street"
+                          :zip      "12345"
+                          :po       "Dollarville"
+                          :netbill  "foo"}
+        {shop-id   :id
+         shop-y    :y
+         shop-name :name
+         :as       shop} {:id             "shop"
+                          :name           "Shop"
+                          :y              "888888-8"
+                          :contactAddress "Contact Road"
+                          :contactZip     "98765"
+                          :contactPo      "Shoptown"
+                          :netbill        "bar"}
+        firm-auth        (com/company->auth firm)
+        shop-invite      (com/company->auth shop :warlock)
+        app-id           "LP-12345"
+        firm-inviter     {:name "Firm inviter"}
+        shop-inviter     {:name "Shop inviter"}]
+    (fact "Regular company auth"
+      (auth->invite firm-auth firm-inviter app-id 12345)
+      => {:id           firm-id
+          :y            firm-y
+          :username     firm-y
+          :firstName    firm-name
+          :lastName     ""
+          :name         firm-name
+          :role         "reader"
+          :type         "company"
+          :company-role :admin
+          :inviter      firm-inviter
+          :invite       {:user    {:id firm-id}
+                         :role    "writer"
+                         :created 54321}}
+      (provided
+       (com/find-company-by-id "firm") => firm
+       (sade.core/now) => 54321))
+    (fact "Open invitation company auth"
+      (auth->invite shop-invite shop-inviter app-id 12345)
+      => {:id           shop-id
+          :y            shop-y
+          :username     shop-y
+          :firstName    shop-name
+          :lastName     ""
+          :name         shop-name
+          :role         "reader"
+          :type         "company"
+          :company-role :admin
+          :inviter      shop-inviter
+          :invite       {:user    {:id shop-id}
+                         :role    :warlock
+                         :created 54321}}
+      (provided
+       (com/find-company-by-id "shop") => shop
+       (sade.core/now) => 54321))))
+
+(facts "Person auths"
+  (let [inviter      {:username  "inviter"
+                      :firstName "Igor"
+                      :lastName  "Inviter"
+                      :role      "authority"
+                      :id        "inviter"
+                      :email     "igor.inviter@example.org"}
+        inviter-auth (usr/summary inviter)
+        closed       {:id        "closed"
+                      :role      "applicant"
+                      :username  "closed"
+                      :email     "calvin.closed@example.com"
+                      :firstName "Calvin"
+                      :lastName  "Closed"}
+        closed-auth  (assoc (select-keys closed [:id :username
+                                                 :firstName :lastName])
+                            :role           "writer"
+                            :inviter         inviter-auth
+                            :inviteAccepted 12345)
+        open         {:id        "open"
+                      :role      "applicant"
+                      :username  "open"
+                      :firstName "Olivia"
+                      :lastName  "Open"
+                      :email     "olivia.open@example.com"}
+        open-auth    (assoc (select-keys open [:id :username
+                                               :firstName :lastName])
+                            :role           "reader"
+                            :invite    {:role    :elf
+                                        :inviter inviter-auth
+                                        :created 121212})
+        app-id       "LP-12345"]
+    (fact "Regular person auth"
+      (auth->invite closed-auth inviter app-id 12345)
+      => {:id        "closed"
+          :role      :reader
+          :username  "closed"
+          :firstName "Calvin"
+          :lastName  "Closed"
+          :invite    {:role    "writer"
+                      :user    (usr/summary closed)
+                      :created 12345
+                      :email   (:email closed)
+                      :inviter inviter-auth}}
+      (provided
+       (usr/get-user-by-id "closed") => closed))
+    (fact "Open invitation person auth"
+      (auth->invite open-auth inviter app-id 12345)
+      => {:id        "open"
+          :role      :reader
+          :username  "open"
+          :firstName "Olivia"
+          :lastName  "Open"
+          :invite    {:role    :elf
+                      :user    (usr/summary open)
+                      :created 12345
+                      :email   (:email open)
+                      :inviter inviter-auth}}
+      (provided
+       (usr/get-user-by-id "open") => open))))

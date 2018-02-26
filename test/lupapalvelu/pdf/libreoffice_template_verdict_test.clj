@@ -13,7 +13,7 @@
 
 (def applicant-index #'lupapalvelu.pdf.libreoffice-template/applicant-index)
 (fact "Applicant index"
-      (applicant-index application2) => '[["Testaaja Testi"]])
+      (applicant-index application2) => '[["Testi Testaaja"]])
 
 (facts "Verdict lupamaaraykset "
        (def verdict-lupamaaraykset #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-lupamaaraykset)

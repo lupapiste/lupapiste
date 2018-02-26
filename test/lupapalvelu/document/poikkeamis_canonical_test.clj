@@ -173,8 +173,7 @@
      :auth [{:lastName "Panaani",
              :firstName "Pena",
              :username "pena",
-             :type "owner",
-             :role "owner",
+             :role "writer",
              :id "777777777777777777000020"}]
      :location [404174.92749023 6690687.4923706]
      :statements ctc/statements

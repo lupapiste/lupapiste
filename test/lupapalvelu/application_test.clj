@@ -403,19 +403,24 @@
         created 12345]
     (fact application-auth
       (application-auth user "kerrostalo-rivitalo")
-      => [(assoc (usr/summary user) :role :owner :type :owner :unsubscribed false)]
+      => [(assoc (usr/summary user) :role :writer :unsubscribed false)]
 
       (application-auth user "aiemmalla-luvalla-hakeminen")
-      => [(assoc (usr/summary user) :role :owner :type :owner :unsubscribed true)]
+      => [(assoc (usr/summary user) :role :writer :unsubscribed true)]
 
       (application-auth ..company-user.. "kerrostalo-rivitalo")
-      => [(assoc (usr/summary ..company-user..) :role :owner :type :owner :unsubscribed false) ..company-auth..]
+      => [{:id ..company-id..
+           :name ..company-name..
+           :y ..company-y..
+           :unsubscribed false}]
 
       (against-background
        ..company.. =contains=> {:id ..company-id..
                                 :name ..company-name..
                                 :y ..company-y..}
-       (com/company->auth ..company..) => ..company-auth..
+       (com/company->auth ..company..) => {:id ..company-id..
+                                           :name ..company-name..
+                                           :y ..company-y..}
        ..company-user.. =contains=> {:id ..company-user-id..
                                      :firstName ..company-first-name..
                                      :lastName ..company-last-name..

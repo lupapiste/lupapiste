@@ -109,7 +109,9 @@
         (:state updated-task) => "requires_user_action"))
 
     (fact "Review cannot be rejected"
-      (command sonja :reject-task :id application-id :taskId review-id) => (partial expected-failure? "error.invalid-task-type")))
+      (command sonja :reject-task :id application-id :taskId review-id) => (partial expected-failure? "error.invalid-task-type"))
+    (fact "Review can't be deleted, because Vaadittu lupaehtona"
+      (command sonja :delete-task :id application-id :taskId review-id) => (partial expected-failure? :error.task-is-required)))
 
   (facts "create task"
     (fact "Applicant can't create tasks"

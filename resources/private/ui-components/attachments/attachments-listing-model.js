@@ -51,6 +51,9 @@ LUPAPISTE.AttachmentsListingModel = function() {
                                               return !self.authModel.ok( "upload-attachment");
                                             }),
                                             badFileHandler: _.noop} );
+  self.batchEmpty = self.disposedComputed( _.partial( lupapisteApp.services
+                                                      .batchService.batchEmpty,
+                                                      null, self.upload));
 
   // After attachment query
   function afterQuery( params ) {

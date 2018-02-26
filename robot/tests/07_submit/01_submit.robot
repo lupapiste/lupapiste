@@ -31,7 +31,6 @@ Mikko could submit application (when required fields are not obligatory)
   Open tab  requiredFieldSummary
   Wait Until  Submit button is enabled
   Logout
-
 Sonja can submit application
   Sonja logs in
   Open test application in required field summary tab
@@ -41,6 +40,7 @@ Sonja can submit application
 #
 # Testing the missing required fields and attachments
 #
+
 
 Sipoo marks required fields obligatory
   Sipoo logs in
@@ -61,9 +61,10 @@ Mikko can not submit application because there are "missing required" items on t
   Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']
   Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-required-fields']
   Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-required-attachments']
-  Xpath Should Match X Times  //div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']//*[contains(@class,'info-line')]  12
-  ${missingRequiredCount} =  Get Matching Xpath Count  xpath=//*[contains(@class,'info-line')]
-  Set Suite Variable  ${missingRequiredCount}
+
+  ${EXPECTED-TEST-IDS}=  Create List  missing-uusiRakennus-kayttotarkoitus  missing-uusiRakennus-julkisivu  missing-paasuunnittelija-osapuoli.patevyys.valmistumisvuosi  missing-suunnittelija-osapuoli.patevyys.valmistumisvuosi  missing-hankkeen-kuvaus-hankkeen-kuvaus.kuvaus  missing-rakennuspaikka-rakennuspaikka.hallintaperuste._group_label  missing-uusiRakennus-huoneistot.huoneluku  missing-uusiRakennus-huoneistot.keittionTyyppi  missing-uusiRakennus-huoneistot.huoneistoala  missing-uusiRakennus-uusiRakennus.kaytto.rakentajaTyyppi._group_label  missing-uusiRakennus-omistajalaji._group_label  missing-uusiRakennus-puhelin  missing-uusiRakennus-email  missing-uusiRakennus-hetu  missing-uusiRakennus-sukunimi  missing-uusiRakennus-etunimi  missing-uusiRakennus-osoite.katu  missing-uusiRakennus-osoite.postinumero  missing-uusiRakennus-osoite.postitoimipaikannimi  missing-uusiRakennus-rakentamistapa  missing-uusiRakennus-kantavaRakennusaine  missing-uusiRakennus-uusiRakennus.tunnus  missing-paatoksen-toimitus-rakval-sukunimi  missing-paatoksen-toimitus-rakval-etunimi  missing-paatoksen-toimitus-rakval-osoite.katu  missing-paatoksen-toimitus-rakval-osoite.postinumero  missing-paatoksen-toimitus-rakval-osoite.postitoimipaikannimi  missing-paasuunnittelija-osapuoli.suunnittelutehtavanVaativuusluokka._group_label  missing-paasuunnittelija-koulutus  missing-paasuunnittelija-osapuoli.patevyys.patevyysluokka._group_label  missing-paasuunnittelija-osapuoli.patevyys.valmistumisvuosi  missing-paasuunnittelija-puhelin  missing-paasuunnittelija-email  missing-paasuunnittelija-hetu  missing-paasuunnittelija-sukunimi  missing-paasuunnittelija-etunimi  missing-paasuunnittelija-osoite.katu  missing-paasuunnittelija-osoite.postinumero  missing-paasuunnittelija-osoite.postitoimipaikannimi  missing-suunnittelija-osapuoli.suunnittelutehtavanVaativuusluokka._group_label  missing-suunnittelija-osapuoli.suunnittelija.kuntaRoolikoodi._group_label  missing-suunnittelija-koulutus  missing-suunnittelija-osapuoli.patevyys.patevyysluokka._group_label  missing-suunnittelija-osapuoli.patevyys.valmistumisvuosi  missing-suunnittelija-puhelin  missing-suunnittelija-email  missing-suunnittelija-hetu  missing-suunnittelija-sukunimi  missing-suunnittelija-etunimi  missing-suunnittelija-osoite.katu  missing-suunnittelija-osoite.postinumero  missing-suunnittelija-osoite.postitoimipaikannimi  missing-maksaja-puhelin  missing-maksaja-email  missing-maksaja-hetu  missing-maksaja-sukunimi  missing-maksaja-etunimi  missing-maksaja-osoite.katu  missing-maksaja-osoite.postinumero  missing-maksaja-osoite.postitoimipaikannimi  missing-paapiirustus-asemapiirros  missing-paapiirustus-pohjapiirustus  missing-pelastusviranomaiselle_esitettavat_suunnitelmat-vaestonsuojasuunnitelma  missing-uusiRakennus-huoneistot  missing-uusiRakennus-kayttotarkoitus  missing-uusiRakennus-lammitystapa  missing-uusiRakennus-kayttotarkoitus  missing-uusiRakennus-lammitystapa  missing-uusiRakennus-uusiRakennus.mitat.kerrosala  missing-uusiRakennus-kayttotarkoitus  missing-uusiRakennus-kayttotarkoitus  missing-hakija-valtakirja
+  Check expected required fields and warnings  ${EXPECTED-TEST-IDS}
+
   Logout
 
 Sipoo marks required fields not obligatory
@@ -92,7 +93,7 @@ Mikko selects not needed for valtakirja attachment
 
 Mikko follows missing attachment link
   Open tab  requiredFieldSummary
-  Scroll and click test id  missing-muut-muu
+  Scroll and click test id  missing-attachment-muut-muu
 
 Mikko adds pdf attachment to the template requested by Sonja
   Add attachment version  ${PDF_TESTFILE_PATH}
@@ -107,25 +108,30 @@ Mikko fills up a field marked with a VRK warning
   Select From List By Value  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='lammitys.lammitystapa']  ilmakeskus
   Select From List By Value  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='lammitys.lammonlahde']  kaasu
 
-Mikko fills up first name for the hakija party in the parties tab
+Mikko removes last name for the hakija party in the parties tab
   Open tab  parties
   Open accordions  parties
   ${hakija-etunimi-path} =  Set Variable  //div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']
+  ${hakija-sukunimi-path} =  Set Variable  //div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']
   Wait until  Element should be visible  xpath=${hakija-etunimi-path}
   Scroll to test id  application-invite-hakija-r
-  Execute Javascript  $('#application-parties-tab').find('section[data-doc-type="hakija-r"]').find('input[data-docgen-path="henkilo.henkilotiedot.etunimi"]').val("Elmeri").change().blur();
-  Wait Until  Textfield value should be  xpath=${hakija-etunimi-path}  Elmeri
+  # Applicant is filled by default
+  Wait Until  Textfield value should be  xpath=${hakija-etunimi-path}  Mikko
+  Wait Until  Textfield value should be  xpath=${hakija-sukunimi-path}  Intonen
+  # ok, lets remove lastname to get validation error
+  Edit party name  hakija-r  Mikko  ${EMPTY}  henkilo.henkilotiedot
   Focus  xpath=//div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']
   Wait until  Element should be visible  xpath=//span[contains(@class,'form-input-saved')]
+  Wait Until  Textfield value should be  xpath=${hakija-etunimi-path}  Mikko
+  Wait Until  Textfield value should be  xpath=${hakija-sukunimi-path}  ${EMPTY}
 
-The filled-up warning field and party info plus the added attachment cause corresponding items to disappear from the "missing required" list in the requiredFieldSummary tab
+
+Expected warnings and errors
   Open tab  requiredFieldSummary
-  Wait for jQuery
   Wait Until  Element should be visible  xpath=//*[@data-test-id='application-submit-btn']
-  # The reduction includes filled fields and the no longer obligatory requirement.
-  ${missingRequiredCountAfter} =  Evaluate  ${missingRequiredCount} - 11
-  Wait Until  Xpath Should Match X Times  //*[contains(@class,'info-line')]  ${missingRequiredCountAfter}
-  Xpath Should Match X Times  //div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']//*[contains(@class,'info-line')]  4
+  ${EXPECTED-TEST-IDS}=  Create List  missing-uusiRakennus-kayttotarkoitus  missing-uusiRakennus-julkisivu  missing-paasuunnittelija-osapuoli.patevyys.valmistumisvuosi  missing-suunnittelija-osapuoli.patevyys.valmistumisvuosi  missing-hankkeen-kuvaus-hankkeen-kuvaus.kuvaus  missing-rakennuspaikka-rakennuspaikka.hallintaperuste._group_label  missing-uusiRakennus-huoneistot.huoneluku  missing-uusiRakennus-huoneistot.keittionTyyppi  missing-uusiRakennus-huoneistot.huoneistoala  missing-uusiRakennus-uusiRakennus.kaytto.rakentajaTyyppi._group_label  missing-uusiRakennus-omistajalaji._group_label  missing-uusiRakennus-puhelin  missing-uusiRakennus-email  missing-uusiRakennus-hetu  missing-uusiRakennus-sukunimi  missing-uusiRakennus-etunimi  missing-uusiRakennus-osoite.katu  missing-uusiRakennus-osoite.postinumero  missing-uusiRakennus-osoite.postitoimipaikannimi  missing-uusiRakennus-rakentamistapa  missing-uusiRakennus-kantavaRakennusaine  missing-uusiRakennus-uusiRakennus.tunnus  missing-paatoksen-toimitus-rakval-sukunimi  missing-paatoksen-toimitus-rakval-etunimi  missing-paatoksen-toimitus-rakval-osoite.katu  missing-paatoksen-toimitus-rakval-osoite.postinumero  missing-paatoksen-toimitus-rakval-osoite.postitoimipaikannimi  missing-hakija-r-sukunimi  missing-paasuunnittelija-osapuoli.suunnittelutehtavanVaativuusluokka._group_label  missing-paasuunnittelija-koulutus  missing-paasuunnittelija-osapuoli.patevyys.patevyysluokka._group_label  missing-paasuunnittelija-osapuoli.patevyys.valmistumisvuosi  missing-paasuunnittelija-puhelin  missing-paasuunnittelija-email  missing-paasuunnittelija-hetu  missing-paasuunnittelija-sukunimi  missing-paasuunnittelija-etunimi  missing-paasuunnittelija-osoite.katu  missing-paasuunnittelija-osoite.postinumero  missing-paasuunnittelija-osoite.postitoimipaikannimi  missing-suunnittelija-osapuoli.suunnittelutehtavanVaativuusluokka._group_label  missing-suunnittelija-osapuoli.suunnittelija.kuntaRoolikoodi._group_label  missing-suunnittelija-koulutus  missing-suunnittelija-osapuoli.patevyys.patevyysluokka._group_label  missing-suunnittelija-osapuoli.patevyys.valmistumisvuosi  missing-suunnittelija-puhelin  missing-suunnittelija-email  missing-suunnittelija-hetu  missing-suunnittelija-sukunimi  missing-suunnittelija-etunimi  missing-suunnittelija-osoite.katu  missing-suunnittelija-osoite.postinumero  missing-suunnittelija-osoite.postitoimipaikannimi  missing-maksaja-puhelin  missing-maksaja-email  missing-maksaja-hetu  missing-maksaja-sukunimi  missing-maksaja-etunimi  missing-maksaja-osoite.katu  missing-maksaja-osoite.postinumero  missing-maksaja-osoite.postitoimipaikannimi  missing-paapiirustus-asemapiirros  missing-paapiirustus-pohjapiirustus  missing-pelastusviranomaiselle_esitettavat_suunnitelmat-vaestonsuojasuunnitelma
+  Check expected required fields and warnings  ${EXPECTED-TEST-IDS}
+
 
 Mikko could submit application after missing stuff have been added
   Wait Until  Submit button is enabled

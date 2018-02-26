@@ -31,7 +31,7 @@
             <div>
               <p data-bind="ltext: 'application.asker'"></p>
               <span class="application_summary_text">
-                <span data-bind="text: applicant" data-test-id="inforequest-application-applicant" ></span> <br>
+                <span data-bind="fullName: creator" data-test-id="inforequest-application-applicant" ></span> <br>
                 <!-- ko ifnot: _.isEmpty(applicantCompanies()) -->
                 <span data-bind="text: _.join(applicantCompanies(), ', ')"></span> <br>
                 <!-- /ko -->

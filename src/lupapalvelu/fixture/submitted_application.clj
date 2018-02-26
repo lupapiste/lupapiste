@@ -84,9 +84,8 @@
                     :handlers []
                     :finished nil
                     :auth [(-> pena
-                               (usr/summary)
-                               (assoc :role "owner"
-                                      :unsubscribed false))]
+                               (usr/user-in-role "writer")
+                               (assoc :unsubscribed false))]
                     :urgency "normal"
                     :sent nil
                     :title "Latokuja 3"

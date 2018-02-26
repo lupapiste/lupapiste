@@ -41,8 +41,6 @@ LUPAPISTE.UploadModel = function( owner, params ) {
   self.readOnly = params.readOnly;
   self.allowMultiple = params.allowMultiple;
 
-  self.batchListHidden = self.disposedPureComputed(_.flow(self.files, _.isEmpty));
-
   self.listenService = function ( message, fn ) {
     self.addEventListener( service.serviceName, message, function( event ) {
       if( event.input === self.fileInputId ) {

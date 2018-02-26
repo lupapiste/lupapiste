@@ -32,13 +32,44 @@ Bad batch
   No such test id  upload-progress-title
   Element should not be visible  jquery=table.attachment-batch-table
 
-Add good one and cancel
+Add good one
   Add to batch
   Test id should contain  upload-progress-title  1 tiedosto lisätty
-  Scroll and click test id  batch-cancel
+  Only batch visible
+
+Edit properties
+  Select type  0  CV
+  Set contents  0  Hello
+  Set drawing  0  88
+  Select grouping  0  Selvitykset
+
+Visit another tab and come back
+  Open tab  parties
+  No such test id  batch-ready
+  Open tab  attachments
+  Only batch visible
+
+Properties are unchanged
+  Type is  0  CV
+  Contents is  0  Hello
+  Drawing is  0  88
+  Grouping is  0  Selvitykset
+
+Progress has bar has vanished (not a big deal)
   No such test id  upload-progress-title
+
+Cancel the batch
+  Scroll and click test id  batch-cancel
   Wait until  Element should not be visible  jquery=table.attachment-batch-table
 
+Batch properties are stored only within the application context
+  Add to batch
+  Test id should contain  upload-progress-title  1 tiedosto lisätty
+  Only batch visible
+  Select type  0  Muistio
+  Go to page  applications
+  Open application attachments
+  Wait until  Element should not be visible  jquery=table.attachment-batch-table
 
 Batch of four files
   No such test id  upload-progress-title
@@ -89,7 +120,7 @@ Contents have changed too
 
 Fill contents
   Set contents  1  New contents
-  Sleep  0.5s   # wait for "New" to reach it's observable
+  Sleep  0.5s   # wait for "New" to reach its observable
   Fill down  contents-1
   Contents is  0  CV
   Contents is  1  New contents
@@ -203,6 +234,16 @@ Upload attachments results: still empty
   Empty attachment  pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma
   Empty attachment  paapiirustus.pohjapiirustus
 
+Add paapiirustus.pohjapiirustus file
+  Add attachment file  tr[data-test-type='paapiirustus.pohjapiirustus']  ${PNG_TESTFILE_PATH}  Doodle
+  Wait test id visible  batch-ready
+  Type is  0  Pohjapiirustus
+  Contents is  0  Doodle
+  Grouping is  0  Asuinkerrostalon tai rivitalon rakentaminen
+
+Cancel batch
+  Click visible test id  batch-cancel
+
 Upload attachments results: signed
   jQuery should match X times  i[data-test-icon=signed-icon]  2
 
@@ -299,9 +340,17 @@ Contents is
   [Arguments]  ${index}  ${value}
   Test id input is  batch-contents-${index}  ${value}
 
+Set drawing
+  [Arguments]  ${index}  ${value}
+  Fill test id  batch-drawing-${index}  ${value}
+
+Drawing is
+  [Arguments]  ${index}  ${value}
+  Test id input is  batch-drawing-${index}  ${value}
+
 Select grouping
   [Arguments]  ${index}  ${grouping}
-  Select from autocomplete  jquery=[data-test-id=batch-grouping-${index}]  ${grouping}
+  Select from autocomplete  [data-test-id=batch-grouping-${index}]  ${grouping}
 
 Deselect grouping
   [Arguments]  ${index}
@@ -333,3 +382,11 @@ Add bad
   Add to batch  ${XML_TESTFILE_PATH}  False
   Wait until  Element should be visible  jquery=div.batch-bad-files li strong
   Element should be visible  jquery=div.batch-bad-files i.lupicon-warning
+
+Only batch visible
+  Wait test id visible  batch-ready
+  No such test id  add-attachment-templates
+  Element should not be visible  jquery=div.attachment-operations
+  No such test id  automatic-assignments-component
+  No such test id  create-assignment-component
+  Element should not be visible  jquery=filters

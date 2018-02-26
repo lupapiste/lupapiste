@@ -613,3 +613,6 @@
     (edit-distance test-string-3 test-string-2) => 3
     (edit-distance test-string-1 test-string-3) => 4
     (edit-distance test-string-1 test-string-3) => 4))
+
+(fact "to-finnish-date"
+  (to-finnish-date 1517838282483) => "5.2.2018")

@@ -19,8 +19,7 @@
                           :firstName "Pekka"
                           :lastName "Borga"
                           :username "pekka"
-                          :type "owner"
-                          :role "owner"}]
+                          :role "writer"}]
                   :authority {:id "777777777777777777000033"
                               :firstName "Pekka"
                               :lastName "Borga"

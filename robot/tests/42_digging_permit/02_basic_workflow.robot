@@ -18,7 +18,7 @@ Mikko invites Solita Oy to the application, Solita Oy accepts the invitation
 Mikko selects Solita Oy as applicant for the application
   Open tab  parties
   Open accordions  parties
-  # Execute Javascript  $("input[value='yritys']").click();
+  Scroll and click input  section[data-doc-type=hakija-ya] input[value=yritys]
   Select From List  //section[@data-doc-type="hakija-ya"]//select[@name="company-select"]  Solita Oy (1060155-5)
   Wait Until  Javascript?  $("section[data-doc-type=hakija-ya] input[data-docgen-path='yritys.yritysnimi']").val() == "Solita Oy"
 
@@ -74,6 +74,8 @@ Mikko creates another digging application from the same sijoitus application
   Open the request at index  sijoitus-app  2
   Wait until  Element should be visible by test id  create-digging-permit-button
   Click by test id  create-digging-permit-button
+  Sleep  1s
+  Wait until  Element should be visible  xpath=//section[@id="create-digging-permit"]//div[contains(@class,"tree-link")]
   Select digging operations path YA kayttolupa kaivu
   Click by test id  create-digging-permit
   Wait until  Element Should Be Visible  application

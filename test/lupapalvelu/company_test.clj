@@ -1,10 +1,11 @@
 (ns lupapalvelu.company-test
-  (:require [midje.sweet :refer :all]
+  (:require [lupapalvelu.authorization :as auth]
             [lupapalvelu.company :as com]
+            [lupapalvelu.itest-util :refer [expected-failure?]]
             [lupapalvelu.mongo :as mongo]
+            [midje.sweet :refer :all]
             [sade.core :as core]
-            [sade.util :as util]
-            [lupapalvelu.itest-util :refer [expected-failure?]]))
+            [sade.util :as util]))
 
 (facts create-company
   (fact
@@ -112,7 +113,17 @@
                  :firstName "Hii" :lastName ""}
              (com/company->auth {:locked (- (core/now) 10000)
                                  :id "hii" :name "Hii" :y "Not real Y"})
-             => nil))
+             => nil)
+       (fact "company auth with invite"
+         (com/company->auth {:id "foo" :name "Foo Ltd." :y "000-0"} :writer)
+         => {:id "foo" :role "reader" :company-role :admin
+             :y "000-0" :name "Foo Ltd."
+             :type "company" :username "000-0" :firstName "Foo Ltd."
+             :lastName "" :invite {:user {:id "foo"}
+                                   :created 12345
+                                   :role :writer}}
+         (provided
+          (core/now) => 12345)))
 
 (facts "Pre-checkers"
        (let [unauthorized (partial expected-failure? :error.unauthorized)]
@@ -270,4 +281,21 @@
         :y        "1234567-8"
         :address1 "Park View"
         :zip      "33333"
-        :po       "Headquarters"}))
+        :po       "Headquarters"}
+    (fact "Accept company invitation"
+      (auth/approve-invite-auth (assoc (com/company->auth firm :wizard)
+                                       :inviter {:name "hello"})
+                                {:company firm}
+                                12345678)
+      => {:type           "company"
+          :role           :wizard
+          :inviter        {:name "hello"}
+          :inviteAccepted 12345678
+          :username       (:y firm)
+          :firstName      "Firm"
+          :lastName       ""
+          :y              (:y firm)
+          :name           "Firm"
+          :id             "firm"}
+      (provided
+       (com/find-company! {:id "firm"}) => firm))))

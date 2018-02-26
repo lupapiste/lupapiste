@@ -51,6 +51,7 @@
             [lupapalvelu.integrations.messages :as imessages]
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.tasks :as tasks]
@@ -624,9 +625,13 @@
           {application-id :id :as response} (execute-command "create-application" params request)
           user (usr/current-user request)]
       (if (core/ok? response)
-        (let [command (-> (domain/get-application-no-access-checking application-id)
+        (let [app (domain/get-application-no-access-checking application-id)
+              applicant-doc (domain/get-applicant-document (:documents app))
+              command (-> app
                           action/application->command
                           (assoc :user user, :created (now)))]
+          (when applicant-doc
+            (doc-persistence/do-set-user-to-document app (:id applicant-doc) (:id user) "henkilo" (now)))
           (cond
             (= state "submitted")
             (app/submit command)

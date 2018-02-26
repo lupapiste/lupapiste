@@ -67,11 +67,11 @@
 
           (fact "Auths are correct, foreman get's invited to both applications"
             (->> (:auth foreman-application)
-                 (map #(select-keys % [:username :role]))) => (just [{:username "sonja" :role "owner"}
+                 (map #(select-keys % [:username :role]))) => (just [{:username "sonja" :role "writer"}
                                                                      {:username "teppo@example.com" :role "foreman"}]
                                                                     :in-any-order)
             (->> (:auth application)
-                 (map #(select-keys % [:username :role]))) => (just [{:username "mikko@example.com" :role "owner"}
+                 (map #(select-keys % [:username :role]))) => (just [{:username "mikko@example.com" :role "writer"}
                                                                      {:username "teppo@example.com" :role "foreman"}]
                                                                     :in-any-order))
 
@@ -144,7 +144,7 @@
             (fact "ok after link-permit has verdict"
               (command teppo :submit-application :id foreman-application-id) => ok?))
 
-          (facts "Auths without foremanEmail"               ; tested after verdict, when it's possible to create foreman-app as owner
+          (facts "Auths without foremanEmail"               ; tested after verdict, when it's possible to create foreman-app as writer
             (let [{foreman-id :id :as resp} (command mikko :create-foreman-application :id application-id
                                                      :taskId "" :foremanRole "ei tiedossa" :foremanEmail "")
                   orig-app (query-application mikko application-id)
@@ -152,12 +152,12 @@
               resp => ok?
               (fact "original app"
                 (->> (:auth orig-app)
-                     (map #(select-keys % [:username :role]))) => (just [{:username "mikko@example.com" :role "owner"}
+                     (map #(select-keys % [:username :role]))) => (just [{:username "mikko@example.com" :role "writer"}
                                                                          {:role "foreman", :username "teppo@example.com"}]
                                                                         :in-any-order))
               (fact "foreman app"
                 (->> (:auth foreman-app)
-                     (map #(select-keys % [:username :role]))) => (just [{:username "mikko@example.com" :role "owner"}]))))
+                     (map #(select-keys % [:username :role]))) => (just [{:username "mikko@example.com" :role "writer"}]))))
 
           ;; delete verdict for next steps
           (let [app (query-application mikko application-id)
@@ -419,7 +419,7 @@
             {auth-array :auth} (query-application pena foreman-app-id) => truthy
             {orig-auth :auth}  (query-application pena application-id)]
         (count auth-array) => 4
-        (fact "Pena is owner" (:username (some #(when (= (:role %) "owner") %) auth-array)) => "pena")
+        (fact "Pena is writer" (:username (some #(when (= (:role %) "writer") %) auth-array)) => "pena")
         (fact "applicant 'foo@example.com' is authed to foreman application"
           (has-auth? "foo@example.com" auth-array) => true)
         (fact "applicant 'unknown@example.com' is not authed to foreman app"
@@ -457,12 +457,12 @@
                                               :taskId "" :foremanRole "ei tiedossa" :foremanEmail "pena@example.com") => truthy
                 {auth-array :auth}   (query-application pena foreman-app-id) => truthy
                 {orig-auth :auth}    (query-application pena application-id)]
-            (fact "Pena is the sole auth and owner of the foreman application"
+            (fact "Pena is the sole auth and writer on the foreman application"
                   (count auth-array) => 1
-                  (:username (some #(when (= (:role %) "owner") %) auth-array)) => "pena")
-            (fact "Pena is the sole auth and owner of the original application"
+                  (:username (some #(when (= (:role %) "writer") %) auth-array)) => "pena")
+            (fact "Pena is the sole auth and writer on the original application"
                   (count orig-auth) => 1
-                  (:username (some #(when (= (:role %) "owner") %) orig-auth)) => "pena"))))
+                  (:username (some #(when (= (:role %) "writer") %) orig-auth)) => "pena"))))
   (let [apikey pena
         has-auth? (fn [email auth]
                     (or (some (partial = email) (map :username auth)) false))]
@@ -493,7 +493,7 @@
                                          "contact@example.com"
                                          "Kaino Solita <kaino@solita.fi>"])))))
 
-   (fact "No double-auth, if owner of foreman-application is authed as writer in original application" ;; LPK-1331
+   (fact "No double-auth, if writer of foreman-application is authed as writer in original application" ;; LPK-1331
          (let [{application-id :id}    (create-and-submit-application apikey :operation "kerrostalo-rivitalo") => truthy
                {writer-applicant :doc} (command apikey :create-doc :id application-id :schemaName "hakija-r")
                ;; Pena fills Teppo's email to applicant document
@@ -509,7 +509,7 @@
                {foreman-app-id :id}    (command teppo :create-foreman-application :id application-id
                                                 :taskId "" :foremanRole "ei tiedossa" :foremanEmail "heppu@example.com") => truthy
                {auth-array :auth}      (query-application teppo foreman-app-id) => truthy]
-           (fact "Teppo is owner" (:username (some #(when (= (:role %) "owner") %) auth-array)) => "teppo@example.com")
+           (fact "Teppo is writer" (:username (some #(when (= (:role %) "writer") %) auth-array)) => "teppo@example.com")
            (fact "Teppo is not double authed"
                  (count (filter #(= (:username %) "teppo@example.com") auth-array)) => 1)))))
 

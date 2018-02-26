@@ -64,6 +64,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.operationsCount = ko.observable();
   self.applicant = ko.observable();
+  self.creator = ko.observable();
   self.assignee = ko.observable();
   self.authority = ko.observable({});
   self.neighbors = ko.observable([]);
@@ -558,10 +559,6 @@ LUPAPISTE.ApplicationModel = function() {
       componentParams: {applicationId: self.id()} });
     hub.send("track-click", {category:"Application", label:"", event:"findOwners"});
     return false;
-  };
-
-  self.isNotOwner = function(model) {
-    return model.role() !== "owner";
   };
 
   self.userHasRole = function(userModel, role) {
