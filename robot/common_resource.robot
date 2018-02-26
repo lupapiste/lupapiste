@@ -1493,6 +1493,10 @@ Open company details
   Click by test id  company-edit-info
   Wait until  Element should be visible  company
 
+# At company registration page
+Company ${type} billing is selected
+  Wait until  Element should be visible  xpath=//button[@data-test-id='${type}-billing' and contains(@class, 'selected')]
+
 
 #
 # Mock Ajax calls: jquery.mockjax
