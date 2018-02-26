@@ -399,17 +399,17 @@
         actual-roles    (organization/filter-valid-user-roles-in-organization organization-id roles)]
     (usr/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})))
 
-(defn- change-authority-email [authority email data]
+(defn- update-authority [authority email data]
   (let [new-email (:email data)]
-    (change-email/update-email-in-application-auth! (:id authority) email new-email)
-    (change-email/update-email-in-invite-auth! (:id authority) email new-email)
+    (when (not= email new-email)
+      (change-email/update-email-in-application-auth! (:id authority) email new-email)
+      (change-email/update-email-in-invite-auth! (:id authority) email new-email))
     (usr/update-user-by-email email {$set data})))
 
 (defcommand update-auth-info
   {:parameters       [firstName lastName email new-email]
    :input-validators [(partial action/non-blank-parameters [:firstName :lastName :email :new-email])]
-   :user-roles        #{:authorityAdmin}
-   :pre-checks       [action/disallow-impersonation]}
+   :user-roles        #{:authorityAdmin}}
   [{auth-admin :user}]
   (let [authority           (usr/find-user {:email email})
         valid-org?          (uu/auth-admin-can-view-authority? authority auth-admin)
@@ -421,8 +421,8 @@
                              :firstName firstName
                              :lastName  lastName}]
     (cond
-      (and valid-org? valid-domain? email-not-in-use? user-info-editable?) (change-authority-email authority email data)
-      (not email-not-in-use?) (fail :error.duplicate-email)
+      (and valid-org? valid-domain? email-not-in-use? user-info-editable?) (update-authority authority email data)
+      (not email-not-in-use?) (fail :error.auth-admin-duplicate-email)
       (not valid-domain?) (fail :error.auth-admin-and-authority-have-different-domains)
       (not user-info-editable?) (fail :error.authority-has-multiple-orgs)
       (not valid-org?) (fail :error.unauthorized)
