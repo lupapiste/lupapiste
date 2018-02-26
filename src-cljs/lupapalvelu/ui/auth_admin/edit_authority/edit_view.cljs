@@ -9,10 +9,8 @@
             [rum.core :as rum]))
 
 (defn init [init-state props]
-  (let [[                                                   ;auth-model
-         authority-id] (-> (aget props ":rum/initial-state") :rum/args)]
-    (swap! state/component-state assoc                      ;:auth-model {:global-auth-model auth-model}
-                                       :authority-id authority-id)
+  (let [[authority-id] (-> (aget props ":rum/initial-state") :rum/args)]
+    (swap! state/component-state assoc :authority-id authority-id)
     (util/get-organization)
     (util/get-authority)
     init-state))
@@ -20,8 +18,7 @@
 (rum/defc edit-authority-view < rum/reactive
   {:init         init
    :will-unmount (fn [& _] (reset! state/component-state {}))}
-  [authority-id ;auth-model
-   ]
+  [authority-id]
   (let [user (rum/react state/authority)]
     [:div
      [:h1 (str (loc "auth-admin.edit-authority.title") ", " (:firstName user) " " (:lastName user))]
@@ -33,13 +30,10 @@
 (defonce args (atom {}))
 
 (defn mount-component []
-  (rum/mount (edit-authority-view (:authority-id @args)
-                                  ;   (:auth-model @args)
-                                  )
+  (rum/mount (edit-authority-view (:authority-id @args))
              (.getElementById js/document (:dom-id @args))))
 
 (defn ^export start [domId componentParams]
-  (swap! args assoc                                         ;:auth-model (aget componentParams "authModel")
-                    :authority-id (aget componentParams "authorityId")
+  (swap! args assoc :authority-id (aget componentParams "authorityId")
                     :dom-id (name domId))
   (mount-component))

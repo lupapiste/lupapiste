@@ -781,7 +781,6 @@
       attachmentTypes:     docterminalModel
     });
     $("#edit-authority").applyBindings({
-        authorization: lupapisteApp.models.globalAuthModel,
         authorityIdObservable: self.authorityIdObservable,
         backToUsers: function () {
           pageutil.openPage("users");
