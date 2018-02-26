@@ -278,6 +278,7 @@
     this.parent = parent;
     this.model = ko.validatedObservable({
       accountType:  ko.observable().extend(required),
+      billingType:  ko.observable(),
       customAccountLimit: ko.observable(),
       name:           ko.observable().extend(required),
       y:              ko.observable(),
@@ -305,6 +306,7 @@
       netbill: undefined,
       pop: undefined,
       accountType: undefined,
+      billingType: "monthly",
       customAccountLimit: undefined,
       contactAddress: undefined,
       contactZip:     undefined,
@@ -329,17 +331,22 @@
   };
 
   CompanyInfo.prototype.updateAccountTypes = function(company) {
-    var serviceAccountTypes = lupapisteApp.services.companyRegistrationService.accountTypes();
-    var accountType = this.accountType; // take correct observable to var, 'this' context differs in _.map's function
-    accountType(_.find(LUPAPISTE.config.accountTypes, {name: company.accountType}));
-    var mappedAccountTypes = _.map(LUPAPISTE.config.accountTypes, function(type) {
-      type.disable = ko.observable(accountType() ? type.limit < accountType().limit : false);
-      var serviceAccountType = _.find( serviceAccountTypes, {id: type.name});
-      type.displayName = sprintf("%s (%s)", serviceAccountType.title, loc("register.company.price", serviceAccountType.price));
-      return type;
-    });
-    this.accountTypes([]);
-    this.accountTypes(mappedAccountTypes);
+    if (_.isEmpty(company)) {
+      this.accountTypes([]);
+    } else {
+      var accountType = this.accountType; // take correct observable to var, 'this' context differs in _.map's function
+      accountType(_.find(LUPAPISTE.config.accountTypes, {name: company.accountType}));
+      var mappedAccountTypes = _.map(LUPAPISTE.config.accountTypes, function(type) {
+        type.disable = ko.observable(accountType() ? type.limit < accountType().limit : false);
+        var price = util.getIn(type, ["price", company.billingType]);
+        var accountTitle = loc(sprintf( "register.company.%s.title", type.name));
+        var priceText = loc("register.company.billing." + company.billingType + ".price", price);
+        type.displayName = sprintf("%s (%s)", accountTitle, priceText);
+        return type;
+      });
+      this.accountTypes([]);
+      this.accountTypes(mappedAccountTypes);
+    }
   };
 
   CompanyInfo.prototype.update = function(company) {
