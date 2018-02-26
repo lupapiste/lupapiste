@@ -174,8 +174,8 @@
       (recur application (util/find-by-id id (:tasks application)))
       task)))
 
-(defn first-review-in-done-state? [tasks]
-  (->> (filter #(= :review (keyword (get-in % [:schema-info :subtype]))) tasks)
+(defn no-sent-reviews-yet? [tasks]
+  (->> (filter #(tasks/task-is-review? %) tasks)
        (filter #(= :sent (keyword (:state %))))
        (count)
        (zero?)))
@@ -258,8 +258,8 @@
 
     (when (and (env/feature? :pate-json)
                (org/pate-org? (:id @organization))
-               (first-review-in-done-state? (:tasks application))
-               (sm/can-proceed? application :constructionStarted))
+               (no-sent-reviews-yet? (:tasks application))
+               (= :constructionStarted (sm/next-state application)))
       (update-application command (app-state/state-transition-update :constructionStarted created application user)))
 
     (ok :integrationAvailable sent-to-krysp?)))
