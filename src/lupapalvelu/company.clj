@@ -189,7 +189,7 @@
   company."
   ([] (find-companies {}))
   ([query]
-    (find-companies query [:name :y :address1 :zip :po :accountType
+    (find-companies query [:name :y :address1 :zip :po :accountType :billingType
                            :contactAddress :contactZip :contactPo
                            :customAccountLimit :created :pop :ovt
                            :netbill :reference :document :locked]))
