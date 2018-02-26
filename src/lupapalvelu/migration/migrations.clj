@@ -3750,7 +3750,7 @@
 
 (defmigration company-default-billing-type
   {:apply-when (pos? (mongo/count :companies {:billingType {$exists false}}))}
-  (mongo/update-by-query :companies {:billingType {$exists false}} {$set {:billingType "monthly"}}))
+  (mongo/update-by-query :companies {:billingType {$exists false}} {$set {:billingType "yearly"}}))
 
 ;;
 ;; ****** NOTE! ******
