@@ -25,8 +25,10 @@
                 <td data-bind="text: email"></td>
                 <td>
                   <span data-bind="visible: $parent.canEdit()">
-                    [<a href="#" data-bind="click: $parent.removeGuest,
-                                            ltext: 'remove'"></a>]
+                    <button class="secondary" data-bind="click: $parent.removeGuest">
+                      <i class="lupicon-remove"></i>
+                      <span data-bind="ltext: 'remove'"></span>
+                    </button>
                   </span>
                 </td>
               </tr>

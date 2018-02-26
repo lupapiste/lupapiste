@@ -12,7 +12,6 @@
       asianhallintaModel,
       linkToVendorBackendModel,
       usersList = null,
-      editRolesDialogModel,
       calendarsModel,
       reservationTypesModel,
       reservationPropertiesModel,
@@ -615,7 +614,6 @@
   kopiolaitosModel = new KopiolaitosModel();
   asianhallintaModel = new AsianhallintaModel();
   linkToVendorBackendModel = new LinkToVendorBackendModel();
-  editRolesDialogModel = new LUPAPISTE.EditRolesDialogModel(organizationModel);
   bulletinsModel = new BulletinsModel();
   docterminalModel = new DocterminalModel();
   docstoreModel = new DocstoreModel();
@@ -624,17 +622,21 @@
       hideRoleFilter: true,
       hideEnabledFilter: true,
       ops: [{name: "removeFromOrg",
+             button: "secondary",
+             icon: "lupicon-remove",
              showFor: _.partial(lupapisteApp.models.globalAuthModel.ok, "remove-user-organization"),
              operation: function(email, callback) {
                ajax
                  .command("remove-user-organization", {email: email})
                  .success(function() { callback(true); })
                  .call();
-             }},
+            }},
             {name: "editUser",
+             button: "positive",
+             icon: "lupicon-pen",
              showFor: _.partial(lupapisteApp.models.globalAuthModel.ok, "update-user-roles"),
              rowOperationFn: function (row) {
-               editRolesDialogModel.showDialog({email: row[0], name: row[1], roles: row[2]});
+               pageutil.openPage("edit-authority", row.user._id);
              }}]
   };
 
@@ -691,8 +693,19 @@
     docterminalModel.load();
   });
 
+  self.authorityIdObservable = ko.observable("");
+
+  hub.onPageLoad("edit-authority", function () {
+      self.authorityIdObservable(_.head(pageutil.getPagePath()));
+  });
+
+  hub.onPageUnload("edit-authority", function () {
+      self.authorityIdObservable("");
+  });
+
   hub.onPageLoad("organization-store-settings", function() {
     docstoreModel.load();
+
   });
 
   $(function() {
@@ -701,8 +714,7 @@
     $("#users").applyBindings({
       organizationUsers:   organizationUsers,
       statementGivers:    statementGiversModel,
-      createStatementGiver: createStatementGiverModel,
-      editRoles:           editRolesDialogModel
+      createStatementGiver: createStatementGiverModel
       });
     $("#applications").applyBindings({
       organization:        organizationModel,
@@ -767,6 +779,13 @@
       organization:        organizationModel,
       authorization:       lupapisteApp.models.globalAuthModel,
       attachmentTypes:     docterminalModel
+    });
+    $("#edit-authority").applyBindings({
+        authorityIdObservable: self.authorityIdObservable,
+        backToUsers: function () {
+          pageutil.openPage("users");
+          usersList.redraw();
+        }
     });
     $("#organization-store-settings").applyBindings({
       organization: organizationModel,

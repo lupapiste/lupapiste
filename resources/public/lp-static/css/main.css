@@ -12480,6 +12480,22 @@ table.company-report-table {
   margin-top: 10px;
 }
 
+.admin-users-table td.users-table-actions {
+  white-space: nowrap;
+}
+
+.admin-users-table td.users-table-actions i {
+  pointer-events: none;
+}
+
+.admin-users-table td.users-table-actions span {
+  pointer-events: none;
+}
+
+.admin-users-table td.users-table-actions button:first-child {
+  margin-right: 12px;
+}
+
 /*Tab styles*/
 .tab-wrapper {
   padding: 30px;
@@ -35653,6 +35669,23 @@ table.default-digitalization-location {
 
 #organization-bulletins .checkbox-wrapper {
   border: none;
+}
+
+.edit-authority-roles {
+  width: 60%;
+}
+
+.edit-authority-roles button {
+  margin-top: 12px;
+}
+
+.edit-authority-info label {
+  display: block;
+}
+
+.edit-authority-info p {
+  margin-left: 0px;
+  margin-top: 12px;
 }
 
 #neighbor-show .pending {

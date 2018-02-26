@@ -5,6 +5,7 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.calendar :as cal]
+            [lupapalvelu.change-email :as change-email]
             [lupapalvelu.idf.idf-client :as idf]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
@@ -95,6 +96,23 @@
   {:user-roles #{:admin :authorityAdmin}}
   [{caller :user {params :params} :data}]
   (ok :data (usr/users-for-datatables caller params)))
+
+(defquery user-for-edit-authority
+  {:user-roles #{:authorityAdmin}
+   :parameters [authority-id]
+   :input-validators [(partial action/non-blank-parameters [:authority-id])]}
+  [{auth-admin :user}]
+  (let [{:keys [username firstName lastName email orgAuthz]
+         :as authority}  (usr/get-user-by-id authority-id)
+        valid-auth?      (uu/auth-admin-can-view-authority? authority auth-admin)
+        data             {:email     email
+                          :username  username
+                          :firstName firstName
+                          :lastName  lastName
+                          :orgAuthz  orgAuthz}]
+  (if valid-auth?
+     (ok :data data)
+     (fail :error.unauthorized))))
 
 (defendpoint "/rest/user"
   {:summary             "Returns details of the user associated to the provided access token"
@@ -380,6 +398,35 @@
   (let [organization-id (usr/authority-admins-organization-id caller)
         actual-roles    (organization/filter-valid-user-roles-in-organization organization-id roles)]
     (usr/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})))
+
+(defn- update-authority [authority email data]
+  (let [new-email (:email data)]
+    (when (not= email new-email)
+      (change-email/update-email-in-application-auth! (:id authority) email new-email)
+      (change-email/update-email-in-invite-auth! (:id authority) email new-email))
+    (usr/update-user-by-email email {$set data})))
+
+(defcommand update-auth-info
+  {:parameters       [firstName lastName email new-email]
+   :input-validators [(partial action/non-blank-parameters [:firstName :lastName :email :new-email])]
+   :user-roles        #{:authorityAdmin}}
+  [{auth-admin :user}]
+  (let [authority           (usr/find-user {:email email})
+        valid-org?          (uu/auth-admin-can-view-authority? authority auth-admin)
+        valid-domain?       (uu/admin-and-user-have-same-email-domain? authority auth-admin)
+        email-not-in-use?   (if (= email new-email) true (not (usr/email-in-use? new-email)))
+        user-info-editable? (uu/authority-has-only-one-org? authority)
+        data                {:email     new-email
+                             :username  new-email
+                             :firstName firstName
+                             :lastName  lastName}]
+    (cond
+      (and valid-org? valid-domain? email-not-in-use? user-info-editable?) (update-authority authority email data)
+      (not email-not-in-use?) (fail :error.auth-admin-duplicate-email)
+      (not valid-domain?) (fail :error.auth-admin-and-authority-have-different-domains)
+      (not user-info-editable?) (fail :error.authority-has-multiple-orgs)
+      (not valid-org?) (fail :error.unauthorized)
+      :else (fail :error.unknown))))
 
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
   (infof "invitation for new authority: email=%s: processing..." email)

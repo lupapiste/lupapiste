@@ -702,3 +702,19 @@ table.company-report-table {
   width: 45%;
   margin-top: 10px;
 }
+
+.admin-users-table {
+  td.users-table-actions {
+    white-space: nowrap;
+    i {
+      pointer-events: none;
+    }
+
+    span {
+      pointer-events: none;
+    }
+    button:first-child {
+      margin-right: 12px;
+    }
+  }
+}
