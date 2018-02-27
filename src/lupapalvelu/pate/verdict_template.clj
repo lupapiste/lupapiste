@@ -312,13 +312,16 @@
 (defn template-filled?
   "Template is filled when every required field has been filled."
   [{:keys [org-id template template-id data]}]
-  (if (some? template)
-    (schemas/required-filled? (shared/default-verdict-template (keyword (:category template)))
-                              (or data
-                                  (:draft (or template
-                                              (verdict-template (organization-templates
-                                                                  org-id)
-                                                                template-id)))))))
+  (let [category (or (:category data)
+                     (:category template)
+                     (if (some? org-id) (:category (verdict-template (organization-templates org-id) template-id)))
+                     (str "r"))]
+      (schemas/required-filled? (shared/default-verdict-template (keyword category))
+                                (or data
+                                    (:draft (or template
+                                                (verdict-template (organization-templates
+                                                                    org-id)
+                                                                  template-id)))))))
 
 ;; Generic is a placeholder term that means either review or plan
 ;; depending on the context. Namely, the subcollection argument in
