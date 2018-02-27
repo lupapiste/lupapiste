@@ -138,7 +138,7 @@
         message-id (save-building-data-message! user "processing" data)
         {org-id :organization :as app} (domain/get-application-as application-id user)]
     (if (and (usr/user-is-authority-in-organization? user org-id)
-             (applications-data/update-building! app operationId nationalBuildingId location))
+             (applications-data/update-building! app operationId nationalBuildingId location (now)))
       (do (messages/set-message-status message-id "processed")
           (resp/status 200 (ok)))
       (resp/status 404 "Not found"))))

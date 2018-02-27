@@ -41,6 +41,15 @@
                (some #(= (:name %) schemas/national-building-id) schema-body))
       (= (:id op) op-id))))
 
+(defn push-building-updates
+  [{:keys [documents]} operation-id national-building-id location-map timestamp]
+  (when (some (partial buildingId-in-document? operation-id) documents)
+    {$push {:building-updates
+            {:operationId operation-id
+             :nationalBuildingId national-building-id
+             :location location-map
+             :timestamp timestamp}}}))
+
 (defn document-buildingid-updates-for-operation
   "Generates valtakunnallinenNumero updates to documents regarding operation.
    Example update: {documents.1.data.valtakunnalinenNumero.value '123456001M'}"

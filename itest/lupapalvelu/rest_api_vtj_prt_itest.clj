@@ -51,13 +51,13 @@
            (select-keys [:messageType :status]))
         => {:messageType "update-building-data" :status "processed"})
 
-  #_(facts "building array has correct data"                ; TODO fix in LPK-3598
-    (let [{:keys [buildings]} (query sonja :application :id (:id application))
-          building (first buildings)]
-     (count buildings) => 1
-     (fact "VTJ-PRT" (:nationalId building) => "1234567892")
-     (fact "location EPSG:3067" (:location building) => location-map)
-     (fact "location WGS84" (:location-wgs84 building) => location-wgs84))))
+  (facts "building-updates has correct data"
+    (let [building-updates (-> (get-by-id :applications (:id application))
+                               :body :data :building-updates)
+          building (first building-updates)]
+      (count building-updates) => 1
+      (fact "VTJ-PRT" (:nationalBuildingId building) => "1234567892")
+      (fact "location EPSG:3067" (:location building) => location-map))))
 
 (facts "sipoo backend user try to update vtj-prt on nonexesting document"
   (fact "Sipoo Backend can access"
