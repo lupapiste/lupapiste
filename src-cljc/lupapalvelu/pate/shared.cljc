@@ -629,30 +629,12 @@
                                                                :type       :select
                                                                :loc-prefix :pate-r.verdict-code}}
                   :paatosteksti              {:phrase-text {:category :paatosteksti}}
-                  :bulletinOpDescription     {:phrase-text {:category :toimenpide-julkipanoon
-                                                            :i18nkey  :phrase.category.toimenpide-julkipanoon}}
                   :link-to-settings          {:link {:text-loc :pate.settings-link
                                                      :click    :open-settings}}
                   :link-to-settings-no-label {:link {:text-loc :pate.settings-link
                                                      :label?   false
                                                      :click    :open-settings}}
                   ;; The following keys are whole sections
-                  :foremen                   (reference-list :settings.foremen {:item-loc-prefix :pate-r.foremen})
-                  :plans                     (reference-list :plans {:item-key :id
-                                                                     :term     {:path       [:plans]
-                                                                                :extra-path [:name]
-                                                                                :match-key  :id}})
-                  :reviews                   (reference-list :reviews {:item-key :id
-                                                                       :term     {:path       [:reviews]
-                                                                                  :extra-path [:name]
-                                                                                  :match-key  :id}})
-                  :conditions                {:repeating {:condition        {:phrase-text {:i18nkey  :pate-condition
-                                                                                           :category :lupaehdot}}
-                                                          :remove-condition {:button {:i18nkey :remove
-                                                                                      :label?  false
-                                                                                      :icon    :lupicon-remove
-                                                                                      :css     [:primary :outline]
-                                                                                      :remove  :conditions}}}}
                   :add-condition             {:button {:icon    :lupicon-circle-plus
                                                        :i18nkey :pate-conditions.add
                                                        :css     :positive
@@ -708,24 +690,6 @@
                                           :dict  :verdict-code}]
                                         [{:col  12
                                           :dict :paatosteksti}]]}}
-                {:id         "bulletin"
-                 :loc-prefix :bulletin
-                 :grid       {:columns 1
-                              :rows    [[{:col  1
-                                          :dict :bulletinOpDescription}]]}}
-                (multi-section :foremen :*ref.settings.foremen)
-                (multi-section :reviews :*ref.reviews)
-                (multi-section :plans :*ref.plans)
-                {:id         "conditions"
-                 :loc-prefix :phrase.category.lupaehdot
-                 :grid       {:columns 1
-                              :rows    [[{:grid {:columns   8
-                                                 :repeating :conditions
-                                                 :rows      [[{:col  6
-                                                               :dict :condition}
-                                                              {}
-                                                              {:dict :remove-condition}]]}}]
-                                        [{:dict :add-condition}]]}}
                 (text-section :neighbors)
                 {:id         "appeal"
                  :loc-prefix :pate-appeal
@@ -743,17 +707,6 @@
                 (text-section :rights)
                 (text-section :purpose)
                 (text-section :statements)
-                {:id         "buildings"
-                 :loc-prefix :pate-buildings
-                 :grid       {:columns 1
-                              :rows    [[{:loc-prefix :pate-buildings.info
-                                          :list       {:title   "pate-buildings.info"
-                                                       :labels? false
-                                                       :items   (mapv (fn [check]
-                                                                        {:dict check
-                                                                         :id   check
-                                                                         :css  [:pate-condition-box]})
-                                                                      [:autopaikat :vss-luokka :paloluokka])}}]]}}
                 {:id         "attachments"
                  :loc-prefix :application.verdict-attachments
                  :grid       {:columns 1
@@ -1216,15 +1169,6 @@
           :deviations       {:phrase-text {:category :yleinen}}
           :rights           {:phrase-text {:category :rakennusoikeus}}
           :purpose          {:phrase-text {:category :kaava}}
-          :buildings        {:repeating {:building-name          {:placeholder {:label? false
-                                                                                :type   :building}}
-                                         :rakennetut-autopaikat  {:docgen "pate-string"}
-                                         :kiinteiston-autopaikat {:docgen "pate-string"}
-                                         :autopaikat-yhteensa    {:docgen "pate-string"}
-                                         :vss-luokka             {:docgen "pate-string"}
-                                         :paloluokka             {:docgen "pate-string"}
-                                         :show-building          {:docgen "required-in-verdict"}}
-                             :sort-by :order}
           :upload           {:attachments {:i18nkey    :application.verdict-attachments
                                            :label?     false
                                            :type-group #"paatoksenteko"
@@ -1286,13 +1230,6 @@
                             :id    "application-id"
                             :hide? :_meta.editing?
                             :dict  :application-id}]]}}
-        {:id         "bulletin"
-         :loc-prefix :bulletin
-         :show?      :?.bulletin-op-description
-         :grid       {:columns 1
-                      :rows    [[{:col  1
-                                  :id   "toimenpide-julkipanoon"
-                                  :dict :bulletinOpDescription}]]}}
 
         {:id    "appeal"
          :show? [:OR :?.appeal :?.collateral]
@@ -1361,33 +1298,6 @@
          :grid       {:columns 7
                       :rows    [[{:col  6
                                   :dict :deviations}]]}}
-        {:id    "buildings"
-         :show? :?.buildings
-         :grid  {:columns 7
-                 :rows    [[{:col  7
-                             :grid {:columns    6
-                                    :loc-prefix :pate-buildings.info
-                                    :repeating  :buildings
-                                    :rows       [{:css   [:row--tight]
-                                                  :show? [:OR :_meta.editing? :+.show-building]
-                                                  :row   [{:col  6
-                                                           :dict :building-name}]}
-                                                 {:show? [:OR :_meta.editing? :+.show-building]
-                                                  :css   [:row--indent]
-                                                  :row   [{:col  5
-                                                           :list {:css   :list--sparse
-                                                                  :items (map #(hash-map :id %
-                                                                                         :dict %
-                                                                                         :show? (util/kw-path :?+ %)
-                                                                                         :enabled? :-.show-building)
-                                                                              [:rakennetut-autopaikat
-                                                                               :kiinteiston-autopaikat
-                                                                               :autopaikat-yhteensa
-                                                                               :vss-luokka
-                                                                               :paloluokka])}}
-                                                          {:dict  :show-building
-                                                           :show? :_meta.editing?}]}
-                                                 ]}}]]}}
         {:id   "attachments"
          :grid {:columns 7
                 :rows    [[{:col  6
