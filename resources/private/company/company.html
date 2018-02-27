@@ -433,6 +433,7 @@
     </div>
   </section>
   <section class="page container" id="company-reports">
+    <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === "company-reports" -->
     <div id="inner-margins">
       <button class="secondary"
               data-bind="click: function() { history.go(-1); }"
@@ -443,6 +444,7 @@
     </div>
     <div class="hr"></div>
     <cljs-company_reports></cljs-company_reports>
+    <!-- /ko -->
   </section>
 </body>
 </html>
