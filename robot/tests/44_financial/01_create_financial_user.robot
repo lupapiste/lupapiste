@@ -24,8 +24,8 @@ Admin creates new financial user
   User count is  2
 
 Admin resets financial authority password
-  Element should be visible  xpath=//section[@id='users']//tr[@data-user-email='massi.mies@mail.com']//td/a[@data-op='resetPassword']
-  Click element  xpath=//section[@id='users']//tr[@data-user-email='massi.mies@mail.com']//td/a[@data-op='resetPassword']
+  Element should be visible  xpath=//section[@id='users']//tr[@data-user-email='massi.mies@mail.com']//td/button[@data-op='resetPassword']
+  Click element  xpath=//section[@id='users']//tr[@data-user-email='massi.mies@mail.com']//td/button[@data-op='resetPassword']
   Confirm  dynamic-yes-no-confirm-dialog
   Confirm  dynamic-ok-confirm-dialog
 

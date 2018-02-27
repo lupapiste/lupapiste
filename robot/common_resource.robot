@@ -17,7 +17,7 @@ ${OP_TREE_SPEED}                0.1
 ${SLOW_SPEED}                   0.2
 ${SLOWEST_SPEED}                0.5
 
-${LOGIN URL}                    ${SERVER}/app/fi/welcome#!/login
+${LOGIN URL}                    ${SERVER}/app/fi/welcome
 ${LOGOUT URL}                   ${SERVER}/app/fi/logout
 ${BULLETINS URL}                ${SERVER}/app/fi/bulletins
 ${APPLICATIONS PATH}            /applicant#!/applications
