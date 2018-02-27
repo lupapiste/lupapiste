@@ -193,7 +193,6 @@ Add phone number
   Input text with jQuery  input[data-docgen-path="yhteystiedot.puhelin"]  12345678
 
 Application is submitted
-  Click link  jquery=div.nav-top div.header-box a[title=Hankkeet]
   Open project application
   Wait Until  Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
   Submit application
@@ -276,7 +275,6 @@ Applicant can invite additional foremen to application with verdict
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
 
 Applicant invites foreman Mikko to application
-  Click link  jquery=div.nav-top div.header-box a[title=Hankkeet]
   Open project application
   Open tab  parties
   Open foreman accordions

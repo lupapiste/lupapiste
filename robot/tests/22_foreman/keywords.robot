@@ -29,8 +29,8 @@ Go back to project application
 
 Open foreman application
   [Arguments]  ${index}
-  Wait until  Element should be visible  //table[@id="applications-list"]//td[@data-test-col-name="operation" and text()="Työnjohtajan nimeäminen"]
-  Click element  //table[@id="applications-list"]//td[@data-test-col-name="operation" and text()="Työnjohtajan nimeäminen"]
+  ${foremanAppId} =  Get From List  ${foremanApps}  ${index}
+  Open application by id  ${foremanAppId}
   Wait until  jQuery should match X times  span[data-test-primary-operation-id=tyonjohtajan-nimeaminen-v2]:visible  1
 
 Open foreman accordions
@@ -109,8 +109,8 @@ Project application is open
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${appId}
 
 Open project application
-  Wait until  Element should be visible  //table[@id="applications-list"]//td[@data-test-col-name="operation" and text()="Asuinkerrostalon tai rivitalon rakentaminen"]
-  Click element  //table[@id="applications-list"]//td[@data-test-col-name="operation" and text()="Asuinkerrostalon tai rivitalon rakentaminen"]
+  ${appId} =   Get From List  ${applicationIds}  0
+  Open application by id  ${appId}
   Project application is open
 
 Foreman history should have text X times
