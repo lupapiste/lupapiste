@@ -314,7 +314,7 @@ User should not be logged in
   Wait Until  User is not logged in
 
 User is not logged in
-  Location should be  ${LOGIN URL}
+  Location should be  ${LOGIN URL}#!/login
   Page should contain  Haluan kirjautua palveluun
   # test that no data is bind.
 
