@@ -15,8 +15,8 @@ Solita admin search Ronja and resets her password
   Wait until     Element should be visible    xpath=//section[@id='users']//input[@data-test-id='users-list-input-search']
   Input text                                  xpath=//section[@id='users']//input[@data-test-id='users-list-input-search']  ronj
   Wait Until     Page Should Contain Element  xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']
-  Wait until     Element should be visible    xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='resetPassword']
-  Wait until     Click element                xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='resetPassword']
+  Wait until     Element should be visible    xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/button[@data-op='resetPassword']
+  Wait until     Click element                xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/button[@data-op='resetPassword']
   Confirm  dynamic-yes-no-confirm-dialog
   Confirm  dynamic-ok-confirm-dialog
 

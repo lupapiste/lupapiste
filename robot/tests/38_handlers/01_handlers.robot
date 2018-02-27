@@ -157,7 +157,7 @@ No handlers in inforequest
 # -------------------------
 Sipoo logs and fires Ronja
   Sipoo logs in
-  Click element  jquery=div.admin-users-table tr[data-user-email="ronja.sibbo@sipoo.fi"] a[data-op=removeFromOrg]
+  Click element  jquery=div.admin-users-table tr[data-user-email="ronja.sibbo@sipoo.fi"] button[data-op=removeFromOrg]
   Confirm  dynamic-yes-no-confirm-dialog
 
 Sipoo renames Käsittelijä handler role

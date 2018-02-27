@@ -53,8 +53,9 @@ var users = (function($) {
           td$.append($("<button>")
             .attr("class", op.button)
             .attr("data-op", op.name)
-              .append($("<i>")
-                  .attr("class", op.icon))
+              .append( function() {
+                return op.icon ? $("<i>").attr("class", op.icon) : null;
+              })
               .append($("<span>")
                   .text(loc(["users.op", op.name]))));
         }
