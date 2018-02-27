@@ -305,7 +305,7 @@
         =not=> ok?))
     (fact "Sonja can not edit authority info"
       (command sonja :update-auth-info command-data) =not=> ok?)
-    (fact "Järvenpaa can not edit info of authority in Sipoo"
+    (fact "Jarvenpaa can not edit info of authority in Sipoo"
       (command jarvenpaa :update-auth-info command-data) =not=> ok?)))
 
 ;;
