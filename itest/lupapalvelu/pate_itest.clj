@@ -755,6 +755,85 @@
                          :verdict :data :conditions)
                     kv))
 
+;;; Verdicts
+
+(defn verdict-neighbors [app-id open-verdict]
+  (facts "Verdict neighbors"
+    (fact "Add two neighbors to the application"
+      (let [first-prop-id  "75341600880088"
+            second-prop-id "75341600990099"
+            first-id       (:neighborId (command sonja :neighbor-add :id app-id
+                                                 :name "First neighbor"
+                                                 :street "Naapurintie 4"
+                                                 :city "Sipoo"
+                                                 :zip "12345"
+                                                 :email "first.neighbor@example.com"
+                                                 :propertyId first-prop-id))
+            second-id      (:neighborId (command sonja :neighbor-add :id app-id
+                                                 :name "Second neighbor"
+                                                 :street "Naapurintie 6"
+                                                 :city "Sipoo"
+                                                 :zip "12345"
+                                                 :email "second.neighbor@example.com"
+                                                 :propertyId second-prop-id))]
+        first-id => ss/not-blank?
+        second-id => ss/not-blank?
+        (fact "Verdict has now neighbor states"
+          (-> (open-verdict)
+              :verdict :data :neighbor-states)
+          => (just [{:property-id first-prop-id :done nil}
+                    {:property-id second-prop-id :done nil}] :in-any-order))
+        (fact "Mark the first neighbor heard"
+          (command sonja :neighbor-mark-done :id app-id
+                   :lang :fi
+                   :neighborId first-id) => ok?)
+        (fact "Neighbor states have been updated"
+          (-> (open-verdict)
+              :verdict :data :neighbor-states)
+          => (just [(just {:property-id first-prop-id :done pos?})
+                    {:property-id second-prop-id :done nil}] :in-any-order))
+        (fact "Remove the second neighbor"
+          (command sonja :neighbor-remove :id app-id
+                   :neighborId second-id) => ok?)
+        (fact "Neighbor states have been updated"
+          (-> (open-verdict)
+              :verdict :data :neighbor-states)
+          => (just [(just {:property-id first-prop-id :done pos?})]))))))
+
+(defn check-post-verdict-building-data [{:keys [buildings documents]} doc-id operation-id]
+  (fact "pientalo VTJ-PRT still same"
+    (->> documents
+         (util/find-by-id doc-id)
+         :data :valtakunnallinenNumero :value) => "1234567881")
+  (fact "primary-op VTJ-PRT updated to doc"
+    (->> documents
+         (util/find-first #(= (get-in % [:schema-info :op :id]) operation-id))
+         :data :valtakunnallinenNumero :value) => "1234567892")
+  (facts "buildings"
+    (count buildings) => 2
+    (fact "first (primaryOperation sisatila-muutos)"
+      (-> buildings first :nationalId) => "1234567892"
+      (-> buildings first :location) => [406216.0 6686856.0]
+      (-> buildings first :location-wgs84) => (coord/convert "EPSG:3067" "WGS84" 5 [406216.0 6686856.0]))
+    (fact "second (secondaryOperation pientalo"
+      (-> buildings second :nationalId) => "1234567881"
+      (-> buildings second :location) => nil ; TODO should return location after LPK-3598 (from the first api-update call beginning of this test
+      (-> buildings second :location-wgs84) => nil)))
+
+(defn add-attachment-to-verdict-draft [verdict app-id]
+  (facts "Add attachment to verdict draft"
+         (let [verdict-id (:id verdict)
+               attachment-id (add-verdict-attachment app-id verdict-id "Hello world!")]
+           (fact "Delete verdict draft"
+                 (command sonja :delete-pate-verdict :id app-id
+                          :verdict-id verdict-id) => ok?)
+           (let [{:keys [pate-verdicts attachments]} (query-application sonja app-id)]
+             (fact "Verdict draft is no longer in the application"
+                   pate-verdicts =not=> (contains {:id verdict-id}))
+             (fact "Verdict draft attachment is no longer in the application"
+                   attachments =not=> (contains {:id attachment-id}))
+             (fact "There are still other attachments"
+                   (count attachments) => pos?)))))
 
 (facts "Verdicts"
   (let [{template-id :id} (init-verdict-template sipoo :r)
@@ -1032,48 +1111,8 @@
                   (fact "Empty reviews is OK"
                     (check-error (edit-verdict :reviews [])))
                   (fact "Set good  review"
-                    (check-error (edit-verdict :reviews [(:id review)]))))
-                (facts "Verdict neighbors"
-                  (fact "Add two neighbors to the application"
-                    (let [first-prop-id  "75341600880088"
-                          second-prop-id "75341600990099"
-                          first-id       (:neighborId (command sonja :neighbor-add :id app-id
-                                                               :name "First neighbor"
-                                                               :street "Naapurintie 4"
-                                                               :city "Sipoo"
-                                                               :zip "12345"
-                                                               :email "first.neighbor@example.com"
-                                                               :propertyId first-prop-id))
-                          second-id      (:neighborId (command sonja :neighbor-add :id app-id
-                                                               :name "Second neighbor"
-                                                               :street "Naapurintie 6"
-                                                               :city "Sipoo"
-                                                               :zip "12345"
-                                                               :email "second.neighbor@example.com"
-                                                               :propertyId second-prop-id))]
-                      first-id => ss/not-blank?
-                      second-id => ss/not-blank?
-                      (fact "Verdict has now neighbor states"
-                        (-> (open-verdict)
-                            :verdict :data :neighbor-states)
-                        => (just [{:property-id first-prop-id :done nil}
-                                  {:property-id second-prop-id :done nil}] :in-any-order))
-                      (fact "Mark the first neighbor heard"
-                        (command sonja :neighbor-mark-done :id app-id
-                                 :lang :fi
-                                 :neighborId first-id) => ok?)
-                      (fact "Neighbor states have been updated"
-                        (-> (open-verdict)
-                            :verdict :data :neighbor-states)
-                        => (just [(just {:property-id first-prop-id :done pos?})
-                                  {:property-id second-prop-id :done nil}] :in-any-order))
-                      (fact "Remove the second neighbor"
-                        (command sonja :neighbor-remove :id app-id
-                                 :neighborId second-id) => ok?)
-                      (fact "Neighbor states have been updated"
-                        (-> (open-verdict)
-                            :verdict :data :neighbor-states)
-                        => (just [(just {:property-id first-prop-id :done pos?})])))))
+                        (check-error (edit-verdict :reviews [(:id review)]))))
+                (verdict-neighbors app-id open-verdict)
                 (facts "Verdict buildings"
                   (let [{doc-id :id} (util/find-first (util/fn-> :schema-info :op :id
                                                                  (util/=as-kw op-id))
@@ -1439,39 +1478,11 @@
                                                            :content-type :json
                                                            :as          :json
                                                            :basic-auth  ["sipoo-r-backend" "sipoo"]}) => http200?
-                        (let [{:keys [buildings]} (query-application sonja app-id)]
-                          (fact "pientalo VTJ-PRT still same"
-                            (->> (query-application sonja app-id) :documents
-                                 (util/find-by-id doc-id)
-                                 :data :valtakunnallinenNumero :value) => "1234567881")
-                          (fact "primary-op VTJ-PRT updated to doc"
-                            (->> (query-application sonja app-id) :documents
-                                 (util/find-first #(= (get-in % [:schema-info :op :id]) operation-id))
-                                 :data :valtakunnallinenNumero :value) => "1234567892")
-                          (facts "buildings"
-                            (count buildings) => 2
-                            (fact "first (primaryOperation sisatila-muutos)"
-                              (-> buildings first :nationalId) => "1234567892"
-                              (-> buildings first :location) => [406216.0 6686856.0]
-                              (-> buildings first :location-wgs84) => (coord/convert "EPSG:3067" "WGS84" 5 [406216.0 6686856.0]))
-                            (fact "second (secondaryOperation pientalo"
-                              (-> buildings second :nationalId) => "1234567881"
-                              (-> buildings second :location) => nil ; TODO should return location after LPK-3598 (from the first api-update call beginning of this test
-                              (-> buildings second :location-wgs84) => nil)))))))
+                        (check-post-verdict-building-data (query-application sonja app-id)
+                                                          doc-id operation-id)))))
                 (fact "Verdict draft to be deleted"
                   (let  [{verdict :verdict} (command sonja :new-pate-verdict-draft
                                                      :id app-id
                                                      :template-id template-id)
                          {verdict-id :id}   verdict]
-                    (facts "Add attachment to verdict draft"
-                      (let [attachment-id (add-verdict-attachment app-id verdict-id "Hello world!")]
-                        (fact "Delete verdict draft"
-                          (command sonja :delete-pate-verdict :id app-id
-                                   :verdict-id verdict-id) => ok?)
-                        (let [{:keys [pate-verdicts attachments]} (query-application sonja app-id)]
-                          (fact "Verdict draft is no longer in the application"
-                            pate-verdicts =not=> (contains {:id verdict-id}))
-                          (fact "Verdict draft attachment is no longer in the application"
-                            attachments =not=> (contains {:id attachment-id}))
-                          (fact "There are still other attachments"
-                            (count attachments) => pos?))))))))))))))
+                    (add-attachment-to-verdict-draft verdict app-id)))))))))))
