@@ -27,6 +27,7 @@
             [sade.util :as util]
             [schema.core :as sc]
             [swiss.arrows :refer :all]
+            [sade.coordinate :as coord]
             [sade.validators :as validators]))
 
 (defn neighbor-states
@@ -392,6 +393,13 @@
                            ss/->plain-string))))
                {})))
 
+(defn- building-update-map [{:keys [building-updates]}]
+  (reduce (fn [acc building-update]
+            (assoc acc (:operationId building-update)
+                   (update building-update :nationalBuildingId not-empty)))
+          {}
+          building-updates))
+
 (defn ->buildings-array
   "Construction of the application-buildings array. This should be
   equivalent to ->buildings-summary function in
@@ -399,22 +407,26 @@
   the message from backing system, here all the input data is
   originating from PATE verdict."
   [application]
-  (->> application
-       app-documents-having-buildings
-       (util/indexed 1)
-       (map (fn [[n {toimenpide :data {op :op} :schema-info}]]
-              (let [{:keys [rakennusnro valtakunnallinenNumero mitat kaytto tunnus]} toimenpide
-                    description-parts (remove ss/blank? [tunnus (:description op)])]
-                 {:localShortId (or rakennusnro (when (validators/rakennusnumero? tunnus) tunnus))
-                  :nationalId valtakunnallinenNumero
-                  :buildingId (or valtakunnallinenNumero rakennusnro)
-                  :location-wgs84 nil
-                  :location nil
-                  :area (:kokonaisala mitat)
-                  :index (str n)
-                  :description (ss/join ": " description-parts)
-                  :operationId (:id op)
-                  :usage (or (:kayttotarkoitus kaytto) "")})))))
+  (let [building-updates (building-update-map application)]
+    (->> application
+         app-documents-having-buildings
+         (util/indexed 1)
+         (map (fn [[n {toimenpide :data {op :op} :schema-info}]]
+                (let [{:keys [rakennusnro valtakunnallinenNumero mitat kaytto tunnus]} toimenpide
+                      description-parts (remove ss/blank? [tunnus (:description op)])
+                      building-update (get building-updates (:id op))
+                      location (when-let [loc (:location building-update)] [(:x loc) (:y loc)])
+                      location-wgs84 (when location (coord/convert "EPSG:3067" "WGS84" 5 location))]
+                  {:localShortId (or rakennusnro (when (validators/rakennusnumero? tunnus) tunnus))
+                   :nationalId (or valtakunnallinenNumero (:nationalBuildingId building-update))
+                   :buildingId (or valtakunnallinenNumero (:nationalBuildingId building-update) rakennusnro)
+                   :location-wgs84 location-wgs84
+                   :location location
+                   :area (:kokonaisala mitat)
+                   :index (str n)
+                   :description (ss/join ": " description-parts)
+                   :operationId (:id op)
+                   :usage (or (:kayttotarkoitus kaytto) "")}))))))
 
 (defn edit-verdict
   "Updates the verdict data. Validation takes the template exclusions

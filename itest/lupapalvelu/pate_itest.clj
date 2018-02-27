@@ -817,8 +817,8 @@
       (-> buildings first :location-wgs84) => (coord/convert "EPSG:3067" "WGS84" 5 [406216.0 6686856.0]))
     (fact "second (secondaryOperation pientalo"
       (-> buildings second :nationalId) => "1234567881"
-      (-> buildings second :location) => nil ; TODO should return location after LPK-3598 (from the first api-update call beginning of this test
-      (-> buildings second :location-wgs84) => nil)))
+      (-> buildings second :location) => [406216.0 6686856.0]
+      (-> buildings second :location-wgs84) => (coord/convert "EPSG:3067" "WGS84" 5 [406216.0 6686856.0]))))
 
 (defn add-attachment-to-verdict-draft [verdict app-id]
   (facts "Add attachment to verdict draft"
@@ -1277,11 +1277,17 @@
                       (raw sonja :preview-pate-verdict :id app-id
                            :verdict-id verdict-id)
                       => fail?)
-                    ; TODO LPK-3598,
-                    ; add test case here that data in buildings-array, which was created in above 'todo'
-                    ; does look correct, ie:
-                    ; - the coordinates received via api-call are still existing in buildings-array
-                    ; - count of buildings array is correct (that no duplicate buildings were added after 'publish-pate-verdict'
+                    (facts "buildings"
+                      (let [{:keys [buildings]} (query-application sonja app-id)]
+                        (count buildings) => 2
+                        (fact "first (primaryOperation sisatila-muutos)"
+                              (-> buildings first :nationalId) => ""
+                              (-> buildings first :location) => nil
+                              (-> buildings first :location-wgs84) => nil)
+                        (fact "second (secondaryOperation pientalo"
+                              (-> buildings second :nationalId) => "1234567881"
+                              (-> buildings second :location) => [406216.0 6686856.0]
+                              (-> buildings second :location-wgs84) => (coord/convert "EPSG:3067" "WGS84" 5 [406216.0 6686856.0]))))
                     (facts "Modify template"
                       (letfn [(edit-template [path value]
                                 (fact {:midje/description (format "Template draft %s -> %s" path value)}
