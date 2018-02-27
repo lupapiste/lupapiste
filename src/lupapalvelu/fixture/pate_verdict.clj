@@ -111,4 +111,5 @@
 (deffixture "pate-verdict" {}
   (mongo/clear!)
   (mongo/insert-batch :users users)
+  (mongo/insert-batch :companies minimal/companies)
   (mongo/insert-batch :organizations organizations))
