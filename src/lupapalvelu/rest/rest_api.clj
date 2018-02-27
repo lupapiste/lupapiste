@@ -110,13 +110,13 @@
       (resp/status 404 "Not found"))))
 
 
-(defn- save-building-data-message! [user status data]
+(defn- save-building-data-message! [user status data timestamp]
   (let [message-id (messages/create-id)]
     (messages/save {:id message-id
                     :direction "in"
                     :messageType "update-building-data"
                     :format "json"
-                    :created (now)
+                    :created timestamp
                     :partner "matti"
                     :status  status
                     :application {:id (:application-id data)}
@@ -135,10 +135,11 @@
               :operationId        operationId
               :nationalBuildingId nationalBuildingId
               :location           location}
-        message-id (save-building-data-message! user "processing" data)
+        timestamp (now)
+        message-id (save-building-data-message! user "processing" data timestamp)
         {org-id :organization :as app} (domain/get-application-as application-id user)]
     (if (and (usr/user-is-authority-in-organization? user org-id)
-             (applications-data/update-building! app operationId nationalBuildingId location (now)))
+             (applications-data/update-building! app operationId nationalBuildingId location timestamp))
       (do (messages/set-message-status message-id "processed")
           (resp/status 200 (ok)))
       (resp/status 404 "Not found"))))
