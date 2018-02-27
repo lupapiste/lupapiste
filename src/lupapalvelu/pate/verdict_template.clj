@@ -178,11 +178,12 @@
 (defn save-draft-value
   "Error code on failure (see schemas for details)."
   [organization template-id timestamp path value]
-  (let [{:keys [category draft]
+  (let [_ (println "Save :: " path "  with value ::: " value "  to template ::: " template-id)
+        {:keys [category draft]
          :as   template}  (verdict-template organization template-id)
         {:keys [path value op]
          :as   processed} (schemas/validate-and-process-value
-                           shared/default-verdict-template
+                           (shared/default-verdict-template (keyword category))
                            path
                            value
                            draft
@@ -195,7 +196,8 @@
                               (hash-map ref-gen
                                         (map :id (generic-list organization
                                                                category
-                                                               ref-gen))))))]
+                                                               ref-gen))))))
+        _ (println "processed ::: " processed)]
     (when op ;; Value could be nil
       (let [mongo-path (util/kw-path (cons :verdict-templates.templates.$.draft
                                            path))]
@@ -312,12 +314,13 @@
 (defn template-filled?
   "Template is filled when every required field has been filled."
   [{:keys [org-id template template-id data]}]
-  (schemas/required-filled? shared/default-verdict-template
-                            (or data
-                                (:draft (or template
-                                            (verdict-template (organization-templates
-                                                               org-id)
-                                                              template-id))))))
+  (if (some? template)
+    (schemas/required-filled? (shared/default-verdict-template (keyword (:category template)))
+                              (or data
+                                  (:draft (or template
+                                              (verdict-template (organization-templates
+                                                                  org-id)
+                                                                template-id)))))))
 
 ;; Generic is a placeholder term that means either review or plan
 ;; depending on the context. Namely, the subcollection argument in

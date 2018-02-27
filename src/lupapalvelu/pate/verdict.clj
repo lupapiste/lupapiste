@@ -158,7 +158,7 @@
                                                        "")
                                          :skip-nil? true}))
                                 {}
-                                shared/verdict-dates)
+                                shared/p-verdict-dates)
                         (reduce (fn [acc k]
                                   (merge acc (map-unremoved-section (:data snapshot) k)))
                                 {}

@@ -254,7 +254,7 @@
 							</xs:sequence>
 						</xs:complexType>
 					</xs:element>
-					<xs:element name="paatostieto" type="yht:PaatoksetType" minOccurs="0" maxOccurs="unbounded">
+					<xs:element name="paatostieto" type="yht:Paatokset Type" minOccurs="0" maxOccurs="unbounded">
 						<xs:annotation>
 							<xs:documentation>Viranomaisien asiasta antamat päätökset</xs:documentation>
 						</xs:annotation>

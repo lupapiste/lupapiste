@@ -43,7 +43,6 @@
        (not published)))
 
 (defn reset-verdict [{:keys [verdict references filled]}]
-  (println " RESET ::: " verdict)
   (reset! state/current-verdict
           (when verdict
             {:state (:data verdict)

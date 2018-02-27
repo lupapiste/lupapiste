@@ -13,6 +13,7 @@
             [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]))
 
+(enable-console-print!)
 
 (defn updater
   ([{:keys [state info path] :as options} value]
@@ -202,9 +203,9 @@
        (with-back-button
          (verdict-template
           (merge
-           {:schema     (dissoc shared/default-verdict-template
+           {:schema     (dissoc (shared/default-verdict-template (keyword @state/current-category))
                                 :dictionary)
-            :dictionary (:dictionary shared/default-verdict-template)
+            :dictionary (:dictionary (shared/default-verdict-template (keyword @state/current-category)))
             :references state/references}
            (state/select-keys state/current-template [:state :info :_meta]))))
 
