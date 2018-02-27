@@ -14,34 +14,6 @@ LUPAPISTE.CompanyRegistrationService = function() {
          : null;
   }
 
-  // Property names are the same as used by the backend.
-  function newRegistration() {
-    return {
-      billingType: ko.observable().extend({
-        limited: {values: ["monthly", "yearly"], defaultValue: "yearly"}
-      }),
-      accountType: ko.observable(),
-      name: ko.observable(),
-      y: ko.observable(),
-      address1: ko.observable(),
-      zip: ko.observable(),
-      po: ko.observable(),
-      country: ko.observable(),
-      netbill: ko.observable(),
-      pop: ko.observable(),
-      reference: ko.observable(),
-      firstName: ko.observable(),
-      lastName: ko.observable(),
-      email: ko.observable(),
-      personId: ko.observable(),
-      language: ko.observable( loc.currentLanguage ),
-      contactAddress: ko.observable(),
-      contactZip: ko.observable(),
-      contactPo: ko.observable(),
-      contactCountry: ko.observable()
-    };
-  }
-
   function requiredFields() {
     var fields = ["name", "y",
                   "address1", "zip", "po"];
@@ -51,6 +23,7 @@ LUPAPISTE.CompanyRegistrationService = function() {
                                "email", "personId"]);
   }
 
+  // Property names are the same as used by the backend.
   // Guard makes sure that the wizard components are disposed.
   self.guard = ko.observable( true );
   self.registration = {
