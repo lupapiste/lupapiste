@@ -30,8 +30,7 @@
 (defmethod permit/verdict-krysp-mapper :P [application verdict lang krysp-version begin-of-link]
   (let [attachments-canonical (att-canonical/get-attachments-as-canonical application begin-of-link (comp #{(:id verdict)} :id :target))
         raw-verdict (canonical/verdict-canonical application lang verdict)
-        verdict (assoc raw-verdict :Paatos (dissoc (:Paatos raw-verdict) :lupamaaraykset))
-        _ (println verdict)]
+        verdict (assoc raw-verdict :Paatos (dissoc (:Paatos raw-verdict) :lupamaaraykset))]
 
     {:attachment attachments-canonical
      :xml (-> (p-canoncial/poikkeus-application-to-canonical application lang)

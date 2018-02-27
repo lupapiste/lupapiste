@@ -178,8 +178,7 @@
 (defn save-draft-value
   "Error code on failure (see schemas for details)."
   [organization template-id timestamp path value]
-  (let [_ (println "Save :: " path "  with value ::: " value "  to template ::: " template-id)
-        {:keys [category draft]
+  (let [{:keys [category draft]
          :as   template}  (verdict-template organization template-id)
         {:keys [path value op]
          :as   processed} (schemas/validate-and-process-value
@@ -196,8 +195,7 @@
                               (hash-map ref-gen
                                         (map :id (generic-list organization
                                                                category
-                                                               ref-gen))))))
-        _ (println "processed ::: " processed)]
+                                                               ref-gen))))))]
     (when op ;; Value could be nil
       (let [mongo-path (util/kw-path (cons :verdict-templates.templates.$.draft
                                            path))]
