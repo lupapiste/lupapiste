@@ -14,8 +14,6 @@
             [rum.core :as rum]
             [sade.shared_util :as util]))
 
-(enable-console-print!)
-
 (defonce args (atom {}))
 
 (defn- can-edit? []
@@ -266,7 +264,6 @@
   (when (common/feature? :pate)
     (swap! args assoc
            :dom-id (name domId))
-
     (service/fetch-schemas)
     (reset-verdict nil)
     (mount-component)))

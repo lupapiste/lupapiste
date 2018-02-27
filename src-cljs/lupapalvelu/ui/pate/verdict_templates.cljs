@@ -13,8 +13,6 @@
             [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]))
 
-(enable-console-print!)
-
 (defn updater
   ([{:keys [state info path] :as options} value]
    (service/save-draft-value (path/value [:id] info)
