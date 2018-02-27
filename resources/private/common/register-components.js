@@ -27,6 +27,7 @@ jQuery(document).ready(function() {
     {name: "construction-waste-report", synchronous: true},
     {name: "attachments-multiselect"},
     {name: "attachment-details"},
+    {name: "attachment-page-stamping"},
     {name: "attachments-change-type"},
     {name: "base-autocomplete", model: "autocomplete-base-model"},
     {name: "autocomplete"},

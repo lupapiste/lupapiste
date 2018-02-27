@@ -763,6 +763,9 @@ div.sticky {
   display: inline-block;
 }
 
+.form-approval-status.stamped {
+  display: inline-block;
+}
 
 .is-status > .like-btn {
   @include btn-height;
@@ -781,6 +784,9 @@ div.sticky {
   }
   .approved {
     padding-right: $icon-pad;
+  }
+  .lupicon-circle-stamp {
+    color: $green;
   }
 }
 

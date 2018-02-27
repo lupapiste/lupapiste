@@ -2,8 +2,12 @@
         id="state-icons-template">
   <div class="attachment-state-icons"
        data-bind="foreach: stateIcons()">
-    <i data-bind="attr: {'class': css,
-                  'title': title,
-                  'data-test-icon': icon + '-icon'}"></i>
+    <i data-bind="attr: {'class': css + ' bubble-hover',
+                  'data-test-icon': icon + '-icon'}">
+        <!-- ko if: info -->
+            <span class="bubble-hover-text"
+                data-bind="text: info, attr: {'data-test-id': 'attachment-state-icons-hover-' + icon}"></span>
+        <!-- /ko -->
+    </i>
   </div>
 </script>

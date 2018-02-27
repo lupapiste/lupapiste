@@ -28,8 +28,8 @@ Mikko uploads attachment
 Mikko signs attachment
   Sign all attachments  mikko123
 
-Signed icon title is Mikko Intonen
-  Signed icon title is  Mikko Intonen
+Signed icon hover contains Mikko Intonen
+  Signed icon bubble hover contains  Mikko Intonen
 
 Mikko invites Pena to the application
   Invite pena@example.com to application
@@ -47,13 +47,14 @@ Pena logs in and accepts invitation
 
 Pena checks the signed icon title
   Open tab  attachments
-  Signed icon title is  Mikko Intonen
+  Signed icon bubble hover contains  Mikko Intonen
 
 Pena signs the attachment
   Sign all attachments  pena
 
 Pena is now also on the icon title
-  Signed icon title is  Mikko Intonen\\nPena Panaani
+  Signed icon bubble hover contains  Mikko Intonen
+  Signed icon bubble hover contains  Pena Panaani
 
 Pena adds new attachment version
   Open attachment details  muut.muu
@@ -68,7 +69,8 @@ There is no more signed icon
 
 *** Keywords ***
 
-Signed icon title is
-  [Arguments]  ${title}
-  Wait Until  Attachment indicator icon should be visible  signed  muut.muu
-  Javascript?  $("[data-test-icon=signed-icon]").attr( "title") === "${title}"
+Signed icon bubble hover contains
+  [Arguments]  ${name}
+  Mouse over  xpath=//*[@data-test-icon='signed-icon']
+  Element should be visible  xpath=//*[@data-test-id='attachment-state-icons-hover-signed']
+  Element should contain  xpath=//*[@data-test-id='attachment-state-icons-hover-signed']  ${name}

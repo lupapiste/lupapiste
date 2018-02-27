@@ -499,7 +499,7 @@
      :timestamp timestamp}))
 
 (defn- build-version-updates [user attachment version-model
-                              {:keys [created target stamped replaceable-original-file-id state contents drawingNumber group]}]
+                              {:keys [created target stamped replaceable-original-file-id state contents drawingNumber group approval]}]
   {:pre [(map? attachment) (map? version-model) (number? created) (map? user)]}
 
   (let [{:keys [originalFileId]} version-model
@@ -518,12 +518,13 @@
      (when (not-empty group)
        {$set {:attachments.$.op (not-empty (:operations group))
               :attachments.$.groupType (:groupType group)}})
-     (when-let [approval (cond
-                           state                                           (->approval state user created )
-                           (not (att-util/attachment-version-state attachment
-                                                          originalFileId)) {:state :requires_authority_action})]
-       {$set {(version-approval-path originalFileId) approval}})
-
+     (when-let [new-approval (cond
+                               approval                                approval
+                               state                                   (->approval state user created)
+                               (not (att-util/attachment-version-state
+                                      attachment
+                                      originalFileId))                 {:state :requires_authority_action})]
+       {$set {(version-approval-path originalFileId) new-approval}})
      (merge
        {$set      (merge
                     {:modified                            created
