@@ -203,6 +203,37 @@
         (:version (get (:signatures stamped-attachment) 2)) => {:major 1 :minor 1}
         (:version (get (:signatures stamped-attachment) 3)) => {:major 1 :minor 1}))))
 
+(facts "Stamping does not change approval"
+  (let [application    (create-and-submit-application pena :propertyId sipoo-property-id)
+        application-id (:id application)
+        att-template   (first (:attachments application))
+        attachment-id  (upload-attachment pena application-id att-template true :filename "dev-resources/test-pdf.pdf")
+        attachment     (-> (query-application sonja application-id) :attachments (first))
+        stamp {:id         "123456789012345678901234"
+               :name       "Oletusleima"
+               :position   {:x 10 :y 200}
+               :background 0
+               :page       :first
+               :qrCode     true
+               :rows       [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
+                            [{:type :backend-id :value "17-0753-R"}]
+                            [{:type :organization :value "Sipoon rakennusvalvonta"}]]}]
+
+    (fact "Sonja approves attachment"
+      (command sonja :approve-attachment :id application-id :attachmentId attachment-id :fileId (-> attachment :latestVersion :fileId)) => ok?
+      (attachment-state (get-attachment-info (query-application sonja application-id) (:id attachment))) => :ok)
+
+    (fact "Ronja stamps attachment"
+      (let [{job :job} (command ronja :stamp-attachments :id application-id :timestamp (sade.core/now) :files [attachment-id] :lang :fi :stamp stamp) => ok?]
+        ; Wait that stamping job is done
+        (when-not (= "done" (:status job)) (poll-job sonja :stamp-attachments-job (:id job) (:version job) 25))
+
+        (fact "attachment still has Sonja's approval"
+          (let [attachment (get-attachment-info (query-application sonja application-id) attachment-id)
+                fileId (-> attachment :latestVersion :originalFileId (keyword))
+                approval (-> attachment :approvals (get fileId))]
+            (-> approval :user :firstName) => "Sonja"))))))
+
 (facts stamp-templates
   (let [result (query sipoo :stamp-templates)
         stamps (:stamps result)]
@@ -280,4 +311,3 @@
       (let [updated-stamps (:stamps (query sipoo :stamp-templates))]
         (count updated-stamps) => (dec (count stamps))
         (util/find-by-id stamp-id updated-stamps) => nil))))
-

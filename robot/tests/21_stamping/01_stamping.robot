@@ -60,6 +60,15 @@ Mikko adds new version
 Version number is 2.0
   Wait until  Element text should be  test-attachment-version  2.0
 
+Ronja approves attachment in first application
+  [Tags]  attachments
+  Logout
+  Ronja logs in
+  Open application  ${appname1}  753-416-25-30
+  Open tab  attachments
+  Wait until  Element should be visible  jquery=button[@class=btn-icon-only-approve]
+  Click element  jquery=button[@class=btn-icon-only-approve]
+
 Sonja logs in
   Logout
   Sonja logs in
