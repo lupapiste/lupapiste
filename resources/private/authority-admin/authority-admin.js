@@ -693,14 +693,14 @@
     docterminalModel.load();
   });
 
-  self.authorityIdObservable = ko.observable("");
+  var authorityIdObservable = ko.observable("");
 
   hub.onPageLoad("edit-authority", function () {
-      self.authorityIdObservable(_.head(pageutil.getPagePath()));
+      authorityIdObservable(_.head(pageutil.getPagePath()));
   });
 
   hub.onPageUnload("edit-authority", function () {
-      self.authorityIdObservable("");
+      authorityIdObservable("");
   });
 
   hub.onPageLoad("organization-store-settings", function() {
@@ -781,7 +781,7 @@
       attachmentTypes:     docterminalModel
     });
     $("#edit-authority").applyBindings({
-        authorityIdObservable: self.authorityIdObservable,
+        authorityIdObservable: authorityIdObservable,
         backToUsers: function () {
           pageutil.openPage("users");
           usersList.redraw();
