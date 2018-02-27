@@ -33,7 +33,7 @@
   (rum/mount (edit-authority-view (:authority-id @args))
              (.getElementById js/document (:dom-id @args))))
 
-(defn ^export start [domId componentParams]
+(defn ^:export start [domId componentParams]
   (swap! args assoc :authority-id (aget componentParams "authorityId")
                     :dom-id (name domId))
   (mount-component))
