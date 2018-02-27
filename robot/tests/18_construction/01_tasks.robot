@@ -175,7 +175,7 @@ Delete loppukatselmus
   Wait until  Element should be visible  xpath=//div[@id="application-tasks-tab"]//table[contains(@class, 'tasks')]//tbody/tr
   Open task  loppukatselmus
   Review checkboxes enabled
-  Click enabled by test id  delete-task
+  Scroll and click test id  delete-task
   Confirm  dynamic-yes-no-confirm-dialog
 
 The attachment is gone too
