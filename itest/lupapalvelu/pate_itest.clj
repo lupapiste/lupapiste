@@ -1205,9 +1205,7 @@
                                                              :basic-auth ["sipoo-r-backend" "sipoo"]}) => http200?
                       (->> (query-application sonja app-id) :documents
                            (util/find-by-id doc-id)
-                           :data :valtakunnallinenNumero :value) => "1234567881"
-                      ; TODO after LPK-3598, add test case here that data is saved to buildings-array also before publish-pate-verdict
-                      )
+                           :data :valtakunnallinenNumero :value) => "1234567881")
                     (fact "Set kiinteiston-autopaikat for pientalo"
                       (check-error (edit-verdict [:buildings op-id-pientalo :kiinteiston-autopaikat]
                                                  "8")))

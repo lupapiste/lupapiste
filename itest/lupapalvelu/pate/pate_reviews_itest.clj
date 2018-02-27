@@ -79,8 +79,8 @@
           (->> (:documents app)
                (shared-util/find-first #(= (:id primaryOperation) (get-in % [:schema-info :op :id])))
                :data :valtakunnallinenNumero :value) => "1234567881")
-        (fact "Buildings still empty"                       ; TODO after LPK-3598, add test case here that data is saved to buildings-array
-          (:buildings app) => empty?)))
+        (fact "Buildings still empty"
+              (:buildings app) => empty?)))
 
     (facts "fill required data"
       (fact "Set automatic calucation and verdict-date"
