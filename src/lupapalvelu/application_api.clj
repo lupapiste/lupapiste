@@ -540,20 +540,21 @@
                                          :secondaryOperations new-secondary-ops}}))
     (ok)))
 
-(defcommand replace-primary-operation
-  {:parameters       [id op-id newOperation]
-   :input-validators [(partial action/non-blank-parameters [:id :op-id :newOperation])]
+(defcommand replace-operation
+  {:parameters       [id opId operation]
    :states           states/pre-sent-application-states
    :permissions      [{:context  {:application {:state #{:draft}}}
                        :required [:application/edit-draft :application/edit-operation]}
-                      {:required [:application/edit-operation]}]}
+
+                      {:required [:application/edit-operation]}]
+   :input-validators [operation-validator]}
   [{{app-state :state tos-function :tosFunction :as application} :application
    organization :organization
    created :created :as command}]
-  (let [primary-op?           (= op-id (-> application :primaryOperation :id))
-        old-op                (app/get-operation application primary-op? op-id)
-        new-op                (assoc old-op :name newOperation)
-        new-operations        (->> application (app/get-operations) (remove #(= op-id (:id %))) (cons new-op))
+  (let [primary-op?           (= opId (-> application :primaryOperation :id))
+        old-op                (app/get-operation application primary-op? opId)
+        new-op                (assoc old-op :name operation)
+        new-operations        (->> application (app/get-operations) (remove #(= opId (:id %))) (cons new-op))
         new-op-docs           (app/make-documents nil created @organization new-op application)
         new-docs              (app/copy-docs-from-old-op-to-new application new-operations new-op-docs)
         new-attachments-blank (app/make-attachments created new-op @organization app-state tos-function)

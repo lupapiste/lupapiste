@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <body>
-<section class="page container" id="replace-primary-operation">
+<section class="page container" id="replace-operation">
 
-    <h1 data-bind="ltext: 'replacePrimaryOperation'"></h1>
+    <h1 data-bind="ltext: 'replaceOperation'"></h1>
 
     <div data-bind="visible: operations">
         <div class="operation-tree tree-control"></div>
@@ -19,7 +19,7 @@
 
 </section>
 
-<section class="page" id="replace-primary-operation-templates">
+<section class="page" id="replace-operation-templates">
 
     <div class="tree-last">
 
@@ -29,10 +29,10 @@
             <span data-bind="ltext: 'operations.replaceOperationWarningText'"></span>
         </div>
 
-        <button data-bind="click: replacePrimaryOperation,
+        <button data-bind="click: replaceOperation,
                            disable: processing,
                            css: {waiting: pending}" class="positive"
-                data-test-id="change-application-primary-operation">
+                data-test-id="replace-operation">
             <i class="lupicon-circle-pen"></i>
             <i class="wait spin lupicon-refresh"></i>
             <span data-bind="ltext: 'operations.replace'"></span>

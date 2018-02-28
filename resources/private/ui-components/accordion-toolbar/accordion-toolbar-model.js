@@ -54,14 +54,13 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
                                                "id"] );
   });
 
-  self.showReplaceOperation = self.disposedComputed( function () {
-      return op && self.auth.ok("replace-primary-operation");
+  self.showReplaceOperation = ko.pureComputed( function() {
+    return _.get(self.info, ["op", "id"]) //&& self.auth.ok("replace-operation")
   });
-  console.log(self.showReplaceOperation());
 
-  self.replacePrimaryOperation = function() {
-      pageutil.openPage("replace-primary-operation", self.id());
-      hub.send("track-click", {category:"Application", label:"", event:"replacePrimaryOperation"});
+  self.replaceOperation = function() {
+      pageutil.openPage("replace-operation", [self.docModel.appId, _.get(self.info, ["op", "id"])].join("/"));
+      hub.send("track-click", {category:"Application", label:"", event:"replaceOperation"});
       return false;
   };
 

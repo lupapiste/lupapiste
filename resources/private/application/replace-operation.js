@@ -12,6 +12,7 @@
         self.url = ko.observable();
         self.operations = ko.observable();
         self.operation = ko.observable();
+        self.oldOperation = ko.observable();
         self.processing = ko.observable();
         self.pending = ko.observable();
         self.waitingOperations = ko.observable();
@@ -24,6 +25,7 @@
             self
                 .operations(null)
                 .operation(null)
+                .oldOperation(pageutil.getPagePath()[1])
                 .processing(false)
                 .pending(false)
                 .waitingOperations(false)
@@ -31,6 +33,8 @@
                 .url("#!/application/" + lupapisteApp.models.application.id());
 
             lupapisteApp.setTitle(lupapisteApp.models.application.title());
+
+            console.log(self.oldOperation());
 
             if (lupapisteApp.models.applicationAuthModel.ok("addable-operations")) {
                 ajax
@@ -46,22 +50,24 @@
             return self;
         };
 
-        self.replacePrimaryOperation = function(op) {
+        self.replaceOperation = function() {
             ajax
-                .command("replace-primary-operation", {id: lupapisteApp.models.application.id(), newOperation: op.op})
+                .command("replace-operation", {id: lupapisteApp.models.application.id(),
+                                                       opId: self.oldOperation(),
+                                                       operation: self.operation()})
                 .processing(self.processing)
                 .pending(self.pending)
                 .success(function() {
                     window.location.hash = self.url();
                 })
                 .call();
-            hub.send("track-click", {category:"Application", label:"", event:"replacePrimaryOperation"});
+            hub.send("track-click", {category:"Application", label:"", event:"replaceOperation"});
         };
 
     }
     model = new Model();
 
-    hub.onPageLoad("replace-primary-operation", function(e) {
+    hub.onPageLoad("replace-operation", function(e) {
         var newId = e.pagePath[0];
         if (newId !== lupapisteApp.models.application.id()) {
             model.clear();
@@ -76,18 +82,18 @@
     });
 
     hub.subscribe("application-model-updated", function() {
-        if (getVisibleApplicationId() === lupapisteApp.models.application.id() && pageutil.getPage() === "replace-primary-operation") {
+        if (getVisibleApplicationId() === lupapisteApp.models.application.id() && pageutil.getPage() === "replace-operation") {
             model.init();
         }
     });
 
     $(function() {
 
-        $("#replace-primary-operation").applyBindings(model);
+        $("#replace-operation").applyBindings(model);
 
-        tree = $("#replace-primary-operation .operation-tree").selectTree({
+        tree = $("#replace-operation .operation-tree").selectTree({
             template: $("#create-templates"),
-            last: $("#replace-primary-operation-templates .tree-last"),
+            last: $("#replace-operation-templates .tree-last"),
             onSelect: function(v) { model.operation(v ? v.op : null); },
             baseModel: model
         });

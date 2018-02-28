@@ -1000,7 +1000,7 @@
                                                     :type-id type-id}} true) => truthy)
 
     (fact "Pena replaces primary operation"
-      (command pena :replace-primary-operation :id app-id :op-id  :newOperation "masto-tms") => ok?)
+      (command pena :replace-operation :id app-id :op-id  :newOperation "masto-tms") => ok?)
 
     (let
       [updated-app (query-application pena app-id)]

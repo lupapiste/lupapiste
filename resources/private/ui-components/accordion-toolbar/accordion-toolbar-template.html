@@ -85,12 +85,12 @@
         <i class="lupicon-check"></i>
         <span data-bind="ltext: 'document.approve'"></span>
       </button>
-      <!-- ko if: showReplaceOperation() -->
+      <!-- ko if: showReplaceOperation -->
       <button class="secondary is-right"
-              data-bind="click: replacePrimaryOperation"
-              data-test-id="replace-primary-operation">
+              data-bind="click: replaceOperation"
+              data-test-id="replace-operation">
         <i class="lupicon-pen"></i>
-        <span data-bind="ltext: 'application.replacePrimaryOperation'"></span>
+        <span data-bind="ltext: 'application.replaceOperation'"></span>
       </button>
       <!-- /ko -->
       <!-- ko if: showIdentifierEditors -->
