@@ -19,7 +19,9 @@
         (query sipoo :permanent-archive-enabled) => unauthorized?))
     (facts "applicant"
       (fact "disabled"
-        (query pena :permanent-archive-enabled) => unauthorized?)))
+        (query pena :permanent-archive-enabled) => unauthorized?))
+    (fact "tos-editor and tos-publisher, but not authority in organization"
+      (query torsti :permanent-archive-enabled) => ok?))
   (facts "with application - archive enabled in municipality"
     (let [app-id (create-app-id pena :propertyId jarvenpaa-property-id :address "Arkistotie 13")]
       (facts "normal authority"
