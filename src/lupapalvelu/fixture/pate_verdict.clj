@@ -102,7 +102,8 @@
 (defn update-sipoo [org]
   (if-not (= "753-R" (:id org))
     org
-    (assoc org :verdict-templates verdic-templates-setting)))
+    (assoc org :verdict-templates verdic-templates-setting
+               :pate-enabled true)))
 
 (def organizations (->> minimal/organizations
                         (filter (comp (set (mapcat (comp keys :orgAuthz) users)) keyword :id))
