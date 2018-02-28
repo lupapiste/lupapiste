@@ -102,20 +102,21 @@ Foreman logs in and checks related projects on the second foreman application
   Scroll and click test id  fill-info-button
   Wait for jQuery
   Check related project  0
-
-Can not link base app to foreman application
-  Open project application
-  Open linking dialog
-
-  ${app} =   Get From List  ${applications}  1
-  ${linkPermitAppId} =   Get From List  ${foremanApps}  1
-
-  Select from autocomplete by test id  link-permit-select  ${app}, ${linkPermitAppId}
-  Autocomplete selection by test id is  link-permit-select  ${app}, ${linkPermitAppId}
-  Click enabled by test id  button-link-permit-dialog-add
-  Wait Until  Element should be visible  xpath=//div[@data-test-id="add-link-permit-card"]//div[@data-bind="ltext: errorMessage"]
-  Element Text Should Be  xpath=//div[@data-test-id="add-link-permit-card"]//div[@data-bind="ltext: errorMessage"]  Kohdehakemukseen ei voi lisätä enempää viitteitä
   Logout
+
+#Can not link base app to foreman application
+#  Open project application
+#  Open linking dialog
+#
+#  ${app} =   Get From List  ${applications}  1
+#  ${linkPermitAppId} =   Get From List  ${foremanApps}  1
+#
+#  Select from autocomplete by test id  link-permit-select  ${app}, ${linkPermitAppId}
+#  Autocomplete selection by test id is  link-permit-select  ${app}, ${linkPermitAppId}
+#  Click enabled by test id  button-link-permit-dialog-add
+#  Wait Until  Element should be visible  xpath=//div[@data-test-id="add-link-permit-card"]//div[@data-bind="ltext: errorMessage"]
+#  Element Text Should Be  xpath=//div[@data-test-id="add-link-permit-card"]//div[@data-bind="ltext: errorMessage"]  Kohdehakemukseen ei voi lisätä enempää viitteitä
+#  Logout
 
 Authority opens the submitted foreman application
   Sonja logs in
