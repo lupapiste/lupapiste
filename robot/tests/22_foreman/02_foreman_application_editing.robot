@@ -196,8 +196,8 @@ Foreman state has changed on base app
 Deleting the verdict sets application back to previous state
   Open foreman application  1
   Open tab  verdict
-
   Wait Until  Element should be visible  //div[@id="application-verdict-tab"]//*[@data-test-id="delete-verdict-from-listing"]
+  # The click below fails if the window has a certain width and the conversion button obscures the delete icon
   Click element  xpath=//div[@id="application-verdict-tab"]//*[@data-test-id="delete-verdict-from-listing"]
   Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element should not be visible  //div[@id="application-verdict-tab"]//*[@data-test-id="delete-verdict-from-listing"]

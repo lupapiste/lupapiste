@@ -99,7 +99,7 @@ Sonja invites foreman Teppo to application
 
 Applicant sees sent invitation on the original application
   Pena logs in
-  Open project application
+  Open project app from list
   Open tab  parties
   Open foreman accordions
   Wait until  Element text should be  xpath=//ul[@data-test-id='invited-foremans']//span[@data-test-id='foreman-email']  (teppo@example.com)
@@ -149,7 +149,7 @@ Solita accepts invitation via sidebar button
   Sleep  0.5s
 
 Solita returns to applications and the invitation is gone
-  Click link  jquery=div.nav-top div.header-box a[title=Hankkeet]
+  Click element  //div[contains(@class,"nav-top")]//div[contains(@class,"header-box")]//a[@title="Hankkeet"]
   Applications page should be open
   No such test id  accept-invite-button
   [Teardown]  Logout
@@ -161,7 +161,7 @@ Sven can now open the foreman application
 
 Applicant returns to project application
   Pena logs in
-  Open project application
+  Open project app from list
 
 Applicant upgrades foremans authorization to full write access
   Open tab  parties
@@ -193,7 +193,7 @@ Add phone number
   Input text with jQuery  input[data-docgen-path="yhteystiedot.puhelin"]  12345678
 
 Application is submitted
-  Open project application
+  Open project app from list
   Wait Until  Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
   Submit application
   Logout
@@ -217,7 +217,7 @@ All foremen table is shown on the Construction tab
 Applicant can create foreman applications after verdict is given for the original application
   Sleep  2s
   Pena logs in
-  Open project application
+  Open project app from list
   Open tab  parties
   Open foreman accordions
   Element should not be visible  xpath=//div[@data-test-id="invite-foreman-authority-info"]
@@ -227,7 +227,7 @@ Applicant can create foreman applications after verdict is given for the origina
 
 Authority adds työnjohtaja task to original application
   Sonja logs in
-  Open project application
+  Open project app from list
   Add työnjohtaja task to current application  Ylitarkastaja
   Add työnjohtaja task to current application  Alitarkastaja
   Wait until  Xpath Should Match X Times  //div[@data-test-id="tasks-foreman"]//tbody/tr  2
@@ -235,7 +235,7 @@ Authority adds työnjohtaja task to original application
 
 Applicant can link existing foreman application to foreman task
   Pena logs in
-  Open project application
+  Open project app from list
   Open tab  tasks
   Wait until  Element should be visible  xpath=//select[@data-test-id="foreman-selection-1"]
   Select From List By Value  xpath=//select[@data-test-id="foreman-selection-1"]  ${foremanAppId}
@@ -275,7 +275,7 @@ Applicant can invite additional foremen to application with verdict
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
 
 Applicant invites foreman Mikko to application
-  Open project application
+  Open project app from list
   Open tab  parties
   Open foreman accordions
   Scroll and click test id  invite-foreman-button
