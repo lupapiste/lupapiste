@@ -472,6 +472,18 @@
     :username "digitoija@jarvenpaa.fi"
     :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
               :apikey "a0ac77ecd2e6c2ea6e73f853"}}
+   ;; Torsti Tossavainen - Jarvenpaan TOS-vastaava: torsti / torsti
+   {:id "777777777777777777000027"
+    :username "torsti"
+    :role "authority"
+    :enabled true
+    :language "fi"
+    :email "torsti.tossavainen@jarvenpaa.fi"
+    :orgAuthz {:186-R #{:tos-editor :tos-publisher}} ; Note that :authority is not present
+    :firstName "Torsti"
+    :lastName "Tossavainen"
+    :private {:password "$2a$10$eo2H257MMoJHMUCxAmEXVeRTDjaEL9qPpbQQiC/kdI38lPwXutklS"
+              :apikey "a0ac77ecd2e6c2ea6e73f854"}}
 
    {:id "jarvenpaa-backend"
     :username "jarvenpaa-backend"
