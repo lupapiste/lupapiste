@@ -131,7 +131,7 @@
     (-> (ssg/generate Statement)
         (assoc :modify-id id-a)
         (dissoc :modified)
-        (update-draft "some text" "puollettu" id-a id-1))
+        (update-draft "some text" "puollettu" id-a id-1 false))
     => (contains #{[:text "some text"]
                    [:status "puollettu"]
                    [:modify-id anything]
@@ -139,29 +139,54 @@
                    [:state :draft]
                    [:modified anything]}))
 
+  (fact "update-draft - statement in attachment"
+    (-> (ssg/generate Statement)
+        (assoc :modify-id id-a)
+        (dissoc :modified)
+        (update-draft nil "puollettu" id-a id-1 true))
+    => (contains #{[:status "puollettu"]
+                   [:modify-id anything]
+                   [:editor-id id-1]
+                   [:state :draft]
+                   [:modified anything]
+                   [:in-attachment true]}))
+
   (fact "update-draft - wrong modify-id"
     (-> (ssg/generate Statement)
         (assoc :modify-id id-a)
-        (update-draft "some text" "puollettu" id-b id-1))
+        (update-draft "some text" "puollettu" id-b id-1 false))
     => (throws Exception))
 
   (fact "update-draft - updated statement is missing person should produce validation error"
     (-> (ssg/generate Statement)
         (dissoc :person)
-        (update-draft "some text" "puollettu" id-b id-1))
+        (update-draft "some text" "puollettu" id-b id-1 false))
     => (throws Exception))
 
   (fact "give-statement"
     (-> (ssg/generate Statement)
         (assoc :modify-id id-a)
         (dissoc :given)
-        (give-statement "some text" "puollettu" id-a id-1))
+        (give-statement "some text" "puollettu" id-a id-1 false))
     => (contains #{[:text "some text"]
                    [:status "puollettu"]
                    [:modify-id anything]
                    [:editor-id id-1]
                    [:state :given]
                    [:given anything]}))
+
+  (fact "give-statement - statement in attachment"
+    (-> (ssg/generate Statement)
+        (assoc :modify-id id-a)
+        (dissoc :given)
+        (give-statement "some text" "puollettu" id-a id-1 true))
+    => (contains #{[:text "some text"]
+                   [:status "puollettu"]
+                   [:modify-id anything]
+                   [:editor-id id-1]
+                   [:state :given]
+                   [:given anything]
+                   [:in-attachment true]}))
 
   (fact "update-reply-draft"
     (-> (ssg/generate Statement)

@@ -22,6 +22,7 @@ Start registration
   Click by test id  logged-user-register-company-start
   Test id disabled  register-company-continue
   Click by test id  account-type-account5
+  Company yearly billing is selected
   Click enabled by test id  register-company-continue
 
 Userinfo is filled
@@ -34,6 +35,11 @@ Fill in info
   Input text by test id  register-company-zip         00002
   Input text by test id  register-company-po          Kunta
   Select From Test id  register-company-pop  Basware Oyj (BAWCFI22)
+  Click enabled by test id  register-company-continue
+
+Summary page is opened
+  Wait until  Element should be visible  xpath=//div[contains(@class, 'register-company-summary')]
+  Element should contain  xpath=//strong[@data-test-id='summary-account-text']  Yritystili 5
   Click enabled by test id  register-company-continue
 
 Accept terms
@@ -127,9 +133,10 @@ Kaino is ultimately redirected to the Applications page
 *** Keywords ***
 
 Start registering
-  [Arguments]  ${account-type}
+  [Arguments]  ${account-type}  ${billing-type}=yearly
   Wait and click  register-button
   Wait and click  xpath=//*[@data-test-id='register-company-start']
+  Click by test id  ${billing-type}-billing
   Click by test id  account-type-${account-type}
   Click by test id  register-company-continue
 

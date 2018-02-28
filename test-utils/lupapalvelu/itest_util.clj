@@ -406,7 +406,6 @@
   ([f apikey id]
     {:pre  [apikey id]
      :post [(:id %)
-            (not (s/blank? (:applicant %)))
             (:created %) (pos? (:created %))
             (:modified %) (pos? (:modified %))
             (contains? % :opened)
@@ -441,7 +440,6 @@
   ([f apikey id]
     {:pre  [id]
      :post [(:id %)
-            (not (s/blank? (:applicant %)))
             (:modified %) (pos? (:modified %))
             (:primaryOperation %)
             (:state %)

@@ -118,7 +118,7 @@
        (let [app {:organization "753-R"
                   :id           "ABC123"
                   :state        "sent"
-                  :auth [{:role "owner"
+                  :auth [{:role "writer"
                           :id "foo"}]}
              fail {:ok false :text "error.unauthorized"}]
          (fact "Applicant"

@@ -605,6 +605,17 @@ LUPAPISTE.AttachmentsService = function() {
     return fileId && util.getIn( attachment, ["approvals", fileId]);
   };
 
+  self.stampingData = function ( attachment ) {
+    return {
+        isStamped: util.getIn(attachment,["latestVersion", "stamped"]),
+        user: {
+            firstName: util.getIn(attachment, ["latestVersion", "user", "firstName"]),
+            lastName: util.getIn(attachment, ["latestVersion", "user", "lastName"])
+        },
+        timestamp: util.getIn(attachment, ["latestVersion", "created"])
+    };
+  };
+
   function attachmentState( attachment ) {
     return _.get( self.attachmentApproval( attachment), "state");
   }
@@ -618,11 +629,16 @@ LUPAPISTE.AttachmentsService = function() {
     return attachmentState(attachment) === self.REJECTED
       && !self.isNotNeeded( attachment );
   };
+
   self.isNotNeeded = function(attachment) {
     return util.getIn(attachment, ["notNeeded"]) === true;
   };
   self.requiresAuthorityAction = function(attachment) {
     return attachmentState(attachment) === self.REQUIRES_AUTHORITY_ACTION;
+  };
+
+  self.isStamped = function(attachment) {
+    return util.getIn(attachment, ["latestVersion", "stamped"]) === true;
   };
 
   self.isResellable = function(attachment) {

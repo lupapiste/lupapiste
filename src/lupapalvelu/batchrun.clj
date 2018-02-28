@@ -47,10 +47,6 @@
 
 (defn- newer-than [timestamp] {$gt timestamp})
 
-(defn- get-app-owner [application]
-  (let [owner (auth/get-auths-by-role application :owner)]
-    (user/get-user-by-id (-> owner first :id))))
-
 (defn system-not-in-lockdown? []
   (-> (http/get "http://127.0.0.1:8000/system/status")
       http/decode-response
@@ -100,7 +96,7 @@
 
 (notifications/defemail :reminder-application-state
   {:subject-key    "active-application-reminder"
-   :recipients-fn  notifications/from-user})
+   :recipients-fn  notifications/application-state-reminder-recipients-fn})
 
 ;; Email definition for the "YA work time is expiring"
 
@@ -261,7 +257,7 @@
                     (< work-time-expires-timestamp timestamp-1-week-in-future))]
       (logging/with-logging-context {:applicationId (:id app)}
         (notifications/notify! :reminder-ya-work-time-is-expiring {:application app
-                                                                   :user (get-app-owner app)
+                                                                   :user (user/batchrun-user [])
                                                                    :data {:work-time-expires-date (util/to-local-date work-time-expires-timestamp)}})
         (update-application (application->command app)
           {$set {:work-time-expiring-reminder-sent (now)}})))))
@@ -284,7 +280,7 @@
     (doseq [app apps]
       (logging/with-logging-context {:applicationId (:id app)}
         (notifications/notify! :reminder-application-state {:application app
-                                                            :user (get-app-owner app)})
+                                                            :user (user/batchrun-user [])})
         (update-application (application->command app)
           {$set {:reminder-sent (now)}})))))
 

@@ -194,6 +194,9 @@
         (fact "Statement cannot be given with invalid status"
           (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => (partial expected-failure? "error.unknown-statement-status"))
 
+        (fact "Statement cannot be given with insufficient data"
+          (command veikko :give-statement :id application-id :statementId (:id statement) :status "puollettu" :lang "fi") => (partial expected-failure? "error.statement-text-or-attachment-required"))
+
         (fact "Veikko can delete attachment"
               (let [attachment-id (upload-attachment-for-statement veikko application-id nil true (:id statement))]
                 (command veikko :delete-attachment :id application-id
@@ -305,6 +308,36 @@
                  :modify-id (:modify-id (designated-statement sonja ymp-id))
                  :text "I disagree strongly!"
                  :lang "fi") => ok?))))
+
+(facts "Statement may be given as an attachment"
+  (apply-remote-minimal)
+  (let [id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
+        statement-giver-veikko (create-statement-giver sipoo veikko-email)
+        _ (command sonja :request-for-statement :functionCode nil :id id :selectedPersons [statement-giver-veikko] :saateText "saate" :dueDate 1450994400000)
+        application (query-application sonja id)
+        statement (some #(when (= veikko-email (-> % :person :email)) %) (:statements application)) => truthy]
+
+    (upload-attachment-to-target veikko id nil true (:id statement) "statement" "ennakkoluvat_ja_lausunnot.lausunnon_liite")
+
+    (fact "Statement can't be given without proper attachment"
+      (command veikko :give-statement :id id :statementId (:id statement) :status "puollettu" :in-attachment true :lang "fi") => (partial expected-failure? "error.statement-attachment-missing"))
+
+    (upload-attachment-to-target veikko id nil true (:id statement) "statement" "ennakkoluvat_ja_lausunnot.lausunto")
+
+    (fact "Statement is given successfully"
+      (command veikko :give-statement :id id :statementId (:id statement) :status "puollettu" :in-attachment true :lang "fi") => ok?)
+
+    (fact "Only the uploaded attachments are present"
+      (let [attachments (->> (query-application sonja id)
+                             :attachments
+                             (filter (comp #{"ennakkoluvat_ja_lausunnot"} :type-group :type)))]
+        (count attachments) => 2))
+
+    (fact "Comment is added"
+      (->> (query-application sonja id)
+           :comments
+           (filter (comp #{"statement"} :type :target))
+           (count)) => 1)))
 
 
 (facts "Applicant type person can be requested for statement"

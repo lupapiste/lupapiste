@@ -586,7 +586,7 @@
         application {:id "LP-XXX-2017-00001"
                      :attachments [attachment]
                      :organization "186-R"
-                     :auth [{:role "owner"
+                     :auth [{:role "writer"
                              :id "foo"}]}]
     (against-background
       [(mongo/download file-id) => {:contents :from-mongo}

@@ -22,7 +22,7 @@
         auth-roles  (map (comp keyword :role) user-auths)]
     (->> (or (some (set other-roles) [:authority])
              (first party-roles)
-             (some (set auth-roles) [:foreman :owner :statementGiver])
+             (some (set auth-roles) [:foreman :statementGiver])
              (when (not-empty auth-roles) :other-auth)
              (when (usr/authority? user)  :authority)
              :other-auth)

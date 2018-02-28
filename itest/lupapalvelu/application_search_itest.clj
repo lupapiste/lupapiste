@@ -3,6 +3,7 @@
             [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.domain :as domain]
             [sade.property :as p]
             [sade.util :as util]
             [sade.strings :as ss]))
@@ -32,8 +33,11 @@
         id-matches? (fn [response]
                       (and
                         (one-result? response)
-                        (= (get-in response [:data :applications 0 :id]) application-id)))]
+                        (= (get-in response [:data :applications 0 :id]) application-id)))
 
+        hakija-doc (first (domain/get-documents-by-subtype (:documents application) "hakija"))]
+
+    (command mikko :set-current-user-to-document :id application-id :documentId (:id hakija-doc) :path "henkilo") => ok?
     (command mikko :add-operation :id application-id :operation "pientalo") => ok?
     (:secondaryOperations (query-application mikko application-id)) => seq
 

@@ -86,7 +86,9 @@
 (facts "Teppo cannot submit even his own applications"
        (let [application-id (create-app-id teppo :propertyId sipoo-property-id :address "Xi Dawang Lu 8")]
          (fact "Query says can't submit"
-               (query teppo :application-submittable :id application-id) => (partial expected-failure? :company.user.cannot.submit))
+           (query teppo :application-submittable :id application-id) => {:ok false
+                                                                         :text "error.cannot-submit-application"
+                                                                         :errors [{:ok false :text "company.user.cannot.submit"}]})
          (fact "Submit application fails"
                (command teppo :submit-application :id application-id) => fail?)))
 
@@ -143,7 +145,9 @@
 
     (facts "Teppo cannot submit application"
            (fact "Query says can't submit"
-                 (query teppo :application-submittable :id application-id) => unauthorized?)
+                 (query teppo :application-submittable :id application-id) => {:ok false
+                                                                               :text "error.cannot-submit-application"
+                                                                               :errors [{:ok false :text "company.user.cannot.submit"}]})
            (fact "Submit application fails"
                  (command teppo :submit-application :id application-id) => fail?))
     (fact "Teppo cannot edit his company user details"
@@ -207,6 +211,11 @@
       (fact "Solita admin can set account to be 'custom', customAccountLimit needs to be set"
         (command admin :company-update :company company-id :updates {:accountType "custom"}) => (partial expected-failure? "company.missing.custom-limit")
         (command admin :company-update :company company-id :updates {:accountType "custom" :customAccountLimit 3}) => ok?))
+    (facts "billingType"
+      (fact "Solita admin can change"
+        (command admin :company-update :company company-id :updates {:billingType "yearly"}) => ok?)
+      (fact "Kaino can't change"
+        (command kaino :company-update :company company-id :updates {:billingType "yearly"}) => unauthorized?))
 
     (fact "When company has max count of users, new member can't be invited"
       (command kaino :company-invite-user :email "pena@example.com" :admin false :submit true) => (partial expected-failure? "error.company-user-limit-exceeded"))))
@@ -217,8 +226,7 @@
   (fact "Before kickban, Teppo sees company application"
     (let [apps (-> (datatables teppo :applications-search :searchText "")
                    (get-in [:data :applications]))]
-      (count apps) => 2
-      (map :applicant apps) => (just "Nieminen Teppo" "Intonen Mikko")))
+      (count apps) => 2))
 
   (fact "Kaino deletes Teppo from company"
     (command kaino :company-user-delete :user-id teppo-id) => ok?
@@ -234,8 +242,7 @@
     (fact "Teppo can't no longer see company applications"
       (let [apps (-> (datatables teppo :applications-search :searchText "")
                      (get-in [:data :applications]))]
-        (count apps) => 1
-        (map :applicant apps) => (just "Nieminen Teppo")))))
+        (count apps) => 0))))
 
 (facts "Authed dummy into company"
   (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kustukatu 13")
@@ -306,7 +313,7 @@
                             (assoc :body (json/encode {:searchText ""})
                                    :as :json)))
              :body :data :applications
-             (map :applicant)) => (just ["Nieminen Teppo" "Intonen Mikko" "Bar Foo" "Intonen Mikko"] :in-any-order)))))
+             count) => 4))))
 
 (def locked-err {:ok false :text "error.company-locked"})
 
@@ -341,11 +348,11 @@
                     :zip "88888"
                     :po "Town"}]))
        (fact "Company is not authed to new applications"
-             (let [{auth :auth} (create-application kaino
-                                         :propertyId sipoo-property-id
-                                         :address "Sanyuanqiao") => ok?]
+         (let [{auth :auth} (create-application kaino
+                                                :propertyId sipoo-property-id
+                                                :address "Sanyuanqiao") => ok?]
                (count auth) => 1
-               auth => (just [(contains {:type "owner"})])))
+               (map :role auth) => ["writer"]))
        (fact "Company can be queried"
              (query kaino :company :company "solita" :users true) => ok?)
        (fact "Company cannot be updated"
@@ -390,8 +397,7 @@
              (let [{auth :auth} (create-application kaino
                                          :propertyId sipoo-property-id
                                          :address "Dongzhimen") => ok?]
-               (count auth) => 2
-               (map :type auth) => (just ["owner" "company"] :in-any-order)))
+               (map :type auth) => ["company"]))
        (fact "Company can now be updated"
              (command kaino :company-update :company "solita" :updates {:po "Beijing"}) => ok?)
        (fact "Nuking is not an option for unlocked company"
@@ -483,7 +489,7 @@
                           (assoc :body (json/encode {:searchText ""})
                                  :as :json)))
            :body :data :applications
-           (map :applicant)) => (just ["Intonen Mikko" "Bar Foo"] :in-any-order))))
+           count) => 1)))
 
 (apply-remote-minimal)
 

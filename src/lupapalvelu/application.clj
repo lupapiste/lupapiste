@@ -105,7 +105,7 @@
   [{user :user application :application}]
   (when (and (= :draft (keyword (:state application)))
              (usr/authority? user)
-             (not (domain/owner-or-write-access? application (:id user))))
+             (not (domain/write-access? application (:id user))))
     (fail :error.unauthorized :source ::validate-authority-in-drafts)))
 
 (defn validate-has-subtypes [{application :application}]
@@ -489,11 +489,11 @@
            {:permitSubtype (first (resolve-valid-subtypes classification))})))
 
 (defn application-auth [user operation-name]
-  (let [owner (merge (usr/user-in-role user :owner :type :owner)
-                     {:unsubscribed (contains? #{:aiemmalla-luvalla-hakeminen :archiving-project} (keyword operation-name))})]
-    (if-let [company (some-> user :company :id com/find-company-by-id com/company->auth)]
-      [owner company]
-      [owner])))
+  (let [user-auth    (usr/user-in-role user :writer)
+        company-auth (some-> user :company :id com/find-company-by-id com/company->auth)]
+    (-> (or company-auth user-auth)
+        (assoc :unsubscribed (boolean (get-in op/operations [(keyword operation-name) :unsubscribe-notifications])))
+        (vector))))
 
 (defn application-comments [user messages open-inforequest? created]
   (let [comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])]
@@ -541,6 +541,7 @@
                             :auth                (application-auth user operation-name)
                             :comments            (application-comments user messages open-inforequest? created)
                             :created             created
+                            :creator             (usr/summary user)
                             :id                  id
                             :infoRequest         info-request?
                             :municipality        municipality

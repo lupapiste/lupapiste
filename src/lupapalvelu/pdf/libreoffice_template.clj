@@ -129,9 +129,7 @@
   (domain/get-applicant-documents (:documents application)))
 
 (defn formatted-applicant-index [application formatter]
-  (let [applicants (doall (remove s/blank? (map formatter (domain/get-applicant-documents (:documents application)))))
-        applicant (:applicant application)]
-    [(if (seq applicants) applicants [applicant])]))
+  [(doall (remove s/blank? (map formatter (domain/get-applicant-documents (:documents application)))))])
 
 (defn applicant-index [application]
   (formatted-applicant-index application applicant-name-from-doc))

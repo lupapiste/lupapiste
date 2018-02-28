@@ -84,3 +84,9 @@
                :page       (apply sc/enum pages)
                :qrCode     sc/Bool
                :rows       [StampRow]})
+
+(sc/defschema JSONStampSchema
+  (assoc Stamp
+    :page (apply sc/enum (map name pages))
+    :rows [[{:type                    (apply sc/enum (map name all-field-types))
+             (sc/optional-key :value) (sc/maybe sc/Str)}]]))

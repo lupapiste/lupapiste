@@ -9,15 +9,17 @@ LUPAPISTE.ApprovalModel = function(params) {
 
 
   // Textual representation of the approval status.
-  // Tiedot OK (Sibbo Sonja 21.9.2015 10:55)
+  // Tiedot OK 21.9.2015 10:55: Sonja Sibbo
   self.approvalInfo = function(approvalData) {
     var approval = ko.unwrap(approvalData);
     var text = null;
     if(approval && approval.user && approval.timestamp) {
-      text = loc(["document", self.isApproved() ? APPROVED : REJECTED]);
-      text += " (" + approval.user.lastName + " "
-      + approval.user.firstName
-      + " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
+      text = sprintf("%s %s%s %s %s",
+                     loc(["document", self.isApproved() ? APPROVED : REJECTED]),
+                     moment(approval.timestamp).format("D.M.YYYY HH:mm"),
+                     ":",
+                     approval.user.firstName,
+                     approval.user.lastName);
     }
     return text;
   };
@@ -48,7 +50,7 @@ LUPAPISTE.ApprovalModel = function(params) {
 
 
     self.details = self.disposedComputed( function()  {
-      return self.approvalInfo( service.attachmentApproval( attachment)) ;
+      return self.approvalInfo( service.attachmentApproval( ko.unwrap(attachment))) ;
     } );
   }
 };

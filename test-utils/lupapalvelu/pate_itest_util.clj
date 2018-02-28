@@ -3,6 +3,16 @@
             [midje.sweet :refer :all]
             [sade.util :as util]))
 
+
+(defn no-errors?
+  "Checks PATE api response and ensures request didn't contain errors"
+  [{:keys [errors ok]}]
+  (and (nil? errors) (true? ok)))
+
+(defn invalid-value? [{:keys [errors]}]
+  (util/=as-kw (-> errors first last) :error.invalid-value))
+
+
 (defn init-verdict-template [as-user category]
   (let [{id :id :as template} (command as-user :new-verdict-template :category category)]
     template))

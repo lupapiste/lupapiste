@@ -9,7 +9,7 @@
 (def all-authenticated-user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin :financialAuthority})
 (def all-user-roles (conj all-authenticated-user-roles :anonymous :rest-api :docstore-api :trusted-etl :trusted-salesforce))
 
-(def default-authz-writer-roles #{:owner :writer})
+(def default-authz-writer-roles #{:writer})
 (def default-authz-reader-roles (conj default-authz-writer-roles :foreman :reader :guest :guestAuthority :financialAuthority))
 (def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
 (def all-authz-roles (union all-authz-writer-roles default-authz-reader-roles))

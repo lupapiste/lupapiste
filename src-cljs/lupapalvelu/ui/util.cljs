@@ -26,3 +26,7 @@
 
 (defn format-currency-value [n]
   (.format (goog.i18n.NumberFormat. (.-CURRENCY goog.i18n.NumberFormat.Format)) n))
+
+(defn get-user-field [fieldName]
+  (js/util.getIn js/lupapisteApp.models.currentUser #js [(name fieldName)]))
+ 

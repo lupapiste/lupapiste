@@ -124,7 +124,7 @@ Sonja assigns application to Ronja
 Sipoo admin logs in and removes Ronja
   Sipoo logs in
   Wait Until  Element should be visible  jquery=div.users-table tr[data-user-email='ronja.sibbo@sipoo.fi']
-  Click Element  jquery=tr[data-user-email='ronja.sibbo@sipoo.fi'] a[data-op=removeFromOrg]
+  Click Element  jquery=tr[data-user-email='ronja.sibbo@sipoo.fi'] button[data-op=removeFromOrg]
   Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element should not be visible  jquery=tr[data-user-email='ronja.sibbo@sipoo.fi']
   [Teardown]  Logout

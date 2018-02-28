@@ -16,6 +16,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.permissions :as permissions]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
@@ -102,9 +103,10 @@
                       action/email-validator
                       role-validator]
    :states     (states/all-application-states-but [:canceled])
-   :user-roles #{:applicant :authority}
-   :pre-checks  [application/validate-authority-in-drafts
-                 permit/is-not-archiving-project]
+   :permissions [{:context  {:application {:state #{:draft}}}
+                  :required [:application/edit-draft :application/invite]}
+                 {:required [:application/invite]}]
+   :pre-checks  [permit/is-not-archiving-project]
    :notified   true}
   [command]
   (send-invite! command))
@@ -143,15 +145,23 @@
     flatten
     (zipmap <> (repeat ""))))
 
-(defn do-remove-auth [{application :application :as command} username]
+(defn do-remove-auth [{{auth :auth :as application} :application :as command} username]
   (let [username (ss/canonize-email username)
-        user-pred #(when (and (= (:username %) username) (not= (:type %) "owner")) %)]
+        last-invite-permission? (->> (auth/get-auths-by-permissions application [:application/invite])
+                                     (every? (comp #{username} :username)))
+        inviter-roles (permissions/roles-in-scope-with-permissions :application [:application/invite])
+        user-pred (if last-invite-permission?
+                    (fn [auth-entry] (and (= username (:username auth-entry))
+                                          (not (contains? inviter-roles (keyword (:role auth-entry))))))
+                    (fn [auth-entry] (= username (:username auth-entry))))]
     (when (some user-pred (:auth application))
       (let [updated-app (update-in application [:auth] (fn [a] (remove user-pred a)))
             doc-updates (generate-remove-invalid-user-from-docs-updates updated-app)]
         (update-application command
           (merge
-            {$pull {:auth {$and [{:username username}, {:type {$ne :owner}}]}}}
+            {$pull {:auth (if last-invite-permission?
+                            {$and [{:username username}, {:type {$nin inviter-roles}}]}
+                            {:username username})}}
             (when (seq doc-updates) {$unset doc-updates})))))))
 
 (defcommand decline-invitation

@@ -141,6 +141,7 @@ Pena fills out the first extension
   Open application  ${ext1}  ${propertyid}
   Input text with jQuery  textarea[name=kuvaus]  Description
   Invite company to application  Solita Oy
+  Scroll and click input  section[data-doc-type=hakija-ya] input[value=yritys]
   Select from list by value  jquery=select[name=company-select]:first  solita
   Wait until  Value should be  jquery=input[data-docgen-path='yritys.yritysnimi']:first  Solita Oy
   Select from list by value  jquery=select[name=company-select]:last  solita

@@ -10,7 +10,7 @@
 (facts "Yritystilisopimus"
   (let [company {:name "Asiakas Oy", :y "123456-1", :address1 "Osoiterivi 1", :zip "99999", :po "Stockholm"}
         contact {:firstName "Etu", :lastName "Suku"}
-        account {:type "TEST", :price "BILLIONS!"}
+        account {:type "TEST", :price "BILLIONS!" :billingType "monthly"}
         pdf-stream (docx/yritystilisopimus company contact account 0)]
     (files/with-temp-file pdf-file
       (io/copy pdf-stream pdf-file)

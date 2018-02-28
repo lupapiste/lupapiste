@@ -153,7 +153,9 @@
                 <div class="info-line warning">
                     <div class="like-btn">
                         <i class="lupicon-circle-attention"></i>
-                        <span class="required-field-error-element-name" data-bind="ltext: element.locKey"></span>
+                        <span class="required-field-error-element-name"
+                              data-bind="ltext: element.locKey,
+                                         testId: 'missing-' + document.name + '-' + element.locKey"></span>
                     </div>
                     <a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>
                 </div>
@@ -173,7 +175,9 @@
               <div class="info-line">
                   <div class="like-btn">
                       <i class="lupicon-circle-attention"></i>
-                      <span class="required-field-error-element-name" data-bind="ltext: element.locKey"></span>
+                      <span class="required-field-error-element-name"
+                            data-bind="ltext: element.locKey,
+                                       testId: 'missing-' + document.name + '-' + element.locKey"></span>
                   </div>
                   <a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>
               </div>
@@ -193,11 +197,12 @@
                     <div class="like-btn">
                         <i class="lupicon-circle-attention"></i>
                         <span class="required-field-error-element-name"
-                              data-bind="attachmentType: $data">
+                              data-bind="attachmentType: $data,
+                                         testId: 'missing-' + util.getIn( $data.type, ['type-group']) + '-' + util.getIn( $data.type, ['type-id'])">
                         </span>
                     </div>
                     <a data-bind="ltext: 'view',
-                                  testId: 'missing-' + util.getIn( $data.type, ['type-group']) + '-' + util.getIn( $data.type, ['type-id']),
+                                  testId: 'missing-attachment-' + util.getIn( $data.type, ['type-group']) + '-' + util.getIn( $data.type, ['type-id']),
                                   attr: {href: lupapisteApp.services.ramService.attachmentUrl( $data.id)}"></a>
                 </div>
               <!-- /ko -->

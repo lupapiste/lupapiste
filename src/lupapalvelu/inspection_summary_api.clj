@@ -177,7 +177,7 @@
    :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])
                       (partial action/boolean-parameters [:status])]
-   :user-authz-roles #{:writer :owner :foreman}
+   :user-authz-roles #{:writer :foreman}
    :user-roles #{:applicant :authority}}
   [{application :application user :user}]
   (let [params (if status
@@ -195,7 +195,7 @@
    :parameters [:id summaryId targetId date]
    :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])]
-   :user-authz-roles #{:writer :owner :foreman}
+   :user-authz-roles #{:writer :foreman}
    :user-roles #{:applicant :authority}}
   [{application :application user :user}]
   (inspection-summary/edit-target application summaryId targetId {:set {:inspection-date date}})

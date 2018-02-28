@@ -16,7 +16,7 @@ Authority admin goes to admin page
 
 Statement giver can be deleted - no questions asked
   Statement giver count is  1
-  Wait and click  xpath=//a[@data-test-id='remove-statement-giver']
+  Wait and click  xpath=//button[@data-test-id='remove-statement-giver']
   Statement giver count is  0
 
 Authorities from own municipality can be added as statement giver
@@ -129,17 +129,16 @@ Sonja types in draft
   Wait Until  Text area should contain  statement-text  typed in statement text but not gonna submit the statement.
 
 Sonja adds attachment to statement draft
-  Wait test id visible  statement-attachments-no-attachments
-  Add attachment  statement  ${PDF_TESTFILE_PATH}  Important note
+  Upload attachment with default type  ${PDF_TESTFILE_PATH}
 
-Attachment comment appears
-  Wait Until  Element should contain  jquery=table[data-test-id=statement-attachments-table] span  Important note
+Attachment list appears
+  Wait Until  Element should contain  xpath=//table[@data-test-id="targetted-attachments-table"]//span  Erityislausunto, liite
 
 Sonja removes attachment from statement draft
-  Scroll to test id  add-statement-attachment
-  Click element  jquery=table[data-test-id=statement-attachments-table] i.lupicon-remove
+  Scroll to test id  targetted-attachments-table
+  Click element  jquery=table[data-test-id=targetted-attachments-table] i.lupicon-remove
   Confirm  dynamic-yes-no-confirm-dialog
-  Wait until  Element Should Not Be Visible  jquery=table[data-test-id=statement-attachments-table]
+  Wait until  Element Should Not Be Visible  //table[@data-test-id="targetted-attachments-table"]
   Return from statement
 
 Sonja can give statement to own request
@@ -217,13 +216,15 @@ Veikko cannot delete statement requests
   Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-1']
   Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-3']
 
-Veikko from Tampere can give statement (and attach something to it as well)
+Veikko from Tampere can give statement as attachment
   Open statement  veikko.viranomainen@tampere.fi
   Wait Until  element should be enabled  statement-text
-  Input text  statement-text  uittotunnelin vieressa on tilaa.
-  Add attachment  statement  ${TXT_TESTFILE_PATH}  ${EMPTY}  ${EMPTY}  ennakkoluvat_ja_lausunnot.lausunto
-  Wait test id visible  statement-attachments-table
+  Click label by test id  statement-provided-as-attachment-label
   Select From List By Value  statement-type-select  ehdollinen
+  Wait until  Element Should Be Disabled  statement-submit
+  Upload attachment with default type  ${TXT_TESTFILE_PATH}
+  Wait Until  Element should contain  xpath=//table[@data-test-id="targetted-attachments-table"]//span  Tampereen luvat
+  Element should contain  xpath=//table[@data-test-id="targetted-attachments-table"]//td  Lausunto
   Wait until  Element Should Be Enabled  statement-submit
   Scroll to  \#statement-submit
   Click Element  statement-submit

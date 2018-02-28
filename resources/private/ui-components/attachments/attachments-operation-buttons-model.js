@@ -15,6 +15,10 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function(params) {
   self.upload = params.upload;
   self.processing = appModel.processing;
 
+  self.batchEmpty = self.disposedComputed( _.partial( lupapisteApp.services
+                                                      .batchService.batchEmpty,
+                                                      null, self.upload));
+
   self.requireAttachmentsBubbleVisible = ko.observable(false);
 
   self.attachmentTemplatesAdd = function() {

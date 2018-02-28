@@ -132,6 +132,7 @@
                 :company {:name "Gongsi"
                           :y "0000000-0"
                           :accountType "account5"
+                          :billingType "monthly"
                           :address1 "Jianguomen"
                           :zip "12345"
                           :po "Tampere"

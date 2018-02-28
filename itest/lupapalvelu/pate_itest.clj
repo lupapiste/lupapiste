@@ -35,12 +35,6 @@
              :path "pate-enabled"
              :value flag) => ok?))
 
-(defn no-errors? [{:keys [errors ok]}]
-  (and (nil? errors) (true? ok)))
-
-(defn invalid-value? [{:keys [errors]}]
-  (util/=as-kw (-> errors first last) :error.invalid-value))
-
 (defn check-kuntagml [{:keys [organization permitType id]} verdict-date]
   (let [organization (organization-from-minimal-by-id organization)
         permit-type (keyword permitType)
@@ -1121,7 +1115,7 @@
                                          ["manuaalinen_rakennusnro" "789"]])
                       => ok?))
                   (fact "Add pientalo operation to the application"
-                    (command sonja :add-operation :id app-id
+                    (command pena :add-operation :id app-id
                              :operation "pientalo") => ok?)
                   (let [{:keys [documents
                                 secondaryOperations]} (query-application sonja app-id)
@@ -1156,11 +1150,11 @@
                                           :paloluokka             ""
                                           :order                  "1"}})
                     (fact "Add tag and description to pientalo"
-                      (command sonja :update-doc :id app-id
+                      (command pena :update-doc :id app-id
                                :doc doc-id
                                :collection "documents"
                                :updates [["tunnus" "Hao"]]) => ok?
-                      (command sonja :update-op-description :id app-id
+                      (command pena :update-op-description :id app-id
                                :op-id op-id-pientalo
                                :desc "Hen piaoliang!") => ok?)
                     (fact "national-id update pre-verdict"
@@ -1211,7 +1205,7 @@
                     (fact "Cannot publish in the complementNeeded state"
                       (command sonja :publish-pate-verdict :id app-id
                                :verdict-id verdict-id)
-                      => fail?)
+                      => (partial expected-failure? :error.command-illegal-state))
                     (fact "Preview fetch works, though"
                       (:headers (raw sonja :preview-pate-verdict :id app-id
                                      :verdict-id verdict-id))

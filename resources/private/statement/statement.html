@@ -30,7 +30,8 @@
                                                applicationId: $root.service.applicationId,
                                                data: $root.service.data,
                                                commands: $root.service.commands['statement'],
-                                               authModel: $root.authModel } },
+                                               authModel: $root.authModel,
+                                               target: $root.targeted.defaults.target} },
                         visible: $root.selectedTab() === 'statement'"></div>
         <div data-bind="component: { name: 'statement-reply-request',
                                      params: { applicationTitle: $root.service.applicationTitle,
@@ -45,13 +46,9 @@
                                                authModel: $root.authModel } },
                         visible: $root.selectedTab() === 'reply'"></div>
       </div>
-      <div id="statement-attachments-container">
-        <div data-bind="component: { name: 'statement-attachments',
-                                     params: { applicationId: $root.service.applicationId,
-                                               statementId: $root.service.statementId,
-                                               authModel: $root.authModel,
-                                               selectedTab: $root.selectedTab } }"></div>
-      </div>
+
+      <div data-bind="component: {name: 'targeted-attachments', params: $root.targeted}"></div>
+
       <div id="statement-control-button-container">
         <div data-bind="component: { name: 'statement-control-buttons',
                                      params: { applicationId: $root.service.applicationId,

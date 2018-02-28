@@ -32,11 +32,11 @@ Sonja enters the address for the copied application
 
 Sonja invites Pena to the copied application
   Xpath Should Match X Times  //section[@id='copy']//div[@id='copy-auths']//input  1
-  Element text should be  //section[@id='copy']//div[@id='copy-auths']//label  Mikko Intonen, Hakemuksen tekijä
+  Element text should be  //section[@id='copy']//div[@id='copy-auths']//label  Mikko Intonen, Hakija
   Click element  xpath=//section[@id='copy']//div[@id='copy-auths']//label
   Click by test id  copy-button-next
   Wait until  Xpath Should Match X Times  //section[@id='copy']//div[@id='copy-auths']/div  1
-  Element text should be  //section[@id='copy']//span[@data-test-id='selected-auth-text-0']  Mikko Intonen, Hakemuksen tekijä
+  Element text should be  //section[@id='copy']//span[@data-test-id='selected-auth-text-0']  Mikko Intonen, Hakija
 
 Sonja clicks the button confirming that she is ready to copy the application
   Click by test id  copy-button-next

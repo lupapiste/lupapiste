@@ -8742,6 +8742,10 @@ div.sticky {
   display: inline-block;
 }
 
+.form-approval-status.stamped {
+  display: inline-block;
+}
+
 .is-status > .like-btn, .is-status > a.link-btn, .is-status > a.link-btn-inverse, .is-status > a.link-btn-julkipano {
   min-height: 40px;
   max-height: 40px;
@@ -8767,6 +8771,10 @@ div.sticky {
 
 .is-status > .like-btn .approved, .is-status > a.link-btn .approved, .is-status > a.link-btn-inverse .approved, .is-status > a.link-btn-julkipano .approved {
   padding-right: 10px;
+}
+
+.is-status > .like-btn .lupicon-circle-stamp, .is-status > a.link-btn .lupicon-circle-stamp, .is-status > a.link-btn-inverse .lupicon-circle-stamp, .is-status > a.link-btn-julkipano .lupicon-circle-stamp {
+  color: #46b02d;
 }
 
 .reject-edits {
@@ -12042,16 +12050,6 @@ div.attachments-table-container table.attachments-table .amount-controls > [clas
   color: #f39129;
 }
 
-.attachment-state-icons {
-  white-space: nowrap;
-}
-
-.attachment-state-icons i {
-  margin-left: 1px;
-  margin-right: 1px;
-  cursor: default;
-}
-
 table.suti-admin-table {
   margin-top: 12px;
 }
@@ -12120,6 +12118,41 @@ div.suti-admin-container .serversettings--wide {
 }
 
 .view-with-download .bubble-hover:hover .bubble-hover-text {
+  visibility: visible;
+}
+
+.attachment-state-icons {
+  white-space: nowrap;
+}
+
+.attachment-state-icons i {
+  margin-left: 1px;
+  margin-right: 1px;
+  cursor: default;
+}
+
+.attachment-state-icons .bubble-hover {
+  position: relative;
+  cursor: default;
+}
+
+.attachment-state-icons .bubble-hover .bubble-hover-text {
+  visibility: hidden;
+  width: 250px;
+  background-color: white;
+  border: 2px solid #2ca92c;
+  color: #333333;
+  padding: 10px;
+  border-radius: 6px;
+  z-index: 1;
+  bottom: 100%;
+  left: 100%;
+  font-size: 15px;
+  position: absolute;
+  white-space: pre-line;
+}
+
+.attachment-state-icons .bubble-hover:hover .bubble-hover-text {
   visibility: visible;
 }
 
@@ -12478,6 +12511,22 @@ div.handler-roles-container div.handler-role-warning {
 table.company-report-table {
   width: 45%;
   margin-top: 10px;
+}
+
+td.users-table-actions {
+  white-space: nowrap;
+}
+
+td.users-table-actions i {
+  pointer-events: none;
+}
+
+td.users-table-actions span {
+  pointer-events: none;
+}
+
+td.users-table-actions button:first-child {
+  margin-right: 12px;
 }
 
 /*Tab styles*/
@@ -32716,6 +32765,47 @@ div.printing-order-footer div.pricelist-panel .arrow:after {
   margin-left: -16px;
 }
 
+.ribbon {
+  position: absolute;
+  z-index: 1;
+  overflow: hidden;
+  width: 50%;
+  padding-bottom: 50%;
+  text-align: right;
+}
+
+.ribbon.ribbon--right {
+  right: 0;
+  top: 0;
+}
+
+.ribbon.ribbon--right span {
+  right: -45%;
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+}
+
+.ribbon.ribbon--left {
+  left: 0;
+  top: 0;
+}
+
+.ribbon.ribbon--left span {
+  left: -45%;
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  -moz-transform: rotate(-45deg);
+}
+
+.ribbon span {
+  text-align: center;
+  width: 150%;
+  display: block;
+  position: absolute;
+  top: 22%;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {
@@ -34993,14 +35083,6 @@ td.comment-text {
   width: 99%;
 }
 
-#statement .statement-attachments {
-  margin-bottom: 24px;
-}
-
-#statement .statement-attachments .remove-col {
-  width: 60px;
-}
-
 #statement .statement-control-buttons {
   margin-bottom: 24px;
 }
@@ -35622,6 +35704,23 @@ table.default-digitalization-location {
   border: none;
 }
 
+.edit-authority-roles {
+  width: 60%;
+}
+
+.edit-authority-roles button {
+  margin-top: 12px;
+}
+
+.edit-authority-info label {
+  display: block;
+}
+
+.edit-authority-info p {
+  margin-left: 0px;
+  margin-top: 12px;
+}
+
 #neighbor-show .pending {
   width: 100%;
   height: 100px;
@@ -35799,6 +35898,7 @@ div.register-company-wizard div.account-type-boxes {
 }
 
 div.register-company-wizard div.account-type-boxes div.account-type-box {
+  position: relative;
   text-align: center;
   background-color: #f6f6f6;
   border: 4px solid white;
@@ -35835,7 +35935,7 @@ div.register-company-wizard div.account-type-boxes div.account-type-box > h3 {
 
 div.register-company-wizard div.account-type-boxes div.account-type-box > .account-type-price {
   margin-top: 0.5em;
-  margin-bottom: 1em;
+  margin-bottom: 0.5em;
   font-size: 4em;
   font-weight: bold;
   color: #f39129;
@@ -35844,6 +35944,17 @@ div.register-company-wizard div.account-type-boxes div.account-type-box > .accou
 
 div.register-company-wizard div.account-type-boxes div.account-type-box > .account-type-price.campaign {
   margin-bottom: 0;
+}
+
+div.register-company-wizard div.account-type-boxes div.account-type-box > .account-billing-type-description {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+div.register-company-wizard div.account-type-boxes div.account-type-box > .account-billing-type-description span {
+  font-weight: bold;
+  font-size: 24px;
+  color: #999999;
 }
 
 div.register-company-wizard div.account-type-boxes div.account-type-box > .account-type-description {
@@ -35873,6 +35984,63 @@ div.register-company-wizard div.account-type-boxes div.account-type-box > .overs
   margin-bottom: 1em;
 }
 
+div.register-company-wizard div.account-type-boxes div.account-type-box > .ribbon span {
+  color: white;
+  background-color: #f39129;
+  font-size: 19.2px;
+  line-height: 32px;
+  border-top: 1px solid #f39129;
+  border-bottom: 1px solid #f39129;
+}
+
+div.register-company-wizard .account-billing-type-select div.button-container button {
+  display: block;
+  margin: 12px auto;
+  padding: 24px;
+  background-color: #f6f6f6;
+  line-height: 0;
+  border: 4px solid transparent;
+}
+
+div.register-company-wizard .account-billing-type-select div.button-container button span {
+  display: block;
+  text-align: center;
+}
+
+div.register-company-wizard .account-billing-type-select div.button-container button.selected {
+  border: 4px solid #f39129;
+}
+
+div.register-company-wizard .account-billing-type-select div.button-container.yearly button {
+  margin-bottom: 0;
+}
+
+div.register-company-wizard .account-billing-type-select div.button-container.yearly button:not(.selected) {
+  border-top: 1px dashed black;
+  border-right: 1px dashed black;
+  border-left: 1px dashed black;
+  padding-top: 27px;
+  padding-bottom: 24px;
+  padding-left: 27px;
+  padding-right: 27px;
+}
+
+div.register-company-wizard .account-billing-type-select div.button-container div.discount {
+  display: block;
+  color: #2ca92c;
+  border-right: 1px dashed black;
+  border-bottom: 1px dashed black;
+  border-left: 1px dashed black;
+  padding: 18px;
+  line-height: 0;
+}
+
+div.register-company-wizard .account-billing-type-select div.button-container div.discount span {
+  font-size: 19.2px;
+  text-align: center;
+  display: block;
+}
+
 div.register-company-wizard register-company-buttons {
   display: block;
   text-align: center;
@@ -35890,7 +36058,7 @@ div.register-company-wizard register-company-buttons .register-company-buttons-g
 
 div.register-company-wizard div.form-grid {
   margin-top: 2em;
-  border: 1px solid #eeeeee;
+  border: 1px solid #dddddd;
 }
 
 div.register-company-wizard div.form-grid h3 {
@@ -35915,7 +36083,7 @@ div.register-company-wizard .existing-user-sign-in {
 
 div.register-company-wizard div.register-company-container {
   margin-top: 0;
-  border: 1px solid #eeeeee;
+  border: 1px solid #dddddd;
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 20px;
@@ -35949,6 +36117,46 @@ div.register-company-wizard div.register-company-container form icon-button {
 div.register-company-wizard div.register-company-container img.logo {
   width: 200px;
   height: auto;
+}
+
+div.register-company-wizard div.register-company-summary .tabby__row .tabby__cell:last-child {
+  text-align: right;
+}
+
+div.register-company-wizard div.register-company-summary .tabby__row:last-child .tabby__cell {
+  border-top: 2px dotted #dddddd;
+  padding-top: 12px;
+}
+
+div.register-company-wizard div.register-company-summary .tabby__row:nth-last-child(2) .tabby__cell {
+  padding-bottom: 20px;
+}
+
+div.register-company-wizard div.register-company-summary span.discount {
+  color: #2ca92c;
+}
+
+div.register-company-wizard div.register-company-confirmation {
+  display: block;
+  margin: 24px 0;
+  padding: 0;
+  border: 1px solid #f39129;
+}
+
+div.register-company-wizard div.register-company-confirmation i, div.register-company-wizard div.register-company-confirmation span {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+div.register-company-wizard div.register-company-confirmation i {
+  color: white;
+  background-color: #f39129;
+  margin-bottom: 0;
+  padding: 12px;
+}
+
+div.register-company-wizard div.register-company-confirmation span {
+  padding-left: 6px;
 }
 
 .login--error {

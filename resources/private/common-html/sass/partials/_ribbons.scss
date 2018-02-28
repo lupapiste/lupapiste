@@ -1,0 +1,36 @@
+
+.ribbon {
+  position: absolute;
+  z-index: 1;
+  overflow: hidden;
+  width: 50%;
+  padding-bottom: 50%;
+  text-align: right;
+  &.ribbon--right {
+    right: 0;
+    top: 0;
+    span {
+      right: -45%;
+      transform: rotate(45deg);
+      -webkit-transform: rotate(45deg);
+      -moz-transform: rotate(45deg);
+    }
+  }
+  &.ribbon--left {
+    left: 0;
+    top: 0;
+    span {
+      left: -45%;
+      transform: rotate(-45deg);
+      -webkit-transform: rotate(-45deg);
+      -moz-transform: rotate(-45deg);
+    }
+  }
+  span {
+    text-align: center;
+    width: 150%;
+    display: block;
+    position: absolute;
+    top: 22%;
+  }
+}

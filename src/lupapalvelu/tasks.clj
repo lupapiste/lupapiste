@@ -1,6 +1,5 @@
 (ns lupapalvelu.tasks
   (:require [clojure.set :refer [rename-keys]]
-            [clojure.string :as s]
             [lupapalvelu.action :as action :refer [application->command update-application]]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.attachment :as att]
@@ -8,13 +7,11 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [monger.operators :refer :all]
-            [sade.core :refer [def-]]
+            [sade.core :refer [def- fail]]
             [sade.strings :as ss]
             [sade.util :as util]
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]))
@@ -37,6 +34,11 @@
 
 (defn all-states-but [& states]
   (apply disj task-states states))
+
+(defn deny-removal-of-vaadittu-lupaehtona [{:keys [application] {task-id :taskId} :data}]
+  (when-let [task (util/find-by-id task-id (:tasks application))]
+    (when (true? (get-in task [:data :vaadittuLupaehtona :value]))
+      (fail :error.task-is-required))))
 
 (defn task-is-review? [task]
   (some->> (get-in task [:schema-info :name])
@@ -337,24 +339,24 @@
         (concat
           (map (partial katselmus->task meta source application) (:vaaditutKatselmukset lupamaaraykset))
           (map #(new-task "task-lupamaarays" (:sisalto %) {:maarays (:sisalto %)} meta source)
-            (filter #(-> % :sisalto s/blank? not) (:maaraykset lupamaaraykset)))
+            (filter #(-> % :sisalto ss/blank? not) (:maaraykset lupamaaraykset)))
           ; KRYSP yhteiset 2.1.5+
           (map #(new-task "task-lupamaarays" % {:vaaditutErityissuunnitelmat %} meta source)
-            (filter #(-> %  s/blank? not) (:vaaditutErityissuunnitelmat lupamaaraykset)))
+            (filter #(-> %  ss/blank? not) (:vaaditutErityissuunnitelmat lupamaaraykset)))
           (if (seq (:vaadittuTyonjohtajatieto lupamaaraykset))
             ; KRYSP yhteiset 2.1.1+
             (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source) (:vaadittuTyonjohtajatieto lupamaaraykset))
             ; KRYSP yhteiset 2.1.0 and below
-            (when-not (s/blank? (:vaaditutTyonjohtajat lupamaaraykset))
+            (when-not (ss/blank? (:vaaditutTyonjohtajat lupamaaraykset))
               (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source)
-                (s/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*)"))))
+                (ss/split (:vaaditutTyonjohtajat lupamaaraykset) #"(,\s*)"))))
           ;; from YA verdict
           (map #(new-task "task-lupamaarays" % {:maarays %} meta source)
-            (filter #(-> %  s/blank? not) (:muutMaaraykset lupamaaraykset))))))
+            (filter #(-> %  ss/blank? not) (:muutMaaraykset lupamaaraykset))))))
     (:paatokset verdict)))
 
 (defn verdicts->tasks [application timestamp]
-  (let [owner (first (auth/get-auths-by-role application :owner))
+  (let [owner (first (auth/get-auths-by-role application :writer))
         meta {:created timestamp
               :assignee (user/get-user-by-id (:id owner))}]
     (flatten (map #(verdict->tasks % meta application) (:verdicts application)))))

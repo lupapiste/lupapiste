@@ -39,7 +39,7 @@
         {:_id nil})))) ; should not yield any results
 
 (defn applications-with-writer-authz-query-for [user]
-  {:auth {$elemMatch {:id (:id user) :role {$in [:owner :writer :foreman]}}}})
+  {:auth {$elemMatch {:id (:id user) :role {$in [:writer :foreman]}}}})
 
 (defn applications-containing-future-reservations-for [user]
   {:reservations {$elemMatch {$and [{$or [{:from {"$eq" (:id user)}}
@@ -235,10 +235,10 @@
 ;; authorization
 ;;
 
-(def owner-or-write-roles ["owner" "writer" "foreman"])
+(def write-roles ["writer" "foreman"])
 
-(defn owner-or-write-access? [application user-id]
-  (auth/has-some-auth-role? application user-id owner-or-write-roles))
+(defn write-access? [application user-id]
+  (auth/has-some-auth-role? application user-id write-roles))
 
 (defn validate-access
   "Command pre-check for validating user roles in application auth array."
@@ -247,11 +247,11 @@
                 (auth/has-some-auth-role? application (get-in user [:company :id]) allowed-roles))
     unauthorized))
 
-(defn validate-owner-or-write-access
+(defn validate-write-access
   "Validator: current user must be owner or have write access.
    To be used in commands' :pre-checks vector."
   [command]
-  (validate-access owner-or-write-roles command))
+  (validate-access write-roles command))
 
 ;;
 ;; documents

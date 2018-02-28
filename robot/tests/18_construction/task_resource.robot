@@ -9,7 +9,9 @@ Open task
   [Arguments]  ${name}
   Wait until  Element should be visible  xpath=//div[@id='application-tasks-tab']//table//td/a[text()='${name}']
   Scroll to  div#application-tasks-tab table.tasks
+  Sleep  0.5s
   Wait until  Click Element  //div[@id='application-tasks-tab']//table//td/a[text()='${name}']
+  Sleep  0.5s
   Wait Until  Element should be visible  xpath=//section[@id="task"]/h1/span[contains(., "${name}")]
   Wait Until  Element should be visible  taskAttachments
 
@@ -46,10 +48,13 @@ Open review
   Wait until  Element should be visible  jquery=div.review-tasks
   Scroll to  tr[data-test-index=${index}]
   Wait until  Click element  jquery=tr[data-test-index=${index}] td[data-test-column=requirement] a
+  Sleep  0.5s
   Wait test id visible  back-to-application-from-task
 
 Return from review
+  Sleep  0.5s
   Scroll and click test id  back-to-application-from-task
+  Sleep  0.5s
   Tab should be visible  tasks
   Scroll to test id  reviews-table-end
 

@@ -240,7 +240,7 @@ Mikko adds another attachment and signs it as single attachment
 One signature is visible in attachment page
   [Tags]  attachments
   Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-test-id="attachment-signature-fullname"]  1
-  Element text should be  xpath=//section[@id="attachment"]//div[@data-test-id="attachment-signature-fullname"]  Intonen Mikko
+  Element text should be  xpath=//section[@id="attachment"]//div[@data-test-id="attachment-signature-fullname"]  Mikko Intonen
   Element text should be  xpath=//section[@id="attachment"]//span[@data-test-id="attachment-signature-version"]  1.0
   Element should be visible  xpath=//section[@id="attachment"]//div[@data-test-id="attachment-signature-date"]
   Return to application
@@ -265,7 +265,7 @@ Signature is visible
   Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
   Assert file latest version  ${PNG_TESTFILE_NAME}  1.0
   Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-test-id="attachment-signature-fullname"]  1
-  Element text should be  xpath=//section[@id="attachment"]//*/div[@data-test-id="attachment-signature-fullname"]  Intonen Mikko
+  Element text should be  xpath=//section[@id="attachment"]//*/div[@data-test-id="attachment-signature-fullname"]  Mikko Intonen
   Element text should be  xpath=//section[@id="attachment"]//*/span[@data-test-id="attachment-signature-version"]  1.0
   Element should be visible  xpath=//section[@id="attachment"]//*/div[@data-test-id="attachment-signature-date"]
   Return to application
@@ -370,7 +370,8 @@ Sonja approves attachment
 Approver info is visible
   [Tags]  attachments
   Wait Until  Element Should Be Visible  jquery=#attachment .attachment-info span.form-approval-status
-  Wait Until  Element Should Contain  jquery=#attachment .attachment-info .approved .is-details  Tiedot OK (Sibbo Sonja
+  Wait Until  Element Should Contain  jquery=#attachment .attachment-info .approved .is-details  Tiedot OK
+  Wait Until  Element Should Contain  jquery=#attachment .attachment-info .approved .is-details  Sonja Sibbo
 
 Approve-button should be disabled
   [Tags]  attachments

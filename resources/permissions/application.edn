@@ -9,6 +9,7 @@
  :organization {:authorityAdmin     #{}
                 :authority          #{:application/read
                                       :application/mark-everything-seen
+                                      :application/invite
                                       :application/submit
                                       :application/request-for-complement
                                       :application/cancel
@@ -44,6 +45,7 @@
                 :approver           #{:application/approve  ;; TODO: could this be just 'approve', as in a supplement for :authority role. Then just 'approver' role couldn't exist.
                                       :application/read
                                       :application/mark-everything-seen
+                                      :application/invite
                                       :application/submit
                                       :application/request-for-complement
                                       :application/cancel
@@ -94,24 +96,10 @@
                 :statementGiver     #{:application/set-urgency
                                       :application/set-authority-notice
                                       :application/read-authority-notice}}
- :application  {:owner              #{:application/read
+ :application  {:writer             #{:application/read
                                       :application/accordions-open
                                       :application/edit-draft
-                                      :application/submit
-                                      :application/cancel-in-restricted-states
-                                      :application/edit
-                                      :application/edit-drawings
-                                      :application/edit-operation
-                                      :application/edit-permit-subtype
-                                      :application/remove-extra-link-permit
-                                      :application/change-location-in-pre-verdict-states
-                                      :application/create-change-permit
-                                      :application/create-continuation-period-permit
-                                      :application/create-foreman-app-in-post-verdict-states
-                                      :application/convert-to-application}
-                :writer             #{:application/read
-                                      :application/accordions-open
-                                      :application/edit-draft
+                                      :application/invite
                                       :application/submit
                                       :application/cancel-in-restricted-states
                                       :application/edit
@@ -136,8 +124,7 @@
                                       :application/accordions-open}
                 :statementGiver     #{:application/read
                                       :application/accordions-open}}
- :inforequest  {:owner              #{:application/cancel}
-                :writer             #{:application/cancel}}
+ :inforequest  {:writer             #{:application/cancel}}
  :canceled-app {:canceler           #{:application/undo-cancelation}}
  :foreman-app  {:foreman            #{:application/edit-draft
                                       :application/submit
