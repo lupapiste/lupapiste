@@ -3,7 +3,7 @@ LUPAPISTE.CompanyEditModel = function(params) {
 
   var self = this;
 
-  self.company = ko.mapping.fromJS(_.defaults(params.company, {customAccountLimit: undefined}));
+  self.company = ko.mapping.fromJS(_.defaults(params.company, {customAccountLimit: undefined, submitRestrictor: false}));
 
 
   self.accountTypes = LUPAPISTE.config.accountTypes.slice(); // copy
@@ -14,7 +14,7 @@ LUPAPISTE.CompanyEditModel = function(params) {
   self.showCustomCount.subscribe(function() { _.delay(hub.send, 50, "resize-dialog");});
 
   self.saveCompany = function() {
-    var updates = _.pick(ko.mapping.toJS(self.company), ["accountType", "customAccountLimit"]);
+    var updates = _.pick(ko.mapping.toJS(self.company), ["accountType", "customAccountLimit", "submitRestrictor"]);
     updates.customAccountLimit = parseInt(updates.customAccountLimit, 10);
     ajax
       .command("company-update",

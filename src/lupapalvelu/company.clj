@@ -64,6 +64,7 @@
               (sc/optional-key :contactPo)         (sc/maybe (ssc/max-length-string 64))
               (sc/optional-key :contactZip)        (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
               (sc/optional-key :contactCountry)    (sc/maybe (ssc/max-length-string 64))
+              (sc/optional-key :submitRestrictor)  sc/Bool
               (sc/optional-key :invitationDenied)  sc/Bool})
 
 (def company-skeleton ; required keys
@@ -184,7 +185,8 @@
    (mongo/select :companies query [:name :y :address1 :zip :po :accountType
                                    :contactAddress :contactZip :contactPo
                                    :customAccountLimit :created :pop :ovt
-                                   :netbill :reference :document :locked] (array-map :name 1))))
+                                   :netbill :reference :document :locked
+                                   :submitRestrictor] (array-map :name 1))))
 
 (defn find-company-users [company-id]
   (usr/get-users {:company.id company-id} {:lastName 1}))
