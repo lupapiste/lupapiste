@@ -1049,7 +1049,8 @@
                                  :add-operation-allowed false
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :unsubscribe-notifications true}
    :rak-valm-tyo                {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -1215,7 +1216,8 @@
                        :add-operation-allowed false
                        :copying-allowed false
                        :min-outgoing-link-permits 0
-                       :asianhallinta false}})
+                       :asianhallinta false
+                       :unsubscribe-notifications true}})
 
 (def operations
   (merge
@@ -1270,7 +1272,7 @@
 
    :asianhallinta sc/Bool
    (sc/optional-key :hidden) sc/Bool
-   })
+   (sc/optional-key :unsubscribe-notifications) sc/Bool})
 
 ;; Validate operations
 (doseq [[k op] operations]

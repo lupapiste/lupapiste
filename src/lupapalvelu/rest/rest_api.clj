@@ -7,7 +7,7 @@
             [ring.swagger.swagger2 :as rs]
             [ring.swagger.ui :as ui]
             [schema.core :as sc]
-            [sade.core :refer [fail]]
+            [sade.core :refer [fail ok]]
             [sade.env :as env]
             [lupapalvelu.action :as action]
             [lupapalvelu.api-common :refer :all]
@@ -98,14 +98,25 @@
    The scopes requested at authorization time must include the one defined in endpoint metadata."
   `(defendpoint-for usr/rest-user? ~path true ~@content))
 
-(defendpoint [:post "/rest/application/:application-id/update-national-building-id"]
+(defendpoint [:post "/rest/application/:application-id/update-national-building-id"] ; FIXME: deprecated, remove when parter has implementation ready for new endpoint 'update-building-data'
   {:parameters       [:application-id     ApplicationId
                       :operationId        OperationId
                       :nationalBuildingId NationalBuildingId]}
   (let [{org-id :organization :as app} (domain/get-application-as application-id user)]
     (if (and (usr/user-is-authority-in-organization? user org-id)
-             (applications-data/update-national-building-id! app operationId nationalBuildingId))
-      (resp/status 200 {})
+             (applications-data/update-building! app operationId nationalBuildingId nil))
+      (resp/status 200 (ok))
+      (resp/status 404 "Not found"))))
+
+(defendpoint [:post "/rest/application/:application-id/update-building-data"]
+  {:parameters       [:application-id     ApplicationId
+                      :operationId        OperationId
+                      :nationalBuildingId NationalBuildingId
+                      :location           Location]}
+  (let [{org-id :organization :as app} (domain/get-application-as application-id user)]
+    (if (and (usr/user-is-authority-in-organization? user org-id)
+             (applications-data/update-building! app operationId nationalBuildingId location))
+      (resp/status 200 (ok))
       (resp/status 404 "Not found"))))
 
 (defendpoint "/rest/submitted-applications"

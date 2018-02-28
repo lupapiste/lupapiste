@@ -132,8 +132,7 @@
      :auth [{:lastName "Panaani"
              :firstName "Pena"
              :username "pena"
-             :type "owner"
-             :role "owner"
+             :role "writer"
              :id "777777777777777777000020"}]
      :state "open"
      :location {:x 444444.0, :y 6666666.0}
@@ -229,8 +228,7 @@
       :auth [{:lastName "Panaani"
               :firstName "Pena"
               :username "pena"
-              :type "owner"
-              :role "owner"
+              :role "writer"
               :id "777777777777777777000020"}],
       :verdicts [{:id "5605252edacf322aecce8636",
                   :kuntalupatunnus "523",

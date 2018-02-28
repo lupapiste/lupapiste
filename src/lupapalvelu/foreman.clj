@@ -297,13 +297,9 @@
 (defn- create-company-auth [inviter company-id timestamp]
   (when-let [company (company/find-company-by-id company-id)]
     ;; company-auth can be nil if company is locked
-    (when-let [company-auth (company/company->auth company)]
+    (when-let [company-auth (company/company->auth company :writer)]
       (assoc company-auth
-             :company-role "admin"
-             :role "reader"
-             :inviter (usr/summary inviter)
-             :invite {:user {:id company-id}
-                      :created timestamp}))))
+             :inviter (usr/summary inviter)))))
 
 (defn- invite->auth [inv app-id inviter timestamp]
   (if (:company-id inv)

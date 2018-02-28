@@ -44,8 +44,7 @@
                             :auth [{:lastName "Panaani",
                                     :firstName "Pena",
                                     :username "pena",
-                                    :type "owner",
-                                    :role "owner",
+                                    :role "writer",
                                     :id "777777777777777777000020"}]
                             :permitType "YA"
                             :organization "753-YA"

@@ -36,7 +36,7 @@
    ;; Keyword corresponds to a key in the data context.
    keyword? sc/Keyword
    :else (shared/only-one-of [:doc :dict]
-                             ;; Vector is a path to applicatio
+                             ;; Vector is a path to application
                              ;; document data. The first item is the
                              ;; document name and rest are path within
                              ;; the data.
@@ -582,19 +582,13 @@
        (sort-by :id)
        (map :text)))
 
-(defn finnish-date
-  "Timestamp in the Finnish date format without zero-padding.
-  For example, 30.1.2018."
-  [timestamp]
-  (util/format-timestamp-local-tz timestamp "d.M.YYYY"))
-
 (defn statements [lang verdict]
   (->> (dict-value verdict :statements)
        (filter :given)
        (map (fn [{:keys [given text status]}]
               (join-non-blanks ", "
                                text
-                               (finnish-date given)
+                               (util/to-finnish-date given)
                                (i18n/localize lang :statement status))))
        not-empty))
 
@@ -687,21 +681,29 @@
 (defn language [verdict]
   (-> verdict :data :language))
 
-(defn verdict-pdf [application {:keys [published] :as verdict}]
-  (html-pdf/create-and-upload-pdf
-   application
-   "pate-verdict"
-   (html (verdict-body {:lang        (language verdict)
-                        :application (tools/unwrapped application)
-                        :verdict     verdict}))
-   {:filename (i18n/localize-and-fill (language verdict)
-                                      (if published
-                                        :pdf.filename
-                                        :pdf.draft)
-                                      (:id application)
-                                      (util/to-local-datetime (or published (now))))
-    :header   (html (verdict-header (language verdict) application verdict) true)
-    :footer   (html (verdict-footer))}))
+(defn verdict-html
+  "returns :header, :body, :footer map."
+  [application verdict]
+  {:body   (html (verdict-body {:lang        (language verdict)
+                                :application (tools/unwrapped application)
+                                :verdict     verdict}))
+   :header (html (verdict-header (language verdict) application verdict) true)
+   :footer (html (verdict-footer))})
+
+(defn upload-verdict-pdf [application {:keys [published] :as verdict}]
+  (let [{:keys [body header footer]} (verdict-html application verdict)]
+    (html-pdf/create-and-upload-pdf
+     application
+     "pate-verdict"
+     body
+     {:filename (i18n/localize-and-fill (language verdict)
+                                        (if published
+                                          :pdf.filename
+                                          :pdf.draft)
+                                        (:id application)
+                                        (util/to-local-datetime (or published (now))))
+      :header header
+      :footer footer})))
 
 
 (defn create-verdict-attachment
@@ -709,7 +711,7 @@
    2. Create verdict attachment.
    3. Bind 1 into 2."
   [{:keys [application created] :as command} verdict]
-  (let [{:keys [file-id]}          (verdict-pdf application verdict)
+  (let [{:keys [file-id]}          (upload-verdict-pdf application verdict)
         _                          (when-not file-id
                                      (fail! :pate.pdf-verdict-error))
         {attachment-id :id
@@ -734,7 +736,15 @@
                                   nil)))
 
 (defn create-verdict-preview
-  "Creates draft version of the verdict PDF. Returns file-id or fails."
-  [{:keys [lang application] :as command} verdict]
-  (or (:file-id (verdict-pdf application verdict))
-      (fail! :pate.pdf-verdict-error)))
+  "Creates draft version of the verdict
+  PDF. Returns :pdf-file-stream, :filename map or fails."
+  [{:keys [application created] :as command} verdict]
+  (let [pdf (html-pdf/html->pdf application
+                                "pate-verdict-draft"
+                                (verdict-html application verdict))]
+    (if (:ok pdf)
+      (assoc pdf :filename (i18n/localize-and-fill (language verdict)
+                                                   :pdf.draft
+                                                   (:id application)
+                                                   (util/to-finnish-date created)))
+      (fail! :pate.pdf-verdict-error))))

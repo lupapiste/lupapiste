@@ -263,8 +263,8 @@
             (:documents bulletin) => (partial every? #(not= (-> % :schema-info :type keyword) :party)))
           (fact "no document metadata in bulletins"
             (:documents bulletin) => (partial not-any? :meta))
-          (fact "_applicantIndex"
-            (:_applicantIndex bulletin) => (just ["Panaani Pena"]))))
+          (fact "_applicantIndex is empty"
+            (:_applicantIndex bulletin) => [])))
 
       (facts "Filters"
         (fact "Municipality"

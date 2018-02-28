@@ -142,6 +142,11 @@
 
 (register-generator ssc/Maaraalatunnus maaraalatunnus)
 
+(def location-x-generator (gen/double* {:min 10001 :max 800000 :infinite? false :NaN? false}))
+(register-generator ssc/LocationX location-x-generator)
+(def location-y-generator (gen/double* {:min 6610001 :max 7779999 :infinite? false :NaN? false}))
+(register-generator ssc/LocationY location-y-generator)
+
 (def finnish-zipcode (gen/fmap s/join
                                (gen/vector single-number-int 5)))
 

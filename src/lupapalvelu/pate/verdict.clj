@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.verdict
   (:require [clj-time.core :as time]
+            [taoensso.timbre :refer [warnf]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
@@ -11,12 +12,14 @@
             [lupapalvelu.inspection-summary :as inspection-summary]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.date :as date]
-            [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.pdf :as pdf]
+            [lupapalvelu.pate.review :as review]
+            [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.state-machine :as sm]
+            [lupapalvelu.tasks :as tasks]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp]
             [monger.operators :refer :all]
@@ -367,8 +370,8 @@
 (defn buildings
   "Map of building infos: operation id is key and value map contains
   operation (loc-key), building-id (either national or manual id),
-  tag (tunnus) and description."
-  [application]
+  tag (tunnus), description and order (primary operation is the first)."
+  [{primary-op :primaryOperation :as application}]
   (->> application
        app-documents-having-buildings
        (reduce (fn [acc {:keys [schema-info data]}]
@@ -384,7 +387,8 @@
                                               (select-keys data)
                                               vals
                                               (util/find-first ss/not-blank?))
-                            :tag         (:tunnus data)}
+                            :tag         (:tunnus data)
+                            :order (if (= id (:id primary-op)) 0 1)}
                            ss/->plain-string))))
                {})))
 
@@ -597,6 +601,21 @@
                               (map (fn [[k v]]
                                      (assoc k :amount (count v)))))))}))
 
+(defn pate-verdict->tasks [verdict buildings {ts :created}]
+  (->> (get-in verdict [:data :reviews])
+       (map (partial review/review->task verdict buildings ts))
+       (remove nil?)))
+
+(defn log-task-katselmus-errors [tasks]
+  (when-let [errs (seq (mapv (partial tasks/task-doc-validation "task-katselmus") tasks))]
+    (doseq [err errs
+            :when (seq err)
+            sub-error err]
+      (warnf "PATE task (%s) validation warning - elem locKey: %s, results: %s"
+             (get-in sub-error [:document :id])
+             (get-in sub-error [:element :locKey])
+             (get-in sub-error [:result])))))
+
 (defn publish-verdict
   "Publishing verdict does the following:
    1. Finalize and publish verdict
@@ -605,7 +624,7 @@
    4. Other document updates (e.g., waste plan -> waste report)
    5. Construct buildings array
    6. Freeze (locked and read-only) verdict attachments and update TOS details
-   7. TODO: Create tasks
+   7. Create tasks (old ones will be overwritten)
    8. Generate section (for non-board verdicts)
    9. Create PDF/A for the verdict
   10. Generate KuntaGML
@@ -616,16 +635,20 @@
                                      (insert-section (:organization application)
                                                      created))
         next-state             (sm/verdict-given-state application)
+        buildings  (->buildings-array application)
+        tasks      (pate-verdict->tasks verdict buildings command)
         {att-items :items
          update-fn :update-fn} (attachment-items command verdict)
-        buildings-updates      {:buildings (->buildings-array application)}
         verdict                (update verdict :data update-fn)]
+
+    (log-task-katselmus-errors tasks) ; TODO cancel publishing if validation errors?
     (verdict-update command
                     (util/deep-merge
                      {$set (merge
                             {:pate-verdicts.$.data      (:data verdict)
                              :pate-verdicts.$.published created}
-                            buildings-updates
+                            {:buildings buildings}
+                            (when (seq tasks) {:tasks tasks}) ; in re-publish situation, old tasks are nuked and new ones generated
                             (att/attachment-array-updates (:id application)
                                                           #(util/includes-as-kw? (map :id att-items)
                                                                                  (:id %))
@@ -656,14 +679,12 @@
   "Preview version of the verdict.
   1. Finalize verdict but do not store the changes.
   2. Generate PDF and return it."
-  [{session :session :as command}]
-  (let [{:keys [size contentType
-                filename content]} (-<>> (command->verdict command)
-                                         (enrich-verdict command <> true)
-                                         (pdf/create-verdict-preview command)
-                                         mongo/download)]
+  [{:keys [application created] :as command}]
+  (let [{:keys [pdf-file-stream
+                filename]} (-<>> (command->verdict command)
+                                 (enrich-verdict command <> true)
+                                 (pdf/create-verdict-preview command))]
     {:status  200
-     :headers {"Content-Type"        contentType
-               "Content-Disposition" (format "filename=\"%s\"" filename)
-               "Content-Length"      size}
-     :body    (content)}))
+     :headers {"Content-Type"        "application/pdf"
+               "Content-Disposition" (format "filename=\"%s\"" filename)}
+     :body    pdf-file-stream}))

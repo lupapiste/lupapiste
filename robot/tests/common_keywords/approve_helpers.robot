@@ -17,7 +17,7 @@ Accordion approved
   [Arguments]  ${name}  ${idx}=0
   Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) div.sticky button.positive i.approved
   Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky .form-approval-status i.approved
-  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky .form-approval-status span:contains('Sibbo Sonja')
+  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky .form-approval-status span:contains('Sonja Sibbo')
   # Every group is approved or neutral
   Wait Until  Element should not be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) i.rejected
 
@@ -52,7 +52,7 @@ Accordion rejected
   Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky button.secondary.rejected i.rejected
   Element should not be visible  jquery=button.positve[data-accordion-id='${name}']:eq(${idx})
   Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky .form-approval-status i.rejected
-  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky .form-approval-status span:contains('Sibbo Sonja')
+  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky .form-approval-status span:contains('Sonja Sibbo')
 
 Sonja accordion rejected
   [Arguments]  ${name}  ${idx}=0
@@ -86,7 +86,7 @@ Group approved
   Wait Until  Element should be visible  jquery=div.form-group[id*='${name}'] i.approved
   Wait Until  Element should not be visible  jquery=div.form-group[id*='${name}'] i.rejected
   Wait Until  Element should be visible  jquery=div.form-group[id*=${name}] span:contains('OK')
-  Wait Until  Element should be visible  jquery=div.form-group[id*='${name}'] span:contains('Sibbo Sonja')
+  Wait Until  Element should be visible  jquery=div.form-group[id*='${name}'] span:contains('Sonja Sibbo')
 
 
 Sonja group approved
@@ -100,7 +100,7 @@ Group rejected
   Wait Until  Element should be visible  jquery=div.form-group[id*=${name}] i.rejected
   Wait Until  Element should not be visible  jquery=div.form-group[id*=${name}] i.approved
   Wait Until  Element should be visible  jquery=div.form-group[id*=${name}] span:contains('Tarkennettavaa')
-  Wait Until  Element should be visible  jquery=div.form-group[id*=${name}] span:contains('Sibbo Sonja')
+  Wait Until  Element should be visible  jquery=div.form-group[id*=${name}] span:contains('Sonja Sibbo')
 
 Sonja group rejected
   [Arguments]  ${name}

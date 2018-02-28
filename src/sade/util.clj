@@ -373,6 +373,12 @@
 (defn to-RFC1123-datetime [^Long timestamp]
   (format-utc-timestamp timestamp "EEE, dd MMM yyyy HH:mm:ss 'GMT'"))
 
+(defn to-finnish-date
+  "Timestamp in the Finnish date format without zero-padding.
+  For example, 30.1.2018."
+  [^Long timestamp]
+  (format-timestamp-local-tz timestamp "d.M.YYYY"))
+
 (def time-pattern #"^([012]?[0-9]):([0-5]?[0-9])(:([0-5][0-9])(\.(\d))?)?$")
 
 (defn to-xml-time-from-string [^String time-s]

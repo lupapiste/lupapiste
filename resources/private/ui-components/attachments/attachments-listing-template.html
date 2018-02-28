@@ -6,7 +6,7 @@
                    name: 'help-toggle',
                    params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
                    }"></span>
-  <!-- ko if: authModel.ok("assignments-for-application") && lupapisteApp.services.assignmentService.automaticAssignments().length > 0  && upload.batchListHidden() -->
+  <!-- ko if: authModel.ok("assignments-for-application") && lupapisteApp.services.assignmentService.automaticAssignments().length > 0  && batchEmpty() -->
   <automatic-assignments data-test-id="automatic-assignments-component"
                          params="authModel : authModel,
                                  assignments: lupapisteApp.services.assignmentService.automaticAssignments,
@@ -15,7 +15,7 @@
                                  getFilters: lupapisteApp.services.attachmentsService.getFilters">
   </automatic-assignments>
   <!-- /ko -->
-  <!-- ko if: authModel.ok("create-assignment") && upload.batchListHidden() -->
+  <!-- ko if: authModel.ok("create-assignment") && batchEmpty() -->
   <create-assignment data-test-id="create-assignment-component"
                      params="authorities: $root.authorities,
                              applicationId: applicationId,
@@ -28,7 +28,7 @@
 
   <attachment-batch params="upload: upload"></attachment-batch>
 
-  <!-- ko if: upload.batchListHidden -->
+  <!-- ko if: batchEmpty -->
 
     <suti-display></suti-display>
 

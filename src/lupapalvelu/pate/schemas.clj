@@ -92,11 +92,11 @@
                                      (map (fn [k]
                                             [(sc/optional-key k) sc/Int]))
                                      (into {}))
-   :foremen                     [(apply sc/enum (map name shared/foreman-codes))]
-   :reviews                     [{:id   ssc/ObjectIdStr
+   (sc/optional-key :foremen)   [(apply sc/enum (map name shared/foreman-codes))]
+   (sc/optional-key :reviews)   [{:id   ssc/ObjectIdStr
                                   :name PateName
                                   :type review-type}]
-   :plans                       [{:id   ssc/ObjectIdStr
+   (sc/optional-key :plans)     [{:id   ssc/ObjectIdStr
                                   :name PateName}]
    ;; Boardname included only when the verdict giver is Lautakunta.
    (sc/optional-key :boardname) sc/Str})

@@ -24,7 +24,7 @@
                       <span class="user-invite" data-bind="ltext: 'invited'"></span>
                     </span>
                     <span data-bind="if: !$data.invite">
-                      <span data-bind="visible: $parent.isNotOwner($data), ltext: 'accepted'"></span>
+                      <span data-bind="visible: $data.inviteAccepted, ltext: 'accepted'"></span>
                       <!-- ko if: $data.inviteAccepted -->
                       <span data-test-id="invite-accepted-span"
                             data-bind="dateTimeString: $data.inviteAccepted"></span>

@@ -20,6 +20,7 @@
 (def company-map {:name  "company-name"
                   :y     "2341528-4"
                   :accountType "account5"
+                  :billingType "monthly"
                   :address1 "katu"
                   :zip "33100"
                   :po "Tampere"

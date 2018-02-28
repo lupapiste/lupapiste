@@ -2,6 +2,8 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]))
 
+(apply-remote-minimal)
+
 (facts "application property owners"
   (let [application-id (create-app-id pena :operation "kiinteistonmuodostus" :propertyId "75312312340001")]
     (fact "Applicant can't query owners"

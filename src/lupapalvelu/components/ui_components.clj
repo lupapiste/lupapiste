@@ -76,7 +76,7 @@
                  :postVerdictStates     states/post-verdict-states
                  :loggedInUploadMaxSize (env/value :file-upload :max-size :logged-in)
                  :anonymousUploadMaxSize (env/value :file-upload :max-size :anonymous)
-                 :writerRoles           domain/owner-or-write-roles
+                 :writerRoles           domain/write-roles
                  :stampableMimes        (filter identity (map mime/mime-types file-types))
                  :foremanRoles          (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
                  :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]
@@ -227,7 +227,8 @@
                    "company-registration-service.js"
                    "triggers-target-service.js"
                    "trigger-service.js"
-                   "navi-sidebar-service.js"]}
+                   "navi-sidebar-service.js"
+                   "batch-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -469,14 +470,14 @@
                                    :accordion :mypage :calendar-view :header :debug :analytics :proj4 :ol :footer
                                    :ui-components :authority-admin-components]
                          :js [schema-versions-by-permit-type "organization-model.js" "wfsmodel.js" "organization-user.js"
-                              "organization-reports.js" "edit-roles-dialog-model.js"
+                              "organization-reports.js"
                               "calendars-model.js" "organization-reservation-types-model.js"
                               "organization-reservation-properties-model.js"
                               "municipality-maps-service.js" "authority-admin.js"]
                          :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"
                                 "organization-reports.html" "organization-calendars.html" "calendar-admin.html" "assignments.html" "stamp-editor.html"
                                 "pate-verdict-templates.html" "archiving.html" "organization-bulletins.html"
-                                "organization-store.html" "organization-terminal.html"]}
+                                "organization-store.html" "organization-terminal.html" "edit-authority.html"]}
 
    :admin-app {:depends []
                :js ["admin.js"]}

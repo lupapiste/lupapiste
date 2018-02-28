@@ -225,6 +225,19 @@
                                       (-> schema :labels? false? not)))])))
                 (:items schema))])
 
+(defn- repeating-keys
+  "The repeating keys (keys within the state that correspond to a
+  repeating schema). Sorted by :sort-by if given within schema."
+  [{:keys [dictionary path state] :as options} repeating]
+  (let [r-map    (path/react repeating state)
+        sort-key (get-in dictionary (path/extend path repeating :sort-by))]
+    (if sort-key
+      (->> r-map
+           (sort-by (fn [[_ a] [_ b]]
+                      (compare (sort-key a) (sort-key b))))
+           (map first))
+      (keys r-map))))
+
 (rum/defc pate-grid < rum/reactive
   {:key-fn #(-> % :path path/id)}
   [{:keys [schema path state] :as options}]
@@ -265,7 +278,7 @@
     (if-let [repeating (:repeating schema)]
       [:div (map (fn [k]
                    (pate-grid (assoc options
-                                :schema (dissoc schema :repeating)
-                                :path (path/extend path repeating k))))
-                 (keys (path/react repeating state)))]
+                                     :schema (dissoc schema :repeating)
+                                     :path (path/extend path repeating k))))
+                 (repeating-keys options repeating))]
       (grid options))))

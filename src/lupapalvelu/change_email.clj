@@ -46,7 +46,7 @@
                                 :auth.$.invite.email email
                                 :auth.$.invite.user (usr/summary user)}}))
 
-(defn- update-email-in-application-auth! [user-id old-email new-email]
+(defn update-email-in-application-auth! [user-id old-email new-email]
   ;; There might be duplicates due to old bugs, ensure everything is updated.
   ;; loop exits when no applications with the old username were found
   (loop [n 1]
@@ -56,7 +56,7 @@
                                                         :username old-email}}}
                                     {$set {:auth.$.username new-email}})))))
 
-(defn- update-email-in-invite-auth! [user-id old-email new-email]
+(defn update-email-in-invite-auth! [user-id old-email new-email]
   (loop [n 1]
     (when (pos? n)
       (recur (mongo/update-by-query :applications

@@ -184,6 +184,7 @@
                           :application-verdict-tab-visible
                           :application-handlers
                           :application-organization-archive-enabled
+                          :application-submittable
                           :create-application}
         user {:id "user123" :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]

@@ -27,6 +27,7 @@ Mikko prepares YA application and fills it to pass KRYSP validation later in tes
   Invite erkki@example.com to application
   # LPK-2915, previous was Solita Oy, which didn't have parties invited to application
   Invite company to application  Esimerkki Oy
+  Scroll and click input  section[data-doc-type=hakija-ya] input[value=yritys]
   Select from list by value  jquery=select[name=company-select]:first  esimerkki
   Wait until  Value should be  jquery=input[data-docgen-path='yritys.yritysnimi']:first  Esimerkki Oy
   Select from list by value  jquery=select[name=company-select]:last  esimerkki
@@ -174,7 +175,7 @@ Delete loppukatselmus
   Wait until  Element should be visible  xpath=//div[@id="application-tasks-tab"]//table[contains(@class, 'tasks')]//tbody/tr
   Open task  loppukatselmus
   Review checkboxes enabled
-  Click enabled by test id  delete-task
+  Scroll and click test id  delete-task
   Confirm  dynamic-yes-no-confirm-dialog
 
 The attachment is gone too

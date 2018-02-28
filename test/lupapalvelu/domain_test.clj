@@ -45,21 +45,19 @@
         invite2 {:email "kiss@example.com"}
         app     {:auth [{:role "writer" :invite invite1}
                         {:role "writer" :invite invite2 :type :company :inviter "inviter2"}
-                        {:role "owner"}]}]
+                        {:role "writer"}]}]
     (fact "has two invites" (invites app) => (just (assoc invite1 :type nil :inviter "inviter1")
                                                    (assoc invite2 :type :company :inviter "inviter2")))))
 
-(facts "owner-or-write-access?"
-  (let [owner   {:id 1 :role "owner"}
-        writer  {:id 2 :role "writer"}
+(facts "write-access?"
+  (let [writer  {:id 2 :role "writer"}
         foreman {:id 3 :role "foreman"}
         reader  {:id 4 :role "reader"}
-        app     {:auth [owner writer foreman reader]}]
-    (fact "owner has accesss"   (owner-or-write-access? app (:id owner)) => true)
-    (fact "writer has accesss" (owner-or-write-access? app (:id writer)) => true)
-    (fact "foreman has accesss" (owner-or-write-access? app (:id foreman)) => true)
-    (fact "reader doesn't have accesss" (owner-or-write-access? app (:id reader)) => false)
-    (fact "someone else doesn't have accesss" (owner-or-write-access? app 5) => false)))
+        app     {:auth [writer foreman reader]}]
+    (fact "writer has accesss" (write-access? app (:id writer)) => true)
+    (fact "foreman has accesss" (write-access? app (:id foreman)) => true)
+    (fact "reader doesn't have accesss" (write-access? app (:id reader)) => false)
+    (fact "someone else doesn't have accesss" (write-access? app 5) => false)))
 
 (facts validate-access
   (let [app {:auth [{:id "basic-user"    :role "usering"}

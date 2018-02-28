@@ -100,7 +100,8 @@ Verdict for foreman application
 Open application by id
   [Arguments]  ${appId}
   ${user-role} =  Get role
-  Go to  ${SERVER}/app/fi/${user-role}#!/application/${appId}
+  Go to  ${SERVER}/app/fi/${user-role}
+  Execute Javascript  window.location.hash = "!/application/${appId}";
   Wait until  Element text should be  xpath=//span[@data-test-id='application-id']  ${appId}
 
 Project application is open

@@ -3,6 +3,7 @@
 Documentation  Common stuff for the Lupapiste Functional Tests.
 Library        CustomSeleniumLibrary.py  timeout=12  run_on_failure=Nothing
 Library        String
+Library        Collections
 Library        OperatingSystem
 Library        DebugLibrary
 
@@ -16,7 +17,7 @@ ${OP_TREE_SPEED}                0.1
 ${SLOW_SPEED}                   0.2
 ${SLOWEST_SPEED}                0.5
 
-${LOGIN URL}                    ${SERVER}/app/fi/welcome#!/login
+${LOGIN URL}                    ${SERVER}/app/fi/welcome
 ${LOGOUT URL}                   ${SERVER}/app/fi/logout
 ${BULLETINS URL}                ${SERVER}/app/fi/bulletins
 ${APPLICATIONS PATH}            /applicant#!/applications
@@ -270,9 +271,9 @@ Check accordion text
   Test id text is  ${id}-accordion-description-text  ${text}
 
 Edit party name
-  [Arguments]  ${party}  ${firstname}  ${lastname}
-  Input text with jQuery  section[data-doc-type='${party}'] input[data-docgen-path='henkilotiedot.etunimi']  ${firstname}
-  Input text with jQuery  section[data-doc-type='${party}'] input[data-docgen-path='henkilotiedot.sukunimi']  ${lastname}
+  [Arguments]  ${party}  ${firstname}  ${lastname}  ${henkilotiedot-path}=henkilotiedot
+  Input text with jQuery  section[data-doc-type='${party}'] input[data-docgen-path='${henkilotiedot-path}.etunimi']  ${firstname}
+  Input text with jQuery  section[data-doc-type='${party}'] input[data-docgen-path='${henkilotiedot-path}.sukunimi']  ${lastname}
 
 Positive indicator should be visible
   Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
@@ -313,7 +314,7 @@ User should not be logged in
   Wait Until  User is not logged in
 
 User is not logged in
-  Location should be  ${LOGIN URL}
+  Location should be  ${LOGIN URL}#!/login
   Page should contain  Haluan kirjautua palveluun
   # test that no data is bind.
 
@@ -773,9 +774,9 @@ Do prepare new request
   Textfield Value Should Be  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']  ${propertyId}
   Wait Until  Selected Municipality Is  ${municipality}
   Wait Until  Address is not blank
-  Execute Javascript  $("div[id='popup-id'] input[data-test-id='create-address']").val("${address}").change();
+  Sleep  1s
+  Input Text  //div[@id='popup-id']//input[@data-test-id='create-address']  ${address}
   Set animations off
-
   ${path} =   Set Variable  xpath=//div[@id="popup-id"]//button[@data-test-id="create-continue"]
   Wait until  Element should be enabled  ${path}
   Click element  ${path}
@@ -819,7 +820,8 @@ Upload batch file
   Wait Until  Element should be visible  jquery=div.upload-progress--finished
   Wait test id visible  batch-ready
   Scroll to bottom
-  Select From Autocomplete  div.batch-autocomplete[data-test-id=batch-type-${index}]  ${type}
+  ${alreadySelected}=  Run keyword and return status  Autocomplete selection is  div[contains(@class, 'batch-autocomplete') and @data-test-id='batch-type-${index}']  ${type}
+  Run keyword unless  ${alreadySelected}  Select from autocomplete  div.batch-autocomplete[data-test-id=batch-type-${index}]  ${type}
   Run keyword unless  '${contents}' == '${EMPTY}'  Fill test id  batch-contents-${index}  ${contents}
   ${group-is-selected}=  Run Keyword and Return Status  Autocomplete selection by test id contains  batch-grouping-${index}  ${grouping}
   Run keyword unless  ${group-is-selected}  Clear autocomplete selections by test id  batch-grouping-${index}
@@ -830,6 +832,18 @@ Upload verdict or task attachment
   Test id visible  upload-button-label
   Scroll to top
   Upload batch file  0  ${path}  ${type}  ${contents}  ${grouping}  upload-button-input
+  Click enabled by test id  batch-ready
+  Wait until  No such test id  batch-ready
+
+Upload attachment with default type
+  [Arguments]  ${path}  ${testId}=upload-button-input
+  Test id visible  upload-button-label
+  Expose file input  input[data-test-id=${testId}]
+  Choose file  jquery=input[data-test-id=${testId}]  ${path}
+  Hide file input  input[data-test-id=${testId}]
+  Wait Until  Element should be visible  jquery=div.upload-progress--finished
+  Wait test id visible  batch-ready
+  Scroll to bottom
   Click enabled by test id  batch-ready
   Wait until  No such test id  batch-ready
 
@@ -1479,6 +1493,10 @@ Open company details
   Click by test id  company-edit-info
   Wait until  Element should be visible  company
 
+# At company registration page
+Company ${type} billing is selected
+  Wait until  Element should be visible  xpath=//button[@data-test-id='${type}-billing' and contains(@class, 'selected')]
+
 
 #
 # Mock Ajax calls: jquery.mockjax
@@ -1800,3 +1818,20 @@ Permit subtype is
   ${SELECT_VISIBLE}=  Run Keyword And Return Status  Element should be visible  permitSubtypeSelect
   Run keyword If  ${SELECT_VISIBLE}  List Selection Should Be  permitSubtypeSelect  ${localizedPermitSubtype}
   Run keyword unless  ${SELECT_VISIBLE}  Element text should be  xpath=//section[@id='application']//span[@data-test-id='permit-subtype-text']  ${localizedPermitSubtype}
+
+Check expected required fields and warnings
+  [Arguments]  ${EXPECTED-TEST-IDS}
+  Wait for jQuery
+  ${ELEMENTS}=  Get Webelements  xpath=//div[contains(@class,'info-line')]//span[contains(@class, 'required-field-error-element-name')]
+  ${FOUND-TEST-IDS}=  Create List
+  ${NOT-FOUND-TEST-IDS}=  Create List
+  :FOR  ${elem}  IN  @{ELEMENTS}
+  \  ${TEST-ID}=  Get Element Attribute  ${elem}  data-test-id
+  \  ${EXPECTED-IDX}=  Get Index From List  ${EXPECTED-TEST-IDS}  ${TEST-ID}
+  \  Run keyword if  ${EXPECTED-IDX} >= 0  Remove From List  ${EXPECTED-TEST-IDS}  ${EXPECTED-IDX}
+  \  Run keyword if  ${EXPECTED-IDX} < 0  Append to list  ${NOT-FOUND-TEST-IDS}  ${TEST-ID}
+
+  ${EXPECTED-LENGTH}=  Get Length  ${EXPECTED-TEST-IDS}
+  ${NOT-FOUND-LENGTH}=  Get Length  ${NOT-FOUND-TEST-IDS}
+  Should Be Equal As Integers  0  ${EXPECTED-LENGTH}  Expected errors were not found: ${EXPECTED-TEST-IDS}
+  Should Be Equal As Integers  0  ${NOT-FOUND-LENGTH}  Errors were not expected: ${NOT-FOUND-TEST-IDS}

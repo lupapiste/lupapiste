@@ -336,7 +336,9 @@
                :keymap         {:keymap KeyMap}
                :attachments    {:attachments PateAttachments}
                :application-attachments {:application-attachments PateComponent}
-               :repeating      {:repeating (sc/recursive #'SchemaTypes)})})
+               :repeating      {:repeating (sc/recursive #'SchemaTypes)
+                                ;; The value is a key in the repeating dictionary.
+                                (sc/optional-key :sort-by) sc/Keyword})})
 
 (defschema Dictionary
   "Id to schema mapping."
@@ -365,8 +367,8 @@
          CellConfig
          {:list (merge PateCss
                        {(sc/optional-key :title)   sc/Str
-                        ;; By default, items always have labels, if
-                        ;; when they are just empty strings. Otherwise
+                        ;; By default, items always have labels, even
+                        ;; if they are just empty strings. Otherwise
                         ;; the vertical alignment could be
                         ;; off. If :labels? is false, then the labels
                         ;; are not laid out at all. This is useful,
@@ -654,9 +656,7 @@
                  :loc-prefix :pate-verdict-dates
                  :grid       {:columns    17
                               :loc-prefix :pate-verdict
-                              :rows       [(date-delta-row [:julkipano :anto
-                                                            :muutoksenhaku :lainvoimainen
-                                                            :aloitettava :voimassa])]
+                              :rows       [(date-delta-row verdict-dates)]
                               }}
                 {:id         "verdict"
                  :required?  true
@@ -792,7 +792,8 @@
                                      :autopaikat-yhteensa    {:docgen "pate-string"}
                                      :vss-luokka             {:docgen "pate-string"}
                                      :paloluokka             {:docgen "pate-string"}
-                                     :show-building          {:docgen "required-in-verdict"}}}
+                                     :show-building          {:docgen "required-in-verdict"}}
+                         :sort-by :order}
       :upload           {:attachments {:i18nkey    :application.verdict-attachments
                                        :label?     false
                                        :type-group #"paatoksenteko"

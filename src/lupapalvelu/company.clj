@@ -29,13 +29,20 @@
 
 (def account-types [{:name :account5
                      :limit 5
-                     :price 59}
+                     :price {:monthly 69
+                             :yearly 780}}
                     {:name :account15
                      :limit 15
-                     :price 79}
+                     :price {:monthly 89
+                             :yearly 1008}}
                     {:name :account30
                      :limit 30
-                     :price 99}])
+                     :price {:monthly 109
+                             :yearly 1236}}])
+
+(def billing-types (->> account-types
+                        (mapcat (comp keys :price))         ; all keys under :price
+                        (distinct)))
 
 (defn user-limit-for-account-type [account-name]
   (let [account-type (some #(if (= (:name %) account-name) %) account-types)]
@@ -45,6 +52,7 @@
               :name                                (ssc/min-max-length-string 1 64)
               :y                                   ssc/FinnishY
               :accountType                         (apply sc/enum "custom" (map (comp name :name) account-types))
+              :billingType                         (apply sc/enum (map name billing-types))
               :customAccountLimit                  (sc/maybe sc/Int)
               (sc/optional-key :reference)         (sc/maybe (ssc/max-length-string 64))
               :address1                            (sc/maybe (ssc/max-length-string 64))
@@ -151,7 +159,7 @@
     company))
 
 (defn find-company
-  "Returns company mathing the provided query, or nil"
+  "Returns company matching the provided query, or nil"
   ([q]
    (when (seq q)
      (some->> q (mongo/with-_id) (mongo/select-one :companies))))
@@ -160,7 +168,7 @@
      (mongo/select-one :companies (mongo/with-_id query) projection))))
 
 (defn find-company!
-  "Returns company mathing the provided query. Throws if not found."
+  "Returns company matching the provided query. Throws if not found."
   ([q]
    (or (find-company q) (fail! :company.not-found)))
   ([query projection]
@@ -181,10 +189,12 @@
   company."
   ([] (find-companies {}))
   ([query]
-   (mongo/select :companies query [:name :y :address1 :zip :po :accountType
-                                   :contactAddress :contactZip :contactPo
-                                   :customAccountLimit :created :pop :ovt
-                                   :netbill :reference :document :locked] (array-map :name 1))))
+    (find-companies query [:name :y :address1 :zip :po :accountType :billingType
+                           :contactAddress :contactZip :contactPo
+                           :customAccountLimit :created :pop :ovt
+                           :netbill :reference :document :locked]))
+  ([query projection]
+   (mongo/select :companies query projection (array-map :name 1))))
 
 (defn find-company-users [company-id]
   (usr/get-users {:company.id company-id} {:lastName 1}))
@@ -260,6 +270,11 @@
        (or (= :custom (keyword old-type))
            (= :custom (keyword new-type)))))
 
+(defn changing-billing-type?
+  "True if company :billingType was changed"
+  [{old :billingType} {new :billingType}]
+  (boolean (when new (not= old new))))
+
 (defn- changes [old new]
   (let [[in-old in-new _] (diff old new)
         keyset (set/union (-> in-old keys set) (-> in-new keys set))
@@ -278,7 +293,9 @@
         limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (validate! updated)
     (when (and (not (usr/admin? caller))
-               (account-type-changing-with-custom? company updates)) ; only admins are allowed to change account type to/from 'custom'
+               (or (account-type-changing-with-custom? company updates)
+                   ; only admins are allowed to change account type to/from 'custom'
+                   (changing-billing-type? company updates)))
       (fail! :error.unauthorized))
     (when (and (not (usr/admin? caller)) (not (custom-account? company)) (< limit old-limit))
       (fail! :company.account-type-not-downgradable))
@@ -371,7 +388,9 @@
                                             :link       #(str (env/value :host) "/app/" (name %) "/welcome#!/new-company-user/" token-id)})
     token-id))
 
-(defn add-user! [user company role submit]
+(defn add-user!
+  "Adds creates :new-company-user token and sends email to new user. Returns token-id."
+  [user company role submit]
   (let [user (update-in user [:email] ss/canonize-email)
         token-id (token/make-token :new-company-user nil {:user user
                                                           :company company
@@ -450,16 +469,29 @@
   (ok))
 
 (defn company->auth
-  "No auth if company is currently locked."
-  [company]
-  (when-not (locked? company (now))
-      (some-> company
-           (select-keys [:id :name :y])
-           (assoc :role      "writer"
-                  :type      "company"
-                  :username  (-> company :y ss/trim ss/lower-case) ; usernames are always in lower case
-                  :firstName (:name company)
-                  :lastName  ""))))
+  "No auth if company is currently locked. The default role is
+  writer. However, if invite-role is given, the resulting auth is in
+  the invite format: only company-admin can read the application and
+  accept the invitation."
+  ([company invite-role]
+   (when-not (locked? company (now))
+     (when-let [auth (some-> company
+                             (select-keys [:id :name :y])
+                             (assoc :type      "company"
+                                    ;; usernames are always in lower case
+                                    :username  (-> company :y ss/trim ss/lower-case)
+                                    :firstName (:name company)
+                                    :lastName  ""))]
+       (if invite-role
+         (assoc auth
+                :role "reader"
+                :company-role :admin
+                :invite {:user    {:id (:id company)}
+                         :created (now)
+                         :role    invite-role})
+         (assoc auth :role "writer")))))
+  ([company]
+   (company->auth company nil)))
 
 (defn company-invitation-token [caller company-id application-id]
   (token/make-token
@@ -495,26 +527,19 @@
 
 (defn company-invite [caller application company-id]
   {:pre [(map? caller) (map? application) (string? company-id)]}
-  (let [company   (find-company! {:id company-id})
-        auth      (assoc (company->auth company)
-                    :id      company-id
-                    :role    "reader"
-                    :company-role :admin
-                    :inviter (usr/summary caller)
-                    :invite  {:user {:id company-id}
-                              :created (now)
-                              :role "writer"})
-        admins    (find-company-admins company-id)
-        application-id (:id application)
-        update-count (update-application
-                       (application->command application)
-                       {:auth {$not {$elemMatch {:invite.user.id company-id}}}}
-                       {$push {:auth auth}, $set  {:modified (now)}}
-                       :return-count? true)]
+  (let [company        (find-company! {:id company-id})
+        auth           (assoc (company->auth company :writer)
+                              :inviter (usr/summary caller))
+        admins         (find-company-admins company-id)
+        update-count   (update-application
+                        (application->command application)
+                        {:auth {$not {$elemMatch {:invite.user.id company-id}}}}
+                        {$push {:auth auth}, $set {:modified (now)}}
+                        :return-count? true)]
     (when (pos? update-count)
-      (notif/notify! :accept-company-invitation {:admins     admins
-                                                 :inviter    caller
-                                                 :company    company
+      (notif/notify! :accept-company-invitation {:admins      admins
+                                                 :inviter     caller
+                                                 :company     company
                                                  :application application}))))
 
 (notif/defemail :accept-company-invitation {:subject-key   "accept-company-invitation.subject"
@@ -523,11 +548,13 @@
                                                              (merge (notif/create-app-model model nil recipient)
                                                                     model))})
 
-(defmethod auth/approve-invite-auth :company [{invite :invite :as auth} {{company-id :id} :company :as user} accepted-ts]
+(defmethod auth/approve-invite-auth :company
+  [{invite :invite :as auth} {{company-id :id} :company :as user} accepted-ts]
   (when invite
     (some-> (find-company! {:id company-id})
             company->auth
             (util/assoc-when-pred util/not-empty-or-nil?
+              :role (:role invite)
               :inviter (:inviter auth)
               :inviteAccepted accepted-ts))))
 

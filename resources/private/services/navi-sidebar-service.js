@@ -59,7 +59,7 @@ LUPAPISTE.NaviSidebarService = function() {
                       page: "organization-bulletins",
                       loc: "auth-admin.bulletin-settings",
                       showIf: authOk( "user-organization-bulletin-settings")},
-                     {icon: "lupicon-archives",
+                     {icon: "lupicon-shopping-cart",
                       page: "organization-store-settings",
                       loc:  "auth-admin.docstore.title-short",
                       showIf: authOk("docstore-enabled")},

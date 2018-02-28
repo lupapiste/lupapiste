@@ -69,3 +69,13 @@
         :template {:giver "lautakunta"}}
 
     (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0)))
+
+(facts "update automatic dates"                             ; TODO test "update-automatic-verdict-dates" function
+  ; this should be continued done at some point,
+  ; update-automatic-verdict-dates is given the "verdict" (result of 'command->verdict')
+  ; which has keys 'category' 'verdict-data', 'references' 'template'
+  #_(-> (set/rename-keys (:verdict verdict-draft) {:data :verdict-data})
+       (assoc :category :r)
+       (assoc-in [:verdict-data :automatic-verdict-dates] true)
+       (assoc-in [:verdict-data :verdict-date] "1.3.2018")
+       (lupapalvelu.pate.verdict/update-automatic-verdict-dates)))

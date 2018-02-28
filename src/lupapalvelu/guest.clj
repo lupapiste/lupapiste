@@ -182,14 +182,14 @@
 (defn toggle-guest-subscription
   "Namesake command implementation.
   Organization authorities can un/subscribe anybody.
-  Owner/writer can un/subscribe guests.
+  Writer can un/subscribe guests.
   Guests can un/subscribe themselves."
   [{{:keys [username unsubscribe]} :data
     application :application
     user :user
     :as command}]
   (let [authority? (auth/application-authority? application user)
-        writer?    (auth/user-authz? #{:owner :writer} application user)
+        writer?    (auth/user-authz? #{:writer} application user)
         guest?     (-> (username-auth application username) :role (= "guest"))
         own?       (= (:username user) username)]
     (if (or authority? (and writer? guest?) own?)

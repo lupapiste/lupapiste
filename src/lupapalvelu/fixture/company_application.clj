@@ -11,7 +11,7 @@
 
 (def created 1514877090000)
 
-(def applications [{:id "LP-753-2018-90001"
+(def applications [{:id (str "LP-753-" minimal/now-year "-90001")
                     :startedBy {}
                     :archived {:initial nil
                                :application nil
@@ -80,14 +80,7 @@
                     :warrantyEnd nil
                     :handlers []
                     :finished nil
-                    :auth [{:role "owner"
-                            :username "kaino@solita.fi"
-                            :firstName "Kaino"
-                            :type "owner"
-                            :unsubscribed false
-                            :id "kainosolita"
-                            :lastName "Solita"}
-                           {:id "solita"
+                    :auth [{:id "solita"
                             :name "Solita Oy"
                             :y "1060155-5"
                             :role "writer"
@@ -272,4 +265,4 @@
   (mongo/insert-batch :companies companies)
   (mongo/insert-batch :organizations organizations)
   (mongo/insert-batch :applications applications)
-  (mongo/insert :sequences {:_id "applications-753-2018" :count 1}))
+  (mongo/insert :sequences {:_id (str "applications-753-" minimal/now-year) :count 1}))

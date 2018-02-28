@@ -559,8 +559,7 @@
                      :firstName "Pena"
                      :lastName "Panaani"
                      :username "pena"
-                     :type "owner"
-                     :role "owner"}
+                     :role "writer"}
                      {:id "777777777777777777000023"
                       :firstName "Sonja"
                       :lastName "Sibbo"
@@ -634,9 +633,8 @@
 (fact "Meta test: fixture is valid"
   (let [app {:auth [{:lastName "Panaani",
                      :firstName "Pena",
-                     :username "pena",
-                     :type "owner",
-                     :role "owner",
+                     :username "pena"
+                     :role "writer",
                      :id "777777777777777777000020"}]}]
     (has-errors? (validate app hakija-with-turvakielto)) => false
     (has-errors? (validate app uusiRakennus-with-turvakielto)) => false))
@@ -658,11 +656,10 @@
 
     (facts "stripped documents are valid"
       (let [app {:auth [{:lastName "Panaani",
-                     :firstName "Pena",
-                     :username "pena",
-                     :type "owner",
-                     :role "owner",
-                     :id "777777777777777777000020"}]}]
+                         :firstName "Pena",
+                         :username "pena",
+                         :role "writer",
+                         :id "777777777777777777000020"}]}]
         (has-errors? (validate app stripped-hakija)) => false
         (has-errors? (validate app stripped-uusirakennus)) => false))
 
