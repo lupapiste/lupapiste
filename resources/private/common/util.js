@@ -302,7 +302,7 @@ var util = (function($) {
     if (ua && ub && ua["type-group"] && ua["type-id"]) {
       return ua["type-group"] === ub["type-group"] && ua["type-id"] === ub["type-id"];
     } else {
-      return ua === ub;
+      return _.isEqual(ua, ub);
     }
   });
 
