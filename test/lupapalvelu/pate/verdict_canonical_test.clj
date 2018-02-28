@@ -64,6 +64,61 @@
                                              :en "Review2"}
                                       :type "paikan-merkitseminen"}]}})
 
+(def p-verdict {:data     {:voimassa "25.2.2020"
+                           :appeal ""
+                           :julkipano "22.2.2018"
+                           :bulletinOpDescription "Hanke on todella vaativa"
+                           :verdict-date "21.2.2018"
+                           :purpose ""
+                           :verdict-section "9"
+                           :verdict-text "Annettu"
+                           :muutoksenhaku "24.2.2018"
+                           :anto "23.2.2018"
+                           :complexity "medium"
+                           :attachments
+                           ({:type-group :paatoksenteko, :type-id :paatos, :amount 6}
+                             {:type-group :paatoksenteko, :type-id :paatosote, :amount 1})
+                           :plans []
+                           :foremen ["erityis-tj"]
+                           :verdict-code "annettu-lausunto"
+                           :extra-info ""
+                           :collateral ""
+                           :conditions {}
+                           :rights ""
+                           :plans-included false
+                           :language "fi"
+                           :reviews []
+                           :foremen-included false
+                           :deviations ""
+                           :neighbors ""
+                           :contact "Pete Paattaja"
+                           :reviews-included false}
+                :references
+                          {:verdict-code ["annettu-lausunto"]
+                           :foremen ["erityis-tj"]
+                           :date-deltas
+                                         {:julkipano 1
+                                          :anto 11
+                                          :muutoksenhaku 1
+                                          :lainvoimainen 1
+                                          :aloitettava 1
+                                          :voimassa 2}
+                           :plans []
+                           :reviews []}
+                :template
+                          {:giver "viranhaltija"
+                           :exclusions
+                                  {:statements true
+                                   :upload true
+                                   :aloitettava true
+                                   :lainvoimainen true
+                                   :verdict-section true
+                                   :buildings true}}
+                :id "5a8adacba067cd387ff9c00c"
+                :modified 1519224505171
+                :category :p})
+
+
 (testable-privates lupapalvelu.pate.verdict-canonical
                    vaadittu-katselmus-canonical
                    maarays-seq-canonical
@@ -226,3 +281,34 @@
       :paatospvm "2017-11-23"
       :pykala "99"
       :liite nil})
+
+(facts "Canonical for P verdict"
+
+  (facts paivamaarat-type-canonical
+    (fact "all dates defined"
+      (paivamaarat-type-canonical "fi" p-verdict)
+      => {:aloitettavaPvm nil
+          :lainvoimainenPvm nil
+          :voimassaHetkiPvm "2020-02-25"
+          :raukeamisPvm nil
+          :antoPvm "2018-02-23"
+          :viimeinenValitusPvm nil
+          :julkipanoPvm "2018-02-22"})
+    (fact "undefined fields defaults to nil"
+      (paivamaarat-type-canonical "fi" (update p-verdict :data dissoc :lainvoimainen :voimassa))
+      => {:aloitettavaPvm nil
+          :lainvoimainenPvm nil
+          :voimassaHetkiPvm nil
+          :raukeamisPvm nil
+          :antoPvm "2018-02-23"
+          :viimeinenValitusPvm nil
+          :julkipanoPvm "2018-02-22"}))
+
+  (fact paatospoytakirja-type-canonical
+    (paatospoytakirja-type-canonical "fi" p-verdict)
+    => {:paatos "Annettu"
+        :paatoskoodi "annettu lausunto"
+        :paatoksentekija "Pete Paattaja"
+        :paatospvm "2018-02-21"
+        :pykala "9"
+        :liite nil}))

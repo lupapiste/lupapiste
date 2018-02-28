@@ -113,7 +113,8 @@
 
 (defschema PateSavedVerdictTemplates
   {:templates [PateSavedTemplate]
-   (sc/optional-key :settings)  {(sc/optional-key :r) PateSavedSettings}
+   (sc/optional-key :settings)  {(sc/optional-key :r) PateSavedSettings
+                                 (sc/optional-key :p) PateSavedSettings}
    (sc/optional-key :reviews)   [PateSettingsReview]
    (sc/optional-key :plans)     [PateGeneric]})
 
