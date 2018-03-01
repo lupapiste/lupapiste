@@ -687,26 +687,29 @@
   (->> (usr/find-authorized-users-in-org org-id org-authz)
        (map #(select-keys % [:id :firstName :lastName]))))
 
+;; Replacing operation
+
 (defn- get-operation-schemas [op-name]
   (->> op-name
        (keyword)
        (get op/operations)
        ((fn [op-metadata] (concat (:required op-metadata)
                                   (:org-required-schemas op-metadata)
-                                  (:optional op-metadata)
                                   [(:applicant-doc-schema op-metadata)])))))
 
-(defn- get-relevant-documents-for-all-operations [new-ops]
+(defn- get-relevant-document-names-for-all-operations [new-ops]
   (->> new-ops
        (map #(get-operation-schemas (:name %)))
        (apply concat)
        (set)))
 
-(defn- get-operation-names-from-operation-schema-docs [op-docs]
-  (->> op-docs
-       (map #(-> % :schema-info :op :name))
-       (remove nil?)
-       (set)))
+(defn- replace-old-operation-doc-with-new [documents op-id new-docs]
+  (let [new-operation-docs (->> new-docs
+                                (filter #(#{op-id} (-> % :schema-info :op :id))))]
+    (->> documents
+         (filter #(some? (-> % :schema-info :op :name)))
+         (remove #(#{op-id} (-> % :schema-info :op :id)))
+         (concat new-operation-docs))))
 
 (defn- pick-relevant-docs-from-old-docs [new-op-docs documents doc-name]
   (let [existing-docs (filter #(= doc-name (-> % :schema-info :name)) documents)]
@@ -714,15 +717,14 @@
       existing-docs
       (filter #(= doc-name (-> % :schema-info :name)) new-op-docs))))
 
-(defn copy-docs-from-old-op-to-new [{:keys [documents]} new-ops new-op-docs]
-  (let [docs-for-new-ops        (get-relevant-documents-for-all-operations new-ops)
-        new-op-doc-names        (get-operation-names-from-operation-schema-docs new-op-docs)
-        new-operation-documents (filter #(new-op-doc-names (-> % :schema-info :op :name)) new-op-docs)]
+(defn- copy-docs-from-old-op-to-new [{:keys [documents]} op-id new-ops new-op-docs]
+  (let [docs-for-new-ops (get-relevant-document-names-for-all-operations new-ops)
+        operation-docs   (replace-old-operation-doc-with-new documents op-id new-op-docs)]
     (->> docs-for-new-ops
          (map (partial pick-relevant-docs-from-old-docs new-op-docs documents))
          (apply concat)
-         (remove nil?)
-         (concat new-operation-documents))))
+         (concat operation-docs)
+         (remove nil?))))
 
 (defn- get-attachment-types [attachments]
   (->> attachments
@@ -741,7 +743,7 @@
 (defn- change-operation-in-attachments [old-op new-op attachments]
   (map (partial change-operation-in-attachment old-op new-op) attachments))
 
-(defn copy-attachments-from-old-op-to-new [{:keys [attachments]} old-op new-op new-attachments]
+(defn- copy-attachments-from-old-op-to-new [{:keys [attachments]} old-op new-op new-attachments]
   (let [new-attachment-types (get-attachment-types new-attachments)]
     (loop [acc []
            old-attachments attachments
@@ -761,15 +763,21 @@
                  (remove #(new-attachment-types (:type %)) old-attachments)
                  (rest new-attachments)))))))
 
-(defn get-operation [application primary? op-id]
+(defn- get-operation [application primary? op-id]
   (if primary?
     (:primaryOperation application)
-    (-> application
-        :secondaryOperations
-        (filter #(= op-id (:id %)))
-        (first))))
+    (->> application
+         :secondaryOperations
+         (filter #(= op-id (:id %)))
+         (first))))
 
-(defn build-replace-operation-query [application primary-op? new-op new-docs new-attachments]
+(defn- get-new-operations [application old-op-id new-op]
+  (->> application
+       (get-operations)
+       (remove #(= old-op-id (:id %)))
+       (cons new-op)))
+
+(defn- build-replace-operation-query [application primary-op? new-op new-docs new-attachments]
   (let [base-query {:attachments new-attachments
                     :documents   new-docs}]
     (if primary-op?
@@ -778,6 +786,25 @@
                                                   :secondaryOperations
                                                   (remove #(= (:id new-op) (:id %)))
                                                   (cons new-op))))))
+
+(defn replace-operation [{{app-state :state tos-function :tosFunction :as application} :application
+                          organization                                                 :organization
+                          created                                                      :created :as command} op-id operation]
+  (let [primary-op?           (= op-id (-> application :primaryOperation :id))
+        old-op                (get-operation application primary-op? op-id)
+        new-op                (assoc old-op :name operation)
+        new-operations        (get-new-operations application op-id new-op)
+        new-op-docs           (make-documents nil created @organization new-op application)
+        new-docs              (copy-docs-from-old-op-to-new application op-id new-operations new-op-docs)
+        new-attachments-blank (make-attachments created new-op @organization app-state tos-function)
+        new-attachments       (copy-attachments-from-old-op-to-new application old-op new-op new-attachments-blank)
+        update-query          (build-replace-operation-query application
+                                                             primary-op?
+                                                             new-op
+                                                             new-docs
+                                                             new-attachments)]
+    (action/update-application command {$set update-query})
+    (ok)))
 
 ;; Cancellation
 

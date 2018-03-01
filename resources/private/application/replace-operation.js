@@ -34,8 +34,6 @@
 
             lupapisteApp.setTitle(lupapisteApp.models.application.title());
 
-            console.log(self.oldOperation());
-
             if (lupapisteApp.models.applicationAuthModel.ok("addable-operations")) {
                 ajax
                     .query("addable-operations", {id: lupapisteApp.models.application.id()})
@@ -57,7 +55,7 @@
                                                        operation: self.operation()})
                 .processing(self.processing)
                 .pending(self.pending)
-                .success(function() {
+                .success(function(result) {
                     window.location.hash = self.url();
                 })
                 .call();

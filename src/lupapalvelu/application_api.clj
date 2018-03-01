@@ -547,25 +547,10 @@
                        :required [:application/edit-draft :application/edit-operation]}
 
                       {:required [:application/edit-operation]}]
-   :input-validators [operation-validator]}
-  [{{app-state :state tos-function :tosFunction :as application} :application
-   organization :organization
-   created :created :as command}]
-  (let [primary-op?           (= opId (-> application :primaryOperation :id))
-        old-op                (app/get-operation application primary-op? opId)
-        new-op                (assoc old-op :name operation)
-        new-operations        (->> application (app/get-operations) (remove #(= opId (:id %))) (cons new-op))
-        new-op-docs           (app/make-documents nil created @organization new-op application)
-        new-docs              (app/copy-docs-from-old-op-to-new application new-operations new-op-docs)
-        new-attachments-blank (app/make-attachments created new-op @organization app-state tos-function)
-        new-attachments       (app/copy-attachments-from-old-op-to-new application old-op new-op new-attachments-blank)
-        update-query          (app/build-replace-operation-query application
-                                                                 primary-op?
-                                                                 new-op
-                                                                 new-docs
-                                                                 new-attachments)]
-    (update-application command {$set update-query})
-    (ok)))
+   :input-validators [operation-validator
+                      (partial action/non-blank-parameters [:id :opId :operation])]}
+  [command]
+  (app/replace-operation command opId operation))
 
 (defcommand change-permit-sub-type
   {:parameters       [id permitSubtype]
