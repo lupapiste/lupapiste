@@ -202,7 +202,7 @@
                 mapping-to-krysp/http-not-allowed]
    :states     states/post-verdict-states}
   [{:keys [application organization] :as command}]
-  (let [sent-document-ids (mapping-to-krysp/save-parties-as-krysp command lang)
+  (let [sent-document-ids (or (mapping-to-krysp/save-parties-as-krysp command lang) [])
         transfer-item     (get-transfer-item :parties-to-backing-system command {:data-key :party-documents
                                                                                  :data sent-document-ids})]
     (update-application command {$push {:transfers transfer-item}})
