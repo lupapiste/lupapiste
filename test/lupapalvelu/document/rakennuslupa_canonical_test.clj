@@ -1513,13 +1513,15 @@
                    :description "Talo"
                    :operationId "op1"}})
 
-  (fact "rakennusnro missing"
+  (fact "rakennusnro missing, match by valtakunnallinenNumero"
     (enrich-review-building application-rakennuslupa-verdict-given {:rakennus {:jarjestysnumero 1
-                                                                               :valtakunnallinenNumero "123"
+                                                                               :valtakunnallinenNumero "098098098"
                                                                                :kiinttun "21111111111111"}})
     => {:rakennus {:jarjestysnumero 1
-                   :valtakunnallinenNumero "123"
-                   :kiinttun "21111111111111"}})
+                   :valtakunnallinenNumero "098098098"
+                   :kiinttun "21111111111111"
+                   :description "Talo"
+                   :operationId "op1"}})
 
   (fact "kiinttun missing"
     (enrich-review-building application-rakennuslupa-verdict-given {:rakennus {:rakennusnro "001"

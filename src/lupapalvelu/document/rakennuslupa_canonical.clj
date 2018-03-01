@@ -407,7 +407,10 @@
   (when rakennus
     (let [property-id (or (not-empty kiinttun) (:propertyId app))
           app-building (util/find-first (every-pred (comp #{property-id} :propertyId)
-                                                    (comp #{rakennusnro} :localShortId)) app-buildings)]
+                                                    (some-fn (comp #{rakennusnro} :localShortId)
+                                                             (comp #{national-id} :nationalId)
+                                                             (comp #{national-id} :buildingId)))
+                                        app-buildings)]
       (update building :rakennus util/assoc-when
               :kiinttun property-id
               :valtakunnallinenNumero (when (ss/blank? national-id) (:nationalId app-building))
