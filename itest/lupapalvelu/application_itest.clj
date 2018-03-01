@@ -992,6 +992,7 @@
 (facts "Replacing primary operation"
   (let [app        (create-application pena :operation :pientalo :propertyId sipoo-property-id)
         app-id     (:id app)
+        op-id      (-> app :primaryOperation :id)
         type-group "pelastusviranomaiselle_esitettavat_suunnitelmat"
         type-id    "savunpoistosuunnitelma"]
 
@@ -999,8 +1000,11 @@
       (upload-attachment pena app-id {:id "" :type {:type-group type-group
                                                     :type-id type-id}} true) => truthy)
 
+    (fact "Pena adds operation"
+      (command pena :add-operation :id app-id :operation "varasto-tms"))
+
     (fact "Pena replaces primary operation"
-      (command pena :replace-operation :id app-id :op-id  :newOperation "masto-tms") => ok?)
+      (command pena :replace-operation :id app-id :opId op-id :operation "masto-tms") => ok?)
 
     (let
       [updated-app (query-application pena app-id)]
@@ -1015,7 +1019,7 @@
                            (= (-> % :type :type-id) type-id)))
              (count)) => 1)
 
-      (fact "Application has new primary operation documents"
+      (fact "Application has new primary operation document and old secondary operation document"
         (->> updated-app
              :documents
              (filter #(= "uusiRakennus" (-> % :schema-info :op :name)))) => empty?
@@ -1023,5 +1027,16 @@
         (->> updated-app
              :documents
              (filter #(= "masto-tms" (-> % :schema-info :op :name)))
+             (count)) => 1)
+
+      (fact "Application also has the secondary operation"
+        (->> updated-app
+             :secondaryOperations
+             (first)
+             :name) => "varasto-tms"
+
+        (->> updated-app
+             :documents
+             (filter #(= "varasto-tms" (-> % :schema-info :op :name)))
              (count)) => 1))))
 
