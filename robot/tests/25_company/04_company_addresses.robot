@@ -91,7 +91,9 @@ Payers address is still billing address
   Open tab  parties
   Open accordions  parties
   Select From List  //section[@data-doc-type="maksaja"]//select[@name="company-select"]  Valitse...
+  Sleep  0.5s
   Select From List  //section[@data-doc-type="maksaja"]//select[@name="company-select"]  Solita Oy (1060155-5)
+  Sleep  0.5s
   Company street address is  maksaja  \u00c5kerlundinkatu 11
   Company po is  maksaja  Tampere
   Company zip is  maksaja  33100
