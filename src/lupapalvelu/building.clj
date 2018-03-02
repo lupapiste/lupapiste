@@ -42,6 +42,9 @@
       (= (:id op) op-id))))
 
 (defn push-building-updates
+  "Push the provided building data to building-updates array in the
+  application. The data is used to buid the actual building array when
+  the application is given verdict."
   [{:keys [documents]} operation-id national-building-id location-map timestamp]
   (when (some (partial buildingId-in-document? operation-id) documents)
     {$push {:building-updates

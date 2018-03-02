@@ -99,16 +99,6 @@
    The scopes requested at authorization time must include the one defined in endpoint metadata."
   `(defendpoint-for usr/rest-user? ~path true ~@content))
 
-(defendpoint [:post "/rest/application/:application-id/update-national-building-id"] ; FIXME: deprecated, remove when parter has implementation ready for new endpoint 'update-building-data'
-  {:parameters       [:application-id     ApplicationId
-                      :operationId        OperationId
-                      :nationalBuildingId NationalBuildingId]}
-  (let [{org-id :organization :as app} (domain/get-application-as application-id user)]
-    (if (and (usr/user-is-authority-in-organization? user org-id)
-             (applications-data/update-building! app operationId nationalBuildingId nil))
-      (resp/status 200 (ok))
-      (resp/status 404 "Not found"))))
-
 
 (defn- save-building-data-message! [user status data timestamp]
   (let [message-id (messages/create-id)]
@@ -124,7 +114,6 @@
                     :action "update-building-data"
                     :data data})
     message-id))
-
 
 (defendpoint [:post "/rest/application/:application-id/update-building-data"]
   {:parameters       [:application-id     ApplicationId
