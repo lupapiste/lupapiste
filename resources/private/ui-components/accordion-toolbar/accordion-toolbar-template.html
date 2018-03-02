@@ -64,6 +64,14 @@
         <i class="lupicon-remove"></i>
         <span data-bind="ltext: 'remove'"></span>
       </button>
+      <!-- ko if: showReplaceOperation -->
+      <button class="secondary is-right"
+              data-bind="click: replaceOperation"
+              data-test-id="replace-operation">
+        <i class="lupicon-pen"></i>
+        <span data-bind="ltext: 'operations.replace'"></span>
+      </button>
+      <!-- /ko -->
       <!-- ko if: canBeDisabled -->
       <button class="secondary is-right"
               data-bind="attr: {'data-test-id': 'toggle-document-status'},
@@ -85,14 +93,6 @@
         <i class="lupicon-check"></i>
         <span data-bind="ltext: 'document.approve'"></span>
       </button>
-      <!-- ko if: showReplaceOperation -->
-      <button class="secondary is-right"
-              data-bind="click: replaceOperation"
-              data-test-id="replace-operation">
-        <i class="lupicon-pen"></i>
-        <span data-bind="ltext: 'application.replaceOperation'"></span>
-      </button>
-      <!-- /ko -->
       <!-- ko if: showIdentifierEditors -->
       <div class="identifier-editors container-bubble" data-test-id="identifier-editors" data-bind="event: {keydown: closeEditors}">
        <!-- ko if: isArchiveProject() -->

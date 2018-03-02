@@ -55,7 +55,8 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   });
 
   self.showReplaceOperation = ko.pureComputed( function() {
-    return _.get(self.info, ["op", "id"]) //&& self.auth.ok("replace-operation")
+    var isOp = op && op.id;
+    return isOp && lupapisteApp.models.applicationAuthModel.ok("replace-operation");
   });
 
   self.replaceOperation = function() {
