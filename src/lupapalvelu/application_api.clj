@@ -563,7 +563,7 @@
   (ok))
 
 (defcommand change-location
-  {:parameters       [id x y address propertyId]
+  {:parameters       [id x y address propertyId refreshBuildings]
    :states           (states/all-states-but (conj states/terminal-states :sent))
    :input-validators [(partial action/non-blank-parameters [:address])
                       (partial action/property-id-parameters [:propertyId])
@@ -588,7 +588,7 @@
                            $unset {:propertyIdSource true}})
       (try (app/autofill-rakennuspaikka (mongo/by-id :applications id) (now))
            (catch Exception e (warn "KTJ data was not updated after location changed")))
-      (when (permit/archiving-project? application)
+      (when (and (permit/archiving-project? application) (true? refreshBuildings))
         (app/fetch-buildings command propertyId)))
     (fail :error.property-in-other-muinicipality)))
 

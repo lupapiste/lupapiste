@@ -129,8 +129,17 @@
                           (:id application)
                           {$set {:buildings updated-buildings}}))))
 
+(defn add-other-building-docs [created-application document-datas structure-descriptions]
+  (let [;; make secondaryOperations for buildings other than the first one in case there are many
+        other-building-docs (map (partial application/document-data->op-document created-application) (rest document-datas))
+        secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
+
+        created-application (update-in created-application [:documents] concat other-building-docs)
+        created-application (update-in created-application [:secondaryOperations] concat secondary-ops)]
+    created-application))
+
 (defn create-archiving-project-application!
-  [command operation buildings-and-structures app-info location-info permit-type building-xml backend-id]
+  [command operation buildings-and-structures app-info location-info permit-type building-xml backend-id refreshBuildings]
   (let [{:keys [hakijat]} app-info
         document-datas (application/schema-datas app-info buildings-and-structures)
         manual-schema-datas {"archiving-project" (first document-datas)}
@@ -142,12 +151,9 @@
         structure-descriptions (map :description buildings-and-structures)
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
-        ;; make secondaryOperations for buildings other than the first one in case there are many
-        other-building-docs (map (partial application/document-data->op-document created-application) (rest document-datas))
-        secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
-
-        created-application (update-in created-application [:documents] concat other-building-docs)
-        created-application (update-in created-application [:secondaryOperations] concat secondary-ops)
+        created-application (if (true? refreshBuildings)
+                              (add-other-building-docs created-application document-datas structure-descriptions)
+                              created-application)
 
         created-application (assoc created-application :drawings (:drawings app-info))
 
@@ -182,7 +188,7 @@
    :propertyId (apply str (concat (first (split-at 3 organizationId)) "-00-00-00"))}))
 
 (defn fetch-or-create-archiving-project!
-  [{{:keys [lang organizationId kuntalupatunnus createAnyway createWithoutBuildings createWithDefaultLocation]} :data :as command}]
+  [{{:keys [lang organizationId kuntalupatunnus createAnyway createWithoutBuildings createWithDefaultLocation refreshBuildings]} :data :as command}]
   (let [operation         :archiving-project
         permit-type       "R"                                ; No support for other permit types currently
         dummy-application {:id "" :permitType permit-type :organization organizationId}
@@ -191,6 +197,7 @@
         {:keys [propertyId] :as location-info} (if createWithDefaultLocation (default-location organizationId lang) (get-location-info command app-info))
         organization      (when propertyId
                             (organization/resolve-organization (p/municipality-id-by-property-id propertyId) permit-type))
+        _ (println "FETCHISSÄÄ :::: " refreshBuildings)
         building-xml      (if app-info xml (application/fetch-building-xml organizationId permit-type propertyId))
         bldgs-and-structs (or (when app-info (building-reader/->buildings-and-structures xml))
                               (application/buildings-for-documents building-xml))
@@ -212,7 +219,8 @@
                                                                                                   location-info
                                                                                                   permit-type
                                                                                                   building-xml
-                                                                                                  kuntalupatunnus)]
+                                                                                                  kuntalupatunnus
+                                                                                                  refreshBuildings)]
                                             (ok :id id)))))
 
 (defn update-verdicts [{:keys [application] :as command} verdicts]
