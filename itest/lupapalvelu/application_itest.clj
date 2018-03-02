@@ -18,6 +18,11 @@
 
 (apply-remote-minimal)
 
+(command admin :set-organization-boolean-path
+         :organizationId "753-R"
+         :path "pate-enabled"
+         :value true)
+
 (fact "can't inject js in 'x' or 'y' params"
    (create-app pena :x ";alert(\"foo\");" :y "what ever") =not=> ok?
    (create-app pena :x "0.1x" :y "1.0")                   =not=> ok?

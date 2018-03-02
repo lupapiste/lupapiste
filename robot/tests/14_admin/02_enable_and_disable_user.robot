@@ -15,8 +15,8 @@ Solita admin search Ronja and disables her access
   Wait until     Element should be visible  xpath=//section[@id='users']//input[@data-test-id='users-list-input-search']
   Input text                                xpath=//section[@id='users']//input[@data-test-id='users-list-input-search']  ronj
   Wait for jQuery
-  Wait until     Element should be visible  xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='disable']
-  Wait until     Click element              xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='disable']
+  Wait until     Element should be visible  xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/button[@data-op='disable']
+  Wait until     Click element              xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/button[@data-op='disable']
   Confirm        dynamic-yes-no-confirm-dialog
   [Teardown]  Logout
 
@@ -30,8 +30,8 @@ Solita admin enables Ronjas account
   Wait until     Element should be visible  xpath=//section[@id='users']//input[@data-test-id='users-list-input-search']
   Input text                                xpath=//section[@id='users']//input[@data-test-id='users-list-input-search']  ronj
   Wait for jQuery
-  Wait until     Element should be visible  xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='enable']
-  Wait until     Click element              xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='enable']
+  Wait until     Element should be visible  xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/button[@data-op='enable']
+  Wait until     Click element              xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/button[@data-op='enable']
   Confirm        dynamic-yes-no-confirm-dialog
   [Teardown]  Logout
 

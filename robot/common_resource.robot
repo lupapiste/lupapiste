@@ -17,7 +17,7 @@ ${OP_TREE_SPEED}                0.1
 ${SLOW_SPEED}                   0.2
 ${SLOWEST_SPEED}                0.5
 
-${LOGIN URL}                    ${SERVER}/app/fi/welcome#!/login
+${LOGIN URL}                    ${SERVER}/app/fi/welcome
 ${LOGOUT URL}                   ${SERVER}/app/fi/logout
 ${BULLETINS URL}                ${SERVER}/app/fi/bulletins
 ${APPLICATIONS PATH}            /applicant#!/applications
@@ -57,7 +57,7 @@ Reload page and kill dev-box
 
 Open browser to login page
   Browser
-  Maximize browser window
+  Run Keyword And Ignore Error  Maximize browser window
   Set selenium speed  ${DEFAULT_SPEED}
   Apply minimal fixture now
   Set integration proxy on
@@ -314,7 +314,7 @@ User should not be logged in
   Wait Until  User is not logged in
 
 User is not logged in
-  Location should be  ${LOGIN URL}
+  Location should be  ${LOGIN URL}#!/login
   Page should contain  Haluan kirjautua palveluun
   # test that no data is bind.
 
@@ -332,7 +332,7 @@ Login fails
 
 User should be logged in
   [Arguments]  ${name}
-  Maximize browser window
+  Run Keyword And Ignore Error  Maximize browser window
   Scroll to top
   Wait Until  Element text should be  user-name  ${name}
 

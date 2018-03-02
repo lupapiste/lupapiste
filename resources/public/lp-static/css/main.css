@@ -1913,7 +1913,7 @@ nav .julkipano-brand .nav-bottom ul li a span {
 }
 
 .admin h2, .authority-admin h2 {
-  margin-top: 24px;
+  margin-top: 12px;
 }
 
 /* Louhi and Facta themes */
@@ -12513,19 +12513,19 @@ table.company-report-table {
   margin-top: 10px;
 }
 
-.admin-users-table td.users-table-actions {
+td.users-table-actions {
   white-space: nowrap;
 }
 
-.admin-users-table td.users-table-actions i {
+td.users-table-actions i {
   pointer-events: none;
 }
 
-.admin-users-table td.users-table-actions span {
+td.users-table-actions span {
   pointer-events: none;
 }
 
-.admin-users-table td.users-table-actions button:first-child {
+td.users-table-actions button:first-child {
   margin-right: 12px;
 }
 

@@ -7,7 +7,7 @@ Resource       ../../common_resource.robot
 *** Test Cases ***
 
 Sonja logs in and creates another application
-  Sonja logs in
+  Sonja logs in  False
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  kerrostalo-${secs}
   Set Suite Variable  ${propertyId}  753-423-2-41

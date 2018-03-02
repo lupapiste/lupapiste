@@ -102,8 +102,7 @@
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :user-roles #{:authority}
    :states     valid-states
-   :pre-checks [(task-state-assertion (tasks/all-states-but :sent :faulty_review_task))
-                tasks/deny-removal-of-vaadittu-lupaehtona]}
+   :pre-checks [(task-state-assertion (tasks/all-states-but :sent :faulty_review_task))]}
   [{:keys [application created] :as command}]
   (attachment/delete-attachments! application (map :id (tasks/task-attachments application taskId)))
   (update-application command

@@ -108,7 +108,9 @@
                    server
                    (str server "&"))
                  (str server "?"))]
-    (str server "request=GetFeature&" object-type "&filter=" filter)))
+    (str server "request=GetFeature&"
+         "maxFeatures=1000" ; LPK-3648
+         "&" object-type "&filter=" filter)))
 
 (defn wfs-krysp-url-with-service [server object-type filter]
   (str (wfs-krysp-url server object-type filter) "&service=WFS"))

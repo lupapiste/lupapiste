@@ -16,7 +16,7 @@ Authority admin goes to admin page
 
 Statement giver can be deleted - no questions asked
   Statement giver count is  1
-  Wait and click  xpath=//a[@data-test-id='remove-statement-giver']
+  Wait and click  xpath=//button[@data-test-id='remove-statement-giver']
   Statement giver count is  0
 
 Authorities from own municipality can be added as statement giver

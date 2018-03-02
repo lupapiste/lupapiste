@@ -2,6 +2,8 @@
                 :authorityAdmin     #{:organization/check-permanent-archive-enabled}}
  :organization {:authority          #{:organization/check-permanent-archive-enabled}
                 :approver           #{:organization/check-permanent-archive-enabled}
+                :tos-editor         #{:organization/check-permanent-archive-enabled}
+                :tos-publisher      #{:organization/check-permanent-archive-enabled}
                 :archivist          #{:organization/get-archiving-status}}
  :application  {:writer             #{:organization/check-permanent-archive-enabled}
                 :reader             #{:organization/check-permanent-archive-enabled}
