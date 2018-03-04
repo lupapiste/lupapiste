@@ -86,11 +86,9 @@
 (defquery document
   {:parameters       [:id doc collection]
    :categories       #{:documents :tasks}
-   :user-roles       #{:applicant :authority}
    :states           states/all-states
    :input-validators [doc-persistence/validate-collection]
-   :user-authz-roles roles/all-authz-roles
-   :org-authz-roles  roles/reader-org-authz-roles}
+   :permissions      [{:required [:application/read]}]}
   [{:keys [application user]}]
   (if-let [document (doc-persistence/by-id application collection doc)]
     (ok :document (application/process-document-or-task user application document))
@@ -105,10 +103,11 @@
    :categories  #{:documents}
    :optional-parameters [updates fetchRakennuspaikka]
    :input-validators [(partial action/non-blank-parameters [:id :schemaName])]
-   :user-roles #{:applicant :authority}
    :pre-checks [(addable-by-state? states/create-doc-states)
-                create-doc-validator
-                application/validate-authority-in-drafts]}
+                create-doc-validator]
+   :permissions [{:context  {:application {:state #{:draft}}}
+                  :required [:application/edit-draft]}
+                 {:required [:application/edit]}]}
   [{{schema-name :schemaName} :data :as command}]
   (let [document (doc-persistence/do-create-doc! command schema-name updates)]
     (when fetchRakennuspaikka
@@ -122,20 +121,17 @@
   {:parameters  [id docId]
    :categories  #{:documents}
    :input-validators [(partial action/non-blank-parameters [:id :docId])]
-   :user-roles #{:applicant :authority}
-   :pre-checks [(document-in-application-validator :docId)
-                (editable-by-state? :docId #{:draft :answered :open :submitted :complementNeeded})
-                application/validate-authority-in-drafts
-                validate-user-authz-by-doc-id
+   :pre-checks [(editable-by-state? :docId #{:draft :answered :open :submitted :complementNeeded})
                 (doc-disabled-validator :docId)
-                remove-doc-validator]}
-  [{:keys [application created] :as command}]
-  (if-let [document (domain/get-document-by-id application docId)]
-    (do
-      (doc-persistence/remove! command docId "documents")
-      (assignment/remove-target-from-assignments id docId)
-      (ok))
-    (fail :error.document-not-found)))
+                remove-doc-validator]
+   :contexts [document-context]
+   :permissions [{:context  {:application {:state #{:draft}}}
+                  :required [:application/edit-draft :document/edit]}
+                 {:required [:application/edit :document/edit]}]}
+  [{:keys [document] :as command}]
+  (doc-persistence/remove! command document)
+  (assignment/remove-target-from-assignments id docId)
+  (ok))
 
 (defn- update-document-assignment-statuses [app-id doc-id doc-status]
   (if (= doc-status "disabled")

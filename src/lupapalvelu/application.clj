@@ -801,7 +801,7 @@
         command                   (util/deep-merge command (action/application->command application))]
   (when (some? (:id primary-operation))
     (do
-      (mapv #(doc-persistence/remove! command (:id %) "documents") old-building-docs)
+      (mapv #(doc-persistence/remove! command %) old-building-docs)
       (action/update-application command {$set  {:primaryOperation    primary-operation
                                                  :secondaryOperations secondary-ops}
                                           $push {:documents {$each building-docs}}})

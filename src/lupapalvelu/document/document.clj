@@ -13,16 +13,27 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.permissions :refer [defcontext]]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as usr]
             [lupapalvelu.wfs :as wfs]
             [clj-time.format :as tf]))
 
 ;;
 ;; Validators
 ;;
+
+(defcontext document-context [{{document-id :docId} :data :keys [application user]}]
+  (if-let [doc (domain/get-document-by-id application document-id)]
+    (let [schema (model/get-document-schema doc)
+          roles (if (auth/application-authority? application user)
+                 #{:authority}
+                 (get-in schema [:info :user-authz-roles] #{:writer}))]
+      {:context-scope :document
+       :context-roles roles
+       :document doc})
+    (fail! :error.document-not-found)))
 
 (defn state-valid-by-schema? [schema schema-states-key default-states state]
   (-> (get-in schema [:info (keyword schema-states-key)])
