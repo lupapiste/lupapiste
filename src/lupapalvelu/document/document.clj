@@ -25,19 +25,20 @@
 ;; Validators
 ;;
 
-(defcontext document-context [{{document-id :docId} :data :keys [application user]}]
-  (if-let [doc (domain/get-document-by-id application document-id)]
-    (let [schema (model/get-document-schema doc)
-          ; At least foreman schema allows access with :foreman role, this resolves if the users application authz
-          ; match the one required by the schema, i.e. foreman won't get any role for a document requiring writer
-          required-roles (set (get-in schema [:info :user-authz-roles] roles/default-authz-writer-roles))
-          actual-role (auth/user-or-company-authz? required-roles application user)]
-      {:context-scope :document
-       :context-roles (if actual-role
-                        #{actual-role}
-                        #{})
-       :document doc})
-    (fail! :error.document-not-found)))
+(defcontext document-context [{:keys [application user data]}]
+  (when-let [document-id (and application (some data [:docId :doc]))]
+    (if-let [doc (domain/get-document-by-id application document-id)]
+      (let [schema (model/get-document-schema doc)
+            ; At least foreman schema allows access with :foreman role, this resolves if the users application authz
+            ; match the one required by the schema, i.e. foreman won't get any role for a document requiring writer
+            required-roles (set (get-in schema [:info :user-authz-roles] roles/default-authz-writer-roles))
+            actual-role (->> [(auth/user-or-company-authz? required-roles application user)]
+                             (filter some?)
+                             set)]
+        {:context-scope :document
+         :context-roles actual-role
+         :document doc})
+      (fail! :error.document-not-found))))
 
 (defn state-valid-by-schema? [schema schema-states-key default-states state]
   (-> (get-in schema [:info (keyword schema-states-key)])

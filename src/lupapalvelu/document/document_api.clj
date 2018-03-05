@@ -163,14 +163,13 @@
 (defcommand update-doc
   {:parameters [id doc updates]
    :categories #{:documents}
-   :user-roles #{:applicant :authority}
-   :user-authz-roles roles/writer-roles-with-foreman
    :input-validators [(partial action/non-blank-parameters [:id :doc])
                       (partial action/vector-parameters [:updates])]
-   :pre-checks [(document-in-application-validator :doc)
-                (editable-by-state? :doc states/update-doc-states)
-                validate-user-authz-by-doc
-                application/validate-authority-in-drafts
+   :contexts [document-context]
+   :permissions [{:context  {:application {:state #{:draft}}}
+                  :required [:application/edit-draft :document/edit]}
+                 {:required [:application/edit :document/edit]}]
+   :pre-checks [(editable-by-state? :doc states/update-doc-states)
                 (doc-disabled-validator :doc)
                 (validate-created-after-verdict :doc)
                 (validate-post-verdict-not-approved :doc)]}
