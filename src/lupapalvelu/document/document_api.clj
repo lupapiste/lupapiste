@@ -179,12 +179,14 @@
 (defcommand update-task
   {:parameters [id doc updates]
    :categories #{:tasks}
-   :user-roles #{:applicant :authority}
-   :states     (states/all-application-states-but (conj states/terminal-states :sent))
+   ; TODO: Sallitaanko tämä vain viranomaiselle vai pitääkö applicantin muokata muuta lupaehtoa?
+   ; Tässä oli sallittuna draft-tila (applicantille), mutta käytännössä tätä ei voinut applicant suorittaa
+   ; koska validate-user-authz-by-key esti. Draft oli estettynä viranomiselta. Voiko taskia edes luoda
+   ; draft-tilassa? Ei ainakaan create-task-commandilla.
+   :states     (states/all-application-states-but (conj states/terminal-states :sent :draft))
    :input-validators [(partial action/non-blank-parameters [:id :doc])
                       (partial action/vector-parameters [:updates])]
-   :pre-checks [validate-user-authz-by-doc
-                application/validate-authority-in-drafts]}
+   :permissions [{:required [:application/edit :task/edit]}]}
   [command]
   (doc-persistence/update! command doc updates "tasks"))
 
