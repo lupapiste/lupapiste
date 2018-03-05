@@ -80,23 +80,24 @@
        process-applications))
 
 (defn- operation-building-updates
-  "Generates single mongo update clause from three parts:
-  1. Document updates for national-building-id (valtakunnallinenNumero)
-  2. Buildings-array updates for national-building-id (valtakunnallinenNumero)
-  3. Buildings-array updates for building location (x+y)."
-  [application operation-id national-building-id location-map]
-  (util/assoc-when-pred
-      nil not-empty
-      $set (merge
-            (building/document-buildingid-updates-for-operation application national-building-id operation-id)
-            (building/buildings-array-buildingid-updates-for-operation application national-building-id operation-id)
-            (building/buildings-array-location-updates-for-operation application location-map operation-id))))
+  "Generates single mongo update clause from four parts:
+  1. Push building updates to building-updates array
+  2. Document updates for national-building-id (valtakunnallinenNumero)
+  3. Buildings-array updates for national-building-id (valtakunnallinenNumero)
+  4. Buildings-array updates for building location (x+y)."
+  [application operation-id national-building-id location-map timestamp]
+  (-> (building/push-building-updates application operation-id national-building-id location-map timestamp)
+      (util/assoc-when-pred not-empty
+        $set (merge
+              (building/document-buildingid-updates-for-operation application national-building-id operation-id)
+              (building/buildings-array-buildingid-updates-for-operation application national-building-id operation-id)
+              (building/buildings-array-location-updates-for-operation application location-map operation-id)))))
 
 (defn update-building!
   "Updates building data from REST API to application.
   Updates national-building-id to document and buildings-array.
   Updates building location (x+y) to buildings array."
-  [application operation-id national-building-id location-map]
-  (when-let [updates (operation-building-updates application operation-id national-building-id location-map)]
+  [application operation-id national-building-id location-map timestamp]
+  (when-let [updates (operation-building-updates application operation-id national-building-id location-map timestamp)]
     (action/update-application (action/application->command application) updates)
     true))
