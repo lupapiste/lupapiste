@@ -16,7 +16,7 @@
    :user-roles #{:admin}}
   [_]
   (let [app-id (ss/trim applicationId)]
-    (if-let [application (domain/get-application-no-access-checking app-id)]
+    (if-let [application (domain/get-application-no-access-checking app-id [:permitType :organization])]
      {:status 200
       :body (krysp-fetch/get-application-xml-by-application-id application true)
       :headers {"Content-Type" "application/xml;charset=UTF-8"
