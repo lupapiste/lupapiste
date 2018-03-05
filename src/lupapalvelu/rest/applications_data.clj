@@ -80,10 +80,11 @@
        process-applications))
 
 (defn- operation-building-updates
-  "Generates single mongo update clause from three parts:
-  1. Document updates for national-building-id (valtakunnallinenNumero)
-  2. Buildings-array updates for national-building-id (valtakunnallinenNumero)
-  3. Buildings-array updates for building location (x+y)."
+  "Generates single mongo update clause from four parts:
+  1. Push building updates to building-updates array
+  2. Document updates for national-building-id (valtakunnallinenNumero)
+  3. Buildings-array updates for national-building-id (valtakunnallinenNumero)
+  4. Buildings-array updates for building location (x+y)."
   [application operation-id national-building-id location-map timestamp]
   (-> (building/push-building-updates application operation-id national-building-id location-map timestamp)
       (util/assoc-when-pred not-empty
