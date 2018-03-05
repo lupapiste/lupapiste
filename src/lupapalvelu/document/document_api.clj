@@ -147,20 +147,18 @@
    :categories  #{:documents}
    :input-validators [(partial action/non-blank-parameters [:id :docId])
                       (partial action/select-parameters [:value] #{"enabled" "disabled"})]
-   :user-roles #{:applicant :authority}
    :states     states/post-verdict-states
-   :pre-checks [(document-in-application-validator :docId)
-                (editable-by-state? :docId nil)            ; edition defined solely by document schema
-                (validate-disableable-schema :docId)
-                validate-document-is-pre-verdict-or-approved
-                validate-user-authz-by-doc-id]}
+   :contexts [document-context]
+   :permissions [{:context  {:application {:state #{:draft}}}
+                  :required [:application/edit-draft :document/edit]}
+                 {:required [:application/edit :document/edit]}]
+   :pre-checks [(editable-by-state? :docId nil)            ; edition defined solely by document schema
+                document-disableable-precheck
+                validate-document-is-pre-verdict-or-approved]}
   [command]
-  (if (domain/get-document-by-id (:application command) docId)
-    (do
-      (doc-persistence/set-disabled-status command docId value)
-      (update-document-assignment-statuses id docId value)
-      (ok))
-    (fail :error.document-not-found)))
+  (doc-persistence/set-disabled-status command docId value)
+  (update-document-assignment-statuses id docId value)
+  (ok))
 
 (defcommand update-doc
   {:parameters [id doc updates]

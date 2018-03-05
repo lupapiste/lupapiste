@@ -130,13 +130,11 @@
       (when (:disabled doc)
         (fail :error.document.disabled)))))
 
-(defn validate-disableable-schema
+(defn document-disableable-precheck
   "Checks if document can be disabled from document's schema"
-  [key]
-  (fn [{:keys [application data]}]
-    (when-let [doc (and (get data key) (domain/get-document-by-id application (get data key)))]
-      (when-not (get-in doc [:schema-info :disableable])
-        (fail :error.document.not-disableable)))))
+  [{:keys [document]}]
+  (when-not (get-in document [:schema-info :disableable])
+    (fail :error.document.not-disableable)))
 
 (defn validate-document-is-pre-verdict-or-approved
   "Pre-check for document disabling. If document is added after verdict, it needs to be approved."
