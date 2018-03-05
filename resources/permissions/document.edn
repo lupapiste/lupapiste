@@ -1,4 +1,5 @@
-{:organization {:authority          #{:document/approve}
+{:organization {:authority          #{:document/approve
+                                      :document/edit}
                 :approver           #{:document/approve}}
- :document     {:authority          #{:document/edit}
-                :writer             #{:document/edit}}}
+ :document     {:writer             #{:document/edit}
+                :foreman            #{:document/edit}}}

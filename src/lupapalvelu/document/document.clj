@@ -15,6 +15,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.permissions :refer [defcontext]]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [lupapalvelu.wfs :as wfs]
@@ -27,11 +28,14 @@
 (defcontext document-context [{{document-id :docId} :data :keys [application user]}]
   (if-let [doc (domain/get-document-by-id application document-id)]
     (let [schema (model/get-document-schema doc)
-          roles (if (auth/application-authority? application user)
-                 #{:authority}
-                 (get-in schema [:info :user-authz-roles] #{:writer}))]
+          ; At least foreman schema allows access with :foreman role, this resolves if the users application authz
+          ; match the one required by the schema, i.e. foreman won't get any role for a document requiring writer
+          required-roles (set (get-in schema [:info :user-authz-roles] roles/default-authz-writer-roles))
+          actual-role (auth/user-or-company-authz? required-roles application user)]
       {:context-scope :document
-       :context-roles roles
+       :context-roles (if actual-role
+                        #{actual-role}
+                        #{})
        :document doc})
     (fail! :error.document-not-found)))
 
