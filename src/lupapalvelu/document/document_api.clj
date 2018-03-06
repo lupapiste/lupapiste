@@ -217,26 +217,24 @@
 ;;
 
 (defcommand approve-doc
-  {:parameters [:id :doc :path :collection]
-   :categories       #{:documents :tasks}
-   :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
-                      doc-persistence/validate-collection]
-   :pre-checks [(document-in-application-validator :doc)
-                (editable-by-state? :doc states/approve-doc-states)
-                (doc-disabled-validator :doc)]
-   :user-roles #{:authority}}
+  {:parameters       [:id :doc :path]
+   :categories       #{:documents}
+   :input-validators [(partial action/non-blank-parameters [:id :doc])]
+   :contexts         [document-context]
+   :permissions      [{:required [:application/edit :document/approve]}]
+   :pre-checks       [(editable-by-state? :doc states/approve-doc-states)
+                      (doc-disabled-validator :doc)]}
   [command]
   (ok :approval (approve command "approved")))
 
 (defcommand reject-doc
-  {:parameters [:id :doc :path :collection]
-   :categories       #{:documents :tasks}
-   :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
-                      doc-persistence/validate-collection]
-   :pre-checks [(document-in-application-validator :doc)
-                (editable-by-state? :doc states/approve-doc-states)
-                (doc-disabled-validator :doc)]
-   :user-roles #{:authority}}
+  {:parameters       [:id :doc :path]
+   :categories       #{:documents}
+   :input-validators [(partial action/non-blank-parameters [:id :doc :collection])]
+   :contexts         [document-context]
+   :permissions      [{:required [:application/edit :document/approve]}]
+   :pre-checks       [(editable-by-state? :doc states/approve-doc-states)
+                      (doc-disabled-validator :doc)]}
   [command]
   (ok :approval (approve command "rejected")))
 
@@ -244,13 +242,12 @@
   {:description "Explanatory note regarding the reject reason. Adding
   note updates application modified timestamp but not the approval
   timestamp"
-   :parameters       [:id :doc :path :collection note]
-   :categories       #{:documents :tasks}
-   :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
-                      doc-persistence/validate-collection]
-   :pre-checks       [(document-in-application-validator :doc)
-                      (editable-by-state? :doc states/approve-doc-states)]
-   :user-roles       #{:authority}}
+   :parameters       [:id :doc :path note]
+   :categories       #{:documents}
+   :input-validators [(partial action/non-blank-parameters [:id :doc :collection])]
+   :contexts         [document-context]
+   :permissions      [{:required [:application/edit :document/approve]}]
+   :pre-checks       [(editable-by-state? :doc states/approve-doc-states)]}
   [command]
   (set-rejection-note command note)
   (ok))

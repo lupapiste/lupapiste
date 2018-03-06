@@ -189,13 +189,13 @@
                             approval)]
     {$set (into {:modified (model/current-timestamp)} approval-pairs)}))
 
-(defn- update-approval [{{:keys [id doc path collection]} :data user :user created :created :as command} approval-data]
+(defn- update-approval [{{:keys [doc path]} :data created :created :as command} approval-data]
   (or
    (validate-approvability command)
    (model/with-timestamp created
      (update-application
       command
-      {collection {$elemMatch {:id doc}}}
+      {:documents {$elemMatch {:id doc}}}
       (->approval-mongo-model path approval-data))
      approval-data)))
 
