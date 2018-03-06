@@ -179,10 +179,6 @@
 (defcommand update-task
   {:parameters [id doc updates]
    :categories #{:tasks}
-   ; TODO: Sallitaanko tämä vain viranomaiselle vai pitääkö applicantin muokata muuta lupaehtoa?
-   ; Tässä oli sallittuna draft-tila (applicantille), mutta käytännössä tätä ei voinut applicant suorittaa
-   ; koska validate-user-authz-by-key esti. Draft oli estettynä viranomiselta. Voiko taskia edes luoda
-   ; draft-tilassa? Ei ainakaan create-task-commandilla.
    :states     (states/all-application-states-but (conj states/terminal-states :sent :draft))
    :input-validators [(partial action/non-blank-parameters [:id :doc])
                       (partial action/vector-parameters [:updates])]
@@ -191,18 +187,18 @@
   (doc-persistence/update! command doc updates "tasks"))
 
 (defcommand remove-document-data
-  {:parameters       [id doc path collection]
-   :categories       #{:documents :tasks}
-   :user-roles       #{:applicant :authority}
-   :user-authz-roles roles/writer-roles-with-foreman
-   :input-validators [doc-persistence/validate-collection]
-   :pre-checks       [(document-in-application-validator :doc)
-                      (editable-by-state? :doc #{:draft :answered :open :submitted :complementNeeded})
-                      validate-user-authz-by-doc
-                      application/validate-authority-in-drafts
-                      (doc-disabled-validator :doc)]}
+  "Remove document data under some path (recurring sections).
+   This previously supported also tasks, but there are no task schemas that would use it, so the support was removed."
+  {:parameters  [id doc path]
+   :categories  #{:documents}
+   :contexts    [document-context]
+   :permissions [{:context  {:application {:state #{:draft}}}
+                  :required [:application/edit-draft :document/edit]}
+                 {:required [:application/edit :document/edit]}]
+   :pre-checks  [(editable-by-state? :doc #{:draft :answered :open :submitted :complementNeeded})
+                 (doc-disabled-validator :doc)]}
   [command]
-  (doc-persistence/remove-document-data command doc [path] collection))
+  (doc-persistence/remove-document-data command doc [path] :documents))
 
 ;;
 ;; Document validation
