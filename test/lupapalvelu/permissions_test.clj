@@ -149,7 +149,7 @@
     (get-application-permissions {:user {:id 1} :application {:auth [{:id 2 :role "some-role"}
                                                                      {:id 1 :role "app-tester"}
                                                                      {:id 1 :role "another-role"}]
-                                                              :authRestrictions [{:restrictions [:test/fail]
+                                                              :authRestrictions [{:restriction :test/fail
                                                                                   :user {:id 2}
                                                                                   :target {:type "others"}}]}})
     => #{:test/do :test/test}
@@ -249,7 +249,7 @@
   (fact "company has existing role in auth - with auth restriction"
     (get-company-permissions {:user {:company {:id 1 :role "user" :submit true}}
                               :application {:auth [{:id 1 :role "app-tester"}]
-                                            :authRestrictions [{:restrictions [:test/fail]
+                                            :authRestrictions [{:restriction :test/fail
                                                                 :user {:id 2}
                                                                 :target {:type "others"}}]}})
     => #{:test/do}

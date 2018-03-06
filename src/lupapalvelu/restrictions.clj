@@ -3,13 +3,13 @@
             [sade.schemas :as ssc]))
 
 (defschema AuthRestriction
-  {:restrictions [sc/Str]
+  {:restriction  sc/Str
    :user         {:id       sc/Str
                   :username ssc/Username}
    :target       {:type (sc/enum "others")}})
 
-(defn- restrict [permissions restrictions]
-  (apply disj (set permissions) restrictions))
+(defn- restrict [permissions restriction]
+  (disj (set permissions) restriction))
 
 (defmulti apply-auth-restriction
   {:arglists '([command permissions auth-restriction])}
@@ -17,9 +17,9 @@
     (keyword target-type)))
 
 (defmethod apply-auth-restriction :others
-  [{{user-id :id {company-id :id} :company} :user} permissions {{restrictor-id :id} :user restrictions :restrictions}]
+  [{{user-id :id {company-id :id} :company} :user} permissions {{restrictor-id :id} :user restriction :restriction}]
   (cond-> permissions
-    (not (#{user-id company-id} restrictor-id)) (restrict restrictions)))
+    (not (#{user-id company-id} restrictor-id)) (restrict restriction)))
 
 (defn apply-auth-restrictions
   ([command]
