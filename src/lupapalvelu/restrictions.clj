@@ -11,10 +11,13 @@
                   :username ssc/Username}
    :target       {:type (sc/enum "others")}})
 
-(defn- restrict [permissions restriction]
+(defn- restrict
+  "Applies single restriction in permissions."
+  [permissions restriction]
   (disj (set permissions) restriction))
 
 (defmulti apply-auth-restriction
+  "Applies single restriction in permissions if conditions apply."
   {:private true
    :arglists '([command permissions auth-restriction])}
   (fn [_ _ {{target-type :type} :target}]
@@ -26,12 +29,16 @@
     (not (#{user-id company-id} restrictor-id)) (restrict restriction)))
 
 (defn apply-auth-restrictions
+  "Applies restrictions defined in application :authRestrictions permissions.
+  Every restriction  that is applied removes corresponding permissions. Permissions
+  can be given under command :permissions key or as separate array."
   ([command]
    (update command :permissions (partial apply-auth-restrictions command)))
   ([{{auth-restrictions :authRestrictions} :application :as command} permissions]
    (reduce (partial apply-auth-restriction command) permissions auth-restrictions)))
 
 (defmulti check-auth-restriction-entry
+  "Check that fails if restriction is applied with given conditions."
   {:private true
    :arglists '([user restriction auth-restriction-entry])}
   (fn [_ _ {{target-type :type} :target}]
@@ -44,25 +51,34 @@
     (fail :error.permissions-restricted-by-another-user :restriction restriction)))
 
 (defn check-auth-restriction
-  "Pre check that fails if restriction is applied for user"
+  "Pre check that fails if restriction is applied for user."
   [{user :user {auth-restrictions :authRestrictions} :application} restriction]
   (some (partial check-auth-restriction-entry user restriction) auth-restrictions))
 
-(defn- restriction-as-string [restriction]
+(defn- restriction-as-string
+  "Monger drops namespace part of keywords. To store them with namespace part,
+  keywords must be converted as strings."
+  [restriction]
   (if (keyword? restriction)
     (ss/join "/" [(namespace restriction) (name restriction)])
     restriction))
 
-(defn mongo-updates-for-restrict-other-auths [{user-id :id username :username} restriction]
+(defn mongo-updates-for-restrict-other-auths
+  "Return mogno update for adding restriction that is applied to other users."
+  [{user-id :id username :username} restriction]
   {$push {:authRestrictions {:restriction (restriction-as-string restriction)
                              :user        {:id user-id
                                            :username username}
                              :target      {:type "others"}}}})
 
-(defn mongo-updates-for-remove-all-user-restrictions [{user-id :id}]
+(defn mongo-updates-for-remove-all-user-restrictions
+  "Returns mongo updates for removing all restrictions that are set by current user."
+  [{user-id :id}]
   {$pull {:authRestrictions {:user.id user-id}}})
 
 (defn mongo-updates-for-remove-other-user-restrictions
+  "Returns mongo updates for removing restrictions that are applied to other users.
+  If restriction is given, only mathing restrictions are removed."
   ([{user-id :id}]
    {$pull {:authRestrictions {:user.id user-id :target.type "others"}}})
   ([{user-id :id} restriction]
