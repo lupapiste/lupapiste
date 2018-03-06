@@ -259,14 +259,13 @@
 (defcommand set-user-to-document
   {:parameters [id documentId userId path]
    :categories #{:documents}
-   :user-roles #{:applicant :authority}
-   :user-authz-roles roles/writer-roles-with-foreman
+   :contexts    [document-context]
+   :permissions [{:context  {:application {:state #{:draft}}}
+                  :required [:application/edit-draft :document/edit]}
+                 {:required [:application/edit :document/edit]}]
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
-   :pre-checks [(document-in-application-validator :documentId)
-                (editable-by-state? :documentId states/update-doc-states)
+   :pre-checks [(editable-by-state? :documentId states/update-doc-states)
                 user-can-be-set-validator
-                validate-user-authz-by-document-id
-                application/validate-authority-in-drafts
                 (doc-disabled-validator :documentId)]}
   [{:keys [created application] :as command}]
   (doc-persistence/do-set-user-to-document application documentId userId path created))
@@ -274,14 +273,12 @@
 (defcommand set-current-user-to-document
   {:parameters [id documentId path]
    :categories #{:documents}
-   :user-roles #{:applicant :authority}
-   :user-authz-roles roles/writer-roles-with-foreman
+   :contexts    [document-context]
+   :permissions [{:context  {:application {:state #{:draft}}}
+                  :required [:application/edit-draft :document/edit]}
+                 {:required [:application/edit :document/edit]}]
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
-   :pre-checks [(document-in-application-validator :documentId)
-                (editable-by-state? :documentId states/update-doc-states)
-                domain/validate-write-access
-                validate-user-authz-by-document-id
-                application/validate-authority-in-drafts
+   :pre-checks [(editable-by-state? :documentId states/update-doc-states)
                 (doc-disabled-validator :documentId)]}
   [{:keys [created application user] :as command}]
   (doc-persistence/do-set-user-to-document application documentId (:id user) path created))
@@ -293,15 +290,17 @@
   auth array. Otherwise, left empty."
    :parameters       [id documentId companyId path]
    :categories       #{:documents}
-   :user-roles       #{:applicant :authority}
-   :user-authz-roles roles/writer-roles-with-foreman
+   :contexts    [document-context]
+   :permissions [{:context  {:application {:state #{:draft}}}
+                  :required [:application/edit-draft :document/edit]}
+                 {:required [:application/edit :document/edit]}]
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
-   :pre-checks       [(document-in-application-validator :documentId)
-                      (editable-by-state? :documentId states/update-doc-states)
-                      validate-user-authz-by-document-id
-                      application/validate-authority-in-drafts
+   :pre-checks       [(editable-by-state? :documentId states/update-doc-states)
                       (doc-disabled-validator :documentId)]}
-  [{:keys [user created application] :as command}]
-  (if-let [document (domain/get-document-by-id application documentId)]
-    (doc-persistence/do-set-company-to-document application document companyId path (user/get-user-by-id (:id user)) created)
-    (fail :error.document-not-found)))
+  [{:keys [user created application document] :as command}]
+  (doc-persistence/do-set-company-to-document application
+                                              document
+                                              companyId
+                                              path
+                                              user
+                                              created))

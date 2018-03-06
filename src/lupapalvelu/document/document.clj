@@ -26,7 +26,7 @@
 ;;
 
 (defcontext document-context [{:keys [application user data]}]
-  (when-let [document-id (and application (some data [:docId :doc]))]
+  (when-let [document-id (and application (some data [:docId :doc :documentId]))]
     (if-let [doc (domain/get-document-by-id application document-id)]
       (let [schema (model/get-document-schema doc)
             ; At least foreman schema allows access with :foreman role, this resolves if the users application authz
