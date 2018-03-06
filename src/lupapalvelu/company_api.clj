@@ -275,3 +275,8 @@
   {:user-roles #{:applicant}
    :pre-checks [(com/validate-has-company-role :any)]}
   [_])
+
+(defquery authorized-to-apply-submit-restriction-to-other-auths
+  {:permissions [{:required []}]
+   :pre-checks  [com/authorized-to-apply-submit-restriction-to-other-auths]}
+  [_])

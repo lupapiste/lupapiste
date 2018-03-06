@@ -317,6 +317,10 @@
                      created)
     (fail :error.company-not-locked)))
 
+(defn authorized-to-apply-submit-restriction-to-other-auths [{company :company}]
+  (when-not (:submitRestrictor (and company @company))
+    (fail :error.not-allowed-to-apply-submit-restriction)))
+
 ;;
 ;; Deletion
 ;;

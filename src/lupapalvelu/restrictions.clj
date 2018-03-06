@@ -1,7 +1,9 @@
 (ns lupapalvelu.restrictions
   (:require [schema.core :refer [defschema] :as sc]
+            [monger.operators :refer [$push $pull]]
             [sade.core :refer [fail]]
-            [sade.schemas :as ssc]))
+            [sade.schemas :as ssc]
+            [sade.strings :as ss]))
 
 (defschema AuthRestriction
   {:restriction  sc/Str
@@ -45,3 +47,23 @@
   "Pre check that fails if restriction is applied for user"
   [{user :user {auth-restrictions :authRestrictions} :application} restriction]
   (some (partial check-auth-restriction-entry user restriction) auth-restrictions))
+
+(defn- restriction-as-string [restriction]
+  (if (keyword? restriction)
+    (ss/join "/" [(namespace restriction) (name restriction)])
+    restriction))
+
+(defn mongo-updates-for-restrict-other-auths [{user-id :id username :username} restriction]
+  {$push {:authRestrictions {:restriction (restriction-as-string restriction)
+                             :user        {:id user-id
+                                           :username username}
+                             :target      {:type "others"}}}})
+
+(defn mongo-updates-for-remove-all-user-restrictions [{user-id :id}]
+  {$pull {:authRestrictions {:user.id user-id}}})
+
+(defn mongo-updates-for-remove-other-user-restrictions
+  ([{user-id :id}]
+   {$pull {:authRestrictions {:user.id user-id :target.type "others"}}})
+  ([{user-id :id} restriction]
+   {$pull {:authRestrictions {:user.id user-id :target.type "others" :restriction (restriction-as-string restriction)}}}))

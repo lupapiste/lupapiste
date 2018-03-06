@@ -17,6 +17,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.permissions :as permissions]
+            [lupapalvelu.restrictions :as restrictions]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
@@ -111,12 +112,17 @@
   [command]
   (send-invite! command))
 
+(defn authorized-to-apply-submit-restriction [{{:keys [apply-submit-restriction]} :data :as command}]
+  (when apply-submit-restriction
+    (company/authorized-to-apply-submit-restriction-to-other-auths command)))
+
 (defcommand approve-invite
   {:parameters [id]
-   :optional-parameters [invite-type]
+   :optional-parameters [invite-type apply-submit-restriction]
    :user-roles #{:applicant}
    :user-authz-roles roles/default-authz-reader-roles
-   :states     states/all-application-states}
+   :states     states/all-application-states
+   :pre-checks [authorized-to-apply-submit-restriction]}
   [{created :created  {user-id :id {company-id :id company-role :role} :company :as user} :user application :application :as command}]
   (let [auth-id       (cond (not (util/=as-kw invite-type :company)) user-id
                             (util/=as-kw company-role :admin)        company-id)
@@ -125,8 +131,10 @@
     (when approved-auth
       (update-application command
         {:auth {$elemMatch {:invite.user.id auth-id}}}
-        {$set {:modified created
-               :auth.$   approved-auth}})
+        (util/deep-merge {$set {:modified created
+                                :auth.$   approved-auth}}
+                         (when apply-submit-restriction
+                           (restrictions/mongo-updates-for-restrict-other-auths auth :application/submit))))
       (when-let [document-id (not-empty (get-in auth [:invite :documentId]))]
         (let [application (domain/get-application-as id user :include-canceled-apps? true)]
           ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.

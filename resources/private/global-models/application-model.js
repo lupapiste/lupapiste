@@ -252,9 +252,10 @@ LUPAPISTE.ApplicationModel = function() {
     return !_.isEmpty(_.filter(self.invites(), ["user.id", id]));
   });
 
-  self.approveInvite = function(type) {
+  self.approveInvite = function(type, opts) {
+    var unwrappedOpts = opts ? ko.mapping.toJS(opts) : {};
     ajax
-      .command("approve-invite", {id: self.id(), "invite-type": type})
+      .command("approve-invite", _.assign({id: self.id(), "invite-type": type}, unwrappedOpts))
       .success(function() {
         self.reload();
         self.updateInvites();
@@ -900,14 +901,16 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.showAcceptCompanyInvitationDialog = function() {
+    var applySubmitRestriction = ko.observable(false);
     if (self.hasCompanyInvites() && lupapisteApp.models.applicationAuthModel.ok("approve-invite")) {
       hub.send("show-dialog", {ltitle: "application.inviteSend",
                                size: "medium",
-                               component: "yes-no-dialog",
+                               component: "company-approve-invite-dialog",
                                componentParams: {ltext: "application.inviteCompanyDialogText",
+                                                 applySubmitRestriction: applySubmitRestriction,
                                                  lyesTitle: "applications.approveInvite",
                                                  lnoTitle: "application.showApplication",
-                                                 yesFn: _.partial(self.approveInvite, "company")}});
+                                                 yesFn: _.partial(self.approveInvite, "company", {"apply-submit-restriction": applySubmitRestriction})}});
     }
   };
 
