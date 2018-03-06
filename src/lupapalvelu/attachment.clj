@@ -405,12 +405,21 @@
    :version version
    :fileId fileId})
 
-(defn- signature-updates [version-model user ts original-signature attachment-signatures]
-  "Returns update query for single signature. If attachment version is signed updates signature,
-  if attachment version is not signed add signature."
-    (if-let [orig-index (util/position-by-key :version (:version version-model) attachment-signatures)]
-      {$set {(util/kw-path :attachments.$.signatures orig-index) (signature version-model user ts original-signature)}}
-      {$push {:attachments.$.signatures (signature version-model user ts original-signature)}}))
+(defn- signature-updates [version-model user ts copied-signatures]
+  "Returns mongo updates for setting signatures to an attachment. If the copied-signatures are provided, just copies
+   them to point to the given version. Otherwise a new signature is generated.
+   Does NOT handle possible duplicates, i.e. the same version can be signed multiple times by the same user."
+  (cond
+    (and (sequential? copied-signatures) (seq copied-signatures))
+    {$push {:attachments.$.signatures {$each (map (fn [sig]
+                                                    (signature version-model ts user sig))
+                                                  copied-signatures)}}}
+
+
+
+
+    (nil? copied-signatures)
+    {$push {:attachments.$.signatures (signature version-model user ts nil)}}))
 
 (defn can-delete-version?
   "False if the attachment version is a) rejected or approved and b)
@@ -567,10 +576,8 @@
            mongo-updates (cond-> (util/deep-merge (attachment-comment-updates application user attachment options)
                                                   (when (:constructionTime options)
                                                     (construction-time-state-updates attachment true))
-                                                  (when (or (:sign options) (:signature options))
-                                                    (if (> (count (:signature options)) 1)
-                                                      {$push {:attachments.$.signatures {$each (map (fn [original-signature] (signature version-model (:created options) user original-signature)) (:signature options))}}}
-                                                      (signature-updates version-model user (:created options) (first (:signature options)) (:signatures attachment))))
+                                                  (when (or (:sign options) (:signatures options))
+                                                    (signature-updates version-model user (:created options) (:signatures options)))
                                                   (build-version-updates user attachment version-model options))
                            (not set-app-modified?) (util/dissoc-in [$set :modified]))
            update-result (update-application (application->command application) mongo-query mongo-updates :return-count? true)]
