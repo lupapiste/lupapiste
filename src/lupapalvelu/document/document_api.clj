@@ -206,10 +206,9 @@
 
 (defquery fetch-validation-errors
   {:parameters       [:id]
-   :user-roles       #{:applicant :authority}
-   :user-authz-roles roles/all-authz-roles
-   :org-authz-roles  roles/reader-org-authz-roles
-   :states           states/all-states}
+   :permissions      [{:required [:application/read]}]
+   :states           states/all-states
+   }
   [{app :application}]
   (ok :results (application/pertinent-validation-errors app)))
 
