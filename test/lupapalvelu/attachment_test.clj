@@ -439,7 +439,7 @@
 (facts signature-updates
 
   (fact "no original-signature provided -> create new"
-    (signature-updates {:fileId ..file-id.. :version {:major ..major.. :minor ..minor..}} ..user.. ..ts.. nil [])
+    (signature-updates {:fileId ..file-id.. :version {:major ..major.. :minor ..minor..}} ..user.. ..ts.. nil)
     => {$push {:attachments.$.signatures {:fileId ..file-id.. :version {:major ..major.. :minor ..minor..} :created ..ts.. :user ..user-summary..}}}
     (provided (lupapalvelu.user/summary ..user..) => ..user-summary..))
 
@@ -447,27 +447,24 @@
     (signature-updates {:fileId ..file-id.. :version ..version..}
                        ..user..
                        ..ts..
-                       {:created ..orig-created.. :user ..orig-user.. :fileId ..orig-file-id.. :version ..orig-version..}
-                       [{:version ..orig-version.. :fileId ..some-file-id.. :user ..user.. :created ..created..}])
-    => {$push {:attachments.$.signatures {:fileId ..file-id.. :version ..version.. :created ..orig-created.. :user ..orig-user..}}})
+                       [{:created ..orig-created.. :user ..orig-user.. :fileId ..orig-file-id.. :version ..orig-version..}])
+    => {$push {:attachments.$.signatures {$each [{:fileId ..file-id.. :version ..version.. :created ..orig-created.. :user ..orig-user..}]}}})
 
-  (fact "Updating existing attachment version signature"
+  (fact "Multiple signatures may be copied"
     (signature-updates {:fileId ..file-id.. :version ..version..}
                        ..user..
                        ..ts..
-                       nil
-                       [{:version ..old-version.. :fileId ..some-file-id.. :user ..user.. :created ..created..}
-                        {:version ..version.. :fileId ..some-file-id.. :user ..user.. :created ..created..}])
-    => {$set {:attachments.$.signatures.1 {:fileId ..file-id.. :version ..version.. :created ..ts.. :user ..user-summary..}}}
-    (provided (lupapalvelu.user/summary ..user..) => ..user-summary..))
+                       [{:created ..orig-created.. :user ..orig-user.. :fileId ..orig-file-id.. :version ..orig-version..}
+                        {:created ..orig-created2.. :user ..orig-user2.. :fileId ..orig-file-id.. :version ..orig-version..}])
+    => {$push {:attachments.$.signatures {$each [{:fileId ..file-id.. :version ..version.. :created ..orig-created.. :user ..orig-user..}
+                                                 {:fileId ..file-id.. :version ..version.. :created ..orig-created2.. :user ..orig-user2..}]}}})
 
-  (fact "Updating existing attachment version signature with timestamp and user copied from existing signature"
-    (signature-updates {:fileId ..file-id.. :version ..orig-version..}
+  (fact "Passing an empty list of copied signatures does not generate a signature"
+    (signature-updates {:fileId ..file-id.. :version ..version..}
                        ..user..
                        ..ts..
-                       {:created ..orig-created.. :user ..orig-user.. :fileId ..orig-file-id.. :version ..orig-version..}
-                       [{:version ..orig-version.. :fileId ..some-file-id.. :user ..user.. :created ..created..}])
-    => {$set {:attachments.$.signatures.0 {:fileId ..file-id.. :version ..orig-version.. :created ..orig-created.. :user ..orig-user..}}}))
+                       [])
+    => nil))
 
 (facts "Manually set construction time"
   (fact "draft -> verdictGiven"
