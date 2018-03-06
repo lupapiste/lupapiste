@@ -92,44 +92,39 @@
 (defn- deny-remove-of-approved-post-verdict-document [document application]
   (and (created-after-verdict? document application) (approved? document)))
 
-(defn remove-doc-validator [{data :data user :user application :application}]
-  (if-let [document (when application (domain/get-document-by-id application (:docId data)))]
-    (cond
-      (deny-remove-of-non-removable-doc document application user) (fail :error.not-allowed-to-remove-document)
-      (deny-remove-of-last-document document application user) (fail :error.removal-of-last-document-denied)
-      (deny-remove-of-primary-operation document application) (fail :error.removal-of-primary-document-denied)
-      (deny-remove-of-non-post-verdict-document document application) (fail :error.document.post-verdict-deletion)
-      (deny-remove-of-approved-post-verdict-document document application) (fail :error.document.post-verdict-deletion))))
-
+(defn remove-doc-validator [{:keys [document user application]}]
+  (cond
+    (deny-remove-of-non-removable-doc document application user) (fail :error.not-allowed-to-remove-document)
+    (deny-remove-of-last-document document application user) (fail :error.removal-of-last-document-denied)
+    (deny-remove-of-primary-operation document application) (fail :error.removal-of-primary-document-denied)
+    (deny-remove-of-non-post-verdict-document document application) (fail :error.document.post-verdict-deletion)
+    (deny-remove-of-approved-post-verdict-document document application) (fail :error.document.post-verdict-deletion)))
 
 (defn validate-post-verdict-not-approved
-  "In post verdict states, validates that given document is approved.
+  "In post verdict states, validates that given document is not approved.
    Approval 'locks' documents in post-verdict state."
-  [key]
-  (fn [{:keys [application data]}]
-    (when-let [document (when (and application (contains? states/post-verdict-states (keyword (:state application))))
-                          (domain/get-document-by-id application (get data key)))]
-      (when (approved? document)
-        (fail :error.document.approved)))))
+  [{:keys [application document]}]
+  (when (and application
+             (contains? states/post-verdict-states (keyword (:state application)))
+             (approved? document))
+    (fail :error.document.approved)))
 
 (defn validate-created-after-verdict
   "In post-verdict state, validates that document is post-verdict-party and it's not created-after-verdict.
    This is special case for post-verdict-parties. Also waste schemas can be edited in post-verdict states, though
    they have been created before verdict. Thus we are only interested in 'post-verdict-party' documents here."
-  [key]
-  (fn [{:keys [application data]}]
-    (when-let [document (when (and application (contains? states/post-verdict-states (keyword (:state application))))
-                          (domain/get-document-by-id application (get data key)))]
-      (when (and (get-in document [:schema-info :post-verdict-party]) (not (created-after-verdict? document application)))
-        (fail :error.document.pre-verdict-document)))))
+  [{:keys [application document]}]
+  (when (and application
+             (contains? states/post-verdict-states (keyword (:state application)))
+             (get-in document [:schema-info :post-verdict-party])
+             (not (created-after-verdict? document application)))
+    (fail :error.document.pre-verdict-document)))
 
 (defn doc-disabled-validator
   "Deny action if document is marked as disabled"
-  [key]
-  (fn [{:keys [application data]}]
-    (when-let [doc (and (get data key) (domain/get-document-by-id application (get data key)))]
-      (when (:disabled doc)
-        (fail :error.document.disabled)))))
+  [{:keys [document]}]
+  (when (:disabled document)
+    (fail :error.document.disabled)))
 
 (defn document-disableable-precheck
   "Checks if document can be disabled from document's schema"
@@ -139,11 +134,9 @@
 
 (defn validate-document-is-pre-verdict-or-approved
   "Pre-check for document disabling. If document is added after verdict, it needs to be approved."
-  [{:keys [application data]}]
-  (when-let [document (when application (domain/get-document-by-id application (:docId data)))]
-    (when-not (or (not (created-after-verdict? document application)) (approved? document))
-      (fail :error.document-not-approved))))
-
+  [{:keys [application document]}]
+  (when-not (or (not (created-after-verdict? document application)) (approved? document))
+    (fail :error.document-not-approved)))
 
 ;;
 ;; KTJ-info updation

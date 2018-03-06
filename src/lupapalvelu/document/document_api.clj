@@ -1,9 +1,7 @@
 (ns lupapalvelu.document.document-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error]]
-            [clojure.set :refer [intersection union difference]]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! unauthorized unauthorized! now]]
-            [sade.util :as util]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.application :as application]
@@ -16,8 +14,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.roles :as roles]
-            [lupapalvelu.states :as states]
-            [lupapalvelu.user :as user]))
+            [lupapalvelu.states :as states]))
 
 
 ;; Action category: documents & tasks
@@ -45,20 +42,14 @@
   [command]
   (action/allowed-actions-for-collection :tasks build-task-params command))
 
-(defn document-in-application-validator [doc-id-key]
-  (fn [{{documents :documents} :application data :data}]
-    (when (and (get data doc-id-key) (not (util/find-by-id (get data doc-id-key) documents)))
-      (fail :error.document-not-found))))
-
 (defn editable-by-state?
   "Pre-check to determine if documents are editable in abnormal states"
-  [data-key default-states]
-  (fn [{data :data {docs :documents state :state} :application}]
-    (when-let [doc-id (get data (keyword data-key))]
-      (when-not (-> (domain/get-document-by-id docs doc-id)
-                    (model/get-document-schema)
-                    (state-valid-by-schema? :editable-in-states default-states state))
-        (fail :error.document-not-editable-in-current-state)))))
+  [default-states]
+  (fn [{document :document {state :state} :application}]
+    (when-not (-> document
+                  (model/get-document-schema)
+                  (state-valid-by-schema? :editable-in-states default-states state))
+      (fail :error.document-not-editable-in-current-state))))
 
 (defn addable-by-state?
   [default-states]
@@ -80,8 +71,6 @@
         (fail :error.document-not-found)))))
 
 (def validate-user-authz-by-doc (partial validate-user-authz-by-key :doc))
-(def validate-user-authz-by-doc-id (partial validate-user-authz-by-key :doc-id))
-(def validate-user-authz-by-document-id (partial validate-user-authz-by-key :documentId))
 
 (defquery document
   {:parameters       [:id doc collection]
@@ -98,6 +87,11 @@
 ;; CRUD
 ;;
 
+(def document-edit-permissions
+  [{:context  {:application {:state #{:draft}}}
+    :required [:application/edit-draft :document/edit]}
+   {:required [:application/edit :document/edit]}])
+
 (defcommand create-doc
   {:parameters [:id :schemaName]
    :categories  #{:documents}
@@ -111,23 +105,20 @@
   [{{schema-name :schemaName} :data :as command}]
   (let [document (doc-persistence/do-create-doc! command schema-name updates)]
     (when fetchRakennuspaikka
-      (let [property-id (or
-                          (tools/get-update-item-value updates "kiinteisto.kiinteistoTunnus")
-                          (get-in command [:application :propertyId]))]
+      (let [property-id (or (tools/get-update-item-value updates "kiinteisto.kiinteistoTunnus")
+                            (get-in command [:application :propertyId]))]
         (fetch-and-persist-ktj-tiedot (:application command) document property-id (now))))
     (ok :doc (:id document))))
 
 (defcommand remove-doc
-  {:parameters  [id docId]
-   :categories  #{:documents}
+  {:parameters       [id docId]
+   :categories       #{:documents}
    :input-validators [(partial action/non-blank-parameters [:id :docId])]
-   :pre-checks [(editable-by-state? :docId #{:draft :answered :open :submitted :complementNeeded})
-                (doc-disabled-validator :docId)
-                remove-doc-validator]
-   :contexts [document-context]
-   :permissions [{:context  {:application {:state #{:draft}}}
-                  :required [:application/edit-draft :document/edit]}
-                 {:required [:application/edit :document/edit]}]}
+   :contexts         [document-context]
+   :permissions      document-edit-permissions
+   :pre-checks       [(editable-by-state? #{:draft :answered :open :submitted :complementNeeded})
+                      doc-disabled-validator
+                      remove-doc-validator]}
   [{:keys [document] :as command}]
   (doc-persistence/remove! command document)
   (assignment/remove-target-from-assignments id docId)
@@ -142,47 +133,43 @@
     (assignment/set-assignment-status app-id doc-id "active")))
 
 (defcommand set-doc-status
-  {:description "Set document status to disabled: true or disabled: false"
-   :parameters [id docId value]
-   :categories  #{:documents}
+  {:description      "Set document status to disabled: true or disabled: false"
+   :parameters       [id docId value]
+   :categories       #{:documents}
    :input-validators [(partial action/non-blank-parameters [:id :docId])
                       (partial action/select-parameters [:value] #{"enabled" "disabled"})]
-   :states     states/post-verdict-states
-   :contexts [document-context]
-   :permissions [{:context  {:application {:state #{:draft}}}
-                  :required [:application/edit-draft :document/edit]}
-                 {:required [:application/edit :document/edit]}]
-   :pre-checks [(editable-by-state? :docId nil)            ; edition defined solely by document schema
-                document-disableable-precheck
-                validate-document-is-pre-verdict-or-approved]}
+   :states           states/post-verdict-states
+   :contexts         [document-context]
+   :permissions      document-edit-permissions
+   :pre-checks       [(editable-by-state? nil)       ; edition defined solely by document schema
+                      document-disableable-precheck
+                      validate-document-is-pre-verdict-or-approved]}
   [command]
   (doc-persistence/set-disabled-status command docId value)
   (update-document-assignment-statuses id docId value)
   (ok))
 
 (defcommand update-doc
-  {:parameters [id doc updates]
-   :categories #{:documents}
+  {:parameters       [id doc updates]
+   :categories       #{:documents}
    :input-validators [(partial action/non-blank-parameters [:id :doc])
                       (partial action/vector-parameters [:updates])]
-   :contexts [document-context]
-   :permissions [{:context  {:application {:state #{:draft}}}
-                  :required [:application/edit-draft :document/edit]}
-                 {:required [:application/edit :document/edit]}]
-   :pre-checks [(editable-by-state? :doc states/update-doc-states)
-                (doc-disabled-validator :doc)
-                (validate-created-after-verdict :doc)
-                (validate-post-verdict-not-approved :doc)]}
+   :contexts         [document-context]
+   :permissions      document-edit-permissions
+   :pre-checks       [(editable-by-state? states/update-doc-states)
+                      doc-disabled-validator
+                      validate-created-after-verdict
+                      validate-post-verdict-not-approved]}
   [command]
   (doc-persistence/update! command doc updates "documents"))
 
 (defcommand update-task
-  {:parameters [id doc updates]
-   :categories #{:tasks}
-   :states     (states/all-application-states-but (conj states/terminal-states :sent :draft))
+  {:parameters       [id doc updates]
+   :categories       #{:tasks}
+   :states           (states/all-application-states-but (conj states/terminal-states :sent :draft))
    :input-validators [(partial action/non-blank-parameters [:id :doc])
                       (partial action/vector-parameters [:updates])]
-   :permissions [{:required [:application/edit :task/edit]}]}
+   :permissions      [{:required [:application/edit :task/edit]}]}
   [command]
   (doc-persistence/update! command doc updates "tasks"))
 
@@ -192,11 +179,9 @@
   {:parameters  [id doc path]
    :categories  #{:documents}
    :contexts    [document-context]
-   :permissions [{:context  {:application {:state #{:draft}}}
-                  :required [:application/edit-draft :document/edit]}
-                 {:required [:application/edit :document/edit]}]
-   :pre-checks  [(editable-by-state? :doc #{:draft :answered :open :submitted :complementNeeded})
-                 (doc-disabled-validator :doc)]}
+   :permissions document-edit-permissions
+   :pre-checks  [(editable-by-state? #{:draft :answered :open :submitted :complementNeeded})
+                 doc-disabled-validator]}
   [command]
   (doc-persistence/remove-document-data command doc [path] :documents))
 
@@ -205,10 +190,9 @@
 ;;
 
 (defquery fetch-validation-errors
-  {:parameters       [:id]
-   :permissions      [{:required [:application/read]}]
-   :states           states/all-states
-   }
+  {:parameters  [:id]
+   :permissions [{:required [:application/read]}]
+   :states      states/all-states}
   [{app :application}]
   (ok :results (application/pertinent-validation-errors app)))
 
@@ -222,8 +206,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :doc])]
    :contexts         [document-context]
    :permissions      [{:required [:application/edit :document/approve]}]
-   :pre-checks       [(editable-by-state? :doc states/approve-doc-states)
-                      (doc-disabled-validator :doc)]}
+   :pre-checks       [(editable-by-state? states/approve-doc-states)
+                      doc-disabled-validator]}
   [command]
   (ok :approval (approve command "approved")))
 
@@ -233,13 +217,13 @@
    :input-validators [(partial action/non-blank-parameters [:id :doc :collection])]
    :contexts         [document-context]
    :permissions      [{:required [:application/edit :document/approve]}]
-   :pre-checks       [(editable-by-state? :doc states/approve-doc-states)
-                      (doc-disabled-validator :doc)]}
+   :pre-checks       [(editable-by-state? states/approve-doc-states)
+                      doc-disabled-validator]}
   [command]
   (ok :approval (approve command "rejected")))
 
 (defcommand reject-doc-note
-  {:description "Explanatory note regarding the reject reason. Adding
+  {:description      "Explanatory note regarding the reject reason. Adding
   note updates application modified timestamp but not the approval
   timestamp"
    :parameters       [:id :doc :path note]
@@ -247,7 +231,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :doc :collection])]
    :contexts         [document-context]
    :permissions      [{:required [:application/edit :document/approve]}]
-   :pre-checks       [(editable-by-state? :doc states/approve-doc-states)]}
+   :pre-checks       [(editable-by-state? states/approve-doc-states)]}
   [command]
   (set-rejection-note command note)
   (ok))
@@ -257,46 +241,40 @@
 ;;
 
 (defcommand set-user-to-document
-  {:parameters [id documentId userId path]
-   :categories #{:documents}
-   :contexts    [document-context]
-   :permissions [{:context  {:application {:state #{:draft}}}
-                  :required [:application/edit-draft :document/edit]}
-                 {:required [:application/edit :document/edit]}]
+  {:parameters       [id documentId userId path]
+   :categories       #{:documents}
+   :contexts         [document-context]
+   :permissions      document-edit-permissions
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
-   :pre-checks [(editable-by-state? :documentId states/update-doc-states)
-                user-can-be-set-validator
-                (doc-disabled-validator :documentId)]}
+   :pre-checks       [(editable-by-state? states/update-doc-states)
+                      user-can-be-set-validator
+                      doc-disabled-validator]}
   [{:keys [created application] :as command}]
   (doc-persistence/do-set-user-to-document application documentId userId path created))
 
 (defcommand set-current-user-to-document
-  {:parameters [id documentId path]
-   :categories #{:documents}
-   :contexts    [document-context]
-   :permissions [{:context  {:application {:state #{:draft}}}
-                  :required [:application/edit-draft :document/edit]}
-                 {:required [:application/edit :document/edit]}]
+  {:parameters       [id documentId path]
+   :categories       #{:documents}
+   :contexts         [document-context]
+   :permissions      document-edit-permissions
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
-   :pre-checks [(editable-by-state? :documentId states/update-doc-states)
-                (doc-disabled-validator :documentId)]}
+   :pre-checks       [(editable-by-state? states/update-doc-states)
+                      doc-disabled-validator]}
   [{:keys [created application user] :as command}]
   (doc-persistence/do-set-user-to-document application documentId (:id user) path created))
 
 (defcommand set-company-to-document
-  {:description "Updates company information on the document.The
+  {:description      "Updates company information on the document.The
   contact person information is filled only if either the current user
   is a company member or the application has a company member in the
   auth array. Otherwise, left empty."
    :parameters       [id documentId companyId path]
    :categories       #{:documents}
-   :contexts    [document-context]
-   :permissions [{:context  {:application {:state #{:draft}}}
-                  :required [:application/edit-draft :document/edit]}
-                 {:required [:application/edit :document/edit]}]
+   :contexts         [document-context]
+   :permissions      document-edit-permissions
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
-   :pre-checks       [(editable-by-state? :documentId states/update-doc-states)
-                      (doc-disabled-validator :documentId)]}
+   :pre-checks       [(editable-by-state? states/update-doc-states)
+                      doc-disabled-validator]}
   [{:keys [user created application document] :as command}]
   (doc-persistence/do-set-company-to-document application
                                               document
