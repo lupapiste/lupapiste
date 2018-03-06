@@ -4,7 +4,7 @@
             [lupapalvelu.restrictions :refer :all]
             [sade.util :as util]))
 
-(testable-privates lupapalvelu.restrictions restrict)
+(testable-privates lupapalvelu.restrictions restrict apply-auth-restriction check-auth-restriction-entry)
 
 (facts restrict
   (fact "both nils"
@@ -90,3 +90,58 @@
                                                                   :target {:type "others"}}]}}
                                #{:test/do :test/fail :test/test :test/foo})
       => #{:test/do})))
+
+(facts check-auth-restriction
+  (facts "others"
+    (fact "single applied restriction"
+      (check-auth-restriction {:user {:id "user1"}
+                               :application {:authRestrictions [{:restriction :test/fail
+                                                                 :user {:id "user2"}
+                                                                 :target {:type "others"}}]}}
+                              :test/fail)
+      => {:restriction :test/fail, :ok false, :text "error.permissions-restricted-by-another-user"})
+
+    (fact "restriction not applied to self"
+      (check-auth-restriction {:user {:id "user1"}
+                               :application {:authRestrictions [{:restriction :test/fail
+                                                                 :user {:id "user1"}
+                                                                 :target {:type "others"}}]}}
+                              :test/fail)
+      => nil)
+
+    (fact "no restrictions"
+      (check-auth-restriction {:user {:id "user1"}
+                               :application {:authRestrictions []}}
+                              :test/fail)
+      => nil)
+
+    (fact "auth-restrictions not in application"
+      (check-auth-restriction {:user {:id "user1"}
+                               :application {}}
+                              :test/fail)
+      => nil)
+
+    (fact "no mathching restriction"
+      (check-auth-restriction {:user {:id "user1"}
+                               :application {:authRestrictions [{:restriction :test/do
+                                                                 :user {:id "user2"}
+                                                                 :target {:type "others"}}]}}
+                              :test/fail)
+      => nil)
+
+    (fact "multiple restrictions with match"
+      (check-auth-restriction {:user {:id "user1"}
+                               :application {:authRestrictions [{:restriction :test/fail
+                                                                 :user {:id "user1"}
+                                                                 :target {:type "others"}}
+                                                                {:restriction :test/do
+                                                                 :user {:id "user2"}
+                                                                 :target {:type "others"}}
+                                                                {:restriction :test/fail
+                                                                 :user {:id "user2"}
+                                                                 :target {:type "others"}}
+                                                                {:restriction :test/test
+                                                                 :user {:id "user2"}
+                                                                 :target {:type "others"}}]}}
+                              :test/fail)
+      => {:restriction :test/fail, :ok false, :text "error.permissions-restricted-by-another-user"})))

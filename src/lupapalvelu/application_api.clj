@@ -35,6 +35,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.permissions :as permissions]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.restrictions :as restrictions]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.suti :as suti]
@@ -307,7 +308,8 @@
                      (ya/validate-digging-permit application)
                      (when-not (company/cannot-submit command)
                        (fail :company.user.cannot.submit))
-                     (suti/suti-submit-validation command))))
+                     (suti/suti-submit-validation command)
+                     (restrictions/check-auth-restriction command :application/submit))))
 
 (defquery application-submittable
   {:description "Query for frontend, to display possible errors regarding application submit"

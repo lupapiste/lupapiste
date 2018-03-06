@@ -1,5 +1,6 @@
 (ns lupapalvelu.restrictions
   (:require [schema.core :refer [defschema] :as sc]
+            [sade.core :refer [fail]]
             [sade.schemas :as ssc]))
 
 (defschema AuthRestriction
@@ -12,7 +13,8 @@
   (disj (set permissions) restriction))
 
 (defmulti apply-auth-restriction
-  {:arglists '([command permissions auth-restriction])}
+  {:private true
+   :arglists '([command permissions auth-restriction])}
   (fn [_ _ {{target-type :type} :target}]
     (keyword target-type)))
 
@@ -26,3 +28,20 @@
    (update command :permissions (partial apply-auth-restrictions command)))
   ([{{auth-restrictions :authRestrictions} :application :as command} permissions]
    (reduce (partial apply-auth-restriction command) permissions auth-restrictions)))
+
+(defmulti check-auth-restriction-entry
+  {:private true
+   :arglists '([user restriction auth-restriction-entry])}
+  (fn [_ _ {{target-type :type} :target}]
+    (keyword target-type)))
+
+(defmethod check-auth-restriction-entry :others
+  [{user-id :id {company-id :id} :company} restriction auth-restriction-entry]
+  (when (and (not (#{user-id company-id} (get-in auth-restriction-entry [:user :id])))
+             (= (keyword restriction) (keyword (:restriction auth-restriction-entry))))
+    (fail :error.permissions-restricted-by-another-user :restriction restriction)))
+
+(defn check-auth-restriction
+  "Pre check that fails if restriction is applied for user"
+  [{user :user {auth-restrictions :authRestrictions} :application} restriction]
+  (some (partial check-auth-restriction-entry user restriction) auth-restrictions))
