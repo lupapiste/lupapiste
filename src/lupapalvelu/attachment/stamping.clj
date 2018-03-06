@@ -20,7 +20,9 @@
         re-stamp? (:stamped (first versions))
         source (if re-stamp? (second versions) (first versions))]
     (assoc (select-keys source [:contentType :fileId :filename :size])
-      :signature (filter #(= (:fileId (first versions)) (:fileId %)) (:signatures attachment))
+      :signatures (when-not re-stamp?
+                    (seq (filter #(= (:fileId (first versions)) (:fileId %))
+                                 (:signatures attachment))))
       :stamped-original-file-id (when re-stamp? (:originalFileId (first versions)))
       :operation-ids (set (att-util/get-operation-ids attachment))
       :attachment-id (:id attachment)
@@ -33,7 +35,7 @@
     (when (-> approval :state #{"ok"}) approval)))
 
 (defn- update-stamp-to-attachment! [stamp file-info {:keys [application user created] :as context}]
-  (let [{:keys [attachment-id fileId filename stamped-original-file-id signature]} file-info
+  (let [{:keys [attachment-id fileId filename stamped-original-file-id signatures]} file-info
         options (select-keys context [:x-margin :y-margin :transparency :page])]
     (files/with-temp-file file
       (with-open [out (io/output-stream file)]
@@ -47,7 +49,7 @@
                       :comment-text                 nil :created created
                       :stamped                      true :comment? false
                       :state                        :ok
-                      :signature                    signature
+                      :signatures                   signatures
                       :approval                     approval}
                      {:filename filename :content file
                       :size     (.length file)})]
