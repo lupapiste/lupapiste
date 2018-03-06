@@ -204,19 +204,6 @@
 ;; Document validation
 ;;
 
-(defquery validate-doc
-  {:parameters       [:id doc collection]
-   :categories       #{:documents :tasks}
-   :user-roles       #{:applicant :authority}
-   :states           states/all-states
-   :input-validators [doc-persistence/validate-collection]
-   :user-authz-roles roles/all-authz-roles
-   :org-authz-roles  roles/reader-org-authz-roles}
-  [{:keys [application]}]
-  (let [document (doc-persistence/by-id application collection doc)]
-    (when-not document (fail! :error.document-not-found))
-    (ok :results (model/validate application document))))
-
 (defquery fetch-validation-errors
   {:parameters       [:id]
    :user-roles       #{:applicant :authority}

@@ -1495,15 +1495,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   };
 
-  function validate() {
-    if (!options || options.validate) {
-      ajax
-        .query("validate-doc", { id: self.appId, doc: self.docId, collection: self.getCollection() })
-        .success(function (e) { self.showValidationResults(e.results); })
-        .call();
-    }
-  }
-
   function afterSave(label, loader, indicator, callback, updateCommand, status, results) {
     self.showValidationResults(results);
     if (label) {
@@ -1644,12 +1635,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   };
 
   self.element = buildSection();
-  // If doc.validationErrors is truthy, i.e. doc includes ready evaluated errors,
-  // self.showValidationResults is called with in docgen.js after this docmodel has been appended to DOM.
-  // So self.showValidationResults cannot be called here because of its jQuery lookups.
-  if (!doc.validationErrors) {
-    validate();
-  }
 
   // Temporary storage for the document approval state after redraw.
   // The state is read and cleared by the reject-note component.
