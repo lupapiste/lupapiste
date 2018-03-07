@@ -223,6 +223,24 @@
       {:auth {:$elemMatch {:id userId, :role {$in changeable-roles}}}}
       {$set {:auth.$.role role}})))
 
+(defcommand toggle-submit-restriction-for-other-auths
+  {:parameters  [id apply-submit-restriction]
+   :permissions [{:required [:application/edit]}]
+   :pre-checks  [company/authorized-to-apply-submit-restriction-to-other-auths]}
+  [{{user-id :id {company-id :id} :company} :user application :application :as command}]
+  (let [auth (or (auth/get-auth application company-id)
+                 (auth/get-auth application user-id))]
+    (->> (if apply-submit-restriction
+           (restrictions/mongo-updates-for-restrict-other-auths auth :application/submit)
+           (restrictions/mongo-updates-for-remove-other-user-restrictions auth :application/submit))
+         (action/update-application command))))
+
+(defquery submit-restriction-enabled-for-other-auths
+  {:parameters  [id]
+   :permissions [{:required [:application/edit]}]
+   :pre-checks  [(partial restrictions/check-auth-restriction-is-enabled-by-user :others :application/submit)]}
+  [_])
+
 (defn- manage-unsubscription [{application :application user :user :as command} unsubscribe?]
   (let [username (get-in command [:data :username])]
     (if (or (= username (:username user))

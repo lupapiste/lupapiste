@@ -84,6 +84,33 @@ LUPAPISTE.ApplicationModel = function() {
     return lupapisteApp.models.applicationAuthModel.ok( "municipality-hears-neighbors-visible");
   });
 
+  // Use writable computed to init value by auth model without triggering save command
+  var submitRestrictionForOtherAuths = ko.observable();
+  self.optionSubmitRestrictionForOtherAuths = ko.pureComputed({
+    read: function() {
+      // Default value is determined by the auth model
+      return _.isNil(submitRestrictionForOtherAuths()) ?
+        lupapisteApp.models.applicationAuthModel.ok("submit-restriction-enabled-for-other-auths") :
+        submitRestrictionForOtherAuths();
+    },
+    write: function(enabled) {
+      // If value is changed manually it is stored in the observable and save command is triggered
+      submitRestrictionForOtherAuths(enabled);
+      ajax.command("toggle-submit-restriction-for-other-auths", {id: self.id(),
+                                                                 "apply-submit-restriction": enabled})
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
+        .processing(self.processing)
+        .call();
+    }
+  });
+  self.optionSubmitRestrictionForOtherAuthsDisabled = ko.pureComputed(function() {
+    return !lupapisteApp.models.applicationAuthModel.ok("toggle-submit-restriction-for-other-auths");
+  });
+  self.submitRestrictionForOtherAuthsVisible = ko.pureComputed(function() {
+    return lupapisteApp.models.applicationAuthModel.ok("authorized-to-apply-submit-restriction-to-other-auths");
+  });
+
   // Application indicator metadata fields
   self.unseenStatements = ko.observable();
   self.unseenVerdicts = ko.observable();

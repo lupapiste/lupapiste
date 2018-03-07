@@ -17,6 +17,14 @@
           </div>
           <!-- /ko -->
 
+          <!-- ko if: submitRestrictionForOtherAuthsVisible -->
+          <div class="form-grid form-grid--no-border">
+            <div class="row">
+              <div data-bind="component: {name: 'checkbox-field', params: {value: optionSubmitRestrictionForOtherAuths, id: 'optionSubmitRestrictionForOtherAuths', lLabel: 'application.applySubmitRestrictionForOthers', disable: optionSubmitRestrictionForOtherAuthsDisabled}}" ></div>
+            </div>
+          </div>
+          <!-- /ko -->
+
           <!-- ko ifnot: missingSomeInfo -->
           <h2 data-bind="ltext: 'application.allRequiredDataFilled'" class="missing-info-title"></h2>
           <div class="clear spacerM"></div>

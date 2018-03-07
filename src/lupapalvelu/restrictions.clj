@@ -19,7 +19,7 @@
 (defmulti apply-auth-restriction
   "Applies single restriction in permissions if conditions apply."
   {:private true
-   :arglists '([command permissions auth-restriction])}
+   :arglists '([command permissions auth-restriction-entry])}
   (fn [_ _ {{target-type :type} :target}]
     (keyword target-type)))
 
@@ -73,13 +73,22 @@
 
 (defn mongo-updates-for-remove-all-user-restrictions
   "Returns mongo updates for removing all restrictions that are set by current user."
-  [{user-id :id}]
-  {$pull {:authRestrictions {:user.id user-id}}})
+  [{auth-id :id}]
+  {$pull {:authRestrictions {:user.id auth-id}}})
 
 (defn mongo-updates-for-remove-other-user-restrictions
   "Returns mongo updates for removing restrictions that are applied to other users.
   If restriction is given, only mathing restrictions are removed."
-  ([{user-id :id}]
-   {$pull {:authRestrictions {:user.id user-id :target.type "others"}}})
-  ([{user-id :id} restriction]
-   {$pull {:authRestrictions {:user.id user-id :target.type "others" :restriction (restriction-as-string restriction)}}}))
+  ([{auth-id :id}]
+   {$pull {:authRestrictions {:user.id auth-id :target.type "others"}}})
+  ([{auth-id :id} restriction]
+   {$pull {:authRestrictions {:user.id auth-id :target.type "others" :restriction (restriction-as-string restriction)}}}))
+
+(defn check-auth-restriction-is-enabled-by-user
+  "Pre for checking that auth-restriction is anebled by current user."
+  [target-type restriction {{auth-restrictions :authRestrictions} :application {user-id :id {company-id :id} :company} :user}]
+  (when (not-any? #(and (= (keyword target-type) (keyword (get-in % [:target :type])))
+                        (= (keyword restriction) (keyword (get-in % [:restriction])))
+                        (#{user-id company-id} (get-in % [:user :id])))
+                  auth-restrictions)
+    (fail :error.auth-restriction-not-enabled)))
