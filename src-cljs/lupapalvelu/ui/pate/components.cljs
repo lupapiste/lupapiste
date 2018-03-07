@@ -18,6 +18,24 @@
 (defn show-label? [{label? :label?} wrap-label?]
   (and wrap-label? (not (false? label?))))
 
+(defn label-wrap
+  [{:keys [schema path] :as options} {:keys [component empty-label?]}]
+  [:div.col--vertical
+   (if empty-label?
+     (common/empty-label)
+     [:label.pate-label {:for (path/id path)
+                         :class (common/css-flags :required
+                                                  (path/required? options))}
+      (path/loc options)])
+   component])
+
+(defn label-wrap-if-needed
+  [{:keys [schema] :as options} {:keys [component wrap-label? empty-label?]
+                                 :as extra}]
+  (if (show-label? schema wrap-label?)
+    (label-wrap options extra)
+    component))
+
 (rum/defc pate-date-delta < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
   (let [required? (path/required? options)
@@ -257,3 +275,64 @@
        (common/empty-label :pate-label)
        button]
       button)))
+
+(rum/defc pate-toggle < rum/reactive
+  [{:keys [schema state path] :as options} & [wrap-label?]]
+  (label-wrap-if-needed
+   options
+   {:component    (components/toggle
+                   (path/state path state)
+                   {:callback  #(path/meta-updated options)
+                    :disabled? (path/disabled? options)
+                    :text      (path/loc options)
+                    :prefix    (:prefix schema)})
+    :wrap-label?  wrap-label?
+    :empty-label? true}))
+
+(defn- state-change-callback
+  "Updates state according to value."
+  [{:keys [state path] :as options}]
+  (fn [value]
+    (when (common/reset-if-needed! (path/state path state) value)
+      (path/meta-updated options))))
+
+(defn pate-unit [unit]
+  (case unit
+    :days    (path/loc :pate-date-delta unit)
+    :years   (path/loc :pate-date-delta unit)
+    :ha      (path/loc :unit.hehtaaria)
+    :m2      [:span "m" [:sup 2]]
+    :m3      [:span "m" [:sup 3]]
+    :kpl     (path/loc :unit.kpl)
+    :section "\u00a7"
+    :eur     "\u20ac"
+    nil))
+
+(defn sandwich [{:keys [before after class]} component]
+  (if (or before after)
+    (->> [:span.pate-sandwich
+          {:class class}
+          (when before
+            [:span.sandwich--before
+             (pate-unit before)])
+          component
+          (when after
+            [:span.sandwich--after (pate-unit after)])])
+    component))
+
+(rum/defc pate-text < rum/reactive
+  ;;{:key-fn (fn [_ {path :path} _ & _] (path/id path))}
+  "Update the options model state only on blur. Immediate update does
+  not work reliably."
+  [{:keys [schema state path] :as options} & [wrap-label?]]
+  (label-wrap-if-needed
+   options
+   {:component    (sandwich schema
+                            (components/text-edit
+                             (path/value path state)
+                             {:callback  (state-change-callback options)
+                              :disabled  (path/disabled? options)
+                              :required? (path/required? options)
+                              :class     (path/css options)
+                              :type      (:type schema)}))
+    :wrap-label?  wrap-label?}))

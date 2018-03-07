@@ -29539,6 +29539,26 @@ input:disabled + .pate-attachment-check-label:hover.pate-attachment-check-label:
   margin-left: 12px;
 }
 
+span.pate-sandwich {
+  white-space: nowrap;
+}
+
+span.pate-sandwich .sandwich--before {
+  padding-right: .5em;
+}
+
+span.pate-sandwich .sandwich--after {
+  padding-left: .5em;
+}
+
+span.pate-sandwich.sandwich__view .sandwich--before {
+  padding-right: 0;
+}
+
+span.pate-sandwich.sandwich__view .sandwich--after {
+  padding-left: .25em;
+}
+
 .order-grid-1 {
   width: 100%;
   color: #333333;

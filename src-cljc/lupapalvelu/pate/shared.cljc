@@ -227,9 +227,11 @@
           ;; Selection sorted by label. Default is true.
           (sc/optional-key :sort?) sc/Bool}))
 
+(def positive-integer (sc/constrained sc/Int (comp not neg?)))
+
 (defschema PateDateDelta
   (merge PateComponent
-         {(sc/optional-key :delta)   (sc/constrained sc/Int (comp not neg?))
+         {(sc/optional-key :delta)   positive-integer
           :unit                      (sc/enum :days :years)}))
 
 (defschema PateReference
@@ -316,6 +318,24 @@
           ;; time. Default false.
           (sc/optional-key :multiple?)  sc/Bool}))
 
+(defschema PateToggle
+  (merge (dissoc PateComponent :css)
+         {(sc/optional-key :value)  sc/Bool
+          (sc/optional-key :prefix) keyword-or-string}))
+
+(def pate-units
+  (sc/enum :days :years :ha :m2 :m3 :kpl :section :eur))
+
+(defschema PateText
+  (merge PateComponent
+         {(sc/optional-key :value)  sc/Str
+          ;; Default type is :text.
+          (sc/optional-key :type)   (sc/enum :text :password)
+          ;; Before and after are localisation keys for the strings to
+          ;; be shown before and after the value and editor.
+          (sc/optional-key :before) pate-units
+          (sc/optional-key :after)  pate-units}))
+
 (defschema PateRequired
   {(sc/optional-key :required?) sc/Bool})
 
@@ -339,6 +359,8 @@
                :keymap         {:keymap KeyMap}
                :attachments    {:attachments PateAttachments}
                :application-attachments {:application-attachments PateComponent}
+               :toggle         {:toggle PateToggle}
+               :text           (required {:text PateText})
                :repeating      {:repeating (sc/recursive #'SchemaTypes)
                                 ;; The value is a key in the repeating dictionary.
                                 (sc/optional-key :sort-by) sc/Keyword})})
@@ -529,11 +551,11 @@
                 :purpose          {:loc-text :pate-purpose.text}
                 :statements       {:loc-text :pate-statements.text}
                 ;; Buildings section
-                :autopaikat       {:docgen "pate-verdict-check"}
-                :vss-luokka       {:docgen "pate-verdict-check"}
-                :paloluokka       {:docgen "pate-verdict-check"}
+                :autopaikat {:toggle {}}
+                :vss-luokka {:toggle {}}
+                :paloluokka       {:toggle {}}
                 ;; Attachments section
-                :upload           {:docgen "pate-verdict-check"}
+                :upload           {:toggle {}}
                 ;; Removable sections
                 :removed-sections {:keymap (zipmap [:foremen :reviews :plans
                                                     :conditions :neighbors
@@ -655,11 +677,11 @@
                   :purpose          {:loc-text :pate-purpose.text}
                   :statements       {:loc-text :pate-statements.text}
                   ;; Buildings section
-                  :autopaikat       {:docgen "pate-verdict-check"}
-                  :vss-luokka       {:docgen "pate-verdict-check"}
-                  :paloluokka       {:docgen "pate-verdict-check"}
+                  :autopaikat       {:toggle {}}
+                  :vss-luokka       {:toggle {}}
+                  :paloluokka       {:toggle {}}
                   ;; Attachments section
-                  :upload           {:docgen "pate-verdict-check"}
+                  :upload           {:toggle {}}
                   ;; Removable sections
                   :removed-sections {:keymap (zipmap [:foremen :reviews :plans
                                                       :conditions :neighbors
@@ -737,7 +759,7 @@
                 :verdict-code             (req {:multi-select {:label? false
                                                                :items  (keys verdict-code-map)}})
                 :lautakunta-muutoksenhaku (req {:date-delta {:unit :days}})
-                :boardname                (req {:docgen "pate-string"})
+                :boardname                (req {:text {}})
                 :foremen                  {:multi-select {:label? false
                                                           :items  foreman-codes}}
                 :plans                    {:reference-list {:label?   false
@@ -811,6 +833,9 @@
           :sections                   [PateVerdictSection]}))
 
 
+(def required-in-verdict
+  {:toggle {:i18nkey :pate.template-removed}})
+
 ;; It is advisable to reuse ids from template when possible. This
 ;; makes localization work automatically.
 (def verdict-schemas
@@ -819,7 +844,7 @@
     (merge
      {:language                (req {:docgen "pate-languages"})
       :verdict-date            (req {:docgen "pate-date"})
-      :automatic-verdict-dates {:docgen {:name "pate-verdict-check"}}}
+      :automatic-verdict-dates {:toggle {}}}
      (->> [:julkipano :anto :muutoksenhaku :lainvoimainen :aloitettava :voimassa]
           (map (fn [kw]
                  [kw (req {:docgen {:name      "pate-date"
@@ -827,8 +852,8 @@
           (into {}))
      {:contact-ref           {:reference {:path :contact}}
       :boardname             {:reference {:path :*ref.boardname}}
-      :contact               (req {:docgen "pate-verdict-contact"})
-      :verdict-section       (req {:docgen "pate-verdict-section"})
+      :contact               (req {:text {}})
+      :verdict-section       (req {:text {:before :section}})
       :verdict-code          (req {:reference-list {:path       :verdict-code
                                                     :type       :select
                                                     :loc-prefix :pate-r.verdict-code}})
@@ -854,9 +879,8 @@
                                               :match-key  :id}})
                                 (when separator?
                                   {:separator " \u2013 "}))}
-                        ;; Included checkbox
-                        included
-                        {:docgen "required-in-verdict"})))
+                        ;; Included toggle
+                        included required-in-verdict)))
              {}
              [[:pate-r.foremen :foremen false false]
               [:pate-plans :plans true false]
@@ -877,7 +901,7 @@
       :neighbors        {:phrase-text {:i18nkey  :phrase.category.naapurit
                                        :category :naapurit}}
       :neighbor-states  {:placeholder {:type :neighbors}}
-      :collateral       {:docgen "pate-string"}
+      :collateral       {:text {:after :eur}}
       :collateral-date  {:docgen "pate-date"}
       :collateral-type  {:docgen "collateral-type"}
       :appeal           {:phrase-text {:category :muutoksenhaku}}
@@ -890,12 +914,12 @@
       :purpose          {:phrase-text {:category :kaava}}
       :buildings        {:repeating {:building-name          {:placeholder {:label? false
                                                                             :type   :building}}
-                                     :rakennetut-autopaikat  {:docgen "pate-string"}
-                                     :kiinteiston-autopaikat {:docgen "pate-string"}
-                                     :autopaikat-yhteensa    {:docgen "pate-string"}
-                                     :vss-luokka             {:docgen "pate-string"}
-                                     :paloluokka             {:docgen "pate-string"}
-                                     :show-building          {:docgen "required-in-verdict"}}
+                                     :rakennetut-autopaikat  {:text {}}
+                                     :kiinteiston-autopaikat {:text {}}
+                                     :autopaikat-yhteensa    {:text {}}
+                                     :vss-luokka             {:text {}}
+                                     :paloluokka             {:text {}}
+                                     :show-building          required-in-verdict}
                          :sort-by :order}
       :upload           {:attachments {:i18nkey    :application.verdict-attachments
                                        :label?     false
@@ -943,7 +967,8 @@
                          :show?      [:OR :*ref.boardname :verdict-section]
                          :loc-prefix :pate-verdict.section
                          :dict       :verdict-section}
-                        {:hide? :verdict-section}
+                        {:show? :_meta.editing?}
+                        {:hide? [:OR :verdict-section :_meta.editing?]}
                         {:col   2
                          :align :full
                          :dict  :verdict-code}]
@@ -1100,7 +1125,7 @@
        (merge
          {:language                (req {:docgen "pate-languages"})
           :verdict-date            (req {:docgen "pate-date"})
-          :automatic-verdict-dates {:docgen {:name "pate-verdict-check"}}}
+          :automatic-verdict-dates {:toggle {}}}
          (->> [:julkipano :anto :valitus :lainvoimainen :aloitettava :voimassa]
               (map (fn [kw]
                      [kw (req {:docgen {:name      "pate-date"
@@ -1108,8 +1133,8 @@
               (into {}))
          {:contact-ref           {:reference {:path :contact}}
           :boardname             {:reference {:path :*ref.boardname}}
-          :contact               (req {:docgen "pate-verdict-contact"})
-          :verdict-section       (req {:docgen "pate-verdict-section"})
+          :contact               (req {:text {}})
+          :verdict-section       (req {:text {:before :section}})
           :verdict-code          (req {:reference-list {:path       :verdict-code
                                                         :type       :select
                                                         :loc-prefix :pate-r.verdict-code}})
@@ -1136,8 +1161,7 @@
                                (when separator?
                                  {:separator " \u2013 "}))}
                        ;; Included checkbox
-                       included
-                       {:docgen "required-in-verdict"})))
+                       included required-in-verdict)))
                  {}
                  [[:pate-r.foremen :foremen false false]
                   [:pate-plans :plans true false]
@@ -1158,7 +1182,7 @@
           :neighbors        {:phrase-text {:i18nkey  :phrase.category.naapurit
                                            :category :naapurit}}
           :neighbor-states  {:placeholder {:type :neighbors}}
-          :collateral       {:docgen "pate-string"}
+          :collateral       {:text {:after :eur}}
           :collateral-date  {:docgen "pate-date"}
           :collateral-type  {:docgen "collateral-type"}
           :appeal           {:phrase-text {:category :muutoksenhaku}}

@@ -709,3 +709,21 @@ div.pate-select-application-attachments {
 .pate-left-space {
   margin-left: $marginM;
 }
+
+span.pate-sandwich {
+  white-space: nowrap;
+  .sandwich--before {
+    padding-right: .5em;
+  }
+  .sandwich--after {
+    padding-left: .5em;
+  }
+  &.sandwich__view {
+    .sandwich--before {
+      padding-right: 0;
+    }
+    .sandwich--after {
+      padding-left: .25em;
+    }
+  }
+}

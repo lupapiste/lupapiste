@@ -112,6 +112,8 @@
          :phrase-text    pate-components/pate-phrase-text
          :button         pate-components/pate-button
          :application-attachments pate-att/pate-select-application-attachments
+         :toggle         pate-components/pate-toggle
+         :text           pate-components/pate-text
          ;; The rest are always displayed as view components
          (partial view-component cell-type)) options wrap-label?)
       (view-component cell-type options wrap-label?))))
@@ -201,6 +203,15 @@
     (if (pate-components/show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options elem)
       elem)))
+
+(defmethod view-component :text
+  [_ {:keys [schema state path] :as options} & [wrap-label?]]
+  (pate-components/label-wrap-if-needed
+   options
+   {:component (pate-components/sandwich (assoc schema
+                                                :class :sandwich__view)
+                                         [:span (path/value path state)])
+    :wrap-label? wrap-label?}))
 
 ;; -------------------------------
 ;; Containers

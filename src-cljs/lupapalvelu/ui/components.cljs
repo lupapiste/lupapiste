@@ -70,7 +70,7 @@
             {:on-click #(swap! editing? not)}
             [:i.lupicon-pen]])])))
 
-(rum/defc checkbox
+#_(rum/defc checkbox
   "Checkbox component (using checkbox wrapper mechanism).
    Parameters [optional]:
    label:      Localization key. Overrides label if both given.
@@ -146,7 +146,7 @@
   [local-state _ & [options]]
   (let [text* (::text local-state)]
     [:input.grid-style-input
-     (merge {:type "text"}
+     (merge {:type (get options :type :text)}
             (text-options text* options))]))
 
 ;; The same arguments as for text-edit.
@@ -406,12 +406,12 @@
                                    callback)}
           (dissoc options :callback))])
 
-;; Renders text with included link
-;; Options (text and text-loc are mutually exclusive):
-;;   text Text where link is in brackets: 'Press [me] for details'
-;;   text-loc Localization key for text.
-;;   click Function to be called when the link is clicked
 (rum/defc text-and-link < rum/reactive
+"Renders text with included link
+ Options (text and text-loc are mutually exclusive):
+   text Text where link is in brackets: 'Press [me] for details'
+   text-loc Localization key for text.
+   click Function to be called when the link is clicked"
   [{:keys [click] :as options}]
   (let [regex          #"\[(.*)\]"
         text           (common/resolve-text options)
@@ -420,24 +420,24 @@
         [before after] (remove #(= link %) (s/split text regex))]
     [:span before [:a {:on-click click} link] after]))
 
-;; Button with optional icon and waiting support
-;; Options (text and text-loc are mutually exclusive) [optional]
-;;
-;;   text or text-loc See resolve-text
-;;
-;;   [icon] Icon class for the button (e.g., :lupicon-save)
-;;
-;;   [wait?] If true the button is disabled and the wait icon is
-;;   shown (if the icon has been given). Can be either value or
-;;   atom. Atom makes the most sense for the typical use cases.
-;;
-;;   [disabled?] See resolve-disabled function above
-;;   [enabled?]  See resolve-disabled function above
-;;
-;; Any other options are passed to the :button
-;; tag (e.g, :class, :on-click). The only exception is :disabled,
-;; since it is overridden with :disabled?
 (rum/defc icon-button < rum/reactive
+  "Button with optional icon and waiting support
+   Options (text and text-loc are mutually exclusive) [optional]
+
+     text or text-loc See common/resolve-text
+
+     [icon] Icon class for the button (e.g., :lupicon-save)
+
+     [wait?] If true the button is disabled and the wait icon is
+     shown (if the icon has been given). Can be either value or
+     atom. Atom makes the most sense for the typical use cases.
+
+     [disabled?] See common/resolve-disabled
+     [enabled?]  See common/resolve-disabled
+
+   Any other options are passed to the :button
+   tag (e.g, :class, :on-click). The only exception is :disabled,
+   since it is overridden with :disabled?"
   [{:keys [icon wait?] :as options}]
   (let [waiting? (rum/react (common/atomize wait?))]
     [:button
@@ -452,13 +452,13 @@
                                  icon))}])
      [:span (common/resolve-text options)]]))
 
-;; Link that is rendered as button.
-;; Options:
-;;   url: Link url
-;;
-;; In addition, text, text-loc, enabled? and disabled? options are
-;; supported.
 (rum/defc link-button < rum/reactive
+  "Link that is rendered as button.
+   Options:
+     url: Link url
+
+   In addition, text, text-loc, enabled? and disabled? options are
+   supported."
   [{:keys [url] :as options}]
   (let [disabled? (common/resolve-disabled options)
         text      (common/resolve-text options)]
@@ -468,3 +468,40 @@
        {:href   url
         :target :_blank}
        text])))
+
+(rum/defcs toggle < rum/reactive
+  (initial-value-mixin ::value)
+  "Toggle component (using checkbox wrapper mechanism and intial-value-mixin).
+   Parameters: initial-value options
+   Options [optional]:
+   text or text-loc See common/resolve-text
+   [disabled?]      See common/resolve-disabled
+   [enabled?]       See common/resolve-disabled
+   [callback]       Toggle callback function. Optional because sometimes
+                    the two-way binding via the mixin is enough.
+   [negate?]        If true, the value is negated (default false)
+   [prefix]         Wrapper class prefix (default :pate-checkbox)
+   [test-id]        Test id prefix for input and label."
+  [{value* ::value} _ {:keys [callback negate? prefix test-id] :as options}]
+  (let [input-id (common/unique-id "toggle")
+        test-id  (name (or test-id input-id))
+        value-fn (if negate? not identity)
+        value    (-> value* rum/react value-fn)
+        prefix   (name (or prefix :pate-checkbox))]
+    [:div
+     {:class (str prefix "-wrapper")
+      :key   input-id}
+     [:input {:type         "checkbox"
+              :disabled     (common/resolve-disabled options)
+              :checked      value
+              :id           input-id
+              :data-test-id (str test-id "-input")
+              :on-change    (fn [_]
+                              (swap! value* not)
+                              (when callback
+                                (callback (value-fn @value*))))}]
+     [:label
+      {:class        (str prefix "-label")
+       :for          input-id
+       :data-test-id (str test-id "-label")}
+      (common/resolve-text options "")]]))

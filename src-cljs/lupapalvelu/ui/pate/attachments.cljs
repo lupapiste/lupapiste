@@ -383,20 +383,19 @@
        (for [{:keys [group type id filename] :as item} items]
          [:div
           {:key (or id group)}
-          (components/checkbox
-           (if group
-             {:text       (group-loc group)
-              :value      (group-selected? group)
-              :prefix     :pate-attachment-group
-              :handler-fn #(toggle (map :id (get att-items group)) %)
-              :disabled   disabled?}
-             {:text       (str (type-loc (:type-group type)
-                                         (:type-id type))
-                               ". " filename)
-              :value      (selected? item)
-              :prefix     :pate-attachment-check
-              :handler-fn #(toggle [id] %)
-              :disabled   (or disabled? (targeted? item))}))])]
+          (if group
+            (components/toggle (group-selected? group)
+                               {:text      (group-loc group)
+                                :prefix    :pate-attachment-group
+                                :callback  #(toggle (map :id (get att-items group)) %)
+                                :disabled? disabled?})
+            (components/toggle (selected? item)
+                               {:text      (str (type-loc (:type-group type)
+                                                          (:type-id type))
+                                                ". " filename)
+                                :prefix    :pate-attachment-check
+                                :callback  #(toggle [id] %)
+                                :disabled? (or disabled? (targeted? item))}))])]
       [:span (common/loc :pate.no-attachments)])))
 
 (rum/defc pate-select-application-attachments < rum/reactive

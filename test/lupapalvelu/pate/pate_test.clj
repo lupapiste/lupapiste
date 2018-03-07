@@ -64,7 +64,8 @@
                                           :add-sub     {:button {:add :sublevel}}
                                           :bad-add     {:button {:add :dynamic}}}}
                 :add-item    {:button {:add :dynamic}}
-                :attachments {:application-attachments {}}}
+                :attachments {:application-attachments {}}
+                :toggle      {:toggle {}}}
    :name       "test"
    :sections   [{:id   "one"
                  :grid {:columns 4
@@ -277,7 +278,17 @@
     (validate-path-value [:attachments] "hello")
     => :error.invalid-value
     (validate-path-value [:attachments] ["hello"]) => nil
-    (validate-path-value [:attachments] ["" "foo" "bar"]) => nil))
+    (validate-path-value [:attachments] ["" "foo" "bar"]) => nil)
+  (facts "Toggle"
+    (validate-path-value [:toggle] nil) => :error.invalid-value
+    (validate-path-value [:toggle] "foo") => :error.invalid-value
+    (validate-path-value [:toggle] true) => nil
+    (validate-path-value [:toggle] false) => nil)
+  (facts "Text"
+    (validate-path-value [:text] nil) => :error.invalid-value
+    (validate-path-value [:text] true) => :error.invalid-value
+    (validate-path-value [:text] "") => nil
+    (validate-path-value [:text] "hello") => nil))
 
 (defn validate-and-process-value [path value old-data & [references]]
   (schemas/validate-and-process-value test-template
@@ -613,4 +624,3 @@
         => (err :error.invalid-value-path)
         (validate-and-process-value [:dynamic :id :add-sub] true {:dynamic {}})
         => (err :error.invalid-value-path)))))
-

@@ -82,7 +82,7 @@
           (map (fn [{:keys [value text]}]
                  [:option {:key value :value value} text])))]))
 
-(rum/defc docgen-checkbox < rum/reactive
+#_(rum/defc docgen-checkbox < rum/reactive
   [{:keys [schema state path] :as options}]
   (let [state*    (path/state path state)
         input-id  (common/unique-id "checkbox-input")]
@@ -124,7 +124,7 @@
                     (docgen-loc options n)]]))))]))
 
 
-(rum/defc text-edit < rum/reactive
+#_(rum/defc text-edit < rum/reactive
   {:key-fn (fn [_ {path :path} _ & _] (path/id path))}
   "Update the options model state only on blur. Immediate update does
   not work reliably."
@@ -151,7 +151,7 @@
 (defn docgen-component [options]
   (case (docgen-type options)
     :select     (docgen-select options)
-    :checkbox   (docgen-checkbox options)
+    ;;:checkbox   (docgen-checkbox options)
     :radioGroup (docgen-radio-group options)
     :string     (text-edit options :text)
     :text       (text-edit options :textarea)
