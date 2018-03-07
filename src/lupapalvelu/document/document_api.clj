@@ -46,10 +46,11 @@
   "Pre-check to determine if documents are editable in abnormal states"
   [default-states]
   (fn [{document :document {state :state} :application}]
-    (when-not (-> document
-                  (model/get-document-schema)
-                  (state-valid-by-schema? :editable-in-states default-states state))
-      (fail :error.document-not-editable-in-current-state))))
+    (when document
+      (when-not (-> document
+                    (model/get-document-schema)
+                    (state-valid-by-schema? :editable-in-states default-states state))
+        (fail :error.document-not-editable-in-current-state)))))
 
 (defn addable-by-state?
   [default-states]

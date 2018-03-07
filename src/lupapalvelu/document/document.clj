@@ -104,7 +104,8 @@
   "In post verdict states, validates that given document is not approved.
    Approval 'locks' documents in post-verdict state."
   [{:keys [application document]}]
-  (when (and application
+  (when (and document
+             application
              (contains? states/post-verdict-states (keyword (:state application)))
              (approved? document))
     (fail :error.document.approved)))
@@ -114,7 +115,8 @@
    This is special case for post-verdict-parties. Also waste schemas can be edited in post-verdict states, though
    they have been created before verdict. Thus we are only interested in 'post-verdict-party' documents here."
   [{:keys [application document]}]
-  (when (and application
+  (when (and document
+             application
              (contains? states/post-verdict-states (keyword (:state application)))
              (get-in document [:schema-info :post-verdict-party])
              (not (created-after-verdict? document application)))
@@ -135,8 +137,9 @@
 (defn validate-document-is-pre-verdict-or-approved
   "Pre-check for document disabling. If document is added after verdict, it needs to be approved."
   [{:keys [application document]}]
-  (when-not (or (not (created-after-verdict? document application)) (approved? document))
-    (fail :error.document-not-approved)))
+  (when document
+    (when-not (or (not (created-after-verdict? document application)) (approved? document))
+      (fail :error.document-not-approved))))
 
 ;;
 ;; KTJ-info updation
