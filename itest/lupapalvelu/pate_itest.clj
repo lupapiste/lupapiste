@@ -118,8 +118,8 @@
               (fact {:midje/description (format "Set %s delta to %s" k delta)}
                 (command sipoo :save-verdict-template-settings-value
                          :category :r
-                         :path [k :delta]
-                         :value delta) => ok?))]
+                         :path [k]
+                         :value (str delta)) => ok?))]
       (set-date-delta "julkipano" 1)
       (set-date-delta "anto" 2)
       (set-date-delta "muutoksenhaku" 3)
@@ -130,13 +130,13 @@
   (fact "Date delta validation"
     (command sipoo :save-verdict-template-settings-value
              :category :r
-             :path [:muutoksenhaku :delta]
-             :value -8)=> invalid-value?)
+             :path [:muutoksenhaku]
+             :value "-8")=> invalid-value?)
   (fact "Board"
     (command sipoo :save-verdict-template-settings-value
              :category :r
-             :path [:lautakunta-muutoksenhaku :delta]
-             :value 10)=> ok?
+             :path [:lautakunta-muutoksenhaku]
+             :value "10")=> ok?
     (command sipoo :save-verdict-template-settings-value
              :category :r
              :path [:boardname]

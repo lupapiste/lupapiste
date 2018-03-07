@@ -158,11 +158,10 @@
 
 (defmethod validate-resolution :date-delta
   [{:keys [path schema value] :as options}]
-  (let [property (first path)]
-    (if (util/=as-kw :delta property)
-     (schema-error (assoc options
-                          :value (parse-int value)))
-     :error.invalid-value-path)))
+  (or (path-error path)
+      (schema-error (assoc options
+                           :value (parse-int value)
+                           :path [:delta]))))
 
 (defn keyword-set [xs]
   (set (map keyword xs)))
@@ -430,7 +429,6 @@
                  (:required? v)))
        (every? (fn [[k v]]
                  (case (-> v (dissoc :required?) keys first)
-                   :date-delta   (ss/not-blank? (str (get-in data [k :delta])))
                    :multi-select (not-empty (k data))
                    :reference    true ;; Required only for highlighting purposes
                    (ss/not-blank? (k data)))))))

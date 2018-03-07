@@ -132,9 +132,10 @@
     (validate-path-value [:check] "bad") => :error.invalid-value
     (validate-path-value [:check :bad] true) => :error.invalid-value-path)
   (facts "Date delta"
-    (validate-path-value [:delta :delta] 0) => nil
-    (validate-path-value [:delta :delta] 2) => nil
-    (validate-path-value [:delta :delta] -2) => :error.invalid-value)
+    (validate-path-value [:delta] 0) => nil
+    (validate-path-value [:delta] 2) => nil
+    (validate-path-value [:delta] -2) => :error.invalid-value
+    (validate-path-value [:delta :delta] 2) => :error.invalid-value-path)
   (facts "Phrase text"
     (validate-path-value [:phrase] "hello") => nil
     (validate-path-value [:phrase :bad] "hello") => :error.invalid-value-path
@@ -239,7 +240,7 @@
     => :error.invalid-value-path)
   (facts "Repeating"
     (validate-path-value [:loop] :hii) => :error.invalid-value-path
-    (validate-path-value [:loop :some-index :delta3 :delta] 8)
+    (validate-path-value [:loop :some-index :delta3] 8)
     => nil
     (validate-path-value [:loop :date2] "25.9.2017")
     => :error.invalid-value-path
@@ -336,12 +337,14 @@
     (validate-and-process-value [:check :bad] true {})
     => (err :error.invalid-value-path))
   (facts "Date delta"
-    (validate-and-process-value [:delta :delta] 0 {})
-    => (ok [:delta :delta] 0)
+    (validate-and-process-value [:delta] 0 {})
+    => (ok [:delta] 0)
+    (validate-and-process-value [:delta] 2 {})
+    => (ok [:delta] 2)
+    (validate-and-process-value [:delta] -2 {})
+    => (err [:delta] :error.invalid-value)
     (validate-and-process-value [:delta :delta] 2 {})
-    => (ok [:delta :delta] 2)
-    (validate-and-process-value [:delta :delta] -2 {})
-    => (err [:delta :delta] :error.invalid-value))
+    => (err :error.invalid-value-path))
   (facts "Phrase text"
     (validate-and-process-value [:phrase] "hello" {:hi "moi"})
     => (ok [:phrase] "hello" {:hi "moi"})
@@ -513,19 +516,19 @@
   (facts "Repeating"
     (validate-and-process-value [:loop] :hii {})
     => (err :error.invalid-value-path)
-    (validate-and-process-value [:loop :some-index :delta3 :delta]
+    (validate-and-process-value [:loop :some-index :delta3]
                                 8 {:loop {:some-index {}}})
-    => (ok [:loop :some-index :delta3 :delta] 8)
-    (validate-and-process-value [:loop :some-index :delta3 :delta]
+    => (ok [:loop :some-index :delta3] 8)
+    (validate-and-process-value [:loop :some-index :delta3]
                                 8 {:loop {:some-index {:delta3 {}}}})
-    => (ok [:loop :some-index :delta3 :delta] 8)
-    (validate-and-process-value [:loop :some-index :delta3 :delta]
-                                8 {:loop {:some-index {:delta3 {:delta 1}}}})
-    => (ok [:loop :some-index :delta3 :delta] 8)
-    (validate-and-process-value [:loop :some-index :delta3 :delta]
+    => (ok [:loop :some-index :delta3] 8)
+    (validate-and-process-value [:loop :some-index :delta3]
+                                8 {:loop {:some-index {:delta3 1}}})
+    => (ok [:loop :some-index :delta3] 8)
+    (validate-and-process-value [:loop :some-index :delta3]
                                 8 {:loop {}})
     => (err :error.invalid-value-path)
-    (validate-and-process-value [:loop :some-index :delta3 :delta]
+    (validate-and-process-value [:loop :some-index :delta3]
                                 8 {})
     => (err :error.invalid-value-path)
     (validate-and-process-value [:loop :date2] "25.9.2017" {})

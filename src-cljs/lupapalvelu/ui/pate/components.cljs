@@ -36,24 +36,6 @@
     (label-wrap options extra)
     component))
 
-(rum/defc pate-date-delta < rum/reactive
-  [{:keys [state path schema] :as options}  & [wrap-label?]]
-  (let [required? (path/required? options)
-        delta-path (path/extend path :delta)]
-    [:div.pate-date-delta
-     (when (show-label? schema wrap-label?)
-       [:label.delta-label {:class (common/css-flags :required required?)
-                            :for (path/id delta-path)}
-        (path/loc options)])
-     [:div.delta-editor
-      (docgen/text-edit (assoc options
-                               :path delta-path
-                               :required? required?)
-                        :text
-                        {:type "number"
-                         :disabled (path/disabled? options)})
-      (common/loc (str "pate-date-delta." (-> schema :unit name)))]]))
-
 (rum/defc pate-multi-select < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
   [:div.pate-multi-select
@@ -320,6 +302,18 @@
             [:span.sandwich--after (pate-unit after)])])
     component))
 
+(defn pate-attr
+  "Fills attribute map with :id, :key and :class. Also merges extra if
+  given."
+  [{:keys [path] :as options} & [extra]]
+  (let [id (path/id path)]
+    (merge {:key   id
+            :id    id
+            :class (conj (path/css options)
+                         (common/css-flags :warning
+                                           (path/error? options)))}
+           extra)))
+
 (rum/defc pate-text < rum/reactive
   ;;{:key-fn (fn [_ {path :path} _ & _] (path/id path))}
   "Update the options model state only on blur. Immediate update does
@@ -330,9 +324,38 @@
    {:component    (sandwich schema
                             (components/text-edit
                              (path/value path state)
-                             {:callback  (state-change-callback options)
-                              :disabled  (path/disabled? options)
-                              :required? (path/required? options)
-                              :class     (path/css options)
-                              :type      (:type schema)}))
+                             (pate-attr options
+                                        {:callback  (state-change-callback options)
+                                         :disabled  (path/disabled? options)
+                                         :required? (path/required? options)
+                                         :type      (:type schema)})))
     :wrap-label?  wrap-label?}))
+
+(defn pate-date-delta
+  [{:keys [schema] :as options}  & [wrap-label?]]
+  (pate-text (-> options
+                 (assoc-in [:schema :after] (:unit schema))
+                 (assoc-in [:schema :type] :number)
+                 (assoc-in [:schema :css] (conj (flatten [(:css schema)]) :max-width-5em)))
+             wrap-label?))
+
+#_(rum/defc pate-date-delta < rum/reactive
+  [{:keys [state path schema] :as options}  & [wrap-label?]]
+  (let [required? (path/required? options)
+        delta-path (path/extend path :delta)]
+    [:div.pate-date-delta
+     (when (show-label? schema wrap-label?)
+       [:label.delta-label {:class (common/css-flags :required required?)
+                            :for (path/id delta-path)}
+        (path/loc options)])
+     [:div.delta-editor
+      (docgen/text-edit (assoc options
+                               :path delta-path
+                               :required? required?)
+                        :text
+                        {:type "number"
+                         :disabled (path/disabled? options)})
+      (common/loc (str "pate-date-delta." (-> schema :unit name)))]]))
+
+#_(rum/defc pate-date < rum/reactive
+  [{:keys [path state] :as options}])

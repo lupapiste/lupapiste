@@ -29559,6 +29559,10 @@ span.pate-sandwich.sandwich__view .sandwich--after {
   padding-left: .25em;
 }
 
+.max-width-5em {
+  max-width: 5em;
+}
+
 .order-grid-1 {
   width: 100%;
   color: #333333;
