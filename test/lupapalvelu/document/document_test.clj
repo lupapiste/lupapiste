@@ -108,35 +108,6 @@
         (deny-remove-of-non-removable-doc doc {:documents [doc]} ..user..) => falsey
         (provided (lupapalvelu.authorization/application-role anything ..user..) => :authority)))))
 
-(facts "document user-authz-roles validation"
-  (let [command {:application
-                 {:auth [{:id "1" :role "guest"}
-                         {:id "2" :role "writer"}
-                         {:id "3" :role "writer"}
-                         {:id "4" :role "foreman"}]
-                  :organization "000-R"
-                  :documents [{:id "1", :schema-info {:name "tyonjohtaja-v2"}}
-                              {:id "2", :schema-info {:name "hakija-tj"}}]}}]
-
-    (fact "guest does not have access to docs"
-      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "1"), (assoc-in [:user :id] "1"))) => unauthorized?
-      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "1"))) => unauthorized?)
-
-    (fact "writer has access to docs"
-      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "1"), (assoc-in [:user :id] "3"))) => nil
-      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "3"))) => nil)
-
-    (fact "authority has access to docs"
-      (let [authority {:id "-1", :orgAuthz {:000-R #{:authority}}, :role "authority"}]
-        (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "1"), (assoc :user authority))) => nil
-        (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc :user authority))) => nil))
-
-    (fact "foreman has access to foreman doc"
-      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "1"), (assoc-in [:user :id] "4"))) => nil)
-
-    (fact "foreman does not have access to applicant doc"
-      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "4"))) => unauthorized?)))
-
 (def selected-accordion-fields [{:type :selected
                                  :paths [["henkilo" "henkilotiedot" "etunimi"]
                                          ["henkilo" "henkilotiedot" "sukunimi"]

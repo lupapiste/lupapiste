@@ -59,19 +59,6 @@
                     (state-valid-by-schema? :addable-in-states default-states state))
         (fail :error.document.post-verdict-addition)))))
 
-(defn- validate-user-authz-by-key
-  [doc-id-key {:keys [data application user] :as command}]
-  {:pre [(keyword? doc-id-key)]}
-  (let [doc-id (get data doc-id-key)
-        schema (some-> application (domain/get-document-by-id doc-id) model/get-document-schema)]
-    (when (and doc-id (not (auth/application-authority? application user)))
-      (if schema
-        (-> (get-in schema [:info :user-authz-roles] roles/default-authz-writer-roles)
-            (domain/validate-access command))
-        (fail :error.document-not-found)))))
-
-(def validate-user-authz-by-doc (partial validate-user-authz-by-key :doc))
-
 (defquery document
   {:parameters       [:id doc collection]
    :categories       #{:documents :tasks}
