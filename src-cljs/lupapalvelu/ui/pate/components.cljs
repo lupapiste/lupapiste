@@ -273,9 +273,11 @@
 
 (defn- state-change-callback
   "Updates state according to value."
-  [{:keys [state path] :as options}]
+  [{:keys [state path] :as options} & [always?]]
   (fn [value]
-    (when (common/reset-if-needed! (path/state path state) value)
+    (when (or always?
+              (common/reset-if-needed! (path/state path state)
+                                       value))
       (path/meta-updated options))))
 
 (defn pate-unit [unit]
@@ -292,7 +294,7 @@
 
 (defn sandwich [{:keys [before after class]} component]
   (if (or before after)
-    (->> [:span.pate-sandwich
+    (->> [:div.pate-sandwich
           {:class class}
           (when before
             [:span.sandwich--before
@@ -332,30 +334,20 @@
     :wrap-label?  wrap-label?}))
 
 (defn pate-date-delta
-  [{:keys [schema] :as options}  & [wrap-label?]]
+  [{:keys [schema] :as options} & [wrap-label?]]
   (pate-text (-> options
                  (assoc-in [:schema :after] (:unit schema))
                  (assoc-in [:schema :type] :number)
-                 (assoc-in [:schema :css] (conj (flatten [(:css schema)]) :max-width-5em)))
+                 (assoc-in [:schema :css] (conj (flatten [(:css schema)]) :date-delta)))
              wrap-label?))
 
-#_(rum/defc pate-date-delta < rum/reactive
-  [{:keys [state path schema] :as options}  & [wrap-label?]]
-  (let [required? (path/required? options)
-        delta-path (path/extend path :delta)]
-    [:div.pate-date-delta
-     (when (show-label? schema wrap-label?)
-       [:label.delta-label {:class (common/css-flags :required required?)
-                            :for (path/id delta-path)}
-        (path/loc options)])
-     [:div.delta-editor
-      (docgen/text-edit (assoc options
-                               :path delta-path
-                               :required? required?)
-                        :text
-                        {:type "number"
-                         :disabled (path/disabled? options)})
-      (common/loc (str "pate-date-delta." (-> schema :unit name)))]]))
-
-#_(rum/defc pate-date < rum/reactive
-  [{:keys [path state] :as options}])
+(rum/defc pate-date < rum/reactive
+  [{:keys [path state] :as options} & [wrap-label?]]
+  (label-wrap-if-needed
+   options
+   {:component (components/date-edit
+                (path/state path state)
+                (pate-attr options
+                           {:callback (state-change-callback options true)
+                            :disabled (path/disabled? options)}))
+    :wrap-label? wrap-label?}))

@@ -336,6 +336,10 @@
           (sc/optional-key :before) pate-units
           (sc/optional-key :after)  pate-units}))
 
+(defschema PateDate
+  (merge PateComponent
+         {(sc/optional-key :value) sc/Str}))
+
 (defschema PateRequired
   {(sc/optional-key :required?) sc/Bool})
 
@@ -361,6 +365,7 @@
                :application-attachments {:application-attachments PateComponent}
                :toggle         {:toggle PateToggle}
                :text           (required {:text PateText})
+               :date           (required {:date PateDate})
                :repeating      {:repeating (sc/recursive #'SchemaTypes)
                                 ;; The value is a key in the repeating dictionary.
                                 (sc/optional-key :sort-by) sc/Keyword})})
@@ -843,12 +848,11 @@
    {:dictionary
     (merge
      {:language                (req {:docgen "pate-languages"})
-      :verdict-date            (req {:docgen "pate-date"})
+      :verdict-date            (req {:date {}})
       :automatic-verdict-dates {:toggle {}}}
      (->> [:julkipano :anto :muutoksenhaku :lainvoimainen :aloitettava :voimassa]
           (map (fn [kw]
-                 [kw (req {:docgen {:name      "pate-date"
-                                    :disabled? :automatic-verdict-dates}})]))
+                 [kw (req {:date {:disabled? :automatic-verdict-dates}})]))
           (into {}))
      {:contact-ref           {:reference {:path :contact}}
       :boardname             {:reference {:path :*ref.boardname}}
@@ -902,7 +906,7 @@
                                        :category :naapurit}}
       :neighbor-states  {:placeholder {:type :neighbors}}
       :collateral       {:text {:after :eur}}
-      :collateral-date  {:docgen "pate-date"}
+      :collateral-date  {:date {}}
       :collateral-type  {:docgen "collateral-type"}
       :appeal           {:phrase-text {:category :muutoksenhaku}}
       :complexity       {:docgen "pate-complexity"}
@@ -968,7 +972,7 @@
                          :loc-prefix :pate-verdict.section
                          :dict       :verdict-section}
                         {:show? :_meta.editing?}
-                        {:hide? [:OR :verdict-section :_meta.editing?]}
+                        {:hide? [:OR  :*ref.boardname :verdict-section :_meta.editing?]}
                         {:col   2
                          :align :full
                          :dict  :verdict-code}]
@@ -1124,12 +1128,11 @@
    :p {:dictionary
        (merge
          {:language                (req {:docgen "pate-languages"})
-          :verdict-date            (req {:docgen "pate-date"})
+          :verdict-date            (req {:date {}})
           :automatic-verdict-dates {:toggle {}}}
          (->> [:julkipano :anto :valitus :lainvoimainen :aloitettava :voimassa]
               (map (fn [kw]
-                     [kw (req {:docgen {:name      "pate-date"
-                                        :disabled? :automatic-verdict-dates}})]))
+                     [kw (req {:date {:disabled? :automatic-verdict-dates}})]))
               (into {}))
          {:contact-ref           {:reference {:path :contact}}
           :boardname             {:reference {:path :*ref.boardname}}
@@ -1183,7 +1186,7 @@
                                            :category :naapurit}}
           :neighbor-states  {:placeholder {:type :neighbors}}
           :collateral       {:text {:after :eur}}
-          :collateral-date  {:docgen "pate-date"}
+          :collateral-date  {:date {}}
           :collateral-type  {:docgen "collateral-type"}
           :appeal           {:phrase-text {:category :muutoksenhaku}}
           :complexity       {:docgen "pate-complexity"}

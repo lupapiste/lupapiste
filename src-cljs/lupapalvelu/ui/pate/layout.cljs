@@ -80,7 +80,7 @@
 ;; Component instantiation
 ;; -------------------------------
 
-(declare view-component)
+(declare wrap-view-component)
 
 (rum/defc instantiate-docgen < rum/reactive
   [{:keys [schema] :as options} wrap-label?]
@@ -114,9 +114,10 @@
          :application-attachments pate-att/pate-select-application-attachments
          :toggle         pate-components/pate-toggle
          :text           pate-components/pate-text
+         :date           pate-components/pate-date
          ;; The rest are always displayed as view components
-         (partial view-component cell-type)) options wrap-label?)
-      (view-component cell-type options wrap-label?))))
+         (partial wrap-view-component cell-type)) options wrap-label?)
+      (wrap-view-component cell-type options wrap-label?))))
 
 (defmulti instantiate (fn [options & _]
                         (schema-type options)))
@@ -139,78 +140,66 @@
 ;; View layout components
 ;; -------------------------------
 
-(defmulti view-component (fn [cell-type & _]
+(defmulti view-component (fn [cell-type _]
                            cell-type))
 
 (defmethod view-component :default
   [& _])
 
 (defmethod view-component :reference-list
-  [_ {:keys [state path schema ] :as options} & [wrap-label?]]
-  (let [values (set (flatten [(path/value path state)]))
-        span [:span (->> (pate-components/resolve-reference-list options)
-                         (filter #(contains? values (:value %)))
-                         (map :text)
-                         (s/join (get schema :separator ", ")))]]
-    (if (pate-components/show-label? schema wrap-label?)
-      (docgen/docgen-label-wrap options span)
-      span)))
+  [_ {:keys [state path schema ] :as options}]
+  (let [values (set (flatten [(path/value path state)]))]
+    [:span (->> (pate-components/resolve-reference-list options)
+                (filter #(contains? values (:value %)))
+                (map :text)
+                (s/join (get schema :separator ", ")))]))
 
 (defmethod view-component :phrase-text
-  [_ {:keys [state path schema] :as options} & [wrap-label?]]
-  (let [span [:span.phrase-text (path/value path state)]]
-    (if (pate-components/show-label? schema wrap-label?)
-      (docgen/docgen-label-wrap options span)
-      span)))
+  [_ {:keys [state path schema] :as options}]
+  [:span.phrase-text (path/value path state)])
 
 (defmethod view-component :reference
-  [_ {:keys [state schema references] :as options} & [wrap-label?]]
-  (let [[x & xs :as path] (-> schema :path util/split-kw-path)
-        span [:span.formatted
-              (if (util/=as-kw x :*ref)
-                (path/react xs references)
-                (path/react path state))]]
-    (if (pate-components/show-label? schema wrap-label?)
-      (docgen/docgen-label-wrap options span)
-      span)))
+  [_ {:keys [state schema references] :as options}]
+  (let [[x & xs :as path] (-> schema :path util/split-kw-path)]
+    [:span.formatted
+     (if (util/=as-kw x :*ref)
+       (path/react xs references)
+       (path/react path state))]))
 
 (defmethod view-component :placeholder
-  [_ {:keys [state path schema] :as options} & [wrap-label?]]
-  (let [elem (placeholder/placeholder options)]
-    (if (pate-components/show-label? schema wrap-label?)
-      (docgen/docgen-label-wrap options elem)
-      elem)))
+  [_ {:keys [state path schema] :as options}]
+  (placeholder/placeholder options))
 
 (defmethod view-component :attachments
-  [_ {:keys [state path schema] :as options} & [wrap-label?]]
-  (let [elem (pate-att/pate-attachments options)]
-    (if (pate-components/show-label? schema wrap-label?)
-      (docgen/docgen-label-wrap options elem)
-      elem)))
+  [_ {:keys [state path schema] :as options}]
+  (pate-att/pate-attachments options))
 
 (defmethod view-component :link
-  [_ {:keys [schema] :as options} & [wrap-label?]]
-  (let [elem (pate-components/pate-link options)]
-    (if (pate-components/show-label? schema wrap-label?)
-      (docgen/docgen-label-wrap options elem)
-      elem)))
+  [_ {:keys [schema] :as options}]
+  (pate-components/pate-link options))
 
 (defmethod view-component :application-attachments
-  [_ {:keys [schema info] :as options} & [wrap-label?]]
-  (let [elem ((if (path/value :published info)
-                pate-att/pate-frozen-application-attachments
-                pate-att/pate-application-attachments) options)]
-    (if (pate-components/show-label? schema wrap-label?)
-      (docgen/docgen-label-wrap options elem)
-      elem)))
+  [_ {:keys [schema info] :as options}]
+  ((if (path/value :published info)
+     pate-att/pate-frozen-application-attachments
+     pate-att/pate-application-attachments) options))
 
 (defmethod view-component :text
-  [_ {:keys [schema state path] :as options} & [wrap-label?]]
+  [_ {:keys [schema state path] :as options}]
+  (pate-components/sandwich (assoc schema
+                                   :class :sandwich__view)
+                            [:span (path/value path state)]))
+
+(defmethod view-component :date
+  [_ {:keys [schema state path] :as options}]
+  (pate-components/sandwich (assoc schema
+                                   :class :sandwich__view)
+                            [:span (path/value path state)]))
+
+(defn wrap-view-component [cell-type options wrap-label?]
   (pate-components/label-wrap-if-needed
    options
-   {:component (pate-components/sandwich (assoc schema
-                                                :class :sandwich__view)
-                                         [:span (path/value path state)])
+   {:component (view-component cell-type options)
     :wrap-label? wrap-label?}))
 
 ;; -------------------------------

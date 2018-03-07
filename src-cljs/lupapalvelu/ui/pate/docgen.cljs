@@ -82,23 +82,6 @@
           (map (fn [{:keys [value text]}]
                  [:option {:key value :value value} text])))]))
 
-#_(rum/defc docgen-checkbox < rum/reactive
-  [{:keys [schema state path] :as options}]
-  (let [state*    (path/state path state)
-        input-id  (common/unique-id "checkbox-input")]
-    [:div.pate-checkbox-wrapper (docgen-attr options)
-     [:input (docgen-attr options
-                          :type    "checkbox"
-                          :checked (rum/react state*)
-                          :id      input-id)]
-     [:label.pate-checkbox-label
-      {:for      input-id
-       :on-click (fn [_]
-                   (swap! state* not)
-                   (path/meta-updated options))}
-      (when-not (false? (:label schema))
-        (docgen-loc options))]]))
-
 (rum/defc docgen-radio-group < rum/reactive
   [{:keys [schema state path] :as options}]
   (let [state (path/state path state)
@@ -124,26 +107,6 @@
                     (docgen-loc options n)]]))))]))
 
 
-#_(rum/defc text-edit < rum/reactive
-  {:key-fn (fn [_ {path :path} _ & _] (path/id path))}
-  "Update the options model state only on blur. Immediate update does
-  not work reliably."
-  [{:keys [schema state path] :as options} tag & [attr]]
-  ((case tag
-     :text components/text-edit
-     :textarea components/textarea-edit)
-   (path/value path state)
-   (merge {:required? (path/required? options)
-           :callback (state-change-callback options)}
-          (docgen-attr options)
-          attr)))
-
-(rum/defc docgen-date < rum/reactive
-  [{:keys [schema path state] :as options}]
-  (components/date-edit (path/state path state)
-                        (docgen-attr options
-                                     :callback #(path/meta-updated options))))
-
 ;; ---------------------------------------
 ;; Component dispatch
 ;; ---------------------------------------
@@ -152,10 +115,7 @@
   (case (docgen-type options)
     :select     (docgen-select options)
     ;;:checkbox   (docgen-checkbox options)
-    :radioGroup (docgen-radio-group options)
-    :string     (text-edit options :text)
-    :text       (text-edit options :textarea)
-    :date       (docgen-date options)))
+    :radioGroup (docgen-radio-group options)))
 
 ;; ---------------------------------------
 ;; Docgen view components

@@ -199,6 +199,7 @@ span.formatted {
 @mixin pate-default-label() {
   font-size: 15px;
   font-weight: bold;
+  white-space: nowrap;
 }
 
 .pate-label {
@@ -235,23 +236,9 @@ span.saved-info {
   color: $gray153;
 }
 
-div.pate-date-delta {
-  > label.delta-label {
-    @include pate-default-label;
-    white-space: nowrap;
-  }
-  > div.delta-editor {
-    white-space: nowrap;
-    input.grid-style-input {
-      max-width: 5em;
-      margin-right: 0.2em;
-    }
-  }}
-
 .date-delta-plus {
   padding-top: 30px;
-  padding-right: 20px;
-  text-align: center;
+  text-align: left;
   width: 100%;
   > span {
     font-size: 2em;
@@ -710,7 +697,7 @@ div.pate-select-application-attachments {
   margin-left: $marginM;
 }
 
-span.pate-sandwich {
+.pate-sandwich {
   white-space: nowrap;
   .sandwich--before {
     padding-right: .5em;
@@ -728,6 +715,6 @@ span.pate-sandwich {
   }
 }
 
-.max-width-5em {
-  max-width: 5em;
+input.date-delta {
+  max-width: 50%;
 }

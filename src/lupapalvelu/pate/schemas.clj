@@ -28,9 +28,6 @@
                  :body (map #(hash-map :name %)
                             ["small" "medium" "large" "extra-large"])})
 
-(def date {:name "pate-date"
-           :type :date})
-
 (def collateral-type {:name "collateral-type"
                       :type :select
                       :body [{:name "shekki"}
@@ -100,7 +97,7 @@
 (def pate-schemas
   "Raw schemas are combined here for the benefit of
   pdf-export-test/ignored-schemas."
-  [verdict-giver automatic-vs-manual complexity date collateral-type
+  [verdict-giver automatic-vs-manual complexity collateral-type
    languages])
 
 (doc-schemas/defschemas 1
@@ -204,6 +201,11 @@
       (= data-type :date)          (check-date value)
       :else                        :error.invalid-value)))
 
+(defmethod validate-resolution :date
+  [{:keys [path value] :as options}]
+  (or (path-error path)
+      (check-date value)))
+
 (defmethod validate-resolution :multi-select
   [{:keys [path schema data value] :as options}]
   ;; Items should not be part of the original path.
@@ -279,7 +281,7 @@
                 date-delta multi-select
                 phrase-text keymap button
                 application-attachments
-                toggle text]} data
+                toggle text date]} data
         wrap                  (fn [type schema data]
                                 {:type   type
                                  :schema schema
@@ -297,7 +299,8 @@
                                     shared/PateComponent
                                     application-attachments)
       toggle                  (wrap :toggle shared/PateToggle toggle)
-      text                    (wrap :text shared/PateText text))))
+      text                    (wrap :text shared/PateText text)
+      date                    (wrap :date shared/PateDate date))))
 
 (defn- validate-dictionary-value
   "Validates that path-value combination is valid for the given

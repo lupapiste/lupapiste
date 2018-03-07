@@ -28774,6 +28774,7 @@ span.formatted.warning {
 .pate-label {
   font-size: 15px;
   font-weight: bold;
+  white-space: nowrap;
 }
 
 .row-text {
@@ -28799,25 +28800,9 @@ span.saved-info {
   color: #999999;
 }
 
-div.pate-date-delta > label.delta-label {
-  font-size: 15px;
-  font-weight: bold;
-  white-space: nowrap;
-}
-
-div.pate-date-delta > div.delta-editor {
-  white-space: nowrap;
-}
-
-div.pate-date-delta > div.delta-editor input.grid-style-input {
-  max-width: 5em;
-  margin-right: 0.2em;
-}
-
 .date-delta-plus {
   padding-top: 30px;
-  padding-right: 20px;
-  text-align: center;
+  text-align: left;
   width: 100%;
 }
 
@@ -29539,28 +29524,28 @@ input:disabled + .pate-attachment-check-label:hover.pate-attachment-check-label:
   margin-left: 12px;
 }
 
-span.pate-sandwich {
+.pate-sandwich {
   white-space: nowrap;
 }
 
-span.pate-sandwich .sandwich--before {
+.pate-sandwich .sandwich--before {
   padding-right: .5em;
 }
 
-span.pate-sandwich .sandwich--after {
+.pate-sandwich .sandwich--after {
   padding-left: .5em;
 }
 
-span.pate-sandwich.sandwich__view .sandwich--before {
+.pate-sandwich.sandwich__view .sandwich--before {
   padding-right: 0;
 }
 
-span.pate-sandwich.sandwich__view .sandwich--after {
+.pate-sandwich.sandwich__view .sandwich--after {
   padding-left: .25em;
 }
 
-.max-width-5em {
-  max-width: 5em;
+input.date-delta {
+  max-width: 50%;
 }
 
 .order-grid-1 {
