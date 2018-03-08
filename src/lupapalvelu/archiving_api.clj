@@ -1,12 +1,18 @@
 (ns lupapalvelu.archiving-api
   (:require [cheshire.core :as json]
             [sade.core :refer [ok unauthorized fail]]
-            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters]]
+            [schema.core :as sc]
+            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters update-application application->command]]
             [lupapalvelu.archiving :as archiving]
             [lupapalvelu.application :as app]
+            [lupapalvelu.attachment :as att]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.rest.schemas :as rest-schemas]
+            [lupapalvelu.user :as user]
+            [monger.operators :refer [$set $elemMatch]]))
 
 (defn validate-permanent-archive-enabled [{user-orgs :user-organizations app-org :organization app :application}]
   (when-not (if (:organization app)

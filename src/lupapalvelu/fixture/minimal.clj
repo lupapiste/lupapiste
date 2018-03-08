@@ -726,6 +726,24 @@
                            :en "Lupapiste store"}
             :callback-url "http://localhost:8000"}}
 
+   ;; Onkalo
+   {:id "onkalo"
+    :username "onkalo"
+    :email "onkalo@lupapiste.fi"
+    :firstName "Onkalo"
+    :lastName "API-user"
+    :enabled true
+    :language "fi"
+    :role "onkalo-api"
+    :private {:password "$2a$10$LqhU/xPaLEsiPYkIJlT3UuBkzZ0wJyLr.0NBcOAlaP4/DW7AHbeGy"} ; basicauth
+    :oauth {:client-id "onkalo"
+            :client-secret "onkalo"
+            :scopes []                                      ;???
+            :display-name {:fi "Onkalo"
+                           :sv "Onkalo"
+                           :en "Onkalo"}
+            :callback-url "http://localhost:8000"}}
+
    ;; Solita admin:  financial / admin
    {:id "financial"
     :email "financial@ara.fi"
