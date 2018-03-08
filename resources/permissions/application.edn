@@ -39,7 +39,6 @@
                                       :application/create-foreman-app-in-pre-verdict-states
                                       :application/create-foreman-app-in-post-verdict-states
                                       :application/convert-to-application
-                                      :application/get-document-states
                                       :application/check-final-archiving-state
                                       :application/check-within-archiving-time-limit}
                 :approver           #{:application/approve  ;; TODO: could this be just 'approve', as in a supplement for :authority role. Then just 'approver' role couldn't exist.
@@ -75,7 +74,6 @@
                                       :application/create-foreman-app-in-pre-verdict-states
                                       :application/create-foreman-app-in-post-verdict-states
                                       :application/convert-to-application
-                                      :application/get-document-states
                                       :application/check-final-archiving-state
                                       :application/check-within-archiving-time-limit}
                 :commenter          #{:application/read

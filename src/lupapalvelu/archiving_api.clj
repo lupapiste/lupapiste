@@ -39,7 +39,7 @@
 (defquery document-states
   {:parameters       [:id]
    :input-validators [(partial non-blank-parameters [:id])]
-   :permissions      [{:required [:application/get-document-states]}]
+   :permissions      [{:required [:application/read]}]
    :states           states/all-application-or-archiving-project-states}
   [{:keys [application]}]
   (let [app-doc-id (str (:id application) "-application")
