@@ -19,7 +19,6 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as org]
             [lupapalvelu.permissions :as permissions]
-            [lupapalvelu.restrictions :as restrictions]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
@@ -574,8 +573,7 @@
                         (merge command)
                         (update :user update-user-application-role application)
                         enrich-default-permissions
-                        enrich-action-contexts
-                        restrictions/apply-restrictions)]
+                        enrich-action-contexts)]
         (or
           (not-authorized-to-application command)
           (access-denied-by-insufficient-permissions command)
