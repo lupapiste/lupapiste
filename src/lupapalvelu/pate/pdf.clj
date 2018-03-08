@@ -304,8 +304,8 @@
                     [{:loc :empty
                       :source {:dict :verdict-date}
                       :styles :pad-before}]
-                    [{:loc :empty
-                      :source :verdict-giver
+                    [{:loc :applications.authority
+                      :source {:dict :handler}
                       :styles :pad-before}]
                     [{:loc :empty
                       :source :organization
@@ -593,11 +593,12 @@
        not-empty))
 
 (defn collateral [lang verdict]
-  (join-non-blanks ", "
-                   [(add-unit lang :eur (dict-value verdict :collateral))
-                    (loc-non-blank lang :pate.collateral-type
-                                   (dict-value verdict :collateral-type))
-                    (dict-value verdict :collateral-date)]))
+  (when (dict-value verdict :collateral-flag)
+    (join-non-blanks ", "
+                     [(add-unit lang :eur (dict-value verdict :collateral))
+                      (loc-non-blank lang :pate.collateral-type
+                                     (dict-value verdict :collateral-type))
+                      (dict-value verdict :collateral-date)])))
 
 (defn organization-name [lang {organization :organization}]
   (org/get-organization-name organization lang))
@@ -635,8 +636,6 @@
                     :conditions (conditions verdict)
                     :statements (statements lang verdict)
                     :collateral (collateral lang verdict)
-                    :verdict-giver (or (some-> verdict :references :boardname)
-                                       (dict-value verdict :contact))
                     :organization (organization-name lang application)
                     :muutoksenhaku (loc-fill-non-blank lang
                                                        :pdf.not-later-than
@@ -681,8 +680,6 @@
                :conditions (conditions verdict)
                :statements (statements lang verdict)
                :collateral (collateral lang verdict)
-               :verdict-giver (or (some-> verdict :references :boardname)
-                                  (dict-value verdict :contact))
                :organization (organization-name lang application)
                :muutoksenhaku (loc-fill-non-blank lang
                                                   :pdf.not-later-than

@@ -756,6 +756,7 @@
                                                                 :dict :upload}]}}]]}}]})
 
 (sc/validate PateVerdictTemplate (default-verdict-template :r))
+(sc/validate PateVerdictTemplate (default-verdict-template :p))
 
 (defschema PateSettings
   (merge Dictionary
@@ -851,8 +852,10 @@
           :sections                   [PateVerdictSection]}))
 
 
-(def required-in-verdict
-  {:toggle {:i18nkey :pate.template-removed}})
+(def required-in-verdict {:toggle {:i18nkey :pate.template-removed}})
+(def verdict-handler (req {:text {:loc-prefix :pate-verdict.handler}}))
+(def app-id-placeholder {:placeholder {:loc-prefix :pate-verdict.application-id
+                                       :type :application-id}})
 
 ;; It is advisable to reuse ids from template when possible. This
 ;; makes localization work automatically.
@@ -867,9 +870,8 @@
           (map (fn [kw]
                  [kw (req {:date {:disabled? :automatic-verdict-dates}})]))
           (into {}))
-     {:contact-ref           {:reference {:path :contact}}
-      :boardname             {:reference {:path :*ref.boardname}}
-      :contact               (req {:text {}})
+     {:boardname             {:reference {:path :*ref.boardname}}
+      :handler               verdict-handler
       :verdict-section       (req {:text {:before :section}})
       :verdict-code          (req {:reference-list {:path       :verdict-code
                                                     :type       :select
@@ -878,7 +880,7 @@
       :bulletinOpDescription {:phrase-text {:category :toimenpide-julkipanoon
                                             :i18nkey  :phrase.category.toimenpide-julkipanoon}}
       :verdict-text-ref      (req {:reference {:path :verdict-text}})
-      :application-id        {:placeholder {:type :application-id}}}
+      :application-id        app-id-placeholder}
      (reduce (fn [acc [loc-prefix kw term? separator?]]
                (let [included (keyword (str (name kw) "-included"))
                      path     kw]
@@ -919,6 +921,7 @@
                                        :category :naapurit}}
       :neighbor-states  {:placeholder {:type :neighbors}}
       :collateral       {:text {:after :eur}}
+      :collateral-flag  {:toggle {:loc-prefix :pate-collateral.flag}}
       :collateral-date  {:date {}}
       :collateral-type  collateral-type-select
       :appeal           {:phrase-text {:category :muutoksenhaku}}
@@ -951,6 +954,12 @@
              :rows    [[{:col   7
                          :dict  :language
                          :hide? :_meta.published?}]
+                       [{:col  2
+                         :dict :handler}
+                        {}
+                        {:col  2
+                         :hide? :_meta.editing?
+                         :dict :application-id}]
                        [{:id   "verdict-date"
                          :dict :verdict-date}
                         {:id    "automatic-verdict-dates"
@@ -972,10 +981,6 @@
       :grid {:columns 7
              :rows    [[{:col        2
                          :loc-prefix :pate-verdict.giver
-                         :hide?      :*ref.boardname
-                         :dict       :contact}
-                        {:col        2
-                         :loc-prefix :pate-verdict.giver
                          :hide?      :_meta.editing?
                          :show?      :*ref.boardname
                          :dict       :boardname}
@@ -983,8 +988,7 @@
                          :show?      [:OR :*ref.boardname :verdict-section]
                          :loc-prefix :pate-verdict.section
                          :dict       :verdict-section}
-                        {:show? :_meta.editing?}
-                        {:hide? [:OR  :*ref.boardname :verdict-section :_meta.editing?]}
+                        {:show? [:AND :_meta.editing? :*ref.boardname]}
                         {:col   2
                          :align :full
                          :dict  :verdict-code}]
@@ -992,13 +996,9 @@
                          :id    "paatosteksti"
                          :show? :_meta.editing?
                          :dict  :verdict-text}
-                        {:col   3
+                        {:col   5
                          :hide? :_meta.editing?
-                         :dict  :verdict-text-ref}
-                        {:col   2
-                         :id    "application-id"
-                         :hide? :_meta.editing?
-                         :dict  :application-id}]]}}
+                         :dict  :verdict-text-ref}]]}}
      {:id         "bulletin"
       :loc-prefix :bulletin
       :show?      :?.bulletin-op-description
@@ -1039,7 +1039,11 @@
                          :row   [{:col        6
                                   :loc-prefix :verdict.muutoksenhaku
                                   :dict       :appeal}]}
-                        {:show?      :?.collateral
+                        {:show? [:AND :?.collateral :_meta.editing?]
+                         :css   [:row--tight]
+                         :row   [{:col  3
+                                  :dict :collateral-flag}]}
+                        {:show?      [:AND :?.collateral :collateral-flag]
                          :loc-prefix :pate
                          :row        [{:col  2
                                        :id   :collateral-date
@@ -1145,8 +1149,7 @@
              (map (fn [kw]
                     [kw (req {:date {:disabled? :automatic-verdict-dates}})]))
              (into {}))
-        {:contact-ref           {:reference {:path :contact}}
-         :boardname             {:reference {:path :*ref.boardname}}
+        {:boardname             {:reference {:path :*ref.boardname}}
          :contact               (req {:text {}})
          :verdict-section       (req {:text {:before :section}})
          :verdict-code          (req {:reference-list {:path       :verdict-code
@@ -1156,7 +1159,7 @@
          :bulletinOpDescription {:phrase-text {:category :toimenpide-julkipanoon
                                                :i18nkey  :phrase.category.toimenpide-julkipanoon}}
          :verdict-text-ref      (req {:reference {:path :verdict-text}})
-         :application-id        {:placeholder {:type :application-id}}}
+         :application-id        app-id-placeholder}
         (reduce (fn [acc [loc-prefix kw term? separator?]]
                   (let [included (keyword (str (name kw) "-included"))
                         path     kw]

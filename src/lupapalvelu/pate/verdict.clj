@@ -92,10 +92,17 @@
 (defn- kw-format [& xs]
   (keyword (apply format (map ss/->plain-string xs))))
 
+(defn- general-handler [{handlers :handlers}]
+  (if-let [{:keys [firstName
+                   lastName]} (util/find-first :general handlers)]
+    (str firstName " " lastName)
+    ""))
+
 (defmethod initial-draft :r
   [{snapshot :published} application]
   {:data       (data-draft
                 (merge {:language              :language
+                        :handler               (general-handler application)
                         :verdict-code          :verdict-code
                         :verdict-text          :paatosteksti
                         :bulletinOpDescription :bulletinOpDescription}

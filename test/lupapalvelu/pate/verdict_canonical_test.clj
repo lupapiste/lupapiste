@@ -261,13 +261,13 @@
   (fact "nil fields"
     (paatoksentekija "fi" {:data {:giver nil :contact nil}}) => nil)
 
-  (fact "emtpy giver"
+  (fact "empty giver"
     (paatoksentekija "fi" {:data {:giver "" :contact "contact text"}}) => "contact text")
 
-  (fact "emtpy contact - viranhaltija - Finnish"
+  (fact "empty contact - viranhaltija - Finnish"
     (paatoksentekija "fi" {:data {:giver "viranhaltija" :contact ""}}) => "Viranhaltija")
 
-  (fact "emtpy contact - lautakunta - Swedish"
+  (fact "empty contact - lautakunta - Swedish"
     (paatoksentekija "sv" {:data {:giver "lautakunta" :contact ""}}) => "N\u00e4mnd")
 
   (fact "both fields set - English"
