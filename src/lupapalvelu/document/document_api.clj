@@ -77,8 +77,8 @@
 
 (def document-edit-permissions
   [{:context  {:application {:state #{:draft}}}
-    :required [:application/edit-draft :document/edit]}
-   {:required [:application/edit :document/edit]}])
+    :required [:application/read :document/edit-draft]}
+   {:required [:application/read :document/edit]}])
 
 (defcommand create-doc
   {:parameters [:id :schemaName]
