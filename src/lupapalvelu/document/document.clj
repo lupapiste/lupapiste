@@ -13,16 +13,32 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.permissions :refer [defcontext]]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as usr]
             [lupapalvelu.wfs :as wfs]
             [clj-time.format :as tf]))
 
 ;;
 ;; Validators
 ;;
+
+(defcontext document-context [{:keys [application user data]}]
+  (when-let [document-id (and application (some data [:docId :doc :documentId]))]
+    (if-let [doc (domain/get-document-by-id application document-id)]
+      (let [schema (model/get-document-schema doc)
+            ; At least foreman schema allows access with :foreman role, this resolves if the users application authz
+            ; match the one required by the schema, i.e. foreman won't get any role for a document requiring writer
+            required-roles (set (get-in schema [:info :user-authz-roles] roles/default-authz-writer-roles))
+            actual-role (->> [(auth/user-or-company-authz? required-roles application user)]
+                             (filter some?)
+                             set)]
+        {:context-scope :document
+         :context-roles actual-role
+         :document doc})
+      (fail! :error.document-not-found))))
 
 (defn state-valid-by-schema? [schema schema-states-key default-states state]
   (-> (get-in schema [:info (keyword schema-states-key)])
@@ -76,60 +92,54 @@
 (defn- deny-remove-of-approved-post-verdict-document [document application]
   (and (created-after-verdict? document application) (approved? document)))
 
-(defn remove-doc-validator [{data :data user :user application :application}]
-  (if-let [document (when application (domain/get-document-by-id application (:docId data)))]
-    (cond
-      (deny-remove-of-non-removable-doc document application user) (fail :error.not-allowed-to-remove-document)
-      (deny-remove-of-last-document document application user) (fail :error.removal-of-last-document-denied)
-      (deny-remove-of-primary-operation document application) (fail :error.removal-of-primary-document-denied)
-      (deny-remove-of-non-post-verdict-document document application) (fail :error.document.post-verdict-deletion)
-      (deny-remove-of-approved-post-verdict-document document application) (fail :error.document.post-verdict-deletion))))
-
+(defn remove-doc-validator [{:keys [document user application]}]
+  (cond
+    (deny-remove-of-non-removable-doc document application user) (fail :error.not-allowed-to-remove-document)
+    (deny-remove-of-last-document document application user) (fail :error.removal-of-last-document-denied)
+    (deny-remove-of-primary-operation document application) (fail :error.removal-of-primary-document-denied)
+    (deny-remove-of-non-post-verdict-document document application) (fail :error.document.post-verdict-deletion)
+    (deny-remove-of-approved-post-verdict-document document application) (fail :error.document.post-verdict-deletion)))
 
 (defn validate-post-verdict-not-approved
-  "In post verdict states, validates that given document is approved.
+  "In post verdict states, validates that given document is not approved.
    Approval 'locks' documents in post-verdict state."
-  [key]
-  (fn [{:keys [application data]}]
-    (when-let [document (when (and application (contains? states/post-verdict-states (keyword (:state application))))
-                          (domain/get-document-by-id application (get data key)))]
-      (when (approved? document)
-        (fail :error.document.approved)))))
+  [{:keys [application document]}]
+  (when (and document
+             application
+             (contains? states/post-verdict-states (keyword (:state application)))
+             (approved? document))
+    (fail :error.document.approved)))
 
 (defn validate-created-after-verdict
   "In post-verdict state, validates that document is post-verdict-party and it's not created-after-verdict.
    This is special case for post-verdict-parties. Also waste schemas can be edited in post-verdict states, though
    they have been created before verdict. Thus we are only interested in 'post-verdict-party' documents here."
-  [key]
-  (fn [{:keys [application data]}]
-    (when-let [document (when (and application (contains? states/post-verdict-states (keyword (:state application))))
-                          (domain/get-document-by-id application (get data key)))]
-      (when (and (get-in document [:schema-info :post-verdict-party]) (not (created-after-verdict? document application)))
-        (fail :error.document.pre-verdict-document)))))
+  [{:keys [application document]}]
+  (when (and document
+             application
+             (contains? states/post-verdict-states (keyword (:state application)))
+             (get-in document [:schema-info :post-verdict-party])
+             (not (created-after-verdict? document application)))
+    (fail :error.document.pre-verdict-document)))
 
 (defn doc-disabled-validator
   "Deny action if document is marked as disabled"
-  [key]
-  (fn [{:keys [application data]}]
-    (when-let [doc (and (get data key) (domain/get-document-by-id application (get data key)))]
-      (when (:disabled doc)
-        (fail :error.document.disabled)))))
+  [{:keys [document]}]
+  (when (:disabled document)
+    (fail :error.document.disabled)))
 
-(defn validate-disableable-schema
+(defn document-disableable-precheck
   "Checks if document can be disabled from document's schema"
-  [key]
-  (fn [{:keys [application data]}]
-    (when-let [doc (and (get data key) (domain/get-document-by-id application (get data key)))]
-      (when-not (get-in doc [:schema-info :disableable])
-        (fail :error.document.not-disableable)))))
+  [{:keys [document]}]
+  (when-not (get-in document [:schema-info :disableable])
+    (fail :error.document.not-disableable)))
 
 (defn validate-document-is-pre-verdict-or-approved
   "Pre-check for document disabling. If document is added after verdict, it needs to be approved."
-  [{:keys [application data]}]
-  (when-let [document (when application (domain/get-document-by-id application (:docId data)))]
+  [{:keys [application document]}]
+  (when document
     (when-not (or (not (created-after-verdict? document application)) (approved? document))
       (fail :error.document-not-approved))))
-
 
 ;;
 ;; KTJ-info updation
@@ -175,13 +185,13 @@
                             approval)]
     {$set (into {:modified (model/current-timestamp)} approval-pairs)}))
 
-(defn- update-approval [{{:keys [id doc path collection]} :data user :user created :created :as command} approval-data]
+(defn- update-approval [{{:keys [doc path]} :data created :created :as command} approval-data]
   (or
    (validate-approvability command)
    (model/with-timestamp created
      (update-application
       command
-      {collection {$elemMatch {:id doc}}}
+      {:documents {$elemMatch {:id doc}}}
       (->approval-mongo-model path approval-data))
      approval-data)))
 

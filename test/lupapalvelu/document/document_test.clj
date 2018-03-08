@@ -3,7 +3,7 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.itest-util :refer [unauthorized? ok?]]
             [lupapalvelu.document.document-api :as dapi]
-            [lupapalvelu.document.document :refer [create-doc-validator]]
+            [lupapalvelu.document.document :refer [create-doc-validator document-context]]
             [lupapalvelu.document.schemas :as schemas]))
 
 (testable-privates lupapalvelu.document.document
@@ -107,35 +107,6 @@
       (fact "authority"
         (deny-remove-of-non-removable-doc doc {:documents [doc]} ..user..) => falsey
         (provided (lupapalvelu.authorization/application-role anything ..user..) => :authority)))))
-
-(facts "document user-authz-roles validation"
-  (let [command {:application
-                 {:auth [{:id "1" :role "guest"}
-                         {:id "2" :role "writer"}
-                         {:id "3" :role "writer"}
-                         {:id "4" :role "foreman"}]
-                  :organization "000-R"
-                  :documents [{:id "1", :schema-info {:name "tyonjohtaja-v2"}}
-                              {:id "2", :schema-info {:name "hakija-tj"}}]}}]
-
-    (fact "guest does not have access to docs"
-      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "1"), (assoc-in [:user :id] "1"))) => unauthorized?
-      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "1"))) => unauthorized?)
-
-    (fact "writer has access to docs"
-      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "1"), (assoc-in [:user :id] "3"))) => nil
-      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "3"))) => nil)
-
-    (fact "authority has access to docs"
-      (let [authority {:id "-1", :orgAuthz {:000-R #{:authority}}, :role "authority"}]
-        (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "1"), (assoc :user authority))) => nil
-        (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc :user authority))) => nil))
-
-    (fact "foreman has access to foreman doc"
-      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "1"), (assoc-in [:user :id] "4"))) => nil)
-
-    (fact "foreman does not have access to applicant doc"
-      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "4"))) => unauthorized?)))
 
 (def selected-accordion-fields [{:type :selected
                                  :paths [["henkilo" "henkilotiedot" "etunimi"]
@@ -270,3 +241,73 @@
       (let [docs (map #(update % :schema-info (fn [schema] (dissoc schema :type))) [schema1 schema2 schema3])]
         (->> (describe-non-party-document-assignment-targets {:documents docs})
              (map :id))) => (just ["s1" "s3" "s2"]))))
+
+(facts "document context function"
+  (let [guest {:id "1" :role "guest"}
+        writer {:id "2" :role "writer"}
+        foreman {:id "3" :role "foreman"}
+        application {:auth         [guest
+                                    writer
+                                    foreman]
+                     :organization "000-R"
+                     :documents    [{:id "1", :schema-info {:name "hakija-r"}}
+                                    {:id "2", :schema-info {:name "tyonjohtaja-v2"}}]}
+        authority {:id       "5"
+                   :orgAuthz {"000-R" ["authority"]}}
+        command {:application application
+                 :permissions #{}}]
+
+    (fact "authority does not receive permissions through the context"
+      (document-context (assoc command :user authority :data {:doc "1"})) => {:application application
+                                                                              :user        authority
+                                                                              :permissions #{}
+                                                                              :data        {:doc "1"}
+                                                                              :document    {:id "1", :schema-info {:name "hakija-r"}}})
+
+    (fact "writer receives edit permissions for hakija-r document"
+      (document-context (assoc command :user writer :data {:doc "1"})) => {:application application
+                                                                           :user        writer
+                                                                           :permissions #{:document/edit}
+                                                                           :data        {:doc "1"}
+                                                                           :document    {:id "1", :schema-info {:name "hakija-r"}}})
+
+    (fact "foreman does not receive edit permissions for hakija-r"
+      (document-context (assoc command :user foreman :data {:doc "1"})) => {:application application
+                                                                            :user        foreman
+                                                                            :permissions #{}
+                                                                            :data        {:doc "1"}
+                                                                            :document    {:id "1", :schema-info {:name "hakija-r"}}})
+
+    (fact "foreman receives edit permissions for tyonjohtaja-v2"
+      (document-context (assoc command :user foreman :data {:doc "2"})) => {:application application
+                                                                            :user        foreman
+                                                                            :permissions #{:document/edit}
+                                                                            :data        {:doc "2"}
+                                                                            :document    {:id "2", :schema-info {:name "tyonjohtaja-v2"}}})
+
+    (fact "guest does not receive permissions for tyonjohtaja-v2"
+      (document-context (assoc command :user guest :data {:doc "2"})) => {:application application
+                                                                          :user        guest
+                                                                          :permissions #{}
+                                                                          :data        {:doc "2"}
+                                                                          :document    {:id "2", :schema-info {:name "tyonjohtaja-v2"}}})
+
+    (fact "docId works as data key"
+      (document-context (assoc command :user writer :data {:docId "1"})) => {:application application
+                                                                           :user        writer
+                                                                           :permissions #{:document/edit}
+                                                                           :data        {:docId "1"}
+                                                                           :document    {:id "1", :schema-info {:name "hakija-r"}}})
+
+    (fact "documentId works as data key"
+      (document-context (assoc command :user writer :data {:documentId "1"})) => {:application application
+                                                                             :user        writer
+                                                                             :permissions #{:document/edit}
+                                                                             :data        {:documentId "1"}
+                                                                             :document    {:id "1", :schema-info {:name "hakija-r"}}})
+
+    (fact "function returns unaltered command when proper data key is missing"
+      (document-context (assoc command :user writer :data {})) => (assoc command :user writer :data {}))
+
+    (fact "invalid document id results in a failure"
+      (document-context (assoc command :user writer :data {:documentId "999"})) => (throws Exception))))
