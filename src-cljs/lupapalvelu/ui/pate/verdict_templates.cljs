@@ -188,8 +188,7 @@
 
 (rum/defc verdict-templates < rum/reactive
   []
-  (when (and (rum/react state/schemas)
-             (rum/react state/categories)
+  (when (and (rum/react state/categories)
              (rum/react state/phrases))
     [:div
      (case (:view (rum/react state/current-view))
@@ -229,7 +228,6 @@
     (swap! args assoc
            :dom-id (name domId))
     (reset! state/auth-fn lupapisteApp.models.globalAuthModel.ok)
-    (service/fetch-schemas)
     (service/fetch-template-list)
     (service/fetch-categories (fn [categories]
                                 (set-category (first categories))))

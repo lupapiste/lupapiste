@@ -36,7 +36,6 @@
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.pate.components :as pate-components]
             [lupapalvelu.ui.pate.attachments :as pate-att]
-            [lupapalvelu.ui.pate.docgen :as docgen]
             [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.phrases :as phrases]
             [lupapalvelu.ui.pate.placeholder :as placeholder]
@@ -82,20 +81,6 @@
 
 (declare wrap-view-component)
 
-(rum/defc instantiate-docgen < rum/reactive
-  [{:keys [schema] :as options} wrap-label?]
-  (let [docgen      (:docgen schema)
-        schema-name (get docgen :name docgen)
-        options     (path/schema-options options
-                                         (cond-> (service/schema schema-name)
-                                           ;; Additional, non-legacy properties
-                                           (map? docgen) (merge (dissoc docgen :name))))
-        editing?    (path/react-meta options :editing?)]
-    (cond->> options
-      editing?       docgen/docgen-component
-      (not editing?) docgen/docgen-view
-      wrap-label?    (docgen/docgen-label-wrap options))))
-
 (rum/defc  instantiate-default < rum/reactive
   [{:keys [schema] :as options} wrap-label?]
   (let [cell-type    (schema-type options)
@@ -122,10 +107,6 @@
 
 (defmulti instantiate (fn [options & _]
                         (schema-type options)))
-
-(defmethod instantiate :docgen
-  [options & [wrap-label?]]
-  (instantiate-docgen options wrap-label?))
 
 (defmethod instantiate :default
   [options & [wrap-label?]]
@@ -187,15 +168,23 @@
 
 (defmethod view-component :text
   [_ {:keys [schema state path] :as options}]
-  (pate-components/sandwich (assoc schema
-                                   :class :sandwich__view)
-                            [:span (path/value path state)]))
+  (let [value (path/value path state)]
+    (when-not (s/blank? value)
+      (pate-components/sandwich (assoc schema
+                                       :class :sandwich__view)
+                                [:span value]))))
 
 (defmethod view-component :date
   [_ {:keys [schema state path] :as options}]
   (pate-components/sandwich (assoc schema
                                    :class :sandwich__view)
                             [:span (path/value path state)]))
+
+(defmethod view-component :select
+  [_ {:keys [schema state path] :as options}]
+  (let [value (path/value path state)]
+    [:span (when-not (s/blank? value)
+             (path/loc options value))]))
 
 (defn wrap-view-component [cell-type options wrap-label?]
   (pate-components/label-wrap-if-needed

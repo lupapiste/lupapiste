@@ -8,7 +8,6 @@
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.pate.components :as pate-components]
-            [lupapalvelu.ui.pate.docgen :as docgen]
             [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.state :as state]
@@ -400,14 +399,15 @@
 
 (rum/defc pate-select-application-attachments < rum/reactive
   [{:keys [schema path state info] :as options} & [wrap-label?]]
-  (cond->> (select-application-attachments (path/state path state)
-                                           {:callback  (partial path/meta-updated
-                                                                options)
-                                            :disabled? (path/disabled? options)
-                                            :target-id (path/value :id info)})
-    (pate-components/show-label? schema wrap-label?)
-    (docgen/docgen-label-wrap options)))
-
+  (pate-components/label-wrap-if-needed
+   options
+   {:component (select-application-attachments
+                (path/state path state)
+                {:callback  (partial path/meta-updated
+                                     options)
+                 :disabled? (path/disabled? options)
+                 :target-id (path/value :id info)})
+    :wrap-label? wrap-label?}))
 
 (defn- attachments-table
   "Items are maps with type-string and amount keys."

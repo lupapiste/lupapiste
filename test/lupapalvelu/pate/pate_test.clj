@@ -45,20 +45,19 @@
                                                :item-key :value}}
                 :text        {:text {}}
                 :giver       {:select {:items [:viranhaltija :lautakunta]}}
-                :radio       {:docgen "automatic-vs-manual"}
                 :date        {:date {}}
-                :complexity  {:docgen {:name "pate-complexity"}}
+                :complexity  shared/complexity-select
                 :keymap      {:keymap {:one   "hello"
                                        :two   :world
                                        :three 88}}
                 :placeholder {:placeholder {:type :neighbors}}
                 :loop        {:repeating {:delta3     {:date-delta {:unit :years}}
-                                          :date2      {:docgen "pate-date"}
-                                          :inner-loop {:repeating {:date {:docgen "pate-verdict-check"}}}}}
-                :dynamic     {:repeating {:text        {:docgen "pate-string"}
-                                          :flag        {:docgen "pate-verdict-check"}
+                                          :date2      {:date {}}
+                                          :inner-loop {:repeating {:date {:toggle {}}}}}}
+                :dynamic     {:repeating {:text        {:text {}}
+                                          :flag        {:toggle {}}
                                           :remove-item {:button {:remove :dynamic}}
-                                          :sublevel    {:repeating {:tick       {:docgen "pate-verdict-check"}
+                                          :sublevel    {:repeating {:tick       {:toggle {}}
                                                                     :remove-sub {:button {:remove :sublevel}}
                                                                     :remove-top {:button {:remove :dynamic}}}}
                                           :add-sub     {:button {:add :sublevel}}
@@ -206,12 +205,6 @@
     ;; Empty selection
     (validate-path-value [:giver] nil) => nil
     (validate-path-value [:giver] "") => nil)
-  (facts "Docgen: radioGroup"
-    (validate-path-value [:radio] :automatic) => nil
-    (validate-path-value [:radio] "manual") => nil
-    (validate-path-value [:radio] :bad) => :error.invalid-value
-    (validate-path-value [:radio :bad] :automatic) => :error.invalid-value-path
-    (validate-path-value [:radio] nil) => :error.invalid-value)
   (facts "Date"
     (validate-path-value [:date] "13.9.2017") => nil
     (validate-path-value [:date] "13.09.2017") => nil
@@ -221,14 +214,6 @@
     (validate-path-value [:date] "bad") => :error.invalid-value
     (validate-path-value [:date] "") => nil
     (validate-path-value [:date] nil) => nil)
-  (facts "Docgen: select defined with map"
-    (validate-path-value [:complexity] :medium) => nil
-    (validate-path-value [:complexity] "large") => nil
-    (validate-path-value [:complexity] nil) => nil
-    (validate-path-value [:complexity] "") => nil
-    (validate-path-value [:complexity] "bad") => :error.invalid-value
-    (validate-path-value [:complexity :bad] :extra-large)
-    => :error.invalid-value-path)
   (facts "KeyMap"
     (validate-path-value [:keymap] :hii) => :error.invalid-value-path
     (validate-path-value [:keymap :one] :hii) => nil
@@ -330,7 +315,7 @@
   (fact "Bad path"
     (validate-and-process-value [:foo :bar] 88 {})
     => (err :error.invalid-value-path))
-  (facts "Docgen: checkbox"
+  (facts "Toggle (was docgen checkbox)"
     (validate-and-process-value [:check] true {}) => (ok [:check] true)
     (validate-and-process-value ["check"] false {:foo 8})
     => (ok [:check] false {:foo 8})
@@ -377,7 +362,7 @@
     => (ok [:multi] [:world])
     (validate-and-process-value [:multi] [:world "bar" :foo] {:dum "dom"})
     => (ok [:multi] [:world "bar" :foo] {:dum "dom"}))
-  (facts "Docgen: string"
+  (facts "Text (was docgen string)"
     (validate-and-process-value [:string] "hello" {})
     => (ok [:string] "hello")
     (validate-and-process-value ["string"] "hello" {})
@@ -440,7 +425,7 @@
       => (ok [:ref-key] [])
       (validate-and-process-value [:ref-key] nil {} refs)
       => (ok [:ref-key] nil)))
-  (facts "Docgen: select"
+  (facts "Select (was docgen select)"
     (validate-and-process-value [:giver :bad] "viranhaltija" {})
     => (err :error.invalid-value-path)
     (validate-and-process-value [:giver] "viranhaltija" {})
@@ -458,17 +443,6 @@
     => (ok [:giver] nil {:foo "bar"})
     (validate-and-process-value [:giver] "" {})
     => (ok [:giver] ""))
-  (facts "Docgen: radioGroup"
-    (validate-and-process-value [:radio] :automatic {})
-    => (ok [:radio] :automatic)
-    (validate-and-process-value [:radio] "manual" {})
-    => (ok [:radio] "manual")
-    (validate-and-process-value [:radio] :bad {})
-    => (err [:radio] :error.invalid-value)
-    (validate-and-process-value [:radio :bad] :automatic {})
-    => (err :error.invalid-value-path)
-    (validate-and-process-value [:radio] nil {})
-    => (err [:radio] :error.invalid-value))
   (facts "Date"
     (validate-and-process-value [:date] "13.9.2017" {})
     => (ok [:date] "13.9.2017")
@@ -486,19 +460,6 @@
     => (ok [:date] "")
     (validate-and-process-value [:date] nil {})
     => (ok [:date] nil))
-  (facts "Docgen: select defined with map"
-    (validate-and-process-value [:complexity] :medium {})
-    => (ok [:complexity] :medium)
-    (validate-and-process-value [:complexity] "large" {})
-    => (ok [:complexity] "large")
-    (validate-and-process-value [:complexity] nil {})
-    => (ok [:complexity] nil)
-    (validate-and-process-value [:complexity] "" {})
-    => (ok [:complexity] "")
-    (validate-and-process-value [:complexity] "bad" {})
-    => (err [:complexity] :error.invalid-value)
-    (validate-and-process-value [:complexity :bad] :extra-large {})
-    => (err :error.invalid-value-path))
   (facts "KeyMap"
     (validate-and-process-value [:keymap] :hii {})
     => (err :error.invalid-value-path)

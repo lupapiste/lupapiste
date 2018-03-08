@@ -244,12 +244,6 @@
   (merge PateComponent
          {:path path-type}))
 
-(defschema PateDocgen
-  "Additional properties for old school docgen definitions. Shortcut
-  is to use just the schema name (see below)."
-  (merge PateEnabled
-         {:name sc/Str}))
-
 (defschema PateLink
   "UI component that represents a text with link. The link is part of
   the text-loc, using a special notation: 'Text before [link]
@@ -361,9 +355,6 @@
 
 (defschema SchemaTypes
   {sc/Keyword (sc/conditional
-               :docgen         (required {:docgen (sc/conditional
-                                                   :name PateDocgen
-                                                   :else sc/Str)})
                :reference-list (required {:reference-list PateReferenceList})
                :phrase-text    (required {:phrase-text PatePhraseText})
                :loc-text       {:loc-text sc/Keyword} ;; Localisation term shown as text.

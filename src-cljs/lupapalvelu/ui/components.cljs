@@ -380,15 +380,14 @@
      [required?] If true, the select is highlighted if empty.
 
    The rest of the options are passed to the underlying select."
-  [{selected* ::selected} _ {:keys [items choose? callback required?]
+  [{selected* ::selected} _ {:keys    [items choose? callback required?]
                              sort-key :sort-by
-                             :as   options}]
+                             :as      options}]
   (let [value   (rum/react selected*)
         choose? (-> choose? false? not)]
     [:select.dropdown
      (merge {:value     value
-             :on-change #(do (console.log (.-target %))
-                             (set-selected selected* (.. % -target -value) callback))
+             :on-change #(set-selected selected* (.. % -target -value) callback)
              :disabled  (common/resolve-disabled options)}
             (common/update-css (dissoc options
                                        :items :choose? :callback
@@ -400,11 +399,11 @@
                          (if (= sort-key :text)
                            js/util.localeComparator
                            identity))
-       choose? (cons {:text  (common/loc :selectone)
-                      :value ""})
-       true    (map (fn [{:keys [text value]}]
-                      [:option {:key   value
-                                :value value} text])))]))
+       choose?  (cons {:text  (common/loc :selectone)
+                       :value ""})
+       true     (map (fn [{:keys [text value]}]
+                       [:option {:key   value
+                                 :value value} text])))]))
 
 (def log (.-log js/console))
 

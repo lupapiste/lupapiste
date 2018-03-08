@@ -1,19 +1,25 @@
 (ns lupapalvelu.ui.pate.components
   "More or less Pate-specific user interface components. See
-  layout.cljs for documentation on the component conventions. Docgen
-  support is in docgen.cljs."
+  layout.cljs for documentation on the component conventions."
   (:require [clojure.set :as set]
             [clojure.string :as s]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
-            [lupapalvelu.ui.pate.docgen :as docgen]
             [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.phrases :as phrases]
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]
             [sade.shared-util :as util]))
+
+(defn- state-change-callback
+  "Updates state according to value."
+  [{:keys [state path] :as options}]
+  (fn [value]
+    (when (common/reset-if-needed! (path/state path state)
+                                   value)
+      (path/meta-updated options))))
 
 (defn show-label? [{label? :label?} wrap-label?]
   (and wrap-label? (not (false? label?))))
@@ -105,17 +111,17 @@
                            identity)))))
 
 (rum/defc select-reference-list < rum/reactive
-  [{:keys [schema references] :as options} & [wrap-label?]]
-  (let [options   (assoc options
-                         :schema (assoc schema
-                                        :body [{:sortBy :displayName
-                                                :body (map #(hash-map :name %)
-                                                           (distinct (path/react (path/pathify (:path schema))
-                                                                                 references)))}]))
-        component (docgen/docgen-select options)]
-    (if (show-label? schema wrap-label?)
-      (docgen/docgen-label-wrap options component)
-      component)))
+  [{:keys [schema references path state] :as options} & [wrap-label?]]
+  (label-wrap-if-needed
+   options
+   {:component   (components/dropdown
+                  (path/value path state)
+                  {:items     (resolve-reference-list options)
+                   :sort-by   :text
+                   :callback  (state-change-callback options)
+                   :disabled? (path/disabled? options)
+                   :required? (path/required? options)})
+    :wrap-label? wrap-label?}))
 
 (rum/defc multi-select-reference-list < rum/reactive
   [{:keys [schema] :as options} & [wrap-label?]]
@@ -270,14 +276,6 @@
                     :prefix    (:prefix schema)})
     :wrap-label?  wrap-label?
     :empty-label? true}))
-
-(defn- state-change-callback
-  "Updates state according to value."
-  [{:keys [state path] :as options}]
-  (fn [value]
-    (when (common/reset-if-needed! (path/state path state)
-                                   value)
-      (path/meta-updated options))))
 
 (defn pate-unit [unit]
   (case unit

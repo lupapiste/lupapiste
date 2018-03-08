@@ -12,12 +12,6 @@
             [schema-tools.core :as st]
             [schema.core :refer [defschema] :as sc]))
 
-(def automatic-vs-manual {:name "automatic-vs-manual"
-                          :type :radioGroup
-                          :label false
-                          :body  [{:name "automatic"}
-                                  {:name "manual"}]})
-
 (defschema PateCategory
   {:id       ssc/ObjectIdStr
    :category (sc/enum "r" "p" "ya" "kt" "ymp")})
@@ -74,17 +68,6 @@
                                  (sc/optional-key :p) PateSavedSettings}
    (sc/optional-key :reviews)   [PateSettingsReview]
    (sc/optional-key :plans)     [PateGeneric]})
-
-(def pate-schemas
-  "Raw schemas are combined here for the benefit of
-  pdf-export-test/ignored-schemas."
-  [automatic-vs-manual])
-
-(doc-schemas/defschemas 1
-  (map (fn [m]
-         {:info {:name (:name m)}
-          :body (body m)})
-       pate-schemas))
 
 ;; Phrases
 
@@ -159,27 +142,6 @@
     (when-not (or (ss/blank? trimmed)
                   (date/parse-finnish-date trimmed))
       :error.invalid-value)))
-
-(defmethod validate-resolution :docgen
-  [{:keys [path schema value data] :as options}]
-  ;; TODO: Use the old-school docgen validation if possible
-  ;; For now we support only the types used by Pate
-  (let [body      (-> schema :body first)
-        data-type (:type body)
-        names     (map :name (:body body))
-        check     (fn [pred] (when (sc/check pred value)
-                               :error.invalid-value))]
-    (cond
-      (seq path)                   :error.invalid-value-path
-      (coll? value)                :error.invalid-value
-      (data-type #{:text :string}) (check sc/Str)
-      (= data-type :checkbox)      (check sc/Bool)
-      ;; TODO: Nil handling should follow valueAllowUnset.
-      (= data-type :select)        (when-not (ss/blank? (str value))
-                                     (check-items [value] names))
-      (= data-type :radioGroup)    (check-items [value] names)
-      (= data-type :date)          (check-date value)
-      :else                        :error.invalid-value)))
 
 (defmethod validate-resolution :date
   [{:keys [path value] :as options}]
