@@ -14,7 +14,8 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.roles :as roles]
-            [lupapalvelu.states :as states]))
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :as user]))
 
 
 ;; Action category: documents & tasks
@@ -268,5 +269,5 @@
                                               document
                                               companyId
                                               path
-                                              user
+                                              (user/get-user-by-id (:id user))
                                               created))
