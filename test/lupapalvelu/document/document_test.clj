@@ -267,7 +267,8 @@
     (fact "writer receives edit permissions for hakija-r document"
       (document-context (assoc command :user writer :data {:doc "1"})) => {:application application
                                                                            :user        writer
-                                                                           :permissions #{:document/edit}
+                                                                           :permissions #{:document/edit
+                                                                                          :document/edit-draft}
                                                                            :data        {:doc "1"}
                                                                            :document    {:id "1", :schema-info {:name "hakija-r"}}})
 
@@ -281,7 +282,8 @@
     (fact "foreman receives edit permissions for tyonjohtaja-v2"
       (document-context (assoc command :user foreman :data {:doc "2"})) => {:application application
                                                                             :user        foreman
-                                                                            :permissions #{:document/edit}
+                                                                            :permissions #{:document/edit
+                                                                                           :document/edit-draft}
                                                                             :data        {:doc "2"}
                                                                             :document    {:id "2", :schema-info {:name "tyonjohtaja-v2"}}})
 
@@ -295,14 +297,16 @@
     (fact "docId works as data key"
       (document-context (assoc command :user writer :data {:docId "1"})) => {:application application
                                                                            :user        writer
-                                                                           :permissions #{:document/edit}
+                                                                           :permissions #{:document/edit
+                                                                                          :document/edit-draft}
                                                                            :data        {:docId "1"}
                                                                            :document    {:id "1", :schema-info {:name "hakija-r"}}})
 
     (fact "documentId works as data key"
       (document-context (assoc command :user writer :data {:documentId "1"})) => {:application application
                                                                              :user        writer
-                                                                             :permissions #{:document/edit}
+                                                                             :permissions #{:document/edit
+                                                                                            :document/edit-draft}
                                                                              :data        {:documentId "1"}
                                                                              :document    {:id "1", :schema-info {:name "hakija-r"}}})
 
