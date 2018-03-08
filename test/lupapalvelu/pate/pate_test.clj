@@ -29,12 +29,12 @@
 
 
 (def test-template
-  {:dictionary {:check       {:docgen "pate-verdict-check"}
+  {:dictionary {:check       {:toggle {}}
                 :delta       {:date-delta {:unit :years}}
                 :phrase      {:phrase-text {:category :paatosteksti}}
                 :multi       {:multi-select {:items [:foo :bar {:text  "Hello"
                                                                 :value :world}]}}
-                :string      {:docgen "pate-string"}
+                :string      {:text {}}
                 :delta2      {:date-delta {:unit :days}}
                 :ref-select  {:reference-list {:type :select
                                                :path [:path :to :somewhere]}}
@@ -43,10 +43,10 @@
                 :ref-key     {:reference-list {:type     :select
                                                :path     [:my :path]
                                                :item-key :value}}
-                :text        {:docgen "pate-verdict-text"}
-                :giver       {:docgen "pate-verdict-giver"}
+                :text        {:text {}}
+                :giver       {:select {:items [:viranhaltija :lautakunta]}}
                 :radio       {:docgen "automatic-vs-manual"}
-                :date        {:docgen "pate-date"}
+                :date        {:date {}}
                 :complexity  {:docgen {:name "pate-complexity"}}
                 :keymap      {:keymap {:one   "hello"
                                        :two   :world
@@ -65,7 +65,9 @@
                                           :bad-add     {:button {:add :dynamic}}}}
                 :add-item    {:button {:add :dynamic}}
                 :attachments {:application-attachments {}}
-                :toggle      {:toggle {}}}
+                :toggle      {:toggle {}}
+                :select      {:select {:items [:one :two :three]}}
+                }
    :name       "test"
    :sections   [{:id   "one"
                  :grid {:columns 4
@@ -108,9 +110,9 @@
                                            :rows      [[{:dict :text}
                                                         {:dict :remove-item}]]}}]
                                   [{:dict :add-item}]]}}
-                {:id "attachments"
+                {:id   "attachments"
                  :grid {:columns 1
-                        :rows [[{:dict :attachments}]]}}]})
+                        :rows    [[{:dict :attachments}]]}}]})
 
 (facts "Test template is valid"
   (sc/validate shared/PateVerdictTemplate test-template)
@@ -126,7 +128,7 @@
   (fact "Bad path"
     (validate-path-value [:foo :bar] 88)
     => :error.invalid-value-path)
-  (facts "Docgen: checkbox"
+  (facts "Toggle (was docgen checkbox)"
     (validate-path-value [:check] true) => nil
     (validate-path-value [:check] false) => nil
     (validate-path-value [:check] "bad") => :error.invalid-value
@@ -152,7 +154,7 @@
     (validate-path-value [:multi] [88]) => :error.invalid-value
     (validate-path-value [:multi] [:world]) => nil
     (validate-path-value [:multi] [:world "bar" :foo]) => nil)
-  (facts "Docgen: string"
+  (facts "Text (was docgen string)"
     (validate-path-value [:string] "hello") => nil
     (validate-path-value ["string"] "hello") => nil
     (validate-path-value [:string :hii] "hello") => :error.invalid-value-path
@@ -193,7 +195,7 @@
       => :error.invalid-value
       (validate-path-value [:ref-key] [] refs) => nil
       (validate-path-value [:ref-key] nil refs) => nil))
-  (facts "Docgen: select"
+  (facts "Select (was docgen select)"
     (validate-path-value [:giver :bad] "viranhaltija")
     => :error.invalid-value-path
     (validate-path-value [:giver] "viranhaltija") => nil

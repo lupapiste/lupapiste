@@ -360,24 +360,51 @@
         [:div.ac__term text-edit]
         menu-items])]))
 
-;; Dropwdown is a styled select.
-;; Parameters: initial-value options
-;; Options [optional]:
-;;   items list of :value, :text maps. Items are rendered ordered by
-;;         text.
-;;   [choose?] If true, the select caption (nil selection) is included. (default true)
-;;   [callback] Selection callback
 (rum/defcs dropdown < rum/reactive
   (initial-value-mixin ::selected)
-  [{selected* ::selected} _ {:keys [items choose? callback]}]
-  [:select.dropdown
-   {:value (rum/react selected*)
-    :on-change #(set-selected selected* (.. % -target -value) callback)}
-   (cond->> (sort-by :text items)
-     choose? (cons {:text (common/loc "choose")})
-     true    (map (fn [{:keys [text value]}]
-                    [:option {:key   value
-                              :value value} text])))])
+  "Dropwdown is a styled select.
+   Parameters: initial-value options
+   Options [optional]:
+
+     items: list of :value, :text maps. Items are rendered ordered by
+            text.
+
+     [sort-by] Either :text or :value.
+
+     [choose?] If true, the select caption (empty selection) is
+     included. (default true)
+
+     [callback] Selection callback
+     [disabled?] See common/resolve-disabled
+     [enabled?]  See common/resolve-disabled
+     [required?] If true, the select is highlighted if empty.
+
+   The rest of the options are passed to the underlying select."
+  [{selected* ::selected} _ {:keys [items choose? callback required?]
+                             sort-key :sort-by
+                             :as   options}]
+  (let [value   (rum/react selected*)
+        choose? (-> choose? false? not)]
+    [:select.dropdown
+     (merge {:value     value
+             :on-change #(do (console.log (.-target %))
+                             (set-selected selected* (.. % -target -value) callback))
+             :disabled  (common/resolve-disabled options)}
+            (common/update-css (dissoc options
+                                       :items :choose? :callback
+                                       :disabled? :enabled? :required?
+                                       :sort-by)
+                               :required (and required? (s/blank? value))))
+     (cond->> items
+       sort-key (sort-by sort-key
+                         (if (= sort-key :text)
+                           js/util.localeComparator
+                           identity))
+       choose? (cons {:text  (common/loc :selectone)
+                      :value ""})
+       true    (map (fn [{:keys [text value]}]
+                      [:option {:key   value
+                                :value value} text])))]))
 
 (def log (.-log js/console))
 

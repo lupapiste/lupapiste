@@ -12,30 +12,11 @@
             [schema-tools.core :as st]
             [schema.core :refer [defschema] :as sc]))
 
-(def verdict-giver {:name "pate-verdict-giver"
-                    :type :select
-                    :body [{:name "viranhaltija"}
-                           {:name "lautakunta"}]})
-
 (def automatic-vs-manual {:name "automatic-vs-manual"
                           :type :radioGroup
                           :label false
                           :body  [{:name "automatic"}
                                   {:name "manual"}]})
-
-(def complexity {:name "pate-complexity"
-                 :type :select
-                 :body (map #(hash-map :name %)
-                            ["small" "medium" "large" "extra-large"])})
-
-(def collateral-type {:name "collateral-type"
-                      :type :select
-                      :body [{:name "shekki"}
-                             {:name "panttaussitoumus"}]})
-
-(def languages {:name "pate-languages"
-                :type :select
-                :body (map #(hash-map :name (name %)) i18n/languages)})
 
 (defschema PateCategory
   {:id       ssc/ObjectIdStr
@@ -97,8 +78,7 @@
 (def pate-schemas
   "Raw schemas are combined here for the benefit of
   pdf-export-test/ignored-schemas."
-  [verdict-giver automatic-vs-manual complexity collateral-type
-   languages])
+  [automatic-vs-manual])
 
 (doc-schemas/defschemas 1
   (map (fn [m]
@@ -206,6 +186,12 @@
   (or (path-error path)
       (check-date value)))
 
+(defmethod validate-resolution :select
+  [{:keys [path value data] :as options}]
+  (or (path-error path)
+      (when-not (ss/blank? (str value))
+        (check-items [value] (:items data)))))
+
 (defmethod validate-resolution :multi-select
   [{:keys [path schema data value] :as options}]
   ;; Items should not be part of the original path.
@@ -277,15 +263,13 @@
 
 (defn- resolve-dict-value
   [data]
-  (let [{:keys [docgen reference-list
-                date-delta multi-select
-                phrase-text keymap button
-                application-attachments
-                toggle text date]} data
-        wrap                  (fn [type schema data]
-                                {:type   type
-                                 :schema schema
-                                 :data   data})]
+  (let [{:keys [docgen reference-list date-delta multi-select
+                phrase-text keymap button application-attachments
+                toggle text date select]} data
+        wrap                              (fn [type schema
+                                               data] {:type   type
+                                                      :schema schema
+                                                      :data   data})]
     (cond
       docgen                  (wrap :docgen (doc-schemas/get-schema
                                              {:name (get docgen :name docgen)}) docgen)
@@ -300,7 +284,8 @@
                                     application-attachments)
       toggle                  (wrap :toggle shared/PateToggle toggle)
       text                    (wrap :text shared/PateText text)
-      date                    (wrap :date shared/PateDate date))))
+      date                    (wrap :date shared/PateDate date)
+      select                  (wrap :select shared/PateSelect select))))
 
 (defn- validate-dictionary-value
   "Validates that path-value combination is valid for the given

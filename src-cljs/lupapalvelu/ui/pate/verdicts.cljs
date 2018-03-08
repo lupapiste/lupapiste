@@ -192,7 +192,8 @@
           (layout/vertical {:label :pate-verdict-template
                             :align :full}
                            (components/dropdown template*
-                                                {:items items}))
+                                                {:items   items
+                                                 :choose? false}))
           (layout/vertical [:button.positive
                             {:on-click #(service/new-verdict-draft @state/application-id
                                                                    @template*

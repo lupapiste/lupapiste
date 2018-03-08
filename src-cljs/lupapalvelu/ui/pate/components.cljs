@@ -273,11 +273,10 @@
 
 (defn- state-change-callback
   "Updates state according to value."
-  [{:keys [state path] :as options} & [always?]]
+  [{:keys [state path] :as options}]
   (fn [value]
-    (when (or always?
-              (common/reset-if-needed! (path/state path state)
-                                       value))
+    (when (common/reset-if-needed! (path/state path state)
+                                   value)
       (path/meta-updated options))))
 
 (defn pate-unit [unit]
@@ -346,8 +345,26 @@
   (label-wrap-if-needed
    options
    {:component (components/date-edit
-                (path/state path state)
+                (path/react path state)
                 (pate-attr options
-                           {:callback (state-change-callback options true)
+                           {:callback (state-change-callback options)
                             :disabled (path/disabled? options)}))
+    :wrap-label? wrap-label?}))
+
+(rum/defc pate-select < rum/reactive
+  [{:keys [path state schema] :as options} & [wrap-label?]]
+  (label-wrap-if-needed
+   options
+   {:component   (components/dropdown
+                  (path/react path state)
+                  (pate-attr options
+                             {:callback  (state-change-callback options)
+                              :disabled? (path/disabled? options)
+                              :choose?   (-> schema :allow-empty false? not)
+                              :sort-by   (:sort-by schema)
+                              :items     (map (fn [item]
+                                                {:value item
+                                                 :text  (path/loc options item)})
+                                              (:items schema))
+                              :required? (path/required? options)}))
     :wrap-label? wrap-label?}))

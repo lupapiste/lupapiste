@@ -83,7 +83,7 @@
   (boolean (js/features.enabled (name feature))))
 
 (defn css
-  "Convenience function for :class defintions."
+  "Convenience function for :class definitions."
   [& classes]
   (->> classes flatten (remove nil?) (map name)))
 

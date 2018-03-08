@@ -15524,7 +15524,8 @@ button.rollup-button {
 }
 
 .pate-grid-1 > .row > .col-1 input.warning,
-.pate-grid-1 > .row > .col-1 textarea.warning {
+.pate-grid-1 > .row > .col-1 textarea.warning,
+.pate-grid-1 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -15617,7 +15618,8 @@ button.rollup-button {
 }
 
 .pate-grid-2 > .row > .col-1 input.warning,
-.pate-grid-2 > .row > .col-1 textarea.warning {
+.pate-grid-2 > .row > .col-1 textarea.warning,
+.pate-grid-2 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -15656,7 +15658,8 @@ button.rollup-button {
 }
 
 .pate-grid-2 > .row > .col-2 input.warning,
-.pate-grid-2 > .row > .col-2 textarea.warning {
+.pate-grid-2 > .row > .col-2 textarea.warning,
+.pate-grid-2 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -15749,7 +15752,8 @@ button.rollup-button {
 }
 
 .pate-grid-3 > .row > .col-1 input.warning,
-.pate-grid-3 > .row > .col-1 textarea.warning {
+.pate-grid-3 > .row > .col-1 textarea.warning,
+.pate-grid-3 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -15788,7 +15792,8 @@ button.rollup-button {
 }
 
 .pate-grid-3 > .row > .col-2 input.warning,
-.pate-grid-3 > .row > .col-2 textarea.warning {
+.pate-grid-3 > .row > .col-2 textarea.warning,
+.pate-grid-3 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -15827,7 +15832,8 @@ button.rollup-button {
 }
 
 .pate-grid-3 > .row > .col-3 input.warning,
-.pate-grid-3 > .row > .col-3 textarea.warning {
+.pate-grid-3 > .row > .col-3 textarea.warning,
+.pate-grid-3 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -15920,7 +15926,8 @@ button.rollup-button {
 }
 
 .pate-grid-4 > .row > .col-1 input.warning,
-.pate-grid-4 > .row > .col-1 textarea.warning {
+.pate-grid-4 > .row > .col-1 textarea.warning,
+.pate-grid-4 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -15959,7 +15966,8 @@ button.rollup-button {
 }
 
 .pate-grid-4 > .row > .col-2 input.warning,
-.pate-grid-4 > .row > .col-2 textarea.warning {
+.pate-grid-4 > .row > .col-2 textarea.warning,
+.pate-grid-4 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -15998,7 +16006,8 @@ button.rollup-button {
 }
 
 .pate-grid-4 > .row > .col-3 input.warning,
-.pate-grid-4 > .row > .col-3 textarea.warning {
+.pate-grid-4 > .row > .col-3 textarea.warning,
+.pate-grid-4 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16037,7 +16046,8 @@ button.rollup-button {
 }
 
 .pate-grid-4 > .row > .col-4 input.warning,
-.pate-grid-4 > .row > .col-4 textarea.warning {
+.pate-grid-4 > .row > .col-4 textarea.warning,
+.pate-grid-4 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16130,7 +16140,8 @@ button.rollup-button {
 }
 
 .pate-grid-5 > .row > .col-1 input.warning,
-.pate-grid-5 > .row > .col-1 textarea.warning {
+.pate-grid-5 > .row > .col-1 textarea.warning,
+.pate-grid-5 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16169,7 +16180,8 @@ button.rollup-button {
 }
 
 .pate-grid-5 > .row > .col-2 input.warning,
-.pate-grid-5 > .row > .col-2 textarea.warning {
+.pate-grid-5 > .row > .col-2 textarea.warning,
+.pate-grid-5 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16208,7 +16220,8 @@ button.rollup-button {
 }
 
 .pate-grid-5 > .row > .col-3 input.warning,
-.pate-grid-5 > .row > .col-3 textarea.warning {
+.pate-grid-5 > .row > .col-3 textarea.warning,
+.pate-grid-5 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16247,7 +16260,8 @@ button.rollup-button {
 }
 
 .pate-grid-5 > .row > .col-4 input.warning,
-.pate-grid-5 > .row > .col-4 textarea.warning {
+.pate-grid-5 > .row > .col-4 textarea.warning,
+.pate-grid-5 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16286,7 +16300,8 @@ button.rollup-button {
 }
 
 .pate-grid-5 > .row > .col-5 input.warning,
-.pate-grid-5 > .row > .col-5 textarea.warning {
+.pate-grid-5 > .row > .col-5 textarea.warning,
+.pate-grid-5 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16379,7 +16394,8 @@ button.rollup-button {
 }
 
 .pate-grid-6 > .row > .col-1 input.warning,
-.pate-grid-6 > .row > .col-1 textarea.warning {
+.pate-grid-6 > .row > .col-1 textarea.warning,
+.pate-grid-6 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16418,7 +16434,8 @@ button.rollup-button {
 }
 
 .pate-grid-6 > .row > .col-2 input.warning,
-.pate-grid-6 > .row > .col-2 textarea.warning {
+.pate-grid-6 > .row > .col-2 textarea.warning,
+.pate-grid-6 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16457,7 +16474,8 @@ button.rollup-button {
 }
 
 .pate-grid-6 > .row > .col-3 input.warning,
-.pate-grid-6 > .row > .col-3 textarea.warning {
+.pate-grid-6 > .row > .col-3 textarea.warning,
+.pate-grid-6 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16496,7 +16514,8 @@ button.rollup-button {
 }
 
 .pate-grid-6 > .row > .col-4 input.warning,
-.pate-grid-6 > .row > .col-4 textarea.warning {
+.pate-grid-6 > .row > .col-4 textarea.warning,
+.pate-grid-6 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16535,7 +16554,8 @@ button.rollup-button {
 }
 
 .pate-grid-6 > .row > .col-5 input.warning,
-.pate-grid-6 > .row > .col-5 textarea.warning {
+.pate-grid-6 > .row > .col-5 textarea.warning,
+.pate-grid-6 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16574,7 +16594,8 @@ button.rollup-button {
 }
 
 .pate-grid-6 > .row > .col-6 input.warning,
-.pate-grid-6 > .row > .col-6 textarea.warning {
+.pate-grid-6 > .row > .col-6 textarea.warning,
+.pate-grid-6 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16667,7 +16688,8 @@ button.rollup-button {
 }
 
 .pate-grid-7 > .row > .col-1 input.warning,
-.pate-grid-7 > .row > .col-1 textarea.warning {
+.pate-grid-7 > .row > .col-1 textarea.warning,
+.pate-grid-7 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16706,7 +16728,8 @@ button.rollup-button {
 }
 
 .pate-grid-7 > .row > .col-2 input.warning,
-.pate-grid-7 > .row > .col-2 textarea.warning {
+.pate-grid-7 > .row > .col-2 textarea.warning,
+.pate-grid-7 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16745,7 +16768,8 @@ button.rollup-button {
 }
 
 .pate-grid-7 > .row > .col-3 input.warning,
-.pate-grid-7 > .row > .col-3 textarea.warning {
+.pate-grid-7 > .row > .col-3 textarea.warning,
+.pate-grid-7 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16784,7 +16808,8 @@ button.rollup-button {
 }
 
 .pate-grid-7 > .row > .col-4 input.warning,
-.pate-grid-7 > .row > .col-4 textarea.warning {
+.pate-grid-7 > .row > .col-4 textarea.warning,
+.pate-grid-7 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16823,7 +16848,8 @@ button.rollup-button {
 }
 
 .pate-grid-7 > .row > .col-5 input.warning,
-.pate-grid-7 > .row > .col-5 textarea.warning {
+.pate-grid-7 > .row > .col-5 textarea.warning,
+.pate-grid-7 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16862,7 +16888,8 @@ button.rollup-button {
 }
 
 .pate-grid-7 > .row > .col-6 input.warning,
-.pate-grid-7 > .row > .col-6 textarea.warning {
+.pate-grid-7 > .row > .col-6 textarea.warning,
+.pate-grid-7 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16901,7 +16928,8 @@ button.rollup-button {
 }
 
 .pate-grid-7 > .row > .col-7 input.warning,
-.pate-grid-7 > .row > .col-7 textarea.warning {
+.pate-grid-7 > .row > .col-7 textarea.warning,
+.pate-grid-7 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -16994,7 +17022,8 @@ button.rollup-button {
 }
 
 .pate-grid-8 > .row > .col-1 input.warning,
-.pate-grid-8 > .row > .col-1 textarea.warning {
+.pate-grid-8 > .row > .col-1 textarea.warning,
+.pate-grid-8 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17033,7 +17062,8 @@ button.rollup-button {
 }
 
 .pate-grid-8 > .row > .col-2 input.warning,
-.pate-grid-8 > .row > .col-2 textarea.warning {
+.pate-grid-8 > .row > .col-2 textarea.warning,
+.pate-grid-8 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17072,7 +17102,8 @@ button.rollup-button {
 }
 
 .pate-grid-8 > .row > .col-3 input.warning,
-.pate-grid-8 > .row > .col-3 textarea.warning {
+.pate-grid-8 > .row > .col-3 textarea.warning,
+.pate-grid-8 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17111,7 +17142,8 @@ button.rollup-button {
 }
 
 .pate-grid-8 > .row > .col-4 input.warning,
-.pate-grid-8 > .row > .col-4 textarea.warning {
+.pate-grid-8 > .row > .col-4 textarea.warning,
+.pate-grid-8 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17150,7 +17182,8 @@ button.rollup-button {
 }
 
 .pate-grid-8 > .row > .col-5 input.warning,
-.pate-grid-8 > .row > .col-5 textarea.warning {
+.pate-grid-8 > .row > .col-5 textarea.warning,
+.pate-grid-8 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17189,7 +17222,8 @@ button.rollup-button {
 }
 
 .pate-grid-8 > .row > .col-6 input.warning,
-.pate-grid-8 > .row > .col-6 textarea.warning {
+.pate-grid-8 > .row > .col-6 textarea.warning,
+.pate-grid-8 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17228,7 +17262,8 @@ button.rollup-button {
 }
 
 .pate-grid-8 > .row > .col-7 input.warning,
-.pate-grid-8 > .row > .col-7 textarea.warning {
+.pate-grid-8 > .row > .col-7 textarea.warning,
+.pate-grid-8 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17267,7 +17302,8 @@ button.rollup-button {
 }
 
 .pate-grid-8 > .row > .col-8 input.warning,
-.pate-grid-8 > .row > .col-8 textarea.warning {
+.pate-grid-8 > .row > .col-8 textarea.warning,
+.pate-grid-8 > .row > .col-8 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17360,7 +17396,8 @@ button.rollup-button {
 }
 
 .pate-grid-9 > .row > .col-1 input.warning,
-.pate-grid-9 > .row > .col-1 textarea.warning {
+.pate-grid-9 > .row > .col-1 textarea.warning,
+.pate-grid-9 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17399,7 +17436,8 @@ button.rollup-button {
 }
 
 .pate-grid-9 > .row > .col-2 input.warning,
-.pate-grid-9 > .row > .col-2 textarea.warning {
+.pate-grid-9 > .row > .col-2 textarea.warning,
+.pate-grid-9 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17438,7 +17476,8 @@ button.rollup-button {
 }
 
 .pate-grid-9 > .row > .col-3 input.warning,
-.pate-grid-9 > .row > .col-3 textarea.warning {
+.pate-grid-9 > .row > .col-3 textarea.warning,
+.pate-grid-9 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17477,7 +17516,8 @@ button.rollup-button {
 }
 
 .pate-grid-9 > .row > .col-4 input.warning,
-.pate-grid-9 > .row > .col-4 textarea.warning {
+.pate-grid-9 > .row > .col-4 textarea.warning,
+.pate-grid-9 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17516,7 +17556,8 @@ button.rollup-button {
 }
 
 .pate-grid-9 > .row > .col-5 input.warning,
-.pate-grid-9 > .row > .col-5 textarea.warning {
+.pate-grid-9 > .row > .col-5 textarea.warning,
+.pate-grid-9 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17555,7 +17596,8 @@ button.rollup-button {
 }
 
 .pate-grid-9 > .row > .col-6 input.warning,
-.pate-grid-9 > .row > .col-6 textarea.warning {
+.pate-grid-9 > .row > .col-6 textarea.warning,
+.pate-grid-9 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17594,7 +17636,8 @@ button.rollup-button {
 }
 
 .pate-grid-9 > .row > .col-7 input.warning,
-.pate-grid-9 > .row > .col-7 textarea.warning {
+.pate-grid-9 > .row > .col-7 textarea.warning,
+.pate-grid-9 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17633,7 +17676,8 @@ button.rollup-button {
 }
 
 .pate-grid-9 > .row > .col-8 input.warning,
-.pate-grid-9 > .row > .col-8 textarea.warning {
+.pate-grid-9 > .row > .col-8 textarea.warning,
+.pate-grid-9 > .row > .col-8 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17672,7 +17716,8 @@ button.rollup-button {
 }
 
 .pate-grid-9 > .row > .col-9 input.warning,
-.pate-grid-9 > .row > .col-9 textarea.warning {
+.pate-grid-9 > .row > .col-9 textarea.warning,
+.pate-grid-9 > .row > .col-9 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17765,7 +17810,8 @@ button.rollup-button {
 }
 
 .pate-grid-10 > .row > .col-1 input.warning,
-.pate-grid-10 > .row > .col-1 textarea.warning {
+.pate-grid-10 > .row > .col-1 textarea.warning,
+.pate-grid-10 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17804,7 +17850,8 @@ button.rollup-button {
 }
 
 .pate-grid-10 > .row > .col-2 input.warning,
-.pate-grid-10 > .row > .col-2 textarea.warning {
+.pate-grid-10 > .row > .col-2 textarea.warning,
+.pate-grid-10 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17843,7 +17890,8 @@ button.rollup-button {
 }
 
 .pate-grid-10 > .row > .col-3 input.warning,
-.pate-grid-10 > .row > .col-3 textarea.warning {
+.pate-grid-10 > .row > .col-3 textarea.warning,
+.pate-grid-10 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17882,7 +17930,8 @@ button.rollup-button {
 }
 
 .pate-grid-10 > .row > .col-4 input.warning,
-.pate-grid-10 > .row > .col-4 textarea.warning {
+.pate-grid-10 > .row > .col-4 textarea.warning,
+.pate-grid-10 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17921,7 +17970,8 @@ button.rollup-button {
 }
 
 .pate-grid-10 > .row > .col-5 input.warning,
-.pate-grid-10 > .row > .col-5 textarea.warning {
+.pate-grid-10 > .row > .col-5 textarea.warning,
+.pate-grid-10 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17960,7 +18010,8 @@ button.rollup-button {
 }
 
 .pate-grid-10 > .row > .col-6 input.warning,
-.pate-grid-10 > .row > .col-6 textarea.warning {
+.pate-grid-10 > .row > .col-6 textarea.warning,
+.pate-grid-10 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -17999,7 +18050,8 @@ button.rollup-button {
 }
 
 .pate-grid-10 > .row > .col-7 input.warning,
-.pate-grid-10 > .row > .col-7 textarea.warning {
+.pate-grid-10 > .row > .col-7 textarea.warning,
+.pate-grid-10 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18038,7 +18090,8 @@ button.rollup-button {
 }
 
 .pate-grid-10 > .row > .col-8 input.warning,
-.pate-grid-10 > .row > .col-8 textarea.warning {
+.pate-grid-10 > .row > .col-8 textarea.warning,
+.pate-grid-10 > .row > .col-8 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18077,7 +18130,8 @@ button.rollup-button {
 }
 
 .pate-grid-10 > .row > .col-9 input.warning,
-.pate-grid-10 > .row > .col-9 textarea.warning {
+.pate-grid-10 > .row > .col-9 textarea.warning,
+.pate-grid-10 > .row > .col-9 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18116,7 +18170,8 @@ button.rollup-button {
 }
 
 .pate-grid-10 > .row > .col-10 input.warning,
-.pate-grid-10 > .row > .col-10 textarea.warning {
+.pate-grid-10 > .row > .col-10 textarea.warning,
+.pate-grid-10 > .row > .col-10 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18209,7 +18264,8 @@ button.rollup-button {
 }
 
 .pate-grid-11 > .row > .col-1 input.warning,
-.pate-grid-11 > .row > .col-1 textarea.warning {
+.pate-grid-11 > .row > .col-1 textarea.warning,
+.pate-grid-11 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18248,7 +18304,8 @@ button.rollup-button {
 }
 
 .pate-grid-11 > .row > .col-2 input.warning,
-.pate-grid-11 > .row > .col-2 textarea.warning {
+.pate-grid-11 > .row > .col-2 textarea.warning,
+.pate-grid-11 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18287,7 +18344,8 @@ button.rollup-button {
 }
 
 .pate-grid-11 > .row > .col-3 input.warning,
-.pate-grid-11 > .row > .col-3 textarea.warning {
+.pate-grid-11 > .row > .col-3 textarea.warning,
+.pate-grid-11 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18326,7 +18384,8 @@ button.rollup-button {
 }
 
 .pate-grid-11 > .row > .col-4 input.warning,
-.pate-grid-11 > .row > .col-4 textarea.warning {
+.pate-grid-11 > .row > .col-4 textarea.warning,
+.pate-grid-11 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18365,7 +18424,8 @@ button.rollup-button {
 }
 
 .pate-grid-11 > .row > .col-5 input.warning,
-.pate-grid-11 > .row > .col-5 textarea.warning {
+.pate-grid-11 > .row > .col-5 textarea.warning,
+.pate-grid-11 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18404,7 +18464,8 @@ button.rollup-button {
 }
 
 .pate-grid-11 > .row > .col-6 input.warning,
-.pate-grid-11 > .row > .col-6 textarea.warning {
+.pate-grid-11 > .row > .col-6 textarea.warning,
+.pate-grid-11 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18443,7 +18504,8 @@ button.rollup-button {
 }
 
 .pate-grid-11 > .row > .col-7 input.warning,
-.pate-grid-11 > .row > .col-7 textarea.warning {
+.pate-grid-11 > .row > .col-7 textarea.warning,
+.pate-grid-11 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18482,7 +18544,8 @@ button.rollup-button {
 }
 
 .pate-grid-11 > .row > .col-8 input.warning,
-.pate-grid-11 > .row > .col-8 textarea.warning {
+.pate-grid-11 > .row > .col-8 textarea.warning,
+.pate-grid-11 > .row > .col-8 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18521,7 +18584,8 @@ button.rollup-button {
 }
 
 .pate-grid-11 > .row > .col-9 input.warning,
-.pate-grid-11 > .row > .col-9 textarea.warning {
+.pate-grid-11 > .row > .col-9 textarea.warning,
+.pate-grid-11 > .row > .col-9 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18560,7 +18624,8 @@ button.rollup-button {
 }
 
 .pate-grid-11 > .row > .col-10 input.warning,
-.pate-grid-11 > .row > .col-10 textarea.warning {
+.pate-grid-11 > .row > .col-10 textarea.warning,
+.pate-grid-11 > .row > .col-10 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18599,7 +18664,8 @@ button.rollup-button {
 }
 
 .pate-grid-11 > .row > .col-11 input.warning,
-.pate-grid-11 > .row > .col-11 textarea.warning {
+.pate-grid-11 > .row > .col-11 textarea.warning,
+.pate-grid-11 > .row > .col-11 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18692,7 +18758,8 @@ button.rollup-button {
 }
 
 .pate-grid-12 > .row > .col-1 input.warning,
-.pate-grid-12 > .row > .col-1 textarea.warning {
+.pate-grid-12 > .row > .col-1 textarea.warning,
+.pate-grid-12 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18731,7 +18798,8 @@ button.rollup-button {
 }
 
 .pate-grid-12 > .row > .col-2 input.warning,
-.pate-grid-12 > .row > .col-2 textarea.warning {
+.pate-grid-12 > .row > .col-2 textarea.warning,
+.pate-grid-12 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18770,7 +18838,8 @@ button.rollup-button {
 }
 
 .pate-grid-12 > .row > .col-3 input.warning,
-.pate-grid-12 > .row > .col-3 textarea.warning {
+.pate-grid-12 > .row > .col-3 textarea.warning,
+.pate-grid-12 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18809,7 +18878,8 @@ button.rollup-button {
 }
 
 .pate-grid-12 > .row > .col-4 input.warning,
-.pate-grid-12 > .row > .col-4 textarea.warning {
+.pate-grid-12 > .row > .col-4 textarea.warning,
+.pate-grid-12 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18848,7 +18918,8 @@ button.rollup-button {
 }
 
 .pate-grid-12 > .row > .col-5 input.warning,
-.pate-grid-12 > .row > .col-5 textarea.warning {
+.pate-grid-12 > .row > .col-5 textarea.warning,
+.pate-grid-12 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18887,7 +18958,8 @@ button.rollup-button {
 }
 
 .pate-grid-12 > .row > .col-6 input.warning,
-.pate-grid-12 > .row > .col-6 textarea.warning {
+.pate-grid-12 > .row > .col-6 textarea.warning,
+.pate-grid-12 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18926,7 +18998,8 @@ button.rollup-button {
 }
 
 .pate-grid-12 > .row > .col-7 input.warning,
-.pate-grid-12 > .row > .col-7 textarea.warning {
+.pate-grid-12 > .row > .col-7 textarea.warning,
+.pate-grid-12 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -18965,7 +19038,8 @@ button.rollup-button {
 }
 
 .pate-grid-12 > .row > .col-8 input.warning,
-.pate-grid-12 > .row > .col-8 textarea.warning {
+.pate-grid-12 > .row > .col-8 textarea.warning,
+.pate-grid-12 > .row > .col-8 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19004,7 +19078,8 @@ button.rollup-button {
 }
 
 .pate-grid-12 > .row > .col-9 input.warning,
-.pate-grid-12 > .row > .col-9 textarea.warning {
+.pate-grid-12 > .row > .col-9 textarea.warning,
+.pate-grid-12 > .row > .col-9 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19043,7 +19118,8 @@ button.rollup-button {
 }
 
 .pate-grid-12 > .row > .col-10 input.warning,
-.pate-grid-12 > .row > .col-10 textarea.warning {
+.pate-grid-12 > .row > .col-10 textarea.warning,
+.pate-grid-12 > .row > .col-10 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19082,7 +19158,8 @@ button.rollup-button {
 }
 
 .pate-grid-12 > .row > .col-11 input.warning,
-.pate-grid-12 > .row > .col-11 textarea.warning {
+.pate-grid-12 > .row > .col-11 textarea.warning,
+.pate-grid-12 > .row > .col-11 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19121,7 +19198,8 @@ button.rollup-button {
 }
 
 .pate-grid-12 > .row > .col-12 input.warning,
-.pate-grid-12 > .row > .col-12 textarea.warning {
+.pate-grid-12 > .row > .col-12 textarea.warning,
+.pate-grid-12 > .row > .col-12 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19214,7 +19292,8 @@ button.rollup-button {
 }
 
 .pate-grid-13 > .row > .col-1 input.warning,
-.pate-grid-13 > .row > .col-1 textarea.warning {
+.pate-grid-13 > .row > .col-1 textarea.warning,
+.pate-grid-13 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19253,7 +19332,8 @@ button.rollup-button {
 }
 
 .pate-grid-13 > .row > .col-2 input.warning,
-.pate-grid-13 > .row > .col-2 textarea.warning {
+.pate-grid-13 > .row > .col-2 textarea.warning,
+.pate-grid-13 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19292,7 +19372,8 @@ button.rollup-button {
 }
 
 .pate-grid-13 > .row > .col-3 input.warning,
-.pate-grid-13 > .row > .col-3 textarea.warning {
+.pate-grid-13 > .row > .col-3 textarea.warning,
+.pate-grid-13 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19331,7 +19412,8 @@ button.rollup-button {
 }
 
 .pate-grid-13 > .row > .col-4 input.warning,
-.pate-grid-13 > .row > .col-4 textarea.warning {
+.pate-grid-13 > .row > .col-4 textarea.warning,
+.pate-grid-13 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19370,7 +19452,8 @@ button.rollup-button {
 }
 
 .pate-grid-13 > .row > .col-5 input.warning,
-.pate-grid-13 > .row > .col-5 textarea.warning {
+.pate-grid-13 > .row > .col-5 textarea.warning,
+.pate-grid-13 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19409,7 +19492,8 @@ button.rollup-button {
 }
 
 .pate-grid-13 > .row > .col-6 input.warning,
-.pate-grid-13 > .row > .col-6 textarea.warning {
+.pate-grid-13 > .row > .col-6 textarea.warning,
+.pate-grid-13 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19448,7 +19532,8 @@ button.rollup-button {
 }
 
 .pate-grid-13 > .row > .col-7 input.warning,
-.pate-grid-13 > .row > .col-7 textarea.warning {
+.pate-grid-13 > .row > .col-7 textarea.warning,
+.pate-grid-13 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19487,7 +19572,8 @@ button.rollup-button {
 }
 
 .pate-grid-13 > .row > .col-8 input.warning,
-.pate-grid-13 > .row > .col-8 textarea.warning {
+.pate-grid-13 > .row > .col-8 textarea.warning,
+.pate-grid-13 > .row > .col-8 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19526,7 +19612,8 @@ button.rollup-button {
 }
 
 .pate-grid-13 > .row > .col-9 input.warning,
-.pate-grid-13 > .row > .col-9 textarea.warning {
+.pate-grid-13 > .row > .col-9 textarea.warning,
+.pate-grid-13 > .row > .col-9 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19565,7 +19652,8 @@ button.rollup-button {
 }
 
 .pate-grid-13 > .row > .col-10 input.warning,
-.pate-grid-13 > .row > .col-10 textarea.warning {
+.pate-grid-13 > .row > .col-10 textarea.warning,
+.pate-grid-13 > .row > .col-10 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19604,7 +19692,8 @@ button.rollup-button {
 }
 
 .pate-grid-13 > .row > .col-11 input.warning,
-.pate-grid-13 > .row > .col-11 textarea.warning {
+.pate-grid-13 > .row > .col-11 textarea.warning,
+.pate-grid-13 > .row > .col-11 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19643,7 +19732,8 @@ button.rollup-button {
 }
 
 .pate-grid-13 > .row > .col-12 input.warning,
-.pate-grid-13 > .row > .col-12 textarea.warning {
+.pate-grid-13 > .row > .col-12 textarea.warning,
+.pate-grid-13 > .row > .col-12 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19682,7 +19772,8 @@ button.rollup-button {
 }
 
 .pate-grid-13 > .row > .col-13 input.warning,
-.pate-grid-13 > .row > .col-13 textarea.warning {
+.pate-grid-13 > .row > .col-13 textarea.warning,
+.pate-grid-13 > .row > .col-13 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19775,7 +19866,8 @@ button.rollup-button {
 }
 
 .pate-grid-14 > .row > .col-1 input.warning,
-.pate-grid-14 > .row > .col-1 textarea.warning {
+.pate-grid-14 > .row > .col-1 textarea.warning,
+.pate-grid-14 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19814,7 +19906,8 @@ button.rollup-button {
 }
 
 .pate-grid-14 > .row > .col-2 input.warning,
-.pate-grid-14 > .row > .col-2 textarea.warning {
+.pate-grid-14 > .row > .col-2 textarea.warning,
+.pate-grid-14 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19853,7 +19946,8 @@ button.rollup-button {
 }
 
 .pate-grid-14 > .row > .col-3 input.warning,
-.pate-grid-14 > .row > .col-3 textarea.warning {
+.pate-grid-14 > .row > .col-3 textarea.warning,
+.pate-grid-14 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19892,7 +19986,8 @@ button.rollup-button {
 }
 
 .pate-grid-14 > .row > .col-4 input.warning,
-.pate-grid-14 > .row > .col-4 textarea.warning {
+.pate-grid-14 > .row > .col-4 textarea.warning,
+.pate-grid-14 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19931,7 +20026,8 @@ button.rollup-button {
 }
 
 .pate-grid-14 > .row > .col-5 input.warning,
-.pate-grid-14 > .row > .col-5 textarea.warning {
+.pate-grid-14 > .row > .col-5 textarea.warning,
+.pate-grid-14 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -19970,7 +20066,8 @@ button.rollup-button {
 }
 
 .pate-grid-14 > .row > .col-6 input.warning,
-.pate-grid-14 > .row > .col-6 textarea.warning {
+.pate-grid-14 > .row > .col-6 textarea.warning,
+.pate-grid-14 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20009,7 +20106,8 @@ button.rollup-button {
 }
 
 .pate-grid-14 > .row > .col-7 input.warning,
-.pate-grid-14 > .row > .col-7 textarea.warning {
+.pate-grid-14 > .row > .col-7 textarea.warning,
+.pate-grid-14 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20048,7 +20146,8 @@ button.rollup-button {
 }
 
 .pate-grid-14 > .row > .col-8 input.warning,
-.pate-grid-14 > .row > .col-8 textarea.warning {
+.pate-grid-14 > .row > .col-8 textarea.warning,
+.pate-grid-14 > .row > .col-8 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20087,7 +20186,8 @@ button.rollup-button {
 }
 
 .pate-grid-14 > .row > .col-9 input.warning,
-.pate-grid-14 > .row > .col-9 textarea.warning {
+.pate-grid-14 > .row > .col-9 textarea.warning,
+.pate-grid-14 > .row > .col-9 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20126,7 +20226,8 @@ button.rollup-button {
 }
 
 .pate-grid-14 > .row > .col-10 input.warning,
-.pate-grid-14 > .row > .col-10 textarea.warning {
+.pate-grid-14 > .row > .col-10 textarea.warning,
+.pate-grid-14 > .row > .col-10 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20165,7 +20266,8 @@ button.rollup-button {
 }
 
 .pate-grid-14 > .row > .col-11 input.warning,
-.pate-grid-14 > .row > .col-11 textarea.warning {
+.pate-grid-14 > .row > .col-11 textarea.warning,
+.pate-grid-14 > .row > .col-11 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20204,7 +20306,8 @@ button.rollup-button {
 }
 
 .pate-grid-14 > .row > .col-12 input.warning,
-.pate-grid-14 > .row > .col-12 textarea.warning {
+.pate-grid-14 > .row > .col-12 textarea.warning,
+.pate-grid-14 > .row > .col-12 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20243,7 +20346,8 @@ button.rollup-button {
 }
 
 .pate-grid-14 > .row > .col-13 input.warning,
-.pate-grid-14 > .row > .col-13 textarea.warning {
+.pate-grid-14 > .row > .col-13 textarea.warning,
+.pate-grid-14 > .row > .col-13 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20282,7 +20386,8 @@ button.rollup-button {
 }
 
 .pate-grid-14 > .row > .col-14 input.warning,
-.pate-grid-14 > .row > .col-14 textarea.warning {
+.pate-grid-14 > .row > .col-14 textarea.warning,
+.pate-grid-14 > .row > .col-14 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20375,7 +20480,8 @@ button.rollup-button {
 }
 
 .pate-grid-15 > .row > .col-1 input.warning,
-.pate-grid-15 > .row > .col-1 textarea.warning {
+.pate-grid-15 > .row > .col-1 textarea.warning,
+.pate-grid-15 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20414,7 +20520,8 @@ button.rollup-button {
 }
 
 .pate-grid-15 > .row > .col-2 input.warning,
-.pate-grid-15 > .row > .col-2 textarea.warning {
+.pate-grid-15 > .row > .col-2 textarea.warning,
+.pate-grid-15 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20453,7 +20560,8 @@ button.rollup-button {
 }
 
 .pate-grid-15 > .row > .col-3 input.warning,
-.pate-grid-15 > .row > .col-3 textarea.warning {
+.pate-grid-15 > .row > .col-3 textarea.warning,
+.pate-grid-15 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20492,7 +20600,8 @@ button.rollup-button {
 }
 
 .pate-grid-15 > .row > .col-4 input.warning,
-.pate-grid-15 > .row > .col-4 textarea.warning {
+.pate-grid-15 > .row > .col-4 textarea.warning,
+.pate-grid-15 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20531,7 +20640,8 @@ button.rollup-button {
 }
 
 .pate-grid-15 > .row > .col-5 input.warning,
-.pate-grid-15 > .row > .col-5 textarea.warning {
+.pate-grid-15 > .row > .col-5 textarea.warning,
+.pate-grid-15 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20570,7 +20680,8 @@ button.rollup-button {
 }
 
 .pate-grid-15 > .row > .col-6 input.warning,
-.pate-grid-15 > .row > .col-6 textarea.warning {
+.pate-grid-15 > .row > .col-6 textarea.warning,
+.pate-grid-15 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20609,7 +20720,8 @@ button.rollup-button {
 }
 
 .pate-grid-15 > .row > .col-7 input.warning,
-.pate-grid-15 > .row > .col-7 textarea.warning {
+.pate-grid-15 > .row > .col-7 textarea.warning,
+.pate-grid-15 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20648,7 +20760,8 @@ button.rollup-button {
 }
 
 .pate-grid-15 > .row > .col-8 input.warning,
-.pate-grid-15 > .row > .col-8 textarea.warning {
+.pate-grid-15 > .row > .col-8 textarea.warning,
+.pate-grid-15 > .row > .col-8 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20687,7 +20800,8 @@ button.rollup-button {
 }
 
 .pate-grid-15 > .row > .col-9 input.warning,
-.pate-grid-15 > .row > .col-9 textarea.warning {
+.pate-grid-15 > .row > .col-9 textarea.warning,
+.pate-grid-15 > .row > .col-9 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20726,7 +20840,8 @@ button.rollup-button {
 }
 
 .pate-grid-15 > .row > .col-10 input.warning,
-.pate-grid-15 > .row > .col-10 textarea.warning {
+.pate-grid-15 > .row > .col-10 textarea.warning,
+.pate-grid-15 > .row > .col-10 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20765,7 +20880,8 @@ button.rollup-button {
 }
 
 .pate-grid-15 > .row > .col-11 input.warning,
-.pate-grid-15 > .row > .col-11 textarea.warning {
+.pate-grid-15 > .row > .col-11 textarea.warning,
+.pate-grid-15 > .row > .col-11 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20804,7 +20920,8 @@ button.rollup-button {
 }
 
 .pate-grid-15 > .row > .col-12 input.warning,
-.pate-grid-15 > .row > .col-12 textarea.warning {
+.pate-grid-15 > .row > .col-12 textarea.warning,
+.pate-grid-15 > .row > .col-12 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20843,7 +20960,8 @@ button.rollup-button {
 }
 
 .pate-grid-15 > .row > .col-13 input.warning,
-.pate-grid-15 > .row > .col-13 textarea.warning {
+.pate-grid-15 > .row > .col-13 textarea.warning,
+.pate-grid-15 > .row > .col-13 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20882,7 +21000,8 @@ button.rollup-button {
 }
 
 .pate-grid-15 > .row > .col-14 input.warning,
-.pate-grid-15 > .row > .col-14 textarea.warning {
+.pate-grid-15 > .row > .col-14 textarea.warning,
+.pate-grid-15 > .row > .col-14 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -20921,7 +21040,8 @@ button.rollup-button {
 }
 
 .pate-grid-15 > .row > .col-15 input.warning,
-.pate-grid-15 > .row > .col-15 textarea.warning {
+.pate-grid-15 > .row > .col-15 textarea.warning,
+.pate-grid-15 > .row > .col-15 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21014,7 +21134,8 @@ button.rollup-button {
 }
 
 .pate-grid-16 > .row > .col-1 input.warning,
-.pate-grid-16 > .row > .col-1 textarea.warning {
+.pate-grid-16 > .row > .col-1 textarea.warning,
+.pate-grid-16 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21053,7 +21174,8 @@ button.rollup-button {
 }
 
 .pate-grid-16 > .row > .col-2 input.warning,
-.pate-grid-16 > .row > .col-2 textarea.warning {
+.pate-grid-16 > .row > .col-2 textarea.warning,
+.pate-grid-16 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21092,7 +21214,8 @@ button.rollup-button {
 }
 
 .pate-grid-16 > .row > .col-3 input.warning,
-.pate-grid-16 > .row > .col-3 textarea.warning {
+.pate-grid-16 > .row > .col-3 textarea.warning,
+.pate-grid-16 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21131,7 +21254,8 @@ button.rollup-button {
 }
 
 .pate-grid-16 > .row > .col-4 input.warning,
-.pate-grid-16 > .row > .col-4 textarea.warning {
+.pate-grid-16 > .row > .col-4 textarea.warning,
+.pate-grid-16 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21170,7 +21294,8 @@ button.rollup-button {
 }
 
 .pate-grid-16 > .row > .col-5 input.warning,
-.pate-grid-16 > .row > .col-5 textarea.warning {
+.pate-grid-16 > .row > .col-5 textarea.warning,
+.pate-grid-16 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21209,7 +21334,8 @@ button.rollup-button {
 }
 
 .pate-grid-16 > .row > .col-6 input.warning,
-.pate-grid-16 > .row > .col-6 textarea.warning {
+.pate-grid-16 > .row > .col-6 textarea.warning,
+.pate-grid-16 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21248,7 +21374,8 @@ button.rollup-button {
 }
 
 .pate-grid-16 > .row > .col-7 input.warning,
-.pate-grid-16 > .row > .col-7 textarea.warning {
+.pate-grid-16 > .row > .col-7 textarea.warning,
+.pate-grid-16 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21287,7 +21414,8 @@ button.rollup-button {
 }
 
 .pate-grid-16 > .row > .col-8 input.warning,
-.pate-grid-16 > .row > .col-8 textarea.warning {
+.pate-grid-16 > .row > .col-8 textarea.warning,
+.pate-grid-16 > .row > .col-8 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21326,7 +21454,8 @@ button.rollup-button {
 }
 
 .pate-grid-16 > .row > .col-9 input.warning,
-.pate-grid-16 > .row > .col-9 textarea.warning {
+.pate-grid-16 > .row > .col-9 textarea.warning,
+.pate-grid-16 > .row > .col-9 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21365,7 +21494,8 @@ button.rollup-button {
 }
 
 .pate-grid-16 > .row > .col-10 input.warning,
-.pate-grid-16 > .row > .col-10 textarea.warning {
+.pate-grid-16 > .row > .col-10 textarea.warning,
+.pate-grid-16 > .row > .col-10 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21404,7 +21534,8 @@ button.rollup-button {
 }
 
 .pate-grid-16 > .row > .col-11 input.warning,
-.pate-grid-16 > .row > .col-11 textarea.warning {
+.pate-grid-16 > .row > .col-11 textarea.warning,
+.pate-grid-16 > .row > .col-11 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21443,7 +21574,8 @@ button.rollup-button {
 }
 
 .pate-grid-16 > .row > .col-12 input.warning,
-.pate-grid-16 > .row > .col-12 textarea.warning {
+.pate-grid-16 > .row > .col-12 textarea.warning,
+.pate-grid-16 > .row > .col-12 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21482,7 +21614,8 @@ button.rollup-button {
 }
 
 .pate-grid-16 > .row > .col-13 input.warning,
-.pate-grid-16 > .row > .col-13 textarea.warning {
+.pate-grid-16 > .row > .col-13 textarea.warning,
+.pate-grid-16 > .row > .col-13 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21521,7 +21654,8 @@ button.rollup-button {
 }
 
 .pate-grid-16 > .row > .col-14 input.warning,
-.pate-grid-16 > .row > .col-14 textarea.warning {
+.pate-grid-16 > .row > .col-14 textarea.warning,
+.pate-grid-16 > .row > .col-14 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21560,7 +21694,8 @@ button.rollup-button {
 }
 
 .pate-grid-16 > .row > .col-15 input.warning,
-.pate-grid-16 > .row > .col-15 textarea.warning {
+.pate-grid-16 > .row > .col-15 textarea.warning,
+.pate-grid-16 > .row > .col-15 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21599,7 +21734,8 @@ button.rollup-button {
 }
 
 .pate-grid-16 > .row > .col-16 input.warning,
-.pate-grid-16 > .row > .col-16 textarea.warning {
+.pate-grid-16 > .row > .col-16 textarea.warning,
+.pate-grid-16 > .row > .col-16 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21692,7 +21828,8 @@ button.rollup-button {
 }
 
 .pate-grid-17 > .row > .col-1 input.warning,
-.pate-grid-17 > .row > .col-1 textarea.warning {
+.pate-grid-17 > .row > .col-1 textarea.warning,
+.pate-grid-17 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21731,7 +21868,8 @@ button.rollup-button {
 }
 
 .pate-grid-17 > .row > .col-2 input.warning,
-.pate-grid-17 > .row > .col-2 textarea.warning {
+.pate-grid-17 > .row > .col-2 textarea.warning,
+.pate-grid-17 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21770,7 +21908,8 @@ button.rollup-button {
 }
 
 .pate-grid-17 > .row > .col-3 input.warning,
-.pate-grid-17 > .row > .col-3 textarea.warning {
+.pate-grid-17 > .row > .col-3 textarea.warning,
+.pate-grid-17 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21809,7 +21948,8 @@ button.rollup-button {
 }
 
 .pate-grid-17 > .row > .col-4 input.warning,
-.pate-grid-17 > .row > .col-4 textarea.warning {
+.pate-grid-17 > .row > .col-4 textarea.warning,
+.pate-grid-17 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21848,7 +21988,8 @@ button.rollup-button {
 }
 
 .pate-grid-17 > .row > .col-5 input.warning,
-.pate-grid-17 > .row > .col-5 textarea.warning {
+.pate-grid-17 > .row > .col-5 textarea.warning,
+.pate-grid-17 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21887,7 +22028,8 @@ button.rollup-button {
 }
 
 .pate-grid-17 > .row > .col-6 input.warning,
-.pate-grid-17 > .row > .col-6 textarea.warning {
+.pate-grid-17 > .row > .col-6 textarea.warning,
+.pate-grid-17 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21926,7 +22068,8 @@ button.rollup-button {
 }
 
 .pate-grid-17 > .row > .col-7 input.warning,
-.pate-grid-17 > .row > .col-7 textarea.warning {
+.pate-grid-17 > .row > .col-7 textarea.warning,
+.pate-grid-17 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -21965,7 +22108,8 @@ button.rollup-button {
 }
 
 .pate-grid-17 > .row > .col-8 input.warning,
-.pate-grid-17 > .row > .col-8 textarea.warning {
+.pate-grid-17 > .row > .col-8 textarea.warning,
+.pate-grid-17 > .row > .col-8 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22004,7 +22148,8 @@ button.rollup-button {
 }
 
 .pate-grid-17 > .row > .col-9 input.warning,
-.pate-grid-17 > .row > .col-9 textarea.warning {
+.pate-grid-17 > .row > .col-9 textarea.warning,
+.pate-grid-17 > .row > .col-9 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22043,7 +22188,8 @@ button.rollup-button {
 }
 
 .pate-grid-17 > .row > .col-10 input.warning,
-.pate-grid-17 > .row > .col-10 textarea.warning {
+.pate-grid-17 > .row > .col-10 textarea.warning,
+.pate-grid-17 > .row > .col-10 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22082,7 +22228,8 @@ button.rollup-button {
 }
 
 .pate-grid-17 > .row > .col-11 input.warning,
-.pate-grid-17 > .row > .col-11 textarea.warning {
+.pate-grid-17 > .row > .col-11 textarea.warning,
+.pate-grid-17 > .row > .col-11 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22121,7 +22268,8 @@ button.rollup-button {
 }
 
 .pate-grid-17 > .row > .col-12 input.warning,
-.pate-grid-17 > .row > .col-12 textarea.warning {
+.pate-grid-17 > .row > .col-12 textarea.warning,
+.pate-grid-17 > .row > .col-12 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22160,7 +22308,8 @@ button.rollup-button {
 }
 
 .pate-grid-17 > .row > .col-13 input.warning,
-.pate-grid-17 > .row > .col-13 textarea.warning {
+.pate-grid-17 > .row > .col-13 textarea.warning,
+.pate-grid-17 > .row > .col-13 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22199,7 +22348,8 @@ button.rollup-button {
 }
 
 .pate-grid-17 > .row > .col-14 input.warning,
-.pate-grid-17 > .row > .col-14 textarea.warning {
+.pate-grid-17 > .row > .col-14 textarea.warning,
+.pate-grid-17 > .row > .col-14 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22238,7 +22388,8 @@ button.rollup-button {
 }
 
 .pate-grid-17 > .row > .col-15 input.warning,
-.pate-grid-17 > .row > .col-15 textarea.warning {
+.pate-grid-17 > .row > .col-15 textarea.warning,
+.pate-grid-17 > .row > .col-15 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22277,7 +22428,8 @@ button.rollup-button {
 }
 
 .pate-grid-17 > .row > .col-16 input.warning,
-.pate-grid-17 > .row > .col-16 textarea.warning {
+.pate-grid-17 > .row > .col-16 textarea.warning,
+.pate-grid-17 > .row > .col-16 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22316,7 +22468,8 @@ button.rollup-button {
 }
 
 .pate-grid-17 > .row > .col-17 input.warning,
-.pate-grid-17 > .row > .col-17 textarea.warning {
+.pate-grid-17 > .row > .col-17 textarea.warning,
+.pate-grid-17 > .row > .col-17 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22409,7 +22562,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-1 input.warning,
-.pate-grid-18 > .row > .col-1 textarea.warning {
+.pate-grid-18 > .row > .col-1 textarea.warning,
+.pate-grid-18 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22448,7 +22602,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-2 input.warning,
-.pate-grid-18 > .row > .col-2 textarea.warning {
+.pate-grid-18 > .row > .col-2 textarea.warning,
+.pate-grid-18 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22487,7 +22642,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-3 input.warning,
-.pate-grid-18 > .row > .col-3 textarea.warning {
+.pate-grid-18 > .row > .col-3 textarea.warning,
+.pate-grid-18 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22526,7 +22682,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-4 input.warning,
-.pate-grid-18 > .row > .col-4 textarea.warning {
+.pate-grid-18 > .row > .col-4 textarea.warning,
+.pate-grid-18 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22565,7 +22722,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-5 input.warning,
-.pate-grid-18 > .row > .col-5 textarea.warning {
+.pate-grid-18 > .row > .col-5 textarea.warning,
+.pate-grid-18 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22604,7 +22762,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-6 input.warning,
-.pate-grid-18 > .row > .col-6 textarea.warning {
+.pate-grid-18 > .row > .col-6 textarea.warning,
+.pate-grid-18 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22643,7 +22802,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-7 input.warning,
-.pate-grid-18 > .row > .col-7 textarea.warning {
+.pate-grid-18 > .row > .col-7 textarea.warning,
+.pate-grid-18 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22682,7 +22842,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-8 input.warning,
-.pate-grid-18 > .row > .col-8 textarea.warning {
+.pate-grid-18 > .row > .col-8 textarea.warning,
+.pate-grid-18 > .row > .col-8 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22721,7 +22882,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-9 input.warning,
-.pate-grid-18 > .row > .col-9 textarea.warning {
+.pate-grid-18 > .row > .col-9 textarea.warning,
+.pate-grid-18 > .row > .col-9 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22760,7 +22922,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-10 input.warning,
-.pate-grid-18 > .row > .col-10 textarea.warning {
+.pate-grid-18 > .row > .col-10 textarea.warning,
+.pate-grid-18 > .row > .col-10 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22799,7 +22962,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-11 input.warning,
-.pate-grid-18 > .row > .col-11 textarea.warning {
+.pate-grid-18 > .row > .col-11 textarea.warning,
+.pate-grid-18 > .row > .col-11 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22838,7 +23002,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-12 input.warning,
-.pate-grid-18 > .row > .col-12 textarea.warning {
+.pate-grid-18 > .row > .col-12 textarea.warning,
+.pate-grid-18 > .row > .col-12 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22877,7 +23042,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-13 input.warning,
-.pate-grid-18 > .row > .col-13 textarea.warning {
+.pate-grid-18 > .row > .col-13 textarea.warning,
+.pate-grid-18 > .row > .col-13 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22916,7 +23082,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-14 input.warning,
-.pate-grid-18 > .row > .col-14 textarea.warning {
+.pate-grid-18 > .row > .col-14 textarea.warning,
+.pate-grid-18 > .row > .col-14 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22955,7 +23122,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-15 input.warning,
-.pate-grid-18 > .row > .col-15 textarea.warning {
+.pate-grid-18 > .row > .col-15 textarea.warning,
+.pate-grid-18 > .row > .col-15 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -22994,7 +23162,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-16 input.warning,
-.pate-grid-18 > .row > .col-16 textarea.warning {
+.pate-grid-18 > .row > .col-16 textarea.warning,
+.pate-grid-18 > .row > .col-16 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23033,7 +23202,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-17 input.warning,
-.pate-grid-18 > .row > .col-17 textarea.warning {
+.pate-grid-18 > .row > .col-17 textarea.warning,
+.pate-grid-18 > .row > .col-17 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23072,7 +23242,8 @@ button.rollup-button {
 }
 
 .pate-grid-18 > .row > .col-18 input.warning,
-.pate-grid-18 > .row > .col-18 textarea.warning {
+.pate-grid-18 > .row > .col-18 textarea.warning,
+.pate-grid-18 > .row > .col-18 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23165,7 +23336,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-1 input.warning,
-.pate-grid-19 > .row > .col-1 textarea.warning {
+.pate-grid-19 > .row > .col-1 textarea.warning,
+.pate-grid-19 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23204,7 +23376,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-2 input.warning,
-.pate-grid-19 > .row > .col-2 textarea.warning {
+.pate-grid-19 > .row > .col-2 textarea.warning,
+.pate-grid-19 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23243,7 +23416,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-3 input.warning,
-.pate-grid-19 > .row > .col-3 textarea.warning {
+.pate-grid-19 > .row > .col-3 textarea.warning,
+.pate-grid-19 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23282,7 +23456,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-4 input.warning,
-.pate-grid-19 > .row > .col-4 textarea.warning {
+.pate-grid-19 > .row > .col-4 textarea.warning,
+.pate-grid-19 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23321,7 +23496,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-5 input.warning,
-.pate-grid-19 > .row > .col-5 textarea.warning {
+.pate-grid-19 > .row > .col-5 textarea.warning,
+.pate-grid-19 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23360,7 +23536,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-6 input.warning,
-.pate-grid-19 > .row > .col-6 textarea.warning {
+.pate-grid-19 > .row > .col-6 textarea.warning,
+.pate-grid-19 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23399,7 +23576,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-7 input.warning,
-.pate-grid-19 > .row > .col-7 textarea.warning {
+.pate-grid-19 > .row > .col-7 textarea.warning,
+.pate-grid-19 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23438,7 +23616,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-8 input.warning,
-.pate-grid-19 > .row > .col-8 textarea.warning {
+.pate-grid-19 > .row > .col-8 textarea.warning,
+.pate-grid-19 > .row > .col-8 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23477,7 +23656,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-9 input.warning,
-.pate-grid-19 > .row > .col-9 textarea.warning {
+.pate-grid-19 > .row > .col-9 textarea.warning,
+.pate-grid-19 > .row > .col-9 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23516,7 +23696,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-10 input.warning,
-.pate-grid-19 > .row > .col-10 textarea.warning {
+.pate-grid-19 > .row > .col-10 textarea.warning,
+.pate-grid-19 > .row > .col-10 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23555,7 +23736,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-11 input.warning,
-.pate-grid-19 > .row > .col-11 textarea.warning {
+.pate-grid-19 > .row > .col-11 textarea.warning,
+.pate-grid-19 > .row > .col-11 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23594,7 +23776,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-12 input.warning,
-.pate-grid-19 > .row > .col-12 textarea.warning {
+.pate-grid-19 > .row > .col-12 textarea.warning,
+.pate-grid-19 > .row > .col-12 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23633,7 +23816,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-13 input.warning,
-.pate-grid-19 > .row > .col-13 textarea.warning {
+.pate-grid-19 > .row > .col-13 textarea.warning,
+.pate-grid-19 > .row > .col-13 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23672,7 +23856,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-14 input.warning,
-.pate-grid-19 > .row > .col-14 textarea.warning {
+.pate-grid-19 > .row > .col-14 textarea.warning,
+.pate-grid-19 > .row > .col-14 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23711,7 +23896,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-15 input.warning,
-.pate-grid-19 > .row > .col-15 textarea.warning {
+.pate-grid-19 > .row > .col-15 textarea.warning,
+.pate-grid-19 > .row > .col-15 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23750,7 +23936,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-16 input.warning,
-.pate-grid-19 > .row > .col-16 textarea.warning {
+.pate-grid-19 > .row > .col-16 textarea.warning,
+.pate-grid-19 > .row > .col-16 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23789,7 +23976,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-17 input.warning,
-.pate-grid-19 > .row > .col-17 textarea.warning {
+.pate-grid-19 > .row > .col-17 textarea.warning,
+.pate-grid-19 > .row > .col-17 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23828,7 +24016,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-18 input.warning,
-.pate-grid-19 > .row > .col-18 textarea.warning {
+.pate-grid-19 > .row > .col-18 textarea.warning,
+.pate-grid-19 > .row > .col-18 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23867,7 +24056,8 @@ button.rollup-button {
 }
 
 .pate-grid-19 > .row > .col-19 input.warning,
-.pate-grid-19 > .row > .col-19 textarea.warning {
+.pate-grid-19 > .row > .col-19 textarea.warning,
+.pate-grid-19 > .row > .col-19 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23960,7 +24150,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-1 input.warning,
-.pate-grid-20 > .row > .col-1 textarea.warning {
+.pate-grid-20 > .row > .col-1 textarea.warning,
+.pate-grid-20 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -23999,7 +24190,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-2 input.warning,
-.pate-grid-20 > .row > .col-2 textarea.warning {
+.pate-grid-20 > .row > .col-2 textarea.warning,
+.pate-grid-20 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24038,7 +24230,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-3 input.warning,
-.pate-grid-20 > .row > .col-3 textarea.warning {
+.pate-grid-20 > .row > .col-3 textarea.warning,
+.pate-grid-20 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24077,7 +24270,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-4 input.warning,
-.pate-grid-20 > .row > .col-4 textarea.warning {
+.pate-grid-20 > .row > .col-4 textarea.warning,
+.pate-grid-20 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24116,7 +24310,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-5 input.warning,
-.pate-grid-20 > .row > .col-5 textarea.warning {
+.pate-grid-20 > .row > .col-5 textarea.warning,
+.pate-grid-20 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24155,7 +24350,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-6 input.warning,
-.pate-grid-20 > .row > .col-6 textarea.warning {
+.pate-grid-20 > .row > .col-6 textarea.warning,
+.pate-grid-20 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24194,7 +24390,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-7 input.warning,
-.pate-grid-20 > .row > .col-7 textarea.warning {
+.pate-grid-20 > .row > .col-7 textarea.warning,
+.pate-grid-20 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24233,7 +24430,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-8 input.warning,
-.pate-grid-20 > .row > .col-8 textarea.warning {
+.pate-grid-20 > .row > .col-8 textarea.warning,
+.pate-grid-20 > .row > .col-8 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24272,7 +24470,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-9 input.warning,
-.pate-grid-20 > .row > .col-9 textarea.warning {
+.pate-grid-20 > .row > .col-9 textarea.warning,
+.pate-grid-20 > .row > .col-9 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24311,7 +24510,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-10 input.warning,
-.pate-grid-20 > .row > .col-10 textarea.warning {
+.pate-grid-20 > .row > .col-10 textarea.warning,
+.pate-grid-20 > .row > .col-10 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24350,7 +24550,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-11 input.warning,
-.pate-grid-20 > .row > .col-11 textarea.warning {
+.pate-grid-20 > .row > .col-11 textarea.warning,
+.pate-grid-20 > .row > .col-11 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24389,7 +24590,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-12 input.warning,
-.pate-grid-20 > .row > .col-12 textarea.warning {
+.pate-grid-20 > .row > .col-12 textarea.warning,
+.pate-grid-20 > .row > .col-12 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24428,7 +24630,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-13 input.warning,
-.pate-grid-20 > .row > .col-13 textarea.warning {
+.pate-grid-20 > .row > .col-13 textarea.warning,
+.pate-grid-20 > .row > .col-13 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24467,7 +24670,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-14 input.warning,
-.pate-grid-20 > .row > .col-14 textarea.warning {
+.pate-grid-20 > .row > .col-14 textarea.warning,
+.pate-grid-20 > .row > .col-14 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24506,7 +24710,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-15 input.warning,
-.pate-grid-20 > .row > .col-15 textarea.warning {
+.pate-grid-20 > .row > .col-15 textarea.warning,
+.pate-grid-20 > .row > .col-15 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24545,7 +24750,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-16 input.warning,
-.pate-grid-20 > .row > .col-16 textarea.warning {
+.pate-grid-20 > .row > .col-16 textarea.warning,
+.pate-grid-20 > .row > .col-16 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24584,7 +24790,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-17 input.warning,
-.pate-grid-20 > .row > .col-17 textarea.warning {
+.pate-grid-20 > .row > .col-17 textarea.warning,
+.pate-grid-20 > .row > .col-17 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24623,7 +24830,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-18 input.warning,
-.pate-grid-20 > .row > .col-18 textarea.warning {
+.pate-grid-20 > .row > .col-18 textarea.warning,
+.pate-grid-20 > .row > .col-18 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24662,7 +24870,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-19 input.warning,
-.pate-grid-20 > .row > .col-19 textarea.warning {
+.pate-grid-20 > .row > .col-19 textarea.warning,
+.pate-grid-20 > .row > .col-19 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24701,7 +24910,8 @@ button.rollup-button {
 }
 
 .pate-grid-20 > .row > .col-20 input.warning,
-.pate-grid-20 > .row > .col-20 textarea.warning {
+.pate-grid-20 > .row > .col-20 textarea.warning,
+.pate-grid-20 > .row > .col-20 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24794,7 +25004,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-1 input.warning,
-.pate-grid-21 > .row > .col-1 textarea.warning {
+.pate-grid-21 > .row > .col-1 textarea.warning,
+.pate-grid-21 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24833,7 +25044,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-2 input.warning,
-.pate-grid-21 > .row > .col-2 textarea.warning {
+.pate-grid-21 > .row > .col-2 textarea.warning,
+.pate-grid-21 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24872,7 +25084,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-3 input.warning,
-.pate-grid-21 > .row > .col-3 textarea.warning {
+.pate-grid-21 > .row > .col-3 textarea.warning,
+.pate-grid-21 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24911,7 +25124,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-4 input.warning,
-.pate-grid-21 > .row > .col-4 textarea.warning {
+.pate-grid-21 > .row > .col-4 textarea.warning,
+.pate-grid-21 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24950,7 +25164,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-5 input.warning,
-.pate-grid-21 > .row > .col-5 textarea.warning {
+.pate-grid-21 > .row > .col-5 textarea.warning,
+.pate-grid-21 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -24989,7 +25204,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-6 input.warning,
-.pate-grid-21 > .row > .col-6 textarea.warning {
+.pate-grid-21 > .row > .col-6 textarea.warning,
+.pate-grid-21 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25028,7 +25244,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-7 input.warning,
-.pate-grid-21 > .row > .col-7 textarea.warning {
+.pate-grid-21 > .row > .col-7 textarea.warning,
+.pate-grid-21 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25067,7 +25284,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-8 input.warning,
-.pate-grid-21 > .row > .col-8 textarea.warning {
+.pate-grid-21 > .row > .col-8 textarea.warning,
+.pate-grid-21 > .row > .col-8 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25106,7 +25324,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-9 input.warning,
-.pate-grid-21 > .row > .col-9 textarea.warning {
+.pate-grid-21 > .row > .col-9 textarea.warning,
+.pate-grid-21 > .row > .col-9 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25145,7 +25364,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-10 input.warning,
-.pate-grid-21 > .row > .col-10 textarea.warning {
+.pate-grid-21 > .row > .col-10 textarea.warning,
+.pate-grid-21 > .row > .col-10 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25184,7 +25404,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-11 input.warning,
-.pate-grid-21 > .row > .col-11 textarea.warning {
+.pate-grid-21 > .row > .col-11 textarea.warning,
+.pate-grid-21 > .row > .col-11 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25223,7 +25444,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-12 input.warning,
-.pate-grid-21 > .row > .col-12 textarea.warning {
+.pate-grid-21 > .row > .col-12 textarea.warning,
+.pate-grid-21 > .row > .col-12 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25262,7 +25484,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-13 input.warning,
-.pate-grid-21 > .row > .col-13 textarea.warning {
+.pate-grid-21 > .row > .col-13 textarea.warning,
+.pate-grid-21 > .row > .col-13 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25301,7 +25524,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-14 input.warning,
-.pate-grid-21 > .row > .col-14 textarea.warning {
+.pate-grid-21 > .row > .col-14 textarea.warning,
+.pate-grid-21 > .row > .col-14 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25340,7 +25564,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-15 input.warning,
-.pate-grid-21 > .row > .col-15 textarea.warning {
+.pate-grid-21 > .row > .col-15 textarea.warning,
+.pate-grid-21 > .row > .col-15 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25379,7 +25604,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-16 input.warning,
-.pate-grid-21 > .row > .col-16 textarea.warning {
+.pate-grid-21 > .row > .col-16 textarea.warning,
+.pate-grid-21 > .row > .col-16 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25418,7 +25644,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-17 input.warning,
-.pate-grid-21 > .row > .col-17 textarea.warning {
+.pate-grid-21 > .row > .col-17 textarea.warning,
+.pate-grid-21 > .row > .col-17 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25457,7 +25684,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-18 input.warning,
-.pate-grid-21 > .row > .col-18 textarea.warning {
+.pate-grid-21 > .row > .col-18 textarea.warning,
+.pate-grid-21 > .row > .col-18 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25496,7 +25724,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-19 input.warning,
-.pate-grid-21 > .row > .col-19 textarea.warning {
+.pate-grid-21 > .row > .col-19 textarea.warning,
+.pate-grid-21 > .row > .col-19 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25535,7 +25764,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-20 input.warning,
-.pate-grid-21 > .row > .col-20 textarea.warning {
+.pate-grid-21 > .row > .col-20 textarea.warning,
+.pate-grid-21 > .row > .col-20 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25574,7 +25804,8 @@ button.rollup-button {
 }
 
 .pate-grid-21 > .row > .col-21 input.warning,
-.pate-grid-21 > .row > .col-21 textarea.warning {
+.pate-grid-21 > .row > .col-21 textarea.warning,
+.pate-grid-21 > .row > .col-21 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25667,7 +25898,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-1 input.warning,
-.pate-grid-22 > .row > .col-1 textarea.warning {
+.pate-grid-22 > .row > .col-1 textarea.warning,
+.pate-grid-22 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25706,7 +25938,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-2 input.warning,
-.pate-grid-22 > .row > .col-2 textarea.warning {
+.pate-grid-22 > .row > .col-2 textarea.warning,
+.pate-grid-22 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25745,7 +25978,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-3 input.warning,
-.pate-grid-22 > .row > .col-3 textarea.warning {
+.pate-grid-22 > .row > .col-3 textarea.warning,
+.pate-grid-22 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25784,7 +26018,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-4 input.warning,
-.pate-grid-22 > .row > .col-4 textarea.warning {
+.pate-grid-22 > .row > .col-4 textarea.warning,
+.pate-grid-22 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25823,7 +26058,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-5 input.warning,
-.pate-grid-22 > .row > .col-5 textarea.warning {
+.pate-grid-22 > .row > .col-5 textarea.warning,
+.pate-grid-22 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25862,7 +26098,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-6 input.warning,
-.pate-grid-22 > .row > .col-6 textarea.warning {
+.pate-grid-22 > .row > .col-6 textarea.warning,
+.pate-grid-22 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25901,7 +26138,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-7 input.warning,
-.pate-grid-22 > .row > .col-7 textarea.warning {
+.pate-grid-22 > .row > .col-7 textarea.warning,
+.pate-grid-22 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25940,7 +26178,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-8 input.warning,
-.pate-grid-22 > .row > .col-8 textarea.warning {
+.pate-grid-22 > .row > .col-8 textarea.warning,
+.pate-grid-22 > .row > .col-8 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -25979,7 +26218,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-9 input.warning,
-.pate-grid-22 > .row > .col-9 textarea.warning {
+.pate-grid-22 > .row > .col-9 textarea.warning,
+.pate-grid-22 > .row > .col-9 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26018,7 +26258,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-10 input.warning,
-.pate-grid-22 > .row > .col-10 textarea.warning {
+.pate-grid-22 > .row > .col-10 textarea.warning,
+.pate-grid-22 > .row > .col-10 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26057,7 +26298,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-11 input.warning,
-.pate-grid-22 > .row > .col-11 textarea.warning {
+.pate-grid-22 > .row > .col-11 textarea.warning,
+.pate-grid-22 > .row > .col-11 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26096,7 +26338,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-12 input.warning,
-.pate-grid-22 > .row > .col-12 textarea.warning {
+.pate-grid-22 > .row > .col-12 textarea.warning,
+.pate-grid-22 > .row > .col-12 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26135,7 +26378,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-13 input.warning,
-.pate-grid-22 > .row > .col-13 textarea.warning {
+.pate-grid-22 > .row > .col-13 textarea.warning,
+.pate-grid-22 > .row > .col-13 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26174,7 +26418,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-14 input.warning,
-.pate-grid-22 > .row > .col-14 textarea.warning {
+.pate-grid-22 > .row > .col-14 textarea.warning,
+.pate-grid-22 > .row > .col-14 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26213,7 +26458,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-15 input.warning,
-.pate-grid-22 > .row > .col-15 textarea.warning {
+.pate-grid-22 > .row > .col-15 textarea.warning,
+.pate-grid-22 > .row > .col-15 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26252,7 +26498,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-16 input.warning,
-.pate-grid-22 > .row > .col-16 textarea.warning {
+.pate-grid-22 > .row > .col-16 textarea.warning,
+.pate-grid-22 > .row > .col-16 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26291,7 +26538,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-17 input.warning,
-.pate-grid-22 > .row > .col-17 textarea.warning {
+.pate-grid-22 > .row > .col-17 textarea.warning,
+.pate-grid-22 > .row > .col-17 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26330,7 +26578,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-18 input.warning,
-.pate-grid-22 > .row > .col-18 textarea.warning {
+.pate-grid-22 > .row > .col-18 textarea.warning,
+.pate-grid-22 > .row > .col-18 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26369,7 +26618,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-19 input.warning,
-.pate-grid-22 > .row > .col-19 textarea.warning {
+.pate-grid-22 > .row > .col-19 textarea.warning,
+.pate-grid-22 > .row > .col-19 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26408,7 +26658,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-20 input.warning,
-.pate-grid-22 > .row > .col-20 textarea.warning {
+.pate-grid-22 > .row > .col-20 textarea.warning,
+.pate-grid-22 > .row > .col-20 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26447,7 +26698,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-21 input.warning,
-.pate-grid-22 > .row > .col-21 textarea.warning {
+.pate-grid-22 > .row > .col-21 textarea.warning,
+.pate-grid-22 > .row > .col-21 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26486,7 +26738,8 @@ button.rollup-button {
 }
 
 .pate-grid-22 > .row > .col-22 input.warning,
-.pate-grid-22 > .row > .col-22 textarea.warning {
+.pate-grid-22 > .row > .col-22 textarea.warning,
+.pate-grid-22 > .row > .col-22 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26579,7 +26832,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-1 input.warning,
-.pate-grid-23 > .row > .col-1 textarea.warning {
+.pate-grid-23 > .row > .col-1 textarea.warning,
+.pate-grid-23 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26618,7 +26872,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-2 input.warning,
-.pate-grid-23 > .row > .col-2 textarea.warning {
+.pate-grid-23 > .row > .col-2 textarea.warning,
+.pate-grid-23 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26657,7 +26912,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-3 input.warning,
-.pate-grid-23 > .row > .col-3 textarea.warning {
+.pate-grid-23 > .row > .col-3 textarea.warning,
+.pate-grid-23 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26696,7 +26952,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-4 input.warning,
-.pate-grid-23 > .row > .col-4 textarea.warning {
+.pate-grid-23 > .row > .col-4 textarea.warning,
+.pate-grid-23 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26735,7 +26992,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-5 input.warning,
-.pate-grid-23 > .row > .col-5 textarea.warning {
+.pate-grid-23 > .row > .col-5 textarea.warning,
+.pate-grid-23 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26774,7 +27032,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-6 input.warning,
-.pate-grid-23 > .row > .col-6 textarea.warning {
+.pate-grid-23 > .row > .col-6 textarea.warning,
+.pate-grid-23 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26813,7 +27072,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-7 input.warning,
-.pate-grid-23 > .row > .col-7 textarea.warning {
+.pate-grid-23 > .row > .col-7 textarea.warning,
+.pate-grid-23 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26852,7 +27112,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-8 input.warning,
-.pate-grid-23 > .row > .col-8 textarea.warning {
+.pate-grid-23 > .row > .col-8 textarea.warning,
+.pate-grid-23 > .row > .col-8 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26891,7 +27152,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-9 input.warning,
-.pate-grid-23 > .row > .col-9 textarea.warning {
+.pate-grid-23 > .row > .col-9 textarea.warning,
+.pate-grid-23 > .row > .col-9 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26930,7 +27192,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-10 input.warning,
-.pate-grid-23 > .row > .col-10 textarea.warning {
+.pate-grid-23 > .row > .col-10 textarea.warning,
+.pate-grid-23 > .row > .col-10 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -26969,7 +27232,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-11 input.warning,
-.pate-grid-23 > .row > .col-11 textarea.warning {
+.pate-grid-23 > .row > .col-11 textarea.warning,
+.pate-grid-23 > .row > .col-11 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27008,7 +27272,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-12 input.warning,
-.pate-grid-23 > .row > .col-12 textarea.warning {
+.pate-grid-23 > .row > .col-12 textarea.warning,
+.pate-grid-23 > .row > .col-12 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27047,7 +27312,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-13 input.warning,
-.pate-grid-23 > .row > .col-13 textarea.warning {
+.pate-grid-23 > .row > .col-13 textarea.warning,
+.pate-grid-23 > .row > .col-13 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27086,7 +27352,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-14 input.warning,
-.pate-grid-23 > .row > .col-14 textarea.warning {
+.pate-grid-23 > .row > .col-14 textarea.warning,
+.pate-grid-23 > .row > .col-14 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27125,7 +27392,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-15 input.warning,
-.pate-grid-23 > .row > .col-15 textarea.warning {
+.pate-grid-23 > .row > .col-15 textarea.warning,
+.pate-grid-23 > .row > .col-15 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27164,7 +27432,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-16 input.warning,
-.pate-grid-23 > .row > .col-16 textarea.warning {
+.pate-grid-23 > .row > .col-16 textarea.warning,
+.pate-grid-23 > .row > .col-16 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27203,7 +27472,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-17 input.warning,
-.pate-grid-23 > .row > .col-17 textarea.warning {
+.pate-grid-23 > .row > .col-17 textarea.warning,
+.pate-grid-23 > .row > .col-17 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27242,7 +27512,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-18 input.warning,
-.pate-grid-23 > .row > .col-18 textarea.warning {
+.pate-grid-23 > .row > .col-18 textarea.warning,
+.pate-grid-23 > .row > .col-18 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27281,7 +27552,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-19 input.warning,
-.pate-grid-23 > .row > .col-19 textarea.warning {
+.pate-grid-23 > .row > .col-19 textarea.warning,
+.pate-grid-23 > .row > .col-19 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27320,7 +27592,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-20 input.warning,
-.pate-grid-23 > .row > .col-20 textarea.warning {
+.pate-grid-23 > .row > .col-20 textarea.warning,
+.pate-grid-23 > .row > .col-20 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27359,7 +27632,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-21 input.warning,
-.pate-grid-23 > .row > .col-21 textarea.warning {
+.pate-grid-23 > .row > .col-21 textarea.warning,
+.pate-grid-23 > .row > .col-21 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27398,7 +27672,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-22 input.warning,
-.pate-grid-23 > .row > .col-22 textarea.warning {
+.pate-grid-23 > .row > .col-22 textarea.warning,
+.pate-grid-23 > .row > .col-22 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27437,7 +27712,8 @@ button.rollup-button {
 }
 
 .pate-grid-23 > .row > .col-23 input.warning,
-.pate-grid-23 > .row > .col-23 textarea.warning {
+.pate-grid-23 > .row > .col-23 textarea.warning,
+.pate-grid-23 > .row > .col-23 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27530,7 +27806,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-1 input.warning,
-.pate-grid-24 > .row > .col-1 textarea.warning {
+.pate-grid-24 > .row > .col-1 textarea.warning,
+.pate-grid-24 > .row > .col-1 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27569,7 +27846,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-2 input.warning,
-.pate-grid-24 > .row > .col-2 textarea.warning {
+.pate-grid-24 > .row > .col-2 textarea.warning,
+.pate-grid-24 > .row > .col-2 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27608,7 +27886,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-3 input.warning,
-.pate-grid-24 > .row > .col-3 textarea.warning {
+.pate-grid-24 > .row > .col-3 textarea.warning,
+.pate-grid-24 > .row > .col-3 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27647,7 +27926,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-4 input.warning,
-.pate-grid-24 > .row > .col-4 textarea.warning {
+.pate-grid-24 > .row > .col-4 textarea.warning,
+.pate-grid-24 > .row > .col-4 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27686,7 +27966,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-5 input.warning,
-.pate-grid-24 > .row > .col-5 textarea.warning {
+.pate-grid-24 > .row > .col-5 textarea.warning,
+.pate-grid-24 > .row > .col-5 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27725,7 +28006,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-6 input.warning,
-.pate-grid-24 > .row > .col-6 textarea.warning {
+.pate-grid-24 > .row > .col-6 textarea.warning,
+.pate-grid-24 > .row > .col-6 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27764,7 +28046,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-7 input.warning,
-.pate-grid-24 > .row > .col-7 textarea.warning {
+.pate-grid-24 > .row > .col-7 textarea.warning,
+.pate-grid-24 > .row > .col-7 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27803,7 +28086,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-8 input.warning,
-.pate-grid-24 > .row > .col-8 textarea.warning {
+.pate-grid-24 > .row > .col-8 textarea.warning,
+.pate-grid-24 > .row > .col-8 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27842,7 +28126,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-9 input.warning,
-.pate-grid-24 > .row > .col-9 textarea.warning {
+.pate-grid-24 > .row > .col-9 textarea.warning,
+.pate-grid-24 > .row > .col-9 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27881,7 +28166,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-10 input.warning,
-.pate-grid-24 > .row > .col-10 textarea.warning {
+.pate-grid-24 > .row > .col-10 textarea.warning,
+.pate-grid-24 > .row > .col-10 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27920,7 +28206,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-11 input.warning,
-.pate-grid-24 > .row > .col-11 textarea.warning {
+.pate-grid-24 > .row > .col-11 textarea.warning,
+.pate-grid-24 > .row > .col-11 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27959,7 +28246,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-12 input.warning,
-.pate-grid-24 > .row > .col-12 textarea.warning {
+.pate-grid-24 > .row > .col-12 textarea.warning,
+.pate-grid-24 > .row > .col-12 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -27998,7 +28286,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-13 input.warning,
-.pate-grid-24 > .row > .col-13 textarea.warning {
+.pate-grid-24 > .row > .col-13 textarea.warning,
+.pate-grid-24 > .row > .col-13 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -28037,7 +28326,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-14 input.warning,
-.pate-grid-24 > .row > .col-14 textarea.warning {
+.pate-grid-24 > .row > .col-14 textarea.warning,
+.pate-grid-24 > .row > .col-14 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -28076,7 +28366,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-15 input.warning,
-.pate-grid-24 > .row > .col-15 textarea.warning {
+.pate-grid-24 > .row > .col-15 textarea.warning,
+.pate-grid-24 > .row > .col-15 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -28115,7 +28406,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-16 input.warning,
-.pate-grid-24 > .row > .col-16 textarea.warning {
+.pate-grid-24 > .row > .col-16 textarea.warning,
+.pate-grid-24 > .row > .col-16 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -28154,7 +28446,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-17 input.warning,
-.pate-grid-24 > .row > .col-17 textarea.warning {
+.pate-grid-24 > .row > .col-17 textarea.warning,
+.pate-grid-24 > .row > .col-17 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -28193,7 +28486,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-18 input.warning,
-.pate-grid-24 > .row > .col-18 textarea.warning {
+.pate-grid-24 > .row > .col-18 textarea.warning,
+.pate-grid-24 > .row > .col-18 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -28232,7 +28526,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-19 input.warning,
-.pate-grid-24 > .row > .col-19 textarea.warning {
+.pate-grid-24 > .row > .col-19 textarea.warning,
+.pate-grid-24 > .row > .col-19 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -28271,7 +28566,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-20 input.warning,
-.pate-grid-24 > .row > .col-20 textarea.warning {
+.pate-grid-24 > .row > .col-20 textarea.warning,
+.pate-grid-24 > .row > .col-20 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -28310,7 +28606,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-21 input.warning,
-.pate-grid-24 > .row > .col-21 textarea.warning {
+.pate-grid-24 > .row > .col-21 textarea.warning,
+.pate-grid-24 > .row > .col-21 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -28349,7 +28646,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-22 input.warning,
-.pate-grid-24 > .row > .col-22 textarea.warning {
+.pate-grid-24 > .row > .col-22 textarea.warning,
+.pate-grid-24 > .row > .col-22 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -28388,7 +28686,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-23 input.warning,
-.pate-grid-24 > .row > .col-23 textarea.warning {
+.pate-grid-24 > .row > .col-23 textarea.warning,
+.pate-grid-24 > .row > .col-23 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }
@@ -28427,7 +28726,8 @@ button.rollup-button {
 }
 
 .pate-grid-24 > .row > .col-24 input.warning,
-.pate-grid-24 > .row > .col-24 textarea.warning {
+.pate-grid-24 > .row > .col-24 textarea.warning,
+.pate-grid-24 > .row > .col-24 select.warning {
   border-color: #df3215;
   background-color: rgba(223, 50, 21, 0.05);
 }

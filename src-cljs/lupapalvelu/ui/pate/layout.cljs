@@ -115,6 +115,7 @@
          :toggle         pate-components/pate-toggle
          :text           pate-components/pate-text
          :date           pate-components/pate-date
+         :select         pate-components/pate-select
          ;; The rest are always displayed as view components
          (partial wrap-view-component cell-type)) options wrap-label?)
       (wrap-view-component cell-type options wrap-label?))))

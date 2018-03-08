@@ -17,7 +17,8 @@ $pate-grid-margin: 10px;
   }
 
   input.warning,
-  textarea.warning {
+  textarea.warning,
+  select.warning {
     border-color: $negative;
     background-color: transparentize( $negative, 0.95 );
   }
