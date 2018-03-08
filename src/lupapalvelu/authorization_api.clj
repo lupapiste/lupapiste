@@ -226,7 +226,8 @@
 (defcommand toggle-submit-restriction-for-other-auths
   {:parameters  [id apply-submit-restriction]
    :permissions [{:required [:application/edit]}]
-   :pre-checks  [company/authorized-to-apply-submit-restriction-to-other-auths]}
+   :pre-checks  [company/authorized-to-apply-submit-restriction-to-other-auths
+                 company/check-invitation-accepted]}
   [{{user-id :id {company-id :id} :company} :user application :application :as command}]
   (let [auth (or (auth/get-auth application company-id)
                  (auth/get-auth application user-id))]

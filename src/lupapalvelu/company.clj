@@ -317,6 +317,11 @@
                      created)
     (fail :error.company-not-locked)))
 
+(defn check-invitation-accepted [{{auth :auth} :application {{company-id :id} :company} :user}]
+  (when (and auth (->> (filter (comp #{company-id} :id) auth)
+                       (not-any? :inviteAccepted)))
+    (fail :error.company-has-not-accepted-invite)))
+
 (defn authorized-to-apply-submit-restriction-to-other-auths [{company :company}]
   (when-not (:submitRestrictor (and company @company))
     (fail :error.not-allowed-to-apply-submit-restriction)))
