@@ -891,7 +891,7 @@
 (defn- update-latest-version-file!
   "Updates the file id and archivability data of the latest version of the attachment.
    originalFileId should include the original file id and it is not altered."
-  [application {:keys [latestVersion versions id]} {:keys [result file]}]
+  [application {:keys [latestVersion versions id]} {:keys [result file]} ts]
   {:pre [(:fileId latestVersion) (:originalFileId latestVersion)]}
   (let [idx (dec (count versions))
         file-update (if (and (:archivable result) (:fileId file))
@@ -901,9 +901,9 @@
                         (fn [updates [k v]]
                           (merge updates {(str "attachments.$.versions." idx "." (name k)) v
                                           (str "attachments.$.latestVersion." (name k)) v}))
-                        file-update
+                        {}
                         (merge file-update
-                               {:modified (now)}
+                               {:modified ts}
                                (select-keys result [:archivable :archivabilityError :missing-fonts
                                                     :autoConversion :conversionLog :filename])))]
     (update-application
@@ -930,14 +930,14 @@
                                                              (conversion application))]
           (if (and (:archivable result) (:fileId file))
             ; If the file is already valid PDF/A, there's no conversion and thus no fileId
-            (do (update-latest-version-file! application attachment conversion-data)
+            (do (update-latest-version-file! application attachment conversion-data (now))
                 (preview/preview-image! (:id application) (:fileId file) (:filename file) (:contentType file))
                 (link-files-to-application (:id application) [(:fileId file)])
                 (cleanup-temp-file result)
                 result)
             (do (when-not (:archivable result)
                   (warn "Attachment" (:id attachment) "could not be converted to PDF/A."))
-                (update-latest-version-file! application attachment conversion-data)
+                (update-latest-version-file! application attachment conversion-data (now))
                 result)))
         (error "PDF/A conversion: No mongo file for fileId" fileId)))))
 

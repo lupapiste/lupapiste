@@ -18,6 +18,7 @@
             [clojure.test.check.generators :as gen]
             [clojure.test :refer [is]]
             [schema.core :as sc]
+            [sade.core :refer [now]]
             [sade.schemas :as ssc]
             [sade.schema-generators :as ssg]
             [lupapalvelu.attachment.onkalo-client :as oc]
@@ -33,7 +34,8 @@
                    attachment-assignment-info
                    version-approval-path
                    signature-updates
-                   manually-set-construction-time)
+                   manually-set-construction-time
+                   update-latest-version-file!)
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
 
@@ -640,3 +642,33 @@
 
         (fact "archived attachments can be deleted from MongoDB"
           (delete-archived-attachments-files-from-mongo! app2 att2) => :application-updated)))))
+
+(facts "about in-place attachment conversion"
+  (let [id "afdagdgahd"
+        attachment {:id id
+                    :versions [{:fileId "1"
+                                :originalFileId "4"}
+                               {:fileId "2"
+                                :originalFileId "3"}]
+                    :latestVersion {:fileId "2"
+                                    :originalFileId "3"}}
+        ts (now)]
+    (fact "update-latest-version-file! works properly"
+      (update-latest-version-file! {}
+                                   attachment
+                                   {:result {:archivable true}
+                                    :file {:fileId "foo"
+                                           :contentType "bar"}}
+                                   ts) => :updated
+      (provided
+        (action/update-application
+          (action/application->command {})
+          {:attachments.id id}
+          {$set {"attachments.$.versions.1.fileId" "foo"
+                 "attachments.$.latestVersion.fileId" "foo"
+                 "attachments.$.versions.1.contentType" "bar"
+                 "attachments.$.latestVersion.contentType" "bar"
+                 "attachments.$.versions.1.modified" ts
+                 "attachments.$.latestVersion.modified" ts
+                 "attachments.$.versions.1.archivable" true
+                 "attachments.$.latestVersion.archivable" true}}) => :updated))))
