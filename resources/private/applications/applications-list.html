@@ -18,8 +18,10 @@
             </div>
             <div class="invitation-actions">
               <a data-bind="ltext: 'applications.openApplication', attr: {href: '#!/application/' + application.id}" class="btn btn-primary btn-auto" data-test-id="open-application-button"></a>
+              <!-- ko if: !lupapisteApp.models.globalAuthModel.ok("authorized-to-apply-submit-restriction-to-other-auths") -->
               <button data-bind="ltext: 'applications.approveInvite', click: $parent.approveInvite, enable: lupapisteApp.models.globalAuthModel.ok('approve-invite')"
                       class="btn btn-primary btn-auto" data-test-id="accept-invite-button"></button>
+              <!-- /ko -->
               <a class="command" data-bind="ltext: 'applications.declineInvite', click: $parent.declineInvite" data-test-id="decline-invite-button"></a>
             </div>
           </div>
