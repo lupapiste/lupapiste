@@ -856,7 +856,7 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   function cannotSubmitResponse(data) {
-    self.submitErrors(_.map(data.errors, "text"));
+    self.submitErrors(data.errors);
   }
 
   function fetchApplicationSubmittable() {

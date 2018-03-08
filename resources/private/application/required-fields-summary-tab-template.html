@@ -91,7 +91,11 @@
             <div data-bind="foreach: submitErrors">
               <div class="info-line like-btn">
                   <i class="lupicon-circle-attention"></i>
-                  <span data-bind="lhtml: $data, attr: {'data-test-id': 'submit-error-' + $index(), 'data-submit-error': $data}"></span>
+                  <span data-bind="lhtml: $data.text, attr: {'data-test-id': 'submit-error-' + $index(), 'data-submit-error': $data.text}"></span>
+                  <!-- ko if: $data.user -->
+                  &nbsp;<span data-bind="lhtml: 'application.contact-to-authorized-user.' + $data.user.type"></span>
+                  &nbsp;<b data-bind="html: $data.user.name, attr: {'data-test-id': 'submit-error-user-' + $index(), 'data-submit-error-user': $data.user.id}"></b>
+                  <!-- /ko -->
               </div>
             </div>
           </div>

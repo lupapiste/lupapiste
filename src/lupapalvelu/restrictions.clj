@@ -3,7 +3,8 @@
             [monger.operators :refer [$push $pull]]
             [sade.core :refer [fail]]
             [sade.schemas :as ssc]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [sade.util :as util]))
 
 (defschema AuthRestriction
   {:restriction  sc/Str
@@ -48,12 +49,22 @@
   [{user-id :id {company-id :id} :company} restriction auth-restriction-entry]
   (when (and (not (#{user-id company-id} (get-in auth-restriction-entry [:user :id])))
              (= (keyword restriction) (keyword (:restriction auth-restriction-entry))))
-    (fail :error.permissions-restricted-by-another-user :restriction restriction)))
+    (fail :error.permissions-restricted-by-another-user
+          :restriction restriction
+          :user (:user auth-restriction-entry))))
+
+(defn- enrich-with-auth-info [{application :application :as command} entry]
+  (let [{auth-type :type :as auth} (util/find-by-id (get-in entry [:user :id]) (:auth application))]
+    (cond-> entry
+      (:user entry)    (assoc-in [:user :type] (if (= :company (keyword auth-type)) :company :person))
+      (:lastName auth) (assoc-in [:user :name] (ss/join " " [(:firstName auth) (:lastName auth)]))
+      (:name auth)     (assoc-in [:user :name] (:name auth)))))
 
 (defn check-auth-restriction
   "Pre check that fails if restriction is applied for user."
-  [{user :user {auth-restrictions :authRestrictions} :application} restriction]
-  (some (partial check-auth-restriction-entry user restriction) auth-restrictions))
+  [{user :user {auth-restrictions :authRestrictions} :application :as command} restriction]
+  (->> (some (partial check-auth-restriction-entry user restriction) auth-restrictions)
+       (enrich-with-auth-info command)))
 
 (defn- restriction-as-string
   "Monger drops namespace part of keywords. To store them with namespace part,
