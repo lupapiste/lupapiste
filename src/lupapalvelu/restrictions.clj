@@ -85,15 +85,18 @@
 (defn mongo-updates-for-remove-all-user-restrictions
   "Returns mongo updates for removing all restrictions that are set by current user."
   [{auth-id :id}]
-  {$pull {:authRestrictions {:user.id auth-id}}})
+  (when auth-id
+    {$pull {:authRestrictions {:user.id auth-id}}}))
 
 (defn mongo-updates-for-remove-other-user-restrictions
   "Returns mongo updates for removing restrictions that are applied to other users.
   If restriction is given, only mathing restrictions are removed."
   ([{auth-id :id}]
-   {$pull {:authRestrictions {:user.id auth-id :target.type "others"}}})
+   (when auth-id
+     {$pull {:authRestrictions {:user.id auth-id :target.type "others"}}}))
   ([{auth-id :id} restriction]
-   {$pull {:authRestrictions {:user.id auth-id :target.type "others" :restriction (restriction-as-string restriction)}}}))
+   (when auth-id
+     {$pull {:authRestrictions {:user.id auth-id :target.type "others" :restriction (restriction-as-string restriction)}}})))
 
 (defn check-auth-restriction-is-enabled-by-user
   "Pre for checking that auth-restriction is anebled by current user."

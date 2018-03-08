@@ -166,10 +166,11 @@
       (let [updated-app (update-in application [:auth] (fn [a] (remove user-pred a)))
             doc-updates (generate-remove-invalid-user-from-docs-updates updated-app)]
         (update-application command
-          (merge
+          (util/deep-merge
             {$pull {:auth (if last-invite-permission?
                             {$and [{:username username}, {:type {$nin inviter-roles}}]}
                             {:username username})}}
+            (restrictions/mongo-updates-for-remove-all-user-restrictions (util/find-first user-pred (:auth application)))
             (when (seq doc-updates) {$unset doc-updates})))))))
 
 (defcommand decline-invitation
