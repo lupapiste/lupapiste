@@ -280,7 +280,7 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.approveInvite = function(type, opts) {
-    var unwrappedOpts = opts ? ko.mapping.toJS(opts) : {};
+    var unwrappedOpts = {"apply-submit-restriction": util.getIn(opts, ["applySubmitRestriction"])};
     ajax
       .command("approve-invite", _.assign({id: self.id(), "invite-type": type}, unwrappedOpts))
       .success(function() {
@@ -937,7 +937,7 @@ LUPAPISTE.ApplicationModel = function() {
                                                  applySubmitRestriction: applySubmitRestriction,
                                                  lyesTitle: "applications.approveInvite",
                                                  lnoTitle: "application.showApplication",
-                                                 yesFn: _.partial(self.approveInvite, "company", {"apply-submit-restriction": applySubmitRestriction})}});
+                                                 yesFn: _.partial(self.approveInvite, "company", {applySubmitRestriction: applySubmitRestriction})}});
     }
   };
 
