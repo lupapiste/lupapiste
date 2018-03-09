@@ -70,35 +70,6 @@
             {:on-click #(swap! editing? not)}
             [:i.lupicon-pen]])])))
 
-#_(rum/defc checkbox
-  "Checkbox component (using checkbox wrapper mechanism).
-   Parameters [optional]:
-   label:      Localization key. Overrides label if both given.
-   text:       'Raw label text'.
-   value:      Initial value
-   handler-fn: Toggle callback function.
-   [negate?]:  If true, the value is negated (default false)
-   [disabled]: Is the checkbox disabled (default false)
-   [prefix]:   Wrapper class prefix (default :pate-checkbox)"
-  [{:keys [label text value handler-fn disabled negate? prefix]}]
-  (let [input-id (str "input-" (common/unique-id "check"))
-        value-fn (if negate? not identity)
-        value    (value-fn value)
-        label    (or (if label (common/loc label) text) "")
-        prefix   (name (or prefix :pate-checkbox))]
-    [:div
-     {:class (str prefix "-wrapper")
-      :key   input-id}
-     [:input {:type     "checkbox"
-              :disabled disabled
-              :checked  value
-              :id       input-id}]
-     [:label
-      {:class    (str prefix "-label")
-       :for      input-id
-       :on-click #(handler-fn (not (value-fn value)))}
-      label]]))
-
 (defn initial-value-mixin
   "Assocs to component's local state local-key with atom that is
   initialized to the first component argument. If the argument is an
