@@ -118,8 +118,8 @@
               (fact {:midje/description (format "Set %s delta to %s" k delta)}
                 (command sipoo :save-verdict-template-settings-value
                          :category :r
-                         :path [k :delta]
-                         :value delta) => ok?))]
+                         :path [k]
+                         :value (str delta)) => ok?))]
       (set-date-delta "julkipano" 1)
       (set-date-delta "anto" 2)
       (set-date-delta "muutoksenhaku" 3)
@@ -130,13 +130,13 @@
   (fact "Date delta validation"
     (command sipoo :save-verdict-template-settings-value
              :category :r
-             :path [:muutoksenhaku :delta]
-             :value -8)=> invalid-value?)
+             :path [:muutoksenhaku]
+             :value "-8")=> invalid-value?)
   (fact "Board"
     (command sipoo :save-verdict-template-settings-value
              :category :r
-             :path [:lautakunta-muutoksenhaku :delta]
-             :value 10)=> ok?
+             :path [:lautakunta-muutoksenhaku]
+             :value "10")=> ok?
     (command sipoo :save-verdict-template-settings-value
              :category :r
              :path [:boardname]
@@ -952,6 +952,10 @@
             (fact "Enable Pate in Sipoo"
               (toggle-sipoo-pate true)
               (query sonja :pate-verdict-tab :id app-id) => ok?)
+            (fact "Sonja clears application handler"
+              (let [{handlers :handlers} (query-application sonja app-id)]
+                (command sonja :remove-application-handler :id app-id
+                         :handlerId (-> handlers first :id))))
             (fact "Sonja creates verdict draft"
               (let [draft                          (command sonja :new-pate-verdict-draft
                                                             :id app-id :template-id template-id)
@@ -973,6 +977,7 @@
                                     (fact "No errors"
                                       errors => nil)))]
                 data => (contains {:language         "fi"
+                                   :handler          ""
                                    :appeal           "Humble appeal."
                                    :purpose          ""
                                    :verdict-text     "Verdict text."
@@ -1047,12 +1052,11 @@
                                                         :autopaikat-yhteensa    ""
                                                         :paloluokka             ""
                                                         :order                  "0"}}}))
-                (fact "Since the verdict is regular (official) we can set contact"
-                  (edit-verdict "contact" "Authority Sonja Sibbo") => no-errors?)
-                (fact "... but cannot set section"
+                (fact "Cannot set section for non-board verdict"
                   (edit-verdict :verdict-section "8")
                   => (err :error.invalid-value-path))
-
+                (fact "Set handler"
+                  (edit-verdict "handler" "Sonja Sibbo") => no-errors?)
                 (facts "Verdict references"
                   (let [{:keys [foremen plans reviews]} (:references draft)]
                     (fact "Foremen"
@@ -1317,6 +1321,13 @@
                           (edit-template :giver :lautakunta) => true)
                         (fact "Publish template"
                           (publish-verdict-template sipoo template-id) => ok?)))
+                    (fact "Sonja sets Ronja as the handler for the application"
+                      (let [{handlers :handlers} (query-application sonja app-id)]
+                        (command sonja :remove-application-handler :id app-id
+                                 :handlerId (-> handlers first :id)) => ok?)
+                      (command sonja :upsert-application-handler :id app-id
+                               :userId ronja-id
+                               :roleId sipoo-general-handler-id) => ok?)
                     (fact "New verdict"
                       (let  [{verdict :verdict}             (command sonja :new-pate-verdict-draft
                                                                      :id app-id
@@ -1328,6 +1339,7 @@
                               edit-verdict  :edit
                               check-changes :check-changes} (verdict-fn-factory verdict-id)]
                         data => {:language              "fi"
+                                 :handler               "Ronja Sibbo"
                                  :voimassa              ""
                                  :verdict-text          "Verdict text."
                                  :anto                  ""

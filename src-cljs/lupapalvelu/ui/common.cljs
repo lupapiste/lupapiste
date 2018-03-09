@@ -83,7 +83,7 @@
   (boolean (js/features.enabled (name feature))))
 
 (defn css
-  "Convenience function for :class defintions."
+  "Convenience function for :class definitions."
   [& classes]
   (->> classes flatten (remove nil?) (map name)))
 
@@ -164,8 +164,10 @@
   options:
      text     Text as it is
      text-loc Localisation key for text"
-  [{:keys [text text-loc]}]
-  (or text (loc text-loc)))
+  ([{:keys [text text-loc]} default]
+   (or text (loc text-loc) default))
+  ([options]
+   (resolve-text options nil)))
 
 (defn resolve-disabled
   "Resolves disabled status based on disabled? and enabled?

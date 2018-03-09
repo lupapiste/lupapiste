@@ -4,6 +4,8 @@
             [sade.shared-util :as util]
             [schema.core :refer [defschema] :as sc]))
 
+(def supported-languages [:fi :sv :en])
+
 ;; identifier - KuntaGML-paatoskoodi (yhteiset.xsd)
 (def verdict-code-map
   {:annettu-lausunto            "annettu lausunto"
@@ -227,9 +229,11 @@
           ;; Selection sorted by label. Default is true.
           (sc/optional-key :sort?) sc/Bool}))
 
+(def positive-integer (sc/constrained sc/Int (comp not neg?)))
+
 (defschema PateDateDelta
   (merge PateComponent
-         {(sc/optional-key :delta)   (sc/constrained sc/Int (comp not neg?))
+         {(sc/optional-key :delta)   positive-integer
           :unit                      (sc/enum :days :years)}))
 
 (defschema PateReference
@@ -239,12 +243,6 @@
   references (like in PateEnabled for example)."
   (merge PateComponent
          {:path path-type}))
-
-(defschema PateDocgen
-  "Additional properties for old school docgen definitions. Shortcut
-  is to use just the schema name (see below)."
-  (merge PateEnabled
-         {:name sc/Str}))
 
 (defschema PateLink
   "UI component that represents a text with link. The link is part of
@@ -316,6 +314,39 @@
           ;; time. Default false.
           (sc/optional-key :multiple?)  sc/Bool}))
 
+(defschema PateToggle
+  (merge (dissoc PateComponent :css)
+         {(sc/optional-key :value)  sc/Bool
+          (sc/optional-key :prefix) keyword-or-string}))
+
+(def pate-units
+  (sc/enum :days :years :ha :m2 :m3 :kpl :section :eur))
+
+(defschema PateText
+  (merge PateComponent
+         {(sc/optional-key :value)  sc/Str
+          ;; Default type is :text.
+          (sc/optional-key :type)   (sc/enum :text :password)
+          ;; Before and after are localisation keys for the strings to
+          ;; be shown before and after the value and editor.
+          (sc/optional-key :before) pate-units
+          (sc/optional-key :after)  pate-units}))
+
+(def PateDate PateComponent)
+
+(defschema PateSelect
+  "Very simple selection model. Rendered as dropdown. Each item
+  coresponds to a value. The option text is resolved via regular
+  localisation mechanisms."
+  (merge PateComponent
+         {:items                          [sc/Keyword]
+          ;; If true (default), empty selection (- Choose -) is
+          ;; available.
+          (sc/optional-key :allow-empty?) sc/Bool
+          ;; Value sorting uses natural order, text sorting takes
+          ;; locale into account. Default order is the items order.
+          (sc/optional-key :sort-by)      (sc/enum :value :text)}))
+
 (defschema PateRequired
   {(sc/optional-key :required?) sc/Bool})
 
@@ -324,9 +355,6 @@
 
 (defschema SchemaTypes
   {sc/Keyword (sc/conditional
-               :docgen         (required {:docgen (sc/conditional
-                                                   :name PateDocgen
-                                                   :else sc/Str)})
                :reference-list (required {:reference-list PateReferenceList})
                :phrase-text    (required {:phrase-text PatePhraseText})
                :loc-text       {:loc-text sc/Keyword} ;; Localisation term shown as text.
@@ -339,6 +367,10 @@
                :keymap         {:keymap KeyMap}
                :attachments    {:attachments PateAttachments}
                :application-attachments {:application-attachments PateComponent}
+               :toggle         {:toggle PateToggle}
+               :text           (required {:text PateText})
+               :date           (required {:date PateDate})
+               :select         (required {:select PateSelect})
                :repeating      {:repeating (sc/recursive #'SchemaTypes)
                                 ;; The value is a key in the repeating dictionary.
                                 (sc/optional-key :sort-by) sc/Keyword})})
@@ -468,6 +500,18 @@
                [])
        (remove nil?)))
 
+(def language-select {:select {:loc-prefix :pate-verdict.language
+                               :items supported-languages}})
+(def verdict-giver-select {:select {:loc-prefix :pate-verdict.giver
+                                    :items      [:lautakunta :viranhaltija]
+                                    :sort-by    :text}})
+(def complexity-select {:select {:loc-prefix :pate.complexity
+                                 :items      [:small :medium :large :extra-large]}})
+
+(def collateral-type-select {:select {:loc-prefix :pate.collateral-type
+                                      :items      [:shekki :panttaussitoumus]
+                                      :sort-by    :text}})
+
 (defn req [m]
   (assoc m :required? true))
 
@@ -475,12 +519,12 @@
                                      arg))
 
 (defmethod default-verdict-template :r [_]
-  {:dictionary {:language                  {:docgen "pate-languages"}
+  {:dictionary {:language                  language-select
                 :verdict-dates             {:multi-select {:items           verdict-dates
                                                            :sort?           false
                                                            :i18nkey         :pate-verdict-dates
                                                            :item-loc-prefix :pate-verdict}}
-                :giver                     (req {:docgen "pate-verdict-giver"})
+                :giver                     (req verdict-giver-select)
                 :verdict-code              {:reference-list {:path       :settings.verdict-code
                                                              :type       :select
                                                              :loc-prefix :pate-r.verdict-code}}
@@ -519,7 +563,7 @@
                                                  :i18nkey  :phrase.category.muutoksenhaku}}
                 :collateral       {:loc-text :pate-collateral.text}
                 ;; Complexity section
-                :complexity       {:docgen "pate-complexity"}
+                :complexity       complexity-select
                 :complexity-text  {:phrase-text {:label?   false
                                                  :category :vaativuus}}
                 ;; Text sections
@@ -529,11 +573,11 @@
                 :purpose          {:loc-text :pate-purpose.text}
                 :statements       {:loc-text :pate-statements.text}
                 ;; Buildings section
-                :autopaikat       {:docgen "pate-verdict-check"}
-                :vss-luokka       {:docgen "pate-verdict-check"}
-                :paloluokka       {:docgen "pate-verdict-check"}
+                :autopaikat       {:toggle {}}
+                :vss-luokka       {:toggle {}}
+                :paloluokka       {:toggle {}}
                 ;; Attachments section
-                :upload           {:docgen "pate-verdict-check"}
+                :upload           {:toggle {}}
                 ;; Removable sections
                 :removed-sections {:keymap (zipmap [:foremen :reviews :plans
                                                     :conditions :neighbors
@@ -545,13 +589,11 @@
    :sections [{:id         "verdict"
                :loc-prefix :pate-verdict
                :grid       {:columns 12
-                            :rows    [[{:col 6
-                                        :id "language"
+                            :rows    [[{:col  6
                                         :dict :language}]
                                       [{:col  12
                                         :dict :verdict-dates}]
                                       [{:col  3
-                                        :id   :giver
                                         :dict :giver}
                                        {:align      :full
                                         :col        3
@@ -619,103 +661,102 @@
                                                                 :dict :upload}]}}]]}}]})
 
 (defmethod default-verdict-template :p [_]
-    {:dictionary {:language                  {:docgen "pate-languages"}
-                  :verdict-dates             {:multi-select {:items           p-verdict-dates
-                                                             :sort?           false
-                                                             :i18nkey         :pate-verdict-dates
-                                                             :item-loc-prefix :pate-verdict}}
-                  :giver                     (req {:docgen "pate-verdict-giver"})
-                  :verdict-code              {:reference-list {:path       :settings.verdict-code
-                                                               :type       :select
-                                                               :loc-prefix :pate-r.verdict-code}}
-                  :paatosteksti              {:phrase-text {:category :paatosteksti}}
-                  :link-to-settings          {:link {:text-loc :pate.settings-link
-                                                     :click    :open-settings}}
-                  :link-to-settings-no-label {:link {:text-loc :pate.settings-link
-                                                     :label?   false
-                                                     :click    :open-settings}}
-                  ;; The following keys are whole sections
-                  :add-condition             {:button {:icon    :lupicon-circle-plus
-                                                       :i18nkey :pate-conditions.add
-                                                       :css     :positive
-                                                       :add     :conditions}}
-                  :neighbors                 {:loc-text :pate-neighbors.text}
+  {:dictionary {:language                  language-select
+                :verdict-dates             {:multi-select {:items           p-verdict-dates
+                                                           :sort?           false
+                                                           :i18nkey         :pate-verdict-dates
+                                                           :item-loc-prefix :pate-verdict}}
+                :giver                     (req verdict-giver-select)
+                :verdict-code              {:reference-list {:path       :settings.verdict-code
+                                                             :type       :select
+                                                             :loc-prefix :pate-r.verdict-code}}
+                :paatosteksti              {:phrase-text {:category :paatosteksti}}
+                :link-to-settings          {:link {:text-loc :pate.settings-link
+                                                   :click    :open-settings}}
+                :link-to-settings-no-label {:link {:text-loc :pate.settings-link
+                                                   :label?   false
+                                                   :click    :open-settings}}
+                ;; The following keys are whole sections
+                :add-condition             {:button {:icon    :lupicon-circle-plus
+                                                     :i18nkey :pate-conditions.add
+                                                     :css     :positive
+                                                     :add     :conditions}}
+                :neighbors                 {:loc-text :pate-neighbors.text}
 
-                  :appeal           {:phrase-text {:category :muutoksenhaku
-                                                   :i18nkey  :phrase.category.muutoksenhaku}}
-                  :collateral       {:loc-text :pate-collateral.text}
-                  ;; Complexity section
-                  :complexity       {:docgen "pate-complexity"}
-                  :complexity-text  {:phrase-text {:label?   false
-                                                   :category :vaativuus}}
-                  ;; Text sections
-                  :extra-info       {:loc-text :pate-extra-info.text}
-                  :deviations       {:loc-text :pate-deviations.text}
-                  :rights           {:loc-text :pate-rights.text}
-                  :purpose          {:loc-text :pate-purpose.text}
-                  :statements       {:loc-text :pate-statements.text}
-                  ;; Buildings section
-                  :autopaikat       {:docgen "pate-verdict-check"}
-                  :vss-luokka       {:docgen "pate-verdict-check"}
-                  :paloluokka       {:docgen "pate-verdict-check"}
-                  ;; Attachments section
-                  :upload           {:docgen "pate-verdict-check"}
-                  ;; Removable sections
-                  :removed-sections {:keymap (zipmap [:foremen :reviews :plans
-                                                      :conditions :neighbors
-                                                      :appeal :statements :collateral
-                                                      :extra-info :deviations
-                                                      :complexity :rights :purpose
-                                                      :buildings :attachments]
-                                                     (repeat false))}}
-     :sections [{:id         "verdict"
-                 :loc-prefix :pate-verdict
-                 :grid       {:columns 12
-                              :rows    [[{:col 6
-                                          :id "language"
-                                          :dict :language}]
-                                        [{:col  12
-                                          :dict :verdict-dates}]
-                                        [{:col  3
-                                          :id   :giver
-                                          :dict :giver}
-                                         {:align      :full
-                                          :col        3
-                                          :loc-prefix :pate-r.verdict-code
-                                          :hide?      :*ref.settings.verdict-code
-                                          :dict       :link-to-settings}
-                                         {:align :full
-                                          :col   3
-                                          :show? :*ref.settings.verdict-code
-                                          :dict  :verdict-code}]
-                                        [{:col  12
-                                          :dict :paatosteksti}]]}}
-                (text-section :neighbors)
-                {:id         "appeal"
-                 :loc-prefix :pate-appeal
-                 :grid       {:columns 1
-                              :rows    [[{:dict :appeal }]]}}
-                (text-section :collateral)
-                {:id         "complexity"
-                 :loc-prefix :pate.complexity
-                 :grid       {:columns 1
-                              :rows    [[{:dict :complexity }]
-                                        [{:id   "text"
-                                          :dict :complexity-text}]]}}
-                (text-section :extra-info)
-                (text-section :deviations)
-                (text-section :rights)
-                (text-section :purpose)
-                (text-section :statements)
-                {:id         "attachments"
-                 :loc-prefix :application.verdict-attachments
-                 :grid       {:columns 1
-                              :rows    [[{:loc-prefix :pate.attachments
-                                          :list       {:labels? false
-                                                       :items   [{:id   :upload
-                                                                  :dict :upload}]}}]]}}]})
+                :appeal           {:phrase-text {:category :muutoksenhaku
+                                                 :i18nkey  :phrase.category.muutoksenhaku}}
+                :collateral       {:loc-text :pate-collateral.text}
+                ;; Complexity section
+                :complexity       complexity-select
+                :complexity-text  {:phrase-text {:label?   false
+                                                 :category :vaativuus}}
+                ;; Text sections
+                :extra-info       {:loc-text :pate-extra-info.text}
+                :deviations       {:loc-text :pate-deviations.text}
+                :rights           {:loc-text :pate-rights.text}
+                :purpose          {:loc-text :pate-purpose.text}
+                :statements       {:loc-text :pate-statements.text}
+                ;; Buildings section
+                :autopaikat       {:toggle {}}
+                :vss-luokka       {:toggle {}}
+                :paloluokka       {:toggle {}}
+                ;; Attachments section
+                :upload           {:toggle {}}
+                ;; Removable sections
+                :removed-sections {:keymap (zipmap [:foremen :reviews :plans
+                                                    :conditions :neighbors
+                                                    :appeal :statements :collateral
+                                                    :extra-info :deviations
+                                                    :complexity :rights :purpose
+                                                    :buildings :attachments]
+                                                   (repeat false))}}
+   :sections [{:id         "verdict"
+               :loc-prefix :pate-verdict
+               :grid       {:columns 12
+                            :rows    [[{:col  6
+                                        :dict :language}]
+                                      [{:col  12
+                                        :dict :verdict-dates}]
+                                      [{:col  3
+                                        :dict :giver}
+                                       {:align      :full
+                                        :col        3
+                                        :loc-prefix :pate-r.verdict-code
+                                        :hide?      :*ref.settings.verdict-code
+                                        :dict       :link-to-settings}
+                                       {:align :full
+                                        :col   3
+                                        :show? :*ref.settings.verdict-code
+                                        :dict  :verdict-code}]
+                                      [{:col  12
+                                        :dict :paatosteksti}]]}}
+              (text-section :neighbors)
+              {:id         "appeal"
+               :loc-prefix :pate-appeal
+               :grid       {:columns 1
+                            :rows    [[{:dict :appeal }]]}}
+              (text-section :collateral)
+              {:id         "complexity"
+               :loc-prefix :pate.complexity
+               :grid       {:columns 1
+                            :rows    [[{:dict :complexity }]
+                                      [{:id   "text"
+                                        :dict :complexity-text}]]}}
+              (text-section :extra-info)
+              (text-section :deviations)
+              (text-section :rights)
+              (text-section :purpose)
+              (text-section :statements)
+              {:id         "attachments"
+               :loc-prefix :application.verdict-attachments
+               :grid       {:columns 1
+                            :rows    [[{:loc-prefix :pate.attachments
+                                        :list       {:labels? false
+                                                     :items   [{:id   :upload
+                                                                :dict :upload}]}}]]}}]})
 
 (sc/validate PateVerdictTemplate (default-verdict-template :r))
+(sc/validate PateVerdictTemplate (default-verdict-template :p))
 
 (defschema PateSettings
   (merge Dictionary
@@ -737,7 +778,7 @@
                 :verdict-code             (req {:multi-select {:label? false
                                                                :items  (keys verdict-code-map)}})
                 :lautakunta-muutoksenhaku (req {:date-delta {:unit :days}})
-                :boardname                (req {:docgen "pate-string"})
+                :boardname                (req {:text {}})
                 :foremen                  {:multi-select {:label? false
                                                           :items  foreman-codes}}
                 :plans                    {:reference-list {:label?   false
@@ -811,24 +852,27 @@
           :sections                   [PateVerdictSection]}))
 
 
+(def required-in-verdict {:toggle {:i18nkey :pate.template-removed}})
+(def verdict-handler (req {:text {:loc-prefix :pate-verdict.handler}}))
+(def app-id-placeholder {:placeholder {:loc-prefix :pate-verdict.application-id
+                                       :type :application-id}})
+
 ;; It is advisable to reuse ids from template when possible. This
 ;; makes localization work automatically.
 (def verdict-schemas
   {:r
    {:dictionary
     (merge
-     {:language                (req {:docgen "pate-languages"})
-      :verdict-date            (req {:docgen "pate-date"})
-      :automatic-verdict-dates {:docgen {:name "pate-verdict-check"}}}
+     {:language                (req language-select)
+      :verdict-date            (req {:date {}})
+      :automatic-verdict-dates {:toggle {}}}
      (->> [:julkipano :anto :muutoksenhaku :lainvoimainen :aloitettava :voimassa]
           (map (fn [kw]
-                 [kw (req {:docgen {:name      "pate-date"
-                                    :disabled? :automatic-verdict-dates}})]))
+                 [kw (req {:date {:disabled? :automatic-verdict-dates}})]))
           (into {}))
-     {:contact-ref           {:reference {:path :contact}}
-      :boardname             {:reference {:path :*ref.boardname}}
-      :contact               (req {:docgen "pate-verdict-contact"})
-      :verdict-section       (req {:docgen "pate-verdict-section"})
+     {:boardname             {:reference {:path :*ref.boardname}}
+      :handler               verdict-handler
+      :verdict-section       (req {:text {:before :section}})
       :verdict-code          (req {:reference-list {:path       :verdict-code
                                                     :type       :select
                                                     :loc-prefix :pate-r.verdict-code}})
@@ -836,7 +880,7 @@
       :bulletinOpDescription {:phrase-text {:category :toimenpide-julkipanoon
                                             :i18nkey  :phrase.category.toimenpide-julkipanoon}}
       :verdict-text-ref      (req {:reference {:path :verdict-text}})
-      :application-id        {:placeholder {:type :application-id}}}
+      :application-id        app-id-placeholder}
      (reduce (fn [acc [loc-prefix kw term? separator?]]
                (let [included (keyword (str (name kw) "-included"))
                      path     kw]
@@ -854,9 +898,8 @@
                                               :match-key  :id}})
                                 (when separator?
                                   {:separator " \u2013 "}))}
-                        ;; Included checkbox
-                        included
-                        {:docgen "required-in-verdict"})))
+                        ;; Included toggle
+                        included required-in-verdict)))
              {}
              [[:pate-r.foremen :foremen false false]
               [:pate-plans :plans true false]
@@ -877,11 +920,12 @@
       :neighbors        {:phrase-text {:i18nkey  :phrase.category.naapurit
                                        :category :naapurit}}
       :neighbor-states  {:placeholder {:type :neighbors}}
-      :collateral       {:docgen "pate-string"}
-      :collateral-date  {:docgen "pate-date"}
-      :collateral-type  {:docgen "collateral-type"}
+      :collateral       {:text {:after :eur}}
+      :collateral-flag  {:toggle {:loc-prefix :pate-collateral.flag}}
+      :collateral-date  {:date {}}
+      :collateral-type  collateral-type-select
       :appeal           {:phrase-text {:category :muutoksenhaku}}
-      :complexity       {:docgen "pate-complexity"}
+      :complexity       complexity-select
       :complexity-text  {:phrase-text {:label?   false
                                        :category :vaativuus}}
       :extra-info       {:phrase-text {:category :yleinen}}
@@ -890,13 +934,13 @@
       :purpose          {:phrase-text {:category :kaava}}
       :buildings        {:repeating {:building-name          {:placeholder {:label? false
                                                                             :type   :building}}
-                                     :rakennetut-autopaikat  {:docgen "pate-string"}
-                                     :kiinteiston-autopaikat {:docgen "pate-string"}
-                                     :autopaikat-yhteensa    {:docgen "pate-string"}
-                                     :vss-luokka             {:docgen "pate-string"}
-                                     :paloluokka             {:docgen "pate-string"}
-                                     :show-building          {:docgen "required-in-verdict"}}
-                         :sort-by :order}
+                                     :rakennetut-autopaikat  {:text {}}
+                                     :kiinteiston-autopaikat {:text {}}
+                                     :autopaikat-yhteensa    {:text {}}
+                                     :vss-luokka             {:text {}}
+                                     :paloluokka             {:text {}}
+                                     :show-building          required-in-verdict}
+                         :sort-by   :order}
       :upload           {:attachments {:i18nkey    :application.verdict-attachments
                                        :label?     false
                                        :type-group #"paatoksenteko"
@@ -907,10 +951,15 @@
     :sections
     [{:id   "pate-dates"
       :grid {:columns 7
-             :rows    [[{:col 7
-                         :loc-prefix :pate-verdict.language
-                         :dict :language
+             :rows    [[{:col   7
+                         :dict  :language
                          :hide? :_meta.published?}]
+                       [{:col  2
+                         :dict :handler}
+                        {}
+                        {:col  2
+                         :hide? :_meta.editing?
+                         :dict :application-id}]
                        [{:id   "verdict-date"
                          :dict :verdict-date}
                         {:id    "automatic-verdict-dates"
@@ -932,10 +981,6 @@
       :grid {:columns 7
              :rows    [[{:col        2
                          :loc-prefix :pate-verdict.giver
-                         :hide?      :*ref.boardname
-                         :dict       :contact}
-                        {:col        2
-                         :loc-prefix :pate-verdict.giver
                          :hide?      :_meta.editing?
                          :show?      :*ref.boardname
                          :dict       :boardname}
@@ -943,7 +988,7 @@
                          :show?      [:OR :*ref.boardname :verdict-section]
                          :loc-prefix :pate-verdict.section
                          :dict       :verdict-section}
-                        {:hide? :verdict-section}
+                        {:show? [:AND :_meta.editing? :*ref.boardname]}
                         {:col   2
                          :align :full
                          :dict  :verdict-code}]
@@ -951,13 +996,9 @@
                          :id    "paatosteksti"
                          :show? :_meta.editing?
                          :dict  :verdict-text}
-                        {:col   3
+                        {:col   5
                          :hide? :_meta.editing?
-                         :dict  :verdict-text-ref}
-                        {:col   2
-                         :id    "application-id"
-                         :hide? :_meta.editing?
-                         :dict  :application-id}]]}}
+                         :dict  :verdict-text-ref}]]}}
      {:id         "bulletin"
       :loc-prefix :bulletin
       :show?      :?.bulletin-op-description
@@ -998,7 +1039,11 @@
                          :row   [{:col        6
                                   :loc-prefix :verdict.muutoksenhaku
                                   :dict       :appeal}]}
-                        {:show?      :?.collateral
+                        {:show? [:AND :?.collateral :_meta.editing?]
+                         :css   [:row--tight]
+                         :row   [{:col  3
+                                  :dict :collateral-flag}]}
+                        {:show?      [:AND :?.collateral :collateral-flag]
                          :loc-prefix :pate
                          :row        [{:col  2
                                        :id   :collateral-date
@@ -1007,14 +1052,13 @@
                                        :id   :collateral
                                        :dict :collateral}
                                       {:col  2
-                                       :id   :collateral-type
                                        :dict :collateral-type}]}]}}
-     {:id    "statements"
-      :show? :?.statements
+     {:id         "statements"
+      :show?      :?.statements
       :loc-prefix :pate-statements
-      :buttons? false
-      :grid  {:columns 1
-              :rows    [[{:dict :statements}]]}}
+      :buttons?   false
+      :grid       {:columns 1
+                   :rows    [[{:dict :statements}]]}}
      {:id    "neighbors"
       :show? :?.neighbors
       :grid  {:columns 12
@@ -1098,90 +1142,86 @@
                              :dict :upload}]]}}]}
    :p {:dictionary
        (merge
-         {:language                (req {:docgen "pate-languages"})
-          :verdict-date            (req {:docgen "pate-date"})
-          :automatic-verdict-dates {:docgen {:name "pate-verdict-check"}}}
-         (->> [:julkipano :anto :valitus :lainvoimainen :aloitettava :voimassa]
-              (map (fn [kw]
-                     [kw (req {:docgen {:name      "pate-date"
-                                        :disabled? :automatic-verdict-dates}})]))
-              (into {}))
-         {:contact-ref           {:reference {:path :contact}}
-          :boardname             {:reference {:path :*ref.boardname}}
-          :contact               (req {:docgen "pate-verdict-contact"})
-          :verdict-section       (req {:docgen "pate-verdict-section"})
-          :verdict-code          (req {:reference-list {:path       :verdict-code
-                                                        :type       :select
-                                                        :loc-prefix :pate-r.verdict-code}})
-          :verdict-text          (req {:phrase-text {:category :paatosteksti}})
-          :bulletinOpDescription {:phrase-text {:category :toimenpide-julkipanoon
-                                                :i18nkey  :phrase.category.toimenpide-julkipanoon}}
-          :verdict-text-ref      (req {:reference {:path :verdict-text}})
-          :application-id        {:placeholder {:type :application-id}}}
-         (reduce (fn [acc [loc-prefix kw term? separator?]]
-                   (let [included (keyword (str (name kw) "-included"))
-                         path     kw]
-                     (assoc acc
-                       (util/kw-path kw)
-                       {:reference-list
-                        (merge {:enabled?   included
-                                :loc-prefix loc-prefix
-                                :path       path
-                                :type       :multi-select}
-                               (when term?
-                                 {:item-key :id
-                                  :term     {:path       path
-                                             :extra-path :name
-                                             :match-key  :id}})
-                               (when separator?
-                                 {:separator " \u2013 "}))}
-                       ;; Included checkbox
-                       included
-                       {:docgen "required-in-verdict"})))
-                 {}
-                 [[:pate-r.foremen :foremen false false]
-                  [:pate-plans :plans true false]
-                  [:pate-reviews :reviews true true]])
-         {:conditions-title {:loc-text :phrase.category.lupaehdot}
-          :conditions       {:repeating {:condition        {:phrase-text {:label?   false
-                                                                          :category :lupaehdot}}
-                                         :remove-condition {:button {:i18nkey :remove
-                                                                     :label?  false
-                                                                     :icon    :lupicon-remove
-                                                                     :css     :secondary
-                                                                     :remove  :conditions}}}}
-          :add-condition    {:button {:icon    :lupicon-circle-plus
-                                      :i18nkey :pate-conditions.add
-                                      :css     :positive
-                                      :add     :conditions}}
-          :statements       {:placeholder {:type :statements}}
-          :neighbors        {:phrase-text {:i18nkey  :phrase.category.naapurit
-                                           :category :naapurit}}
-          :neighbor-states  {:placeholder {:type :neighbors}}
-          :collateral       {:docgen "pate-string"}
-          :collateral-date  {:docgen "pate-date"}
-          :collateral-type  {:docgen "collateral-type"}
-          :appeal           {:phrase-text {:category :muutoksenhaku}}
-          :complexity       {:docgen "pate-complexity"}
-          :complexity-text  {:phrase-text {:label?   false
-                                           :category :vaativuus}}
-          :extra-info       {:phrase-text {:category :yleinen}}
-          :deviations       {:phrase-text {:category :yleinen}}
-          :rights           {:phrase-text {:category :rakennusoikeus}}
-          :purpose          {:phrase-text {:category :kaava}}
-          :upload           {:attachments {:i18nkey    :application.verdict-attachments
-                                           :label?     false
-                                           :type-group #"paatoksenteko"
-                                           :default    :paatoksenteko.paatosote
-                                           :dropzone   "#application-pate-verdict-tab"
-                                           :multiple?  true}}
-          :attachments      {:application-attachments {:i18nkey :application.verdict-attachments}}})
+        {:language                (req language-select)
+         :verdict-date            (req {:date {}})
+         :automatic-verdict-dates {:toggle {}}}
+        (->> [:julkipano :anto :valitus :lainvoimainen :aloitettava :voimassa]
+             (map (fn [kw]
+                    [kw (req {:date {:disabled? :automatic-verdict-dates}})]))
+             (into {}))
+        {:boardname             {:reference {:path :*ref.boardname}}
+         :contact               (req {:text {}})
+         :verdict-section       (req {:text {:before :section}})
+         :verdict-code          (req {:reference-list {:path       :verdict-code
+                                                       :type       :select
+                                                       :loc-prefix :pate-r.verdict-code}})
+         :verdict-text          (req {:phrase-text {:category :paatosteksti}})
+         :bulletinOpDescription {:phrase-text {:category :toimenpide-julkipanoon
+                                               :i18nkey  :phrase.category.toimenpide-julkipanoon}}
+         :verdict-text-ref      (req {:reference {:path :verdict-text}})
+         :application-id        app-id-placeholder}
+        (reduce (fn [acc [loc-prefix kw term? separator?]]
+                  (let [included (keyword (str (name kw) "-included"))
+                        path     kw]
+                    (assoc acc
+                           (util/kw-path kw)
+                           {:reference-list
+                            (merge {:enabled?   included
+                                    :loc-prefix loc-prefix
+                                    :path       path
+                                    :type       :multi-select}
+                                   (when term?
+                                     {:item-key :id
+                                      :term     {:path       path
+                                                 :extra-path :name
+                                                 :match-key  :id}})
+                                   (when separator?
+                                     {:separator " \u2013 "}))}
+                           ;; Included checkbox
+                           included required-in-verdict)))
+                {}
+                [[:pate-r.foremen :foremen false false]
+                 [:pate-plans :plans true false]
+                 [:pate-reviews :reviews true true]])
+        {:conditions-title {:loc-text :phrase.category.lupaehdot}
+         :conditions       {:repeating {:condition        {:phrase-text {:label?   false
+                                                                         :category :lupaehdot}}
+                                        :remove-condition {:button {:i18nkey :remove
+                                                                    :label?  false
+                                                                    :icon    :lupicon-remove
+                                                                    :css     :secondary
+                                                                    :remove  :conditions}}}}
+         :add-condition    {:button {:icon    :lupicon-circle-plus
+                                     :i18nkey :pate-conditions.add
+                                     :css     :positive
+                                     :add     :conditions}}
+         :statements       {:placeholder {:type :statements}}
+         :neighbors        {:phrase-text {:i18nkey  :phrase.category.naapurit
+                                          :category :naapurit}}
+         :neighbor-states  {:placeholder {:type :neighbors}}
+         :collateral       {:text {:after :eur}}
+         :collateral-date  {:date {}}
+         :collateral-type  collateral-type-select
+         :appeal           {:phrase-text {:category :muutoksenhaku}}
+         :complexity       complexity-select
+         :complexity-text  {:phrase-text {:label?   false
+                                          :category :vaativuus}}
+         :extra-info       {:phrase-text {:category :yleinen}}
+         :deviations       {:phrase-text {:category :yleinen}}
+         :rights           {:phrase-text {:category :rakennusoikeus}}
+         :purpose          {:phrase-text {:category :kaava}}
+         :upload           {:attachments {:i18nkey    :application.verdict-attachments
+                                          :label?     false
+                                          :type-group #"paatoksenteko"
+                                          :default    :paatoksenteko.paatosote
+                                          :dropzone   "#application-pate-verdict-tab"
+                                          :multiple?  true}}
+         :attachments      {:application-attachments {:i18nkey :application.verdict-attachments}}})
        :sections
        [{:id   "pate-dates"
          :grid {:columns 7
-                :rows    [[{:col 7
-                            :loc-prefix :pate-verdict.language
-                            :dict :language
+                :rows    [[{:col   7
+                            :dict  :language
                             :hide? :_meta.published?}]
                           [{:id   "verdict-date"
                             :dict :verdict-date}
@@ -1247,14 +1287,13 @@
                                           :id   :collateral
                                           :dict :collateral}
                                          {:col  2
-                                          :id   :collateral-type
                                           :dict :collateral-type}]}]}}
-        {:id    "statements"
-         :show? :?.statements
+        {:id         "statements"
+         :show?      :?.statements
          :loc-prefix :pate-statements
-         :buttons? false
-         :grid  {:columns 1
-                 :rows    [[{:dict :statements}]]}}
+         :buttons?   false
+         :grid       {:columns 1
+                      :rows    [[{:dict :statements}]]}}
         {:id    "neighbors"
          :show? :?.neighbors
          :grid  {:columns 12
