@@ -9,9 +9,11 @@
         <div class="operation-tree tree-control"></div>
     </div>
 
-    <div data-bind="visible: !showOperations()">
+    <!-- ko if: !showOperations() -->
+    <div data-test-id= "replace-operation-not-visible">
         <p data-bind="ltext: 'operations.replaceOperationNotPossible'"></p>
     </div>
+    <!-- /ko -->
 
     <div data-bind="visible: waitingOperations">
         <img src="/lp-static/img/ajax-loader.gif" alt="..." width="66" height="66"/>

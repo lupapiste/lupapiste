@@ -52,3 +52,14 @@ Mikko sees the replaced secondary operation
   Element should be visible  //*[@data-test-id='maisematyo-accordion-title-text']
   Element should not be visible  //*[@data-test-id='muu-uusi-rakentaminen-accordion-title-text']
 
+Mikko creates a new application
+  ${secs} =  Get Time  epoch
+  Set Suite Variable  ${appname}  replace-operation${secs}
+  Create application the fast way  ${appname}  753-416-25-32  yleiskaava
+  Wait Until  Page Should Contain  Yleiskaava
+
+Mikko sees the replace operation button and presses it
+  Wait and click  //section[@data-doc-type='maankayton-muutos']//button[@data-test-id="replace-operation"]
+
+But there are no operations to choose from
+  Wait Until  Element should be visible  //*[@data-test-id='replace-operation-not-visible']
