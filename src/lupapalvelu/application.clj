@@ -687,6 +687,135 @@
   (->> (usr/find-authorized-users-in-org org-id org-authz)
        (map #(select-keys % [:id :firstName :lastName]))))
 
+;; Replacing operation
+
+(defn- get-operation-schemas [op-name]
+  (->> op-name
+       (keyword)
+       (get op/operations)
+       ((fn [op-metadata] (concat (:required op-metadata)
+                                  (:org-required-schemas op-metadata)
+                                  [(:applicant-doc-schema op-metadata)])))))
+
+(defn- get-required-document-schema-names-for-operations [new-ops]
+  (->> new-ops
+       (map #(get-operation-schemas (:name %)))
+       (apply concat)
+       (set)))
+
+(defn- replace-old-operation-doc-with-new [documents op-id new-docs]
+  (let [match-doc-with-op-id (fn [doc] (#{op-id} (-> doc :schema-info :op :id)))
+        new-operation-doc    (->> new-docs (filter match-doc-with-op-id) (first))]
+    (->> documents
+         (filter #(some? (-> % :schema-info :op :name)))
+         (remove match-doc-with-op-id)
+         (cons new-operation-doc))))
+
+(defn- pick-old-documents-that-new-op-needs [new-op-docs documents doc-name]
+  (let [existing-docs (filter #(= doc-name (-> % :schema-info :name)) documents)]
+    (if (seq existing-docs)
+      existing-docs
+      (filter #(= doc-name (-> % :schema-info :name)) new-op-docs))))
+
+(defn- copy-docs-from-old-op-to-new
+  "Copies the old documents to the new operation, when the old documents are of those types that the new operation
+  requires. Changes the 'operation document' to that of the new operation. Takes into account that there might be
+  several operations, and keeps track which documents are required by all the operations."
+  [{:keys [documents]} op-id new-ops new-op-docs]
+  (let [docs-for-new-ops (get-required-document-schema-names-for-operations new-ops)
+        operation-docs   (replace-old-operation-doc-with-new documents op-id new-op-docs)]
+    (->> docs-for-new-ops
+         (map (partial pick-old-documents-that-new-op-needs new-op-docs documents))
+         (apply concat)
+         (concat operation-docs)
+         (remove nil?))))
+
+(defn- get-attachment-types [attachments]
+  (->> attachments
+       (map :type)
+       (set)))
+
+(defn- change-operation-in-attachment [old-op new-op att]
+  (let [new-ops (when (not-empty (:op att))
+                  (for [op (:op att)]
+                    (if (= (:id op) (:id old-op))
+                      (assoc op :id (:id new-op)
+                                :name (:name new-op))
+                      op)))]
+    (assoc att :op new-ops)))
+
+(defn- change-operation-in-attachments [old-op new-op attachments]
+  (map (partial change-operation-in-attachment old-op new-op) attachments))
+
+(defn- copy-attachments-from-old-op-to-new
+  "Copies the old attachments to the new, when there is already an added file and changes it's reference to the
+   operation. If there isn't any attachments, keeps the old placeholder when possible, otherwise adds new."
+  [{:keys [attachments]} old-op new-op new-attachments]
+  (let [new-attachment-types (get-attachment-types new-attachments)]
+    (loop [acc []
+           old-attachments attachments
+           new-attachments new-attachments]
+      (if (empty? new-attachments)
+        (if (empty? old-attachments)
+          acc
+          (->> old-attachments
+               (remove #(-> % :versions (empty?)))
+               (change-operation-in-attachments old-op new-op)
+               (concat acc)))
+        (let [new-attachment (first new-attachments)
+              old-atts-of-the-new-att-type (filter #(new-attachment-types (:type %)) old-attachments)]
+          (recur (concat acc (if (empty? old-atts-of-the-new-att-type)
+                               [new-attachment]
+                               (change-operation-in-attachments old-op new-op old-atts-of-the-new-att-type)))
+                 (remove #(new-attachment-types (:type %)) old-attachments)
+                 (rest new-attachments)))))))
+
+(defn- get-operation [application primary? op-id]
+  (if primary?
+    (:primaryOperation application)
+    (->> application
+         :secondaryOperations
+         (filter #(= op-id (:id %)))
+         (first))))
+
+(defn- get-new-operations [application old-op-id new-op]
+  (->> application
+       (get-operations)
+       (remove #(= old-op-id (:id %)))
+       (cons new-op)))
+
+(defn- build-replace-operation-query [application primary-op? new-op new-docs new-attachments]
+  (let [base-query {:attachments new-attachments
+                    :documents   new-docs}]
+    (if primary-op?
+      (assoc base-query :primaryOperation new-op)
+      (assoc base-query :secondaryOperations (->> application
+                                                  :secondaryOperations
+                                                  (remove #(= (:id new-op) (:id %)))
+                                                  (cons new-op))))))
+
+(defn replace-operation
+  "Replaces the old operation's name to the one requested. Then generates the necessary new documents and attachments
+   and deletes the documents that aren't needed any more but keeps all the attachments."
+  [{{app-state :state tos-function :tosFunction :as application} :application
+    organization                                                 :organization
+    created                                                      :created :as command} op-id operation]
+  (let [primary-op?            (= op-id (-> application :primaryOperation :id))
+        old-op                 (get-operation application primary-op? op-id)
+        new-op                 (assoc old-op :name operation)
+        new-operations         (get-new-operations application op-id new-op)
+        docs-for-new-op        (make-documents nil created @organization new-op application)
+        updated-docs           (copy-docs-from-old-op-to-new application op-id new-operations docs-for-new-op)
+        attachments-for-new-op (make-attachments created new-op @organization app-state tos-function)
+        updated-attachments    (copy-attachments-from-old-op-to-new application old-op new-op attachments-for-new-op)
+        update-query           (build-replace-operation-query application
+                                                             primary-op?
+                                                             new-op
+                                                             updated-docs
+                                                             updated-attachments)]
+    (action/update-application command {$set update-query})
+    (ok)))
+
 ;; Cancellation
 
 (defn- remove-app-links [id]
