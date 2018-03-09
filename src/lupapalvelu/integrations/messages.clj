@@ -54,3 +54,6 @@
     (update-message message-id updates WriteConcern/ACKNOWLEDGED))
   ([message-id updates write-concern]
     (mongo/update-by-id :integration-messages message-id updates :write-concern write-concern)))
+
+(defn set-message-status [message-id status]
+  (update-message message-id {$set {:status status}} WriteConcern/UNACKNOWLEDGED))

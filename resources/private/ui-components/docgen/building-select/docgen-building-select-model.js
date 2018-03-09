@@ -39,7 +39,8 @@ LUPAPISTE.DocgenBuildingSelectModel = function( params ) {
   self.otherId = sprintf( "%s-%s",
                           params.documentId,
                           _.get( params, "schema.other-key"));
-  self.otherParams = _.merge( {documentId: params.documentId},
+  self.otherParams = _.merge( {documentId: params.documentId,
+                               authModel: params.authModel},
                               _.pick( lupapisteApp.services.documentDataService
                                       .getInDocument( params.documentId,
                                                       [params.schema["other-key"]]),

@@ -149,6 +149,10 @@
        (map (comp keyword :role))
        (some roles)))
 
+(defn user-or-company-authz? [roles application user]
+  (or (user-authz? roles application user)
+      (company-authz? roles application user)))
+
 (defn org-authz
   "Returns user's org authz in given organization, nil if not found"
   [organization-id user]

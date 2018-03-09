@@ -6,7 +6,9 @@
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.calendar :as cal]
             [lupapalvelu.change-email :as change-email]
+            [lupapalvelu.company :as company]
             [lupapalvelu.idf.idf-client :as idf]
+            [lupapalvelu.logging :as logging]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
@@ -33,9 +35,7 @@
             [schema.core :as sc]
             [slingshot.slingshot :refer [throw+ try+]]
             [swiss.arrows :refer :all]
-            [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]
-            [lupapalvelu.company :as company]
-            [schema.core :as s]))
+            [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]))
 
 ;;
 ;; ==============================================================================
@@ -118,7 +118,7 @@
   {:summary             "Returns details of the user associated to the provided access token"
    :description         ""
    :parameters          []
-   :optional-parameters [:dummy-role s/Str]
+   :optional-parameters [:dummy-role sc/Str]
    :oauth-scope         :read
    :returns             usr/UserForRestEndpoint}
   (let [company-id (get-in user [:company :id])
@@ -694,7 +694,7 @@
                              :content-type     content-type
                              :size             size
                              :created          (now)}]
-
+    (logging/with-logging-context {:userId (:id user)}
       (when-not (add-user-attachment-allowed? user) (throw+ {:status 401 :body "forbidden"}))
 
       (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename size "id=" attachment-id)
@@ -703,8 +703,9 @@
 
       (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
       (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
-      (resp/json (assoc file-info :ok true)))
+      (resp/json (assoc file-info :ok true))))
     (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
+      (error "fail! in user-attachment: " text)
       (resp/json (fail text)))
     (catch Exception e
       (error e "exception while uploading user attachment" (class e) (str e))

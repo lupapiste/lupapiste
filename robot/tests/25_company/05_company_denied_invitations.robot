@@ -42,15 +42,15 @@ Oragnization admin adds guest authority
   Logout
 
 Creates application
-  Sonja logs in
+  Sonja logs in  False
   Create application the fast way  hakemus  753-416-45-1  kerrostalo-rivitalo
 
 Company user cant be invited to application
   Open tab  parties
   Scroll and click test id  application-invite-person
   Scroll to test id  person-invite-bubble-dialog-ok
-  Wait until  Element should be visible  person-invite-email-4
-  Input Text  person-invite-email-4  ${dummy}
+  Wait until  Element should be visible  person-invite-email-2
+  Input Text  person-invite-email-2  ${dummy}
   Element should be enabled  xpath=//*[@data-test-id='person-invite-bubble-dialog-ok']
   Click by test id  person-invite-bubble-dialog-ok
   Wait until  Page should contain  ${error_message}
@@ -77,8 +77,8 @@ Company user can be invited to application
   Open tab  parties
   Click by test id  application-invite-person
   Scroll to test id  person-invite-bubble-dialog-ok
-  Wait until  Element should be visible  person-invite-email-4
-  Input Text  person-invite-email-4  ${dummy}
+  Wait until  Element should be visible  person-invite-email-2
+  Input Text  person-invite-email-2  ${dummy}
   Element should be enabled  xpath=//*[@data-test-id='person-invite-bubble-dialog-ok']
   Click by test id  person-invite-bubble-dialog-ok
   Wait until  Element should not be visible  xpath=//div[@id='modal-dialog-content']

@@ -5,6 +5,11 @@
 
 (apply-remote-minimal)
 
+(command admin :set-organization-boolean-path
+         :organizationId "753-R"
+         :path "pate-enabled"
+         :value true)
+
 (defn check-count-and-last-state [id msg-count state]
   (fact
     (count (integration-messages id)) => msg-count
