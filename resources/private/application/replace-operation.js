@@ -16,6 +16,7 @@
         self.processing = ko.observable();
         self.pending = ko.observable();
         self.waitingOperations = ko.observable();
+        self.showOperations = ko.observable();
 
         self.clear = function() {
             return self.title("").url("").operations(null).operation(null).pending(false).waitingOperations(false);
@@ -41,6 +42,7 @@
                     .success(function(data) {
                         if (lupapisteApp.models.application.id() === getVisibleApplicationId()) {
                             self.operations(data.operations);
+                            self.showOperations(!_.isEmpty(self.operations()));
                         }
                     })
                     .call();

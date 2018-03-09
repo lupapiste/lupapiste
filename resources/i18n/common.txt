@@ -3917,3 +3917,6 @@
 "operations.replaceOperationWarningText" "en" ""
 "operations.replaceOperationWarningText" "fi" "Huom! Toimenpiteen vaihtaminen poistaa vanhan toimenpiteen."
 "operations.replaceOperationWarningText" "sv" ""
+"operations.replaceOperationNotPossible" "en" ""
+"operations.replaceOperationNotPossible" "fi" "Ikävä kyllä tämän toimenpiteen vaihtaminen ei ole mahdollista."
+"operations.replaceOperationNotPossible" "sv" ""

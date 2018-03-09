@@ -51,3 +51,4 @@ Mikko sees the replaced secondary operation
   Wait Until  Element should be visible  //*[@data-test-id='uusi-rakennus-ei-huoneistoa-accordion-title-text']
   Element should be visible  //*[@data-test-id='maisematyo-accordion-title-text']
   Element should not be visible  //*[@data-test-id='muu-uusi-rakentaminen-accordion-title-text']
+

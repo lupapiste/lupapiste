@@ -30,8 +30,8 @@
 
 (testable-privates lupapalvelu.application count-required-link-permits new-attachment-types-for-operation
                    attachment-grouping-for-type person-id-masker-for-user enrich-tos-function-name
-                   enrich-single-doc-disabled-flag get-operation-schemas get-relevant-document-names-for-all-operations
-                   replace-old-operation-doc-with-new pick-relevant-docs-from-old-docs
+                   enrich-single-doc-disabled-flag get-operation-schemas get-required-document-schema-names-for-operations
+                   replace-old-operation-doc-with-new pick-old-documents-that-new-op-needs
                    copy-docs-from-old-op-to-new get-attachment-types change-operation-in-attachments
                    copy-attachments-from-old-op-to-new get-new-operations)
 
@@ -656,7 +656,7 @@
       => #{"maksaja" "hakija-r"})
 
     (fact "multiple operations need lots of documents"
-      (get-relevant-document-names-for-all-operations new-ops)
+      (get-required-document-schema-names-for-operations new-ops)
       => (clojure.set/union #{"hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"}
                             #{"hakija-r" "hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"}))
 
@@ -665,7 +665,7 @@
       => [new-op-doc secondary-op-doc])
 
     (fact "picking relevant docs from old docs"
-      (pick-relevant-docs-from-old-docs new-docs old-docs "hakija-r")
+      (pick-old-documents-that-new-op-needs new-docs old-docs "hakija-r")
       => [hakija-r-doc])
 
     (fact "merging relevant old documents to new"

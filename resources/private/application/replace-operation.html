@@ -5,8 +5,12 @@
 
     <h1 data-bind="ltext: 'operations.replace'"></h1>
 
-    <div data-bind="visible: operations">
+    <div data-bind="visible: showOperations()">
         <div class="operation-tree tree-control"></div>
+    </div>
+
+    <div data-bind="visible: !showOperations()">
+        <p data-bind="ltext: 'operations.replaceOperationNotPossible'"></p>
     </div>
 
     <div data-bind="visible: waitingOperations">

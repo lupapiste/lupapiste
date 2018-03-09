@@ -946,3 +946,6 @@
 "permanent-archive-disabled" "en" "Municipality's PDF/A conversion was unavailable when the file was uploaded."
 "permanent-archive-disabled" "fi" "Kunnan PDF/A-konversio ei ollut käytettävissä tiedoston lisäyshetkellä."
 "permanent-archive-disabled" "sv" "Kommunens PDF/A-konvertering var inte i bruk när filen lades till."
+"error.replace-operation-not-allowed" "en" ""
+"error.replace-operation-not-allowed" "fi" "Tämän toimeenpiteen vaihto ei ole mahdollista."
+"error.replace-operation-not-allowed" "sv" ""
