@@ -2352,7 +2352,7 @@
 "not-known" "en" "Not known"
 "not-known" "fi" "Ei tiedossa"
 "not-known" "sv" "Okänd"
-"not-validated" "en" "The archivability of the attachment has not been confirmed."
+"not-validated" "en" "The archivability of the attachment has not been verified."
 "not-validated" "fi" "Liitteen arkistokelpoisuutta ei ole tarkastettu."
 "not-validated" "sv" "Bilagans arkiveringsduglighet är inte granskad."
 "notRegistered" "en" "Not yet registered"
