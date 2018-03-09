@@ -88,7 +88,9 @@
                 :tos-editor         #{:application/edit-tos-function
                                       :application/mark-everything-seen}
                 :archivist          #{:application/archive
-                                      :application/mark-everything-seen}
+                                      :application/mark-everything-seen
+                                      :application/check-final-archiving-state
+                                      :application/check-within-archiving-time-limit}
                 :digitizer          #{:application/show-authorities
                                       :application/mark-everything-seen}
                 :statementGiver     #{:application/set-urgency
