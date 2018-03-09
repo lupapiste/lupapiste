@@ -57,7 +57,7 @@
                                                        operation: self.operation()})
                 .processing(self.processing)
                 .pending(self.pending)
-                .success(function(result) {
+                .success(function() {
                     window.location.hash = self.url();
                 })
                 .call();
