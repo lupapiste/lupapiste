@@ -18,19 +18,18 @@
 
 (testable-privates lupapalvelu.pdf.pdf-export get-value-by-path get-subschemas hide-by-hide-when show-by-show-when removable-groups)
 
-(def ignored-schemas (set (concat ["hankkeen-kuvaus-jatkoaika"
-                                   "poikkeusasian-rakennuspaikka"
-                                   "hulevedet"
-                                   "talousvedet"
-                                   "ottamismaara"
-                                   "ottamis-suunnitelman-laatija"
-                                   "kaupunkikuvatoimenpide"
-                                   "task-katselmus"
-                                   "tyonjohtaja"
-                                   "approval-model-with-approvals"
-                                   "approval-model-without-approvals"
-                                   "rahoitus"]
-                                  (map :name pate-schemas/pate-schemas))))
+(def ignored-schemas #{"hankkeen-kuvaus-jatkoaika"
+                       "poikkeusasian-rakennuspaikka"
+                       "hulevedet"
+                       "talousvedet"
+                       "ottamismaara"
+                       "ottamis-suunnitelman-laatija"
+                       "kaupunkikuvatoimenpide"
+                       "task-katselmus"
+                       "tyonjohtaja"
+                       "approval-model-with-approvals"
+                       "approval-model-without-approvals"
+                       "rahoitus"})
 
 (defn- localized-doc-headings [schema-names]
   (map #(loc (str % "._group_label")) schema-names))
