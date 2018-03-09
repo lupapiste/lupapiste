@@ -313,7 +313,10 @@
                        :kuntalupatunnukset    permit-ids
                        :lupapvm               (or (get-verdict-date application :lainvoimainen)
                                                   (get-paatospvm application))
-                       :paatospvm             (if (not= permitType permit/ARK) (get-paatospvm application) (get-ark-paatospvm verdicts attachment))
+                       :paatospvm             (if (not= permitType permit/ARK)
+                                                (get-paatospvm application)
+                                                (or (get-ark-paatospvm verdicts attachment)
+                                                    (get-paatospvm application)))
                        :jattopvm              (get-jattopvm application)
                        :paatoksentekija       (get-from-verdict-minutes application :paatoksentekija)
                        :tiedostonimi          (get-in attachment [:latestVersion :filename] (str id ".pdf"))
