@@ -217,7 +217,13 @@
               </div>
             </div>
             <div data-bind="if: convertableToPdfA">
-              <button class="btn-primary" data-bind="click: _.partial($component.convertToPdfA, $data), ltext: 'Konvertoi PDF/A-muotoon'"></button>
+              <button class="btn-primary" data-bind="click: _.partial($component.convertToPdfA, $data),
+                                                     disable: $component.conversionInProgress">
+                <span class="waiting" data-bind="css: { waiting: $component.conversionInProgress }">
+                  <i class="spin lupicon-refresh wait"></i>
+                </span>
+                <span data-bind="ltext: 'Konvertoi PDF/A-muotoon'"></span>
+              </button>
             </div>
             <!-- ko if: showArchivalError -->
             <div class="additional-data-container archival-summary-conversion-log">

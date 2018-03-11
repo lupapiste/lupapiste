@@ -276,6 +276,35 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     togglePreview( true );
   });
 
+  self.archivabilityText = self.disposedPureComputed(function() {
+    var latestVersion = util.getIn(self.attachment, ["latestVersion"]);
+    if (latestVersion.archivable && latestVersion.autoConversion) {
+      return "attachment.archivable.converted";
+    } else if (latestVersion.archivable) {
+      return "attachment.archivability";
+    } else if (!latestVersion.archivable && !latestVersion.archivabilityError) {
+      return "attachment.archivable.notConverted";
+    } else {
+      return latestVersion.archivabilityError;
+    }
+  });
+
+  self.convertableToPdfA = self.disposedPureComputed(function() {
+    return authModel.ok("convert-to-pdfa");
+  });
+
+  self.conversionInProgress = ko.observable(false);
+
+  addUpdateListener("convert-to-pdfa", {}, function() {
+    querySelf();
+    self.conversionInProgress(false);
+  });
+
+  self.convertToPdfA = function() {
+    self.conversionInProgress(true);
+    service.convertToPdfA(self.id);
+  };
+
   self.disposedSubscribe(self.showPreview, function(val) {
     if (val) {
       trackClick("previewVisible");
