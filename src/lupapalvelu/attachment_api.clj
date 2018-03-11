@@ -224,8 +224,8 @@
                 att/foreman-must-be-uploader
                 att/edit-allowed-by-target
                 att/attachment-editable-by-application-state
-                (action/some-pre-check att/attachment-not-readOnly
-                                       usr/precheck-user-is-archivist)
+                (action/some-pre-check usr/precheck-user-is-archivist
+                                       att/attachment-not-readOnly)
                 att/attachment-matches-application
                 (action/some-pre-check att/allowed-only-for-authority-when-application-sent
                                        (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))
@@ -765,8 +765,8 @@
    :pre-checks [app/validate-authority-in-drafts
                 att/foreman-must-be-uploader
                 att/attachment-editable-by-application-state
-                (action/some-pre-check att/attachment-not-readOnly
-                                       usr/precheck-user-is-archivist)
+                (action/some-pre-check usr/precheck-user-is-archivist
+                                       att/attachment-not-readOnly)
                 att/edit-allowed-by-target
                 (action/some-pre-check att/allowed-only-for-authority-when-application-sent
                                        (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))

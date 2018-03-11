@@ -79,6 +79,8 @@
                  :rotate-pdf ; original is left in db, this is fine
                  :set-attachment-not-needed ; does not alter content or meta data
                  :sign-attachments ; allow signing attachments always
+                 :set-attachment-meta ; Allowed for archivist
+                 :set-attachment-type ; Allowed for archivist
                  })
 
 (facts "only authority may edit attachments in terminal state"
