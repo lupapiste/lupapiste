@@ -105,11 +105,16 @@
         </div>
       </div>
       <!-- /ko -->
-      <!-- ko if: tosFunctionExists() && $data.showMarkArchivedSection() && !$root.authorization.ok("common-area-application") -->
+      <!-- ko if: showMarkArchivedSection -->
       <div class="mark-as-archived">
         <h2 data-bind="ltext: 'archivalSummary.markArchived.heading'"></h2>
         <p data-bind="ltext: 'archivalSummary.markArchived.guide'"></p>
-        <button class="btn-primary" data-bind="click: markApplicationArchived, ltext: 'archivalSummary.markArchived.button'">Merkitse hakemusvaihe arkistoiduksi</button>
+        <button class="btn-primary" data-bind="click: markPreVerdictPhaseArchived,
+                                               visible: markPreVerdictPhaseArchivedEnabled,
+                                               ltext: 'archivalSummary.markArchived.button'"></button>
+        <button class="btn-primary" data-bind="click: markFullyArchived,
+                                               visible: markFullyArchivedEnabled,
+                                               ltext: 'archivalSummary.markFullyArchived.button'"></button>
       </div>
       <!-- /ko -->
 
