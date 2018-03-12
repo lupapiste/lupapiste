@@ -198,21 +198,30 @@
 
 (rum/defc pate-list < rum/reactive
   [{:keys [schema] :as options} & [wrap-label?]]
-  [:div.pate-list
-   {:class (path/css options)}
-   (when (and wrap-label? (:title schema))
-     [:h4.pate-label (common/loc (:title schema))])
-   (map-indexed (fn [i item-schema]
-                  (let [item-options (path/schema-options options item-schema)]
-                    (when (path/visible? item-options)
-                      [:div.item {:key   (str "item-" i)
-                                  :class (path/css item-options
-                                                   (when-let [item-align (:align item-schema)]
-                                                     (str "item--" (name item-align))))}
-                       (when (:dict item-schema)
-                         (instantiate (path/dict-options item-options)
-                                      (-> schema :labels? false? not)))])))
-                (:items schema))])
+  (let [items (map-indexed
+               (fn [i item-schema]
+                 (let [item-options (path/schema-options options item-schema)]
+                   (when (path/visible? item-options)
+                      {:component [:div.item
+                                   {:key   (str "item-" i)
+                                    :class (path/css item-options
+                                                     (when-let [item-align (:align item-schema)]
+                                                       (str "item--" (name item-align))))}
+                                   (when (:dict item-schema)
+                                     (instantiate (path/dict-options item-options)
+                                                  (-> schema :labels? false? not)))]
+                       :required? (-> item-options
+                                      path/dict-options
+                                      :schema
+                                      :required? )})))
+                           (:items schema))]
+    [:div.pate-list
+     {:class (path/css options)}
+     (when (and wrap-label? (:title schema))
+       [:h4.pate-label
+        {:class (common/css-flags :required (some :required? items))}
+        (common/loc (:title schema))])
+     (mapv :component items)]))
 
 (defn- repeating-keys
   "The repeating keys (keys within the state that correspond to a

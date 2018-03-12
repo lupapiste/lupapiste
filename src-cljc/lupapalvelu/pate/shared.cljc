@@ -401,7 +401,7 @@
   (merge PateLayout
          CellConfig
          {:list (merge PateCss
-                       {(sc/optional-key :title)   sc/Str
+                       {(sc/optional-key :title)   keyword-or-string
                         ;; By default, items always have labels, even
                         ;; if they are just empty strings. Otherwise
                         ;; the vertical alignment could be
@@ -872,6 +872,7 @@
           (into {}))
      {:boardname             {:reference {:path :*ref.boardname}}
       :handler               verdict-handler
+      :handler-title         {:text {:loc-prefix :pate-verdict.handler.title}}
       :verdict-section       (req {:text {:before :section}})
       :verdict-code          (req {:reference-list {:path       :verdict-code
                                                     :type       :select
@@ -954,8 +955,17 @@
              :rows    [[{:col   7
                          :dict  :language
                          :hide? :_meta.published?}]
-                       [{:col  2
+                       [{:dict :handler-title
+                         :show? :_meta.editing?}
+                        {:col  2
+                         :show? :_meta.editing?
                          :dict :handler}
+                        {:col 3
+                         :hide? :_meta.editing?
+                         :list {:title :pate-verdict.handler
+                                :labels? false
+                                :items [{:dict :handler-title}
+                                        {:dict :handler}]}}
                         {}
                         {:col  2
                          :hide? :_meta.editing?

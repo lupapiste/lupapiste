@@ -312,7 +312,7 @@
                       :source {:dict :verdict-date}
                       :styles :pad-before}]
                     [{:loc    :applications.authority
-                      :source {:dict :handler}
+                      :source :handler
                       :styles :pad-before}]
                     [{:loc    :empty
                       :source :organization
@@ -620,6 +620,15 @@
 (defn organization-name [lang {organization :organization}]
   (org/get-organization-name organization lang))
 
+(defn handler
+  "Handler with title (if given)"
+  [verdict]
+  (->> [:handler-title :handler]
+       (map (partial dict-value verdict))
+       (map ss/trim)
+       (remove ss/blank?)
+       (ss/join " ")))
+
 (defmulti verdict-body (util/fn-> :verdict :category keyword))
 
 (defmethod verdict-body :r
@@ -664,7 +673,8 @@
                                                      (dict-value verdict
                                                                  :aloitettava)
                                                      (dict-value verdict
-                                                                 :voimassa)))
+                                                                 :voimassa))
+                    :handler (handler verdict))
              (:r pdf-layouts))))
 
 (defmethod verdict-body :p
