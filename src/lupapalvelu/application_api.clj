@@ -41,7 +41,8 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
             [lupapalvelu.ya :as ya]
-            [lupapalvelu.operations :as operations])
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.archiving-util :as archiving-util])
   (:import (java.net SocketTimeoutException)))
 
 (defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
@@ -632,7 +633,8 @@
       (update-application command (util/deep-merge
                                     (app-state/state-transition-update (keyword state) (:created command) application user)
                                     {$set (app/warranty-period (:created command))}))
-      (update-application command (app-state/state-transition-update (keyword state) (:created command) application user)))))
+      (update-application command (app-state/state-transition-update (keyword state) (:created command) application user)))
+    (archiving-util/mark-application-archived-if-done application (:created command) user)))
 
 (defcommand return-to-draft
   {:description "Returns the application to draft state."
