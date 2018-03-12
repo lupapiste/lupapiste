@@ -16,11 +16,12 @@
                      (reset! state* flag)
                      (path/meta-updated (assoc options
                                                :path path)))]
-    (components/checkbox {:label      "pate.template-removed"
-                          :value      (rum/react state*)
-                          :handler-fn handler-fn
-                          :disabled   (path/disabled? options)
-                          :negate?    true})))
+    (components/toggle state*
+                       {:text-loc  :pate.template-removed
+                        :callback  #(path/meta-updated (assoc options
+                                                              :path path))
+                        :disabled? (path/disabled? options)
+                        :negate?   true})))
 
 (declare section)
 (declare section-header)

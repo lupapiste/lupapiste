@@ -1,13 +1,11 @@
 (ns lupapalvelu.ui.pate.components
   "More or less Pate-specific user interface components. See
-  layout.cljs for documentation on the component conventions. Docgen
-  support is in docgen.cljs."
+  layout.cljs for documentation on the component conventions."
   (:require [clojure.set :as set]
             [clojure.string :as s]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
-            [lupapalvelu.ui.pate.docgen :as docgen]
             [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.phrases :as phrases]
             [lupapalvelu.ui.pate.service :as service]
@@ -15,26 +13,34 @@
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
+(defn- state-change-callback
+  "Updates state according to value."
+  [{:keys [state path] :as options}]
+  (fn [value]
+    (when (common/reset-if-needed! (path/state path state)
+                                   value)
+      (path/meta-updated options))))
+
 (defn show-label? [{label? :label?} wrap-label?]
   (and wrap-label? (not (false? label?))))
 
-(rum/defc pate-date-delta < rum/reactive
-  [{:keys [state path schema] :as options}  & [wrap-label?]]
-  (let [required? (path/required? options)
-        delta-path (path/extend path :delta)]
-    [:div.pate-date-delta
-     (when (show-label? schema wrap-label?)
-       [:label.delta-label {:class (common/css-flags :required required?)
-                            :for (path/id delta-path)}
-        (path/loc options)])
-     [:div.delta-editor
-      (docgen/text-edit (assoc options
-                               :path delta-path
-                               :required? required?)
-                        :text
-                        {:type "number"
-                         :disabled (path/disabled? options)})
-      (common/loc (str "pate-date-delta." (-> schema :unit name)))]]))
+(defn label-wrap
+  [{:keys [schema path] :as options} {:keys [component empty-label?]}]
+  [:div.col--vertical
+   (if empty-label?
+     (common/empty-label)
+     [:label.pate-label {:for (path/id path)
+                         :class (common/css-flags :required
+                                                  (path/required? options))}
+      (path/loc options)])
+   component])
+
+(defn label-wrap-if-needed
+  [{:keys [schema] :as options} {:keys [component wrap-label? empty-label?]
+                                 :as extra}]
+  (if (show-label? schema wrap-label?)
+    (label-wrap options extra)
+    component))
 
 (rum/defc pate-multi-select < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
@@ -105,17 +111,17 @@
                            identity)))))
 
 (rum/defc select-reference-list < rum/reactive
-  [{:keys [schema references] :as options} & [wrap-label?]]
-  (let [options   (assoc options
-                         :schema (assoc schema
-                                        :body [{:sortBy :displayName
-                                                :body (map #(hash-map :name %)
-                                                           (distinct (path/react (path/pathify (:path schema))
-                                                                                 references)))}]))
-        component (docgen/docgen-select options)]
-    (if (show-label? schema wrap-label?)
-      (docgen/docgen-label-wrap options component)
-      component)))
+  [{:keys [schema references path state] :as options} & [wrap-label?]]
+  (label-wrap-if-needed
+   options
+   {:component   (components/dropdown
+                  (path/value path state)
+                  {:items     (resolve-reference-list options)
+                   :sort-by   :text
+                   :callback  (state-change-callback options)
+                   :disabled? (path/disabled? options)
+                   :required? (path/required? options)})
+    :wrap-label? wrap-label?}))
 
 (rum/defc multi-select-reference-list < rum/reactive
   [{:keys [schema] :as options} & [wrap-label?]]
@@ -257,3 +263,106 @@
        (common/empty-label :pate-label)
        button]
       button)))
+
+(rum/defc pate-toggle < rum/reactive
+  [{:keys [schema state path] :as options} & [wrap-label?]]
+  (label-wrap-if-needed
+   options
+   {:component    (components/toggle
+                   (path/state path state)
+                   {:callback  #(path/meta-updated options)
+                    :disabled? (path/disabled? options)
+                    :text      (path/loc options)
+                    :prefix    (:prefix schema)})
+    :wrap-label?  wrap-label?
+    :empty-label? true}))
+
+(defn pate-unit [unit]
+  (case unit
+    :days    (path/loc :pate-date-delta unit)
+    :years   (path/loc :pate-date-delta unit)
+    :ha      (path/loc :unit.hehtaaria)
+    :m2      [:span "m" [:sup 2]]
+    :m3      [:span "m" [:sup 3]]
+    :kpl     (path/loc :unit.kpl)
+    :section "\u00a7"
+    :eur     "\u20ac"
+    nil))
+
+(defn sandwich [{:keys [before after class]} component]
+  (if (or before after)
+    (->> [:div.pate-sandwich
+          {:class class}
+          (when before
+            [:span.sandwich--before
+             (pate-unit before)])
+          component
+          (when after
+            [:span.sandwich--after (pate-unit after)])])
+    component))
+
+(defn pate-attr
+  "Fills attribute map with :id, :key and :class. Also merges extra if
+  given."
+  [{:keys [path] :as options} & [extra]]
+  (let [id (path/id path)]
+    (merge {:key   id
+            :id    id
+            :class (conj (path/css options)
+                         (common/css-flags :warning
+                                           (path/error? options)))}
+           extra)))
+
+(rum/defc pate-text < rum/reactive
+  ;;{:key-fn (fn [_ {path :path} _ & _] (path/id path))}
+  "Update the options model state only on blur. Immediate update does
+  not work reliably."
+  [{:keys [schema state path] :as options} & [wrap-label?]]
+  (label-wrap-if-needed
+   options
+   {:component    (sandwich schema
+                            (components/text-edit
+                             (path/value path state)
+                             (pate-attr options
+                                        {:callback  (state-change-callback options)
+                                         :disabled  (path/disabled? options)
+                                         :required? (path/required? options)
+                                         :type      (:type schema)})))
+    :wrap-label?  wrap-label?}))
+
+(defn pate-date-delta
+  [{:keys [schema] :as options} & [wrap-label?]]
+  (pate-text (-> options
+                 (assoc-in [:schema :after] (:unit schema))
+                 (assoc-in [:schema :type] :number)
+                 (assoc-in [:schema :css] (conj (flatten [(:css schema)]) :date-delta)))
+             wrap-label?))
+
+(rum/defc pate-date < rum/reactive
+  [{:keys [path state] :as options} & [wrap-label?]]
+  (label-wrap-if-needed
+   options
+   {:component (components/date-edit
+                (path/react path state)
+                (pate-attr options
+                           {:callback (state-change-callback options)
+                            :disabled (path/disabled? options)}))
+    :wrap-label? wrap-label?}))
+
+(rum/defc pate-select < rum/reactive
+  [{:keys [path state schema] :as options} & [wrap-label?]]
+  (label-wrap-if-needed
+   options
+   {:component   (components/dropdown
+                  (path/react path state)
+                  (pate-attr options
+                             {:callback  (state-change-callback options)
+                              :disabled? (path/disabled? options)
+                              :choose?   (-> schema :allow-empty false? not)
+                              :sort-by   (:sort-by schema)
+                              :items     (map (fn [item]
+                                                {:value item
+                                                 :text  (path/loc options item)})
+                                              (:items schema))
+                              :required? (path/required? options)}))
+    :wrap-label? wrap-label?}))

@@ -40,7 +40,9 @@
             [lupapalvelu.suti :as suti]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
-            [lupapalvelu.ya :as ya])
+            [lupapalvelu.ya :as ya]
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.archiving-util :as archiving-util])
   (:import (java.net SocketTimeoutException)))
 
 (defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
@@ -540,6 +542,24 @@
                                          :secondaryOperations new-secondary-ops}}))
     (ok)))
 
+(defn- replace-operation-allowed-pre-check [{application :application}]
+  (when (or (foreman/foreman-app? application)
+            (app/designer-app? application))
+    (fail :error.replace-operation-not-allowed)))
+
+(defcommand replace-operation
+  {:parameters       [id opId operation]
+   :states           states/pre-sent-application-states
+   :permissions      [{:context  {:application {:state #{:draft}}}
+                       :required [:application/edit-draft :application/edit-operation]}
+
+                      {:required [:application/edit-operation]}]
+   :input-validators [operation-validator
+                      (partial action/non-blank-parameters [:id :opId :operation])]
+   :pre-checks       [replace-operation-allowed-pre-check]}
+  [command]
+  (app/replace-operation command opId operation))
+
 (defcommand change-permit-sub-type
   {:parameters       [id permitSubtype]
    :states           states/pre-sent-application-states
@@ -613,7 +633,8 @@
       (update-application command (util/deep-merge
                                     (app-state/state-transition-update (keyword state) (:created command) application user)
                                     {$set (app/warranty-period (:created command))}))
-      (update-application command (app-state/state-transition-update (keyword state) (:created command) application user)))))
+      (update-application command (app-state/state-transition-update (keyword state) (:created command) application user)))
+    (archiving-util/mark-application-archived-if-done application (:created command) user)))
 
 (defcommand return-to-draft
   {:description "Returns the application to draft state."

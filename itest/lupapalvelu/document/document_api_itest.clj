@@ -26,18 +26,6 @@
         readonly-updates [["kiinteisto.tilanNimi" "tilannimi"]]
         readonly-result  (command pena :update-doc :id application-id :doc rakennus-doc-id :updates readonly-updates)]
 
-    (fact "hakija is valid, but missing some fieds"
-      (let [resp (query pena :validate-doc :id application-id :doc hakija-doc-id :collection "documents") => ok?
-            results-by-doc (group-by #(get-in % [:document :id]) (:results resp))
-            results (get results-by-doc hakija-doc-id)]
-        (count results-by-doc) => 1
-        (first (keys results-by-doc)) => hakija-doc-id
-        (count results) => pos?
-        (every? (fn [{:keys [element result]}] (and (:required element) (= result ["tip" "illegal-value:required"]))) results) => true))
-
-    (fact "rakennus can not be validated as a task"
-      (query pena :validate-doc :id application-id :doc rakennus-doc-id :collection "tasks") => fail?)
-
     modified1 => truthy
     modified2 => truthy
     modified2 => (partial < modified1)

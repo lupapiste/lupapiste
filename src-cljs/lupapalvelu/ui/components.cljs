@@ -70,35 +70,6 @@
             {:on-click #(swap! editing? not)}
             [:i.lupicon-pen]])])))
 
-(rum/defc checkbox
-  "Checkbox component (using checkbox wrapper mechanism).
-   Parameters [optional]:
-   label:      Localization key. Overrides label if both given.
-   text:       'Raw label text'.
-   value:      Initial value
-   handler-fn: Toggle callback function.
-   [negate?]:  If true, the value is negated (default false)
-   [disabled]: Is the checkbox disabled (default false)
-   [prefix]:   Wrapper class prefix (default :pate-checkbox)"
-  [{:keys [label text value handler-fn disabled negate? prefix]}]
-  (let [input-id (str "input-" (common/unique-id "check"))
-        value-fn (if negate? not identity)
-        value    (value-fn value)
-        label    (or (if label (common/loc label) text) "")
-        prefix   (name (or prefix :pate-checkbox))]
-    [:div
-     {:class (str prefix "-wrapper")
-      :key   input-id}
-     [:input {:type     "checkbox"
-              :disabled disabled
-              :checked  value
-              :id       input-id}]
-     [:label
-      {:class    (str prefix "-label")
-       :for      input-id
-       :on-click #(handler-fn (not (value-fn value)))}
-      label]]))
-
 (defn initial-value-mixin
   "Assocs to component's local state local-key with atom that is
   initialized to the first component argument. If the argument is an
@@ -146,7 +117,7 @@
   [local-state _ & [options]]
   (let [text* (::text local-state)]
     [:input.grid-style-input
-     (merge {:type "text"}
+     (merge {:type (get options :type :text)}
             (text-options text* options))]))
 
 ;; The same arguments as for text-edit.
@@ -360,24 +331,50 @@
         [:div.ac__term text-edit]
         menu-items])]))
 
-;; Dropwdown is a styled select.
-;; Parameters: initial-value options
-;; Options [optional]:
-;;   items list of :value, :text maps. Items are rendered ordered by
-;;         text.
-;;   [choose?] If true, the select caption (nil selection) is included. (default true)
-;;   [callback] Selection callback
 (rum/defcs dropdown < rum/reactive
   (initial-value-mixin ::selected)
-  [{selected* ::selected} _ {:keys [items choose? callback]}]
-  [:select.dropdown
-   {:value (rum/react selected*)
-    :on-change #(set-selected selected* (.. % -target -value) callback)}
-   (cond->> (sort-by :text items)
-     choose? (cons {:text (common/loc "choose")})
-     true    (map (fn [{:keys [text value]}]
-                    [:option {:key   value
-                              :value value} text])))])
+  "Dropwdown is a styled select.
+   Parameters: initial-value options
+   Options [optional]:
+
+     items: list of :value, :text maps. Items are rendered ordered by
+            text.
+
+     [sort-by] Either :text or :value.
+
+     [choose?] If true, the select caption (empty selection) is
+     included. (default true)
+
+     [callback] Selection callback
+     [disabled?] See common/resolve-disabled
+     [enabled?]  See common/resolve-disabled
+     [required?] If true, the select is highlighted if empty.
+
+   The rest of the options are passed to the underlying select."
+  [{selected* ::selected} _ {:keys    [items choose? callback required?]
+                             sort-key :sort-by
+                             :as      options}]
+  (let [value   (rum/react selected*)
+        choose? (-> choose? false? not)]
+    [:select.dropdown
+     (merge {:value     value
+             :on-change #(set-selected selected* (.. % -target -value) callback)
+             :disabled  (common/resolve-disabled options)}
+            (common/update-css (dissoc options
+                                       :items :choose? :callback
+                                       :disabled? :enabled? :required?
+                                       :sort-by)
+                               :required (and required? (s/blank? value))))
+     (cond->> items
+       sort-key (sort-by sort-key
+                         (if (= sort-key :text)
+                           js/util.localeComparator
+                           identity))
+       choose?  (cons {:text  (common/loc :selectone)
+                       :value ""})
+       true     (map (fn [{:keys [text value]}]
+                       [:option {:key   value
+                                 :value value} text])))]))
 
 (def log (.-log js/console))
 
@@ -406,12 +403,12 @@
                                    callback)}
           (dissoc options :callback))])
 
-;; Renders text with included link
-;; Options (text and text-loc are mutually exclusive):
-;;   text Text where link is in brackets: 'Press [me] for details'
-;;   text-loc Localization key for text.
-;;   click Function to be called when the link is clicked
 (rum/defc text-and-link < rum/reactive
+"Renders text with included link
+ Options (text and text-loc are mutually exclusive):
+   text Text where link is in brackets: 'Press [me] for details'
+   text-loc Localization key for text.
+   click Function to be called when the link is clicked"
   [{:keys [click] :as options}]
   (let [regex          #"\[(.*)\]"
         text           (common/resolve-text options)
@@ -420,24 +417,24 @@
         [before after] (remove #(= link %) (s/split text regex))]
     [:span before [:a {:on-click click} link] after]))
 
-;; Button with optional icon and waiting support
-;; Options (text and text-loc are mutually exclusive) [optional]
-;;
-;;   text or text-loc See resolve-text
-;;
-;;   [icon] Icon class for the button (e.g., :lupicon-save)
-;;
-;;   [wait?] If true the button is disabled and the wait icon is
-;;   shown (if the icon has been given). Can be either value or
-;;   atom. Atom makes the most sense for the typical use cases.
-;;
-;;   [disabled?] See resolve-disabled function above
-;;   [enabled?]  See resolve-disabled function above
-;;
-;; Any other options are passed to the :button
-;; tag (e.g, :class, :on-click). The only exception is :disabled,
-;; since it is overridden with :disabled?
 (rum/defc icon-button < rum/reactive
+  "Button with optional icon and waiting support
+   Options (text and text-loc are mutually exclusive) [optional]
+
+     text or text-loc See common/resolve-text
+
+     [icon] Icon class for the button (e.g., :lupicon-save)
+
+     [wait?] If true the button is disabled and the wait icon is
+     shown (if the icon has been given). Can be either value or
+     atom. Atom makes the most sense for the typical use cases.
+
+     [disabled?] See common/resolve-disabled
+     [enabled?]  See common/resolve-disabled
+
+   Any other options are passed to the :button
+   tag (e.g, :class, :on-click). The only exception is :disabled,
+   since it is overridden with :disabled?"
   [{:keys [icon wait?] :as options}]
   (let [waiting? (rum/react (common/atomize wait?))]
     [:button
@@ -452,13 +449,13 @@
                                  icon))}])
      [:span (common/resolve-text options)]]))
 
-;; Link that is rendered as button.
-;; Options:
-;;   url: Link url
-;;
-;; In addition, text, text-loc, enabled? and disabled? options are
-;; supported.
 (rum/defc link-button < rum/reactive
+  "Link that is rendered as button.
+   Options:
+     url: Link url
+
+   In addition, text, text-loc, enabled? and disabled? options are
+   supported."
   [{:keys [url] :as options}]
   (let [disabled? (common/resolve-disabled options)
         text      (common/resolve-text options)]
@@ -468,3 +465,40 @@
        {:href   url
         :target :_blank}
        text])))
+
+(rum/defcs toggle < rum/reactive
+  (initial-value-mixin ::value)
+  "Toggle component (using checkbox wrapper mechanism and intial-value-mixin).
+   Parameters: initial-value options
+   Options [optional]:
+   text or text-loc See common/resolve-text
+   [disabled?]      See common/resolve-disabled
+   [enabled?]       See common/resolve-disabled
+   [callback]       Toggle callback function. Optional because sometimes
+                    the two-way binding via the mixin is enough.
+   [negate?]        If true, the value is negated (default false)
+   [prefix]         Wrapper class prefix (default :pate-checkbox)
+   [test-id]        Test id prefix for input and label."
+  [{value* ::value} _ {:keys [callback negate? prefix test-id] :as options}]
+  (let [input-id (common/unique-id "toggle")
+        test-id  (name (or test-id input-id))
+        value-fn (if negate? not identity)
+        value    (-> value* rum/react value-fn)
+        prefix   (name (or prefix :pate-checkbox))]
+    [:div
+     {:class (str prefix "-wrapper")
+      :key   input-id}
+     [:input {:type         "checkbox"
+              :disabled     (common/resolve-disabled options)
+              :checked      value
+              :id           input-id
+              :data-test-id (str test-id "-input")
+              :on-change    (fn [_]
+                              (swap! value* not)
+                              (when callback
+                                (callback (value-fn @value*))))}]
+     [:label
+      {:class        (str prefix "-label")
+       :for          input-id
+       :data-test-id (str test-id "-label")}
+      (common/resolve-text options "")]]))

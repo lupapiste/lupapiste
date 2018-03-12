@@ -161,10 +161,19 @@
       (fact "Teppo approves"
         (command teppo :approve-invite :id application-id) => ok?))
 
-    (let [actions (:actions (query teppo :allowed-actions :id application-id))]
+    (let [actions (:actions (query teppo :allowed-actions :id application-id))
+          application  (query-application teppo application-id)
+          doc (domain/get-document-by-id application hakija-doc)
+          doc-actions (-> (query teppo
+                                 :allowed-actions-for-category
+                                 :category "documents"
+                                 :id application-id
+                                 :doc (:id doc))
+                          :actionsById
+                          (get (keyword (:id doc))))]
       (fact "Teppo should be able to"
         (fact "add-operation" (-> actions :add-operation :ok) => true)
-        (fact "update-doc" (-> actions :update-doc :ok) => true)
+        (fact "update-doc" (-> doc-actions :update-doc :ok) => true)
         (fact "cancel application" (-> actions :cancel-application :ok) => true)))
 
     (fact "Sonja must be able to remove authz from Teppo!"

@@ -1,6 +1,7 @@
 (ns sade.coordinate
   (:require [taoensso.timbre :as timbre :refer [debug info warn error]]
             [clojure.string :as s]
+            [clojure.core.memoize :as memo]
             [sade.util :as util]
             [sade.core :refer :all])
   (:import [org.geotools.referencing.crs DefaultGeographicCRS]
@@ -41,8 +42,7 @@
   (let [proj-name (s/lower-case (name proj))]
     (if (= "wgs84" proj-name) DefaultGeographicCRS/WGS84 (CRS/decode proj-name))))
 
-(defn convert [source-projection target-projection result-accuracy coord-array]
-  (info "Converting coordinates " coord-array " from projection " source-projection " to projection " target-projection)
+(defn do-convert [source-projection target-projection result-accuracy coord-array]
   (let [source-CRS (resolve-crs source-projection)
         to-CRS     (resolve-crs target-projection)
         math-transform (CRS/findMathTransform source-CRS to-CRS true)
@@ -54,6 +54,9 @@
     (->> result-point
       .getCoordinate
       (map (comp #(.doubleValue %) #(round-to % result-accuracy) bigdec)))))
+
+(def ^{:arglists '([source-projection target-projection result-accuracy coord-array])} convert
+  (memo/lu do-convert :lu/threshold 200))
 
 (def known-bad-coordinates
   "Coordinates from KRYSP message that are known to be invalid."
