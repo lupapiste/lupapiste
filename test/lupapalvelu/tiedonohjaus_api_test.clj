@@ -7,6 +7,7 @@
             [lupapalvelu.action :refer [execute update-application]]
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.archiving-util]
             [sade.util :as util]))
 
 (testable-privates lupapalvelu.tiedonohjaus-api store-function-code update-application-child-metadata!)
@@ -32,16 +33,18 @@
       (lupapalvelu.tiedonohjaus/available-tos-functions "753-R") => [{:code "55 55 55 55"}]))
 
   (fact "attachment metadata is updated correctly"
-    (let [command {:application {:id 1
-                                 :organization "753-R"
-                                 :attachments  [{:id 1 :metadata {"julkisuusluokka" "julkinen"
-                                                                  "henkilotiedot"   "sisaltaa"
-                                                                  "sailytysaika"    {"arkistointi" "ei"
-                                                                                     "perustelu"   "foo"}
-                                                                  "myyntipalvelu"   false
-                                                                  "nakyvyys"        "julkinen"}}]}
+    (let [user    {:orgAuthz {:753-R #{:authority :archivist}}}
+          application {:id 1
+                       :organization "753-R"
+                       :attachments  [{:id 1 :metadata {"julkisuusluokka" "julkinen"
+                                                        "henkilotiedot"   "sisaltaa"
+                                                        "sailytysaika"    {"arkistointi" "ei"
+                                                                           "perustelu"   "foo"}
+                                                        "myyntipalvelu"   false
+                                                        "nakyvyys"        "julkinen"}}]}
+          command {:application application
                    :created     1000
-                   :user        {:orgAuthz {:753-R #{:authority :archivist}}}}]
+                   :user        user}]
       (update-application-child-metadata!
         command
         :attachments
@@ -70,19 +73,22 @@
                                                                                                              :nakyvyys        :julkinen
                                                                                                              :tila            :luonnos
                                                                                                              :kieli           :fi}}]}}) => nil
-        (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil)))
+        (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil
+        (lupapalvelu.archiving-util/mark-application-archived-if-done application 1000 user) => 1)))
 
   (fact "user with insufficient rights cannot update retention metadata"
-    (let [command {:application {:id 1
-                                 :organization "753-R"
-                                 :attachments  [{:id 1 :metadata {"julkisuusluokka" "julkinen"
-                                                                  "henkilotiedot"   "sisaltaa"
-                                                                  "sailytysaika"    {"arkistointi" "ikuisesti"
-                                                                                     "perustelu"   "foo"}
-                                                                  "myyntipalvelu"   false
-                                                                  "nakyvyys"        "julkinen"}}]}
+    (let [application {:id 1
+                       :organization "753-R"
+                       :attachments  [{:id 1 :metadata {"julkisuusluokka" "julkinen"
+                                                        "henkilotiedot"   "sisaltaa"
+                                                        "sailytysaika"    {"arkistointi" "ikuisesti"
+                                                                           "perustelu"   "foo"}
+                                                        "myyntipalvelu"   false
+                                                        "nakyvyys"        "julkinen"}}]}
+          user {:orgAuthz {:753-R #{:authority}}}
+          command {:application application
                    :created     1000
-                   :user        {:orgAuthz {:753-R #{:authority}}}}]
+                   :user        user}]
       (update-application-child-metadata!
         command
         :attachments
@@ -113,7 +119,8 @@
                                                                                                              :tila            :luonnos
 
                                                                                                              :kieli           :fi}}]}}) => nil
-        (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil)))
+        (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil
+        (lupapalvelu.archiving-util/mark-application-archived-if-done application 1000 user) => 1)))
 
   (fact "process metadata is updated correctly"
     (let [command {:application  {:organization    "753-R"
@@ -160,13 +167,15 @@
                     "kieli" "fi"
                     "turvallisuusluokka" "ei-turvallisuusluokkaluokiteltu"
                     "salassapitoperuste" "peruste"}
-          command {:application {:id 1
-                                 :organization "753-R"
-                                 :attachments  [{:id 1 :metadata metadata}]
-                                 ;; Verdict date 2016-1-29
-                                 :verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]}
+          application {:id 1
+                       :organization "753-R"
+                       :attachments  [{:id 1 :metadata metadata}]
+                       ;; Verdict date 2016-1-29
+                       :verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]}
+          user {:orgAuthz {:753-R #{:authority :archivist}}}
+          command {:application application
                    :created     1000
-                   :user        {:orgAuthz {:753-R #{:authority :archivist}}}}]
+                   :user        user}]
       (update-application-child-metadata!
         command
         :attachments
@@ -209,7 +218,8 @@
                                                                                                   :henkilotiedot :sisaltaa
                                                                                                   :julkisuusluokka :salainen
                                                                                                   :kayttajaryhmakuvaus :muokkausoikeus}}]}}) => nil
-        (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil)))
+        (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil
+        (lupapalvelu.archiving-util/mark-application-archived-if-done application 1000 user) => 1)))
 
   (fact "retention and security end dates are not set when they are not required"
     (let [metadata {"julkisuusluokka" "julkinen"
@@ -219,13 +229,15 @@
                     "myyntipalvelu"   false
                     "nakyvyys"        "julkinen"
                     "kieli" "fi"}
-          command {:application {:id 1
-                                 :organization "753-R"
-                                 :attachments  [{:id 1 :metadata metadata}]
-                                 ;; Verdict date 2016-1-29
-                                 :verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]}
+          application {:id 1
+                       :organization "753-R"
+                       :attachments  [{:id 1 :metadata metadata}]
+                       ;; Verdict date 2016-1-29
+                       :verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]}
+          user {:orgAuthz {:753-R #{:authority :archivist}}}
+          command {:application application
                    :created     1000
-                   :user        {:orgAuthz {:753-R #{:authority :archivist}}}}]
+                   :user        user}]
       (update-application-child-metadata!
         command
         :attachments
@@ -250,20 +262,23 @@
                                                                                                   :myyntipalvelu false
                                                                                                   :kieli :fi
                                                                                                   :henkilotiedot :sisaltaa}}]}}) => nil
-        (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil)))
+        (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil
+        (lupapalvelu.archiving-util/mark-application-archived-if-done application 1000 user) => 1)))
 
   (fact "metadata can be updated to a read-only attachment"
-        (let [command {:application {:id 1
-                                     :organization "753-R"
-                                     :attachments  [{:id 1 :metadata {"julkisuusluokka" "julkinen"
-                                                                      "henkilotiedot"   "sisaltaa"
-                                                                      "sailytysaika"    {"arkistointi" "ei"
-                                                                                         "perustelu"   "foo"}
-                                                                      "myyntipalvelu"   false
-                                                                      "nakyvyys"        "julkinen"}
-                                                     :readOnly true}]}
+        (let [application {:id 1
+                           :organization "753-R"
+                           :attachments  [{:id 1 :metadata {"julkisuusluokka" "julkinen"
+                                                            "henkilotiedot"   "sisaltaa"
+                                                            "sailytysaika"    {"arkistointi" "ei"
+                                                                               "perustelu"   "foo"}
+                                                            "myyntipalvelu"   false
+                                                            "nakyvyys"        "julkinen"}
+                                           :readOnly true}]}
+              user {:orgAuthz {:753-R #{:authority :archivist}}}
+              command {:application application
                        :created     1000
-                       :user        {:orgAuthz {:753-R #{:authority :archivist}}}}]
+                       :user        user}]
           (update-application-child-metadata!
             command
             :attachments
@@ -293,7 +308,8 @@
                                                                                                                  :tila            :luonnos
                                                                                                                  :kieli           :fi}
                                                                                                 :readOnly true}]}}) => nil
-            (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil)))
+            (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil
+            (lupapalvelu.archiving-util/mark-application-archived-if-done application 1000 user) => 1)))
 
   (fact "a valid function code can be set to application and it is stored in history array"
     (let [fc "10 03 00 01"
