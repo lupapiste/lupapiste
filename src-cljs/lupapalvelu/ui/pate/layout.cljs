@@ -122,6 +122,11 @@
 ;; View layout components
 ;; -------------------------------
 
+(defn markdown-span [markdown]
+  [:span.markdown
+     {:dangerouslySetInnerHTML
+      {:__html (shared/markdown->html markdown)}}])
+
 (defmulti view-component (fn [cell-type _]
                            cell-type))
 
@@ -138,15 +143,14 @@
 
 (defmethod view-component :phrase-text
   [_ {:keys [state path schema] :as options}]
-  [:span.phrase-text (path/value path state)])
+  (markdown-span (path/value path state)))
 
 (defmethod view-component :reference
   [_ {:keys [state schema references] :as options}]
   (let [[x & xs :as path] (-> schema :path util/split-kw-path)]
-    [:span.formatted
-     (if (util/=as-kw x :*ref)
-       (path/react xs references)
-       (path/react path state))]))
+    (markdown-span (if (util/=as-kw x :*ref)
+                            (path/react xs references)
+                            (path/react path state)))))
 
 (defmethod view-component :placeholder
   [_ {:keys [state path schema] :as options}]

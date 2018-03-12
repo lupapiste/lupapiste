@@ -716,3 +716,5 @@
 "plus" "en" "+"
 "plus" "fi" "+"
 "plus" "sv" "+"
+"pate.try-again" "fi" "Yritä uudelleen"
+"pate.try-again" "en" "Try again"

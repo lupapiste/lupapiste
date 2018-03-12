@@ -1,6 +1,7 @@
 (ns lupapalvelu.pate.shared
   (:require [clojure.string :as s]
             [clojure.set :as set]
+            [markdown.core :as markdown]
             [sade.shared-util :as util]
             [schema.core :refer [defschema] :as sc]))
 
@@ -1399,3 +1400,11 @@
                              {})
                       path)
       :else                   (recur (butlast path)))))
+
+(defn markdown->html
+  "Translates markdown string into HTML. Used both in the UI and
+  PDF."
+  [markdown]
+  (-> markdown
+      (markdown/md-to-html-string* nil)
+      :html))

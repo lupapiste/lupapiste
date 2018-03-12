@@ -197,6 +197,14 @@ span.formatted {
   }
 }
 
+span.markdown {
+  display: inline-block;
+  p {margin-bottom: $marginS;}
+  &.warning {
+    color: $negative;
+  }
+}
+
 @mixin pate-default-label() {
   font-size: 15px;
   font-weight: bold;
@@ -322,7 +330,6 @@ div.pate-verdict {
   }
 }
 
-
 // Phrases
 
 div.pate-phrases {
@@ -344,10 +351,6 @@ div.pate-phrases {
       overflow-x: hidden;
     }
   }
-}
-
-span.phrase-text {
-  white-space: pre-wrap;
 }
 
 // Autocomplete
@@ -718,4 +721,8 @@ div.pate-select-application-attachments {
 
 input.date-delta {
   max-width: 50%;
+}
+
+body.pate-error-page {
+  padding: 2em 2em;
 }

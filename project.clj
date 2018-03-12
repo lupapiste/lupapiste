@@ -141,6 +141,9 @@
                  ; JMX-server with socket reuse
                  [lupapiste/jmx-server "0.1.0"]
 
+                 ;; Markdown -> HTML also ClojureScript.
+                 [markdown-clj "1.0.2"]
+
                  [org.clojure/clojurescript "1.9.473"]
                  [rum "0.10.8"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]

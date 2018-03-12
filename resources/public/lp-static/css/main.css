@@ -29069,6 +29069,18 @@ span.formatted.warning {
   color: #df3215;
 }
 
+span.markdown {
+  display: inline-block;
+}
+
+span.markdown p {
+  margin-bottom: 6px;
+}
+
+span.markdown.warning {
+  color: #df3215;
+}
+
 .pate-label {
   font-size: 15px;
   font-weight: bold;
@@ -29221,10 +29233,6 @@ div.pate-phrases table.pate-phrases-table td.phrase {
   max-width: 0;
   text-overflow: ellipsis;
   overflow-x: hidden;
-}
-
-span.phrase-text {
-  white-space: pre-wrap;
 }
 
 div.pate-autocomplete {
@@ -29844,6 +29852,10 @@ input:disabled + .pate-attachment-check-label:hover.pate-attachment-check-label:
 
 input.date-delta {
   max-width: 50%;
+}
+
+body.pate-error-page {
+  padding: 2em 2em;
 }
 
 .order-grid-1 {

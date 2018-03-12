@@ -42,7 +42,9 @@
                              ;; the data.
                              {(sc/optional-key :doc)  [sc/Keyword]
                               ;; Kw-path into published verdict data.
-                              (sc/optional-key :dict) sc/Keyword})))
+                              (sc/optional-key :dict) sc/Keyword
+                              ;; Is the value in markdown format?
+                              (sc/optional-key :markdown?) sc/Bool})))
 
 (defn styles
   "Definition that only allows either individual kw or subset of kws."
@@ -82,7 +84,7 @@
             (sc/optional-key :source)   Source
             (sc/optional-key :styles)   (styles row-styles)}
            {})
-   ;; Note that the right-hand side can consist of multpiple
+   ;; Note that the right-hand side can consist of multiple
    ;; cells/columns. As every property is optional, the cells can be
    ;; omitted. In that case, the value of the right-hand side is the
    ;; source value.
@@ -166,7 +168,14 @@
                               cell-widths)
                          [:&.spaced
                           [(sel/+ :.row :.row)
-                           [:.cell {:padding-top "0.5em"}]]]]]])}}]]
+                           [:.cell {:padding-top "0.5em"}]]]]]
+                       [:.markdown
+                        [:p {:margin-top    "0"
+                             :margin-bottom "0.25em"}]
+                        [:ul {:margin-top    "0"
+                              :margin-bottom "0"}]
+                        [:ol {:margin-top    "0"
+                              :margin-bottom "0"}]]])}}]]
          [:body body (when script?
                        page-number-script)]])))
 
@@ -279,7 +288,8 @@
                       :styles [:bold :border-top]}
                      {:loc-prefix :pate-r.verdict-code}]
                     [{:loc    :empty
-                      :source {:dict :verdict-text}
+                      :source {:dict      :verdict-text
+                               :markdown? true}
                       :styles :pad-before}]
                     [{:loc      :pdf.required-foreman
                       :loc-many :verdict.vaaditutTyonjohtajat
@@ -301,22 +311,22 @@
                     [{:loc    :pate-collateral
                       :source :collateral
                       :styles :pad-before}]
-                    [{:loc :empty
+                    [{:loc    :empty
                       :source {:dict :verdict-date}
                       :styles :pad-before}]
-                    [{:loc :applications.authority
+                    [{:loc    :applications.authority
                       :source {:dict :handler}
                       :styles :pad-before}]
-                    [{:loc :empty
+                    [{:loc    :empty
                       :source :organization
                       :styles :pad-after}]
-                    [{:loc :pdf.julkipano
+                    [{:loc    :pdf.julkipano
                       :source {:dict :julkipano}}]
-                    [{:loc :pdf.anto
+                    [{:loc    :pdf.anto
                       :source {:dict :anto}}]
-                    [{:loc :pdf.muutoksenhaku
+                    [{:loc    :pdf.muutoksenhaku
                       :source :muutoksenhaku}]
-                    [{:loc :pdf.vomassa
+                    [{:loc    :pdf.vomassa
                       :source :vomassaolo}]
                     ;; Page break
                     [{:loc    :pate-verdict.muutoksenhaku
@@ -462,30 +472,41 @@
        (concat extra)
        (remove nil?)))
 
-(defn resolve-cell [{lang :lang :as data} source-value
+(defn resolve-cell [{lang :lang :as data}
+                    source-value
+                    markdown?
                     {:keys [text width unit loc-prefix styles] :as cell}]
-  (let [path (some-> cell :path pathify)]
-    [:div.cell {:class (resolve-class cell-styles
-                                      styles
-                                      (when width (str "cell--" width))
-                                      (or (when (seq path)
-                                            (get-in source-value
-                                                    (cons ::styles path)))
-                                          (get-in source-value
-                                                  [::styles ::cell])))}
-     (cond->> (or text (get-in source-value path source-value))
-       loc-prefix (i18n/localize lang loc-prefix)
-       unit (add-unit lang unit))]))
+  (let [path (some-> cell :path pathify)
+        class (resolve-class cell-styles
+                             styles
+                             (when width (str "cell--" width))
+                             (or (when (seq path)
+                                   (get-in source-value
+                                           (cons ::styles path)))
+                                 (get-in source-value
+                                         [::styles ::cell])))
+        value (or text (get-in source-value path source-value))]
+    (when markdown?
+      (println "------------------ class:" (or (not-empty class) [:markdown])))
+    (if markdown?
+      [:div.cell
+       {:class (or (not-empty class) [:markdown])
+        :dangerouslySetInnerHTML {:__html (shared/markdown->html source-value)}}]
+     [:div.cell {:class class}
+      (cond->> value
+        loc-prefix (i18n/localize lang loc-prefix)
+        unit (add-unit lang unit))])))
 
 (defn entry-row
   [left-width {lang :lang :as data} [{:keys [loc loc-many source styles]} & cells]]
   (let [source-value (util/pcond-> (resolve-source data source) string? ss/trim)
+        markdown?    (:markdown? source)
         multiple?    (and (sequential? source-value)
                           (> (count source-value) 1))]
     (when (or (nil? source) (not-empty source-value))
       (let [section-styles [:page-break :border-top :border-bottom]
-            row-styles (resolve-class row-styles styles
-                                      (get-in source-value [::styles :row]))]
+            row-styles     (resolve-class row-styles styles
+                                          (get-in source-value [::styles :row]))]
         [:div.section
          {:class (util/intersection-as-kw section-styles row-styles)}
          [:div.row
@@ -502,11 +523,12 @@
                         (vector source-value))]
                 [:div.row
                  {:class (get-in v [::styles :row])}
-                 (map (partial resolve-cell data v)
+                 (map (partial resolve-cell data v markdown?)
                       (if (empty? cells) [{}] cells))])]]
             (resolve-cell data
                           (util/pcond-> source-value
                                         sequential? first)
+                          markdown?
                           (first cells)))]]))))
 
 (defn content
@@ -780,7 +802,7 @@
 
 (defn create-verdict-preview
   "Creates draft version of the verdict
-  PDF. Returns :pdf-file-stream, :filename map or fails."
+  PDF. Returns :pdf-file-stream, :filename map or :error map."
   [{:keys [application created] :as command} verdict]
   (let [pdf (html-pdf/html->pdf application
                                 "pate-verdict-draft"
@@ -790,4 +812,4 @@
                                                    :pdf.draft
                                                    (:id application)
                                                    (util/to-finnish-date created)))
-      (fail! :pate.pdf-verdict-error))))
+      {:error :pate.pdf-verdict-error})))
