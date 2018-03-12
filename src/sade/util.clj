@@ -670,3 +670,5 @@
 
 (defn ^java.util.Date object-id-to-date [object-id]
   (-> object-id org.bson.types.ObjectId. bean :time java.util.Date.))
+
+(defalias markdown->html shared/markdown->html)

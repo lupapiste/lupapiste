@@ -486,12 +486,10 @@
                                  (get-in source-value
                                          [::styles ::cell])))
         value (or text (get-in source-value path source-value))]
-    (when markdown?
-      (println "------------------ class:" (or (not-empty class) [:markdown])))
     (if markdown?
       [:div.cell
        {:class (or (not-empty class) [:markdown])
-        :dangerouslySetInnerHTML {:__html (shared/markdown->html source-value)}}]
+        :dangerouslySetInnerHTML {:__html (util/markdown->html source-value)}}]
      [:div.cell {:class class}
       (cond->> value
         loc-prefix (i18n/localize lang loc-prefix)

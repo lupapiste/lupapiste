@@ -50,7 +50,9 @@
 
 (rum/defcs phrase-editor < rum/reactive
   (components/initial-value-mixin ::local)
-  [{local* ::local} _ phrase*]
+  (rum/local ::edit ::tab)
+  [{local* ::local
+    tab*   ::tab} _ phrase*]
   [:div.pate-grid-8
    [:div.row
     [:div.col-2
@@ -71,36 +73,50 @@
                              :immediate? true})]]]
    [:div.row
     [:div.col-8
-     [:div.col--vertical.col--full
-      [:label.required (common/loc :phrase.phrase)]
-      (components/textarea-edit (:phrase @local*)
-                                {:callback   (fn [text]
-                                               (swap! local* #(assoc % :phrase text)))
-                                 :required?  true
-                                 :immediate? true})]]]
+     (let [phrase (:phrase @local*)]
+       [:div.col--full
+        (components/tabbar {:selected* tab*
+                            :tabs      [{:text-loc :edit
+                                         :id       ::edit}
+                                        {:text-loc :pdf.preview
+                                         :id       ::preview}]})
+        [:div.phrase-edit
+         (if (= (rum/react tab*) ::preview)
+           (components/markdown-span phrase :phrase-preview)
+           (components/textarea-edit phrase
+                                     {:callback   (fn [text]
+                                                    (swap! local*
+                                                           #(assoc % :phrase text)))
+                                      :required?  true
+                                      :immediate? true}))]])]]
    [:div.row
     [:div.col-2.inner-margins
-     [:button.positive
-      {:disabled (->> (rum/react local*)
-                      vals
-                      (some (comp s/blank? s/trim)))
-       :on-click (fn []
-                   (service/upsert-phrase (set/rename-keys @local* {:id :phrase-id})
-                                          #(reset! phrase* nil)))}
-      (common/loc :save)]
+     (components/icon-button {:icon      :lupicon-save
+                              :text-loc  :save
+                              :class     :positive
+                              :disabled? (->> (rum/react local*)
+                                              vals
+                                              (some (comp s/blank? s/trim)))
+                              :on-click  (fn []
+                                           (service/upsert-phrase
+                                            (set/rename-keys @local* {:id :phrase-id})
+                                            #(reset! phrase* nil)))})
      [:button.primary.outline
       {:on-click #(reset! phrase* nil)}
       (common/loc :cancel)]]
     (when-let [phrase-id (:id @local*)]
       [:div.col-6.col--right
-       [:button.secondary
-        {:on-click (fn []
-                     (components/confirm-dialog :phrase.remove
-                                                :areyousure
-                                                (fn []
-                                                  (service/delete-phrase phrase-id
-                                                                         #(reset! phrase* nil)))))}
-        (common/loc :remove)]])]])
+       (components/icon-button
+        {:icon     :lupicon-remove
+         :text-loc :remove
+         :class    :secondary
+         :on-click (fn []
+                     (components/confirm-dialog
+                      :phrase.remove
+                      :areyousure
+                      (fn []
+                        (service/delete-phrase phrase-id
+                                               #(reset! phrase* nil)))))})])]])
 
 (rum/defc phrase-sorter < rum/reactive
   [column sort-column* descending?*]

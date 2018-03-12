@@ -29075,6 +29075,7 @@ span.markdown {
 
 span.markdown p {
   margin-bottom: 6px;
+  color: #333333;
 }
 
 span.markdown.warning {
@@ -29233,6 +29234,68 @@ div.pate-phrases table.pate-phrases-table td.phrase {
   max-width: 0;
   text-overflow: ellipsis;
   overflow-x: hidden;
+}
+
+div.phrase-edit-mode a:last-child,
+div.phrase-edit-mode label:last-child {
+  margin-left: 24px;
+}
+
+div.phrase-edit-mode a.required:after {
+  content: " *";
+  color: #df3215;
+  padding-right: 6px;
+}
+
+span.phrase-preview {
+  border: 1px solid #bbbbbb;
+  padding: 6px 12px;
+  background-color: #f6f6f6;
+}
+
+div.phrase-edit {
+  border: 1px solid #eeeeee;
+  border-top: none;
+  padding: 10px 10px;
+}
+
+div.phrase-edit > * {
+  width: 100%;
+}
+
+div.pate-tabbar {
+  display: table;
+}
+
+div.pate-tabbar div.pate-tab {
+  display: table-cell;
+  border: 1px solid #eeeeee;
+  border-bottom: 1px solid #eeeeee;
+  padding: 0 6px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  background-color: #f6f6f6;
+}
+
+div.pate-tabbar div.pate-tab__space {
+  display: table-cell;
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #eeeeee;
+}
+
+div.pate-tabbar div.pate-tab__divider {
+  display: table-cell;
+  border: none;
+  border-bottom: 1px solid #eeeeee;
+  min-width: 3px;
+  max-width: 3px;
+}
+
+div.pate-tabbar div.pate-tab.pate-tab--active {
+  border: 1px solid #eeeeee;
+  border-bottom: none;
+  background-color: initial;
 }
 
 div.pate-autocomplete {
