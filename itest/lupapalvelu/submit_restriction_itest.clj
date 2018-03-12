@@ -113,4 +113,21 @@
     (fact "application is submittable for pena again"
       (query pena :application-submittable :id default-app-id) => ok?))
 
-  (fact "pena invites Solita"))
+  (facts "invite non-submit-restrictor company"
+    (fact "pena invites Solita"
+      (command pena :company-invite :id default-app-id :company-id "solita") => ok?)
+
+    (fact "solita cannot apply submit restriction to others by approving invite with flag"
+      (command kaino :approve-invite :id default-app-id :invite-type :company :apply-submit-restriction true) => (partial expected-failure? :error.not-allowed-to-apply-submit-restriction))
+
+    (fact "solita approves invite without flag"
+      (command kaino :approve-invite :id default-app-id :invite-type :company) => ok?)
+
+    (fact "kaino is not authorized to restrict submissions inside application context"
+      (query kaino :authorized-to-apply-submit-restriction-to-other-auths :id default-app-id) => (partial expected-failure? :error.not-allowed-to-apply-submit-restriction))
+
+    (fact "... or outside application context"
+      (query kaino :authorized-to-apply-submit-restriction-to-other-auths) => (partial expected-failure? :error.not-allowed-to-apply-submit-restriction))
+
+    (fact "kaino is not allowed to toggle submit restriction"
+      (command kaino :toggle-submit-restriction-for-other-auths :id default-app-id :apply-submit-restriction true) => (partial expected-failure? :error.not-allowed-to-apply-submit-restriction))))
