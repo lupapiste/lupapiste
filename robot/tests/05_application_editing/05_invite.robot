@@ -30,8 +30,8 @@ Mikko can't reinvite Teppo
   Scroll and click test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
   Sleep  1
-  Input Text  invite-email  teppo@example.com
-  Input Text  invite-text  Tervetuloa muokkaamaan taas hakemusta
+  Input Text  invite-email-valtuutus  teppo@example.com
+  Input Text  invite-text-valtuutus  Tervetuloa muokkaamaan taas hakemusta
   Click by test id  application-invite-submit
   Error message is present on invite form
   Invite count is  1
@@ -111,8 +111,8 @@ Mikko can see invite paasuunnittelija button again
 
 Mikko can't invite himself
   Scroll and click test id  application-invite-paasuunnittelija
-  Input Text  invite-email  mikko@example.com
-  Input Text  invite-text  Voinko kutsua itseni?
+  Input Text  invite-email-valtuutus  mikko@example.com
+  Input Text  invite-text-valtuutus  Voinko kutsua itseni?
   Click by test id  application-invite-submit
   Error message is present on invite form
   Invite count is  0
@@ -147,12 +147,12 @@ Mikko invites previously unknown user Oskari as paasuunnittelija
   Open accordions  parties
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
   Scroll and click test id  application-invite-paasuunnittelija
-  Wait until  Element should be visible  invite-email
-  Input Text  invite-email  oskari@example.com
-  Input Text  invite-text  Tuu mukaan tunkkaan lupaa
+  Wait until  Element should be visible  invite-email-valtuutus
+  Input Text  invite-email-valtuutus  oskari@example.com
+  Input Text  invite-text-valtuutus  Tuu mukaan tunkkaan lupaa
   Click by test id  application-invite-submit
   Wait until  Mask is invisible
-  Wait until  Element should not be visible  invite-email
+  Wait until  Element should not be visible  invite-email-valtuutus
   Wait until  Invite count is  1
 
 # TODO: should create new user "oskari@example.com" and make sure he has access
@@ -183,12 +183,12 @@ Mikko invites previously unknown user Unto as tyonjohtaja
   Open accordions  parties
   Wait until  Element should be visible  xpath=//div[@id="application-parties-tab"]//*[@data-test-id='application-invite-tyonjohtaja']
   Scroll and click test id  application-invite-tyonjohtaja
-  Wait until  Element should be visible  invite-email
-  Input Text  invite-email  unto@example.com
-  Input Text  invite-text  Tuu mulle tyonjohtajaksi
+  Wait until  Element should be visible  invite-email-valtuutus
+  Input Text  invite-email-valtuutus  unto@example.com
+  Input Text  invite-text-valtuutus  Tuu mulle tyonjohtajaksi
   Click by test id  application-invite-submit
   Wait until  Mask is invisible
-  Wait until  Element should not be visible  invite-email
+  Wait until  Element should not be visible  invite-email-valtuutus
   Wait until  Invite count is  1
 
 Unto hasn't accepted auth, so it can't be upgreded
@@ -216,16 +216,18 @@ Mask is invisible
 Invite Teppo
   Invite count is  0
   Scroll and click test id  application-invite-paasuunnittelija
-  Wait until  Element should be visible  invite-email
-  Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
+  Wait until  Element should be visible  invite-email-valtuutus
+  Input Text  invite-text-valtuutus  Tervetuloa muokkaamaan hakemusta
   Element should be disabled  xpath=//*[@data-test-id='application-invite-submit']
-  Input Text  invite-email  teppo@example
+  Input Text  invite-email-valtuutus  teppo@example
   Element should be disabled  xpath=//*[@data-test-id='application-invite-submit']
-  Input Text  invite-email  teppo@example.com
+  Input Text  invite-email-valtuutus  teppo@example.com
   Element should be enabled  xpath=//*[@data-test-id='application-invite-submit']
+  Import Library  DebugLibrary
+  Debug
   Click by test id  application-invite-submit
   Wait until  Mask is invisible
-  Wait until  Element should not be visible  invite-email
+  Wait until  Element should not be visible  invite-email-valtuutus
   Wait until  Invite count is  1
 
 Person selector includes
