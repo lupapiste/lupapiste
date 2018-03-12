@@ -13,7 +13,8 @@
             [lupapiste-commons.schema-utils :as schema-utils]
             [lupapalvelu.application :as a]
             [lupapalvelu.permit :as permit]
-            [lupapiste-commons.operations :as operations]))
+            [lupapiste-commons.operations :as operations]
+            [lupapalvelu.archiving-util :as archiving-util]))
 
 (defn- target-is-not-archived [target-type {{attachment-id :attachmentId} :data {:keys [metadata processMetadata attachments]} :application}]
   (let [md (case target-type
@@ -151,6 +152,7 @@
           updated-children (-> (remove #(= % child) (child-type application)) (conj updated-child))]
       (action/update-application command {$set {:modified created child-type updated-children}})
       (t/update-process-retention-period (:id application) created)
+      (archiving-util/mark-application-archived-if-done application created user)
       (ok {:metadata (:metadata updated-child)}))
     (fail "error.child.id")))
 
@@ -168,7 +170,7 @@
    :user-roles #{:authority}
    :states states/all-but-draft
    :pre-checks [(partial target-is-not-archived :attachment)]}
-  [{:keys [application created] :as command}]
+  [command]
   (update-application-child-metadata! command :attachments attachmentId metadata))
 
 (defcommand store-tos-metadata-for-application
