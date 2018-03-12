@@ -279,7 +279,7 @@ LUPAPISTE.ApplicationModel = function() {
     return !_.isEmpty(_.filter(self.invites(), ["user.id", id]));
   });
 
-  self.approveInvite = function(type, opts) {
+  function approveInvite(type, opts) {
     var unwrappedOpts = {"apply-submit-restriction": util.getIn(opts, ["applySubmitRestriction"])};
     ajax
       .command("approve-invite", _.assign({id: self.id(), "invite-type": type}, unwrappedOpts))
@@ -289,6 +289,14 @@ LUPAPISTE.ApplicationModel = function() {
       })
       .call();
     return false;
+  }
+
+  self.approveInvite = function(type) {
+    if (type === "company" && lupapisteApp.models.globalAuthModel.ok("authorized-to-apply-submit-restriction-to-other-auths")) {
+      self.showAcceptCompanyInvitationDialog();
+    } else {
+      approveInvite(type);
+    }
   };
 
   var acceptDecline = function(applicationId) {
@@ -923,7 +931,7 @@ LUPAPISTE.ApplicationModel = function() {
                                componentParams: {ltext: "application.inviteDialogText",
                                                  lyesTitle: "applications.approveInvite",
                                                  lnoTitle: "application.showApplication",
-                                                 yesFn: self.approveInvite}});
+                                                 yesFn: approveInvite}});
     }
   };
 
@@ -937,7 +945,7 @@ LUPAPISTE.ApplicationModel = function() {
                                                  applySubmitRestriction: applySubmitRestriction,
                                                  lyesTitle: "applications.approveInvite",
                                                  lnoTitle: "application.showApplication",
-                                                 yesFn: _.partial(self.approveInvite, "company", {applySubmitRestriction: applySubmitRestriction})}});
+                                                 yesFn: _.partial(approveInvite, "company", {applySubmitRestriction: applySubmitRestriction})}});
     }
   };
 
