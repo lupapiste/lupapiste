@@ -62,9 +62,10 @@
 
 (defn check-auth-restriction
   "Pre check that fails if restriction is applied for user."
-  [{user :user {auth-restrictions :authRestrictions} :application :as command} restriction]
-  (->> (some (partial check-auth-restriction-entry user restriction) auth-restrictions)
-       (enrich-with-auth-info command)))
+  [{user :user {auth-restrictions :authRestrictions} :application permissions :permissions :as command} restriction]
+  (when-not (permissions (keyword restriction)) ; User can get permissions from different sources. Restriction is only applied to auth array.
+    (->> (some (partial check-auth-restriction-entry user restriction) auth-restrictions)
+         (enrich-with-auth-info command))))
 
 (defn- restriction-as-string
   "Monger drops namespace part of keywords. To store them with namespace part,
