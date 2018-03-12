@@ -15,7 +15,7 @@
 (defn- restrict
   "Applies single restriction in permissions."
   [permissions restriction]
-  (disj (set permissions) restriction))
+  (disj (set permissions) (keyword restriction)))
 
 (defmulti apply-auth-restriction
   "Applies single restriction in permissions if conditions apply."
