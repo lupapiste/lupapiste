@@ -385,6 +385,9 @@ div.phrase-edit {
   border-top: none;
   padding: 10px 10px;
   > * {width: 100%;}
+  > textarea {
+    min-height: 20em;
+  }
 }
 
 div.pate-tabbar {

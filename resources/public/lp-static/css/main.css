@@ -29267,6 +29267,10 @@ div.phrase-edit > * {
   width: 100%;
 }
 
+div.phrase-edit > textarea {
+  min-height: 20em;
+}
+
 div.pate-tabbar {
   display: table;
 }

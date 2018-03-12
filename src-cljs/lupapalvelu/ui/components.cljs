@@ -548,15 +548,15 @@
   [{:keys [selected* tabs]}]
   (let [selected (or (rum/react selected*) (-> tabs first :id))]
     [:div.pate-tabbar
-     (let [divider [:div.pate-tab__divider]
+     (let [divider [:div.pate-tab__divider {}]
            buttons (for [{id :id :as tab} tabs
                          :let             [text (common/resolve-text tab)]]
                      (if (= id selected)
                        [:div.pate-tab.pate-tab--active
-                        {:key id} text]
+                        {} text]
                        [:div.pate-tab
-                        [:a {:key      id
-                             :on-click #(reset! selected* id)} text]]))]
-       (concat ;;[divider]
-               (interpose divider buttons)
-               [[:div.pate-tab__space]]))]))
+                        {}
+                        [:a {:on-click #(reset! selected* id)} text]]))]
+       (map #(assoc-in % [1 :key] (common/unique-id "tabbar-"))
+            (concat (interpose divider buttons)
+                    [[:div.pate-tab__space]])))]))

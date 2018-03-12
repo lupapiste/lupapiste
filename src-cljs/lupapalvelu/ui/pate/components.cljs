@@ -159,9 +159,11 @@
   (rum/local nil ::category)
   (rum/local "" ::selected)
   (rum/local "" ::replaced)
+  (rum/local ::edit ::tab)
   [{category* ::category
     selected* ::selected
-    replaced* ::replaced :as local-state}
+    replaced* ::replaced
+    tab*      ::tab :as local-state}
    {:keys [state path schema] :as options} & [wrap-label?]]
   (letfn [(set-category [category]
             (when (util/not=as-kw category @category*)
@@ -173,7 +175,9 @@
     (when-not @category*
       (set-category (:category schema)))
     (let [ref-id    (common/unique-id "-ref")
-          disabled? (path/disabled? options)
+          tab       (rum/react tab*)
+          disabled? (or (path/disabled? options)
+                        (= tab ::preview))
           required? (path/required? options)]
       [:div.pate-grid-12
        (when (show-label? schema wrap-label?)
@@ -228,11 +232,21 @@
               (common/loc :phrase.undo)]]]]])
        [:div.row
         [:div.col-12.col--full
-         {:ref ref-id}
-         (components/textarea-edit (path/value path state)
-                                   {:callback  update-text
-                                    :disabled  disabled?
-                                    :required? required?})]]])))
+         (components/tabbar {:selected* tab*
+                             :tabs     [{:id       ::edit
+                                         :text-loc :edit}
+                                        {:id       ::preview
+                                         :text-loc :pdf.preview}]})
+         (if (= tab ::edit)
+           [:div.phrase-edit
+            {:ref ref-id}
+            (components/textarea-edit (path/value path state)
+                                      {:callback  update-text
+                                       :disabled  disabled?
+                                       :required? required?})]
+           [:div.phrase-edit
+            (components/markdown-span (path/value path state)
+                                      :phrase-preview)])]]])))
 
 (rum/defc pate-link < rum/reactive
   [{:keys [schema] :as options}]
