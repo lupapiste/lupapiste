@@ -42,9 +42,7 @@
                              ;; the data.
                              {(sc/optional-key :doc)  [sc/Keyword]
                               ;; Kw-path into published verdict data.
-                              (sc/optional-key :dict) sc/Keyword
-                              ;; Is the value in markdown format?
-                              (sc/optional-key :markdown?) sc/Bool})))
+                              (sc/optional-key :dict) sc/Keyword})))
 
 (defn styles
   "Definition that only allows either individual kw or subset of kws."
@@ -288,8 +286,7 @@
                       :styles [:bold :border-top]}
                      {:loc-prefix :pate-r.verdict-code}]
                     [{:loc    :empty
-                      :source {:dict      :verdict-text
-                               :markdown? true}
+                      :source {:dict :verdict-text}
                       :styles :pad-before}]
                     [{:loc      :pdf.required-foreman
                       :loc-many :verdict.vaaditutTyonjohtajat
@@ -496,9 +493,9 @@
         unit (add-unit lang unit))])))
 
 (defn entry-row
-  [left-width {lang :lang :as data} [{:keys [loc loc-many source styles]} & cells]]
+  [left-width {:keys [lang dictionary] :as data} [{:keys [loc loc-many source styles]} & cells]]
   (let [source-value (util/pcond-> (resolve-source data source) string? ss/trim)
-        markdown?    (:markdown? source)
+        markdown?    (boolean (some->> source :dict (get dictionary) :phrase-text ))
         multiple?    (and (sequential? source-value)
                           (> (count source-value) 1))]
     (when (or (nil? source) (not-empty source-value))
@@ -629,6 +626,7 @@
   [{:keys [lang application verdict] :as data}]
   (let [buildings (verdict-buildings data)]
     (content (assoc data
+                    :dictionary (-> shared/verdict-schemas :r :dictionary)
                     :application-id (:id application)
                     :property-id (property-id application)
                     :applicants (->> (applicants data)

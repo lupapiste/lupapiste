@@ -194,15 +194,16 @@
             (components/autocomplete
              selected*
              {:items     (phrases/phrase-list-for-autocomplete (rum/react category*))
-              :callback  #(let [text-node (.-firstChild (rum/ref local-state ref-id) )
+              :callback  #(let [text-node (.-firstChild (rum/ref local-state ref-id))
                                 sel-start (.-selectionStart text-node)
                                 sel-end   (.-selectionEnd text-node)
                                 old-text  (or (path/value path state) "")]
                             (reset! replaced* (subs old-text sel-start sel-end))
                             (update-text (s/join (concat (take sel-start old-text)
-                                                         %
+                                                         (str "\n" % "\n")
                                                          (drop sel-end old-text)))))
-              :disabled? disabled?})]]
+              :disabled? disabled?
+              :clear?    true})]]
           [:div.col-4.col--right
            [:div.col--vertical
             (common/empty-label)
