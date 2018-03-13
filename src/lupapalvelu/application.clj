@@ -806,3 +806,11 @@
                                                  :secondaryOperations secondary-ops}
                                           $push {:documents {$each building-docs}}})
       (update-buildings-array! building-xml (mongo/by-id :applications (:id application)))))))
+
+(defn remove-secondary-buildings [{:keys [application] :as command}]
+  (let [building-docs (domain/get-documents-by-name application "archiving-project")
+        primary-op-id (get-in application [:primaryOperation :id])
+        secondary-building-docs (filter #(not (= (-> % :schema-info :op :id) primary-op-id)) building-docs)
+        secondary-buildings (filter #(not (= (:operationId %) primary-op-id)) (:buildings application))]
+    (mapv #(doc-persistence/remove! command (:id %) "documents") secondary-building-docs)
+    (action/update-application command {$pull {:buildings {:buildingId {$in (map :buildingId secondary-buildings)}}}})))

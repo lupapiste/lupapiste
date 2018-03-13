@@ -197,7 +197,6 @@
         {:keys [propertyId] :as location-info} (if createWithDefaultLocation (default-location organizationId lang) (get-location-info command app-info))
         organization      (when propertyId
                             (organization/resolve-organization (p/municipality-id-by-property-id propertyId) permit-type))
-        _ (println "FETCHISSÄÄ :::: " refreshBuildings)
         building-xml      (if app-info xml (application/fetch-building-xml organizationId permit-type propertyId))
         bldgs-and-structs (or (when app-info (building-reader/->buildings-and-structures xml))
                               (application/buildings-for-documents building-xml))

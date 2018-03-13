@@ -41,7 +41,8 @@
                                       :application/convert-to-application
                                       :application/get-document-states
                                       :application/check-final-archiving-state
-                                      :application/check-within-archiving-time-limit}
+                                      :application/check-within-archiving-time-limit
+                                      :application/remove-buildings-in-archiving-projects}
                 :approver           #{:application/approve  ;; TODO: could this be just 'approve', as in a supplement for :authority role. Then just 'approver' role couldn't exist.
                                       :application/read
                                       :application/mark-everything-seen
@@ -111,7 +112,8 @@
                                       :application/create-change-permit
                                       :application/create-continuation-period-permit
                                       :application/create-foreman-app-in-post-verdict-states
-                                      :application/convert-to-application}
+                                      :application/convert-to-application
+                                      :application/remove-buildings-in-archiving-projects}
                 :reader             #{:application/read
                                       :application/accordions-open}
                 :foreman            #{:application/read

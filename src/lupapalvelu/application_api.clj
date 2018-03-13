@@ -912,6 +912,14 @@
   (try (app/autofill-rakennuspaikka app created)
        (catch Exception e (warn "KTJ data was not updated to inforequest when converted to application"))))
 
+(defcommand remove-buildings
+  {:parameters  [id]
+   :permissions [{:required [:application/remove-buildings-in-archiving-projects]}]
+   :states       states/all-archiving-project-states
+   :pre-checks  [(permit/validate-permit-type-is permit/ARK)]}
+  [command]
+  (app/remove-secondary-buildings command))
+
 (defn- validate-organization-backend-urls [{organization :organization}]
   (when-let [org (and organization @organization)]
     (if-let [conf (:vendor-backend-redirect org)]

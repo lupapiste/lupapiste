@@ -169,5 +169,13 @@
               <span data-bind="ltext: 'application.createDiggingPermit'"></span>
             </button>
        <!-- /ko -->
+       <!-- ko if: isArchivingProject -->
+            <button class="function"
+                    data-bind="click: removeBuildings"
+                    data-test-id="remove-buildings-button">
+              <i class="lupicon-circle-remove"></i>
+              <span data-bind="ltext: 'application.remove.buildings'"></span>
+            </button>
+       <!-- /ko -->
     </div>
 </script>
