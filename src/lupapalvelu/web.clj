@@ -404,6 +404,15 @@
 (defn- logged-in-with-apikey? [request]
   (and (get-apikey request) (logged-in? request)))
 
+;; Verify autologin header and get user info from an another application
+(defpage [:get "/internal/autologin/user"] {basic-auth-data :basic-auth original-ip :ip}
+  (if (and basic-auth-data original-ip)
+    (if-let [user (autologin/autologin {:headers {"authorization" basic-auth-data
+                                                  "x-real-ip"     original-ip}})]
+      (resp/json user)
+      (resp/status 400 "Invalid or expired authorization header data"))
+    (resp/status 400 "Missing basic-auth or ip parameter")))
+
 ;;
 ;; File upload
 ;;
