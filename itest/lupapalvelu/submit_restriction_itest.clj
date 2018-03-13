@@ -17,6 +17,9 @@
     (fact "application is submittable by authority"
       (query sonja :application-submittable :id default-app-id) => ok?)
 
+    (fact "submit restriction enabled for others fails for erkki since invitation is not accepted"
+      (query erkki :submit-restriction-enabled-for-other-auths :id default-app-id) => unauthorized?)
+
     (fact "erkki applies submit restriction to others by approving invite with flag"
       (command erkki :approve-invite :id default-app-id :invite-type :company :apply-submit-restriction true) => ok?)
 
@@ -60,6 +63,23 @@
     (fact "application is again submittable for pena"
       (query pena :application-submittable :id default-app-id) => ok?))
 
+  (facts "Erkki cannot apply submit restriction with personal auth"
+    (fact "Pena invites Erkki"
+      (command pena :invite-with-role :id default-app-id :email (email-for-key erkki)
+               :role "writer" :text "personal" :documentName "" :documentId "" :path "") => ok?)
+
+    (fact "Erkki cannot apply submit restriction by approving personal invite"
+      (command erkki :approve-invite :id default-app-id  :apply-submit-restriction true) => (partial expected-failure? :error.not-allowed-to-apply-submit-restriction))
+
+    (fact "Erkki approves invite without applying submit restriction"
+      (command erkki :approve-invite :id default-app-id) => ok?)
+
+    (fact "Erkki is not authorized to apply submit restriction after approving personal invite "
+      (query erkki :authorized-to-apply-submit-restriction-to-other-auths :id default-app-id) => (partial expected-failure? :error.company-has-not-accepted-invite))
+
+    (fact "Erkki cannot apply submit restriction"
+      (command erkki :toggle-submit-restriction-for-other-auths :id default-app-id :apply-submit-restriction true) => (partial expected-failure? :error.company-has-not-accepted-invite)))
+
   (facts "enable submit restriction by toggling it after approving invite"
 
     (fact "pena invites Esimerkki company again"
@@ -70,9 +90,6 @@
 
     (fact "erkki is authorized to restrict submissions outside application context"
       (query erkki :authorized-to-apply-submit-restriction-to-other-auths) => ok?)
-
-    (fact "submit restriction enabled for others fails for erkki since invitation is not accepted"
-      (query erkki :submit-restriction-enabled-for-other-auths :id default-app-id) => unauthorized?)
 
     (fact "erkki approves invite without submit restriction"
       (command erkki :approve-invite :id default-app-id :invite-type :company) => ok?)

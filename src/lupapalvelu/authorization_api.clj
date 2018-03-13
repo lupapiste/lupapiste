@@ -112,9 +112,11 @@
   [command]
   (send-invite! command))
 
-(defn authorized-to-apply-submit-restriction [{{:keys [apply-submit-restriction]} :data :as command}]
+(defn authorized-to-apply-submit-restriction [{{:keys [invite-type apply-submit-restriction]} :data :as command}]
   (when apply-submit-restriction
-    (company/authorized-to-apply-submit-restriction-to-other-auths command)))
+    (case (keyword invite-type)
+      :company (company/authorized-to-apply-submit-restriction-to-other-auths command)
+      (fail :error.not-allowed-to-apply-submit-restriction))))
 
 (defcommand approve-invite
   {:parameters [id]
