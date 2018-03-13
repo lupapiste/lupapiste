@@ -337,7 +337,7 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.submitButtonFunction = ko.pureComputed(function() {
-    if (lupapisteApp.models.applicationAuthModel.ok("submit-application")) {
+    if (lupapisteApp.models.applicationAuthModel.ok("application-submittable")) {
       return self.submitApplication;
     } else if (lupapisteApp.models.applicationAuthModel.ok("submit-archiving-project")) {
       return self.submitArchivingProject;
@@ -868,7 +868,7 @@ LUPAPISTE.ApplicationModel = function() {
   }
 
   function fetchApplicationSubmittable() {
-    if (lupapisteApp.models.applicationAuthModel.ok("submit-application")) {
+    if (lupapisteApp.models.applicationAuthModel.ok("application-submittable")) {
       ajax
         .query("application-submittable", {id: self.id.peek()})
         .success(function() { self.submitErrors([]); })

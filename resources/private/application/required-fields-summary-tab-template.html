@@ -86,7 +86,7 @@
               </button>
           </div>
 
-          <div data-bind="visible: submitErrors().length > 0 && $root.authorization.ok('submit-application')" data-test-id="submit-errors-container">
+          <div data-bind="visible: submitErrors().length > 0 && $root.authorization.ok('application-submittable')" data-test-id="submit-errors-container">
             <h2 data-bind="ltext: 'application.not-submittable'"></h2>
             <div data-bind="foreach: submitErrors">
               <div class="info-line like-btn">

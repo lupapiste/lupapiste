@@ -316,7 +316,7 @@
    :parameters [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :contexts         [foreman/foreman-app-context]
-   :permissions      [{:required [:application/read]}]
+   :permissions      [{:required [:application/edit]}]
    :states           #{:draft :open}}
   [command]
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data (:application command)))]
