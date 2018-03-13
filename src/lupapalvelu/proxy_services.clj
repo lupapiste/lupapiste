@@ -85,7 +85,7 @@
 (defn municipality-by-point
   "Requests municipality number for given point from geoserver REST endpoint"
   [x y]
-  (let [url (str (env/value :geoserver :host) (env/value :geoserver :kunta))
+  (let [url (str (or (env/value :geoserver :host :old) (env/value :geoserver :host)) (env/value :geoserver :kunta))
         query {:query-params {:x x, :y y}
                :conn-timeout 10000, :socket-timeout 10000
                :as :json}]
