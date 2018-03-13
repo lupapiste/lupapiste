@@ -192,7 +192,8 @@
           (layout/vertical {:label :pate-verdict-template
                             :align :full}
                            (components/dropdown template*
-                                                {:items items}))
+                                                {:items   items
+                                                 :choose? false}))
           (layout/vertical [:button.positive
                             {:on-click #(service/new-verdict-draft @state/application-id
                                                                    @template*
@@ -242,7 +243,6 @@
                    (dissoc state ::hub-id))}
   []
   (when (and (rum/react state/application-id)
-             (rum/react state/schemas)
              (rum/react state/verdict-list))
     [:div
      (case (rum/react state/current-view)
@@ -264,6 +264,5 @@
   (when (common/feature? :pate)
     (swap! args assoc
            :dom-id (name domId))
-    (service/fetch-schemas)
     (reset-verdict nil)
     (mount-component)))

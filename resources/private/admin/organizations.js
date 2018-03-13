@@ -57,6 +57,7 @@
     self.pending = ko.observable();
     self.newOrganization = ko.observable();
     self.searchTerm = ko.observable();
+    self.searchFocus = ko.observable(false);
     self.search = function() {
       self.organizations( _.filter( all,
                                     function( org ) {
@@ -66,6 +67,7 @@
     };
 
     self.load = function() {
+      self.searchFocus(true);
       ajax
         .query("organizations")
         .pending(self.pending)

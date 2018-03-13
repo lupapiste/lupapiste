@@ -336,13 +336,15 @@
                        "create-digging-permit.js"
                        "parties-model.js"
                        "application.js"
-                       "backend-id-manager.js"]
+                       "backend-id-manager.js"
+                       "replace-operation.js"]
                   :html ["application.html" "inforequest.html" "add-operation.html" "change-location.html"
                          "foreman-template.html" "archival-summary-template.html"
                          "required-fields-summary-tab-template.html" "parties-tab-template.html"
                          "case-file-template.html" "create-digging-permit.html"
                          "application-actions-template.html"
-                         "backend-id-manager-template.html"]}
+                         "backend-id-manager-template.html"
+                         "replace-operation.html"]}
 
    :applications {:depends [:common-html :repository :invites :global-models]
                   :html ["applications-list.html"]

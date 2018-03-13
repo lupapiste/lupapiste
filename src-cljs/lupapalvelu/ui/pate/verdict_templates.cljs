@@ -13,7 +13,6 @@
             [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]))
 
-
 (defn updater
   ([{:keys [state info path] :as options} value]
    (service/save-draft-value (path/value [:id] info)
@@ -150,14 +149,10 @@
      [:h2 (common/loc "pate.verdict-templates")]
      (category-select)
      (when (some :deleted templates)
-       [:div.checkbox-wrapper
-        [:input {:type "checkbox"
-                 :id "show-deleted"
-                 :value @show-deleted}]
-        [:label.checkbox-label
-         {:for "show-deleted"
-          :on-click #(swap! show-deleted not)}
-         (common/loc :handler-roles.show-all)]])
+       (components/toggle show-deleted
+                          {:test-id  :show-deleted-templates
+                           :text-loc :handler-roles.show-all
+                           :prefix   :checkbox}))
      (let [filtered (if @show-deleted
                       templates
                       (remove :deleted templates))]
@@ -193,8 +188,7 @@
 
 (rum/defc verdict-templates < rum/reactive
   []
-  (when (and (rum/react state/schemas)
-             (rum/react state/categories)
+  (when (and (rum/react state/categories)
              (rum/react state/phrases))
     [:div
      (case (:view (rum/react state/current-view))
@@ -202,9 +196,9 @@
        (with-back-button
          (verdict-template
           (merge
-           {:schema     (dissoc shared/default-verdict-template
+           {:schema     (dissoc (shared/default-verdict-template (keyword @state/current-category))
                                 :dictionary)
-            :dictionary (:dictionary shared/default-verdict-template)
+            :dictionary (:dictionary (shared/default-verdict-template (keyword @state/current-category)))
             :references state/references}
            (state/select-keys state/current-template [:state :info :_meta]))))
 
@@ -234,7 +228,6 @@
     (swap! args assoc
            :dom-id (name domId))
     (reset! state/auth-fn lupapisteApp.models.globalAuthModel.ok)
-    (service/fetch-schemas)
     (service/fetch-template-list)
     (service/fetch-categories (fn [categories]
                                 (set-category (first categories))))

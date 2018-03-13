@@ -12,55 +12,6 @@
             [schema-tools.core :as st]
             [schema.core :refer [defschema] :as sc]))
 
-(def pate-string {:name "pate-string"
-                  :type :string})
-
-(def verdict-text {:name "pate-verdict-text"
-                   :type :string})
-
-(def verdict-section {:name "pate-verdict-section"
-                      :type :string})
-
-(def verdict-contact {:name  "pate-verdict-contact"
-                      :type  :string})
-
-(def verdict-giver {:name "pate-verdict-giver"
-                    :type :select
-                    :body [{:name "viranhaltija"}
-                           {:name "lautakunta"}]})
-
-(def automatic-vs-manual {:name "automatic-vs-manual"
-                          :type :radioGroup
-                          :label false
-                          :body  [{:name "automatic"}
-                                  {:name "manual"}]})
-
-(def verdict-check {:name "pate-verdict-check"
-                    :label false
-                    :type :checkbox})
-
-(def in-verdict {:name "required-in-verdict"
-                 :label false
-                 :i18nkey "pate.template-removed"
-                 :type :checkbox})
-
-(def complexity {:name "pate-complexity"
-                 :type :select
-                 :body (map #(hash-map :name %)
-                            ["small" "medium" "large" "extra-large"])})
-
-(def date {:name "pate-date"
-           :type :date})
-
-(def collateral-type {:name "collateral-type"
-                      :type :select
-                      :body [{:name "shekki"}
-                             {:name "panttaussitoumus"}]})
-
-(def languages {:name "pate-languages"
-                :type :select
-                :body (map #(hash-map :name (name %)) i18n/languages)})
-
 (defschema PateCategory
   {:id       ssc/ObjectIdStr
    :category (sc/enum "r" "p" "ya" "kt" "ymp")})
@@ -113,22 +64,10 @@
 
 (defschema PateSavedVerdictTemplates
   {:templates [PateSavedTemplate]
-   (sc/optional-key :settings)  {(sc/optional-key :r) PateSavedSettings}
+   (sc/optional-key :settings)  {(sc/optional-key :r) PateSavedSettings
+                                 (sc/optional-key :p) PateSavedSettings}
    (sc/optional-key :reviews)   [PateSettingsReview]
    (sc/optional-key :plans)     [PateGeneric]})
-
-(def pate-schemas
-  "Raw schemas are combined here for the benefit of
-  pdf-export-test/ignored-schemas."
-  [pate-string verdict-section verdict-text verdict-contact
-   verdict-check in-verdict verdict-giver automatic-vs-manual
-   complexity date collateral-type languages])
-
-(doc-schemas/defschemas 1
-  (map (fn [m]
-         {:info {:name (:name m)}
-          :body (body m)})
-       pate-schemas))
 
 ;; Phrases
 
@@ -179,11 +118,10 @@
 
 (defmethod validate-resolution :date-delta
   [{:keys [path schema value] :as options}]
-  (let [property (first path)]
-    (if (util/=as-kw :delta property)
-     (schema-error (assoc options
-                          :value (parse-int value)))
-     :error.invalid-value-path)))
+  (or (path-error path)
+      (schema-error (assoc options
+                           :value (parse-int value)
+                           :path [:delta]))))
 
 (defn keyword-set [xs]
   (set (map keyword xs)))
@@ -205,26 +143,16 @@
                   (date/parse-finnish-date trimmed))
       :error.invalid-value)))
 
-(defmethod validate-resolution :docgen
-  [{:keys [path schema value data] :as options}]
-  ;; TODO: Use the old-school docgen validation if possible
-  ;; For now we support only the types used by Pate
-  (let [body      (-> schema :body first)
-        data-type (:type body)
-        names     (map :name (:body body))
-        check     (fn [pred] (when (sc/check pred value)
-                               :error.invalid-value))]
-    (cond
-      (seq path)                   :error.invalid-value-path
-      (coll? value)                :error.invalid-value
-      (data-type #{:text :string}) (check sc/Str)
-      (= data-type :checkbox)      (check sc/Bool)
-      ;; TODO: Nil handling should follow valueAllowUnset.
-      (= data-type :select)        (when-not (ss/blank? (str value))
-                                     (check-items [value] names))
-      (= data-type :radioGroup)    (check-items [value] names)
-      (= data-type :date)          (check-date value)
-      :else                        :error.invalid-value)))
+(defmethod validate-resolution :date
+  [{:keys [path value] :as options}]
+  (or (path-error path)
+      (check-date value)))
+
+(defmethod validate-resolution :select
+  [{:keys [path value data] :as options}]
+  (or (path-error path)
+      (when-not (ss/blank? (str value))
+        (check-items [value] (:items data)))))
 
 (defmethod validate-resolution :multi-select
   [{:keys [path schema data value] :as options}]
@@ -282,28 +210,44 @@
       (when (sc/check [sc/Str] value)
         :error.invalid-value)))
 
+(defn- simple-value-resolution
+  [{:keys [path value] :as options}]
+  (or (path-error path)
+      (schema-error (assoc options :path [:value]))))
+
+(defmethod validate-resolution :toggle
+  [options]
+  (simple-value-resolution options))
+
+(defmethod validate-resolution :text
+  [options]
+  (simple-value-resolution options))
+
 (defn- resolve-dict-value
   [data]
-  (let [{:keys [docgen reference-list
-                date-delta multi-select
-                phrase-text keymap button
-                application-attachments]} data
-        wrap                                (fn [type schema data]
-                                              {:type   type
-                                               :schema schema
-                                               :data   data})]
+  (let [{:keys [docgen reference-list date-delta multi-select
+                phrase-text keymap button application-attachments
+                toggle text date select]} data
+        wrap                              (fn [type schema
+                                               data] {:type   type
+                                                      :schema schema
+                                                      :data   data})]
     (cond
-      docgen         (wrap :docgen (doc-schemas/get-schema
-                                    {:name (get docgen :name docgen)}) docgen)
-      date-delta     (wrap :date-delta shared/PateDateDelta date-delta)
-      reference-list (wrap :reference-list shared/PateReferenceList reference-list)
-      multi-select   (wrap :multi-select shared/PateMultiSelect multi-select)
-      phrase-text    (wrap :phrase-text shared/PatePhraseText phrase-text)
-      keymap         (wrap :keymap shared/KeyMap keymap)
-      button         (wrap :button shared/PateButton button)
+      docgen                  (wrap :docgen (doc-schemas/get-schema
+                                             {:name (get docgen :name docgen)}) docgen)
+      date-delta              (wrap :date-delta shared/PateDateDelta date-delta)
+      reference-list          (wrap :reference-list shared/PateReferenceList reference-list)
+      multi-select            (wrap :multi-select shared/PateMultiSelect multi-select)
+      phrase-text             (wrap :phrase-text shared/PatePhraseText phrase-text)
+      keymap                  (wrap :keymap shared/KeyMap keymap)
+      button                  (wrap :button shared/PateButton button)
       application-attachments (wrap :application-attachments
                                     shared/PateComponent
-                                    application-attachments))))
+                                    application-attachments)
+      toggle                  (wrap :toggle shared/PateToggle toggle)
+      text                    (wrap :text shared/PateText text)
+      date                    (wrap :date shared/PateDate date)
+      select                  (wrap :select shared/PateSelect select))))
 
 (defn- validate-dictionary-value
   "Validates that path-value combination is valid for the given
@@ -435,7 +379,6 @@
                  (:required? v)))
        (every? (fn [[k v]]
                  (case (-> v (dissoc :required?) keys first)
-                   :date-delta   (ss/not-blank? (str (get-in data [k :delta])))
                    :multi-select (not-empty (k data))
                    :reference    true ;; Required only for highlighting purposes
                    (ss/not-blank? (k data)))))))

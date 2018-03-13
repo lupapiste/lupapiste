@@ -105,18 +105,14 @@
 (rum/defcs generic-editor < rum/reactive
   (rum/local false ::show-deleted)
   [{show-deleted ::show-deleted} generic-type]
-  (let [items    (rum/react (generic-state generic-type))
-        check-id (js/sprintf "show-deleted-%ss" (name generic-type))]
+  (let [items (rum/react (generic-state generic-type))]
     [:div.pate-settings-editor
      (when (some :deleted items)
-       [:div.checkbox-wrapper
-        [:input {:type  "checkbox"
-                 :id    check-id
-                 :value @show-deleted}]
-        [:label.checkbox-label
-         {:for      check-id
-          :on-click #(swap! show-deleted not)}
-         (common/loc :handler-roles.show-all)]])
+       (components/toggle show-deleted
+                          {:test-id  (js/sprintf "show-deleted-%ss"
+                                                 (name generic-type))
+                           :text-loc :handler-roles.show-all
+                           :prefix   :checkbox}))
      (let [filtered (if @show-deleted
                       items
                       (remove :deleted items))]

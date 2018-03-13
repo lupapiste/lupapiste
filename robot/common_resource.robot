@@ -36,7 +36,7 @@ ${DB PREFIX}                    test_
 
 Set DB cookie
   ${timestamp}=  Get Time  epoch
-  ${random post fix}=  Evaluate  random.randint(0, sys.maxint)  modules=random, sys
+  ${random post fix}=  Evaluate  random.randint(0, 999999999999)  modules=random
   ${dbname}=  Set Variable  ${DB PREFIX}${timestamp}_${random post fix}
   Add Cookie  ${DB COOKIE}  ${dbname}  /
   Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
@@ -57,7 +57,7 @@ Reload page and kill dev-box
 
 Open browser to login page
   Browser
-  Maximize browser window
+  Run Keyword And Ignore Error  Maximize browser window
   Set selenium speed  ${DEFAULT_SPEED}
   Apply minimal fixture now
   Set integration proxy on
@@ -332,7 +332,7 @@ Login fails
 
 User should be logged in
   [Arguments]  ${name}
-  Maximize browser window
+  Run Keyword And Ignore Error  Maximize browser window
   Scroll to top
   Wait Until  Element text should be  user-name  ${name}
 

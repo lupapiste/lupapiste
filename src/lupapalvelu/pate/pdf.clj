@@ -304,8 +304,8 @@
                     [{:loc :empty
                       :source {:dict :verdict-date}
                       :styles :pad-before}]
-                    [{:loc :empty
-                      :source :verdict-giver
+                    [{:loc :applications.authority
+                      :source {:dict :handler}
                       :styles :pad-before}]
                     [{:loc :empty
                       :source :organization
@@ -593,11 +593,12 @@
        not-empty))
 
 (defn collateral [lang verdict]
-  (join-non-blanks ", "
-                   [(add-unit lang :eur (dict-value verdict :collateral))
-                    (loc-non-blank lang :pate.collateral-type
-                                   (dict-value verdict :collateral-type))
-                    (dict-value verdict :collateral-date)]))
+  (when (dict-value verdict :collateral-flag)
+    (join-non-blanks ", "
+                     [(add-unit lang :eur (dict-value verdict :collateral))
+                      (loc-non-blank lang :pate.collateral-type
+                                     (dict-value verdict :collateral-type))
+                      (dict-value verdict :collateral-date)])))
 
 (defn organization-name [lang {organization :organization}]
   (org/get-organization-name organization lang))
@@ -635,8 +636,6 @@
                     :conditions (conditions verdict)
                     :statements (statements lang verdict)
                     :collateral (collateral lang verdict)
-                    :verdict-giver (or (some-> verdict :references :boardname)
-                                       (dict-value verdict :contact))
                     :organization (organization-name lang application)
                     :muutoksenhaku (loc-fill-non-blank lang
                                                        :pdf.not-later-than
@@ -648,6 +647,50 @@
                                                                  :aloitettava)
                                                      (dict-value verdict
                                                                  :voimassa)))
+             (:r pdf-layouts))))
+
+(defmethod verdict-body :p
+  [{:keys [lang application verdict] :as data}]
+  (let [buildings (verdict-buildings data)]
+    (content (assoc data
+               :application-id (:id application)
+               :property-id (property-id application)
+               :applicants (->> (applicants data)
+                                (map #(format "%s\n%s"
+                                              (:name %) (:address %)))
+                                (ss/join "\n\n"))
+               :operations (assoc-in (operation-infos application)
+                                     [0 ::styles :name] :bold)
+               :complexity (complexity lang verdict)
+               :designers (designers data)
+               :primary (primary-operation-data application)
+               :paloluokka (->> buildings
+                                (map :paloluokka)
+                                (remove ss/blank?)
+                                distinct
+                                (ss/join " / "))
+               :parking (->>  buildings
+                              (map (partial building-parking lang))
+                              (interpose {:text    "" :amount ""
+                                          ::styles {:row :pad-before}})
+                              flatten)
+               :attachments (verdict-attachments lang verdict)
+               :reviews (references lang verdict :reviews)
+               :plans   (references lang verdict :plans)
+               :conditions (conditions verdict)
+               :statements (statements lang verdict)
+               :collateral (collateral lang verdict)
+               :organization (organization-name lang application)
+               :muutoksenhaku (loc-fill-non-blank lang
+                                                  :pdf.not-later-than
+                                                  (dict-value verdict
+                                                              :muutoksenhaku))
+               :voimassaolo (loc-fill-non-blank lang
+                                                :pdf.voimassa.text
+                                                (dict-value verdict
+                                                            :aloitettava)
+                                                (dict-value verdict
+                                                            :voimassa)))
              (:r pdf-layouts))))
 
 (defn verdict-header

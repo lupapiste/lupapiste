@@ -184,9 +184,8 @@
                            (empty? versions)))
                     attachments)))))
 
-(defn remove! [{application :application timestamp :created :as command} doc-id collection]
-  (let [document      (by-id application collection doc-id)
-        updated-app   (update-in application [:documents] (fn [c] (filter #(not= (:id %) doc-id) c)))
+(defn remove! [{application :application timestamp :created :as command} document]
+  (let [updated-app   (update-in application [:documents] (fn [c] (filter #(not= (:id %) (:id document)) c)))
         trigger-fn    (get-after-update-trigger-fn document)
         extra-updates (trigger-fn updated-app)
         op-id         (get-in document [:schema-info :op :id])
@@ -198,7 +197,7 @@
       (util/deep-merge
         extra-updates
         {$pull (merge
-                 {:documents {:id doc-id}}
+                 {:documents {:id (:id document)}}
                  (when op-id
                    {:secondaryOperations {:id op-id}}))
          $set  (merge

@@ -286,17 +286,24 @@
               <div data-bind="if: $data.permanentArchiveEnabled() && $data.hasVersion()">
                 <div class="archive-valid"
                      data-bind="with: $data.attachment().latestVersion">
-                  <div>
+                  <div class="spacerM">
                     <i data-bind="css: {'lupicon-circle-check': $data.archivable,
                                         'positive': $data.archivable,
                                         'lupicon-circle-attention': !$data.archivable,
                                         'negative': !$data.archivable}"></i>
-                    <!-- ko ifnot: $data.archivabilityError -->
-                    <span data-bind="visible: $data.autoConversion, ltext: 'attachment.archivable.converted'"></span>
-                    <span data-bind="visible: !ko.unwrap($data.autoConversion), ltext: 'attachment.archivable.notConverted'"></span>
-                    <!-- /ko -->
-                    <span data-bind="visible: $data.archivabilityError, ltext: $data.archivabilityError"></span>
+                    <span data-bind="ltext: $component.archivabilityText"></span>
                   </div>
+                  <!-- ko if: $component.convertableToPdfA -->
+                  <div class="spacerM">
+                    <button class="btn-primary" data-bind="click: $component.convertToPdfA,
+                                                           disable: $component.conversionInProgress">
+                      <span class="waiting" data-bind="css: { waiting: $component.conversionInProgress }">
+                        <i class="spin lupicon-refresh wait"></i>
+                      </span>
+                      <span data-bind="ltext: 'Konvertoi PDF/A-muotoon'"></span>
+                    </button>
+                  </div>
+                  <!-- /ko -->
                   <div data-bind="if: $data['missing-fonts'] && $data['missing-fonts'].length > 0">
                     <h4><span data-bind="ltext: 'attachment.missing-fonts'"></span>:</h4>
                     <div data-bind="foreach: $data['missing-fonts']">

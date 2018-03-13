@@ -312,6 +312,10 @@
               => (contains {:application application-id}))))))))
 
 (facts "Reviews with PATE"
+  (command admin :set-organization-boolean-path
+           :organizationId "753-R"
+           :path "pate-enabled"
+           :value true)
   (let [sipoo-application        (create-and-submit-application pena :propertyId sipoo-property-id)
         jarvenpaa-application    (create-and-submit-application pena :propertyId jarvenpaa-property-id)
         sipoo-app-id             (:id sipoo-application)

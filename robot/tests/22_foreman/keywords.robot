@@ -33,6 +33,14 @@ Open foreman application
   Open application by id  ${foremanAppId}
   Wait until  jQuery should match X times  span[data-test-primary-operation-id=tyonjohtajan-nimeaminen-v2]:visible  1
 
+Open foreman app from list
+  [Arguments]  ${index}
+  ${foremanAppId} =  Get From List  ${foremanApps}  ${index}
+  Click element  //div[contains(@class,"nav-top")]//div[contains(@class,"header-box")]//a[@title="Hankkeet"]
+  Wait until  Element should be visible  //table[@id="applications-list"]//td[@data-test-col-name="operation"]
+  Click element  //table[@id="applications-list"]//tr[@data-id="${foremanAppId}"]//td[@data-test-col-name="operation"]
+  Wait until  jQuery should match X times  span[data-test-primary-operation-id=tyonjohtajan-nimeaminen-v2]:visible  1
+
 Open foreman accordions
   Open accordions  parties
   ${toggled}=  Run Keyword And Return Status  Element should be visible  xpath=//button[@data-test-id='accordion-application-foreman-header' and contains(@class,'toggled')]
@@ -53,7 +61,7 @@ Sonja invites foreman to application
 
 Foreman applies personal information to the foreman application
   [Arguments]  ${index}
-  Open foreman application  ${index}
+  Open foreman app from list  ${index}
   Wait until  Confirm yes no dialog
   Open tab  parties
   Wait until  Page should contain  Hyväksynyt valtuutuksen
@@ -76,7 +84,7 @@ Foreman accepts invitation and fills info
 
 Foreman sets role and difficulty to foreman application
   [Arguments]  ${index}  ${role}  ${difficulty}
-  Open foreman application  ${index}
+  Open foreman app from list  ${index}
   Test id visible  confirm-no
   Deny yes no dialog
   Sleep  1s
@@ -87,7 +95,8 @@ Foreman sets role and difficulty to foreman application
 
 Foreman submit application
   [Arguments]  ${index}
-  Open foreman application  ${index}
+  Open foreman app from list  ${index}
+  Sleep  1s
   Select From List By Value  permitSubtypeSelect  tyonjohtaja-hakemus
   Positive indicator should be visible
   Submit application
@@ -111,6 +120,13 @@ Project application is open
 Open project application
   ${appId} =   Get From List  ${applicationIds}  0
   Open application by id  ${appId}
+  Project application is open
+
+Open project app from list
+  ${appId} =   Get From List  ${applicationIds}  0
+  Click element  //div[contains(@class,"nav-top")]//div[contains(@class,"header-box")]//a[@title="Hankkeet"]
+  Wait until  Element should be visible  //table[@id="applications-list"]//td[@data-test-col-name="operation"]
+  Click element  //table[@id="applications-list"]//tr[@data-id="${appId}"]//td[@data-test-col-name="operation"]
   Project application is open
 
 Foreman history should have text X times

@@ -56,10 +56,16 @@
    :viimeinenValitusPvm (util/to-xml-date-from-string (:valitus data))
    :julkipanoPvm (util/to-xml-date-from-string (:julkipano data))})
 
-(defn- paatoksentekija [lang {{:keys [contact giver]} :data :as verdict}]
-  (cond
-    (ss/blank? giver) contact
-    (ss/blank? contact) (i18n/localize lang "pate-verdict.giver" giver)
+(defn- paatoksentekija [lang {{handler :handler} :data
+                              {giver :giver} :template :as verdict}]
+  (->> [handler
+        (when-not (ss/blank? giver)
+          (format "(%s)" (i18n/localize lang :pate-verdict.giver giver)))]
+       (remove ss/blank?)
+       (ss/join " "))
+  #_(cond
+    (ss/blank? giver) handler
+    (ss/blank? handler) (i18n/localize lang "pate-verdict.giver" giver)
     :else (format "%s (%s)" contact (i18n/localize lang "pate-verdict.giver" giver))))
 
 (defn- paatospoytakirja-type-canonical [lang {data :data :as verdict}]

@@ -465,23 +465,48 @@
         .call();
     };
 
+    self.conversionInProgress = ko.observable(false);
+
     self.convertToPdfA = function(attachment) {
+      self.conversionInProgress(true);
       var attachmentId = ko.unwrap(attachment.id);
       attachment.showAdditionalControls(true);
+      self.addEventListener(attachmentsService.serviceName,
+        {eventType: "update", attachmentId: attachmentId, commandName: "convert-to-pdfa"},
+        function() {
+          attachmentsService.queryOne(attachmentId, {triggerCommand: "convert-to-pdfa"});
+          self.conversionInProgress(false);
+        }
+      );
       attachmentsService.convertToPdfA(attachmentId);
     };
 
-    self.showMarkArchivedSection = ko.observable(!params.application._js.archived.application &&
-      lupapisteApp.models.applicationAuthModel.ok("mark-pre-verdict-phase-archived"));
-    self.markApplicationArchived = function() {
+    self.markPreVerdictPhaseArchivedEnabled = self.disposedPureComputed(function() {
+      return lupapisteApp.models.applicationAuthModel.ok("mark-pre-verdict-phase-archived");
+    });
+
+    self.markFullyArchivedEnabled = self.disposedPureComputed(function() {
+      return lupapisteApp.models.applicationAuthModel.ok("mark-fully-archived");
+    });
+
+    self.showMarkArchivedSection = self.disposedPureComputed(function() {
+      return self.tosFunctionExists() &&
+        (self.markPreVerdictPhaseArchivedEnabled() || self.markFullyArchivedEnabled()) &&
+        !lupapisteApp.models.applicationAuthModel.ok("common-area-application");
+    });
+
+    function markApplicationArchived(cmd) {
       ajax
-        .command("mark-pre-verdict-phase-archived", {id: ko.unwrap(params.application.id)})
+        .command(cmd, {id: ko.unwrap(params.application.id)})
         .success(function() {
           repository.load(ko.unwrap(params.application.id));
-          self.showMarkArchivedSection(false);
         })
         .call();
-    };
+    }
+
+    self.markPreVerdictPhaseArchived = _.partial(markApplicationArchived, "mark-pre-verdict-phase-archived");
+
+    self.markFullyArchived = _.partial(markApplicationArchived, "mark-fully-archived");
 
     var baseModelDispose = self.dispose;
     self.dispose = function() {

@@ -12,7 +12,7 @@
         <form data-bind="submit: organizationsModel.search"
               class="organizations-search">
           <input type="text" class="textinput textinput--big"
-                 data-bind="value: organizationsModel.searchTerm"
+                 data-bind="value: organizationsModel.searchTerm, hasFocus: organizationsModel.searchFocus"
                  data-test-id="organization-search-term">
           <button class="function" type="submit"
                   data-test-id="organization-search">

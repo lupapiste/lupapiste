@@ -336,6 +336,15 @@
         org-set (if organization (set/intersection #{organization} archive-orgs) archive-orgs)]
     (and (seq org-set) (org/some-organization-has-archive-enabled? org-set))))
 
+(defn precheck-user-is-archivist [{user :user {:keys [organization]} :application}]
+  (when (and (map? (:orgAuthz user))
+             (string? organization)
+             (not (-> (with-org-auth user)
+                      :orgAuthz
+                      (get (keyword organization))
+                      (contains? :archivist))))
+    (fail :error.unauthorized)))
+
 (defn user-is-pure-digitizer? [user]
   (let [all-roles (apply set/union (vals (:orgAuthz (with-org-auth user))))]
     (and (authority? user)

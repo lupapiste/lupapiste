@@ -967,7 +967,8 @@
                        :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true
-                       :pate-enabled true
+                       ; NB! Setting pate-enabled to true WILL BREAK (robot) tests
+                       :pate-enabled false
                        :docstore-info (assoc org/default-docstore-info
                                              :docStoreInUse true
                                              :docTerminalInUse true
