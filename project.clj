@@ -143,6 +143,7 @@
 
                  ;; Markdown -> HTML also ClojureScript.
                  [markdown-clj "1.0.2"]
+                 [instaparse "1.4.8"]
 
                  [org.clojure/clojurescript "1.9.473"]
                  [rum "0.10.8"]

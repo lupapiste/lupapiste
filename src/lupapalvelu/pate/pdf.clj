@@ -14,6 +14,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pdf.html-template :as html-pdf]
             [lupapalvelu.pdf.html-template-common :as common]
             [rum.core :as rum]
@@ -35,7 +36,7 @@
   (sc/conditional
    ;; Keyword corresponds to a key in the data context.
    keyword? sc/Keyword
-   :else (shared/only-one-of [:doc :dict]
+   :else (shared-schemas/only-one-of [:doc :dict]
                              ;; Vector is a path to application
                              ;; document data. The first item is the
                              ;; document name and rest are path within
@@ -86,17 +87,17 @@
    ;; cells/columns. As every property is optional, the cells can be
    ;; omitted. In that case, the value of the right-hand side is the
    ;; source value.
-   (shared/only-one-of [:value :text]
+   (shared-schemas/only-one-of [:value :text]
                        ;; Path within the source value. Useful, when the value is a map.
-                       {(sc/optional-key :path)       shared/path-type
+                       {(sc/optional-key :path)       shared-schemas/path-type
                         ;; Textual representation that is static and
                         ;; independent from any source value.
-                        (sc/optional-key :text)       shared/keyword-or-string
+                        (sc/optional-key :text)       shared-schemas/keyword-or-string
                         (sc/optional-key :width)      (apply sc/enum cell-widths)
                         (sc/optional-key :unit)       (sc/enum :ha :m2 :m3 :kpl)
                         ;; Additional localisation key prefix. Is
                         ;; applied both to path and text values.
-                        (sc/optional-key :loc-prefix) shared/path-type
+                        (sc/optional-key :loc-prefix) shared-schemas/path-type
                         (sc/optional-key :styles)     (styles cell-styles)})])
 
 (defschema PdfLayout
