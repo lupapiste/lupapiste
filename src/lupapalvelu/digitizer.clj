@@ -112,23 +112,6 @@
   (->> (building-reader/->buildings xml)
        (map #(-> {:data %}))))
 
-(defn update-buildings-array! [xml application]
-  (let [doc-buildings (building/building-ids application)
-        buildings (building-reader/->buildings-summary xml)
-        find-op-id (fn [nid]
-                     (->> (filter #(= (:national-id %) nid) doc-buildings)
-                          first
-                          :operation-id))
-        updated-buildings (map
-                            (fn [{:keys [nationalId] :as bldg}]
-                              (-> (select-keys bldg [:localShortId :buildingId :localId :nationalId :location-wgs84 :location])
-                                  (assoc :operationId (find-op-id nationalId))))
-                            buildings)]
-    (when (seq updated-buildings)
-      (mongo/update-by-id :applications
-                          (:id application)
-                          {$set {:buildings updated-buildings}}))))
-
 (defn add-other-building-docs [created-application document-datas structure-descriptions]
   (let [;; make secondaryOperations for buildings other than the first one in case there are many
         other-building-docs (map (partial application/document-data->op-document created-application) (rest document-datas))
@@ -170,7 +153,7 @@
 
     (let [fetched-application (mongo/by-id :applications (:id created-application))]
       (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
-      (application/update-buildings-array! building-xml fetched-application)
+      (application/update-buildings-array! building-xml fetched-application refreshBuildings)
       fetched-application)))
 
 (defn get-location-info [{data :data :as command} app-info]

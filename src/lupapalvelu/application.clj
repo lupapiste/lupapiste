@@ -770,9 +770,13 @@
   (->> (building-reader/->buildings xml)
        (map #(-> {:data %}))))
 
-(defn update-buildings-array! [xml application]
+(defn update-buildings-array! [xml application all-buildings]
   (let [doc-buildings (building/building-ids application)
         buildings (building-reader/->buildings-summary xml)
+        primary-building-id (:buildingId (first buildings))
+        buildings (if (true? all-buildings)
+                    buildings
+                    (filter #(= (:buildingId %) primary-building-id) buildings))
         find-op-id (fn [nid]
                      (->> (filter #(= (:national-id %) nid) doc-buildings)
                           first
@@ -788,7 +792,7 @@
                           {$set {:buildings updated-buildings}}))))
 
 
-(defn fetch-buildings [{:keys [application] :as command} propertyId]
+(defn fetch-buildings [{:keys [application] :as command} propertyId all-buildings]
   (let [building-xml              (fetch-building-xml (:organization application) "R" propertyId)
         old-building-docs         (domain/get-documents-by-name application "archiving-project")
         buildings-and-structures  (buildings-for-documents building-xml)
@@ -805,7 +809,7 @@
       (action/update-application command {$set  {:primaryOperation    primary-operation
                                                  :secondaryOperations secondary-ops}
                                           $push {:documents {$each building-docs}}})
-      (update-buildings-array! building-xml (mongo/by-id :applications (:id application)))))))
+      (update-buildings-array! building-xml (mongo/by-id :applications (:id application)) all-buildings)))))
 
 (defn remove-secondary-buildings [{:keys [application] :as command}]
   (let [building-docs (domain/get-documents-by-name application "archiving-project")

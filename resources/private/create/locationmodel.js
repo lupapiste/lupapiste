@@ -10,8 +10,6 @@ LUPAPISTE.CreateApplicationLocationModel = function(options) {
        popupContentModel: "section#map-popup-content"});
 
   self.municipalitySupported = ko.observable(true);
-  self.refreshBuildingsi = ko.observable(true);
-
 
   ko.computed(function() {
     var code = self.municipalityCode();

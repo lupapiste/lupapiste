@@ -589,7 +589,7 @@
       (try (app/autofill-rakennuspaikka (mongo/by-id :applications id) (now))
            (catch Exception e (warn "KTJ data was not updated after location changed")))
       (when (and (permit/archiving-project? application) (true? refreshBuildings))
-        (app/fetch-buildings command propertyId)))
+        (app/fetch-buildings command propertyId refreshBuildings)))
     (fail :error.property-in-other-muinicipality)))
 
 (defcommand change-application-state
