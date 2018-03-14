@@ -6,6 +6,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :as fixture]
+            [lupapalvelu.property-location :as prop-loc]
             [sade.core :refer [now]]
             [sade.env :as env]
             [sade.coordinate :as coord]
@@ -97,16 +98,19 @@
   (let [response (property-info-by-wkt-proxy {:params params})]
     (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
     (let [body (json/decode (:body response) true)
-          {:keys [x y rekisteriyksikkolaji kiinttunnus kunta wkt]} (first body)
+          {:keys [x y rekisteriyksikkolaji kiinttunnus kunta wkt nimi]} (first body)
           {:keys [id selite]} rekisteriyksikkolaji]
 
       (fact "collection format"
         (count body) => 1
-        (keys (first body)) => (just #{:x :y :rekisteriyksikkolaji :kiinttunnus :kunta :wkt}))
+        (keys (first body)) => (just #{:x :y :rekisteriyksikkolaji :kiinttunnus :kunta :wkt :nimi}))
       (fact "valid x" x => coord/valid-x?)
       (fact "valid y" y => coord/valid-y?)
       (fact "kiinttunnus" kiinttunnus => "75341600380021")
       (fact "kunta" kunta => "753")
+      (fact "nimi"
+        (:fi nimi) => "Sipoo"
+        (:sv nimi) => "Sibbo")
       (fact "wkt" wkt => #"^POLYGON")
       (fact "rekisteriyksikkolaji"
         id => "1"
@@ -398,3 +402,15 @@
                            (wfs/feature-to-address-details "fi"))]
           (:municipality details) => "505"
           (get-in details [:name :fi]) => "M\u00e4nts\u00e4l\u00e4")))))
+
+(facts "property-info-by-point from KTJKii"                 ; LPK-3683
+  (let [jakku {:x "436885.026" :y "7242129.297"}
+        jarvenpaa {:x "399309.136" :y "6709508.629"}]
+    (fact "Jakkukyla"
+      (prop-loc/property-info-by-point (:x jakku) (:y jakku)) => (contains {:municipality "139",
+                                                                            :name {:fi "Ii", :sv "Ii"},
+                                                                            :propertyId "56442100060084"})) ; was formerly in Oulu, property id indicates that
+    (fact "Jarvenpaa in border of Mantsala"
+      (prop-loc/property-info-by-point (:x jarvenpaa) (:y jarvenpaa)) => (contains {:municipality "186"
+                                                                                    :name {:fi "J\u00e4rvenp\u00e4\u00e4"
+                                                                                           :sv "Tr\u00e4sk\u00e4nda"}}))))
