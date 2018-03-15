@@ -30,7 +30,7 @@
     <div class="tree-last">
 
         <div data-bind="text: loc('operations.selected') + ' ' + loc(['operations',op])"></div>
-        <div class="info-line like-btn">
+        <div class="info-line">
             <i class="lupicon-circle-attention"></i>
             <span data-bind="ltext: 'operations.replaceOperationWarningText'"></span>
         </div>
@@ -39,7 +39,7 @@
                            disable: processing,
                            css: {waiting: pending}" class="positive"
                 data-test-id="replace-operation">
-            <i class="lupicon-circle-pen"></i>
+            <i class="lupicon-check"></i>
             <i class="wait spin lupicon-refresh"></i>
             <span data-bind="ltext: 'operations.replace'"></span>
         </button>

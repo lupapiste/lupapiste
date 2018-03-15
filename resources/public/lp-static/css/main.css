@@ -13963,18 +13963,15 @@ ul.tabs {
   white-space: initial;
 }
 
-.operation-tree .tree-nav .tree-back {
+.operation-tree .tree-nav .tree-back, .operation-tree .tree-nav .tree-start {
   min-width: 5.625em;
-  display: inline-block;
-  margin: 24px 24px 0 30px;
+  margin: 24px 0 24px 24px;
   height: 30px;
 }
 
-.operation-tree .tree-nav .tree-start {
-  min-width: 5.625em;
+.operation-tree .tree-nav .tree-back button, .operation-tree .tree-nav .tree-start button {
   display: inline-block;
-  margin: 24px 24px 0 30px;
-  height: 30px;
+  position: relative;
 }
 
 .operation-tree .tree-page {
@@ -14020,7 +14017,8 @@ ul.tabs {
 
 .operation-tree .tree-last button {
   margin-top: 24px;
-  width: 18em;
+  position: relative;
+  margin-right: 24px;
 }
 
 .operation-tree .tree-last .operation-description {
@@ -34453,8 +34451,9 @@ span.icon_clear:before {
   display: table-row;
 }
 
-.info-line span, .info-line a {
-  display: table-cell;
+.info-line i {
+  float: left;
+  padding-right: 10px;
 }
 
 .info-line span a {
@@ -34684,10 +34683,6 @@ div.foreman-history-container {
   display: inline-block;
   padding-right: 48px;
   vertical-align: top;
-}
-
-.create-buttons {
-  float: right;
 }
 
 .create-content {
