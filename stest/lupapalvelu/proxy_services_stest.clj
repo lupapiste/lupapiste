@@ -414,3 +414,9 @@
       (prop-loc/property-info-by-point (:x jarvenpaa) (:y jarvenpaa)) => (contains {:municipality "186"
                                                                                     :name {:fi "J\u00e4rvenp\u00e4\u00e4"
                                                                                            :sv "Tr\u00e4sk\u00e4nda"}}))))
+
+(facts "Municipality info from KTJKii"
+  (fact "Jakkukyla"
+    (->> (wfs/get-property-location-info-by-property-id "56442100060084")
+         (wfs/location-feature-to-property-info)) => {:propertyId "56442100060084" :municipality "139"
+                                                      :name {:fi "Ii", :sv "Ii"}}))
