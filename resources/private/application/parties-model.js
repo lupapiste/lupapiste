@@ -19,9 +19,11 @@ LUPAPISTE.PartiesModel = function() {
     if (!_.isEmpty(companies) && lupapisteApp.models.applicationAuthModel.ok("company-users-for-person-selector")) {
       ajax.query("company-users-for-person-selector", {id: application.id})
         .success(function(result) {
+          var currentUserId = util.getIn(lupapisteApp.models.currentUser, ["id"]);
           var companyUsers = result.users;
           _.map(companyUsers, function(u) {
-            u.notPersonallyAuthorized = _.isUndefined(_.find(validPersons, ["id", u.id]));
+            // Current user is always deemed as personally authorized
+            u.notPersonallyAuthorized = u.id !== currentUserId && _.isUndefined(_.find(validPersons, ["id", u.id]));
             return u;
           });
           var allUsers = _.unionBy(companyUsers, validPersons, "id");
