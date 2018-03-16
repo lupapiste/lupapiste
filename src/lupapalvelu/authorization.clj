@@ -135,6 +135,10 @@
                             :inviter (:inviter invite)
                             :inviteAccepted accepted-ts))))
 
+(defn make-user-auth [user unsubscribed?]
+  (let [user-auth    (usr/user-in-role user :writer)]
+    (assoc user-auth :unsubscribed unsubscribed?)))
+
 ;;
 ;; Authz checkers
 ;;
