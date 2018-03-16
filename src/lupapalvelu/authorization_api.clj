@@ -131,7 +131,7 @@
         (let [application (domain/get-application-as id user :include-canceled-apps? true)]
           ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.
           ; It's not possible to combine Mongo writes here, because only the last $elemMatch counts.
-          (doc-persistence/do-set-user-to-document application document-id (:id user) (get-in auth [:invite :path]) created false)))
+          (doc-persistence/do-set-user-to-document application document-id (:id user) (get-in auth [:invite :path]) created user false)))
       (ok))))
 
 (defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
