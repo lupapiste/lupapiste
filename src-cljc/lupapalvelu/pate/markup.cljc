@@ -63,7 +63,7 @@
 
 (def text-formats {"*" :strong
                    "/" :em
-                   "_" :underline})
+                   "_" :span.underline})
 
 (defn parse [s]
   (markup-parser (str s "\n")))
@@ -74,14 +74,14 @@
 (declare resolve-tags)
 
 (defn context-tag [{:keys [tag data]} & [extra]]
-  (remove nil? (cons (case tag
-                       :List    :ul
-                       :Ordered :ol
-                       :Paragraph :p
-                       :Quote :blockquote
-                       tag)
-                     (cond-> data
-                       (seq extra) (conj extra)))))
+  (->> (cond-> data
+         (seq extra) (conj extra))
+       (cons (case tag
+               :List    :ul
+               :Ordered :ol
+               tag))
+       (remove nil?)
+       vec))
 
 (defn collapse-context [[ctx & ctxs :as context]]
   (let [[x & xs] ctxs]
@@ -133,9 +133,9 @@
                                  :data
                                  (fn [data]
                                    (let [item   (if (= :Link (first x))
-                                                  [:a {:href   (ws-escape-all (second x))
+                                                  [:a {:href   (ws-escape-all (nth x 2))
                                                        :target :_blank}
-                                                   (ws-escape-all (nth x 2))]
+                                                   (ws-escape-all (second x))]
                                                   (ws-escape x))
                                          latest (last data)]
                                      (if (and (string? item)
@@ -145,18 +145,34 @@
                                        (conj (vec data) item))))))
         ))))
 
+(defn tagify [[tag & txt-tags]]
+  (when-not (= tag :Blank)
+    (->> (text-tags txt-tags)
+         (cons (case tag
+                 :Paragraph :p
+                 :Quote     :blockquote))
+         vec)))
+
 (defn resolve-list [[x & xs :as parsed] resolved [ctx & ctxs :as context]]
   (let [spaces (count-spaces x)]
     (case (compare spaces (:depth ctx))
       0  {:parsed   xs
           :resolved resolved
-          :context  (cons (update ctx :data #(conj % x)) ctxs)}
+          :context  (cons (update ctx
+                                  :data
+                                  #(->> (drop 2 x)
+                                        text-tags
+                                        (cons :li)
+                                        vec
+                                        (conj %)
+                                        vec))
+                          ctxs)}
       -1 (if (seq ctxs)
            {:parsed   parsed
             :resolved resolved
             :context  (collapse-context context)}
            {:parsed   parsed
-            :resolved (conj resolved (context-tag ctx))
+            :resolved (conj resolved  (context-tag ctx))
             :context  []})
       1  {:parsed   parsed
           :resolved resolved
@@ -173,8 +189,11 @@
         :List (resolve-scopes (resolve-list parsed resolved context))
         :Ordered (resolve-scopes (resolve-list parsed resolved context))
         (resolve-scopes {:parsed xs
-                       :resolved (concat resolved (reduce-context context) [x])
-                       :context []}))
+                         :resolved (->> [(tagify x)]
+                                        (remove nil?)
+                                        (concat resolved
+                                                (reduce-context context)))
+                         :context []}))
       options)))
 
 (defn markup->tags [markup]
