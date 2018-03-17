@@ -4,49 +4,17 @@
             [rum.core :as rum]
             [clojure.string :as s]))
 
-#_(def markup-parser
-  (insta/parser
-   "<Lines>      := (List / Ordered / Quote / Blank / Paragraph)+
-    <EOL>        := <'\\n'>
-    <WS>         := <' '+>
-    <KeepWS>     := ' '+
-    <Text>       := Link / Bold / Underline / Italics / Plain
-    <Texts>      := (Text (Spaces? Text)*)+
-    <Plain>      := #'[^\\s*_/]+'
-    <Plains>     := (Plain (WS? Plain)*)*
-    <Star>       := <'*'>
-    <Dash>       := <'_'>
-    <Slash>      := <'/'>
-    Bold         := Star Texts? Star
-    Underline    := Dash Texts? Dash
-    Italics      := Slash Texts? Slash
-    <Url>        := #'https?://[a-zA-Z0-9\\-\\.:_/]+'
-    <LinkText>   := #'[^|]+'
-    Link         := <'['> LinkText <'|'> Url <']'>
-    Spaces       := ' '+
-    <Bullet>     := < ('-' | '*' | '+') WS>
-    List         := Spaces Bullet Regular+
-    <Number>     := <#'[0-9]+\\.' WS>
-    Ordered      := Spaces Number Regular+
-    <QuoteMark>  := <'>' WS>
-    Quote        := WS QuoteMark Regular+
-    <NotSpecial> := !(Bullet | Number | QuoteMark | Blank)
-    <Regular>    := (Spaces? NotSpecial Texts Spaces?)+ EOL
-    Paragraph    := Regular+
-    Blank        := (WS? EOL)+
-"))
-
 (def markup-parser
   (insta/parser
    "<Lines>      := (List / Ordered / Quote / Blank / Paragraph)+
     <EOL>        := <'\\r'? '\\n'>
     WS           := <' '+>
     Escape       := <'\\\\'> ( '*' | '\\\\' | '-' | '+' | '|' | '[' | ']' | '>' )
-    <Text>       := ( Escape / Link / Plain)
+    <Text>       := Escape / Link / Plain
     <Texts>      := (Text (WS? Text)*)+
     <Plain>      := #'\\S'+
-    <Url>        := #'https?://[a-zA-Z0-9\\-\\.:_/]+'
-    <LinkText>   := #'[^|]+'
+    Url          := #'https?://' (#'[a-zA-Z0-9\\-\\.:_/]' | Escape)+
+    <LinkText>   := (Escape / WS / Plain)+
     Link         := <'['> LinkText <'|'> Url <']'>
     Spaces       := ' '+
     <Bullet>     := < ('-' | '*' | '+') WS>
@@ -105,6 +73,14 @@
 (defn ws-escape-all [x]
   (->> x (map ws-escape) s/join))
 
+(declare text-tags)
+
+(defn resolve-link [link]
+  (let [[_ http & url] (last link)]
+    [:a {:href (str http (ws-escape-all url))
+        :target :_blank}
+     (ws-escape-all (-> link rest butlast))]))
+
 (defn text-tags [markup]
   (loop [[x & xs]               markup
          scopes                 []
@@ -133,9 +109,7 @@
                                  :data
                                  (fn [data]
                                    (let [item   (if (= :Link (first x))
-                                                  [:a {:href   (ws-escape-all (nth x 2))
-                                                       :target :_blank}
-                                                   (ws-escape-all (second x))]
+                                                  (resolve-link x)
                                                   (ws-escape x))
                                          latest (last data)]
                                      (if (and (string? item)
@@ -223,7 +197,7 @@
 
   * Jeah
 
-  Tavallista tekstiä jonka perässä [linkki jonnekin|http://evolta.fi:900/hii/hoo/index.html]")
+  Tavallista tekstiä jonka perässä [linkki\\| jonnekin|http://evolta.fi:900/h\\]ii/hoo/index.html]")
 
 (def txt2
   "hello world
