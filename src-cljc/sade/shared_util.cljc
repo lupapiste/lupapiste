@@ -1,8 +1,7 @@
 (ns sade.shared-util
   "Required and passed-through by sade.util"
   (:require [clojure.set :as set]
-            [clojure.string :as s]
-            [markdown.core :as markdown]))
+            [clojure.string :as s]))
 
 (defn find-first
   "Returns first element from coll for which (pred item)
@@ -138,12 +137,6 @@
                     (if (= j length-of-b)
                       1 (inc j))))))))))
 
-(defn markdown->html
-  "Translates markdown string into HTML."
-  [markdown]
-  (-> markdown
-      (markdown/md-to-html-string* nil)
-      :html))
 
 ;; ---------------------------------------------
 ;; The following are not aliased in sade.util.

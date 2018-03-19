@@ -1,7 +1,7 @@
 (ns lupapalvelu.ui.pate.phrases
   (:require [clojure.set :as set]
             [clojure.string :as s]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.pate.path :as path]
@@ -20,7 +20,7 @@
 (defn non-empty-categories []
   (filter #(util/find-by-key :category (name %)
                              @state/phrases)
-          shared/phrase-categories))
+          shared-schemas/phrase-categories))
 
 (defn- category-text [category]
   (path/loc [:phrase.category category]))
@@ -29,7 +29,7 @@
   (components/initial-value-mixin ::selected)
   [{selected* ::selected} _ callback & [{:keys [include-empty? disabled?]}]]
   (let [items (->> (if include-empty?
-                     shared/phrase-categories
+                     shared-schemas/phrase-categories
                      (non-empty-categories))
                    (map name)
                    (map (fn [n] {:value n :text (category-text n)}))
@@ -82,7 +82,7 @@
                                          :id       ::preview}]})
         [:div.phrase-edit
          (if (= (rum/react tab*) ::preview)
-           (components/markdown-span phrase :phrase-preview)
+           (components/markup-span phrase :phrase-preview)
            (components/textarea-edit phrase
                                      {:callback   (fn [text]
                                                     (swap! local*

@@ -13,6 +13,7 @@
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.pate.markup :as markup]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pdf.html-template :as html-pdf]
@@ -168,13 +169,15 @@
                          [:&.spaced
                           [(sel/+ :.row :.row)
                            [:.cell {:padding-top "0.5em"}]]]]]
-                       [:.markdown
+                       [:.markup
                         [:p {:margin-top    "0"
                              :margin-bottom "0.25em"}]
                         [:ul {:margin-top    "0"
                               :margin-bottom "0"}]
                         [:ol {:margin-top    "0"
-                              :margin-bottom "0"}]]])}}]]
+                              :margin-bottom "0"}]
+                        ;; wkhtmltopdf does not seem to support text-decoration?
+                        [:span.underline {:border-bottom "1px solid black"}]]])}}]]
          [:body body (when script?
                        page-number-script)]])))
 
@@ -472,7 +475,7 @@
 
 (defn resolve-cell [{lang :lang :as data}
                     source-value
-                    markdown?
+                    markup?
                     {:keys [text width unit loc-prefix styles] :as cell}]
   (let [path (some-> cell :path pathify)
         class (resolve-class cell-styles
@@ -484,10 +487,10 @@
                                  (get-in source-value
                                          [::styles ::cell])))
         value (or text (get-in source-value path source-value))]
-    (if markdown?
+    (if markup?
       [:div.cell
-       {:class (or (not-empty class) [:markdown])
-        :dangerouslySetInnerHTML {:__html (util/markdown->html source-value)}}]
+       {:class (or (not-empty class) [:markup])}
+       (markup/markup->tags value)]
      [:div.cell {:class class}
       (cond->> value
         loc-prefix (i18n/localize lang loc-prefix)
@@ -496,7 +499,7 @@
 (defn entry-row
   [left-width {:keys [lang dictionary] :as data} [{:keys [loc loc-many source styles]} & cells]]
   (let [source-value (util/pcond-> (resolve-source data source) string? ss/trim)
-        markdown?    (boolean (some->> source :dict (get dictionary) :phrase-text ))
+        markup?    (boolean (some->> source :dict (get dictionary) :phrase-text ))
         multiple?    (and (sequential? source-value)
                           (> (count source-value) 1))]
     (when (or (nil? source) (not-empty source-value))
@@ -519,12 +522,12 @@
                         (vector source-value))]
                 [:div.row
                  {:class (get-in v [::styles :row])}
-                 (map (partial resolve-cell data v markdown?)
+                 (map (partial resolve-cell data v markup?)
                       (if (empty? cells) [{}] cells))])]]
             (resolve-cell data
                           (util/pcond-> source-value
                                         sequential? first)
-                          markdown?
+                          markup?
                           (first cells)))]]))))
 
 (defn content
@@ -598,7 +601,7 @@
               {:id   (name k)
                :text (:condition v)}))
        (sort-by :id)
-       (map :text)))
+       (map (comp markup/markup->tags :text))))
 
 (defn statements [lang verdict]
   (->> (dict-value verdict :statements)

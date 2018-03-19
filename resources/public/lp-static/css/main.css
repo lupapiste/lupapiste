@@ -29073,17 +29073,17 @@ span.formatted.warning {
   color: #df3215;
 }
 
-span.markdown {
+span.markup {
   display: inline-block;
 }
 
-span.markdown p {
+span.markup p {
   margin-bottom: 6px;
   color: #333333;
 }
 
-span.markdown.warning {
-  color: #df3215;
+span.markup span.underline {
+  text-decoration-line: underline;
 }
 
 .pate-label {

@@ -203,13 +203,13 @@ span.formatted {
   }
 }
 
-span.markdown {
+span.markup {
   display: inline-block;
   p {margin-bottom: $marginS;
      color: $gray51;
     }
-  &.warning {
-    color: $negative;
+  span.underline {
+    text-decoration-line: underline;
   }
 }
 

@@ -138,12 +138,12 @@
 
 (defmethod view-component :phrase-text
   [_ {:keys [state path schema] :as options}]
-  (components/markdown-span (path/value path state)))
+  (components/markup-span (path/value path state)))
 
 (defmethod view-component :reference
   [_ {:keys [state schema references] :as options}]
   (let [[x & xs :as path] (-> schema :path util/split-kw-path)]
-    (components/markdown-span (if (util/=as-kw x :*ref)
+    (components/markup-span (if (util/=as-kw x :*ref)
                                 (path/react xs references)
                                 (path/react path state)))))
 

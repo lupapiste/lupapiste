@@ -245,8 +245,8 @@
                                        :disabled  disabled?
                                        :required? required?})]
            [:div.phrase-edit
-            (components/markdown-span (path/value path state)
-                                      :phrase-preview)])]]])))
+            (components/markup-span (path/value path state)
+                                    :phrase-preview)])]]])))
 
 (rum/defc pate-link < rum/reactive
   [{:keys [schema] :as options}]

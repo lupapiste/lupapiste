@@ -1,7 +1,7 @@
 (ns lupapalvelu.pate.markup
   "Simple and safe markup handling."
-  (:require [instaparse.core :as insta]
-            [clojure.string :as s]))
+  (:require [clojure.string :as s]
+            [instaparse.core :as insta]))
 
 (def markup-parser
   (insta/parser
@@ -36,36 +36,36 @@
 (defn parse [s]
   (markup-parser (str s "\n")))
 
-(defn new-scope [scopes tag & kvs]
+(defn- new-scope [scopes tag & kvs]
   (cons (merge {:tag tag :data []}
                (apply hash-map kvs)) scopes))
 
-(defn add-to-data [data x]
+(defn- add-to-data [data x]
   (->> (if (and (-> data last string?)
                 (string? x))
          (conj (-> data butlast vec) (str (last data) x))
          (conj (vec data) x))
        (remove nil?)))
 
-(defn add-to-scope [[scope & others :as scopes] add]
+(defn- add-to-scope [[scope & others :as scopes] add]
   (if (:tag scope)
     (-> (update scope :data #(vec (add-to-data % add)))
         (cons others)
         vec)
     (add-to-data scopes add)))
 
-(defn close-scope [[closing & others  :as scopes] & [trim?]]
+(defn- close-scope [[closing & others  :as scopes] & [trim?]]
   (if-let [tag (:tag closing)]
     (add-to-scope others (vec (cons tag (:data closing))))
     scopes))
 
-(defn close-all-scopes [scopes]
+(defn- close-all-scopes [scopes]
   (loop [[x & xs :as scs] scopes]
     (if (:tag x)
       (recur (close-scope scs))
       scs)))
 
-(defn ws-escape [x]
+(defn- ws-escape [x]
   (if (string? x)
     x
     (case (first x)
@@ -74,16 +74,16 @@
       :WSEOL " "
       x)))
 
-(defn ws-escape-all [x]
+(defn- ws-escape-all [x]
   (->> x (map ws-escape) s/join))
 
-(defn resolve-link [[_ url & text]]
+(defn- resolve-link [[_ url & text]]
   (let [[http & parts] (rest url)]
     [:a {:href (str http (ws-escape-all parts))
          :target :_blank}
      (ws-escape-all text)]))
 
-(defn text-tags [markup]
+(defn- text-tags [markup]
   (loop [[x & xs]                    markup
          [scope & others :as scopes] []]
     (let [{scope-tag  :tag
@@ -107,7 +107,7 @@
                                   (resolve-link x)
                                   (ws-escape x))))))))
 
-(defn resolve-list [markup]
+(defn- resolve-list [markup]
   (loop [[x & xs :as markup] (rest markup)
          m                   {:list-depth 0}]
     (case (first x)
@@ -118,7 +118,7 @@
                               (cons :li)
                               vec)))))
 
-(defn list-tag [scopes markup]
+(defn- list-tag [scopes markup]
   (let [{:keys [list-depth list-type list-tag]} (resolve-list markup)]
     (loop [[scope & others :as scopes] scopes]
       (let [depth (:depth scope)]
@@ -138,7 +138,7 @@
           (> depth list-depth)
           (recur (close-scope scopes)))))))
 
-(defn tagify [[tag & txt-tags]]
+(defn- tagify [[tag & txt-tags]]
   (when-not (= tag :Blank)
     (->> (text-tags txt-tags)
          (cons (case tag
@@ -146,7 +146,7 @@
                  :Quote     :blockquote))
          vec)))
 
-(defn block-tags [markup]
+(defn- block-tags [markup]
   (loop [[x & xs]                    markup
          [scope & others :as scopes] []]
     (case (first x)
@@ -159,53 +159,3 @@
 
 (defn markup->tags [markup]
   (block-tags (parse markup)))
-
-
-(def txt
-  "hello world
-  Tämä on *bold*
-  * Yksi
-  ja jatkuu
-  * Kaksi
-
-
-     - aaa
-     - bbb lisää tekstiä
-  Teksti jatkuu uudella rivillä.
-  1. Numba 1
-  2. Numba 2
-  Ja /kursiivilla/ jatketaan
-  ja _vielä alleviivaus_
-  > blockquote *hei* hou
-
-  * Jeah
-
-  Tavallista tekstiä jonka perässä [http://evolta.fi:900/h\\]ii/hoo/index.html|linkki\\| jonnekin]")
-
-(def txt2
-  "hello world
-
-  Tämä on *bold*
-  * Yksi
-  * Kaksi
-  ja jatkuu
-     - kolme
-  + Neljä")
-
-(def txt3
-  "     * Yksi
-  ja jatkuu
-
-  - hei")
-
-(def txt4 "hii *hoo*")
-
-(def txt5 "hii hoo
-   1. Eka
-  ... ja 1. jatkuu > juu nääs
-  2. Toka
-
-  ** foo * bar
-  * dii * doo
-  1. Num 1.
-  2. Num 2.")

@@ -1,6 +1,7 @@
 (ns lupapalvelu.ui.components
   (:require [cljs.pprint :refer [pprint]]
             [clojure.string :as s]
+            [lupapalvelu.pate.markup :as markup]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components.datepicker :as datepicker]
             [lupapalvelu.ui.hub :as hub]
@@ -503,15 +504,14 @@
        :data-test-id (str test-id "-label")}
       (common/resolve-text options "")]]))
 
-(defn markdown-span
+(defn markup-span
   "Converts given markdown string into HTML and returns the
   corresponding span. Span class is :markdown and (optional) other
   given classes."
-  [markdown & class]
-  [:span.markdown
-   {:class class
-    :dangerouslySetInnerHTML
-    {:__html (util/markdown->html markdown)}}])
+  [markup & class]
+  [:span.markup
+   {:class class}
+   (markup/markup->tags markup)])
 
 (rum/defc link-label < rum/reactive
   "Component that alternates between link and label representation
