@@ -205,11 +205,15 @@ span.formatted {
 
 span.markup {
   display: inline-block;
-  p {margin-bottom: $marginS;
-     color: $gray51;
-    }
+  p {
+    margin-bottom: $marginS;
+    color: $gray51;
+  }
   span.underline {
     text-decoration-line: underline;
+  }
+  ul, ol, blockquote {
+    margin-bottom: $marginS;
   }
 }
 

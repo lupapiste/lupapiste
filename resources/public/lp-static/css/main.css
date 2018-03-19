@@ -29086,6 +29086,10 @@ span.markup span.underline {
   text-decoration-line: underline;
 }
 
+span.markup ul, span.markup ol, span.markup blockquote {
+  margin-bottom: 6px;
+}
+
 .pate-label {
   font-size: 15px;
   font-weight: bold;

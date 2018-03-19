@@ -1,5 +1,88 @@
 (ns lupapalvelu.pate.markup
-  "Simple and safe markup handling."
+  "Simple and safe markup handling.
+
+  markup->tags takes markup string and returns Rum-compliant Hiccup-like syntax.
+
+  The markup syntax is line-oriented. Empty line resets the current
+  context (e.g., open formatting chars are implicitly closed).
+
+  Top-level blocks are either paragraphs, lists or blockquotes.
+
+  Lists: if a line begins with list character (*, + or -. Characters
+  can be used interchangeably) a list is created. For numbered lists,
+  the list items are marked with <number.> notation (e.g., 1.). The
+  actual numbers do not matter. Indentation (spaces) denotes list
+  scopes. List types can be mixed freely:
+
+  * List 1, item 1
+  - List 1, item 2
+    - Sublist, item 1
+    + Sublist, item2. This text
+  continues here (no blank line)
+  - List 1, item 3
+
+  * List 2, item 1
+  1. Numbered, item 1
+  1. Numbered, item 2
+     * Sublist of numbered, item 1
+
+  Blockquotes are marked with >. Indentation does not matter. A
+  blockquote is always top-level block.
+
+  > this is blockquote
+  * List 1
+    > another blockquote (also on the top-level)
+    * List 2 (not a sublist)
+
+  If a line is not part of the list of blockquote it is then paragraph:
+
+  Paragraph starts and
+  continues on the next line.
+
+  After blank line, a new paragraph
+  * List
+
+  Third paragraph.
+
+  Block (list, blockquote or paragraph) can contain formatted text and links.
+
+  Markup formatting conventions:
+
+  *this is bold*    -> [:strong ...]
+  _underlined text_ -> [:span.underline ...]
+  /italics/         -> [:em ...]
+
+  Formats can be combined:
+
+  *_/ bold underlined italics/_* -> [:strong [:span.underline [:em ...]]]
+
+  Mismatched and unclosed formats are resolved eventually. In other
+  words, even if the result is not exactly what you would expect, the
+  parser should not fail.
+
+  Links:
+
+  [ url | text]  -> [:a {:href url :target :_blank} text]
+
+  , where url must contain protocol part. Text cannot contain formatting, but it follows the enclosing format:
+
+  Here is * [https://www.example.org/foobar/index.html| bold link]*
+
+  Note: link cannot be preceded by non-whitespace character:
+
+  This is not link[http://example.net|example]
+
+  This is link [http://example.net|example]-entity
+
+  Special characters can be quoted with backslash:
+
+  \\* Paragraph
+  * List
+
+  /hi \\*\\_\\/ bye/ -> [:em hi *_/ bye]
+
+  [http://example.com | \\[ example\\]]
+  "
   (:require [clojure.string :as s]
             [instaparse.core :as insta]))
 
