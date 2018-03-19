@@ -559,32 +559,23 @@
     });
 
     function save() {
-      var first = true;
-      return function() {
-        if (first) {
-          first = false;
-        } else if (self.documentRequest.isValid()) {
-          ajax.command("set-document-request-info",
-                       {enabled: self.documentRequest.enabled(),
-                        email: self.documentRequest.email(),
-                        instructions: _.zipObject(self.languages,
-                                                  _.map(self.languages,
-                                                        function (language) {
-                                                          return self.documentRequest.instructions[language]();
-                                                        }))})
-            .success(util.showSavedIndicator)
-            .error(util.showSavedIndicator)
-            .call();
-        }
-      };
+      if (self.documentRequest.isValid()) {
+        ajax.command("set-document-request-info",
+                     {enabled: self.documentRequest.enabled(),
+                      email: self.documentRequest.email(),
+                      instructions: _.zipObject(self.languages,
+                                                _.map(self.languages,
+                                                      function (language) {
+                                                        return self.documentRequest.instructions[language]();
+                                                      }))})
+          .success(util.showSavedIndicator)
+          .error(util.showSavedIndicator)
+          .call();
+      }
     }
 
     // Attach autosave to observables
-    self.documentRequest.enabled.subscribe(save());
-    self.documentRequest.email.subscribe(save());
-    _.forEach(self.documentRequest.instructions, function(value) {
-      value.subscribe(save());
-    });
+    var initialized = false;
 
     self.load = function () {
       ajax.query("document-request-info")
@@ -594,6 +585,14 @@
           _.forEach(data.documentRequest.instructions, function(value, key) {
             self.documentRequest.instructions[key](value);
           });
+          if (!initialized) {
+            initialized = true;
+            self.documentRequest.enabled.subscribe(save);
+            self.documentRequest.email.subscribe(save);
+            _.forEach(self.documentRequest.instructions, function(value) {
+              value.subscribe(save);
+            });
+          }
         })
         .call();
     };
