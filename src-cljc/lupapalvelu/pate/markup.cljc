@@ -9,7 +9,8 @@
    "<Lines>      := (List / Ordered / Quote / Blank / Paragraph)+
     <EOL>        := <'\\r'? '\\n'>
     WS           := <' '+>
-    Escape       := <'\\\\'> ( '*' | '\\\\' | '-' | '+' | '|' | '[' | ']' | '>' )
+    Escape       := <'\\\\'> ( '*' | '/' | '_' | '\\\\' | '.'
+                             | '-' | '+' | '|' | '[' | ']' | '>' )
     <Text>       := Escape / Link / Plain
     <Texts>      := (Text (WS? Text)*)+
     <Plain>      := #'\\S'+
@@ -36,8 +37,39 @@
 (defn parse [s]
   (markup-parser (str s "\n")))
 
+(defn new-scope [scopes scope]
+  (cons scope scopes))
+
+(defn add-to-data [data x]
+  (->> (if (and (-> data last string?)
+                (string? x))
+         (conj (-> data butlast vec) (str (last data) x))
+         (conj data x))
+       (remove nil?)
+       vec))
+
+(defn add-to-scope [[scope & others :as scopes] add]
+  (if (:tag scope)
+    (-> (update scope :data #(add-to-data % add))
+        (cons others)
+        vec)
+    (conj (vec scopes) add)))
+
+(defn close-scope [[closing & others  :as scopes]]
+  (if-let [tag (:tag closing)]
+    (add-to-scope others (vec (cons tag (:data closing))))
+    scopes))
+
+(defn close-all-scopes [scopes]
+  (loop [[x & xs :as scs] scopes]
+    (if (:tag x)
+      (recur (close-scope scs))
+      scs)))
+
 (defn count-spaces [[kw spaces & xs :as parsed] ]
-  (-> spaces rest count))
+  (if (= (first spaces) :Spaces)
+    (-> spaces rest count)
+    0))
 
 (declare resolve-tags)
 
@@ -96,9 +128,9 @@
 
         format-tag
         (if (= tag format-tag)
-          (let [scope (last scopes)]
+          (let [scope (first scopes)]
             (recur xs
-                   (butlast scopes)
+                   (rest scopes)
                    (update scope
                            :data
                            #(conj (vec %) (context-tag context)))))
@@ -134,7 +166,7 @@
           :resolved resolved
           :context  (cons (update ctx
                                   :data
-                                  #(->> (drop 2 x)
+                                  #(->> (drop (if (zero? spaces) 1 2) x)
                                         text-tags
                                         (cons :li)
                                         vec
@@ -173,8 +205,8 @@
 (defn markup->tags [markup]
   (let  [{:keys [resolved
                  context]} (resolve-scopes {:parsed (parse markup)
-                                          :resolved []
-                                          :context []})]
+                                            :resolved []
+                                            :context []})]
     (concat resolved (reduce-context context))))
 
 
