@@ -726,6 +726,16 @@
                            :en "Lupapiste store"}
             :callback-url "http://localhost:8000"}}
 
+   {:id "tiedonohjausjarjestelma"
+    :username "tiedonohjausjarjestelma"
+    :email "tiedonohjausjarjestelma@lupapiste.fi"
+    :firstName "TOJ"
+    :lastName "API-user"
+    :enabled true
+    :language "fi"
+    :role "rest-api"
+    :private {:apikey "tojTOJtojTOJtojTOJtoj"}}
+
    ;; Solita admin:  financial / admin
    {:id "financial"
     :email "financial@ara.fi"
