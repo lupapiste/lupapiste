@@ -291,11 +291,9 @@
                           :netbill        "bar"}
         firm-auth        (com/company->auth firm)
         shop-invite      (com/company->auth shop :warlock)
-        app-id           "LP-12345"
-        firm-inviter     {:name "Firm inviter"}
-        shop-inviter     {:name "Shop inviter"}]
+        app-id           "LP-12345"]
     (fact "Regular company auth"
-      (auth->invite firm-auth firm-inviter app-id 12345)
+      (auth->invite firm-auth ...firm-inviter... app-id 12345)
       => {:id           firm-id
           :y            firm-y
           :username     firm-y
@@ -305,15 +303,16 @@
           :role         "reader"
           :type         "company"
           :company-role :admin
-          :inviter      firm-inviter
+          :inviter      ...firm-inviter-summary...
           :invite       {:user    {:id firm-id}
                          :role    "writer"
                          :created 54321}}
       (provided
+       (usr/summary ...firm-inviter...) => ...firm-inviter-summary...
        (com/find-company-by-id "firm") => firm
        (sade.core/now) => 54321))
     (fact "Open invitation company auth"
-      (auth->invite shop-invite shop-inviter app-id 12345)
+      (auth->invite shop-invite ...shop-inviter... app-id 12345)
       => {:id           shop-id
           :y            shop-y
           :username     shop-y
@@ -323,11 +322,12 @@
           :role         "reader"
           :type         "company"
           :company-role :admin
-          :inviter      shop-inviter
+          :inviter      ...shop-inviter-summary...
           :invite       {:user    {:id shop-id}
                          :role    :warlock
                          :created 54321}}
       (provided
+       (usr/summary ...shop-inviter...) => ..shop-inviter-summary...
        (com/find-company-by-id "shop") => shop
        (sade.core/now) => 54321))))
 
