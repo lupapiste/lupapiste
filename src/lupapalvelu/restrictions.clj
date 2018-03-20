@@ -66,7 +66,7 @@
 (defn check-auth-restriction
   "Pre check that fails if restriction is applied for user."
   [{user :user {auth-restrictions :authRestrictions} :application permissions :permissions :as command} restriction]
-  (when-not (permissions (keyword restriction)) ; User can get permissions from different sources. Restriction is only applied to auth array.
+  (when-not (get permissions (keyword restriction)) ; User can get permissions from different sources. Restriction is only applied to auth array.
     (->> (some (partial check-auth-restriction-entry user restriction) auth-restrictions)
          (enrich-with-auth-info command))))
 

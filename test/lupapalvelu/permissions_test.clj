@@ -145,7 +145,7 @@
     (provided (get-permissions-by-role :application "app-tester") => #{:test/do :test/fail})
     (provided (get-permissions-by-role :application "another-role") => #{:test/do :test/test}))
 
-  (fact "same user with multiple roles in auth plus restrictions"
+  (fact "same user with multiple roles in auth plus restrictions - :test/fail permission is removed"
     (get-application-permissions {:user {:id 1} :application {:auth [{:id 2 :role "some-role"}
                                                                      {:id 1 :role "app-tester"}
                                                                      {:id 1 :role "another-role"}]

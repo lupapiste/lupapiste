@@ -1,6 +1,7 @@
 (ns lupapalvelu.fixture.submit-restriction
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :refer [deffixture]]
+            [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.fixture.company-application :as company-application-fixture]))
 
 (def users company-application-fixture/users)
@@ -10,6 +11,7 @@
 (def companies (map #(cond-> % (= "esimerkki" (:id %)) (assoc :submitRestrictor true)) company-application-fixture/companies))
 
 (def created 1514877090000)
+(def opened (+ created 100))
 
 (def default-app-id company-application-fixture/default-app-id)
 
@@ -76,7 +78,7 @@
                     :created created
                     :municipality "753"
                     :state "open"
-                    :opened nil
+                    :opened opened
                     :permitType "R"
                     :organization "753-R"
                     :warrantyEnd nil

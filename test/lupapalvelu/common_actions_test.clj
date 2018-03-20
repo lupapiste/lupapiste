@@ -184,7 +184,8 @@
                           :application-verdict-tab-visible
                           :application-handlers
                           :application-organization-archive-enabled
-                          :create-application}
+                          :create-application
+                          :authorized-to-apply-submit-restriction-to-other-auths}
         user {:id "user123" :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (foreach-action {:web {} :user user :application application :data {} :organization (delay {:statementGivers [{:id "user123"}]})})
