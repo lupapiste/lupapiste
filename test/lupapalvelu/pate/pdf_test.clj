@@ -228,3 +228,10 @@
                                             :status "ehdollinen"}]}})
   => ["Stakeholder, 7.2.2018, Ei huomautettavaa"
       "Interested, 6.2.2018, Ehdollinen"])
+
+(fact "handler"
+  (pdf/handler {:data {}}) => ""
+  (pdf/handler {:data {:handler "Hank Handler  "}}) => "Hank Handler"
+  (pdf/handler {:data {:handler " Hank Handler"
+                       :handler-title "Title"}}) => "Title Hank Handler"
+  (pdf/handler {:data {:handler-title " Title  "}}) => "Title")

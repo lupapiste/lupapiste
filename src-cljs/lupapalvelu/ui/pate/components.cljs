@@ -159,9 +159,11 @@
   (rum/local nil ::category)
   (rum/local "" ::selected)
   (rum/local "" ::replaced)
+  (rum/local ::edit ::tab)
   [{category* ::category
     selected* ::selected
-    replaced* ::replaced :as local-state}
+    replaced* ::replaced
+    tab*      ::tab :as local-state}
    {:keys [state path schema] :as options} & [wrap-label?]]
   (letfn [(set-category [category]
             (when (util/not=as-kw category @category*)
@@ -173,7 +175,9 @@
     (when-not @category*
       (set-category (:category schema)))
     (let [ref-id    (common/unique-id "-ref")
-          disabled? (path/disabled? options)
+          tab       (rum/react tab*)
+          disabled? (or (path/disabled? options)
+                        (= tab ::preview))
           required? (path/required? options)]
       [:div.pate-grid-12
        (when (show-label? schema wrap-label?)
@@ -194,15 +198,16 @@
             (components/autocomplete
              selected*
              {:items     (phrases/phrase-list-for-autocomplete (rum/react category*))
-              :callback  #(let [text-node (.-firstChild (rum/ref local-state ref-id) )
+              :callback  #(let [text-node (.-firstChild (rum/ref local-state ref-id))
                                 sel-start (.-selectionStart text-node)
                                 sel-end   (.-selectionEnd text-node)
                                 old-text  (or (path/value path state) "")]
                             (reset! replaced* (subs old-text sel-start sel-end))
                             (update-text (s/join (concat (take sel-start old-text)
-                                                         %
+                                                         (str "\n" % "\n")
                                                          (drop sel-end old-text)))))
-              :disabled? disabled?})]]
+              :disabled? disabled?
+              :clear?    true})]]
           [:div.col-4.col--right
            [:div.col--vertical
             (common/empty-label)
@@ -227,11 +232,21 @@
               (common/loc :phrase.undo)]]]]])
        [:div.row
         [:div.col-12.col--full
-         {:ref ref-id}
-         (components/textarea-edit (path/value path state)
-                                   {:callback  update-text
-                                    :disabled  disabled?
-                                    :required? required?})]]])))
+         (components/tabbar {:selected* tab*
+                             :tabs     [{:id       ::edit
+                                         :text-loc :edit}
+                                        {:id       ::preview
+                                         :text-loc :pdf.preview}]})
+         (if (= tab ::edit)
+           [:div.phrase-edit
+            {:ref ref-id}
+            (components/textarea-edit (path/value path state)
+                                      {:callback  update-text
+                                       :disabled  disabled?
+                                       :required? required?})]
+           [:div.phrase-edit
+            (components/markup-span (path/value path state)
+                                    :phrase-preview)])]]])))
 
 (rum/defc pate-link < rum/reactive
   [{:keys [schema] :as options}]

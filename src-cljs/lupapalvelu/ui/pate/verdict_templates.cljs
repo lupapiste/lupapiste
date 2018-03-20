@@ -48,16 +48,18 @@
              (common/loc :pate.last-published
                          (js/util.finnishDateAndTime published))
              (common/loc :pate.template-not-published))]
-     [:button.ghost
-      {:disabled (or (not (state/auth? :publish-verdict-template))
-                     (> published
-                        (max (path/react [:modified] info*)
-                             (path/react [:info :modified] state/settings-info)))
-                     (false? (path/react :filled? info*))
-                     (false? (path/react [:info :filled?] state/settings-info)))
+     (components/icon-button
+      {:disabled? (or (not (state/auth? :publish-verdict-template))
+                      (> published
+                         (max (path/react [:modified] info*)
+                              (path/react [:info :modified] state/settings-info)))
+                      (false? (path/react :filled? info*))
+                      (false? (path/react [:info :filled?] state/settings-info)))
        :on-click #(service/publish-template (path/value [:id] info*)
-                                            (common/response->state info* :published))}
-      (common/loc :pate.publish)]]))
+                                            (common/response->state info* :published))
+       :class :primary
+       :icon :lupicon-megaphone
+       :text-loc :pate.publish})]))
 
 
 (defn reset-template [{draft :draft :as template}]
@@ -110,14 +112,15 @@
   (reset-template options))
 
 (defn toggle-delete [id deleted]
-  [:button.primary.outline
-   {:on-click #(service/toggle-delete-template id (not deleted) identity)}
-   (common/loc (if deleted :pate-restore :remove))])
+  (components/icon-button
+   {:class    [:primary :outline]
+    :on-click #(service/toggle-delete-template id (not deleted) identity)
+    :text-loc (if deleted :pate-restore :remove)
+    :icon (if deleted :lupicon-undo :lupicon-remove)}))
 
 (defn set-category [category]
   (reset! state/current-category category)
   (settings/fetch-settings category ))
-
 
 (rum/defc category-select < rum/reactive
   []
@@ -125,19 +128,21 @@
    [:div.row
     [:div.col-2.col--full
      [:select.dropdown
-      {:value (rum/react state/current-category)
+      {:value     (rum/react state/current-category)
        :on-change #(set-category (.. % -target -value))}
       (->> (rum/react state/categories)
            (map (fn [cid]
                   {:value cid
-                   :text (common/loc (str "pate-" cid))}))
+                   :text  (common/loc (str "pate-" cid))}))
            (sort-by :text)
            (map (fn [{:keys [value text]}]
                   [:option {:key value :value value} text])))]]
     [:div.col-4.col--right
-     [:button.ghost
-      {:on-click #(open-settings)}
-      [:span (common/loc :auth-admin.organization.properties)]]]]])
+     (components/icon-button
+      {:icon     :lupicon-gear
+       :class    :ghost
+       :on-click #(open-settings)
+       :text-loc :auth-admin.organization.properties})]]])
 
 (rum/defcs verdict-template-list < rum/reactive
   (rum/local false ::show-deleted)
@@ -174,12 +179,16 @@
               [:td
                [:div.pate-buttons
                 (when-not deleted
-                  [:button.primary.outline
-                   {:on-click #(open-template id)}
-                   (common/loc "edit")])
-                [:button.primary.outline
-                 {:on-click #(service/copy-template id reset-template)}
-                 (common/loc "pate.copy")]
+                  (components/icon-button
+                   {:class    [:primary :outline]
+                    :on-click #(open-template id)
+                    :text-loc :edit
+                    :icon     :lupicon-pen}))
+                (components/icon-button
+                 {:class    [:primary :outline]
+                  :on-click #(service/copy-template id reset-template)
+                  :text-loc :pate.copy
+                  :icon     :lupicon-copy})
                 (toggle-delete id deleted)]]])]]))
      [:button.positive
       {:on-click #(service/new-template @state/current-category new-template)}

@@ -161,6 +161,14 @@ sub, sup {
   vertical-align: baseline;
 }
 
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
 /*------------------------------------*    ELEMENTS
 \*------------------------------------*/
 /* BASE
@@ -331,6 +339,10 @@ i {
 
 .success-message {
   color: #04c714;
+}
+
+blockquote {
+  margin-left: 2em;
 }
 
 /* ABSTRACTIONS (OOCSS style)
@@ -29069,6 +29081,23 @@ span.formatted.warning {
   color: #df3215;
 }
 
+span.markup {
+  display: inline-block;
+}
+
+span.markup p {
+  margin-bottom: 6px;
+  color: #333333;
+}
+
+span.markup span.underline {
+  text-decoration-line: underline;
+}
+
+span.markup ul, span.markup ol, span.markup blockquote {
+  margin-bottom: 6px;
+}
+
 .pate-label {
   font-size: 15px;
   font-weight: bold;
@@ -29223,8 +29252,70 @@ div.pate-phrases table.pate-phrases-table td.phrase {
   overflow-x: hidden;
 }
 
-span.phrase-text {
-  white-space: pre-wrap;
+div.phrase-edit-mode a:last-child,
+div.phrase-edit-mode label:last-child {
+  margin-left: 24px;
+}
+
+div.phrase-edit-mode a.required:after {
+  content: " *";
+  color: #df3215;
+  padding-right: 6px;
+}
+
+span.phrase-preview {
+  border: 1px solid #bbbbbb;
+  padding: 6px 12px;
+  background-color: #f6f6f6;
+}
+
+div.phrase-edit {
+  border: 1px solid #eeeeee;
+  border-top: none;
+  padding: 10px 10px;
+}
+
+div.phrase-edit > * {
+  width: 100%;
+}
+
+div.phrase-edit > textarea {
+  min-height: 20em;
+}
+
+div.pate-tabbar {
+  display: table;
+}
+
+div.pate-tabbar div.pate-tab {
+  display: table-cell;
+  border: 1px solid #eeeeee;
+  border-bottom: 1px solid #eeeeee;
+  padding: 0 6px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  background-color: #f6f6f6;
+}
+
+div.pate-tabbar div.pate-tab__space {
+  display: table-cell;
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #eeeeee;
+}
+
+div.pate-tabbar div.pate-tab__divider {
+  display: table-cell;
+  border: none;
+  border-bottom: 1px solid #eeeeee;
+  min-width: 3px;
+  max-width: 3px;
+}
+
+div.pate-tabbar div.pate-tab.pate-tab--active {
+  border: 1px solid #eeeeee;
+  border-bottom: none;
+  background-color: initial;
 }
 
 div.pate-autocomplete {
@@ -29844,6 +29935,10 @@ input:disabled + .pate-attachment-check-label:hover.pate-attachment-check-label:
 
 input.date-delta {
   max-width: 50%;
+}
+
+body.pate-error-page {
+  padding: 2em 2em;
 }
 
 .order-grid-1 {

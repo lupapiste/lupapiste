@@ -138,15 +138,14 @@
 
 (defmethod view-component :phrase-text
   [_ {:keys [state path schema] :as options}]
-  [:span.phrase-text (path/value path state)])
+  (components/markup-span (path/value path state)))
 
 (defmethod view-component :reference
   [_ {:keys [state schema references] :as options}]
   (let [[x & xs :as path] (-> schema :path util/split-kw-path)]
-    [:span.formatted
-     (if (util/=as-kw x :*ref)
-       (path/react xs references)
-       (path/react path state))]))
+    (components/markup-span (if (util/=as-kw x :*ref)
+                                (path/react xs references)
+                                (path/react path state)))))
 
 (defmethod view-component :placeholder
   [_ {:keys [state path schema] :as options}]
@@ -199,21 +198,30 @@
 
 (rum/defc pate-list < rum/reactive
   [{:keys [schema] :as options} & [wrap-label?]]
-  [:div.pate-list
-   {:class (path/css options)}
-   (when (and wrap-label? (:title schema))
-     [:h4.pate-label (common/loc (:title schema))])
-   (map-indexed (fn [i item-schema]
-                  (let [item-options (path/schema-options options item-schema)]
-                    (when (path/visible? item-options)
-                      [:div.item {:key   (str "item-" i)
-                                  :class (path/css item-options
-                                                   (when-let [item-align (:align item-schema)]
-                                                     (str "item--" (name item-align))))}
-                       (when (:dict item-schema)
-                         (instantiate (path/dict-options item-options)
-                                      (-> schema :labels? false? not)))])))
-                (:items schema))])
+  (let [items (map-indexed
+               (fn [i item-schema]
+                 (let [item-options (path/schema-options options item-schema)]
+                   (when (path/visible? item-options)
+                      {:component [:div.item
+                                   {:key   (str "item-" i)
+                                    :class (path/css item-options
+                                                     (when-let [item-align (:align item-schema)]
+                                                       (str "item--" (name item-align))))}
+                                   (when (:dict item-schema)
+                                     (instantiate (path/dict-options item-options)
+                                                  (-> schema :labels? false? not)))]
+                       :required? (-> item-options
+                                      path/dict-options
+                                      :schema
+                                      :required? )})))
+                           (:items schema))]
+    [:div.pate-list
+     {:class (path/css options)}
+     (when (and wrap-label? (:title schema))
+       [:h4.pate-label
+        {:class (common/css-flags :required (some :required? items))}
+        (common/loc (:title schema))])
+     (mapv :component items)]))
 
 (defn- repeating-keys
   "The repeating keys (keys within the state that correspond to a
