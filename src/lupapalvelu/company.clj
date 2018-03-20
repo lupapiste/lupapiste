@@ -282,6 +282,9 @@
     (when (and (not (usr/admin? caller))
                (account-type-changing-with-custom? company updates)) ; only admins are allowed to change account type to/from 'custom'
       (fail! :error.unauthorized))
+    (when (and (not (usr/admin? caller))
+               (contains? updates :submitRestrictor))
+      (fail! :error.unauthorized))
     (when (and (not (usr/admin? caller)) (not (custom-account? company)) (< limit old-limit))
       (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)
