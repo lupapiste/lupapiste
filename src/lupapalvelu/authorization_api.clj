@@ -249,7 +249,11 @@
       {$set {:auth.$.role role}})))
 
 (defcommand toggle-submit-restriction-for-other-auths
-  {:parameters  [id apply-submit-restriction]
+  {:description "Sets submit restriction on the application for all other users in
+   the application auth. When the restriction is set, other authorized users are not
+   allowed to submit the application. Restriction applies for personal and company
+   authorizations but not for organization authorizations (authorities)."
+   :parameters  [id apply-submit-restriction]
    :permissions [{:required [:application/edit]}]
    :pre-checks  [company/authorized-to-apply-submit-restriction-to-other-auths
                  company/check-invitation-accepted]}

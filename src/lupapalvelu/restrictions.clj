@@ -10,6 +10,9 @@
   {:restriction  sc/Str
    :user         {:id       sc/Str
                   :username ssc/Username}
+   ;; Currently there is only restrictions that are applied to other
+   ;; users in application auth. Using different target restrictions
+   ;; can be applied for example single users or companies.
    :target       {:type (sc/enum "others")}})
 
 (defn- restrict
