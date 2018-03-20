@@ -887,10 +887,7 @@
     (command teppo :submit-application :id application-id)
     (return-to-draft sonja application-id)
 
-      (println "\n\n\n\n\n" (:auth (query-application teppo application-id)) "\n\n\n\n\n")
-
     (let [email (last-email)]
-      (println "\n\n\n\n\n" email "\n\n\n\n\n")
       (:to email) => (contains "teppo")
       (:subject email) => (contains "Hakemus palautettiin Luonnos-tilaan")
       (get-in email [:body :plain]) => (contains "comment-text"))
