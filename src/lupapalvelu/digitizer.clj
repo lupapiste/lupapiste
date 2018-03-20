@@ -174,12 +174,11 @@
       rakennuspaikka-exists?                             (:rakennuspaikka app-info)
       (pp/enough-location-info-from-parameters? command) (select-keys data [:x :y :address :propertyId]))))
 
-(defn default-location [organizationId lang]
-  (let [organization (org/get-organization organizationId)]
-  {:x (get-in organization [:default-digitalization-location :x])
-   :y (get-in organization [:default-digitalization-location :y])
-   :address (i18n/localize lang "digitizer.location.missing")
-   :propertyId (apply str (concat (first (split-at 3 organizationId)) "-00-00-00"))}))
+(defn default-location [organization lang]
+  {:x          (get-in organization [:default-digitalization-location :x])
+   :y          (get-in organization [:default-digitalization-location :y])
+   :address    (i18n/localize lang "digitizer.location.missing")
+   :propertyId (apply str (concat (first (split-at 3 (:id organization))) "00000000000"))})
 
 (defn fetch-or-create-archiving-project!
   [{{:keys [lang organizationId kuntalupatunnus createAnyway createWithoutBuildings createWithDefaultLocation]} :data :as command}]
@@ -188,21 +187,19 @@
         dummy-application {:id "" :permitType permit-type :organization organizationId}
         xml               (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
         app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-        {:keys [propertyId] :as location-info} (if createWithDefaultLocation (default-location organizationId lang) (get-location-info command app-info))
-        organization      (when propertyId
-                            (organization/resolve-organization (p/municipality-id-by-property-id propertyId) permit-type))
+        organization      (org/get-organization organizationId)
+        {:keys [propertyId] :as location-info} (if createWithDefaultLocation
+                                                 (default-location organization lang)
+                                                 (get-location-info command app-info))
         building-xml      (if app-info xml (application/fetch-building-xml organizationId permit-type propertyId))
         bldgs-and-structs (or (when app-info (building-reader/->buildings-and-structures xml))
-                              (application/buildings-for-documents building-xml))
-        organizations-match?  (= organizationId (:id organization))]
+                              (application/buildings-for-documents building-xml))]
     (cond
       (and (empty? app-info)
            (not createAnyway))              (fail :error.no-previous-permit-found-from-backend :permitNotFound true)
       (not location-info)                   (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
       (and (not (:propertyId location-info))
            (not createWithDefaultLocation)) (fail :error.previous-permit-no-propertyid)
-      (and (not organizations-match?)
-           (not createWithDefaultLocation)) (fail :error.previous-permit-found-from-backend-is-of-different-organization)
       (and (empty? bldgs-and-structs)
            (not createWithoutBuildings))    (fail :error.no-buildings-found-from-backend :buildingsNotFound true)
       :else                                 (let [{id :id} (create-archiving-project-application! command
