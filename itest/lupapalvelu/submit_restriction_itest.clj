@@ -54,8 +54,8 @@
 
   (facts "Esimerkki is removed from auths"
 
-    #_(fact "pena cannot remove Esimerkki from authorized users"
-        (command pena :remove-auth :id default-app-id :username "7208863-8") => unauthorized?)
+    (fact "pena cannot remove Esimerkki from authorized users"
+      (command pena :remove-auth :id default-app-id :username "7208863-8") => unauthorized?)
 
     (fact "authority removes Esimerkki"
       (command sonja :remove-auth :id default-app-id :username "7208863-8") => ok?)
@@ -128,7 +128,10 @@
       (command erkki :toggle-submit-restriction-for-other-auths :id default-app-id :apply-submit-restriction false) => ok?)
 
     (fact "application is submittable for pena again"
-      (query pena :application-submittable :id default-app-id) => ok?))
+      (query pena :application-submittable :id default-app-id) => ok?)
+
+    (fact "pena is now able to remove Esimerkki Oy authorization"
+      (command pena :remove-auth :id default-app-id :username "7208863-8") => ok?))
 
   (facts "invite non-submit-restrictor company"
     (fact "pena invites Solita"

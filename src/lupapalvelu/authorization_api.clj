@@ -16,7 +16,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.permissions :as permissions]
+            [lupapalvelu.permissions :refer [defcontext] :as permissions]
             [lupapalvelu.restrictions :as restrictions]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
@@ -187,12 +187,34 @@
 ;; Auhtorizations
 ;;
 
+(defcontext auth-entry-context [{{auth :auth auth-restrictions :authRestrictions} :application
+                                 {username :username} :data
+                                 user :user}]
+  ;; Finds requested auth-entry and authRestrictions that are applied by
+  ;; corresponding user. auth-entry and restrictions are injected into
+  ;; command. Permissions for :auth-owner in :authorization scope are
+  ;; added into command if command caller matches requesteed auth-entry.
+  (let [auth-entry (util/find-first (comp #{username} :username) auth)
+        restrictions (filter (comp #{(:id auth-entry)} :id :user) auth-restrictions)]
+    {:context-scope :authorization
+     :context-role  (when (= (:id user) (:id auth-entry)) :auth-owner)
+     :auth-entry    (assoc auth-entry :restrictions restrictions)}))
+
 (defcommand remove-auth
   {:parameters [:id username]
    :input-validators [(partial action/non-blank-parameters [:username])]
-   :user-roles #{:applicant :authority}
-   :states     (states/all-application-states-but [:canceled])
-   :pre-checks [application/validate-authority-in-drafts]}
+   :contexts   [auth-entry-context]
+   :permissions [{:context  {:application {:state #{:draft}} :auth-entry {:restrictions not-empty}}
+                  :required [:application/edit-draft :application/edit-restricting-auth]}
+
+                 {:context  {:application {:state #{:draft}}}
+                  :required [:application/edit-draft :application/edit-auth]}
+
+                 {:context  {:auth-entry {:restrictions not-empty}} ; trying to remove auth that has applied authRestriciton
+                  :required [:application/edit-restricting-auth]}
+
+                 {:required [:application/edit-auth]}]
+   :states     (states/all-application-states-but [:canceled])}
   [command]
   (do-remove-auth command username))
 
