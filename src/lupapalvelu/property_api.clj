@@ -11,7 +11,7 @@
    :user-roles #{:applicant :authority}
    :input-validators [(partial action/property-id-parameters [:propertyId])]}
   [_]
-  (ok :municipality (prop/municipality-id-by-property-id propertyId)))
+  (ok :municipality (prop/municipality-by-property-id propertyId)))
 
 (defquery property-borders
   {:parameters [propertyIds]

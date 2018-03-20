@@ -596,7 +596,7 @@
 
                       {:required [:application/change-location-in-post-verdict-states]}]}
   [{:keys [created application] :as command}]
-  (if (= (:municipality application) (prop/municipality-id-by-property-id propertyId))
+  (if (= (:municipality application) (prop/municipality-by-property-id propertyId))
     (do
       (update-application command
                           {$set {:location   (app/->location x y)

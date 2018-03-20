@@ -661,7 +661,7 @@
             kiinteistotunnus (if (and (seq coord-array-Rakennuspaikka) (#{:building :area} coordinates-type))
                                (resolve-property-id-by-point coord-array-Rakennuspaikka)
                                (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus))
-            municipality (or (prop/municipality-id-by-property-id kiinteistotunnus) kuntakoodi)]
+            municipality (or (prop/municipality-by-property-id kiinteistotunnus) kuntakoodi)]
 
         (-> (merge
               {:id                          (->lp-tunnus asia)

@@ -58,7 +58,7 @@
 
 (defn do-create-application
   [{{:keys [operation x y address propertyId propertyIdSource messages]} :data :keys [user created]} manual-schema-datas permit-type]
-  (let [municipality      (prop/municipality-id-by-property-id propertyId)
+  (let [municipality      (prop/municipality-by-property-id propertyId)
         organization      (org/resolve-organization municipality permit-type)
         organization-id   (:id organization)]
 

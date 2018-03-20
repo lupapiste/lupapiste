@@ -397,7 +397,7 @@
   [{{:keys [source-application-id x y address propertyId]} :data :keys [user]}]
   (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
     (let [operation-name (primary-op-name source-application)
-          municipality   (prop/municipality-id-by-property-id propertyId)
+          municipality   (prop/municipality-by-property-id propertyId)
           organization   (organization-or-fail! municipality operation-name)]
       (or (check-valid-source-application source-application)
           (check-valid-operation-for-organization source-application organization)))
@@ -418,7 +418,7 @@
 (defn copy-application
   [{{:keys [source-application-id x y address propertyId auth-invites]} :data :keys [user created]} & [manual-schema-datas]]
   (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
-    (let [municipality (prop/municipality-id-by-property-id propertyId)
+    (let [municipality (prop/municipality-by-property-id propertyId)
           operation    (-> source-application :primaryOperation :name)
           organization (organization-or-fail! municipality operation)]
 

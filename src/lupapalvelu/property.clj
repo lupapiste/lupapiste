@@ -22,7 +22,7 @@
       (:municipality (location-data-by-property-id-from-wfs property-id))
       (warnf "Property ID not in db format: %s" property-id))))
 
-(defn municipality-id-by-property-id
+(defn municipality-by-property-id
   "Query KTJKii WFS for property location information and returns municipality code as string or nil if not found
   or property-id not in db-format.
   If no sufficient response from NLS, fallback to resolve municipality from property-id as string.

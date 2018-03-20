@@ -563,7 +563,7 @@
 
 (defn do-create-application
   [{{:keys [operation x y address propertyId propertyIdSource infoRequest messages]} :data :keys [user created]} & [manual-schema-datas]]
-  (let [municipality      (prop/municipality-id-by-property-id propertyId)
+  (let [municipality      (prop/municipality-by-property-id propertyId)
         permit-type       (op/permit-type-of-operation operation)
         organization      (org/resolve-organization municipality permit-type)
         scope             (org/resolve-organization-scope municipality permit-type organization)
