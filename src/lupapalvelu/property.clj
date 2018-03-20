@@ -20,7 +20,7 @@
     (infof "ktj-client is disabled - not getting municipality information for %s" property-id)
     (if (and (string? property-id) (re-matches sprop/db-property-id-pattern property-id))
       (:municipality (location-data-by-property-id-from-wfs property-id))
-      (warnf "Property ID not in db format: %s" property-id))))
+      (fail! :error.invalid-property-id :propertyId property-id))))
 
 (defn municipality-by-property-id
   "Query KTJKii WFS for property location information and returns municipality code as string or nil if not found

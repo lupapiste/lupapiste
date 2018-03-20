@@ -1,18 +1,16 @@
 (ns lupapalvelu.property-test
   (:require [midje.sweet :refer :all]
+            [lupapalvelu.itest-util :refer [expected-failure?]]
             [lupapalvelu.property :refer :all]
             [sade.env :as env]))
 
 
 (facts "municipality-id-by-property-id"
-  (municipality-by-property-id nil) => nil
-  (municipality-by-property-id "") => nil
+  (municipality-by-property-id nil) => (partial expected-failure? :error.invalid-property-id)
+  (municipality-by-property-id "") =>  (partial expected-failure? :error.invalid-property-id)
   (fact "not in db format"
-    (municipality-by-property-id "123") => nil)
-  (fact "not in db format, but looks like human readable so fallbacks to string resolver"
-    (municipality-by-property-id "245-003-0105-0006") => "245"
-    (provided
-      (location-data-by-property-id-from-wfs "245-003-0105-0006") => anything :times 0))
+    (municipality-by-property-id "123") => (partial expected-failure? :error.invalid-property-id)
+    (municipality-by-property-id "245-003-0105-0006") => (partial expected-failure? :error.invalid-property-id))
   (fact "returns from WFS"
     (municipality-by-property-id "24500301050006") => "245test"
     (provided
