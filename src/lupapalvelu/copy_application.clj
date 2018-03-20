@@ -12,9 +12,9 @@
             [lupapalvelu.notifications :as notif]
             [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.property :as prop]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
-            [sade.property :as prop]
             [sade.util :refer [merge-in find-first pathwalk]]))
 
 ;;;

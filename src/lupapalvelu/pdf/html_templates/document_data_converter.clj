@@ -1,6 +1,5 @@
 (ns lupapalvelu.pdf.html-templates.document-data-converter
-  (:require [sade.property :as property]
-            [sade.util :refer [fn->>] :as util]
+  (:require [sade.util :refer [fn->>] :as util]
             [sade.strings :as ss]
             [clojure.walk :refer [prewalk]]
             [net.cgrand.enlive-html :as enlive]

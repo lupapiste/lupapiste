@@ -9,10 +9,10 @@
             [sade.strings :as ss]
             [sade.coordinate :as coordinate]
             [sade.core :refer [now def- fail]]
-            [sade.property :as p]
             [sade.xml :as sxml]
             [lupapalvelu.drawing :as drawing]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.property :as prop]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.xml.krysp.verdict :as verdict]
             [lupapalvelu.xml.krysp.common-reader :as common]
@@ -661,7 +661,7 @@
             kiinteistotunnus (if (and (seq coord-array-Rakennuspaikka) (#{:building :area} coordinates-type))
                                (resolve-property-id-by-point coord-array-Rakennuspaikka)
                                (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus))
-            municipality (or (p/municipality-id-by-property-id kiinteistotunnus) kuntakoodi)]
+            municipality (or (prop/municipality-id-by-property-id kiinteistotunnus) kuntakoodi)]
 
         (-> (merge
               {:id                          (->lp-tunnus asia)

@@ -1,20 +1,19 @@
 (ns lupapalvelu.digitizer
-  (:require [sade.property :as p]
-            [sade.core :refer :all]
-            [lupapalvelu.organization :as organization]
+  (:require [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.prev-permit :as pp]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.application :as application]
-            [sade.util :as util]
             [lupapalvelu.action :as action]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.organization :as org]
-            [sade.property :as prop]
-            [sade.env :as env]
+            [lupapalvelu.property :as prop]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [lupapalvelu.application :as app]
@@ -24,8 +23,7 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.building :as building]
             [lupapalvelu.i18n :as i18n]
-            [monger.operators :refer :all]
-            [sade.strings :as ss]))
+            [monger.operators :refer :all]))
 
 (defn- get-applicant-type [applicant]
   (-> applicant (select-keys [:henkilo :yritys]) keys first))
