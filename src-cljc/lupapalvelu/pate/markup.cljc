@@ -1,18 +1,29 @@
 (ns lupapalvelu.pate.markup
   "Simple and safe markup handling.
 
-  markup->tags takes markup string and returns Rum-compliant Hiccup-like syntax.
+  markup->tags takes markup string and returns Rum-compliant
+  Hiccup-like syntax.
 
   The markup syntax is line-oriented. Empty line resets the current
   context (e.g., open formatting chars are implicitly closed).
 
-  Top-level blocks are either paragraphs, lists or blockquotes.
+  Top-level blocks are either headings, lists, blockquotes or
+  paragraphs.
+
+  Heading levels (h1-h6) are denoted with # characters
+
+  # H1 heading
+  ## H2 heading
+  ...
+  ###### H6 heading
+  ############## H6 heading
 
   Lists: if a line begins with list character (*, + or -. Characters
-  can be used interchangeably) a list is created. For numbered lists,
-  the list items are marked with <number.> notation (e.g., 1.). The
-  actual numbers do not matter. Indentation (spaces) denotes list
-  scopes. List types can be mixed freely:
+  can be used interchangeably and must be followed by space) a list is
+  created. For numbered lists, the list items are marked with
+  <number.> notation (e.g., 1.). The actual numbers do not
+  matter. Indentation (spaces) denotes list scopes. List types can be
+  mixed freely:
 
   * List 1, item 1
   - List 1, item 2
@@ -44,13 +55,15 @@
 
   Third paragraph.
 
-  Block (list, blockquote or paragraph) can contain formatted text and links.
+  Block (heading, list, blockquote or paragraph) can contain formatted
+  text and links.
 
   Markup formatting conventions:
 
   *this is bold*    -> [:strong ...]
   _underlined text_ -> [:span.underline ...]
   /italics/         -> [:em ...]
+  ^superscript^     -> [:sup ...]
 
   Formats can be combined:
 
@@ -64,7 +77,8 @@
 
   [ url | text]  -> [:a {:href url :target :_blank} text]
 
-  , where url must contain protocol part. Text cannot contain formatting, but it follows the enclosing format:
+  , where url must contain protocol part. Text cannot contain
+  formatting, but it follows the enclosing format:
 
   Here is * [https://www.example.org/foobar/index.html| bold link]*
 
@@ -88,12 +102,13 @@
 
 (def markup-parser
   (insta/parser
-   "<Lines>      := (List / Quote / Blank / Paragraph)+
+   "<Lines>      := (Heading / List / Quote / Blank / Paragraph)+
     <EOL>        := <'\\r'? '\\n'>
     WS           := <' '+>
     WSEOL        := EOL
-    Escape       := <'\\\\'> ( '*' | '/' | '_' | '\\\\' | '.'
-                             | '-' | '+' | '|' | '[' | ']' | '>' )
+    Escape       := <'\\\\'> ( '*' | '/' | '_' | '^' | '\\\\'
+                             | '.' | '#' | '-' | '+' | '|'
+                             | '[' | ']' | '>' )
     <Text>       := Escape / Link / Plain
     <Texts>      := (Text (WS? Text)*)+
     <Plain>      := #'\\S'+
@@ -104,6 +119,8 @@
     Bullet       := < ('-' | '*' | '+') WS>
     List         := Spaces? (Bullet | Number) Regular+
     Number       := <#'[0-9]+\\.' WS>
+    Title        := '#'+ <WS>
+    Heading      := <WS?> Title Regular+
     <QuoteMark>  := <'>' WS>
     Quote        := <WS>? QuoteMark Regular+
     <NotSpecial> := !(Bullet | Number | QuoteMark | Blank)
@@ -114,10 +131,14 @@
 
 (def text-formats {"*" :strong
                    "/" :em
-                   "_" :span.underline})
+                   "_" :span.underline
+                   "^" :sup})
 
-(defn parse [s]
+(defn- parse [s]
   (markup-parser (str s "\n")))
+
+(defn- consv [& x]
+  (vec (apply cons x)))
 
 (defn- new-scope [scopes tag & kvs]
   (cons (merge {:tag tag :data []}
@@ -132,14 +153,13 @@
 
 (defn- add-to-scope [[scope & others :as scopes] add]
   (if (:tag scope)
-    (-> (update scope :data #(vec (add-to-data % add)))
-        (cons others)
-        vec)
+    (consv (update scope :data #(vec (add-to-data % add)))
+           others)
     (add-to-data scopes add)))
 
 (defn- close-scope [[closing & others  :as scopes] & [trim?]]
   (if-let [tag (:tag closing)]
-    (add-to-scope others (vec (cons tag (:data closing))))
+    (add-to-scope others (consv tag (:data closing)))
     scopes))
 
 (defn- close-all-scopes [scopes]
@@ -197,9 +217,7 @@
       :Spaces (recur xs (assoc m :list-depth (-> x rest count)))
       :Bullet (recur xs (assoc m :list-type :ul))
       :Number (recur xs (assoc m :list-type :ol))
-      (assoc m :list-tag (->> (text-tags markup)
-                              (cons :li)
-                              vec)))))
+      (assoc m :list-tag (consv :li (text-tags markup))))))
 
 (defn- list-tag [scopes markup]
   (let [{:keys [list-depth list-type list-tag]} (resolve-list markup)]
@@ -221,13 +239,16 @@
           (> depth list-depth)
           (recur (close-scope scopes)))))))
 
-(defn- tagify [[tag & txt-tags]]
-  (when-not (= tag :Blank)
-    (->> (text-tags txt-tags)
-         (cons (case tag
-                 :Paragraph :p
-                 :Quote     :blockquote))
-         vec)))
+(defn- tagify [[tag & content]]
+  (case tag
+    :Blank nil
+    :Heading (let [level (-> content first rest count)]
+               (consv (keyword (str "h" (min level 6)))
+                      (text-tags (rest content))))
+    (consv (case tag
+             :Paragraph :p
+             :Quote     :blockquote)
+           (text-tags content))))
 
 (defn- block-tags [markup]
   (loop [[x & xs]                    markup
@@ -240,5 +261,8 @@
       (recur xs (add-to-scope (close-all-scopes scopes)
                               (tagify x))))))
 
-(defn markup->tags [markup]
+(defn markup->tags
+  "Converts given markup to Hiccup-like Rum-compliant tags. See the
+  namespace documentation for the markup syntax."
+  [markup]
   (block-tags (parse markup)))

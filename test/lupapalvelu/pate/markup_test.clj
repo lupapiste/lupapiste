@@ -20,11 +20,12 @@
   (fact "escapes"
     (markup->tags "\\* \\_ \\/ \\\\ \\[ \\] \\|")
     => '([:p "* _ / \\ [ ] |"])
-    (markup->tags "\\- \\+ \\> \\.")
-    => '([:p "- + > ."])
+    (markup->tags "\\- \\+ \\> \\. \\# \\^")
+    => '([:p "- + > . # ^"])
     (markup->tags
      "
       * Asterisk
+      *bold*
       \\* quoted
       - Dash
       \\- quoted
@@ -33,14 +34,18 @@
       > Blockquote
       \\> quoted
       1. Numbered
-      1\\. quoted")
+      1\\. quoted
+      # Header
+      \\## # quoted
+      ")
     => '([:ul
-          [:li "Asterisk * quoted"]
+          [:li "Asterisk "  [:strong "bold" ] " * quoted"]
           [:li "Dash - quoted"]
           [:li "Plus + quoted"]]
          [:blockquote "Blockquote > quoted"]
          [:ol
-          [:li "Numbered 1. quoted"]]))
+          [:li "Numbered 1. quoted"]]
+         [:h1 "Header ## # quoted"]))
   (fact "italics (:em tag)"
     (markup->tags "hello /italics text/")
     => '([:p "hello " [:em "italics text"]])
@@ -59,6 +64,14 @@
     => '([:p "hello " [:span.underline "underline text"]])
     (markup->tags "hello _underline \\_    text")
     => '([:p "hello " [:span.underline "underline _ text"]]))
+  (fact "superscript"
+    (markup->tags "area is 200 m^2^")
+    => '([:p "area is 200 m" [:sup "2"]])
+    (markup->tags "volume is 200 m^3\n and *then* some...")
+    => '([:p "volume is 200 m"
+          [:sup "3 and "
+           [:strong "then"]
+           " some..."]]))
   (fact "enclosing formats"
     (markup->tags "hello _underlined *bold /italics/*_ world")
     => '([:p "hello " [:span.underline "underlined "
@@ -92,6 +105,36 @@
                 [:span.underline " "
                  [:a {:href "http://example.org:8000/index.html"
                       :target :_blank} "Example"]]]]))))
+
+(facts "headings"
+  (fact "H1 - H6"
+    (markup->tags
+     "# h1 *bold
+## h2 hello
+   ### h3 /italics
+ #### h4 # > + -
+##### h5
+###### h6
+####### h6 is the maximum")
+    => '([:h1 "h1 " [:strong "bold"]]
+         [:h2 "h2 hello"]
+         [:h3 "h3 " [:em "italics"]]
+         [:h4 "h4 # > + -"]
+         [:h5 "h5"]
+         [:h6 "h6"]
+         [:h6 "h6 is the maximum"]))
+  (fact "Ignored whitespace"
+    (markup->tags "   ## hello\nworld")
+    => '([:h2 "hello world"])
+    (markup->tags "##   hello  \n  world  ")
+    => '([:h2 "hello world"]))
+  (fact "Significant whitespace"
+    (markup->tags "### hello")
+    => '([:h3 "hello"])
+    (markup->tags "###hello")
+    => '([:p "###hello"])
+    (markup->tags "## # hello")
+    => '([:h2 "# hello"])))
 
 (facts "lists"
   (fact "simple unordered"
