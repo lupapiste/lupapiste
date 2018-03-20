@@ -227,7 +227,7 @@
                                                              :dict :condition}
                                                             {}
                                                             {:dict :remove-condition}]]}}]
-                                      [{:dict :add-condition}]]}}
+                                      [{:dict  :add-condition}]]}}
               (text-section :neighbors)
               {:id         "appeal"
                :loc-prefix :pate-appeal
@@ -538,21 +538,21 @@
              :rows    [[{:col   7
                          :dict  :language
                          :hide? :_meta.published?}]
-                       [{:dict :handler-title
+                       [{:dict  :handler-title
                          :show? :_meta.editing?}
-                        {:col  2
+                        {:col   2
                          :show? :_meta.editing?
-                         :dict :handler}
-                        {:col 3
+                         :dict  :handler}
+                        {:col   3
                          :hide? :_meta.editing?
-                         :list {:title :pate-verdict.handler
-                                :labels? false
-                                :items [{:dict :handler-title}
-                                        {:dict :handler}]}}
+                         :list  {:title   :pate-verdict.handler
+                                 :labels? false
+                                 :items   [{:dict :handler-title}
+                                           {:dict :handler}]}}
                         {}
-                        {:col  2
+                        {:col   2
                          :hide? :_meta.editing?
-                         :dict :application-id}]
+                         :dict  :application-id}]
                        [{:id   "verdict-date"
                          :dict :verdict-date}
                         {:id    "automatic-verdict-dates"
@@ -623,7 +623,8 @@
                                               :dict :condition}
                                              {:align :right
                                               :dict  :remove-condition}]]}}]
-                       [{:dict :add-condition}]]}}
+                       [{:show? :_meta.editing?
+                         :dict  :add-condition}]]}}
 
      {:id    "appeal"
       :show? [:OR :?.appeal :?.collateral]

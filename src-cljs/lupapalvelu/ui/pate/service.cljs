@@ -29,7 +29,15 @@
                                          $
                                          changes)
                                  (reduce (fn [acc k]
-                                           (util/dissoc-in acc (map keyword k)))
+                                           (let [[x & _
+                                                  :as path] (map keyword k)
+                                                 pruned     (util/dissoc-in acc path)]
+                                             ;; Make sure that the
+                                             ;; top-level map still
+                                             ;; exists
+                                             (cond-> pruned
+                                               (-> pruned x nil?)
+                                               (assoc x {}))))
                                          $
                                          removals))]
                      (reduce (fn [acc [k v]]

@@ -137,8 +137,8 @@
 (defn- parse [s]
   (markup-parser (str s "\n")))
 
-(defn- consv [& x]
-  (vec (apply cons x)))
+(defn- consv [x seq]
+  (vec (cons x seq)))
 
 (defn- new-scope [scopes tag & kvs]
   (cons (merge {:tag tag :data []}
