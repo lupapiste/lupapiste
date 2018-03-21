@@ -1017,8 +1017,8 @@ Cancel current application
 
 Cancel current application as authority
   [Arguments]  ${reason}=${EMPTY}
-  Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-authority-btn"]
-  Click enabled by test id  application-cancel-authority-btn
+  Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
+  Click enabled by test id  application-cancel-btn
   Fill test id  modal-dialog-textarea  ${reason}
   Confirm yes no dialog
 

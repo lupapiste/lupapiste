@@ -316,7 +316,6 @@ Authority can view draft foreman application, but can't use commands
   Element should not be visible  xpath=//div[contains(@class, 'application_actions')]//button[@data-test-id="add-operation"]
   Element should not be visible  xpath=//div[contains(@class, 'application_actions')]//button[@data-test-id="application-add-link-permit-btn"]
   Element should not be visible  xpath=//div[contains(@class, 'application_actions')]//button[@data-test-id="application-cancel-btn"]
-  Element should not be visible  xpath=//div[contains(@class, 'application_actions')]//button[@data-test-id="application-cancel-authority-btn"]
   Logout
 
 Frontend errors check

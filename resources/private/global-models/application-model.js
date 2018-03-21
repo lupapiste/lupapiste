@@ -644,9 +644,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.cancelApplication = function() {
     if (!self.stateChanged()) {
-      var command = lupapisteApp.models.applicationAuthModel.ok( "cancel-application-authority")
-            ? "cancel-application-authority"
-            : "cancel-application";
+      var command = "cancel-application";
       hub.send("track-click", {category:"Application", label:"", event:"cancelApplication"});
       hub.send("show-dialog", {ltitle: self.isArchivingProject() ? "application.cancelArchivingProject" : "application.cancelApplication",
                                size: "medium",

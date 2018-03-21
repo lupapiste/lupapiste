@@ -3,6 +3,7 @@
                 :oirAuthority       #{:application/read
                                       :application/show-inforequest-markers
                                       :application/cancel
+                                      :application/cancel-in-restricted-states
                                       :application/mark-everything-seen
                                       :application/change-location-in-pre-verdict-states
                                       :application/edit-drawings}}
@@ -13,6 +14,7 @@
                                       :application/submit
                                       :application/request-for-complement
                                       :application/cancel
+                                      :application/cancel-in-restricted-states
                                       :application/undo-cancelation
                                       :application/edit
                                       :application/edit-drawings
@@ -48,6 +50,7 @@
                                       :application/submit
                                       :application/request-for-complement
                                       :application/cancel
+                                      :application/cancel-in-restricted-states
                                       :application/undo-cancelation
                                       :application/edit
                                       :application/edit-drawings
