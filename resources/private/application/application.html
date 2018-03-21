@@ -109,7 +109,7 @@
                                 </a>
                             </li>
 
-                            <li data-bind="if: !inPostVerdictState() && !isArchivingProject(), css: {'active': $parent.selectedTabName() === 'statement'}">
+                            <li data-bind="if: $root.authorization.ok('application-statement-tab-visible'), css: {'active': $parent.selectedTabName() === 'statement'}">
                                 <a data-bind="click: changeTab" href="#" data-target="statement" data-test-id="application-open-statement-tab"
                                    class="link-btn">
                                     <span data-bind="ltext: 'application.tabStatement'"></span>

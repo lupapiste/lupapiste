@@ -21,7 +21,8 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [lupapalvelu.attachment :as att]))
+            [lupapalvelu.attachment :as att]
+            [lupapalvelu.foreman :as foreman]))
 
 ;;
 ;; Authority Admin operations
@@ -365,3 +366,14 @@
    :pre-checks [(permit/validate-permit-type-is-not permit/YA)]
    :description "Pseudo query for determining whether show neighbors statement section."}
   [_])
+
+(defquery application-statement-tab-visible
+          {:description      "Pseudo query for tab visibility logic"
+           :parameters       [:id]
+           :states           (states/all-application-states-but [:draft])
+           :user-roles       #{:authority :applicant}
+           :user-authz-roles roles/all-authz-writer-roles
+           :pre-checks       [permit/is-not-archiving-project
+                              (fn foreman-app-check [{application :application}]
+                                (when (foreman/foreman-app? application)
+                                  (fail :error.unauthorized)))]} [_])
