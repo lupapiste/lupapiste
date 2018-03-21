@@ -29,6 +29,7 @@
             [lupapalvelu.operations :as op]
             [lupapalvelu.permissions :refer [defcontext] :as permissions]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.property :as prop]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as usr]
             [lupapalvelu.states :as states]
@@ -36,7 +37,6 @@
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [sade.core :refer :all]
             [sade.env :as env]
-            [sade.property :as prop]
             [sade.util :as util :refer [merge-in]]
             [sade.coordinate :as coord]
             [sade.strings :as ss]
@@ -563,7 +563,7 @@
 
 (defn do-create-application
   [{{:keys [operation x y address propertyId propertyIdSource infoRequest messages]} :data :keys [user created]} & [manual-schema-datas]]
-  (let [municipality      (prop/municipality-id-by-property-id propertyId)
+  (let [municipality      (prop/municipality-by-property-id propertyId)
         permit-type       (op/permit-type-of-operation operation)
         organization      (org/resolve-organization municipality permit-type)
         scope             (org/resolve-organization-scope municipality permit-type organization)

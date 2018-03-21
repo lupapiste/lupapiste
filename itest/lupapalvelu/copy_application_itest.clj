@@ -6,7 +6,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.operations :as operations]
             [sade.env :as env]
-            [sade.property :as prop]))
+            [sade.property :as sprop]))
 
 (apply-remote-minimal)
 
@@ -116,7 +116,7 @@
       (fact "the copied app has the provided location and property id"
         (:location copy-app) => {:x x :y y}
         (:propertyId copy-app) => property-id
-        (:municipality copy-app) => (prop/municipality-id-by-property-id property-id))
+        (:municipality copy-app) => (sprop/municipality-id-by-property-id property-id))
 
       (fact "Sonja is authorized to application, Pena is invited as writer, Teppo's pending invitation has been transferred successfully"
         (count (:auth copy-app)) => 4

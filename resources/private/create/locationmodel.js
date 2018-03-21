@@ -28,7 +28,7 @@ LUPAPISTE.CreateApplicationLocationModel = function(options) {
   var municipalityByPropertyId = ko.observable();
   ko.computed(function() {
     if (self.locationServiceUnavailable() && self.propertyIdOk()) {
-      ajax.query("municipality-for-property", {propertyId: self.propertyId()})
+      ajax.query("municipality-for-property", {propertyId: util.prop.toDbFormat(self.propertyId())})
         .success(function(resp) {
           municipalityByPropertyId(resp.municipality);
         }).call();
