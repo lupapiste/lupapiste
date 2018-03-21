@@ -241,7 +241,7 @@
   (= :rest-api (keyword role)))
 
 (defn docstore-user? [{role :role}]
-  (= :docstore-api (keyword role)))
+  (#{:onkalo-api :docstore-api} (keyword role)))
 
 (defn admin? [{role :role}]
   (= :admin (keyword role)))
@@ -265,7 +265,7 @@
   (= :financialAuthority (keyword role)))
 
 (defn onkalo-user? [{role :role}]
-  (= (-> :onkalo-api (keyword role))))
+  (= :onkalo-api (keyword role)))
 
 (defn organization-ids
   "Returns user's organizations as a set of strings"
