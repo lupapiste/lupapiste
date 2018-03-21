@@ -4,8 +4,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.operations :as operations]
-            [sade.env :as env]
-            [sade.property :as prop]))
+            [sade.env :as env]))
 
 (apply-remote-minimal)
 

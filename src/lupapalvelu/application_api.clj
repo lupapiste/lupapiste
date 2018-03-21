@@ -10,7 +10,6 @@
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
-            [sade.property :as prop]
             [lupapalvelu.action :refer [defraw defquery defcommand
                                         update-application notify] :as action]
             [lupapalvelu.application :as app]
@@ -35,6 +34,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.permissions :as permissions]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.property :as prop]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.suti :as suti]
@@ -596,7 +596,7 @@
 
                       {:required [:application/change-location-in-post-verdict-states]}]}
   [{:keys [created application] :as command}]
-  (if (= (:municipality application) (prop/municipality-id-by-property-id propertyId))
+  (if (= (:municipality application) (prop/municipality-by-property-id propertyId))
     (do
       (update-application command
                           {$set {:location   (app/->location x y)

@@ -15,6 +15,7 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.property :as prop]
             [lupapalvelu.review :as review]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
@@ -23,7 +24,6 @@
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [monger.operators :refer :all]
             [sade.core :refer :all]
-            [sade.property :as p]
             [sade.strings :as ss]
             [sade.util :as util]
             [taoensso.timbre :refer [debug info infof]]))
@@ -308,7 +308,7 @@
         app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
         location-info         (get-location-info command app-info)
         organization          (when (:propertyId location-info)
-                                (organization/resolve-organization (p/municipality-id-by-property-id (:propertyId location-info)) permit-type))
+                                (organization/resolve-organization (prop/municipality-by-property-id (:propertyId location-info)) permit-type))
         validation-result     (permit/validate-verdict-xml permit-type xml organization)
         organizations-match?  (= organizationId (:id organization))
         no-proper-applicants? (not-any? get-applicant-type (:hakijat app-info))]
