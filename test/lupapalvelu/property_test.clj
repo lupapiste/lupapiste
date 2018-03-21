@@ -7,6 +7,7 @@
             [sade.property :as sprop]))
 
 (facts "municipality-id-by-property-id"
+  (against-background (env/feature? :disable-ktj-on-create) => false)
   (facts "without mongo cache"
     (against-background
       (mongo/select-one :propertyMunicipalityCache anything [:municipality]) => nil
