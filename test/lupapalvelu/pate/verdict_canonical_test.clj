@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.verdict-canonical-test
   (:require [lupapalvelu.pate.verdict-canonical :refer :all]
+            [lupapalvelu.document.attachments-canonical :refer [verdict-attachment-canonical]]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.util :as util]))
@@ -62,7 +63,25 @@
                                              :sv "Syn2"
                                              :en "Review2"}
                                       :type "paikan-merkitseminen"}]}
-              :template   {:giver "viranhaltija"}})
+              :template   {:giver "viranhaltija"}
+              :verdict-attachment {:type           {:type-id    :paatos
+                                                    :type-group :paatoksenteko}
+                                   :created        1521628178984
+                                   :size           22959
+                                   :filename       "LP-753-2018-90012 Päätös 21.03.2018 12:29.pdf"
+                                   :originalFileId "5ab234139997d70535b952b2"
+                                   :id             "5ab234139997d70535b952b5"
+                                   :autoConversion true
+                                   :contentType    "application/pdf"
+                                   :archivable     true
+                                   :version        {:major 0 :minor 1}
+                                   :stamped        false
+                                   :user           {:id        "777777777777777777000023"
+                                                    :username  "sonja"
+                                                    :firstName "Sonja"
+                                                    :lastName  "Sibbo"
+                                                    :role      "authority"}
+                                   :fileId         "5ab234149997d70535b952b6"}})
 
 (def p-verdict {:data     {:voimassa              "25.2.2020"
                            :appeal                ""
@@ -286,8 +305,7 @@
       :paatoskoodi "my\u00f6nnetty"
       :paatoksentekija "Pate Paattaja (Viranhaltija)"
       :paatospvm "2017-11-23"
-      :pykala "99"
-      :liite nil})
+      :pykala "99"})
 
 (facts "Canonical for P verdict"
 
@@ -317,5 +335,18 @@
         :paatoskoodi "annettu lausunto"
         :paatoksentekija "Pete Paattaja (Viranhaltija)"
         :paatospvm "2018-02-21"
-        :pykala "9"
-        :liite nil}))
+        :pykala "9"}))
+
+(facts "Canonical for verdict attachment"
+
+  (fact verdict-attachment-canonical
+    (verdict-attachment-canonical "fi" verdict "http://localhost:8000/api/raw/")
+    => {:kuvaus "P\u00e4\u00e4t\u00f6s"
+        :linkkiliitteeseen "http://localhost:8000/api/raw/latest-attachment-version?attachment-id=5ab234139997d70535b952b5"
+        :muokkausHetki "2018-03-21T10:29:38"
+        :versionumero 1
+        :tyyppi "paatos"
+        :metatietotieto nil
+        :rakennustunnustieto nil
+        :fileId "5ab234149997d70535b952b6"
+        :filename "LP-753-2018-90012 P\u00e4\u00e4t\u00f6s 21.03.2018 12:29.pdf"}))

@@ -179,5 +179,5 @@
         use-http-links? (re-matches #"https?://.*" begin-of-link)
         link (str begin-of-link (if use-http-links? (attachment-url attachment) (:filename attachment)))
         file-id (:fileId attachment)
-        file-name (:fileName attachment)]
+        file-name (:filename attachment)]
     (get-Liite attachment-title link attachment type-id file-id file-name)))
