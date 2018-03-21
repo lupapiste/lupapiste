@@ -794,13 +794,14 @@
                                  (:mongo-updates doc-updates)))
     (tiedonohjaus/mark-app-and-attachments-final! (:id application)
                                                   created)
-    (pdf/create-verdict-attachment command
-                                   (assoc verdict :published created))
-    ;; KuntaGML
-    (when (org/krysp-integration? @organization (:permitType application))
-      (-> (assoc command :application (domain/get-application-no-access-checking (:id application)))
-          (krysp/verdict-as-kuntagml verdict))
-      nil)))
+
+    (let [verdict-attachment (pdf/create-verdict-attachment command (assoc verdict :published created))
+          verdict (assoc verdict :verdict-attachment verdict-attachment)]
+      ;; KuntaGML
+      (when (org/krysp-integration? @organization (:permitType application))
+        (-> (assoc command :application (domain/get-application-no-access-checking (:id application)))
+            (krysp/verdict-as-kuntagml verdict))
+        nil))))
 
 (defn preview-verdict
   "Preview version of the verdict.

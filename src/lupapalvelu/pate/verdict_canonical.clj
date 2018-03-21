@@ -73,10 +73,9 @@
    :paatoskoodi (pate-shared/verdict-code-map (or (keyword (:verdict-code data)) :ei-tiedossa))
    :paatoksentekija (paatoksentekija lang verdict)
    :paatospvm (util/to-xml-date-from-string (:verdict-date data))
-   :pykala (:verdict-section data)
-   :liite nil #_"yht:RakennusvalvontaLiiteType"}) ; TODO: add generated pdf attachment
+   :pykala (:verdict-section data)})
 
 (defn verdict-canonical [application lang verdict]
   {:Paatos {:lupamaaraykset (lupamaaraykset-type-canonical lang verdict)
             :paivamaarat (paivamaarat-type-canonical lang verdict)
-            :poytakirja [(paatospoytakirja-type-canonical lang verdict)]}})
+            :poytakirja (paatospoytakirja-type-canonical lang verdict)}})
