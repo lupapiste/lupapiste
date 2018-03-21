@@ -144,7 +144,7 @@
                  ;; Used in the markup support.
                  [instaparse "1.4.8"]
 
-                 [org.clojure/clojurescript "1.9.473"]
+                 [org.clojure/clojurescript "1.9.946"]
                  [rum "0.10.8"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  ; JS Pikaday for cljs datepicker (https://github.com/dbushell/Pikaday)
