@@ -68,7 +68,7 @@
                                                     :type-group :paatoksenteko}
                                    :created        1521628178984
                                    :size           22959
-                                   :filename       "LP-753-2018-90012 Päätös 21.03.2018 12:29.pdf"
+                                   :filename       "LP-753-2018-90012 P\u00e4\u00e4t\u00f6s 21.03.2018 12:29.pdf"
                                    :originalFileId "5ab234139997d70535b952b2"
                                    :id             "5ab234139997d70535b952b5"
                                    :autoConversion true
