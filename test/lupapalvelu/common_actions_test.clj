@@ -185,7 +185,8 @@
                           :application-handlers
                           :application-organization-archive-enabled
                           :application-submittable
-                          :create-application}
+                          :create-application
+                          :document-states}
         user {:id "user123" :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (foreach-action {:web {} :user user :application application :data {} :organization (delay {:statementGivers [{:id "user123"}]})})

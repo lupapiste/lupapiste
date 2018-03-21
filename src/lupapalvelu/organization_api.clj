@@ -28,7 +28,6 @@
             [sade.core :refer [ok fail fail! now unauthorized]]
             [sade.env :as env]
             [sade.municipality :as muni]
-            [sade.property :as p]
             [sade.shared-schemas :as sssc]
             [sade.schemas :as ssc]
             [sade.schema-utils :as ssu]

@@ -12,9 +12,9 @@
             [lupapalvelu.notifications :as notif]
             [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.property :as prop]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
-            [sade.property :as prop]
             [sade.util :refer [merge-in find-first pathwalk]]))
 
 ;;;
@@ -288,7 +288,7 @@
   (when-let [company-id (auth-id old-company-auth)]
     (when-let [company (company/find-company-by-id company-id)]
       (assoc (company/company->auth company (get invite :role role))
-             :inviter inviter))))
+             :inviter (usr/summary inviter)))))
 
 (defn create-user-auth [old-user-auth role inviter application-id timestamp & [text document-name document-id path]]
   (when-let [user (usr/get-user-by-id (:id old-user-auth))]
@@ -375,9 +375,8 @@
       (fail :error.operations.hidden :organization (:id organization)
             :operation operation-name))))
 
-(defn- organization-for-property-id [propertyId operation-name]
-  (let [municipality (prop/municipality-id-by-property-id propertyId)
-        permit-type  (op/permit-type-of-operation operation-name)
+(defn- organization-or-fail! [municipality operation-name]
+  (let [permit-type  (op/permit-type-of-operation operation-name)
         org (org/resolve-organization municipality
                                       permit-type)]
     (when-not org
@@ -397,11 +396,11 @@
   "Fails if the application cannot be copied to the specific organization"
   [{{:keys [source-application-id x y address propertyId]} :data :keys [user]}]
   (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
-    (let [operation-name (primary-op-name source-application)]
+    (let [operation-name (primary-op-name source-application)
+          municipality   (prop/municipality-by-property-id propertyId)
+          organization   (organization-or-fail! municipality operation-name)]
       (or (check-valid-source-application source-application)
-          (check-valid-operation-for-organization source-application
-                                                  (organization-for-property-id propertyId
-                                                                                operation-name))))
+          (check-valid-operation-for-organization source-application organization)))
     (fail! :error.application-not-found :id source-application-id)))
 
 (defn- check-valid-auth-invites
@@ -419,9 +418,9 @@
 (defn copy-application
   [{{:keys [source-application-id x y address propertyId auth-invites]} :data :keys [user created]} & [manual-schema-datas]]
   (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
-    (let [municipality (prop/municipality-id-by-property-id propertyId)
+    (let [municipality (prop/municipality-by-property-id propertyId)
           operation    (-> source-application :primaryOperation :name)
-          organization (organization-for-property-id propertyId operation)]
+          organization (organization-or-fail! municipality operation)]
 
       (if-let [check-failed (or (check-valid-source-application source-application)
                                 (check-valid-operation-for-organization source-application organization)

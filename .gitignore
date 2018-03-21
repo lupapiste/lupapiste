@@ -75,3 +75,4 @@ node_modules
 resources/public/lp-static/css/*.css.map
 resources/public/lp-static/js/*
 /resources/public/lp-static/css/main-blessed1.css
+/.dir-locals.el

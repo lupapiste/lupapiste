@@ -737,6 +737,16 @@
     :role "onkalo-api"
     :private {:password "$2a$10$LqhU/xPaLEsiPYkIJlT3UuBkzZ0wJyLr.0NBcOAlaP4/DW7AHbeGy"} ; basicauth}
 
+   {:id "tiedonohjausjarjestelma"
+    :username "tiedonohjausjarjestelma"
+    :email "tiedonohjausjarjestelma@lupapiste.fi"
+    :firstName "TOJ"
+    :lastName "API-user"
+    :enabled true
+    :language "fi"
+    :role "rest-api"
+    :private {:apikey "tojTOJtojTOJtojTOJtoj"}}
+
    ;; Solita admin:  financial / admin
    {:id "financial"
     :email "financial@ara.fi"

@@ -79,7 +79,13 @@ var repository = (function() {
           application.allowedAttachmentTypes = sortedAttachmentTypes;
 
           application.tosFunction = application.tosFunction === undefined ? null : application.tosFunction;
-          application.kuntalupatunnukset = _.filter(_.map(application.verdicts, "kuntalupatunnus")); // collect non-null values for KLT
+          application.kuntalupatunnukset = _(application.verdicts)
+            .filter(function(verdict) { // only show non-draft verdicts, but everything for archiving projects
+              return application.permitType === "ARK" || !verdict.draft;
+            })
+            .map("kuntalupatunnus")
+            .filter() // collect non-null values for KLT
+            .value();
 
           application.propertyIdSource = application.propertyIdSource || "";
 

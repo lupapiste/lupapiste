@@ -135,6 +135,10 @@
                             :inviter (:inviter invite)
                             :inviteAccepted accepted-ts))))
 
+(defn make-user-auth [user unsubscribed?]
+  (let [user-auth    (usr/user-in-role user :writer)]
+    (assoc user-auth :unsubscribed unsubscribed?)))
+
 ;;
 ;; Authz checkers
 ;;
@@ -148,6 +152,10 @@
   (->> (get-company-auths application user)
        (map (comp keyword :role))
        (some roles)))
+
+(defn user-or-company-authz? [roles application user]
+  (or (user-authz? roles application user)
+      (company-authz? roles application user)))
 
 (defn org-authz
   "Returns user's org authz in given organization, nil if not found"

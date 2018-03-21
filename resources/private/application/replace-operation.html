@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page container" id="replace-operation">
+
+    <h1 data-bind="ltext: 'operations.replace'"></h1>
+
+    <div data-bind="visible: showOperations()">
+        <div class="operation-tree tree-control"></div>
+    </div>
+
+    <!-- ko if: !showOperations() -->
+    <div data-test-id= "replace-operation-not-visible">
+        <p data-bind="ltext: 'operations.replaceOperationNotPossible'"></p>
+    </div>
+    <!-- /ko -->
+
+    <div data-bind="visible: waitingOperations">
+        <img src="/lp-static/img/ajax-loader.gif" alt="..." width="66" height="66"/>
+    </div>
+
+    <a href="#" data-bind="attr: {href: url}" class="btn secondary">
+        <span data-bind="ltext: 'cancel'"></span>
+    </a>
+
+</section>
+
+<section class="page" id="replace-operation-templates">
+
+    <div class="tree-last">
+
+        <div data-bind="text: loc('operations.selected') + ' ' + loc(['operations',op])"></div>
+        <div class="info-line">
+            <i class="lupicon-circle-attention"></i>
+            <span data-bind="ltext: 'operations.replaceOperationWarningText'"></span>
+        </div>
+
+        <button data-bind="click: replaceOperation,
+                           disable: processing,
+                           css: {waiting: pending}" class="positive"
+                data-test-id="replace-operation">
+            <i class="lupicon-check"></i>
+            <i class="wait spin lupicon-refresh"></i>
+            <span data-bind="ltext: 'operations.replace'"></span>
+        </button>
+    </div>
+
+</section>
+
+</body>
+</html>

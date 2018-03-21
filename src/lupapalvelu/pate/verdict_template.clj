@@ -145,10 +145,10 @@
   [draft board-verdict?]
   (cond-> (->> shared/verdict-dates
                (map (fn [k]
-                      [k (-> draft k :delta schemas/parse-int)]))
+                      [k (-> draft k schemas/parse-int)]))
                (into {}))
     board-verdict? (assoc :muutoksenhaku (-> draft :lautakunta-muutoksenhaku
-                                             :delta schemas/parse-int))))
+                                             schemas/parse-int))))
 
 (defn- published-settings
   "The published settings only include lists without schema-ordained

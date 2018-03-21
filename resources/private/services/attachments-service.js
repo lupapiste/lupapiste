@@ -555,12 +555,7 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.convertToPdfA = function(attachmentId) {
-    ajax
-      .command("convert-to-pdfa", {id: self.applicationId(), attachmentId: attachmentId})
-      .success(function() {
-        self.queryOne(attachmentId, {triggerCommand: "convert-to-pdfa"});
-      })
-      .call();
+    self.updateAttachment(attachmentId, "convert-to-pdfa", {}, {});
   };
 
   self.getDefaultBackendId = function() {

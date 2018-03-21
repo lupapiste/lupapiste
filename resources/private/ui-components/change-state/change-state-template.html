@@ -1,6 +1,7 @@
 <script class="ko-template"
         type="text/x-jquery-tmpl"
         id="change-state-template">
+<!-- ko if: !_.isEmpty( states() ) -->
   <p class="no-wrap-whitespace"
      data-bind="ltext: 'state.application'"></p>
   <span class="application_summary_text">
@@ -10,4 +11,5 @@
                      optionsText: stateText,
                      value: selectedState,
                      optionsCaption: loc( 'choose')"></select></span>
+<!-- /ko -->
 </script>

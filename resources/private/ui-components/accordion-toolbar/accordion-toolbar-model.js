@@ -54,6 +54,17 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
                                                "id"] );
   });
 
+  self.showReplaceOperation = ko.pureComputed( function() {
+    var isOp = op && op.id;
+    return isOp && lupapisteApp.models.applicationAuthModel.ok("replace-operation");
+  });
+
+  self.replaceOperation = function() {
+      pageutil.openPage("replace-operation", [self.docModel.appId, _.get(self.info, ["op", "id"])].join("/"));
+      hub.send("track-click", {category:"Application", label:"", event:"replaceOperation"});
+      return false;
+  };
+
   // identifier field is object with keys docId, schema, key, value. Value is observable (can be edited).
   self.identifierField = self.accordionService && self.accordionService.getIdentifier(self.docModel.docId);
 
@@ -169,7 +180,8 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.showToolbar = ko.pureComputed(function() {
     return hasRole &&  (self.showRemove() || self.showStatus()
                         || self.showReject() || self.showApprove()
-                        || self.hasOperation() || self.canBeDisabled());
+                        || self.hasOperation() || self.canBeDisabled())
+                        || self.showReplaceOperation;
   });
 
   self.closeEditors = function( data, event ) {

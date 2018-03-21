@@ -189,14 +189,22 @@
                        :in-any-order))))
 
 (fact "collateral"
-  (pdf/collateral :fi {:data {:collateral "20 000"
+  (pdf/collateral :fi {:data {:collateral-flag true
+                              :collateral      "20 000"
                               :collateral-type "shekki"
                               :collateral-date "5.2.2018"}})
   => "20 000\u20ac, Shekki, 5.2.2018"
-  (pdf/collateral :fi {:data {:collateral "20 000"}})
+  (pdf/collateral :fi {:data {:collateral-flag true
+                              :collateral "20 000"}})
   => "20 000\u20ac"
-  (pdf/collateral :fi {:data {}})
-  => "")
+  (pdf/collateral :fi {:data {:collateral-flag true}})
+  => ""
+  (pdf/collateral :fi {:data {:collateral-flag false
+                              :collateral      "20 000"
+                              :collateral-type "shekki"
+                              :collateral-date "5.2.2018"}})
+  => nil
+  (pdf/collateral :fi {:data {}}) => nil)
 
 (fact "complexity"
   (pdf/complexity :fi {:data {}})
@@ -220,3 +228,10 @@
                                             :status "ehdollinen"}]}})
   => ["Stakeholder, 7.2.2018, Ei huomautettavaa"
       "Interested, 6.2.2018, Ehdollinen"])
+
+(fact "handler"
+  (pdf/handler {:data {}}) => ""
+  (pdf/handler {:data {:handler "Hank Handler  "}}) => "Hank Handler"
+  (pdf/handler {:data {:handler " Hank Handler"
+                       :handler-title "Title"}}) => "Title Hank Handler"
+  (pdf/handler {:data {:handler-title " Title  "}}) => "Title")

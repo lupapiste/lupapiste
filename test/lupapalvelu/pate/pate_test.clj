@@ -4,6 +4,7 @@
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared  :as shared]
+            [lupapalvelu.pate.shared-schemas  :as shared-schemas]
             [midje.sweet :refer :all]
             [sade.util :as util]
             [schema.core :refer [defschema] :as sc]
@@ -12,29 +13,29 @@
 (fact "only-one-of constraint"
   (let [err-msg (util/fn-> validation-error-explain second first)
         s "Only one of the keys is allowed: [:add :remove :click]"]
-    (err-msg (sc/check shared/PateButton
+    (err-msg (sc/check shared-schemas/PateButton
                        {:click :foo :add :bar :remove :baz})) => s
-    (err-msg (sc/check shared/PateButton
+    (err-msg (sc/check shared-schemas/PateButton
                        {:add :one :remove :two :click :three})) => s
-    (err-msg (sc/check shared/PateButton
+    (err-msg (sc/check shared-schemas/PateButton
                        {:click :one :add :two})) => s
-    (err-msg (sc/check shared/PateButton
+    (err-msg (sc/check shared-schemas/PateButton
                        {:add :one :remove :hii})) => s
-    (err-msg (sc/check shared/PateButton
+    (err-msg (sc/check shared-schemas/PateButton
                        {:remove :foo :click :bar})) => s)
-  (sc/check shared/PateButton {:click :foo}) => nil
-  (sc/check shared/PateButton {:add :bar}) => nil
-  (sc/check shared/PateButton {:remove :baz}) => nil
-  (sc/check shared/PateButton {}) => nil)
+  (sc/check shared-schemas/PateButton {:click :foo}) => nil
+  (sc/check shared-schemas/PateButton {:add :bar}) => nil
+  (sc/check shared-schemas/PateButton {:remove :baz}) => nil
+  (sc/check shared-schemas/PateButton {}) => nil)
 
 
 (def test-template
-  {:dictionary {:check       {:docgen "pate-verdict-check"}
+  {:dictionary {:check       {:toggle {}}
                 :delta       {:date-delta {:unit :years}}
                 :phrase      {:phrase-text {:category :paatosteksti}}
                 :multi       {:multi-select {:items [:foo :bar {:text  "Hello"
                                                                 :value :world}]}}
-                :string      {:docgen "pate-string"}
+                :string      {:text {}}
                 :delta2      {:date-delta {:unit :days}}
                 :ref-select  {:reference-list {:type :select
                                                :path [:path :to :somewhere]}}
@@ -43,28 +44,30 @@
                 :ref-key     {:reference-list {:type     :select
                                                :path     [:my :path]
                                                :item-key :value}}
-                :text        {:docgen "pate-verdict-text"}
-                :giver       {:docgen "pate-verdict-giver"}
-                :radio       {:docgen "automatic-vs-manual"}
-                :date        {:docgen "pate-date"}
-                :complexity  {:docgen {:name "pate-complexity"}}
+                :text        {:text {}}
+                :giver       {:select {:items [:viranhaltija :lautakunta]}}
+                :date        {:date {}}
+                :complexity  shared/complexity-select
                 :keymap      {:keymap {:one   "hello"
                                        :two   :world
                                        :three 88}}
                 :placeholder {:placeholder {:type :neighbors}}
                 :loop        {:repeating {:delta3     {:date-delta {:unit :years}}
-                                          :date2      {:docgen "pate-date"}
-                                          :inner-loop {:repeating {:date {:docgen "pate-verdict-check"}}}}}
-                :dynamic     {:repeating {:text        {:docgen "pate-string"}
-                                          :flag        {:docgen "pate-verdict-check"}
+                                          :date2      {:date {}}
+                                          :inner-loop {:repeating {:date {:toggle {}}}}}}
+                :dynamic     {:repeating {:text        {:text {}}
+                                          :flag        {:toggle {}}
                                           :remove-item {:button {:remove :dynamic}}
-                                          :sublevel    {:repeating {:tick       {:docgen "pate-verdict-check"}
+                                          :sublevel    {:repeating {:tick       {:toggle {}}
                                                                     :remove-sub {:button {:remove :sublevel}}
                                                                     :remove-top {:button {:remove :dynamic}}}}
                                           :add-sub     {:button {:add :sublevel}}
                                           :bad-add     {:button {:add :dynamic}}}}
                 :add-item    {:button {:add :dynamic}}
-                :attachments {:application-attachments {}}}
+                :attachments {:application-attachments {}}
+                :toggle      {:toggle {}}
+                :select      {:select {:items [:one :two :three]}}
+                }
    :name       "test"
    :sections   [{:id   "one"
                  :grid {:columns 4
@@ -107,12 +110,12 @@
                                            :rows      [[{:dict :text}
                                                         {:dict :remove-item}]]}}]
                                   [{:dict :add-item}]]}}
-                {:id "attachments"
+                {:id   "attachments"
                  :grid {:columns 1
-                        :rows [[{:dict :attachments}]]}}]})
+                        :rows    [[{:dict :attachments}]]}}]})
 
 (facts "Test template is valid"
-  (sc/validate shared/PateVerdictTemplate test-template)
+  (sc/validate shared-schemas/PateVerdictTemplate test-template)
   => test-template)
 
 (defn validate-path-value [path value & [references]]
@@ -125,15 +128,16 @@
   (fact "Bad path"
     (validate-path-value [:foo :bar] 88)
     => :error.invalid-value-path)
-  (facts "Docgen: checkbox"
+  (facts "Toggle (was docgen checkbox)"
     (validate-path-value [:check] true) => nil
     (validate-path-value [:check] false) => nil
     (validate-path-value [:check] "bad") => :error.invalid-value
     (validate-path-value [:check :bad] true) => :error.invalid-value-path)
   (facts "Date delta"
-    (validate-path-value [:delta :delta] 0) => nil
-    (validate-path-value [:delta :delta] 2) => nil
-    (validate-path-value [:delta :delta] -2) => :error.invalid-value)
+    (validate-path-value [:delta] 0) => nil
+    (validate-path-value [:delta] 2) => nil
+    (validate-path-value [:delta] -2) => :error.invalid-value
+    (validate-path-value [:delta :delta] 2) => :error.invalid-value-path)
   (facts "Phrase text"
     (validate-path-value [:phrase] "hello") => nil
     (validate-path-value [:phrase :bad] "hello") => :error.invalid-value-path
@@ -150,7 +154,7 @@
     (validate-path-value [:multi] [88]) => :error.invalid-value
     (validate-path-value [:multi] [:world]) => nil
     (validate-path-value [:multi] [:world "bar" :foo]) => nil)
-  (facts "Docgen: string"
+  (facts "Text (was docgen string)"
     (validate-path-value [:string] "hello") => nil
     (validate-path-value ["string"] "hello") => nil
     (validate-path-value [:string :hii] "hello") => :error.invalid-value-path
@@ -191,7 +195,7 @@
       => :error.invalid-value
       (validate-path-value [:ref-key] [] refs) => nil
       (validate-path-value [:ref-key] nil refs) => nil))
-  (facts "Docgen: select"
+  (facts "Select (was docgen select)"
     (validate-path-value [:giver :bad] "viranhaltija")
     => :error.invalid-value-path
     (validate-path-value [:giver] "viranhaltija") => nil
@@ -202,12 +206,6 @@
     ;; Empty selection
     (validate-path-value [:giver] nil) => nil
     (validate-path-value [:giver] "") => nil)
-  (facts "Docgen: radioGroup"
-    (validate-path-value [:radio] :automatic) => nil
-    (validate-path-value [:radio] "manual") => nil
-    (validate-path-value [:radio] :bad) => :error.invalid-value
-    (validate-path-value [:radio :bad] :automatic) => :error.invalid-value-path
-    (validate-path-value [:radio] nil) => :error.invalid-value)
   (facts "Date"
     (validate-path-value [:date] "13.9.2017") => nil
     (validate-path-value [:date] "13.09.2017") => nil
@@ -217,14 +215,6 @@
     (validate-path-value [:date] "bad") => :error.invalid-value
     (validate-path-value [:date] "") => nil
     (validate-path-value [:date] nil) => nil)
-  (facts "Docgen: select defined with map"
-    (validate-path-value [:complexity] :medium) => nil
-    (validate-path-value [:complexity] "large") => nil
-    (validate-path-value [:complexity] nil) => nil
-    (validate-path-value [:complexity] "") => nil
-    (validate-path-value [:complexity] "bad") => :error.invalid-value
-    (validate-path-value [:complexity :bad] :extra-large)
-    => :error.invalid-value-path)
   (facts "KeyMap"
     (validate-path-value [:keymap] :hii) => :error.invalid-value-path
     (validate-path-value [:keymap :one] :hii) => nil
@@ -238,7 +228,7 @@
     => :error.invalid-value-path)
   (facts "Repeating"
     (validate-path-value [:loop] :hii) => :error.invalid-value-path
-    (validate-path-value [:loop :some-index :delta3 :delta] 8)
+    (validate-path-value [:loop :some-index :delta3] 8)
     => nil
     (validate-path-value [:loop :date2] "25.9.2017")
     => :error.invalid-value-path
@@ -277,7 +267,17 @@
     (validate-path-value [:attachments] "hello")
     => :error.invalid-value
     (validate-path-value [:attachments] ["hello"]) => nil
-    (validate-path-value [:attachments] ["" "foo" "bar"]) => nil))
+    (validate-path-value [:attachments] ["" "foo" "bar"]) => nil)
+  (facts "Toggle"
+    (validate-path-value [:toggle] nil) => :error.invalid-value
+    (validate-path-value [:toggle] "foo") => :error.invalid-value
+    (validate-path-value [:toggle] true) => nil
+    (validate-path-value [:toggle] false) => nil)
+  (facts "Text"
+    (validate-path-value [:text] nil) => :error.invalid-value
+    (validate-path-value [:text] true) => :error.invalid-value
+    (validate-path-value [:text] "") => nil
+    (validate-path-value [:text] "hello") => nil))
 
 (defn validate-and-process-value [path value old-data & [references]]
   (schemas/validate-and-process-value test-template
@@ -316,7 +316,7 @@
   (fact "Bad path"
     (validate-and-process-value [:foo :bar] 88 {})
     => (err :error.invalid-value-path))
-  (facts "Docgen: checkbox"
+  (facts "Toggle (was docgen checkbox)"
     (validate-and-process-value [:check] true {}) => (ok [:check] true)
     (validate-and-process-value ["check"] false {:foo 8})
     => (ok [:check] false {:foo 8})
@@ -325,12 +325,14 @@
     (validate-and-process-value [:check :bad] true {})
     => (err :error.invalid-value-path))
   (facts "Date delta"
-    (validate-and-process-value [:delta :delta] 0 {})
-    => (ok [:delta :delta] 0)
+    (validate-and-process-value [:delta] 0 {})
+    => (ok [:delta] 0)
+    (validate-and-process-value [:delta] 2 {})
+    => (ok [:delta] 2)
+    (validate-and-process-value [:delta] -2 {})
+    => (err [:delta] :error.invalid-value)
     (validate-and-process-value [:delta :delta] 2 {})
-    => (ok [:delta :delta] 2)
-    (validate-and-process-value [:delta :delta] -2 {})
-    => (err [:delta :delta] :error.invalid-value))
+    => (err :error.invalid-value-path))
   (facts "Phrase text"
     (validate-and-process-value [:phrase] "hello" {:hi "moi"})
     => (ok [:phrase] "hello" {:hi "moi"})
@@ -361,7 +363,7 @@
     => (ok [:multi] [:world])
     (validate-and-process-value [:multi] [:world "bar" :foo] {:dum "dom"})
     => (ok [:multi] [:world "bar" :foo] {:dum "dom"}))
-  (facts "Docgen: string"
+  (facts "Text (was docgen string)"
     (validate-and-process-value [:string] "hello" {})
     => (ok [:string] "hello")
     (validate-and-process-value ["string"] "hello" {})
@@ -424,7 +426,7 @@
       => (ok [:ref-key] [])
       (validate-and-process-value [:ref-key] nil {} refs)
       => (ok [:ref-key] nil)))
-  (facts "Docgen: select"
+  (facts "Select (was docgen select)"
     (validate-and-process-value [:giver :bad] "viranhaltija" {})
     => (err :error.invalid-value-path)
     (validate-and-process-value [:giver] "viranhaltija" {})
@@ -442,17 +444,6 @@
     => (ok [:giver] nil {:foo "bar"})
     (validate-and-process-value [:giver] "" {})
     => (ok [:giver] ""))
-  (facts "Docgen: radioGroup"
-    (validate-and-process-value [:radio] :automatic {})
-    => (ok [:radio] :automatic)
-    (validate-and-process-value [:radio] "manual" {})
-    => (ok [:radio] "manual")
-    (validate-and-process-value [:radio] :bad {})
-    => (err [:radio] :error.invalid-value)
-    (validate-and-process-value [:radio :bad] :automatic {})
-    => (err :error.invalid-value-path)
-    (validate-and-process-value [:radio] nil {})
-    => (err [:radio] :error.invalid-value))
   (facts "Date"
     (validate-and-process-value [:date] "13.9.2017" {})
     => (ok [:date] "13.9.2017")
@@ -470,19 +461,6 @@
     => (ok [:date] "")
     (validate-and-process-value [:date] nil {})
     => (ok [:date] nil))
-  (facts "Docgen: select defined with map"
-    (validate-and-process-value [:complexity] :medium {})
-    => (ok [:complexity] :medium)
-    (validate-and-process-value [:complexity] "large" {})
-    => (ok [:complexity] "large")
-    (validate-and-process-value [:complexity] nil {})
-    => (ok [:complexity] nil)
-    (validate-and-process-value [:complexity] "" {})
-    => (ok [:complexity] "")
-    (validate-and-process-value [:complexity] "bad" {})
-    => (err [:complexity] :error.invalid-value)
-    (validate-and-process-value [:complexity :bad] :extra-large {})
-    => (err :error.invalid-value-path))
   (facts "KeyMap"
     (validate-and-process-value [:keymap] :hii {})
     => (err :error.invalid-value-path)
@@ -502,19 +480,19 @@
   (facts "Repeating"
     (validate-and-process-value [:loop] :hii {})
     => (err :error.invalid-value-path)
-    (validate-and-process-value [:loop :some-index :delta3 :delta]
+    (validate-and-process-value [:loop :some-index :delta3]
                                 8 {:loop {:some-index {}}})
-    => (ok [:loop :some-index :delta3 :delta] 8)
-    (validate-and-process-value [:loop :some-index :delta3 :delta]
+    => (ok [:loop :some-index :delta3] 8)
+    (validate-and-process-value [:loop :some-index :delta3]
                                 8 {:loop {:some-index {:delta3 {}}}})
-    => (ok [:loop :some-index :delta3 :delta] 8)
-    (validate-and-process-value [:loop :some-index :delta3 :delta]
-                                8 {:loop {:some-index {:delta3 {:delta 1}}}})
-    => (ok [:loop :some-index :delta3 :delta] 8)
-    (validate-and-process-value [:loop :some-index :delta3 :delta]
+    => (ok [:loop :some-index :delta3] 8)
+    (validate-and-process-value [:loop :some-index :delta3]
+                                8 {:loop {:some-index {:delta3 1}}})
+    => (ok [:loop :some-index :delta3] 8)
+    (validate-and-process-value [:loop :some-index :delta3]
                                 8 {:loop {}})
     => (err :error.invalid-value-path)
-    (validate-and-process-value [:loop :some-index :delta3 :delta]
+    (validate-and-process-value [:loop :some-index :delta3]
                                 8 {})
     => (err :error.invalid-value-path)
     (validate-and-process-value [:loop :date2] "25.9.2017" {})
@@ -613,4 +591,3 @@
         => (err :error.invalid-value-path)
         (validate-and-process-value [:dynamic :id :add-sub] true {:dynamic {}})
         => (err :error.invalid-value-path)))))
-

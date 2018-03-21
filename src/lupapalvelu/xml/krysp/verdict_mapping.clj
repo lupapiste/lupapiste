@@ -1,5 +1,6 @@
 (ns lupapalvelu.xml.krysp.verdict-mapping
-  (:require [lupapalvelu.document.attachments-canonical :as att-canonical]
+  (:require [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.document.attachments-canonical :as att-canonical]
             [lupapalvelu.pate.verdict-canonical :as canonical]
             [lupapalvelu.document.rakennuslupa-canonical :as r-canonical]
             [lupapalvelu.document.poikkeamis-canonical :as p-canoncial]
@@ -16,7 +17,8 @@
         verdict (canonical/verdict-canonical application lang verdict)]
 
     {:attachments (mapping-common/attachment-details-from-canonical attachments-canonical)
-     :xml (-> (r-canonical/application-to-canonical application lang)
+     :xml (-> (meta-fields/enrich-with-link-permit-data application)
+              (r-canonical/application-to-canonical lang)
               (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :kayttotapaus]
                         kayttotapaus)
               (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :paatostieto]

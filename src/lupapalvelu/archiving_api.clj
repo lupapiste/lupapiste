@@ -45,7 +45,7 @@
 (defquery document-states
   {:parameters       [:id]
    :input-validators [(partial non-blank-parameters [:id])]
-   :permissions      [{:required [:application/get-document-states]}]
+   :permissions      [{:required [:application/read]}]
    :states           states/all-application-or-archiving-project-states}
   [{:keys [application]}]
   (let [app-doc-id (str (:id application) "-application")
@@ -58,14 +58,34 @@
                          case-file-doc-id (get-in application [:processMetadata :tila]))]
     (ok :state state-map)))
 
+(defn- not-archived-precheck [key]
+  (fn [{:keys [application]}]
+    (when (get-in application [:archived key])
+      (fail :error.command-illegal-state))))
+
 (defcommand mark-pre-verdict-phase-archived
   {:parameters       [:id]
    :input-validators [(partial non-blank-parameters [:id])]
    :permissions      [{:required [:application/archive]}]
    :states           states/post-verdict-states
-   :pre-checks       [permit/is-not-archiving-project]}
+   :pre-checks       [permit/is-not-archiving-project
+                      (not-archived-precheck :application)]}
   [{:keys [application created]}]
   (archiving/mark-application-archived application created :application)
+  (ok))
+
+(defcommand mark-fully-archived
+  {:parameters       [:id]
+   :input-validators [(partial non-blank-parameters [:id])]
+   :permissions      [{:required [:application/archive]}]
+   :states           states/post-verdict-states
+   :pre-checks       [permit/is-not-archiving-project
+                      (fn [{:keys [application]}]
+                        (when-not (get-in application [:archived :application])
+                          (fail :error.command-illegal-state)))
+                      (not-archived-precheck :completed)]}
+  [{:keys [application created]}]
+  (archiving/mark-application-archived application created :completed)
   (ok))
 
 (defquery archiving-operations-enabled
