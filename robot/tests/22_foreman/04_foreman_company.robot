@@ -85,3 +85,6 @@ Sven can now open the foreman application
   Sven logs in
   Open application by id  ${foremanAppId}
   Logout
+
+Frontend errors
+  There are no frontend errors
