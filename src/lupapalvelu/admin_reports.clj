@@ -110,10 +110,10 @@
                  :allowDirectMarketing 1 :company.id 1 :company.role 1}))
 
 (defn- company-map []
-  (reduce (fn [acc {:keys [id y name locked]}]
-            (assoc acc id {:y y :name name :locked locked}))
+  (reduce (fn [acc {:keys [id] :as company}]
+            (assoc acc id (dissoc company :id)))
           {}
-          (mongo/select :companies {} {:y 1 :name 1 :locked 1})))
+          (mongo/select :companies {} [:y :name :locked :billingType])))
 
 (defn- user-report-data [company allow professional]
   (let [users (users-spam-flags (user-list company allow professional))]
@@ -152,6 +152,9 @@
                  :spam                 "Spam"
                  :company.name         {:header "Yritystili"
                                         :path   [:company :name]}
+                 :company.billingType  {:header "Laskutusjakso"
+                                        :path   [:company :billingType]
+                                        :fun    #(localize :fi (str "register.company.billing." % ".title"))}
                  :company.y            {:header "Y-tunnus"
                                         :path   [:company :y]}
                  :company.role         {:header "Yritystilirooli"
@@ -174,7 +177,7 @@
         columns (concat [:lastName :firstName :email :phone :companyName
                          :street :zip :city :architect :allowDirectMarketing :spam]
                         (when-not (= company :no)
-                          [:company.name :company.y
+                          [:company.name :company.billingType :company.y
                            :company.role :company.locked]))
         headers (map #(:header (user-report-cell-def nil %)) columns)
         rows    (for [row data]
