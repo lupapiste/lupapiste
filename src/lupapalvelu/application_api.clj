@@ -625,16 +625,18 @@
    :notified         true
    :on-success       (notify :application-state-change)}
   [{:keys [user application] :as command}]
-  (let [organization    (deref (:organization command))
-        application     (:application command)
-        krysp?          (org/krysp-integration? organization (permit/permit-type application))
-        warranty?       (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))]
+  (let [organization       (deref (:organization command))
+        application        (:application command)
+        archiving-project? (= (keyword (:permitType application)) :ARK)
+        krysp?             (org/krysp-integration? organization (permit/permit-type application))
+        warranty?          (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))]
     (if warranty?
       (update-application command (util/deep-merge
                                     (app-state/state-transition-update (keyword state) (:created command) application user)
                                     {$set (app/warranty-period (:created command))}))
       (update-application command (app-state/state-transition-update (keyword state) (:created command) application user)))
-    (archiving-util/mark-application-archived-if-done application (:created command) user)))
+    (when-not archiving-project?
+      (archiving-util/mark-application-archived-if-done application (:created command) user))))
 
 (defcommand return-to-draft
   {:description "Returns the application to draft state."
