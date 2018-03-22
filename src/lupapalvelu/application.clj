@@ -816,5 +816,5 @@
         primary-op-id (get-in application [:primaryOperation :id])
         secondary-building-docs (filter #(not (= (-> % :schema-info :op :id) primary-op-id)) building-docs)
         secondary-buildings (filter #(not (= (:operationId %) primary-op-id)) (:buildings application))]
-    (mapv #(doc-persistence/remove! command (:id %) "documents") secondary-building-docs)
+    (mapv #(doc-persistence/remove! command  %) secondary-building-docs)
     (action/update-application command {$pull {:buildings {:buildingId {$in (map :buildingId secondary-buildings)}}}})))
