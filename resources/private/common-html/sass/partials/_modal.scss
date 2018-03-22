@@ -303,6 +303,11 @@
     left: $marginS;
     right: $marginS;
   }
+
+  .checkbox-wrapper {
+    border: none;
+    margin-left: -9px;
+  }
 }
 
 .neighbor-error {

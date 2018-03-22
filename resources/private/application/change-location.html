@@ -25,6 +25,13 @@
                         <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
                         <input data-bind="textInput: address" data-test-id="application-new-address" type="text" maxlength="100" class="form-input text long" autofocus="autofocus"/>
 
+                        <!-- ko if: isArchiveProject() -->
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="refreshBuildings" data-bind="checked: refreshBuildings">
+                            <label id="refreshBuildings-label" for="refreshBuildings" class="checkbox-label" data-bind="ltext: 'newRequest.refreshBuildings'"></label>
+                        </div>
+                        <!-- /ko -->
+
                         <div data-bind="if: errorMessage" ><div data-bind="ltext: errorMessage" class="context-error"></div></div>
                     </div>
                     <div class="with-map-bottom">

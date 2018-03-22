@@ -774,7 +774,7 @@
       (command pena :change-location :id application-id
                                      :x (-> application :location :x) - 1
                                      :y (-> application :location :y) + 1
-                                     :address (:address application) :propertyId (:propertyId application)) => ok?)
+                                     :address (:address application) :propertyId (:propertyId application) :refreshBuildings false) => ok?)
 
     ; applicant submits and authority gives verdict
     (command pena :submit-application :id application-id)
@@ -784,13 +784,13 @@
       (command pena :change-location :id application-id
                                      :x (-> application :location :x) - 1
                                      :y (-> application :location :y) + 1
-                                     :address (:address application) :propertyId (:propertyId application)) => fail?)
+                                     :address (:address application) :propertyId (:propertyId application) :refreshBuildings false) => fail?)
 
     (fact "authority should still be authorized to change location"
       (command sonja :change-location :id application-id
                                       :x (-> application :location :x) - 1
                                       :y (-> application :location :y) + 1
-                                      :address (:address application) :propertyId (:propertyId application)) => ok?)))
+                                      :address (:address application) :propertyId (:propertyId application) :refreshBuildings false) => ok?)))
 
 (fact "Authority can access drafts, but can't use most important commands"
   (let [id (create-app-id pena)

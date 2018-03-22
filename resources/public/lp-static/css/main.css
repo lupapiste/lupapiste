@@ -13418,6 +13418,11 @@ ul.tabs {
   margin-right: 6px;
 }
 
+.with-map-top .checkbox-wrapper {
+  border: none;
+  margin-left: -9px;
+}
+
 .neighbor-error {
   color: #df3215;
   margin-top: 6px;
@@ -34766,6 +34771,10 @@ div.foreman-history-container {
 .map-select-info .warning-message {
   color: #df3215;
   margin-bottom: 15px;
+}
+
+.map-select-info .checkbox-wrapper {
+  border: none;
 }
 
 .create-application-map {

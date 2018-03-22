@@ -583,7 +583,7 @@
   (ok))
 
 (defcommand change-location
-  {:parameters       [id x y address propertyId]
+  {:parameters       [id x y address propertyId refreshBuildings]
    :states           (states/all-states-but (conj states/terminal-states :sent))
    :input-validators [(partial action/non-blank-parameters [:address])
                       (partial action/property-id-parameters [:propertyId])
@@ -608,8 +608,8 @@
                            $unset {:propertyIdSource true}})
       (try (app/autofill-rakennuspaikka (mongo/by-id :applications id) (now))
            (catch Exception e (warn "KTJ data was not updated after location changed")))
-      (when (permit/archiving-project? application)
-        (app/fetch-buildings command propertyId)))
+      (when (and (permit/archiving-project? application) (true? refreshBuildings))
+        (app/fetch-buildings command propertyId refreshBuildings)))
     (fail :error.property-in-other-muinicipality)))
 
 (defcommand change-application-state
@@ -932,6 +932,14 @@
                         $push {:attachments {$each (app/make-attachments created op @org state tos-fn)}}}))
   (try (app/autofill-rakennuspaikka app created)
        (catch Exception e (warn "KTJ data was not updated to inforequest when converted to application"))))
+
+(defcommand remove-buildings
+  {:parameters  [id]
+   :permissions [{:required [:application/remove-buildings-in-archiving-projects]}]
+   :states       states/all-archiving-project-states
+   :pre-checks  [(permit/validate-permit-type-is permit/ARK)]}
+  [command]
+  (app/remove-secondary-buildings command))
 
 (defn- validate-organization-backend-urls [{organization :organization}]
   (when-let [org (and organization @organization)]
