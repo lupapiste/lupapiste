@@ -62,7 +62,7 @@
 
 (defn find-addresses-proxy [{{:keys [term lang]} :params}]
     (if (and (string? term) (string? lang) (not (ss/blank? term)))
-      (let [normalized-term (ss/replace term #"\p{Punct}" " ")]
+      (let [normalized-term (ss/replace term #"\p{Punct}&&[-]" " ")]
         (resp/json (or (find-address/search normalized-term lang) [])))
       (resp/status 400 "Missing query parameters")))
 
