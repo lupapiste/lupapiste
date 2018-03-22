@@ -32,6 +32,13 @@
                 data-bind="options: $component.billingTypes,
                            optionsText: function(type) {return loc('register.company.billing.' + type + '.title');},
                            value: billingType"></select>
+        <div class="checkbox-wrapper">
+          <input type="checkbox"
+                 id="enable-submit-restrictor-property"
+                 data-bind="checked: submitRestrictor">
+          <label class="checkbox-label"
+                 for="enable-submit-restrictor-property">Yritystili saa rajoittaa hakemuksen j&auml;tt&auml;mist&auml;</label>
+        </div>
         <div data-bind="component: {name: 'submit-button-group',
                                     params: { isSubmitVisible: true,
                                               submit: $parent.saveCompany,

@@ -72,6 +72,7 @@
               (sc/optional-key :contactPo)         (sc/maybe (ssc/max-length-string 64))
               (sc/optional-key :contactZip)        (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
               (sc/optional-key :contactCountry)    (sc/maybe (ssc/max-length-string 64))
+              (sc/optional-key :submitRestrictor)  sc/Bool
               (sc/optional-key :invitationDenied)  sc/Bool})
 
 (def company-skeleton ; required keys
@@ -192,7 +193,8 @@
     (find-companies query [:name :y :address1 :zip :po :accountType :billingType
                            :contactAddress :contactZip :contactPo
                            :customAccountLimit :created :pop :ovt
-                           :netbill :reference :document :locked]))
+                           :netbill :reference :document :locked
+                           :submitRestrictor]))
   ([query projection]
    (mongo/select :companies query projection (array-map :name 1))))
 
@@ -297,6 +299,9 @@
                    ; only admins are allowed to change account type to/from 'custom'
                    (changing-billing-type? company updates)))
       (fail! :error.unauthorized))
+    (when (and (not (usr/admin? caller))
+               (contains? updates :submitRestrictor))
+      (fail! :error.unauthorized))
     (when (and (not (usr/admin? caller)) (not (custom-account? company)) (< limit old-limit))
       (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)
@@ -331,6 +336,15 @@
   (when-not (locked? (find-company-by-id! (some-> user :company :id))
                      created)
     (fail :error.company-not-locked)))
+
+(defn check-invitation-accepted [{{auth :auth} :application {{company-id :id} :company} :user}]
+  (when (and auth (->> (filter (comp #{company-id} :id) auth)
+                       (not-any? :inviteAccepted)))
+    (fail :error.company-has-not-accepted-invite)))
+
+(defn authorized-to-apply-submit-restriction-to-other-auths [{company :company}]
+  (when-not (:submitRestrictor (and company @company))
+    (fail :error.not-allowed-to-apply-submit-restriction)))
 
 ;;
 ;; Deletion

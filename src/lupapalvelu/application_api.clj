@@ -35,6 +35,7 @@
             [lupapalvelu.permissions :as permissions]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.property :as prop]
+            [lupapalvelu.restrictions :as restrictions]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.suti :as suti]
@@ -309,14 +310,15 @@
                      (ya/validate-digging-permit application)
                      (when-not (company/cannot-submit command)
                        (fail :company.user.cannot.submit))
-                     (suti/suti-submit-validation command))))
+                     (suti/suti-submit-validation command)
+                     (restrictions/check-auth-restriction command :application/submit))))
 
 (defquery application-submittable
   {:description "Query for frontend, to display possible errors regarding application submit"
    :parameters [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :contexts         [foreman/foreman-app-context]
-   :permissions      [{:required [:application/read]}]
+   :permissions      [{:required [:application/edit]}]
    :states           #{:draft :open}}
   [command]
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data (:application command)))]

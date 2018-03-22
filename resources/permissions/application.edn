@@ -15,10 +15,12 @@
                                       :application/cancel
                                       :application/undo-cancelation
                                       :application/edit
+                                      :application/edit-auth
                                       :application/edit-drawings
                                       :application/edit-operation
                                       :application/edit-permit-subtype
                                       :application/edit-permit-subtype-in-ya
+                                      :application/edit-restricting-auth
                                       :application/edit-warranty-dates
                                       :application/edit-handlers
                                       :application/remove-link-permit
@@ -104,6 +106,7 @@
                                       :application/submit
                                       :application/cancel-in-restricted-states
                                       :application/edit
+                                      :application/edit-auth
                                       :application/edit-drawings
                                       :application/edit-operation
                                       :application/edit-permit-subtype
@@ -126,6 +129,7 @@
                                       :application/accordions-open}
                 :statementGiver     #{:application/read
                                       :application/accordions-open}}
+ :authorization {:auth-owner        #{:application/edit-restricting-auth}}
  :inforequest  {:writer             #{:application/cancel}}
  :canceled-app {:canceler           #{:application/undo-cancelation}}
  :foreman-app  {:foreman            #{:application/edit-draft

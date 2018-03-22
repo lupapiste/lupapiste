@@ -16,7 +16,8 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.permissions :as permissions]
+            [lupapalvelu.permissions :refer [defcontext] :as permissions]
+            [lupapalvelu.restrictions :as restrictions]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
@@ -111,12 +112,19 @@
   [command]
   (send-invite! command))
 
+(defn authorized-to-apply-submit-restriction [{{:keys [invite-type apply-submit-restriction]} :data :as command}]
+  (when apply-submit-restriction
+    (case (keyword invite-type)
+      :company (company/authorized-to-apply-submit-restriction-to-other-auths command)
+      (fail :error.not-allowed-to-apply-submit-restriction))))
+
 (defcommand approve-invite
   {:parameters [id]
-   :optional-parameters [invite-type]
+   :optional-parameters [invite-type apply-submit-restriction]
    :user-roles #{:applicant}
    :user-authz-roles roles/default-authz-reader-roles
-   :states     states/all-application-states}
+   :states     states/all-application-states
+   :pre-checks [authorized-to-apply-submit-restriction]}
   [{created :created  {user-id :id {company-id :id company-role :role} :company :as user} :user application :application :as command}]
   (let [auth-id       (cond (not (util/=as-kw invite-type :company)) user-id
                             (util/=as-kw company-role :admin)        company-id)
@@ -125,8 +133,10 @@
     (when approved-auth
       (update-application command
         {:auth {$elemMatch {:invite.user.id auth-id}}}
-        {$set {:modified created
-               :auth.$   approved-auth}})
+        (util/deep-merge {$set {:modified created
+                                :auth.$   approved-auth}}
+                         (when apply-submit-restriction
+                           (restrictions/mongo-updates-for-restrict-other-auths auth :application/submit))))
       (when-let [document-id (not-empty (get-in auth [:invite :documentId]))]
         (let [application (domain/get-application-as id user :include-canceled-apps? true)]
           ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.
@@ -158,10 +168,11 @@
       (let [updated-app (update-in application [:auth] (fn [a] (remove user-pred a)))
             doc-updates (generate-remove-invalid-user-from-docs-updates updated-app)]
         (update-application command
-          (merge
+          (util/deep-merge
             {$pull {:auth (if last-invite-permission?
                             {$and [{:username username}, {:type {$nin inviter-roles}}]}
                             {:username username})}}
+            (restrictions/mongo-updates-for-remove-all-user-restrictions (util/find-first user-pred (:auth application)))
             (when (seq doc-updates) {$unset doc-updates})))))))
 
 (defcommand decline-invitation
@@ -176,12 +187,34 @@
 ;; Auhtorizations
 ;;
 
+(defcontext auth-entry-context [{{auth :auth auth-restrictions :authRestrictions} :application
+                                 {username :username} :data
+                                 user :user}]
+  ;; Finds requested auth-entry and authRestrictions that are applied by
+  ;; corresponding user. auth-entry and restrictions are injected into
+  ;; command. Permissions for :auth-owner in :authorization scope are
+  ;; added into command if command caller matches requesteed auth-entry.
+  (let [auth-entry (util/find-first (comp #{username} :username) auth)
+        restrictions (filter (comp #{(:id auth-entry)} :id :user) auth-restrictions)]
+    {:context-scope :authorization
+     :context-role  (when (= (:id user) (:id auth-entry)) :auth-owner)
+     :auth-entry    (assoc auth-entry :restrictions restrictions)}))
+
 (defcommand remove-auth
   {:parameters [:id username]
    :input-validators [(partial action/non-blank-parameters [:username])]
-   :user-roles #{:applicant :authority}
-   :states     (states/all-application-states-but [:canceled])
-   :pre-checks [application/validate-authority-in-drafts]}
+   :contexts   [auth-entry-context]
+   :permissions [{:context  {:application {:state #{:draft}} :auth-entry {:restrictions not-empty}}
+                  :required [:application/edit-draft :application/edit-restricting-auth]}
+
+                 {:context  {:application {:state #{:draft}}}
+                  :required [:application/edit-draft :application/edit-auth]}
+
+                 {:context  {:auth-entry {:restrictions not-empty}} ; trying to remove auth that has applied authRestriciton
+                  :required [:application/edit-restricting-auth]}
+
+                 {:required [:application/edit-auth]}]
+   :states     (states/all-application-states-but [:canceled])}
   [command]
   (do-remove-auth command username))
 
@@ -214,6 +247,29 @@
     (update-application command
       {:auth {:$elemMatch {:id userId, :role {$in changeable-roles}}}}
       {$set {:auth.$.role role}})))
+
+(defcommand toggle-submit-restriction-for-other-auths
+  {:description "Sets submit restriction on the application for all other users in
+   the application auth. When the restriction is set, other authorized users are not
+   allowed to submit the application. Restriction applies for personal and company
+   authorizations but not for organization authorizations (authorities)."
+   :parameters  [id apply-submit-restriction]
+   :permissions [{:required [:application/edit]}]
+   :pre-checks  [company/authorized-to-apply-submit-restriction-to-other-auths
+                 company/check-invitation-accepted]}
+  [{{user-id :id {company-id :id} :company} :user application :application :as command}]
+  (let [auth (or (auth/get-auth application company-id)
+                 (auth/get-auth application user-id))]
+    (->> (if apply-submit-restriction
+           (restrictions/mongo-updates-for-restrict-other-auths auth :application/submit)
+           (restrictions/mongo-updates-for-remove-other-user-restrictions auth :application/submit))
+         (action/update-application command))))
+
+(defquery submit-restriction-enabled-for-other-auths
+  {:parameters  [id]
+   :permissions [{:required [:application/edit]}]
+   :pre-checks  [(partial restrictions/check-auth-restriction-is-enabled-by-user :others :application/submit)]}
+  [_])
 
 (defn- manage-unsubscription [{application :application user :user :as command} unsubscribe?]
   (let [username (get-in command [:data :username])]

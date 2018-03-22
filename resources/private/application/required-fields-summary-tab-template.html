@@ -17,6 +17,14 @@
           </div>
           <!-- /ko -->
 
+          <!-- ko if: submitRestrictionForOtherAuthsVisible -->
+          <div class="form-grid form-grid--no-border">
+            <div class="row">
+              <div data-bind="component: {name: 'checkbox-field', params: {value: optionSubmitRestrictionForOtherAuths, id: 'optionSubmitRestrictionForOtherAuths', lLabel: 'application.applySubmitRestrictionForOthers', disable: optionSubmitRestrictionForOtherAuthsDisabled}}" ></div>
+            </div>
+          </div>
+          <!-- /ko -->
+
           <!-- ko ifnot: missingSomeInfo -->
           <h2 data-bind="ltext: 'application.allRequiredDataFilled'" class="missing-info-title"></h2>
           <div class="clear spacerM"></div>
@@ -78,12 +86,16 @@
               </button>
           </div>
 
-          <div data-bind="visible: submitErrors().length > 0 && $root.authorization.ok('submit-application')" data-test-id="submit-errors-container">
+          <div data-bind="visible: submitErrors().length > 0 && $root.authorization.ok('application-submittable')" data-test-id="submit-errors-container">
             <h2 data-bind="ltext: 'application.not-submittable'"></h2>
             <div data-bind="foreach: submitErrors">
               <div class="info-line like-btn">
                   <i class="lupicon-circle-attention"></i>
-                  <span data-bind="lhtml: $data, attr: {'data-test-id': 'submit-error-' + $index(), 'data-submit-error': $data}"></span>
+                  <span data-bind="lhtml: $data.text, attr: {'data-test-id': 'submit-error-' + $index(), 'data-submit-error': $data.text}"></span>
+                  <!-- ko if: $data.user -->
+                  &nbsp;<span data-bind="lhtml: 'application.contact-to-authorized-user.' + $data.user.type"></span>
+                  &nbsp;<b data-bind="html: $data.user.name, attr: {'data-test-id': 'submit-error-user-' + $index(), 'data-submit-error-user': $data.user.id}"></b>
+                  <!-- /ko -->
               </div>
             </div>
           </div>

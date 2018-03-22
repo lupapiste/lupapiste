@@ -1,17 +1,19 @@
-(ns lupapalvelu.fixture.company-application
+(ns lupapalvelu.fixture.submit-restriction
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :refer [deffixture]]
-            [lupapalvelu.fixture.minimal :as minimal]))
+            [lupapalvelu.fixture.minimal :as minimal]
+            [lupapalvelu.fixture.company-application :as company-application-fixture]))
 
-(def users (filter (comp #{"admin" "sonja" "pena" "kaino@solita.fi" "erkki@example.com"} :username) minimal/users))
+(def users company-application-fixture/users)
 
-(def organizations (filter (comp (set (mapcat (comp keys :orgAuthz) users)) keyword :id) minimal/organizations))
+(def organizations company-application-fixture/organizations)
 
-(def companies minimal/companies)
+(def companies (map #(cond-> % (= "esimerkki" (:id %)) (assoc :submitRestrictor true)) company-application-fixture/companies))
 
 (def created 1514877090000)
+(def opened (+ created 100))
 
-(def default-app-id (str "LP-753-" minimal/now-year "-90001"))
+(def default-app-id company-application-fixture/default-app-id)
 
 (def applications [{:id default-app-id
                     :startedBy {}
@@ -75,21 +77,18 @@
                                       :role "applicant"}}]
                     :created created
                     :municipality "753"
-                    :state "draft"
-                    :opened nil
+                    :state "open"
+                    :opened opened
                     :permitType "R"
                     :organization "753-R"
                     :warrantyEnd nil
                     :handlers []
                     :finished nil
-                    :auth [{:id "solita"
-                            :name "Solita Oy"
-                            :y "1060155-5"
-                            :role "writer"
-                            :type "company"
-                            :username "1060155-5"
-                            :firstName "Solita Oy"
-                            :lastName ""}]
+                    :auth [{:id "777777777777777777000020"
+                            :username "pena"
+                            :firstName "Pena"
+                            :lastName "Panaani"
+                            :role "writer"}]
                     :modified created
                     :urgency "normal"
                     :sent nil
@@ -261,7 +260,7 @@
                     :company-notes [{:companyId "solita"
                                      :tags ["7a67a67a67a67a67a67a67a6"]}]}])
 
-(deffixture "company-application" {}
+(deffixture "submit-restriction" {}
   (mongo/clear!)
   (mongo/insert-batch :users users)
   (mongo/insert-batch :companies companies)
