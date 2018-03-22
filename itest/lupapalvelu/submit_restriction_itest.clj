@@ -1,6 +1,5 @@
-(ns lupapalvelu.fixture.submit-restriction-itest
+(ns lupapalvelu.submit-restriction-itest
   (:require [midje.sweet :refer :all]
-            [sade.util :as util]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.fixture.submit-restriction :refer [default-app-id]]))
 
