@@ -94,7 +94,7 @@
                                                     :content-type  sc/Str
                                                     :size  sc/Num
                                                     :created ssc/Timestamp}]
-           (sc/optional-key :company)             {:id sc/Str :role sc/Str :submit sc/Bool}
+           (sc/optional-key :company)             {:id sc/Str :role (sc/enum "admin" "user") :submit sc/Bool}
            (sc/optional-key :partnerApplications) {(sc/optional-key :rakentajafi) {:id sc/Str
                                                                                    :created ssc/Timestamp
                                                                                    :origin sc/Bool}}
