@@ -1067,4 +1067,26 @@ LUPAPISTE.ApplicationModel = function() {
                                                yesFn: _.partial(self.doRemoveLinkPermit, linkPermit.id())}});
   };
 
+  function callRemoveBuildings () {
+    return function () {
+      ajax
+        .command("remove-buildings", {id: self.id()})
+        .success(function() {
+          self.reload();
+        })
+        .call();
+      return false;
+    };
+  }
+
+  self.removeBuildings = function() {
+    hub.send("show-dialog", {ltitle: "application.remove.buildings",
+      size: "medium",
+      component: "yes-no-dialog",
+      componentParams: {text: loc("areyousure.removeBuildings"),
+        yesFn: callRemoveBuildings(),
+        lyesTitle: "yes",
+        lnoTitle: "no"}});
+  };
+
 };

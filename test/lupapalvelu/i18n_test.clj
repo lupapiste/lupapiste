@@ -172,13 +172,13 @@
 (facts "Localize and fill"
        (fact "Simple usage"
              (localize-and-fill :fi "register.company.price" "foo")
-             => "foo \u20ac/kk"
+             => "foo \u20ac"
              (localize-and-fill "fi" :register.company.price 88)
-             => "88 \u20ac/kk"
+             => "88 \u20ac"
              (localize-and-fill :fi ["register" "company" "price"] :hi)
-             => "hi \u20ac/kk"
+             => "hi \u20ac"
              (localize-and-fill "fi" [:register "company"  :price] 99)
-             => "99 \u20ac/kk")
+             => "99 \u20ac")
        (fact "Multiple substitutions"
              (localize-and-fill :en "applications.results" "one" 2 :three "out")
              => "My Projects one - 2 / three"

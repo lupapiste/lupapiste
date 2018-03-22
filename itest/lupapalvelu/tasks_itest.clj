@@ -110,7 +110,7 @@
 
     (fact "Review cannot be rejected"
       (command sonja :reject-task :id application-id :taskId review-id) => (partial expected-failure? "error.invalid-task-type"))
-    (fact "Review can't be deleted, because Vaadittu lupaehtona"
+    #_(fact "Review can't be deleted, because Vaadittu lupaehtona"
       (command sonja :delete-task :id application-id :taskId review-id) => (partial expected-failure? :error.task-is-required)))
 
   (facts "create task"
@@ -312,6 +312,10 @@
               => (contains {:application application-id}))))))))
 
 (facts "Reviews with PATE"
+  (command admin :set-organization-boolean-path
+           :organizationId "753-R"
+           :path "pate-enabled"
+           :value true)
   (let [sipoo-application        (create-and-submit-application pena :propertyId sipoo-property-id)
         jarvenpaa-application    (create-and-submit-application pena :propertyId jarvenpaa-property-id)
         sipoo-app-id             (:id sipoo-application)

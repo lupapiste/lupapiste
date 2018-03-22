@@ -40,7 +40,7 @@
                   <span data-bind="fullName: $data"></span> / <span data-bind="text: $data.username"></span>
                 </div>
               </td>
-              <td data-bind="text: loc('register.company.' + company.accountType + '.title')"></td>
+              <td data-bind="text: loc('register.company.' + company.accountType + '.title') + ' (' + loc('register.company.billing.' + company.billingType + '.title') + ')'"></td>
               <td data-bind="text: company.userLimit"></td>
               <td data-bind="text: company.netbill"></td>
               <td data-bind="text: company.pop"></td>

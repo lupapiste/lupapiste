@@ -88,7 +88,8 @@
               </div>
               <!-- /ko -->
               <!-- ko if: authorization.ok('company-notes')-->
-              <div id="company-notes-panel" class="notice-panel" data-bind="if: showCompanyNotesPanel">
+              <div id="company-notes-panel" class="notice-panel" data-bind="if: showCompanyNotesPanel,
+                                                                            visible: showCompanyNotesPanel">
                   <div class="header">
                       <h1 data-bind="ltext: 'company-notes.title'"></h1>
                   </div>

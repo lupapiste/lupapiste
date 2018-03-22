@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page" id="edit-authority">
+    <div class="container container--authority-admin">
+        <div class="nav-back-container">
+            <a class="btn secondary"
+               data-bind="click: backToUsers"
+               data-test-id="back-to-authority-view">
+                <i class="lupicon-chevron-start"></i>
+                <span data-bind="ltext: 'back'"></span>
+            </a>
+        </div>
+
+        <div class="hr"></div>
+
+        <!-- ko if: authorityIdObservable -->
+        <cljs-auth-admin_edit-authority_edit-view params="{authorityId: authorityIdObservable()}">
+        </cljs-auth-admin_edit-authority_edit-view>
+        <!-- /ko -->
+    </div>
+</section>
+</body>
+</html>

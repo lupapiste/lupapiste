@@ -8,13 +8,17 @@ LUPAPISTE.CompanyEditModel = function(params) {
 
   self.accountTypes = LUPAPISTE.config.accountTypes.slice(); // copy
   self.accountTypes.push({name: "custom"});
+  self.billingTypes = _.reduce(self.accountTypes, function(acc, type) {
+    return _.union(acc, _.keys(type.price));
+  }, []);
   self.showCustomCount = ko.pureComputed(function() {
     return self.company.accountType() === "custom";
   });
   self.showCustomCount.subscribe(function() { _.delay(hub.send, 50, "resize-dialog");});
 
   self.saveCompany = function() {
-    var updates = _.pick(ko.mapping.toJS(self.company), ["accountType", "customAccountLimit", "submitRestrictor"]);
+
+    var updates = _.pick(ko.mapping.toJS(self.company), ["accountType", "customAccountLimit", "billingType", "submitRestrictor"]);
     updates.customAccountLimit = parseInt(updates.customAccountLimit, 10);
     ajax
       .command("company-update",

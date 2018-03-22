@@ -10,7 +10,6 @@
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
-            [sade.property :as prop]
             [lupapalvelu.action :refer [defraw defquery defcommand
                                         update-application notify] :as action]
             [lupapalvelu.application :as app]
@@ -35,13 +34,16 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.permissions :as permissions]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.property :as prop]
             [lupapalvelu.restrictions :as restrictions]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.suti :as suti]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
-            [lupapalvelu.ya :as ya])
+            [lupapalvelu.ya :as ya]
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.archiving-util :as archiving-util])
   (:import (java.net SocketTimeoutException)))
 
 (defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
@@ -542,6 +544,24 @@
                                          :secondaryOperations new-secondary-ops}}))
     (ok)))
 
+(defn- replace-operation-allowed-pre-check [{application :application}]
+  (when (or (foreman/foreman-app? application)
+            (app/designer-app? application))
+    (fail :error.replace-operation-not-allowed)))
+
+(defcommand replace-operation
+  {:parameters       [id opId operation]
+   :states           states/pre-sent-application-states
+   :permissions      [{:context  {:application {:state #{:draft}}}
+                       :required [:application/edit-draft :application/edit-operation]}
+
+                      {:required [:application/edit-operation]}]
+   :input-validators [operation-validator
+                      (partial action/non-blank-parameters [:id :opId :operation])]
+   :pre-checks       [replace-operation-allowed-pre-check]}
+  [command]
+  (app/replace-operation command opId operation))
+
 (defcommand change-permit-sub-type
   {:parameters       [id permitSubtype]
    :states           states/pre-sent-application-states
@@ -565,7 +585,7 @@
   (ok))
 
 (defcommand change-location
-  {:parameters       [id x y address propertyId]
+  {:parameters       [id x y address propertyId refreshBuildings]
    :states           (states/all-states-but (conj states/terminal-states :sent))
    :input-validators [(partial action/non-blank-parameters [:address])
                       (partial action/property-id-parameters [:propertyId])
@@ -578,7 +598,7 @@
 
                       {:required [:application/change-location-in-post-verdict-states]}]}
   [{:keys [created application] :as command}]
-  (if (= (:municipality application) (prop/municipality-id-by-property-id propertyId))
+  (if (= (:municipality application) (prop/municipality-by-property-id propertyId))
     (do
       (update-application command
                           {$set {:location   (app/->location x y)
@@ -590,8 +610,8 @@
                            $unset {:propertyIdSource true}})
       (try (app/autofill-rakennuspaikka (mongo/by-id :applications id) (now))
            (catch Exception e (warn "KTJ data was not updated after location changed")))
-      (when (permit/archiving-project? application)
-        (app/fetch-buildings command propertyId)))
+      (when (and (permit/archiving-project? application) (true? refreshBuildings))
+        (app/fetch-buildings command propertyId refreshBuildings)))
     (fail :error.property-in-other-muinicipality)))
 
 (defcommand change-application-state
@@ -607,15 +627,18 @@
    :notified         true
    :on-success       (notify :application-state-change)}
   [{:keys [user application] :as command}]
-  (let [organization    (deref (:organization command))
-        application     (:application command)
-        krysp?          (org/krysp-integration? organization (permit/permit-type application))
-        warranty?       (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))]
+  (let [organization       (deref (:organization command))
+        application        (:application command)
+        archiving-project? (= (keyword (:permitType application)) :ARK)
+        krysp?             (org/krysp-integration? organization (permit/permit-type application))
+        warranty?          (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))]
     (if warranty?
       (update-application command (util/deep-merge
                                     (app-state/state-transition-update (keyword state) (:created command) application user)
                                     {$set (app/warranty-period (:created command))}))
-      (update-application command (app-state/state-transition-update (keyword state) (:created command) application user)))))
+      (update-application command (app-state/state-transition-update (keyword state) (:created command) application user)))
+    (when-not archiving-project?
+      (archiving-util/mark-application-archived-if-done application (:created command) user))))
 
 (defcommand return-to-draft
   {:description "Returns the application to draft state."
@@ -913,6 +936,14 @@
                         $push {:attachments {$each (app/make-attachments created op @org state tos-fn)}}}))
   (try (app/autofill-rakennuspaikka app created)
        (catch Exception e (warn "KTJ data was not updated to inforequest when converted to application"))))
+
+(defcommand remove-buildings
+  {:parameters  [id]
+   :permissions [{:required [:application/remove-buildings-in-archiving-projects]}]
+   :states       states/all-archiving-project-states
+   :pre-checks  [(permit/validate-permit-type-is permit/ARK)]}
+  [command]
+  (app/remove-secondary-buildings command))
 
 (defn- validate-organization-backend-urls [{organization :organization}]
   (when-let [org (and organization @organization)]

@@ -5,7 +5,10 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.calendar :as cal]
+            [lupapalvelu.change-email :as change-email]
+            [lupapalvelu.company :as company]
             [lupapalvelu.idf.idf-client :as idf]
+            [lupapalvelu.logging :as logging]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
@@ -32,9 +35,7 @@
             [schema.core :as sc]
             [slingshot.slingshot :refer [throw+ try+]]
             [swiss.arrows :refer :all]
-            [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]
-            [lupapalvelu.company :as company]
-            [schema.core :as s]))
+            [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]))
 
 ;;
 ;; ==============================================================================
@@ -96,11 +97,28 @@
   [{caller :user {params :params} :data}]
   (ok :data (usr/users-for-datatables caller params)))
 
+(defquery user-for-edit-authority
+  {:user-roles #{:authorityAdmin}
+   :parameters [authority-id]
+   :input-validators [(partial action/non-blank-parameters [:authority-id])]}
+  [{auth-admin :user}]
+  (let [{:keys [username firstName lastName email orgAuthz]
+         :as authority}  (usr/get-user-by-id authority-id)
+        valid-auth?      (uu/auth-admin-can-view-authority? authority auth-admin)
+        data             {:email     email
+                          :username  username
+                          :firstName firstName
+                          :lastName  lastName
+                          :orgAuthz  orgAuthz}]
+  (if valid-auth?
+     (ok :data data)
+     (fail :error.unauthorized))))
+
 (defendpoint "/rest/user"
   {:summary             "Returns details of the user associated to the provided access token"
    :description         ""
    :parameters          []
-   :optional-parameters [:dummy-role s/Str]
+   :optional-parameters [:dummy-role sc/Str]
    :oauth-scope         :read
    :returns             usr/UserForRestEndpoint}
   (let [company-id (get-in user [:company :id])
@@ -381,6 +399,35 @@
         actual-roles    (organization/filter-valid-user-roles-in-organization organization-id roles)]
     (usr/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})))
 
+(defn- update-authority [authority email data]
+  (let [new-email (:email data)]
+    (when (not= email new-email)
+      (change-email/update-email-in-application-auth! (:id authority) email new-email)
+      (change-email/update-email-in-invite-auth! (:id authority) email new-email))
+    (usr/update-user-by-email email {$set data})))
+
+(defcommand update-auth-info
+  {:parameters       [firstName lastName email new-email]
+   :input-validators [(partial action/non-blank-parameters [:firstName :lastName :email :new-email])]
+   :user-roles        #{:authorityAdmin}}
+  [{auth-admin :user}]
+  (let [authority           (usr/find-user {:email email})
+        valid-org?          (uu/auth-admin-can-view-authority? authority auth-admin)
+        valid-domain?       (uu/admin-and-user-have-same-email-domain? authority auth-admin)
+        email-not-in-use?   (if (= email new-email) true (not (usr/email-in-use? new-email)))
+        user-info-editable? (uu/authority-has-only-one-org? authority)
+        data                {:email     new-email
+                             :username  new-email
+                             :firstName firstName
+                             :lastName  lastName}]
+    (cond
+      (and valid-org? valid-domain? email-not-in-use? user-info-editable?) (update-authority authority email data)
+      (not email-not-in-use?) (fail :error.auth-admin-duplicate-email)
+      (not valid-domain?) (fail :error.auth-admin-and-authority-have-different-domains)
+      (not user-info-editable?) (fail :error.authority-has-multiple-orgs)
+      (not valid-org?) (fail :error.unauthorized)
+      :else (fail :error.unknown))))
+
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
   (infof "invitation for new authority: email=%s: processing..." email)
   (let [caller (usr/get-user-by-email caller-email)]
@@ -647,7 +694,7 @@
                              :content-type     content-type
                              :size             size
                              :created          (now)}]
-
+    (logging/with-logging-context {:userId (:id user)}
       (when-not (add-user-attachment-allowed? user) (throw+ {:status 401 :body "forbidden"}))
 
       (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename size "id=" attachment-id)
@@ -656,8 +703,9 @@
 
       (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
       (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
-      (resp/json (assoc file-info :ok true)))
+      (resp/json (assoc file-info :ok true))))
     (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
+      (error "fail! in user-attachment: " text)
       (resp/json (fail text)))
     (catch Exception e
       (error e "exception while uploading user attachment" (class e) (str e))

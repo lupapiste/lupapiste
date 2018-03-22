@@ -4,6 +4,7 @@
   var usersList = null;
   var usersTableConfig = {
     ops: [{name: "enable",
+           button: "secondary",
            showFor: function(user) { return !user.enabled; },
            operation: function(email, callback) {
              ajax
@@ -12,6 +13,7 @@
                .call();
            }},
           {name: "disable",
+           button: "secondary",
            showFor: function(user) { return user.enabled; },
            operation: function(email, callback) {
              ajax
@@ -20,6 +22,7 @@
                .call();
            }},
           {name: "resetPassword",
+           button: "secondary",
            showFor: function(user) { return user.enabled; },
            operation: function(email, callback) {
              ajax
@@ -28,6 +31,7 @@
                .call();
            }},
           {name: "toAuthority",
+           button: "secondary",
            showFor: function(user) {return (user.enabled && user.role === "applicant") || user.role === "dummy";},
            operation: function(email, callback) {
              ajax
@@ -36,6 +40,7 @@
                .call();
            }},
           {name: "retryRakentajafi",
+           button: "secondary",
            showFor: function(user) {return user.enabled && user.role === "applicant";},
            operation: function(email, callback) {
              ajax

@@ -6,11 +6,12 @@ LUPAPISTE.RegisterCompanyAccountTypeModel = function() {
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
   var service = lupapisteApp.services.companyRegistrationService;
-  var campService = lupapisteApp.services.campaignService;
 
   self.accountTypes = service.accountTypes;
 
   self.selected = service.registration.accountType;
+
+  self.billingType = service.registration.billingType;
 
   self.selectedCss = function( id ) {
     var isSelected = id === self.selected();
@@ -20,13 +21,10 @@ LUPAPISTE.RegisterCompanyAccountTypeModel = function() {
   };
 
   self.price = function( data ) {
-    return campService.campaignPrice( data.id)
-        || data.price;
+    return loc("register.company.price", data.price);
   };
 
-  self.campaign = campService.campaign;
-  self.lastDiscount = self.disposedPureComputed( function() {
-    return util.getIn( campService.campaignTexts, ["lastDiscount"]);
-  });
-  self.campaignSmallPrint = campService.campaignSmallPrint;
+  self.toggleBilling = function(type) { // toggles selected billing type defined in companyRegistrationService
+    self.billingType(type);
+  };
 };

@@ -5,7 +5,8 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.mock.organization :as mock-org]
             [lupapalvelu.mock.user :as mock-usr]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [sade.env :as env]))
 
 (fact "digging-permit-can-be-created?"
   (digging-permit-can-be-created? {:permitType "not YA"}) => false
@@ -28,6 +29,7 @@
            [["muu-liikennealuetyo" :ya-katulupa-muu-liikennealuetyo]]]]]]]])
 
 (facts "new-digging-permit"
+  (against-background (env/feature? :disable-ktj-on-create) => true)
   (mock-org/with-all-mocked-orgs
     (with-redefs [app/make-application-id (constantly "LP-123")
                   usr/get-user-by-id mock-usr/users-by-id]

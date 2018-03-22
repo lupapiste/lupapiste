@@ -1,6 +1,5 @@
 (ns lupapalvelu.pate.verdict
   (:require [clj-time.core :as time]
-            [taoensso.timbre :refer [warnf]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
@@ -9,7 +8,9 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.transformations :as transformations]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.inspection-summary :as inspection-summary]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.pdf :as pdf]
@@ -17,17 +18,20 @@
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.verdict-template :as template]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp]
             [monger.operators :refer :all]
+            [ring.util.codec :as codec]
+            [rum.core :as rum]
+            [sade.coordinate :as coord]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.validators :as validators]
             [schema.core :as sc]
             [swiss.arrows :refer :all]
-            [sade.validators :as validators]))
+            [taoensso.timbre :refer [warnf]]))
 
 (defn neighbor-states
   "Application neighbor-states data in a format suitable for verdicts: list
@@ -91,10 +95,17 @@
 (defn- kw-format [& xs]
   (keyword (apply format (map ss/->plain-string xs))))
 
+(defn- general-handler [{handlers :handlers}]
+  (if-let [{:keys [firstName
+                   lastName]} (util/find-first :general handlers)]
+    (str firstName " " lastName)
+    ""))
+
 (defmethod initial-draft :r
   [{snapshot :published} application]
   {:data       (data-draft
                 (merge {:language              :language
+                        :handler               (general-handler application)
                         :verdict-code          :verdict-code
                         :verdict-text          :paatosteksti
                         :bulletinOpDescription :bulletinOpDescription}
@@ -138,6 +149,53 @@
                 snapshot)
    :references (:settings snapshot)})
 
+(defmethod initial-draft :p
+  [{snapshot :published} application]
+  {:data       (data-draft
+                 (merge {:language              :language
+                         :verdict-code          :verdict-code
+                         :verdict-text          :paatosteksti
+                         :bulletinOpDescription :bulletinOpDescription}
+                        (reduce (fn [acc kw]
+                                  (assoc acc
+                                    kw kw
+                                    (kw-format "%s-included" kw)
+                                    {:fn (util/fn-> (get-in [:removed-sections kw]) not)}))
+                                {}
+                                [:foremen :plans :reviews])
+                        (reduce (fn [acc kw]
+                                  (assoc acc
+                                    kw  {:fn        #(when (util/includes-as-kw? (:verdict-dates %) kw)
+                                                       "")
+                                         :skip-nil? true}))
+                                {}
+                                shared/p-verdict-dates)
+                        (reduce (fn [acc k]
+                                  (merge acc (map-unremoved-section (:data snapshot) k)))
+                                {}
+                                [:neighbors :appeal :statements :collateral
+                                 :complexity :rights :purpose :extra-info
+                                 :attachments])
+                        ;; List of conditions to conditions map where keys are ids.
+                        (when (map-unremoved-section (:data snapshot) :conditions)
+                          {:conditions {:fn        (fn [{:keys [conditions]}]
+                                                     (reduce (fn [acc condition]
+                                                               (assoc-in acc
+                                                                         [(keyword (mongo/create-id)) :condition]
+                                                                         condition))
+                                                             {}
+                                                             conditions))
+                                        :skip-nil? true}})
+                        (when (map-unremoved-section (:data snapshot) :deviations)
+                          {:deviations (-> (domain/get-document-by-name application
+                                                                        "hankkeen-kuvaus")
+                                           :data :poikkeamat :value
+                                           (or ""))})
+                        (when (map-unremoved-section (:data snapshot) :attachments)
+                          {:attachments []}))
+                 snapshot)
+   :references (:settings snapshot)})
+
 (declare enrich-verdict)
 
 (defmulti template-info
@@ -153,6 +211,50 @@
 (defmethod template-info :default [_] nil)
 
 (defmethod template-info :r
+  [{snapshot :published}]
+  (let [data             (:data snapshot)
+        removed?         #(boolean (get-in data [:removed-sections %]))
+        building-details (->> [(when-not (:autopaikat data)
+                                 [:rakennetut-autopaikat
+                                  :kiinteiston-autopaikat
+                                  :autopaikat-yhteensa])
+                               (map  (fn [kw]
+                                       (when-not (kw data) kw))
+                                     [:vss-luokka :paloluokka])]
+                              flatten
+                              (remove nil?))
+        exclusions       (-<>> [(filter removed? [:appeal :statements
+                                                  :collateral :rights :purpose
+                                                  :extra-info :deviations])
+                                (when (removed? :conditions)
+                                  [:conditions :add-condition])
+                                (when (removed? :collateral)
+                                  [:collateral :collateral-date :collateral-type])
+                                (when (removed? :neighbors)
+                                  [:neighbors :neighbor-states])
+                                (when (removed? :complexity)
+                                  [:complexity :complexity-text])
+                                (let [no-attachments? (removed? :attachments)]
+                                  [(when no-attachments?
+                                     :attachments)
+                                   (when (or no-attachments? (not (:upload data)))
+                                     :upload)])
+                                (util/difference-as-kw shared/verdict-dates
+                                                       (:verdict-dates data))
+                                (if (-> snapshot :settings :boardname)
+                                  :contact
+                                  :verdict-section)]
+                               flatten
+                               (remove nil?)
+                               (zipmap <> (repeat true))
+                               (util/assoc-when <> :buildings (or (removed? :buildings)
+                                                                  (zipmap building-details
+                                                                          (repeat true))))
+                               not-empty)]
+    {:giver      (:giver data)
+     :exclusions exclusions}))
+
+(defmethod template-info :p
   [{snapshot :published}]
   (let [data             (:data snapshot)
         removed?         #(boolean (get-in data [:removed-sections %]))
@@ -392,6 +494,13 @@
                            ss/->plain-string))))
                {})))
 
+(defn- building-update-map [{:keys [building-updates]}]
+  (reduce (fn [acc building-update]
+            (assoc acc (:operationId building-update)
+                   (update building-update :nationalBuildingId not-empty)))
+          {}
+          building-updates))
+
 (defn ->buildings-array
   "Construction of the application-buildings array. This should be
   equivalent to ->buildings-summary function in
@@ -399,22 +508,26 @@
   the message from backing system, here all the input data is
   originating from PATE verdict."
   [application]
-  (->> application
-       app-documents-having-buildings
-       (util/indexed 1)
-       (map (fn [[n {toimenpide :data {op :op} :schema-info}]]
-              (let [{:keys [rakennusnro valtakunnallinenNumero mitat kaytto tunnus]} toimenpide
-                    description-parts (remove ss/blank? [tunnus (:description op)])]
-                 {:localShortId (or rakennusnro (when (validators/rakennusnumero? tunnus) tunnus))
-                  :nationalId valtakunnallinenNumero
-                  :buildingId (or valtakunnallinenNumero rakennusnro)
-                  :location-wgs84 nil
-                  :location nil
-                  :area (:kokonaisala mitat)
-                  :index (str n)
-                  :description (ss/join ": " description-parts)
-                  :operationId (:id op)
-                  :usage (or (:kayttotarkoitus kaytto) "")})))))
+  (let [building-updates (building-update-map application)]
+    (->> application
+         app-documents-having-buildings
+         (util/indexed 1)
+         (map (fn [[n {toimenpide :data {op :op} :schema-info}]]
+                (let [{:keys [rakennusnro valtakunnallinenNumero mitat kaytto tunnus]} toimenpide
+                      description-parts (remove ss/blank? [tunnus (:description op)])
+                      building-update (get building-updates (:id op))
+                      location (when-let [loc (:location building-update)] [(:x loc) (:y loc)])
+                      location-wgs84 (when location (coord/convert "EPSG:3067" "WGS84" 5 location))]
+                  {:localShortId (or rakennusnro (when (validators/rakennusnumero? tunnus) tunnus))
+                   :nationalId (or valtakunnallinenNumero (:nationalBuildingId building-update))
+                   :buildingId (or valtakunnallinenNumero (:nationalBuildingId building-update) rakennusnro)
+                   :location-wgs84 location-wgs84
+                   :location location
+                   :area (:kokonaisala mitat)
+                   :index (str n)
+                   :description (ss/join ": " description-parts)
+                   :operationId (:id op)
+                   :usage (or (:kayttotarkoitus kaytto) "")}))))))
 
 (defn edit-verdict
   "Updates the verdict data. Validation takes the template exclusions
@@ -616,6 +729,23 @@
              (get-in sub-error [:element :locKey])
              (get-in sub-error [:result])))))
 
+(defmethod attachment-items :p
+  [command verdict]
+  (let [items (verdict-attachment-items command
+                                        verdict
+                                        :attachments)]
+    {:items     items
+     :update-fn (fn [data]
+                  (assoc data
+                    :attachments
+                    (->> (cons {:type-group :paatoksenteko
+                                :type-id    :paatos}
+                               items)
+                         (group-by #(select-keys % [:type-group
+                                                    :type-id]))
+                         (map (fn [[k v]]
+                                (assoc k :amount (count v)))))))}))
+
 (defn publish-verdict
   "Publishing verdict does the following:
    1. Finalize and publish verdict
@@ -679,12 +809,29 @@
   "Preview version of the verdict.
   1. Finalize verdict but do not store the changes.
   2. Generate PDF and return it."
-  [{:keys [application created] :as command}]
-  (let [{:keys [pdf-file-stream
+  [{:keys [lang application created] :as command}]
+  (let [{:keys [error
+                pdf-file-stream
                 filename]} (-<>> (command->verdict command)
                                  (enrich-verdict command <> true)
                                  (pdf/create-verdict-preview command))]
-    {:status  200
-     :headers {"Content-Type"        "application/pdf"
-               "Content-Disposition" (format "filename=\"%s\"" filename)}
-     :body    pdf-file-stream}))
+    (if error
+      {:status 503 ;; Service Unavailable
+       :headers {"Content-Type" "text/html; charset=utf-8"}
+       :body (let [msg (i18n/localize lang error)]
+               (rum/render-static-markup
+                [:html
+                 [:head [:title msg]]
+                 [:body
+                  [:div
+                   {:style {:margin "2em 2em"
+                            :border "2px solid red"
+                            :padding "1em 1em"}}
+                   [:h3 {:style {:margin-top 0}} msg]
+                   [:a {:href (str "/api/raw/preview-pate-verdict?"
+                                   (codec/form-encode (:data command)))}
+                    (i18n/localize lang :pate.try-again)]]]]))}
+      {:status  200
+       :headers {"Content-Type"        "application/pdf"
+                 "Content-Disposition" (format "filename=\"%s\"" filename)}
+       :body    pdf-file-stream})))

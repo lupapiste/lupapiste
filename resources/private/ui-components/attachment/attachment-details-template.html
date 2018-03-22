@@ -62,6 +62,7 @@
       </div>
 
       <div data-test-id="approval-component" data-bind="component: { name:'approval', params: {attachment: $data.attachment} }"></div>
+      <div data-test-id="attachment-page-stamping-component" data-bind="component: { name:'attachment-page-stamping', params: {attachment: $data.attachment} }"></div>
       <div data-bind="component: {name: 'reject-note',
                       params: {attachmentId: id,
                       editorCss: 'attachment-reject-note-editor',
@@ -147,7 +148,7 @@
                   <td data-bind="version: $data.version"></td>
                   <td data-bind="dateString: $data.created"></td>
                   <td>
-                    <span data-bind="fullName: $data.user"></span>
+                    <span data-bind="firstLastName: $data.user"></span>
                   </td>
                   <td data-bind="if: $data.autoConversion" style="text-align:center">
                     <span class="lupicon-circle-check positive"></span>
@@ -190,7 +191,7 @@
                   <span data-bind="version: $data.version"></span>
                 </span>
                 <span class="attachment-label-header-item" data-bind="dateTimeString: $data.created"></span>
-                <span class="attachment-label-header-item" data-bind="fullName: $data.user"></span>
+                <span class="attachment-label-header-item" data-bind="firstLastName: $data.user"></span>
               </div>
               <div data-bind="if: $data.fileId !== $data.originalFileId">
                 <span class="attachment-label-info-item">
@@ -285,17 +286,24 @@
               <div data-bind="if: $data.permanentArchiveEnabled() && $data.hasVersion()">
                 <div class="archive-valid"
                      data-bind="with: $data.attachment().latestVersion">
-                  <div>
+                  <div class="spacerM">
                     <i data-bind="css: {'lupicon-circle-check': $data.archivable,
                                         'positive': $data.archivable,
                                         'lupicon-circle-attention': !$data.archivable,
                                         'negative': !$data.archivable}"></i>
-                    <!-- ko ifnot: $data.archivabilityError -->
-                    <span data-bind="visible: $data.autoConversion, ltext: 'attachment.archivable.converted'"></span>
-                    <span data-bind="visible: !ko.unwrap($data.autoConversion), ltext: 'attachment.archivable.notConverted'"></span>
-                    <!-- /ko -->
-                    <span data-bind="visible: $data.archivabilityError, ltext: $data.archivabilityError"></span>
+                    <span data-bind="ltext: $component.archivabilityText"></span>
                   </div>
+                  <!-- ko if: $component.convertableToPdfA -->
+                  <div class="spacerM">
+                    <button class="btn-primary" data-bind="click: $component.convertToPdfA,
+                                                           disable: $component.conversionInProgress">
+                      <span class="waiting" data-bind="css: { waiting: $component.conversionInProgress }">
+                        <i class="spin lupicon-refresh wait"></i>
+                      </span>
+                      <span data-bind="ltext: 'Konvertoi PDF/A-muotoon'"></span>
+                    </button>
+                  </div>
+                  <!-- /ko -->
                   <div data-bind="if: $data['missing-fonts'] && $data['missing-fonts'].length > 0">
                     <h4><span data-bind="ltext: 'attachment.missing-fonts'"></span>:</h4>
                     <div data-bind="foreach: $data['missing-fonts']">
@@ -316,7 +324,7 @@
               <!-- ko foreach: { data: $data.attachment().signatures, as: 'signature' } -->
               <div class="signature-row">
                 <div class="signature-cell"
-                     data-bind="fullName: signature.user"
+                     data-bind="firstLastName: signature.user"
                      data-test-id="attachment-signature-fullname"></div>
                 <div class="signature-cell">
                   <span data-bind="ltext: 'attachment.version'"></span>

@@ -318,7 +318,7 @@
     };
     self.error = function(e, data) {
       self.state(self.stateError);
-      error("AJAX: ERROR", data.url, data.result);
+      error("AJAX: UPLOAD ERROR", data.url, data.textStatus, data.errorThrown);
     };
 
     self.start = ko.observable();

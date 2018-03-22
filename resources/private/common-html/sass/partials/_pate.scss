@@ -17,7 +17,8 @@ $pate-grid-margin: 10px;
   }
 
   input.warning,
-  textarea.warning {
+  textarea.warning,
+  select.warning {
     border-color: $negative;
     background-color: transparentize( $negative, 0.95 );
   }
@@ -82,6 +83,12 @@ $pate-grid-margin: 10px;
 
 @for $i from 1 through 24 {
   @include pate-grid( $i );
+}
+
+@mixin required-after {
+  content: " *";
+  color: $label-required-star-color;
+  padding-right: $marginS;
 }
 
 .pate-list {
@@ -196,9 +203,24 @@ span.formatted {
   }
 }
 
+span.markup {
+  display: inline-block;
+  p {
+    margin-bottom: $marginS;
+    color: $gray51;
+  }
+  span.underline {
+    text-decoration-line: underline;
+  }
+  ul, ol, blockquote {
+    margin-bottom: $marginS;
+  }
+}
+
 @mixin pate-default-label() {
   font-size: 15px;
   font-weight: bold;
+  white-space: nowrap;
 }
 
 .pate-label {
@@ -235,23 +257,9 @@ span.saved-info {
   color: $gray153;
 }
 
-div.pate-date-delta {
-  > label.delta-label {
-    @include pate-default-label;
-    white-space: nowrap;
-  }
-  > div.delta-editor {
-    white-space: nowrap;
-    input.grid-style-input {
-      max-width: 5em;
-      margin-right: 0.2em;
-    }
-  }}
-
 .date-delta-plus {
   padding-top: 30px;
-  padding-right: 20px;
-  text-align: center;
+  text-align: left;
   width: 100%;
   > span {
     font-size: 2em;
@@ -334,7 +342,6 @@ div.pate-verdict {
   }
 }
 
-
 // Phrases
 
 div.pate-phrases {
@@ -358,8 +365,64 @@ div.pate-phrases {
   }
 }
 
-span.phrase-text {
-  white-space: pre-wrap;
+div.phrase-edit-mode {
+  a:last-child,
+  label:last-child {
+    margin-left: $marginL;
+  }
+  a.required:after {
+    @include required-after;
+  }
+}
+
+// Typically used together with .markdown.
+span.phrase-preview {
+  border: 1px solid $gray187;
+  padding: 6px 12px;
+  background-color: $gray246;
+}
+
+$tab-border-color: $gray238;
+
+div.phrase-edit {
+  border: 1px solid $tab-border-color;
+  border-top: none;
+  padding: 10px 10px;
+  > * {width: 100%;}
+  > textarea {
+    min-height: 20em;
+  }
+}
+
+div.pate-tabbar {
+  display: table;
+  div.pate-tab {
+    display: table-cell;
+    border: 1px solid $tab-border-color;;
+    border-bottom: 1px solid $tab-border-color;
+    padding: 0 6px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    background-color: $gray246;
+  }
+  div.pate-tab__space {
+    display: table-cell;
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid $tab-border-color;
+  }
+  div.pate-tab__divider {
+    display: table-cell;
+    border: none;
+    border-bottom: 1px solid $tab-border-color;
+    min-width: 3px;
+    max-width: 3px;
+  }
+  div.pate-tab.pate-tab--active {
+    border: 1px solid $tab-border-color;
+    border-bottom: none;
+    background-color: initial;
+  }
 }
 
 // Autocomplete
@@ -658,9 +721,7 @@ div.pate-required-fields-note {
   display: inline-block;
   margin-right: $marginS;
   &:after {
-    content: " *";
-    color: $label-required-star-color;
-    padding-right: $marginS;
+    @include required-after;
   }
 }
 
@@ -708,4 +769,30 @@ div.pate-select-application-attachments {
 
 .pate-left-space {
   margin-left: $marginM;
+}
+
+.pate-sandwich {
+  white-space: nowrap;
+  .sandwich--before {
+    padding-right: .5em;
+  }
+  .sandwich--after {
+    padding-left: .5em;
+  }
+  &.sandwich__view {
+    .sandwich--before {
+      padding-right: 0;
+    }
+    .sandwich--after {
+      padding-left: .25em;
+    }
+  }
+}
+
+input.date-delta {
+  max-width: 50%;
+}
+
+body.pate-error-page {
+  padding: 2em 2em;
 }

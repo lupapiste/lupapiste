@@ -121,7 +121,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   function Cell( valueObs, required ) {
     this.value = valueObs;
     this.isOk = function() {
-      return !required || valueObs();
+      return !required || !_.isEmpty(valueObs());
     };
   }
 

@@ -12,7 +12,6 @@
       asianhallintaModel,
       linkToVendorBackendModel,
       usersList = null,
-      editRolesDialogModel,
       calendarsModel,
       reservationTypesModel,
       reservationPropertiesModel,
@@ -560,32 +559,23 @@
     });
 
     function save() {
-      var first = true;
-      return function() {
-        if (first) {
-          first = false;
-        } else if (self.documentRequest.isValid()) {
-          ajax.command("set-document-request-info",
-                       {enabled: self.documentRequest.enabled(),
-                        email: self.documentRequest.email(),
-                        instructions: _.zipObject(self.languages,
-                                                  _.map(self.languages,
-                                                        function (language) {
-                                                          return self.documentRequest.instructions[language]();
-                                                        }))})
-            .success(util.showSavedIndicator)
-            .error(util.showSavedIndicator)
-            .call();
-        }
-      };
+      if (self.documentRequest.isValid()) {
+        ajax.command("set-document-request-info",
+                     {enabled: self.documentRequest.enabled(),
+                      email: self.documentRequest.email(),
+                      instructions: _.zipObject(self.languages,
+                                                _.map(self.languages,
+                                                      function (language) {
+                                                        return self.documentRequest.instructions[language]();
+                                                      }))})
+          .success(util.showSavedIndicator)
+          .error(util.showSavedIndicator)
+          .call();
+      }
     }
 
     // Attach autosave to observables
-    self.documentRequest.enabled.subscribe(save());
-    self.documentRequest.email.subscribe(save());
-    _.forEach(self.documentRequest.instructions, function(value) {
-      value.subscribe(save());
-    });
+    var initialized = false;
 
     self.load = function () {
       ajax.query("document-request-info")
@@ -595,6 +585,14 @@
           _.forEach(data.documentRequest.instructions, function(value, key) {
             self.documentRequest.instructions[key](value);
           });
+          if (!initialized) {
+            initialized = true;
+            self.documentRequest.enabled.subscribe(save);
+            self.documentRequest.email.subscribe(save);
+            _.forEach(self.documentRequest.instructions, function(value) {
+              value.subscribe(save);
+            });
+          }
         })
         .call();
     };
@@ -615,7 +613,6 @@
   kopiolaitosModel = new KopiolaitosModel();
   asianhallintaModel = new AsianhallintaModel();
   linkToVendorBackendModel = new LinkToVendorBackendModel();
-  editRolesDialogModel = new LUPAPISTE.EditRolesDialogModel(organizationModel);
   bulletinsModel = new BulletinsModel();
   docterminalModel = new DocterminalModel();
   docstoreModel = new DocstoreModel();
@@ -624,17 +621,21 @@
       hideRoleFilter: true,
       hideEnabledFilter: true,
       ops: [{name: "removeFromOrg",
+             button: "secondary",
+             icon: "lupicon-remove",
              showFor: _.partial(lupapisteApp.models.globalAuthModel.ok, "remove-user-organization"),
              operation: function(email, callback) {
                ajax
                  .command("remove-user-organization", {email: email})
                  .success(function() { callback(true); })
                  .call();
-             }},
+            }},
             {name: "editUser",
+             button: "positive",
+             icon: "lupicon-pen",
              showFor: _.partial(lupapisteApp.models.globalAuthModel.ok, "update-user-roles"),
              rowOperationFn: function (row) {
-               editRolesDialogModel.showDialog({email: row[0], name: row[1], roles: row[2]});
+               pageutil.openPage("edit-authority", row.user._id);
              }}]
   };
 
@@ -691,8 +692,19 @@
     docterminalModel.load();
   });
 
+  var authorityIdObservable = ko.observable("");
+
+  hub.onPageLoad("edit-authority", function () {
+      authorityIdObservable(_.head(pageutil.getPagePath()));
+  });
+
+  hub.onPageUnload("edit-authority", function () {
+      authorityIdObservable("");
+  });
+
   hub.onPageLoad("organization-store-settings", function() {
     docstoreModel.load();
+
   });
 
   $(function() {
@@ -701,8 +713,7 @@
     $("#users").applyBindings({
       organizationUsers:   organizationUsers,
       statementGivers:    statementGiversModel,
-      createStatementGiver: createStatementGiverModel,
-      editRoles:           editRolesDialogModel
+      createStatementGiver: createStatementGiverModel
       });
     $("#applications").applyBindings({
       organization:        organizationModel,
@@ -767,6 +778,13 @@
       organization:        organizationModel,
       authorization:       lupapisteApp.models.globalAuthModel,
       attachmentTypes:     docterminalModel
+    });
+    $("#edit-authority").applyBindings({
+        authorityIdObservable: authorityIdObservable,
+        backToUsers: function () {
+          pageutil.openPage("users");
+          usersList.redraw();
+        }
     });
     $("#organization-store-settings").applyBindings({
       organization: organizationModel,

@@ -29,13 +29,20 @@
 
 (def account-types [{:name :account5
                      :limit 5
-                     :price 59}
+                     :price {:monthly 69
+                             :yearly 780}}
                     {:name :account15
                      :limit 15
-                     :price 79}
+                     :price {:monthly 89
+                             :yearly 1008}}
                     {:name :account30
                      :limit 30
-                     :price 99}])
+                     :price {:monthly 109
+                             :yearly 1236}}])
+
+(def billing-types (->> account-types
+                        (mapcat (comp keys :price))         ; all keys under :price
+                        (distinct)))
 
 (defn user-limit-for-account-type [account-name]
   (let [account-type (some #(if (= (:name %) account-name) %) account-types)]
@@ -45,6 +52,7 @@
               :name                                (ssc/min-max-length-string 1 64)
               :y                                   ssc/FinnishY
               :accountType                         (apply sc/enum "custom" (map (comp name :name) account-types))
+              :billingType                         (apply sc/enum (map name billing-types))
               :customAccountLimit                  (sc/maybe sc/Int)
               (sc/optional-key :reference)         (sc/maybe (ssc/max-length-string 64))
               :address1                            (sc/maybe (ssc/max-length-string 64))
@@ -182,11 +190,13 @@
   company."
   ([] (find-companies {}))
   ([query]
-   (mongo/select :companies query [:name :y :address1 :zip :po :accountType
-                                   :contactAddress :contactZip :contactPo
-                                   :customAccountLimit :created :pop :ovt
-                                   :netbill :reference :document :locked
-                                   :submitRestrictor] (array-map :name 1))))
+    (find-companies query [:name :y :address1 :zip :po :accountType :billingType
+                           :contactAddress :contactZip :contactPo
+                           :customAccountLimit :created :pop :ovt
+                           :netbill :reference :document :locked
+                           :submitRestrictor]))
+  ([query projection]
+   (mongo/select :companies query projection (array-map :name 1))))
 
 (defn find-company-users [company-id]
   (usr/get-users {:company.id company-id} {:lastName 1}))
@@ -262,6 +272,11 @@
        (or (= :custom (keyword old-type))
            (= :custom (keyword new-type)))))
 
+(defn changing-billing-type?
+  "True if company :billingType was changed"
+  [{old :billingType} {new :billingType}]
+  (boolean (when new (not= old new))))
+
 (defn- changes [old new]
   (let [[in-old in-new _] (diff old new)
         keyset (set/union (-> in-old keys set) (-> in-new keys set))
@@ -280,7 +295,9 @@
         limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (validate! updated)
     (when (and (not (usr/admin? caller))
-               (account-type-changing-with-custom? company updates)) ; only admins are allowed to change account type to/from 'custom'
+               (or (account-type-changing-with-custom? company updates)
+                   ; only admins are allowed to change account type to/from 'custom'
+                   (changing-billing-type? company updates)))
       (fail! :error.unauthorized))
     (when (and (not (usr/admin? caller))
                (contains? updates :submitRestrictor))
@@ -385,7 +402,9 @@
                                             :link       #(str (env/value :host) "/app/" (name %) "/welcome#!/new-company-user/" token-id)})
     token-id))
 
-(defn add-user! [user company role submit]
+(defn add-user!
+  "Adds creates :new-company-user token and sends email to new user. Returns token-id."
+  [user company role submit]
   (let [user (update-in user [:email] ss/canonize-email)
         token-id (token/make-token :new-company-user nil {:user user
                                                           :company company

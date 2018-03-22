@@ -84,7 +84,7 @@ Add new statement giver as authority
 
 Delete new statement giver guest authority
   [Arguments]  ${email}  ${description}
-  Click Link  jquery=tr[data-test-guest-description=${description}] a
+  Click Button  jquery=tr[data-test-guest-description=${description}] button
   Confirm  dynamic-yes-no-confirm-dialog
   User table does not contain  ${email}
 
@@ -99,7 +99,7 @@ Add bad authority
 
 Delete guest authority
   [Arguments]  ${email}  ${firstname}  ${lastname}  ${description}
-  Click Link  jquery=tr[data-test-guest-description=${description}] a
+  Click Button  jquery=tr[data-test-guest-description=${description}] button
   Confirm  dynamic-yes-no-confirm-dialog
   Wait Until Page Does Not Contain Element  jquery=tr[data-test-guest-description=${description}]
 

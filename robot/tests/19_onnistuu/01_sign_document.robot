@@ -13,8 +13,23 @@ Setup
 Bob decides to register his company (he will change his mind later)
   Wait and click  register-button
   Wait and click  xpath=//*[@data-test-id='register-company-start']
+
+There are accounts available
+  Xpath Should Match X Times  //div[contains(@class, 'account-type-boxes')]//div[contains(@class, 'account-type-box')]  3
+
+Bob sees that yearly subscription is selected by default
+  Company yearly billing is selected
+  # Each has 'save5' ribbons LPK-3430
+  Xpath Should Match X Times  //div[contains(@class, 'account-type-boxes')]//span[@data-test-id='save-5-ribbon']  3
+  # Each have discounted price visible LPK-3430
+  Xpath Should Match X Times  //div[contains(@class, 'account-type-boxes')]//div[@data-test-id='normal-yearly-price']  3
+
+Also monthly billing is an option
+  Test id visible  monthly-billing
+
+Bob selects account15 with yearly billing to continue
   Test id disabled  register-company-continue
-  Select account type  account5
+  Select account type  account15
   Click by test id  register-company-continue
 
 Bob checks that input validation works
@@ -26,15 +41,33 @@ Bob checks that input validation works
 Existing user email cannot be used
   Validate input  register-company-email  pena@example.com  bob@example.org
 
-Bobo changes his mind
+Bob sees that he is entitled to discount in summary page
+  # .. after he enters all required fields :D
+  Input text by test id  register-company-name        Bobin rakennus Oy
+  Input text by test id  register-company-firstName   Bob
+  Input text by test id  register-company-lastName    Dylan
+  Input text by test id  register-company-address1    Katukatu
+  Input text by test id  register-company-po          Kunta
+  Click by test id  register-company-continue
+  # Ok, summary page now:
+  Wait until  Element should be visible  xpath=//div[contains(@class, 'register-company-summary')]
+  Element should contain  xpath=//strong[@data-test-id='summary-account-text']  Yritystili 15
+  Element should be visible  xpath=//*[@data-test-id='reduction-price']
+
+Bob changes his mind
+  Click by test id  register-company-cancel
   Click by test id  register-company-cancel
   Test id enabled  register-company-continue
   Click by test id  register-company-cancel
   Test id enabled  register-company-continue
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-start']
+  Wait and click  xpath=//*[@data-test-id='register-company-start']
 
 Bob decides to register his company after all, but still chickens out
   Register wizard until signing
+  # Now at sign page
+  Click by test id  register-company-cancel
+  # Now at fill page
   Click by test id  register-company-cancel
   Test id select is  register-company-language  fi
   Click by test id  register-company-cancel
@@ -43,6 +76,8 @@ Bob decides to register his company after all, but still chickens out
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-start']
 
 Bob's first attempt for proper registration fails during signing
+  Wait and click  xpath=//*[@data-test-id='register-company-start']
+  Account type selected  account5
   Register wizard until signing
   Click Element  xpath=//*[@data-test-id='register-company-sign']
   Click by test id  onnistuu-dummy-fail
@@ -51,6 +86,8 @@ Bob's first attempt for proper registration fails during signing
   Wait and click  register-button
 
 Bob decides to register his company after all, and this time he means it
+  Wait and click  xpath=//*[@data-test-id='register-company-start']
+  Account type not selected
   Register wizard until signing  sv
   Click Element  xpath=//*[@data-test-id='register-company-sign']
 
@@ -106,7 +143,7 @@ Company details include company name, identifier and PDF link
 
 Company info page has the registered information
   Click by test id  company-edit-info
-  Test id select text is  company-account-select  Företagskonto 5 (59 €/månad)
+  Test id select text is  company-account-select  Företagskonto 5 (69 €/månad)
   Test id input is  edit-company-name        Peten rakennus Oy
   Test id input is  edit-company-y           2341528-4
   Test id input is  edit-company-address1    Katukatu
@@ -138,10 +175,10 @@ Validate input
   No such test id  ${tid}-warning
 
 Register wizard until signing
-  [Arguments]  ${lang}=fi
-  Wait and click  xpath=//*[@data-test-id='register-company-start']
-  Account type not selected
-  Select account type  account5
+  [Arguments]  ${lang}=fi  ${billing}=monthly  ${account}=account5
+  Click by test id  ${billing}-billing
+  Company ${billing} billing is selected
+  Select account type  ${account}
   Click enabled by test id  register-company-continue
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-continue']
   Input text by test id  register-company-name        Peten rakennus Oy
@@ -158,8 +195,15 @@ Register wizard until signing
   Run Keyword If  '${lang}' <> 'fi'  Select from test id  register-company-language  ${lang}
   Select From test id  register-company-pop  Basware Oyj (BAWCFI22)
   Click enabled by test id  register-company-continue
+  Wait until  Element should be visible  xpath=//div[contains(@class, 'register-company-summary')]
+  Run Keyword If  '${account}' == 'account5'  Element should contain  xpath=//strong[@data-test-id='summary-account-text']  Yritystili 5
+  Run Keyword If  '${account}' == 'account15'  Element should contain  xpath=//strong[@data-test-id='summary-account-text']  Yritystili 15
+  Run Keyword If  '${account}' == 'account30'  Element should contain  xpath=//strong[@data-test-id='summary-account-text']  Yritystili 30
+  Click enabled by test id  register-company-continue
   Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-sign']
   Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel']
+  Run Keyword If  '${lang}' == 'fi' and '${billing}' == 'monthly'  Element should contain  register-confirmation-text  €/kuukausi
+  Run Keyword If  '${lang}' == 'fi' and '${billing}' == 'yearly'  Element should contain  register-confirmation-text  €/vuosi
   Toggle not Selected  register-company-agree
   Toggle toggle  register-company-agree
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-sign']

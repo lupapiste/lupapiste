@@ -7,37 +7,27 @@
             [sade.core :as core]
             [sade.util :as util]))
 
+(def base-data-5 {:name "foo" :y "2341528-4" :accountType "account5" :customAccountLimit nil
+                  :billingType "monthly" :address1 "katu" :zip "33100" :po "Tampere"})
+(def base-data-15 (assoc base-data-5 :accountType "account15"))
+(def base-data-custom (assoc base-data-5 :accountType "custom" :customAccountLimit 100))
+(def base-to-db (assoc base-data-5
+                  :id "012345678901234567890123"
+                  :created 1))
+
 (facts create-company
   (fact
     (com/create-company {}) => (throws clojure.lang.ExceptionInfo))
   (fact
-    (com/create-company {:name "foo" :y "2341528-4" :accountType "account5" :customAccountLimit nil
-                       :address1 "katu" :zip "33100" :po "Tampere"})
-    => {:name "foo"
-        :y "2341528-4"
-        :id "012345678901234567890123"
-        :accountType "account5"
-        :address1 "katu"
-        :zip "33100"
-        :po "Tampere"
-        :created 1
-        :customAccountLimit nil}
+    (com/create-company base-data-5)
+    => base-to-db
     (provided
       (core/now) => 1
       (mongo/create-id) => "012345678901234567890123"
-      (mongo/insert :companies {:name "foo"
-                                :y "2341528-4"
-                                :id "012345678901234567890123"
-                                :address1 "katu"
-                                :zip "33100"
-                                :po "Tampere"
-                                :created 1
-                                :accountType "account5"
-                                :customAccountLimit nil}) => true)))
+      (mongo/insert :companies base-to-db) => true)))
 
 (let [id       "012345678901234567890123"
-      data     {:id id :name "foo" :y "2341528-4" :created 1 :accountType "account15"
-                :address1 "katu" :zip "33100" :po "Tampere" :customAccountLimit nil}
+      data     (assoc base-data-15 :id id :created 1)
       expected (-> data (dissoc :id) (assoc :name "bar"))]
   (against-background [(com/find-company-by-id! id) => data
                        (mongo/update :companies {:_id id} anything) => true]
@@ -55,10 +45,8 @@
 (facts "Custom account"
        (let [id              "0987654321"
              custom-id       "123456789"
-             data            {:id       id     :name "normal" :y  "2341528-4" :created            1 :accountType "account5"
-                              :address1 "katu" :zip  "33100"  :po "Tampere"   :customAccountLimit nil}
-             custom-data     {:id       custom-id :name "custom" :y  "2341528-4" :created            1 :accountType "custom"
-                              :address1 "katu"    :zip  "33100"  :po "Tampere"   :customAccountLimit 100}
+             data            (assoc base-data-5 :id id :name "normal")
+             custom-data     (assoc base-data-custom :id custom-id :name "custom")
              expected        (-> (assoc data :accountType "custom" :customAccountLimit 1000)
                                  (dissoc :id))
              custom-expected (-> (assoc custom-data :accountType "account5" :customAccountLimit nil)

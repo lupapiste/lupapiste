@@ -416,15 +416,6 @@ div.attachments-table-container {
   }
 }
 
-.attachment-state-icons {
-  white-space: nowrap;
-  i {
-    margin-left: 1px;
-    margin-right: 1px;
-    cursor: default;
-  }
-}
-
 table.suti-admin-table {
   margin-top: $marginM;
   td:nth-child(even) {
@@ -454,7 +445,7 @@ div.suti-admin-container .serversettings--wide {
   }
 }
 
-@mixin icon-bubble-hover($size: false, $marginleft: false) {
+@mixin icon-bubble-hover($size: false, $marginleft: false, $border: $negative) {
   .bubble-hover {
     position: relative;
     @if $marginleft {margin-left: $marginleft;}
@@ -465,7 +456,7 @@ div.suti-admin-container .serversettings--wide {
     visibility: hidden;
     width: 250px;
     background-color: white;
-    border: 2px solid $negative;
+    border: 2px solid $border;
     color: $grey-text;
     padding: 10px;
     border-radius: 6px;
@@ -493,6 +484,17 @@ div.suti-admin-container .serversettings--wide {
     }
   }
   @include icon-bubble-hover(15px, 5px);
+}
+
+.attachment-state-icons {
+  white-space: nowrap;
+  i {
+    margin-left: 1px;
+    margin-right: 1px;
+    cursor: default;
+  }
+  @include icon-bubble-hover($border: $positive);
+
 }
 
 th.full-width-column {
@@ -701,4 +703,18 @@ div.handler-roles-container {
 table.company-report-table {
   width: 45%;
   margin-top: 10px;
+}
+
+td.users-table-actions {
+  white-space: nowrap;
+  i {
+    pointer-events: none;
+  }
+
+  span {
+    pointer-events: none;
+  }
+  button:first-child {
+    margin-right: 12px;
+  }
 }

@@ -9,7 +9,7 @@
                  [org.clojure/data.zip "0.1.1"] ; Note: 0.1.2 breaks lupapalvelu.wfs
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/tools.nrepl "0.2.12"]
-                 [org.clojure/tools.reader "1.0.4"]
+                 [org.clojure/tools.reader "1.1.3.1"]
                  [org.clojure/tools.trace "0.7.9"]
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/core.memoize "0.5.9"]
@@ -131,7 +131,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.60"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.9.3"]
+                 [lupapiste/commons "0.9.6"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
@@ -141,7 +141,10 @@
                  ; JMX-server with socket reuse
                  [lupapiste/jmx-server "0.1.0"]
 
-                 [org.clojure/clojurescript "1.9.473"]
+                 ;; Used in the markup support.
+                 [instaparse "1.4.8"]
+
+                 [org.clojure/clojurescript "1.9.946"]
                  [rum "0.10.8"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  ; JS Pikaday for cljs datepicker (https://github.com/dbushell/Pikaday)
@@ -162,14 +165,14 @@
                                          [rhizome "0.2.7"]
                                          [pdfboxing "0.1.13"]
                                          [com.cemerick/piggieback "0.2.2"]
-                                         [figwheel-sidecar "0.5.8"]
+                                         [figwheel-sidecar "0.5.15"]
                                          ;; Better Chrome Dev Tools support
                                          [binaryage/devtools "0.9.4"]]
                         :plugins        [[lein-midje "3.2"]
                                          [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
                                          [lupapiste/lein-buildid "0.4.2"]
                                          [lupapiste/lein-nitpicker "0.5.1"]
-                                         [lein-figwheel "0.5.14"]]
+                                         [lein-figwheel "0.5.15"]]
                         :resource-paths ["dev-resources"]
                         :source-paths   ["dev-src" "test-utils"]
                         :jvm-opts       ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]

@@ -184,9 +184,8 @@
                            (empty? versions)))
                     attachments)))))
 
-(defn remove! [{application :application timestamp :created :as command} doc-id collection]
-  (let [document      (by-id application collection doc-id)
-        updated-app   (update-in application [:documents] (fn [c] (filter #(not= (:id %) doc-id) c)))
+(defn remove! [{application :application timestamp :created :as command} document]
+  (let [updated-app   (update-in application [:documents] (fn [c] (filter #(not= (:id %) (:id document)) c)))
         trigger-fn    (get-after-update-trigger-fn document)
         extra-updates (trigger-fn updated-app)
         op-id         (get-in document [:schema-info :op :id])
@@ -198,7 +197,7 @@
       (util/deep-merge
         extra-updates
         {$pull (merge
-                 {:documents {:id doc-id}}
+                 {:documents {:id (:id document)}}
                  (when op-id
                    {:secondaryOperations {:id op-id}}))
          $set  (merge
@@ -327,9 +326,9 @@
         (persist-model-updates application "documents" document updates timestamp)))))
 
 (defn do-set-user-to-document
-  ([application document-id user-id path timestamp]
-    (do-set-user-to-document application document-id user-id path timestamp true))
-  ([application document-id user-id path timestamp set-empty-values?]
+  ([application document-id user-id path timestamp current-user]
+    (do-set-user-to-document application document-id user-id path timestamp current-user true))
+  ([application document-id user-id path timestamp current-user set-empty-values?]
     {:pre [application document-id timestamp]}
    (if-let [{data :data :as document} (domain/get-document-by-id application
                                                                  document-id)]
@@ -343,11 +342,24 @@
                                 timestamp))
         (let [company-auth (auth/auth-via-company application user-id)
               company      (when company-auth
-                             (company/find-company-by-id (:id company-auth)))]
+                             (company/find-company-by-id (:id company-auth)))
+              personal-auth (auth/get-auth application (:id current-user))]
           (if-let [subject (util/assoc-when (user/get-user-by-id user-id)
                                             :companyId (:y company)
                                             :companyName (:name company))]
-            (set-subject-to-document application document subject path timestamp set-empty-values?)
+            (do (set-subject-to-document application document subject path timestamp set-empty-values?)
+                (when (and (= user-id (:id current-user))
+                           company
+                           (= :suunnittelija (get-in document [:schema-info :subtype]))
+                           (nil? personal-auth))
+                  ; If current user is a company member and without personal auth, and is setting
+                  ; herself as a designer, create auth because of the implicit consent of manipulating
+                  ; your own data.
+                  (update-application
+                    (application->command application)
+                    {:auth.id {$ne user-id}}
+                    {$push {:auth     (auth/make-user-auth current-user false)}
+                     $set  {:modified timestamp}})))
             (fail! :error.user-not-found))))
       (fail :error.document-not-found))))
 

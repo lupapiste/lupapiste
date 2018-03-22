@@ -483,19 +483,20 @@
 
 (facts "wfs-krysp-url works correctly"
   (fact "without ? returns url with ?"
-    (wfs-krysp-url "http://localhost" rakval-case-type (property-equals "test" "lp-1")) => "http://localhost?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
+    (wfs-krysp-url "http://localhost" rakval-case-type (property-equals "test" "lp-1")) => "http://localhost?request=GetFeature&maxFeatures=1000&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
   (fact "with ? returns url with ?"
-    (wfs-krysp-url "http://localhost" rakval-case-type (property-equals "test" "lp-1")) => "http://localhost?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
+    (wfs-krysp-url "http://localhost" rakval-case-type (property-equals "test" "lp-1")) => "http://localhost?request=GetFeature&maxFeatures=1000&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
   (fact "without extraparam returns correct"
-    (wfs-krysp-url "http://localhost?output=KRYSP" rakval-case-type (property-equals "test" "lp-1")) => "http://localhost?output=KRYSP&request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E"))
+    (wfs-krysp-url "http://localhost?output=KRYSP" rakval-case-type (property-equals "test" "lp-1")) => "http://localhost?output=KRYSP&request=GetFeature&maxFeatures=1000&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E"))
 
 
 
-(facts* "Testing information parsed from a verdict xml message for application creation"
+(facts "Testing information parsed from a verdict xml message for application creation"
+  (against-background (sade.env/feature? :disable-ktj-on-create) => true)
   (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml"))
-        info (get-app-info-from-message xml "14-0241-R 3") => truthy
+        info (get-app-info-from-message xml "14-0241-R 3")
         {:keys [id kuntalupatunnus municipality rakennusvalvontaasianKuvaus vahainenPoikkeaminen rakennuspaikka ensimmainen-rakennus hakijat]} info]
-
+    (fact "got info" info => truthy)
     (fact "info contains the needed keys" (every? (partial contains info)
                                             [:id :kuntalupatunnus :municipality :rakennusvalvontaasianKuvaus :vahainenPoikkeaminen :rakennuspaikka :ensimmainen-rakennus :hakijat]))
 
@@ -531,7 +532,8 @@
 
 (facts "Testing area like location information for application creation"
   (against-background
-    (resolve-property-id-by-point anything) => "89552200010051")
+    (resolve-property-id-by-point anything) => "89552200010051"
+    (sade.env/feature? :disable-ktj-on-create) => true)
   (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-with-area-like-location.xml"))
         info (get-app-info-from-message xml "895-2015-001")
         rakennuspaikka (:rakennuspaikka info)]
@@ -561,7 +563,8 @@
 
 (facts "Testing area like location with building location information for application creation"
   (against-background
-    (resolve-property-id-by-point anything) => "89552200010052")
+    (resolve-property-id-by-point anything) => "89552200010052"
+    (sade.env/feature? :disable-ktj-on-create) => true)
   (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-with-building-location.xml"))
         info (get-app-info-from-message xml "895-2015-002")
         rakennuspaikka (:rakennuspaikka info)]
@@ -591,7 +594,8 @@
 
 (facts "Testing information parsed from verdict xml without location information"
   (against-background
-    (resolve-property-id-by-point anything) => "47540208780003")
+    (resolve-property-id-by-point anything) => "47540208780003"
+    (sade.env/feature? :disable-ktj-on-create) => true)
   (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-missing-location.xml"))
         info (get-app-info-from-message xml "475-2016-001")
         rakennuspaikka (:rakennuspaikka info)]

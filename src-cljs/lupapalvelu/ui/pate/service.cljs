@@ -5,19 +5,6 @@
             [lupapalvelu.ui.authorization :as auth]
             [sade.shared-util :as util]))
 
-(defn fetch-schemas
-  "We fetch schemas only when needed, since they do not change during
-  the session."
-  []
-  (when-not (seq @state/schemas)
-    (common/query "schemas"
-                  #(reset! state/schemas (:schemas %)))))
-(defn schema
-  ([schema-name version]
-   (get-in @state/schemas [(-> version str keyword) (keyword schema-name)]))
-  ([schema-name]
-   (schema schema-name 1)))
-
 (defn fetch-template-list []
   (common/query "verdict-templates"
                 #(reset! state/template-list (:verdict-templates %))))

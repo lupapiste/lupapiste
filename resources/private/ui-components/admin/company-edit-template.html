@@ -26,6 +26,12 @@
         <label class="form-label">Max k&auml;ytt&auml;j&auml;t</label>
         <input class="form-input text" name="customAccountLimit" data-bind="value: customAccountLimit" />
         <!-- /ko -->
+        <label class="form-label" for="billing-type" data-bind="ltext: 'register.company.billing.select-type'"></label>
+        <select name="billing-type"
+                class="form-input combobox"
+                data-bind="options: $component.billingTypes,
+                           optionsText: function(type) {return loc('register.company.billing.' + type + '.title');},
+                           value: billingType"></select>
         <div class="checkbox-wrapper">
           <input type="checkbox"
                  id="enable-submit-restrictor-property"

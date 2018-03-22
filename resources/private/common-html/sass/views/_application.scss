@@ -893,8 +893,11 @@ $preamble-min-height: 280px; // at least the size of the map container
 
 .info-line {
   display: table-row;
-  span, a {
-    display: table-cell;
+  i {
+    float: left;
+    padding: {
+      right: $icon-pad;
+    }
   }
   span a {
     display: inline;

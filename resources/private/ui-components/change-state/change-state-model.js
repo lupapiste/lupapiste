@@ -23,6 +23,7 @@ LUPAPISTE.ChangeStateModel = function( params) {
       self.states( res.states );
       self.selectedState( backup );
     })
+    .error( _.noop )
     .call();
   }
 

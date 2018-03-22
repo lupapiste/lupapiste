@@ -1,5 +1,6 @@
 (ns lupapalvelu.file-upload-api
   (:require [noir.response :as resp]
+            [taoensso.timbre :refer [errorf]]
             [clojure.set :refer [rename-keys]]
             [sade.core :refer :all]
             [sade.env :as env]
@@ -38,7 +39,9 @@
    :pre-checks       [disallow-impersonation]
    :states           states/all-states}
   [{:keys [application]}]
-  (let [{:keys [ok] :as result} (file-upload/save-files application files (vetuma/session-id))]
+  (let [{:keys [ok error] :as result} (file-upload/save-files application files (vetuma/session-id))]
+    (when-not ok
+      (errorf "upload failed, error: %s" error))
     (->> result
          (file-upload/mark-duplicates application)
          (resp/json)

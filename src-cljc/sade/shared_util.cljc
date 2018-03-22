@@ -102,36 +102,6 @@
       (drop-nth k m)
       (dissoc m k))))
 
-
-;; ---------------------------------------------
-;; The following are not aliased in sade.util.
-;; ---------------------------------------------
-
-(defn kw-path
-  "Like sade.util/kw-path on the Clojure side. Note: this is not
-  defaliased in sade.util."
-  [& path]
-  (->> path
-       flatten
-       (remove nil?)
-       (map #(if (keyword? %)
-               (name %)
-               %))
-       (s/join ".")
-       keyword))
-
-(defmacro fn->  [& body] `(fn [x#] (-> x# ~@body)))
-(defmacro fn->> [& body] `(fn [x#] (->> x# ~@body)))
-
-(defn safe-update-in [a-map path fn & params]
-  "Like update-in, but does nothing in case the given path does not exist"
-  (if (empty? path)
-    (apply fn a-map params)
-    (let [[fst & rst] path]
-      (if (contains? a-map fst)
-        (apply update a-map fst safe-update-in rst fn params)
-        a-map))))
-
 (defn edit-distance
   "Levenshtein distance between strings a and b using Wagner–Fischer
   algorithm. The implementation is iterative, but uses O(|a|*|b|) space."
@@ -166,3 +136,33 @@
                       (inc i) i)
                     (if (= j length-of-b)
                       1 (inc j))))))))))
+
+
+;; ---------------------------------------------
+;; The following are not aliased in sade.util.
+;; ---------------------------------------------
+
+(defn kw-path
+  "Like sade.util/kw-path on the Clojure side. Note: this is not
+  defaliased in sade.util."
+  [& path]
+  (->> path
+       flatten
+       (remove nil?)
+       (map #(if (keyword? %)
+               (name %)
+               %))
+       (s/join ".")
+       keyword))
+
+(defmacro fn->  [& body] `(fn [x#] (-> x# ~@body)))
+(defmacro fn->> [& body] `(fn [x#] (->> x# ~@body)))
+
+(defn safe-update-in [a-map path fn & params]
+  "Like update-in, but does nothing in case the given path does not exist"
+  (if (empty? path)
+    (apply fn a-map params)
+    (let [[fst & rst] path]
+      (if (contains? a-map fst)
+        (apply update a-map fst safe-update-in rst fn params)
+        a-map))))

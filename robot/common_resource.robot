@@ -17,7 +17,7 @@ ${OP_TREE_SPEED}                0.1
 ${SLOW_SPEED}                   0.2
 ${SLOWEST_SPEED}                0.5
 
-${LOGIN URL}                    ${SERVER}/app/fi/welcome#!/login
+${LOGIN URL}                    ${SERVER}/app/fi/welcome
 ${LOGOUT URL}                   ${SERVER}/app/fi/logout
 ${BULLETINS URL}                ${SERVER}/app/fi/bulletins
 ${APPLICATIONS PATH}            /applicant#!/applications
@@ -36,7 +36,7 @@ ${DB PREFIX}                    test_
 
 Set DB cookie
   ${timestamp}=  Get Time  epoch
-  ${random post fix}=  Evaluate  random.randint(0, sys.maxint)  modules=random, sys
+  ${random post fix}=  Evaluate  random.randint(0, 999999999999)  modules=random
   ${dbname}=  Set Variable  ${DB PREFIX}${timestamp}_${random post fix}
   Add Cookie  ${DB COOKIE}  ${dbname}  /
   Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
@@ -57,11 +57,12 @@ Reload page and kill dev-box
 
 Open browser to login page
   Browser
-  Maximize browser window
+  Run Keyword And Ignore Error  Maximize browser window
   Set selenium speed  ${DEFAULT_SPEED}
   Apply minimal fixture now
   Set integration proxy on
   Disable maps
+  Disable KTJ
 
 Go to login page
   Go to  ${LOGIN URL}
@@ -314,7 +315,7 @@ User should not be logged in
   Wait Until  User is not logged in
 
 User is not logged in
-  Location should be  ${LOGIN URL}
+  Location should be  ${LOGIN URL}#!/login
   Page should contain  Haluan kirjautua palveluun
   # test that no data is bind.
 
@@ -332,7 +333,7 @@ Login fails
 
 User should be logged in
   [Arguments]  ${name}
-  Maximize browser window
+  Run Keyword And Ignore Error  Maximize browser window
   Scroll to top
   Wait Until  Element text should be  user-name  ${name}
 
@@ -1345,8 +1346,6 @@ Enable maps
 Set integration proxy on
   Execute Javascript  ajax.post("/api/proxy-ctrl/on").call();
   Wait for jQuery
-  Execute Javascript  ajax.command("set-feature", {feature: "disable-ktj-on-create", value:false}).call();
-  Wait for jQuery
 
 Disable maps
   Execute Javascript  ajax.command("set-feature", {feature: "maps-disabled", value:true}).call();
@@ -1355,7 +1354,13 @@ Disable maps
 Set integration proxy off
   Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
   Wait for jQuery
+
+Disable KTJ
   Execute Javascript  ajax.command("set-feature", {feature: "disable-ktj-on-create", value:true}).call();
+  Wait for jQuery
+
+Enable KTJ
+  Execute Javascript  ajax.command("set-feature", {feature: "disable-ktj-on-create", value:false}).call();
   Wait for jQuery
 
 #
@@ -1492,6 +1497,10 @@ Open company details
   Wait Until  Element should be visible  //div[@data-test-id='my-company']//button[@data-test-id='company-edit-info']
   Click by test id  company-edit-info
   Wait until  Element should be visible  company
+
+# At company registration page
+Company ${type} billing is selected
+  Wait until  Element should be visible  xpath=//button[@data-test-id='${type}-billing' and contains(@class, 'selected')]
 
 
 #

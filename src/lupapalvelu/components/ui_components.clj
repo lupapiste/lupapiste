@@ -336,13 +336,15 @@
                        "create-digging-permit.js"
                        "parties-model.js"
                        "application.js"
-                       "backend-id-manager.js"]
+                       "backend-id-manager.js"
+                       "replace-operation.js"]
                   :html ["application.html" "inforequest.html" "add-operation.html" "change-location.html"
                          "foreman-template.html" "archival-summary-template.html"
                          "required-fields-summary-tab-template.html" "parties-tab-template.html"
                          "case-file-template.html" "create-digging-permit.html"
                          "application-actions-template.html"
-                         "backend-id-manager-template.html"]}
+                         "backend-id-manager-template.html"
+                         "replace-operation.html"]}
 
    :applications {:depends [:common-html :repository :invites :global-models]
                   :html ["applications-list.html"]
@@ -470,14 +472,14 @@
                                    :accordion :mypage :calendar-view :header :debug :analytics :proj4 :ol :footer
                                    :ui-components :authority-admin-components]
                          :js [schema-versions-by-permit-type "organization-model.js" "wfsmodel.js" "organization-user.js"
-                              "organization-reports.js" "edit-roles-dialog-model.js"
+                              "organization-reports.js"
                               "calendars-model.js" "organization-reservation-types-model.js"
                               "organization-reservation-properties-model.js"
                               "municipality-maps-service.js" "authority-admin.js"]
                          :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"
                                 "organization-reports.html" "organization-calendars.html" "calendar-admin.html" "assignments.html" "stamp-editor.html"
                                 "pate-verdict-templates.html" "archiving.html" "organization-bulletins.html"
-                                "organization-store.html" "organization-terminal.html"]}
+                                "organization-store.html" "organization-terminal.html" "edit-authority.html"]}
 
    :admin-app {:depends []
                :js ["admin.js"]}

@@ -4,6 +4,7 @@ Documentation   Application gets tasks based on verdict
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        task_resource.robot
+Resource        keywords.robot
 Variables      ../06_attachments/variables.py
 
 *** Test Cases ***
@@ -16,27 +17,10 @@ Mikko prepares the application
   Set Suite Variable  ${propertyId}  753-416-18-1
   Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
   Submit application
-
-Mikko prepares YA application and fills it to pass KRYSP validation later in test
-  Set Suite Variable  ${appname-ya}  Taskitesti-YA-${secs}
-  Create application the fast way  ${appname-ya}  ${propertyId}  ya-katulupa-vesi-ja-viemarityot
-  Tab should be visible  info
-  # Alkupvm + loppupvm
-  Fill tyoaika fields
-  # Osapuolet
-  Invite erkki@example.com to application
-  # LPK-2915, previous was Solita Oy, which didn't have parties invited to application
-  Invite company to application  Esimerkki Oy
-  Scroll and click input  section[data-doc-type=hakija-ya] input[value=yritys]
-  Select from list by value  jquery=select[name=company-select]:first  esimerkki
-  Wait until  Value should be  jquery=input[data-docgen-path='yritys.yritysnimi']:first  Esimerkki Oy
-  Select from list by value  jquery=select[name=company-select]:last  esimerkki
-  Wait until  Value should be  jquery=input[data-docgen-path='yritys.yritysnimi']:last  Esimerkki Oy
-  Submit application
-  Logout
+  [Teardown]  Logout
 
 Sonja gives verdict
-  Sonja logs in
+  Sonja logs in  False
   Open application  ${appname}  ${propertyId}
   Open tab  verdict
   Fetch verdict
@@ -86,7 +70,7 @@ Luukas cannot add attachment to Valaistussuunnitelma
   [Teardown]  Logout
 
 Sonja logs in again
-  Sonja logs in
+  Sonja logs in  False
   Open application  ${appname}  ${propertyId}
   Open tab  tasks
 
@@ -175,7 +159,7 @@ Delete loppukatselmus
   Wait until  Element should be visible  xpath=//div[@id="application-tasks-tab"]//table[contains(@class, 'tasks')]//tbody/tr
   Open task  loppukatselmus
   Review checkboxes enabled
-  Click enabled by test id  delete-task
+  Scroll and click test id  delete-task
   Confirm  dynamic-yes-no-confirm-dialog
 
 The attachment is gone too
@@ -222,14 +206,6 @@ Verify post-verdict attachments - Aloituskokous
   Wait until  Element should be visible  jquery=a[data-test-id=application-open-attachments-tab]
   Open tab  attachments
   Wait Until  Element should be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME}')
-
-Katselmus task created in an YA application does not include any Rakennus information (LPK-719)
-  Open application  ${appname-ya}  ${propertyId}
-  Open tab  verdict
-  Fetch YA verdict
-  Open tab  tasks
-  Create katselmus task  task-katselmus-ya  uus muu ya-tarkastus
-  Wait until  Element should not be visible  xpath=//div[@id='taskDocgen']//div[@data-repeating-id='rakennus']
   [Teardown]  Logout
 
 Mikko is unable to edit Kayttoonottotarkastus (LPK-494)
@@ -254,25 +230,10 @@ Mikko can add attachments though
   Scroll to top
   Wait test id visible  upload-button-label
   Return from review
-
-Mikko sets started past date for YA application (LPK-1054)
-  Open application  ${appname-ya}  ${propertyId}
-  Open tab  tasks
-  Wait Until  Element Text Should Be  jquery=[data-test-id=task-started-by]  ${EMPTY}
-  Set date and check  application-inform-construction-started-btn  construction-state-change-info-started  10.8.2012
-  Wait Until  Element Text Should Be  jquery=[data-test-id=task-started-by]  Intonen Mikko
   [Teardown]  Logout
 
-Sonja comes back and finalizes YA review
-  Sonja logs in
-  Open application  ${appname-ya}  ${propertyId}
-  Open tab  tasks
-  Open task  uus muu ya-tarkastus
-  Edit YA katselmus  Aloituskatselmus  14.4.2016  Some Sonja  Description is mandatory for YA reviews.
-  # TODO: Sending requires fully formed application
-  #Finalize review
-
 Deleting R verdict does not delete its done reviews
+  Sonja logs in  False
   Open application  ${appname}  ${propertyId}
   Open tab  verdict
   Scroll to  h2 span[data-test-id=given-verdict-id-1] ~ i
@@ -295,29 +256,3 @@ Attachments have been updated
 
 No errors so far
   There are no frontend errors
-
-*** Keywords ***
-
-Create katselmus task
-  [Arguments]  ${taskSchemaName}  ${taskName}  ${taskSubtype}=
-  Click enabled by test id  application-new-task
-  Wait until  Element should be visible  dialog-create-task
-  Select From List By Value  choose-task-type   ${taskSchemaName}
-  Run Keyword If  $taskSubtype  Wait until  Element should be visible  choose-task-subtype
-  Run Keyword If  $taskSubtype  Select From List By Value  choose-task-subtype   ${taskSubtype}
-  Input text  create-task-name  ${taskName}
-  Click enabled by test id  create-task-save
-  Wait test id visible  review-done
-
-Set date and check
-  [Arguments]  ${button}  ${span}  ${date}
-  Wait Until  Element should be visible  jquery=[data-test-id=${button}]
-  Click by test id  ${button}
-  Wait Until  Element should be visible  modal-datepicker-date
-  Input text by test id  modal-datepicker-date  ${date}
-  ## Datepickers stays open when using Selenium
-  Execute JavaScript  $("#ui-datepicker-div").hide();
-  Click enabled by test id  modal-datepicker-continue
-  Wait Until  Element should not be visible  modal-datepicker-date
-  Confirm  dynamic-yes-no-confirm-dialog
-  Wait Until  Element Text Should Be  jquery=[data-test-id=${span}]  ${date}

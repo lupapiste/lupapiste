@@ -1,20 +1,19 @@
 (ns lupapalvelu.digitizer
-  (:require [sade.property :as p]
-            [sade.core :refer :all]
-            [lupapalvelu.organization :as organization]
+  (:require [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.prev-permit :as pp]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.application :as application]
-            [sade.util :as util]
             [lupapalvelu.action :as action]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.organization :as org]
-            [sade.property :as prop]
-            [sade.env :as env]
+            [lupapalvelu.property :as prop]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [lupapalvelu.application :as app]
@@ -24,8 +23,7 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.building :as building]
             [lupapalvelu.i18n :as i18n]
-            [monger.operators :refer :all]
-            [sade.strings :as ss]))
+            [monger.operators :refer :all]))
 
 (defn- get-applicant-type [applicant]
   (-> applicant (select-keys [:henkilo :yritys]) keys first))
@@ -60,7 +58,7 @@
 
 (defn do-create-application
   [{{:keys [operation x y address propertyId propertyIdSource messages]} :data :keys [user created]} manual-schema-datas permit-type]
-  (let [municipality      (prop/municipality-id-by-property-id propertyId)
+  (let [municipality      (prop/municipality-by-property-id propertyId)
         organization      (org/resolve-organization municipality permit-type)
         organization-id   (:id organization)]
 
@@ -112,25 +110,17 @@
   (->> (building-reader/->buildings xml)
        (map #(-> {:data %}))))
 
-(defn update-buildings-array! [xml application]
-  (let [doc-buildings (building/building-ids application)
-        buildings (building-reader/->buildings-summary xml)
-        find-op-id (fn [nid]
-                     (->> (filter #(= (:national-id %) nid) doc-buildings)
-                          first
-                          :operation-id))
-        updated-buildings (map
-                            (fn [{:keys [nationalId] :as bldg}]
-                              (-> (select-keys bldg [:localShortId :buildingId :localId :nationalId :location-wgs84 :location])
-                                  (assoc :operationId (find-op-id nationalId))))
-                            buildings)]
-    (when (seq updated-buildings)
-      (mongo/update-by-id :applications
-                          (:id application)
-                          {$set {:buildings updated-buildings}}))))
+(defn add-other-building-docs [created-application document-datas structure-descriptions]
+  (let [;; make secondaryOperations for buildings other than the first one in case there are many
+        other-building-docs (map (partial application/document-data->op-document created-application) (rest document-datas))
+        secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
+
+        created-application (update-in created-application [:documents] concat other-building-docs)
+        created-application (update-in created-application [:secondaryOperations] concat secondary-ops)]
+    created-application))
 
 (defn create-archiving-project-application!
-  [command operation buildings-and-structures app-info location-info permit-type building-xml backend-id]
+  [command operation buildings-and-structures app-info location-info permit-type building-xml backend-id refreshBuildings]
   (let [{:keys [hakijat]} app-info
         document-datas (application/schema-datas app-info buildings-and-structures)
         manual-schema-datas {"archiving-project" (first document-datas)}
@@ -142,12 +132,9 @@
         structure-descriptions (map :description buildings-and-structures)
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
-        ;; make secondaryOperations for buildings other than the first one in case there are many
-        other-building-docs (map (partial application/document-data->op-document created-application) (rest document-datas))
-        secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
-
-        created-application (update-in created-application [:documents] concat other-building-docs)
-        created-application (update-in created-application [:secondaryOperations] concat secondary-ops)
+        created-application (if (true? refreshBuildings)
+                              (add-other-building-docs created-application document-datas structure-descriptions)
+                              created-application)
 
         created-application (assoc created-application :drawings (:drawings app-info))
 
@@ -164,7 +151,7 @@
 
     (let [fetched-application (mongo/by-id :applications (:id created-application))]
       (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
-      (application/update-buildings-array! building-xml fetched-application)
+      (application/update-buildings-array! building-xml fetched-application refreshBuildings)
       fetched-application)))
 
 (defn get-location-info [{data :data :as command} app-info]
@@ -174,35 +161,32 @@
       rakennuspaikka-exists?                             (:rakennuspaikka app-info)
       (pp/enough-location-info-from-parameters? command) (select-keys data [:x :y :address :propertyId]))))
 
-(defn default-location [organizationId lang]
-  (let [organization (org/get-organization organizationId)]
-  {:x (get-in organization [:default-digitalization-location :x])
-   :y (get-in organization [:default-digitalization-location :y])
-   :address (i18n/localize lang "digitizer.location.missing")
-   :propertyId (apply str (concat (first (split-at 3 organizationId)) "-00-00-00"))}))
+(defn default-location [organization lang]
+  {:x          (get-in organization [:default-digitalization-location :x])
+   :y          (get-in organization [:default-digitalization-location :y])
+   :address    (i18n/localize lang "digitizer.location.missing")
+   :propertyId (apply str (concat (first (split-at 3 (:id organization))) "00000000000"))})
 
 (defn fetch-or-create-archiving-project!
-  [{{:keys [lang organizationId kuntalupatunnus createAnyway createWithoutBuildings createWithDefaultLocation]} :data :as command}]
+  [{{:keys [lang organizationId kuntalupatunnus createAnyway createWithoutBuildings createWithDefaultLocation refreshBuildings]} :data :as command}]
   (let [operation         :archiving-project
         permit-type       "R"                                ; No support for other permit types currently
         dummy-application {:id "" :permitType permit-type :organization organizationId}
         xml               (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
         app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-        {:keys [propertyId] :as location-info} (if createWithDefaultLocation (default-location organizationId lang) (get-location-info command app-info))
-        organization      (when propertyId
-                            (organization/resolve-organization (p/municipality-id-by-property-id propertyId) permit-type))
+        organization      (org/get-organization organizationId)
+        {:keys [propertyId] :as location-info} (if createWithDefaultLocation
+                                                 (default-location organization lang)
+                                                 (get-location-info command app-info))
         building-xml      (if app-info xml (application/fetch-building-xml organizationId permit-type propertyId))
         bldgs-and-structs (or (when app-info (building-reader/->buildings-and-structures xml))
-                              (application/buildings-for-documents building-xml))
-        organizations-match?  (= organizationId (:id organization))]
+                              (application/buildings-for-documents building-xml))]
     (cond
       (and (empty? app-info)
            (not createAnyway))              (fail :error.no-previous-permit-found-from-backend :permitNotFound true)
       (not location-info)                   (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
       (and (not (:propertyId location-info))
            (not createWithDefaultLocation)) (fail :error.previous-permit-no-propertyid)
-      (and (not organizations-match?)
-           (not createWithDefaultLocation)) (fail :error.previous-permit-found-from-backend-is-of-different-organization)
       (and (empty? bldgs-and-structs)
            (not createWithoutBuildings))    (fail :error.no-buildings-found-from-backend :buildingsNotFound true)
       :else                                 (let [{id :id} (create-archiving-project-application! command
@@ -212,7 +196,8 @@
                                                                                                   location-info
                                                                                                   permit-type
                                                                                                   building-xml
-                                                                                                  kuntalupatunnus)]
+                                                                                                  kuntalupatunnus
+                                                                                                  refreshBuildings)]
                                             (ok :id id)))))
 
 (defn update-verdicts [{:keys [application] :as command} verdicts]

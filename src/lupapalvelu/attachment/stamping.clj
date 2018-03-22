@@ -20,27 +20,37 @@
         re-stamp? (:stamped (first versions))
         source (if re-stamp? (second versions) (first versions))]
     (assoc (select-keys source [:contentType :fileId :filename :size])
-      :signature (filter #(= (:fileId (first versions)) (:fileId %)) (:signatures attachment))
+      :signatures (when-not re-stamp?
+                    (seq (filter #(= (:fileId (first versions)) (:fileId %))
+                                 (:signatures attachment))))
       :stamped-original-file-id (when re-stamp? (:originalFileId (first versions)))
       :operation-ids (set (att-util/get-operation-ids attachment))
       :attachment-id (:id attachment)
       :attachment-type (:type attachment))))
 
+(defn get-attachment-approval-stamping [application attachment-id]
+  (let [attachment     (att/get-attachment-info application attachment-id)
+        originalFileId (-> attachment :latestVersion :originalFileId keyword)
+        approval       (-> attachment :approvals originalFileId)]
+    (when (-> approval :state #{"ok"}) approval)))
+
 (defn- update-stamp-to-attachment! [stamp file-info {:keys [application user created] :as context}]
-  (let [{:keys [attachment-id fileId filename stamped-original-file-id signature]} file-info
+  (let [{:keys [attachment-id fileId filename stamped-original-file-id signatures]} file-info
         options (select-keys context [:x-margin :y-margin :transparency :page])]
     (files/with-temp-file file
       (with-open [out (io/output-stream file)]
         (stamper/stamp stamp fileId out options))
       (debug "uploading stamped file: " (.getAbsolutePath file))
-      (let [result (att/upload-and-attach!
+      (let [approval (get-attachment-approval-stamping application attachment-id)
+            result  (att/upload-and-attach!
                      {:application application :user user}
                      {:attachment-id                attachment-id
                       :replaceable-original-file-id stamped-original-file-id
                       :comment-text                 nil :created created
                       :stamped                      true :comment? false
                       :state                        :ok
-                      :signature                    signature}
+                      :signatures                   signatures
+                      :approval                     approval}
                      {:filename filename :content file
                       :size     (.length file)})]
         (tos/mark-attachment-final! application created attachment-id)

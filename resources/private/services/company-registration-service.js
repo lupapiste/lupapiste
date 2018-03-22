@@ -14,9 +14,22 @@ LUPAPISTE.CompanyRegistrationService = function() {
          : null;
   }
 
+  function requiredFields() {
+    var fields = ["name", "y",
+                  "address1", "zip", "po"];
+    return user()
+         ? fields
+         : _.concat( fields, [ "firstName", "lastName",
+                               "email", "personId"]);
+  }
+
   // Property names are the same as used by the backend.
-  function newRegistration() {
-    return {
+  // Guard makes sure that the wizard components are disposed.
+  self.guard = ko.observable( true );
+  self.registration = {
+      billingType: ko.observable().extend({
+        limited: {values: ["monthly", "yearly"], defaultValue: "yearly"}
+      }),
       accountType: ko.observable(),
       name: ko.observable(),
       y: ko.observable(),
@@ -37,20 +50,6 @@ LUPAPISTE.CompanyRegistrationService = function() {
       contactPo: ko.observable(),
       contactCountry: ko.observable()
     };
-  }
-
-  function requiredFields() {
-    var fields = ["name", "y",
-                  "address1", "zip", "po"];
-    return user()
-         ? fields
-         : _.concat( fields, [ "firstName", "lastName",
-                               "email", "personId"]);
-  }
-
-  // Guard makes sure that the wizard components are disposed.
-  self.guard = ko.observable( true );
-  self.registration = newRegistration();
   // Current step [0-3] in the registration wizard.
   self.currentStep = ko.observable( 0 );
 
@@ -128,23 +127,29 @@ LUPAPISTE.CompanyRegistrationService = function() {
             testId: "register-company-" + fieldName};
   };
 
-  self.accountTypes = ko.computed( function() {
+  self.accountTypes = ko.pureComputed(function() {
+    var billingType = self.registration.billingType();
     return _.map( LUPAPISTE.config.accountTypes, function( account ) {
       return { id: account.name,
                title: loc( sprintf( "register.company.%s.title",
                                     account.name )),
-               price: loc(  "register.company.price",
-                            account.price),
+               price: _.get(account.price, billingType),
+               priceRaw: account.price,
+               isYearly: billingType === "yearly",
+               normalYearPrice: (_.get(account.price, "monthly") * 12),
                description: loc( "register.company.account.description",
                                  account.limit )};
     });
+  });
+
+  self.selectedAccount = ko.pureComputed(function() {
+    return _.find(self.accountTypes(), {id: self.registration.accountType()});
   });
 
   // Guard makes sure that components are disposed, when they are
   // located within suitable if.
   function reset() {
     self.guard( false );
-    self.registration = newRegistration() ;
     updateRegistrationUserInfo();
     self.currentStep( 0 );
     self.guard( true );
@@ -191,7 +196,8 @@ LUPAPISTE.CompanyRegistrationService = function() {
                                    ["accountType", "name", "y", "address1",
                                     "zip", "po", "country", "netbill",
                                     "pop", "reference", "campaign", "contactAddress",
-                                   "contactZip", "contactPo", "contactCountry"]),
+                                    "contactZip", "contactPo", "contactCountry",
+                                    "billingType"]),
                   signer: _.pick( reg,
                                  ["firstName", "lastName", "email",
                                   "personId", "language"])};
@@ -215,19 +221,22 @@ LUPAPISTE.CompanyRegistrationService = function() {
 
   // Definitions for the first three wizard steps. The last step
   // (Activation) is accessed via an email link and does not use the
-  // service.
-  var stepConfigs = [{component: "register-company-account-type",
+  // service. ---> Why not??? :)
+  self.stepConfigs = [{component: "register-company-account-type",
                       continueEnable: self.registration.accountType,
                       continueClick: nextStep},
                      {component: "register-company-info",
                       continueEnable: fieldsOk,
+                      continueClick: nextStep},
+                     {component: "register-company-summary",
+                      continueEnable: _.constant(true),
                       continueClick: initSign},
                      {component: "register-company-sign",
                       noButtons: true}];
 
-  self.currentConfig = function() {
-    return stepConfigs[self.currentStep()];
-  };
+  self.currentConfig = ko.pureComputed(function() {
+    return self.stepConfigs[self.currentStep()];
+  });
 
   // Save the current step and registration data to session
   // storage. This is needed, when the user signs in and the page is

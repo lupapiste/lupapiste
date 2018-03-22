@@ -472,6 +472,18 @@
     :username "digitoija@jarvenpaa.fi"
     :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
               :apikey "a0ac77ecd2e6c2ea6e73f853"}}
+   ;; Torsti Tossavainen - Jarvenpaan TOS-vastaava: torsti / torsti
+   {:id "777777777777777777000027"
+    :username "torsti"
+    :role "authority"
+    :enabled true
+    :language "fi"
+    :email "torsti.tossavainen@jarvenpaa.fi"
+    :orgAuthz {:186-R #{:tos-editor :tos-publisher}} ; Note that :authority is not present
+    :firstName "Torsti"
+    :lastName "Tossavainen"
+    :private {:password "$2a$10$eo2H257MMoJHMUCxAmEXVeRTDjaEL9qPpbQQiC/kdI38lPwXutklS"
+              :apikey "a0ac77ecd2e6c2ea6e73f854"}}
 
    {:id "jarvenpaa-backend"
     :username "jarvenpaa-backend"
@@ -714,6 +726,16 @@
                            :en "Lupapiste store"}
             :callback-url "http://localhost:8000"}}
 
+   {:id "tiedonohjausjarjestelma"
+    :username "tiedonohjausjarjestelma"
+    :email "tiedonohjausjarjestelma@lupapiste.fi"
+    :firstName "TOJ"
+    :lastName "API-user"
+    :enabled true
+    :language "fi"
+    :role "rest-api"
+    :private {:apikey "tojTOJtojTOJtojTOJtoj"}}
+
    ;; Solita admin:  financial / admin
    {:id "financial"
     :email "financial@ara.fi"
@@ -955,7 +977,8 @@
                        :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true
-                       :pate-enabled true
+                       ; NB! Setting pate-enabled to true WILL BREAK (robot) tests
+                       :pate-enabled false
                        :docstore-info (assoc org/default-docstore-info
                                              :docStoreInUse true
                                              :docTerminalInUse true
@@ -1457,6 +1480,7 @@
 
 (def companies [{:id "solita"
                  :accountType "account5"
+                 :billingType "monthly"
                  :customAccountLimit nil
                  :created 1412959886600
                  :name "Solita Oy"
@@ -1474,6 +1498,7 @@
                          :label "Projekti1"}]}
                 {:id "esimerkki"
                  :accountType "account5"
+                 :billingType "monthly"
                  :customAccountLimit nil
                  :created 1493200035783
                  :name "Esimerkki Oy"

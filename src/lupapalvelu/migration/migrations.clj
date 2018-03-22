@@ -3748,6 +3748,17 @@
     (->> (mongo/select collection {} [:auth])
          (run! (partial update-application-owner-to-writer collection)))))
 
+(defmigration company-default-billing-type
+  {:apply-when (pos? (mongo/count :companies {:billingType {$exists false}}))}
+  (mongo/update-by-query :companies {:billingType {$exists false}} {$set {:billingType "yearly"}}))
+
+(defmigration remove-extra-file-id-and-content-type-keys
+  {:apple-when (pos? (mongo/count :applications {$or [{:contentType {$exists true}} {:fileId {$exists true}}]}))}
+  (mongo/update-by-query :applications
+                         {$or [{:contentType {$exists true}} {:fileId {$exists true}}]}
+                         {$unset {:contentType ""
+                                  :fileId ""}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

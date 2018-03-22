@@ -1,5 +1,5 @@
 (ns lupapalvelu.property-location
-  (:require [clojure.set :refer [difference]]
+  (:require [clojure.set :refer [difference rename-keys]]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.wfs :as wfs])
@@ -36,3 +36,18 @@
         ; NLS WFS service does not support or-query, need to fetch areas one by one (in parallel)
         (let [missed-infos (pmap property-location-from-wfs unfound-ids)]
           (concat cached-infos (->> missed-infos flatten (remove nil?))))))))
+
+(defn- rename [property-info]
+  (-> property-info
+      (select-keys [:kiinttunnus :kunta :nimi :x :y])
+      (rename-keys {:kiinttunnus :propertyId
+                    :kunta :municipality
+                    :nimi :name})))
+
+(defn property-infos-by-point [x y]
+  (->> (wfs/property-info-by-point x y)
+       (map wfs/feature-to-property-info)
+       (map rename)))
+
+(defn property-info-by-point [x y]
+  (first (property-infos-by-point x y)))

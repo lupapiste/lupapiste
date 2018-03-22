@@ -18,6 +18,7 @@
             [clojure.test.check.generators :as gen]
             [clojure.test :refer [is]]
             [schema.core :as sc]
+            [sade.core :refer [now]]
             [sade.schemas :as ssc]
             [sade.schema-generators :as ssg]
             [lupapalvelu.attachment.onkalo-client :as oc]
@@ -33,7 +34,8 @@
                    attachment-assignment-info
                    version-approval-path
                    signature-updates
-                   manually-set-construction-time)
+                   manually-set-construction-time
+                   update-latest-version-file!)
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
 
@@ -439,7 +441,7 @@
 (facts signature-updates
 
   (fact "no original-signature provided -> create new"
-    (signature-updates {:fileId ..file-id.. :version {:major ..major.. :minor ..minor..}} ..user.. ..ts.. nil [])
+    (signature-updates {:fileId ..file-id.. :version {:major ..major.. :minor ..minor..}} ..user.. ..ts.. nil)
     => {$push {:attachments.$.signatures {:fileId ..file-id.. :version {:major ..major.. :minor ..minor..} :created ..ts.. :user ..user-summary..}}}
     (provided (lupapalvelu.user/summary ..user..) => ..user-summary..))
 
@@ -447,27 +449,24 @@
     (signature-updates {:fileId ..file-id.. :version ..version..}
                        ..user..
                        ..ts..
-                       {:created ..orig-created.. :user ..orig-user.. :fileId ..orig-file-id.. :version ..orig-version..}
-                       [{:version ..orig-version.. :fileId ..some-file-id.. :user ..user.. :created ..created..}])
-    => {$push {:attachments.$.signatures {:fileId ..file-id.. :version ..version.. :created ..orig-created.. :user ..orig-user..}}})
+                       [{:created ..orig-created.. :user ..orig-user.. :fileId ..orig-file-id.. :version ..orig-version..}])
+    => {$push {:attachments.$.signatures {$each [{:fileId ..file-id.. :version ..version.. :created ..orig-created.. :user ..orig-user..}]}}})
 
-  (fact "Updating existing attachment version signature"
+  (fact "Multiple signatures may be copied"
     (signature-updates {:fileId ..file-id.. :version ..version..}
                        ..user..
                        ..ts..
-                       nil
-                       [{:version ..old-version.. :fileId ..some-file-id.. :user ..user.. :created ..created..}
-                        {:version ..version.. :fileId ..some-file-id.. :user ..user.. :created ..created..}])
-    => {$set {:attachments.$.signatures.1 {:fileId ..file-id.. :version ..version.. :created ..ts.. :user ..user-summary..}}}
-    (provided (lupapalvelu.user/summary ..user..) => ..user-summary..))
+                       [{:created ..orig-created.. :user ..orig-user.. :fileId ..orig-file-id.. :version ..orig-version..}
+                        {:created ..orig-created2.. :user ..orig-user2.. :fileId ..orig-file-id.. :version ..orig-version..}])
+    => {$push {:attachments.$.signatures {$each [{:fileId ..file-id.. :version ..version.. :created ..orig-created.. :user ..orig-user..}
+                                                 {:fileId ..file-id.. :version ..version.. :created ..orig-created2.. :user ..orig-user2..}]}}})
 
-  (fact "Updating existing attachment version signature with timestamp and user copied from existing signature"
-    (signature-updates {:fileId ..file-id.. :version ..orig-version..}
+  (fact "Passing an empty list of copied signatures does not generate a signature"
+    (signature-updates {:fileId ..file-id.. :version ..version..}
                        ..user..
                        ..ts..
-                       {:created ..orig-created.. :user ..orig-user.. :fileId ..orig-file-id.. :version ..orig-version..}
-                       [{:version ..orig-version.. :fileId ..some-file-id.. :user ..user.. :created ..created..}])
-    => {$set {:attachments.$.signatures.0 {:fileId ..file-id.. :version ..orig-version.. :created ..orig-created.. :user ..orig-user..}}}))
+                       [])
+    => nil))
 
 (facts "Manually set construction time"
   (fact "draft -> verdictGiven"
@@ -643,3 +642,33 @@
 
         (fact "archived attachments can be deleted from MongoDB"
           (delete-archived-attachments-files-from-mongo! app2 att2) => :application-updated)))))
+
+(facts "about in-place attachment conversion"
+  (let [id "afdagdgahd"
+        attachment {:id id
+                    :versions [{:fileId "1"
+                                :originalFileId "4"}
+                               {:fileId "2"
+                                :originalFileId "3"}]
+                    :latestVersion {:fileId "2"
+                                    :originalFileId "3"}}
+        ts (now)]
+    (fact "update-latest-version-file! works properly"
+      (update-latest-version-file! {}
+                                   attachment
+                                   {:result {:archivable true}
+                                    :file {:fileId "foo"
+                                           :contentType "bar"}}
+                                   ts) => :updated
+      (provided
+        (action/update-application
+          (action/application->command {})
+          {:attachments.id id}
+          {$set {"attachments.$.versions.1.fileId" "foo"
+                 "attachments.$.latestVersion.fileId" "foo"
+                 "attachments.$.versions.1.contentType" "bar"
+                 "attachments.$.latestVersion.contentType" "bar"
+                 "attachments.$.versions.1.modified" ts
+                 "attachments.$.latestVersion.modified" ts
+                 "attachments.$.versions.1.archivable" true
+                 "attachments.$.latestVersion.archivable" true}}) => :updated))))

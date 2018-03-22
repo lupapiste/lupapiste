@@ -51,6 +51,17 @@
                                   :display 1
                                   :echo "123"})})))
 
+(facts "User for edit authority"
+  (fact (query sonja :user-for-edit-authority :authority-id "777777777777777777000024") =not=> ok?)
+  (fact (query jarvenpaa :user-for-edit-authority :authority-id "777777777777777777000024") =not=> ok?)
+  (fact (query sipoo :user-for-edit-authority :authority-id "777777777777777777000024")
+    => {:ok true
+        :data {:email "ronja.sibbo@sipoo.fi"
+               :username "ronja"
+               :firstName "Ronja"
+               :lastName "Sibbo"
+               :orgAuthz {:753-R ["authority"]}}}))
+
 (facts "Check passwords"
        (fact "Good password"
              (command pena :check-password :password "pena") => ok?)
@@ -267,6 +278,35 @@
                 :companyId "1060155-5"}]
       (apply command teppo :update-user (flatten (seq data))) => ok?
       (query teppo :user) => (contains {:user (contains data)}))))
+
+(facts "Auth admin edits authority info"
+  (apply-remote-minimal)
+
+  (let [command-data {:firstName "Tonja"
+                      :lastName  "Tibbo"
+                      :email     "ronja.sibbo@sipoo.fi"
+                      :new-email "tonja.tibbo@sipoo.fi"}]
+
+    (fact "Sipoo can edit authority info"
+      (command sipoo :update-auth-info command-data) => ok?)
+
+    (fact "Sipoo can't change email if it's already in use"
+      (command sipoo :update-auth-info (assoc command-data :new-email "sonja.sibbo@sipoo.fi")) =not=> ok?)
+
+    (fact "Sipoo can give authz to Pekka Borga but can not edit info"
+      (let [pekka {:firstName "Pekka"
+                   :lastName "Borga"
+                   :email "pekka.borga@porvoo.fi"
+                   :roles ["commenter"]}]
+        (command sipoo :update-user-organization pekka) => ok?
+        (command sipoo :update-auth-info (-> pekka
+                                             (dissoc :roles)
+                                             (assoc :new-email "pekka.porvoo@porvoo.fi")))
+        =not=> ok?))
+    (fact "Sonja can not edit authority info"
+      (command sonja :update-auth-info command-data) =not=> ok?)
+    (fact "Jarvenpaa can not edit info of authority in Sipoo"
+      (command jarvenpaa :update-auth-info command-data) =not=> ok?)))
 
 ;;
 ;; historical tests, dragons be here...

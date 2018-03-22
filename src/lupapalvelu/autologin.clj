@@ -13,7 +13,8 @@
             [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.user :as user]))
+            [lupapalvelu.user :as user])
+  (:import [org.apache.commons.codec.binary Base64]))
 
 
 (def cache-ttl (* 10 60 1000)) ; 10 min
@@ -59,7 +60,6 @@
         canonical-email  (ss/canonize-email email)
         ip (http/client-ip request)
         [ts hash] (parse-ts-hash password)]
-
     (when (and ts hash
             (valid-hash? hash email ip ts (load-secret ip))
             (valid-timestamp? ts (now) ip))
@@ -79,3 +79,11 @@
       (handler request)
       (catch [:type ::autologin] {text :text}
         (resp/status 403 text)))))
+
+(defn generate-test-auth [username & [ip]]
+  (let [ip (or ip "127.0.0.1")
+        ts (now)
+        secret (load-secret ip)
+        hash (pandect/sha256-hmac (str username ip ts) secret)
+        basic-auth (Base64/encodeBase64String (.getBytes (str username ":" ts "_" hash)))]
+    (str "Basic " basic-auth)))
