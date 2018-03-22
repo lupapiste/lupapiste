@@ -152,48 +152,42 @@
 (defmethod initial-draft :p
   [{snapshot :published} application]
   {:data       (data-draft
-                 (merge {:language              :language
-                         :verdict-code          :verdict-code
-                         :verdict-text          :paatosteksti
-                         :bulletinOpDescription :bulletinOpDescription}
-                        (reduce (fn [acc kw]
-                                  (assoc acc
-                                    kw kw
-                                    (kw-format "%s-included" kw)
-                                    {:fn (util/fn-> (get-in [:removed-sections kw]) not)}))
-                                {}
-                                [:foremen :plans :reviews])
-                        (reduce (fn [acc kw]
-                                  (assoc acc
-                                    kw  {:fn        #(when (util/includes-as-kw? (:verdict-dates %) kw)
-                                                       "")
-                                         :skip-nil? true}))
-                                {}
-                                shared/p-verdict-dates)
-                        (reduce (fn [acc k]
-                                  (merge acc (map-unremoved-section (:data snapshot) k)))
-                                {}
-                                [:neighbors :appeal :statements :collateral
-                                 :complexity :rights :purpose :extra-info
-                                 :attachments])
-                        ;; List of conditions to conditions map where keys are ids.
-                        (when (map-unremoved-section (:data snapshot) :conditions)
-                          {:conditions {:fn        (fn [{:keys [conditions]}]
-                                                     (reduce (fn [acc condition]
-                                                               (assoc-in acc
-                                                                         [(keyword (mongo/create-id)) :condition]
-                                                                         condition))
-                                                             {}
-                                                             conditions))
-                                        :skip-nil? true}})
-                        (when (map-unremoved-section (:data snapshot) :deviations)
-                          {:deviations (-> (domain/get-document-by-name application
-                                                                        "hankkeen-kuvaus")
-                                           :data :poikkeamat :value
-                                           (or ""))})
-                        (when (map-unremoved-section (:data snapshot) :attachments)
-                          {:attachments []}))
-                 snapshot)
+                (merge {:language              :language
+                        :handler               (general-handler application)
+                        :verdict-code          :verdict-code
+                        :verdict-text          :paatosteksti
+                        :bulletinOpDescription :bulletinOpDescription}
+                       (reduce (fn [acc kw]
+                                 (assoc acc
+                                        kw  {:fn        #(when (util/includes-as-kw? (:verdict-dates %) kw)
+                                                           "")
+                                             :skip-nil? true}))
+                               {}
+                               shared/p-verdict-dates)
+                       (reduce (fn [acc k]
+                                 (merge acc (map-unremoved-section (:data snapshot) k)))
+                               {}
+                               [:neighbors :appeal :statements :collateral
+                                :complexity :rights :purpose :start-info
+                                :attachments])
+                       ;; List of conditions to conditions map where keys are ids.
+                       (when (map-unremoved-section (:data snapshot) :conditions)
+                         {:conditions {:fn        (fn [{:keys [conditions]}]
+                                                    (reduce (fn [acc condition]
+                                                              (assoc-in acc
+                                                                        [(keyword (mongo/create-id)) :condition]
+                                                                        condition))
+                                                            {}
+                                                            conditions))
+                                       :skip-nil? true}})
+                       (when (map-unremoved-section (:data snapshot) :deviations)
+                         {:deviations (-> (domain/get-document-by-name application
+                                                                       "hankkeen-kuvaus")
+                                          :data :poikkeamat :value
+                                          (or ""))})
+                       (when (map-unremoved-section (:data snapshot) :attachments)
+                         {:attachments []}))
+                snapshot)
    :references (:settings snapshot)})
 
 (declare enrich-verdict)
