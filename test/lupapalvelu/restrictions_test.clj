@@ -99,7 +99,7 @@
                                                                  :user {:id "user2"}
                                                                  :target {:type "others"}}]}}
                               :test/fail)
-      => {:restriction :test/fail, :ok false, :text "error.permissions-restricted-by-another-user"})
+      => {:restriction :test/fail, :ok false, :user {:id "user2", :type :person}, :text "error.permissions-restricted-by-another-user"})
 
     (fact "restriction not applied to self"
       (check-auth-restriction {:user {:id "user1"}
@@ -144,4 +144,4 @@
                                                                  :user {:id "user2"}
                                                                  :target {:type "others"}}]}}
                               :test/fail)
-      => {:restriction :test/fail, :ok false, :text "error.permissions-restricted-by-another-user"})))
+      => {:restriction :test/fail, :ok false, :user {:id "user2", :type :person}, :text "error.permissions-restricted-by-another-user"})))
