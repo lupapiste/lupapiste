@@ -9,20 +9,6 @@ Suite Setup     Initialize foreman
 
 *** Test Cases ***
 
-Solita invites Sven to company
-  Kaino logs in
-  Open company user listing
-  Invite existing user  sven@example.com  Sven  Svensson
-  Check invitation  0  sven@example.com  Svensson  Sven  Käyttäjä  Kyllä
-
-Sven accepts invite
-  Accept invitation  sven@example.com
-  Click link  Siirry Lupapiste-palveluun
-
-Sven logs in and out to clear the language notification
-  Sven logs in
-  [Teardown]  Logout
-
 Applicant creates new application
   Pena logs in
   Create project application  open
@@ -37,9 +23,6 @@ Applicant invites Solita
   Open foreman accordions
   Invite company to application  Solita Oy
   Logout
-
-Sven does not see the invitation
-  No invitations for Sven
 
 Solita accepts invite
   User logs in  kaino@solita.fi  kaino123  Kaino Solita
@@ -128,37 +111,6 @@ Foreman accepts invite to project application
   Wait until  Confirm yes no dialog
   Logout
 
-Sven does not see the foreman invitation either
-  No invitations for Sven
-
-Solita is invited to the foreman application
-  User logs in  kaino@solita.fi  kaino123  Kaino Solita
-  Wait test id visible  accept-invite-button
-  Element Should Contain  xpath=//div[@class='invitation'][1]//h3  Yritysvaltuutus: ${appname}, Sipoo, Työnjohtajan nimeäminen
-  Element Should Contain  xpath=//div[@class='invitation'][1]//span[1]  Kutsuja:
-  Element Should Contain  xpath=//div[@class='invitation'][1]//span[2]  Sibbo Sonja
-
-Solita opens the foreman application and dismisses invitation dialog
-  Scroll and click test id  open-application-button
-  Wait test id visible  yes-no-dialog
-  Deny yes no dialog
-
-Solita accepts invitation via sidebar button
-  Click visible test id  accept-invite-button
-  No such test id  accept-invite-button
-  Sleep  0.5s
-
-Solita returns to applications and the invitation is gone
-  Click element  //div[contains(@class,"nav-top")]//div[contains(@class,"header-box")]//a[@title="Hankkeet"]
-  Applications page should be open
-  No such test id  accept-invite-button
-  [Teardown]  Logout
-
-Sven can now open the foreman application
-  Sven logs in
-  Open application by id  ${foremanAppId}
-  [Teardown]  Logout
-
 Applicant returns to project application
   Pena logs in
   Open project app from list
@@ -215,7 +167,6 @@ All foremen table is shown on the Construction tab
   Logout
 
 Applicant can create foreman applications after verdict is given for the original application
-  Sleep  2s
   Pena logs in
   Open project app from list
   Open tab  parties
@@ -337,9 +288,3 @@ Invite Mikko
   Scroll and click test id  application-invite-submit
   Wait until  Element should not be visible  invite-email
   Wait until  Invite count is  1
-
-No invitations for Sven
-  Sven logs in
-  Applications page should be open
-  No such test id  accept-invite-button
-  [Teardown]  Logout
