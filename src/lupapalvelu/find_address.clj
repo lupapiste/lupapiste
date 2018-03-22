@@ -99,7 +99,8 @@
           (wfs/ogc-and
             (wfs/property-is-like "oso:katunimi"   (str street "*"))
             (wfs/property-is-like "oso:katunumero" (str number "*"))
-            (wfs/property-is-less "oso:jarjestysnumero" "10")))))))
+            (when (>= 10 (util/->long number))
+              (wfs/property-is-less "oso:jarjestysnumero" "10"))))))))
 
 (defn search-street-maybe-city
   "Checks if city is in municipality list. If not, calls search-street,
