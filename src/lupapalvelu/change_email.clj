@@ -80,7 +80,7 @@
     (cond
       (not= (:token-type token) :change-email) (fail! :error.token-not-found)
       (and (not hetu) not-company? (not financial-authority?)) (fail! :error.missing-person-id)
-      (and (usr/verified-person-id? user) (not= hetu vetuma-hetu)) (fail! :error.personid-mismatch)
+      (and not-company? (usr/verified-person-id? user) (not= hetu vetuma-hetu)) (fail! :error.personid-mismatch)
       (usr/email-in-use? new-email)            (fail! :error.duplicate-email))
 
     (when-let [{dummy-id :id :as dummy-user} (usr/get-user-by-email new-email)]

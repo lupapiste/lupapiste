@@ -63,7 +63,19 @@
         (fact "User is seen in company query"
               (let [company (query kaino :company :company "solita" :users true)]
                 (count (:invitations company)) => 0
-                (count (:users company)) => 2)))
+                (count (:users company)) => 2))
+
+        ;; LPK-3699
+        (fact "User can change email after being invited to company"
+              (let [new-email "teppo2@example.com"]
+                (command teppo :change-email-init :email new-email) => ok?
+                (let [token (token-from-email new-email)]
+                  (command teppo :change-email-simple :tokenId token) => ok?)
+
+                ;; Revert back to original email
+                (command teppo :change-email-init :email (email-for-key teppo)) => ok?
+                (let [token (token-from-email (email-for-key teppo))]
+                  (command teppo :change-email-simple :tokenId token) => ok?))))
 
 (fact "User details are correct"
       (check-user-details (email-for-key teppo) :company {:role "user" :submit false} :firstName "Teppo" :lastName "Nieminen"))
