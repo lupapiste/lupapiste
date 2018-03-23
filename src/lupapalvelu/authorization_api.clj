@@ -188,6 +188,21 @@
 ;; Auhtorizations
 ;;
 
+(defn no-company-users-in-auths-when-company-denies-invitations
+  "Precheck for company auth removal for companies that have set :invitationDenied
+  flag on. To remove company, all company users have to be removed first."
+  [{{auth-id :id type :type} :auth-entry {auth :auth :as application} :application}]
+  (when (and (= :company (keyword type))
+             (:invitationDenied (company/find-company-by-id auth-id)))
+
+    (let [company-users-ids  (->> (mongo/select :users {:company.id auth-id} [:_id])
+                                  (map :id))
+          company-user-auths (filter (comp (set company-users-ids) :id) auth)]
+
+      (when (not-empty company-user-auths)
+        (fail :error.company-users-have-to-be-removed-before-company
+              :users (map #(select-keys % [:firstName :lastName]) company-user-auths))))))
+
 (defcontext auth-entry-context [{{auth :auth auth-restrictions :authRestrictions} :application
                                  {username :username} :data
                                  {user-id :id {company-id :id} :company} :user}]
@@ -215,7 +230,8 @@
                   :required [:application/edit-restricting-auth]}
 
                  {:required [:application/edit-auth]}]
-   :states     (states/all-application-states-but [:canceled])}
+   :states     (states/all-application-states-but [:canceled])
+   :pre-checks [no-company-users-in-auths-when-company-denies-invitations]}
   [command]
   (do-remove-auth command username))
 
