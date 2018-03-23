@@ -2175,3 +2175,53 @@
     (fact "jarjestysnumero"
       (-> rakennusvalvontaasia :toimenpidetieto first :Toimenpide :rakennelmatieto :Rakennelma :tunnus :jarjestysnumero)
       => 1)))
+
+(def huoneistot {:0 {:muutostapa "lis\u00e4ys"
+                     :porras "A"
+                     :huoneistonumero "1"
+                     :jakokirjain "a"
+                     :huoneistoTyyppi "asuinhuoneisto"
+                     :huoneistoala "56"
+                     :huoneluku "66"
+                     :keittionTyyppi "keittio"
+                     :parvekeTaiTerassiKytkin true
+                     :WCKytkin true}
+                 :1 {:muutostapa "muutos"
+                     :porras "A"
+                     :huoneistonumero "2"
+                     :jakokirjain "a"
+                     :huoneistoTyyppi "toimitila"
+                     :huoneistoala "03"
+                     :huoneluku "12"
+                     :keittionTyyppi "keittokomero"
+                     :ammeTaiSuihkuKytkin true
+                     :saunaKytkin true
+                     :lamminvesiKytkin true}
+                 :2 {:porras "A"
+                     :huoneistonumero "3"
+                     :jakokirjain "a"
+                     :huoneistoTyyppi "asuinhuoneisto"
+                     :huoneistoala "38.5"
+                     :huoneluku "12"
+                     :keittionTyyppi "keittokomero"
+                     :ammeTaiSuihkuKytkin true
+                     :saunaKytkin true
+                     :lamminvesiKytkin true}})
+
+(facts "Huoneistot info for new building"
+  (let [huoneistot-data (get-huoneisto-data huoneistot "uusiRakennus")]
+
+    (fact "huoneistot lkm"
+      (get-huoneistot-lkm huoneistot-data ) => 3)
+
+    (fact "huoneistot pintaala"
+      (get-huoneistot-pintaala huoneistot-data) => 97.5)))
+
+(facts "Huoneistot info for old building"
+  (let [huoneistot-data (get-huoneisto-data huoneistot "rakennuksen-muuttaminen")]
+
+    (fact "huoneistot lkm"
+      (get-huoneistot-lkm huoneistot-data ) => 1)
+
+    (fact "huoneistot pintaala"
+      (get-huoneistot-pintaala huoneistot-data) => 56.0)))
