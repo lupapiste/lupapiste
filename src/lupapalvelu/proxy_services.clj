@@ -1,8 +1,5 @@
 (ns lupapalvelu.proxy-services
   (:require [clojure.data.zip.xml :refer :all]
-            [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.organization :as org]
-            [lupapalvelu.user :as usr]
             [taoensso.timbre :as timbre :refer [debug debugf info warn error errorf]]
             [monger.operators :refer [$exists]]
             [noir.response :as resp]
@@ -13,8 +10,12 @@
             [sade.property :as p]
             [sade.strings :as ss]
             [sade.util :as util]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.find-address :as find-address]
+            [lupapalvelu.property :as prop]
             [lupapalvelu.property-location :as plocation]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.wfs :as wfs]))
 
 (defn- trim [s]
@@ -66,11 +67,29 @@
         (resp/json (or (find-address/search normalized-term lang) [])))
       (resp/status 400 "Missing query parameters")))
 
-(defn point-by-property-id-proxy [{{property-id :property-id} :params :as request}]
+; DEPRECATED, but lets remove after production build to see if there are dependent systems
+#_(defn point-by-property-id-proxy [{{property-id :property-id} :params :as request}]
   (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id))
     (let [features (plocation/property-location-info property-id)]
       (if features
         (resp/json {:data (map #(select-keys % [:x :y]) features)})
+        (resp/status 503 "Service temporarily unavailable")))
+    (resp/status 400 "Bad Request")))
+
+(defn location-by-property-id-proxy [{{property-id :property-id} :params}]
+  (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id))
+    (let [point-features (future (plocation/property-location-info property-id))
+          location (future (prop/location-by-property-id-from-wfs property-id))
+          backup-municipality (p/municipality-id-by-property-id property-id)
+          found-points @point-features
+          result-data (merge (select-keys (first found-points) [:x :y])
+                             (or @location
+                                 {:municipality backup-municipality
+                                  :propertyId property-id
+                                  :name {:fi (i18n/localize :fi "municipality" backup-municipality)
+                                         :sv (i18n/localize :sv "municipality" backup-municipality)}}))]
+      (if (seq found-points)
+        (resp/json result-data)
         (resp/status 503 "Service temporarily unavailable")))
     (resp/status 400 "Bad Request")))
 
@@ -349,7 +368,8 @@
                "kuntawms" (cache (* 3 60 60 24) (secure #(wfs/raster-images %1 %2 org/query-organization-map-server) "wms" ))
                "wmts/maasto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
                "wmts/kiinteisto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
-               "point-by-property-id" (cache (* 60 60 8) (secure point-by-property-id-proxy))
+               ; "point-by-property-id" (cache (* 60 60 8) (secure point-by-property-id-proxy)) FIXME deprecated, remove after hotfixing
+               "location-by-property-id" (cache (* 60 60 8) (secure location-by-property-id-proxy))
                "property-id-by-point" (cache (* 60 60 8) (secure property-id-by-point-proxy))
                "address-by-point" (no-cache (secure address-by-point-proxy))
                "find-address" (no-cache (secure find-addresses-proxy))

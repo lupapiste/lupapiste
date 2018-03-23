@@ -66,22 +66,22 @@
                                   :municipality "837"}])
     (fact (-> r :data first :location keys) => (just #{:x :y}))))
 
-(facts "point-by-property-id"
+(facts "location-by-property-id"
   (against-background
     (mongo/select :propertyCache anything) => nil
     (mongo/insert-batch :propertyCache anything anything) => nil)
   (let [property-id "09100200990013"
         request {:params {:property-id property-id}}
-        response (point-by-property-id-proxy request)]
+        response (location-by-property-id-proxy request)]
     (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
-    (let [body (json/decode (:body response) true)
-          data (:data body)
-          {:keys [x y]} (first data)]
-      (fact "collection format"
-        (count data) => 1
-        (keys (first data)) => (just #{:x :y})
+    (let [{:keys [x y municipality] :as body} (json/decode (:body response) true)]
+      (fact "response is a map"
+        (map? body) => true
+        (keys body) => (contains #{:x :y :municipality})
         x => string?
         y => string?)
+      (fact "also municipality is returned"
+        municipality => "091")
       (fact "valid x" x => coord/valid-x?)
       (fact "valid y" y => coord/valid-y?))))
 
