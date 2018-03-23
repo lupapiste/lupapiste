@@ -78,10 +78,19 @@
                                    (vetuma/get-user stamp))
         not-company?             (-> user :company :role ss/blank?)]
     (cond
-      (not= (:token-type token) :change-email) (fail! :error.token-not-found)
-      (and (not hetu) not-company? (not financial-authority?)) (fail! :error.missing-person-id)
-      (and not-company? (usr/verified-person-id? user) (not= hetu vetuma-hetu)) (fail! :error.personid-mismatch)
-      (usr/email-in-use? new-email)            (fail! :error.duplicate-email))
+      (not= (:token-type token) :change-email)
+      (fail! :error.token-not-found)
+
+      (and (not hetu) not-company? (not financial-authority?))
+      (fail! :error.missing-person-id)
+
+      (and (usr/strong-authentication-required? user)
+           (usr/verified-person-id? user)
+           (not= hetu vetuma-hetu))
+      (fail! :error.personid-mismatch)
+
+      (usr/email-in-use? new-email)
+      (fail! :error.duplicate-email))
 
     (when-let [{dummy-id :id :as dummy-user} (usr/get-user-by-email new-email)]
       (when (usr/dummy? dummy-user)
