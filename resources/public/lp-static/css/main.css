@@ -36033,6 +36033,10 @@ body.authority-admin .header-menu {
   margin-left: 118px;
 }
 
+.container.container--authority-admin section {
+  margin-bottom: 24px;
+}
+
 @media (max-width: 1800px) {
   .container.container--authority-admin,
   .container.container--authority-admin.container--icon {

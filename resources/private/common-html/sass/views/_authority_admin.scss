@@ -299,6 +299,9 @@ $navi-sidebar-bp: 1800px;
   &.container--icon {
     margin-left: $sidebar-icon-width;
   }
+  section {
+    margin-bottom: $marginL;
+  }
 }
 
 .container.container--authority-admin,
