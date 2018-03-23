@@ -16,7 +16,7 @@
   (if (env/feature? :disable-ktj-on-create)
     (infof "ktj-client is disabled - not getting municipality information for %s" property-id)
     (or
-      (mongo/select-one :propertyMunicipalityCache {:propertyId property-id} [:municipality])
+      (mongo/without-mongo-meta (mongo/select-one :propertyMunicipalityCache {:propertyId property-id} [:municipality]))
       (let [start  (double (now))
             result (property-info-from-wfs property-id)]
         (debugf "Municipality for property id from KTJKii took %.3f seconds" (/ (- (now) start) 1000))
