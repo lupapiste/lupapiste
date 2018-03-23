@@ -133,11 +133,6 @@ Foreman history should have text X times
   [Arguments]  ${text}  ${times}
   Xpath Should Match X Times  //foreman-history//td[contains(., '${text}')]  ${times}
 
-Check related project
-  [Arguments]  ${foreman-app-index}
-  ${permitId} =   Get From List  ${applicationIds}  ${foreman-app-index}
-  Test id input is  'muutHankkeet.0.luvanNumero'  ${permitId}
-
 Foreman logs in
   Logout
   Teppo logs in

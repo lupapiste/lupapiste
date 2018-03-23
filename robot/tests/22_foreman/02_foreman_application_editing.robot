@@ -95,15 +95,6 @@ Sonja logs in and gets verdict for the first foreman application
   Verdict for foreman application  0
   Logout
 
-Foreman logs in and checks related projects on the second foreman application
-  Foreman logs in
-  Open foreman application  1
-  Open tab  parties
-  Scroll and click test id  fill-info-button
-  Wait for jQuery
-  Check related project  0
-  Logout
-
 #Can not link base app to foreman application
 #  Open project application
 #  Open linking dialog
