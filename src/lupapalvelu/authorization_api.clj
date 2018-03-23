@@ -68,7 +68,8 @@
   (let [email (ss/canonize-email email)
         existing-auth (auth/get-auth application (:id (user/get-user-by-email email)))
         existing-role (keyword (get-in existing-auth [:invite :role] (:role existing-auth)))
-        denied-by-company (company/company-denies-invitations? application (user/get-user-by-email email))]
+        denied-by-company (->> (get-in (user/get-user-by-email email) [:company :id])
+                               (company/company-denies-invitations? application))]
     (cond
       (#{:reader :guest} existing-role)
       (fail :invite.already-has-reader-auth :existing-role existing-role)
