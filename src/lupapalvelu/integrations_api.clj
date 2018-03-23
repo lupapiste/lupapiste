@@ -197,7 +197,7 @@
    :parameters [id lang]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles #{:authority}
-   :pre-checks [(permit/validate-permit-type-is permit/R)
+   :pre-checks [(partial permit/valid-permit-types {:R []})
                 (application-already-exported :exported-to-backing-system)
                 mapping-to-krysp/http-not-allowed]
    :states     states/post-verdict-states}

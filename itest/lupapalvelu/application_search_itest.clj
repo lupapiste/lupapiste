@@ -211,7 +211,7 @@
 
     (fact "canceled application and foreman application"
 
-      (command sonja :cancel-application-authority :id application-id :text "test" :lang "fi") => ok?
+      (command sonja :cancel-application :id application-id :text "test" :lang "fi") => ok?
 
       (let [{default-res :applications}   (datatables sonja :applications)
             {unlimited-res :applications} (datatables sonja :applications :applicationType "unlimited")

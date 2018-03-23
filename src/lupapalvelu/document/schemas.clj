@@ -598,6 +598,7 @@
                                   :approvable true
                                   :copybutton false
                                   :listen [:hetuChanged]
+                                  :whitelist {:roles [:authority] :otherwise :hidden}
                                   :body hanke-row})
 
 (def tayta-omat-tiedot-button {:name "fillMyInfo" :type :fillMyInfoButton :whitelist {:roles [:applicant] :otherwise :disabled}})

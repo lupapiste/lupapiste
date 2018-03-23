@@ -39,5 +39,5 @@
          (fact "Tabs post-verdict"
                (check-queries :tasks true :info false :summary true))
          (fact "Tabs post-verdict canceled"
-               (command sonja :cancel-application-authority :id app-id :lang "fi" :text "") => ok?
+               (command sonja :cancel-application :id app-id :lang "fi" :text "") => ok?
                (check-queries :tasks false :info false :summary true))))

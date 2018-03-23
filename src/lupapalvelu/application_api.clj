@@ -219,21 +219,18 @@
   {:parameters       [id text lang]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :contexts         [foreman/foreman-app-context]
-   :permissions      [{:required [:application/cancel-in-restricted-states]}]
-   :notified         true
-   :on-success       (notify :application-state-change)
-   :states           #{:draft :info :open :submitted}
-   :pre-checks       [(partial sm/validate-state-transition :canceled)]}
-  [command]
-  (app/cancel-application command))
+   :permissions      [{:context  {:application {:state #{:draft}}}
+                       :required [:application/edit-draft
+                                  :application/cancel-in-restricted-states]}
 
-(defcommand cancel-application-authority
-  {:parameters       [id text lang]
-   :input-validators [(partial action/non-blank-parameters [:id :lang])]
-   :permissions      [{:required [:application/cancel]}]
+                      {:context  {:application {:state #{:info :open :submitted}}}
+                       :required [:application/cancel-in-restricted-states]}
+
+                      {:context  {:application {:state states/all-but-draft}}
+                       :required [:application/cancel]}]
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           states/all-but-draft
+   :states           states/all-application-states
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
   [command]
   (app/cancel-application command))
