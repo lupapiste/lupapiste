@@ -189,7 +189,7 @@
 
 (defcontext auth-entry-context [{{auth :auth auth-restrictions :authRestrictions} :application
                                  {username :username} :data
-                                 user :user}]
+                                 {user-id :id {company-id :id} :company} :user}]
   ;; Finds requested auth-entry and authRestrictions that are applied by
   ;; corresponding user. auth-entry and restrictions are injected into
   ;; command. Permissions for :auth-owner in :authorization scope are
@@ -197,7 +197,7 @@
   (let [auth-entry (util/find-first (comp #{username} :username) auth)
         restrictions (filter (comp #{(:id auth-entry)} :id :user) auth-restrictions)]
     {:context-scope :authorization
-     :context-role  (when (= (:id user) (:id auth-entry)) :auth-owner)
+     :context-role  (when (#{user-id company-id} (:id auth-entry)) :auth-owner)
      :auth-entry    (assoc auth-entry :restrictions restrictions)}))
 
 (defcommand remove-auth
