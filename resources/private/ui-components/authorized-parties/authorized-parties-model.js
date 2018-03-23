@@ -75,6 +75,12 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     });
   };
 
+  self.isOwnAuthorization = function( authEntry ) {
+    var userId = util.getIn(lupapisteApp.models.currentUser, ["id"]);
+    var companyId = util.getIn(lupapisteApp.models.currentUser, ["company", "id"]);
+    return _.includes([userId, companyId], authEntry.id);
+  };
+
   var roleChangeMap = {"foreman":"writer", "writer":"foreman"};
 
   self.changeAuth = function(model) {
@@ -139,7 +145,9 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
   self.showRemove = function( authEntry ) {
     return hasAuth( "remove-auth") &&
       self.isNotFinancialAuthority ( authEntry ) &&
-      !self.hasAppliedRestriction( authEntry );
+      (!self.hasAppliedRestriction( authEntry ) ||
+       self.isOwnAuthorization( authEntry )  ||
+       lupapisteApp.models.currentUser.isAuthority());
   };
 
   self.showSubscriptionStatus = function( role ) {
