@@ -147,7 +147,7 @@
       (fact (:number body) => #"\d")
       (fact (:fi (:name body)) => "Tampere"))))
 
-(fact "address-by-point-proxy - municipality is retured even if no address found"
+(fact "address-by-point-proxy - municipality is returned even if no address found"
   (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
   (let [x 296734.231 ; Island in Raasepori
         y 6647154.2190031
@@ -176,6 +176,14 @@
 (facts "address-by-point - outside Finland"
   (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
   (let [x 229337
+        y 7669179
+        request {:params {:x x :y y}}
+        response (address-by-point-proxy request)]
+    response => http404?))
+
+(facts "address-by-point - invalid ETRS-TM35FIN coordinates"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
+  (let [x 9999
         y 7669179
         request {:params {:x x :y y}}
         response (address-by-point-proxy request)]
@@ -369,10 +377,10 @@
 
 (facts "municipality-by-point"
   (fact "Helsinki"
-    (municipality-by-point 386169.912 6671577.21) => "091")
+    (:municipality (prop-loc/property-info-by-point 386169.912 6671577.21)) => "091")
 
   (fact "Jalasjarvi, as of 2016 part of Kurikka and shoud return Kurikka's code"
-    (municipality-by-point 281160 6936532.8125001) => "301"))
+    (:municipality (prop-loc/property-info-by-point 281160 6936532.8125001)) => "301"))
 
 (facts "Get address from Salo"
   (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://kartta.salo.fi/teklaogcweb/wfs.ashx" :no-bbox-srs true})
@@ -385,27 +393,27 @@
       (fact (:fi (:name body)) => "Salo")
       )))
 
-(facts "Municipality number with address from kunta rest"
+(facts "Municipality number with address"
   (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
   (fact "Jarvenpaa, in border of Mantsala"
     (let [x "399309.136" y "6709508.629"
           response (address-by-point-proxy {:params {:lang "fi" :x x :y y}})
           body (json/decode (:body response) true)]
-      (fact (:street body) => "Kulmapolku")
+      (fact (:street body) => "Kulmapolku")                 ; Street data is from MML Nearestfeature
       (fact (:number body) => "35")
-      (fact (:municipality body) => "186")                  ; MML would return Mantsala's code, see below
+      (fact (:municipality body) => "186")                  ; Municipality data is from MML KTJKii (more accurate)
       (fact (:fi (:name body)) => "J\u00e4rvenp\u00e4\u00e4")
 
-      (fact "municipality from NLS address WFS is wrong"
+      (fact "only using NLS address-by-point WFS would give wrong results" ; nearestfeature is not that accurate
         (let [details (->> (wfs/address-by-point x y)
-                           first
                            (wfs/feature-to-address-details "fi"))]
           (:municipality details) => "505"
           (get-in details [:name :fi]) => "M\u00e4nts\u00e4l\u00e4")))))
 
 (facts "property-info-by-point from KTJKii"                 ; LPK-3683
   (let [jakku {:x "436885.026" :y "7242129.297"}
-        jarvenpaa {:x "399309.136" :y "6709508.629"}]
+        jarvenpaa {:x "399309.136" :y "6709508.629"}
+        raasepori-island {:x "296734.231" :y "6647154.2190031"}]
     (fact "Jakkukyla"
       (prop-loc/property-info-by-point (:x jakku) (:y jakku)) => (contains {:municipality "139",
                                                                             :name {:fi "Ii", :sv "Ii"},
@@ -413,7 +421,12 @@
     (fact "Jarvenpaa in border of Mantsala"
       (prop-loc/property-info-by-point (:x jarvenpaa) (:y jarvenpaa)) => (contains {:municipality "186"
                                                                                     :name {:fi "J\u00e4rvenp\u00e4\u00e4"
-                                                                                           :sv "Tr\u00e4sk\u00e4nda"}}))))
+                                                                                           :sv "Tr\u00e4sk\u00e4nda"}}))
+    (fact "Island inside Raasepori"
+      (prop-loc/property-info-by-point (:x raasepori-island) (:y raasepori-island)) => (contains {:municipality "710"
+                                                                                                  :propertyId "71042400010059"
+                                                                                                  :name {:fi "Raasepori"
+                                                                                                         :sv "Raseborg"}}))))
 
 (facts "Municipality info from KTJKii"
   (fact "Jakkukyla"
