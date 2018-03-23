@@ -182,6 +182,7 @@
                           :application-info-tab-visible
                           :application-summary-tab-visible
                           :application-verdict-tab-visible
+                          :application-statement-tab-visible
                           :application-handlers
                           :application-organization-archive-enabled
                           :create-application
