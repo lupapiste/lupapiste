@@ -8022,6 +8022,16 @@ div.labeled-input > label {
   display: block;
 }
 
+div.labeled-input .row {
+  display: table-row;
+}
+
+div.labeled-input .cell {
+  display: table-cell;
+  padding-right: 24px;
+  vertical-align: bottom;
+}
+
 legend {
   font-size: 21.6px;
   font-family: "Source Sans Pro", sans-serif;

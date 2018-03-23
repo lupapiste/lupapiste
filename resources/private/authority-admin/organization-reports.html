@@ -6,7 +6,6 @@
       <div class="container container--authority-admin"
            data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
         <section class="authority-admin-reports">
-          <h2 data-bind="ltext: 'auth-admin.reports'"></h2>
 
           <section>
             <h2 data-bind="ltext: 'authorityAdmin.openApplicationsReport.title'"></h2>
@@ -14,16 +13,17 @@
             <form action="/api/raw/open-applications-xlsx" method="get">
               <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
               <input type="hidden" name="lang" data-bind="value: loc.currentLanguage">
-              <button type="submit"
-                      class="primary outline">
-                <i class="lupicon-download"></i>
-                <span data-bind="ltext: 'authorityAdmin.openApplicationsReport.buttonText'"></span>
-              </button>
+              <div class="labeled-input cell">
+                <button type="submit"
+                          class="primary outline ">
+                    <i class="lupicon-download"></i>
+                    <span data-bind="ltext: 'authorityAdmin.openApplicationsReport.buttonText'"></span>
+                  </button>
+                </div>
             </form>
           </section>
 
           <section>
-            <br>
             <h2 data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.title'"></h2>
             <span data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.caption'"></span>
             <form action="/api/raw/applications-between-xlsx" method="get">
@@ -31,24 +31,27 @@
               <input type="hidden" name="lang" data-bind="value: loc.currentLanguage">
               <input type="hidden" name="startTs" data-bind="value: reportsModel.startComputed">
               <input type="hidden" name="endTs" data-bind="value: reportsModel.endComputed">
-              <div class="labeled-input">
-                <label data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.startTs'"></label>
-                <input type="text" data-bind="datepicker: reportsModel.startDate" class="dateinput">
+              <div class="labeled-input row">
+                <div class="labeled-input cell">
+                  <label data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.startTs'"></label>
+                  <input type="text" data-bind="datepicker: reportsModel.startDate" class="dateinput">
+                </div>
+                <div class="labeled-input cell">
+                  <label data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.endTs'"></label>
+                  <input type="text" data-bind="datepicker: reportsModel.endDate" class="dateinput">
+                </div>
+                <div class="labeled-input cell">
+                  <button type="submit"
+                          class="primary outline">
+                    <i class="lupicon-download"></i>
+                    <span data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.buttonText'"></span>
+                  </button>
+                </div>
               </div>
-              <div class="labeled-input">
-                <label data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.endTs'"></label>
-                <input type="text" data-bind="datepicker: reportsModel.endDate" class="dateinput">
-              </div>
-              <button type="submit"
-                      class="primary outline">
-                <i class="lupicon-download"></i>
-                <span data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.buttonText'"></span>
-              </button>
             </form>
           </section>
 
           <section>
-            <br>
             <h2 data-bind="ltext: 'authorityAdmin.partiesReports.title'"></h2>
             <span data-bind="ltext: 'authorityAdmin.partiesReports.caption'"></span>
             <form action="/api/raw/parties-between-xlsx" method="get">
@@ -56,24 +59,27 @@
               <input type="hidden" name="lang" data-bind="value: loc.currentLanguage">
               <input type="hidden" name="startTs" data-bind="value: reportsModel.partiesStartComputed">
               <input type="hidden" name="endTs" data-bind="value: reportsModel.partiesEndComputed">
-              <div class="labeled-input">
-                <label data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.startTs'"></label>
-                <input type="text" data-bind="datepicker: reportsModel.partiesStartDate" class="dateinput">
+              <div class="labeled-input row">
+                <div class="labeled-input cell">
+                  <label data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.startTs'"></label>
+                  <input type="text" data-bind="datepicker: reportsModel.partiesStartDate" class="dateinput">
+                </div>
+                <div class="labeled-input cell">
+                  <label data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.endTs'"></label>
+                  <input type="text" data-bind="datepicker: reportsModel.partiesEndDate" class="dateinput">
+                </div>
+                <div class="labeled-input cell">
+                  <button type="submit"
+                          class="primary outline">
+                    <i class="lupicon-download"></i>
+                    <span data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.buttonText'"></span>
+                  </button>
+                </div>
               </div>
-              <div class="labeled-input">
-                <label data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.endTs'"></label>
-                <input type="text" data-bind="datepicker: reportsModel.partiesEndDate" class="dateinput">
-              </div>
-              <button type="submit"
-                      class="primary outline">
-                <i class="lupicon-download"></i>
-                <span data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.buttonText'"></span>
-              </button>
             </form>
           </section>
 
           <section>
-            <br>
             <h2 data-bind="ltext: 'authorityAdmin.postVerdictReports.title'"></h2>
             <span data-bind="ltext: 'authorityAdmin.postVerdictReports.caption'"></span>
             <form action="/api/raw/post-verdict-xlsx" method="get">
@@ -81,23 +87,25 @@
               <input type="hidden" name="lang" data-bind="value: loc.currentLanguage">
               <input type="hidden" name="startTs" data-bind="value: reportsModel.verdictsStartComputed">
               <input type="hidden" name="endTs" data-bind="value: reportsModel.verdictsEndComputed">
-              <div class="labeled-input">
-                <label data-bind="ltext: 'authorityAdmin.postVerdictReports.timePeriod.startTs'"></label>
-                <input type="text" data-bind="datepicker: reportsModel.verdictsStartDate" class="dateinput">
+              <div class="labeled-input row">
+                <div class="labeled-input cell">
+                  <label data-bind="ltext: 'authorityAdmin.postVerdictReports.timePeriod.startTs'"></label>
+                  <input type="text" data-bind="datepicker: reportsModel.verdictsStartDate" class="dateinput">
+                </div>
+                <div class="labeled-input cell">
+                  <label data-bind="ltext: 'authorityAdmin.postVerdictReports.timePeriod.endTs'"></label>
+                  <input type="text" data-bind="datepicker: reportsModel.verdictsEndDate" class="dateinput">
+                </div>
+                <div class="labeled-input cell">
+                  <button type="submit"
+                          class="primary outline">
+                    <i class="lupicon-download"></i>
+                    <span data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.buttonText'"></span>
+                  </button>
+                </div>
               </div>
-              <div class="labeled-input">
-                <label data-bind="ltext: 'authorityAdmin.postVerdictReports.timePeriod.endTs'"></label>
-                <input type="text" data-bind="datepicker: reportsModel.verdictsEndDate" class="dateinput">
-              </div>
-              <button type="submit"
-                      class="primary outline">
-                <i class="lupicon-download"></i>
-                <span data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.buttonText'"></span>
-              </button>
             </form>
           </section>
-
-
 
         </section>
       </div>

@@ -476,4 +476,12 @@ div.labeled-input {
   > label {
     display: block;
   }
+  .row {
+    display: table-row;
+  }
+  .cell {
+    display: table-cell;
+    padding-right: $marginL;
+    vertical-align: bottom;
+  }
 }
