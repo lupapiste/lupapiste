@@ -821,3 +821,12 @@
   (mongo/remove-many :users
                      {:_id user-id
                       :role "dummy"}))
+
+;;
+;; ==============================================================================
+;; Strong authentication
+;; ==============================================================================
+;;
+(defn strong-authentication-required? [user]
+  (and (not (company-user? user))
+       (not (financial-authority? user))))
