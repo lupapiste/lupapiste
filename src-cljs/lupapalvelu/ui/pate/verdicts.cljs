@@ -247,8 +247,8 @@
     [:div
      (case (rum/react state/current-view)
        ::list (verdict-list @state/verdict-list @state/application-id)
-       ::verdict (let [{dictionary :dictionary :as schema} (get shared/verdict-schemas
-                                                                (shared/permit-type->category (js/lupapisteApp.models.application.permitType)))]
+       ::verdict (let [{dictionary :dictionary :as schema} (shared/verdict-schema
+                                                            (shared/permit-type->category (js/lupapisteApp.models.application.permitType)))]
                    (with-back-button (verdict (assoc (state/select-keys state/current-verdict
                                                                         [:state :info :_meta])
                                                      :schema (dissoc schema :dictionary)

@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.verdict
   (:require [clj-time.core :as time]
+            [clojure.set :as set]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
@@ -43,6 +44,31 @@
                                             "mark-done"
                                             status))})
        neighbors))
+
+(defn section-dicts
+  "Set of :dict and :repeating keys in the given
+  section. The :repeating short-circuits the traversal."
+  [section]
+  (letfn [(search-fn [x]
+            (let [dict     (:dict x)
+                  repeating (:repeating x)]
+              (cond
+                dict            dict
+                repeating       repeating
+                (map? x)        (map search-fn (vals x))
+                (sequential? x) (map search-fn x))))]
+    (->> section search-fn flatten (remove nil?) set)))
+
+(defn dict-sections
+  "Map of :dict (or :repeating) values to section ids."
+  [sections]
+  (reduce (fn [acc {id :id :as section}]
+            (reduce (fn [m dict]
+                      (update m dict #(conj (set %) (keyword id))))
+                    acc
+                    (section-dicts section)))
+          {}
+          sections))
 
 (defn data-draft
   "Kmap keys are draft targets (kw-paths). Each value is either
@@ -189,6 +215,79 @@
                          {:attachments []}))
                 snapshot)
    :references (:settings snapshot)})
+
+#_(defn sections-exclusions
+  "List of excluded dictionary keys. Calculated by the template removed
+  sections."
+  [{:keys [category published]}]
+  (let [removed            (some->> published :data :removed-sections
+                                    (map keyword)
+                                    set)
+        {:keys [template-sections
+                sections]} (shared/verdict-schema category)
+        sec-dicts          (dict-sections sections)
+        excluded-ids       (filter (util/fn->> :template-section
+                                               (contains? removed))
+                                   sections)
+        ex-dicts           (flatten
+                            (concat
+                             (reduce (fn [acc section-id]
+                                       (concat acc (section-id sec-dicts)))
+                                     []
+                                     excluded-ids)
+                             (->> template-sections
+                                  (filter (fn [[k v]] (k removed)))
+                                  (map second))))]
+    ;; If a dict is used both in a removed and non-removed section it
+    ;; is naturally not excluded.
+    (util/difference-as-kw ex-dicts
+                           (-> (apply dissoc sections excluded-ids)
+                               vals
+                               flatten))))
+
+(defn dicts->kw-paths
+  [dictionary]
+  (->> dictionary
+       (map (fn [[k v]]
+              (if-let [repeating (:repeating v)]
+                (map #(util/kw-path k %) (dicts->kw-paths repeating))
+                k)))
+       flatten))
+
+(defn inclusions
+  "List if kw-paths that denote the dicts included in the verdict. By
+  default, every dict is included, but can be excluded
+  via :template-dict and section-level :template-section
+  definitions. Note: if a :repeating is included, its every dict is
+  included."
+  [category published-template]
+  (let [removed-tem-secs   (or (some->> published-template
+                                        :data
+                                        :removed-sections
+                                        (map (fn [[k v]]
+                                               (when v
+                                                 (keyword k))))
+                                        (remove nil?)
+                                        set)
+                               #{})
+        {:keys [dictionary
+                sections]} (shared/verdict-schema category)
+        dic-sec            (dict-sections sections)
+        removed-ver-secs   (->> sections
+                                (filter #(contains? removed-tem-secs
+                                                    (:template-section %)))
+                                (map :id)
+                                set)]
+    (->> (keys dictionary)
+         (remove (fn [dict]
+                   (if-let [dict-ts (get-in dictionary
+                                            [dict :template-section])]
+                     (contains? removed-tem-secs dict-ts)
+                     (util/pcond->> (dict dic-sec)
+                                    seq (every? #(contains? removed-ver-secs
+                                                            %))))))
+         (select-keys dictionary)
+         dicts->kw-paths)))
 
 (declare enrich-verdict)
 
@@ -380,7 +479,7 @@
   template."
   [{:keys [category template references verdict-data]}]
   (let [datestring  (:verdict-date verdict-data)
-        dictionary  (-> shared/settings-schemas category :dictionary)
+        dictionary  (:dictionary (shared/settings-schema category))
         date-deltas (:date-deltas references)
         automatic?  (:automatic-verdict-dates verdict-data)]
     (when (and automatic? (ss/not-blank? datestring))
@@ -440,7 +539,7 @@
             dictionary)))
 
 (defn- verdict-schema [category template]
-  (update (category shared/verdict-schemas)
+  (update (shared/verdict-schema category)
           :dictionary
           (partial strip-exclusions (:exclusions template))))
 

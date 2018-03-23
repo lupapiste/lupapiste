@@ -639,7 +639,7 @@
   [{:keys [lang application verdict] :as data}]
   (let [buildings (verdict-buildings data)]
     (content (assoc data
-                    :dictionary (-> shared/verdict-schemas :r :dictionary)
+                    :dictionary (:dictionary (shared/verdict-schema :r))
                     :application-id (:id application)
                     :property-id (property-id application)
                     :applicants (->> (applicants data)

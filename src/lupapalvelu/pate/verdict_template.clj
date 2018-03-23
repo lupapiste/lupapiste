@@ -182,7 +182,7 @@
          :as   template}  (verdict-template organization template-id)
         {:keys [path value op]
          :as   processed} (schemas/validate-and-process-value
-                           (shared/default-verdict-template (keyword category))
+                           (shared/verdict-template-schema category)
                            path
                            value
                            draft
@@ -279,13 +279,10 @@
        (ss/join ".")
        keyword))
 
-(defn- settings-schema [category]
-  (get shared/settings-schemas (keyword category)))
-
 (defn save-settings-value [organization category timestamp path value]
   (let [settings-key    (settings-key category)
         {:keys [path value]
-         :as   processed} (schemas/validate-and-process-value (settings-schema category)
+         :as   processed} (schemas/validate-and-process-value (shared/settings-schema category)
                                                               path
                                                               value
                                                               (:draft (settings organization
@@ -303,7 +300,7 @@
 (defn settings-filled?
   "Settings are filled properly if every requireid field has been filled."
   [{org-id :org-id ready :settings data :data} category]
-  (schemas/required-filled? (settings-schema category)
+  (schemas/required-filled? (shared/settings-schema category)
                             (or data
                                 (:draft (or ready
                                             (settings (organization-templates org-id)
@@ -316,12 +313,12 @@
                      (:category template)
                      (if (some? org-id) (:category (verdict-template (organization-templates org-id) template-id)))
                      (str "r"))]
-      (schemas/required-filled? (shared/default-verdict-template (keyword category))
-                                (or data
-                                    (:draft (or template
-                                                (verdict-template (organization-templates
-                                                                    org-id)
-                                                                  template-id)))))))
+    (schemas/required-filled? (shared/verdict-template-schema category)
+                              (or data
+                                  (:draft (or template
+                                              (verdict-template (organization-templates
+                                                                 org-id)
+                                                                template-id)))))))
 
 ;; Generic is a placeholder term that means either review or plan
 ;; depending on the context. Namely, the subcollection argument in

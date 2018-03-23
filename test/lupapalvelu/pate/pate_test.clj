@@ -66,10 +66,9 @@
                 :add-item    {:button {:add :dynamic}}
                 :attachments {:application-attachments {}}
                 :toggle      {:toggle {}}
-                :select      {:select {:items [:one :two :three]}}
-                }
+                :select      {:select {:items [:one :two :three]}}}
    :name       "test"
-   :sections   [{:id   "one"
+   :sections   [{:id   :one
                  :grid {:columns 4
                         :rows    [[{:col  2
                                     :dict :check}]
@@ -77,7 +76,7 @@
                                    :row [{:col  2
                                           :dict :delta}
                                          {:dict :phrase}]}]}}
-                {:id   "two"
+                {:id   :two
                  :grid {:columns 2
                         :rows    [[{}
                                    {:dict :multi}]
@@ -86,7 +85,7 @@
                                           {:items [{:dict :string}
                                                    {:dict :delta2}
                                                    {:dict :ref}]}}]}]}}
-                {:id   "three"
+                {:id   :three
                  :grid {:columns 5
                         :rows    [{:id  "docgen"
                                    :row [{:dict :text}
@@ -94,7 +93,7 @@
                                          {:dict :radio}
                                          {:dict :date}
                                          {:dict :complexity}]}]}}
-                {:id   "repeat"
+                {:id   :repeat
                  :grid {:columns 1
                         :rows    [[{:grid {:columns   3
                                            :repeating :loop
@@ -103,14 +102,14 @@
                                                         {:grid {:columns   1
                                                                 :repeating :inner-loop
                                                                 :rows      [[{:dict :date}]]}}]]}}]]}}
-                {:id   "dynamic"
+                {:id   :dynamic
                  :grid {:columns 1
                         :rows    [[{:grid {:columns   2
                                            :repeating :dynamic
                                            :rows      [[{:dict :text}
                                                         {:dict :remove-item}]]}}]
                                   [{:dict :add-item}]]}}
-                {:id   "attachments"
+                {:id   :attachments
                  :grid {:columns 1
                         :rows    [[{:dict :attachments}]]}}]})
 
