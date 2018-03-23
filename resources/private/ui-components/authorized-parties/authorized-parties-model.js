@@ -78,7 +78,7 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
   self.isOwnAuthorization = function( authEntry ) {
     var userId = util.getIn(lupapisteApp.models.currentUser, ["id"]);
     var companyId = util.getIn(lupapisteApp.models.currentUser, ["company", "id"]);
-    return _.includes([userId, companyId], authEntry.id);
+    return _.includes([userId, companyId], util.getIn(authEntry, ["id"]));
   };
 
   var roleChangeMap = {"foreman":"writer", "writer":"foreman"};
