@@ -25,26 +25,18 @@ LUPAPISTE.CreateApplicationLocationModel = function(options) {
     write: self.propertyId
   });
 
-  var municipalityByPropertyId = ko.observable();
   ko.computed(function() {
     if (self.locationServiceUnavailable() && self.propertyIdOk()) {
       ajax.query("municipality-for-property", {propertyId: util.prop.toDbFormat(self.propertyId())})
+        .processing(self.processing)
         .success(function(resp) {
-          municipalityByPropertyId(resp.municipality);
+          self.municipalityCode(resp.municipality);
         }).call();
-    } else {
-      municipalityByPropertyId(null);
     }
   }).extend({ throttle: 200 });
 
-  self.propertyInMunicipality = ko.computed(function() {
-    return !self.locationServiceUnavailable() || municipalityByPropertyId() && self.municipalityCode() === municipalityByPropertyId();
-  });
-
-  self.propertyIdError = ko.computed(function() {
-    if (municipalityByPropertyId() && !self.propertyInMunicipality()) {
-      return loc("error.propertyId.municipality-mismatch");
-    }
+  self.propertyIdNotOk = ko.pureComputed(function() { // show warning when something is inputted, blank is ok
+    return !(_.isBlank(self.propertyId()) || self.propertyIdOk());
   });
 
   //
@@ -54,7 +46,7 @@ LUPAPISTE.CreateApplicationLocationModel = function(options) {
   self.searchPoint = function(value, searchingListener) {
     if (!_.isEmpty(value)) {
       self.reset();
-      return util.prop.isPropertyId(value) ? self._searchPointByPropertyId(value, searchingListener) : self._searchPointByAddress(value, searchingListener);
+      return util.prop.isPropertyId(value) ? self._searchLocationByPropertyId(value, searchingListener) : self._searchPointByAddress(value, searchingListener);
     }
     return self;
   };
@@ -66,28 +58,32 @@ LUPAPISTE.CreateApplicationLocationModel = function(options) {
   self._searchPointByAddress = function(address, searchingListener) {
     locationSearch.pointByAddress(self.requestContext, address, function(result) {
         if (result.data && result.data.length > 0) {
+          self.locationServiceUnavailable(false);
           var data = result.data[0],
               x = data.location.x,
               y = data.location.y;
           self
             .setXY(x,y).center(13)
+            .municipalityCode(data.municipality || "")
             .setAddress(data)
             .beginUpdateRequest()
-            .searchPropertyId(x, y);
+            .searchPropertyId(x, y); // we could use searchPropertyInfo here, but it seems property-id-by-point has slightly faster response times.
         }
       }, self.onError, searchingListener);
     return self;
   };
 
-  self._searchPointByPropertyId = function(id, searchingListener) {
-    locationSearch.pointByPropertyId(self.requestContext, id, function(result) {
-        if (result.data && result.data.length > 0) {
-          var data = result.data[0],
-              x = data.x,
-              y = data.y;
+  self._searchLocationByPropertyId = function(id, searchingListener) {
+    locationSearch.locationByPropertyId(self.requestContext, id, function(result) {
+        if (result.x && result.municipality) {
+          self.locationServiceUnavailable(false);
+          var municipality = result.municipality,
+              x = result.x,
+              y = result.y;
           self
             .setXY(x,y).center(14)
             .propertyId(util.prop.toDbFormat(id))
+            .municipalityCode(municipality)
             .beginUpdateRequest()
             .searchAddress(x, y);
         }

@@ -12,9 +12,9 @@ var locationSearch = (function() {
       .call();
   };
 
-  var searchPointByPropertyId = function(requestContext, propertyId, onSuccess, onFail, processing) {
+  var searchLocationByPropertyId = function(requestContext, propertyId, onSuccess, onFail, processing) {
     return ajax
-      .get("/proxy/point-by-property-id")
+      .get("/proxy/location-by-property-id")
       .param("property-id", util.prop.toDbFormat(propertyId))
       .processing(processing || _.noop)
       .success(requestContext.onResponse(onSuccess))
@@ -26,6 +26,18 @@ var locationSearch = (function() {
     if (x > 0 && y > 0 ) {
       return ajax
         .get("/proxy/property-id-by-point")
+        .param("x", x).param("y", y)
+        .processing(processing || _.noop)
+        .success(requestContext.onResponse(onSuccess))
+        .fail(requestContext.onResponse(onFail))
+        .call();
+    }
+  };
+  // returns also municipality data, compared to searchPropertyId
+  var searchPropertyInfo = function(requestContext, x, y, onSuccess, onFail, processing) {
+    if (x > 0 && y > 0 ) {
+      return ajax
+        .get("/proxy/property-info-by-point")
         .param("x", x).param("y", y)
         .processing(processing || _.noop)
         .success(requestContext.onResponse(onSuccess))
@@ -69,8 +81,9 @@ var locationSearch = (function() {
 
   return {
     pointByAddress: searchPointByAddress,
-    pointByPropertyId: searchPointByPropertyId,
+    locationByPropertyId: searchLocationByPropertyId,
     propertyIdByPoint: searchPropertyId,
+    propertyInfoByPoint: searchPropertyInfo,
     propertyIdsByWKT: searchPropertyIdByWKT,
     addressByPoint: searchAddress,
     ownersByPropertyIds: searchOwnersByPropertyIds

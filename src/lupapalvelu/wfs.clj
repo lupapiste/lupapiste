@@ -446,7 +446,8 @@
 ;;
 
 (defn address-by-point [x y]
-  (exec :get nearestfeature {:NAMESPACE "xmlns(oso=http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02)"
+  (first                                                    ; MAXFEATURES 1
+    (exec :get nearestfeature {:NAMESPACE "xmlns(oso=http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02)"
                              :TYPENAME "oso:Osoitepiste"
                              :REQUEST "GetFeature"
                              :SERVICE "WFS"
@@ -454,12 +455,10 @@
                              :COORDS (str x "," y ",EPSG:3067")
                              :SRSNAME "EPSG:3067"
                              :MAXFEATURES "1"
-                             :BUFFER "500"}))
+                             :BUFFER "500"})))
 
-(defn address-by-point-from-municipality [x y {:keys [url credentials no-bbox-srs]}]
-  (let [x_d (util/->double x)
-        y_d (util/->double y)
-        radii [25 50 100 250 500 1000]]
+(defn address-by-point-from-municipality [x_d y_d {:keys [url credentials no-bbox-srs]}]
+  (let [radii [25 50 100 250 500 1000]]
     (some identity
       ; Searching by point is not directly supported.
       ; Try searching with increasing radius.
@@ -479,7 +478,7 @@
         (if (not-empty results)
           results
           (warnf "No results for x/y %s/%s within radius of %d. %s (bbox=%s)"
-            x y radius (if (= radius (last radii)) "Giving up!" "Increasing radius...") bbox))))))
+            x_d y_d radius (if (= radius (last radii)) "Giving up!" "Increasing radius...") bbox))))))
 
 (defn property-id-by-point [x y]
   (post ktjkii
