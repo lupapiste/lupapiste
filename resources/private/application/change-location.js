@@ -59,7 +59,7 @@ LUPAPISTE.ChangeLocationModel = function() {
       if (!self.propertyIdAutoUpdated && util.prop.isPropertyId(id)) {
         // Id changed from human format to valid human format:
         // Turing test passed, search for new location
-        self.beginUpdateRequest().searchPointByPropertyId(id);
+        self.beginUpdateRequest().searchLocationByPropertyId(id);
       }
       self.propertyIdAutoUpdated = false;
       self.propertyIdValidated(false);
@@ -104,10 +104,10 @@ LUPAPISTE.ChangeLocationModel = function() {
 
   // Service functions
 
-  self.searchPointByPropertyId = function(propertyId) {
-    locationSearch.pointByPropertyId(self.requestContext, propertyId, function(result) {
-        if (result.data && result.data.length > 0) {
-          self.setXY(result.data[0].x, result.data[0].y);
+  self.searchLocationByPropertyId = function(propertyId) {
+    locationSearch.locationByPropertyId(self.requestContext, propertyId, function(result) {
+        if (result.x && result.y) {
+          self.setXY(result.x, result.y);
           self.center();
           self.propertyIdValidated(true);
         } else {

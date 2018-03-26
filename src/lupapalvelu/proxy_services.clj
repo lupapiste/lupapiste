@@ -1,20 +1,21 @@
 (ns lupapalvelu.proxy-services
   (:require [clojure.data.zip.xml :refer :all]
-            [clojure.xml :as xml]
-            [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.organization :as org]
-            [lupapalvelu.user :as user]
             [taoensso.timbre :as timbre :refer [debug debugf info warn error errorf]]
             [monger.operators :refer [$exists]]
             [noir.response :as resp]
+            [sade.core :refer :all]
             [sade.coordinate :as coord]
             [sade.env :as env]
             [sade.http :as http]
             [sade.property :as p]
             [sade.strings :as ss]
             [sade.util :as util]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.find-address :as find-address]
+            [lupapalvelu.property :as prop]
             [lupapalvelu.property-location :as plocation]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.wfs :as wfs]))
 
 (defn- trim [s]
@@ -62,15 +63,33 @@
 
 (defn find-addresses-proxy [{{:keys [term lang]} :params}]
     (if (and (string? term) (string? lang) (not (ss/blank? term)))
-      (let [normalized-term (ss/replace term #"\p{Punct}" " ")]
+      (let [normalized-term (ss/replace term #"\p{Punct}&&[-]" " ")]
         (resp/json (or (find-address/search normalized-term lang) [])))
       (resp/status 400 "Missing query parameters")))
 
-(defn point-by-property-id-proxy [{{property-id :property-id} :params :as request}]
+; DEPRECATED, but lets remove after production build to see if there are dependent systems
+#_(defn point-by-property-id-proxy [{{property-id :property-id} :params :as request}]
   (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id))
     (let [features (plocation/property-location-info property-id)]
       (if features
         (resp/json {:data (map #(select-keys % [:x :y]) features)})
+        (resp/status 503 "Service temporarily unavailable")))
+    (resp/status 400 "Bad Request")))
+
+(defn location-by-property-id-proxy [{{property-id :property-id} :params}]
+  (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id))
+    (let [point-features (future (plocation/property-location-info property-id))
+          location (future (prop/location-by-property-id-from-wfs property-id))
+          backup-municipality (p/municipality-id-by-property-id property-id)
+          found-points @point-features
+          result-data (merge (select-keys (first found-points) [:x :y])
+                             (or @location
+                                 {:municipality backup-municipality
+                                  :propertyId property-id
+                                  :name {:fi (i18n/localize :fi "municipality" backup-municipality)
+                                         :sv (i18n/localize :sv "municipality" backup-municipality)}}))]
+      (if (seq found-points)
+        (resp/json result-data)
         (resp/status 503 "Service temporarily unavailable")))
     (resp/status 400 "Bad Request")))
 
@@ -82,38 +101,25 @@
         (resp/status 503 "Service temporarily unavailable")))
     (resp/status 400 "Bad Request")))
 
-(defn municipality-by-point
-  "Requests municipality number for given point from geoserver REST endpoint"
-  [x y]
-  (let [url (str (or (env/value :geoserver :host :old) (env/value :geoserver :host)) (env/value :geoserver :kunta))
-        query {:query-params {:x x, :y y}
-               :conn-timeout 10000, :socket-timeout 10000
-               :as :json}]
-    (try
-      (when-let [municipality (get-in (http/get url query) [:body :kuntanumero])]
-        (ss/zero-pad 3 municipality))
-      (catch Exception e
-        (error e (str "Unable to resolve municipality by " x \/ y))))))
+(defn property-info-by-point-proxy [{{x :x y :y} :params}]
+  (if (and (coord/valid-x? x) (coord/valid-y? y))
+    (if-let [info (plocation/property-info-by-point x y)]
+      (resp/json info)
+      (resp/status 503 "Service temporarily unavailable"))
+    (resp/status 400 "Bad Request")))
 
-(defn- respond-nls-address
-  "Given municipality code defines the municipality and is returned, other address details are returned from NLS feature."
-  [features x y lang municipality-code]
-  (cond
-    (seq features) (-> (wfs/feature-to-address-details (or lang "fi") (first features))
-                       (util/assoc-when :municipality municipality-code)
-                       (update :name util/assoc-when
-                               :fi (i18n/localize :fi :municipality municipality-code)
-                               :sv (i18n/localize :sv :municipality municipality-code))
-                       (resp/json))
-    ; Fallback: return only the municipality if code is given
-    (not (nil? municipality-code)) (resp/json {:street ""
-                                               :number ""
-                                               :municipality municipality-code
-                                               :x (util/->double x)
-                                               :y (util/->double y)
-                                               :name {:fi (i18n/localize :fi :municipality municipality-code)
-                                                      :sv (i18n/localize :sv :municipality municipality-code)}})
-    :else (resp/status 400 "Bad Request")))
+(defn address-from-nls
+  "Feature is from NLS nearestfeature. Try to parse address from feature.
+   If no address available, address details are returned as empty strings.
+   Municipality and propertyId are returned from property-info."
+  [feature lang x_d y_d property-info]
+  (if-let [address (wfs/feature-to-address-details (or lang "fi") feature)]
+    (merge (select-keys address [:street :number])
+           (select-keys property-info [:municipality :name :propertyId])
+           {:x x_d :y y_d})
+    (merge                                                  ; fallback with default data
+      (select-keys property-info [:municipality :name :propertyId])
+      {:street "" :number "" :x x_d :y y_d})))
 
 (defn- distance [^double x1 ^double y1 ^double x2 ^double y2]
   {:pre [(and x1 x2 y1 y2)]}
@@ -121,27 +127,29 @@
 
 (defn address-by-point-proxy [{{:keys [x y lang]} :params}]
   (if (and (coord/valid-x? x) (coord/valid-y? y))
-    (let [nls-address-query  (future (wfs/address-by-point x y))
-          municipality (municipality-by-point x y)
-          x_d (util/->double x)
-          y_d (util/->double y)]
-      (if-let [endpoint (org/municipality-address-endpoint municipality)]
-        (if-let [address-from-muni (->> (wfs/address-by-point-from-municipality x y endpoint)
-                                     (map (partial wfs/krysp-to-address-details (or lang "fi")))
-                                     (remove (fn [addr] (= {:x 0 :y 0} (select-keys addr [:x :y]))))
-                                     (map (fn [{x2 :x y2 :y :as f}]
-                                            (assoc f :distance (distance x_d y_d x2 y2)
-                                                     :name {:fi (i18n/localize :fi :municipality municipality)
-                                                            :sv (i18n/localize :sv :municipality municipality)})))
-                                     (sort-by :distance)
-                                     first)]
-          (do
-            (future-cancel nls-address-query)
-            (resp/json address-from-muni))
-          (do
-            (errorf "error.integration - Fallback to NSL address data - no addresses found from %s by x/y %s/%s" (i18n/localize :fi :municipality municipality) x y)
-            (respond-nls-address @nls-address-query x y lang municipality)))
-        (respond-nls-address @nls-address-query x y lang municipality)))
+    (if-let [property (plocation/property-info-by-point x y)]
+      (let [municipality (:municipality property)
+            nls-address-query (future (wfs/address-by-point x y))
+            x_d (util/->double x)
+            y_d (util/->double y)]
+        (if-let [endpoint (org/municipality-address-endpoint municipality)]
+          (if-let [address-from-muni (->> (wfs/address-by-point-from-municipality x_d y_d endpoint)
+                                          (map (partial wfs/krysp-to-address-details (or lang "fi")))
+                                          (remove (fn [addr] (= {:x 0 :y 0} (select-keys addr [:x :y]))))
+                                          (map (fn [{x2 :x y2 :y :as f}]
+                                                 (assoc f :distance (distance x_d y_d x2 y2)
+                                                          :name {:fi (i18n/localize :fi :municipality municipality)
+                                                                 :sv (i18n/localize :sv :municipality municipality)})))
+                                          (sort-by :distance)
+                                          first)]
+            (do
+              (future-cancel nls-address-query)
+              (resp/json address-from-muni))
+            (do
+              (errorf "error.integration - Fallback to NSL address data - no addresses found from %s by x/y %s/%s" (i18n/localize :fi :municipality municipality) x y)
+              (resp/json (address-from-nls @nls-address-query lang x_d y_d property))))
+          (resp/json (address-from-nls @nls-address-query lang x_d y_d property))))
+      (resp/status 404 (fail :error.property-not-found)))
     (resp/status 400 "Bad Request")))
 
 (def wdk-type-pattern #"^POINT|^LINESTRING|^POLYGON")
@@ -313,7 +321,7 @@
 
 (defn organization-map-server
   [request]
-  (if-let [org-id (user/authority-admins-organization-id (user/current-user request))]
+  (if-let [org-id (usr/authority-admins-organization-id (usr/current-user request))]
     (if-let [response (org/query-organization-map-server org-id (:params request) (:headers request))]
       (update response :headers select-keys ["Content-Type" "Cache-Control" "Pragma" "Date"])
       (resp/status 503 "Service temporarily unavailable"))
@@ -367,8 +375,10 @@
                "kuntawms" (cache (* 3 60 60 24) (secure #(wfs/raster-images %1 %2 org/query-organization-map-server) "wms" ))
                "wmts/maasto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
                "wmts/kiinteisto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
-               "point-by-property-id" (cache (* 60 60 8) (secure point-by-property-id-proxy))
+               ; "point-by-property-id" (cache (* 60 60 8) (secure point-by-property-id-proxy)) FIXME deprecated, remove after hotfixing
+               "location-by-property-id" (cache (* 60 60 8) (secure location-by-property-id-proxy))
                "property-id-by-point" (cache (* 60 60 8) (secure property-id-by-point-proxy))
+               "property-info-by-point" (cache (* 60 60 8) (secure property-info-by-point-proxy))
                "address-by-point" (no-cache (secure address-by-point-proxy))
                "find-address" (no-cache (secure find-addresses-proxy))
                "get-address" (no-cache (secure get-addresses-proxy))

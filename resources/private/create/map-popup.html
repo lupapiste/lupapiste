@@ -12,11 +12,11 @@
            <label class="form-label" data-bind="ltext: 'newRequest.propertyId'"></label>
            <img alt="" src="/lp-static/img/ajax-loader-16.gif" data-bind="visible: processing">
            <input data-bind="textInput: propertyIdForCreateApplication,
-                             css: {'warn': propertyIdError},
+                             css: {'warn': propertyIdNotOk},
                              attr: { 'readonly': !locationServiceUnavailable() }"
                   data-test-id="create-property-id" type="text"
                   class="form-input text bottom-marginM">
-           <p class="warning-message", data-bind="visible: propertyIdError, text: propertyIdError"></p>
+           <p class="warning-message", data-bind="visible: propertyIdNotOk, ltext: 'error.invalid-property-id'"></p>
          </div>
 
          <div class="form-entry">
@@ -44,7 +44,7 @@
                data-bind="ltext: 'municipality.unknown'">
             </p>
           </div>
-         <button data-bind="enable: addressOk() && propertyIdOk() && municipalitySupported() && propertyInMunicipality(), click: proceed"
+         <button data-bind="enable: addressOk() && propertyIdOk() && municipalitySupported(), click: proceed"
                  class="positive"
                  data-test-id="create-continue" id="create-location-continue">
            <span data-bind="ltext: 'continue'"></span>
