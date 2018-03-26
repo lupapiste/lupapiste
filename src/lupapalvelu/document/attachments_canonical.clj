@@ -61,15 +61,15 @@
 
 
 (defn- get-Liite [title link attachment type file-id filename & [meta building-ids]]
-  {:kuvaus title
-   :linkkiliitteeseen link
-   :muokkausHetki (util/to-xml-datetime (:modified attachment))
-   :versionumero 1
-   :tyyppi type
-   :metatietotieto meta
+  {:kuvaus              title
+   :linkkiliitteeseen   link
+   :muokkausHetki       (util/to-xml-datetime (or (:modified attachment) (:created attachment)))
+   :versionumero        1
+   :tyyppi              type
+   :metatietotieto      meta
    :rakennustunnustieto building-ids
-   :fileId file-id
-   :filename filename})
+   :fileId              file-id
+   :filename            filename})
 
 
 (defn- get-attachment-building-ids [attachment application]
@@ -170,3 +170,14 @@
                                 {(keyword id) (for [attachment ((keyword id) statement-attachments-by-id)]
                                                 (get-liite-for-lausunto attachment application begin-of-link))})]
     (not-empty canonical-attachments)))
+
+(defn verdict-attachment-canonical [lang verdict begin-of-link]
+  (let [attachment (:verdict-attachment verdict)
+        type-id (name (get-in attachment [:type :type-id]))
+        type-group (name (get-in attachment [:type :type-group]))
+        attachment-title (i18n/localize lang (ss/join "." ["attachmentType" type-group type-id]))
+        use-http-links? (re-matches #"https?://.*" begin-of-link)
+        link (str begin-of-link (if use-http-links? (attachment-url attachment) (:filename attachment)))
+        file-id (:fileId attachment)
+        file-name (:filename attachment)]
+    (get-Liite attachment-title link attachment type-id file-id file-name)))
