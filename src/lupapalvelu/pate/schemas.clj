@@ -383,3 +383,28 @@
                    :multi-select (not-empty (k data))
                    :reference    true ;; Required only for highlighting purposes
                    (ss/not-blank? (k data)))))))
+
+(defn section-dicts
+  "Set of :dict and :repeating keys in the given
+  section. The :repeating short-circuits the traversal."
+  [section]
+  (letfn [(search-fn [x]
+            (let [dict     (:dict x)
+                  repeating (:repeating x)]
+              (cond
+                dict            dict
+                repeating       repeating
+                (map? x)        (map search-fn (vals x))
+                (sequential? x) (map search-fn x))))]
+    (->> section search-fn flatten (remove nil?) set)))
+
+(defn dict-sections
+  "Map of :dict (or :repeating) values to section ids."
+  [sections]
+  (reduce (fn [acc {id :id :as section}]
+            (reduce (fn [m dict]
+                      (update m dict #(conj (set %) (keyword id))))
+                    acc
+                    (section-dicts section)))
+          {}
+          sections))

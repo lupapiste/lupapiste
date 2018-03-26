@@ -1,9 +1,10 @@
 (ns lupapalvelu.pate.verdict-test
   (:require [clj-time.coerce :as time-coerce]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict :refer :all]
-            [lupapalvelu.mongo :as mongo]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.util :as util]
@@ -177,21 +178,21 @@
 
 (facts "section-dicts"
   (fact "Verdict sections"
-    (section-dicts (-> test-verdict :sections first))
+    (schemas/section-dicts (-> test-verdict :sections first))
     => #{:one}
-    (section-dicts (-> test-verdict :sections second))
+    (schemas/section-dicts (-> test-verdict :sections second))
     => #{:three :four}
-    (section-dicts (-> test-verdict :sections (nth 2)))
+    (schemas/section-dicts (-> test-verdict :sections (nth 2)))
     => #{:two :three :five}
-    (section-dicts (-> test-verdict :sections last))
+    (schemas/section-dicts (-> test-verdict :sections last))
     => #{:seven})
   (fact "Verdict tmeplate section"
-    (section-dicts (-> mock-template :sections first))
+    (schemas/section-dicts (-> mock-template :sections first))
     => #{:t-two :t-three}))
 
 (facts "dict-sections"
   (fact "Verdict"
-    (dict-sections (:sections test-verdict))
+    (schemas/dict-sections (:sections test-verdict))
     => {:one   #{:first}
         :two   #{:third}
         :three #{:second :third}
@@ -199,7 +200,7 @@
         :five  #{:third}
         :seven #{:fourth}})
   (fact "Template"
-    (dict-sections (:sections mock-template))
+    (schemas/dict-sections (:sections mock-template))
     => {:t-two   #{:t-first}
         :t-three #{:t-first}}))
 

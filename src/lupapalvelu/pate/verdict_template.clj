@@ -217,19 +217,25 @@
                                        (map :id)
                                        (util/intersection-as-kw ids)))))
 
-(defn- transform-conditions
-  "Transform conditions from map of maps to sequence of strings. If
-  conditions section is removed or transformation result is empty,
-  conditions are removed from draft. Returns draft."
-  [{:keys [conditions removed-sections] :as draft}]
-  (let [transformed (some->> conditions
-                                vals
-                                (map :condition)
-                                (remove ss/blank?))]
-    (if (and (-> removed-sections :conditions not)
-             transformed)
-      (assoc draft :conditions transformed)
-      (dissoc draft :conditions))))
+(defn- draft-for-publishing
+  "Extracts template draft data for publishing. Keys with empty values
+  are omitted. However, removed-sections do not affect the data
+  selection, since the verdicts may handler removed-sections
+  differently (e.g., foremen and reviews). Transforms :repeating in
+  template draft from map of maps to sequence of maps."
+  [{:keys [category draft]}]
+  (let [{:keys [dictionary]} (shared/verdict-template-schema category)]
+
+    (reduce (fn [acc dict]
+              (if-let [value (dict draft)]
+                (assoc acc
+                       dict
+                       (if (-> dictionary dict :repeating)
+                         (vals value)
+                         value))
+                acc))
+            {}
+            (keys dictionary))))
 
 (defn publish-verdict-template [organization template-id timestamp]
   (let [{:keys [draft category]
@@ -242,10 +248,9 @@
                      template-id
                      {$set {:verdict-templates.templates.$.published
                             {:published timestamp
-                             :data      (->> draft
+                             :data      (->> (draft-for-publishing template)
                                              (prune-template-data settings :reviews)
-                                             (prune-template-data settings :plans)
-                                             transform-conditions)
+                                             (prune-template-data settings :plans))
                              :settings  settings}}})))
 
 (defn set-name [organization template-id timestamp name]

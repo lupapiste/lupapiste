@@ -45,31 +45,6 @@
                                             status))})
        neighbors))
 
-(defn section-dicts
-  "Set of :dict and :repeating keys in the given
-  section. The :repeating short-circuits the traversal."
-  [section]
-  (letfn [(search-fn [x]
-            (let [dict     (:dict x)
-                  repeating (:repeating x)]
-              (cond
-                dict            dict
-                repeating       repeating
-                (map? x)        (map search-fn (vals x))
-                (sequential? x) (map search-fn x))))]
-    (->> section search-fn flatten (remove nil?) set)))
-
-(defn dict-sections
-  "Map of :dict (or :repeating) values to section ids."
-  [sections]
-  (reduce (fn [acc {id :id :as section}]
-            (reduce (fn [m dict]
-                      (update m dict #(conj (set %) (keyword id))))
-                    acc
-                    (section-dicts section)))
-          {}
-          sections))
-
 (defn data-draft
   "Kmap keys are draft targets (kw-paths). Each value is either
 
@@ -126,6 +101,12 @@
                    lastName]} (util/find-first :general handlers)]
     (str firstName " " lastName)
     ""))
+
+(defn- application-deviations [application]
+  (-> (domain/get-document-by-name application
+                                   "hankkeen-kuvaus")
+      :data :poikkeamat :value
+      (or "")))
 
 (defmethod initial-draft :r
   [{snapshot :published} application]
@@ -216,35 +197,6 @@
                 snapshot)
    :references (:settings snapshot)})
 
-#_(defn sections-exclusions
-  "List of excluded dictionary keys. Calculated by the template removed
-  sections."
-  [{:keys [category published]}]
-  (let [removed            (some->> published :data :removed-sections
-                                    (map keyword)
-                                    set)
-        {:keys [template-sections
-                sections]} (shared/verdict-schema category)
-        sec-dicts          (dict-sections sections)
-        excluded-ids       (filter (util/fn->> :template-section
-                                               (contains? removed))
-                                   sections)
-        ex-dicts           (flatten
-                            (concat
-                             (reduce (fn [acc section-id]
-                                       (concat acc (section-id sec-dicts)))
-                                     []
-                                     excluded-ids)
-                             (->> template-sections
-                                  (filter (fn [[k v]] (k removed)))
-                                  (map second))))]
-    ;; If a dict is used both in a removed and non-removed section it
-    ;; is naturally not excluded.
-    (util/difference-as-kw ex-dicts
-                           (-> (apply dissoc sections excluded-ids)
-                               vals
-                               flatten))))
-
 (defn dicts->kw-paths
   [dictionary]
   (->> dictionary
@@ -254,6 +206,19 @@
                 k)))
        flatten))
 
+(defn published-template-removed-sections
+  "Set of removed section ids from a published template."
+  [template]
+  (or (some->> template
+               :data
+               :removed-sections
+               (map (fn [[k v]]
+                      (when v
+                        (keyword k))))
+               (remove nil?)
+               set)
+      #{}))
+
 (defn inclusions
   "List if kw-paths that denote the dicts included in the verdict. By
   default, every dict is included, but can be excluded
@@ -261,18 +226,10 @@
   definitions. Note: if a :repeating is included, its every dict is
   included."
   [category published-template]
-  (let [removed-tem-secs   (or (some->> published-template
-                                        :data
-                                        :removed-sections
-                                        (map (fn [[k v]]
-                                               (when v
-                                                 (keyword k))))
-                                        (remove nil?)
-                                        set)
-                               #{})
+  (let [removed-tem-secs   (published-template-removed-sections published-template)
         {:keys [dictionary
                 sections]} (shared/verdict-schema category)
-        dic-sec            (dict-sections sections)
+        dic-sec            (schemas/dict-sections sections)
         removed-ver-secs   (->> sections
                                 (filter #(contains? removed-tem-secs
                                                     (:template-section %)))
@@ -427,10 +384,13 @@
 ;; template:    Published template for the verdict
 ;; application: Application
 ;; draft:       Default draft:
-                                      ;
+;;
 ;;              template:   Template part of the verdict data. The map
 ;;                          should contain at least inclusions.
-;;              data:       Initialized verdict data
+;;
+;;              data: Initialized verdict data (from
+;;                    default-verdict-drat).
+;;
 ;;              references: References for the data (default is
 ;;                          published settings)
 ;;
@@ -439,7 +399,22 @@
 
 (defmethod initialize-verdict-draft :r
   [{:keys [template application draft]}]
-  )
+  (let [removed  (template-removed-sections (:published template))
+        removed? #(contains? removed %)]
+    (-> draft
+        (update :data (fn [data]
+                        (assoc data
+                               :foremen-included (not (removed? :foremen))
+                               :reviews-included (not (removed? :reviews))
+                               :plans-included (not (removed? :plans))
+                               :handler (general-handler application)
+                               :deviations (application-deviations application))))
+        (update-in [:template :inclusions] (fn [incs]
+                                             (->> template :published :data
+                                                  :verdict-dates
+                                                  (concat incs)
+                                                  (remove nil?)
+                                                  distinct))))))
 
 (defn new-verdict-draft [template-id {:keys [application organization created]
                                       :as   command}]
