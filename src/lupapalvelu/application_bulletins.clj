@@ -61,19 +61,33 @@
        (not (app/designer-app? application))))
 
 ;; Query/Projection fields
+(defn- ts-as-date [ts]
+  (-> ts tc/from-long t/with-time-at-start-of-day tc/to-long))
 
 (defn versions-elemMatch
   ([now-ts]
    (versions-elemMatch now-ts (tc/to-long (t/minus (tc/from-long now-ts) (t/days 14)))))
   ([now-ts officialAt-lowerLimit]
+   (let [date-ts (ts-as-date now-ts)]
     {:versions {$elemMatch
                 {$or [{:bulletinState :proclaimed
-                       :proclamationStartsAt {$lt now-ts} :proclamationEndsAt {$gt now-ts}}
+                       :proclamationStartsAt {$lt now-ts} :proclamationEndsAt {$gte date-ts}}
                       {:bulletinState :verdictGiven
-                       :appealPeriodStartsAt {$lt now-ts} :appealPeriodEndsAt {$gt now-ts}}
+                       :appealPeriodStartsAt {$lt now-ts} :appealPeriodEndsAt {$gte date-ts}}
                       {:bulletinState :final
                        :officialAt {$lt now-ts
-                                    $gt officialAt-lowerLimit}}]}}}))
+                                    $gt officialAt-lowerLimit}}]}}})))
+
+(defn version-elemMatch
+  [now-ts officialAt-lowerLimit]
+  (let [date-ts (ts-as-date now-ts)]
+    {$or [{:versions.bulletinState :proclaimed
+           :versions.proclamationStartsAt {$lt now-ts} :versions.proclamationEndsAt {$gte date-ts}}
+          {:versions.bulletinState :verdictGiven
+           :versions.appealPeriodStartsAt {$lt now-ts} :versions.appealPeriodEndsAt {$gte date-ts}}
+          {:versions.bulletinState :final
+           :versions.officialAt {$lt now-ts
+                                 $gt officialAt-lowerLimit}}]}))
 
 (def bulletins-fields
   {:versions.bulletinState 1
