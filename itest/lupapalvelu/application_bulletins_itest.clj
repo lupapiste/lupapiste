@@ -28,7 +28,7 @@
     (-> (query-application mikko app-id) :verdicts count) => pos?)
   (fact "Bulletin is created automatically"
     (let [bulletins (:data (datatables mikko :application-bulletins :municipality sonja-muni :searchText "" :state "" :page 1 :sort ""))]
-      (count bulletins) => 1
+      (count bulletins) => 2
       (-> bulletins first :bulletinState) => "verdictGiven"
       ;TODO ensure bulletin dates looks correct
       (fact "description is set"
