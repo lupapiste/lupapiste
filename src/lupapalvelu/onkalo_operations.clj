@@ -25,7 +25,7 @@
         tila (if (= operation :undo-archiving) :valmis :arkistoitu)
         modified (sade.core/now)]
     (cond
-      (not application) (fail :bad-request :desc (str "Application not found"))
+      (not application) (fail :bad-request :desc (str "Application" application-id " not found"))
       (= attachment-state tila) (fail :bad-request :desc (str "Cannot perform this operation when attachment in state " attachment-state))
       (= attachment-state :arkistoitu) (update-archival-status-change application attachment-id :valmis false modified explanation)
       (= attachment-state :valmis) (update-archival-status-change application attachment-id :arkistoitu true modified explanation)
