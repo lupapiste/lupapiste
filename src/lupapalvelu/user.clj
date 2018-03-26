@@ -54,7 +54,8 @@
    "trusted-etl"
    "trusted-salesforce"
    "docstore-api"
-   "financialAuthority"])
+   "financialAuthority"
+   "onkalo-api"])
 
 (defschema Role (apply sc/enum all-roles))
 (defschema OrgId (sc/pred keyword? "Organization ID"))
@@ -240,7 +241,7 @@
   (= :rest-api (keyword role)))
 
 (defn docstore-user? [{role :role}]
-  (= :docstore-api (keyword role)))
+  (#{:onkalo-api :docstore-api} (keyword role)))
 
 (defn admin? [{role :role}]
   (= :admin (keyword role)))
@@ -263,6 +264,8 @@
 (defn financial-authority? [{role :role}]
   (= :financialAuthority (keyword role)))
 
+(defn onkalo-user? [{role :role}]
+  (= :onkalo-api (keyword role)))
 
 (defn organization-ids
   "Returns user's organizations as a set of strings"
