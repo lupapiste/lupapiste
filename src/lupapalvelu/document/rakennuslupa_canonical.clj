@@ -59,8 +59,7 @@
 (defn get-huoneistot-pintaala [huoneistot]
   (->> (filter #(= "lis\u00e4ys" (:muutostapa %)) huoneistot)
        (map :huoneistoala)
-       (remove nil?)
-       (map #(Double/parseDouble %))
+       (map #(util/->double %))
        (apply +)))
 
 (defn- get-rakennuksen-omistaja [omistaja]
