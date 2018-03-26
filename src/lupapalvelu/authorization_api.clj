@@ -197,7 +197,7 @@
   (let [auth-entry (util/find-first (comp #{username} :username) auth)
         restrictions (filter (comp #{(:id auth-entry)} :id :user) auth-restrictions)]
     {:context-scope :authorization
-     :context-role  (when (#{user-id company-id} (:id auth-entry)) :auth-owner)
+     :context-role  (when (and user-id (#{user-id company-id} (:id auth-entry))) :auth-owner)
      :auth-entry    (assoc auth-entry :restrictions restrictions)}))
 
 (defcommand remove-auth
