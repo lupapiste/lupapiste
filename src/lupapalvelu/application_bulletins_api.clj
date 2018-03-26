@@ -68,13 +68,7 @@
         apps (collection/aggregate (mongo/get-db) "application-bulletins"
                [{"$match" (bulletins/versions-elemMatch now-ts officialAt-lowerLimit)}
                 {"$unwind" {:path "$versions"}}
-                {"$match" {$or [{:versions.bulletinState :proclaimed
-                                 :versions.proclamationStartsAt {$lt now-ts} :versions.proclamationEndsAt {$gt now-ts}}
-                                {:versions.bulletinState :verdictGiven
-                                 :versions.appealPeriodStartsAt {$lt now-ts} :versions.appealPeriodEndsAt {$gt now-ts}}
-                                {:versions.bulletinState :final
-                                 :versions.officialAt {$lt now-ts
-                                                       $gt officialAt-lowerLimit}}]}}
+                {"$match" (bulletins/version-elemMatch now-ts officialAt-lowerLimit)}
                 {"$group" {:_id "$_id"
                            :versions {"$last" "$$ROOT.versions"},
                            :modified {"$last" "$$ROOT.modified"},

@@ -1,6 +1,11 @@
  (ns lupapalvelu.application-bulletins-itest
-   (:require [midje.sweet :refer :all]
+   (:require [clj-time.coerce :as c]
+             [clj-time.core :as t]
+             [midje.sweet :refer :all]
+             [lupapalvelu.fixture.core :as fixture]
              [lupapalvelu.itest-util :refer :all]
+             [lupapalvelu.mongo :as mongo]
+             [lupapalvelu.application-bulletins-api :as bulletins-api]
              [lupapalvelu.application-bulletins-itest-util :refer :all]
              [lupapalvelu.factlet :refer :all]
              [sade.util :as util]
@@ -23,12 +28,11 @@
     (-> (query-application mikko app-id) :verdicts count) => pos?)
   (fact "Bulletin is created automatically"
     (let [bulletins (:data (datatables mikko :application-bulletins :municipality sonja-muni :searchText "" :state "" :page 1 :sort ""))]
-      (count bulletins) => 1
+      (count bulletins) => 2
       (-> bulletins first :bulletinState) => "verdictGiven"
       ;TODO ensure bulletin dates looks correct
       (fact "description is set"
         (-> bulletins first :bulletinOpDescription) => op-description)))
-
   (fact "foreman verdict"
     (let [foreman-app-id (create-foreman-application app-id mikko pena-id "vastaava ty\u00F6njohtaja" "A")
           _ (finalize-foreman-app mikko sonja foreman-app-id true)
@@ -42,6 +46,31 @@
              :municipality "753"
              :descriptionsFromBackendSystem true) => ok?
     (command sonja :check-for-verdict :id app-id) => ok?)
-    (let [bulletins (:data (datatables mikko :application-bulletins :municipality sonja-muni :searchText "" :state "" :page 1 :sort ""))]
-      (fact "description is set according to the backend verdict"
-        (-> bulletins first :bulletinOpDescription) => "Uudisrakennuksen ja talousrakennuksen 15 m2 rakentaminen. Yhden huoneiston erillistalo.")))
+
+  (let [bulletins (:data (datatables mikko :application-bulletins :municipality sonja-muni :searchText "" :state "" :page 1 :sort ""))]
+    (fact "description is set according to the backend verdict"
+          (-> bulletins first :bulletinOpDescription) => "Uudisrakennuksen ja talousrakennuksen 15 m2 rakentaminen. Yhden huoneiston erillistalo.")))
+
+(mongo/with-db (str "test_application-bulletins_" (now))
+  (mongo/connect!)
+  (fixture/apply-fixture "minimal")
+  (let [app (create-and-submit-local-application mikko :operation "kerrostalo-rivitalo"
+                                                :propertyId sipoo-property-id
+                                                :x 406898.625 :y 6684125.375
+                                                :address "Hitantine 109")
+        app-id (:id app)]
+    (fact "Bulletin is shown on its final day"
+          (local-command sonja :check-for-verdict :id app-id) => ok?
+
+          (-> (bulletins-api/get-application-bulletins {:municipality sonja-muni :searchText "" :state "" :page 1 :sort ""} (now))
+              :data count)
+          => pos?
+
+          (mongo/update-n :application-bulletins {}
+                          {"$set"
+                           {:versions.0.appealPeriodStartsAt (c/to-long (t/minus (t/today) (t/days 1)))
+                            :versions.0.appealPeriodEndsAt (c/to-long (t/today))}}
+                          :multi true)
+
+          (let [bulletins (:data (bulletins-api/get-application-bulletins {:municipality sonja-muni :searchText "" :state "" :page 1 :sort ""} (now)))]
+            (count bulletins) => pos?))))
