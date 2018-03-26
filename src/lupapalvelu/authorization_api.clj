@@ -192,7 +192,7 @@
   "Precheck for company auth removal for companies that have set :invitationDenied
   flag on. To remove company, all company users have to be removed first."
   [{{auth-id :id type :type} :auth-entry {auth :auth :as application} :application}]
-  (when (and (= :company (keyword type))
+  (when (and (util/=as-kw :company type)
              (:invitationDenied (company/find-company-by-id auth-id)))
 
     (let [company-users-ids  (->> (mongo/select :users {:company.id auth-id} [:_id])
