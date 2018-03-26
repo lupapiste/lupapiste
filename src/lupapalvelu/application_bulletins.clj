@@ -83,11 +83,11 @@
   (let [date-ts (ts-as-date now-ts)]
     {$or [{:versions.bulletinState :proclaimed
            :versions.proclamationStartsAt {$lt now-ts} :versions.proclamationEndsAt {$gte date-ts}}
-         {:versions.bulletinState :verdictGiven
-          :versions.appealPeriodStartsAt {$lt now-ts} :versions.appealPeriodEndsAt {$gte date-ts}}
-         {:versions.bulletinState :final
-          :versions.officialAt {$lt now-ts
-                                $gt officialAt-lowerLimit}}]}))
+          {:versions.bulletinState :verdictGiven
+           :versions.appealPeriodStartsAt {$lt now-ts} :versions.appealPeriodEndsAt {$gte date-ts}}
+          {:versions.bulletinState :final
+           :versions.officialAt {$lt now-ts
+                                 $gt officialAt-lowerLimit}}]}))
 
 (def bulletins-fields
   {:versions.bulletinState 1
