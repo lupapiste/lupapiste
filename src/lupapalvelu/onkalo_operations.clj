@@ -5,28 +5,32 @@
             [sade.core :refer :all]
             [taoensso.timbre :as timbre :refer [debug info warn error]]))
 
-(defn undo-archiving [application-id attachment-id modified]
-  (let [application (domain/get-application-no-access-checking application-id)
-        attachment (->> application :attachments (filter #(= attachment-id (:id %))) (first))
-        attachment-state (-> attachment :metadata :tila (keyword))]
-    (if (= attachment-state :arkistoitu)
-      (action/update-application (action/application->command application)
-                                 {:attachments {$elemMatch {:id attachment-id}}}
-                                 {$set {:attachments.$.metadata.tila :valmis
-                                        :attachments.$.readOnly      false
-                                        :attachments.$.modified      modified}})
-      (fail :bad-request :desc (str "Cannot perform this operation when attachment in state " attachment-state)))))
+(defn- update-archival-status-change [application attachment-id tila readOnly modified explanation]
+  (let [update-result (action/update-application (action/application->command application)
+                                                 {:attachments {$elemMatch {:id attachment-id}}}
+                                                 {$set {:attachments.$.metadata.tila tila
+                                                        :attachments.$.readOnly      readOnly
+                                                        :attachments.$.modified      modified}})]
+    (if update-result
+      (do
+        (info "Onkalo originated status change to state" tila "for attachment" attachment-id "in application" (:id application) "with explanation" explanation "was successful")
+        (ok))
+      (fail :internal-server-error :desc "Could not change attachment archival status"))))
 
-(defn redo-archiving [application-id attachment-id modified]
+(defn undo-archiving [application-id attachment-id modified explanation]
   (let [application (domain/get-application-no-access-checking application-id)
         attachment (->> application :attachments (filter #(= attachment-id (:id %))) (first))
-        attachment-state (-> attachment :metadata :tila (keyword))]
-    (if (= attachment-state :valmis)
-      (action/update-application (-> application-id
-                                 (domain/get-application-no-access-checking)
-                                 action/application->command)
-                             {:attachments {$elemMatch {:id attachment-id}}}
-                             {$set {:attachments.$.metadata.tila :arkistoitu
-                                    :attachments.$.readOnly      true
-                                    :attachments.$.modified      modified}})
-      (fail :bad-request :desc (str "Cannot perform this operation when attachment in state " attachment-state)))))
+        attachment-state (-> attachment :metadata :tila)]
+    (cond
+      (not application) (fail :bad-request :desc (str "Application not found"))
+      (= attachment-state "arkistoitu") (update-archival-status-change application attachment-id "valmis" false modified explanation)
+      :else (fail :bad-request :desc (str "Cannot perform this operation when attachment in state " attachment-state)))))
+
+(defn redo-archiving [application-id attachment-id modified explanation]
+  (let [application (domain/get-application-no-access-checking application-id)
+        attachment (->> application :attachments (filter #(= attachment-id (:id %))) (first))
+        attachment-state (-> attachment :metadata :tila)]
+    (cond
+      (not application) (fail :bad-request :desc (str "Application not found"))
+      (= attachment-state "valmis") (update-archival-status-change application attachment-id "arkistoitu" true modified explanation)
+      :else (fail :bad-request :desc (str "Cannot perform this operation when attachment in state " attachment-state)))))

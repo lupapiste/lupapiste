@@ -14,14 +14,9 @@
    :parameters  [:application-id rest-schemas/ApplicationId
                  :attachment-id att/AttachmentId
                  :archivist usr/SummaryUser
-                 :explanation sc/Str]
-   :returns     rest-schemas/ApiResponse}
-  (let [modified (sade.core/now)
-        op-success? (oo/undo-archiving application-id attachment-id modified)]
-    (info "Undo archiving from Onkalo for attachment" attachment-id "in application" application-id "with explanation" explanation "was" (if op-success? "successful" "unsuccessful"))
-    (if op-success?
-      (ok)
-      (fail {:text :error.undo-archiving-failed}))))
+                 :explanation sc/Str]}
+  (let [modified (sade.core/now)]
+    (oo/undo-archiving application-id attachment-id modified explanation)))
 
 (defendpoint-for usr/onkalo-user? [:post "/rest/onkalo/redo-archive-attachment"] false
   {:summary     "Changes attachment status to 'arkistoitu'."
@@ -29,11 +24,6 @@
    :parameters  [:application-id rest-schemas/ApplicationId
                  :attachment-id att/AttachmentId
                  :archivist usr/SummaryUser
-                 :explanation sc/Str]
-   :returns     rest-schemas/ApiResponse}
-  (let [modified (sade.core/now)
-        op-success? (oo/redo-archiving application-id attachment-id modified)]
-    (info "Redo archiving from Onkalo for attachment" attachment-id "in application" application-id "with explanation" explanation "was" (if op-success? "successful" "unsuccessful"))
-    (if op-success?
-      (ok)
-      (fail {:text :error.redo-archiving-failed}))))
+                 :explanation sc/Str]}
+  (let [modified (sade.core/now)]
+    (oo/redo-archiving application-id attachment-id modified explanation)))
