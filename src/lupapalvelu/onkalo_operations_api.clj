@@ -8,20 +8,12 @@
             [schema.core :as sc]
             [taoensso.timbre :refer [info]]))
 
-(defendpoint-for usr/onkalo-user? [:post "/rest/onkalo/undo-archive-attachment"] false
+(defendpoint-for usr/onkalo-user? [:post "/rest/onkalo/change-attachment-archival-status"] false
   {:summary     "Changes attachment status to 'valmis' and allows it to be edited."
    :description ""
    :parameters  [:application-id rest-schemas/ApplicationId
                  :attachment-id att/AttachmentId
+                 :target-state sc/Str
                  :archivist usr/SummaryUser
                  :explanation sc/Str]}
-  (oo/attachment-archiving-operation application-id attachment-id :undo-archiving explanation))
-
-(defendpoint-for usr/onkalo-user? [:post "/rest/onkalo/redo-archive-attachment"] false
-  {:summary     "Changes attachment status to 'arkistoitu'."
-   :description ""
-   :parameters  [:application-id rest-schemas/ApplicationId
-                 :attachment-id att/AttachmentId
-                 :archivist usr/SummaryUser
-                 :explanation sc/Str]}
-  (oo/attachment-archiving-operation application-id attachment-id :redo-archiving explanation))
+  (oo/attachment-archiving-operation application-id attachment-id archivist (keyword target-state) explanation))
