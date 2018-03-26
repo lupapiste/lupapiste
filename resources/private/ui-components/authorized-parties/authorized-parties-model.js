@@ -157,7 +157,8 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     return hasAuth( "remove-auth") &&
       self.isNotFinancialAuthority ( authEntry ) &&
       (!self.hasAppliedRestriction( authEntry ) ||
-       self.isOwnAuthorization( authEntry ));
+       self.isOwnAuthorization( authEntry )  ||
+       lupapisteApp.models.currentUser.isAuthority());
   };
 
   self.showSubscriptionStatus = function( role ) {
