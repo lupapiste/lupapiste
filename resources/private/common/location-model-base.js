@@ -54,7 +54,7 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
         newAddress = newAddress + " " + a.number;
       }
     }
-    return self.municipalityCode(a ? a.municipality : "").address(newAddress);
+    return self.address(newAddress);
   };
 
   //
@@ -70,7 +70,7 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
         .center(404168, 7205000, mapOptions.initialZoom)
         .addClickHandler(function(x, y) {
           self.reset().setXY(x, y)
-            .beginUpdateRequest().searchPropertyId(x, y).searchAddress(x, y);
+            .beginUpdateRequest().searchPropertyInfo(x, y).searchAddress(x, y);
           if (_.isFunction(mapOptions.afterClick)) {mapOptions.afterClick();}
         });
 
@@ -128,6 +128,21 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
     if (e.status > 400) {
       hub.send("indicator", {style: "negative", message: "integration.getAddressNotWorking", html: true});
     }
+  };
+
+  self.searchPropertyInfo = function(x, y) {
+    if (x && y) {
+      locationSearch.propertyInfoByPoint(self.requestContext, x, y, function(resp) {
+        self.locationServiceUnavailable(false);
+        self.propertyId(resp.propertyId);
+        self.municipalityCode(resp.municipality);
+        self.propertyIdValidated(true);
+      }, function(err) {
+        self.locationServiceUnavailable(err.status === 503);
+        self.onError(err);
+      }, self.processing);
+    }
+    return self;
   };
 
   self.searchPropertyId = function(x, y) {

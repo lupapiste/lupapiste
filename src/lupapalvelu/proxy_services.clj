@@ -101,6 +101,13 @@
         (resp/status 503 "Service temporarily unavailable")))
     (resp/status 400 "Bad Request")))
 
+(defn property-info-by-point-proxy [{{x :x y :y} :params}]
+  (if (and (coord/valid-x? x) (coord/valid-y? y))
+    (if-let [info (plocation/property-info-by-point x y)]
+      (resp/json info)
+      (resp/status 503 "Service temporarily unavailable"))
+    (resp/status 400 "Bad Request")))
+
 (defn address-from-nls
   "Feature is from NLS nearestfeature. Try to parse address from feature.
    If no address available, address details are returned as empty strings.
@@ -371,6 +378,7 @@
                ; "point-by-property-id" (cache (* 60 60 8) (secure point-by-property-id-proxy)) FIXME deprecated, remove after hotfixing
                "location-by-property-id" (cache (* 60 60 8) (secure location-by-property-id-proxy))
                "property-id-by-point" (cache (* 60 60 8) (secure property-id-by-point-proxy))
+               "property-info-by-point" (cache (* 60 60 8) (secure property-info-by-point-proxy))
                "address-by-point" (no-cache (secure address-by-point-proxy))
                "find-address" (no-cache (secure find-addresses-proxy))
                "get-address" (no-cache (secure get-addresses-proxy))

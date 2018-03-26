@@ -33,6 +33,18 @@ var locationSearch = (function() {
         .call();
     }
   };
+  // returns also municipality data, compared to searchPropertyId
+  var searchPropertyInfo = function(requestContext, x, y, onSuccess, onFail, processing) {
+    if (x > 0 && y > 0 ) {
+      return ajax
+        .get("/proxy/property-info-by-point")
+        .param("x", x).param("y", y)
+        .processing(processing || _.noop)
+        .success(requestContext.onResponse(onSuccess))
+        .fail(requestContext.onResponse(onFail))
+        .call();
+    }
+  };
   var searchPropertyIdByWKT = function(requestContext, wkt, radius, onSuccess, onFail, processing) {
     var r = _.isNumber(radius) ? Math.round(radius) : "";
     if (wkt) {
@@ -71,6 +83,7 @@ var locationSearch = (function() {
     pointByAddress: searchPointByAddress,
     locationByPropertyId: searchLocationByPropertyId,
     propertyIdByPoint: searchPropertyId,
+    propertyInfoByPoint: searchPropertyInfo,
     propertyIdsByWKT: searchPropertyIdByWKT,
     addressByPoint: searchAddress,
     ownersByPropertyIds: searchOwnersByPropertyIds
