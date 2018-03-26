@@ -735,7 +735,7 @@
     :enabled true
     :language "fi"
     :role "onkalo-api"
-    :private {:password "$2a$10$LqhU/xPaLEsiPYkIJlT3UuBkzZ0wJyLr.0NBcOAlaP4/DW7AHbeGy"} ; basicauth}
+    :private {:password "$2a$10$LqhU/xPaLEsiPYkIJlT3UuBkzZ0wJyLr.0NBcOAlaP4/DW7AHbeGy"}} ; basicauth
 
    {:id "tiedonohjausjarjestelma"
     :username "tiedonohjausjarjestelma"
