@@ -391,6 +391,56 @@
     {:giver      (:giver data)
      :exclusions exclusions}))
 
+(defn default-verdict-draft [{:keys [category published] :as template}]
+  (let [dic                (:dictionary (shared/verdict-schema category))
+        {:keys [data
+                settings]} published
+        incs               (inclusions category published)]
+    {:template {:inclusions incs}
+     :data     (reduce (fn [acc kwp]
+                         (let [dict                (-> kwp
+                                                       util/split-kw-path
+                                                       first)
+                               {:keys [template-dict
+                                       repeating]} (dict dic)
+                               initial-value (and template-dict
+                                                  (template-dict data))]
+                           (cond
+                             ;; So far only one level repeating can be initialized
+                             (and initial-value repeating)
+                             (reduce (fn [m v]
+                                       (assoc-in m [dict (mongo/create-id)] v))
+                                     acc
+                                     initial-value)
+
+                             initial-value
+                             (assoc acc dict initial-value)
+
+                             :else
+                             acc)))
+                       {}
+                       incs)
+     :references settings}))
+
+
+;; Argument map:
+;; template:    Published template for the verdict
+;; application: Application
+;; draft:       Default draft:
+                                      ;
+;;              template:   Template part of the verdict data. The map
+;;                          should contain at least inclusions.
+;;              data:       Initialized verdict data
+;;              references: References for the data (default is
+;;                          published settings)
+;;
+;; The return value is the modified (if needed) draft.
+(defmulti initialize-verdict-draft (util/fn-> :template :category keyword))
+
+(defmethod initialize-verdict-draft :r
+  [{:keys [template application draft]}]
+  )
+
 (defn new-verdict-draft [template-id {:keys [application organization created]
                                       :as   command}]
   (let [template (template/verdict-template @organization template-id)

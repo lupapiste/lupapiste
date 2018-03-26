@@ -3,6 +3,7 @@
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict :refer :all]
+            [lupapalvelu.mongo :as mongo]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.util :as util]
@@ -89,7 +90,7 @@
   {:dictionary
    {:one   {:text             {}
             :template-section :t-first}
-    :two   {:toggle           {}
+    :two   {:text             {}
             :template-dict    :t-two
             :template-section :t-second}
     :three {:date          {}
@@ -99,7 +100,9 @@
                         :r-two   {:toggle {}}
                         :r-three {:repeating {:r-sub-one {:date {}}
                                               :r-sub-two {:text {}}}}}}
-    :six   {:toggle {}}}
+    :six   {:toggle {}}
+    :seven {:repeating {:up  {:text {}}}
+            :template-dict :t-seven}}
    :sections [{:id   :first
                :grid {:columns 4
                       :rows    [[{:dict :one}]]}}
@@ -120,19 +123,27 @@
                                                                   {:grid {:columns   2
                                                                           :repeating :r-three
                                                                           :rows      [[{:dict :r-sub-one}
-                                                                                       {:dict :r-sub-two}]]}}]]}}]]}}]})
+                                                                                       {:dict :r-sub-two}]]}}]]}}]]}}
+              {:id :fourth
+               :template-section :t-fifth
+               :grid {:columns 1
+                      :rows [[{:grid {:columns 1
+                                      :repeating :seven
+                                      :rows [[{:dict :up}]]}}]]}}]})
 
 (def mock-template
   {:dictionary {:t-two            {:toggle {}}
                 :t-three          {:date {}}
+                :t-seven          {:repeating {:up {:text {}}}}
                 :removed-sections {:keymap {:t-first  false
                                             :t-second false
                                             :t-third  false
-                                            :t-fourth false}}}
-   :sections [{:id :t-first
-               :grid {:columns 2
-                      :rows [[{:dict :t-two}
-                              {:dict :t-three}]]} }]})
+                                            :t-fourth false
+                                            :t-fifth  false}}}
+   :sections   [{:id   :t-first
+                 :grid {:columns 2
+                        :rows    [[{:dict :t-two}
+                                   {:dict :t-three}]]} }]})
 
 (facts "Verdict validation"
   (facts "Schema creation"
@@ -170,8 +181,10 @@
     => #{:one}
     (section-dicts (-> test-verdict :sections second))
     => #{:three :four}
+    (section-dicts (-> test-verdict :sections (nth 2)))
+    => #{:two :three :five}
     (section-dicts (-> test-verdict :sections last))
-    => #{:two :three :five})
+    => #{:seven})
   (fact "Verdict tmeplate section"
     (section-dicts (-> mock-template :sections first))
     => #{:t-two :t-three}))
@@ -183,7 +196,8 @@
         :two   #{:third}
         :three #{:second :third}
         :four  #{:second}
-        :five  #{:third}})
+        :five  #{:third}
+        :seven #{:fourth}})
   (fact "Template"
     (dict-sections (:sections mock-template))
     => {:t-two   #{:t-first}
@@ -194,63 +208,124 @@
   => (just [:one :two :three :four
             :five.r-one :five.r-two
             :five.r-three.r-sub-one :five.r-three.r-sub-two
-            :six] :in-any-order)
+            :six
+            :seven.up] :in-any-order)
   (dicts->kw-paths (:dictionary mock-template))
-  => [:t-two :t-three :removed-sections] :in-any-order)
+  => [:t-two :t-three :t-seven.up :removed-sections] :in-any-order)
 
 (facts "Inclusions"
   (fact "Every template section included"
     (inclusions :r {:data {:removed-sections {:t-first  false
                                               :t-second false
                                               :t-third  false
-                                              :t-fourth false}}})
+                                              :t-fourth false
+                                              :t-fifth  false}}})
     => (just [:one :two :three :four
               :five.r-one :five.r-two
               :five.r-three.r-sub-one :five.r-three.r-sub-two
-              :six] :in-any-order)
+              :six :seven.up] :in-any-order)
+    (provided (shared/verdict-schema :r) => test-verdict)
+    (inclusions :r {:data {}})
+    => (just [:one :two :three :four
+              :five.r-one :five.r-two
+              :five.r-three.r-sub-one :five.r-three.r-sub-two
+              :six :seven.up] :in-any-order)
     (provided (shared/verdict-schema :r) => test-verdict))
   (fact "Template sections t-first and t-second removed"
     (inclusions :r {:data {:removed-sections {:t-first  true
                                               :t-second true
                                               :t-third  false
-                                              :t-fourth false}}})
+                                              :t-fourth false
+                                              :t-fifth  false}}})
     => (just [:three ;; Not removed since also in :third
               :four
               :five.r-one :five.r-two
               :five.r-three.r-sub-one :five.r-three.r-sub-two
-              :six] :in-any-order)
+              :six :seven.up] :in-any-order)
     (provided (shared/verdict-schema :r) => test-verdict))
     (fact "Template section t-third removed"
       (inclusions :r {:data {:removed-sections {:t-first  false
                                                 :t-second false
                                                 :t-third  true
-                                                :t-fourth false}}})
+                                                :t-fourth false
+                                                :t-fifth  false}}})
     => (just [:one :two :three ;; Not removed since also in :second
               :five.r-one :five.r-two
               :five.r-three.r-sub-one :five.r-three.r-sub-two
-              :six] :in-any-order)
+              :six :seven.up] :in-any-order)
     (provided (shared/verdict-schema :r) => test-verdict))
     (fact "Template section t-fourth removed"
       (inclusions :r {:data {:removed-sections {:t-first  false
                                                 :t-second false
                                                 :t-third  false
-                                                :t-fourth true}}})
+                                                :t-fourth true
+                                                :t-fifth  false}}})
       => (just [:one :two ;; Not removed since dict's template-section overrides section's
                 :three ;; ;; Not removed since also in :second
-                :four :six] :in-any-order)
+                :four :six :seven.up] :in-any-order)
       (provided (shared/verdict-schema :r) => test-verdict))
     (fact "Template section t-third and t-fourth removed"
       (inclusions :r {:data {:removed-sections {:t-first  false
                                                 :t-second false
                                                 :t-third  true
-                                                :t-fourth true}}})
+                                                :t-fourth true
+                                                :t-fifth  false}}})
       => (just [:one :two ;; Not removed since dict's template-section overrides section's
-                :six] :in-any-order)
+                :six :seven.up] :in-any-order)
       (provided (shared/verdict-schema :r) => test-verdict))
     (fact "Every template section removed"
       (inclusions :r {:data {:removed-sections {:t-first  true
                                                 :t-second true
                                                 :t-third  true
-                                                :t-fourth true}}})
+                                                :t-fourth true
+                                                :t-fifth  true}}})
       => (just [:six])
       (provided (shared/verdict-schema :r) => test-verdict)))
+
+(defn templater [removed & kvs]
+  {:category  "r"
+   :published {:data     (assoc (apply hash-map kvs)
+                                :removed-sections (zipmap removed
+                                                          (repeat true)))
+               :settings {:date-deltas {:julkipano 5
+                                        :anto      7}}}})
+
+(against-background
+ [(shared/verdict-schema "r") => test-verdict]
+ (facts "Initialize verdict draft"
+   (fact "default, no removed sections"
+     (default-verdict-draft (templater [] :t-two "Hello"))
+     => {:template   {:inclusions [:one :two :three :four
+                                   :five.r-one :five.r-two
+                                   :five.r-three.r-sub-one
+                                   :five.r-three.r-sub-two
+                                   :six :seven.up]}
+         :data       {:two "Hello"}
+         :references {:date-deltas {:julkipano 5
+                                    :anto      7}}})
+   (fact "default, :t-second removed"
+     (default-verdict-draft (templater [:t-second] :t-two "Hello"))
+     => {:template   {:inclusions [:one :three :four
+                                   :five.r-one :five.r-two
+                                   :five.r-three.r-sub-one
+                                   :five.r-three.r-sub-two
+                                   :six :seven.up]}
+         :data       {}
+         :references {:date-deltas {:julkipano 5
+                                    :anto      7}}})
+   (fact "default, repeating init"
+     (let [draft (default-verdict-draft (templater [:t-first :t-third :t-fourth]
+                                                   :t-two "Hello"
+                                                   :t-seven [{:up "These"}
+                                                             {:up "are"}
+                                                             {:up "terms"}]))]
+       draft => (contains {:template   {:inclusions [:two
+                                                     :six :seven.up]}
+                           :references {:date-deltas {:julkipano 5
+                                                      :anto      7}}})
+
+       (-> draft :data :two) => "Hello"
+       (-> draft :data :seven vals) => (just [{:up "These"}
+                                              {:up "are"}
+                                              {:up "terms"}])
+       (-> draft :data :seven keys) => (has every? (partial re-matches #"[0-9a-z]+"))))))
