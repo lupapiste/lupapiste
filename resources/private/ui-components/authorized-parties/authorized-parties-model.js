@@ -116,6 +116,15 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     return hasAuth("change-auth") && model.role() === "foreman";
   };
 
+  function showRemoveInvitationDeniedCompanyErrorDialog(error) {
+    hub.send("show-dialog", {
+      ltitle: "error.dialog.title",
+      size: "medium",
+      component: "remove-invitation-denied-company-error-dialog",
+      componentParams: error
+    });
+  }
+
   self.removeAuth = function(model) {
     var username = model.username();
     var id = application().id();
@@ -131,6 +140,8 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
                             application().lightReload();
                             hub.send("track-click", {category:"Application", label:"", event:"authChanged"});
                           })
+                          .onError("error.company-users-have-to-be-removed-before-company",
+                                   showRemoveInvitationDeniedCompanyErrorDialog)
                           .processing(application().processing)
                           .call();
                           return false;
@@ -146,8 +157,7 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     return hasAuth( "remove-auth") &&
       self.isNotFinancialAuthority ( authEntry ) &&
       (!self.hasAppliedRestriction( authEntry ) ||
-       self.isOwnAuthorization( authEntry )  ||
-       lupapisteApp.models.currentUser.isAuthority());
+       self.isOwnAuthorization( authEntry ));
   };
 
   self.showSubscriptionStatus = function( role ) {
