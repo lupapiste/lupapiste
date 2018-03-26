@@ -15,8 +15,7 @@
                  :attachment-id att/AttachmentId
                  :archivist usr/SummaryUser
                  :explanation sc/Str]}
-  (let [modified (sade.core/now)]
-    (oo/undo-archiving application-id attachment-id modified explanation)))
+  (oo/attachment-archiving-operation application-id attachment-id :undo-archiving explanation))
 
 (defendpoint-for usr/onkalo-user? [:post "/rest/onkalo/redo-archive-attachment"] false
   {:summary     "Changes attachment status to 'arkistoitu'."
@@ -25,5 +24,4 @@
                  :attachment-id att/AttachmentId
                  :archivist usr/SummaryUser
                  :explanation sc/Str]}
-  (let [modified (sade.core/now)]
-    (oo/redo-archiving application-id attachment-id modified explanation)))
+  (oo/attachment-archiving-operation application-id attachment-id :redo-archiving explanation))
