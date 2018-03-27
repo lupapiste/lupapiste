@@ -35,6 +35,7 @@
             [lupapalvelu.permissions :as permissions]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.property :as prop]
+            [lupapalvelu.restrictions :as restrictions]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.suti :as suti]
@@ -218,21 +219,18 @@
   {:parameters       [id text lang]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :contexts         [foreman/foreman-app-context]
-   :permissions      [{:required [:application/cancel-in-restricted-states]}]
-   :notified         true
-   :on-success       (notify :application-state-change)
-   :states           #{:draft :info :open :submitted}
-   :pre-checks       [(partial sm/validate-state-transition :canceled)]}
-  [command]
-  (app/cancel-application command))
+   :permissions      [{:context  {:application {:state #{:draft}}}
+                       :required [:application/edit-draft
+                                  :application/cancel-in-restricted-states]}
 
-(defcommand cancel-application-authority
-  {:parameters       [id text lang]
-   :input-validators [(partial action/non-blank-parameters [:id :lang])]
-   :permissions      [{:required [:application/cancel]}]
+                      {:context  {:application {:state #{:info :open :submitted}}}
+                       :required [:application/cancel-in-restricted-states]}
+
+                      {:context  {:application {:state states/all-but-draft}}
+                       :required [:application/cancel]}]
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           states/all-but-draft
+   :states           states/all-application-states
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
   [command]
   (app/cancel-application command))
@@ -309,14 +307,15 @@
                      (ya/validate-digging-permit application)
                      (when-not (company/cannot-submit command)
                        (fail :company.user.cannot.submit))
-                     (suti/suti-submit-validation command))))
+                     (suti/suti-submit-validation command)
+                     (restrictions/check-auth-restriction command :application/submit))))
 
 (defquery application-submittable
   {:description "Query for frontend, to display possible errors regarding application submit"
    :parameters [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :contexts         [foreman/foreman-app-context]
-   :permissions      [{:required [:application/read]}]
+   :permissions      [{:required [:application/edit]}]
    :states           #{:draft :open}}
   [command]
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data (:application command)))]
@@ -583,7 +582,7 @@
   (ok))
 
 (defcommand change-location
-  {:parameters       [id x y address propertyId]
+  {:parameters       [id x y address propertyId refreshBuildings]
    :states           (states/all-states-but (conj states/terminal-states :sent))
    :input-validators [(partial action/non-blank-parameters [:address])
                       (partial action/property-id-parameters [:propertyId])
@@ -608,8 +607,8 @@
                            $unset {:propertyIdSource true}})
       (try (app/autofill-rakennuspaikka (mongo/by-id :applications id) (now))
            (catch Exception e (warn "KTJ data was not updated after location changed")))
-      (when (permit/archiving-project? application)
-        (app/fetch-buildings command propertyId)))
+      (when (and (permit/archiving-project? application) (true? refreshBuildings))
+        (app/fetch-buildings command propertyId refreshBuildings)))
     (fail :error.property-in-other-muinicipality)))
 
 (defcommand change-application-state
@@ -934,6 +933,14 @@
                         $push {:attachments {$each (app/make-attachments created op @org state tos-fn)}}}))
   (try (app/autofill-rakennuspaikka app created)
        (catch Exception e (warn "KTJ data was not updated to inforequest when converted to application"))))
+
+(defcommand remove-buildings
+  {:parameters  [id]
+   :permissions [{:required [:application/remove-buildings-in-archiving-projects]}]
+   :states       states/all-archiving-project-states
+   :pre-checks  [(permit/validate-permit-type-is permit/ARK)]}
+  [command]
+  (app/remove-secondary-buildings command))
 
 (defn- validate-organization-backend-urls [{organization :organization}]
   (when-let [org (and organization @organization)]

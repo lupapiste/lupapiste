@@ -12,7 +12,9 @@
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.printing-order.mylly-client :as mylly]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.roles :as roles]))
+            [lupapalvelu.roles :as roles]
+            [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.permit :as permit]))
 
 (def omitted-attachment-type-groups
   [:hakija :osapuolet :rakennuspaikan_hallinta :paatoksenteko :muutoksenhaku
@@ -38,19 +40,20 @@
 
 
 (defquery attachments-for-printing-order
-  {:feature          :printing-order
-   :parameters       [id]
-   :states           states/all-application-states
-   :user-roles       #{:applicant}
-   :pre-checks       [pricing-available?]}
+  {:feature    :printing-order
+   :parameters [id]
+   :states     states/all-application-states
+   :user-roles #{:applicant}
+   :pre-checks [pricing-available?
+                (partial permit/valid-permit-types {:R [] :P :all})]}
   [{application :application :as command}]
   (ok :attachments (->> (att/sorted-attachments command)
-                        (map att/enrich-attachment)
-                        (remove #(and
-                                  (util/contains-value? omitted-attachment-type-groups (keyword (-> % :type :type-group)))
-                                  (not (:forPrinting %))))
-                        (filter (fn [att] (util/contains-value? (:tags att) :hasFile)))
-                        (filter pdf-attachment?))
+                    (map att/enrich-attachment)
+                    (remove #(and
+                              (util/contains-value? omitted-attachment-type-groups (keyword (-> % :type :type-group)))
+                              (not (:forPrinting %))))
+                    (filter (fn [att] (util/contains-value? (:tags att) :hasFile)))
+                    (filter pdf-attachment?))
       :tagGroups (map vector att-type/type-groups)))
 
 (defquery printing-order-pricing

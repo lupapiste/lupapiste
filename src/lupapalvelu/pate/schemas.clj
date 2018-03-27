@@ -6,6 +6,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -73,7 +74,7 @@
 
 (defschema Phrase
   {:id       ssc/ObjectIdStr
-   :category (apply sc/enum (map name shared/phrase-categories))
+   :category (apply sc/enum (map name shared-schemas/phrase-categories))
    :tag      sc/Str
    :phrase   sc/Str})
 
@@ -235,19 +236,19 @@
     (cond
       docgen                  (wrap :docgen (doc-schemas/get-schema
                                              {:name (get docgen :name docgen)}) docgen)
-      date-delta              (wrap :date-delta shared/PateDateDelta date-delta)
-      reference-list          (wrap :reference-list shared/PateReferenceList reference-list)
-      multi-select            (wrap :multi-select shared/PateMultiSelect multi-select)
-      phrase-text             (wrap :phrase-text shared/PatePhraseText phrase-text)
-      keymap                  (wrap :keymap shared/KeyMap keymap)
-      button                  (wrap :button shared/PateButton button)
+      date-delta              (wrap :date-delta shared-schemas/PateDateDelta date-delta)
+      reference-list          (wrap :reference-list shared-schemas/PateReferenceList reference-list)
+      multi-select            (wrap :multi-select shared-schemas/PateMultiSelect multi-select)
+      phrase-text             (wrap :phrase-text shared-schemas/PatePhraseText phrase-text)
+      keymap                  (wrap :keymap shared-schemas/KeyMap keymap)
+      button                  (wrap :button shared-schemas/PateButton button)
       application-attachments (wrap :application-attachments
-                                    shared/PateComponent
+                                    shared-schemas/PateComponent
                                     application-attachments)
-      toggle                  (wrap :toggle shared/PateToggle toggle)
-      text                    (wrap :text shared/PateText text)
-      date                    (wrap :date shared/PateDate date)
-      select                  (wrap :select shared/PateSelect select))))
+      toggle                  (wrap :toggle shared-schemas/PateToggle toggle)
+      text                    (wrap :text shared-schemas/PateText text)
+      date                    (wrap :date shared-schemas/PateDate date)
+      select                  (wrap :select shared-schemas/PateSelect select))))
 
 (defn- validate-dictionary-value
   "Validates that path-value combination is valid for the given

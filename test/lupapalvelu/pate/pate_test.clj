@@ -4,6 +4,7 @@
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared  :as shared]
+            [lupapalvelu.pate.shared-schemas  :as shared-schemas]
             [midje.sweet :refer :all]
             [sade.util :as util]
             [schema.core :refer [defschema] :as sc]
@@ -12,20 +13,20 @@
 (fact "only-one-of constraint"
   (let [err-msg (util/fn-> validation-error-explain second first)
         s "Only one of the keys is allowed: [:add :remove :click]"]
-    (err-msg (sc/check shared/PateButton
+    (err-msg (sc/check shared-schemas/PateButton
                        {:click :foo :add :bar :remove :baz})) => s
-    (err-msg (sc/check shared/PateButton
+    (err-msg (sc/check shared-schemas/PateButton
                        {:add :one :remove :two :click :three})) => s
-    (err-msg (sc/check shared/PateButton
+    (err-msg (sc/check shared-schemas/PateButton
                        {:click :one :add :two})) => s
-    (err-msg (sc/check shared/PateButton
+    (err-msg (sc/check shared-schemas/PateButton
                        {:add :one :remove :hii})) => s
-    (err-msg (sc/check shared/PateButton
+    (err-msg (sc/check shared-schemas/PateButton
                        {:remove :foo :click :bar})) => s)
-  (sc/check shared/PateButton {:click :foo}) => nil
-  (sc/check shared/PateButton {:add :bar}) => nil
-  (sc/check shared/PateButton {:remove :baz}) => nil
-  (sc/check shared/PateButton {}) => nil)
+  (sc/check shared-schemas/PateButton {:click :foo}) => nil
+  (sc/check shared-schemas/PateButton {:add :bar}) => nil
+  (sc/check shared-schemas/PateButton {:remove :baz}) => nil
+  (sc/check shared-schemas/PateButton {}) => nil)
 
 
 (def test-template
@@ -114,7 +115,7 @@
                         :rows    [[{:dict :attachments}]]}}]})
 
 (facts "Test template is valid"
-  (sc/validate shared/PateVerdictTemplate test-template)
+  (sc/validate shared-schemas/PateVerdictTemplate test-template)
   => test-template)
 
 (defn validate-path-value [path value & [references]]

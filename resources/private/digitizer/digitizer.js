@@ -78,6 +78,7 @@
 
     self.searchNow = function() {
       hub.send("track-click", {category:"Create", label:"map", event:"searchLocation"});
+      self.locationModel.projectType = "ARK";
       self.locationModel.clearMap().reset();
       self.locationModel.beginUpdateRequest()
         .searchPoint(self.search(), self.searching);

@@ -110,25 +110,17 @@
   (->> (building-reader/->buildings xml)
        (map #(-> {:data %}))))
 
-(defn update-buildings-array! [xml application]
-  (let [doc-buildings (building/building-ids application)
-        buildings (building-reader/->buildings-summary xml)
-        find-op-id (fn [nid]
-                     (->> (filter #(= (:national-id %) nid) doc-buildings)
-                          first
-                          :operation-id))
-        updated-buildings (map
-                            (fn [{:keys [nationalId] :as bldg}]
-                              (-> (select-keys bldg [:localShortId :buildingId :localId :nationalId :location-wgs84 :location])
-                                  (assoc :operationId (find-op-id nationalId))))
-                            buildings)]
-    (when (seq updated-buildings)
-      (mongo/update-by-id :applications
-                          (:id application)
-                          {$set {:buildings updated-buildings}}))))
+(defn add-other-building-docs [created-application document-datas structure-descriptions]
+  (let [;; make secondaryOperations for buildings other than the first one in case there are many
+        other-building-docs (map (partial application/document-data->op-document created-application) (rest document-datas))
+        secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
+
+        created-application (update-in created-application [:documents] concat other-building-docs)
+        created-application (update-in created-application [:secondaryOperations] concat secondary-ops)]
+    created-application))
 
 (defn create-archiving-project-application!
-  [command operation buildings-and-structures app-info location-info permit-type building-xml backend-id]
+  [command operation buildings-and-structures app-info location-info permit-type building-xml backend-id refreshBuildings]
   (let [{:keys [hakijat]} app-info
         document-datas (application/schema-datas app-info buildings-and-structures)
         manual-schema-datas {"archiving-project" (first document-datas)}
@@ -140,12 +132,9 @@
         structure-descriptions (map :description buildings-and-structures)
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
-        ;; make secondaryOperations for buildings other than the first one in case there are many
-        other-building-docs (map (partial application/document-data->op-document created-application) (rest document-datas))
-        secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
-
-        created-application (update-in created-application [:documents] concat other-building-docs)
-        created-application (update-in created-application [:secondaryOperations] concat secondary-ops)
+        created-application (if (true? refreshBuildings)
+                              (add-other-building-docs created-application document-datas structure-descriptions)
+                              created-application)
 
         created-application (assoc created-application :drawings (:drawings app-info))
 
@@ -162,7 +151,7 @@
 
     (let [fetched-application (mongo/by-id :applications (:id created-application))]
       (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
-      (application/update-buildings-array! building-xml fetched-application)
+      (application/update-buildings-array! building-xml fetched-application refreshBuildings)
       fetched-application)))
 
 (defn get-location-info [{data :data :as command} app-info]
@@ -179,7 +168,7 @@
    :propertyId (apply str (concat (first (split-at 3 (:id organization))) "00000000000"))})
 
 (defn fetch-or-create-archiving-project!
-  [{{:keys [lang organizationId kuntalupatunnus createAnyway createWithoutBuildings createWithDefaultLocation]} :data :as command}]
+  [{{:keys [lang organizationId kuntalupatunnus createAnyway createWithoutBuildings createWithDefaultLocation refreshBuildings]} :data :as command}]
   (let [operation         :archiving-project
         permit-type       "R"                                ; No support for other permit types currently
         dummy-application {:id "" :permitType permit-type :organization organizationId}
@@ -207,7 +196,8 @@
                                                                                                   location-info
                                                                                                   permit-type
                                                                                                   building-xml
-                                                                                                  kuntalupatunnus)]
+                                                                                                  kuntalupatunnus
+                                                                                                  refreshBuildings)]
                                             (ok :id id)))))
 
 (defn update-verdicts [{:keys [application] :as command} verdicts]

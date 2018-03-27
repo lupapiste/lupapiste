@@ -84,6 +84,33 @@ LUPAPISTE.ApplicationModel = function() {
     return lupapisteApp.models.applicationAuthModel.ok( "municipality-hears-neighbors-visible");
   });
 
+  // Use writable computed to init value by auth model without triggering save command
+  var submitRestrictionForOtherAuths = ko.observable();
+  self.optionSubmitRestrictionForOtherAuths = ko.pureComputed({
+    read: function() {
+      // Default value is determined by the auth model
+      return _.isNil(submitRestrictionForOtherAuths()) ?
+        lupapisteApp.models.applicationAuthModel.ok("submit-restriction-enabled-for-other-auths") :
+        submitRestrictionForOtherAuths();
+    },
+    write: function(enabled) {
+      // If value is changed manually it is stored in the observable and save command is triggered
+      submitRestrictionForOtherAuths(enabled);
+      ajax.command("toggle-submit-restriction-for-other-auths", {id: self.id(),
+                                                                 "apply-submit-restriction": enabled})
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
+        .processing(self.processing)
+        .call();
+    }
+  });
+  self.optionSubmitRestrictionForOtherAuthsDisabled = ko.pureComputed(function() {
+    return !lupapisteApp.models.applicationAuthModel.ok("toggle-submit-restriction-for-other-auths");
+  });
+  self.submitRestrictionForOtherAuthsVisible = ko.pureComputed(function() {
+    return lupapisteApp.models.applicationAuthModel.ok("authorized-to-apply-submit-restriction-to-other-auths");
+  });
+
   // Application indicator metadata fields
   self.unseenStatements = ko.observable();
   self.unseenVerdicts = ko.observable();
@@ -252,15 +279,24 @@ LUPAPISTE.ApplicationModel = function() {
     return !_.isEmpty(_.filter(self.invites(), ["user.id", id]));
   });
 
-  self.approveInvite = function(type) {
+  function approveInvite(type, opts) {
+    var unwrappedOpts = {"apply-submit-restriction": util.getIn(opts, ["applySubmitRestriction"])};
     ajax
-      .command("approve-invite", {id: self.id(), "invite-type": type})
+      .command("approve-invite", _.assign({id: self.id(), "invite-type": type}, unwrappedOpts))
       .success(function() {
         self.reload();
         self.updateInvites();
       })
       .call();
     return false;
+  }
+
+  self.approveInvite = function(type) {
+    if (type === "company" && lupapisteApp.models.globalAuthModel.ok("authorized-to-apply-submit-restriction-to-other-auths")) {
+      self.showAcceptCompanyInvitationDialog();
+    } else {
+      approveInvite(type);
+    }
   };
 
   var acceptDecline = function(applicationId) {
@@ -301,7 +337,7 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.submitButtonFunction = ko.pureComputed(function() {
-    if (lupapisteApp.models.applicationAuthModel.ok("submit-application")) {
+    if (lupapisteApp.models.applicationAuthModel.ok("application-submittable")) {
       return self.submitApplication;
     } else if (lupapisteApp.models.applicationAuthModel.ok("submit-archiving-project")) {
       return self.submitArchivingProject;
@@ -644,9 +680,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.cancelApplication = function() {
     if (!self.stateChanged()) {
-      var command = lupapisteApp.models.applicationAuthModel.ok( "cancel-application-authority")
-            ? "cancel-application-authority"
-            : "cancel-application";
+      var command = "cancel-application";
       hub.send("track-click", {category:"Application", label:"", event:"cancelApplication"});
       hub.send("show-dialog", {ltitle: self.isArchivingProject() ? "application.cancelArchivingProject" : "application.cancelApplication",
                                size: "medium",
@@ -828,11 +862,11 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   function cannotSubmitResponse(data) {
-    self.submitErrors(_.map(data.errors, "text"));
+    self.submitErrors(data.errors);
   }
 
   function fetchApplicationSubmittable() {
-    if (lupapisteApp.models.applicationAuthModel.ok("submit-application")) {
+    if (lupapisteApp.models.applicationAuthModel.ok("application-submittable")) {
       ajax
         .query("application-submittable", {id: self.id.peek()})
         .success(function() { self.submitErrors([]); })
@@ -895,19 +929,21 @@ LUPAPISTE.ApplicationModel = function() {
                                componentParams: {ltext: "application.inviteDialogText",
                                                  lyesTitle: "applications.approveInvite",
                                                  lnoTitle: "application.showApplication",
-                                                 yesFn: self.approveInvite}});
+                                                 yesFn: approveInvite}});
     }
   };
 
   self.showAcceptCompanyInvitationDialog = function() {
+    var applySubmitRestriction = ko.observable(false);
     if (self.hasCompanyInvites() && lupapisteApp.models.applicationAuthModel.ok("approve-invite")) {
       hub.send("show-dialog", {ltitle: "application.inviteSend",
                                size: "medium",
-                               component: "yes-no-dialog",
+                               component: "company-approve-invite-dialog",
                                componentParams: {ltext: "application.inviteCompanyDialogText",
+                                                 applySubmitRestriction: applySubmitRestriction,
                                                  lyesTitle: "applications.approveInvite",
                                                  lnoTitle: "application.showApplication",
-                                                 yesFn: _.partial(self.approveInvite, "company")}});
+                                                 yesFn: _.partial(approveInvite, "company", {applySubmitRestriction: applySubmitRestriction})}});
     }
   };
 
@@ -1027,6 +1063,28 @@ LUPAPISTE.ApplicationModel = function() {
                              component: "yes-no-dialog",
                              componentParams: {text: loc("linkPermit.remove.message", linkPermit.id()),
                                                yesFn: _.partial(self.doRemoveLinkPermit, linkPermit.id())}});
+  };
+
+  function callRemoveBuildings () {
+    return function () {
+      ajax
+        .command("remove-buildings", {id: self.id()})
+        .success(function() {
+          self.reload();
+        })
+        .call();
+      return false;
+    };
+  }
+
+  self.removeBuildings = function() {
+    hub.send("show-dialog", {ltitle: "application.remove.buildings",
+      size: "medium",
+      component: "yes-no-dialog",
+      componentParams: {text: loc("areyousure.removeBuildings"),
+        yesFn: callRemoveBuildings(),
+        lyesTitle: "yes",
+        lnoTitle: "no"}});
   };
 
 };

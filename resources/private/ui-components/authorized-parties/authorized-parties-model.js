@@ -69,6 +69,18 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     return model.role() !== "financialAuthority";
   };
 
+  self.hasAppliedRestriction = function ( authEntry ) {
+    return _.some(util.getIn(application(), ["authRestrictions"]), function(restriction) {
+      return util.getIn(restriction, ["user","id"]) === util.getIn(authEntry, ["id"]);
+    });
+  };
+
+  self.isOwnAuthorization = function( authEntry ) {
+    var userId = util.getIn(lupapisteApp.models.currentUser, ["id"]);
+    var companyId = util.getIn(lupapisteApp.models.currentUser, ["company", "id"]);
+    return _.includes([userId, companyId], util.getIn(authEntry, ["id"]));
+  };
+
   var roleChangeMap = {"foreman":"writer", "writer":"foreman"};
 
   self.changeAuth = function(model) {
@@ -130,8 +142,12 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     return false;
   };
 
-  self.showRemove = function( role ) {
-    return hasAuth( "remove-auth") && self.isNotFinancialAuthority ( role );
+  self.showRemove = function( authEntry ) {
+    return hasAuth( "remove-auth") &&
+      self.isNotFinancialAuthority ( authEntry ) &&
+      (!self.hasAppliedRestriction( authEntry ) ||
+       self.isOwnAuthorization( authEntry )  ||
+       lupapisteApp.models.currentUser.isAuthority());
   };
 
   self.showSubscriptionStatus = function( role ) {

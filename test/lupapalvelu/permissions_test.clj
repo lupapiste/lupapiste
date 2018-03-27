@@ -143,6 +143,18 @@
     => #{:test/do :test/test :test/fail}
 
     (provided (get-permissions-by-role :application "app-tester") => #{:test/do :test/fail})
+    (provided (get-permissions-by-role :application "another-role") => #{:test/do :test/test}))
+
+  (fact "same user with multiple roles in auth plus restrictions - :test/fail permission is removed"
+    (get-application-permissions {:user {:id 1} :application {:auth [{:id 2 :role "some-role"}
+                                                                     {:id 1 :role "app-tester"}
+                                                                     {:id 1 :role "another-role"}]
+                                                              :authRestrictions [{:restriction :test/fail
+                                                                                  :user {:id 2}
+                                                                                  :target {:type "others"}}]}})
+    => #{:test/do :test/test}
+
+    (provided (get-permissions-by-role :application "app-tester") => #{:test/do :test/fail})
     (provided (get-permissions-by-role :application "another-role") => #{:test/do :test/test})))
 
 (facts get-organization-permissions
@@ -233,6 +245,16 @@
                               :application {:auth [{:id 1 :role "app-tester"}]}}) => #{:test/do}
 
     (provided (get-permissions-by-role :application "app-tester") => #{:test/do :application/submit}))
+
+  (fact "company has existing role in auth - with auth restriction"
+    (get-company-permissions {:user {:company {:id 1 :role "user" :submit true}}
+                              :application {:auth [{:id 1 :role "app-tester"}]
+                                            :authRestrictions [{:restriction :test/fail
+                                                                :user {:id 2}
+                                                                :target {:type "others"}}]}})
+    => #{:test/do}
+
+    (provided (get-permissions-by-role :application "app-tester") => #{:test/do :test/fail}))
 
   (fact "no role in auth"
     (get-company-permissions {:user {:company {:id 1 :role "user"}} :application {:auth []}}) => #{}

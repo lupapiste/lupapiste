@@ -159,7 +159,7 @@
                 (local-command raktark-jarvenpaa :change-application-state
                                :id (:id application)
                                :state "appealed") => ok?
-                (local-command raktark-jarvenpaa :cancel-application-authority
+                (local-command raktark-jarvenpaa :cancel-application
                                :id (:id application)
                                :text "Se on peruutus ny!"
                                :lang "fi")

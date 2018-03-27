@@ -25,12 +25,19 @@
                   data-test-id="create-address" type="text" class="form-input text"/>
          </div>
 
-         <div >
+         <div>
            <label class="form-label" data-bind="ltext: 'newRequest.municipality'"></label>
            <span data-bind="text: municipalityName, attr: {'data-test-value': municipalityCode}"
                  data-test-id="create-municipality-select"></span>
            <img alt="" src="/lp-static/img/ajax-loader-16.gif" data-bind="visible: processingAddress">
          </div>
+
+         <!-- ko if: isArchiveProject() -->
+         <div class="checkbox-wrapper">
+           <input type="checkbox" data-bind="checked: refreshBuildings, attr: {'id': 'rakennukset'}"/>
+           <label class="inline-label checkbox-label" data-bind="ltext: 'newRequest.refreshBuildings', attr: {'for': 'rakennukset'}"></label>
+         </div>
+         <!-- /ko -->
 
          <div data-bind="if: !municipalitySupported()">
             <p class="err"

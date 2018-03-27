@@ -1,6 +1,5 @@
 (ns lupapalvelu.pate.verdict
   (:require [clj-time.core :as time]
-            [taoensso.timbre :refer [warnf]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
@@ -9,7 +8,9 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.transformations :as transformations]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.inspection-summary :as inspection-summary]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.pdf :as pdf]
@@ -17,18 +18,20 @@
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.verdict-template :as template]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp]
             [monger.operators :refer :all]
+            [ring.util.codec :as codec]
+            [rum.core :as rum]
+            [sade.coordinate :as coord]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.validators :as validators]
             [schema.core :as sc]
             [swiss.arrows :refer :all]
-            [sade.coordinate :as coord]
-            [sade.validators :as validators]))
+            [taoensso.timbre :refer [warnf]]))
 
 (defn neighbor-states
   "Application neighbor-states data in a format suitable for verdicts: list
@@ -794,24 +797,42 @@
                                  (:mongo-updates doc-updates)))
     (tiedonohjaus/mark-app-and-attachments-final! (:id application)
                                                   created)
-    (pdf/create-verdict-attachment command
-                                   (assoc verdict :published created))
-    ;; KuntaGML
-    (when (org/krysp-integration? @organization (:permitType application))
-      (-> (assoc command :application (domain/get-application-no-access-checking (:id application)))
-          (krysp/verdict-as-kuntagml verdict))
-      nil)))
+
+    (let [verdict-attachment (pdf/create-verdict-attachment command (assoc verdict :published created))
+          verdict (assoc verdict :verdict-attachment verdict-attachment)]
+      ;; KuntaGML
+      (when (org/krysp-integration? @organization (:permitType application))
+        (-> (assoc command :application (domain/get-application-no-access-checking (:id application)))
+            (krysp/verdict-as-kuntagml verdict))
+        nil))))
 
 (defn preview-verdict
   "Preview version of the verdict.
   1. Finalize verdict but do not store the changes.
   2. Generate PDF and return it."
-  [{:keys [application created] :as command}]
-  (let [{:keys [pdf-file-stream
+  [{:keys [lang application created] :as command}]
+  (let [{:keys [error
+                pdf-file-stream
                 filename]} (-<>> (command->verdict command)
                                  (enrich-verdict command <> true)
                                  (pdf/create-verdict-preview command))]
-    {:status  200
-     :headers {"Content-Type"        "application/pdf"
-               "Content-Disposition" (format "filename=\"%s\"" filename)}
-     :body    pdf-file-stream}))
+    (if error
+      {:status 503 ;; Service Unavailable
+       :headers {"Content-Type" "text/html; charset=utf-8"}
+       :body (let [msg (i18n/localize lang error)]
+               (rum/render-static-markup
+                [:html
+                 [:head [:title msg]]
+                 [:body
+                  [:div
+                   {:style {:margin "2em 2em"
+                            :border "2px solid red"
+                            :padding "1em 1em"}}
+                   [:h3 {:style {:margin-top 0}} msg]
+                   [:a {:href (str "/api/raw/preview-pate-verdict?"
+                                   (codec/form-encode (:data command)))}
+                    (i18n/localize lang :pate.try-again)]]]]))}
+      {:status  200
+       :headers {"Content-Type"        "application/pdf"
+                 "Content-Disposition" (format "filename=\"%s\"" filename)}
+       :body    pdf-file-stream})))

@@ -98,7 +98,7 @@
              :assignments
              (map :status)) => ["active", "active"])
 
-      (command sonja :cancel-application-authority :id id :text "testing" :lang "fi") => ok?
+      (command sonja :cancel-application :id id :text "testing" :lang "fi") => ok?
       (query sonja :assignments-for-application :id id) => fail?
 
       (->> (query sonja :assignments)
@@ -301,8 +301,8 @@
     (fact "areas search"
       (-> (datatables sonja :assignments-search :area [(-> nikkila-area :id)]) :data :assignments count) => 1)
     (fact "no results after application is canceled"
-      (command sonja :cancel-application-authority :id id1 :text "testing" :lang "fi") => ok?
-      (command sonja :cancel-application-authority :id id2 :text "testing" :lang "fi") => ok?
+      (command sonja :cancel-application :id id1 :text "testing" :lang "fi") => ok?
+      (command sonja :cancel-application :id id2 :text "testing" :lang "fi") => ok?
 
       (-> (query sonja :assignments-search :searchText "uva eks" :state "all")
           :data :assignments) => empty?)

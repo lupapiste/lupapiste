@@ -93,7 +93,8 @@
             [lupapalvelu.pate.verdict-api]
             [lupapalvelu.pate.phrases-api]
             [lupapalvelu.financial-api]
-            [lupapalvelu.premises-api])
+            [lupapalvelu.premises-api]
+            [lupapalvelu.onkalo-operations-api])
 
   (:import [javax.imageio ImageIO]
            [javax.activation MailcapCommandMap]

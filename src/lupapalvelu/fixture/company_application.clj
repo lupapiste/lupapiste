@@ -11,7 +11,9 @@
 
 (def created 1514877090000)
 
-(def applications [{:id (str "LP-753-" minimal/now-year "-90001")
+(def default-app-id (str "LP-753-" minimal/now-year "-90001"))
+
+(def applications [{:id default-app-id
                     :startedBy {}
                     :archived {:initial nil
                                :application nil

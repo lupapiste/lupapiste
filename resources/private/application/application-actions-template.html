@@ -63,14 +63,9 @@
                 <span data-bind="ltext: 'application.createContinuationPeriodPermit'"></span>
             </button>
             <button class="function"
-                    data-bind="click: cancelApplication, visible: $root.authorization.ok('cancel-application'), enable: !stateChanged() && !processing() && $root.authorization.ok('cancel-application')"
+                    data-bind="click: cancelApplication, visible: $root.authorization.ok('cancel-application'),
+                               enable: !stateChanged() && !processing() && $root.authorization.ok('cancel-application')"
                     data-test-id="application-cancel-btn">
-                <i class="lupicon-circle-remove"></i>
-                <span data-bind="ltext: 'application.cancelApplication'"></span>
-            </button>
-            <button class="function"
-                    data-bind="click: cancelApplication, visible: $root.authorization.ok('cancel-application-authority'), enable: !stateChanged() && !processing() && $root.authorization.ok('cancel-application-authority')"
-                    data-test-id="application-cancel-authority-btn">
                 <i class="lupicon-circle-remove"></i>
                 <span data-bind="ltext: 'application.cancelArchivingProject', if: isArchivingProject"></span>
                 <span data-bind="ltext: 'application.cancelApplication', ifnot: isArchivingProject"></span>
@@ -167,6 +162,14 @@
                     data-test-id="create-digging-permit-button">
               <i class="lupicon-circle-plus"></i>
               <span data-bind="ltext: 'application.createDiggingPermit'"></span>
+            </button>
+       <!-- /ko -->
+       <!-- ko if: isArchivingProject -->
+            <button class="function"
+                    data-bind="click: removeBuildings"
+                    data-test-id="remove-buildings-button">
+              <i class="lupicon-circle-remove"></i>
+              <span data-bind="ltext: 'application.remove.buildings'"></span>
             </button>
        <!-- /ko -->
     </div>

@@ -161,6 +161,14 @@ sub, sup {
   vertical-align: baseline;
 }
 
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
 /*------------------------------------*    ELEMENTS
 \*------------------------------------*/
 /* BASE
@@ -331,6 +339,10 @@ i {
 
 .success-message {
   color: #04c714;
+}
+
+blockquote {
+  margin-left: 2em;
 }
 
 /* ABSTRACTIONS (OOCSS style)
@@ -8010,6 +8022,16 @@ div.labeled-input > label {
   display: block;
 }
 
+div.labeled-input .row {
+  display: table-row;
+}
+
+div.labeled-input .cell {
+  display: table-cell;
+  padding-right: 24px;
+  vertical-align: bottom;
+}
+
 legend {
   font-size: 21.6px;
   font-family: "Source Sans Pro", sans-serif;
@@ -13406,6 +13428,11 @@ ul.tabs {
   margin-right: 6px;
 }
 
+.with-map-top .checkbox-wrapper {
+  border: none;
+  margin-left: -9px;
+}
+
 .neighbor-error {
   color: #df3215;
   margin-top: 6px;
@@ -13963,18 +13990,15 @@ ul.tabs {
   white-space: initial;
 }
 
-.operation-tree .tree-nav .tree-back {
+.operation-tree .tree-nav .tree-back, .operation-tree .tree-nav .tree-start {
   min-width: 5.625em;
-  display: inline-block;
-  margin: 24px 24px 0 30px;
+  margin: 24px 0 24px 24px;
   height: 30px;
 }
 
-.operation-tree .tree-nav .tree-start {
-  min-width: 5.625em;
+.operation-tree .tree-nav .tree-back button, .operation-tree .tree-nav .tree-start button {
   display: inline-block;
-  margin: 24px 24px 0 30px;
-  height: 30px;
+  position: relative;
 }
 
 .operation-tree .tree-page {
@@ -14020,7 +14044,8 @@ ul.tabs {
 
 .operation-tree .tree-last button {
   margin-top: 24px;
-  width: 18em;
+  position: relative;
+  margin-right: 24px;
 }
 
 .operation-tree .tree-last .operation-description {
@@ -29071,6 +29096,23 @@ span.formatted.warning {
   color: #df3215;
 }
 
+span.markup {
+  display: inline-block;
+}
+
+span.markup p {
+  margin-bottom: 6px;
+  color: #333333;
+}
+
+span.markup span.underline {
+  text-decoration-line: underline;
+}
+
+span.markup ul, span.markup ol, span.markup blockquote {
+  margin-bottom: 6px;
+}
+
 .pate-label {
   font-size: 15px;
   font-weight: bold;
@@ -29225,8 +29267,70 @@ div.pate-phrases table.pate-phrases-table td.phrase {
   overflow-x: hidden;
 }
 
-span.phrase-text {
-  white-space: pre-wrap;
+div.phrase-edit-mode a:last-child,
+div.phrase-edit-mode label:last-child {
+  margin-left: 24px;
+}
+
+div.phrase-edit-mode a.required:after {
+  content: " *";
+  color: #df3215;
+  padding-right: 6px;
+}
+
+span.phrase-preview {
+  border: 1px solid #bbbbbb;
+  padding: 6px 12px;
+  background-color: #f6f6f6;
+}
+
+div.phrase-edit {
+  border: 1px solid #eeeeee;
+  border-top: none;
+  padding: 10px 10px;
+}
+
+div.phrase-edit > * {
+  width: 100%;
+}
+
+div.phrase-edit > textarea {
+  min-height: 20em;
+}
+
+div.pate-tabbar {
+  display: table;
+}
+
+div.pate-tabbar div.pate-tab {
+  display: table-cell;
+  border: 1px solid #eeeeee;
+  border-bottom: 1px solid #eeeeee;
+  padding: 0 6px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  background-color: #f6f6f6;
+}
+
+div.pate-tabbar div.pate-tab__space {
+  display: table-cell;
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #eeeeee;
+}
+
+div.pate-tabbar div.pate-tab__divider {
+  display: table-cell;
+  border: none;
+  border-bottom: 1px solid #eeeeee;
+  min-width: 3px;
+  max-width: 3px;
+}
+
+div.pate-tabbar div.pate-tab.pate-tab--active {
+  border: 1px solid #eeeeee;
+  border-bottom: none;
+  background-color: initial;
 }
 
 div.pate-autocomplete {
@@ -29846,6 +29950,10 @@ input:disabled + .pate-attachment-check-label:hover.pate-attachment-check-label:
 
 input.date-delta {
   max-width: 50%;
+}
+
+body.pate-error-page {
+  padding: 2em 2em;
 }
 
 .order-grid-1 {
@@ -34453,8 +34561,9 @@ span.icon_clear:before {
   display: table-row;
 }
 
-.info-line span, .info-line a {
-  display: table-cell;
+.info-line i {
+  float: left;
+  padding-right: 10px;
 }
 
 .info-line span a {
@@ -34674,6 +34783,10 @@ div.foreman-history-container {
   margin-bottom: 15px;
 }
 
+.map-select-info .checkbox-wrapper {
+  border: none;
+}
+
 .create-application-map {
   position: relative;
   background: white;
@@ -34684,10 +34797,6 @@ div.foreman-history-container {
   display: inline-block;
   padding-right: 48px;
   vertical-align: top;
-}
-
-.create-buttons {
-  float: right;
 }
 
 .create-content {
@@ -35932,6 +36041,10 @@ body.authority-admin .header-menu {
 
 .container.container--authority-admin.container--icon {
   margin-left: 118px;
+}
+
+.container.container--authority-admin section {
+  margin-bottom: 36px;
 }
 
 @media (max-width: 1800px) {

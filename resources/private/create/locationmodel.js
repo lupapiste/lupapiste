@@ -10,6 +10,7 @@ LUPAPISTE.CreateApplicationLocationModel = function(options) {
        popupContentModel: "section#map-popup-content"});
 
   self.municipalitySupported = ko.observable(true);
+
   ko.computed(function() {
     var code = self.municipalityCode();
     self.municipalitySupported(true);
@@ -24,6 +25,8 @@ LUPAPISTE.CreateApplicationLocationModel = function(options) {
     read: self.propertyIdHumanReadable,
     write: self.propertyId
   });
+
+  self.projectType = "";
 
   ko.computed(function() {
     if (self.locationServiceUnavailable() && self.propertyIdOk()) {
@@ -89,6 +92,10 @@ LUPAPISTE.CreateApplicationLocationModel = function(options) {
         }
       }, self.onError, searchingListener);
     return self;
+  };
+
+  self.isArchiveProject = function() {
+    return "ARK" === self.projectType;
   };
 
   self.proceed = _.partial(hub.send, options.nextStep);

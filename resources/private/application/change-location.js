@@ -117,6 +117,10 @@ LUPAPISTE.ChangeLocationModel = function() {
     return self;
   };
 
+  self.isArchiveProject = function() {
+    return "ARK" === lupapisteApp.models.application.permitType();
+  };
+
 };
 
 LUPAPISTE.ChangeLocationModel.prototype = _.create(LUPAPISTE.LocationModelBase.prototype, {"constructor":LUPAPISTE.ChangeLocationModel});

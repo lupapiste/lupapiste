@@ -9,7 +9,7 @@
                  [org.clojure/data.zip "0.1.1"] ; Note: 0.1.2 breaks lupapalvelu.wfs
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/tools.nrepl "0.2.12"]
-                 [org.clojure/tools.reader "1.0.4"]
+                 [org.clojure/tools.reader "1.1.3.1"]
                  [org.clojure/tools.trace "0.7.9"]
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/core.memoize "0.5.9"]
@@ -141,7 +141,10 @@
                  ; JMX-server with socket reuse
                  [lupapiste/jmx-server "0.1.0"]
 
-                 [org.clojure/clojurescript "1.9.473"]
+                 ;; Used in the markup support.
+                 [instaparse "1.4.8"]
+
+                 [org.clojure/clojurescript "1.9.946"]
                  [rum "0.10.8"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  ; JS Pikaday for cljs datepicker (https://github.com/dbushell/Pikaday)

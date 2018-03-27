@@ -15,6 +15,7 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
   self.address = ko.observable("");
   self.propertyId = ko.observable("");
   self.municipalityCode = ko.observable("");
+  self.refreshBuildings = ko.observable(false);
 
   self.reset = function() {
     return self.setXY(0,0).address("").propertyId("").municipalityCode("");
@@ -25,7 +26,8 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
       x: self.x, y: self.y,
       address: self.address(),
       propertyId: util.prop.toDbFormat(self.propertyId()),
-      propertyIdSource: self.locationServiceUnavailable() ? "user" : "location-service"
+      propertyIdSource: self.locationServiceUnavailable() ? "user" : "location-service",
+      refreshBuildings: self.refreshBuildings()
     };
   };
 

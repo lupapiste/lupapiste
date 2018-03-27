@@ -289,7 +289,7 @@
     (fact "Mikko sees the application" (query mikko :application :id application-id) => ok?)
     (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
     (fact "Sonja can cancel Mikko's application"
-      (command sonja :cancel-application-authority :id application-id :text nil :lang "fi") => ok?)
+      (command sonja :cancel-application :id application-id :text nil :lang "fi") => ok?)
     (fact "Sonja sees the canceled application"
       (let [application (query-application sonja application-id)]
         (-> application :history last :state) => "canceled"))
@@ -304,14 +304,14 @@
     (let [application-id  (create-app-id sonja :propertyId sipoo-property-id)]
       (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
       (fact "Sonja can cancel the application"
-        (let [r (command sonja :cancel-application-authority :id application-id :text nil :lang "fi")]
+        (let [r (command sonja :cancel-application :id application-id :text nil :lang "fi")]
           r => ok?
           (fact "No comments exists from cancel" (-> r :application :comments count) => 0)))))
 
   (fact "Authority can cancel with reason text, which is added as comment"
     (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Peruutustie 23")
           cancel-reason "Testihakemus"]
-      (command sonja :cancel-application-authority :id (:id application) :text cancel-reason :lang "fi") => ok?
+      (command sonja :cancel-application :id (:id application) :text cancel-reason :lang "fi") => ok?
 
       (fact "Mikko sees cancel reason text in comments"
         (let [application (:application (query mikko :application :id (:id application)))]
@@ -774,7 +774,7 @@
       (command pena :change-location :id application-id
                                      :x (-> application :location :x) - 1
                                      :y (-> application :location :y) + 1
-                                     :address (:address application) :propertyId (:propertyId application)) => ok?)
+                                     :address (:address application) :propertyId (:propertyId application) :refreshBuildings false) => ok?)
 
     ; applicant submits and authority gives verdict
     (command pena :submit-application :id application-id)
@@ -784,13 +784,13 @@
       (command pena :change-location :id application-id
                                      :x (-> application :location :x) - 1
                                      :y (-> application :location :y) + 1
-                                     :address (:address application) :propertyId (:propertyId application)) => fail?)
+                                     :address (:address application) :propertyId (:propertyId application) :refreshBuildings false) => fail?)
 
     (fact "authority should still be authorized to change location"
       (command sonja :change-location :id application-id
                                       :x (-> application :location :x) - 1
                                       :y (-> application :location :y) + 1
-                                      :address (:address application) :propertyId (:propertyId application)) => ok?)))
+                                      :address (:address application) :propertyId (:propertyId application) :refreshBuildings false) => ok?)))
 
 (fact "Authority can access drafts, but can't use most important commands"
   (let [id (create-app-id pena)
@@ -798,7 +798,7 @@
         user (find-user-from-minimal-by-apikey sonja)
         denied-actions #{:delete-attachment :delete-attachment-version :upload-attachment :change-location
                          :new-verdict-draft :create-attachments :remove-document-data :remove-doc :update-doc
-                         :reject-doc :approve-doc :stamp-attachments :create-task :cancel-application-authority
+                         :reject-doc :approve-doc :stamp-attachments :create-task :cancel-application
                          :add-link-permit :set-tos-function-for-application :set-tos-function-for-operation
                          :unsubscribe-notifications :subscribe-notifications :upsert-application-handler :remove-application-handler
                          :neighbor-add :change-permit-sub-type :refresh-ktj :merge-details-from-krysp :remove-link-permit-by-app-id
@@ -916,10 +916,7 @@
          (fact "Writer submits application"
                (command luukas :submit-application :id application-id) => ok?)
          (fact "Outside authority cannot use authority commands"
-               (command luukas :approve-application :id application-id :lang "fi") => unauthorized?
-               (command luukas :cancel-application-authority :id application-id :lang "fi" :text "") => unauthorized?)
-         (facts "Local authority cannot use applicant commands"
-                (command olli :cancel-application :id application-id :lang "fi" :text "")=> unauthorized?)
+               (command luukas :approve-application :id application-id :lang "fi") => unauthorized?)
          (fact "(Outside) authority cannot access the application"
                (query sonja :application :id application-id) => not-accessible?)
          (fact "Outside authority's comments are applicant comments"

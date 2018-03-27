@@ -158,8 +158,8 @@
 
 (def all-states (->> all-graphs (map keys) (apply concat) set))
 (def all-inforequest-states (-> default-inforequest-state-graph keys set (disj :canceled)))
-(def all-archiving-project-states (-> ark-state-graph keys set (disj :canceled :open)))
-(def all-application-states (difference all-states all-inforequest-states all-archiving-project-states))
+(def all-archiving-project-states (-> ark-state-graph keys set))
+(def all-application-states (difference all-states all-inforequest-states (disj all-archiving-project-states :canceled :open)))
 (def all-application-or-archiving-project-states (difference all-states all-inforequest-states))
 
 (defn terminal-state? [graph state]

@@ -45,17 +45,14 @@ $tree-height: 320px;
     }
   }
   .tree-nav {
-    .tree-back {
+    .tree-back, .tree-start {
       min-width: $cols1 * 1.5;
-      display: inline-block;
-      margin: $marginL $marginL 0 30px;
+      margin: $marginL 0 $marginL $marginL;
       height: 30px;
-    }
-    .tree-start {
-      min-width: $cols1 * 1.5;
-      display: inline-block;
-      margin: $marginL $marginL 0 30px;
-      height: 30px;
+      button {
+        display: inline-block;
+        position: relative;
+      }
     }
   }
   .tree-page {
@@ -80,7 +77,8 @@ $tree-height: 320px;
     }
     button {
       margin-top: $baseline;
-      width: 18em;
+      position: relative;
+      margin-right: $baseline;
     }
     .operation-description {
       margin-top: $marginL;

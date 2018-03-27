@@ -85,6 +85,12 @@ $pate-grid-margin: 10px;
   @include pate-grid( $i );
 }
 
+@mixin required-after {
+  content: " *";
+  color: $label-required-star-color;
+  padding-right: $marginS;
+}
+
 .pate-list {
   > .item {
     display: inline-block;
@@ -194,6 +200,20 @@ span.formatted {
   display: inline-block;
   &.warning {
     color: $negative;
+  }
+}
+
+span.markup {
+  display: inline-block;
+  p {
+    margin-bottom: $marginS;
+    color: $gray51;
+  }
+  span.underline {
+    text-decoration-line: underline;
+  }
+  ul, ol, blockquote {
+    margin-bottom: $marginS;
   }
 }
 
@@ -322,7 +342,6 @@ div.pate-verdict {
   }
 }
 
-
 // Phrases
 
 div.pate-phrases {
@@ -346,8 +365,64 @@ div.pate-phrases {
   }
 }
 
-span.phrase-text {
-  white-space: pre-wrap;
+div.phrase-edit-mode {
+  a:last-child,
+  label:last-child {
+    margin-left: $marginL;
+  }
+  a.required:after {
+    @include required-after;
+  }
+}
+
+// Typically used together with .markdown.
+span.phrase-preview {
+  border: 1px solid $gray187;
+  padding: 6px 12px;
+  background-color: $gray246;
+}
+
+$tab-border-color: $gray238;
+
+div.phrase-edit {
+  border: 1px solid $tab-border-color;
+  border-top: none;
+  padding: 10px 10px;
+  > * {width: 100%;}
+  > textarea {
+    min-height: 20em;
+  }
+}
+
+div.pate-tabbar {
+  display: table;
+  div.pate-tab {
+    display: table-cell;
+    border: 1px solid $tab-border-color;;
+    border-bottom: 1px solid $tab-border-color;
+    padding: 0 6px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    background-color: $gray246;
+  }
+  div.pate-tab__space {
+    display: table-cell;
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid $tab-border-color;
+  }
+  div.pate-tab__divider {
+    display: table-cell;
+    border: none;
+    border-bottom: 1px solid $tab-border-color;
+    min-width: 3px;
+    max-width: 3px;
+  }
+  div.pate-tab.pate-tab--active {
+    border: 1px solid $tab-border-color;
+    border-bottom: none;
+    background-color: initial;
+  }
 }
 
 // Autocomplete
@@ -646,9 +721,7 @@ div.pate-required-fields-note {
   display: inline-block;
   margin-right: $marginS;
   &:after {
-    content: " *";
-    color: $label-required-star-color;
-    padding-right: $marginS;
+    @include required-after;
   }
 }
 
@@ -718,4 +791,8 @@ div.pate-select-application-attachments {
 
 input.date-delta {
   max-width: 50%;
+}
+
+body.pate-error-page {
+  padding: 2em 2em;
 }

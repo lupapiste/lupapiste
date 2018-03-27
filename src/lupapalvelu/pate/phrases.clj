@@ -1,5 +1,5 @@
 (ns lupapalvelu.pate.phrases
-  (:require [lupapalvelu.pate.shared :as shared]
+  (:require [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
@@ -10,7 +10,7 @@
 (defn valid-category
   "Input validator for category parameter."
   [{data :data}]
-  (when-not (util/includes-as-kw? shared/phrase-categories (:category data))
+  (when-not (util/includes-as-kw? shared-schemas/phrase-categories (:category data))
     (fail :error.invalid-category)))
 
 (defn phrase-id-exists [command]

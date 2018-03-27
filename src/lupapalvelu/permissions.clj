@@ -3,7 +3,8 @@
             [clojure.java.io :as io]
             [schema.core :as sc]
             [sade.strings :as ss]
-            [sade.util :refer [fn->] :as util]))
+            [sade.util :refer [fn->] :as util]
+            [lupapalvelu.restrictions :as restrictions]))
 
 (defonce permission-tree (atom {}))
 
@@ -73,7 +74,7 @@
     (not company-submitter) submit-restriction))
 
 (defn get-company-permissions [{{{company-id :id company-role :role :as company} :company} :user
-                                {auth :auth} :application}]
+                                {auth :auth} :application :as command}]
   (when company-id
     (->> auth
          (filter (every-pred (comp #{company-id} :id)
@@ -81,13 +82,15 @@
          (map :role)
          (map (partial get-permissions-by-role :application))
          (reduce into #{})
-         (apply-company-restrictions company))))
+         (apply-company-restrictions company)
+         (restrictions/apply-auth-restrictions command))))
 
-(defn get-application-permissions [{{user-id :id} :user {auth :auth} :application}]
+(defn get-application-permissions [{{user-id :id} :user {auth :auth} :application :as command}]
   (->> (filter (comp #{user-id} :id) auth)
        (map :role)
        (map (partial get-permissions-by-role :application))
-       (reduce into #{})))
+       (reduce into #{})
+       (restrictions/apply-auth-restrictions command)))
 
 (defmacro defcontext
   "Creates an extender function for action context. Function takes only command parameter

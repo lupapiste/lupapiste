@@ -9,6 +9,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as op]
+            [lupapalvelu.restrictions :as restrictions]
             [lupapalvelu.rest.applications-data :as rest-application-data]
             [lupapalvelu.rest.schemas :refer [HakemusTiedot]]
             [lupapalvelu.state-machine :as sm]
@@ -37,7 +38,7 @@
                       (and (= :err (first result)) (not (ignored (second result)))))
                     (flatten (model/validate-fields application info nil data [])))]
       (when (seq results)
-        {:document-id id :schema-info schema-info :results results}))))
+        {:document-id id :schema-info (select-keys schema-info [:name :type :subtype]) :results results}))))
 
 (defn- validate-documents [ignored-errors {documents :documents :as application}]
   (let [results (filter seq (map (partial validate-doc ignored-errors application) documents))]
@@ -95,6 +96,27 @@
 
 ;; All auths are valid
 (mongocheck :applications validate-auth-array :auth)
+
+(def coerce-auth-restriction (ssc/json-coercer restrictions/AuthRestriction))
+
+(defn validate-auth-restriction-against-schema [auth-restriction]
+  (let [coercion-result (coerce-auth-restriction auth-restriction)]
+    (when (instance? schema.utils.ErrorContainer coercion-result)
+      (assoc auth-restriction
+             :error "Not valid auth-restriction"
+             :coercion-result coercion-result))))
+
+(defn validate-restricting-user-in-auths [auths {{restricting-user-id :id} :user :as restriction}]
+  (when-not (contains? (set (map :id auths)) restricting-user-id)
+    (assoc restriction :error "Restricting user not in auths")))
+
+(defn validate-auth-restrictions [{auth :auth auth-restrictions :authRestrictions}]
+  (->> (concat (map validate-auth-restriction-against-schema auth-restrictions)
+               (map (partial validate-restricting-user-in-auths auth) auth-restrictions))
+       (remove nil?)
+       seq))
+
+(mongocheck :applications validate-auth-restrictions :auth :authRestrictions)
 
 ;; Latest attachment version and latestVersion match
 (defn validate-latest-version [{id :id versions :versions latestVersion :latestVersion}]

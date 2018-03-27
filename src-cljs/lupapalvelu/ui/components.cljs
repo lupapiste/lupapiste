@@ -1,6 +1,7 @@
 (ns lupapalvelu.ui.components
   (:require [cljs.pprint :refer [pprint]]
             [clojure.string :as s]
+            [lupapalvelu.pate.markup :as markup]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components.datepicker :as datepicker]
             [lupapalvelu.ui.hub :as hub]
@@ -502,3 +503,60 @@
        :for          input-id
        :data-test-id (str test-id "-label")}
       (common/resolve-text options "")]]))
+
+(defn markup-span
+  "Converts given markdown string into HTML and returns the
+  corresponding span. Span class is :markdown and (optional) other
+  given classes."
+  [markup & class]
+  [:span.markup
+   {:class class}
+   (markup/markup->tags markup)])
+
+(rum/defc link-label < rum/reactive
+  "Component that alternates between link and label representation
+  based on the given flag atom. The link toggles the
+  atom. Options [optional]:
+
+  text or text-loc  See common/resolve-text
+  [required?]  Whether label/link is marked as required (default
+               false)
+  flag*        Flag atom
+  [negate?]    By default, the label is shown when flag is true.
+               Negate? negates that."
+  [{:keys [required? flag* negate?] :as options}]
+  (let [fun    (if negate? not identity)
+        label? (-> flag* rum/react fun)
+        class  (common/css-flags :required required?)
+        text   (common/resolve-text options)]
+    (if label?
+      [:label {:class class} text]
+      [:a {:on-click #(swap! flag* not)
+           :class    class}
+       text])))
+
+(rum/defc tabbar < rum/reactive
+  "Tabbar representation (only the bar). Options:
+
+  selected* Atom that holds the selected :id. The default id is the
+            first tab id.
+
+  tabs  Sequence of :id :text-loc (or :text, see common/resolve-text)
+        maps.
+
+  When a tab is selected its id is swapped into selected*."
+  [{:keys [selected* tabs]}]
+  (let [selected (or (rum/react selected*) (-> tabs first :id))]
+    [:div.pate-tabbar
+     (let [divider [:div.pate-tab__divider {}]
+           buttons (for [{id :id :as tab} tabs
+                         :let             [text (common/resolve-text tab)]]
+                     (if (= id selected)
+                       [:div.pate-tab.pate-tab--active
+                        {} text]
+                       [:div.pate-tab
+                        {}
+                        [:a {:on-click #(reset! selected* id)} text]]))]
+       (map #(assoc-in % [1 :key] (common/unique-id "tabbar-"))
+            (concat (interpose divider buttons)
+                    [[:div.pate-tab__space]])))]))

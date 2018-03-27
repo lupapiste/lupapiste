@@ -62,6 +62,7 @@ Open browser to login page
   Apply minimal fixture now
   Set integration proxy on
   Disable maps
+  Disable KTJ
 
 Go to login page
   Go to  ${LOGIN URL}
@@ -1017,8 +1018,8 @@ Cancel current application
 
 Cancel current application as authority
   [Arguments]  ${reason}=${EMPTY}
-  Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-authority-btn"]
-  Click enabled by test id  application-cancel-authority-btn
+  Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
+  Click enabled by test id  application-cancel-btn
   Fill test id  modal-dialog-textarea  ${reason}
   Confirm yes no dialog
 
@@ -1345,8 +1346,6 @@ Enable maps
 Set integration proxy on
   Execute Javascript  ajax.post("/api/proxy-ctrl/on").call();
   Wait for jQuery
-  Execute Javascript  ajax.command("set-feature", {feature: "disable-ktj-on-create", value:false}).call();
-  Wait for jQuery
 
 Disable maps
   Execute Javascript  ajax.command("set-feature", {feature: "maps-disabled", value:true}).call();
@@ -1355,7 +1354,13 @@ Disable maps
 Set integration proxy off
   Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
   Wait for jQuery
+
+Disable KTJ
   Execute Javascript  ajax.command("set-feature", {feature: "disable-ktj-on-create", value:true}).call();
+  Wait for jQuery
+
+Enable KTJ
+  Execute Javascript  ajax.command("set-feature", {feature: "disable-ktj-on-create", value:false}).call();
   Wait for jQuery
 
 #

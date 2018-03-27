@@ -41,6 +41,7 @@ jQuery(document).ready(function() {
     {name: "yes-no-dialog"},
     {name: "yes-no-select-dialog"},
     {name: "textarea-dialog"},
+    {name: "company-approve-invite-dialog"},
     {name: "yes-no-button-group"},
     {name: "company-registration-init"},
     {name: "invoice-operator-selector"},
