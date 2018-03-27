@@ -337,10 +337,11 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.submitButtonFunction = ko.pureComputed(function() {
-    if (lupapisteApp.models.applicationAuthModel.ok("application-submittable")) {
-      return self.submitApplication;
-    } else if (lupapisteApp.models.applicationAuthModel.ok("submit-archiving-project")) {
+    if (lupapisteApp.models.applicationAuthModel.ok("submit-archiving-project")) {
       return self.submitArchivingProject;
+    }
+    else if (lupapisteApp.models.applicationAuthModel.ok("application-submittable")) {
+      return self.submitApplication;
     } else {
       return false;
     }
