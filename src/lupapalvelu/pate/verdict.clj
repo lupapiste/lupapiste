@@ -17,6 +17,7 @@
             [lupapalvelu.pate.review :as review]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.tasks :as pate-tasks]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.tasks :as tasks]
@@ -715,9 +716,16 @@
                                      (assoc k :amount (count v)))))))}))
 
 (defn pate-verdict->tasks [verdict buildings {ts :created}]
-  (->> (get-in verdict [:data :reviews])
-       (map (partial review/review->task verdict buildings ts))
-       (remove nil?)))
+  (let [review-tasks    (->> (get-in verdict [:data :reviews])
+                             (map (partial review/review->task verdict buildings ts))
+                             (remove nil?))
+        plans-tasks     (->> (get-in verdict [:data :plans])
+                             (map #(pate-tasks/plan->task verdict ts %))
+                             (remove nil?))
+        condition-tasks (->> (get-in verdict [:data :conditions])
+                             (map #(pate-tasks/condition->task verdict ts %))
+                             (remove nil?))]
+    (lazy-cat review-tasks plans-tasks condition-tasks)))
 
 (defn log-task-katselmus-errors [tasks]
   (when-let [errs (seq (mapv (partial tasks/task-doc-validation "task-katselmus") tasks))]
