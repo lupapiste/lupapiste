@@ -38,7 +38,7 @@
                       (and (= :err (first result)) (not (ignored (second result)))))
                     (flatten (model/validate-fields application info nil data [])))]
       (when (seq results)
-        {:document-id id :schema-info schema-info :results results}))))
+        {:document-id id :schema-info (select-keys schema-info [:name :type :subtype]) :results results}))))
 
 (defn- validate-documents [ignored-errors {documents :documents :as application}]
   (let [results (filter seq (map (partial validate-doc ignored-errors application) documents))]
