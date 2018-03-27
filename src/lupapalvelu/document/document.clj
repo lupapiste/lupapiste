@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.document
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error]]
             [monger.operators :refer :all]
+            [swiss.arrows :refer [-<>>]]
             [sade.core :refer [ok fail fail! unauthorized! now]]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -140,6 +141,21 @@
   (when document
     (when-not (or (not (created-after-verdict? document application)) (approved? document))
       (fail :error.document-not-approved))))
+
+;;
+;; Document updates
+;;
+
+(defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
+  (-<>> docs
+        (map-indexed
+          (fn [i doc]
+            (->> (model/validate application doc)
+                 (filter #(= (:result %) [:err "application-does-not-have-given-auth"]))
+                 (map (comp (partial map name) :path))
+                 (map (comp (partial ss/join ".") (partial concat ["documents" i "data"]))))))
+        flatten
+        (zipmap <> (repeat ""))))
 
 ;;
 ;; KTJ-info updation
