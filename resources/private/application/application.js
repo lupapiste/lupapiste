@@ -273,6 +273,7 @@
 
       // permit subtypes
       applicationModel.permitSubtypes(applicationDetails.permitSubtypes);
+      applicationModel.permitSubtype(applicationDetails.application.permitSubtype);
 
       // Organization's TOS functions
       initAvailableTosFunctions(applicationDetails.application.organization);
