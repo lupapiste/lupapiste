@@ -95,6 +95,10 @@
    :plans [{:id "5a85960a809b5a1e454f3233",
             :name {:fi "Suunnitelmat", :sv "Planer", :en "Plans"},
             :category "r",
+            :deleted false}
+           {:id "5a85960a809b5a1e454f3234",
+            :name {:fi "ErityisSuunnitelmat", :sv "SpecialPlaner", :en "SpecialPlans"},
+            :category "r",
             :deleted false}]})
 
 (sc/validate ps/PateSavedVerdictTemplates verdic-templates-setting)

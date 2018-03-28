@@ -108,6 +108,8 @@
   :error.invalid-value-path)
 
 (defn schema-error [{:keys [schema path value schema-overrides type]}]
+  (println "validoidaan :;; " value "  polkuun :;; " path)
+  (println (sc/check schema value))
   (if-let [schema (st/get-in (get schema-overrides type schema) path)]
     (when (sc/check schema value)
       :error.invalid-value)
