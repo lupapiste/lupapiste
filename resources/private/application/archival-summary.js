@@ -481,12 +481,16 @@
       attachmentsService.convertToPdfA(attachmentId);
     };
 
+    self.archivingDates = ko.observable(params.application.archived);
+
+    self.blockMarkArchived = ko.observable(false);
+
     self.markPreVerdictPhaseArchivedEnabled = self.disposedPureComputed(function() {
-      return lupapisteApp.models.applicationAuthModel.ok("mark-pre-verdict-phase-archived");
+      return !self.blockMarkArchived() && lupapisteApp.models.applicationAuthModel.ok("mark-pre-verdict-phase-archived");
     });
 
     self.markFullyArchivedEnabled = self.disposedPureComputed(function() {
-      return lupapisteApp.models.applicationAuthModel.ok("mark-fully-archived");
+      return !self.blockMarkArchived() && lupapisteApp.models.applicationAuthModel.ok("mark-fully-archived");
     });
 
     self.showMarkArchivedSection = self.disposedPureComputed(function() {
@@ -496,9 +500,13 @@
     });
 
     function markApplicationArchived(cmd) {
+      self.blockMarkArchived(true);
       ajax
         .command(cmd, {id: ko.unwrap(params.application.id)})
         .success(function() {
+          window.setTimeout(function(){
+            self.blockMarkArchived(false);
+          }, 5000);
           repository.load(ko.unwrap(params.application.id));
         })
         .call();
