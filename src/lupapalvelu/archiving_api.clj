@@ -72,7 +72,7 @@
   {:parameters       [:id]
    :input-validators [(partial non-blank-parameters [:id])]
    :permissions      [{:required [:application/archive]}]
-   :states           states/post-verdict-states
+   :states           states/archival-final-states
    :pre-checks       [permit/is-not-archiving-project
                       (fn [{:keys [application]}]
                         (when-not (get-in application [:archived :application])

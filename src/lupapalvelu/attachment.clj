@@ -370,9 +370,10 @@
   (let [attachment-data (create-attachment-data application options)]
     (update-application
      (application->command application)
-     (merge (when set-app-modified?
-              {$set {:modified ts}})
-            {$push {:attachments attachment-data}}))
+     (util/deep-merge (when set-app-modified?
+                        {$set {:modified ts}})
+                      {$push {:attachments attachment-data}
+                       $set {:archived.completed nil}}))    ; Adding a new attachment means that the application is not completely archived
     (tos/update-process-retention-period (:id application) ts)
     attachment-data))
 
