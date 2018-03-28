@@ -6,14 +6,13 @@
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.assignment :as assignment]
-            [lupapalvelu.authorization :as auth]
+            [lupapalvelu.building-site :as bsite]
+            [lupapalvelu.document.approval :as approval]
             [lupapalvelu.document.document :refer :all]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]))
 
@@ -96,7 +95,7 @@
     (when fetchRakennuspaikka
       (let [property-id (or (tools/get-update-item-value updates "kiinteisto.kiinteistoTunnus")
                             (get-in command [:application :propertyId]))]
-        (fetch-and-persist-ktj-tiedot (:application command) document property-id (now))))
+        (bsite/fetch-and-persist-ktj-tiedot (:application command) document property-id (now))))
     (ok :doc (:id document))))
 
 (defcommand remove-doc
@@ -198,7 +197,7 @@
    :pre-checks       [(editable-by-state? states/approve-doc-states)
                       doc-disabled-validator]}
   [command]
-  (ok :approval (approve command "approved")))
+  (ok :approval (approval/approve command "approved")))
 
 (defcommand reject-doc
   {:parameters       [:id :doc :path]
@@ -209,7 +208,7 @@
    :pre-checks       [(editable-by-state? states/approve-doc-states)
                       doc-disabled-validator]}
   [command]
-  (ok :approval (approve command "rejected")))
+  (ok :approval (approval/approve command "rejected")))
 
 (defcommand reject-doc-note
   {:description      "Explanatory note regarding the reject reason. Adding
@@ -222,7 +221,7 @@
    :permissions      [{:required [:application/edit :document/approve]}]
    :pre-checks       [(editable-by-state? states/approve-doc-states)]}
   [command]
-  (set-rejection-note command note)
+  (approval/set-rejection-note command note)
   (ok))
 
 ;;
