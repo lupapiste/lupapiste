@@ -78,7 +78,7 @@
       </div>
       <!-- /ko -->
       <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("force-fix-tos-function-for-application") -->
-      <div class="tos-function-correction">
+      <div class="tos-function-correction spacerL">
         <div>
           <h2 data-bind="ltext: 'tos.function.fix'"></h2>
           <p data-bind="ltext: 'tos.function.fix.guide'"></p>
@@ -105,6 +105,23 @@
         </div>
       </div>
       <!-- /ko -->
+
+      <div data-bind="if: util.getIn(archivingDates, ['initial'])" class="spacerL">
+        <h2>Arkistointipäivämäärät</h2>
+        <div>
+          <span>Ensimmäinen arkistointi:</span>
+          <span data-bind="dateString: archivingDates().initial"></span>
+        </div>
+        <div data-bind="if: archivingDates().application">
+          <span>Hakemusvaihe arkistoitu:</span>
+          <span data-bind="dateString: archivingDates().application"></span>
+        </div>
+        <div data-bind="if: archivingDates().completed">
+          <span>Kokonaan arkistoitu:</span>
+          <span data-bind="dateString: archivingDates().completed"></span>
+        </div>
+      </div>
+
       <!-- ko if: showMarkArchivedSection -->
       <div class="mark-as-archived">
         <h2 data-bind="ltext: 'archivalSummary.markArchived.heading'"></h2>
