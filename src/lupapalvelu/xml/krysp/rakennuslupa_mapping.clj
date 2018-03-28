@@ -99,7 +99,9 @@
                              {:tag :uima-altaita}
                              {:tag :vaestonsuoja}]}
                     {:tag :jaahdytysmuoto}
-                    {:tag :asuinhuoneistot :child [huoneisto]}]}
+                    {:tag :asuinhuoneistot :child [huoneisto
+                                                   {:tag :asuntojenPintaala}
+                                                   {:tag :asuntojenLkm}]}]}
            {:tag :rakentajatyyppi}
            {:tag :omistajatieto
             :child [{:tag :Omistaja
