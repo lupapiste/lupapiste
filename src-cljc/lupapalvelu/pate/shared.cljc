@@ -566,8 +566,7 @@
 (defn versub-dates
   "Verdict handler title is different in :r and :p verdicts."
   [category]
-  {:dictionary (assoc (->> [:julkipano :anto :muutoksenhaku
-                            :lainvoimainen :aloitettava :voimassa]
+  {:dictionary (assoc (->> verdict-dates
                            (map (fn [kw]
                                   [kw (required {:date {:disabled?
                                                         :automatic-verdict-dates}})]))

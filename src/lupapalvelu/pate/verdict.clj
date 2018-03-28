@@ -348,35 +348,41 @@
     {:giver      (:giver data)
      :exclusions exclusions}))
 
-(defn default-verdict-draft [{:keys [category published] :as template}]
+(defn default-verdict-draft
+  "Prepares the default initmap with :template, :data and :references
+  keys. Resolves inclusions and initial values from the template."
+  [{:keys [category published] :as template}]
   (let [dic                (:dictionary (shared/verdict-schema category))
         {:keys [data
                 settings]} published
-        incs               (inclusions category published)]
+        incs               (inclusions category published)
+        included?          #(contains? (set incs) %)]
     {:template {:inclusions incs}
-     :data     (reduce (fn [acc kwp]
-                         (let [dict                (-> kwp
-                                                       util/split-kw-path
-                                                       first)
-                               {:keys [template-dict
-                                       repeating]} (dict dic)
-                               initial-value (and template-dict
-                                                  (template-dict data))]
-                           (cond
-                             ;; So far only one level repeating can be initialized
-                             (and initial-value repeating)
-                             (reduce (fn [m v]
-                                       (assoc-in m [dict (mongo/create-id)] v))
-                                     acc
-                                     initial-value)
+     :data     (reduce-kv (fn [acc dict value]
+                            (let [{:keys [template-dict
+                                          repeating]} value
+                                  initial-value       (and template-dict
+                                                           (template-dict data))]
+                              (cond
+                                ;; So far only one level repeating can be initialized
+                                (and initial-value repeating)
+                                (reduce (fn [m v]
+                                          (reduce-kv (fn [a inner-k inner-v]
+                                                       (cond-> a
+                                                         (included? (util/kw-path dict inner-k))
+                                                         (assoc-in [dict (mongo/create-id) inner-k] inner-v)))
+                                                     m
+                                                     v))
+                                        acc
+                                        initial-value)
 
-                             initial-value
-                             (assoc acc dict initial-value)
+                                (and initial-value (included? dict))
+                                (assoc acc dict initial-value)
 
-                             :else
-                             acc)))
-                       {}
-                       incs)
+                                :else
+                                acc)))
+                          {}
+                          dic)
      :references settings}))
 
 
@@ -397,24 +403,84 @@
 ;; The return value is the modified (if needed) draft.
 (defmulti initialize-verdict-draft (util/fn-> :template :category keyword))
 
+;; Initialization helper functions
+(defn section-removed? [template section]
+  (contains? (published-template-removed-sections (:published template))
+             section))
+
+(defn dict-included? [{:keys [draft]} dict]
+  (contains? (-> draft :template :inclusions set) dict))
+
+(defn init--included-checks
+  "Included toggle value according to the template section status."
+  [{:keys [template] :as initmap} & kw]
+  (update-in initmap
+             [:draft :data]
+             (fn [data]
+               (reduce (fn [acc k]
+                         (assoc acc
+                                (-> (name k)
+                                    (str "-included")
+                                    keyword)
+                                (not (section-removed? template k))))
+                       data
+                       kw))))
+
+(defn init--verdict-dates
+  "Include in verdict only those verdict dates that have been checked in
+  the template."
+  [{:keys [template] :as initmap}]
+  (update-in initmap
+             [:draft :template :inclusions]
+             (fn [incs]
+               (let [{:keys [verdict-dates]} (-> template :published :data)]
+                 (-> incs
+                     ;; Only include those dates that are checked in the template.
+                     (util/difference-as-kw shared/verdict-dates)
+                     (util/union-as-kw verdict-dates))))))
+
+(defn init--upload
+  "Upload is included if the attachments section is not removed and
+  upload is checked in the template. Note that the attachments section
+  dependence has been resolved earlier."
+    [{:keys [template] :as initmap}]
+  (update-in initmap
+             [:draft :template :inclusions]
+             (fn [incs]
+               (util/difference-as-kw incs
+                                      (when-not (some-> template
+                                                        :published
+                                                        :data
+                                                        :upload)
+                                        [:upload])))))
+
+(defn init--verdict-giver-type
+  "Adds giver key into template. The value is either lautakunta or
+  viranhaltija."
+  [{:keys [template] :as initmap}]
+  (assoc-in initmap
+            [:draft :template :giver]
+            (some-> template :published :data :giver)))
+
+(defn init--dict-by-application
+  "Inits given dict (if included) with the app-fn result (if the result
+  is non-nil). App-fn takes application as an argument"
+  [{:keys [application] :as initmap} dict app-fn]
+  (let [value (when (dict-included? initmap dict)
+                (app-fn application))]
+    (if (nil? value)
+      initmap
+      (assoc-in initmap [:draft :data dict] value))))
+
 (defmethod initialize-verdict-draft :r
-  [{:keys [template application draft]}]
-  (let [removed  (template-removed-sections (:published template))
-        removed? #(contains? removed %)]
-    (-> draft
-        (update :data (fn [data]
-                        (assoc data
-                               :foremen-included (not (removed? :foremen))
-                               :reviews-included (not (removed? :reviews))
-                               :plans-included (not (removed? :plans))
-                               :handler (general-handler application)
-                               :deviations (application-deviations application))))
-        (update-in [:template :inclusions] (fn [incs]
-                                             (->> template :published :data
-                                                  :verdict-dates
-                                                  (concat incs)
-                                                  (remove nil?)
-                                                  distinct))))))
+  [initmap]
+  (-> initmap
+      (init--included-checks :plans :reviews :foremen)
+      (init--dict-by-application :handler general-handler)
+      (init--dict-by-application :deviations application-deviations)
+      init--verdict-dates
+      init--upload
+      init--verdict-giver-type))
 
 (defn new-verdict-draft [template-id {:keys [application organization created]
                                       :as   command}]
