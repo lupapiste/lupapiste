@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.document
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error]]
             [monger.operators :refer :all]
+            [swiss.arrows :refer [-<>>]]
             [sade.core :refer [ok fail fail! unauthorized! now]]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -9,7 +10,6 @@
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -17,9 +17,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.states :as states]
-            [lupapalvelu.wfs :as wfs]
-            [clj-time.format :as tf]))
+            [lupapalvelu.states :as states]))
 
 ;;
 ;; Validators
@@ -142,64 +140,19 @@
       (fail :error.document-not-approved))))
 
 ;;
-;; KTJ-info updation
+;; Document updates
 ;;
 
-(def ktj-format (tf/formatter "yyyyMMdd"))
-(def output-format (tf/formatter "dd.MM.yyyy"))
-
-(defn fetch-and-persist-ktj-tiedot [application document property-id time]
-  (when-let [ktj-tiedot (wfs/rekisteritiedot-xml property-id)]
-    (let [doc-updates [[[:kiinteisto :tilanNimi] (or (:nimi ktj-tiedot) "")]
-                       [[:kiinteisto :maapintaala] (or (:maapintaala ktj-tiedot) "")]
-                       [[:kiinteisto :vesipintaala] (or (:vesipintaala ktj-tiedot) "")]
-                       [[:kiinteisto :rekisterointipvm] (or
-                                                          (try
-                                                            (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                            (catch Exception e (:rekisterointipvm ktj-tiedot)))
-                                                          "")]]
-          schema (schemas/get-schema (:schema-info document))
-          updates (filter (partial doc-persistence/update-key-in-schema? (:body schema)) doc-updates)]
-      (doc-persistence/persist-model-updates application "documents" document updates time))))
-
-
-;;
-;; Document approvals
-;;
-
-(defn- validate-approvability [{{:keys [doc path collection]} :data application :application}]
-  (let [path-v (if (ss/blank? path) [] (ss/split path #"\."))
-        document (doc-persistence/by-id application collection doc)]
-    (if document
-      (when-not (model/approvable? document path-v)
-        (fail :error.document-not-approvable))
-      (fail :error.document-not-found))))
-
-(defn- ->approval-mongo-model
-  "Creates a mongo update map of approval data.
-   To be used within model/with-timestamp. Does not overwrite the rejection note."
-  [path approval]
-  (let [mongo-path (if (ss/blank? path) "documents.$.meta._approved" (str "documents.$.meta." path "._approved"))
-        approval-pairs (map (fn [[k v]]
-                              [(format "%s.%s" mongo-path (name k)) v])
-                            approval)]
-    {$set (into {:modified (model/current-timestamp)} approval-pairs)}))
-
-(defn- update-approval [{{:keys [doc path]} :data created :created :as command} approval-data]
-  (or
-   (validate-approvability command)
-   (model/with-timestamp created
-     (update-application
-      command
-      {:documents {$elemMatch {:id doc}}}
-      (->approval-mongo-model path approval-data))
-     approval-data)))
-
-(defn approve [{:keys [user created] :as command} status]
-  (update-approval command (model/with-timestamp created (model/->approved status user))))
-
-(defn set-rejection-note [command note]
-  (update-approval command {:note note}))
+(defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
+  (-<>> docs
+        (map-indexed
+          (fn [i doc]
+            (->> (model/validate application doc)
+                 (filter #(= (:result %) [:err "application-does-not-have-given-auth"]))
+                 (map (comp (partial map name) :path))
+                 (map (comp (partial ss/join ".") (partial concat ["documents" i "data"]))))))
+        flatten
+        (zipmap <> (repeat ""))))
 
 
 ;;

@@ -1,8 +1,7 @@
 (ns lupapalvelu.authorization-api
   "API for manipulating application.auth"
   (:require [taoensso.timbre :refer [debug error errorf]]
-            [clojure.string :refer [blank? join trim split]]
-            [swiss.arrows :refer [-<>>]]
+            [clojure.string :refer [blank? trim split]]
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.core :refer [ok fail fail! unauthorized]]
@@ -11,7 +10,7 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.authorization-messages] ; notification definitions
-            [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
@@ -144,17 +143,6 @@
           (doc-persistence/do-set-user-to-document application document-id (:id user) (get-in auth [:invite :path]) created user false)))
       (ok))))
 
-(defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
-  (-<>> docs
-    (map-indexed
-      (fn [i doc]
-        (->> (model/validate application doc)
-          (filter #(= (:result %) [:err "application-does-not-have-given-auth"]))
-          (map (comp (partial map name) :path))
-          (map (comp (partial join ".") (partial concat ["documents" i "data"]))))))
-    flatten
-    (zipmap <> (repeat ""))))
-
 (defn do-remove-auth [{{auth :auth :as application} :application :as command} username]
   (let [username (ss/canonize-email username)
         last-invite-permission? (->> (auth/get-auths-by-permissions application [:application/invite])
@@ -166,7 +154,7 @@
                     (fn [auth-entry] (= username (:username auth-entry))))]
     (when (some user-pred (:auth application))
       (let [updated-app (update-in application [:auth] (fn [a] (remove user-pred a)))
-            doc-updates (generate-remove-invalid-user-from-docs-updates updated-app)]
+            doc-updates (doc/generate-remove-invalid-user-from-docs-updates updated-app)]
         (update-application command
           (util/deep-merge
             {$pull {:auth (if last-invite-permission?

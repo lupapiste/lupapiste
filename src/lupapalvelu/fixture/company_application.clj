@@ -3,7 +3,18 @@
             [lupapalvelu.fixture.core :refer [deffixture]]
             [lupapalvelu.fixture.minimal :as minimal]))
 
-(def users (filter (comp #{"admin" "sonja" "pena" "kaino@solita.fi" "erkki@example.com"} :username) minimal/users))
+(def selected-users #{"admin" "sonja" "pena" "kaino@solita.fi" "erkki@example.com" "teppo@example.com"})
+
+(defn teppo-to-solita [users]
+  (letfn [(do-teppo [user]
+            (if (= (:username user) "teppo@example.com")
+              (assoc user :company {:id "solita" :role "user" :submit true})
+              user))]
+    (map do-teppo users)))
+
+(def users (->> minimal/users
+                (filter (comp selected-users :username))
+                (teppo-to-solita)))
 
 (def organizations (filter (comp (set (mapcat (comp keys :orgAuthz) users)) keyword :id) minimal/organizations))
 
