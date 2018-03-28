@@ -8,7 +8,7 @@
 (defn teppo-to-solita [users]
   (letfn [(do-teppo [user]
             (if (= (:username user) "teppo@example.com")
-              (assoc user :company {:id "solita" :role "user"})
+              (assoc user :company {:id "solita" :role "user" :submit true})
               user))]
     (map do-teppo users)))
 
