@@ -88,7 +88,9 @@
           :modified                     ssc/Timestamp
           :data                         sc/Any
           (sc/optional-key :references) PatePublishedSettings
-          :template                     sc/Any}))
+          :template                     {:inclusions [sc/Keyword]
+                                         (sc/optional-key :giver) (sc/enum "viranhaltija"
+                                                                           "lautakunta")}}))
 
 ;; Schema utils
 

@@ -303,18 +303,20 @@
  (facts "Initialize mock verdict draft"
    (fact "default, no removed sections"
      (default-verdict-draft (templater [] :t-two "Hello"))
-     => {:template   {:inclusions [:one :two :three :four
+     => {:category   "r"
+         :template   {:inclusions [:one :two :three :four
                                    :five.r-one :five.r-two
                                    :five.r-three.r-sub-one
                                    :five.r-three.r-sub-two
                                    :six :seven.up]}
-         :data       {:two   "Hello"}
+         :data       {:two "Hello"}
          :references {:verdict-code ["osittain-myonnetty"]}})
    (fact "default, :t-second removed"
      (default-verdict-draft (templater [:t-second]
                                        :t-two "Hello"
                                        :giver true))
-     => {:template   {:inclusions [:one :three :four
+     => {:category   "r"
+         :template   {:inclusions [:one :three :four
                                    :five.r-one :five.r-two
                                    :five.r-three.r-sub-one
                                    :five.r-three.r-sub-two
@@ -345,7 +347,8 @@
                                 :plans       false
                                 :attachments false
                                 :conditions  false
-                                :deviations  false}}}
+                                :deviations  false
+                                :buildings   false}}}
    :sections []})
 
 (def mini-verdict
@@ -371,20 +374,26 @@
                        :template-section :deviations}
     :foremen          {:reference-list {:path :foremen
                                         :type :multi-select}
-                       :template-dict :foremen}
+                       :template-dict  :foremen}
     :foremen-included {:toggle {}}
     :reviews-included {:toggle {}}
     :reviews          {:reference-list {:path :reviews
                                         :type :multi-select}
-                       :template-dict :reviews}
+                       :template-dict  :reviews}
     :plans            {:reference-list {:path :plans
                                         :type :multi-select}
-                       :template-dict :plans}
+                       :template-dict  :plans}
     :plans-included   {:toggle {}}
-    :upload           {:attachments {}
+    :upload           {:attachments      {}
                        :template-section :attachments}
     :attachments      {:application-attachments {}
-                       :template-section :attachments}}
+                       :template-section        :attachments}
+    :buildings        {:repeating        {:rakennetut-autopaikat  {:text {}}
+                                          :kiinteiston-autopaikat {:text {}}
+                                          :autopaikat-yhteensa    {:text {}}
+                                          :vss-luokka             {:text {}}
+                                          :paloluokka             {:text {}}}
+                       :template-section :buildings}}
    :sections []})
 
 (defn draftee [& args]
@@ -426,7 +435,8 @@
      => mini-verdict)
 
    (fact "init included checks"
-     (init--included-checks (draftee [:conditions :deviations :attachments])
+     (init--included-checks (draftee [:conditions :deviations :attachments
+                                      :buildings])
                             :plans)
      => (check-draft :inclusions [:julkipano :anto :lainvoimainen
                                   :voimassa :muutoksenhaku :aloitettava
@@ -436,7 +446,7 @@
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data       {:plans-included true})
      (init--included-checks (draftee [:conditions :deviations
-                                      :attachments :foremen])
+                                      :attachments :foremen :buildings])
                             :plans :foremen :reviews)
      => (check-draft :inclusions [:julkipano :anto :lainvoimainen
                                   :voimassa :muutoksenhaku :aloitettava
@@ -448,14 +458,16 @@
                                   :foremen-included false
                                   :reviews-included true}))
    (fact "init verdict-dates"
-     (init--verdict-dates (draftee [:conditions :deviations :attachments]
+     (init--verdict-dates (draftee [:conditions :deviations :attachments
+                                    :buildings]
                                    :verdict-dates []))
      => (check-draft :inclusions [:handler :paatosteksti :foremen
                                   :foremen-included :plans
                                   :plans-included :reviews :reviews-included]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data       {})
-     (init--verdict-dates (draftee [:conditions :deviations :attachments]
+     (init--verdict-dates (draftee [:conditions :deviations :attachments
+                                    :buildings]
                                    :verdict-dates [:julkipano
                                                    :anto
                                                    :voimassa]))
@@ -475,7 +487,10 @@
                                   :conditions.condition
                                   :conditions.remove-condition
                                   :add-condition :deviations
-                                  :attachments]
+                                  :attachments :buildings.rakennetut-autopaikat
+                                  :buildings.kiinteiston-autopaikat
+                                  :buildings.autopaikat-yhteensa
+                                  :buildings.vss-luokka :buildings.paloluokka]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {}))
    (fact "init upload: upload checked"
@@ -488,7 +503,11 @@
                                   :conditions.condition
                                   :conditions.remove-condition
                                   :add-condition :deviations
-                                  :attachments :upload]
+                                  :attachments :upload
+                                  :buildings.rakennetut-autopaikat
+                                  :buildings.kiinteiston-autopaikat
+                                  :buildings.autopaikat-yhteensa
+                                  :buildings.vss-luokka :buildings.paloluokka]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {}))
    (fact "init upload: upload checked, attachments removed"
@@ -500,7 +519,11 @@
                                   :plans-included :reviews :reviews-included
                                   :conditions.condition
                                   :conditions.remove-condition
-                                  :add-condition :deviations]
+                                  :add-condition :deviations
+                                  :buildings.rakennetut-autopaikat
+                                  :buildings.kiinteiston-autopaikat
+                                  :buildings.autopaikat-yhteensa
+                                  :buildings.vss-luokka :buildings.paloluokka]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {}))
    (fact "init upload: upload unchecked, attachments removed"
@@ -512,12 +535,16 @@
                                   :plans-included :reviews :reviews-included
                                   :conditions.condition
                                   :conditions.remove-condition
-                                  :add-condition :deviations]
+                                  :add-condition :deviations
+                                  :buildings.rakennetut-autopaikat
+                                  :buildings.kiinteiston-autopaikat
+                                  :buildings.autopaikat-yhteensa
+                                  :buildings.vss-luokka :buildings.paloluokka]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {}))
    (fact "init verdict giver type: viranhaltija"
      (init--verdict-giver-type (draftee [:conditions :deviations
-                                         :attachments]))
+                                         :attachments :buildings]))
      => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
                                   :lainvoimainen :voimassa :aloitettava
                                   :handler :paatosteksti :foremen
@@ -529,7 +556,7 @@
                      :data {}))
    (fact "init verdict giver type: lautakunta"
      (init--verdict-giver-type (draftee [:conditions :deviations
-                                         :attachments]
+                                         :attachments :buildings]
                                         :giver true))
      => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
                                   :lainvoimainen :voimassa :aloitettava
@@ -543,7 +570,7 @@
                      :data {}))
    (fact "init by application: handler - no handler"
      (init--dict-by-application (assoc (draftee [:conditions :deviations
-                                                 :attachments])
+                                                 :attachments :buildings])
                                        :application {})
                                 :handler general-handler)
      => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
@@ -556,7 +583,7 @@
                      :data {:handler ""}))
    (fact "init by application: handler - Bob Builder"
      (init--dict-by-application (assoc (draftee [:conditions :deviations
-                                                 :attachments])
+                                                 :attachments :buildings])
                                        :application {:handlers [{:general   true
                                                                  :firstName "Bob"
                                                                  :lastName  "Builder"}]})
@@ -570,7 +597,8 @@
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {:handler "Bob Builder"}))
    (fact "init by application: deviations - no deviations"
-     (init--dict-by-application (assoc (draftee [:conditions :attachments])
+     (init--dict-by-application (assoc (draftee [:conditions :attachments
+                                                 :buildings])
                                        :application {:documents []})
                                 :deviations application-deviations)
      => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
@@ -582,7 +610,7 @@
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {:deviations ""}))
       (fact "init by application: deviations - Cannot live by your rules, man!"
-        (init--dict-by-application (assoc (draftee [:conditions :attachments])
+        (init--dict-by-application (assoc (draftee [:conditions :attachments :buildings])
                                           :application
                                           {:documents
                                            [{:schema-info {:name "hankkeen-kuvaus"}
@@ -598,7 +626,7 @@
                         :data {:deviations "Cannot live by your rules, man!"}))
       (fact "init by application: deviations - template section removed"
         (init--dict-by-application (assoc (draftee [:conditions :attachments
-                                                    :deviations])
+                                                    :deviations :buildings])
                                           :application
                                           {:documents
                                            [{:schema-info {:name "hankkeen-kuvaus"}
@@ -612,6 +640,65 @@
                                      :reviews-included]
                         :references {:verdict-code ["osittain-myonnetty"]}
                         :data {}))
+      (fact "init buildings: no buildings, no template data"
+        (init--buildings (draftee [:conditions :deviations :attachments :buildings]))
+        => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
+                                     :lainvoimainen :voimassa :aloitettava
+                                     :handler :paatosteksti :foremen
+                                     :foremen-included :plans
+                                     :plans-included :reviews
+                                     :reviews-included]
+                        :references {:verdict-code ["osittain-myonnetty"]}
+                        :data {}))
+      (fact "init buildings: no buildings, template data"
+        (init--buildings (draftee [:conditions :deviations :attachments :buildings]
+                                  :autopaikat true))
+        => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
+                                     :lainvoimainen :voimassa :aloitettava
+                                     :handler :paatosteksti :foremen
+                                     :foremen-included :plans
+                                     :plans-included :reviews
+                                     :reviews-included]
+                        :references {:verdict-code ["osittain-myonnetty"]}
+                        :data {}))
+      (fact "init buildings: buildings, no template data"
+        (init--buildings (draftee [:conditions :deviations :attachments]))
+        => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
+                                     :lainvoimainen :voimassa :aloitettava
+                                     :handler :paatosteksti :foremen
+                                     :foremen-included :plans
+                                     :plans-included :reviews
+                                     :reviews-included]
+                        :references {:verdict-code ["osittain-myonnetty"]}
+                        :data {}))
+      (fact "init buildings: buildings, autopaikat"
+        (init--buildings (draftee [:conditions :deviations :attachments]
+                                  :autopaikat true))
+        => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
+                                     :lainvoimainen :voimassa :aloitettava
+                                     :handler :paatosteksti :foremen
+                                     :foremen-included :plans
+                                     :plans-included :reviews
+                                     :reviews-included
+                                     :buildings.rakennetut-autopaikat
+                                     :buildings.kiinteiston-autopaikat
+                                     :buildings.autopaikat-yhteensa]
+                        :references {:verdict-code ["osittain-myonnetty"]}
+                        :data {}))
+      (fact "init buildings: buildings, vss-luokka and paloluokka"
+        (init--buildings (draftee [:conditions :deviations :attachments]
+                                  :vss-luokka true
+                                  :paloluokka true))
+        => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
+                                     :lainvoimainen :voimassa :aloitettava
+                                     :handler :paatosteksti :foremen
+                                     :foremen-included :plans
+                                     :plans-included :reviews
+                                     :reviews-included
+                                     :buildings.vss-luokka
+                                     :buildings.paloluokka]
+                        :references {:verdict-code ["osittain-myonnetty"]}
+                        :data {}))
       (fact "initialize-verdict-draft"
         (let [init (initialize-verdict-draft
                     (assoc (draftee [:foremen]
@@ -620,7 +707,9 @@
                                                  {:condition "Carry on"}]
                                     :verdict-dates ["anto" "voimassa"]
                                     :foremen ["vastaava-tj" "tj"]
-                                    :reviews ["aaa" "bbb"])
+                                    :reviews ["aaa" "bbb"]
+                                    :vss-luokka true
+                                    :autopaikat true)
                            :application
                            {:handlers [{:general   true
                                         :firstName "Bob"
@@ -634,7 +723,11 @@
                                             :reviews-included :handler
                                             :deviations :conditions.condition
                                             :add-condition :conditions.remove-condition
-                                            :attachments]
+                                            :attachments
+                                            :buildings.rakennetut-autopaikat
+                                            :buildings.kiinteiston-autopaikat
+                                            :buildings.autopaikat-yhteensa
+                                            :buildings.vss-luokka]
                                :references {:verdict-code ["osittain-myonnetty"]})
           (-> init :draft :data
               :conditions vec flatten) => (just [mongo-id? {:condition "Stay calm"}
@@ -644,7 +737,7 @@
                                         :foremen          ["vastaava-tj" "tj"]
                                         :reviews-included true
                                         :reviews          ["aaa" "bbb"]
-                                        :plans-included true
-                                        :deviations "Cannot live by your rules, man!"
-                                        :handler "Bob Builder"
-                                        :paatosteksti "This is verdict."}))))
+                                        :plans-included   true
+                                        :deviations       "Cannot live by your rules, man!"
+                                        :handler          "Bob Builder"
+                                        :paatosteksti     "This is verdict."}))))

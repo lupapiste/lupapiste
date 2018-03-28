@@ -45,7 +45,7 @@
                                             status))})
        neighbors))
 
-(defn data-draft
+#_(defn data-draft
   "Kmap keys are draft targets (kw-paths). Each value is either
 
    1. kw-path: Path into template value to be taken as the initial value.
@@ -77,7 +77,7 @@
              {}
              kmap))
 
-(defn- map-unremoved-section
+#_(defn- map-unremoved-section
   "Map (for data-draft) section only it has not been removed. If
   target-key is not given, source-key is used. Result is key-key map
   or nil."
@@ -85,15 +85,15 @@
   (when-not (some-> source-data :removed-sections source-key)
     (hash-map (or target-key source-key) source-key)))
 
-(defn- template-category [template]
+#_(defn- template-category [template]
   (-> template :category keyword))
 
-(defmulti initial-draft
+#_(defmulti initial-draft
   "Creates a map with :data and :references"
   (fn [template & _]
     (template-category template)))
 
-(defn- kw-format [& xs]
+#_(defn- kw-format [& xs]
   (keyword (apply format (map ss/->plain-string xs))))
 
 (defn- general-handler [{handlers :handlers}]
@@ -108,7 +108,7 @@
       :data :poikkeamat :value
       (or "")))
 
-(defmethod initial-draft :r
+#_(defmethod initial-draft :r
   [{snapshot :published} application]
   {:data       (data-draft
                 (merge {:language              :language
@@ -156,7 +156,7 @@
                 snapshot)
    :references (:settings snapshot)})
 
-(defmethod initial-draft :p
+#_(defmethod initial-draft :p
   [{snapshot :published} application]
   {:data       (data-draft
                 (merge {:language              :language
@@ -248,7 +248,7 @@
 
 (declare enrich-verdict)
 
-(defmulti template-info
+#_(defmulti template-info
   "Contents of the verdict's template property. The actual contents
   depend on the category. Typical keys:
 
@@ -258,9 +258,9 @@
   map (for repeating)."
   template-category)
 
-(defmethod template-info :default [_] nil)
+#_(defmethod template-info :default [_] nil)
 
-(defmethod template-info :r
+#_(defmethod template-info :r
   [{snapshot :published}]
   (let [data             (:data snapshot)
         removed?         #(boolean (get-in data [:removed-sections %]))
@@ -304,7 +304,7 @@
     {:giver      (:giver data)
      :exclusions exclusions}))
 
-(defmethod template-info :p
+#_(defmethod template-info :p
   [{snapshot :published}]
   (let [data             (:data snapshot)
         removed?         #(boolean (get-in data [:removed-sections %]))
@@ -349,15 +349,17 @@
      :exclusions exclusions}))
 
 (defn default-verdict-draft
-  "Prepares the default initmap with :template, :data and :references
-  keys. Resolves inclusions and initial values from the template."
+  "Prepares the default initmap with :category, :template, :data
+  and :references keys. Resolves inclusions and initial values from
+  the template."
   [{:keys [category published] :as template}]
   (let [dic                (:dictionary (shared/verdict-schema category))
         {:keys [data
                 settings]} published
         incs               (inclusions category published)
         included?          #(contains? (set incs) %)]
-    {:template {:inclusions incs}
+    {:category category
+     :template {:inclusions incs}
      :data     (reduce-kv (fn [acc dict value]
                             (let [{:keys [template-dict
                                           repeating]} value
@@ -472,6 +474,29 @@
       initmap
       (assoc-in initmap [:draft :data dict] value))))
 
+(defn init--buildings
+  "Update inclusions according to selected building details."
+  [{:keys [template] :as initmap}]
+  (cond-> initmap
+    (not (section-removed? template :buildings))
+    (update-in [:draft :template :inclusions]
+               (fn [incs]
+                 (let [details (some->  template :published :data)]
+                   (cond-> (util/difference-as-kw
+                            incs [:buildings.rakennetut-autopaikat
+                                  :buildings.kiinteiston-autopaikat
+                                  :buildings.autopaikat-yhteensa
+                                  :buildings.vss-luokka
+                                  :buildings.paloluokka])
+
+                     (:autopaikat details)
+                     (util/union-as-kw #{:buildings.rakennetut-autopaikat
+                                         :buildings.kiinteiston-autopaikat
+                                         :buildings.autopaikat-yhteensa})
+
+                     (:vss-luokka details) (conj :buildings.vss-luokka)
+                     (:paloluokka details) (conj :buildings.paloluokka)))))))
+
 (defmethod initialize-verdict-draft :r
   [initmap]
   (-> initmap
@@ -480,22 +505,21 @@
       (init--dict-by-application :deviations application-deviations)
       init--verdict-dates
       init--upload
-      init--verdict-giver-type))
+      init--verdict-giver-type
+      init--buildings))
 
 (defn new-verdict-draft [template-id {:keys [application organization created]
                                       :as   command}]
-  (let [template (template/verdict-template @organization template-id)
-        draft    (assoc (initial-draft template application)
-                        :template (template-info template)
-                        :id       (mongo/create-id)
-                        :modified created)]
+  (let [template       (template/verdict-template @organization template-id)
+        {draft :draft} (-> {:template template
+                            :draft    (default-verdict-draft template)}
+                           initialize-verdict-draft
+                           (assoc :id       (mongo/create-id)
+                                  :modified created))]
     (action/update-application command
                                {$push {:pate-verdicts
-                                       (sc/validate
-                                        schemas/PateVerdict
-                                        (util/assoc-when draft
-                                                         :category (:category template)))}})
-    {:verdict  (enrich-verdict command draft)
+                                       (sc/validate schemas/PateVerdict draft)}})
+    {:verdict    (enrich-verdict command draft)
      :references (:references draft)}))
 
 (defn verdict-summary [verdict]
