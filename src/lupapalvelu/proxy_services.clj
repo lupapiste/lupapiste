@@ -67,8 +67,7 @@
         (resp/json (or (find-address/search normalized-term lang) [])))
       (resp/status 400 "Missing query parameters")))
 
-; DEPRECATED, but lets remove after production build to see if there are dependent systems
-#_(defn point-by-property-id-proxy [{{property-id :property-id} :params :as request}]
+(defn point-by-property-id-proxy [{{property-id :property-id} :params :as request}]
   (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id))
     (let [features (plocation/property-location-info property-id)]
       (if features
@@ -375,7 +374,7 @@
                "kuntawms" (cache (* 3 60 60 24) (secure #(wfs/raster-images %1 %2 org/query-organization-map-server) "wms" ))
                "wmts/maasto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
                "wmts/kiinteisto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
-               ; "point-by-property-id" (cache (* 60 60 8) (secure point-by-property-id-proxy)) FIXME deprecated, remove after hotfixing
+               "point-by-property-id" (cache (* 60 60 8) (secure point-by-property-id-proxy))
                "location-by-property-id" (cache (* 60 60 8) (secure location-by-property-id-proxy))
                "property-id-by-point" (cache (* 60 60 8) (secure property-id-by-point-proxy))
                "property-info-by-point" (cache (* 60 60 8) (secure property-info-by-point-proxy))
@@ -389,4 +388,3 @@
                "plandocument" (cache (* 3 60 60 24) (secure wfs/raster-images "plandocument"))
                "organization-map-server" (secure organization-map-server)
                "trimble-kaavamaaraykset-by-point" (no-cache (secure trimble-kaavamaaraykset-by-point-proxy))})
-
