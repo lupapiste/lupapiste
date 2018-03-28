@@ -1,6 +1,6 @@
 *** Settings ***
 
-Documentation   Users are added to company
+Documentation   Company notes
 Suite Setup     Apply company-application fixture now
 Suite Teardown  Logout
 Default Tags    company
