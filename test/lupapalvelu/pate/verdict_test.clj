@@ -740,4 +740,12 @@
                                         :plans-included   true
                                         :deviations       "Cannot live by your rules, man!"
                                         :handler          "Bob Builder"
-                                        :paatosteksti     "This is verdict."}))))
+                                        :paatosteksti     "This is verdict."}
+          (fact "select-inclusions"
+            (select-inclusions (:dictionary mini-verdict)
+                               [:deviations :buildings.paloluokka :foremen-included])
+            => {:deviations {:phrase-text      {:category :yleinen}
+                             :template-section :deviations}
+                :buildings  {:repeating        {:paloluokka {:text {}}}
+                             :template-section :buildings}
+                :foremen-included {:toggle {}}})))))

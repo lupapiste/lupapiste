@@ -547,16 +547,22 @@
     (sc/validate schemas/PateVerdict (assoc combined :version version))))
 
 (defn phrase-versub
-  "Verdict subschema that contains only a phrase text. Show? visibility
-  rule is set if given"
-  [dict loc-text phrase-category & [show?]]
-  {:dictionary {dict {:phrase-text {:category   phrase-category
-                                    :loc-prefix loc-text}}}
-   :section    (cond-> {:id    dict
-                        :grid {:columns 7
-                               :rows    [[{:col  6
-                                           :dict dict}]]}}
-                 show? (assoc :show? show?)) })
+  "Verdict subschema that contains only a phrase text. Additional keyword arguments:
+
+  show?            Visibility rule
+  template-section Inclusion dependency
+  template-dict    Initialization dependency"
+  [dict loc-text phrase-category & kvs]
+  (let [{:keys [show? template-section template-dict]} (apply hash-map kvs)]
+    {:dictionary {dict (cond-> {:phrase-text {:category   phrase-category
+                                              :loc-prefix loc-text}}
+                         template-section (assoc :template-section template-section)
+                         template-dict    (assoc :template-dict template-dict))}
+     :section     (cond-> {:id    dict
+                           :grid {:columns 7
+                                  :rows    [[{:col  6
+                                              :dict dict}]]}}
+                    show? (assoc :show? show?)) }))
 
 (def required-in-verdict {:toggle {:i18nkey :pate.template-removed}})
 (def verdict-handler )
@@ -571,15 +577,16 @@
                                   [kw (required {:date {:disabled?
                                                         :automatic-verdict-dates}})]))
                            (into {}))
-                :language                (required language-select)
-                :verdict-date            (required {:date {}})
-                :automatic-verdict-dates {:toggle {}}
-                :handler               (required {:text {:loc-prefix
-                                                         (if (= category :r)
-                                                           :pate-verdict.handler
-                                                           :pate.prepper)}})
-                :handler-title         {:text {:loc-prefix :pate-verdict.handler.title}}
-                :application-id        app-id-placeholder)
+                      :language                (required (assoc language-select
+                                                                :template-dict :language))
+                      :verdict-date            (required {:date {}})
+                      :automatic-verdict-dates {:toggle {}}
+                      :handler               (required {:text {:loc-prefix
+                                                               (if (= category :r)
+                                                                 :pate-verdict.handler
+                                                                 :pate.prepper)}})
+                      :handler-title         {:text {:loc-prefix :pate-verdict.handler.title}}
+                      :application-id        app-id-placeholder)
    :section    {:id   :pate-dates
                 :grid {:columns 7
                        :rows    [[{:col   7
@@ -625,8 +632,10 @@
                 :verdict-section  (required {:text {:before :section}})
                 :verdict-code     (required {:reference-list {:path       :verdict-code
                                                               :type       :select
-                                                              :loc-prefix :pate-r.verdict-code}})
-                :verdict-text     (required {:phrase-text {:category :paatosteksti}})
+                                                              :loc-prefix :pate-r.verdict-code}
+                                             :template-dict :verdict-code})
+                :verdict-text     (required {:phrase-text {:category :paatosteksti}
+                                             :template-dict :paatosteksti})
                 :verdict-text-ref (required {:reference {:path :verdict-text}})
                 :collateral       {:text {:after :eur}}
                 :collateral-flag  {:toggle {:loc-prefix :pate-collateral.flag}}
@@ -673,7 +682,8 @@
   {:dictionary
    {:bulletinOpDescription
     {:phrase-text {:category :toimenpide-julkipanoon
-                   :i18nkey  :phrase.category.toimenpide-julkipanoon}}}
+                   :i18nkey  :phrase.category.toimenpide-julkipanoon}
+     :template-dict :bulletinOpDescription}}
    :section {:id         :bulletin
              :loc-prefix :bulletin
              :show?      :?.bulletin-op-description
@@ -700,7 +710,8 @@
                                             :extra-path :name
                                             :match-key  :id}})
                               (when separator?
-                                {:separator " \u2013 "}))}
+                                {:separator " \u2013 "}))
+                       :template-dict kw}
                       ;; Included toggle
                       included required-in-verdict)))
            {}
@@ -754,10 +765,13 @@
                        :dict  :add-condition}]]}}})
 
 (def versub-appeal ;; Muutoksenhaku, vakuudet
-  (phrase-versub :appeal :verdict.muutoksenhaku :muutoksenhaku :?.appeal))
+  (phrase-versub :appeal :verdict.muutoksenhaku :muutoksenhaku
+                 :show? :?.appeal :template-section :appeal
+                 :template-dict :appeal))
 
 (def versub-statements
-  {:dictionary {:statements {:placeholder {:type :statements}}}
+  {:dictionary {:statements {:placeholder {:type :statements}
+                             :template-section :statements}}
    :section    {:id         :statements
                 :show?      :?.statements
                 :loc-prefix :pate-statements
@@ -771,6 +785,7 @@
                                     :category :naapurit}}
     :neighbor-states {:placeholder {:type :neighbors}}}
    :section {:id    :neighbors
+             :template-section :neighbors
              :show? :?.neighbors
              :grid  {:columns 12
                      :rows    [[{:col  7
@@ -784,11 +799,17 @@
                                ]}}})
 
 (def versub-complexity ;; Vaativuus, rakennusoikeus, kaava
-  {:dictionary {:complexity      complexity-select
-                :complexity-text {:phrase-text {:label?   false
-                                                :category :vaativuus}}
-                :rights          {:phrase-text {:category :rakennusoikeus}}
-                :purpose         {:phrase-text {:category :kaava}}}
+  {:dictionary {:complexity      (assoc complexity-select
+                                        :template-section :complexity
+                                        :template-dict    :complexity)
+                :complexity-text {:phrase-text      {:label?   false
+                                                     :category :vaativuus}
+                                  :template-section :complexity
+                                  :template-dict    :complexity-text}
+                :rights          {:phrase-text      {:category :rakennusoikeus}
+                                  :template-section :rights}
+                :purpose         {:phrase-text      {:category :kaava}
+                                  :template-section :purpose}}
    :section
    {:id         :complexity
     :loc-prefix :pate.complexity
@@ -811,14 +832,15 @@
                                      :dict       :purpose}]}]}}})
 
 (def versub-extra-info
-  (phrase-versub :extra-info :pate-extra-info
-                 :yleinen :?.extra-info))
+  (phrase-versub :extra-info :pate-extra-info :yleinen
+                 :show? :?.extra-info :template-section :extra-info))
 
 (def versub-deviations ;; Poikkeamiset
-  {:dictionary {:deviations {:phrase-text {:category :yleinen}}}
+  {:dictionary {:deviations       {:phrase-text {:category :yleinen}
+                                   :template-section :deviations}}
    :section    {:id         :deviations
                 :loc-prefix :pate-deviations
-                :show?      :?.extra-info
+                :show?      :?.deviations
                 :grid       {:columns 7
                              :rows    [[{:col  6
                                          :dict :deviations}]]}}})
@@ -826,15 +848,16 @@
 (def versub-buildings
   {:dictionary
    {:buildings
-    {:repeating {:building-name          {:placeholder {:label? false
-                                                        :type   :building}}
-                 :rakennetut-autopaikat  {:text {}}
-                 :kiinteiston-autopaikat {:text {}}
-                 :autopaikat-yhteensa    {:text {}}
-                 :vss-luokka             {:text {}}
-                 :paloluokka             {:text {}}
-                 :show-building          required-in-verdict}
-     :sort-by   :order}}
+    {:repeating        {:building-name          {:placeholder {:label? false
+                                                               :type   :building}}
+                        :rakennetut-autopaikat  {:text {}}
+                        :kiinteiston-autopaikat {:text {}}
+                        :autopaikat-yhteensa    {:text {}}
+                        :vss-luokka             {:text {}}
+                        :paloluokka             {:text {}}
+                        :show-building          required-in-verdict}
+     :sort-by          :order
+     :template-section :buildings}}
    :section
    {:id    :buildings
     :show? :?.buildings
@@ -876,6 +899,7 @@
     :attachments
     {:application-attachments {:i18nkey :application.verdict-attachments}}}
    :sections [{:id   :attachments
+               :template-section :attachments
                :grid {:columns 7
                       :rows    [[{:col  6
                                   :dict :attachments}]]}}
@@ -904,8 +928,9 @@
                                               versub-attachments))
 
 (def versub-start-info ;; Lahtokohtatiedot
-  (phrase-versub :start-info :pate-start-info
-                 :yleinen :?.start-info))
+  (phrase-versub :start-info :pate-start-info :yleinen
+                 :show? :?.start-info
+                 :template-section :start-info))
 
 (def versub-rationale  ;; Perustelut
   (phrase-versub :rationale :pate.verdict-rationale :yleinen))
@@ -935,7 +960,6 @@
                                               versub-appeal
                                               versub-statements
                                               versub-neighbors
-                                              versub-complexity
                                               versub-start-info
                                               versub-deviations
                                               versub-rationale

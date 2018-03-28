@@ -979,18 +979,18 @@
                 data => (contains {:language         "fi"
                                    :handler          ""
                                    :appeal           "Humble appeal."
-                                   :purpose          ""
+                                   ;;:purpose          ""
                                    :verdict-text     "Verdict text."
-                                   :anto             ""
+                                   ;;:anto             ""
                                    :complexity       "medium"
                                    :foremen          ["iv-tj" "erityis-tj"]
                                    :verdict-code     "ehdollinen"
-                                   :collateral       ""
-                                   :rights           ""
+                                   ;;:collateral       ""
+                                   ;;:rights           ""
                                    :plans-included   true
                                    :plans            [(:id plan)]
                                    :foremen-included true
-                                   :neighbors        ""
+                                   ;;:neighbors        ""
                                    :neighbor-states  []
                                    :reviews-included true
                                    :reviews          [(:id review)]
@@ -1043,14 +1043,14 @@
                 (fact "Building info is mostly empty but contains the template fields"
                   data => (contains {:buildings {op-id {:description            ""
                                                         :show-building          true
-                                                        :vss-luokka             ""
-                                                        :kiinteiston-autopaikat ""
+                                                        ;;:vss-luokka             ""
+                                                        ;;:kiinteiston-autopaikat ""
                                                         :building-id            "122334455R"
                                                         :operation              "sisatila-muutos"
-                                                        :rakennetut-autopaikat  ""
+                                                        ;;:rakennetut-autopaikat  ""
                                                         :tag                    ""
-                                                        :autopaikat-yhteensa    ""
-                                                        :paloluokka             ""
+                                                        ;;:autopaikat-yhteensa    ""
+                                                        ;;:paloluokka             ""
                                                         :order                  "0"}}}))
                 (fact "Cannot set section for non-board verdict"
                   (edit-verdict :verdict-section "8")
@@ -1141,13 +1141,13 @@
                       => {:description            "Hello world!"
                           :show-building          true
                           :vss-luokka             "Foo"
-                          :kiinteiston-autopaikat ""
+                          ;;:kiinteiston-autopaikat ""
                           :building-id            "199887766E"
                           :operation              "sisatila-muutos"
-                          :rakennetut-autopaikat  ""
+                          ;;:rakennetut-autopaikat  ""
                           :tag                    ""
-                          :autopaikat-yhteensa    ""
-                          :paloluokka             ""
+                          ;;:autopaikat-yhteensa    ""
+                          ;;:paloluokka             ""
                           :order                  "0"})
                     (fact "Change building id to manual"
                       (command sonja :update-doc :id app-id
@@ -1173,24 +1173,24 @@
                       => {op-id          {:description            "Hello world!"
                                           :show-building          true
                                           :vss-luokka             "Foo"
-                                          :kiinteiston-autopaikat ""
+                                          ;;:kiinteiston-autopaikat ""
                                           :building-id            "789"
                                           :operation              "sisatila-muutos"
-                                          :rakennetut-autopaikat  ""
+                                          ;;:rakennetut-autopaikat  ""
                                           :tag                    ""
-                                          :autopaikat-yhteensa    ""
-                                          :paloluokka             ""
+                                          ;;:autopaikat-yhteensa    ""
+                                          ;;:paloluokka             ""
                                           :order                  "0"}
                           op-id-pientalo {:description            ""
                                           :show-building          true
-                                          :vss-luokka             ""
-                                          :kiinteiston-autopaikat ""
+                                          ;;:vss-luokka             ""
+                                          ;;:kiinteiston-autopaikat ""
                                           :building-id            ""
                                           :operation              "pientalo"
-                                          :rakennetut-autopaikat  ""
+                                          ;;:rakennetut-autopaikat  ""
                                           :tag                    ""
-                                          :autopaikat-yhteensa    ""
-                                          :paloluokka             ""
+                                          ;;:autopaikat-yhteensa    ""
+                                          ;;:paloluokka             ""
                                           :order                  "1"}})
                     (fact "Add tag and description to pientalo"
                       (command pena :update-doc :id app-id
@@ -1224,24 +1224,24 @@
                       => {op-id          {:description            "Hello world!"
                                           :show-building          true
                                           :vss-luokka             "Foo"
-                                          :kiinteiston-autopaikat ""
+                                          ;;:kiinteiston-autopaikat ""
                                           :building-id            "789"
                                           :operation              "sisatila-muutos"
-                                          :rakennetut-autopaikat  ""
+                                          ;;:rakennetut-autopaikat  ""
                                           :tag                    ""
-                                          :autopaikat-yhteensa    ""
-                                          :paloluokka             ""
+                                          ;;:autopaikat-yhteensa    ""
+                                          ;;:paloluokka             ""
                                           :order                  "1"}
                           op-id-pientalo {:description            "Hen piaoliang!"
                                           :show-building          true
-                                          :vss-luokka             ""
+                                          ;;:vss-luokka             ""
                                           :kiinteiston-autopaikat "8"
                                           :building-id            "1234567881"
                                           :operation              "pientalo"
-                                          :rakennetut-autopaikat  ""
+                                          ;;:rakennetut-autopaikat  ""
                                           :tag                    "Hao"
-                                          :autopaikat-yhteensa    ""
-                                          :paloluokka             ""
+                                          ;;:autopaikat-yhteensa    ""
+                                          ;;:paloluokka             ""
                                           :order                  "0"}})
                     (fact "Cannot publish in the complementNeeded state"
                       (command sonja :publish-pate-verdict :id app-id
@@ -1307,7 +1307,7 @@
                           (edit-template [:removed-sections :neighbors] true)
                           (edit-template [:removed-sections :appeal] true)
                           (edit-template [:removed-sections :statements] true)
-                          (edit-template [:removed-sections :collateral] true)
+                          ;;(edit-template [:removed-sections :collateral] true)
                           (edit-template [:removed-sections :complexity] true)
                           (edit-template [:removed-sections :rights] true)
                           (edit-template [:removed-sections :purpose] true)
@@ -1340,10 +1340,10 @@
                               check-changes :check-changes} (verdict-fn-factory verdict-id)]
                         data => {:language              "fi"
                                  :handler               "Ronja Sibbo"
-                                 :voimassa              ""
+                                 ;;:voimassa              ""
                                  :verdict-text          "Verdict text."
-                                 :anto                  ""
-                                 :muutoksenhaku         ""
+                                 ;;:anto                  ""
+                                 ;;:muutoksenhaku         ""
                                  :foremen-included      false
                                  :foremen               ["iv-tj" "erityis-tj"]
                                  :verdict-code          "ehdollinen"
@@ -1351,23 +1351,24 @@
                                  :plans                 [(:id plan)]
                                  :reviews-included      false
                                  :reviews               [(:id review)]
-                                 :bulletinOpDescription ""
+                                 ;;:bulletinOpDescription ""
                                  :buildings
                                  {op-id          {:description   "Hello world!"
                                                   :show-building true
                                                   :building-id   "789"
                                                   :operation     "sisatila-muutos"
                                                   :tag           ""
-                                                  :paloluokka    ""
+                                                  ;;:paloluokka    ""
                                                   :order         "0"}
                                   op-id-pientalo {:description   "Hen piaoliang!"
                                                   :show-building true
                                                   :building-id   "1234567881"
                                                   :operation     "pientalo"
                                                   :tag           "Hao"
-                                                  :paloluokka    ""
+                                                  ;;:paloluokka    ""
                                                   :order         "1"}}
-                                 :attachments           []}
+                                 ;;:attachments           []
+                                 }
                         (facts "Cannot edit verdict values not in the template"
                           (let [check-fn (fn [kwp value]
                                            (fact {:midje/description (str "Bad path " kwp)}

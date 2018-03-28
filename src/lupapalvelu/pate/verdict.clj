@@ -45,57 +45,6 @@
                                             status))})
        neighbors))
 
-#_(defn data-draft
-  "Kmap keys are draft targets (kw-paths). Each value is either
-
-   1. kw-path: Path into template value to be taken as the initial value.
-
-   2. Maps with :fn and :skip-nil? properties. :fn is the source
-  (full) data handler function. If :skip-nil? is true then nil value
-  entries are skipped.
-
-   3. Anything else is used as an initial value as is.
-
-  Nil values are substituted with empty string (unless :skip-nil? is
-  true in 2).
-
-  The second argument is the published template snapshot."
-  [kmap {data :data}]
-  (reduce-kv (fn [acc k v]
-               (let [v-fn  (get v :fn)
-                     value (cond
-                             v-fn         (v-fn data)
-                             (keyword? v) (get-in data (util/split-kw-path v))
-                             :else v)]
-                 (if (and (nil? value) (:skip-nil? v))
-                   acc
-                   (assoc-in acc
-                             (util/split-kw-path k)
-                             (if (nil? value)
-                               ""
-                               value)))))
-             {}
-             kmap))
-
-#_(defn- map-unremoved-section
-  "Map (for data-draft) section only it has not been removed. If
-  target-key is not given, source-key is used. Result is key-key map
-  or nil."
-  [source-data source-key & [target-key]]
-  (when-not (some-> source-data :removed-sections source-key)
-    (hash-map (or target-key source-key) source-key)))
-
-#_(defn- template-category [template]
-  (-> template :category keyword))
-
-#_(defmulti initial-draft
-  "Creates a map with :data and :references"
-  (fn [template & _]
-    (template-category template)))
-
-#_(defn- kw-format [& xs]
-  (keyword (apply format (map ss/->plain-string xs))))
-
 (defn- general-handler [{handlers :handlers}]
   (if-let [{:keys [firstName
                    lastName]} (util/find-first :general handlers)]
@@ -107,95 +56,6 @@
                                    "hankkeen-kuvaus")
       :data :poikkeamat :value
       (or "")))
-
-#_(defmethod initial-draft :r
-  [{snapshot :published} application]
-  {:data       (data-draft
-                (merge {:language              :language
-                        :handler               (general-handler application)
-                        :verdict-code          :verdict-code
-                        :verdict-text          :paatosteksti
-                        :bulletinOpDescription :bulletinOpDescription}
-                       (reduce (fn [acc kw]
-                                 (assoc acc
-                                        kw kw
-                                        (kw-format "%s-included" kw)
-                                        {:fn (util/fn-> (get-in [:removed-sections kw]) not)}))
-                               {}
-                               [:foremen :plans :reviews])
-                       (reduce (fn [acc kw]
-                                 (assoc acc
-                                        kw  {:fn        #(when (util/includes-as-kw? (:verdict-dates %) kw)
-                                                           "")
-                                             :skip-nil? true}))
-                               {}
-                               shared/verdict-dates)
-                       (reduce (fn [acc k]
-                                 (merge acc (map-unremoved-section (:data snapshot) k)))
-                               {}
-                               [:neighbors :appeal :statements :collateral
-                                :complexity :rights :purpose :extra-info
-                                :attachments])
-                       ;; List of conditions to conditions map where keys are ids.
-                       (when (map-unremoved-section (:data snapshot) :conditions)
-                         {:conditions {:fn        (fn [{:keys [conditions]}]
-                                                    (reduce (fn [acc condition]
-                                                              (assoc-in acc
-                                                                        [(keyword (mongo/create-id)) :condition]
-                                                                        condition))
-                                                            {}
-                                                            conditions))
-                                       :skip-nil? true}})
-                       (when (map-unremoved-section (:data snapshot) :deviations)
-                         {:deviations (-> (domain/get-document-by-name application
-                                                                       "hankkeen-kuvaus")
-                                          :data :poikkeamat :value
-                                          (or ""))})
-                       (when (map-unremoved-section (:data snapshot) :attachments)
-                         {:attachments []}))
-                snapshot)
-   :references (:settings snapshot)})
-
-#_(defmethod initial-draft :p
-  [{snapshot :published} application]
-  {:data       (data-draft
-                (merge {:language              :language
-                        :handler               (general-handler application)
-                        :verdict-code          :verdict-code
-                        :verdict-text          :paatosteksti
-                        :bulletinOpDescription :bulletinOpDescription}
-                       (reduce (fn [acc kw]
-                                 (assoc acc
-                                        kw  {:fn        #(when (util/includes-as-kw? (:verdict-dates %) kw)
-                                                           "")
-                                             :skip-nil? true}))
-                               {}
-                               shared/p-verdict-dates)
-                       (reduce (fn [acc k]
-                                 (merge acc (map-unremoved-section (:data snapshot) k)))
-                               {}
-                               [:neighbors :appeal :statements :collateral
-                                :complexity :rights :purpose :start-info
-                                :attachments])
-                       ;; List of conditions to conditions map where keys are ids.
-                       (when (map-unremoved-section (:data snapshot) :conditions)
-                         {:conditions {:fn        (fn [{:keys [conditions]}]
-                                                    (reduce (fn [acc condition]
-                                                              (assoc-in acc
-                                                                        [(keyword (mongo/create-id)) :condition]
-                                                                        condition))
-                                                            {}
-                                                            conditions))
-                                       :skip-nil? true}})
-                       (when (map-unremoved-section (:data snapshot) :deviations)
-                         {:deviations (-> (domain/get-document-by-name application
-                                                                       "hankkeen-kuvaus")
-                                          :data :poikkeamat :value
-                                          (or ""))})
-                       (when (map-unremoved-section (:data snapshot) :attachments)
-                         {:attachments []}))
-                snapshot)
-   :references (:settings snapshot)})
 
 (defn dicts->kw-paths
   [dictionary]
@@ -246,110 +106,8 @@
          (select-keys dictionary)
          dicts->kw-paths)))
 
-(declare enrich-verdict)
-
-#_(defmulti template-info
-  "Contents of the verdict's template property. The actual contents
-  depend on the category. Typical keys:
-
-  :giver      Verdict giver type (lautakunta vs. viranhaltija).
-  :exclusions A map where each key matches a verdict dictionary
-  key. Value is either true (dict is excluded) or another exclusions
-  map (for repeating)."
-  template-category)
-
-#_(defmethod template-info :default [_] nil)
-
-#_(defmethod template-info :r
-  [{snapshot :published}]
-  (let [data             (:data snapshot)
-        removed?         #(boolean (get-in data [:removed-sections %]))
-        building-details (->> [(when-not (:autopaikat data)
-                                 [:rakennetut-autopaikat
-                                  :kiinteiston-autopaikat
-                                  :autopaikat-yhteensa])
-                               (map  (fn [kw]
-                                       (when-not (kw data) kw))
-                                     [:vss-luokka :paloluokka])]
-                              flatten
-                              (remove nil?))
-        exclusions       (-<>> [(filter removed? [:appeal :statements
-                                                  :collateral :rights :purpose
-                                                  :extra-info :deviations])
-                                (when (removed? :conditions)
-                                  [:conditions :add-condition])
-                                (when (removed? :collateral)
-                                  [:collateral :collateral-date :collateral-type])
-                                (when (removed? :neighbors)
-                                  [:neighbors :neighbor-states])
-                                (when (removed? :complexity)
-                                  [:complexity :complexity-text])
-                                (let [no-attachments? (removed? :attachments)]
-                                  [(when no-attachments?
-                                     :attachments)
-                                   (when (or no-attachments? (not (:upload data)))
-                                     :upload)])
-                                (util/difference-as-kw shared/verdict-dates
-                                                       (:verdict-dates data))
-                                (if (-> snapshot :settings :boardname)
-                                  :contact
-                                  :verdict-section)]
-                               flatten
-                               (remove nil?)
-                               (zipmap <> (repeat true))
-                               (util/assoc-when <> :buildings (or (removed? :buildings)
-                                                                  (zipmap building-details
-                                                                          (repeat true))))
-                               not-empty)]
-    {:giver      (:giver data)
-     :exclusions exclusions}))
-
-#_(defmethod template-info :p
-  [{snapshot :published}]
-  (let [data             (:data snapshot)
-        removed?         #(boolean (get-in data [:removed-sections %]))
-        building-details (->> [(when-not (:autopaikat data)
-                                 [:rakennetut-autopaikat
-                                  :kiinteiston-autopaikat
-                                  :autopaikat-yhteensa])
-                               (map  (fn [kw]
-                                       (when-not (kw data) kw))
-                                     [:vss-luokka :paloluokka])]
-                              flatten
-                              (remove nil?))
-        exclusions       (-<>> [(filter removed? [:appeal :statements
-                                                  :collateral :rights :purpose
-                                                  :extra-info :deviations])
-                                (when (removed? :conditions)
-                                  [:conditions :add-condition])
-                                (when (removed? :collateral)
-                                  [:collateral :collateral-date :collateral-type])
-                                (when (removed? :neighbors)
-                                  [:neighbors :neighbor-states])
-                                (when (removed? :complexity)
-                                  [:complexity :complexity-text])
-                                (let [no-attachments? (removed? :attachments)]
-                                  [(when no-attachments?
-                                     :attachments)
-                                   (when (or no-attachments? (not (:upload data)))
-                                     :upload)])
-                                (util/difference-as-kw shared/verdict-dates
-                                                       (:verdict-dates data))
-                                (if (-> snapshot :settings :boardname)
-                                  :contact
-                                  :verdict-section)]
-                               flatten
-                               (remove nil?)
-                               (zipmap <> (repeat true))
-                               (util/assoc-when <> :buildings (or (removed? :buildings)
-                                                                  (zipmap building-details
-                                                                          (repeat true))))
-                               not-empty)]
-    {:giver      (:giver data)
-     :exclusions exclusions}))
-
 (defn default-verdict-draft
-  "Prepares the default initmap with :category, :template, :data
+  "Prepares the default draft (for initmap) with :category, :template, :data
   and :references keys. Resolves inclusions and initial values from
   the template."
   [{:keys [category published] :as template}]
@@ -458,11 +216,16 @@
 
 (defn init--verdict-giver-type
   "Adds giver key into template. The value is either lautakunta or
-  viranhaltija."
+  viranhaltija. Verdict-section dict not included for viranhaltija
+  verdicts."
   [{:keys [template] :as initmap}]
-  (assoc-in initmap
-            [:draft :template :giver]
-            (some-> template :published :data :giver)))
+  (let [giver-type (some-> template :published :data :giver)]
+    (cond-> (assoc-in initmap
+                      [:draft :template :giver]
+                      giver-type)
+      (util/=as-kw giver-type :viranhaltija)
+      (update-in [:draft :template :inclusions]
+                 util/difference-as-kw  [:verdict-section]))))
 
 (defn init--dict-by-application
   "Inits given dict (if included) with the app-fn result (if the result
@@ -474,6 +237,13 @@
       initmap
       (assoc-in initmap [:draft :data dict] value))))
 
+(def buildings-inclusion {:autopaikat [:buildings.rakennetut-autopaikat
+                                       :buildings.kiinteiston-autopaikat
+                                       :buildings.autopaikat-yhteensa]
+                          :vss-luokka [:buildings.vss-luokka]
+                          :paloluokka [:buildings.paloluokka]})
+(def buildings-inclusion-keys (-> buildings-inclusion vals flatten))
+
 (defn init--buildings
   "Update inclusions according to selected building details."
   [{:keys [template] :as initmap}]
@@ -482,20 +252,12 @@
     (update-in [:draft :template :inclusions]
                (fn [incs]
                  (let [details (some->  template :published :data)]
-                   (cond-> (util/difference-as-kw
-                            incs [:buildings.rakennetut-autopaikat
-                                  :buildings.kiinteiston-autopaikat
-                                  :buildings.autopaikat-yhteensa
-                                  :buildings.vss-luokka
-                                  :buildings.paloluokka])
-
-                     (:autopaikat details)
-                     (util/union-as-kw #{:buildings.rakennetut-autopaikat
-                                         :buildings.kiinteiston-autopaikat
-                                         :buildings.autopaikat-yhteensa})
-
-                     (:vss-luokka details) (conj :buildings.vss-luokka)
-                     (:paloluokka details) (conj :buildings.paloluokka)))))))
+                   (reduce-kv (fn [acc k v]
+                                (cond-> acc
+                                  (k details) (util/union-as-kw v)))
+                              (util/difference-as-kw incs
+                                                     buildings-inclusion-keys)
+                              buildings-inclusion))))))
 
 (defmethod initialize-verdict-draft :r
   [initmap]
@@ -508,14 +270,19 @@
       init--verdict-giver-type
       init--buildings))
 
+(declare enrich-verdict)
+
 (defn new-verdict-draft [template-id {:keys [application organization created]
                                       :as   command}]
   (let [template       (template/verdict-template @organization template-id)
-        {draft :draft} (-> {:template template
-                            :draft    (default-verdict-draft template)}
+        {draft :draft} (-> {:template    template
+                            :draft       (default-verdict-draft template)
+                            :application application}
                            initialize-verdict-draft
-                           (assoc :id       (mongo/create-id)
-                                  :modified created))]
+                           (update-in [:draft]
+                                      assoc
+                                      :id  (mongo/create-id)
+                                      :modified created))]
     (action/update-application command
                                {$push {:pate-verdicts
                                        (sc/validate schemas/PateVerdict draft)}})
@@ -592,7 +359,7 @@
   "Returns map of dates. While the calculation takes every date into
   account, the result only includes the dates included in the
   template."
-  [{:keys [category template references verdict-data]}]
+  [{:keys [category template references verdict-data] :as args}]
   (let [datestring  (:verdict-date verdict-data)
         dictionary  (:dictionary (shared/settings-schema category))
         date-deltas (:date-deltas references)
@@ -602,7 +369,8 @@
              [kw & kws] shared/verdict-dates
              latest     datestring]
         (if (nil? kw)
-          (apply dissoc dates (-> template :exclusions keys))
+          (select-keys dates (util/intersection-as-kw shared/verdict-dates
+                                                      (:inclusions template)))
           (let [unit   (-> dictionary  kw :date-delta :unit)
                 result (date/parse-and-forward latest
                                                ;; Delta could be empty.
@@ -632,31 +400,32 @@
   [options]
   (update-automatic-verdict-dates options))
 
+(defn select-inclusions [dictionary inclusions]
+  (->> (map util/split-kw-path inclusions)
+       (reduce (fn [acc [x & xs]]
+                 (update acc
+                         x
+                         (fn [v]
+                           (if (seq xs)
+                             (conj v (util/kw-path xs))
+                             []))))
+               {})
+       (reduce-kv (fn [acc k v]
+                    (let [dic-value (k dictionary)]
+                      (assoc acc
+                             k
+                             (if (seq v)
+                               (assoc dic-value
+                                      :repeating (select-inclusions
+                                                  (-> dictionary k :repeating)
+                                                  v))
+                               dic-value))))
+                  {})))
 
-(defn- strip-exclusions
-  "Removes excluded target keys from dictionary schema."
-  [exclusions dictionary]
-  (cond
-    (nil? exclusions)  dictionary
-    (true? exclusions) nil
-
-    :else
-    (reduce (fn [acc [k v]]
-              (let [excluded (k exclusions)]
-                (if (-> v keys first (= :repeating))
-                  (if-let [dic (strip-exclusions excluded
-                                                 (-> v vals first))]
-                    (assoc acc k {:repeating dic})
-                    acc)
-                  (util/assoc-when acc k (when-not excluded
-                                           v)))))
-            {}
-            dictionary)))
-
-(defn- verdict-schema [category template]
+(defn- verdict-schema [category {:keys [inclusions]}]
   (update (shared/verdict-schema category)
           :dictionary
-          (partial strip-exclusions (:exclusions template))))
+          #(select-inclusions % inclusions)))
 
 (defn verdict-filled?
   "Have all the required fields been filled. Refresh? argument can force
@@ -738,7 +507,7 @@
                    :usage (or (:kayttotarkoitus kaytto) "")}))))))
 
 (defn edit-verdict
-  "Updates the verdict data. Validation takes the template exclusions
+  "Updates the verdict data. Validation takes the template inclusions
   into account. Some updates (e.g., automatic dates) can propagate other
   changes as well. Returns processing result or modified and (possible
   additional) changes."
@@ -785,26 +554,12 @@
                                    processed)))))
 
 
-(defn- merge-buildings [app-buildings verdict-buildings defaults]
+(defn- merge-buildings [app-buildings verdict-buildings]
   (reduce (fn [acc [op-id v]]
-            (assoc acc op-id (merge defaults (op-id verdict-buildings) v)))
+            (assoc acc op-id (merge {:show-building true}
+                                    (op-id verdict-buildings) v)))
           {}
           app-buildings))
-
-(defn- building-defaults
-  "Verdict building defaults (keys with empty values). Nil if building
-  or every detail is not to be included in the verdict."
-  [exclusions]
-  (when-not (true? (:buildings exclusions))
-    (let [subkeys (remove #(get-in exclusions [:buildings %])
-                          [:rakennetut-autopaikat
-                           :kiinteiston-autopaikat
-                           :autopaikat-yhteensa
-                           :vss-luokka
-                           :paloluokka])]
-      (when (seq subkeys)
-        (assoc (zipmap subkeys (repeat ""))
-               :show-building true)))))
 
 (defn command->category [{app :application}]
   (shared/permit-type->category (:permitType app)))
@@ -832,22 +587,22 @@
 
 (defmethod enrich-verdict :r
   ;; If final? is truthy than the enrichment is part of publishing.
-  [{:keys [application]} {:keys [data template]:as verdict} & [final?]]
-  (let [{:keys [exclusions]} template
+  [{:keys [application]} {:keys [data template] :as verdict} & [final?]]
+  (let [inc-set  (->> template
+                      :inclusions
+                      (map keyword)
+                      set)
         addons (merge
-                ;; Buildings added only if the buildings section is in
-                ;; the template AND at least one of the checkboxes has
-                ;; been selected.
-                (when-let [defaults (building-defaults exclusions)]
+                (when (util/intersection-as-kw inc-set
+                                               buildings-inclusion-keys)
                   {:buildings (merge-buildings (buildings application)
-                                               (:buildings data)
-                                               defaults)})
+                                               (:buildings data))})
                 ;; Neighbors added if in the template
-                (when-not (:neighbors exclusions)
+                (when (:neighbors inc-set)
                   {:neighbor-states (neighbor-states application)})
-                (when-not (:statements exclusions)
+                (when (:statements inc-set)
                   {:statements (statements application final?)}))]
-    (assoc-in verdict [:data] (merge data addons))))
+    (assoc verdict :data (merge data addons))))
 
 (defn open-verdict [{:keys [application] :as command}]
   (let [{:keys [data published] :as verdict} (command->verdict command)]

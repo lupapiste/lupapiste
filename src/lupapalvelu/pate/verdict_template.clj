@@ -220,20 +220,23 @@
 (defn- draft-for-publishing
   "Extracts template draft data for publishing. Keys with empty values
   are omitted. However, removed-sections do not affect the data
-  selection, since the verdicts may handler removed-sections
+  selection, since the verdicts may handle removed-sections
   differently (e.g., foremen and reviews). Transforms :repeating in
   template draft from map of maps to sequence of maps."
   [{:keys [category draft]}]
-  (let [{:keys [dictionary]} (shared/verdict-template-schema category)]
+  (let [{:keys [dictionary]} (shared/verdict-template-schema category)
+        good? (util/fn-> str ss/not-blank?)]
 
     (reduce (fn [acc dict]
-              (if-let [value (dict draft)]
-                (assoc acc
-                       dict
-                       (if (-> dictionary dict :repeating)
-                         (vals value)
-                         value))
-                acc))
+              (let [value (dict draft)]
+                (if (good? value)
+                  (assoc acc
+                         dict
+                         (if (-> dictionary dict :repeating)
+                           (filter (util/fn->> vals (every? good?))
+                                   (vals value))
+                           value))
+                  acc)))
             {}
             (keys dictionary))))
 
