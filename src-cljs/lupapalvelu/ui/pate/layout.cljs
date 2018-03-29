@@ -201,7 +201,7 @@
   (let [items (map-indexed
                (fn [i item-schema]
                  (let [item-options (path/schema-options options item-schema)]
-                   (when (path/visible? item-options)
+                   (when (path/item-visible? item-options)
                       {:component [:div.item
                                    {:key   (str "item-" i)
                                     :class (path/css item-options
@@ -252,7 +252,7 @@
                                 (let [cell-options (path/schema-options row-options
                                                                         cell-schema)]
                                   ;; Cell visibility
-                                  (when (path/visible? cell-options)
+                                  (when (path/item-visible? cell-options)
                                     [:div {:class (path/css cell-options
                                                             (str "col-" (or col 1))
                                                             (when align

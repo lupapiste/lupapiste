@@ -86,6 +86,7 @@
          {;; Verdict is draft until it is published
           (sc/optional-key :published)  ssc/Timestamp
           :modified                     ssc/Timestamp
+          :schema-version               sc/Int
           :data                         sc/Any
           (sc/optional-key :references) PatePublishedSettings
           :template                     {:inclusions [sc/Keyword]

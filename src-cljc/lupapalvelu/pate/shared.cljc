@@ -613,16 +613,14 @@
                                    :dict :verdict-date}
                                   {:id    "automatic-verdict-dates"
                                    :col   2
-                                   :show? [:AND :_meta.editing?
-                                           (cons :OR (map #(util/kw-path :? %) verdict-dates))]
+                                   :show? :_meta.editing?
                                    :dict  :automatic-verdict-dates}]
                                  {:id         "deltas"
                                   :css        [:pate-date]
                                   :loc-prefix :pate-verdict
                                   :row        (map (fn [kw]
                                                      (let [id (name kw)]
-                                                       {:show?     (util/kw-path :? kw)
-                                                        :disabled? :automatic-verdict-dates
+                                                       {:disabled? :automatic-verdict-dates
                                                         :id        id
                                                         :dict      kw}))
                                                    verdict-dates)}]}}})
@@ -633,8 +631,8 @@
                 :verdict-code     (required {:reference-list {:path       :verdict-code
                                                               :type       :select
                                                               :loc-prefix :pate-r.verdict-code}
-                                             :template-dict :verdict-code})
-                :verdict-text     (required {:phrase-text {:category :paatosteksti}
+                                             :template-dict  :verdict-code})
+                :verdict-text     (required {:phrase-text   {:category :paatosteksti}
                                              :template-dict :paatosteksti})
                 :verdict-text-ref (required {:reference {:path :verdict-text}})
                 :collateral       {:text {:after :eur}}
@@ -646,13 +644,12 @@
                        :rows    [[{:col        2
                                    :loc-prefix :pate-verdict.giver
                                    :hide?      :_meta.editing?
-                                   :show?      :*ref.boardname
                                    :dict       :boardname}
                                   {:col        1
                                    :show?      [:OR :*ref.boardname :verdict-section]
                                    :loc-prefix :pate-verdict.section
                                    :dict       :verdict-section}
-                                  {:show? [:AND :_meta.editing? :*ref.boardname]}
+                                  {:show? [:AND :_meta.editing? :?.boardname]}
                                   {:col   2
                                    :align :full
                                    :dict  :verdict-code}]
@@ -766,11 +763,12 @@
 
 (def versub-appeal ;; Muutoksenhaku, vakuudet
   (phrase-versub :appeal :verdict.muutoksenhaku :muutoksenhaku
-                 :show? :?.appeal :template-section :appeal
+                 :show? :?.appeal
+                 :template-section :appeal
                  :template-dict :appeal))
 
 (def versub-statements
-  {:dictionary {:statements {:placeholder {:type :statements}
+  {:dictionary {:statements {:placeholder      {:type :statements}
                              :template-section :statements}}
    :section    {:id         :statements
                 :show?      :?.statements
@@ -836,8 +834,8 @@
                  :show? :?.extra-info :template-section :extra-info))
 
 (def versub-deviations ;; Poikkeamiset
-  {:dictionary {:deviations       {:phrase-text {:category :yleinen}
-                                   :template-section :deviations}}
+  {:dictionary {:deviations {:phrase-text      {:category :yleinen}
+                             :template-section :deviations}}
    :section    {:id         :deviations
                 :loc-prefix :pate-deviations
                 :show?      :?.deviations
@@ -876,7 +874,6 @@
                                                       :list {:css   :list--sparse
                                                              :items (map #(hash-map :id %
                                                                                     :dict %
-                                                                                    :show? (util/kw-path :?+ %)
                                                                                     :enabled? :-.show-building)
                                                                          [:rakennetut-autopaikat
                                                                           :kiinteiston-autopaikat
@@ -898,11 +895,11 @@
                    :multiple?  true}}
     :attachments
     {:application-attachments {:i18nkey :application.verdict-attachments}}}
-   :sections [{:id   :attachments
+   :sections [{:id               :attachments
                :template-section :attachments
-               :grid {:columns 7
-                      :rows    [[{:col  6
-                                  :dict :attachments}]]}}
+               :grid             {:columns 7
+                                  :rows    [[{:col  6
+                                              :dict :attachments}]]}}
               {:id       :upload
                :hide?    :_meta.published?
                :css      :pate-section--no-border
@@ -972,12 +969,19 @@
 
 
 (defn verdict-schema
+  "Nil version returns the latest version."
   ([category version]
-   (case (util/kw-path category version)
-     :r.1 r-verdict-schema-1
-     :p.1 p-verdict-schema-1))
+   (let [schemas (case (keyword category)
+                   :r [r-verdict-schema-1]
+                   :p [p-verdict-schema-1]
+                   (pate-assert false "Invalid schema category:" category))]
+     (cond
+       (nil? version) (last schemas)
+       (and (pos? version)
+            (<= version (count schemas))) (nth schemas (dec version))
+       :else (pate-assert false "Invalid schema version:" version))))
   ([category]
-   (verdict-schema category 1)))
+   (verdict-schema category nil)))
 
 ;; Other utils
 

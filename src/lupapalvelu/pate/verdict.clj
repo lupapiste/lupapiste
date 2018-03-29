@@ -107,42 +107,44 @@
          dicts->kw-paths)))
 
 (defn default-verdict-draft
-  "Prepares the default draft (for initmap) with :category, :template, :data
-  and :references keys. Resolves inclusions and initial values from
-  the template."
+  "Prepares the default draft (for initmap)
+  with :category, :schema-version, :template, :data and :references
+  keys. Resolves inclusions and initial values from the template."
   [{:keys [category published] :as template}]
-  (let [dic                (:dictionary (shared/verdict-schema category))
+  (let [{dic     :dictionary
+         version :version} (shared/verdict-schema category)
         {:keys [data
                 settings]} published
         incs               (inclusions category published)
         included?          #(contains? (set incs) %)]
-    {:category category
-     :template {:inclusions incs}
-     :data     (reduce-kv (fn [acc dict value]
-                            (let [{:keys [template-dict
-                                          repeating]} value
-                                  initial-value       (and template-dict
-                                                           (template-dict data))]
-                              (cond
-                                ;; So far only one level repeating can be initialized
-                                (and initial-value repeating)
-                                (reduce (fn [m v]
-                                          (reduce-kv (fn [a inner-k inner-v]
-                                                       (cond-> a
-                                                         (included? (util/kw-path dict inner-k))
-                                                         (assoc-in [dict (mongo/create-id) inner-k] inner-v)))
-                                                     m
-                                                     v))
-                                        acc
-                                        initial-value)
+    {:category       category
+     :schema-version version
+     :template       {:inclusions incs}
+     :data           (reduce-kv (fn [acc dict value]
+                                  (let [{:keys [template-dict
+                                                repeating]} value
+                                        initial-value       (and template-dict
+                                                                 (template-dict data))]
+                                    (cond
+                                      ;; So far only one level repeating can be initialized
+                                      (and initial-value repeating)
+                                      (reduce (fn [m v]
+                                                (reduce-kv (fn [a inner-k inner-v]
+                                                             (cond-> a
+                                                               (included? (util/kw-path dict inner-k))
+                                                               (assoc-in [dict (mongo/create-id) inner-k] inner-v)))
+                                                           m
+                                                           v))
+                                              acc
+                                              initial-value)
 
-                                (and initial-value (included? dict))
-                                (assoc acc dict initial-value)
+                                      (and initial-value (included? dict))
+                                      (assoc acc dict initial-value)
 
-                                :else
-                                acc)))
-                          {}
-                          dic)
+                                      :else
+                                      acc)))
+                                {}
+                                dic)
      :references settings}))
 
 
@@ -188,16 +190,19 @@
 
 (defn init--verdict-dates
   "Include in verdict only those verdict dates that have been checked in
-  the template."
+  the template. Also, if no verdict dates, the automatic-verdict-dates
+  toggle is excluded."
   [{:keys [template] :as initmap}]
   (update-in initmap
              [:draft :template :inclusions]
              (fn [incs]
                (let [{:keys [verdict-dates]} (-> template :published :data)]
-                 (-> incs
-                     ;; Only include those dates that are checked in the template.
-                     (util/difference-as-kw shared/verdict-dates)
-                     (util/union-as-kw verdict-dates))))))
+                 (cond-> (util/difference-as-kw incs
+                                                [:automatic-verdict-dates]
+                                                shared/verdict-dates)
+                   (seq verdict-dates)
+                   (util/union-as-kw verdict-dates
+                                     [:automatic-verdict-dates]))))))
 
 (defn init--upload
   "Upload is included if the attachments section is not removed and
@@ -216,8 +221,8 @@
 
 (defn init--verdict-giver-type
   "Adds giver key into template. The value is either lautakunta or
-  viranhaltija. Verdict-section dict not included for viranhaltija
-  verdicts."
+  viranhaltija. Verdict-section and boardname dicts not included for
+  viranhaltija verdicts."
   [{:keys [template] :as initmap}]
   (let [giver-type (some-> template :published :data :giver)]
     (cond-> (assoc-in initmap
@@ -225,7 +230,8 @@
                       giver-type)
       (util/=as-kw giver-type :viranhaltija)
       (update-in [:draft :template :inclusions]
-                 util/difference-as-kw  [:verdict-section]))))
+                 util/difference-as-kw  [:verdict-section
+                                         :boardname]))))
 
 (defn init--dict-by-application
   "Inits given dict (if included) with the app-fn result (if the result
@@ -286,8 +292,13 @@
     (action/update-application command
                                {$push {:pate-verdicts
                                        (sc/validate schemas/PateVerdict draft)}})
-    {:verdict    (enrich-verdict command draft)
-     :references (:references draft)}))
+    (let [enriched (enrich-verdict command draft)]
+      {:verdict    (assoc (select-keys enriched
+                                       [:category :schema-version :data
+                                        :modified :published :id])
+                          :inclusions (get-in enriched
+                                              [:template :inclusions]))
+       :references (:references enriched)})))
 
 (defn verdict-summary [verdict]
   (select-keys verdict [:id :published :modified]))
@@ -422,17 +433,17 @@
                                dic-value))))
                   {})))
 
-(defn- verdict-schema [category {:keys [inclusions]}]
-  (update (shared/verdict-schema category)
+(defn- verdict-schema [{:keys [category schema-version template]}]
+  (update (shared/verdict-schema category schema-version)
           :dictionary
-          #(select-inclusions % inclusions)))
+          #(select-inclusions % (map keyword (:inclusions template)))))
 
 (defn verdict-filled?
   "Have all the required fields been filled. Refresh? argument can force
   the read from mongo (see command->verdict)."
   ([command refresh?]
-   (let [{:keys [data category template]} (command->verdict command refresh?)
-         schema (verdict-schema category template)]
+   (let [{:keys [data] :as verdict} (command->verdict command refresh?)
+         schema (verdict-schema verdict)]
      (schemas/required-filled? schema data)))
   ([command]
    (verdict-filled? command false)))
@@ -518,10 +529,11 @@
     :as                             command}]
   (let [{:keys [data category
                 template
-                references]} (command->verdict command)
+                references]
+         :as verdict} (command->verdict command)
         {:keys [data value path op]
          :as     processed}    (schemas/validate-and-process-value
-                                (verdict-schema category template)
+                                (verdict-schema verdict)
                                 path value
                                 ;; Make sure that building related
                                 ;; paths can be resolved.
@@ -605,12 +617,14 @@
     (assoc verdict :data (merge data addons))))
 
 (defn open-verdict [{:keys [application] :as command}]
-  (let [{:keys [data published] :as verdict} (command->verdict command)]
-    {:verdict  (assoc (select-keys verdict [:id :modified :published])
-                      :data (if published
-                              data
-                              (:data (enrich-verdict command
-                                                     verdict))))
+  (let [{:keys [data published template]
+         :as   verdict} (command->verdict command)]
+    {:verdict    (assoc (select-keys verdict [:id :modified :published])
+                        :data (if published
+                                data
+                                (:data (enrich-verdict command
+                                                       verdict)))
+                        :inclusions (:inclusions template))
      :references (:references verdict)}))
 
 (defn- next-section [org-id created verdict-giver]

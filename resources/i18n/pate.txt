@@ -736,3 +736,4 @@
 "pate.hearing" "fi" "Kuuleminen"
 "pate-start-info" "fi" "Lähtökohtatiedot"
 "pate-start-info.text" "fi" "Mahdolliset lähtökohtatiedot tulee kirjata päätökseen käsin."
+"pate.no-statements" "fi" "Ei lausuntoja."
