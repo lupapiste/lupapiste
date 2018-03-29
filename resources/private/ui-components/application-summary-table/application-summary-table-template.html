@@ -82,7 +82,7 @@
       <!-- ko if: permitSubtypes().length > 1 -->
       <select class="dropdown"
               data-bind="options: permitSubtypes, value: permitSubtype,
-                         enable: $root.authorization.ok('change-permit-sub-type'),
+                         enable: $root.authorization.ok('change-permit-sub-type') && !processing(),
                          css: {mandatory: permitSubtypeMandatory},
                          optionsText: function(item) {return item ? loc('permitSubtype.' + item) : loc('choose'); }"
               id="permitSubtypeSelect">
