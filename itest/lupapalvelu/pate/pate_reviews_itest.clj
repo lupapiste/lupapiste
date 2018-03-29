@@ -52,7 +52,7 @@
                        :anto                  "",
                        :complexity            "",
                        :attachments           [],
-                       :plans                 [],
+                       :plans                 ["5a85960a809b5a1e454f3233" "5a85960a809b5a1e454f3234"],
                        :foremen               ["vastaava-tj"],
                        :verdict-code          "",
                        :extra-info            "",

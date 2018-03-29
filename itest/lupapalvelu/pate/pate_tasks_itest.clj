@@ -37,10 +37,10 @@
 
 (facts "PATE tasks"
 
-  (fact "submit" (command pena :submit-application :id app-id) => ok?)
-  (fact "bulletinOpDescription..."
-    (command sonja :update-app-bulletin-op-description :id app-id :description "Bullet the blue sky.") => ok?)
-  (fact "Sonja approves" (command sonja :approve-application :id app-id :lang "fi") => ok?)
+  (facts "Submit and approve application"
+    (command pena :submit-application :id app-id) => ok?
+    (command sonja :update-app-bulletin-op-description :id app-id :description "Bulletin description") => ok?
+    (command sonja :approve-application :id app-id :lang "fi") => ok?)
 
   (let [verdict-draft (command sonja :new-pate-verdict-draft
                                :id app-id
@@ -50,7 +50,7 @@
                                                 :id))
         verdict-id    (get-in verdict-draft [:verdict :id])]
 
-    (facts "fill verdict data and publish verdict"
+    (facts "Fill verdict data and publish verdict"
       (fact "Set automatic calculation of other dates"
         (command sonja :edit-pate-verdict :id app-id :verdict-id verdict-id
                  :path [:automatic-verdict-dates] :value true) => no-errors?)
