@@ -5,7 +5,7 @@
             [sade.strings :as ss]
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.document.model :as model]
-            [lupapalvelu.document.persistence :as doc-persistence]))
+            [lupapalvelu.document.tools :as tools]))
 
 (defn get-approval
   "Returns document's approval data. Nil if not found."
@@ -34,7 +34,7 @@
 
 (defn- validate-approvability [{{:keys [doc path collection]} :data application :application}]
   (let [path-v (if (ss/blank? path) [] (ss/split path #"\."))
-        document (doc-persistence/by-id application collection doc)]
+        document (tools/by-id application collection doc)]
     (if document
       (when-not (approvable? document path-v)
         (fail :error.document-not-approvable))

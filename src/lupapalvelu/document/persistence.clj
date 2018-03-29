@@ -19,10 +19,6 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]))
 
-(defn by-id [application collection id]
-  (let [docs ((keyword collection) application)]
-    (some #(when (= (:id %) id) %) docs)))
-
 (defn ->model-updates
   "Creates model-updates from ui-format."
   [updates]
@@ -166,7 +162,7 @@
           (fail! :error-trying-to-remove-readonly-field))))))
 
 (defn update! [{application :application timestamp :created {role :role} :user} doc-id updates collection]
-  (let [document      (by-id application collection doc-id)
+  (let [document      (tools/by-id application collection doc-id)
         model-updates (->model-updates updates)
         update-paths  (map first model-updates)]
     (when-not document (fail! :error.document-not-found))
@@ -235,7 +231,7 @@
           document paths))
 
 (defn remove-document-data [{application :application {role :role} :user :as command} doc-id paths collection]
-  (let [document (by-id application collection doc-id)
+  (let [document (tools/by-id application collection doc-id)
         updated-doc (apply-removals document paths)
         post-results (model/validate application updated-doc)
         paths (map (partial map util/->keyword) paths)]

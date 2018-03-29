@@ -124,7 +124,7 @@
     (doc-persistence/remove-document-data command doc paths :documents)))
 
 (defn save-premises-data [model-updates {application :application timestamp :created {role :role} :user :as command} doc-id]
-  (let [document                                         (doc-persistence/by-id application "documents" doc-id)
+  (let [document                                         (util/find-by-id doc-id (:documents application))
         update-paths                                     (map first model-updates)
         {:keys [mongo-query mongo-updates post-results]} (apply doc-persistence/validated-model-updates application "documents" document
                                                                 (doc-persistence/transform document model-updates) timestamp nil)]
