@@ -617,12 +617,15 @@
                                              (assoc :permanent-archive-in-use-since date))})
       (ok))))
 
-(defn split-emails [emails] (ss/split emails #"[\s,;]+"))
+(defn split-emails
+  "Splits and canonizes emails string"
+  [emails]
+  (map ss/canonize-email (ss/split emails #"[\s,;]+")))
 
 (def email-list-validators [(partial action/string-parameters [:emails])
                             (fn [{{emails :emails} :data}]
                               (let [splitted (split-emails emails)]
-                                (when (and (not (ss/blank? emails)) (some (complement v/valid-email?) splitted))
+                                (when (and (not (ss/blank? emails)) (some (partial sc/check ssc/Email) splitted))
                                   (fail :error.email))))])
 
 (defcommand set-organization-neighbor-order-email
