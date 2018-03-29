@@ -99,8 +99,11 @@
 (defn- created-before-verdict? [application document]
   (not (doc/created-after-verdict? document application)))
 
+(defn- approved-before-verdict? [application document]
+  (not (doc/approved-after-verdict? document application)))
+
 (defn- remove-pre-verdict-designers [application]
-  (update application :documents #(remove (every-pred designer-doc? (partial created-before-verdict? application)) %)))
+  (update application :documents #(remove (every-pred designer-doc? (partial approved-before-verdict? application)) %)))
 
 (defn- remove-disabled-documents [application]
   (update application :documents (fn [docs] (remove :disabled docs))))

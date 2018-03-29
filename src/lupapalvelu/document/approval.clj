@@ -12,6 +12,8 @@
   [document]
   (not-empty (get-in document [:meta :_approved])))
 
+(defn approved? [document]
+  (= "approved" (:value (get-approval document))))
 
 (defn ->approved
   "Approval meta data model. To be used within with-timestamp."
