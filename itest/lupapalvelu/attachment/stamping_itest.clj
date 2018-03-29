@@ -54,8 +54,9 @@
     (fact "Job id is returned" (:id job) => truthy)
     (fact "FileId is returned" file-id => truthy)
 
-    ; Poll for 5 seconds
-    (when-not (= "done" (:status job)) (poll-job sonja :stamp-attachments-job (:id job) (:version job) 25))
+    ; Poll for 10 seconds
+    (when-not (= "done" (:status job))
+      (poll-job sonja :stamp-attachments-job (:id job) (:version job) 50) => ok?)
 
     (let [attachment (get-attachment-by-id sonja application-id (:id attachment))
           pena-app (query-application pena application-id)
@@ -86,8 +87,9 @@
                                     :lang "fi"
                                     :stamp stamp)]
           resp => ok?
-          ; Poll for 5 seconds
-          (when-not (= "done" (:status job)) (poll-job sonja :stamp-attachments-job (:id job) (:version job) 25))
+          ; Poll for 10 seconds
+          (when-not (= "done" (:status job))
+            (poll-job sonja :stamp-attachments-job (:id job) (:version job) 50) => ok?)
 
           (fact "Latest version has chaned"
             (let [attachment-after-restamp (get-attachment-by-id sonja application-id (:id attachment))]
