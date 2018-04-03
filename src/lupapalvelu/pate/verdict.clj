@@ -57,6 +57,12 @@
       :data :poikkeamat :value
       (or "")))
 
+(defn- application-operation [application]
+  (-> (domain/get-document-by-name application
+                                   "hankkeen-kuvaus")
+      :data :kuvaus :value
+      (or "")))
+
 (defn dicts->kw-paths
   [dictionary]
   (->> dictionary
@@ -274,7 +280,20 @@
       init--verdict-dates
       init--upload
       init--verdict-giver-type
-      init--buildings))
+      init--buildings
+      (init--dict-by-application :operation application-operation)
+      (init--dict-by-application :address :address)))
+
+(defmethod initialize-verdict-draft :p
+  [initmap]
+  (-> initmap
+      (init--dict-by-application :handler general-handler)
+      (init--dict-by-application :deviations application-deviations)
+      init--verdict-dates
+      init--upload
+      init--verdict-giver-type
+      (init--dict-by-application :operation application-operation)
+      (init--dict-by-application :address :address)))
 
 (declare enrich-verdict)
 

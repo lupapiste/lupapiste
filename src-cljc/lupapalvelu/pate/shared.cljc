@@ -625,6 +625,16 @@
                                                         :dict      kw}))
                                                    verdict-dates)}]}}})
 
+(def versub-operation
+  {:dictionary {:operation {:text {:loc-prefix :pate.operation}}
+                :address   {:text {:loc-prefix :pate.address}}}
+   :section    {:id   :pate-operation
+                :grid {:columns 2
+                       :rows    [[{:dict  :operation
+                                   :align :full}]
+                                 [{:dict  :address
+                                   :align :full}]]}}})
+
 (def versub-verdict
   {:dictionary {:boardname        {:reference {:path :*ref.boardname}}
                 :verdict-section  (required {:text {:before :section}})
@@ -912,7 +922,7 @@
                                               (versub-dates :r)
                                               versub-verdict
                                               versub-bulletin
-                                              ;; TODO: rakennushanke tai toimenpide
+                                              versub-operation
                                               versub-requirements
                                               versub-conditions
                                               versub-appeal
@@ -952,7 +962,7 @@
                                               (versub-dates :p)
                                               versub-verdict
                                               versub-bulletin
-                                              ;; TODO: rakennushanke tai toimenpide
+                                              versub-operation
                                               versub-conditions
                                               versub-appeal
                                               versub-statements
