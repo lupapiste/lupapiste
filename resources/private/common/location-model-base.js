@@ -15,10 +15,10 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
   self.address = ko.observable("");
   self.propertyId = ko.observable("");
   self.municipalityCode = ko.observable("");
-  self.refreshBuildings = ko.observable(false);
+  self.refreshBuildings = ko.observable(true);
 
   self.reset = function() {
-    return self.setXY(0,0).address("").propertyId("").municipalityCode("");
+    return self.setXY(0,0).address("").propertyId("").municipalityCode("").refreshBuildings(true);
   };
 
   self.toJS = function() {
