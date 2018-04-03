@@ -1039,7 +1039,8 @@
                                  :add-operation-allowed false
                                  :copying-allowed false
                                  :min-outgoing-link-permits 1
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver (constantly states/r-jatkoaika-state-graph)}
    :aiemmalla-luvalla-hakeminen {:schema "aiemman-luvan-toimenpide"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -1078,7 +1079,8 @@
                                 :add-operation-allowed false
                                 :copying-allowed true
                                 :min-outgoing-link-permits 1
-                                :asianhallinta false}})
+                                :asianhallinta false
+                                :state-graph-resolver (constantly states/r-jatkoaika-state-graph)}})
 
 (def- vvvl-operations
   {:vvvl-vesijohdosta           {:schema "talousvedet"

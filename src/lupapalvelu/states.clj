@@ -55,6 +55,8 @@
 
 (def ark-state-graph common-states/ark-state-graph)
 
+(def r-jatkoaika-state-graph common-states/r-jatkoaika-state-graph)
+
 ; TODO draft versions this forward
 
 (def
@@ -133,6 +135,7 @@
                             :foremanVerdictGiven :acknowledged ; foreman applications
                             :finished :agreementPrepared :agreementSigned  ; YA cases
                             :archived ; Archiving projects (ARK)
+                            :ready    ; R jatkoaika
                             })
 
 (def post-verdict-states

@@ -34075,6 +34075,20 @@ span.icon_clear:before {
   display: none;
 }
 
+.application_summary .application_summary_info .state-indication div.ready .ready-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+
+.application_summary .application_summary_info .state-indication div.ready .ready-box:after {
+  border-left: 11px solid #2ca92c;
+}
+
+.application_summary .application_summary_info .state-indication div.ready .draft-box, .application_summary .application_summary_info .state-indication div.ready .open-box, .application_summary .application_summary_info .state-indication div.ready .submitted-box, .application_summary .application_summary_info .state-indication div.ready .sent-box {
+  display: none;
+}
+
 .application_summary .application_actions {
   position: absolute;
   right: 0;
