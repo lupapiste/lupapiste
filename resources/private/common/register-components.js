@@ -48,6 +48,7 @@ jQuery(document).ready(function() {
     {name: "ok-dialog"},
     {name: "ok-button-group"},
     {name: "integration-error-dialog"},
+    {name: "remove-invitation-denied-company-error-dialog"},
     {name: "company-edit"},
     {name: "organization-name-editor"},
     {name: "tags-editor"},

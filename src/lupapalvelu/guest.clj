@@ -108,7 +108,8 @@
     application                  :application
     :as                          command}]
   (let [email (ss/canonize-email email)]
-    (if (company/company-denies-invitations? application (usr/get-user-by-email email))
+    (if (->> (get-in (usr/get-user-by-email email) [:company :id])
+             (company/company-denies-invitations? application))
       (fail :invite.company-denies-invitation)
       (if (or (util/find-by-key :email email (domain/invites application))
               (auth/has-auth? application (:id (usr/get-user-by-email email))))

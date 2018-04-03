@@ -599,8 +599,7 @@
   (when-not (and company  (not (:submit company)))
     (fail :error.authorized)))
 
-(defn company-denies-invitations? [application user]
-  (let [user-company-id (get-in user [:company :id])
-        company (find-company-by-id user-company-id)
-        invites-denied (:invitationDenied company)]
-    (and invites-denied (empty? (auth/get-auth application user-company-id)))))
+(defn company-denies-invitations? [application company-id]
+  (and (ss/not-blank? company-id)
+       (empty? (auth/get-auth application company-id))
+       (:invitationDenied (find-company-by-id company-id))))
