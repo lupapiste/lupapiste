@@ -157,7 +157,7 @@
 
 (def- db-fields ; projection
   [:_comments-seen-by :_statements-seen-by :_verdicts-seen-by
-   :_attachment_indicator_reset :address :applicant :attachments
+   :_attachment_indicator_reset :address :applicant :creator :attachments
    :auth :handlers.firstName :handlers.lastName :authorityNotice :comments :created :documents
    :foreman :foremanRole :infoRequest :location :modified :municipality
    :neighbors :permitType :permitSubtype :primaryOperation :state :statements
@@ -168,7 +168,7 @@
   (map :field meta-fields/indicator-meta-fields))
 
 (def- frontend-fields
-  [:id :address :applicant :handlers :authorityNotice
+  [:id :address :applicant :creator :handlers :authorityNotice
    :infoRequest :kind :location :modified :municipality
    :primaryOperation :state :submitted :urgency :verdicts
    :foreman :foremanRole :permitType])
