@@ -190,3 +190,7 @@ Ronja has one assignment
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
   Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  1
   Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[1]/td[@data-test-col-name='description']  Aita ja asema
+  Logout
+
+Frontend error
+  There are no frontend errors
