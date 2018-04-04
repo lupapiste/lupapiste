@@ -5,7 +5,7 @@
             [sade.property :as sprop]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.wfs :as wfs])
-  (:import (com.mongodb WriteConcern)))
+  (:import (com.mongodb WriteConcern DuplicateKeyException)))
 
 (defn property-info-from-wfs [property-id]
   (->> (wfs/get-property-location-info-by-property-id property-id)
@@ -21,10 +21,13 @@
             result (property-info-from-wfs property-id)]
         (debugf "Municipality for property id from KTJKii took %.3f seconds" (/ (- (now) start) 1000))
         (when (:municipality result)
-          (mongo/insert :propertyMunicipalityCache
-                        (mongo/with-mongo-meta (merge result {:propertyId property-id}))
-                        WriteConcern/UNACKNOWLEDGED)
-          (debugf "Inserted property %s to :propertyMunicipalityCache" property-id))
+          (try
+            (mongo/insert :propertyMunicipalityCache
+                          (mongo/with-mongo-meta (merge result {:propertyId property-id}))
+                          WriteConcern/UNACKNOWLEDGED)
+            (debugf "Inserted property %s to :propertyMunicipalityCache" property-id)
+            (catch DuplicateKeyException _
+              (debugf "Key alredy exists in :propertyMunicipalityCache: %s" property-id))))
         result))))
 
 
