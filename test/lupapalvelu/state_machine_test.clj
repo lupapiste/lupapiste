@@ -24,7 +24,9 @@
     (state-graph {:primaryOperation {:name "raktyo-aloit-loppuunsaat"}
                   :permitSubtype nil}) => states/r-jatkoaika-state-graph
     (state-graph {:primaryOperation {:name "jatkoaika"}
-                  :permitSubtype nil}) => states/r-jatkoaika-state-graph))
+                  :permitSubtype nil}) => states/r-jatkoaika-state-graph
+    (state-graph {:primaryOperation {:name "kerrostalo-rivitalo"}
+                  :permitSubtype "muutoslupa"}) => states/r-muutoslupa-state-graph))
 
 (facts "can-proceed?"
   (can-proceed? {:infoRequest true :state "info"} :answered) => true
@@ -67,4 +69,5 @@
   (application-state-seq {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
                           :permitSubtype "tyonjohtaja-ilmoitus"}) => [:draft :open :submitted :acknowledged]
   (application-state-seq {:primaryOperation {:name "ya-jatkoaika"}}) => [:draft :open :submitted :sent :finished]
-  (application-state-seq {:primaryOperation {:name "raktyo-aloit-loppuunsaat"}}) => [:draft :open :submitted :sent :ready])
+  (application-state-seq {:primaryOperation {:name "raktyo-aloit-loppuunsaat"}}) => [:draft :open :submitted :sent :ready]
+  (application-state-seq {:primaryOperation {:name "kerrostalo-rivitalo"} :permitSubtype "muutoslupa"}) => [:draft :open :submitted :sent :ready])

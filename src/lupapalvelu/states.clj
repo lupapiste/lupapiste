@@ -56,6 +56,7 @@
 (def ark-state-graph common-states/ark-state-graph)
 
 (def r-jatkoaika-state-graph common-states/r-jatkoaika-state-graph)
+(def r-muutoslupa-state-graph common-states/r-muutoslupa-state-graph)
 
 ; TODO draft versions this forward
 
