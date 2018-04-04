@@ -664,11 +664,14 @@
         {giver :giver}             template]
     (cond-> verdict
       (and (ss/blank? section)
-           (util/not=as-kw giver
-                           :lautakunta)) (assoc-in [:data :verdict-section]
-                                                   (next-section org-id
-                                                                 created
-                                                                 giver)))))
+           (util/not=as-kw giver :lautakunta))
+      (->
+       (assoc-in [:data :verdict-section]
+                 (next-section org-id
+                               created
+                               giver))
+       (update-in [:template :inclusions]
+                  #(distinct (conj % :verdict-section)))))))
 
 (defn- verdict-attachment-items
   "Type-groups, type-ids and ids of the verdict attachments. These
@@ -761,8 +764,8 @@
                                      (insert-section (:organization application)
                                                      created))
         next-state             (sm/verdict-given-state application)
-        buildings  (->buildings-array application)
-        tasks      (pate-verdict->tasks verdict buildings command)
+        buildings              (->buildings-array application)
+        tasks                  (pate-verdict->tasks verdict buildings command)
         {att-items :items
          update-fn :update-fn} (attachment-items command verdict)
         verdict                (update verdict :data update-fn)]
@@ -771,8 +774,11 @@
     (verdict-update command
                     (util/deep-merge
                      {$set (merge
-                            {:pate-verdicts.$.data      (:data verdict)
-                             :pate-verdicts.$.published created}
+                            {:pate-verdicts.$.data                (:data verdict)
+                             :pate-verdicts.$.template.inclusions (-> verdict
+                                                                      :template
+                                                                      :inclusions)
+                             :pate-verdicts.$.published           created}
                             {:buildings buildings}
                             (when (seq tasks) {:tasks tasks}) ; in re-publish situation, old tasks are nuked and new ones generated
                             (att/attachment-array-updates (:id application)
@@ -795,7 +801,7 @@
                                                   created)
 
     (let [verdict-attachment (pdf/create-verdict-attachment command (assoc verdict :published created))
-          verdict (assoc verdict :verdict-attachment verdict-attachment)]
+          verdict            (assoc verdict :verdict-attachment verdict-attachment)]
       ;; KuntaGML
       (when (org/krysp-integration? @organization (:permitType application))
         (-> (assoc command :application (domain/get-application-no-access-checking (:id application)))

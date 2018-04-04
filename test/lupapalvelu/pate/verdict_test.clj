@@ -7,6 +7,7 @@
             [lupapalvelu.pate.verdict :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [sade.shared-schemas :refer [object-id-pattern]]
             [sade.strings :as ss]
             [sade.util :as util]
             [schema.core :as sc]))
@@ -49,7 +50,8 @@
     (insert-section "123-T" 1515151515151 {:data     {}
                                            :template {:giver "test"}})
     => {:data     {:verdict-section "2"}
-        :template {:giver "test"}}
+        :template {:giver "test"
+                   :inclusions [:verdict-section]}}
 
     (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 2))
 
@@ -57,7 +59,18 @@
     (insert-section "123-T" 1515151515151 {:data     {:verdict-section ""}
                                            :template {:giver "test"}})
     => {:data     {:verdict-section "1"}
-        :template {:giver "test"}}
+        :template {:giver "test"
+                   :inclusions [:verdict-section]}}
+
+    (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 1))
+
+  (fact "Distinct inclusions"
+    (insert-section "123-T" 1515151515151 {:data     {:verdict-section ""}
+                                           :template {:giver "test"
+                                                      :inclusions [:hello :verdict-section :foo]}})
+    => {:data     {:verdict-section "1"}
+        :template {:giver "test"
+                   :inclusions [:hello :verdict-section :foo]}}
 
     (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 1))
 
@@ -88,7 +101,6 @@
        (assoc-in [:verdict-data :automatic-verdict-dates] true)
        (assoc-in [:verdict-data :verdict-date] "1.3.2018")
        (lupapalvelu.pate.verdict/update-automatic-verdict-dates)))
-
 
 (def test-verdict
   {:version  1
@@ -149,6 +161,97 @@
                  :grid {:columns 2
                         :rows    [[{:dict :t-two}
                                    {:dict :t-three}]]} }]})
+
+(facts "Build schemas"
+  (fact "Dict missing"
+    (shared/check-dicts (dissoc (:dictionary test-verdict) :three)
+                        (:sections test-verdict))
+    => (throws AssertionError))
+  (fact "Dict in repeating missing"
+    (shared/check-dicts (util/dissoc-in (:dictionary test-verdict)
+                                        [:five :repeating :r-three :repeating :r-sub-two])
+                        (:sections test-verdict))
+    => (throws AssertionError))
+  (fact "Overlapping dicts"
+    (shared/check-overlapping-dicts [{:dictionary {:foo {:toggle {}}
+                                                   :bar {:text {}}
+                                                   :baz {:toggle {}}}}
+                                     {:dictionary {:doo {:toggle {}}
+                                                   :mar {:text {}}
+                                                   :daz {:toggle {}}}}
+                                     {:dictionary {:foo {:toggle {}}
+                                                   :har {:text {}}
+                                                   :baz {:toggle {}}}}])
+    => (throws AssertionError))
+  (fact "Combine subschemas"
+    (shared/combine-subschemas {:dictionary {:foo {:toggle {}}
+                                             :bar {:text {}}}
+                                :sections   [{:id   :one
+                                              :grid {:columns 1
+                                                     :rows    [[{:dict :foo}]]}}
+                                             {:id   :two
+                                              :grid {:columns 1
+                                                     :rows    [[{:dict :bar}]]}}]}
+                               {:dictionary {:baz {:date {}}}
+                                :section    {:id   :three
+                                             :grid {:columns 1
+                                                    :rows    [[{:dict :baz}]]}}})
+    => {:dictionary {:foo {:toggle {}}
+                     :bar {:text {}}
+                     :baz {:date {}}}
+        :sections   [{:id   :one
+                      :grid {:columns 1
+                             :rows    [[{:dict :foo}]]}}
+                     {:id   :two
+                      :grid {:columns 1
+                             :rows    [[{:dict :bar}]]}}
+                     {:id   :three
+                      :grid {:columns 1
+                             :rows    [[{:dict :baz}]]}}]})
+  (fact "Build verdict template schema"
+    (shared/build-verdict-template-schema
+     {:dictionary {:foo {:toggle {}}
+                   :bar {:text {}}}
+      :sections   [{:id   :one
+                    :grid {:columns 1
+                           :rows    [[{:dict :foo}]]}}
+                   {:id   :two
+                    :grid {:columns 1
+                           :rows    [[{:dict :bar}]]}}]
+      :removable? true}
+     {:dictionary {:baz {:date {}}}
+      :section    {:id   :three
+                   :grid {:columns 1
+                          :rows    [[{:dict :baz}]]}}
+      :removable? true}
+     {:dictionary {:dum {:date {}}}
+      :section    {:id   :four
+                   :grid {:columns 1
+                          :rows    [[{:dict :dum}]]}}})
+    => {:dictionary {:foo                       {:toggle {}}
+                     :bar                       {:text {}}
+                     :baz                       {:date {}}
+                     :dum                       {:date {}}
+                     :removed-sections          {:keymap {:one   false
+                                                          :two   false
+                                                          :three false}}
+                     :link-to-settings          {:link {:text-loc :pate.settings-link
+                                                        :click    :open-settings}}
+                     :link-to-settings-no-label {:link {:text-loc :pate.settings-link
+                                                        :label?   false
+                                                        :click    :open-settings}}}
+        :sections   [{:id   :one
+                      :grid {:columns 1
+                             :rows    [[{:dict :foo}]]}}
+                     {:id   :two
+                      :grid {:columns 1
+                             :rows    [[{:dict :bar}]]}}
+                     {:id   :three
+                      :grid {:columns 1
+                             :rows    [[{:dict :baz}]]}}
+                     {:id   :four
+                      :grid {:columns 1
+                             :rows    [[{:dict :dum}]]}}]}))
 
 (facts "Verdict validation"
   (facts "Schema creation"
@@ -426,7 +529,7 @@
            (:data draft) => data))))))
 
 (defn mongo-id? [v]
-  (re-matches #"[a-f0-9]{24}" v))
+  (re-matches object-id-pattern v))
 
 (against-background
  [(shared/verdict-template-schema "r") => mini-verdict-template

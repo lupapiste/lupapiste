@@ -501,7 +501,7 @@
       :eur     (str v "\u20ac"))))
 
 (defn complexity [lang verdict]
-  (not-empty (remove nil?
+  (not-empty (filter not-empty
                      [(loc-non-blank lang
                                      :pate.complexity
                                      (dict-value verdict :complexity))
@@ -670,21 +670,22 @@
          (remove nil?))))
 
 (defn building-parking [lang {:keys [description tag building-id]
-                              :as building}]
+                              :as   building}]
   (letfn [(park [kw]
             (hash-map :text (i18n/localize lang :pate-buildings.info kw)
                       :amount (kw building)))]
     (-<>> [:kiinteiston-autopaikat :rakennetut-autopaikat
-           :rakennettavat-autopaikat :autopaikkoja-enintaan
-           :autopaikkoja-vahintaan :ulkopuoliset-autopaikat]
+           #_:rakennettavat-autopaikat #_:autopaikkoja-enintaan
+           #_:autopaikkoja-vahintaan #_:ulkopuoliset-autopaikat]
           (map park)
           (sort-by :text)
           vec
           (conj <> (park :autopaikat-yhteensa))
           (remove (comp ss/blank? :amount))
-          (cons {:text (-<>> [tag description]
-                             (join-non-blanks ": ")
-                             (join-non-blanks " \u2013 " <> building-id))
+          (cons {:text   (-<>> [tag description]
+                               (join-non-blanks ": ")
+                               (join-non-blanks " \u2013 " <> building-id)
+                               (vector :strong))
                  :amount ""}))))
 
 (defn parking-section [lang buildings]

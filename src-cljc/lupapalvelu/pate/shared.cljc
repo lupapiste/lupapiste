@@ -152,11 +152,7 @@
                      :else x)))
                 form))
 
-(defn combine-subschemas
-  "Combines given subschemas into one schema. Throws if dictionary keys
-  overlap or sections refer to a :dict that does not exist."
-  [& subschemas]
-
+(defn check-overlapping-dicts [subschemas]
   (->> subschemas
        (map (comp set keys :dictionary))
        (reduce (fn [acc key-set]
@@ -164,7 +160,13 @@
                    (pate-assert (empty? overlapping)
                                 "Overlapping dicts:" overlapping)
                    (set/union acc key-set)))
-               #{}))
+               #{})))
+
+(defn combine-subschemas
+  "Combines given subschemas into one schema. Throws if dictionary keys
+  overlap or sections refer to a :dict that does not exist."
+  [& subschemas]
+  (check-overlapping-dicts subschemas)
 
   (let [schema (reduce (fn [acc {:keys [dictionary] :as subschema}]
                          (-> acc
@@ -565,7 +567,6 @@
                     show? (assoc :show? show?)) }))
 
 (def required-in-verdict {:toggle {:i18nkey :pate.template-removed}})
-(def verdict-handler )
 (def app-id-placeholder {:placeholder {:loc-prefix :pate-verdict.application-id
                                        :type :application-id}})
 
