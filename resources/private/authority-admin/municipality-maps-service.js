@@ -120,12 +120,16 @@ LUPAPISTE.MunicipalityMapsService = function() {
     deferEvaluation: true
   });
 
+  function userLayerArray( layerNames ) {
+    return  _.map(layerNames, function(name) {
+      return new Layer({name: name,
+                        fixed: true});
+    });
+  }
+
   function resetUserLayers() {
     userLayers.removeAll();
-    userLayers( [new Layer( {name: "asemakaava",
-                             fixed: true}),
-                 new Layer( {name: "kantakartta",
-                             fixed: true})]);
+    userLayers( userLayerArray( ["asemakaava", "kantakartta"] ));
   }
 
   // Reads server details and user layers from
@@ -141,14 +145,16 @@ LUPAPISTE.MunicipalityMapsService = function() {
         username: server.username || "",
         password: server.password || ""
       });
-      if( _.size(res.layers) >= 2 ) {
+      if( _.size(res.layers) >= 1 ) {
+        var defaultNames = ["asemakaava", "kantakartta"];
         var layers = _.map( res.layers, function( layer ) {
+          _.pull(defaultNames, layer.name);
           return new Layer({name: layer.name,
                             id: layer.id,
                             fixed: layer.base });
         });
         mapFitted( false );
-        userLayers( layers);
+        userLayers( _.concat(userLayerArray(defaultNames), layers));
       } else {
         resetUserLayers();
       }
