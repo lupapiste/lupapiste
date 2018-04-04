@@ -259,7 +259,7 @@ Authority can view draft foreman application, but can't use commands
 
 ...submit aplication
   Open tab  requiredFieldSummary
-  Element should not be visible  xpath=//div[@id="application-requiredFieldSummary-tab"]//button[@data-test-id="application-submit-btn"]
+  Element should be disabled  xpath=//div[@id="application-requiredFieldSummary-tab"]//button[@data-test-id="application-submit-btn"]
 
 ...application actions
   # Application actions only exportPDF is visible
