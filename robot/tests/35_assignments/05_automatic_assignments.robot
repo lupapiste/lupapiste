@@ -173,8 +173,6 @@ The assignment targets the 'Aitapiirustus' attachment
 
 Sonja changes handler
   Scroll and click test id  edit-handlers
-  Wait test id visible  add-handler
-  Scroll and click test id  add-handler
   Edit handler  0  Sibbo Ronja  Käsittelijä
 
 Sonja has no open assignments
