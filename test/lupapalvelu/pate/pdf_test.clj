@@ -1,7 +1,8 @@
 (ns lupapalvelu.pate.pdf-test
   "PDF testing concentrates mainly on the source value resolution."
-  (:require [midje.sweet :refer :all]
-            [lupapalvelu.pate.pdf :as pdf]))
+  (:require [lupapalvelu.application :as app]
+            [lupapalvelu.pate.pdf :as pdf]
+            [midje.sweet :refer :all]))
 
 (fact "join-non-blanks"
   (pdf/join-non-blanks "-" "foo" " " "bar" nil "baz")
@@ -212,10 +213,10 @@
   (pdf/complexity :fi {:data {:complexity "large"}})
   => ["Vaativa"]
   (pdf/complexity :fi {:data {:complexity-text "Tai nan le."}})
-  => ["Tai nan le."]
+  => '(([:p {} "Tai nan le."]))
   (pdf/complexity :fi {:data {:complexity-text "Tai nan le."
                               :complexity "large"}})
-  => ["Vaativa" "Tai nan le."])
+  => ["Vaativa" '([:p {}"Tai nan le."])])
 
 (fact "statements"
   (pdf/statements :fi {:data {}})
@@ -235,3 +236,87 @@
   (pdf/handler {:data {:handler " Hank Handler"
                        :handler-title "Title"}}) => "Title Hank Handler"
   (pdf/handler {:data {:handler-title " Title  "}}) => "Title")
+
+(facts "Application operations"
+  (let [app             {:documents           [{:schema-info {:op {:id   "op2"
+                                                                   :name "purkaminen"}}}
+                                               {:schema-info {:op {:id   "op1"
+                                                                   :name "sisatila-muutos"}}
+                                                :data        {:foo "bar"}}]
+                         :primaryOperation    {:id "op1"}
+                         :secondaryOperations [{:id "op2" :created 1}]}
+        sisatila-muutos "Rakennuksen sis\u00e4tilojen muutos (k\u00e4ytt\u00f6tarkoitus ja/tai muu merkitt\u00e4v\u00e4 sis\u00e4muutos)"
+        purkaminen      "Rakennuksen purkaminen"]
+    (fact "Primary operation data"
+      (pdf/primary-operation-data app)
+      => {:foo "bar"})
+    (fact "Operation infos"
+      (pdf/operation-infos app)
+      => [{:id   "op1"
+           :name "sisatila-muutos"}
+          {:id   "op2"
+           :name "purkaminen"}])
+    (fact "operations: no operation dict"
+      (pdf/operations {:lang "fi" :verdict {} :application app})
+      => [{:text sisatila-muutos}
+          {:text purkaminen}])
+    (fact "operations: blank operation dict"
+      (pdf/operations {:lang "fi" :verdict {:data {:operation "   "}} :application app})
+      => [{:text sisatila-muutos}
+          {:text purkaminen}])
+    (fact "operations: operation dict"
+      (pdf/operations {:lang "fi" :verdict {:data {:operation "  Grand Design   "}} :application app})
+      => [{:text "Grand Design"}
+          {:text purkaminen}])))
+
+(facts "Buildings"
+  (let [app     {:documents           [{:schema-info {:op {:id   "op2"
+                                                           :name "purkaminen"}}}
+                                       {:schema-info {:op {:id   "op1"
+                                                           :name "pientalo"}}
+                                        :data        {:foo "bar"}}]
+                 :primaryOperation    {:id "op1"}
+                 :secondaryOperations [{:id "op2" :created 1}]}
+        build1  {:kiinteiston-autopaikat "1"
+                 :autopaikat-yhteensa    "3"
+                 :tag                    "Foo"
+                 :description            "Foobar"
+                 :show-building          true}
+        build2  {:kiinteiston-autopaikat "2"
+                 :autopaikat-yhteensa    "4"
+                 :description            "Burn!"
+                 :building-id            "12345"
+                 :show-building          true}
+        verdict {:data {:buildings {:op2 build2
+                                    :op1 build1}}}]
+    (fact "Verdict buildings: no buildings"
+      (pdf/verdict-buildings {:application app :verdict {}})
+      => [])
+    (fact "Verdict buildings: two buildings"
+      (pdf/verdict-buildings {:application app :verdict verdict})
+      => [build1 build2])
+    (fact "Verdict buildings: other building deselected"
+      (pdf/verdict-buildings {:application app
+                              :verdict     (update-in verdict
+                                                      [:data :buildings :op2 :show-building]
+                                                      not)})
+      => [build1])
+    (fact "Building parking: building 1"
+      (pdf/building-parking "fi" build1)
+      => [{:text [:strong "Foo: Foobar"] :amount ""}
+          {:text "Kiinteist\u00f6n autopaikat" :amount "1"}
+          {:text "Autopaikat yhteens\u00e4" :amount "3"}])
+    (fact "Building parking: building 2"
+      (pdf/building-parking "fi" build2)
+      => [{:text [:strong "Burn! \u2013 12345"] :amount ""}
+          {:text "Kiinteist\u00f6n autopaikat" :amount "2"}
+          {:text "Autopaikat yhteens\u00e4" :amount "4"}])
+    (fact "Parking section: both buildings"
+      (pdf/parking-section :fi [build1 build2])
+      => [:div.section
+          [[{:text [:strong "Foo: Foobar"] :amount ""}
+            {:text "Kiinteist\u00f6n autopaikat" :amount "1"}
+            {:text "Autopaikat yhteens\u00e4" :amount "3"}]
+           [{:text [:strong "Burn! \u2013 12345"] :amount ""}
+            {:text "Kiinteist\u00f6n autopaikat" :amount "2"}
+            {:text "Autopaikat yhteens\u00e4" :amount "4"}]]])))

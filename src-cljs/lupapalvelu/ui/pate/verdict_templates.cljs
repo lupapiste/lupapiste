@@ -205,9 +205,9 @@
        (with-back-button
          (verdict-template
           (merge
-           {:schema     (dissoc (shared/default-verdict-template (keyword @state/current-category))
+           {:schema     (dissoc (shared/verdict-template-schema @state/current-category)
                                 :dictionary)
-            :dictionary (:dictionary (shared/default-verdict-template (keyword @state/current-category)))
+            :dictionary (:dictionary (shared/verdict-template-schema @state/current-category))
             :references state/references}
            (state/select-keys state/current-template [:state :info :_meta]))))
 
@@ -215,7 +215,7 @@
        [:div (verdict-template-list) (phrases/phrases-table)]
 
        ::settings
-       (when-let [full-schema ((keyword @state/current-category) shared/settings-schemas)]
+       (when-let [full-schema (shared/settings-schema @state/current-category)]
          (with-back-button
            (settings/verdict-template-settings
             (merge

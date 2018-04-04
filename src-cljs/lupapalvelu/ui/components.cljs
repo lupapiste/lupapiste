@@ -1,6 +1,9 @@
 (ns lupapalvelu.ui.components
-  (:require [cljs.pprint :refer [pprint]]
+  (:require-macros [cljs.core.async.macros :refer [go]])
+  (:require [cljs.core.async :refer [>! <!] :as async]
+            [cljs.pprint :refer [pprint]]
             [clojure.string :as s]
+            [clojure.walk :as walk]
             [lupapalvelu.pate.markup :as markup]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components.datepicker :as datepicker]
@@ -504,14 +507,31 @@
        :data-test-id (str test-id "-label")}
       (common/resolve-text options "")]]))
 
-(defn markup-span
-  "Converts given markdown string into HTML and returns the
-  corresponding span. Span class is :markdown and (optional) other
-  given classes."
-  [markup & class]
+(defn add-key-attrs
+  "Adds unique key attribute to every element. Note: the attribute is
+  added only if the element has an attribute map (true for
+  markup/markup->tags result)."
+  [form prefix]
+  (walk/prewalk (fn [x]
+                  (cond-> x
+                    (map? x) (assoc :key (common/unique-id prefix))))
+                form))
+
+
+(rum/defcs markup-span < rum/reactive
+  (rum/local "" ::tags)
+  "Displays formatted markup. Span class is :markdown and (optional)
+  other given classes."
+  [{tags* ::tags} markup & class]
+  (let [chn (async/chan)]
+    (go (>! chn (markup/markup->tags markup)))
+    (go (common/reset-if-needed! tags* (<! chn ))))
   [:span.markup
-   {:class class}
-   (markup/markup->tags markup)])
+   (merge
+    {:key (common/unique-id "markup-")}
+    (when class
+      {:class (map name class)}))
+   (add-key-attrs (rum/react tags*) "markup-")])
 
 (rum/defc link-label < rum/reactive
   "Component that alternates between link and label representation
