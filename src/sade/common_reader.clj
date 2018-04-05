@@ -5,7 +5,7 @@
             [clj-time.format :as timeformat]
             [sade.http :as http]
             [sade.env :as env]
-            [sade.util :refer [prewalk-map postwalk-map boolean? convert-values]]
+            [sade.util :refer [prewalk-map postwalk-map convert-values]]
             [sade.xml :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]))

@@ -174,7 +174,7 @@
   [{{:keys [notificationEmail descriptionsFromBackendSystem]} :data}]
   (when (and notificationEmail (not (v/valid-email? notificationEmail))
              (fail! :error.email)))
-  (when (and descriptionsFromBackendSystem (not (util/boolean? descriptionsFromBackendSystem)))
+  (when (and descriptionsFromBackendSystem (not (boolean? descriptionsFromBackendSystem)))
     (fail! :error.invalid-value)))
 
 (defcommand update-organization-bulletin-scope

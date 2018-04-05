@@ -315,7 +315,7 @@
   ([application document subject path timestamp]
     (set-subject-to-document application document subject path timestamp true))
   ([application document subject path timestamp set-empty-values?]
-    {:pre [(map? document) (map? subject) (util/boolean? set-empty-values?)]}
+    {:pre [(map? document) (map? subject) (boolean? set-empty-values?)]}
     (when (seq subject)
       (let [updates (document-subject-updates document subject path set-empty-values?)]
         (debugf "merging user %s with best effort into %s %s: %s" (:email subject) (get-in document [:schema-info :name]) (:id document) updates)

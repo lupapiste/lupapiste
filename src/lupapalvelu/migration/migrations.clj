@@ -1391,7 +1391,7 @@
                                                                                  {"requestedByAuthority" {$not {$type 8}}}]}}}))}
   (update-applications-array :attachments
     (fn [attachment]
-      (if-not (util/boolean? (:requestedByAuthority attachment))
+      (if-not (boolean? (:requestedByAuthority attachment))
         (update attachment :requestedByAuthority boolean)
         attachment))
     {:attachments {$elemMatch {$and [{"requestedByAuthority" {$exists true}}
