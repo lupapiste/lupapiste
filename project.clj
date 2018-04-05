@@ -39,7 +39,7 @@
                  ; markup processing
                  [enlive "1.1.6"]
                  [endophile "0.1.2" :exclusions [hiccup]]
-                 [de.ubercode.clostache/clostache "1.4.0"]
+                 [cljstache "2.0.1"]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [org.freemarker/freemarker "2.3.23"]
                  ; CSS
