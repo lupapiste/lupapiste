@@ -24,13 +24,16 @@
 
                  ; Namespace finder library
                  [bultitude "0.2.8"] ; noir requires 0.2.0
+                 [org.tcrawley/dynapath "1.0.0"]            ; bultitudes requires 0.2.3, but midje needs 1.0.0, should be compatible
 
                  ; MongoDB driver
                  [com.novemberain/monger "3.1.0" :exclusions [[com.google.guava/guava]]]
 
                  ; Logging
-                 [com.taoensso/timbre "4.8.0"]
+                 [com.taoensso/timbre "4.8.0" :exclusions [[io.aviso/pretty]]]
                  [org.slf4j/slf4j-log4j12 "1.7.22"]
+                 ; upgraded pretty to match Midje version, should work with Timbre
+                 [io.aviso/pretty "0.1.34"]
 
                  ;;Hystrix
                  [com.netflix.hystrix/hystrix-clj "1.5.6"]
@@ -159,7 +162,7 @@
   :source-paths ["src" "src-cljc"]
   :java-source-paths ["java-src"]
   :cljsbuild {:builds {:rum {:source-paths ^:replace ["src-cljs" "src-cljc"]}}}
-  :profiles {:dev      {:dependencies   [[midje "1.8.3" :exclusions [org.clojure/tools.namespace]]
+  :profiles {:dev      {:dependencies   [[midje "1.9.1"]
                                          [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                          [com.raspasov/clj-ssh "0.5.12"]
                                          [rhizome "0.2.7"]
@@ -168,7 +171,7 @@
                                          [figwheel-sidecar "0.5.15"]
                                          ;; Better Chrome Dev Tools support
                                          [binaryage/devtools "0.9.4"]]
-                        :plugins        [[lein-midje "3.2"]
+                        :plugins        [[lein-midje "3.2.1"]
                                          [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
                                          [lupapiste/lein-buildid "0.4.2"]
                                          [lupapiste/lein-nitpicker "0.5.1"]
