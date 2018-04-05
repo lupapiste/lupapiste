@@ -4,7 +4,7 @@
 
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/data.codec "0.1.0"]
                  [org.clojure/data.zip "0.1.1"] ; Note: 0.1.2 breaks lupapalvelu.wfs
                  [org.clojure/data.xml "0.0.8"]
