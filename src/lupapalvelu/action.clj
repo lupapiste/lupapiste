@@ -764,7 +764,7 @@
         defname     (symbol (str (name action-type) "-" action-name))
         handler     (eval
                       `(fn [request#]
-                         (let [{{:keys ~letkeys} :data} request#]
+                         (let [{{:keys ~(vec letkeys)} :data} request#]
                            ((fn ~bindings (do ~@body)) request#))))]
     `(do
        (register-action ~action-type ~(str action-name) ~meta-data ~line-number ~ns-str ~handler)
