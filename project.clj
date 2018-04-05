@@ -30,7 +30,7 @@
                  [com.novemberain/monger "3.1.0" :exclusions [[com.google.guava/guava]]]
 
                  ; Logging
-                 [com.taoensso/timbre "4.8.0" :exclusions [[io.aviso/pretty]]]
+                 [com.taoensso/timbre "4.10.0" :exclusions [[io.aviso/pretty]]]
                  [org.slf4j/slf4j-log4j12 "1.7.22"]
                  ; upgraded pretty to match Midje version, should work with Timbre
                  [io.aviso/pretty "0.1.34"]
