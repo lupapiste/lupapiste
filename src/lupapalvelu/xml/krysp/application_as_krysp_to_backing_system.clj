@@ -10,10 +10,10 @@
             [sade.util :as util]
             [lupapiste-commons.attachment-types :as attachment-types]
             [lupapalvelu.document.document :as doc]
+            [lupapalvelu.document.approval :as approval]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.parties-canonical]
             [lupapalvelu.document.tools :as doc-tools]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
@@ -90,7 +90,7 @@
   (= :suunnittelija (doc-tools/doc-subtype document)))
 
 (defn- non-approved? [document]
-  (or (not (doc/approved? document))
+  (or (not (approval/approved? document))
       (pos? (model/modifications-since-approvals document))))
 
 (defn- remove-non-approved-designers [application]
