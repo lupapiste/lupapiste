@@ -5,6 +5,13 @@
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]))
 
+(defn by-id
+  "Return item from application collection by id.
+  Nil if not found."
+  [application collection id]
+  (let [docs ((keyword collection) application)]
+    (some #(when (= (:id %) id) %) docs)))
+
 (defn body
   "Shallow merges stuff into vector"
   [& rest]

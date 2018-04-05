@@ -86,8 +86,8 @@
 
   (let [task-id (->> tasks (remove (fn->> :schema-info :subtype keyword (= :review))) first :id)
         review-id (->> tasks (filter (fn->> :schema-info :subtype keyword (= :review))) first :id)
-        task (doc-persistence/by-id application :tasks task-id)
-        review (doc-persistence/by-id application :tasks review-id)]
+        task (util/find-by-id task-id (:tasks application))
+        review (util/find-by-id review-id (:tasks application))]
 
     (fact "Pena can't approve"
       (command pena :approve-task :id application-id :taskId task-id) => unauthorized?)
@@ -95,7 +95,7 @@
     (facts* "Approve the first non-review task"
       (let [_ (command sonja :approve-task :id application-id :taskId task-id) => ok?
             updated-app (query-application pena application-id)
-            updated-task (doc-persistence/by-id updated-app :tasks task-id)]
+            updated-task (util/find-by-id task-id (:tasks updated-app))]
         (:state task) => "requires_user_action"
         (:state updated-task) => "ok"))
 
@@ -105,7 +105,7 @@
     (facts* "Reject the first task"
       (let [_ (command sonja :reject-task :id application-id :taskId task-id) => ok?
             updated-app (query-application pena application-id)
-            updated-task (doc-persistence/by-id updated-app :tasks task-id)]
+            updated-task (util/find-by-id task-id (:tasks updated-app))]
         (:state updated-task) => "requires_user_action"))
 
     (fact "Review cannot be rejected"
