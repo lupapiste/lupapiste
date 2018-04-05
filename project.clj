@@ -13,7 +13,7 @@
                  [org.clojure/tools.trace "0.7.9"]
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/core.memoize "0.5.9"]
-                 [org.clojure/core.async "0.3.443"]
+                 [org.clojure/core.async "0.4.474"]
 
                  ; Web frameworks
                  [ring "1.6.2" :exclusions [commons-fileupload org.clojure/tools.reader]]
