@@ -1070,7 +1070,7 @@
                                  :copying-allowed true
                                  :min-outgoing-link-permits 1
                                  :asianhallinta false}
-   :raktyo-aloit-loppuunsaat   {:schema "hankkeen-kuvaus-minimum"
+   :raktyo-aloit-loppuunsaat   {:schema "hankkeen-kuvaus-jatkoaika"
                                 :permit-type permit/R
                                 :applicant-doc-schema applicant-doc-schema-name-R
                                 :required ["maksaja" "paatoksen-toimitus-rakval"] ;; TODO: Tuleeko talle myos "rakennusjatesuunnitelma"?

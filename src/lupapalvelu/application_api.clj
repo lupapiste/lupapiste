@@ -909,7 +909,7 @@
         continuation-app (merge continuation-app {:handlers (:handlers application)})
         docs             (if (= permit/YA permit-type)
                            (ya-continuation-app-docs application continuation-app)
-                           [])
+                           (:documents continuation-app))
         continuation-app (assoc continuation-app :documents docs)]
 
     (app/do-add-link-permit continuation-app (:id application))
