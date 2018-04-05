@@ -717,15 +717,12 @@
 
 (defn pate-verdict->tasks [verdict buildings {ts :created}]
   (let [review-tasks    (->> (get-in verdict [:data :reviews])
-                             (map (partial review/review->task verdict buildings ts))
-                             (remove nil?))
+                             (map (partial review/review->task verdict buildings ts)))
         plans-tasks     (->> (get-in verdict [:data :plans])
-                             (map #(pate-tasks/plan->task verdict ts %))
-                             (remove nil?))
+                             (map #(pate-tasks/plan->task verdict ts %)))
         condition-tasks (->> (get-in verdict [:data :conditions])
-                             (map #(pate-tasks/condition->task verdict ts %))
-                             (remove nil?))]
-    (lazy-cat review-tasks plans-tasks condition-tasks)))
+                             (map #(pate-tasks/condition->task verdict ts %)))]
+    (remove nil? (lazy-cat review-tasks plans-tasks condition-tasks))))
 
 (defn log-task-katselmus-errors [tasks]
   (when-let [errs (seq (mapv (partial tasks/task-doc-validation "task-katselmus") tasks))]
@@ -773,8 +770,8 @@
                                      (insert-section (:organization application)
                                                      created))
         next-state             (sm/verdict-given-state application)
-        buildings  (->buildings-array application)
-        tasks      (pate-verdict->tasks verdict buildings command)
+        buildings              (->buildings-array application)
+        tasks                  (pate-verdict->tasks verdict buildings command)
         {att-items :items
          update-fn :update-fn} (attachment-items command verdict)
         verdict                (update verdict :data update-fn)]
