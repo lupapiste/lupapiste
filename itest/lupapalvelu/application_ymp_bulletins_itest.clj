@@ -40,9 +40,9 @@
                                            :x 430109.3125 :y 7210461.375
                                            :address "Oulu 10")
         app-id (:id app)
-        _ (upload-attachment pena app-id {:id "" :type {:type-group "muut" :type-id "muu"}} true) => true
-        _ (upload-attachment pena app-id {:id "" :type {:type-group "kartat" :type-id "jatteen-sijainti"}} true) => true
-        _ (upload-attachment pena app-id {:id "" :type {:type-group "jatteen_kerays" :type-id "vastaanottopaikan_tiedot"}} true) => true
+        _ (upload-file-and-bind pena app-id {:type {:type-group "muut" :type-id "muu"}}) => true
+        _ (upload-file-and-bind pena app-id {:type {:type-group "kartat" :type-id "jatteen-sijainti"}}) => true
+        _ (upload-file-and-bind pena app-id {:type {:type-group "jatteen_kerays" :type-id "vastaanottopaikan_tiedot"}}) => true
         {attachments :attachments} (query-application pena app-id)]
     (fact "Pena sets CV not public"
       (command pena :set-attachment-visibility :id app-id :attachmentId (:id (first attachments)) :value "asiakas-ja-viranomainen") => ok?)

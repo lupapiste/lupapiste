@@ -996,8 +996,7 @@
         type-id    "savunpoistosuunnitelma"]
 
     (fact "Pena adds attachment"
-      (upload-attachment pena app-id {:id "" :type {:type-group type-group
-                                                    :type-id type-id}} true) => truthy)
+      (upload-file-and-bind pena app-id {:type {:type-group type-group :type-id type-id}} ) => truthy)
 
     (fact "Pena adds operation"
       (command pena :add-operation :id app-id :operation "varasto-tms"))
