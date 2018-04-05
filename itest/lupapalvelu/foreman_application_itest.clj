@@ -633,7 +633,7 @@
        (fact "foreman can NOT upload a new version to pre-verdict attachment template on main application"
          (upload-attachment foreman application-id main-attachment-1 false) => (:id main-attachment-1))
        (fact "foreman can NOT upload a new version to applicants attachment on foreman application"
-         (upload-attachment foreman foreman-app-id {:id attachment-by-applicant} false) => attachment-  by-applicant)
+         (upload-attachment foreman foreman-app-id {:id attachment-by-applicant} false) => attachment-by-applicant)
 
        (let [{actions-by-id :actionsById :as resp} (query foreman :allowed-actions-for-category :category "attachments" :id foreman-app-id)
              actions-for-foreman-att (get actions-by-id (keyword attachment-by-foreman))
