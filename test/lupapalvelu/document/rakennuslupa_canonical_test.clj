@@ -2175,3 +2175,65 @@
     (fact "jarjestysnumero"
       (-> rakennusvalvontaasia :toimenpidetieto first :Toimenpide :rakennelmatieto :Rakennelma :tunnus :jarjestysnumero)
       => 1)))
+
+(def huoneistot {:0 {:muutostapa "lis\u00e4ys"
+                     :porras "A"
+                     :huoneistonumero "1"
+                     :jakokirjain "a"
+                     :huoneistoTyyppi "asuinhuoneisto"
+                     :huoneistoala "56"
+                     :huoneluku "66"
+                     :keittionTyyppi "keittio"
+                     :parvekeTaiTerassiKytkin true
+                     :WCKytkin true}
+                 :1 {:muutostapa "muutos"
+                     :porras "A"
+                     :huoneistonumero "2"
+                     :jakokirjain "a"
+                     :huoneistoTyyppi "toimitila"
+                     :huoneistoala "03"
+                     :huoneluku "12"
+                     :keittionTyyppi "keittokomero"
+                     :ammeTaiSuihkuKytkin true
+                     :saunaKytkin true
+                     :lamminvesiKytkin true}
+                 :2 {:porras "A"
+                     :huoneistonumero "3"
+                     :jakokirjain "a"
+                     :huoneistoTyyppi "asuinhuoneisto"
+                     :huoneistoala "38.5"
+                     :huoneluku "12"
+                     :keittionTyyppi "keittokomero"
+                     :ammeTaiSuihkuKytkin true
+                     :saunaKytkin true
+                     :lamminvesiKytkin true}})
+
+; Huoneisto lkm and pintaala in only calculated for huoneistot with muutostapa
+; lis\u00e4ys (PATE-74). For the new buildings the only allowed muutostapa is
+; lis\u00e4ys and its comes by default from schema.
+; For old buildings, i.e renovation projects, muutostapa is muutos and schema
+; rakennuksen-muuttaminen is used and those kind of huoneistot type arent taken count of.
+(facts "Huoneistot info for new building"
+  (let [huoneistot-data (get-huoneisto-data huoneistot "uusiRakennus")]
+
+    (fact "huoneistot lkm"
+      (get-huoneistot-lkm huoneistot-data ) => 3)
+
+    (fact "huoneistot pintaala"
+      (get-huoneistot-pintaala huoneistot-data) => 97.5)))
+
+(facts "Huoneistot info for old building"
+  (let [huoneistot-data (get-huoneisto-data huoneistot "rakennuksen-muuttaminen")]
+
+    (fact "huoneistot lkm"
+      (get-huoneistot-lkm huoneistot-data ) => 1)
+
+    (fact "huoneistot pintaala"
+      (get-huoneistot-pintaala huoneistot-data) => 56.0)))
+
+(facts "Huoneistot info with not valid data"
+  (get-huoneistot-pintaala (get-huoneisto-data (assoc-in huoneistot [:0 :huoneistoala] nil) "uusiRakennus")) => 41.5
+  (get-huoneistot-pintaala (get-huoneisto-data (assoc-in huoneistot [:0 :huoneistoala] "foo") "uusiRakennus")) => 41.5
+  (get-huoneistot-pintaala (get-huoneisto-data (assoc-in huoneistot [:0 :huoneistoala] "") "uusiRakennus")) => 41.5
+  (get-huoneistot-pintaala (get-huoneisto-data (assoc-in huoneistot [:0 :huoneistoala] :bar) "uusiRakennus")) => 41.5
+  (get-huoneistot-pintaala (get-huoneisto-data (assoc-in huoneistot [:0 :huoneistoala] "10,0") "uusiRakennus")) => 51.5)

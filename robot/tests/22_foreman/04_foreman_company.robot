@@ -64,7 +64,6 @@ Second invite has invite to foreman app
 
 Solita opens the foreman application and dismisses invitation dialog
   Click element  xpath=//div[@class='invitation'][2]//a[@data-test-id='open-application-button']
-  Wait test id visible  yes-no-dialog
   Deny yes no dialog
 
 Solita accepts invitation via sidebar button

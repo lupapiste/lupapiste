@@ -88,18 +88,17 @@
    ;; cells/columns. As every property is optional, the cells can be
    ;; omitted. In that case, the value of the right-hand side is the
    ;; source value.
-   (shared-schemas/only-one-of [:value :text]
-                       ;; Path within the source value. Useful, when the value is a map.
-                       {(sc/optional-key :path)       shared-schemas/path-type
-                        ;; Textual representation that is static and
-                        ;; independent from any source value.
-                        (sc/optional-key :text)       shared-schemas/keyword-or-string
-                        (sc/optional-key :width)      (apply sc/enum cell-widths)
-                        (sc/optional-key :unit)       (sc/enum :ha :m2 :m3 :kpl)
-                        ;; Additional localisation key prefix. Is
-                        ;; applied both to path and text values.
-                        (sc/optional-key :loc-prefix) shared-schemas/path-type
-                        (sc/optional-key :styles)     (styles cell-styles)})])
+   ;; Path within the source value. Useful, when the value is a map.
+   {(sc/optional-key :path)       shared-schemas/path-type
+    ;; Textual representation that is static and
+    ;; independent from any source value.
+    (sc/optional-key :text)       shared-schemas/keyword-or-string
+    (sc/optional-key :width)      (apply sc/enum cell-widths)
+    (sc/optional-key :unit)       (sc/enum :ha :m2 :m3 :kpl)
+    ;; Additional localisation key prefix. Is
+    ;; applied both to path and text values.
+    (sc/optional-key :loc-prefix) shared-schemas/path-type
+    (sc/optional-key :styles)     (styles cell-styles)}])
 
 (defschema PdfLayout
   "PDF contents layout."
@@ -181,160 +180,259 @@
          [:body body (when script?
                        page-number-script)]])))
 
-(def pdf-layouts
-  {:r {:left-width 30
-       :entries    [[{:loc    :pate-verdict.application-id
-                      :source :application-id
-                      :styles [:bold :pad-after]}]
-                    [{:loc    :rakennuspaikka._group_label
-                      :styles :bold}]
-                    [{:loc    :rakennuspaikka.kiinteisto.kiinteistotunnus
-                      :source :property-id}]
-                    [{:loc    :rakennuspaikka.kiinteisto.tilanNimi
-                      :source {:doc [:rakennuspaikka :kiinteisto.tilanNimi]}}]
-                    [{:loc    :pdf.pinta-ala
-                      :source {:doc [:rakennuspaikka :kiinteisto.maapintaala]}}
-                     {:unit :ha}]
-                    [{:loc    :rakennuspaikka.kaavatilanne._group_label
-                      :source {:doc [:rakennuspaikka :kaavatilanne]}
-                      :styles :pad-after}
-                     {:loc-prefix :rakennuspaikka.kaavatilanne}]
-                    [{:loc    :pate-purpose
-                      :source {:dict :purpose}
-                      :styles :pad-after}]
-                    [{:loc      :pdf.applicant
-                      :loc-many :pdf.applicants
-                      :source   :applicants
-                      :styles   :border-bottom}]
-                    [{:loc      :applications.operation
-                      :loc-many :operations
-                      :source   :operations
-                      :styles   :bold}
-                     {:loc-prefix :operations
-                      :path       :name}]
-                    [{:loc    :pate-extra-info
-                      :source {:dict :extra-info}
-                      :styles :pad-before}]
-                    [{:loc    :pate.complexity
-                      :source :complexity
-                      :styles [:spaced :pad-after :pad-before]}]
-                    [{:loc    :pate-rights
-                      :source {:dict :rights}
-                      :styles :pad-before}]
-                    [{:loc    :pdf.design-complexity
-                      :source :designers
-                      :styles :pad-before}
-                     {:path   :role
-                      :styles :nowrap}
-                     {:path       :difficulty
-                      :width      100
-                      :loc-prefix :osapuoli.suunnittelutehtavanVaativuusluokka}]
-                    [{:loc      :pdf.designer
-                      :loc-many :pdf.designers
-                      :source   :designers
-                      :styles   :pad-before}
-                     {:path   :role
-                      :styles :nowrap}
-                     {:path  :person
-                      :width 100}]
-                    [{:loc    :verdict.kerrosala
-                      :source :primary
-                      :styles :pad-before}
-                     {:path :mitat.kerrosala
-                      :unit :m2}]
-                    [{:loc    :verdict.kokonaisala
-                      :source :primary}
-                     {:path :mitat.kokonaisala
-                      :unit :m2}]
-                    [{:loc    :pdf.volume
-                      :source :primary}
-                     {:path :mitat.tilavuus
-                      :unit :m3}]
-                    [{:loc    :purku.mitat.kerrosluku
-                      :source :primary}
-                     {:path :mitat.kerrosluku}]
-                    [{:loc    :pate-buildings.info.paloluokka
-                      :source :paloluokka}]
-                    [{:loc    :pdf.parking
-                      :source :parking
-                      :styles :pad-before}
-                     {:path   :text
-                      :styles :nowrap}
-                     {:path   :amount
-                      :styles :right}
-                     {:text  ""
-                      :width 100}]
-                    [{:loc    :pate-deviations
-                      :source {:dict :deviations}
-                      :styles :pad-before}]
-                    [{:loc      :statement.lausunto
-                      :loc-many :pate-statements
-                      :source   :statements
-                      :styles   [:bold :border-top]}]
-                    [{:loc    :phrase.category.naapurit
-                      :source {:dict :neighbors}
-                      :styles [:bold :pad-before]}]
-                    [{:loc      :pdf.attachment
-                      :loc-many :verdict.attachments
-                      :source   :attachments
-                      :styles   [:bold :pad-before]}
-                     {:path   :text
-                      :styles :nowrap}
-                     {:path   :amount
-                      :styles [:right :nowrap]
-                      :unit   :kpl}
-                     {:text  ""
-                      :width 100}]
-                    [{:loc    :pate-verdict
-                      :source {:dict :verdict-code}
-                      :styles [:bold :border-top]}
-                     {:loc-prefix :pate-r.verdict-code}]
-                    [{:loc    :empty
-                      :source {:dict :verdict-text}
-                      :styles :pad-before}]
-                    [{:loc      :pdf.required-foreman
+;; ------------------------------
+;; Entries
+;; ------------------------------
+
+(defn entry--simple
+  ([dict styles]
+   [{:loc    (case dict
+               :address    :pate.address
+               :buyout     :pate.buyout
+               :collateral :pate-collateral
+               :deviations :pate-deviations
+               :extra-info :pate-extra-info
+               :fyi        :pate.fyi
+               :giving     :pate.verdict-giving
+               :legalese   :pate.legalese
+               :next-steps :pate.next-steps
+               :purpose    :pate-purpose
+               :rationale  :pate.verdict-rationale
+               :rights     :pate-rights
+               :start-info :pate-start-info)
+     :source {:dict dict}
+     :styles styles}])
+  ([dict]
+   (entry--simple dict :pad-before)))
+
+(def entry--application-id [{:loc    :pate-verdict.application-id
+                             :source :application-id
+                             :styles [:bold :pad-after]}])
+
+(def entry--rakennuspaikka
+  (list [{:loc    :rakennuspaikka._group_label
+          :styles :bold}]
+        [{:loc    :rakennuspaikka.kiinteisto.kiinteistotunnus
+          :source :property-id}]
+        (entry--simple :address [])
+        [{:loc    :rakennuspaikka.kiinteisto.tilanNimi
+          :source {:doc [:rakennuspaikka :kiinteisto.tilanNimi]}}]
+        [{:loc    :pdf.pinta-ala
+          :source {:doc [:rakennuspaikka :kiinteisto.maapintaala]}}
+         {:unit :ha}]
+        [{:loc    :rakennuspaikka.kaavatilanne._group_label
+          :source {:doc [:rakennuspaikka :kaavatilanne]}
+          :styles :pad-after}
+         {:loc-prefix :rakennuspaikka.kaavatilanne}]))
+
+(defn entry--applicant [loc loc-many]
+  [{:loc      loc
+    :loc-many loc-many
+    :source   :applicants
+    :styles   [:pad-before :border-bottom]}])
+
+(def entry--operation [{:loc      :applications.operation
+                        :loc-many :operations
+                        :source   :operations
+                        :styles   :bold}
+                       {:path     :text}])
+
+(def entry--complexity [{:loc    :pate.complexity
+                         :source :complexity
+                         :styles [:spaced :pad-after :pad-before]}])
+
+(def entry--designers '([{:loc    :pdf.design-complexity
+                          :source :designers
+                          :styles :pad-before}
+                         {:path   :role
+                          :styles :nowrap}
+                         {:path       :difficulty
+                          :width      100
+                          :loc-prefix :osapuoli.suunnittelutehtavanVaativuusluokka}]
+                        [{:loc      :pdf.designer
+                          :loc-many :pdf.designers
+                          :source   :designers
+                          :styles   :pad-before}
+                         {:path   :role
+                          :styles :nowrap}
+                         {:path  :person
+                          :width 100}]))
+
+(def entry--dimensions '([{:loc    :verdict.kerrosala
+                           :source :primary
+                           :styles :pad-before}
+                          {:path :mitat.kerrosala
+                           :unit :m2}]
+                         [{:loc    :verdict.kokonaisala
+                           :source :primary}
+                          {:path :mitat.kokonaisala
+                           :unit :m2}]
+                         [{:loc    :pdf.volume
+                           :source :primary}
+                          {:path :mitat.tilavuus
+                           :unit :m3}]
+                         [{:loc    :purku.mitat.kerrosluku
+                           :source :primary}
+                          {:path :mitat.kerrosluku}]))
+
+(def entry--buildings '([{:loc    :pate-buildings.info.paloluokka
+                          :source :paloluokka}]
+                        [{:loc    :pdf.parking
+                          :source :parking
+                          :styles :pad-before}
+                         {:path   :text
+                          :styles :nowrap}
+                         {:path   :amount
+                          :styles :right}
+                         {:text  ""
+                          :width 100}]))
+
+(def entry--statements '([{:loc      :statement.lausunto
+                           :loc-many :pate-statements
+                           :source   :statements
+                           :styles   [:bold :border-top]}]
+                         [{:loc    :phrase.category.naapurit
+                           :source {:dict :neighbors}
+                           :styles [:bold :pad-before]}]))
+
+(def entry--attachments [{:loc      :pdf.attachment
+                          :loc-many :verdict.attachments
+                          :source   :attachments
+                          :styles   [:bold :pad-before]}
+                         {:path   :text
+                          :styles :nowrap}
+                         {:path   :amount
+                          :styles [:right :nowrap]
+                          :unit   :kpl}
+                         {:text  ""
+                          :width 100}])
+
+(def entry--verdict '([{:loc    :pate-verdict
+                        :source {:dict :verdict-code}
+                        :styles [:bold :border-top]}
+                       {:loc-prefix :pate-r.verdict-code}]
+                      [{:loc    :empty
+                        :source {:dict :verdict-text}
+                        :styles :pad-before}]))
+
+(def entry--foremen [{:loc      :pdf.required-foreman
                       :loc-many :verdict.vaaditutTyonjohtajat
                       :source   {:dict :foremen}
                       :styles   :pad-before}
-                     {:loc-prefix :pate-r.foremen}]
-                    [{:loc      :pdf.required-review
+                     {:loc-prefix :pate-r.foremen}])
+
+(def entry--reviews [{:loc      :pdf.required-review
                       :loc-many :verdict.vaaditutKatselmukset
                       :source   :reviews
-                      :styles   :pad-before}]
-                    [{:loc      :pdf.required-plan
-                      :loc-many :verdict.vaaditutErityissuunnitelmat
-                      :source   :plans
-                      :styles   :pad-before}]
-                    [{:loc      :pdf.condition
-                      :loc-many :pdf.conditions
-                      :source   :conditions
-                      :styles   [:pad-before :spaced]}]
-                    [{:loc    :pate-collateral
-                      :source :collateral
-                      :styles :pad-before}]
-                    [{:loc    :empty
-                      :source {:dict :verdict-date}
-                      :styles :pad-before}]
-                    [{:loc    :applications.authority
-                      :source :handler
-                      :styles :pad-before}]
-                    [{:loc    :empty
-                      :source :organization
-                      :styles :pad-after}]
-                    [{:loc    :pdf.julkipano
+                      :styles   :pad-before}])
+
+(def entry--plans [{:loc      :pdf.required-plan
+                    :loc-many :verdict.vaaditutErityissuunnitelmat
+                    :source   :plans
+                    :styles   :pad-before}])
+
+(def entry--conditions [{:loc      :pdf.condition
+                         :loc-many :pdf.conditions
+                         :source   :conditions
+                         :styles   [:pad-before :spaced]}])
+
+(def entry--collateral [{:loc    :pate-collateral
+                         :source :collateral
+                         :styles :pad-before}])
+
+(defn entry--verdict-giver [handler-loc]
+  (list [{:loc    :empty
+          :source {:dict :verdict-date}
+          :styles :pad-before}]
+        [{:loc handler-loc
+          :source :handler
+          :styles :pad-before}]
+        [{:loc    :empty
+          :source :organization
+          :styles :pad-after}]))
+
+(def entry--dates '([{:loc    :pdf.julkipano
                       :source {:dict :julkipano}}]
                     [{:loc    :pdf.anto
                       :source {:dict :anto}}]
                     [{:loc    :pdf.muutoksenhaku
                       :source :muutoksenhaku}]
                     [{:loc    :pdf.vomassa
-                      :source :vomassaolo}]
-                    ;; Page break
-                    [{:loc    :pate-verdict.muutoksenhaku
-                      :source {:dict :appeal}
-                      :styles [:bold :page-break]}]]}})
+                      :source :vomassaolo}]))
 
-(sc/validate PdfLayout (:r pdf-layouts))
+(def entry--appeal ;; Page break
+  [{:loc    :pate-verdict.muutoksenhaku
+    :source {:dict :appeal}
+    :styles [:bold :page-break]}])
+
+(defn combine-entries
+  "Entries that are lists (not vectors!) are interpreted as multiple
+  entries."
+  [& entries]
+  (reduce (fn [acc entry]
+            (concat acc (cond-> entry
+                          (not (list? entry)) vector)))
+          []
+          entries))
+
+(def r-pdf-layout
+  {:left-width 30
+   :entries (combine-entries entry--application-id
+                             entry--rakennuspaikka
+                             (entry--simple :purpose)
+                             (entry--applicant :pdf.achiever :pdf.achievers)
+                             entry--operation
+                             (entry--simple :extra-info)
+                             entry--complexity
+                             (entry--simple :rights)
+                             entry--designers
+                             entry--dimensions
+                             entry--buildings
+                             (entry--simple :deviations)
+                             entry--statements
+                             entry--attachments
+                             entry--verdict
+                             entry--foremen
+                             entry--reviews
+                             entry--plans
+                             entry--conditions
+                             entry--collateral
+                             (entry--verdict-giver :applications.authority)
+                             entry--dates
+                             entry--appeal)})
+
+(sc/validate PdfLayout r-pdf-layout)
+
+(def p-pdf-layout
+  {:left-width 30
+   :entries (combine-entries entry--application-id
+                             entry--rakennuspaikka
+                             (entry--simple :purpose)
+                             (entry--applicant :applicant :pdf.applicants)
+                             entry--operation
+                             (entry--simple :deviations)
+                             entry--statements
+                             (entry--simple :start-info)
+                             entry--conditions
+                             (entry--verdict-giver :pate.prepper)
+                             entry--verdict
+                             (entry--simple :rationale)
+                             (entry--simple :legalese)
+                             (entry--simple :giving)
+                             entry--dates
+                             (entry--simple :next-steps)
+                             (entry--simple :buyout)
+                             entry--attachments
+                             (entry--simple :fyi)
+                             entry--collateral
+                             entry--appeal)})
+
+(sc/validate PdfLayout p-pdf-layout)
+
+(def pdf-layouts
+  {:r r-pdf-layout
+   :p p-pdf-layout})
+
 
 (defn join-non-blanks
   "Trims and joins."
@@ -403,11 +501,11 @@
       :eur     (str v "\u20ac"))))
 
 (defn complexity [lang verdict]
-  (not-empty (remove nil?
+  (not-empty (filter not-empty
                      [(loc-non-blank lang
                                      :pate.complexity
                                      (dict-value verdict :complexity))
-                      (dict-value verdict :complexity-text)])))
+                      (markup/markup->tags (dict-value verdict :complexity-text))])))
 
 (defn property-id [application]
   (join-non-blanks "-"
@@ -543,9 +641,23 @@
        (domain/get-document-by-operation application)
        :data))
 
-(defn operation-infos [application]
+(defn operation-infos
+  [application]
   (mapv (util/fn-> :schema-info :op)
         (app/get-sorted-operation-documents application)))
+
+(defn operations
+  "If the verdict has an :operation property, its value overrides the
+  application primary operation."
+  [{:keys [lang verdict application]}]
+  (let [infos     (map (util/fn->> :name
+                                   (i18n/localize lang :operations)
+                                   (hash-map :text))
+                       (operation-infos application))
+        operation (ss/trim (get-in verdict [:data :operation]))]
+    (vec (if (ss/not-blank? operation)
+           (cons {:text operation} (rest infos))
+           infos))))
 
 (defn verdict-buildings [{:keys [application verdict]}]
   (let [buildings (reduce-kv (fn [acc k {flag? :show-building :as v}]
@@ -558,21 +670,22 @@
          (remove nil?))))
 
 (defn building-parking [lang {:keys [description tag building-id]
-                              :as building}]
+                              :as   building}]
   (letfn [(park [kw]
             (hash-map :text (i18n/localize lang :pate-buildings.info kw)
                       :amount (kw building)))]
     (-<>> [:kiinteiston-autopaikat :rakennetut-autopaikat
-           :rakennettavat-autopaikat :autopaikkoja-enintaan
-           :autopaikkoja-vahintaan :ulkopuoliset-autopaikat]
+           #_:rakennettavat-autopaikat #_:autopaikkoja-enintaan
+           #_:autopaikkoja-vahintaan #_:ulkopuoliset-autopaikat]
           (map park)
           (sort-by :text)
           vec
           (conj <> (park :autopaikat-yhteensa))
           (remove (comp ss/blank? :amount))
-          (cons {:text (-<>> [tag description]
-                             (join-non-blanks ": ")
-                             (join-non-blanks " \u2013 " <> building-id))
+          (cons {:text   (-<>> [tag description]
+                               (join-non-blanks ": ")
+                               (join-non-blanks " \u2013 " <> building-id)
+                               (vector :strong))
                  :amount ""}))))
 
 (defn parking-section [lang buildings]
@@ -633,97 +746,62 @@
        (remove ss/blank?)
        (ss/join " ")))
 
-(defmulti verdict-body (util/fn-> :verdict :category keyword))
+(defn verdict-properties
+  "Adds all kinds of different properties to the options. It is then up
+  to category-specific verdict-body methods and corresponding
+  pdf-layouts whether every property is displayed in the pdf or not."
+  [{:keys [lang application verdict] :as options}]
+  (let [buildings                         (verdict-buildings options)
+        {:keys [category schema-version]} verdict]
+  (assoc options
+         :dictionary (:dictionary (shared/verdict-schema category
+                                                         schema-version))
+         :application-id (:id application)
+         :property-id (property-id application)
+         :applicants (->> (applicants options)
+                          (map #(format "%s\n%s"
+                                        (:name %) (:address %)))
+                          (interpose "\n"))
+         :operations (assoc-in (operations options)
+                               [0 ::styles :text] :bold)
+         :complexity (complexity lang verdict)
+         :designers (designers options)
+         :primary (primary-operation-data application)
+         :paloluokka (->> buildings
+                          (map :paloluokka)
+                          (remove ss/blank?)
+                          distinct
+                          (ss/join " / "))
+         :parking (->>  buildings
+                        (map (partial building-parking lang))
+                        (interpose {:text    "" :amount ""
+                                    ::styles {:row :pad-before}})
+                        flatten)
+         :attachments (verdict-attachments lang verdict)
+         :reviews (references lang verdict :reviews)
+         :plans   (references lang verdict :plans)
+         :conditions (conditions verdict)
+         :statements (statements lang verdict)
+         :collateral (collateral lang verdict)
+         :organization (organization-name lang application)
+         :muutoksenhaku (loc-fill-non-blank lang
+                                            :pdf.not-later-than
+                                            (dict-value verdict
+                                                        :muutoksenhaku))
+         :voimassaolo (loc-fill-non-blank lang
+                                          :pdf.voimassa.text
+                                          (dict-value verdict
+                                                      :aloitettava)
+                                          (dict-value verdict
+                                                      :voimassa))
+         :handler (handler verdict))))
 
-(defmethod verdict-body :r
-  [{:keys [lang application verdict] :as data}]
-  (let [buildings (verdict-buildings data)]
-    (content (assoc data
-                    :dictionary (-> shared/verdict-schemas :r :dictionary)
-                    :application-id (:id application)
-                    :property-id (property-id application)
-                    :applicants (->> (applicants data)
-                                     (map #(format "%s\n%s"
-                                                   (:name %) (:address %)))
-                                     (ss/join "\n\n"))
-                    :operations (assoc-in (operation-infos application)
-                                          [0 ::styles :name] :bold)
-                    :complexity (complexity lang verdict)
-                    :designers (designers data)
-                    :primary (primary-operation-data application)
-                    :paloluokka (->> buildings
-                                     (map :paloluokka)
-                                     (remove ss/blank?)
-                                     distinct
-                                     (ss/join " / "))
-                    :parking (->>  buildings
-                                   (map (partial building-parking lang))
-                                   (interpose {:text    "" :amount ""
-                                               ::styles {:row :pad-before}})
-                                   flatten)
-                    :attachments (verdict-attachments lang verdict)
-                    :reviews (references lang verdict :reviews)
-                    :plans   (references lang verdict :plans)
-                    :conditions (conditions verdict)
-                    :statements (statements lang verdict)
-                    :collateral (collateral lang verdict)
-                    :organization (organization-name lang application)
-                    :muutoksenhaku (loc-fill-non-blank lang
-                                                       :pdf.not-later-than
-                                                       (dict-value verdict
-                                                                   :muutoksenhaku))
-                    :voimassaolo (loc-fill-non-blank lang
-                                                     :pdf.voimassa.text
-                                                     (dict-value verdict
-                                                                 :aloitettava)
-                                                     (dict-value verdict
-                                                                 :voimassa))
-                    :handler (handler verdict))
-             (:r pdf-layouts))))
-
-(defmethod verdict-body :p
-  [{:keys [lang application verdict] :as data}]
-  (let [buildings (verdict-buildings data)]
-    (content (assoc data
-               :application-id (:id application)
-               :property-id (property-id application)
-               :applicants (->> (applicants data)
-                                (map #(format "%s\n%s"
-                                              (:name %) (:address %)))
-                                (ss/join "\n\n"))
-               :operations (assoc-in (operation-infos application)
-                                     [0 ::styles :name] :bold)
-               :complexity (complexity lang verdict)
-               :designers (designers data)
-               :primary (primary-operation-data application)
-               :paloluokka (->> buildings
-                                (map :paloluokka)
-                                (remove ss/blank?)
-                                distinct
-                                (ss/join " / "))
-               :parking (->>  buildings
-                              (map (partial building-parking lang))
-                              (interpose {:text    "" :amount ""
-                                          ::styles {:row :pad-before}})
-                              flatten)
-               :attachments (verdict-attachments lang verdict)
-               :reviews (references lang verdict :reviews)
-               :plans   (references lang verdict :plans)
-               :conditions (conditions verdict)
-               :statements (statements lang verdict)
-               :collateral (collateral lang verdict)
-               :organization (organization-name lang application)
-               :muutoksenhaku (loc-fill-non-blank lang
-                                                  :pdf.not-later-than
-                                                  (dict-value verdict
-                                                              :muutoksenhaku))
-               :voimassaolo (loc-fill-non-blank lang
-                                                :pdf.voimassa.text
-                                                (dict-value verdict
-                                                            :aloitettava)
-                                                (dict-value verdict
-                                                            :voimassa)))
-             (:r pdf-layouts))))
+(defn verdict-body [{verdict :verdict :as options}]
+  (->> verdict
+       :category
+       keyword
+       (get pdf-layouts)
+       (content (verdict-properties options))))
 
 (defn verdict-header
   [lang application {:keys [category published] :as verdict}]
@@ -736,7 +814,9 @@
         [:div boardname])]
      [:div.cell.cell--40.center
       [:div (if published
-              (i18n/localize lang :attachmentType.paatoksenteko.paatos)
+              (i18n/localize lang (case (keyword category)
+                                    :p :pdf.poikkeamispaatos
+                                    :attachmentType.paatoksenteko.paatos))
               [:span.preview (i18n/localize lang :pdf.preview)])]]
      [:div.cell.cell--30.right
       [:div.permit (i18n/localize lang :pdf category :permit)]]]

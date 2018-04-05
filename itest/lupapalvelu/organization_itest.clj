@@ -646,7 +646,7 @@
         (get-in [:organization :notifications config-key])) => ["kirjaamo@sipoo.example.com"])
 
     (fact "Three emails are set"
-      (command sipoo command-name :emails "kirjaamo@sipoo.example.com,  sijainen1@sipoo.example.com;sijainen2@sipoo.example.com") => ok?
+      (command sipoo command-name :emails "KIRJAAMO@sipoo.example.com,  sijainen1@sipoo.example.com;sijainen2@sipoo.example.com") => ok?
       (-> (query sipoo :organization-by-user)
         (get-in [:organization :notifications config-key])) => ["kirjaamo@sipoo.example.com", "sijainen1@sipoo.example.com", "sijainen2@sipoo.example.com"])
 

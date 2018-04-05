@@ -109,10 +109,11 @@
     Escape       := <'\\\\'> ( '*' | '/' | '_' | '^' | '\\\\'
                              | '.' | '#' | '-' | '+' | '|'
                              | '[' | ']' | '>' )
-    <Text>       := Escape / Link / Plain
+    Bracket      := '[' | ']'
+    <Text>       := Escape / Link / Plain / Bracket
     <Texts>      := (Text (WS? Text)*)+
-    <Plain>      := #'\\S'+
-    Url          := #'https?://' #'[a-zA-Z0-9\\-\\.:_/?&#+]+'
+    <Plain>      := #'[^\\s\\[\\]\\\\]+'
+    Url          := #'https?://[a-zA-Z0-9\\-\\.:_/?&#]+'
     <LinkText>   := (Escape / WS / Plain)+
     Link         := <'[' WS?> Url < WS? '|' WS?> LinkText <WS? ']'>
     Spaces       := ' '+
@@ -135,10 +136,16 @@
                    "^" :sup})
 
 (defn- parse [s]
-  (markup-parser (str s "\n")))
+  (->> (s/split (or s "") #"^\\s*\r?\n")
+       (remove s/blank?)
+       (map #(markup-parser (str % "\n")))
+       (apply concat)))
 
-(defn- consv [& x]
-  (vec (apply cons x)))
+(defn- consv
+  ([x seq]
+   (vec (cons x seq)))
+  ([x y seq]
+   (consv x (cons y seq))))
 
 (defn- new-scope [scopes tag & kvs]
   (cons (merge {:tag tag :data []}
@@ -159,7 +166,7 @@
 
 (defn- close-scope [[closing & others  :as scopes] & [trim?]]
   (if-let [tag (:tag closing)]
-    (add-to-scope others (consv tag (:data closing)))
+    (add-to-scope others (consv tag {} (:data closing)))
     scopes))
 
 (defn- close-all-scopes [scopes]
@@ -174,6 +181,7 @@
     (case (first x)
       :WS " "
       :Escape (last x)
+      :Bracket (last x)
       :WSEOL " "
       x)))
 
@@ -186,8 +194,17 @@
          :target :_blank}
      (ws-escape-all text)]))
 
+(defn- split-markup [markup]
+  (reduce (fn [acc m]
+            (concat acc
+                    (if (string? m)
+                      (map str (vec m))
+                      [m])))
+          []
+          markup))
+
 (defn- text-tags [markup]
-  (loop [[x & xs]                    markup
+  (loop [[x & xs]                    (split-markup markup)
          [scope & others :as scopes] []]
     (let [{scope-tag  :tag
            scope-data :data} scope
@@ -217,7 +234,7 @@
       :Spaces (recur xs (assoc m :list-depth (-> x rest count)))
       :Bullet (recur xs (assoc m :list-type :ul))
       :Number (recur xs (assoc m :list-type :ol))
-      (assoc m :list-tag (consv :li (text-tags markup))))))
+      (assoc m :list-tag (consv :li {} (text-tags markup))))))
 
 (defn- list-tag [scopes markup]
   (let [{:keys [list-depth list-type list-tag]} (resolve-list markup)]
@@ -244,10 +261,12 @@
     :Blank nil
     :Heading (let [level (-> content first rest count)]
                (consv (keyword (str "h" (min level 6)))
+                      {}
                       (text-tags (rest content))))
     (consv (case tag
              :Paragraph :p
              :Quote     :blockquote)
+           {}
            (text-tags content))))
 
 (defn- block-tags [markup]
@@ -263,6 +282,8 @@
 
 (defn markup->tags
   "Converts given markup to Hiccup-like Rum-compliant tags. See the
-  namespace documentation for the markup syntax."
+  namespace documentation for the markup syntax. Every tag has an
+  attribute map even if it is empty. This makes it easy to add
+  specific attributes lates (e.g., React keys)"
   [markup]
   (block-tags (parse markup)))

@@ -12,7 +12,8 @@
 
 (def app-id (create-app-id pena
                            :propertyId sipoo-property-id
-                           :operation  :varasto-tms))
+                           :operation  :varasto-tms
+                           :address "Test Road 8"))
 
 (facts "PATE reviews"
 
@@ -35,39 +36,29 @@
       buildings => empty?)
     (fact "Verdict draft creation OK"
       verdict-draft => ok?)
-    (fact "Verdict data from minimal (+ handler)"
+    (fact "Verdict data from minimal (+ handler, operator and address)"
       verdict-data => {:handler               "Sonja Sibbo"
-                       :appeal                "",
-                       :julkipano             "",
-                       :bulletinOpDescription "",
-                       :purpose               "",
-                       :buildings             {(keyword (:id primaryOperation)) {:building-id   "",
-                                                                                 :description   "",
-                                                                                 :operation     "varasto-tms",
-                                                                                 :order         "0",
-                                                                                 :paloluokka    "",
-                                                                                 :show-building true,
-                                                                                 :tag           ""}},
-                       :verdict-text          "Ver Dict",
-                       :anto                  "",
-                       :complexity            "",
-                       :attachments           [],
-                       :plans                 ["5a85960a809b5a1e454f3233" "5a85960a809b5a1e454f3234"],
-                       :foremen               ["vastaava-tj"],
-                       :verdict-code          "",
-                       :extra-info            "",
-                       :collateral            "",
-                       :conditions            {},
-                       :rights                "",
-                       :plans-included        true,
-                       :language              "fi",
-                       :reviews               ["5a7affbf5266a1d9c1581957" "5a7affcc5266a1d9c1581958" "5a7affe15266a1d9c1581959"],
-                       :foremen-included      true,
-                       :deviations            "",
-                       :neighbors             "",
-                       :neighbor-states       [],
-                       :lainvoimainen         "",
-                       :reviews-included      true,
+                       :address               "Test Road 8"
+                       :bulletinOpDescription ""
+                       :operation             ""
+                       :deviations            ""
+                       :buildings             {(keyword (:id primaryOperation)) {:building-id   ""
+                                                                                 :description   ""
+                                                                                 :operation     "varasto-tms"
+                                                                                 :order         "0"
+                                                                                 :show-building true
+                                                                                 :tag           ""}}
+                       :verdict-text          "Ver Dict"
+                       :plans                 ["5a85960a809b5a1e454f3233" "5a85960a809b5a1e454f3234"]
+                       :foremen               ["vastaava-tj"]
+                       :plans-included        true
+                       :language              "fi"
+                       :reviews               ["5a7affbf5266a1d9c1581957"
+                                               "5a7affcc5266a1d9c1581958"
+                                               "5a7affe15266a1d9c1581959"]
+                       :foremen-included      true
+                       :neighbor-states       []
+                       :reviews-included      true
                        :statements            []})
     (fact "while preparing verdict, VTJ-PRT and location is updated to application"
       (api-update-building-data-call app-id {:form-params  {:operationId        (:id primaryOperation)

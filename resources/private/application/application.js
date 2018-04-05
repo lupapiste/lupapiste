@@ -83,6 +83,7 @@
     if (isInitializing || !authorizationModel.ok("change-permit-sub-type")) { return; }
 
     ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
+      .processing(applicationModel.processing)
       .success(function(resp) {
         util.showSavedIndicator(resp);
         applicationModel.lightReload();

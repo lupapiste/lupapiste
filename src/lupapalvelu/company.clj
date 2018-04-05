@@ -4,14 +4,14 @@
             [clojure.set :as set]
             [monger.operators :refer :all]
             [schema.core :as sc]
-            [sade.util :refer [fn-> fn->>] :as util]
-            [sade.schemas :as ssc]
-            [sade.env :as env]
-            [sade.strings :as ss]
             [sade.core :refer :all]
-            [sade.validators :as v]
+            [sade.env :as env]
+            [sade.schemas :as ssc]
+            [sade.strings :as ss]
+            [sade.util :refer [fn-> fn->>] :as util]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.logging :as logging]
@@ -364,16 +364,25 @@
 (def- unverified-user-removal {$set   {:role "dummy" :enabled false}
                                $unset {:company 1, :private 1}})
 
+(defn- remove-invalid-user-from-document
+  "Cleans application from user_id references that are invalid (if user does not have auth anymore)"
+  [app]
+  (when-let [updates (not-empty (doc/generate-remove-invalid-user-from-docs-updates app))]
+    (mongo/update-by-id :applications (:id app) {$unset updates})))
+
 (defn delete-user!
   "Removes user from company. If user is not yet identificated, role is set to dummy.
    Returns updated user for further processing."
   [user]
-  (->> (if (usr/verified-person-id? user)
-         verified-user-removal
-         unverified-user-removal)
-       (mongo/update-one-and-return :users {:_id (:id user)})
-       (mongo/with-id)
-       (usr/non-private)))
+  (let [updated-user (->> (if (usr/verified-person-id? user)
+                            verified-user-removal
+                            unverified-user-removal)
+                          (mongo/update-one-and-return :users {:_id (:id user)})
+                          (mongo/with-id)
+                          (usr/non-private))
+        apps-with-documents  (mongo/select :applications {:auth.id (:id user)} [:documents :auth])]
+    (run! remove-invalid-user-from-document apps-with-documents)
+    updated-user))
 
 (defn delete-every-user! [company-id]
   (->> (usr/find-users {:company.id company-id})
@@ -590,8 +599,7 @@
   (when-not (and company  (not (:submit company)))
     (fail :error.authorized)))
 
-(defn company-denies-invitations? [application user]
-  (let [user-company-id (get-in user [:company :id])
-        company (find-company-by-id user-company-id)
-        invites-denied (:invitationDenied company)]
-    (and invites-denied (empty? (auth/get-auth application user-company-id)))))
+(defn company-denies-invitations? [application company-id]
+  (and (ss/not-blank? company-id)
+       (empty? (auth/get-auth application company-id))
+       (:invitationDenied (find-company-by-id company-id))))

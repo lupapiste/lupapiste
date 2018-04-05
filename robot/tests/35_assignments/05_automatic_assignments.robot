@@ -173,8 +173,6 @@ The assignment targets the 'Aitapiirustus' attachment
 
 Sonja changes handler
   Scroll and click test id  edit-handlers
-  Wait test id visible  add-handler
-  Scroll and click test id  add-handler
   Edit handler  0  Sibbo Ronja  Käsittelijä
 
 Sonja has no open assignments
@@ -192,3 +190,7 @@ Ronja has one assignment
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
   Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  1
   Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[1]/td[@data-test-col-name='description']  Aita ja asema
+  Logout
+
+Frontend error
+  There are no frontend errors

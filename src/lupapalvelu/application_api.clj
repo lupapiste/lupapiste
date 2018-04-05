@@ -230,7 +230,7 @@
                        :required [:application/cancel]}]
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           states/all-application-states
+   :states           states/all-application-or-archiving-project-states
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
   [command]
   (app/cancel-application command))

@@ -86,7 +86,15 @@
               <td data-bind="ltext: $data.kind" data-test-col-name="type"></td>
               <td data-bind="text: $data.address + ', ' + loc(['municipality', $data.municipality])" data-test-col-name="location"></td>
               <td data-bind="text: $data.primaryOperation ? loc('operations.' + $data.primaryOperation.name) : ''" data-test-col-name="operation"></td>
+              <!-- ko if: !_.isEmpty(ko.unwrap($data.applicant)) -->
               <td data-bind="text: $data.applicant" data-test-col-name="applicant"></td>
+              <!-- /ko -->
+              <!-- ko if: _.isEmpty(ko.unwrap($data.applicant)) && _.isObject(ko.unwrap($data.creator)) -->
+              <td data-bind="fullName: $data.creator" data-test-col-name="applicant"></td>
+              <!-- /ko -->
+              <!-- ko if: _.isEmpty(ko.unwrap($data.applicant)) && !_.isObject(ko.unwrap($data.creator)) -->
+              <td data-bind="ltext: 'ei-tiedossa'" data-test-col-name="applicant"></td>
+              <!-- /ko -->
               <td data-bind="dateTimeString: ($data.searchType === 'construction') ? $data.verdictDate : $data.submitted" data-test-col-name="submitted"></td>
               <td data-bind="dateTimeString: $data.modified" data-test-col-name="modified"></td>
               <td data-bind="ltext: $data.state, attr: {'data-test-row-state': $data.state}" data-test-col-name="status"></td>

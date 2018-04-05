@@ -16,11 +16,15 @@ ${dummy}            dummy3@example.com
 
 *** Test Cases ***
 
-Company admin invites user to company
+Company admin denies company user invitations
   Kaino logs in
   Open company user listing
+  Click enabled by test id  checkbox-invitations-denied
+
+Company admin invites user to company
   Invite existing dummy user  ${dummy}  Duff3  Dummy3
   Check invitation  0  ${dummy}  Dummy3  Duff3  Käyttäjä  Kyllä
+  Logout
 
 User accepts invite
   Accept invitation  dummy3@example.com
@@ -29,12 +33,7 @@ User accepts invite
   Open last email
   Wait Until  Page Should Contain  ${dummy}
   Page Should Contain  /app/fi/welcome#!/setpw/
-
-Company admin denies company user invitations
-  Kaino logs in
-  Open company user listing
-  Click enabled by test id  checkbox-invitations-denied
-  Logout
+  Go to login page
 
 Oragnization admin adds guest authority
   Sipoo logs in
@@ -83,6 +82,15 @@ Company user can be invited to application
   Click by test id  person-invite-bubble-dialog-ok
   Wait until  Element should not be visible  xpath=//div[@id='modal-dialog-content']
   Wait until  Invite count is  2
+
+Company cannot be removed since company user is authorized
+  Click by test id  remove-auth-1060155-5
+  Confirm yes no dialog
+  Wait test id visible  remove-invitation-denied-company-error-dialog
+  Element text should be  jquery=[data-test-id=remove-invitation-denied-company-error-dialog] ul  Duff3 Dummy3
+  Confirm ok dialog
+
+Remove dummy authorization
   Click by test id  remove-auth-dummy3
   Confirm yes no dialog
   Wait until  Invite count is  1

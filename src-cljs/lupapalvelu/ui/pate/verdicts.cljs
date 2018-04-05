@@ -44,8 +44,9 @@
   (reset! state/current-verdict
           (when verdict
             {:state (:data verdict)
-             :info  (assoc (dissoc verdict :data)
-                           :filled? filled)
+             :info  (-> (dissoc verdict :data)
+                        (assoc :filled? filled)
+                        (update :inclusions #(set (map keyword %))))
              :_meta {:updated             updater
                      :highlight-required? (-> verdict :published not)
                      :enabled?            (can-edit-verdict? verdict)
@@ -247,8 +248,9 @@
     [:div
      (case (rum/react state/current-view)
        ::list (verdict-list @state/verdict-list @state/application-id)
-       ::verdict (let [{dictionary :dictionary :as schema} (get shared/verdict-schemas
-                                                                (shared/permit-type->category (js/lupapisteApp.models.application.permitType)))]
+       ::verdict (let [{dictionary :dictionary :as schema} (shared/verdict-schema
+                                                            (shared/permit-type->category (js/lupapisteApp.models.application.permitType))
+                                                            (get-in @state/current-verdict [:info :schema-version]))]
                    (with-back-button (verdict (assoc (state/select-keys state/current-verdict
                                                                         [:state :info :_meta])
                                                      :schema (dissoc schema :dictionary)

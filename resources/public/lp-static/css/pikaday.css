@@ -134,7 +134,7 @@ http://nicolasgallagher.com/micro-clearfix-hack/
 
 .pika-table th,
 .pika-table td {
-    width: 14.285714285714286%;
+    width: 12.5%;
     padding: 0;
 }
 
@@ -166,6 +166,8 @@ http://nicolasgallagher.com/micro-clearfix-hack/
 .pika-week {
     font-size: 11px;
     color: #999;
+    background-color: white;
+
 }
 
 .is-today .pika-button {

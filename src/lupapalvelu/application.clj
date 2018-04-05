@@ -14,9 +14,9 @@
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.building :as building]
+            [lupapalvelu.building-site :as bsite]
             [lupapalvelu.company :as com]
             [lupapalvelu.comment :as comment]
-            [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
@@ -869,7 +869,7 @@
         (let [property-id (or (and force? (:propertyId application))
                               (get-in rakennuspaikka [:data :kiinteisto :kiinteistoTunnus :value])
                               (:propertyId application))]
-          (doc/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))
+          (bsite/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))
 
 (defn schema-datas [{:keys [rakennusvalvontaasianKuvaus]} buildings]
   (map

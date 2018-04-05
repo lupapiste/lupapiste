@@ -1,8 +1,7 @@
 (ns lupapalvelu.authorization-api
   "API for manipulating application.auth"
   (:require [taoensso.timbre :refer [debug error errorf]]
-            [clojure.string :refer [blank? join trim split]]
-            [swiss.arrows :refer [-<>>]]
+            [clojure.string :refer [blank? trim split]]
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.core :refer [ok fail fail! unauthorized]]
@@ -11,7 +10,7 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.authorization-messages] ; notification definitions
-            [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
@@ -68,7 +67,8 @@
   (let [email (ss/canonize-email email)
         existing-auth (auth/get-auth application (:id (user/get-user-by-email email)))
         existing-role (keyword (get-in existing-auth [:invite :role] (:role existing-auth)))
-        denied-by-company (company/company-denies-invitations? application (user/get-user-by-email email))]
+        denied-by-company (->> (get-in (user/get-user-by-email email) [:company :id])
+                               (company/company-denies-invitations? application))]
     (cond
       (#{:reader :guest} existing-role)
       (fail :invite.already-has-reader-auth :existing-role existing-role)
@@ -144,17 +144,6 @@
           (doc-persistence/do-set-user-to-document application document-id (:id user) (get-in auth [:invite :path]) created user false)))
       (ok))))
 
-(defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
-  (-<>> docs
-    (map-indexed
-      (fn [i doc]
-        (->> (model/validate application doc)
-          (filter #(= (:result %) [:err "application-does-not-have-given-auth"]))
-          (map (comp (partial map name) :path))
-          (map (comp (partial join ".") (partial concat ["documents" i "data"]))))))
-    flatten
-    (zipmap <> (repeat ""))))
-
 (defn do-remove-auth [{{auth :auth :as application} :application :as command} username]
   (let [username (ss/canonize-email username)
         last-invite-permission? (->> (auth/get-auths-by-permissions application [:application/invite])
@@ -166,7 +155,7 @@
                     (fn [auth-entry] (= username (:username auth-entry))))]
     (when (some user-pred (:auth application))
       (let [updated-app (update-in application [:auth] (fn [a] (remove user-pred a)))
-            doc-updates (generate-remove-invalid-user-from-docs-updates updated-app)]
+            doc-updates (doc/generate-remove-invalid-user-from-docs-updates updated-app)]
         (update-application command
           (util/deep-merge
             {$pull {:auth (if last-invite-permission?
@@ -186,6 +175,21 @@
 ;;
 ;; Auhtorizations
 ;;
+
+(defn no-company-users-in-auths-when-company-denies-invitations
+  "Precheck for company auth removal for companies that have set :invitationDenied
+  flag on. To remove company, all company users have to be removed first."
+  [{{auth-id :id type :type} :auth-entry {auth :auth :as application} :application}]
+  (when (and (util/=as-kw :company type)
+             (:invitationDenied (company/find-company-by-id auth-id)))
+
+    (let [company-users-ids  (->> (mongo/select :users {:company.id auth-id} [:_id])
+                                  (map :id))
+          company-user-auths (filter (comp (set company-users-ids) :id) auth)]
+
+      (when (not-empty company-user-auths)
+        (fail :error.company-users-have-to-be-removed-before-company
+              :users (map #(select-keys % [:firstName :lastName]) company-user-auths))))))
 
 (defcontext auth-entry-context [{{auth :auth auth-restrictions :authRestrictions} :application
                                  {username :username} :data
@@ -214,7 +218,8 @@
                   :required [:application/edit-restricting-auth]}
 
                  {:required [:application/edit-auth]}]
-   :states     (states/all-application-states-but [:canceled])}
+   :states     (states/all-application-states-but [:canceled])
+   :pre-checks [no-company-users-in-auths-when-company-denies-invitations]}
   [command]
   (do-remove-auth command username))
 

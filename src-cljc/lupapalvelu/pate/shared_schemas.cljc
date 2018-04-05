@@ -288,8 +288,44 @@
 (defn- required [m]
   (merge PateRequired m))
 
+(defn schema-types
+  "Schema type schema 'factory' function.
+
+  schema-ref: Reference to the encompassing schema
+              (e.g., #'SchemaTypes)
+
+  extra: (optional) Map of extra dict schema properties
+                   (see VerdictSchemaTypes). Note that the properties
+                   are added to every dict schema."
+  ([schema-ref extra]
+   {sc/Keyword
+    (letfn [(mex [m] (merge m extra))]
+           (sc/conditional
+            :reference-list (mex (required {:reference-list PateReferenceList}))
+            :phrase-text    (mex (required {:phrase-text PatePhraseText}))
+            :loc-text       (mex {:loc-text sc/Keyword}) ;; Localisation term shown as text.
+            :date-delta     (mex (required {:date-delta PateDateDelta}))
+            :multi-select   (mex (required {:multi-select PateMultiSelect}))
+            :reference      (mex (required {:reference PateReference}))
+            :link           (mex {:link PateLink})
+            :button         (mex {:button PateButton})
+            :placeholder    (mex {:placeholder PatePlaceholder})
+            :keymap         (mex {:keymap KeyMap})
+            :attachments    (mex {:attachments PateAttachments})
+            :application-attachments (mex {:application-attachments PateComponent})
+            :toggle         (mex {:toggle PateToggle})
+            :text           (mex (required {:text PateText}))
+            :date           (mex (required {:date PateDate}))
+            :select         (mex (required {:select PateSelect}))
+            :repeating      (mex {:repeating (sc/recursive schema-ref)
+                              ;; The value is a key in the repeating dictionary.
+                                  (sc/optional-key :sort-by) sc/Keyword})))})
+  ([schema-ref]
+   (schema-types schema-ref nil)))
+
 (defschema SchemaTypes
-  {sc/Keyword (sc/conditional
+  (schema-types #'SchemaTypes)
+  #_{sc/Keyword (sc/conditional
                :reference-list (required {:reference-list PateReferenceList})
                :phrase-text    (required {:phrase-text PatePhraseText})
                :loc-text       {:loc-text sc/Keyword} ;; Localisation term shown as text.
@@ -390,7 +426,7 @@
 
 (defschema PateSection
   (merge PateLayout
-         {:id   keyword-or-string ;; Also title localization key
+         {:id   sc/Keyword ;; Also title localization key
           :grid PateGrid}))
 
 (defschema PateVerdictTemplate
@@ -408,16 +444,35 @@
                             ;; A way to to show "required star" on the section title.
                             (sc/optional-key :required?) sc/Bool)]}))
 
+(defschema PateVerdictSchemaTypes
+  (schema-types #'PateVerdictSchemaTypes
+                {;; If the section is removed in the template, this
+                 ;; dict is excluded in the verdict.
+                 (sc/optional-key :template-section) sc/Keyword
+                 ;; The template-dict provides the initial value to
+                 ;; this verdict dict.
+                 (sc/optional-key :template-dict)    sc/Keyword}))
+
+(defschema PateVerdictDictionary
+  {:dictionary PateVerdictSchemaTypes})
+
 (defschema PateVerdictSection
-  (merge PateLayout
+  (merge PateSection
          PateCss
-         {:id   keyword-or-string ;; Also title localization key
-          (sc/optional-key :buttons?) sc/Bool ;; Show edit button? (default true)
-          :grid PateGrid}))
+         ;; Show edit button? (default true)
+         {(sc/optional-key :buttons?) sc/Bool
+          ;; The corresponding verdict template section. Needed if the
+          ;; template section is removable. If the template section is
+          ;; removed then every dict specific to this verdict section
+          ;; is also removed. If only parts of the section depend on
+          ;; the template section then the correct mechanism is the
+          ;; top level template-sections (see below).
+          (sc/optional-key :template-section) sc/Keyword}))
 
 (defschema PateVerdict
-  (merge Dictionary
+  (merge PateVerdictDictionary
          PateMeta
-         {(sc/optional-key :id)       sc/Str
+         {:version                    sc/Int
+          (sc/optional-key :id)       sc/Str
           (sc/optional-key :modified) sc/Int
           :sections                   [PateVerdictSection]}))

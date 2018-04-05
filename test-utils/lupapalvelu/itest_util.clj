@@ -694,14 +694,18 @@
                                               {:name "operationId"    :content (or operation-id "")}
                                               (when attachment-id {:name "attachmentId"   :content attachment-id})
                                               {:name "upload"         :content uploadfile}])})
-        location (get-in resp [:headers "location"])]
+        location (get-in resp [:headers "location"])
+        parsed-id (parse-attachment-id-from-location location)]
     (if expect-to-succeed
       (and
         (facts "Upload succesfully"
           (fact "Status code" (:status resp) => 302)
           (fact "location"    location => (contains "/lp-static/html/upload-success.html#")))
+        (fact "Parsed id matches"
+          (when attachment-id
+            parsed-id => attachment-id))
         ; Return the attachment id, can be new or existing attachment
-        (parse-attachment-id-from-location location))
+        parsed-id)
       (and
         (facts "Upload should fail"
           (fact "Status code" (:status resp) => 302)

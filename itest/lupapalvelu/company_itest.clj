@@ -1,15 +1,17 @@
 (ns lupapalvelu.company-itest
   (:require [midje.sweet :refer :all]
             [sade.core :refer [now]]
+            [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.vetuma-itest-util :as vetuma]
+            [lupapalvelu.authorization :as auth]
+            [lupapalvelu.fixture.company-application :as comp-app]
             [lupapalvelu.dummy-ident-itest-util :refer :all]
             [lupapalvelu.ident.dummy :as dummy]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.domain :as domain]
             [cheshire.core :as json]
             [clojure.string :refer [index-of]]
-            [sade.util :as util]
             [ring.util.codec :as codec]))
 
 (apply-remote-minimal)
@@ -652,3 +654,35 @@
                    (assoc params
                      :form-params
                      {:username "foo2@example.com" :password "password1234"})) => raw-ok?))))
+
+(facts "Removing user from company and document"
+  (apply-remote-fixture "company-application")
+  (let [app-id (create-app-id teppo)
+        app (query-application teppo app-id)
+        designer-doc (util/find-first #(= "suunnittelija" (-> % :schema-info :subtype)) (:documents app))]
+    (fact "Teppo can open company authed application" app => map?)
+    (fact "Teppo does not have auth" (auth/has-auth? app teppo-id) => false)
+    (fact "Solita is authed" (count (:auth app)) => 1 (-> app :auth first :id) => "solita")
+    (fact "Kaino invites Tebi"
+      (command kaino :invite-with-role :id app-id :documentId (:id designer-doc) :email (email-for-key teppo) :documentName "" :role "writer" :text "lol" :path "") => ok?)
+    ; Teppo's ID would be retained in document if he would accept invite here (he gets writer auth).
+    ; But we will test that userId is cleared from doc when he is removed from company,
+    #_(fact "Teppo accepts invite"
+      (command teppo :approve-invite :id app-id :email (email-for-key teppo)) => ok?)
+    (fact "Kaino sets user to doc"
+      (command kaino :set-user-to-document :id app-id :documentId (:id designer-doc) :userId teppo-id :path "") => ok?)
+    (let [app (query-application teppo app-id)
+          designer-doc (util/find-first #(= "suunnittelija" (-> % :schema-info :subtype)) (:documents app))]
+      (fact "Now Teppo has auth"
+        (auth/has-auth? app teppo-id) => true)
+      (fact "Teppo's id is in document"
+        (get-in designer-doc [:data :userId :value]) => teppo-id)
+      (fact "Kaino removes Teppo from company"
+        (command kaino :company-user-delete :user-id teppo-id) => ok?)
+      (let [app (query-application kaino app-id)
+            designer-doc (util/find-first #(= "suunnittelija" (-> % :schema-info :subtype)) (:documents app))]
+        (fact "Teppo can query app still, because he has auth"
+          (query teppo :application :id app-id) => ok?)
+        (fact "Kaino sees that Teppo's userId is not in document anymore"
+          (get-in designer-doc [:data :userId :value]) => ss/blank?)))
+    ))

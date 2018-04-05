@@ -505,6 +505,19 @@
     (difference-as-kw ["yi" :er "san"] '(:yi "er" :si) ["liu"] nil nil)
     => [:san]))
 
+(facts "union-as-kw"
+  (fact "s, kw, nil"
+    (union-as-kw ["yi" :er "san" nil]) => [:yi :er :san])
+  (fact "no duplicates"
+    (union-as-kw ["yi" :er "san" nil]
+                 [:yi :er nil "si"])
+    => [:yi :er :san :si])
+  (fact "Nil safe"
+    (union-as-kw nil) => []
+    (union-as-kw nil nil) => []
+    (union-as-kw []) => []
+    (union-as-kw [] []) => []))
+
 (facts get-in-tree
   (fact "single level"
     (get-in-tree [[:foo :bar] [:baz :quu]] [:foo]) => :bar)

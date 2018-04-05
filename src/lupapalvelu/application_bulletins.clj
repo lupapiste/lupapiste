@@ -285,6 +285,11 @@
   (infof "Bulletins for removed verdict %s need to be cleaned up" verdictId)
   (mongo/remove :application-bulletins (str applicationId "_" verdictId)))
 
+(defn- fallback-appeal-end-from-appeal-start
+  "If appeal period end date is not available, use 14 days from appeal period start"
+  [appeal-period-start]
+  (-> appeal-period-start tc/from-long (t/plus (t/days 14)) tc/to-long))
+
 (defn process-check-for-verdicts-result
   "For (non-YMP) organizations with bulletins enabled, update bulletins to match with verdicts retrieved from backing system"
   [{{old-verdicts :verdicts applicationId :id :keys [organization permitType municipality] :as application} :application
@@ -299,14 +304,16 @@
         (doseq [vid removed-verdict-ids] ; Delete bulletins related to removed verdicts
           (process-delete-verdict applicationId vid))
         (doseq [{vid :id kuntalupatunnus :kuntalupatunnus :as verdict} new-verdicts]
-          (infof "Upserting the bulletin for verdict %s %s" vid kuntalupatunnus)
-          (upsert-bulletin-by-id (str applicationId "_" vid)
-            (create-bulletin (util/assoc-when-pred application util/not-empty-or-nil?
-                                                   :state :verdictGiven
-                                                   :bulletinOpDescription (when descriptions-from-backend-system
-                                                                            (:kuvaus (util/find-by-key :kuntalupatunnus kuntalupatunnus app-descriptions)))
-                                                   :verdicts [verdict])
-                                                   created
-                             {:verdictGivenAt (-> verdict :paatokset first :paivamaarat :anto)
-                              :appealPeriodStartsAt (or (-> verdict :paatokset first :paivamaarat :julkipano) created)
-                              :appealPeriodEndsAt   (or (-> verdict :paatokset first :paivamaarat :viimeinenValitus) created)})))))))
+          (when-let [appeal-period-start (-> verdict :paatokset first :paivamaarat :julkipano)]
+            (infof "Upserting the bulletin for verdict %s %s" vid kuntalupatunnus)
+            (upsert-bulletin-by-id (str applicationId "_" vid)
+              (create-bulletin (util/assoc-when-pred application util/not-empty-or-nil?
+                                                     :state :verdictGiven
+                                                     :bulletinOpDescription (when descriptions-from-backend-system
+                                                                              (:kuvaus (util/find-by-key :kuntalupatunnus kuntalupatunnus app-descriptions)))
+                                                     :verdicts [verdict])
+                               created
+                               {:verdictGivenAt (-> verdict :paatokset first :paivamaarat :anto)
+                                :appealPeriodStartsAt appeal-period-start
+                                :appealPeriodEndsAt   (or (-> verdict :paatokset first :paivamaarat :viimeinenValitus)
+                                                          (fallback-appeal-end-from-appeal-start appeal-period-start))}))))))))

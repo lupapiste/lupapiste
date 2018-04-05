@@ -260,7 +260,7 @@
            (date/basic-datepicker date commit-fn idx))
          (when (:inspection-date row-target)
            (common/format-timestamp (:inspection-date row-target))))
-       (when (and (not editingInspectionDate?) (auth/ok? auth-model :set-inspection-date) (not targetFinished?))
+       (when (and target-id (not editingInspectionDate?) (auth/ok? auth-model :set-inspection-date) (not targetFinished?))
          [:a.inspection-summary-link
           {:on-click     (fn [_] (swap! selected-summary assoc-in [:targets idx :editingInspectionDate?] true))
            :data-test-id (str "choose-inspection-date-" idx)}

@@ -193,16 +193,16 @@
                          (com/find-company-by-id "allow") => allowing-company]
 
      (fact "Company has authorization for application and user invitation is denied"
-       (com/company-denies-invitations? app-with-auths-1 {:company {:id "denied"}}) => false)
+       (com/company-denies-invitations? app-with-auths-1 "denied") => false)
 
      (fact "Company has authorization for application and allows invitations"
-       (com/company-denies-invitations? app-with-auths-2 {:company {:id "allow"}}) => false)
+       (com/company-denies-invitations? app-with-auths-2 "allow") => false)
 
      (fact "Company doesnt have authorization for application, but allows user invitations"
-       (com/company-denies-invitations? app-with-auths-1 {:company {:id "allow"}}) => false)
+       (com/company-denies-invitations? app-with-auths-1 "allow") => false)
 
      (fact "Company doesnt have authorization for application and user invitation is denied"
-       (com/company-denies-invitations? app-with-auths-2 {:company {:id "denied"}}) => true))))
+       (com/company-denies-invitations? app-with-auths-2 "denied") => true))))
 
 (facts "company-info"
   (let [firm {:id       "firm"
