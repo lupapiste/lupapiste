@@ -33,7 +33,8 @@
                             :data {:verdict-dates ["lainvoimainen" "anto" "julkipano"],
                                    :bulletinOpDescription "",
                                    :giver "viranhaltija",
-                                   :plans [],
+                                   :plans ["5a85960a809b5a1e454f3233"
+                                           "5a85960a809b5a1e454f3234"],
                                    :foremen ["vastaava-tj"],
                                    :language "fi",
                                    :reviews ["5a7affbf5266a1d9c1581957"
@@ -50,7 +51,10 @@
                                                      :lainvoimainen 1,
                                                      :aloitettava 1,
                                                      :voimassa 1},
-                                       :plans [],
+                                       :plans [{:id "5a85960a809b5a1e454f3233",
+                                                :name {:fi "Suunnitelmat", :sv "Planer", :en "Plans"}},
+                                               {:id "5a85960a809b5a1e454f3234",
+                                                :name {:fi "ErityisSuunnitelmat", :sv "SpecialPlaner", :en "SpecialPlans"}}],
                                        :reviews [{:id "5a7affbf5266a1d9c1581957",
                                                   :name {:fi "Aloituskokous", :sv "start", :en "start"},
                                                   :type "aloituskokous"}
@@ -94,6 +98,10 @@
               :type "muu-katselmus"}],
    :plans [{:id "5a85960a809b5a1e454f3233",
             :name {:fi "Suunnitelmat", :sv "Planer", :en "Plans"},
+            :category "r",
+            :deleted false}
+           {:id "5a85960a809b5a1e454f3234",
+            :name {:fi "ErityisSuunnitelmat", :sv "SpecialPlaner", :en "SpecialPlans"},
             :category "r",
             :deleted false}]})
 
