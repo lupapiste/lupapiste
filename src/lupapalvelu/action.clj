@@ -30,7 +30,7 @@
 
 (def ^:dynamic *created-timestamp-for-test-actions* nil)
 
-(defn action [name & {:keys [user type data] :or {:user nil :type :action :data {}}}]
+(defn action [name & {:keys [user type data] :or {user nil type :action data {}}}]
   {:action name
    :user user
    :type type
