@@ -18,7 +18,7 @@
       (-> (query-application pena application-id) :attachments first))
 
     (fact "Upload file to attachment"
-      (upload-attachment pena application-id base-attachment true) => truthy)
+      (upload-file-and-bind pena application-id {:type (:type base-attachment)} :attachment-id (:id base-attachment)) => truthy)
 
     (fact "Ronja is set as general handler"
       (command sonja :upsert-application-handler :id application-id :userId ronja-id :roleId sipoo-general-handler-id) => ok?)
@@ -55,9 +55,9 @@
       => (partial expected-failure? :error.ram-linked))
 
     (facts "Pena uploads new post-verdict attachment and corresponding RAM attachment"
-      (upload-attachment pena application-id {:id "" :type {:type-group "paapiirustus"
-                                                            :type-id "pohjapiirustus"}} true) => truthy
+      (upload-file-and-bind pena application-id {:type {:type-group "paapiirustus" :type-id "julkisivupiirustus"}}) => truthy
       (let [base (latest-attachment)]
+        (fact "testaus" (:type base) => {:type-group "paapiirustus" :type-id "julkisivupiirustus"})
         (fact "RAM creation fails do to unapproved base attachment"
           (command pena :create-ram-attachment :id application-id :attachmentId (:id base))
           => (partial expected-failure? :error.attachment-not-approved) )
@@ -66,8 +66,9 @@
           (command sonja :approve-attachment :id application-id
                    :fileId (-> (latest-attachment) :latestVersion :fileId)) => ok?
           (command pena :create-ram-attachment :id application-id :attachmentId (:id base)) => ok?)
-        (upload-attachment pena application-id {:id (:id (latest-attachment)) :type {:type-group "paapiirustus"
-                                                                                     :type-id "pohjapiirustus"}} true) => truthy
+        (upload-file-and-bind pena application-id
+                              {:type {:type-group "paapiirustus" :type-id "julkisivupiirustus"}}
+                              :attachment-id (:id (latest-attachment))) => truthy
         (fact "Applicant cannot delete base attachment"
           (command pena :delete-attachment :id application-id :attachmentId (:id base))
           => fail?)
@@ -113,7 +114,8 @@
           (fact "Sonja cannot delete base attachment"
             (command sonja :delete-attachment :id application-id :attachmentId (:id base)) => (partial expected-failure? :error.ram-linked))
           (fact "Fill and approve RAM and create one more link"
-            (upload-attachment pena application-id (latest-attachment) true) => truthy
+            (let [ram (latest-attachment)]
+              (upload-file-and-bind pena application-id {:type (:type ram)} :attachment-id (:id ram))) => truthy
             (let [middle (latest-attachment)]
               (command sonja :approve-attachment :id application-id
                        :fileId (-> middle :latestVersion :fileId)) => ok?
@@ -131,8 +133,7 @@
                          :originalFileId (-> middle :latestVersion :originalFileId))
                 => (partial expected-failure? :error.ram-linked)))))))
     (facts "Pena uploads new post-verdict attachment that does not support RAMs"
-      (upload-attachment pena application-id {:id "" :type {:type-group "osapuolet"
-                                                            :type-id "cv"}} true) => truthy
+      (upload-file-and-bind pena application-id {:type {:type-group "osapuolet" :type-id "cv"}}) => truthy
       (let [base (latest-attachment)]
         (fact "Approve"
           (command sonja :approve-attachment :id application-id
