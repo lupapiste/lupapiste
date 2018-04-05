@@ -71,7 +71,7 @@
                  [commons-codec "1.10"]
 
                  ; Joda time wrapper
-                 [clj-time "0.12.0"]
+                 [clj-time "0.14.2"]
 
                  ; String case manipulation
                  [camel-snake-kebab "0.4.0"]
