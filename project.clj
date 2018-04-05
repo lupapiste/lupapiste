@@ -8,7 +8,7 @@
                  [org.clojure/data.codec "0.1.0"]
                  [org.clojure/data.zip "0.1.1"] ; Note: 0.1.2 breaks lupapalvelu.wfs
                  [org.clojure/data.xml "0.0.8"]
-                 [org.clojure/tools.nrepl "0.2.12"]
+                 [org.clojure/tools.nrepl "0.2.13"]
                  [org.clojure/tools.reader "1.1.3.1"]
                  [org.clojure/tools.trace "0.7.9"]
                  [org.clojure/test.check "0.9.0"]
