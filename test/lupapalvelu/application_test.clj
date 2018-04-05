@@ -33,7 +33,7 @@
                    enrich-single-doc-disabled-flag get-operation-schemas get-required-document-schema-names-for-operations
                    replace-old-operation-doc-with-new pick-old-documents-that-new-op-needs
                    copy-docs-from-old-op-to-new get-attachment-types change-operation-in-attachments
-                   copy-attachments-from-old-op-to-new get-new-operations)
+                   copy-attachments-from-old-op-to-new get-new-operations copy-rakennuspaikka-data)
 
 (testable-privates lupapalvelu.ya validate-link-agreements-signature validate-link-agreements-state)
 
@@ -613,7 +613,8 @@
     => empty?))
 
 (facts "copying documents and attachments when replacing primary operation"
-  (let [old-op           {:name "kerrostalo-rivitalo"
+  (let [org              {:id "753-R"}
+        old-op           {:name "kerrostalo-rivitalo"
                           :id "primaarinen-operaatio"}
         new-op           {:name "teollisuusrakennus"
                           :id "primaarinen-operaatio"}
@@ -631,7 +632,9 @@
         old-docs         [old-op-doc
                           secondary-op-doc
                           hakija-r-doc
-                          {:schema-info {:name "hankkeen-kuvaus" :description "vanha"}}]
+                          {:schema-info {:name "hankkeen-kuvaus" :description "vanha"}}
+                          {:schema-info {:name "rakennuspaikka"}
+                           :data {:kaavatilanne {:value "asemakaava"}}}]
         new-docs         [new-op-doc
                           secondary-op-doc
                           {:schema-info {:name "kaupunkikuvatoimenpide" :op secondary-op}
@@ -640,7 +643,9 @@
                           {:schema-info {:name "paatoksen-toimitus-rakval"}}
                           {:schema-info {:name "kaupunkikuvatoimenpide"}}
                           {:schema-info {:name "hakija-r"}
-                           :data        {:henkilo {:henkilotiedot {:etunimi nil :sukunimi nil}}}}]]
+                           :data        {:henkilo {:henkilotiedot {:etunimi nil :sukunimi nil}}}}
+                          {:schema-info {:name "rakennuspaikka"}
+                           :data {:kaavatilanne {:value nil}}}]]
 
     (fact "new operations collection when primary operation is replaced"
       (let [mini-app {:primaryOperation old-op
@@ -649,15 +654,15 @@
         => [new-op secondary-op]))
 
     (fact "get operation schemas by name"
-      (set (get-operation-schemas "kerrostalo-rivitalo"))
-      => #{"hakija-r" "hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"}
+      (set (get-operation-schemas org "kerrostalo-rivitalo"))
+      => #{"hakija-r" "hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "rakennusjatesuunnitelma"}
 
-      (set (get-operation-schemas "aloitusoikeus"))
+      (set (get-operation-schemas org "aloitusoikeus"))
       => #{"maksaja" "hakija-r"})
 
     (fact "multiple operations need lots of documents"
-      (get-required-document-schema-names-for-operations new-ops)
-      => (clojure.set/union #{"hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"}
+      (get-required-document-schema-names-for-operations org new-ops)
+      => (clojure.set/union #{"hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "rakennusjatesuunnitelma"}
                             #{"hakija-r" "hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"}))
 
     (fact "replacing the operation document"
@@ -668,10 +673,61 @@
       (pick-old-documents-that-new-op-needs new-docs old-docs "hakija-r")
       => [hakija-r-doc])
 
+    (fact "rakennuspaikka data persists"
+      (let [old-doc-1 {:id "old-rakennuspaikka"
+                       :schema-info {:name "rakennuspaikka-ilman-ilmoitusta"}
+                       :data {:kiinteisto {:maaraalaTunnus {:value  "0000"}}
+                              :hallintaperuste {:value "oma"}
+                              :kaavanaste {:value nil}
+                              :kaavatilanne {:value "asemakaava"}}}
+            old-doc-2 {:id "old-rakennuspaikka"
+                       :schema-info {:name "rakennuspaikka"}
+                       :data {:kiinteisto {:maaraalaTunnus {:value  "0000"}}
+                              :hallintaperuste {:value "oma"}
+                              :kaavanaste {:value nil}
+                              :kaavatilanne {:value "asemakaava"}
+                              :hankkeestaIlmoitettu {:hankkeestaIlmoitettuPvm {:value "05.04.2018"}}}}
+            new-doc-1 {:id "new-rakennuspaikka"
+                      :schema-info {:name "rakennuspaikka"}
+                      :data {:kiinteisto {:maaraalaTunnus {:value nil}}
+                             :hallintaperuste {:value nil}
+                             :kaavanaste {:value nil}
+                             :kaavatilanne {:value nil}
+                             :hankkeestaIlmoitettu {:hankkeestaIlmoitettuPvm {:value nil}}}}
+            new-doc-2 {:id "new-rakennuspaikka"
+                       :schema-info {:name "rakennuspaikka-ilman-ilmoitusta"}
+                       :data {:kiinteisto {:maaraalaTunnus {:value nil}}
+                              :hallintaperuste {:value nil}
+                              :kaavanaste {:value nil}
+                              :kaavatilanne {:value nil}}}]
+
+        (copy-rakennuspaikka-data [hakija-r-doc old-doc-1] [hakija-r-doc new-doc-1])
+        => [{:id "new-rakennuspaikka"
+            :schema-info {:name "rakennuspaikka"}
+            :data {:kiinteisto {:maaraalaTunnus {:value  "0000"}}
+                   :hallintaperuste {:value "oma"}
+                   :kaavanaste {:value nil}
+                   :kaavatilanne {:value "asemakaava"}
+                   :hankkeestaIlmoitettu {:hankkeestaIlmoitettuPvm {:value nil}}}}
+            hakija-r-doc]
+
+        (copy-rakennuspaikka-data [old-doc-2] [new-doc-2])
+        => [{:id "new-rakennuspaikka"
+             :schema-info {:name "rakennuspaikka-ilman-ilmoitusta"}
+             :data {:kiinteisto {:maaraalaTunnus {:value  "0000"}}
+                    :hallintaperuste {:value "oma"}
+                    :kaavanaste {:value nil}
+                    :kaavatilanne {:value "asemakaava"}}}]
+
+        (copy-rakennuspaikka-data [old-doc-1] [old-doc-1])
+        => [old-doc-1]))
+
     (fact "merging relevant old documents to new"
-      (let [merged-docs (copy-docs-from-old-op-to-new {:documents old-docs} (:id old-op) new-ops new-docs)
+      (let [merged-docs (copy-docs-from-old-op-to-new {:documents old-docs} org (:id old-op) new-ops new-docs)
             expected    [new-op-doc
                          secondary-op-doc
+                         {:schema-info {:name "rakennuspaikka"}
+                          :data {:kaavatilanne {:value "asemakaava"}}}
                          hakija-r-doc
                          {:schema-info {:name "paatoksen-toimitus-rakval"}}
                          {:schema-info {:name "hankkeen-kuvaus" :description "vanha"}}]]
@@ -767,4 +823,5 @@
                       :type-group "osapuolet"}
            :versions []
            :id       "5"
-           :op       nil}]))))
+           :op       nil}])))
+  (against-background (lupapalvelu.operations/common-rakval-org-schemas anything) => "rakennusjatesuunnitelma"))
