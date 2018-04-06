@@ -387,18 +387,18 @@
                                           changes)})))
 
 (defn update-automatic-verdict-dates
-  "Returns map of dates. While the calculation takes every date into
+  "Returns map of dates (timestamps). While the calculation takes every date into
   account, the result only includes the dates included in the
   template."
   [{:keys [category template references verdict-data] :as args}]
-  (let [datestring  (:verdict-date verdict-data)
+  (let [timestamp  (:verdict-date verdict-data)
         dictionary  (:dictionary (shared/settings-schema category))
         date-deltas (:date-deltas references)
         automatic?  (:automatic-verdict-dates verdict-data)]
-    (when (and automatic? (ss/not-blank? datestring))
+    (when (and automatic? (integer? timestamp))
       (loop [dates      {}
              [kw & kws] shared/verdict-dates
-             latest     datestring]
+             latest     timestamp]
         (if (nil? kw)
           (select-keys dates (util/intersection-as-kw shared/verdict-dates
                                                       (:inclusions template)))

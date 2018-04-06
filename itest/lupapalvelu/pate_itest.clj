@@ -28,6 +28,8 @@
 (defn prefix-keys [m prefix]
   (mangle-keys m (util/fn->> name (str (name prefix)) keyword)))
 
+(def timestamp util/to-millis-from-local-date-string)
+
 (defn toggle-sipoo-pate [flag]
   (fact {:midje/description (str "Sipoo Pate: " flag)}
     (command admin :set-organization-boolean-path
@@ -62,7 +64,8 @@
       (fact "element exists"
         (xml/select1 xml [:paatostieto]) => truthy)
       (fact "paatosPvm"
-        (xml/get-text xml [:paatostieto :poytakirja :paatospvm]) => (util/to-xml-date-from-string verdict-date)))
+        (xml/get-text xml [:paatostieto :poytakirja :paatospvm])
+        => (util/to-xml-date verdict-date)))
     xml))
 
 (facts "Pate enabled"
@@ -919,7 +922,7 @@
                                                                  :verdict-id verdict-id
                                                                  :path (map name (flatten [%1]))
                                                                  :value %2)
-                                        :check-changes (fn [{changes :changes} expected]
+                                        :check-changes (fn [{changes :changes :as response} expected]
                                                          (fact "Check changes"
                                                            changes => expected)
                                                          (fact "Check that verdict has been updated"
@@ -1070,36 +1073,36 @@
                       (:plans data) => [(-> plans first :id)])))
                 (facts "Verdict dates"
                   (fact "Set julkipano date"
-                    (edit-verdict "julkipano" "20.9.2017") => no-errors?)
+                    (edit-verdict "julkipano" (timestamp "20.9.2017")) => no-errors?)
                   (fact "Set verdict date"
                     (let [{:keys [modified changes]}
-                          (edit-verdict "verdict-date" "27.9.2017")]
+                          (edit-verdict "verdict-date" (timestamp "27.9.2017"))]
                       changes  => []
                       modified => pos?
                       (fact "Verdict data has been updated"
                         (let [data (:verdict (open-verdict))]
                           (:modified data) => modified
-                          (:data data) => (contains {:verdict-date "27.9.2017"
-                                                     :julkipano    "20.9.2017"})))))
+                          (:data data) => (contains {:verdict-date (timestamp "27.9.2017")
+                                                     :julkipano    (timestamp "20.9.2017")})))))
                   (fact "Set automatic dates"
                     (check-changes (edit-verdict "automatic-verdict-dates" true)
-                                   [[["julkipano"] "28.9.2017"]
-                                    [["anto"] "2.10.2017"]
-                                    [["muutoksenhaku"] "5.10.2017"]
-                                    [["lainvoimainen"] "9.10.2017"]
-                                    [["aloitettava"] "9.10.2018"]
-                                    [["voimassa"] "9.10.2020"]]))
+                                   [[["julkipano"] (timestamp "28.9.2017")]
+                                    [["anto"] (timestamp "2.10.2017")]
+                                    [["muutoksenhaku"] (timestamp "5.10.2017")]
+                                    [["lainvoimainen"] (timestamp "9.10.2017")]
+                                    [["aloitettava"] (timestamp "9.10.2018")]
+                                    [["voimassa"] (timestamp "9.10.2020")]]))
                   (fact "Clearing the verdict date does not clear automatically calculated dates"
                     (edit-verdict "verdict-date" "")
                     => (contains {:changes []}))
                   (fact "Changing the verdict date recalculates others"
-                    (check-changes (edit-verdict :verdict-date "6.10.2017")
-                                   [[["julkipano"] "9.10.2017"]
-                                    [["anto"] "11.10.2017"]
-                                    [["muutoksenhaku"] "16.10.2017"]
-                                    [["lainvoimainen"] "20.10.2017"]
-                                    [["aloitettava"] "22.10.2018"]
-                                    [["voimassa"] "22.10.2020"]])))
+                    (check-changes (edit-verdict :verdict-date (timestamp "6.10.2017"))
+                                   [[["julkipano"] (timestamp "9.10.2017")]
+                                    [["anto"] (timestamp "11.10.2017")]
+                                    [["muutoksenhaku"] (timestamp "16.10.2017")]
+                                    [["lainvoimainen"] (timestamp "20.10.2017")]
+                                    [["aloitettava"] (timestamp "22.10.2018")]
+                                    [["voimassa"] (timestamp "22.10.2020")]])))
                 (facts "Verdict foremen"
                   (fact "vv-tj not in the template"
                     (check-error (edit-verdict :foremen ["vv-tj"]) :foremen))
@@ -1340,7 +1343,7 @@
                       (let  [{verdict :verdict}             (command sonja :new-pate-verdict-draft
                                                                      :id app-id
                                                                      :template-id template-id)
-                             verdict-date                   "27.9.2017"
+                             verdict-date                   (timestamp "27.9.2017")
                              {data       :data
                               verdict-id :id}               verdict
                              {open-verdict  :open
@@ -1386,7 +1389,7 @@
                                                            value)
                                              => (err :error.invalid-value-path)))]
 
-                            (check-fn :julkipano "29.9.2017")
+                            (check-fn :julkipano (timestamp "29.9.2017"))
                             (check-fn :buildings.vss-luokka "12")
                             (check-fn :buildings.kiinteiston-autopaikat 34)
                             (fact "Contact cannot be set for board verdict"
@@ -1395,12 +1398,12 @@
                               (edit-verdict :verdict-section "88") => no-errors?)))
                         (facts "Muutoksenhaku calculation has changed"
                           (fact "Set the verdict date"
-                            (edit-verdict :verdict-date "8.1.2018") => no-errors?)
+                            (edit-verdict :verdict-date (timestamp "8.1.2018")) => no-errors?)
                           (fact "Calculate muutoksenhaku date automatically"
                             (check-changes (edit-verdict :automatic-verdict-dates true)
-                                           [[["anto"] "11.1.2018"]
-                                            [["muutoksenhaku"] "22.1.2018"]
-                                            [["voimassa"] "28.1.2021"]])))
+                                           [[["anto"] (timestamp "11.1.2018")]
+                                            [["muutoksenhaku"] (timestamp "22.1.2018")]
+                                            [["voimassa"] (timestamp "28.1.2021")]])))
                         (facts "Add attachment to verdict draft"
                           (let [attachment-id (add-verdict-attachment app-id verdict-id "Paatosote")]
                             (fact "Attachment can be deleted"

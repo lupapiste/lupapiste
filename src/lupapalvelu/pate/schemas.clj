@@ -98,9 +98,11 @@
 (defn parse-int
   "Empty strings are considered as zeros."
   [x]
-  (let [n (-> x str name)]
+  (let [n (-> x str ss/trim)]
     (cond
       (integer? x)                 x
+      (nil? x)                     0
+      (not (string? x))            nil
       (ss/blank? x)                0
       (re-matches #"^[+-]?\d+$" n) (util/->int n))))
 
@@ -138,19 +140,12 @@
       (not (set/subset? v-set d-set))    :error.invalid-value
       (not= (count items) (count v-set)) :error.duplicate-items)))
 
-(defn check-date
-  "The date is always in the Finnish format: 21.8.2017. Day and month
-  zero-padding is accepted. Empty string is a valid date."
-  [value]
-  (let [trimmed (ss/trim (str value))]
-    (when-not (or (ss/blank? trimmed)
-                  (date/parse-finnish-date trimmed))
-      :error.invalid-value)))
-
 (defmethod validate-resolution :date
   [{:keys [path value] :as options}]
   (or (path-error path)
-      (check-date value)))
+      (schema-error (assoc options
+                           :value (parse-int value)
+                           :path [:value]))))
 
 (defmethod validate-resolution :select
   [{:keys [path value data] :as options}]
@@ -382,10 +377,11 @@
        (filter (fn [[k v]]
                  (:required? v)))
        (every? (fn [[k v]]
-                 (case (-> v (dissoc :required?) keys first)
-                   :multi-select (not-empty (k data))
-                   :reference    true ;; Required only for highlighting purposes
-                   (ss/not-blank? (k data)))))))
+                 (cond
+                   (:multi-select v) (not-empty (k data))
+                   (:reference v)    true ;; Required only for highlighting purposes
+                   (:date v)         (integer? (k data))
+                   :else (ss/not-blank? (k data)))))))
 
 (defn section-dicts
   "Set of :dict and :repeating keys in the given

@@ -1,6 +1,7 @@
 (ns lupapalvelu.pate.date-test
   (:require [midje.sweet :refer :all]
             [lupapalvelu.pate.date :refer :all]
+            [sade.util :as util]
             [clj-time.core :as time]))
 
 
@@ -28,9 +29,17 @@
   (parse-finnish-date "88.77.2017")
   => nil)
 
-(facts "Date unparsing"
+(facts "Finnish date"
   (finnish-date (time/local-date 2017 2 1))
-  => "1.2.2017")
+  => "1.2.2017"
+  (finnish-date (time/date-time 2017 2 1))
+  => "1.2.2017"
+  (finnish-date nil) => nil
+  (finnish-date "") => nil
+  (finnish-date "foobar") => nil
+  (finnish-date (util/to-millis-from-local-date-string "6.4.2018"))
+  => "6.4.2018"
+  (finnish-date "04.05.2018") => "4.5.2018")
 
 (facts "Holidays"
   (holiday "New Year" "1.1.2018" true)

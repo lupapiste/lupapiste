@@ -267,7 +267,10 @@
           (sc/optional-key :before) pate-units
           (sc/optional-key :after)  pate-units}))
 
-(def PateDate PateComponent)
+(defschema PateDate
+  (merge PateComponent
+         ;; Timestamp (ms from epoch).
+         {(sc/optional-key :value) sc/Int}))
 
 (defschema PateSelect
   "Very simple selection model. Rendered as dropdown. Each item
@@ -324,27 +327,7 @@
    (schema-types schema-ref nil)))
 
 (defschema SchemaTypes
-  (schema-types #'SchemaTypes)
-  #_{sc/Keyword (sc/conditional
-               :reference-list (required {:reference-list PateReferenceList})
-               :phrase-text    (required {:phrase-text PatePhraseText})
-               :loc-text       {:loc-text sc/Keyword} ;; Localisation term shown as text.
-               :date-delta     (required {:date-delta PateDateDelta})
-               :multi-select   (required {:multi-select PateMultiSelect})
-               :reference      (required {:reference PateReference})
-               :link           {:link PateLink}
-               :button         {:button PateButton}
-               :placeholder    {:placeholder PatePlaceholder}
-               :keymap         {:keymap KeyMap}
-               :attachments    {:attachments PateAttachments}
-               :application-attachments {:application-attachments PateComponent}
-               :toggle         {:toggle PateToggle}
-               :text           (required {:text PateText})
-               :date           (required {:date PateDate})
-               :select         (required {:select PateSelect})
-               :repeating      {:repeating (sc/recursive #'SchemaTypes)
-                                ;; The value is a key in the repeating dictionary.
-                                (sc/optional-key :sort-by) sc/Keyword})})
+  (schema-types #'SchemaTypes))
 
 (defschema Dictionary
   "Id to schema mapping."
