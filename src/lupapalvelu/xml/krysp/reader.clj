@@ -1,6 +1,6 @@
 (ns lupapalvelu.xml.krysp.reader
   "Read the Krysp from municipality Web Feature Service"
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error warnf]]
             [clojure.set :refer [rename-keys]]
             [net.cgrand.enlive-html :as enlive]
             [sade.xml :refer :all]
@@ -569,24 +569,32 @@
                            (apply build-huoneisto (util/select-values osoite [:huoneisto :jakokirjain :jakokirjain2]))]]
     (ss/join " " (remove nil? osoite-components))))
 
+(def unknown-address "Tuntematon osoite")
+
+(defn- resolve-address-by-point [x y]
+  (let [resp (-> {:params {:x x :y y :lang "fi"}}
+                 proxy-services/address-by-point-proxy
+                 :body)
+        {:keys [street number]} (when (string? resp)
+                                  (try
+                                    (json/parse-string resp true)
+                                    (catch Exception _
+                                      (warnf "Failed to resolve address for point x: %s y: %s" x y))))]
+    (when street
+      (str street " " number))))
+
 (defn- resolve-location-by-property-id [property-id kuntalupatunnus]
   (warn "Falling back to resolve location for kuntalupatunnus" kuntalupatunnus "by property id" property-id)
   (if-let [location (-> (find-address/search-property-id "fi" property-id)
                         first
                         :location)]
     (let [{:keys [x y]} location
-          resp (-> {:params {:x x :y y :lang "fi"}}
-                   proxy-services/address-by-point-proxy
-                   :body)
-          {:keys [street number]} (when (string? resp)
-                                    (try
-                                      (json/parse-string resp true)
-                                      (catch Exception _)))]
+          street (resolve-address-by-point x y)]
       {:rakennuspaikka {:x          x
                         :y          y
                         :address    (if street
-                                      (str street " " number)
-                                      "Tuntematon osoite")
+                                      street
+                                      unknown-address)
                         :propertyId property-id}})
     (warn "Could not resolve location for kuntalupatunnus" kuntalupatunnus "by property id" property-id)))
 
@@ -654,7 +662,7 @@
             osoite-Rakennuspaikka (build-address osoite-xml asioimiskieli-code)
 
             coordinates-type (resolve-coordinate-type asia)
-            coord-array-Rakennuspaikka (resolve-coordinates asia kuntalupatunnus)
+            [x y :as coord-array-Rakennuspaikka] (resolve-coordinates asia kuntalupatunnus)
             osapuolet (map cr/all-of (select asia [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli]))
             suunnittelijat (map cr/all-of (select asia [:osapuolettieto :Osapuolet :suunnittelijatieto :Suunnittelija]))
             [hakijat muut-osapuolet] ((juxt filter remove) #(= "hakija" (:VRKrooliKoodi %)) osapuolet)
@@ -675,10 +683,14 @@
 
               (cond
                 (and (seq coord-array-Rakennuspaikka) (not-any? ss/blank? [osoite-Rakennuspaikka kiinteistotunnus]))
-                {:rakennuspaikka {:x          (first coord-array-Rakennuspaikka)
-                                  :y          (second coord-array-Rakennuspaikka)
+                {:rakennuspaikka {:x x :y y
                                   :address    osoite-Rakennuspaikka
                                   :propertyId kiinteistotunnus}}
+
+                (and (seq coord-array-Rakennuspaikka) (ss/not-blank? kiinteistotunnus))
+                {:rakennuspaikka {:x x :y y
+                                  :propertyId kiinteistotunnus
+                                  :address (or (resolve-address-by-point x y) unknown-address)}}
 
                 (and (nil? coord-array-Rakennuspaikka) (not (ss/blank? kiinteistotunnus)))
                 (resolve-location-by-property-id kiinteistotunnus kuntalupatunnus))

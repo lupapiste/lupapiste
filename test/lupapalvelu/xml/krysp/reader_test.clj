@@ -5,7 +5,7 @@
             [lupapalvelu.factlet :refer [fact* facts*]]
             [clj-time.coerce :as coerce]
             [sade.xml :as xml]
-            [lupapalvelu.xml.krysp.reader :refer [->verdicts get-app-info-from-message application-state resolve-property-id-by-point resolve-coordinate-type resolve-coordinates]]
+            [lupapalvelu.xml.krysp.reader :refer :all]
             [lupapalvelu.xml.krysp.common-reader :refer [rakval-case-type property-equals property-in wfs-krysp-url case-elem-selector]]
             [lupapalvelu.xml.krysp.review-reader :as review-reader]
             [lupapalvelu.xml.validator :as xml-validator]
@@ -15,8 +15,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [sade.strings :as ss]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
+            [sade.strings :as ss]))
 
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
@@ -26,10 +25,9 @@
   standard-verdicts-validator
   simple-verdicts-validator
   ->simple-verdicts
-  tj-suunnittelija-verdicts-validator
   party-with-paatos-data
   valid-sijaistustieto?
-  osapuoli-path-key-mapping)
+  resolve-address-by-point)
 
 (fact "property-equals returns url-encoded data"
   (property-equals "_a_" "_b_") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_b_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
@@ -384,7 +382,7 @@
 
 (facts "KRYSP verdict with reviews"
   (let [xml (-> "resources/krysp/dev/r-verdict-review.xml" slurp xml/parse)
-        reviews (lupapalvelu.xml.krysp.review-reader/xml->reviews xml)
+        reviews (review-reader/xml->reviews xml)
         katselmus-tasks (map (partial lupapalvelu.tasks/katselmus->task {} {} {}) reviews)
         aloitus-review-task (nth katselmus-tasks 0)
         non-empty (complement clojure.string/blank?)]
@@ -506,7 +504,7 @@
     (fact "municipality" municipality => "186")
     (fact "rakennusvalvontaasianKuvaus"
       rakennusvalvontaasianKuvaus => "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto."
-      (krysp-reader/read-permit-descriptions-from-xml :R (cr/strip-xml-namespaces xml)) => (just {:kuntalupatunnus "14-0241-R 3"
+      (read-permit-descriptions-from-xml :R (cr/strip-xml-namespaces xml)) => (just {:kuntalupatunnus "14-0241-R 3"
                                                                                                   :kuvaus          "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto."}))
     (fact "vahainenPoikkeaminen" vahainenPoikkeaminen => "Poikekkaa meill\u00e4!")
     (facts "hakijat"
@@ -524,7 +522,7 @@
 (facts "Multiple features with different descriptions in the same XML file"
   (let [xml (xml/parse (slurp "resources/krysp/dev/feature-collection-with-many-featureMember-elems.xml"))]
    (fact "rakennusvalvontaasianKuvaus"
-         (set (krysp-reader/read-permit-descriptions-from-xml :R (cr/strip-xml-namespaces xml))) =>
+         (set (read-permit-descriptions-from-xml :R (cr/strip-xml-namespaces xml))) =>
          #{{:kuntalupatunnus "999-2017-11"
             :kuvaus "Kuvaus 999-2017-11"}
            {:kuntalupatunnus "999-2016-999"
@@ -612,6 +610,29 @@
 
       (fact "Property id is fetched from service"
         propertyId => "47540208780003")
+
+      (fact "There should not be drawing when location is point"
+        (:drawings info) => nil?))))
+
+(facts "Testing information parsed from verdict xml without address"
+  (against-background
+    (#'lupapalvelu.xml.krysp.reader/resolve-address-by-point anything anything) => "Testi osoite"
+    (#'lupapalvelu.xml.krysp.reader/build-address anything anything) => ""
+    (sade.env/feature? :disable-ktj-on-create) => true)
+  (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml"))
+        info (get-app-info-from-message xml "14-0241-R 3")
+        rakennuspaikka (:rakennuspaikka info)]
+
+    (let [{:keys [x y address propertyId] :as rakennuspaikka} rakennuspaikka]
+      (fact "contains all the needed keys" (every? (-> rakennuspaikka keys set) [:x :y :address :propertyId]))
+
+      (fact "x" x => #(and (instance? Double %) (= 393033.614 %)))
+      (fact "y" y => #(and (instance? Double %) (= 6707228.994 %)))
+
+      (fact "Address comes from fallback (mocked) service for x and y"
+        address => "Testi osoite")                              ; LP-366498
+
+      (fact "Property id is from xml" propertyId => "18600303560006")
 
       (fact "There should not be drawing when location is point"
         (:drawings info) => nil?))))
