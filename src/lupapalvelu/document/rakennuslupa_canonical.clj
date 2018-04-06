@@ -248,7 +248,7 @@
 (defmethod operation-canonical :hankkeen-kuvaus [& _] ;; For prev permit applications
   nil)
 
-(defmethod operation-canonical :hankkeen-kuvaus-jatkoaika [& _]
+(defmethod operation-canonical :jatkoaika-hankkeen-kuvaus [& _]
   nil)
 
 (defmethod operation-canonical :maisematyo [& _]

@@ -1319,7 +1319,7 @@
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width} ; Longest value in Helsinki production data
            rahoitus]}
 
-   {:info {:name "hankkeen-kuvaus-jatkoaika"
+   {:info {:name "jatkoaika-hankkeen-kuvaus"
            :subtype :hankkeen-kuvaus
            :approvable true
            :order 1}

@@ -761,6 +761,11 @@
            (when (integer? lainvoimainen)
              {:lainvoimainen lainvoimainen}))))
 
+(defn- jatkoaika-application? [application]
+  (let [primary-operation (get-in application [:primaryOperation :name])]
+    (or (= primary-operation "raktyo-aloit-loppuunsaat")
+        (= primary-operation "jatkoaika"))))
+
 (defn publish-verdict
   "Publishing verdict does the following:
    1. Finalize and publish verdict
@@ -772,8 +777,9 @@
    7. Create tasks (old ones will be overwritten)
    8. Generate section (for non-board verdicts)
    9. Create PDF/A for the verdict
-  10. Generate KuntaGML
-  11. TODO: Assignments?"
+  10. Update date for continuation applications
+  11. Generate KuntaGML
+  12. TODO: Assignments?"
   [{:keys [created application user organization] :as command}]
   (let [verdict                (-<>> (command->verdict command)
                                      (enrich-verdict command <> true)
@@ -816,6 +822,9 @@
                                  (:mongo-updates doc-updates)))
     (tiedonohjaus/mark-app-and-attachments-final! (:id application)
                                                   created)
+
+    (when (jatkoaika-application? application)
+      )
 
     (let [verdict-attachment (pdf/create-verdict-attachment command (assoc verdict :published created))
           verdict            (assoc verdict :verdict-attachment verdict-attachment)]
