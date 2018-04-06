@@ -42,7 +42,8 @@
   {:verdict-code                [(apply sc/enum (map name (keys shared/verdict-code-map)))]
    :date-deltas                 (->> shared/verdict-dates
                                      (map (fn [k]
-                                            [(sc/optional-key k) sc/Int]))
+                                            [k {:delta sc/Int
+                                                :unit  (sc/enum "days" "years")}]))
                                      (into {}))
    (sc/optional-key :foremen)   [(apply sc/enum (map name shared/foreman-codes))]
    (sc/optional-key :reviews)   [{:id   ssc/ObjectIdStr

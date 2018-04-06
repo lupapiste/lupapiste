@@ -168,8 +168,8 @@
 
 (defschema PateDateDelta
   (merge PateComponent
-         {(sc/optional-key :delta)   positive-integer
-          :unit                      (sc/enum :days :years)}))
+         {(sc/optional-key :delta) positive-integer
+          :unit                    (sc/enum :days :years)}))
 
 (defschema PateReference
   "Displays the referenced value. By default, :path is resolved as a
