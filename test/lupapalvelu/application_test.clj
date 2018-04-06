@@ -633,7 +633,8 @@
                           secondary-op-doc
                           hakija-r-doc
                           {:schema-info {:name "hankkeen-kuvaus" :description "vanha"}}
-                          {:schema-info {:name "rakennuspaikka"}
+                          {:schema-info {:name "rakennuspaikka"
+                                         :type :location}
                            :data {:kaavatilanne {:value "asemakaava"}}}]
         new-docs         [new-op-doc
                           secondary-op-doc
@@ -644,7 +645,8 @@
                           {:schema-info {:name "kaupunkikuvatoimenpide"}}
                           {:schema-info {:name "hakija-r"}
                            :data        {:henkilo {:henkilotiedot {:etunimi nil :sukunimi nil}}}}
-                          {:schema-info {:name "rakennuspaikka"}
+                          {:schema-info {:name "rakennuspaikka"
+                                         :type :location}
                            :data {:kaavatilanne {:value nil}}}]]
 
     (fact "new operations collection when primary operation is replaced"
@@ -675,27 +677,29 @@
 
     (fact "rakennuspaikka data persists"
       (let [old-doc-1 {:id "old-rakennuspaikka"
-                       :schema-info {:name "rakennuspaikka-ilman-ilmoitusta"}
+                       :schema-info {:name "rakennuspaikka-ilman-ilmoitusta"
+                                     :type :location}
                        :data {:kiinteisto {:maaraalaTunnus {:value  "0000"}}
                               :hallintaperuste {:value "oma"}
-                              :kaavanaste {:value nil}
                               :kaavatilanne {:value "asemakaava"}}}
             old-doc-2 {:id "old-rakennuspaikka"
-                       :schema-info {:name "rakennuspaikka"}
+                       :schema-info {:name "rakennuspaikka"
+                                     :type :location}
                        :data {:kiinteisto {:maaraalaTunnus {:value  "0000"}}
                               :hallintaperuste {:value "oma"}
-                              :kaavanaste {:value nil}
                               :kaavatilanne {:value "asemakaava"}
                               :hankkeestaIlmoitettu {:hankkeestaIlmoitettuPvm {:value "05.04.2018"}}}}
             new-doc-1 {:id "new-rakennuspaikka"
-                      :schema-info {:name "rakennuspaikka"}
+                      :schema-info {:name "rakennuspaikka"
+                                    :type :location}
                       :data {:kiinteisto {:maaraalaTunnus {:value nil}}
                              :hallintaperuste {:value nil}
                              :kaavanaste {:value nil}
                              :kaavatilanne {:value nil}
                              :hankkeestaIlmoitettu {:hankkeestaIlmoitettuPvm {:value nil}}}}
             new-doc-2 {:id "new-rakennuspaikka"
-                       :schema-info {:name "rakennuspaikka-ilman-ilmoitusta"}
+                       :schema-info {:name "rakennuspaikka-ilman-ilmoitusta"
+                                     :type :location}
                        :data {:kiinteisto {:maaraalaTunnus {:value nil}}
                               :hallintaperuste {:value nil}
                               :kaavanaste {:value nil}
@@ -703,7 +707,8 @@
 
         (copy-rakennuspaikka-data [hakija-r-doc old-doc-1] [hakija-r-doc new-doc-1])
         => [{:id "new-rakennuspaikka"
-            :schema-info {:name "rakennuspaikka"}
+            :schema-info {:name "rakennuspaikka"
+                          :type :location}
             :data {:kiinteisto {:maaraalaTunnus {:value  "0000"}}
                    :hallintaperuste {:value "oma"}
                    :kaavanaste {:value nil}
@@ -713,7 +718,8 @@
 
         (copy-rakennuspaikka-data [old-doc-2] [new-doc-2])
         => [{:id "new-rakennuspaikka"
-             :schema-info {:name "rakennuspaikka-ilman-ilmoitusta"}
+             :schema-info {:name "rakennuspaikka-ilman-ilmoitusta"
+                           :type :location}
              :data {:kiinteisto {:maaraalaTunnus {:value  "0000"}}
                     :hallintaperuste {:value "oma"}
                     :kaavanaste {:value nil}
@@ -726,7 +732,8 @@
       (let [merged-docs (copy-docs-from-old-op-to-new {:documents old-docs} org (:id old-op) new-ops new-docs)
             expected    [new-op-doc
                          secondary-op-doc
-                         {:schema-info {:name "rakennuspaikka"}
+                         {:schema-info {:name "rakennuspaikka"
+                                        :type :location}
                           :data {:kaavatilanne {:value "asemakaava"}}}
                          hakija-r-doc
                          {:schema-info {:name "paatoksen-toimitus-rakval"}}

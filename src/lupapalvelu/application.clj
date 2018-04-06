@@ -717,14 +717,13 @@
       (filter #(= doc-name (-> % :schema-info :name)) new-op-docs))))
 
 (defn- copy-rakennuspaikka-data [old-docs new-docs]
-  (let [rakennuspaikka-docnames #{"rakennuspaikka" "rakennuspaikka-ilman-ilmoitusta"}
-        rakennuspaikka-filter   #(-> % :schema-info :name rakennuspaikka-docnames)
+  (let [rakennuspaikka-filter   #(and (-> % :schema-info :type (= :location))
+                                      (-> % :schema-info :repeating (not)))
         old-rakennuspaikka      (->> old-docs (filter rakennuspaikka-filter) (first))
         new-rakennuspaikka      (->> new-docs (filter rakennuspaikka-filter) (first))
-        old-name                (-> old-rakennuspaikka :schema-info :name)
-        new-name                (-> new-rakennuspaikka :schema-info :name)
-        rakennuspaikka-data     (when (and old-rakennuspaikka new-rakennuspaikka (not= old-name new-name))
-                                  (-> old-rakennuspaikka :data (dissoc :hankkeestaIlmoitettu)))
+        new-data-keys           (-> new-rakennuspaikka :data (keys))
+        rakennuspaikka-data     (when (and old-rakennuspaikka new-rakennuspaikka)
+                                  (-> old-rakennuspaikka :data (select-keys new-data-keys)))
         updated-doc             (if rakennuspaikka-data
                                   (assoc new-rakennuspaikka :data (merge (:data new-rakennuspaikka) rakennuspaikka-data))
                                   new-rakennuspaikka)]
@@ -825,10 +824,10 @@
         attachments-for-new-op (make-attachments created new-op @organization app-state tos-function)
         updated-attachments    (copy-attachments-from-old-op-to-new application old-op new-op attachments-for-new-op)
         update-query           (build-replace-operation-query application
-                                                             primary-op?
-                                                             new-op
-                                                             updated-docs
-                                                             updated-attachments)]
+                                                              primary-op?
+                                                              new-op
+                                                              updated-docs
+                                                              updated-attachments)]
     (action/update-application command {$set update-query})
     (ok)))
 
