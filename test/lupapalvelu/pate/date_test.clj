@@ -1,8 +1,8 @@
 (ns lupapalvelu.pate.date-test
-  (:require [midje.sweet :refer :all]
+  (:require [clj-time.core :as time]
             [lupapalvelu.pate.date :refer :all]
-            [sade.util :as util]
-            [clj-time.core :as time]))
+            [midje.sweet :refer :all]
+            [sade.util :as util]))
 
 
 (defn work-day
@@ -76,3 +76,10 @@
   (work-day "Regular Monday" "21.8.2017" "21.8.2017")
   (work-day "Saturday" "26.8.2017" "28.8.2017")
   (work-day "Sunday" "27.8.2017" "28.8.2017"))
+
+(defn ts[datestring]
+  (+ (* 1000 3600 12) (util/to-millis-from-local-date-string datestring)))
+
+(facts "Parse and forward"
+  (parse-and-forward (ts "29.3.2018") 3 :days)
+  => (ts "3.4.2018"))

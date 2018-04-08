@@ -41,7 +41,10 @@
   "True if the given date is a Finnish public holiday (excluding known
   weekend dates)."
   [date]
-  (let [year (time/year date)
+  (let [date (time/local-date (time/year date)
+                              (time/month date)
+                              (time/day date))
+        year (time/year date)
         e    (easter year)]
     (contains? #{(time/local-date year 1 1)     ;; New Year
                  (time/local-date year 1 6)     ;; Epiphany

@@ -757,9 +757,10 @@
   (let [buildings                (verdict-buildings options)
         {:keys [category
                 schema-version]} verdict
-        opts                  (assoc options
-                                     :dictionary (:dictionary (shared/verdict-schema category
-                                                                                     schema-version)))]
+        opts                     (assoc options
+                                        :dictionary
+                                        (:dictionary (shared/verdict-schema category
+                                                                            schema-version)))]
     (assoc opts
            :application-id (:id application)
            :property-id (property-id application)
