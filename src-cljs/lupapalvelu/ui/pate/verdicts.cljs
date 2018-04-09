@@ -12,7 +12,7 @@
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]
-            [sade.shared_util :as util]))
+            [sade.shared-util :as util]))
 
 (defonce args (atom {}))
 
@@ -183,8 +183,9 @@
     (if (empty? templates)
       [:div.pate-note (path/loc :pate.no-verdict-templates)]
       (let [items (map #(set/rename-keys % {:id :value :name :text})
-                       templates)]
-        (when-not (rum/react template*)
+                       templates)
+            selected (rum/react template*)]
+        (when-not (util/find-by-key :value (:value selected) items)
           (common/reset-if-needed! template*
                                    (:value (or (util/find-by-key :default? true items)
                                                (first items)))))

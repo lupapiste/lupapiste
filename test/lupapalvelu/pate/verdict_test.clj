@@ -975,14 +975,20 @@
         (fact "Valid according to schema"
           (sc/check schemas/PateVerdict v) => nil)
         (fact "archive info (without lainvoimainen)"
-          (archive-info v)
-          => {:verdict-date  8765432
-              :verdict-giver "The Board"})
+          (let [archive (archive-info v)]
+            archive => {:verdict-date  8765432
+                        :verdict-giver "The Board"}
+            (fact "Archive schema validation"
+              (sc/check schemas/PateVerdict (assoc v :archive archive))
+              => nil)))
         (fact "archive info (with lainvoimainen)"
-          (archive-info (assoc-in v [:data :lainvoimainen] 99999))
-          => {:verdict-date  8765432
-              :lainvoimainen 99999
-              :verdict-giver "The Board"})))
+          (let [archive (archive-info (assoc-in v [:data :lainvoimainen] 99999))]
+           archive => {:verdict-date  8765432
+                       :lainvoimainen 99999
+                       :verdict-giver "The Board"}
+           (fact "Archive schema validation"
+             (sc/check schemas/PateVerdict (assoc v :archive archive))
+             => nil)))))
     (fact "Authority verdict"
       (let [v (assoc-in verdict [:template :giver] "viranhaltija")]
         (fact "Valid according to schema"

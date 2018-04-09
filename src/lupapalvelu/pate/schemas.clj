@@ -90,9 +90,12 @@
           :schema-version               sc/Int
           :data                         sc/Any
           (sc/optional-key :references) PatePublishedSettings
-          :template                     {:inclusions [sc/Keyword]
+          :template                     {:inclusions              [sc/Keyword]
                                          (sc/optional-key :giver) (sc/enum "viranhaltija"
-                                                                           "lautakunta")}}))
+                                                                           "lautakunta")}
+          (sc/optional-key :archive)    {:verdict-date                    ssc/Timestamp
+                                         (sc/optional-key :lainvoimainen) ssc/Timestamp
+                                         :verdict-giver                   sc/Str}}))
 
 ;; Schema utils
 

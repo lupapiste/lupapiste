@@ -26,7 +26,7 @@
                       (reset! state/settings-info
                               {:info  {:modified (:modified settings)
                                        :category category
-                                       :filled? filled}
+                                       :filled? (boolean filled)}
                                :_meta {:updated  settings-updater
                                        :editing? true
                                        :enabled? (state/auth? :save-verdict-template-settings-value)}})))
