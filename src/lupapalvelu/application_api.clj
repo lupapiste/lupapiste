@@ -555,7 +555,8 @@
                       {:required [:application/edit-operation]}]
    :input-validators [operation-validator
                       (partial action/non-blank-parameters [:id :opId :operation])]
-   :pre-checks       [replace-operation-allowed-pre-check]}
+   :pre-checks       [replace-operation-allowed-pre-check]
+   :feature          :replace-operation}
   [command]
   (app/replace-operation command opId operation))
 
