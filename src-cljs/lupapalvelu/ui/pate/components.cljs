@@ -13,13 +13,16 @@
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
-(defn- state-change-callback
+(defn- change-state
   "Updates state according to value."
+  [{:keys [state path] :as options} value]
+  (when (common/reset-if-needed! (path/state path state)
+                                 value)
+    (path/meta-updated options)))
+
+(defn- state-change-callback
   [{:keys [state path] :as options}]
-  (fn [value]
-    (when (common/reset-if-needed! (path/state path state)
-                                   value)
-      (path/meta-updated options))))
+  (partial change-state options))
 
 (defn show-label? [{label? :label?} wrap-label?]
   (and wrap-label? (not (false? label?))))
@@ -354,13 +357,21 @@
              wrap-label?))
 
 (rum/defc pate-date < rum/reactive
+  "Pate dates are always timestamps (ms from epoch). Since date-edit
+  component handles Finnish date strings, we must do some transforming
+  back and forth. Timestamp is marked in the noon of the date."
   [{:keys [path state] :as options} & [wrap-label?]]
   (label-wrap-if-needed
    options
    {:component (components/date-edit
-                (path/react path state)
+                (js/util.finnishDate (path/react path state))
                 (pate-attr options
-                           {:callback (state-change-callback options)
+                           {:callback (fn [datestring]
+                                        (change-state options
+                                                      (some-> datestring
+                                                              (js/util.toMoment "fi")
+                                                              .valueOf
+                                                              (+ (* 1000 3600 12)))))
                             :disabled (path/disabled? options)}))
     :wrap-label? wrap-label?}))
 

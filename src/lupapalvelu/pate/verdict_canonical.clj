@@ -48,13 +48,13 @@
    :vaadittuTyonjohtajatieto (map vaadittu-tyonjohtaja-canonical (:foremen data))})
 
 (defn- paivamaarat-type-canonical [lang {data :data :as verdict}]
-  {:aloitettavaPvm (util/to-xml-date-from-string (:aloitettava data))
-   :lainvoimainenPvm (util/to-xml-date-from-string (:lainvoimainen data))
-   :voimassaHetkiPvm (util/to-xml-date-from-string (:voimassa data))
+  {:aloitettavaPvm (util/to-xml-date (:aloitettava data))
+   :lainvoimainenPvm (util/to-xml-date (:lainvoimainen data))
+   :voimassaHetkiPvm (util/to-xml-date (:voimassa data))
    :raukeamisPvm nil
-   :antoPvm (util/to-xml-date-from-string (:anto data))
-   :viimeinenValitusPvm (util/to-xml-date-from-string (:valitus data))
-   :julkipanoPvm (util/to-xml-date-from-string (:julkipano data))})
+   :antoPvm (util/to-xml-date (:anto data))
+   :viimeinenValitusPvm (util/to-xml-date (:valitus data))
+   :julkipanoPvm (util/to-xml-date (:julkipano data))})
 
 (defn- paatoksentekija [lang {{handler :handler} :data
                               {giver :giver} :template :as verdict}]
@@ -72,7 +72,7 @@
   {:paatos (:verdict-text data)
    :paatoskoodi (pate-shared/verdict-code-map (or (keyword (:verdict-code data)) :ei-tiedossa))
    :paatoksentekija (paatoksentekija lang verdict)
-   :paatospvm (util/to-xml-date-from-string (:verdict-date data))
+   :paatospvm (util/to-xml-date (:verdict-date data))
    :pykala (:verdict-section data)})
 
 (defn verdict-canonical [application lang verdict]

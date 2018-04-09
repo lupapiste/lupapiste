@@ -177,7 +177,7 @@
   [_ {:keys [schema state path] :as options}]
   (pate-components/sandwich (assoc schema
                                    :class :sandwich__view)
-                            [:span (path/value path state)]))
+                            [:span (js/util.finnishDate (path/value path state))]))
 
 (defmethod view-component :select
   [_ {:keys [schema state path] :as options}]

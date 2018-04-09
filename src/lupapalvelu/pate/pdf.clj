@@ -13,6 +13,7 @@
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.markup :as markup]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
@@ -485,8 +486,19 @@
   (get-in (domain/get-document-by-name application (name doc-name))
           (cons :data (pathify kw-path))))
 
-(defn dict-value [verdict kw-path]
-  (get-in verdict (cons :data (pathify kw-path))))
+(defn dict-value [{:keys [dictionary verdict]} kw-path]
+  (let [path             (pathify kw-path)
+        value            (get-in verdict (cons :data path))
+        {schema :schema} (shared/dict-resolve path dictionary)]
+    (cond
+      (and (:phrase-text schema) (ss/not-blank? value))
+      (list [:div.markup (markup/markup->tags value)])
+
+      (and (:date schema) (integer? value))
+      (date/finnish-date value)
+
+      :else
+      value)))
 
 (defn add-unit
   "Result is nil for blank value."
@@ -500,12 +512,12 @@
       :section (str "\u00a7" v)
       :eur     (str v "\u20ac"))))
 
-(defn complexity [lang verdict]
+(defn complexity [{lang :lang :as options}]
   (not-empty (filter not-empty
                      [(loc-non-blank lang
                                      :pate.complexity
-                                     (dict-value verdict :complexity))
-                      (markup/markup->tags (dict-value verdict :complexity-text))])))
+                                     (dict-value options :complexity))
+                      (dict-value options :complexity-text)])))
 
 (defn property-id [application]
   (join-non-blanks "-"
@@ -558,13 +570,13 @@
                  (if (= (:role a) head-loc) -1 1))))))
 
 (defn resolve-source
-  [{:keys [application verdict] :as data} {doc-source  :doc
-                                           dict-source :dict
-                                           :as         source}]
+  [{:keys [application] :as data} {doc-source  :doc
+                                   dict-source :dict
+                                   :as         source}]
   (cond
     doc-source  (apply doc-value (cons application doc-source))
-    dict-source (apply dict-value (cons verdict [dict-source]))
-    :else       (when source (source data))))
+    dict-source (dict-value data dict-source)
+    :else       (get data source)))
 
 (defn resolve-class [all selected & extra]
   (->> (util/intersection-as-kw all (flatten [selected]))
@@ -573,7 +585,6 @@
 
 (defn resolve-cell [{lang :lang :as data}
                     source-value
-                    markup?
                     {:keys [text width unit loc-prefix styles] :as cell}]
   (let [path (some-> cell :path pathify)
         class (resolve-class cell-styles
@@ -585,19 +596,14 @@
                                  (get-in source-value
                                          [::styles ::cell])))
         value (or text (get-in source-value path source-value))]
-    (if markup?
-      [:div.cell
-       {:class (or (not-empty class) [:markup])}
-       (markup/markup->tags value)]
-     [:div.cell {:class class}
-      (cond->> value
-        loc-prefix (i18n/localize lang loc-prefix)
-        unit (add-unit lang unit))])))
+    [:div.cell {:class class}
+     (cond->> value
+       loc-prefix (i18n/localize lang loc-prefix)
+       unit (add-unit lang unit))]))
 
 (defn entry-row
   [left-width {:keys [lang dictionary] :as data} [{:keys [loc loc-many source styles]} & cells]]
   (let [source-value (util/pcond-> (resolve-source data source) string? ss/trim)
-        markup?    (boolean (some->> source :dict (get dictionary) :phrase-text ))
         multiple?    (and (sequential? source-value)
                           (> (count source-value) 1))]
     (when (or (nil? source) (not-empty source-value))
@@ -620,12 +626,11 @@
                         (vector source-value))]
                 [:div.row
                  {:class (get-in v [::styles :row])}
-                 (map (partial resolve-cell data v markup?)
+                 (map (partial resolve-cell data v)
                       (if (empty? cells) [{}] cells))])]]
             (resolve-cell data
                           (util/pcond-> source-value
                                         sequential? first)
-                          markup?
                           (first cells)))]]))))
 
 (defn content
@@ -659,12 +664,12 @@
            (cons {:text operation} (rest infos))
            infos))))
 
-(defn verdict-buildings [{:keys [application verdict]}]
+(defn verdict-buildings [{:keys [application] :as options}]
   (let [buildings (reduce-kv (fn [acc k {flag? :show-building :as v}]
                                (cond-> acc
                                  flag? (assoc k v)))
                              {}
-                             (dict-value verdict :buildings))]
+                             (dict-value options :buildings))]
     (->> (map (comp keyword :id) (operation-infos application))
          (map #(get buildings %))
          (remove nil?))))
@@ -674,9 +679,7 @@
   (letfn [(park [kw]
             (hash-map :text (i18n/localize lang :pate-buildings.info kw)
                       :amount (kw building)))]
-    (-<>> [:kiinteiston-autopaikat :rakennetut-autopaikat
-           #_:rakennettavat-autopaikat #_:autopaikkoja-enintaan
-           #_:autopaikkoja-vahintaan #_:ulkopuoliset-autopaikat]
+    (-<>> [:kiinteiston-autopaikat :rakennetut-autopaikat]
           (map park)
           (sort-by :text)
           vec
@@ -695,53 +698,53 @@
     (when (seq rows)
       [:div.section rows])))
 
-(defn verdict-attachments [lang verdict]
-  (->> (dict-value verdict :attachments)
+(defn verdict-attachments [{lang :lang :as options}]
+  (->> (dict-value options :attachments)
        (map (fn [{:keys [type-group type-id amount]}]
               {:text (i18n/localize lang :attachmentType type-group type-id)
                :amount amount}))
        (sort-by :text)))
 
-(defn references [lang {:keys [references] :as verdict} kw]
-  (let [ids (dict-value verdict kw)]
-    (->> (get references kw)
+(defn references [{:keys [lang verdict] :as options} kw]
+  (let [ids (dict-value options kw)]
+    (->> (get-in verdict [references kw])
          (filter #(util/includes-as-kw? ids (:id %)))
          (map #(get-in % [:name (keyword lang)])))))
 
-(defn conditions [verdict]
-  (->> (dict-value verdict :conditions)
+(defn conditions [options]
+  (->> (dict-value options :conditions)
        (map (fn [[k v]]
               {:id   (name k)
                :text (:condition v)}))
        (sort-by :id)
        (map (comp markup/markup->tags :text))))
 
-(defn statements [lang verdict]
-  (->> (dict-value verdict :statements)
+(defn statements [{lang :lang :as options}]
+  (->> (dict-value options :statements)
        (filter :given)
        (map (fn [{:keys [given text status]}]
               (join-non-blanks ", "
                                text
-                               (util/to-finnish-date given)
+                               (date/finnish-date given)
                                (i18n/localize lang :statement status))))
        not-empty))
 
-(defn collateral [lang verdict]
-  (when (dict-value verdict :collateral-flag)
+(defn collateral [{:keys [lang] :as options}]
+  (when (dict-value options :collateral-flag)
     (join-non-blanks ", "
-                     [(add-unit lang :eur (dict-value verdict :collateral))
+                     [(add-unit lang :eur (dict-value options :collateral))
                       (loc-non-blank lang :pate.collateral-type
-                                     (dict-value verdict :collateral-type))
-                      (dict-value verdict :collateral-date)])))
+                                     (dict-value options :collateral-type))
+                      (dict-value options :collateral-date)])))
 
 (defn organization-name [lang {organization :organization}]
   (org/get-organization-name organization lang))
 
 (defn handler
   "Handler with title (if given)"
-  [verdict]
+  [options]
   (->> [:handler-title :handler]
-       (map (partial dict-value verdict))
+       (map (partial dict-value options))
        (map ss/trim)
        (remove ss/blank?)
        (ss/join " ")))
@@ -751,21 +754,24 @@
   to category-specific verdict-body methods and corresponding
   pdf-layouts whether every property is displayed in the pdf or not."
   [{:keys [lang application verdict] :as options}]
-  (let [buildings                         (verdict-buildings options)
-        {:keys [category schema-version]} verdict]
-  (assoc options
-         :dictionary (:dictionary (shared/verdict-schema category
-                                                         schema-version))
-         :application-id (:id application)
-         :property-id (property-id application)
-         :applicants (->> (applicants options)
-                          (map #(format "%s\n%s"
+  (let [buildings                (verdict-buildings options)
+        {:keys [category
+                schema-version]} verdict
+        opts                     (assoc options
+                                        :dictionary
+                                        (:dictionary (shared/verdict-schema category
+                                                                            schema-version)))]
+    (assoc opts
+           :application-id (:id application)
+           :property-id (property-id application)
+           :applicants (->> (applicants opts)
+                            (map #(format "%s\n%s"
                                         (:name %) (:address %)))
                           (interpose "\n"))
-         :operations (assoc-in (operations options)
+         :operations (assoc-in (operations opts)
                                [0 ::styles :text] :bold)
-         :complexity (complexity lang verdict)
-         :designers (designers options)
+         :complexity (complexity opts)
+         :designers (designers opts)
          :primary (primary-operation-data application)
          :paloluokka (->> buildings
                           (map :paloluokka)
@@ -777,24 +783,24 @@
                         (interpose {:text    "" :amount ""
                                     ::styles {:row :pad-before}})
                         flatten)
-         :attachments (verdict-attachments lang verdict)
-         :reviews (references lang verdict :reviews)
-         :plans   (references lang verdict :plans)
-         :conditions (conditions verdict)
-         :statements (statements lang verdict)
-         :collateral (collateral lang verdict)
+         :attachments (verdict-attachments opts)
+         :reviews (references opts :reviews)
+         :plans   (references opts :plans)
+         :conditions (conditions opts)
+         :statements (statements opts)
+         :collateral (collateral opts)
          :organization (organization-name lang application)
          :muutoksenhaku (loc-fill-non-blank lang
                                             :pdf.not-later-than
-                                            (dict-value verdict
+                                            (dict-value opts
                                                         :muutoksenhaku))
          :voimassaolo (loc-fill-non-blank lang
                                           :pdf.voimassa.text
-                                          (dict-value verdict
+                                          (dict-value opts
                                                       :aloitettava)
-                                          (dict-value verdict
+                                          (dict-value opts
                                                       :voimassa))
-         :handler (handler verdict))))
+         :handler (handler opts))))
 
 (defn verdict-body [{verdict :verdict :as options}]
   (->> verdict
@@ -901,5 +907,5 @@
       (assoc pdf :filename (i18n/localize-and-fill (language verdict)
                                                    :pdf.draft
                                                    (:id application)
-                                                   (util/to-finnish-date created)))
+                                                   (date/finnish-date created)))
       {:error :pate.pdf-verdict-error})))

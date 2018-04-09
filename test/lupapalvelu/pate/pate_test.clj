@@ -113,6 +113,8 @@
                  :grid {:columns 1
                         :rows    [[{:dict :attachments}]]}}]})
 
+(def timestamp util/to-millis-from-local-date-string)
+
 (facts "Test template is valid"
   (sc/validate shared-schemas/PateVerdictTemplate test-template)
   => test-template)
@@ -206,11 +208,8 @@
     (validate-path-value [:giver] nil) => nil
     (validate-path-value [:giver] "") => nil)
   (facts "Date"
-    (validate-path-value [:date] "13.9.2017") => nil
-    (validate-path-value [:date] "13.09.2017") => nil
-    (validate-path-value [:date] "03.9.2017") => nil
-    (validate-path-value [:date] "03.09.2017") => nil
-    (validate-path-value [:date] "31.9.2017") => :error.invalid-value
+    (validate-path-value [:date] "13.9.2017") => :error.invalid-value
+    (validate-path-value [:date] (timestamp "13.9.2017")) => nil
     (validate-path-value [:date] "bad") => :error.invalid-value
     (validate-path-value [:date] "") => nil
     (validate-path-value [:date] nil) => nil)
@@ -229,11 +228,11 @@
     (validate-path-value [:loop] :hii) => :error.invalid-value-path
     (validate-path-value [:loop :some-index :delta3] 8)
     => nil
-    (validate-path-value [:loop :date2] "25.9.2017")
+    (validate-path-value [:loop :date2] (timestamp "25.9.2017"))
     => :error.invalid-value-path
-    (validate-path-value [:loop :i :date2] "25.9.2017")
+    (validate-path-value [:loop :i :date2] (timestamp "25.9.2017"))
     => nil
-    (validate-path-value [:date2] "25.9.2017")
+    (validate-path-value [:date2] (timestamp "25.9.2017"))
     => :error.invalid-value-path
     (validate-path-value [:loop :innerloop] :foo)
     => :error.invalid-value-path
@@ -242,14 +241,14 @@
     (validate-path-value [:loop :i :innerloop :j] :foo)
     => :error.invalid-value-path
     ;; Dict :date refers to docgen checkbox within inner-loop.
-    (validate-path-value [:loop :i :inner-loop :j :date] "25.9.2017")
+    (validate-path-value [:loop :i :inner-loop :j :date] (timestamp "25.9.2017"))
     => :error.invalid-value
     (validate-path-value [:loop :i :inner-loop :j :date] false)
     => nil
     ;; Top-level date is still docgen date.
     (validate-path-value [:date] false)
     => :error.invalid-value
-    (validate-path-value [:date] "25.9.2017")
+    (validate-path-value [:date] (timestamp "25.9.2017"))
     => nil)
   (facts "Dynamic repeating"
     (validate-path-value [:add-item] true)
@@ -444,15 +443,15 @@
     (validate-and-process-value [:giver] "" {})
     => (ok [:giver] ""))
   (facts "Date"
-    (validate-and-process-value [:date] "13.9.2017" {})
-    => (ok [:date] "13.9.2017")
-    (validate-and-process-value [:date] "13.09.2017" {})
-    => (ok [:date] "13.09.2017")
-    (validate-and-process-value [:date] "03.9.2017" {})
-    => (ok [:date] "03.9.2017")
-    (validate-and-process-value [:date] "03.09.2017" {})
-    => (ok [:date] "03.09.2017")
-    (validate-and-process-value [:date] "31.9.2017" {})
+    (validate-and-process-value [:date] (timestamp "13.9.2017") {})
+    => (ok [:date] (timestamp "13.9.2017"))
+    (validate-and-process-value [:date] (timestamp "13.09.2017") {})
+    => (ok [:date] (timestamp "13.09.2017"))
+    (validate-and-process-value [:date] (timestamp "03.9.2017") {})
+    => (ok [:date] (timestamp "03.9.2017"))
+    (validate-and-process-value [:date] (timestamp "03.09.2017") {})
+    => (ok [:date] (timestamp "03.09.2017"))
+    (validate-and-process-value [:date] "bad" {})
     => (err [:date] :error.invalid-value)
     (validate-and-process-value [:date] "bad" {})
     => (err [:date] :error.invalid-value)
@@ -494,11 +493,11 @@
     (validate-and-process-value [:loop :some-index :delta3]
                                 8 {})
     => (err :error.invalid-value-path)
-    (validate-and-process-value [:loop :date2] "25.9.2017" {})
+    (validate-and-process-value [:loop :date2] (timestamp "25.9.2017") {})
     => (err :error.invalid-value-path)
-    (validate-and-process-value [:loop :i :date2] "25.9.2017" {:loop {:i {}}})
-    => (ok [:loop :i :date2] "25.9.2017")
-    (validate-and-process-value [:date2] "25.9.2017" {})
+    (validate-and-process-value [:loop :i :date2] (timestamp "25.9.2017") {:loop {:i {}}})
+    => (ok [:loop :i :date2] (timestamp "25.9.2017"))
+    (validate-and-process-value [:date2] (timestamp "25.9.2017") {})
     => (err :error.invalid-value-path)
     (validate-and-process-value [:loop :inner-loop] :foo {:loop {:inner-loop {}}})
     => (err :error.invalid-value-path)
@@ -508,7 +507,7 @@
                                 {:loop {:i {:inner-loop {:j {}}}}})
     => (err :error.invalid-value-path)
     ;; Dict :date refers to docgen checkbox within inner-loop.
-    (validate-and-process-value [:loop :i :inner-loop :j :date] "25.9.2017"
+    (validate-and-process-value [:loop :i :inner-loop :j :date] (timestamp "25.9.2017")
                                 {:loop {:i {:inner-loop {:j {}}}}})
     => (err [:loop :i :inner-loop :j :date] :error.invalid-value)
     (validate-and-process-value [:loop :i :inner-loop :j :date] true
@@ -520,8 +519,8 @@
     ;; Top-level date is still docgen date.
     (validate-and-process-value [:date] false {})
     => (err [:date] :error.invalid-value)
-    (validate-and-process-value [:date] "25.9.2017" {})
-    => (ok [:date] "25.9.2017"))
+    (validate-and-process-value [:date] (timestamp "25.9.2017") {})
+    => (ok [:date] (timestamp "25.9.2017")))
   (facts "Dynamic repeating"
     (facts "Subpaths"
       (shared/repeating-subpath :dynamic [:dynamic] (:dictionary test-template))
@@ -590,3 +589,15 @@
         => (err :error.invalid-value-path)
         (validate-and-process-value [:dynamic :id :add-sub] true {:dynamic {}})
         => (err :error.invalid-value-path)))))
+
+(fact "parse-int"
+  (schemas/parse-int 88) => 88
+  (schemas/parse-int "88") => 88
+  (schemas/parse-int "  88  ") => 88
+  (schemas/parse-int " -88 ") => -88
+  (schemas/parse-int "  ") => 0
+  (schemas/parse-int 4.5) => nil
+  (schemas/parse-int "foo") => nil
+  (schemas/parse-int false) => nil
+  (schemas/parse-int true) => nil
+  (schemas/parse-int :yeah) => nil)

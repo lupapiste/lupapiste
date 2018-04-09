@@ -5,19 +5,22 @@
             [midje.util :refer [testable-privates]]
             [sade.util :as util]))
 
+(defn timestamp [date]
+  (+ (* 1000 3600 12) (util/to-millis-from-local-date-string date)))
+
 (def verdict {:id         "1a156dd40e40adc8ee064463"
-              :data       {:voimassa                "23.11.2023"
+              :data       {:voimassa                (timestamp "23.11.2023")
                            :appeal                  "muutoksenhakuohje - teksti"
-                           :julkipano               "24.11.2017"
+                           :julkipano               (timestamp "24.11.2017")
                            :bulletin-op-description "julkipano - teksti"
                            :purpose                 "k\u00e4ytt\u00f6tarkoitus"
                            :verdict-text            "p\u00e4\u00e4t\u00f6s - teksti"
-                           :anto                    "20.11.2017"
+                           :anto                    (timestamp "20.11.2017")
                            :complexity              "small"
                            :plans                   ["5a156ddf0e40adc8ee064464"
                                                      "6a156ddf0e40adc8ee064464"]
-                           :aloitettava             "23.11.2022"
-                           :valitus                 "27.12.2017"
+                           :aloitettava             (timestamp "23.11.2022")
+                           :valitus                 (timestamp "27.12.2017")
                            :foremen                 ["erityis-tj"
                                                      "iv-tj"
                                                      "vastaava-tj"
@@ -32,10 +35,10 @@
                                                      "6a156dd40e40adc8ee064463"]
                            :foremen-included        true
                            :neighbors               ""
-                           :lainvoimainen           "27.11.2017"
+                           :lainvoimainen           (timestamp "27.11.2017")
                            :reviews-included        true
                            :statements              ""
-                           :verdict-date            "23.11.2017"
+                           :verdict-date            (timestamp "23.11.2017")
                            :automatic-verdict-dates true
                            :handler                 "Pate Paattaja"
                            :verdict-section         "99"
@@ -83,16 +86,16 @@
                                                     :role      "authority"}
                                    :fileId         "5ab234149997d70535b952b6"}})
 
-(def p-verdict {:data     {:voimassa              "25.2.2020"
+(def p-verdict {:data     {:voimassa              (timestamp "25.2.2020")
                            :appeal                ""
-                           :julkipano             "22.2.2018"
+                           :julkipano             (timestamp "22.2.2018")
                            :bulletinOpDescription "Hanke on todella vaativa"
-                           :verdict-date          "21.2.2018"
+                           :verdict-date          (timestamp "21.2.2018")
                            :purpose               ""
                            :verdict-section       "9"
                            :verdict-text          "Annettu"
-                           :muutoksenhaku         "24.2.2018"
-                           :anto                  "23.2.2018"
+                           :muutoksenhaku         (timestamp "24.2.2018")
+                           :anto                  (timestamp "23.2.2018")
                            :complexity            "medium"
                            :attachments
                            ({:type-group :paatoksenteko, :type-id :paatos, :amount 6}

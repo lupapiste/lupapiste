@@ -1,6 +1,7 @@
 (ns lupapalvelu.pate.date
   "Date handling utilities. Limited to Finnish time zone and formats."
-  (:require [clj-time.core :as time]
+  (:require [clj-time.coerce :as timec]
+            [clj-time.core :as time]
             [clj-time.format :as timef]))
 
 (defn- divide
@@ -40,7 +41,10 @@
   "True if the given date is a Finnish public holiday (excluding known
   weekend dates)."
   [date]
-  (let [year (time/year date)
+  (let [date (time/local-date (time/year date)
+                              (time/month date)
+                              (time/day date))
+        year (time/year date)
         e    (easter year)]
     (contains? #{(time/local-date year 1 1)     ;; New Year
                  (time/local-date year 1 6)     ;; Epiphany
@@ -53,7 +57,7 @@
                  (time/local-date year 12 24)   ;; Christmas eve
                  (time/local-date year 12 25)   ;; Christmas
                  (time/local-date year 12 26)   ;; Boxing Day
-      } date)))
+                 } date)))
 
 (defn forward-to-work-day
   "Forwards date to the next work day, if needed."
@@ -77,17 +81,26 @@
   (try (timef/parse-local-date finnish-formatter s)
        (catch Exception _ nil)))
 
-(defn finnish-date [date]
-  (timef/unparse-local-date finnish-formatter date))
+(defn finnish-date
+  "Returns the given date as a Finnish date format string. The date is
+  in UTC. The argument can be either timestamp (ms from epoch),
+  LocalDate, DateTime or Finnish date string (just in case)."
+  [date]
+  (some->> (cond
+             (string? date) (some-> date parse-finnish-date timec/to-long)
+             (instance? org.joda.time.LocalDate date) (timec/to-long date)
+             (instance? org.joda.time.DateTime date) (timec/to-long date)
+             (integer? date) date)
+           timec/from-long
+           (timef/unparse finnish-formatter)))
 
 (defn parse-and-forward
-  "Parses s and forwards it for n days or years depending on the
-  unit (:days or :years). The result is always work day as a Finnish
-  date (string)"
-  [s n unit]
-  (some-> (parse-finnish-date s)
+  "'Parses' UTC timestamp and forwards it for n days or years depending on the
+  unit (:days or :years). The result is always an UTC timestamp."
+  [ts n unit]
+  (some-> (timec/from-long ts)
           (time/plus ((if (= unit :days)
                         time/days
                         time/years) n))
           forward-to-work-day
-          finnish-date))
+          timec/to-long))

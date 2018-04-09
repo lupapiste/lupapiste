@@ -56,7 +56,7 @@
                  :path [:automatic-verdict-dates] :value true) => no-errors?)
       (fact "Verdict date"
         (command sonja :edit-pate-verdict :id app-id :verdict-id verdict-id
-                 :path [:verdict-date] :value (util/to-finnish-date (core/now))) => no-errors?)
+                 :path [:verdict-date] :value (core/now)) => no-errors?)
       (fact "Verdict code"
         (command sonja :edit-pate-verdict :id app-id :verdict-id verdict-id
                  :path [:verdict-code] :value "hyvaksytty") => no-errors?)

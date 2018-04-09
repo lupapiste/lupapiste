@@ -1,6 +1,7 @@
 (ns lupapalvelu.pate.verdict-test
   (:require [clj-time.coerce :as time-coerce]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
@@ -92,15 +93,67 @@
 
     (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0)))
 
-(facts "update automatic dates"                             ; TODO test "update-automatic-verdict-dates" function
-  ; this should be continued done at some point,
-  ; update-automatic-verdict-dates is given the "verdict" (result of 'command->verdict')
-  ; which has keys 'category' 'verdict-data', 'references' 'template'
-  #_(-> (set/rename-keys (:verdict verdict-draft) {:data :verdict-data})
-       (assoc :category :r)
-       (assoc-in [:verdict-data :automatic-verdict-dates] true)
-       (assoc-in [:verdict-data :verdict-date] "1.3.2018")
-       (lupapalvelu.pate.verdict/update-automatic-verdict-dates)))
+(facts "update automatic dates"
+  ;; Calculation is cumulative
+  (let [refs {:date-deltas {:julkipano     {:delta 1 :unit "days"}
+                            :anto          {:delta 2 :unit "days"}
+                            :muutoksenhaku {:delta 3 :unit "days"}
+                            :lainvoimainen {:delta 4 :unit "days"}
+                            :aloitettava   {:delta 1 :unit "years"}
+                            :voimassa      {:delta 2 :unit "years"}}}
+        ts #(+ (* 1000 3600 12) (util/to-millis-from-local-date-string %))]
+    (fact "All dates included in the verdict"
+      (update-automatic-verdict-dates {:references   refs
+                                       :template     {:inclusions shared/verdict-dates}
+                                       :verdict-data {:automatic-verdict-dates true
+                                                      :verdict-date            (ts "6.4.2018") ;; Friday
+                                                      }})
+      => {:julkipano     (ts "9.4.2018")
+          :anto          (ts "11.4.2018")
+          :muutoksenhaku (ts "16.4.2018") ;; Skips weekend
+          :lainvoimainen (ts "20.4.2018")
+          :aloitettava   (ts "23.4.2019")
+          :voimassa      (ts "23.4.2021")})
+    (fact "Calculation skips public holiday (Easter)"
+      (update-automatic-verdict-dates {:references   refs
+                                       :template     {:inclusions shared/verdict-dates}
+                                       :verdict-data {:automatic-verdict-dates true
+                                                      :verdict-date            (ts "26.3.2018")}})
+      => {:julkipano     (ts "27.3.2018")
+          :anto          (ts "29.3.2018")
+          :muutoksenhaku (ts "3.4.2018") ;; Skips Easter
+          :lainvoimainen (ts "9.4.2018") ;; Skips weekend
+          :aloitettava   (ts "9.4.2019")
+          :voimassa      (ts "9.4.2021")})
+    (fact "Only some dates included"
+      (update-automatic-verdict-dates {:references   refs
+                                       :template     {:inclusions [:anto :lainvoimainen :voimassa]}
+                                       :verdict-data {:automatic-verdict-dates true
+                                                      :verdict-date            (ts "26.3.2018")}})
+      => { :anto          (ts "29.3.2018")
+          :lainvoimainen (ts "9.4.2018") ;; Skips weekend
+          :voimassa      (ts "9.4.2021")})
+    (fact "No automatic calculation flag"
+      (update-automatic-verdict-dates {:references   refs
+                                       :template     {:inclusions shared/verdict-dates}
+                                       :verdict-data {:automatic-verdict-dates false
+                                                      :verdict-date            (ts "26.3.2018")}})
+      => nil
+      (update-automatic-verdict-dates {:references   refs
+                                       :template     {:inclusions shared/verdict-dates}
+                                       :verdict-data {:verdict-date            (ts "26.3.2018")}})
+      => nil)
+    (fact "Verdict date is not set"
+      (update-automatic-verdict-dates {:references   refs
+                                       :template     {:inclusions shared/verdict-dates}
+                                       :verdict-data {:automatic-verdict-dates true
+                                                      :verdict-date ""}})
+      => nil
+      (fact "Verdict date is not set"
+        (update-automatic-verdict-dates {:references   refs
+                                         :template     {:inclusions shared/verdict-dates}
+                                         :verdict-data {:automatic-verdict-dates true}})
+        => nil))))
 
 (def test-verdict
   {:version  1

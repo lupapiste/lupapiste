@@ -190,52 +190,69 @@
                        :in-any-order))))
 
 (fact "collateral"
-  (pdf/collateral :fi {:data {:collateral-flag true
-                              :collateral      "20 000"
-                              :collateral-type "shekki"
-                              :collateral-date "5.2.2018"}})
+  (pdf/collateral {:lang       :fi
+                   :dictionary {:collateral-date {:date {}}}
+                   :verdict    {:data {:collateral-flag true
+                                       :collateral      "20 000"
+                                       :collateral-type "shekki"
+                                       :collateral-date "5.2.2018"}}})
   => "20 000\u20ac, Shekki, 5.2.2018"
-  (pdf/collateral :fi {:data {:collateral-flag true
-                              :collateral "20 000"}})
+  (pdf/collateral {:lang       :fi
+                   :dictionary {}
+                   :verdict    {:data {:collateral-flag true
+                                       :collateral      "20 000"}}})
   => "20 000\u20ac"
-  (pdf/collateral :fi {:data {:collateral-flag true}})
+  (pdf/collateral {:lang       :fi
+                   :dictionary {}
+                   :verdict    {:data {:collateral-flag true}}})
   => ""
-  (pdf/collateral :fi {:data {:collateral-flag false
-                              :collateral      "20 000"
-                              :collateral-type "shekki"
-                              :collateral-date "5.2.2018"}})
+  (pdf/collateral {:lang        :fi
+                   :dictionary  {:collateral-date {:date {}}}
+                   :verdict {:data {:collateral-flag false
+                                    :collateral      "20 000"
+                                    :collateral-type "shekki"
+                                    :collateral-date "5.2.2018"}}})
   => nil
-  (pdf/collateral :fi {:data {}}) => nil)
+  (pdf/collateral {:lang :fi :data {}}) => nil)
 
 (fact "complexity"
-  (pdf/complexity :fi {:data {}})
+  (pdf/complexity {:lang :fi :verdict {:data {}}})
   => nil
-  (pdf/complexity :fi {:data {:complexity "large"}})
+  (pdf/complexity {:lang :fi :verdict {:data {:complexity "large"}}})
   => ["Vaativa"]
-  (pdf/complexity :fi {:data {:complexity-text "Tai nan le."}})
-  => '(([:p {} "Tai nan le."]))
-  (pdf/complexity :fi {:data {:complexity-text "Tai nan le."
-                              :complexity "large"}})
-  => ["Vaativa" '([:p {}"Tai nan le."])])
+  (pdf/complexity {:lang       :fi
+                   :dictionary {:complexity-text {:phrase-text {}}}
+                   :verdict    {:data {:complexity-text "Tai nan le."}}})
+  => '(([:div.markup ([:p {} "Tai nan le."])]))
+  (pdf/complexity {:lang       :fi
+                   :dictionary {:complexity-text {:phrase-text {}}}
+                   :verdict    {:data {:complexity-text "Tai nan le."
+                                       :complexity      "large"}}})
+  => ["Vaativa" '([:div.markup ([:p {}"Tai nan le."])])])
 
 (fact "statements"
-  (pdf/statements :fi {:data {}})
+  (pdf/statements {:lang    :fi
+                   :verdict {:data {}}})
   => nil
-  (pdf/statements :fi {:data {:statements [{:given 1518017023967
-                                            :text "Stakeholder"
-                                            :status "ei-huomautettavaa"}
-                                           {:given 1517930824494
-                                            :text "Interested"
-                                            :status "ehdollinen"}]}})
+  (pdf/statements {:lang    :fi
+                   :verdict {:data {:statements [{:given  1518017023967
+                                                  :text   "Stakeholder"
+                                                  :status "ei-huomautettavaa"}
+                                                 {:given  1517930824494
+                                                  :text   "Interested"
+                                                  :status "ehdollinen"}]}}})
   => ["Stakeholder, 7.2.2018, Ei huomautettavaa"
       "Interested, 6.2.2018, Ehdollinen"])
 
 (fact "handler"
-  (pdf/handler {:data {}}) => ""
-  (pdf/handler {:data {:handler "Hank Handler  "}}) => "Hank Handler"
-  (pdf/handler {:data {:handler " Hank Handler"
-                       :handler-title "Title"}}) => "Title Hank Handler"
-  (pdf/handler {:data {:handler-title " Title  "}}) => "Title")
+  (pdf/handler {:verdict {:data {}}}) => ""
+  (pdf/handler {:verdict {:data {:handler "Hank Handler  "}}})
+  => "Hank Handler"
+  (pdf/handler {:verdict {:data {:handler " Hank Handler"
+                                 :handler-title "Title"}}})
+  => "Title Hank Handler"
+  (pdf/handler {:verdict {:data {:handler-title " Title  "}}})
+  => "Title")
 
 (facts "Application operations"
   (let [app             {:documents           [{:schema-info {:op {:id   "op2"
