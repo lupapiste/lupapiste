@@ -748,6 +748,19 @@
                          (map (fn [[k v]]
                                 (assoc k :amount (count v)))))))}))
 
+(defn- archive-info
+  "Convenience info map is stored into verdict for archiving purposes."
+  [{:keys [data template references] :as verdict}]
+  (merge {:verdict-date  (:verdict-date data)
+          :verdict-giver (if (util/=as-kw :lautakunta (:giver template))
+                           (:boardname references)
+                           (pdf/join-non-blanks " "
+                                                (:handler-title data)
+                                                (:handler data)))}
+         (when-let [lainvoimainen (:lainvoimainen data)]
+           (when (integer? lainvoimainen)
+             {:lainvoimainen lainvoimainen}))))
+
 (defn publish-verdict
   "Publishing verdict does the following:
    1. Finalize and publish verdict
@@ -781,7 +794,8 @@
                              :pate-verdicts.$.template.inclusions (-> verdict
                                                                       :template
                                                                       :inclusions)
-                             :pate-verdicts.$.published           created}
+                             :pate-verdicts.$.published           created
+                             :pate-verdicts.$.archive             (archive-info verdict)}
                             {:buildings buildings}
                             (when (seq tasks) {:tasks tasks}) ; in re-publish situation, old tasks are nuked and new ones generated
                             (att/attachment-array-updates (:id application)

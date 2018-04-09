@@ -15,7 +15,8 @@
 
 (testable-privates lupapalvelu.pate.verdict
                    next-section insert-section
-                   general-handler application-deviations)
+                   general-handler application-deviations
+                   archive-info)
 
 (facts next-section
   (fact "all arguments given"
@@ -951,3 +952,57 @@
                 :buildings  {:repeating        {:paloluokka {:text {}}}
                              :template-section :buildings}
                 :foremen-included {:toggle {}}})))))
+
+(facts "archive-info"
+  (let [verdict {:id             "5ac78d3e791c066eef7198a2"
+                 :category       "r"
+                 :schema-version 1
+                 :modified       12345
+                 :data           {:handler       "Hank Handler"
+                                  :verdict-date  8765432
+                                  :handler-title "Bossman"}
+                 :references     {:boardname    "The Board"
+                                  :verdict-code ["myonnetty"]
+                                  :date-deltas  {:julkipano     {:delta 1 :unit "days"}
+                                                 :anto          {:delta 2 :unit "days"}
+                                                 :muutoksenhaku {:delta 3 :unit "days"}
+                                                 :lainvoimainen {:delta 4 :unit "days"}
+                                                 :aloitettava   {:delta 1 :unit "years"}
+                                                 :voimassa      {:delta 2 :unit "years"}}}
+                 :template       {:inclusions []}}]
+    (fact "Board verdict"
+      (let [v (assoc-in verdict [:template :giver] "lautakunta")]
+        (fact "Valid according to schema"
+          (sc/check schemas/PateVerdict v) => nil)
+        (fact "archive info (without lainvoimainen)"
+          (archive-info v)
+          => {:verdict-date  8765432
+              :verdict-giver "The Board"})
+        (fact "archive info (with lainvoimainen)"
+          (archive-info (assoc-in v [:data :lainvoimainen] 99999))
+          => {:verdict-date  8765432
+              :lainvoimainen 99999
+              :verdict-giver "The Board"})))
+    (fact "Authority verdict"
+      (let [v (assoc-in verdict [:template :giver] "viranhaltija")]
+        (fact "Valid according to schema"
+          (sc/check schemas/PateVerdict v) => nil)
+        (fact "archive info (without lainvoimainen)"
+          (archive-info v)
+          => {:verdict-date  8765432
+              :verdict-giver "Bossman Hank Handler"})
+        (fact "archive info (with lainvoimainen)"
+          (archive-info (assoc-in v [:data :lainvoimainen] 99999))
+          => {:verdict-date  8765432
+              :lainvoimainen 99999
+              :verdict-giver "Bossman Hank Handler"})
+        (fact "archive info (no title)"
+          (archive-info (-> v
+                            (assoc-in [:data :lainvoimainen] 99999)
+                            (assoc-in [:data :handler-title] "")))
+          => {:verdict-date  8765432
+              :lainvoimainen 99999
+              :verdict-giver "Hank Handler"}
+          (archive-info (assoc-in v [:data :handler-title] nil))
+          => {:verdict-date  8765432
+              :verdict-giver "Hank Handler"})))))
