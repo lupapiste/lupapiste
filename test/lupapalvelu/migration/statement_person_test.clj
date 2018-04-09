@@ -1,9 +1,9 @@
 (ns lupapalvelu.migration.statement-person-test
-  (require [midje.sweet :refer :all]
-           [sade.schema-generators :as gen]
-           [lupapalvelu.user :as user]
-           [lupapalvelu.statement :as statement]
-           [lupapalvelu.migration.migrations :refer [add-missing-person-data-to-statement]]))
+  (:require [midje.sweet :refer :all]
+            [sade.schema-generators :as gen]
+            [lupapalvelu.user :as user]
+            [lupapalvelu.statement :as statement]
+            [lupapalvelu.migration.migrations :refer [add-missing-person-data-to-statement]]))
 
 (facts add-missing-person-data-to-statement
   (fact "no person"

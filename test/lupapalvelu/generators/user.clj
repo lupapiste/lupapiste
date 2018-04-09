@@ -1,9 +1,9 @@
 (ns lupapalvelu.generators.user
-  (require [clojure.test.check.generators :as gen]
-           [lupapalvelu.roles :as roles]
-           [lupapalvelu.user :refer :all]
-           [sade.schema-generators :as ssg]
-           [sade.util :as util]))
+  (:require [clojure.test.check.generators :as gen]
+            [lupapalvelu.roles :as roles]
+            [lupapalvelu.user :refer :all]
+            [sade.schema-generators :as ssg]
+            [sade.util :as util]))
 
 (def org-id-num-generator
   (gen/choose 100 1000))
