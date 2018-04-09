@@ -687,6 +687,12 @@
   (->> (usr/find-authorized-users-in-org org-id org-authz)
        (map #(select-keys % [:id :firstName :lastName]))))
 
+(defn add-continuation-period [application link-permit-id user period-end]
+  (let [period {:user                  user
+                :continuationApp       link-permit-id
+                :continuationPeriodEnd period-end}]
+    (action/update-application (action/application->command application) {$push {:continuationPeriods period}})))
+
 ;; Replacing operation
 
 (defn- get-operation-schemas [organization op-name]

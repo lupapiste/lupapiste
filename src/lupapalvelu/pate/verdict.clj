@@ -790,7 +790,8 @@
         tasks                  (pate-verdict->tasks verdict buildings command)
         {att-items :items
          update-fn :update-fn} (attachment-items command verdict)
-        verdict                (update verdict :data update-fn)]
+        verdict                (update verdict :data update-fn)
+        _ (clojure.pprint/pprint verdict)]
 
     (log-task-katselmus-errors tasks) ; TODO cancel publishing if validation errors?
     (verdict-update command
@@ -824,6 +825,7 @@
                                                   created)
 
     (when (jatkoaika-application? application)
+      ;(app/add-continuation-period application)
       )
 
     (let [verdict-attachment (pdf/create-verdict-attachment command (assoc verdict :published created))
