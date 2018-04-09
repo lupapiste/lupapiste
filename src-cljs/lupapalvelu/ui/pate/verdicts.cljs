@@ -217,19 +217,22 @@
   [verdicts app-id]
   [:div
    [:h2 (common/loc "application.tabVerdict")]
-   [:table.pate-verdicts-table
-    [:tbody
-     (map (fn [{:keys [id published modified] :as verdict}]
-           [:tr {:key id}
-            [:td [:a {:on-click #(service/open-verdict app-id id reset-verdict)}
-                  (path/loc (if published :pate-verdict :pate-verdict-draft))]]
-            [:td (if published
-                   (common/loc :pate.published-date (js/util.finnishDate published))
-                   (common/loc :pate.last-saved (js/util.finnishDateAndTime modified)))]
-            [:td (when (and (can-edit-verdict? verdict) (not published))
-                   [:i.lupicon-remove.primary
-                    {:on-click #(confirm-and-delete-verdict app-id id)}])]])
-          verdicts)]]
+   (if (empty? verdicts)
+     (when-not (state/auth? :new-pate-verdict-draft)
+       (common/loc-html :p :application.verdictDesc))
+     [:table.pate-verdicts-table
+      [:tbody
+       (map (fn [{:keys [id published modified] :as verdict}]
+              [:tr {:key id}
+               [:td [:a {:on-click #(service/open-verdict app-id id reset-verdict)}
+                     (path/loc (if published :pate-verdict :pate-verdict-draft))]]
+               [:td (if published
+                      (common/loc :pate.published-date (js/util.finnishDate published))
+                      (common/loc :pate.last-saved (js/util.finnishDateAndTime modified)))]
+               [:td (when (and (can-edit-verdict? verdict) (not published))
+                      [:i.lupicon-remove.primary
+                       {:on-click #(confirm-and-delete-verdict app-id id)}])]])
+            verdicts)]])
    (when (state/auth? :new-pate-verdict-draft)
      (new-verdict))])
 

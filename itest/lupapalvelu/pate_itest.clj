@@ -1001,6 +1001,13 @@
                                    :deviations       "Deviation from mean."
                                    :address          "Dongdaqiao Lu"
                                    :operation        "Description"})
+                (fact "Pena cannot see verdict draft"
+                  (query pena :pate-verdict
+                         :id app-id :verdict-id verdict-id)
+                  => (err :error.verdict-not-found))
+                (fact "Pena's list of verdicts is empty"
+                  (:verdicts (query pena :pate-verdicts :id app-id))
+                  => [])
                 (fact "Attachments cannot be added to the verdict"
                   (edit-verdict :attachments ["foobar"]) => fail?)
                 (facts "Verdict draft conditions"
@@ -1290,6 +1297,13 @@
                       (raw sonja :preview-pate-verdict :id app-id
                            :verdict-id verdict-id)
                       => fail?)
+                    (fact "Pena can see  published verdict"
+                      (query pena :pate-verdict
+                             :id app-id :verdict-id verdict-id)
+                      => ok?)
+                    (fact "Pena's list of verdicts contains the published verdict"
+                      (map :id (:verdicts (query pena :pate-verdicts :id app-id)))
+                      => [verdict-id])
                     (facts "buildings"
                       (let [{:keys [buildings]} (query-application sonja app-id)]
                         (count buildings) => 2

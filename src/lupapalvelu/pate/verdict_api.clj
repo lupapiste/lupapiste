@@ -1,6 +1,9 @@
 (ns lupapalvelu.pate.verdict-api
-  (:require [clojure.set :as set]
+  (:require [clj-time.coerce :as tc]
+            [clj-time.core :as t]
+            [clojure.set :as set]
             [lupapalvelu.action :refer [defquery defcommand defraw notify] :as action]
+            [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.verdict :as verdict]
@@ -11,9 +14,6 @@
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.application-bulletins :as bulletins]
-            [clj-time.core :as t]
-            [clj-time.coerce :as tc]
             [schema.core :as sc]))
 
 
@@ -35,9 +35,10 @@
 (defn- verdict-exists
   "Returns pre-checker that fails if the verdict does not exist.
   Additional conditions:
-    :editable? fails if the verdict has been published."
+    :editable? fails if the verdict has been published.
+    :published? fails if the verdict has NOT been published"
   [& conditions]
-  (let [{:keys [editable?]} (zipmap conditions (repeat true))]
+  (let [{:keys [editable? published?]} (zipmap conditions (repeat true))]
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
         (let [verdict (util/find-by-id verdict-id
@@ -45,7 +46,9 @@
           (when-not verdict
             (fail! :error.verdict-not-found))
           (when (and editable? (:published verdict))
-            (fail! :error.verdict.not-draft)))))))
+            (fail! :error.verdict.not-draft))
+          (when (and published? (not (:published verdict)))
+            (fail! :error.verdict.not-published)))))))
 
 (defn- verdict-filled
   "Precheck that fails if any of the required fields is empty."
@@ -83,9 +86,13 @@
 
 (defquery pate-verdicts
   {:description      "List of verdicts. Item properties:
+
                        id:        Verdict id
                        published: timestamp (can be nil)
-                       modified:  timestamp"
+                       modified:  timestamp
+
+                      If the user is applicant, only published
+                      verdicts are returned."
    :feature          :pate
    :user-roles       #{:authority :applicant}
    :org-authz-roles  roles/reader-org-authz-roles
