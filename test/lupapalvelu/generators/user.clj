@@ -12,10 +12,10 @@
   (gen/elements #{"YA" "YMP" "R"}))
 
 (defn org-id-generator [& {:keys [id-num id-suffix]
-                           :or {:id-num org-id-num-generator
-                                :id-suffix org-id-suffix-generator}}]
-  (gen/let [number-part org-id-num-generator
-            suffix org-id-suffix-generator]
+                           :or {id-num org-id-num-generator
+                                id-suffix org-id-suffix-generator}}]
+  (gen/let [number-part id-num
+            suffix id-suffix]
     (keyword (str number-part "-" suffix))))
 
 (def keyword-authz-generator
