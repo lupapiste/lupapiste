@@ -121,8 +121,8 @@
             approved                          (get approvals (keyword (:fileId latestVersion)))]
 
         (fact "After the latest version was deleted the previous version is popped"
-          approved =contains=> {:state "requires_user_action"
-                                :note  "Bu hao!"}
+          approved => (contains {:state "requires_user_action"
+                                 :note  "Bu hao!"})
           (let [{approvals :approvals} att]
                 (count approvals) => 1
                 (-> approvals vals first :note) => "Bu hao!"))))
