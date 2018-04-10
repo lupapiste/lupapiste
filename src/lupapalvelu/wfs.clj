@@ -2,17 +2,17 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error errorf]]
             [ring.util.codec :as codec]
             [net.cgrand.enlive-html :as enlive]
-            [sade.http :as http]
             [clojure.string :as s]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
             [clojure.data.zip.xml :refer [xml-> xml1-> text text= attr=]]
+            [sade.core :refer :all]
+            [sade.common-reader :as cr]
             [sade.env :as env]
-            [sade.xml :as sxml]
+            [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :refer [future*] :as util]
-            [sade.core :refer :all]
-            [sade.common-reader :as reader]
+            [sade.xml :as sxml]
             [lupapalvelu.logging :as logging]))
 
 
@@ -278,14 +278,14 @@
 
 (defn krysp-to-address-details [lang feature]
   (when (map? feature)
-    (let [street-by-lang (sxml/get-text feature [:mkos:Osoite :yht:osoitenimi :yht:teksti (enlive/attr= :xml:lang lang)])
+    (let [street-by-lang (sxml/get-text feature [:Osoite :osoitenimi #{[:teksti (enlive/attr= :xml:lang lang)]}])
           street (if (seq street-by-lang)
                    street-by-lang
-                   (sxml/get-text feature [:mkos:Osoite :yht:osoitenimi :yht:teksti]))
-          [x y] (ss/split (sxml/get-text feature [:mkos:Osoite :yht:pistesijainti :gml:Point :gml:pos]) #"\s")]
+                   (sxml/get-text feature [:Osoite :osoitenimi :teksti]))
+          [x y] (ss/split (sxml/get-text feature [:Osoite :pistesijainti :Point :pos]) #"\s")]
       {:street street
-       :number (sxml/get-text feature [:mkos:Osoite :yht:osoitenumero])
-       :municipality (sxml/get-text feature [:mkos:Osoite :yht:kunta])
+       :number (sxml/get-text feature [:Osoite :osoitenumero])
+       :municipality (sxml/get-text feature [:Osoite :kunta])
        :x (util/->double x)
        :y (util/->double y)})))
 
@@ -457,6 +457,10 @@
                              :MAXFEATURES "1"
                              :BUFFER "500"})))
 
+(defn select-kuntagml-osoite [stripped-xml]
+  (or (seq (sxml/select stripped-xml [:FeatureCollection :featureMember :Osoite]))
+      (seq (sxml/select stripped-xml [:Osoite]))))
+
 (defn address-by-point-from-municipality [x_d y_d {:keys [url credentials no-bbox-srs]}]
   (let [radii [25 50 100 250 500 1000]]
     (some identity
@@ -467,14 +471,16 @@
                   ; Queries to some bockends must have the SRS defined at the end of BBOX,
                   ; but some bockends return NO RESULTS if it is defened!
                   bbox (ss/join "," (if no-bbox-srs corners (conj corners "EPSG:3067")))
-                  results (sxml/select (exec-get-xml :get url credentials
-                            {:REQUEST "GetFeature"
-                             :SERVICE "WFS"
-                             :VERSION "1.1.0"
-                             :TYPENAME "mkos:Osoite"
-                             :SRSNAME "EPSG:3067"
-                             :BBOX bbox
-                             :MAXFEATURES "50"}) [:mkos:Osoite])]]
+                  xml (exec-get-xml :get url credentials
+                                    {:REQUEST "GetFeature"
+                                     :SERVICE "WFS"
+                                     :VERSION "1.1.0"
+                                     :TYPENAME "mkos:Osoite"
+                                     :SRSNAME "EPSG:3067"
+                                     :BBOX bbox
+                                     :MAXFEATURES "50"})
+                  stripped (cr/strip-xml-namespaces xml)
+                  results (select-kuntagml-osoite stripped)]]
         (if (not-empty results)
           results
           (warnf "No results for x/y %s/%s within radius of %d. %s (bbox=%s)"
@@ -700,7 +706,7 @@
   [base-url username password]
   (let [capabilities-resp  (query-get-capabilities base-url "WFS" username password true)
         xml-s (:body capabilities-resp)]
-    (-> xml-s sxml/parse reader/strip-xml-namespaces)))
+    (-> xml-s sxml/parse cr/strip-xml-namespaces)))
 
 (defn feature-types [xml-no-ns]
   (sxml/select xml-no-ns [:FeatureType]))
@@ -729,8 +735,8 @@
     (infof "ktj-client is disabled - not getting rekisteritiedot for %s" rekisteriyksikon-tunnus)
     (let [url (str (get-rekisteriyksikontietojaFeatureAddress) "SERVICE=WFS&REQUEST=GetFeature&VERSION=1.1.0&NAMESPACE=xmlns%28ktjkiiwfs%3Dhttp%3A%2F%2Fxml.nls.fi%2Fktjkiiwfs%2F2010%2F02%29&TYPENAME=ktjkiiwfs%3ARekisteriyksikonTietoja&PROPERTYNAME=ktjkiiwfs%3Akiinteistotunnus%2Cktjkiiwfs%3Aolotila%2Cktjkiiwfs%3Arekisteriyksikkolaji%2Cktjkiiwfs%3Arekisterointipvm%2Cktjkiiwfs%3Animi%2Cktjkiiwfs%3Amaapintaala%2Cktjkiiwfs%3Avesipintaala&FEATUREID=FI.KTJkii-RekisteriyksikonTietoja-" (codec/url-encode rekisteriyksikon-tunnus) "&SRSNAME=EPSG%3A3067&MAXFEATURES=100&RESULTTYPE=results")
           options {:http-error :error.integration.ktj-down, :connection-error :error.integration.ktj-down :conn-timeout 15000 :socket-timeout 15000}
-          ktj-xml (reader/get-xml url options (get auth ktjkii) false)
-          features (-> ktj-xml reader/strip-xml-namespaces sxml/xml->edn)]
+          ktj-xml (cr/get-xml url options (get auth ktjkii) false)
+          features (-> ktj-xml cr/strip-xml-namespaces sxml/xml->edn)]
       (get-in features [:FeatureCollection :featureMember :RekisteriyksikonTietoja]))))
 
 (defn trimble-kaavamaaraykset-by-point [x y municipality]

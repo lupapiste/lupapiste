@@ -160,3 +160,100 @@
         :x 627013.606
         :y 7117521.877
         :name {:fi "Tampere" :sv "Tammerfors"}}))
+
+(defn kunta-gml-osoite [osoite]
+  {:tag :Osoite,
+   :attrs {:xmlns "http://www.kuntatietopalvelu.fi/gml/opastavattiedot/osoitteet",
+           :xmlns:p3 "http://www.opengis.net/gml",
+           :p3:id "osoite.3219"},
+   :content [{:tag :yksilointitieto,
+              :attrs {:xmlns "http://www.kuntatietopalvelu.fi/gml/yhteiset"},
+              :content ["osoite.3219"]}
+             {:tag :alkuHetki,
+              :attrs {:xmlns "http://www.kuntatietopalvelu.fi/gml/yhteiset"},
+              :content ["2002-04-15T00:00:00"]}
+             {:tag :kunta,
+              :attrs {:xmlns "http://www.kuntatietopalvelu.fi/gml/yhteiset"},
+              :content [(:kunta osoite)]}
+             {:tag :osoitenimi,
+              :attrs {:xmlns "http://www.kuntatietopalvelu.fi/gml/yhteiset"},
+              :content [{:tag :teksti, :attrs {:xml:lang "fi"},
+                         :content [(:osoitenimi osoite)]}
+                        {:tag :teksti, :attrs {:xml:lang "sv"},
+                         :content ["Svensk gatan"]}]}
+             {:tag :osoitenumero,
+              :attrs {:xmlns "http://www.kuntatietopalvelu.fi/gml/yhteiset"},
+              :content [(:osoitenumero osoite)]}
+             {:tag :postinumero,
+              :attrs {:xmlns "http://www.kuntatietopalvelu.fi/gml/yhteiset"},
+              :content [(:postinumero osoite)]}
+             {:tag :postitoimipaikannimi,
+              :attrs {:xmlns "http://www.kuntatietopalvelu.fi/gml/yhteiset"},
+              :content [(:postitoimipaikka osoite)]}
+             {:tag :pistesijainti,
+              :attrs {:xmlns "http://www.kuntatietopalvelu.fi/gml/yhteiset"},
+              :content [{:tag :Point,
+                         :attrs {:axisLabels "x y", :srsName "EPSG:3067", :srsDimension "2"},
+                         :content [{:tag :pos,
+                                    :attrs nil,
+                                    :content [(str (:x osoite) " " (:y osoite))]}]}]}
+             {:tag :tila,
+              :attrs {:xmlns "http://www.kuntatietopalvelu.fi/gml/yhteiset"},
+              :content ["voimassa"]}]})
+
+(defn kunta-gml-osoite-feature [osoite]
+  {:tag :featureMember,
+   :attrs {:xmlns "http://www.opengis.net/gml"},
+   :content [(kunta-gml-osoite osoite)]})
+
+
+(facts "fetch-kuntagml-osoite"
+  (fact "not osoite"
+    (wfs/select-kuntagml-osoite {:tag :Foo :content [{:tag :Faa :content ["fii"]}]}) => nil)
+  (fact "plain Osoite element"
+    (wfs/select-kuntagml-osoite
+      (kunta-gml-osoite {:kunta            "638" :osoitenimi "Testikatu"
+                         :osoitenumero     "1" :postinumero "12300"
+                         :postitoimipaikka "PORVOO"
+                         :x                "424901.37361699" :y "6695339.45658077"})) => (every-checker sequential? not-empty))
+  (fact "with featureMember"
+    (wfs/select-kuntagml-osoite
+      (kunta-gml-osoite-feature {:kunta            "638" :osoitenimi "Testikatu"
+                                 :osoitenumero     "1" :postinumero "12300"
+                                 :postitoimipaikka "PORVOO"
+                                 :x                "424901.37361699" :y "6695339.45658077"})) => (every-checker sequential? not-empty))
+  (fact "with featureCollection"
+    (wfs/select-kuntagml-osoite
+      {:tag     :FeatureCollection
+       :content [(kunta-gml-osoite-feature {:kunta            "638" :osoitenimi "Testikatu"
+                                            :osoitenumero     "1" :postinumero "12300"
+                                            :postitoimipaikka "PORVOO"
+                                            :x                "424901.37361699" :y "6695339.45658077"})]}) => (every-checker sequential? not-empty))
+  (fact "with foo, still works"
+    (wfs/select-kuntagml-osoite
+      {:tag     :foofaa
+       :content [(kunta-gml-osoite-feature {:kunta            "638" :osoitenimi "Testikatu"
+                                            :osoitenumero     "1" :postinumero "12300"
+                                            :postitoimipaikka "PORVOO"
+                                            :x                "424901.37361699" :y "6695339.45658077"})]}) => (every-checker sequential? not-empty)))
+
+(facts "krysp-to-address-details"
+  (wfs/krysp-to-address-details
+    "fi"
+    (kunta-gml-osoite-feature {:kunta            "638" :osoitenimi "Testikatu"
+                               :osoitenumero     "1" :postinumero "12300"
+                               :postitoimipaikka "PORVOO"
+                               :x                "424901.37361699" :y "6695339.45658077"})) => {:municipality "638"
+                                                                                                 :number "1"
+                                                                                                 :street "Testikatu"
+                                                                                                 :x 424901.37361699 :y 6695339.45658077}
+  (fact "Svensk works"                                      ; previous lang selector did not work
+    (wfs/krysp-to-address-details
+      "sv"
+      (kunta-gml-osoite-feature {:kunta            "638" :osoitenimi "Testikatu"
+                                 :osoitenumero     "1" :postinumero "12300"
+                                 :postitoimipaikka "PORVOO"
+                                 :x                "424901.37361699" :y "6695339.45658077"})) => {:municipality "638"
+                                                                                                  :number "1"
+                                                                                                  :street "Svensk gatan"
+                                                                                                  :x 424901.37361699 :y 6695339.45658077}))

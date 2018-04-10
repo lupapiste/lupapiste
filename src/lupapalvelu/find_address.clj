@@ -3,6 +3,7 @@
             [clojure.data.zip.xml :refer [xml-> text]]
             [monger.operators :refer :all]
             [monger.query :as q]
+            [sade.common-reader :as cr]
             [sade.municipality :as muni]
             [sade.strings :as ss]
             [sade.property :as p]
@@ -174,9 +175,10 @@
                             :TYPENAME "mkos:Osoite"
                             :SRSNAME "EPSG:3067"
                             :FILTER filter-str
-                            :MAXFEATURES "10"})]
-    (-> data
-        (sxml/select [:mkos:Osoite]))))
+                            :MAXFEATURES "10"})
+        xml (cr/strip-xml-namespaces data)]
+    (-> xml
+        (sxml/select [:Osoite]))))
 
 (defn search [term lang]
   (condp re-find (ss/trim term)
