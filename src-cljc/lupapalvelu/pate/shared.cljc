@@ -902,7 +902,7 @@
                    :label?     false
                    :type-group #"paatoksenteko"
                    :default    :paatoksenteko.paatosote
-                   :dropzone   "#application-pate-verdict-tab"
+                   :dropzone   "#pate-verdict-page"
                    :multiple?  true}}
     :attachments
     {:application-attachments {:i18nkey :application.verdict-attachments}}}

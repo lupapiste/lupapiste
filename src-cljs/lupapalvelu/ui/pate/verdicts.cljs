@@ -19,161 +19,27 @@
 (defn- can-edit? []
   (state/auth? :edit-pate-verdict))
 
-(defn- can-view? []
-  (state/auth? :pate-verdicts))
-
-(defn- can-publish? []
-  (state/auth? :publish-pate-verdict))
-
-(defn updater
-  ([{:keys [state path] :as options} value]
-   (service/edit-verdict @state/application-id
-                         (path/value [:info :id] state/current-verdict)
-                         path
-                         value
-                         (service/update-changes-and-errors state/current-verdict
-                                                            options)))
-  ([{:keys [state path] :as options}]
-   (updater options (path/value path state))))
-
 (defn- can-edit-verdict? [{published :published}]
   (and (can-edit?)
        (not published)))
 
-(defn reset-verdict [{:keys [verdict references filled]}]
-  (reset! state/current-verdict
-          (when verdict
-            {:state (:data verdict)
-             :info  (-> (dissoc verdict :data)
-                        (assoc :filled? filled)
-                        (update :inclusions #(set (map keyword %))))
-             :_meta {:updated             updater
-                     :highlight-required? (-> verdict :published not)
-                     :enabled?            (can-edit-verdict? verdict)
-                     :published?          (:published verdict)
-                     :upload.filedata     (fn [_ filedata & kvs]
-                                            (apply assoc filedata
-                                                   :target {:type :verdict
-                                                            :id   (:id verdict)}
-                                                   kvs))
-                     :upload.include?     (fn [_ {target :target :as att}]
-                                            (= (:id target) (:id verdict)))}}))
-  (reset! state/references references)
-  (reset! state/current-view (if verdict ::verdict ::list)))
-
 (defn update-application-id []
-  (let [app-id (js/lupapisteApp.services.contextService.applicationId)]
-    (when (common/reset-if-needed! state/application-id app-id)
-      (if app-id
-        (do (reset! state/auth-fn js/lupapisteApp.models.applicationAuthModel.ok)
-            (when (can-edit?)
-              (service/fetch-application-verdict-templates app-id))
-            (when (can-edit?)
-              (service/fetch-application-phrases app-id))
-            (service/fetch-verdict-list app-id))
-        (do (reset! state/template-list [])
-            (reset! state/phrases [])
-            (reset! state/verdict-list nil))))))
+  (if-let [app-id (js/lupapisteApp.services.contextService.applicationId)]
+    (do (service/fetch-verdict-list app-id)
+        (when (common/reset-if-needed! state/application-id app-id)
+          (do (reset! state/auth-fn js/lupapisteApp.models.applicationAuthModel.ok)
+              (when (can-edit?)
+                (service/fetch-application-verdict-templates app-id))
+              (when (can-edit?)
+                (service/fetch-application-phrases app-id)))))
+    (do (reset! state/template-list [])
+        (reset! state/phrases [])
+        (reset! state/verdict-list nil))))
 
-(defn with-back-button [component]
-  [:div
-   (lupapalvelu.ui.attachment.components/dropzone)
-   [:div.operation-button-row
-    [:button.secondary
-     {:on-click #(reset-verdict nil)}
-     [:i.lupicon-chevron-left]
-     [:span (common/loc "back")]]]
-   component])
-
-(rum/defc verdict-section-header < rum/reactive
-  [{:keys [schema] :as options}]
-  [:div.pate-grid-1.section-header
-   {:class (path/css options)}
-   (when (and (not (-> schema :buttons? false?))
-              (path/enabled? options))
-     [:div.row.row--tight
-      [:div.col-1.col--right
-       [:div.verdict-buttons
-        [:button.primary.outline
-         {:on-click #(path/flip-meta options :editing?)}
-         (common/loc (if (path/react-meta options :editing?)
-                       :close
-                       :edit))]]]])])
-
-(defmethod sections/section-header :verdict
-  [options _]
-  (verdict-section-header options))
-
-(rum/defc toggle-all < rum/reactive
-  [{:keys [schema _meta] :as options}]
-  (when (path/enabled? options)
-    (let [all-sections  (map :id (:sections schema))
-          meta-map (rum/react _meta)
-          open-sections (filter #(get meta-map (util/kw-path % :editing?))
-                                all-sections)]
-      [:a.pate-left-space
-       {:on-click #(swap! _meta (fn [m]
-                                  (->> (or (not-empty open-sections)
-                                           all-sections)
-                                       (map (fn [id]
-                                              [(util/kw-path id :editing?)
-                                               (empty? open-sections)]))
-                                       (into {})
-                                       (merge m))))}
-       (common/loc (if (seq open-sections)
-                     :pate.close-all
-                     :pate.open-all))])))
-
-(rum/defcs verdict < rum/reactive
-  (rum/local false ::wait?)
-  [{wait?* ::wait?} {:keys [schema state info _meta] :as options}]
-  (let [published (path/react :published info)
-        yes-fn    (fn []
-                    (reset! wait?* true)
-                    (reset! (rum/cursor-in _meta [:enabled?]) false)
-                    (service/publish-and-reopen-verdict  @state/application-id
-                                                         (path/value :id info)
-                                                         reset-verdict))]
-    [:div.pate-verdict
-     [:div.pate-grid-2
-      (when (and (or (path/enabled? options)
-                     (rum/react wait?*))
-                 (not published))
-        [:div.row
-         [:div.col-2.col--right
-          (components/icon-button {:text-loc :verdict.submit
-                                   :class    (common/css :primary :pate-left-space)
-                                   :icon     :lupicon-circle-section-sign
-                                   :wait?    wait?*
-                                   :enabled? (and (path/react :filled? info)
-                                                  (can-publish?))
-                                   :on-click (fn []
-                                               (hub/send "show-dialog"
-                                                         {:ltitle          "areyousure"
-                                                          :size            "medium"
-                                                          :component       "yes-no-dialog"
-                                                          :componentParams {:ltext "verdict.confirmpublish"
-                                                                            :yesFn yes-fn}}))})
-          (components/link-button {:url      (js/sprintf "/api/raw/preview-pate-verdict?id=%s&verdict-id=%s"
-                                                         @state/application-id
-                                                         (path/value :id info))
-                                   :enabled? (and (path/enabled? options)
-                                                  (path/react :filled? info))
-                                   :disabled published
-                                   :text-loc :pdf.preview})]])
-      (if published
-        [:div.row
-         [:div.col-2.col--right
-          [:span.verdict-published
-           (common/loc :pate.verdict-published
-                       (js/util.finnishDate published))]]]
-        [:div.row.row--tight
-         [:div.col-1
-          (pate-components/required-fields-note options)]
-         [:div.col-1.col--right
-          (toggle-all options)
-          (pate-components/last-saved options)]])]
-     (sections/sections options :verdict)]))
+(defn open-verdict [arg]
+  (common/open-page :pate-verdict
+                    @state/application-id
+                    (get arg :verdict-id arg)))
 
 (rum/defcs new-verdict < rum/reactive
   (rum/local nil ::template)
@@ -185,7 +51,7 @@
       (let [items (map #(set/rename-keys % {:id :value :name :text})
                        templates)
             selected (rum/react template*)]
-        (when-not (util/find-by-key :value (:value selected) items)
+        (when-not (util/find-by-key :value selected items)
           (common/reset-if-needed! template*
                                    (:value (or (util/find-by-key :default? true items)
                                                (first items)))))
@@ -199,7 +65,7 @@
           (layout/vertical [:button.positive
                             {:on-click #(service/new-verdict-draft @state/application-id
                                                                    @template*
-                                                                   reset-verdict)}
+                                                                   open-verdict)}
                             [:i.lupicon-circle-plus]
                             [:span (common/loc :application.verdict.add)]])]]))))
 
@@ -211,8 +77,7 @@
               :component       "yes-no-dialog"
               :componentParams {:ltext "pate.delete-verdict-draft"
                                 :yesFn #(service/delete-verdict app-id
-                                                                verdict-id
-                                                                reset-verdict)}}))
+                                                                verdict-id)}}))
 
 (rum/defc verdict-list < rum/reactive
   [verdicts app-id]
@@ -225,7 +90,7 @@
       [:tbody
        (map (fn [{:keys [id published modified] :as verdict}]
               [:tr {:key id}
-               [:td [:a {:on-click #(service/open-verdict app-id id reset-verdict)}
+               [:td [:a {:on-click #(open-verdict id)}
                      (path/loc (if published :pate-verdict :pate-verdict-draft))]]
                [:td (if published
                       (common/loc :pate.published-date (js/util.finnishDate published))
@@ -249,17 +114,7 @@
   []
   (when (and (rum/react state/application-id)
              (rum/react state/verdict-list))
-    [:div
-     (case (rum/react state/current-view)
-       ::list (verdict-list @state/verdict-list @state/application-id)
-       ::verdict (let [{dictionary :dictionary :as schema} (shared/verdict-schema
-                                                            (shared/permit-type->category (js/lupapisteApp.models.application.permitType))
-                                                            (get-in @state/current-verdict [:info :schema-version]))]
-                   (with-back-button (verdict (assoc (state/select-keys state/current-verdict
-                                                                        [:state :info :_meta])
-                                                     :schema (dissoc schema :dictionary)
-                                                     :dictionary dictionary
-                                                     :references state/references)))))]))
+    (verdict-list @state/verdict-list @state/application-id)))
 
 (defn mount-component []
   (when (common/feature? :pate)
@@ -270,5 +125,4 @@
   (when (common/feature? :pate)
     (swap! args assoc
            :dom-id (name domId))
-    (reset-verdict nil)
     (mount-component)))

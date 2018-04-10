@@ -34,3 +34,17 @@
 (defn auth? [action]
   (boolean (when-let [auth @auth-fn]
              (auth (name action)))))
+
+(defn refresh-application-auth-model
+  "Refreshes application auth model and resets auth-fn accordingly. Also
+  resets application-id. Callback function is called, if given."
+  ([app-id callback]
+   (reset! auth-fn nil)
+   (reset! application-id app-id)
+   (js/lupapisteApp.models.applicationAuthModel.refreshWithCallback (clj->js {:id app-id})
+                                                                    (fn []
+                                                                      (reset! auth-fn
+                                                                              js/lupapisteApp.models.applicationAuthModel.ok)
+                                                                      (when callback (callback)))))
+  ([app-id]
+   (refresh-application-auth-model app-id nil)))
