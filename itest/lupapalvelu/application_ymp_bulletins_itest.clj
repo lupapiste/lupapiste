@@ -249,7 +249,7 @@
         (let [bulletin (query-bulletin local-query pena (:id oulu-app))]
           (keys bulletin) => (just [:id :_applicantIndex :address :applicant :attachments :versionId
                                     :bulletinState :documents :location :modified :municipality
-                                    :primaryOperation :propertyId :state :stateSeq :canComment
+                                    :primaryOperation :propertyId :state :stateSeq :canComment :pate-verdicts
                                     :verdicts :tasks :application-id :verdictData :category :bulletinOpDescription
                                     :proclamationText :proclamationEndsAt :proclamationStartsAt] :in-any-order)
           (fact "attachments only contain specified keys and nothing else"
