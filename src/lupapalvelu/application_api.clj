@@ -43,7 +43,8 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
             [lupapalvelu.ya :as ya]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.archiving-util :as archiving-util])
+            [lupapalvelu.archiving-util :as archiving-util]
+            [lupapalvelu.application-replace-operation :as replace-operation])
   (:import (java.net SocketTimeoutException)))
 
 (defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
@@ -555,10 +556,9 @@
                       {:required [:application/edit-operation]}]
    :input-validators [operation-validator
                       (partial action/non-blank-parameters [:id :opId :operation])]
-   :pre-checks       [replace-operation-allowed-pre-check]
-   :feature          :replace-operation}
+   :pre-checks       [replace-operation-allowed-pre-check]}
   [command]
-  (app/replace-operation command opId operation))
+  (replace-operation/replace-operation command opId operation))
 
 (defcommand change-permit-sub-type
   {:parameters       [id permitSubtype]
