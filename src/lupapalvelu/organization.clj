@@ -383,15 +383,24 @@
       (some-> (get-krysp-wfs {:scope.municipality municipality, :krysp.osoitteet.url {"$regex" "\\S+"}} :osoitteet)
               (util/assoc-when :no-bbox-srs (boolean no-bbox-srs))))))
 
+(defn dissoc-credentials
+  "Returns $unset updates for credentials, if new username is blank."
+  [new-username {:keys [credentials]} endpoint-type]
+  (when (and (ss/blank? new-username) (ss/not-blank? (first credentials)))
+    {$unset {(str "krysp." endpoint-type ".username") 1
+             (str "krysp." endpoint-type ".password") 1
+             (str "krysp." endpoint-type ".crypto-iv") 1}}))
+
 (defn set-krysp-endpoint
-  [id url username password endpoint-type version]
+  [id url username password endpoint-type version old-config]
   {:pre [(mongo/valid-key? endpoint-type)]}
   (let [url (ss/trim url)
         updates (->> (encode-credentials username password)
                   (merge {:url url :version version})
                   (map (fn [[k v]] [(str "krysp." endpoint-type "." (name k)) v]))
                   (into {})
-                  (hash-map $set))]
+                  (hash-map $set)
+                  (merge (dissoc-credentials username old-config endpoint-type)))]
     (if (and (ss/not-blank? url) (= "osoitteet" endpoint-type))
       (let [capabilities-xml (wfs/get-capabilities-xml url username password)
             osoite-feature-type (some->> (wfs/feature-types capabilities-xml)
