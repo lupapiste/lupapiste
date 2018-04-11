@@ -183,3 +183,8 @@
   [{:keys [enabled? disabled?] :as options}]
   (or (rum/react (atomize disabled?))
       (some-> enabled? atomize rum/react false?)))
+
+(defn open-page
+  "Convenience wrapper for pageutil.openPage."
+  [page & suffix]
+  (js/pageutil.openPage (name page) (apply array (map name suffix))))
