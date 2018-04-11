@@ -100,9 +100,9 @@
   (when-let [app-id (js/pageutil.hashApplicationId)]
     (reset! state/template-list [])
     (reset! state/verdict-list nil)
-    (service/fetch-verdict-list app-id)
     (state/refresh-application-auth-model app-id
                                           #(when (can-edit?)
+                                             (service/fetch-verdict-list app-id)
                                              (service/fetch-application-verdict-templates app-id)))))
 
 (defn mount-component []
