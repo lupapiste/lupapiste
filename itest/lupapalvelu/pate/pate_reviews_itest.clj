@@ -22,16 +22,18 @@
     (command sonja :update-app-bulletin-op-description :id app-id :description "Bullet the blue sky.") => ok?)
   (fact "Sonja approves" (command sonja :approve-application :id app-id :lang "fi") => ok?)
 
-  (let [verdict-draft       (command sonja :new-pate-verdict-draft
-                                     :id app-id
-                                     :template-id (-> pate-fixture/verdic-templates-setting
-                                                      :templates
-                                                      first
-                                                      :id))
-        verdict-id          (get-in verdict-draft [:verdict :id])
-        verdict-data        (get-in verdict-draft [:verdict :data])
+  (let [{verdict-id :verdict-id} (command sonja :new-pate-verdict-draft
+                                          :id app-id
+                                          :template-id (-> pate-fixture/verdic-templates-setting
+                                                           :templates
+                                                           first
+                                                           :id))
+        verdict-draft            (query sonja :pate-verdict
+                                        :id app-id
+                                        :verdict-id verdict-id)
+        verdict-data             (get-in verdict-draft [:verdict :data])
         {:keys [primaryOperation
-                buildings]} (query-application pena app-id)]
+                buildings]}      (query-application pena app-id)]
     (fact "Buildings empty"                                 ; they could be populated, but not implemented yet
       buildings => empty?)
     (fact "Verdict draft creation OK"

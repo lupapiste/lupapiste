@@ -42,13 +42,14 @@
     (command sonja :update-app-bulletin-op-description :id app-id :description "Bulletin description") => ok?
     (command sonja :approve-application :id app-id :lang "fi") => ok?)
 
-  (let [verdict-draft (command sonja :new-pate-verdict-draft
-                               :id app-id
-                               :template-id (-> pate-fixture/verdic-templates-setting
-                                                :templates
-                                                first
-                                                :id))
-        verdict-id    (get-in verdict-draft [:verdict :id])]
+  (let [{verdict-id :verdict-id} (command sonja :new-pate-verdict-draft
+                                          :id app-id
+                                          :template-id (-> pate-fixture/verdic-templates-setting
+                                                           :templates
+                                                           first
+                                                           :id))
+        verdict-draft            (query sonja :pate-verdict
+                                        :id app-id :verdict-id verdict-id)]
 
     (facts "Fill verdict data and publish verdict"
       (fact "Set automatic calculation of other dates"
@@ -72,33 +73,33 @@
         (command sonja :publish-pate-verdict :id app-id :verdict-id verdict-id) => no-errors?))
 
     (let [application (query-application sonja app-id)
-          tasks (:tasks application)]
+          tasks       (:tasks application)]
 
       (facts "Tasks are created into application"
         (fact "Plans"
-          (util/find-first #(= (:taskname %) "Suunnitelmat") tasks) => (contains {:schema-info {:name "task-lupamaarays"
-                                                                                                :order 20
-                                                                                                :type "task"
+          (util/find-first #(= (:taskname %) "Suunnitelmat") tasks) => (contains {:schema-info {:name    "task-lupamaarays"
+                                                                                                :order   20
+                                                                                                :type    "task"
                                                                                                 :version 1}
-                                                                                  :taskname "Suunnitelmat"})
-          (util/find-first #(= (:taskname %) "ErityisSuunnitelmat") tasks) => (contains {:schema-info {:name "task-lupamaarays"
-                                                                                                       :order 20
-                                                                                                       :type "task"
+                                                                                  :taskname    "Suunnitelmat"})
+          (util/find-first #(= (:taskname %) "ErityisSuunnitelmat") tasks) => (contains {:schema-info {:name    "task-lupamaarays"
+                                                                                                       :order   20
+                                                                                                       :type    "task"
                                                                                                        :version 1}
-                                                                                         :taskname "ErityisSuunnitelmat"}))
+                                                                                         :taskname    "ErityisSuunnitelmat"}))
         (fact "Conditions"
-          (util/find-first #(= (:taskname %) "ehto 1") tasks) => (contains {:schema-info {:name "task-lupamaarays"
-                                                                                          :order 20
-                                                                                          :type "task"
+          (util/find-first #(= (:taskname %) "ehto 1") tasks) => (contains {:schema-info {:name    "task-lupamaarays"
+                                                                                          :order   20
+                                                                                          :type    "task"
                                                                                           :version 1}
-                                                                            :taskname "ehto 1"})
-          (util/find-first #(= (:taskname %) "ehto 2") tasks) => (contains {:schema-info {:name "task-lupamaarays"
-                                                                                          :order 20
-                                                                                          :type "task"
+                                                                            :taskname    "ehto 1"})
+          (util/find-first #(= (:taskname %) "ehto 2") tasks) => (contains {:schema-info {:name    "task-lupamaarays"
+                                                                                          :order   20
+                                                                                          :type    "task"
                                                                                           :version 1}
-                                                                            :taskname "ehto 2"})
-          (util/find-first #(= (:taskname %) "ehto 3") tasks) => (contains {:schema-info {:name "task-lupamaarays"
-                                                                                          :order 20
-                                                                                          :type "task"
+                                                                            :taskname    "ehto 2"})
+          (util/find-first #(= (:taskname %) "ehto 3") tasks) => (contains {:schema-info {:name    "task-lupamaarays"
+                                                                                          :order   20
+                                                                                          :type    "task"
                                                                                           :version 1}
-                                                                            :taskname "ehto 3"}))))))
+                                                                            :taskname    "ehto 3"}))))))
