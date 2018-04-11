@@ -414,7 +414,7 @@
                     <!-- /ko -->
 
                     <!-- Pate verdict tab -->
-                    <!-- ko if: selectedTabName() === 'pate-verdict' -->
+                    <!-- ko if: selectedTabName() === 'pate-verdict' && lupapisteApp.models.rootVMO.currentPage() === 'application' -->
                     <div id="application-pate-verdict-tab"
                          class="tab-content feature--no-border" data-bind="feature: 'pate'">
                       <cljs-pate_verdicts></cljs-pate_verdicts>

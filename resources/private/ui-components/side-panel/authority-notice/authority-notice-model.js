@@ -24,8 +24,12 @@ LUPAPISTE.AuthorityNoticeModel = function(params) {
   });
 
   self.disposedSubscribe(self.urgency, function(val) {
-    if (updatingObservables) { return; }
-    self.sendEvent("SidePanelService", "UrgencyChanged", {urgency: val});
+    // Extra guard needed for a scenario where the side panel is
+    // initialized "prematurely", for example when returning from a
+    // pate-verdict after reload.
+    if (!updatingObservables && params.urgency()) {
+      self.sendEvent("SidePanelService", "UrgencyChanged", {urgency: val});
+    }
   });
 
   self.disposedSubscribe(self.authorityNotice, function(val) {

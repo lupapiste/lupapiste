@@ -72,7 +72,7 @@
 
 (defcommand new-pate-verdict-draft
   {:description      "Composes new verdict draft from the latest published
-  template and its settings."
+  template and its settings. Returns the verdict-id."
    :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id template-id]
@@ -81,8 +81,7 @@
                       (template/verdict-template-check :application :published)]
    :states           states/post-submitted-states}
   [command]
-  (ok (assoc (verdict/new-verdict-draft template-id command)
-             :filled false)))
+  (ok :verdict-id (verdict/new-verdict-draft template-id command)))
 
 (defquery pate-verdicts
   {:description      "List of verdicts. Item properties:
