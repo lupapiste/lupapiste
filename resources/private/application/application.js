@@ -228,8 +228,11 @@
   }
 
   function showExpiryDate(app) {
-    var allowedOperation = app.primaryOperation.name !== "raktyo-aloit-loppuunsaat" && app.primaryOperation.name !== "jatkoaika";
-    return app.expiryDate > 0 && app.inPostVerdictState && allowedOperation && !app.isArchivingProject;
+    return  app.primaryOperation.name !== "raktyo-aloit-loppuunsaat"
+            && app.primaryOperation.name !== "jatkoaika"
+            && app.expiryDate > 0
+            && app.inPostVerdictState
+            && !app.isArchivingProject;
   }
 
   function initExpiryDate(app) {
