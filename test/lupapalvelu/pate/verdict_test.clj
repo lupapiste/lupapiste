@@ -16,7 +16,8 @@
 (testable-privates lupapalvelu.pate.verdict
                    next-section insert-section
                    general-handler application-deviations
-                   archive-info)
+                   archive-info
+                   jatkoaika-application?)
 
 (facts next-section
   (fact "all arguments given"
@@ -1006,3 +1007,18 @@
           (archive-info (assoc-in v [:data :handler-title] nil))
           => {:verdict-date  8765432
               :verdict-giver "Hank Handler"})))))
+
+(facts "continuation verdict"
+  (fact "jatkoaika-application?"
+    (jatkoaika-application? {:primaryOperation {:name "raktyo-aloit-loppuunsaat"}}) => true
+    (jatkoaika-application? {:primaryOperation {:name "jatkoaika"}}) => true
+    (jatkoaika-application? {:primaryOperation {:name "rivitalo-kerrostalo"}}) => false
+    (jatkoaika-application? {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}}) => false
+    (jatkoaika-application? {:primaryOperation {:name ""}}) => false
+    (jatkoaika-application? nil) => false)
+  (fact "accepted-verdict?" ; TODO Which verdict codes are accepted??
+    (accepted-verdict? {:data {:verdict-code "hyvaksytty"}}) => :hyvaksytty
+    (accepted-verdict? {:data {:verdict-code "myonnetty"}}) => :myonnetty
+    (accepted-verdict? {:data {:verdict-code "evatty"}}) => nil
+    (accepted-verdict? {:data {}}) => nil
+    (accepted-verdict? nil) => nil))

@@ -31,8 +31,8 @@
     (command apikey :update-app-bulletin-op-description :id verdict-given-application-r-id :description "otsikko julkipanoon") => ok?
     (command apikey :approve-application :id verdict-given-application-r-id :lang "fi") => ok?
     (give-verdict apikey verdict-given-application-r-id) => ok?
-    ;; Jatkoaika permit can be applied only for YA type of applications
-    (command apikey :create-continuation-period-permit :id verdict-given-application-r-id) => (partial expected-failure? "error.invalid-permit-type")
+    ;; Jatkoaika permit can be applied also for R type of applications
+    (command apikey :create-continuation-period-permit :id verdict-given-application-r-id) => ok?
 
     ;; Verdict given application, of operation "ya-jatkoaika"
     (let [create-jatkoaika-resp     (command apikey :create-continuation-period-permit :id verdict-given-application-ya-id) => ok?
