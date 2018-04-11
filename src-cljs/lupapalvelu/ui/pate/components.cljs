@@ -206,9 +206,9 @@
                                 sel-end   (.-selectionEnd text-node)
                                 old-text  (or (path/value path state) "")]
                             (reset! replaced* (subs old-text sel-start sel-end))
-                            (update-text (s/join (concat (take sel-start old-text)
-                                                         (str "\n" % "\n")
-                                                         (drop sel-end old-text)))))
+                            (update-text (s/triml (s/join (concat (take sel-start old-text)
+                                                                  (str "\n" % "\n")
+                                                                  (drop sel-end old-text))))))
               :disabled? disabled?
               :clear?    true})]]
           [:div.col-4.col--right

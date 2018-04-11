@@ -23,19 +23,6 @@
   (and (can-edit?)
        (not published)))
 
-(defn update-application-id []
-  (if-let [app-id (js/lupapisteApp.services.contextService.applicationId)]
-    (do (service/fetch-verdict-list app-id)
-        (when (common/reset-if-needed! state/application-id app-id)
-          (do (reset! state/auth-fn js/lupapisteApp.models.applicationAuthModel.ok)
-              (when (can-edit?)
-                (service/fetch-application-verdict-templates app-id))
-              (when (can-edit?)
-                (service/fetch-application-phrases app-id)))))
-    (do (reset! state/template-list [])
-        (reset! state/phrases [])
-        (reset! state/verdict-list nil))))
-
 (defn open-verdict [arg]
   (common/open-page :pate-verdict
                     @state/application-id
@@ -103,18 +90,20 @@
      (new-verdict))])
 
 (rum/defc verdicts < rum/reactive
-  {:will-mount   (fn [state]
-                   (update-application-id)
-                   (assoc state
-                          ::hub-id (hub/subscribe :contextService::enter
-                                                  update-application-id)))
-   :will-unmount (fn [state]
-                   (hub/unsubscribe (::hub-id state))
-                   (dissoc state ::hub-id))}
   []
   (when (and (rum/react state/application-id)
-             (rum/react state/verdict-list))
+             (rum/react state/verdict-list)
+             (rum/react state/auth-fn))
     (verdict-list @state/verdict-list @state/application-id)))
+
+(defn bootstrap-verdicts []
+  (when-let [app-id (js/pageutil.hashApplicationId)]
+    (reset! state/template-list [])
+    (reset! state/verdict-list nil)
+    (service/fetch-verdict-list app-id)
+    (state/refresh-application-auth-model app-id
+                                          #(when (can-edit?)
+                                             (service/fetch-application-verdict-templates app-id)))))
 
 (defn mount-component []
   (when (common/feature? :pate)
@@ -125,4 +114,5 @@
   (when (common/feature? :pate)
     (swap! args assoc
            :dom-id (name domId))
+    (bootstrap-verdicts)
     (mount-component)))

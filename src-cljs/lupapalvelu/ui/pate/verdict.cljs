@@ -160,7 +160,7 @@
      {:on-click #(common/open-page :application @state/application-id :pate-verdict)}
      [:i.lupicon-chevron-left]
      [:span (common/loc :back)]]]
-   (if (and (rum/react state/current-verdict)
+   (if (and (rum/react state/current-verdict-id)
             (rum/react state/auth-fn))
      (let [{dictionary :dictionary :as schema} (shared/verdict-schema
                                                 (shared/permit-type->category (js/lupapisteApp.models.application.permitType))
@@ -175,6 +175,7 @@
 (defn bootstrap-verdict []
   (let [[app-id verdict-id] (js/pageutil.getPagePath)]
     (reset-verdict nil)
+    (service/fetch-application-phrases app-id)
     (state/refresh-application-auth-model app-id
                                           #(service/open-verdict app-id
                                                                  verdict-id

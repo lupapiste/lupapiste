@@ -38,7 +38,7 @@
 
 (defmethod placeholder :application-id
   [_]
-  [:span.formatted (js/lupapisteApp.services.contextService.applicationId)])
+  [:span.formatted (rum/react state/application-id)])
 
 (defmethod placeholder :building
   [{:keys [state path]}]
