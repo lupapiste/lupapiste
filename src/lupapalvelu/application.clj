@@ -397,6 +397,11 @@
           (assoc-in body path val)))
       {} schema-data)))
 
+(defn get-document-schema-names-for-operation [organization schema-version operation]
+  (let [op-info (op/operations (keyword (:name operation)))]
+    (->> (when (not-empty (:org-required op-info)) ((apply juxt (:org-required op-info)) organization))
+         (concat (:required op-info)))))
+
 (defn make-document [application primary-operation-name created manual-schema-datas schema]
   (let [op-info (op/operations (keyword primary-operation-name))
         op-schema-name (:schema op-info)
