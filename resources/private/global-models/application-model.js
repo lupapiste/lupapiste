@@ -3,7 +3,8 @@ LUPAPISTE.EmptyApplicationModel = function() {
   return {startedBy: {firstName: "", lastName: ""},
           closedBy: {firstName: "", lastName: ""},
           warrantyStart: null,
-          warrantyEnd: null};
+          warrantyEnd: null,
+          expiryDate: null};
 };
 
 LUPAPISTE.ApplicationModel = function() {
@@ -74,6 +75,11 @@ LUPAPISTE.ApplicationModel = function() {
   self.metadata = ko.observable();
   self.processMetadata = ko.observable();
   self.kuntalupatunnukset = ko.observable();
+  self['pate-verdicts'] = ko.observable([]);
+  self.continuationPeriods = ko.observable([]);
+  self.expiryDate = ko.observable();
+  self.showExpiryDate = ko.observable();
+  self.showContinuationDate = ko.observable();
 
   // Options
   self.optionMunicipalityHearsNeighbors = ko.observable(false);

@@ -32,6 +32,15 @@
     </span>
   </div>
 
+  <!-- Expiry date: -->
+  <div data-bind="if: showExpiryDate">
+    <p data-bind="ltext: 'application.expiryDate'"></p>
+    <span>
+      <span data-bind="dateString: expiryDate" data-test-id="application-expiry-date" class="application_summary_text"></span>
+      <span data-bind="visible: showContinuationDate, ltext: 'application.continuationPeriod'" class="application_summary_text"></span>
+    </span>
+  </div>
+
   <!-- ID: -->
   <div>
     <p data-bind="ltext: 'application.id'"></p>

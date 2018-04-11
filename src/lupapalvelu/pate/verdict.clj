@@ -3,6 +3,7 @@
             [clojure.set :as set]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-meta-fields :as meta]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.authorization :as auth]
@@ -766,6 +767,16 @@
     (or (= primary-operation "raktyo-aloit-loppuunsaat")
         (= primary-operation "jatkoaika"))))
 
+(defn accepted-verdict? [verdict]
+  (some #{(keyword (get-in verdict [:data :verdict-code]))} [:hyvaksytty :myonnetty])) ; TODO Which verdict codes are accepted??
+
+
+(defn link-permit-application [application]
+  (->> application
+       (meta/enrich-with-link-permit-data)
+       (app/get-link-permit-apps)
+       (first)))
+
 (defn publish-verdict
   "Publishing verdict does the following:
    1. Finalize and publish verdict
@@ -790,8 +801,7 @@
         tasks                  (pate-verdict->tasks verdict buildings command)
         {att-items :items
          update-fn :update-fn} (attachment-items command verdict)
-        verdict                (update verdict :data update-fn)
-        _ (clojure.pprint/pprint verdict)]
+        verdict                (update verdict :data update-fn)]
 
     (log-task-katselmus-errors tasks) ; TODO cancel publishing if validation errors?
     (verdict-update command
@@ -824,9 +834,13 @@
     (tiedonohjaus/mark-app-and-attachments-final! (:id application)
                                                   created)
 
-    (when (jatkoaika-application? application)
-      ;(app/add-continuation-period application)
-      )
+    (when (and (jatkoaika-application? application)
+               (accepted-verdict? verdict))
+      (app/add-continuation-period
+        (link-permit-application application)
+        (:id application)
+        (get-in verdict [:data :handler])
+        (get-in verdict [:data :voimassa])))
 
     (let [verdict-attachment (pdf/create-verdict-attachment command (assoc verdict :published created))
           verdict            (assoc verdict :verdict-attachment verdict-attachment)]
