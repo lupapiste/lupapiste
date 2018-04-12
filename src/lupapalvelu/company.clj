@@ -339,7 +339,7 @@
 
 (defn check-company-authorized [{{auth :auth} :application {{company-id :id} :company} :user}]
   (when auth
-    (let [company-auths (->> (filter (comp #{company-id} :id) auth))]
+    (let [company-auths (filter (comp #{company-id} :id) auth)]
       (when (or (empty? company-auths)
                 (some :invite company-auths))
         (fail :error.company-has-not-accepted-invite)))))
