@@ -15,7 +15,8 @@
   (ActiveMQServers/newActiveMQServer conf))
 
 (defn start []
-  (let [ts (double (System/currentTimeMillis))]
-    (info "Starting Artemis...")
-    (.start embedded-broker)
-    (infof "Started embedded ActiveMQ Artemis message broker, took %.3f s" (/ (- (System/currentTimeMillis) ts) 1000))))
+  (when-not (.isStarted embedded-broker)
+    (let [ts (double (System/currentTimeMillis))]
+      (info "Starting Artemis...")
+      (.start embedded-broker)
+      (infof "Started embedded ActiveMQ Artemis message broker, took %.3f s" (/ (- (System/currentTimeMillis) ts) 1000)))))
