@@ -67,7 +67,9 @@
       (command pena :submit-application :id continue-id) => ok?)
     (fact "Verdict for the continuation application"
       (command sonja :check-for-verdict :id continue-id) => ok?)
+    (fact "After verdict given continuation application is ready"
+      (-> (query-application sonja continue-id) :state) => "ready")
     (fact "Change permits are not supported for continuations"
-      (command pena :create-change-permit :id continue-id) => (partial expected-failure? "error.unsupported-primary-operation"))
+      (command pena :create-change-permit :id continue-id) => (partial expected-failure? "error.command-illegal-state"))
     (fact "Change permit for the original can be created"
       (command pena :create-change-permit :id app-id) => ok?)))

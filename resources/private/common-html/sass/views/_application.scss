@@ -426,6 +426,12 @@ $preamble-min-height: 280px; // at least the size of the map container
           }
           @include hide-pre-verdict-states;
         }
+        &.ready {
+          .ready-box {
+            @include active-state;
+          }
+          @include hide-pre-verdict-states;
+        }
       }
     }
   }
