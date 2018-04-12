@@ -1,5 +1,5 @@
 (ns lupapalvelu.authorization-messages
-  (:require [clostache.parser :as clostache]
+  (:require [cljstache.core :as clostache]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.notifications :as notifications]))
 

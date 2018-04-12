@@ -1,8 +1,8 @@
 (ns lupapalvelu.calendars-api-itest
-  (require [midje.sweet :refer :all]
-           [lupapalvelu.itest-util :refer :all]
-           [clj-time.core :as t]
-           [clj-time.coerce :as tc]))
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.itest-util :refer :all]
+            [clj-time.core :as t]
+            [clj-time.coerce :as tc]))
 
 (facts :ajanvaraus
   (def authority (apikey-for "sonja"))

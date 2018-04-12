@@ -57,7 +57,7 @@
                     :path   path-string
                     :meta   meta-data}))
 
-       (defpage ~path {:keys ~(mapcat keys (vals params)) :as request#}
+       (defpage ~path {:keys ~(vec (mapcat keys (vals params))) :as request#}
            (let [~'user ~(if oauth-scope
                            `(user-for-access-token (request/ring-request))
                            `(or (basic-authentication (request/ring-request))

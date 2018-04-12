@@ -71,11 +71,11 @@
                                                     :code "   HiiHoo  "
                                                     :ends (:starts good))})]
          (fact "Code to id and unchanged properties"
-               back =contains=> {:id               "hiihoo"
-                                 :account5         1
-                                 :account15        2
-                                 :account30        3
-                                 :lastDiscountDate "2017-7-1"})
+               back => (contains {:id               "hiihoo"
+                                  :account5         1
+                                  :account15        2
+                                  :account30        3
+                                  :lastDiscountDate "2017-7-1"}))
          (fact "Period as timestamps"
                (:ends back) => (+ (:starts back) (* (+ (* (+ (* 23 60) 59) 60)
                                                        59)

@@ -1,5 +1,5 @@
 (ns lupapalvelu.printing-order.mylly-client
-  (:require [clostache.parser :as clostache]
+  (:require [cljstache.core :as clostache]
             [clojure.walk :as walk]
             [plumbing.core :refer [for-map]]
             [sade.common-reader :as cr]

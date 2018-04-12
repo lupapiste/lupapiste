@@ -4,16 +4,16 @@
 
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/data.codec "0.1.0"]
                  [org.clojure/data.zip "0.1.1"] ; Note: 0.1.2 breaks lupapalvelu.wfs
                  [org.clojure/data.xml "0.0.8"]
-                 [org.clojure/tools.nrepl "0.2.12"]
+                 [org.clojure/tools.nrepl "0.2.13"]
                  [org.clojure/tools.reader "1.1.3.1"]
                  [org.clojure/tools.trace "0.7.9"]
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/core.memoize "0.5.9"]
-                 [org.clojure/core.async "0.3.443"]
+                 [org.clojure/core.async "0.4.474"]
 
                  ; Web frameworks
                  [ring "1.6.2" :exclusions [commons-fileupload org.clojure/tools.reader]]
@@ -24,13 +24,16 @@
 
                  ; Namespace finder library
                  [bultitude "0.2.8"] ; noir requires 0.2.0
+                 [org.tcrawley/dynapath "1.0.0"]            ; bultitudes requires 0.2.3, but midje needs 1.0.0, should be compatible
 
                  ; MongoDB driver
                  [com.novemberain/monger "3.1.0" :exclusions [[com.google.guava/guava]]]
 
                  ; Logging
-                 [com.taoensso/timbre "4.8.0"]
+                 [com.taoensso/timbre "4.10.0" :exclusions [[io.aviso/pretty]]]
                  [org.slf4j/slf4j-log4j12 "1.7.22"]
+                 ; upgraded pretty to match Midje version, should work with Timbre
+                 [io.aviso/pretty "0.1.34"]
 
                  ;;Hystrix
                  [com.netflix.hystrix/hystrix-clj "1.5.6"]
@@ -39,7 +42,7 @@
                  ; markup processing
                  [enlive "1.1.6"]
                  [endophile "0.1.2" :exclusions [hiccup]]
-                 [de.ubercode.clostache/clostache "1.4.0"]
+                 [cljstache "2.0.1"]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [org.freemarker/freemarker "2.3.23"]
                  ; CSS
@@ -50,7 +53,7 @@
                  [org.mindrot/jbcrypt "0.3m"]
                  [crypto-random "1.2.0" :exclusions [commons-codec]]
                  [org.bouncycastle/bcprov-jdk15on "1.55"]
-                 [pandect "0.6.0"]
+                 [pandect "0.6.1"]
 
                  ; JSON
                  [cheshire "5.7.0"]
@@ -71,7 +74,7 @@
                  [commons-codec "1.10"]
 
                  ; Joda time wrapper
-                 [clj-time "0.12.0"]
+                 [clj-time "0.14.2"]
 
                  ; String case manipulation
                  [camel-snake-kebab "0.4.0"]
@@ -86,8 +89,8 @@
                  [slingshot "0.12.2"]
 
                  ; A Clojure(Script) library for declarative data description and validation
-                 [prismatic/schema "1.1.6"]
-                 [prismatic/schema-generators "0.1.0"]
+                 [prismatic/schema "1.1.9"]
+                 [prismatic/schema-generators "0.1.2"]
 
                  ; MIME type resolution
                  [com.novemberain/pantomime "2.8.0" :exclusions [org.opengis/geoapi org.bouncycastle/bcprov-jdk15on]]
@@ -159,7 +162,7 @@
   :source-paths ["src" "src-cljc"]
   :java-source-paths ["java-src"]
   :cljsbuild {:builds {:rum {:source-paths ^:replace ["src-cljs" "src-cljc"]}}}
-  :profiles {:dev      {:dependencies   [[midje "1.8.3" :exclusions [org.clojure/tools.namespace]]
+  :profiles {:dev      {:dependencies   [[midje "1.9.1"]
                                          [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                          [com.raspasov/clj-ssh "0.5.12"]
                                          [rhizome "0.2.7"]
@@ -168,7 +171,7 @@
                                          [figwheel-sidecar "0.5.15"]
                                          ;; Better Chrome Dev Tools support
                                          [binaryage/devtools "0.9.4"]]
-                        :plugins        [[lein-midje "3.2"]
+                        :plugins        [[lein-midje "3.2.1"]
                                          [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
                                          [lupapiste/lein-buildid "0.4.2"]
                                          [lupapiste/lein-nitpicker "0.5.1"]

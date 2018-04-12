@@ -241,7 +241,7 @@
         stamps (:stamps result)]
 
     (fact "stamps in query result"
-      (keys result) =contains=> :stamps)
+      (keys result) => (contains :stamps))
 
     (fact "two stamps by default"
       (count stamps) => 2)))

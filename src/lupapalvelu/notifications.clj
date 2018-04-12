@@ -4,7 +4,7 @@
             [schema.core :as sc]
             [clojure.set :as set]
             [clojure.string :as s]
-            [clostache.parser :as clostache]
+            [cljstache.core :as clostache]
             [sade.util :refer [future* to-local-date fn->]]
             [sade.env :as env]
             [sade.strings :as ss]

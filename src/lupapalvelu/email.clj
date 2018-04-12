@@ -1,7 +1,7 @@
 (ns lupapalvelu.email
   (:require [clojure.java.io :as io]
             [clojure.walk :refer [postwalk]]
-            [clostache.parser :as clostache]
+            [cljstache.core :as clostache]
             [endophile.core :as endophile]
             [net.cgrand.enlive-html :as enlive]
             [taoensso.timbre :as timbre :refer [warn]]
