@@ -2709,7 +2709,7 @@
 "reader" "fi" "-"
 "reader" "sv" "-"
 "ready.title" "en" ""
-"ready.title" "fi" "Asia on käsitelty"
+"ready.title" "fi" "Asia käsitelty"
 "ready.title" "sv" ""
 "register.accept-terms.label" "en" "I agree to the service"
 "register.accept-terms.label" "fi" "Hyväksyn palvelun"
