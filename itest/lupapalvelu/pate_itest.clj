@@ -961,9 +961,10 @@
                 (command sonja :remove-application-handler :id app-id
                          :handlerId (-> handlers first :id))))
             (fact "Sonja creates verdict draft"
-              (let [draft                          (command sonja :new-pate-verdict-draft
+              (let [{verdict-id :verdict-id}       (command sonja :new-pate-verdict-draft
                                                             :id app-id :template-id template-id)
-                    verdict-id                     (-> draft :verdict :id)
+                    draft                          (query sonja :pate-verdict
+                                                          :id app-id :verdict-id verdict-id)
                     data                           (-> draft :verdict :data)
                     op-id                          (-> data :buildings keys first keyword)
                     {open-verdict  :open
@@ -1354,12 +1355,14 @@
                                :userId ronja-id
                                :roleId sipoo-general-handler-id) => ok?)
                     (fact "New verdict"
-                      (let  [{verdict :verdict}             (command sonja :new-pate-verdict-draft
+                      (let  [{verdict-id :verdict-id}       (command sonja :new-pate-verdict-draft
                                                                      :id app-id
                                                                      :template-id template-id)
+                             {verdict :verdict}             (query sonja :pate-verdict
+                                                                   :id app-id
+                                                                   :verdict-id verdict-id)
                              verdict-date                   (timestamp "27.9.2017")
-                             {data       :data
-                              verdict-id :id}               verdict
+                             {data :data}                   verdict
                              {open-verdict  :open
                               edit-verdict  :edit
                               check-changes :check-changes} (verdict-fn-factory verdict-id)]
@@ -1525,8 +1528,10 @@
                         (check-post-verdict-building-data (query-application sonja app-id)
                                                           doc-id operation-id)))))
                 (fact "Verdict draft to be deleted"
-                  (let  [{verdict :verdict} (command sonja :new-pate-verdict-draft
-                                                     :id app-id
-                                                     :template-id template-id)
-                         {verdict-id :id}   verdict]
+                  (let  [{verdict-id :verdict-id} (command sonja :new-pate-verdict-draft
+                                                           :id app-id
+                                                           :template-id template-id)
+                         {verdict :verdict}       (query sonja :pate-verdict
+                                                         :id app-id
+                                                         :verdict-id verdict-id)]
                     (add-attachment-to-verdict-draft verdict app-id)))))))))))

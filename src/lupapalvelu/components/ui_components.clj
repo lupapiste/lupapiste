@@ -426,7 +426,10 @@
 
    :authority-admin-components {:depends [:common-html]
                    :js (distinct (conj (get-ui-components :authority-admin-components :models) "register-authority-admin-components.js"))
-                   :html (get-ui-components :authority-admin-components :templates)}
+                                :html (get-ui-components :authority-admin-components :templates)}
+   :pate {:depends [:common-html]
+          :html ["pate-verdict.html"]
+          :js ["pate-verdict.js"]}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
@@ -449,17 +452,19 @@
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :copy :mypage :header :debug
-                             :company :analytics :register-company :footer :new-appointment :ui-components]}
+                             :company :analytics :register-company :footer :new-appointment :ui-components
+                             :pate]}
 
    :mycalendar   {:depends [:calendar-view]
                   :js ["mycalendar.js"]
                   :html ["mycalendar.html"]}
 
    :authority-app {:depends [] :js ["authority.js"]}
-   :authority     {:depends [:authority-app :common-html :external-api :authenticated :map :applications
+   :authority     {:depends [:pate :authority-app :common-html :external-api :authenticated :map :applications
                              :integration-message-monitor :application
                              :statement :verdict :neighbors :docgen :create :copy :digitizer :mypage :header :debug
-                             :company :stamp :integration-error :analytics :metadata-editor :footer :mycalendar :ui-components]}
+                             :company :stamp :integration-error :analytics :metadata-editor :footer :mycalendar :ui-components
+                             ]}
 
    :oir-app {:depends [] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment

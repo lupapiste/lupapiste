@@ -183,7 +183,7 @@
                                          :source-map   true}
                         :repl-options   {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]
                                          :timeout          200000}
-                        :cljsbuild      {:builds {:rum {:figwheel {:websocket-host   "lupapiste.local"
+                        :cljsbuild      {:builds {:rum {:figwheel {:websocket-host  :js-client-host
                                                                    :on-jsload        lupapalvelu.ui.ui-components/reload-hook
                                                                    ;; If the figwheel does not connect,
                                                                    ;; turn the heads-up display off.

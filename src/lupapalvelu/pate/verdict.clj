@@ -312,13 +312,7 @@
     (action/update-application command
                                {$push {:pate-verdicts
                                        (sc/validate schemas/PateVerdict draft)}})
-    (let [enriched (enrich-verdict command draft)]
-      {:verdict    (assoc (select-keys enriched
-                                       [:category :schema-version :data
-                                        :modified :published :id])
-                          :inclusions (get-in enriched
-                                              [:template :inclusions]))
-       :references (:references enriched)})))
+    (:id draft)))
 
 (defn verdict-summary [verdict]
   (select-keys verdict [:id :published :modified]))
