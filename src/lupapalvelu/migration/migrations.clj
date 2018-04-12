@@ -3759,6 +3759,35 @@
                          {$unset {:contentType ""
                                   :fileId ""}}))
 
+(defmigration jatkoaikalupa-state-to-ready
+  {:apply-when (pos? (mongo/count :applications {:primaryOperation.name {$in [:raktyo-aloit-loppuunsaat
+                                                                              :jatkoaika]}
+                                                 :state {$in [:verdictGiven
+                                                              :closed]}}))}
+  (let [ts (now)]
+    (mongo/update-by-query :applications
+                           {:primaryOperation.name {$in [:raktyo-aloit-loppuunsaat
+                                                         :jatkoaika]}
+                            :state {$in [:verdictGiven
+                                         :closed]}}
+                           {$set  {:state "ready"}
+                            $push {:history {:state "ready"
+                                             :ts ts
+                                             :user usr/migration-user-summary}}})))
+
+(defmigration muutoslupa-state-to-ready
+  {:apply-when (pos? (mongo/count :applications {:permitSubtype "muutoslupa"
+                                                 :state {$in [:verdictGiven
+                                                              :closed]}}))}
+  (let [ts (now)]
+    (mongo/update-by-query :applications
+                           {:permitSubtype "muutoslupa"
+                            :state {$in [:verdictGiven
+                                         :closed]}}
+                           {$set  {:state "ready"}
+                            $push {:history {:state "ready"
+                                             :ts ts
+                                             :user usr/migration-user-summary}}})))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
