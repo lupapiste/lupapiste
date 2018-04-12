@@ -93,19 +93,26 @@
         {:keys [extra-path match-key] term-path :path} term
         extra-path                                     (path/pathify extra-path)
         term-path                                      (path/pathify term-path)
-        match-key                                      (or match-key item-key)]
-    (->> (path/value (path/pathify (:path schema)) references )
+        match-key                                      (or match-key item-key)
+        target                                         (path/value (path/pathify (:path schema))
+                                                                   references )]
+    (->> (cond->> target
+           (map? target) (map (fn [[k v]]
+                                (assoc v :MAP-KEY k))))
+         ;; TODO: :ignored in schema
          (remove :deleted) ; Safe for non-maps
          (map (fn [x]
                 (let [v (if item-key (item-key x) x)]
                   {:value v
                    :text  (cond
-                            (and match-key term-path) (-> (util/find-by-key match-key
-                                                                            v
-                                                                            (path/value term-path
-                                                                                        references))
-                                                          (get-in (cond->> [(keyword (common/get-current-language))]
-                                                                    extra-path (concat extra-path))))
+                            (and match-key term) (-> (if term-path
+                                                       (util/find-by-key match-key
+                                                                         v
+                                                                         (path/value term-path
+                                                                                     references))
+                                                       x)
+                                                     (get-in (cond->> [(keyword (common/get-current-language))]
+                                                               extra-path (concat extra-path))))
                             item-loc-prefix           (path/loc [item-loc-prefix v])
                             :else                     (path/loc options v))})))
          distinct
@@ -276,7 +283,7 @@
                                   [:i {:class icon}])
                                 (when text?
                                   [:span (path/loc options)])])]
-    (if (show-label? options wrap-label?)
+    (if (show-label? schema wrap-label?)
       [:div.col--vertical
        (common/empty-label :pate-label)
        button]

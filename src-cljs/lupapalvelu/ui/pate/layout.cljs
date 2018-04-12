@@ -247,7 +247,7 @@
                     (let [row-options (path/schema-options options row-schema)]
                       ;; Row visibility
                       (when (path/visible? row-options)
-                        [:div.row {:class (some->> row-schema :css (map name) s/join )}
+                        [:div.row {:class (path/schema-css row-schema)}
                          (map (fn [{:keys [col align] :as cell-schema}]
                                 (let [cell-options (path/schema-options row-options
                                                                         cell-schema)]

@@ -190,7 +190,9 @@
                           (= (first canon-value) ""))))
        (check-items canon-value
                     (map #(get % (:item-key data) %)
-                         (get-in references (get-path data))))))))
+                         (util/pcond->> (get-in references (get-path data))
+                                        map? (map (fn [[k v]]
+                                                    (assoc v :MAP-KEY k))))))))))
 
 (defmethod validate-resolution :phrase-text
   [{:keys [path schema value data] :as options}]

@@ -270,10 +270,12 @@
                                                                  path
                                                                  value)]
       (if data
-        (ok :modified created
-            :filled (template/settings-filled? {:data data}
-                                               category))
-       (template/error-response updated)))))
+        (ok (template/changes-response
+             {:modified created
+              :filled (template/settings-filled? {:data data}
+                                                 category)}
+             updated))
+        (template/error-response updated)))))
 
 ;; ----------------------------------
 ;; Verdict template reviews API

@@ -133,16 +133,22 @@
   (let [kw (util/kw-path id-path key)]
     (swap! (rum/cursor-in _meta [kw]) not)))
 
-(defn css
-  "List of CSS classes based on current :css value and status
-  classes (pate--edit, pate--view) from the latest _meta."
-  [options & other-classes]
-  (->> [(if (meta-value options :editing?) "pate--edit" "pate--view")
-        (some-> options :schema :css)
+(defn schema-css
+  "List of CSS class based on :css property."
+  [schema & other-classes]
+  (->> [(:css schema)
         other-classes]
        flatten
        (remove nil?)
        (map name)))
+
+(defn css
+  "List of CSS classes based on current :css value and status
+  classes (pate--edit, pate--view) from the latest _meta."
+  [options & other-classes]
+  (schema-css (:schema options)
+              (if (meta-value options :editing?) "pate--edit" "pate--view")
+              other-classes))
 
 (defn meta-updated
   "Calls _meta :updated if defined."

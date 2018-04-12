@@ -195,7 +195,7 @@
                            (merge
                             {:settings (:draft (settings organization
                                                          category))}
-                            (when-let [ref-gen (some->> path
+                            #_(when-let [ref-gen (some->> path
                                                         (util/intersection-as-kw [:plans :reviews])
                                                         first)]
                               (hash-map ref-gen
@@ -294,18 +294,22 @@
        keyword))
 
 (defn save-settings-value [organization category timestamp path value]
-  (let [settings-key    (settings-key category)
-        {:keys [path value]
+  (let [settings-key      (settings-key category)
+        {:keys [path value op]
          :as   processed} (schemas/validate-and-process-value (shared/settings-schema category)
                                                               path
                                                               value
                                                               (:draft (settings organization
                                                                                 category)))]
-    (when path  ;; Value could be nil.
-      (mongo/update-by-id :organizations
-                          (:id organization)
-                          {$set {(util/kw-path settings-key :draft path) value
-                                 (util/kw-path settings-key :modified)   timestamp}}))
+    (when op  ;; Value could be nil.
+      (let [mongo-path (util/kw-path settings-key :draft path)]
+        (mongo/update-by-id :organizations
+                            (:id organization)
+                            (assoc-in (if (= op :remove)
+                                        {$unset {mongo-path 1}}
+                                        {$set {mongo-path value}})
+                                      [$set (util/kw-path settings-key :modified)]
+                                      timestamp))))
     processed))
 
 (defn- organization-templates [org-id]

@@ -772,3 +772,8 @@
 "plus" "en" "+"
 "plus" "fi" "+"
 "plus" "sv" "+"
+"pate.add-review" "fi" "Lisää katselmus"
+"pate.add-plan" "fi" "Lisää suunnitelma"
+"pate.review-type" "en" "Type of review"
+"pate.review-type" "fi" "Katselmuksen laji"
+"pate.review-type" "sv" "Typ av syneförrättning"
