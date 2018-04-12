@@ -356,7 +356,7 @@
 ;; Application creation
 ;;
 
-(defn- new-attachment-types-for-operation [organization operation existing-types]
+(defn new-attachment-types-for-operation [organization operation existing-types]
   (->> (org/get-organization-attachments-for-operation organization operation)
        (map (partial apply att-type/attachment-type))
        (filter #(or (att-type/operation-specific? %) (not (att-type/contains? existing-types %))))))
@@ -396,11 +396,6 @@
               val (if (fn? data-value) (data-value application) data-value)]
           (assoc-in body path val)))
       {} schema-data)))
-
-(defn get-document-schema-names-for-operation [organization schema-version operation]
-  (let [op-info (op/operations (keyword (:name operation)))]
-    (->> (when (not-empty (:org-required op-info)) ((apply juxt (:org-required op-info)) organization))
-         (concat (:required op-info)))))
 
 (defn make-document [application primary-operation-name created manual-schema-datas schema]
   (let [op-info (op/operations (keyword primary-operation-name))
@@ -600,6 +595,43 @@
                         user
                         created
                         manual-schema-datas))))
+
+;;
+;; Operation
+;;
+
+(defn add-operation [{{app-state :state tos-function :tosFunction :as application} :application
+                      organization :organization
+                      created :created
+                      :as command}
+                     id
+                     operation]
+  (let [op                 (make-op operation created)
+        new-docs           (make-documents nil created @organization op application)
+        attachments        (:attachments (domain/get-application-no-access-checking id {:attachments true}))
+        new-attachments    (make-attachments created op @organization app-state tos-function :existing-attachments-types (map :type attachments))
+        attachment-updates (multioperation-attachment-updates op @organization attachments)]
+    (action/update-application command {$push {:secondaryOperations  op
+                                               :documents   {$each new-docs}
+                                               :attachments {$each new-attachments}}
+                                        $set  {:modified created}})
+    ;; Cannot update existing array and push new items into it same time with one update
+    (when (not-empty attachment-updates) (action/update-application command attachment-updates))))
+
+(defn change-primary-operation [{:keys [application] :as command} id secondaryOperationId]
+  (let [old-primary-op                       (:primaryOperation application)
+        old-secondary-ops                    (:secondaryOperations application)
+        new-primary-op                       (first (filter #(= secondaryOperationId (:id %)) old-secondary-ops))
+        secondary-ops-without-old-primary-op (remove #{new-primary-op} old-secondary-ops)
+        new-secondary-ops (if old-primary-op ; production data contains applications with nil in primaryOperation
+                            (conj secondary-ops-without-old-primary-op old-primary-op)
+                            secondary-ops-without-old-primary-op)]
+    (when-not (= (:id old-primary-op) secondaryOperationId)
+      (when-not new-primary-op
+        (fail! :error.unknown-operation))
+      ;; TODO update also :app-links apptype if application is linked to other apps (loose WriteConcern ok?)
+      (action/update-application command {$set {:primaryOperation    new-primary-op
+                                                :secondaryOperations new-secondary-ops}}))))
 
 ;;
 ;; Link permit

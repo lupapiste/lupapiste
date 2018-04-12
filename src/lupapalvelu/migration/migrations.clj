@@ -3775,11 +3775,7 @@
         waste-schema-name (waste-schemas/construction-waste-plan-for-organization organization)
         application-does-not-contain-waste-plan? (->> application
                                                       :documents
-                                                      (filter #(-> %
-                                                                   :schema-info
-                                                                   :name
-                                                                   (= waste-schema-name)))
-                                                      (empty?))
+                                                      (some #(-> % :schema-info :name (= waste-schema-name))))
         [op-name _] (when application-does-not-contain-waste-plan? ;; get the operation that needs the waste document
                       (->> (cons (:primaryOperation application) (:secondaryOperations application))
                            (reduce #(assoc %1 (keyword (:name %2)) (get-document-schema-names-for-operation organization %2)) {})
@@ -3798,12 +3794,7 @@
         organization (:organization application)
         application-does-not-contain-rakennuspaikka? (->> application
                                                           :documents
-                                                          (filter #(-> %
-                                                                       :schema-info
-                                                                       :type
-                                                                       (keyword)
-                                                                       (= :location)))
-                                                          (empty?))
+                                                          (some #(-> % :schema-info :type (keyword) (= :location))))
         [op-name doc-names] (when application-does-not-contain-rakennuspaikka? ;; get the operation that needs the rakennuspaikka document
                               (->> (cons (:primaryOperation application) (:secondaryOperations application))
                                    (reduce #(assoc %1 (keyword (:name %2)) (get-document-schema-names-for-operation organization %2)) {})

@@ -5,224 +5,81 @@
             [midje.util :refer [testable-privates]]))
 
 (testable-privates lupapalvelu.application-replace-operation
-                   get-operation-schemas get-required-document-schema-names-for-operations
-                   replace-old-operation-doc-with-new pick-old-documents-that-new-op-needs
-                   copy-docs-from-old-op-to-new get-attachment-types change-operation-in-attachments
-                   copy-attachments-from-old-op-to-new get-new-operations copy-rakennuspaikka-data)
+                   get-operation-by-key replace-op-in-attachment single-operation-attachment?
+                   get-existing-operation-attachment-types non-empty-attachment? coll-contains-not-type?
+                   updated-new-op-attachments remove-new-attachment-duplicates required-attachments-for-operations
+                   remove-not-needed-attachment-templates)
 
-(facts "copying documents and attachments when replacing primary operation"
-       (let [org              {:id "753-R"}
-             old-op           {:name "kerrostalo-rivitalo"
-                               :id "primaarinen-operaatio"}
-             new-op           {:name "teollisuusrakennus"
-                               :id "primaarinen-operaatio"}
-             secondary-op     {:name "auto-katos"
-                               :id "sekundaarinen-operaatio"}
-             new-ops          [new-op secondary-op]
+(facts "attachments when replacing primary operation"
+       (let [op-1           {:name "kerrostalo-rivitalo"
+                               :id "1"}
+             op-2           {:name "teollisuusrakennus"
+                               :id "2"}
+             op-3           {:name "auto-katos"
+                               :id "3"}
+             attachment-1 {:type {:type-group "paapiirustus" :type-id "julkisivupiirros"}
+                           :versions [{:version {:major 0 :minor 1}}]
+                           :id "1"
+                           :op [op-1]}
+             attachment-2 {:type {:type-group "paapiirustus" :type-id "asemapiirros"}
+                           :versions [{:version {:major 0 :minor 1}}]
+                           :id "2"
+                           :op [op-1 op-2]}
+             attachment-3 {:type {:type-group "paapiirustus" :type-id "pohjapiirustus"}
+                           :versions [{:version {:major 0 :minor 1}}]
+                           :id "3"
+                           :op [op-3]}
+             attachment-4 {:type {:type-group "paapiirustus" :type-id "pohjapiirustus"}
+                           :versions []
+                           :id "4"
+                           :op [op-1]}
+             attachment-5 {:type {:type-group "paapiirustus" :type-id "leikkauspiirros"}
+                           :versions []
+                           :id "5"
+                           :op [op-1]}
+             attachment-6 {:type {:type-group "paapiirustus" :type-id "julkisivupiirros"}
+                           :versions []
+                           :id "6"
+                           :op [op-1]}]
 
-             old-op-doc       {:schema-info {:name "uusiRakennus" :op old-op :description "vanha"}
-                               :data        {:kaytto {:kayttotarkoitus {:value "very big house in the country"}}}}
-             new-op-doc       {:schema-info {:name "uusiRakennus" :op   new-op}}
-             secondary-op-doc {:schema-info {:name "kaupunkikuvatoimenpide" :op secondary-op}
-                               :data        {:kayttotarkoitus nil}}
-             hakija-r-doc     {:schema-info {:name "hakija-r" :description "vanha"}
-                               :data        {:henkilo {:henkilotiedot {:etunimi "city dweller" :sukunimi "successfull fella"}}}}
-             old-docs         [old-op-doc
-                               secondary-op-doc
-                               hakija-r-doc
-                               {:schema-info {:name "hankkeen-kuvaus" :description "vanha"}}
-                               {:schema-info {:name "rakennuspaikka"
-                                              :type :location}
-                                :data {:kaavatilanne {:value "asemakaava"}}}]
-             new-docs         [new-op-doc
-                               secondary-op-doc
-                               {:schema-info {:name "kaupunkikuvatoimenpide" :op secondary-op}
-                                :data        {:kayttotarkoitus nil}}
-                               {:schema-info {:name "hankkeen-kuvaus"}}
-                               {:schema-info {:name "paatoksen-toimitus-rakval"}}
-                               {:schema-info {:name "kaupunkikuvatoimenpide"}}
-                               {:schema-info {:name "hakija-r"}
-                                :data        {:henkilo {:henkilotiedot {:etunimi nil :sukunimi nil}}}}
-                               {:schema-info {:name "rakennuspaikka"
-                                              :type :location}
-                                :data {:kaavatilanne {:value nil}}}]]
+         (fact "getting operations in application by key and value pair"
+           (get-operation-by-key {:secondaryOperations [{:a 1 :c "d"} {:b 2 :e "f"}]} :a 1)
+           => {:a 1 :c "d"})
 
-         (fact "new operations collection when primary operation is replaced"
-               (let [mini-app {:primaryOperation old-op
-                               :secondaryOperations [secondary-op]}]
-                 (get-new-operations mini-app (:id old-op) new-op)
-                 => [new-op secondary-op]))
+         (fact "replacing operation in attachment"
+           (replace-op-in-attachment attachment-1 op-1 op-2) => (assoc attachment-1 :op [op-2])
+           (replace-op-in-attachment attachment-2 op-1 op-3) => (assoc attachment-2 :op [op-3 op-2]))
+           (replace-op-in-attachment attachment-1 op-2 op-3) => (assoc attachment-1 :op [op-3 op-1])
 
-         (fact "get operation schemas by name"
-               (set (get-operation-schemas org "kerrostalo-rivitalo"))
-               => #{"hakija-r" "hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "rakennusjatesuunnitelma"}
+         (fact "getting attachments that can only belong to one operation"
+           (single-operation-attachment? op-1 attachment-1) => true
+           (single-operation-attachment? op-2 attachment-2) => false
+           (single-operation-attachment? op-2 attachment-1) => false)
 
-               (set (get-operation-schemas org "aloitusoikeus"))
-               => #{"maksaja" "hakija-r"})
+         (fact "get attachment types for existing attachments"
+           (get-existing-operation-attachment-types [attachment-1 attachment-2 attachment-3 attachment-4] op-1)
+           => #{{:type-group "paapiirustus" :type-id "julkisivupiirros"} {:type-group "paapiirustus" :type-id "pohjapiirustus"}}
 
-         (fact "multiple operations need lots of documents"
-               (get-required-document-schema-names-for-operations org new-ops)
-               => (clojure.set/union #{"hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "rakennusjatesuunnitelma"}
-                                     #{"hakija-r" "hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"}))
+           (get-existing-operation-attachment-types [attachment-1 attachment-2 attachment-3 attachment-4] op-2)
+           => #{}
 
-         (fact "replacing the operation document"
-               (replace-old-operation-doc-with-new old-docs (:id old-op) new-docs)
-               => [new-op-doc secondary-op-doc])
+           (get-existing-operation-attachment-types [attachment-1 attachment-2 attachment-3 attachment-4] op-3)
+           => #{{:type-group "paapiirustus" :type-id "pohjapiirustus"}})
 
-         (fact "picking relevant docs from old docs"
-               (pick-old-documents-that-new-op-needs new-docs old-docs "hakija-r")
-               => [hakija-r-doc])
+         (fact "nonempty attachments are nonempty"
+           (non-empty-attachment? attachment-1) => true
+           (non-empty-attachment? attachment-4) => false)
 
-         (fact "rakennuspaikka data persists"
-               (let [old-doc-1 {:id "old-rakennuspaikka"
-                                :schema-info {:name "rakennuspaikka-ilman-ilmoitusta"
-                                              :type :location}
-                                :data {:kiinteisto {:maaraalaTunnus {:value  "0000"}}
-                                       :hallintaperuste {:value "oma"}
-                                       :kaavatilanne {:value "asemakaava"}}}
-                     old-doc-2 {:id "old-rakennuspaikka"
-                                :schema-info {:name "rakennuspaikka"
-                                              :type :location}
-                                :data {:kiinteisto {:maaraalaTunnus {:value  "0000"}}
-                                       :hallintaperuste {:value "oma"}
-                                       :kaavatilanne {:value "asemakaava"}
-                                       :hankkeestaIlmoitettu {:hankkeestaIlmoitettuPvm {:value "05.04.2018"}}}}
-                     new-doc-1 {:id "new-rakennuspaikka"
-                                :schema-info {:name "rakennuspaikka"
-                                              :type :location}
-                                :data {:kiinteisto {:maaraalaTunnus {:value nil}}
-                                       :hallintaperuste {:value nil}
-                                       :kaavanaste {:value nil}
-                                       :kaavatilanne {:value nil}
-                                       :hankkeestaIlmoitettu {:hankkeestaIlmoitettuPvm {:value nil}}}}
-                     new-doc-2 {:id "new-rakennuspaikka"
-                                :schema-info {:name "rakennuspaikka-ilman-ilmoitusta"
-                                              :type :location}
-                                :data {:kiinteisto {:maaraalaTunnus {:value nil}}
-                                       :hallintaperuste {:value nil}
-                                       :kaavanaste {:value nil}
-                                       :kaavatilanne {:value nil}}}]
+         (fact "a collection of attachments has the attachment in question"
+           (coll-contains-not-type? [attachment-1 attachment-2 attachment-3] attachment-3) => false
+           (coll-contains-not-type? [attachment-1 attachment-2 attachment-3] attachment-5) => true)
 
-                 (copy-rakennuspaikka-data [hakija-r-doc old-doc-1] [hakija-r-doc new-doc-1])
-                 => [{:id "new-rakennuspaikka"
-                      :schema-info {:name "rakennuspaikka"
-                                    :type :location}
-                      :data {:kiinteisto {:maaraalaTunnus {:value  "0000"}}
-                             :hallintaperuste {:value "oma"}
-                             :kaavanaste {:value nil}
-                             :kaavatilanne {:value "asemakaava"}
-                             :hankkeestaIlmoitettu {:hankkeestaIlmoitettuPvm {:value nil}}}}
-                     hakija-r-doc]
+         (fact "new operation gets to keep all uploaded attachments, and those empty attachment that don't have uploded attachment"
+           (updated-new-op-attachments [] [attachment-1 attachment-3])
+           => [attachment-1 attachment-3]
 
-                 (copy-rakennuspaikka-data [old-doc-2] [new-doc-2])
-                 => [{:id "new-rakennuspaikka"
-                      :schema-info {:name "rakennuspaikka-ilman-ilmoitusta"
-                                    :type :location}
-                      :data {:kiinteisto {:maaraalaTunnus {:value  "0000"}}
-                             :hallintaperuste {:value "oma"}
-                             :kaavanaste {:value nil}
-                             :kaavatilanne {:value "asemakaava"}}}]
+           (updated-new-op-attachments [attachment-4 attachment-5] [])
+           => [attachment-5 attachment-4]
 
-                 (copy-rakennuspaikka-data [old-doc-1] [old-doc-1])
-                 => [old-doc-1]))
-
-         (fact "merging relevant old documents to new"
-               (let [merged-docs (copy-docs-from-old-op-to-new {:documents old-docs} org (:id old-op) new-ops new-docs)
-                     expected    [new-op-doc
-                                  secondary-op-doc
-                                  {:schema-info {:name "rakennuspaikka"
-                                                 :type :location}
-                                   :data {:kaavatilanne {:value "asemakaava"}}}
-                                  hakija-r-doc
-                                  {:schema-info {:name "paatoksen-toimitus-rakval"}}
-                                  {:schema-info {:name "hankkeen-kuvaus" :description "vanha"}}]]
-                 merged-docs => expected))
-
-         (let [old-attachments [{:type {:type-id "asemapiirros"
-                                        :type-group "paapiirustus"}
-                                 :versions [{:version {:major 0
-                                                       :minor 1}}
-                                            {:version {:major 1
-                                                       :minor 1}}]
-                                 :id "1"
-                                 :op nil}
-                                {:type {:type-id "valtakirja"
-                                        :type-group "hakija"}
-                                 :versions [{:version {:major 0
-                                                       :minor 1}}]
-                                 :id "2"
-                                 :op [old-op]}
-                                {:type {:type-id "muu"
-                                        :type-group "muut"}
-                                 :versions [{:version {:major 0
-                                                       :minor 1}}]
-                                 :id "3"
-                                 :op nil}]
-               new-attachments [{:type {:type-id "tutkintotodistus"
-                                        :type-group "osapuolet"}
-                                 :versions []
-                                 :id "4"
-                                 :op nil}]]
-
-           (fact "getting attachment types"
-                 (get-attachment-types old-attachments)
-                 => #{{:type-id "asemapiirros"
-                       :type-group "paapiirustus"}
-                      {:type-id "valtakirja"
-                       :type-group "hakija"}
-                      {:type-id    "muu"
-                       :type-group "muut"}})
-
-           (fact "changing operation in attachment"
-                 (change-operation-in-attachments old-op (first new-ops) old-attachments)
-                 => [{:type {:type-id    "asemapiirros"
-                             :type-group "paapiirustus"}
-                      :versions [{:version {:major 0
-                                            :minor 1}}
-                                 {:version {:major 1
-                                            :minor 1}}]
-                      :id "1"
-                      :op nil}
-                     {:type {:type-id "valtakirja"
-                             :type-group "hakija"}
-                      :versions [{:version {:major 0
-                                            :minor 1}}]
-                      :id "2"
-                      :op [new-op]}
-                     {:type     {:type-id    "muu"
-                                 :type-group "muut"}
-                      :versions [{:version {:major 0
-                                            :minor 1}}]
-                      :id       "3"
-                      :op       nil}])
-
-
-           (fact "attachments copy as they should"
-                 (sort-by :id (copy-attachments-from-old-op-to-new {:attachments old-attachments} (first new-ops) new-attachments))
-                 => [{:type     {:type-id    "asemapiirros"
-                                 :type-group "paapiirustus"}
-                      :versions [{:version {:major 0
-                                            :minor 1}}
-                                 {:version {:major 1
-                                            :minor 1}}]
-                      :id       "1"
-                      :op       nil}
-                     {:type     {:type-id    "valtakirja"
-                                 :type-group "hakija"}
-                      :versions [{:version {:major 0
-                                            :minor 1}}]
-                      :id       "2"
-                      :op       [new-op]}
-                     {:type     {:type-id    "muu"
-                                 :type-group "muut"}
-                      :versions [{:version {:major 0
-                                            :minor 1}}]
-                      :id       "3"
-                      :op       nil}
-                     {:type     {:type-id    "tutkintotodistus"
-                                 :type-group "osapuolet"}
-                      :versions []
-                      :id       "4"
-                      :op       nil}])))
-       (against-background (lupapalvelu.operations/common-rakval-org-schemas anything) => "rakennusjatesuunnitelma")
-  )
+           (updated-new-op-attachments [attachment-4 attachment-5] [attachment-1 attachment-3])
+           => [attachment-5 attachment-1 attachment-3])))

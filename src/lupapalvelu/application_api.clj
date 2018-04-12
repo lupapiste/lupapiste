@@ -486,11 +486,9 @@
    :input-validators [operation-validator]
    :pre-checks       [add-operation-allowed?
                       multiple-operations-supported?]}
-  [{{app-state :state
-     tos-function :tosFunction :as application} :application
-    organization :organization
-    created :created :as command}]
-  (let [op (app/make-op operation created)
+  [command]
+  (app/add-operation command id operation)
+  #_(let [op (app/make-op operation created)
         new-docs (app/make-documents nil created @organization op application)
         attachments (:attachments (domain/get-application-no-access-checking id {:attachments true}))
         new-attachments (app/make-attachments created op @organization app-state tos-function :existing-attachments-types (map :type attachments))
@@ -527,7 +525,9 @@
 
                  {:required [:application/edit-operation]}]}
   [{:keys [application] :as command}]
-  (let [old-primary-op (:primaryOperation application)
+  (app/change-primary-operation command id secondaryOperationId)
+  (ok)
+  #_(let [old-primary-op (:primaryOperation application)
         old-secondary-ops (:secondaryOperations application)
         new-primary-op (first (filter #(= secondaryOperationId (:id %)) old-secondary-ops))
         secondary-ops-without-old-primary-op (remove #{new-primary-op} old-secondary-ops)
@@ -558,7 +558,8 @@
                       (partial action/non-blank-parameters [:id :opId :operation])]
    :pre-checks       [replace-operation-allowed-pre-check]}
   [command]
-  (replace-operation/replace-operation command opId operation))
+  (replace-operation/replace-operation command opId operation)
+  (ok))
 
 (defcommand change-permit-sub-type
   {:parameters       [id permitSubtype]
