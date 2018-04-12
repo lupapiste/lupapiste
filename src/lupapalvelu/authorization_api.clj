@@ -270,7 +270,7 @@
    :parameters  [id apply-submit-restriction]
    :permissions [{:required [:application/edit]}]
    :pre-checks  [company/authorized-to-apply-submit-restriction-to-other-auths
-                 company/check-invitation-accepted]}
+                 company/check-company-authorized]}
   [{{user-id :id {company-id :id} :company} :user application :application :as command}]
   (let [auth (or (auth/get-auth application company-id)
                  (auth/get-auth application user-id))]
