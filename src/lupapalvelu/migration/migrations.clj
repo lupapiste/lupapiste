@@ -3763,6 +3763,11 @@
                          {$unset {:contentType ""
                                   :fileId ""}}))
 
+(defn- get-document-schema-names-for-operation [organization operation]
+  (let [op-info (op/operations (keyword (:name operation)))]
+    (->> (when (not-empty (:org-required op-info)) ((apply juxt (:org-required op-info)) organization))
+         (concat (:required op-info)))))
+
 (defn waste-document-fix [lp-id]
   (let [application (domain/get-application-no-access-checking lp-id)
         schema-version (:schema-version application)
@@ -3777,7 +3782,7 @@
                                                       (empty?))
         [op-name _] (when application-does-not-contain-waste-plan? ;; get the operation that needs the waste document
                       (->> (cons (:primaryOperation application) (:secondaryOperations application))
-                           (reduce #(assoc %1 (keyword (:name %2)) (application/get-document-schema-names-for-operation organization schema-version %2)) {})
+                           (reduce #(assoc %1 (keyword (:name %2)) (get-document-schema-names-for-operation organization %2)) {})
                            (filter (fn [[_ v]] ((set v) waste-schema-name)))
                            (first)))
         waste-document (when op-name
@@ -3801,7 +3806,7 @@
                                                           (empty?))
         [op-name doc-names] (when application-does-not-contain-rakennuspaikka? ;; get the operation that needs the rakennuspaikka document
                               (->> (cons (:primaryOperation application) (:secondaryOperations application))
-                                   (reduce #(assoc %1 (keyword (:name %2)) (application/get-document-schema-names-for-operation organization schema-version %2)) {})
+                                   (reduce #(assoc %1 (keyword (:name %2)) (get-document-schema-names-for-operation organization %2)) {})
                                    (filter (fn [[_ v]] (let [doc-set (set v)] (or (doc-set "rakennuspaikka") (doc-set "rakennuspaikka-ilman-ilmoitusta")))))
                                    (sort-by (fn [[k _]] k))
                                    (first)))
