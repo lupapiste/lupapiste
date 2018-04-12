@@ -6,6 +6,10 @@
 (apply-remote-fixture "submit-restriction")
 
 (facts "submit restriction"
+  (fact "company user can create application and restrict submission"
+    (let [app-id (create-app-id erkki)]
+      (query erkki :authorized-to-apply-submit-restriction-to-other-auths :id app-id) => ok?
+      (command erkki :toggle-submit-restriction-for-other-auths :id app-id :apply-submit-restriction true) => ok?))
   (facts "enable submit restriction in approve-invite"
     (fact "pena invites Esimerkki company"
       (command pena :company-invite :id default-app-id :company-id "esimerkki") => ok?)

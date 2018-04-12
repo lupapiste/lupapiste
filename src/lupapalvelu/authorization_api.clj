@@ -5,7 +5,7 @@
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.core :refer [ok fail fail! unauthorized]]
-            [sade.util :as util]
+            [sade.util :as util :refer [=as-kw]]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application notify] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.authorization :as auth]
@@ -118,13 +118,22 @@
       :company (company/authorized-to-apply-submit-restriction-to-other-auths command)
       (fail :error.not-allowed-to-apply-submit-restriction))))
 
+(defn submitRestrictor-company-authorized [{{:keys [invite-type]} :data
+                                            company :company
+                                            :as command}]
+  (when (and invite-type (not (=as-kw invite-type :company)))
+    (when-let [company (and company @company)]
+      (when (:submitRestrictor company)
+        (company/check-company-authorized command)))))
+
 (defcommand approve-invite
   {:parameters [id]
    :optional-parameters [invite-type apply-submit-restriction]
    :user-roles #{:applicant}
    :user-authz-roles roles/default-authz-reader-roles
    :states     states/all-application-states
-   :pre-checks [authorized-to-apply-submit-restriction]}
+   :pre-checks [authorized-to-apply-submit-restriction
+                submitRestrictor-company-authorized]}
   [{created :created  {user-id :id {company-id :id company-role :role} :company :as user} :user application :application :as command}]
   (let [auth-id       (cond (not (util/=as-kw invite-type :company)) user-id
                             (util/=as-kw company-role :admin)        company-id)
