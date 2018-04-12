@@ -1,6 +1,5 @@
 (ns lupapalvelu.server
   (:require [clojure.java.io :as io]
-            [clojure.string :as s]
             [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [noir.core :refer [defpage]]
             [noir.server :as server]
@@ -11,7 +10,8 @@
             [sade.security-headers :as headers]
             [sade.dummy-email-server]
             [sade.util :as util]
-            [lupapalvelu.integrations.activemq :as activemq]
+            [sade.strings :as ss]
+            [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.actions-api]
             [lupapalvelu.admin-api]
             [lupapalvelu.appeal-api]
@@ -143,7 +143,7 @@
                 env/target-env
                 env/build-number
                 (:git-branch env/buildinfo)
-                (s/join failures))]
+                (ss/join failures))]
       (email/send-email-message (env/value :technical-contact) "Critical: Migration failure!" [msg msg])))
 
   (mongo/ensure-indexes)
@@ -235,7 +235,7 @@
   (stop-jetty!)
   (stop-jmx-server!)
   (stop-nrepl!)
-  (activemq/close-all!)
+  (jms/close-all!)
   (mongo/disconnect!))
 
 (defn -main [& _]
@@ -247,7 +247,7 @@
     (if (java.awt.GraphicsEnvironment/isHeadless) "headless" "headful")
     (System/getProperty "javax.net.ssl.trustStore"))
   (info "Running on Clojure" (clojure-version))
-  (info "ImageIO: Registered image MIME types:" (s/join " " (ImageIO/getReaderMIMETypes)))
+  (info "ImageIO: Registered image MIME types:" (ss/join " " (ImageIO/getReaderMIMETypes)))
 
   (init!)
   (start-jetty!)

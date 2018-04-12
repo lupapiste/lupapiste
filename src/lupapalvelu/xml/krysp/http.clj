@@ -11,7 +11,7 @@
             [sade.util :as util]
             [schema.core :as sc]
             [lupapalvelu.cookie :as lupa-cookies]
-            [lupapalvelu.integrations.activemq :as activemq]
+            [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.integrations.messages :as imessages]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]))
@@ -71,15 +71,15 @@
           (update :headers merge (create-headers (:headers http-conf)))
           (wrap-authentication http-conf)))))
 
-(def kuntagml-consumer
-  (activemq/register-consumer
+#_(def kuntagml-consumer
+  (jms/register-consumer
     "application.kuntagml.http"
     message-handler))
 
 (sc/defn ^:always-validate send-xml-jms
   [type :- (apply sc/enum org/endpoint-types) xml :- sc/Str http-conf :- org/KryspHttpConf]
   (let [url (create-url type http-conf)]
-    (activemq/send-jms-message
+    (jms/send-jms-message
       "application.kuntagml.http"
       (prn-str {:url url :xml xml :http-conf http-conf}))))
 
@@ -92,7 +92,7 @@
                        :transferType        "http" :format "xml" :created (now)
                        :status              "processing" :initator (select-keys user [:id :username])
                        :application         (select-keys application [:id :organization])}))
-    (if (env/feature? :jms-kuntagml)
+    (if (env/feature? :jms)
       (send-xml-jms type xml http-conf)
       (POST type xml http-conf))
     (infof "KuntaGML (type: %s) sent via HTTP successfully to partner %s" (name type) (:partner http-conf))

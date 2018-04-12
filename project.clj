@@ -130,7 +130,8 @@
                  [org.geotools/gt-referencing "18.1"]
                  [org.geotools/gt-epsg-wkt "18.1"]
 
-                 [clamq/clamq-activemq "0.4"]
+                 ; Message Queue
+                 [org.apache.activemq/artemis-jms-client "2.5.0"]
 
                  ;; Lupapiste libraries
                  ; Oskari map (https://github.com/lupapiste/oskari)
@@ -167,6 +168,7 @@
   :profiles {:dev      {:dependencies   [[midje "1.9.1"]
                                          [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                          [com.raspasov/clj-ssh "0.5.12"]
+                                         [org.apache.activemq/artemis-jms-server "2.5.0"]
                                          [rhizome "0.2.7"]
                                          [pdfboxing "0.1.13"]
                                          [com.cemerick/piggieback "0.2.2"]
