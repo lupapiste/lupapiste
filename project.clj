@@ -132,6 +132,7 @@
 
                  ; Message Queue
                  [org.apache.activemq/artemis-jms-client "2.5.0"]
+                 [com.taoensso/nippy "2.14.0"]
 
                  ;; Lupapiste libraries
                  ; Oskari map (https://github.com/lupapiste/oskari)
