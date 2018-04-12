@@ -619,9 +619,9 @@
          (upload-attachment foreman application-id {:id new-main-attachment} true) => new-main-attachment)
 
        (fact "foreman CAN upload a new attachment to foreman application"
-         (upload-attachment foreman foreman-app-id {:id ""} true) => ss/not-blank?)
+         (upload-attachment foreman foreman-app-id nil true) => ss/not-blank?)
        (fact "applicant CAN upload a new attachment to foreman application"
-         (upload-attachment applicant foreman-app-id {:id ""} true) => ss/not-blank?)
+         (upload-attachment applicant foreman-app-id nil true) => ss/not-blank?)
 
        (fact "foreman CAN copy own attachments to foreman application"
          (command foreman :update-user :firstName "Teppo" :lastName "Nieminen" :architect true) => ok?

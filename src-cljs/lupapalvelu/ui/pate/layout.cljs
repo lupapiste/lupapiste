@@ -177,7 +177,7 @@
   [_ {:keys [schema state path] :as options}]
   (pate-components/sandwich (assoc schema
                                    :class :sandwich__view)
-                            [:span (path/value path state)]))
+                            [:span (js/util.finnishDate (path/value path state))]))
 
 (defmethod view-component :select
   [_ {:keys [schema state path] :as options}]
@@ -201,7 +201,7 @@
   (let [items (map-indexed
                (fn [i item-schema]
                  (let [item-options (path/schema-options options item-schema)]
-                   (when (path/visible? item-options)
+                   (when (path/item-visible? item-options)
                       {:component [:div.item
                                    {:key   (str "item-" i)
                                     :class (path/css item-options
@@ -252,7 +252,7 @@
                                 (let [cell-options (path/schema-options row-options
                                                                         cell-schema)]
                                   ;; Cell visibility
-                                  (when (path/visible? cell-options)
+                                  (when (path/item-visible? cell-options)
                                     [:div {:class (path/css cell-options
                                                             (str "col-" (or col 1))
                                                             (when align

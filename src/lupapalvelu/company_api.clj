@@ -281,5 +281,5 @@
 (defquery authorized-to-apply-submit-restriction-to-other-auths
   {:permissions [{:required []}]
    :pre-checks  [com/authorized-to-apply-submit-restriction-to-other-auths
-                 com/check-invitation-accepted]}
+                 com/check-company-authorized]}
   [_])

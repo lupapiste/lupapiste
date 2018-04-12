@@ -310,6 +310,19 @@ div.pate-settings-editor {
 
 // Verdicts
 
+div.pate-verdict-page {
+  padding: 2em 2em;
+}
+
+div.pate-spin {
+  width: 100%;
+  text-align: center;
+  > i {
+    display: block;
+    font-size: 4em;
+  }
+}
+
 table.pate-verdicts-table {
   width: initial;
   @include no-row-hover;

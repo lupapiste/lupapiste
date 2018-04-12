@@ -10,10 +10,10 @@
             [sade.util :as util]
             [lupapiste-commons.attachment-types :as attachment-types]
             [lupapalvelu.document.document :as doc]
+            [lupapalvelu.document.approval :as approval]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.parties-canonical]
             [lupapalvelu.document.tools :as doc-tools]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
@@ -90,7 +90,7 @@
   (= :suunnittelija (doc-tools/doc-subtype document)))
 
 (defn- non-approved? [document]
-  (or (not (doc/approved? document))
+  (or (not (approval/approved? document))
       (pos? (model/modifications-since-approvals document))))
 
 (defn- remove-non-approved-designers [application]
@@ -99,8 +99,11 @@
 (defn- created-before-verdict? [application document]
   (not (doc/created-after-verdict? document application)))
 
+(defn- approved-before-verdict? [application document]
+  (not (doc/approved-after-verdict? document application)))
+
 (defn- remove-pre-verdict-designers [application]
-  (update application :documents #(remove (every-pred designer-doc? (partial created-before-verdict? application)) %)))
+  (update application :documents #(remove (every-pred designer-doc? (partial approved-before-verdict? application)) %)))
 
 (defn- remove-disabled-documents [application]
   (update application :documents (fn [docs] (remove :disabled docs))))

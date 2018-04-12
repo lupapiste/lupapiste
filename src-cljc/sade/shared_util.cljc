@@ -56,6 +56,16 @@
        (apply set/difference)
        vec))
 
+(defn union-as-kw
+  "Union of given collections as keywords. The result is a keyword list
+  with no nils, no duplicates."
+  [& colls]
+  (->> colls
+       (apply concat)
+       (remove nil?)
+       (map keyword)
+       distinct))
+
 (defn filter-map-by-val
   "Returns the mapping for which the value satisfies the predicate.
   (filter-map-by-val pos? {:a 1 :b -1}) => {:a 1}"

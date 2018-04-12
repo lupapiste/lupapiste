@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.model-test
   (:require [midje.sweet :refer :all]
             [lupapalvelu.document.model :refer :all]
+            [lupapalvelu.document.approval :as appr]
             [lupapalvelu.document.validators :refer [valid-against? invalid-with? valid?]]
             [lupapalvelu.document.schemas :as schemas]
             [sade.util :as util]))
@@ -386,38 +387,6 @@
             (apply-update [:rakennuksenOmistajat :0 :omistajalaji] "other")
             (apply-update [:rakennuksenOmistajat :0 :muu-omistajalaji] "")) => (invalid-with? schema [:tip "illegal-value:required"]))))))
 
-(fact "apply-approval"
-  (apply-approval {} nil ..status.. {:id ..id.. :firstName ..fn.. :lastName ..ln..} ..now..)
-  =>
-  {:meta {:_approved {:value ..status..
-                      :user {:id ..id.. :firstName ..fn.. :lastName ..ln..}
-                      :timestamp ..now..}}}
-  (apply-approval {} [] ..status.. {:id ..id.. :firstName ..fn.. :lastName ..ln..} ..now..)
-  =>
-  {:meta {:_approved {:value ..status..
-                      :user {:id ..id.. :firstName ..fn.. :lastName ..ln..}
-                      :timestamp ..now..}}}
-  (apply-approval {} [:a] ..status.. {:id ..id.. :firstName ..fn.. :lastName ..ln..} ..now..)
-  =>
-  {:meta {:a {:_approved {:value ..status..
-                          :user {:id ..id.. :firstName ..fn.. :lastName ..ln..}
-                          :timestamp ..now..}}}}
-  (apply-approval {} [:a :b] ..status.. {:id ..id.. :firstName ..fn.. :lastName ..ln..} ..now..)
-  =>
-  {:meta {:a {:b {:_approved {:value ..status..
-                              :user {:id ..id.. :firstName ..fn.. :lastName ..ln..}
-                              :timestamp ..now..}}}}})
-
-(def approvable-schema {:info {:name "approval-model" :version 1 :approvable true}
-                        :body [{:name "s" :type :string}]})
-
-(facts "approvable schema"
-  (approvable? (new-document approvable-schema ..now..) []))
-
-(facts "non-approvable schema"
-  (approvable? nil) => false
-  (approvable? {}) => false
-  (approvable? (new-document schema ..now..)) => false)
 
 (def schema-without-approvals {:info {:name "approval-model-without-approvals"
                                       :version 1
@@ -437,13 +406,6 @@
 
 (schemas/defschema 1 schema-without-approvals)
 (schemas/defschema 1 schema-with-approvals)
-
-(facts "approve document part"
-  (let [document (new-document schema-with-approvals ..now..)]
-    (approvable? document schema-with-approvals [:single]) => true
-    (approvable? document schema-with-approvals [:single2]) => false
-    (approvable? document schema-with-approvals [:repeats :1]) => true
-    (approvable? document schema-with-approvals [:repeats :0 :single3]) => false))
 
 (def uusiRakennus
   {:schema-info {:name "uusiRakennus",
@@ -470,6 +432,16 @@
                                                :userId {:value "777777777777777777000020", :modified 1370856477473}
                                                :yhteystiedot {:email {:modified 1370856477455, :value "pena@example.com"}
                                                               :puhelin {:modified 1370856477455, :value "0102030405"}}}}}}})
+
+; This seems to have been in use at somepoint, but currently dead code.
+; But used as utility in these tests, so let is be here.
+(defn apply-approval
+  "Merges approval meta data into a map.
+   To be used within with-timestamp or with a given timestamp."
+  ([document path status user]
+   (assoc-in document (filter (comp not nil?) (flatten [:meta path :_approved])) (appr/->approved status user)))
+  ([document path status user timestamp]
+   (with-timestamp timestamp (apply-approval document path status user))))
 
 (facts "modifications-since-approvals"
   (with-timestamp 10

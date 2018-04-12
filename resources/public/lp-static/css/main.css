@@ -29191,6 +29191,20 @@ div.pate-settings-editor table.pate-editor-table tr:hover:nth-child(even) {
   background: #f6f6f6;
 }
 
+div.pate-verdict-page {
+  padding: 2em 2em;
+}
+
+div.pate-spin {
+  width: 100%;
+  text-align: center;
+}
+
+div.pate-spin > i {
+  display: block;
+  font-size: 4em;
+}
+
 table.pate-verdicts-table {
   width: initial;
 }

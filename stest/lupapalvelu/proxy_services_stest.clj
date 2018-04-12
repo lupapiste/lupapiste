@@ -393,6 +393,21 @@
       (fact (:fi (:name body)) => "Salo")
       )))
 
+(facts "Get address from Porvoo municipality server"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "https://sitogis.sito.fi/ows/handler.ashx?xmlset=porvoo"})
+  (fact "address-by-point-proxy"
+    (let [response (address-by-point-proxy {:params {:lang "fi" :x "425909" :y "6695518"}})
+          body (json/decode (:body response) true)]
+      (fact (:street body) => "Laamanninkatu")
+      (fact (:number body) => "1")
+      (fact (:fi (:name body)) => "Porvoo")
+      ))
+  (fact "NLS responds something else"
+    (->> (wfs/address-by-point 425909 6695518)
+         (wfs/feature-to-address-details "fi")) => (contains [:municipality "638"]
+                                                             [:street "Aleksanterinkaari"]
+                                                             [:number "12"])))
+
 (facts "Municipality number with address"
   (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
   (fact "Jarvenpaa, in border of Mantsala"

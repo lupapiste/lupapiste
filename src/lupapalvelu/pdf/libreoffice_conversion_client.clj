@@ -32,6 +32,7 @@
   (http/post url
              {:as               :stream
               :throw-exceptions true
+              :conn-timeout     (* 5 1000)                  ; wait connection for 5 seconds
               :multipart        [{:name      filename
                                   :part-name "file"
                                   :mime-type (mime/mime-type (mime/sanitize-filename filename))

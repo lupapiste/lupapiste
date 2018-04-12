@@ -25,7 +25,7 @@
                       #(str (name %) " " suffix))
                 langs)))
 
-(facts
+(facts "set-krysp-endpoint"
   (let [uri "http://127.0.0.1:8000/dev/krysp"]
     (fact "pena can't set krysp-url"
       (command pena :set-krysp-endpoint :url uri :username "" :password "" :permitType "R" :version "1") => unauthorized?)
@@ -39,8 +39,9 @@
    (fact "sipoo cant set incorrect krysp-url"
       (command sipoo :set-krysp-endpoint :url "BROKEN_URL" :username "" :password "" :permitType "R"  :version "1") => fail?)))
 
-(facts
-  (let [uri "http://127.0.0.1:8000/dev/private-krysp"]
+(facts "set-krysp-endpoint private url"
+  (let [uri "http://127.0.0.1:8000/dev/private-krysp"
+        non-private "http://127.0.0.1:8000/dev/krysp"]
 
     (fact "sipoo can not set working krysp-url without credentials"
       (command sipoo :set-krysp-endpoint :url uri :username "" :password "" :permitType "R" :version "2") => fail?)
@@ -64,6 +65,15 @@
       (-> (query sipoo :krysp-config) :krysp :YA (select-keys [:url :username :password])) => (just {:url anything}))
 
     (fact "query krysp config - credentials set for R endpoint - password is not returned"
+      (-> (query sipoo :krysp-config) :krysp :R (select-keys [:url :username :password])) => (just {:url uri :username "pena"}))
+
+    (fact "changing to uri without username is possible"    ; LPK-3719
+      (command sipoo :set-krysp-endpoint :url non-private :username "" :password "" :permitType "R" :version "2") => ok?
+      (fact "username has been $unset"
+        (-> (query sipoo :krysp-config) :krysp :R (select-keys [:url :username :password])) => (just {:url non-private})))
+    (fact "and returning back again works"
+      (command sipoo :set-krysp-endpoint :url uri :username "pena" :password "" :permitType "R" :version "2") => fail?
+      (command sipoo :set-krysp-endpoint :url uri :username "pena" :password "pena" :permitType "R" :version "2") => ok?
       (-> (query sipoo :krysp-config) :krysp :R (select-keys [:url :username :password])) => (just {:url uri :username "pena"}))))
 
 

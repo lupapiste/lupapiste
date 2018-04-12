@@ -207,3 +207,22 @@
 
     (provided (lupapalvelu.permissions/get-permissions-by-role irrelevant irrelevant) => irrelevant :times 0)))
 
+(defn- krysp-unset-map [type _]
+  {$unset
+   {(str "krysp." type ".username")  1
+    (str "krysp." type ".password")  1
+    (str "krysp." type ".crypto-iv") 1}})
+
+(facts "dissoc-credentials"
+  (facts "no updates"
+    (fact "conf can be nil"
+      (dissoc-credentials "new" nil "R") => nil)
+    (fact "set new username, no $unsets"
+      (dissoc-credentials "new" {:credentials ["" "pw"]} "R") => nil)
+    (fact "old username can be presents"
+      (dissoc-credentials "new" {:credentials ["old" "pw"]} "R") => nil)
+    (fact "new is blank, but no old"
+      (dissoc-credentials "" {:credentials ["" "pw"]} "R") => nil))
+  (facts "updates (new is blank)"
+    (dissoc-credentials "" {:credentials ["old" "pw"]} "R") => (partial krysp-unset-map "R")
+    (dissoc-credentials "" {:credentials ["old" "pw"]} "testi") => (partial krysp-unset-map "testi")))

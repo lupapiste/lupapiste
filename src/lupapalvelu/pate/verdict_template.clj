@@ -142,13 +142,19 @@
   "Since the date calculation is cumulative we always store every delta
   into kw-delta map. Empty deltas are zeros. For board-verdicts the
   appeal date (muutoksenhaku) is different."
-  [draft board-verdict?]
-  (cond-> (->> shared/verdict-dates
-               (map (fn [k]
-                      [k (-> draft k schemas/parse-int)]))
-               (into {}))
-    board-verdict? (assoc :muutoksenhaku (-> draft :lautakunta-muutoksenhaku
-                                             schemas/parse-int))))
+  [category draft board-verdict?]
+  (let [{dic :dictionary} (shared/settings-schema category)]
+    (cond-> (->> shared/verdict-dates
+                 (map (fn [k]
+                        [k {:delta (-> draft k schemas/parse-int)
+                            :unit (name (get-in dic [k :date-delta :unit]))}]))
+                 (into {}))
+      board-verdict? (assoc :muutoksenhaku {:delta (-> draft
+                                                       :lautakunta-muutoksenhaku
+                                                       schemas/parse-int)
+                                            :unit  (name (get-in dic
+                                                                 [:lautakunta-muutoksenhaku
+                                                                  :date-delta :unit]))}))))
 
 (defn- published-settings
   "The published settings only include lists without schema-ordained
@@ -167,7 +173,7 @@
                              v))]))
         board-verdict? (util/=as-kw (:giver template-data) :lautakunta)]
     (merge data
-           {:date-deltas (pack-verdict-dates draft board-verdict?)
+           {:date-deltas (pack-verdict-dates category draft board-verdict?)
             :plans       (pack-generics organization :plans template-data)
             :reviews     (pack-generics organization :reviews template-data)}
            (when board-verdict?
@@ -182,7 +188,7 @@
          :as   template}  (verdict-template organization template-id)
         {:keys [path value op]
          :as   processed} (schemas/validate-and-process-value
-                           (shared/default-verdict-template (keyword category))
+                           (shared/verdict-template-schema category)
                            path
                            value
                            draft
@@ -217,19 +223,28 @@
                                        (map :id)
                                        (util/intersection-as-kw ids)))))
 
-(defn- transform-conditions
-  "Transform conditions from map of maps to sequence of strings. If
-  conditions section is removed or transformation result is empty,
-  conditions are removed from draft. Returns draft."
-  [{:keys [conditions removed-sections] :as draft}]
-  (let [transformed (some->> conditions
-                                vals
-                                (map :condition)
-                                (remove ss/blank?))]
-    (if (and (-> removed-sections :conditions not)
-             transformed)
-      (assoc draft :conditions transformed)
-      (dissoc draft :conditions))))
+(defn- draft-for-publishing
+  "Extracts template draft data for publishing. Keys with empty values
+  are omitted. However, removed-sections do not affect the data
+  selection, since the verdicts may handle removed-sections
+  differently (e.g., foremen and reviews). Transforms :repeating in
+  template draft from map of maps to sequence of maps."
+  [{:keys [category draft]}]
+  (let [{:keys [dictionary]} (shared/verdict-template-schema category)
+        good? (util/fn-> str ss/not-blank?)]
+
+    (reduce (fn [acc dict]
+              (let [value (dict draft)]
+                (if (good? value)
+                  (assoc acc
+                         dict
+                         (if (-> dictionary dict :repeating)
+                           (filter (util/fn->> vals (every? good?))
+                                   (vals value))
+                           value))
+                  acc)))
+            {}
+            (keys dictionary))))
 
 (defn publish-verdict-template [organization template-id timestamp]
   (let [{:keys [draft category]
@@ -242,10 +257,9 @@
                      template-id
                      {$set {:verdict-templates.templates.$.published
                             {:published timestamp
-                             :data      (->> draft
+                             :data      (->> (draft-for-publishing template)
                                              (prune-template-data settings :reviews)
-                                             (prune-template-data settings :plans)
-                                             transform-conditions)
+                                             (prune-template-data settings :plans))
                              :settings  settings}}})))
 
 (defn set-name [organization template-id timestamp name]
@@ -279,13 +293,10 @@
        (ss/join ".")
        keyword))
 
-(defn- settings-schema [category]
-  (get shared/settings-schemas (keyword category)))
-
 (defn save-settings-value [organization category timestamp path value]
   (let [settings-key    (settings-key category)
         {:keys [path value]
-         :as   processed} (schemas/validate-and-process-value (settings-schema category)
+         :as   processed} (schemas/validate-and-process-value (shared/settings-schema category)
                                                               path
                                                               value
                                                               (:draft (settings organization
@@ -303,7 +314,7 @@
 (defn settings-filled?
   "Settings are filled properly if every requireid field has been filled."
   [{org-id :org-id ready :settings data :data} category]
-  (schemas/required-filled? (settings-schema category)
+  (schemas/required-filled? (shared/settings-schema category)
                             (or data
                                 (:draft (or ready
                                             (settings (organization-templates org-id)
@@ -316,12 +327,12 @@
                      (:category template)
                      (if (some? org-id) (:category (verdict-template (organization-templates org-id) template-id)))
                      (str "r"))]
-      (schemas/required-filled? (shared/default-verdict-template (keyword category))
-                                (or data
-                                    (:draft (or template
-                                                (verdict-template (organization-templates
-                                                                    org-id)
-                                                                  template-id)))))))
+    (schemas/required-filled? (shared/verdict-template-schema category)
+                              (or data
+                                  (:draft (or template
+                                              (verdict-template (organization-templates
+                                                                 org-id)
+                                                                template-id)))))))
 
 ;; Generic is a placeholder term that means either review or plan
 ;; depending on the context. Namely, the subcollection argument in

@@ -107,6 +107,8 @@ loc.defaultLanguage = "fi";
 
 var pageutil = {};
 pageutil.openPage = function() {};
+pageutil.getPagePath = function() {};
+pageutil.hashApplicationId = function() {};
 
 var lupapisteApp = {};
 lupapisteApp.services = {};

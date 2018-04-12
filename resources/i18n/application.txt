@@ -418,7 +418,7 @@
 "application.extension.end" "en" "Ends"
 "application.extension.end" "fi" "Päättyy"
 "application.extension.end" "sv" "Slutar"
-"application.extension.reason" "en" "Reaso"
+"application.extension.reason" "en" "Reasoning"
 "application.extension.reason" "fi" "Perustelu"
 "application.extension.reason" "sv" "Motivering"
 "application.extension.start" "en" "Starts"

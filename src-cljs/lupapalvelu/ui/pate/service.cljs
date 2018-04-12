@@ -29,7 +29,15 @@
                                          $
                                          changes)
                                  (reduce (fn [acc k]
-                                           (util/dissoc-in acc (map keyword k)))
+                                           (let [[x & _
+                                                  :as path] (map keyword k)
+                                                 pruned     (util/dissoc-in acc path)]
+                                             ;; Make sure that the
+                                             ;; top-level map still
+                                             ;; exists
+                                             (cond-> pruned
+                                               (-> pruned x nil?)
+                                               (assoc x {}))))
                                          $
                                          removals))]
                      (reduce (fn [acc [k v]]
@@ -168,8 +176,7 @@
 
 (defn new-verdict-draft [app-id template-id callback]
   (common/command {:command "new-pate-verdict-draft"
-                   :success #(do (fetch-verdict-list app-id)
-                                 (callback %))}
+                   :success callback}
                   :id app-id
                   :template-id template-id))
 
@@ -179,11 +186,10 @@
                 :id app-id
                 :verdict-id verdict-id))
 
-(defn delete-verdict [app-id verdict-id callback]
+(defn delete-verdict [app-id verdict-id]
   (common/command {:command "delete-pate-verdict"
                    :success #(do (fetch-verdict-list app-id)
-                                 (js/lupapisteApp.services.attachmentsService.queryAll)
-                                 (callback %))}
+                                 (js/lupapisteApp.services.attachmentsService.queryAll))}
                   :id app-id
                   :verdict-id verdict-id))
 

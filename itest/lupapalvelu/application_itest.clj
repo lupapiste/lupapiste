@@ -988,7 +988,7 @@
     (fact "Multiple operations is not allowed in Kuopio"
       velho =not=> (allowed? :add-operation :id app-id-2 :operation "vapaa-ajan-asuinrakennus"))))
 
-(facts "Replacing primary operation"
+#_(facts "Replacing primary operation"
   (let [app        (create-application pena :operation :pientalo :propertyId sipoo-property-id)
         app-id     (:id app)
         op-id      (-> app :primaryOperation :id)
@@ -996,8 +996,7 @@
         type-id    "savunpoistosuunnitelma"]
 
     (fact "Pena adds attachment"
-      (upload-attachment pena app-id {:id "" :type {:type-group type-group
-                                                    :type-id type-id}} true) => truthy)
+      (upload-file-and-bind pena app-id {:type {:type-group type-group :type-id type-id}} ) => truthy)
 
     (fact "Pena adds operation"
       (command pena :add-operation :id app-id :operation "varasto-tms"))
