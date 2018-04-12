@@ -154,7 +154,7 @@
                  [cljs-pikaday "0.1.4"]]
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-shell "0.5.0"]
-            [deraen/lein-sass4clj "0.3.0"]]
+            [deraen/lein-sass4clj "0.3.1"]]
   :clean-targets ^{:protect false} ["resources/public/lp-static/js/rum-app.js"
                                     "resources/public/lp-static/js/rum-app.js.map"
                                     "resources/public/lp-static/js/out"
