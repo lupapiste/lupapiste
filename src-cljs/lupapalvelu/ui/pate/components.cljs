@@ -297,7 +297,11 @@
                    (path/state path state)
                    {:callback  #(path/meta-updated options)
                     :disabled? (path/disabled? options)
-                    :text      (path/loc options)
+                    :text      (if-let [dict (:text-dict schema)]
+                                 (path/react (butlast path)
+                                             state
+                                             dict)
+                                 (path/loc options))
                     :prefix    (:prefix schema)})
     :wrap-label?  wrap-label?
     :empty-label? true}))

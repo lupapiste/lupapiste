@@ -777,3 +777,5 @@
 "pate.review-type" "en" "Type of review"
 "pate.review-type" "fi" "Katselmuksen laji"
 "pate.review-type" "sv" "Typ av syneförrättning"
+"pate.no-name" "fi" "Ei nimeä"
+"pate.no-name" "en" "Name missing"

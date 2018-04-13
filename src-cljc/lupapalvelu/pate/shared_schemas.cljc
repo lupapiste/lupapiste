@@ -256,7 +256,13 @@
 (defschema PateToggle
   (merge (dissoc PateComponent :css)
          {(sc/optional-key :value)  sc/Bool
-          (sc/optional-key :prefix) keyword-or-string}))
+          ;; Checkbox wrapper class prefix (see components/toggle).
+          (sc/optional-key :prefix) keyword-or-string
+          ;; By default the toggle text is determined by the
+          ;; localisation mechanisms. However, in some cases dynamic
+          ;; toggle text might be needed. :text-dict refers to a
+          ;; sibling dict that contains the the toggle text.
+          (sc/optional-key :text-dict) sc/Keyword}))
 
 (def pate-units
   (sc/enum :days :years :ha :m2 :m3 :kpl :section :eur))

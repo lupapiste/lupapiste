@@ -73,9 +73,14 @@
                   :value value))
 
 (defn fetch-template [template-id callback]
-  (common/query "verdict-template"
+  (common/query :verdict-template
                 callback
                 :template-id template-id))
+
+(defn fetch-updated-template [template-id callback]
+  (common/command {:command  :update-and-open-verdict-template
+                   :success callback}
+                  :template-id template-id))
 
 (defn new-template [category callback]
   (common/command {:command "new-verdict-template"

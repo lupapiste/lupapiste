@@ -46,19 +46,56 @@
            :remove {:removals (concat (or removals []) [path])}
            {})))
 
+(declare settings)
+
+(defn- sync-repeatings
+  "Sync the template repeating (t-rep) according to settings
+  repeating. Only the current language version of (plan/review) is
+  copied."
+  [lang s-rep t-rep]
+  (reduce-kv (fn [acc k v]
+               (assoc-in acc [k :text]
+                         (get v
+                              (keyword lang)
+                              (i18n/localize lang :pate.no-name))))
+             (select-keys t-rep (keys s-rep))
+             s-rep))
+
+(def template-settings-dependencies [:plans :reviews])
+
+(defn verdict-template-settings-dependencies
+  "Reviews and plans information from setting is merged into the
+  corresponding template repeatings. Copying is done when the template
+  dictionary has :reviews or :plans. Returns the updated template."
+  [org-id lang {:keys [category draft] :as template}]
+  (let [{dic :dictionary} (shared/verdict-template-schema category)
+        {s-data :draft}   (settings (org/get-organization org-id
+                                                          {:verdict-templates 1})
+                                    category)]
+    (reduce (fn [acc rep-dict]
+              (assoc-in acc [:draft rep-dict]
+                     (sync-repeatings lang
+                                      (rep-dict s-data)
+                                      (rep-dict draft))))
+            template
+            (util/intersection-as-kw template-settings-dependencies
+                                     (keys dic)))))
+
 (defn new-verdict-template
   ([org-id timestamp lang category draft name]
-   (let [data {:id       (mongo/create-id)
-               :draft    draft
-               :name     name
-               :category category
-               :modified timestamp}]
+   (let [data (verdict-template-settings-dependencies
+               org-id lang
+               {:id       (mongo/create-id)
+                :draft    draft
+                :name     name
+                :category category
+                :modified timestamp
+                :deleted  false})]
      (mongo/update-by-id :organizations
                          org-id
                          {$push {:verdict-templates.templates
                                  (sc/validate schemas/PateSavedTemplate
-                                              (assoc data
-                                                     :deleted false))}})
+                                              data)}})
      data))
   ([org-id timestamp lang category]
    (new-verdict-template org-id timestamp lang category {}
@@ -73,6 +110,15 @@
          :published (:published published)))
 
 (declare settings-filled? template-filled?)
+
+
+(defn verdict-template-response-data [organization template-id]
+  (let [template     (verdict-template organization
+                                       template-id)]
+    (assoc (verdict-template-summary template)
+           :draft (:draft template)
+           :filled (template-filled? {:org-id   (:id organization)
+                                      :template template}))))
 
 (defn verdict-template-check
   "Returns prechecker for template-id parameters.
@@ -126,6 +172,31 @@
                             [$set :verdict-templates.templates.$.modified]
                             timestamp)
                   update)))
+
+(defn verdict-template-update-and-open [{:keys [lang data created] :as command}]
+  (let [{:keys [template-id]}   data
+        organization            (command->organization command)
+        {draft :draft :as data} (verdict-template-response-data organization template-id)
+        {new-draft :draft
+         :as       updated}     (verdict-template-settings-dependencies (:id organization)
+                                                                        lang
+                                                                        data)
+        updates                 (reduce (fn [acc dict]
+                                          (let [new-dict-value (dict new-draft)]
+                                            (if (not= (dict draft) new-dict-value)
+                                              (assoc-in acc
+                                                        [$set
+                                                         (util/kw-path :verdict-templates.templates.$.draft
+                                                                       dict)]
+                                                        new-dict-value)
+                                              acc)))
+                                        nil
+                                        template-settings-dependencies)]
+    (if updates
+      (do
+        (template-update organization template-id updates created)
+        (assoc updated :modified created))
+      data)))
 
 (defn settings [organization category]
   (get-in organization [:verdict-templates :settings (keyword category)]))

@@ -251,31 +251,6 @@
                              :loc-prefix :pate-r.foremen
                              :rows       [[{:dict :foremen}]]}}})
 
-#_(def setsub-plans
-  {:dictionary {:plans {:reference-list {:label?   false
-                                         :path     [:plans]
-                                         :item-key :id
-                                         :type     :list
-                                         :sort?    true
-                                         :term     {:path       :plans
-                                                    :extra-path :name}}}}
-   :section    {:id         :plans
-                :loc-prefix :pate-settings.plans
-                :grid       {:columns 1
-                             :rows    [[{:dict :plans}]]}}})
-
-#_(def setsub-reviews
-  {:dictionary {:reviews {:reference-list {:label?   false
-                                           :path     [:reviews]
-                                           :item-key :id
-                                           :type     :list
-                                           :sort?    true
-                                           :term     {:path       :reviews
-                                                      :extra-path :name}}}}
-   :section    {:id         :reviews
-                :loc-prefix :pate-settings.reviews
-                :grid       {:columns 1
-                             :rows    [[{:dict :reviews}]]}}})
 
 ;; Must be included if reviews or plans is included.
 (def setsub-lang-titles
@@ -450,36 +425,31 @@
    :section    (multi-section :foremen :*ref.settings.foremen)
    :removable? true})
 
-#_(def temsub-reviews
-  {:dictionary    {:reviews (reference-list :reviews
-                                            {:item-key :id
-                                             :term     {:path       [:reviews]
-                                                        :extra-path [:name]
-                                                        :match-key  :id}})}
-   :section       (multi-section :reviews :*ref.reviews)
+(defn settings-dependencies [dict loc-prefix]
+  {:dictionary {dict {:repeating {:selected {:toggle {:enabled?  :-.included
+                                                      :label?    false
+                                                      :text-dict :text}}
+                                  :text     {:text {}}
+                                  :included {:toggle {:label?  false
+                                                      :i18nkey :pate.template-removed}}}}}
+   :section    {:id         dict
+                :loc-prefix loc-prefix
+                :grid       {:columns 5
+                             :rows    [{:css :row--extra-tight
+                                        :row [{:col  4
+                                               :grid {:columns   4
+                                                      :repeating dict
+                                                      :rows      [{:css :row--extra-tight
+                                                                   :row [{:col  2
+                                                                          :dict :selected}
+                                                                         {:dict :included}]}]}}]}]}}
    :removable? true})
 
 (def temsub-reviews
-  {:dictionary {:reviews (reference-list :settings.reviews
-                                         {:item-key :MAP-KEY
-                                          :term     {}})}
-   :section    (multi-section :reviews :*ref.reviews)
-   :removable? true})
-
-#_(def temsub-plans
-  {:dictionary {:plans (reference-list :plans {:item-key :id
-                                               :term     {:path       [:plans]
-                                                          :extra-path [:name]
-                                                          :match-key  :id}})}
-   :section    (multi-section :plans :*ref.plans)
-   :removable? true})
+  (settings-dependencies :reviews :pate-reviews))
 
 (def temsub-plans
-  {:dictionary {:plans (reference-list :settings.plans
-                                       {:item-key :MAP-KEY
-                                        :term     {}})}
-   :section    (multi-section :plans :*ref.plans)
-   :removable? true})
+  (settings-dependencies :plans :pate.plans))
 
 (def temsub-conditions ;; Muut lupaehdot
   {:dictionary    {:conditions    {:repeating {:condition        {:phrase-text {:i18nkey  :pate-condition

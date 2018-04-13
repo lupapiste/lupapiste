@@ -193,12 +193,21 @@
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable)]}
   [command]
-  (let [organization (template/command->organization command)
-        template     (template/verdict-template organization template-id)]
-    (ok (assoc (template/verdict-template-summary template)
-               :draft (:draft template)
-               :filled (template/template-filled? {:org-id   (:id organization)
-                                                   :template template})))))
+  (ok (template/verdict-template-response-data (template/command->organization command)
+                                               template-id)))
+
+(defcommand update-and-open-verdict-template
+
+  {:description "Like verdict-template but also updates the template's
+  settings dependencies."
+   :feature :pate
+   :user-roles #{:authorityAdmin}
+   :parameters [template-id]
+   :input-validators [(partial action/non-blank-parameters [:template-id])]
+   :pre-checks [pate-enabled
+                (template/verdict-template-check :editable)]}
+  [command]
+  (ok (template/verdict-template-update-and-open command)))
 
 (defcommand toggle-delete-verdict-template
   {:description      "Toggle template's deletion status"
