@@ -3763,12 +3763,14 @@
   {:apply-when (pos? (mongo/count :applications {:primaryOperation.name {$in [:raktyo-aloit-loppuunsaat
                                                                               :jatkoaika]}
                                                  :state {$in [:verdictGiven
+                                                              :constructionStarted
                                                               :closed]}}))}
   (let [ts (now)]
     (mongo/update-by-query :applications
                            {:primaryOperation.name {$in [:raktyo-aloit-loppuunsaat
                                                          :jatkoaika]}
                             :state {$in [:verdictGiven
+                                         :constructionStarted
                                          :closed]}}
                            {$set  {:state "ready"}
                             $push {:history {:state "ready"
@@ -3776,16 +3778,52 @@
                                              :user usr/migration-user-summary}}})))
 
 (defmigration muutoslupa-state-to-ready
-  {:apply-when (pos? (mongo/count :applications {:permitSubtype "muutoslupa"
+  {:apply-when (pos? (mongo/count :applications {:primaryOperation {$exists true}
+                                                 :permitSubtype "muutoslupa"
                                                  :state {$in [:verdictGiven
+                                                              :constructionStarted
+                                                              :inUse
                                                               :closed]}}))}
   (let [ts (now)]
     (mongo/update-by-query :applications
-                           {:permitSubtype "muutoslupa"
+                           {:primaryOperation {$exists true}
+                            :permitSubtype "muutoslupa"
                             :state {$in [:verdictGiven
+                                         :constructionStarted
+                                         :inUse
                                          :closed]}}
                            {$set  {:state "ready"}
                             $push {:history {:state "ready"
+                                             :ts ts
+                                             :user usr/migration-user-summary}}})))
+
+(defmigration add-history-entry-for-extinct-jatkoaika
+  {:apply-when (pos? (mongo/count :applications {:primaryOperation.name {$in [:raktyo-aloit-loppuunsaat
+                                                                              :jatkoaika]}
+                                                 :state "extinct"
+                                                 :history.state {$ne "ready"}}))}
+  (let [ts (now)]
+    (mongo/update-by-query :applications
+                           {:primaryOperation.name {$in [:raktyo-aloit-loppuunsaat
+                                                         :jatkoaika]}
+                            :state "extinct"
+                            :history.state {$ne "ready"}}
+                           {$push {:history {:state "ready"
+                                             :ts ts
+                                             :user usr/migration-user-summary}}})))
+
+(defmigration add-history-entry-for-appealed-muutoslupa
+  {:apply-when (pos? (mongo/count :applications {:primaryOperation {$exists true}
+                                                 :permitSubtype "muutoslupa"
+                                                 :state "appealed"
+                                                 :history.state {$ne "ready"}}))}
+  (let [ts (now)]
+    (mongo/update-by-query :applications
+                           {:primaryOperation {$exists true}
+                            :permitSubtype "muutoslupa"
+                            :state "appealed"
+                            :history.state {$ne "ready"}}
+                           {$push {:history {:state "ready"
                                              :ts ts
                                              :user usr/migration-user-summary}}})))
 ;;

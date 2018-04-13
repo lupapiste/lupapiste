@@ -1098,7 +1098,8 @@
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
                                  :asianhallinta false
-                                 :unsubscribe-notifications true}
+                                 :unsubscribe-notifications true
+                                 :state-graph-resolver state-machine-resolver}
    :rak-valm-tyo                {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -1108,7 +1109,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :aloitusoikeus               {:schema "aloitusoikeus"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
