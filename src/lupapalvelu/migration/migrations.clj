@@ -3778,7 +3778,7 @@
                                              :user usr/migration-user-summary}}})))
 
 (defmigration muutoslupa-state-to-ready
-  {:apply-when (pos? (mongo/count :applications {:primaryOperation {$exists true}
+  {:apply-when (pos? (mongo/count :applications {:primaryOperation.name {$exists true}
                                                  :permitSubtype "muutoslupa"
                                                  :state {$in [:verdictGiven
                                                               :constructionStarted
@@ -3786,7 +3786,7 @@
                                                               :closed]}}))}
   (let [ts (now)]
     (mongo/update-by-query :applications
-                           {:primaryOperation {$exists true}
+                           {:primaryOperation.name {$exists true}
                             :permitSubtype "muutoslupa"
                             :state {$in [:verdictGiven
                                          :constructionStarted
@@ -3813,13 +3813,13 @@
                                              :user usr/migration-user-summary}}})))
 
 (defmigration add-history-entry-for-appealed-muutoslupa
-  {:apply-when (pos? (mongo/count :applications {:primaryOperation {$exists true}
+  {:apply-when (pos? (mongo/count :applications {:primaryOperation.name {$exists true}
                                                  :permitSubtype "muutoslupa"
                                                  :state "appealed"
                                                  :history.state {$ne "ready"}}))}
   (let [ts (now)]
     (mongo/update-by-query :applications
-                           {:primaryOperation {$exists true}
+                           {:primaryOperation.name {$exists true}
                             :permitSubtype "muutoslupa"
                             :state "appealed"
                             :history.state {$ne "ready"}}
