@@ -26,8 +26,8 @@
     (register :producers producer))
 
   (defn message-listener [cb]
-    (proxy [MessageListener] []
-      (onMessage [^Message m]
+    (reify MessageListener
+      (^void onMessage [_ ^Message m]
         (condp instance? m
           BytesMessage (let [data (byte-array (.getBodyLength ^BytesMessage m))]
                                        (.readBytes ^BytesMessage m data)
