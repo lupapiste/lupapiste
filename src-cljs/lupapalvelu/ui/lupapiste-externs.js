@@ -169,6 +169,7 @@ lupapisteApp.models.currentUser.company = {};
 lupapisteApp.models.currentUser.company.id = function() {};
 lupapisteApp.models.applicationAuthModel = {};
 lupapisteApp.models.applicationAuthModel.ok = function() {};
+lupapisteApp.models.applicationAuthModel.refreshWithCallback = function() {};
 lupapisteApp.models.globalAuthModel = {};
 lupapisteApp.models.globalAuthModel.ok = function() {};
 
