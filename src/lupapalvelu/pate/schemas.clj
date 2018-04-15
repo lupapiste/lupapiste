@@ -381,12 +381,15 @@
   (->> schema
        :dictionary
        (filter (fn [[k v]]
-                 (:required? v)))
+                 (or (:required? v)
+                     (:repeating v))))
        (every? (fn [[k v]]
                  (cond
                    (:multi-select v) (not-empty (k data))
                    (:reference v)    true ;; Required only for highlighting purposes
                    (:date v)         (integer? (k data))
+                   (:repeating v)    (every? #(required-filled? {:dictionary (:repeating v)} %)
+                                             (some-> data k vals))
                    :else (ss/not-blank? (k data)))))))
 
 (defn section-dicts

@@ -295,6 +295,11 @@
           ;; locale into account. Default order is the items order.
           (sc/optional-key :sort-by)      (sc/enum :value :text)}))
 
+(defschema PateLocText
+  "Localisation term shown as text."
+  (assoc PateCss
+         :loc-text sc/Keyword))
+
 (defschema PateRequired
   {(sc/optional-key :required?) sc/Bool})
 
@@ -316,7 +321,7 @@
            (sc/conditional
             :reference-list (mex (required {:reference-list PateReferenceList}))
             :phrase-text    (mex (required {:phrase-text PatePhraseText}))
-            :loc-text       (mex {:loc-text sc/Keyword}) ;; Localisation term shown as text.
+            :loc-text       (mex PateLocText)
             :date-delta     (mex (required {:date-delta PateDateDelta}))
             :multi-select   (mex (required {:multi-select PateMultiSelect}))
             :reference      (mex (required {:reference PateReference}))

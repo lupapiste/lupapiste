@@ -139,6 +139,8 @@
   (->> [(:css schema)
         other-classes]
        flatten
+       (map util/split-kw-path)
+       flatten
        (remove nil?)
        (map name)))
 
@@ -198,8 +200,9 @@
 
 (defn- truthy? [v]
   (boolean (cond
+             (map? v)        (not-empty v)
              (sequential? v) (seq v)
-             :else v)))
+             :else           v)))
 
 (defn- resolve-path
   "Resolve relative path. Relative path is denoted with + or -. The

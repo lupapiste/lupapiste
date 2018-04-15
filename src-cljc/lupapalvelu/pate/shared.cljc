@@ -254,30 +254,34 @@
 
 ;; Must be included if reviews or plans is included.
 (def setsub-lang-titles
-  {:dictionary {:title-fi {:loc-text :pate-verdict.language.fi}
-                :title-sv {:loc-text :pate-verdict.language.sv}
-                :title-en {:loc-text :pate-verdict.language.en}}})
+  {:dictionary {:title-fi {:css      :pate-label.required
+                           :loc-text :pate-verdict.language.fi}
+                :title-sv {:css      :pate-label.required
+                           :loc-text :pate-verdict.language.sv}
+                :title-en {:css      :pate-label.required
+                           :loc-text :pate-verdict.language.en}}})
 
 (defn settings-repeating [{:keys [dict loc-prefix add-dict add-loc remove-dict]}]
-  {:dictionary {dict        {:repeating {:fi         {:text {:label? false}}
-                                         :sv         {:text {:label? false}}
-                                         :en         {:text {:label? false}}
-                                         remove-dict {:button {:i18nkey :remove
-                                                               :label?  false
-                                                               :icon    :lupicon-remove
-                                                               :css     [:primary :outline]
-                                                               :remove  dict}}}}
-                add-dict    {:button {:icon    :lupicon-circle-plus
-                                      :i18nkey add-loc
-                                      :css     :positive
-                                      :add     dict}}}
+  {:dictionary {dict     {:repeating {:fi         (required {:text {:label? false}})
+                                      :sv         (required {:text {:label? false}})
+                                      :en         (required {:text {:label? false}})
+                                      remove-dict {:button {:i18nkey :remove
+                                                            :label?  false
+                                                            :icon    :lupicon-remove
+                                                            :css     [:primary :outline]
+                                                            :remove  dict}}}}
+                add-dict {:button {:icon    :lupicon-circle-plus
+                                   :i18nkey add-loc
+                                   :css     :positive
+                                   :add     dict}}}
    :section    {:id         dict
                 :loc-prefix loc-prefix
                 :grid       {:columns 6
-                             :rows    [{:css [:pate-label :row--tight]
-                                        :row [{:dict :title-fi}
-                                              {:dict :title-sv}
-                                              {:dict :title-en}]}
+                             :rows    [{:css      [:pate-label :row--tight]
+                                        :show? dict
+                                        :row      [{:dict :title-fi}
+                                                   {:dict :title-sv}
+                                                   {:dict :title-en}]}
                                        {:css :row--tight
                                         :row [{:col  6
                                                :grid {:columns   6
@@ -305,12 +309,13 @@
                            :add-dict    :add-review
                            :add-loc     :pate.add-review
                            :remove-dict :remove-review})
-      (assoc-in [:dictionary :title-type] {:loc-text :pate.review-type})
+      (assoc-in [:dictionary :title-type] {:css      [:pate-label.required]
+                                           :loc-text :pate.review-type})
       (assoc-in [:dictionary :reviews :repeating :type]
-                {:select {:label?     false
-                          :loc-prefix :pate.review-type
-                          :items      review-types
-                          :sort-by    :text}})
+                (required {:select {:label?     false
+                                    :loc-prefix :pate.review-type
+                                    :items      review-types
+                           :sort-by    :text}}))
       (update-in [:section :grid :rows 0 :row] #(conj % {:dict :title-type}))
       (update-in [:section :grid :rows 1 :row 0 :grid :rows 0 :row]
                  #(concat (butlast %)

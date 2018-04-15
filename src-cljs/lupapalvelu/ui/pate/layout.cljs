@@ -45,7 +45,7 @@
             [sade.shared-util :as util]))
 
 (defn schema-type [options]
-  (-> options :schema (dissoc :required?) keys first keyword))
+  (-> options :schema (dissoc :required? :css) keys first keyword))
 
 (declare pate-list)
 
@@ -113,8 +113,9 @@
   (instantiate-default options wrap-label?))
 
 (defmethod instantiate :loc-text
-  [{:keys [schema]} & _]
+  [{:keys [schema] :as options} & _]
   [:span
+   {:class (path/css options)}
    (common/loc (name (:loc-text schema)))])
 
 
