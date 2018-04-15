@@ -29,6 +29,9 @@
                  ; MongoDB driver
                  [com.novemberain/monger "3.1.0" :exclusions [[com.google.guava/guava]]]
 
+                 ; S3 Library
+                 [com.amazonaws/aws-java-sdk-s3 "1.11.313"]
+
                  ; Logging
                  [com.taoensso/timbre "4.10.0" :exclusions [[io.aviso/pretty]]]
                  [org.slf4j/slf4j-log4j12 "1.7.22"]
