@@ -4,11 +4,9 @@
             [clj-time.coerce :as coerce]
             [clj-time.format :as timeformat]
             [sade.http :as http]
-            [sade.env :as env]
-            [sade.util :refer [prewalk-map postwalk-map boolean? convert-values]]
-            [sade.xml :refer :all]
             [sade.strings :as ss]
-            [sade.util :as util]))
+            [sade.util :as util :refer [prewalk-map postwalk-map convert-values]]
+            [sade.xml :refer :all]))
 
 ;;
 ;; parsing time

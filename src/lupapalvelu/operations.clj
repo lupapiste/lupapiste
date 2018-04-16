@@ -506,6 +506,11 @@
     states/tj-ilmoitus-state-graph
     states/tj-hakemus-state-graph))
 
+(defn- state-machine-resolver [{subtype :permitSubtype :as application}]
+  (if (= :muutoslupa (keyword subtype))
+    states/r-muutoslupa-state-graph
+    states/full-application-state-graph))
+
 (def- r-operations
   {:asuinrakennus               {:schema "uusiRakennus" ; Deprecated operation. Not in current operation tree, but in use in legacy applications.
                                  :permit-type permit/R
@@ -520,7 +525,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :kerrostalo-rivitalo         {:schema "uusiRakennus"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -534,7 +540,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :pientalo                    {:schema "uusiRakennus"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -548,7 +555,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :vapaa-ajan-asuinrakennus    {:schema "uusi-rakennus-ei-huoneistoa"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -560,7 +568,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :varasto-tms                 {:schema "uusi-rakennus-ei-huoneistoa"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -572,7 +581,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :julkinen-rakennus           {:schema "uusiRakennus" ; Deprecated operation. Not in current operation tree, but in use in legacy applications.
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -584,7 +594,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :teollisuusrakennus          {:schema "uusiRakennus"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -595,7 +606,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :muu-uusi-rakentaminen       {:schema "uusiRakennus"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -608,7 +620,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
 
    :laajentaminen               {:schema "rakennuksen-laajentaminen" ; Deprecated operation. Not in current operation tree, but in use in legacy applications.
                                  :permit-type permit/R
@@ -620,7 +633,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :kerrostalo-rt-laaj          {:schema "rakennuksen-laajentaminen"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -631,7 +645,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :pientalo-laaj               {:schema "rakennuksen-laajentaminen"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -642,7 +657,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :vapaa-ajan-rakennus-laaj    {:schema "rakennuksen-laajentaminen-ei-huoneistoja"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -653,7 +669,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :talousrakennus-laaj         {:schema "rakennuksen-laajentaminen-ei-huoneistoja"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -664,7 +681,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :teollisuusrakennus-laaj     {:schema "rakennuksen-laajentaminen"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -675,7 +693,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :muu-rakennus-laaj           {:schema "rakennuksen-laajentaminen"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -685,7 +704,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
 
    :perus-tai-kant-rak-muutos   {:schema "rakennuksen-muuttaminen-ei-huoneistoja"
                                  :permit-type permit/R
@@ -698,7 +718,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :kayttotark-muutos           {:schema "rakennuksen-muuttaminen"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -710,7 +731,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :sisatila-muutos             {:schema "rakennuksen-muuttaminen"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -722,7 +744,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :julkisivu-muutos            {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -734,7 +757,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :jakaminen-tai-yhdistaminen  {:schema "rakennuksen-muuttaminen"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -746,7 +770,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :rakennustietojen-korjaus    {:schema "rakennustietojen-korjaus"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -755,7 +780,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed false
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :markatilan-laajentaminen    {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -767,7 +793,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :linjasaneeraus              {:schema "rakennuksen-muuttaminen"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -779,7 +806,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :takka-tai-hormi             {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -791,7 +819,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :parveke-tai-terassi         {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -803,7 +832,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :muu-laajentaminen           {:schema "rakennuksen-muuttaminen"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -815,7 +845,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
 
    :auto-katos                  {:schema "kaupunkikuvatoimenpide"
                                  :permit-type permit/R
@@ -827,7 +858,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :masto-tms                   {:schema "kaupunkikuvatoimenpide"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -838,7 +870,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :mainoslaite                 {:schema "kaupunkikuvatoimenpide"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -849,7 +882,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :aita                        {:schema "kaupunkikuvatoimenpide-ei-tunnusta"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -860,7 +894,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :maalampo                    {:schema "maalampokaivo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -871,7 +906,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :jatevesi                    {:schema "kaupunkikuvatoimenpide"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -882,7 +918,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :muu-rakentaminen            {:schema "kaupunkikuvatoimenpide"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -893,7 +930,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
 
    :purkaminen                  {:schema "purkaminen"
                                  :permit-type permit/R
@@ -906,7 +944,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
 
    :kaivuu                      {:schema "maisematyo"
                                  :permit-type permit/R
@@ -917,7 +956,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :puun-kaataminen             {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -927,7 +967,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :tontin-jarjestelymuutos     {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -937,7 +978,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :muu-maisema-toimenpide      {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -947,7 +989,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :tontin-ajoliittyman-muutos  {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -957,7 +1000,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :paikoutysjarjestus-muutos   {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -967,7 +1011,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :kortteli-yht-alue-muutos    {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -977,7 +1022,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :muu-tontti-tai-kort-muutos  {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -987,7 +1033,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
 
    :tyonjohtajan-nimeaminen     {:schema "hankkeen-kuvaus-minimum"
                                  :permit-type permit/R
@@ -1039,7 +1086,8 @@
                                  :add-operation-allowed false
                                  :copying-allowed false
                                  :min-outgoing-link-permits 1
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver (constantly states/r-jatkoaika-state-graph)}
    :aiemmalla-luvalla-hakeminen {:schema "aiemman-luvan-toimenpide"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -1050,7 +1098,8 @@
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
                                  :asianhallinta false
-                                 :unsubscribe-notifications true}
+                                 :unsubscribe-notifications true
+                                 :state-graph-resolver state-machine-resolver}
    :rak-valm-tyo                {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -1060,7 +1109,8 @@
                                  :add-operation-allowed true
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :state-graph-resolver state-machine-resolver}
    :aloitusoikeus               {:schema "aloitusoikeus"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -1078,7 +1128,8 @@
                                 :add-operation-allowed false
                                 :copying-allowed true
                                 :min-outgoing-link-permits 1
-                                :asianhallinta false}})
+                                :asianhallinta false
+                                :state-graph-resolver (constantly states/r-jatkoaika-state-graph)}})
 
 (def- vvvl-operations
   {:vvvl-vesijohdosta           {:schema "talousvedet"

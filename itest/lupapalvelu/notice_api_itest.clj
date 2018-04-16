@@ -1,6 +1,6 @@
 (ns lupapalvelu.notice-api-itest
-  (require [midje.sweet :refer :all]
-           [lupapalvelu.itest-util :refer :all]))
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.itest-util :refer :all]))
 
 (apply-remote-minimal) ; minimal ensures wanted organization tags exist
 

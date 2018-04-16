@@ -40,7 +40,7 @@
                               :hearing :proposal :proposalApproved
                               :survey :sessionProposal :sessionHeld :registered
                               :agreementSigned :agreementPrepared ; YA sijoitussopimus
-                              :appealed :final})
+                              :appealed :final :ready})
 
 (fact "terminal states"
   terminal-states => #{:answered :canceled :closed :final :extinct :registered :acknowledged :agreementSigned :finished :archived})

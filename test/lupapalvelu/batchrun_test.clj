@@ -1,7 +1,6 @@
 (ns lupapalvelu.batchrun-test
   "Tests rely heavily on 'provided' beacause of non-functional nature (lots of side effects) of batchrun processes."
   (:require [midje.sweet :refer :all]
-            [clojure.core.async :as async]
             [midje.util :refer [testable-privates]]
             [taoensso.timbre :refer [debug]]
             [lupapalvelu.krysp-test-util :as krysp-test-util]

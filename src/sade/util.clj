@@ -428,8 +428,6 @@
 
 (defn not-empty-or-nil? [x] (not (empty-or-nil? x)))
 
-(defn boolean? [x] (instance? Boolean x))
-
 (defn assoc-when
   "Assocs entries with truthy values into m."
   [m & kvs]

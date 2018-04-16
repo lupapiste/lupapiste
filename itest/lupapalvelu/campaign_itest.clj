@@ -42,7 +42,7 @@
     (= text (name error))))
 
 (fact "No campaigns yet"
-      (query admin :campaigns) =contains=> {:campaigns []})
+      (query admin :campaigns) => (contains {:campaigns []}))
 
 (fact "Add expired campaign"
       (command admin :add-campaign :code "  PAST  "

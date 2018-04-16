@@ -585,7 +585,7 @@
       (boolean (find-by-name schema-body full-path)))))
 
 (defn good-flag? [flag]
-  (or (nil? flag) (util/boolean? flag)))
+  (or (nil? flag) (boolean? flag)))
 
 (defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId turvakieltokytkin
                          companyName companyId allowDirectMarketing

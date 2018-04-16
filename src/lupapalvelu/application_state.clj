@@ -35,7 +35,8 @@
        :proposalApproved
        :sessionProposal
        :inUse
-       :onHold]
+       :onHold
+       :ready]
       (repeat nil))))
 
 (assert (= states/all-application-states (set (keys timestamp-key))))

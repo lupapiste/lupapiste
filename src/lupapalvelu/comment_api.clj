@@ -67,7 +67,7 @@
 ;; API
 ;;
 
-(def commenting-states (union states/all-inforequest-states (states/all-application-states-but states/terminal-states)))
+(def commenting-states (union states/all-inforequest-states (states/all-application-or-archiving-project-states-but states/terminal-states)))
 
 (defcommand can-target-comment-to-authority
    {:description "Dummy command for UI logic"

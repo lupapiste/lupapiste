@@ -1,9 +1,9 @@
 (ns lupapalvelu.generators.user
-  (require [clojure.test.check.generators :as gen]
-           [lupapalvelu.roles :as roles]
-           [lupapalvelu.user :refer :all]
-           [sade.schema-generators :as ssg]
-           [sade.util :as util]))
+  (:require [clojure.test.check.generators :as gen]
+            [lupapalvelu.roles :as roles]
+            [lupapalvelu.user :refer :all]
+            [sade.schema-generators :as ssg]
+            [sade.util :as util]))
 
 (def org-id-num-generator
   (gen/choose 100 1000))
@@ -12,10 +12,10 @@
   (gen/elements #{"YA" "YMP" "R"}))
 
 (defn org-id-generator [& {:keys [id-num id-suffix]
-                           :or {:id-num org-id-num-generator
-                                :id-suffix org-id-suffix-generator}}]
-  (gen/let [number-part org-id-num-generator
-            suffix org-id-suffix-generator]
+                           :or {id-num org-id-num-generator
+                                id-suffix org-id-suffix-generator}}]
+  (gen/let [number-part id-num
+            suffix id-suffix]
     (keyword (str number-part "-" suffix))))
 
 (def keyword-authz-generator
