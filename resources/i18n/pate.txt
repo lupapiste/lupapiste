@@ -779,3 +779,4 @@
 "pate.review-type" "sv" "Typ av syneförrättning"
 "pate.no-name" "fi" "Ei nimeä"
 "pate.no-name" "en" "Name missing"
+"pate.available-in-verdict" "fi" "Valittavissa päätöksellä"

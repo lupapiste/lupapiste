@@ -436,18 +436,24 @@
                                                       :text-dict :text}}
                                   :text     {:text {}}
                                   :included {:toggle {:label?  false
-                                                      :i18nkey :pate.template-removed}}}}}
+                                                      :i18nkey :pate.available-in-verdict}}}}}
    :section    {:id         dict
                 :loc-prefix loc-prefix
                 :grid       {:columns 5
-                             :rows    [{:css :row--extra-tight
-                                        :row [{:col  4
-                                               :grid {:columns   4
-                                                      :repeating dict
-                                                      :rows      [{:css :row--extra-tight
-                                                                   :row [{:col  2
-                                                                          :dict :selected}
-                                                                         {:dict :included}]}]}}]}]}}
+                             :rows    [{:hide? dict
+                                        :css   :row--extra-tight
+                                        :row   [{:col  4
+                                                 :dict :link-to-settings-no-label}]}
+                                       {:css :row--extra-tight
+                                        :row [{:col   4
+                                               :show? dict
+                                               :grid  {:columns   4
+                                                       :repeating dict
+                                                       :rows      [{:css :row--extra-tight
+                                                                    :row [{:col  2
+                                                                           :dict :selected}
+                                                                          {:col  2
+                                                                           :dict :included}]}]}}]}]}}
    :removable? true})
 
 (def temsub-reviews
