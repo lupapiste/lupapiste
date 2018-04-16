@@ -4,8 +4,7 @@
             [sade.env :as env]
             [sade.strings :as ss])
   (:import (javax.jms ExceptionListener Connection Session Destination Queue
-                      MessageProducer Message MessageListener
-                      BytesMessage ObjectMessage TextMessage)
+                      MessageListener BytesMessage ObjectMessage TextMessage)
            (org.apache.activemq.artemis.jms.client ActiveMQJMSConnectionFactory)
            (org.apache.activemq.artemis.api.jms ActiveMQJMSClient)))
 
@@ -16,12 +15,18 @@
 
 (when (env/feature? :jms)
 
-  (defonce connections (atom {:producers []
-                              :consumers []}))
+  (defonce state (atom {:producers []
+                        :consumers []
+                        :conn nil
+                        :producer-session nil
+                        :consumer-session nil}))
 
-  (defn register [type object]
-    (swap! connections update type conj object)
+  (defn register [type fn object]
+    (swap! state update type fn object)
     object)
+
+  (defn register-conj [type object]
+    (register type conj object))
 
   (defn message-listener [cb]
     (reify MessageListener
@@ -38,10 +43,13 @@
           TextMessage   (cb (.getText ^TextMessage m))
           (error "Unknown JMS message type:" (type m))))))
 
-  (def exception-listener
+  (declare reconnect)
+
+  (defn exception-listener [state options]
     (reify ExceptionListener
       (onException [_ e]
-        (error e (str "JMS exception: " (.getMessage e))))))
+        (error e (str "JMS exception: " (.getMessage e)))
+        (reconnect state options))))
 
   (defn queue ^Queue [name]
     (ActiveMQJMSClient/createQueue name))
@@ -53,33 +61,65 @@
   (def broker-url (or (env/value :jms :broker-url) "vm://0"))
 
   (defn create-connection ^Connection
-    ([] (create-connection broker-url {}))
-    ([host {:keys [username password]}]
-     (let [conn (if (ss/not-blank? username)
-                  (.createConnection (ActiveMQJMSConnectionFactory. host) username password)
-                  (.createConnection (ActiveMQJMSConnectionFactory. host)))]
-       (.setExceptionListener conn exception-listener)
-       conn)))
+    ([] (create-connection {:broker-url broker-url}))
+    ([options]
+     (create-connection options (exception-listener state options)))
+    ([{:keys [broker-url username password]} ex-listener]
+     (try
+       (let [conn (if (ss/not-blank? username)
+                    (.createConnection (ActiveMQJMSConnectionFactory. broker-url) username password)
+                    (.createConnection (ActiveMQJMSConnectionFactory. broker-url)))]
+         (.setExceptionListener conn ex-listener)
+         (.start conn)
+         conn)
+       (catch Exception e
+         (error e "Error while connecting to JMS broker " broker-url ": " (.getMessage e))))))
 
-  (defonce broker-connection ^Connection (create-connection broker-url (env/value :jms)))
+  (defn ensure-connection [state options]
+    (loop [sleep-time 2000]
+      (when-not (:conn @state)
+        (if-let [conn (create-connection options)]
+          (do
+            (swap! state assoc :conn conn)
+            (infof "Started JMS broker connection to %s" (:broker-url options))
+            state)
+          (do
+            (warnf "Couldn't connect to broker %s, reconnecting in %s seconds" (:broker-url options) (/ sleep-time 1000))
+            (Thread/sleep sleep-time)
+            (recur (min (* 2 sleep-time) 600000)))))))
 
-  (defonce consumer-session (.createSession broker-connection Session/AUTO_ACKNOWLEDGE))
-  (defonce producer-session (.createSession broker-connection Session/AUTO_ACKNOWLEDGE))
+  (defn reconnect [state options]
+    (.close (:conn @state))
+    (swap! state assoc :conn nil)
+    (ensure-connection state options))
 
-  (do
-    (.start broker-connection)
-    (infof "Started JMS broker connection to %s" broker-url))
+  (defn register-session [type]
+    (swap! state assoc (keyword (str (name type) "-session")) (.createSession (:conn @state) Session/AUTO_ACKNOWLEDGE)))
+
+  (defn start! []
+    (try
+      (ensure-connection state (merge (env/value :jms) {:broker-url broker-url}))
+      (when-not (:consumer-session @state)
+        (register-session :consumer))
+      (when-not (:producer-session @state)
+        (register-session :producer))
+      (catch Exception e
+        (error e "Couldn't initialize JMS connections" (.getMessage e))
+        e)))
 
   ;;
   ;; Producers
   ;;
+
+  (defn producer-session []
+    (get @state :producer-session))
 
   (defn register-producer
     "Creates a producer to queue in given session.
     Returns one arity function which takes data to be sent to queue."
     [^Session session ^Destination queue message-fn]
     (let [producer (.createProducer session queue)]
-      (register :producers producer)
+      (register-conj :producers producer)
       (fn [data]
         (.send producer (message-fn data)))))
 
@@ -90,14 +130,14 @@
     If no message-fn is given, by default a TextMessage (string) is created.
     Producer is internally registered and closed on shutdown."
     ([^String queue-name]
-     (register-producer producer-session (queue queue-name) #(.createTextMessage producer-session %)))
+     (register-producer (producer-session) (queue queue-name) #(.createTextMessage (producer-session) %)))
     ([^String queue-name message-fn]
-     (register-producer producer-session (queue queue-name) message-fn)))
+     (register-producer (producer-session) (queue queue-name) message-fn)))
 
   (defn create-nippy-producer
     "Producer that serializes data to byte message with nippy." ; props to bowerick/jms
     ([^String queue-name]
-      (create-nippy-producer producer-session queue-name))
+      (create-nippy-producer (producer-session) queue-name))
     ([^Session session ^String queue-name]
      (letfn [(nippy-data [data]
                (doto
@@ -109,13 +149,16 @@
   ;; Consumers
   ;;
 
+  (defn consumer-session []
+    (get @state :consumer-session))
+
   (defn register-consumer
     "Create consumer to queue in given session.
     callback-fn receives the data, listener-fn creates the MessageListener."
     [^Session session ^Destination queue callback-fn listener-fn]
     (let [consumer-instance (doto (.createConsumer session queue)
                               (.setMessageListener (listener-fn callback-fn)))]
-      (register :consumers consumer-instance)
+      (register-conj :consumers consumer-instance)
       consumer-instance))
 
   (defn create-consumer
@@ -123,7 +166,7 @@
     ([^String endpoint callback-fn]
      (create-consumer endpoint callback-fn message-listener))
     ([^String endpoint callback-fn listener-fn]
-     (register-consumer consumer-session (queue endpoint) callback-fn listener-fn)))
+     (register-consumer (consumer-session) (queue endpoint) callback-fn listener-fn)))
 
   (defn create-nippy-consumer
     "Creates and returns consumer to endpoint, that deserializes JMS data with nippy/thaw."
@@ -137,13 +180,15 @@
   (defn close-all!
     "Closes all registered consumers and the broker connection."
     []
-    (doseq [conn (concat (:consumers @connections) (:producers @connections))]
+    (doseq [conn (concat (:consumers @state) (:producers @state))]
       (.close conn))
-    (.close broker-connection)
+    (.close (:conn @state))
 
     (when-let [artemis (ns-resolve 'artemis-server 'embedded-broker)]
       (info "Stopping Artemis...")
       (.stop artemis))))
+
+  (start!)
 
 (comment
   ; replissä testailut:
