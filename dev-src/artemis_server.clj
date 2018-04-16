@@ -8,6 +8,9 @@
 (def conf (doto (ConfigurationImpl.)
             (.setPersistenceEnabled false)
             (.setJournalDirectory "target/artemis_journal")
+            (.setPagingDirectory "target/artemis_paging")
+            (.setBindingsDirectory "target/artemis_bindings")
+            (.setLargeMessagesDirectory "target/artemis_largemessages")
             (.setSecurityEnabled false)
             (.addAcceptorConfiguration "invm" "vm://0")))
 
