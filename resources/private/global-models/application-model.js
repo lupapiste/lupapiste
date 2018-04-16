@@ -543,6 +543,21 @@ LUPAPISTE.ApplicationModel = function() {
     return false;
   };
 
+  self.toApproveApplication = function () {
+    if (self.hasFieldWarnings()
+        || self.hasIncorrectlyFilledRequiredFields()
+        || self.hasMissingRequiredAttachments()) {
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("application.approve.missing-required-info.warning-title"),
+        loc("application.approve.missing-required-info.warning-text"),
+        {title: loc("application.approve.missing-info.continue-anyway"), fn: self.approveApplication},
+        {title: loc("application.approve.missing-info.cancel")}
+      );
+    } else {
+      self.approveApplication();
+    }
+  };
+
   self.partiesAsKrysp = function() {
     var sendParties = function() {
       ajax.command("parties-as-krysp", {id: self.id(), lang: loc.getCurrentLanguage()})

@@ -47,7 +47,7 @@
           <!-- /ko -->
 
           <div class="auth-actions stacked inner-margins">
-              <button data-bind="click: approveApplication,
+              <button data-bind="click: toApproveApplication,
                                  visible: $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
                                  enable: !processing() && $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
                                  attr: {'title': loc('tooltip.approveApplication')}"
