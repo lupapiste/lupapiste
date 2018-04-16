@@ -109,24 +109,26 @@
   ;; Consumers
   ;;
 
-  (defn consumer [^Session session ^Destination queue]
-    (.createConsumer session queue))
-
   (defn register-consumer
+    "Create consumer to queue in given session.
+    callback-fn receives the data, listener-fn creates the MessageListener."
+    [^Session session ^Destination queue callback-fn listener-fn]
+    (let [consumer-instance (doto (.createConsumer session queue)
+                              (.setMessageListener (listener-fn callback-fn)))]
+      (register :consumers consumer-instance)
+      consumer-instance))
+
+  (defn create-consumer
     "Creates, register and starts consumer to given endpoint. Returns consumer instance."
     ([^String endpoint callback-fn]
-     (register-consumer endpoint callback-fn message-listener))
+     (create-consumer endpoint callback-fn message-listener))
     ([^String endpoint callback-fn listener-fn]
-     (let [consumer-instance (doto (consumer consumer-session (queue endpoint))
-                               (.setMessageListener (listener-fn callback-fn)))]
-       (register :consumers consumer-instance)
-       consumer-instance)))
-
-  (def create-consumer register-consumer)
+     (register-consumer consumer-session (queue endpoint) callback-fn listener-fn)))
 
   (defn create-nippy-consumer
+    "Creates and returns consumer to endpoint, that deserializes JMS data with nippy/thaw."
     [^String endpoint callback-fn]
-    (register-consumer endpoint (fn [^bytes data] (callback-fn (nippy/thaw data)))))
+    (create-consumer endpoint (fn [^bytes data] (callback-fn (nippy/thaw data)))))
 
   ;;
   ;; misc
