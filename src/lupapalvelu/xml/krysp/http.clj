@@ -62,26 +62,27 @@
           (update :headers merge (create-headers (:headers http-conf)))
           (wrap-authentication http-conf)))))
 
-(defn message-handler
+(when (env/feature? :jms)
+ (defn message-handler
   [payload]
-  (let [{:keys [url xml http-conf]} (edn/read-string payload)]
+  (let [{:keys [url xml http-conf]} payload]
     (http/post
       url
       (-> (with-krysp-defaults {:body xml})
           (update :headers merge (create-headers (:headers http-conf)))
           (wrap-authentication http-conf)))))
 
-#_(def kuntagml-consumer
-  (jms/register-consumer
-    "application.kuntagml.http"
-    message-handler))
+(def kuntagml-queue "application.kuntagml.http")
+
+(def kuntagml-consumer (jms/create-nippy-consumer kuntagml-queue message-handler))
+
+(def nippy-consumer (jms/create-nippy-producer kuntagml-queue))
 
 (sc/defn ^:always-validate send-xml-jms
   [type :- (apply sc/enum org/endpoint-types) xml :- sc/Str http-conf :- org/KryspHttpConf]
   (let [url (create-url type http-conf)]
-    (jms/send-jms-message
-      "application.kuntagml.http"
-      (prn-str {:url url :xml xml :http-conf http-conf}))))
+    (nippy-consumer {:url url :xml xml :http-conf http-conf})))
+)
 
 (sc/defn ^:always-validate send-xml
   [application user type :- (apply sc/enum org/endpoint-types) xml :- sc/Str http-conf :- org/KryspHttpConf]
