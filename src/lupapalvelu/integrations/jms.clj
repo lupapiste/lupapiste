@@ -1,5 +1,5 @@
 (ns lupapalvelu.integrations.jms
-  (:require [taoensso.timbre :refer [error errorf info infof]]
+  (:require [taoensso.timbre :refer [error errorf info infof tracef warnf]]
             [taoensso.nippy :as nippy]
             [sade.env :as env])
   (:import (javax.jms ExceptionListener Connection Session Destination Queue
@@ -28,6 +28,10 @@
   (defn message-listener [cb]
     (reify MessageListener
       (onMessage [_ m]
+        (when-some [delivery-count (.getIntProperty m "JMSXDeliveryCount")]
+          (tracef "Delivery count of message: %d" delivery-count)
+          (when (< 1 delivery-count)
+            (warnf "Message delivered already %d times" delivery-count)))
         (condp instance? m
           BytesMessage (let [data (byte-array (.getBodyLength ^BytesMessage m))]
                          (.readBytes ^BytesMessage m data)
@@ -72,7 +76,7 @@
   (defn create-producer
     "Creates a producer in given session to given destination (queue).
     Returns function, which is called with data enroute to destination.
-    If no message-fn is given, by default a TextMessage is created.
+    If no message-fn is given, by default a TextMessage (string) is created.
     Producer is internally registered and closed on shutdown."
     ([^Session session ^Destination queue]
      (create-producer session queue #(.createTextMessage session %)))
@@ -100,11 +104,13 @@
 
   (defn register-consumer
     "Creates, register and starts consumer to given endpoint. Returns consumer instance."
-    [^String endpoint callback-fn]
-    (let [consumer (doto (create-consumer session (queue endpoint))
-                     (.setMessageListener (message-listener callback-fn)))]
-      (register :consumers consumer)
-      consumer))
+    ([^String endpoint callback-fn]
+     (register-consumer endpoint callback-fn message-listener))
+    ([^String endpoint callback-fn listener-fn]
+     (let [consumer (doto (create-consumer session (queue endpoint))
+                      (.setMessageListener (listener-fn callback-fn)))]
+       (register :consumers consumer)
+       consumer)))
 
   (defn create-nippy-consumer
     [^String endpoint callback-fn]
