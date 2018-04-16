@@ -22,9 +22,6 @@
     (swap! connections update type conj object)
     object)
 
-  (defn register-producer [producer]
-    (register :producers producer))
-
   (defn message-listener [cb]
     (reify MessageListener
       (onMessage [_ m]
@@ -73,33 +70,42 @@
   ;; Producers
   ;;
 
+  (defn register-producer
+    "Creates a producer to queue in given session.
+    Returns one arity function which takes data to be sent to queue."
+    [^Session session ^Destination queue message-fn]
+    (let [producer (.createProducer session queue)]
+      (register :producers producer)
+      (fn [data]
+        (.send producer (message-fn data)))))
+
   (defn create-producer
-    "Creates a producer in given session to given destination (queue).
+    "Creates a producer to given queue (string) in default session.
     Returns function, which is called with data enroute to destination.
+    message-fn must return instance of javax.jms.Message.
     If no message-fn is given, by default a TextMessage (string) is created.
     Producer is internally registered and closed on shutdown."
-    ([^Session session ^Destination queue]
-     (create-producer session queue #(.createTextMessage session %)))
-    ([^Session session ^Destination queue message-fn]
-     (let [producer (.createProducer session queue)]
-       (register-producer producer)
-       (fn [data]
-         (.send producer (message-fn data))))))
+    ([^String queue-name]
+     (register-producer session (queue queue-name) #(.createTextMessage session %)))
+    ([^String queue-name message-fn]
+     (register-producer session (queue queue-name) message-fn)))
 
   (defn create-nippy-producer
     "Producer that serializes data to byte message with nippy." ; props to bowerick/jms
-    [^Session session ^Destination queue]
-    (letfn [(nippy-data [data]
-              (doto
-                (.createBytesMessage session)
-                (.writeBytes ^bytes (nippy/freeze data))))]
-      (create-producer session queue nippy-data)))
+    ([^String queue-name]
+      (create-nippy-producer session queue-name))
+    ([^Session session ^String queue-name]
+     (letfn [(nippy-data [data]
+               (doto
+                 (.createBytesMessage session)
+                 (.writeBytes ^bytes (nippy/freeze data))))]
+       (create-producer queue-name nippy-data))))
 
   ;;
   ;; Consumers
   ;;
 
-  (defn create-consumer [^Session session ^Destination queue]
+  (defn consumer [^Session session ^Destination queue]
     (.createConsumer session queue))
 
   (defn register-consumer
@@ -107,10 +113,12 @@
     ([^String endpoint callback-fn]
      (register-consumer endpoint callback-fn message-listener))
     ([^String endpoint callback-fn listener-fn]
-     (let [consumer (doto (create-consumer session (queue endpoint))
-                      (.setMessageListener (listener-fn callback-fn)))]
-       (register :consumers consumer)
-       consumer)))
+     (let [consumer-instance (doto (consumer session (queue endpoint))
+                               (.setMessageListener (listener-fn callback-fn)))]
+       (register :consumers consumer-instance)
+       consumer-instance)))
+
+  (def create-consumer register-consumer)
 
   (defn create-nippy-consumer
     [^String endpoint callback-fn]
@@ -119,10 +127,6 @@
   ;;
   ;; misc
   ;;
-
-  (defn send-jms-message
-    [^MessageProducer producer data]
-    (producer data))
 
   (defn close-all!
     "Closes all registered consumers and the broker connection."
@@ -140,14 +144,14 @@
 
   ;; TextMessage
   (register-consumer "testi" (fn [jee] (println "jee sai jotain:" jee)))
-  (def testiprod (create-producer session (queue "testi")))
+  (def testiprod (create-producer "testi"))
   ; => #'lupapalvelu.integrations.jms/testiprod
   (testiprod "stringi dataa")
   ;=> nil
   ; jee sai jotain: stringi dataa
 
   ;; Nippy
-  (def nippy (create-nippy-producer session (queue "nippy")))
+  (def nippy (create-nippy-producer "nippy"))
   (create-nippy-consumer "nippy" (fn [data] (println "nippy dataa:" data)))
   (nippy {:testi true :nimi "Nippy" :version 1})
   ;=> nil
