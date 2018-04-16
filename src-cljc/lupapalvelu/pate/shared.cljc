@@ -242,16 +242,6 @@
                                       :loc-prefix :pate-settings.boardname
                                       :dict       :boardname}]]}}})
 
-(def setsub-foremen
-  {:dictionary {:foremen {:multi-select {:label? false
-                                         :items  foreman-codes}}}
-   :section    {:id         :foremen
-                :loc-prefix :pate-settings.foremen
-                :grid       {:columns    1
-                             :loc-prefix :pate-r.foremen
-                             :rows       [[{:dict :foremen}]]}}})
-
-
 ;; Must be included if reviews or plans is included.
 (def setsub-lang-titles
   {:dictionary {:title-fi {:css      :pate-label.required
@@ -326,7 +316,6 @@
                                        setsub-date-deltas
                                        setsub-verdict-code
                                        setsub-board
-                                       setsub-foremen
                                        setsub-lang-titles
                                        setsub-plans
                                        (setsub-reviews review-types)))
@@ -425,10 +414,35 @@
                                       :dict :bulletinOpDescription}]]}}})
 
 (def temsub-foremen
-  {:dictionary {:foremen (reference-list :settings.foremen
-                                         {:item-loc-prefix :pate-r.foremen})}
-   :section    (multi-section :foremen :*ref.settings.foremen)
-   :removable? true})
+  (->> foreman-codes
+       (map (fn [code]
+              (let [codename     (name code)
+                    included-key (keyword (str codename "-included"))]
+                {:toggle-key code
+                 :toggle     {:toggle {:i18nkey  (keyword (str "pate-r.foremen."
+                                                               codename))
+                                       :enabled? included-key
+                                       :label?   false}}
+
+                 :included-key included-key
+                 :included     {:toggle {:i18nkey :pate.available-in-verdict
+                                         :label?  false}}})))
+       (reduce (fn [acc {:keys [toggle-key toggle included-key included]}]
+                 (-> acc
+                     (assoc-in [:dictionary toggle-key] toggle)
+                     (assoc-in [:dictionary included-key] included)
+                     (update-in [:section :grid :rows]
+                                #(conj (vec %)
+                                       {:css :row--extra-tight
+                                        :row [{:col  2
+                                               :dict toggle-key}
+                                              {:col  2
+                                               :dict included-key}]}))))
+               {:section    {:id         :foremen
+                             :loc-prefix :pate-r.foremen
+                             :grid       {:columns 5
+                                          :rows    []}}
+                :removable? true})))
 
 (defn settings-dependencies [dict loc-prefix]
   {:dictionary {dict {:repeating {:selected {:toggle {:enabled?  :-.included
@@ -785,12 +799,9 @@
                                :type       :multi-select}
                               (when term?
                                 {:item-key :id
-                                 :term     {:path       path
-                                            :extra-path :name
-                                            :match-key  :id}})
+                                 :term     {}})
                               (when separator?
-                                {:separator " \u2013 "}))
-                       :template-dict kw}
+                                {:separator " \u2013 "}))}
                       ;; Included toggle
                       included required-in-verdict)))
            {}
@@ -801,8 +812,9 @@
    {:id   :requirements
     :grid {:columns 7
            :rows    (map (fn [dict]
-                           (let [check-path (keyword (str (name dict) "-included"))]
-                             {:show? [:OR :_meta.editing? check-path]
+                           (let [check-path (keyword (str (name dict) "-included"))
+                                 exist-path (keyword (str "?." (name dict)))]
+                             {:show? [:AND exist-path [:OR :_meta.editing? check-path]]
                               :row   [{:col  4
                                        :dict dict}
                                       {:col   2

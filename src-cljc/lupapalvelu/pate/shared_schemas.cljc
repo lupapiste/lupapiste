@@ -341,6 +341,12 @@
   ([schema-ref]
    (schema-types schema-ref nil)))
 
+;; Keys on the left side of the conditional above.
+(def schema-type-keys [:reference-list :phrase-text :loc-text :date-delta
+                       :multi-select :reference :link :button :placeholder
+                       :keymap :attachments :application-attachments
+                       :toggle :text :date :select :repeating])
+
 (defschema SchemaTypes
   (schema-types #'SchemaTypes))
 

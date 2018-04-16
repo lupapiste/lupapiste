@@ -577,10 +577,10 @@
            (-> draft :template :giver) => giver))
        (when references
          (fact "references"
-           (:references draft) => references))
+           (:references draft) => (just references)))
        (when data
          (fact "data"
-           (:data draft) => data))))))
+           (:data draft) => (just data)))))))
 
 (defn mongo-id? [v]
   (re-matches object-id-pattern v))
@@ -597,33 +597,187 @@
                   mini-verdict)
      => mini-verdict)
 
-   (fact "init included checks"
-     (init--included-checks (draftee [:conditions :deviations :attachments
-                                      :buildings])
-                            :plans)
+   (fact "init foremen: no foremen in template"
+     (init--foremen (draftee [:conditions :deviations :attachments
+                              :buildings]))
      => (check-draft :inclusions [:julkipano :anto :lainvoimainen
                                   :voimassa :muutoksenhaku :aloitettava
-                                  :handler :paatosteksti :foremen
-                                  :foremen-included :plans
+                                  :handler :paatosteksti :plans
                                   :plans-included :reviews :reviews-included
                                   :automatic-verdict-dates
                                   :verdict-section :boardname]
                      :references {:verdict-code ["osittain-myonnetty"]}
-                     :data       {:plans-included true})
-     (init--included-checks (draftee [:conditions :deviations
-                                      :attachments :foremen :buildings])
-                            :plans :foremen :reviews)
+                     :data {}))
+   (fact "init foremen: no foremen included"
+     (init--foremen (draftee [:conditions :deviations :attachments
+                              :buildings]
+                             :vastaava-tj false
+                             :vastaava-tj-included false
+                             :vv-tj true
+                             :iv-tj false
+                             :iv-tj-included false))
      => (check-draft :inclusions [:julkipano :anto :lainvoimainen
                                   :voimassa :muutoksenhaku :aloitettava
-                                  :handler :paatosteksti :foremen
-                                  :foremen-included :plans
-                                  :verdict-section :boardname
+                                  :handler :paatosteksti :plans
                                   :plans-included :reviews :reviews-included
-                                  :automatic-verdict-dates]
+                                  :automatic-verdict-dates
+                                  :verdict-section :boardname]
                      :references {:verdict-code ["osittain-myonnetty"]}
-                     :data       {:plans-included   true
-                                  :foremen-included false
-                                  :reviews-included true}))
+                     :data {}))
+   (fact "init foremen: three foremen included, one selected"
+     (init--foremen (draftee [:conditions :deviations :attachments
+                              :buildings]
+                             :vastaava-tj false
+                             :vastaava-tj-included true
+                             :vv-tj true
+                             :vv-tj-included true
+                             :iv-tj false
+                             :iv-tj-included true
+                             :erityis-tj true
+                             :erityis-tj-included false
+                             :tj false))
+     => (check-draft :inclusions [:julkipano :anto :lainvoimainen
+                                  :voimassa :muutoksenhaku :aloitettava
+                                  :handler :paatosteksti :plans
+                                  :plans-included :reviews :reviews-included
+                                  :automatic-verdict-dates
+                                  :verdict-section :boardname
+                                  :foremen :foremen-included]
+                     :references {:verdict-code ["osittain-myonnetty"]
+                                  :foremen      (just ["vastaava-tj" "vv-tj" "iv-tj"]
+                                                      :in-any-order)}
+                     :data {:foremen          ["vv-tj"]
+                            :foremen-included true}))
+   (fact "init foremen: all foremen included, everyone selected, section removed"
+     (init--foremen (draftee [:conditions :deviations :attachments
+                              :buildings :foremen]
+                             :vastaava-tj true
+                             :vastaava-tj-included true
+                             :vv-tj true
+                             :vv-tj-included true
+                             :iv-tj true
+                             :iv-tj-included true
+                             :erityis-tj true
+                             :erityis-tj-included true
+                             :tj true
+                             :tj-included true))
+     => (check-draft :inclusions [:julkipano :anto :lainvoimainen
+                                  :voimassa :muutoksenhaku :aloitettava
+                                  :handler :paatosteksti :plans
+                                  :plans-included :reviews :reviews-included
+                                  :automatic-verdict-dates
+                                  :verdict-section :boardname
+                                  :foremen :foremen-included]
+                     :references {:verdict-code ["osittain-myonnetty"]
+                                  :foremen      (just ["vastaava-tj" "vv-tj" "iv-tj"
+                                                       "erityis-tj" "tj"]
+                                                      :in-any-order)}
+                     :data {:foremen          (just ["vastaava-tj" "vv-tj" "iv-tj"
+                                                     "erityis-tj" "tj"]
+                                                    :in-any-order)
+                            :foremen-included false}))
+
+   (fact "Init requirements references: no plans"
+     (init--requirements-references (draftee [:conditions :deviations :attachments
+                                              :buildings])
+                                    :plans)
+     => (check-draft :inclusions [:julkipano :anto :lainvoimainen
+                                  :voimassa :muutoksenhaku :aloitettava
+                                  :handler :paatosteksti
+                                  :reviews :reviews-included
+                                  :foremen :foremen-included
+                                  :automatic-verdict-dates
+                                  :verdict-section :boardname]
+                     :references {:verdict-code ["osittain-myonnetty"]}
+                     :data {}))
+   (fact "Init requirements references: no reviews"
+     (init--requirements-references (draftee [:conditions :deviations :attachments
+                                              :buildings])
+                                    :reviews)
+     => (check-draft :inclusions [:julkipano :anto :lainvoimainen
+                                  :voimassa :muutoksenhaku :aloitettava
+                                  :handler :paatosteksti
+                                  :plans :plans-included
+                                  :foremen :foremen-included
+                                  :automatic-verdict-dates
+                                  :verdict-section :boardname]
+                     :references {:verdict-code ["osittain-myonnetty"]}
+                     :data {}))
+   (fact "Init requirements references: plan, not selected"
+     (init--requirements-references (assoc-in (draftee [:conditions :deviations :attachments
+                                                        :buildings])
+                                              [:template :published :settings :plans]
+                                              [{:fi "suomi" :sv "svenska" :en "english"}])
+                                    :plans)
+     => (check-draft :inclusions [:julkipano :anto :lainvoimainen
+                                  :voimassa :muutoksenhaku :aloitettava
+                                  :handler :paatosteksti
+                                  :reviews :reviews-included
+                                  :plans :plans-included
+                                  :foremen :foremen-included
+                                  :automatic-verdict-dates
+                                  :verdict-section :boardname]
+                     :references {:verdict-code ["osittain-myonnetty"]
+                                  :plans        (just [(just {:fi "suomi"
+                                                              :sv "svenska"
+                                                              :en "english"
+                                                              :id mongo-id?})])}
+                     :data {:plans-included true}))
+   (fact "Init requirements references: two plans, one selected"
+     (let [result  (init--requirements-references (assoc-in (draftee [:conditions :deviations :attachments
+                                                                      :buildings])
+                                                            [:template :published :settings :plans]
+                                                            [{:fi "suomi" :sv "svenska" :en "english" :selected true}
+                                                             {:fi "imous" :sv "aksnevs" :en "hsilgne"}])
+                                                  :plans)
+           find-id #(:id (util/find-by-key :fi % (get-in result [:draft :references :plans])))]
+       result => (check-draft :inclusions [:julkipano :anto :lainvoimainen
+                                           :voimassa :muutoksenhaku :aloitettava
+                                           :handler :paatosteksti
+                                           :reviews :reviews-included
+                                           :plans :plans-included
+                                           :foremen :foremen-included
+                                           :automatic-verdict-dates
+                                           :verdict-section :boardname]
+                              :references {:verdict-code ["osittain-myonnetty"]
+                                           :plans        (just [{:fi "suomi"
+                                                                 :sv "svenska"
+                                                                 :en "english"
+                                                                 :id (find-id "suomi")}
+                                                                {:fi "imous"
+                                                                 :sv "aksnevs"
+                                                                 :en "hsilgne"
+                                                                 :id (find-id "imous")}] :in-any-order)}
+                              :data {:plans-included true
+                                     :plans          [(find-id "suomi")]})))
+   (fact "Init requirements references: two reviews, both selected, section removed"
+     (let [result  (init--requirements-references (assoc-in (draftee [:conditions :deviations :attachments
+                                                                      :buildings :reviews])
+                                                            [:template :published :settings :reviews]
+                                                            [{:fi "suomi" :sv "svenska" :en "english" :selected true}
+                                                             {:fi "imous" :sv "aksnevs" :en "hsilgne" :selected true}])
+                                                  :reviews)
+           find-id #(:id (util/find-by-key :fi % (get-in result [:draft :references :reviews])))]
+       result => (check-draft :inclusions [:julkipano :anto :lainvoimainen
+                                           :voimassa :muutoksenhaku :aloitettava
+                                           :handler :paatosteksti
+                                           :reviews :reviews-included
+                                           :plans :plans-included
+                                           :foremen :foremen-included
+                                           :automatic-verdict-dates
+                                           :verdict-section :boardname]
+                              :references {:verdict-code ["osittain-myonnetty"]
+                                           :reviews      (just [{:fi "suomi"
+                                                                 :sv "svenska"
+                                                                 :en "english"
+                                                                 :id (find-id "suomi")}
+                                                                {:fi "imous"
+                                                                 :sv "aksnevs"
+                                                                 :en "hsilgne"
+                                                                 :id (find-id "imous")}] :in-any-order)}
+                              :data {:reviews-included false
+                                     :reviews          (just [(find-id "suomi") (find-id "imous")] :in-any-order)})))
+
    (fact "init verdict-dates"
      (init--verdict-dates (draftee [:conditions :deviations :attachments
                                     :buildings]
@@ -901,28 +1055,32 @@
                         :references {:verdict-code ["osittain-myonnetty"]}
                         :data {}))
       (fact "initialize-verdict-draft"
-        (let [init (initialize-verdict-draft
-                    (assoc (draftee [:foremen]
-                                    :paatosteksti "This is verdict."
-                                    :conditions [{:condition "Stay calm"}
-                                                 {:condition "Carry on"}]
-                                    :verdict-dates ["anto" "voimassa"]
-                                    :foremen ["vastaava-tj" "tj"]
-                                    :reviews ["aaa" "bbb"]
-                                    :vss-luokka true
-                                    :autopaikat true)
-                           :application
-                           {:handlers [{:general   true
-                                        :firstName "Bob"
-                                        :lastName  "Builder"}]
-                            :documents
-                            [{:schema-info {:name "hankkeen-kuvaus"}
-                              :data        {:poikkeamat {:value "Cannot live by your rules, man!"}}}]}))]
+          (let [init (initialize-verdict-draft
+                      (assoc (assoc-in (draftee [:foremen]
+                                                :paatosteksti "This is verdict."
+                                                :conditions [{:condition "Stay calm"}
+                                                             {:condition "Carry on"}]
+                                                :verdict-dates ["anto" "voimassa"]
+                                                :vastaava-tj true
+                                                :vastaava-tj-included true
+                                                :tj false
+                                                :tj-included true
+                                                :vss-luokka true
+                                                :autopaikat true)
+                                       [:template :published :settings :reviews]
+                                       [{:fi "foo" :sv "foo" :en "foo" :selected true}
+                                        {:fi "bar" :sv "bar" :en "bar"}])
+                             :application
+                             {:handlers [{:general   true
+                                          :firstName "Bob"
+                                          :lastName  "Builder"}]
+                              :documents
+                              [{:schema-info {:name "hankkeen-kuvaus"}
+                                :data        {:poikkeamat {:value "Cannot live by your rules, man!"}}}]}))]
           init => (check-draft :inclusions [:anto :voimassa :paatosteksti :foremen
-                                            :foremen-included :plans
+                                            :foremen-included
                                             :automatic-verdict-dates
-                                            :plans-included :reviews
-                                            :reviews-included :handler
+                                            :reviews :reviews-included :handler
                                             :deviations :conditions.condition
                                             :add-condition :conditions.remove-condition
                                             :attachments
@@ -931,26 +1089,35 @@
                                             :buildings.autopaikat-yhteensa
                                             :buildings.vss-luokka]
                                :giver       "viranhaltija"
-                               :references {:verdict-code ["osittain-myonnetty"]})
+                               :references {:verdict-code ["osittain-myonnetty"]
+                                            :foremen (just ["vastaava-tj" "tj"] :in-any-order)
+                                            :reviews (just [(just {:id mongo-id?
+                                                                   :fi "foo"
+                                                                   :sv "foo"
+                                                                   :en "foo"})
+                                                            (just {:id mongo-id?
+                                                                   :fi "bar"
+                                                                   :sv "bar"
+                                                                   :en "bar"})]
+                                                           :in-any-order)})
           (-> init :draft :data
               :conditions vec flatten) => (just [mongo-id? {:condition "Stay calm"}
                                                  mongo-id? {:condition "Carry on"}])
           (-> init :draft :data
-              (dissoc :conditions)) => {:foremen-included false
-                                        :foremen          ["vastaava-tj" "tj"]
-                                        :reviews-included true
-                                        :reviews          ["aaa" "bbb"]
-                                        :plans-included   true
-                                        :deviations       "Cannot live by your rules, man!"
-                                        :handler          "Bob Builder"
-                                        :paatosteksti     "This is verdict."}
+              (dissoc :conditions)) => (just {:foremen-included false
+                                              :foremen          ["vastaava-tj"]
+                                              :reviews-included true
+                                              :reviews          (just [mongo-id?])
+                                              :deviations       "Cannot live by your rules, man!"
+                                              :handler          "Bob Builder"
+                                              :paatosteksti     "This is verdict."})
           (fact "select-inclusions"
             (select-inclusions (:dictionary mini-verdict)
                                [:deviations :buildings.paloluokka :foremen-included])
-            => {:deviations {:phrase-text      {:category :yleinen}
-                             :template-section :deviations}
-                :buildings  {:repeating        {:paloluokka {:text {}}}
-                             :template-section :buildings}
+            => {:deviations       {:phrase-text      {:category :yleinen}
+                                   :template-section :deviations}
+                :buildings        {:repeating        {:paloluokka {:text {}}}
+                                   :template-section :buildings}
                 :foremen-included {:toggle {}}})))))
 
 (facts "archive-info"

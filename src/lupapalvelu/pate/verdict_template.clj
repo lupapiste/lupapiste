@@ -201,13 +201,30 @@
 (defn settings [organization category]
   (get-in organization [:verdict-templates :settings (keyword category)]))
 
-(defn- pack-generics [organization gen-key template-data]
+#_(defn- pack-generics [organization gen-key template-data]
   (->> organization
        :verdict-templates
        gen-key
        (remove :deleted)
        (filter #(util/includes-as-kw? (gen-key template-data) (:id %)))
        (map #(select-keys % [:id :name :type]))))
+
+(defn- pack-dependencies
+  "Packs settings dependency (either :plans or :reviews). Only included
+  items are packed. The selection status is packed as well. The result
+  is a list with (at least) localisation (e.g., :fi) and :selected
+  properties."
+  [settings dep-key template-data]
+  (let [t-data (->> template-data
+                    dep-key
+                    (filter (util/fn-> last :included))
+                    (into {}))]
+    (map (fn [[k v]]
+           (assoc v
+                  :selected (boolean (-> t-data
+                                         k
+                                         :selected))))
+         (select-keys (dep-key settings) (keys t-data)))))
 
 (defn- pack-verdict-dates
   "Since the date calculation is cumulative we always store every delta
@@ -236,8 +253,7 @@
   (let [draft (:draft (settings organization category))
         data  (into {}
                     (for [[k v] (select-keys draft
-                                             [:verdict-code
-                                              :foremen])]
+                                             [:verdict-code])]
                       [k (loop [v v]
                            (if (map? v)
                              (recur (-> v vals first))
@@ -245,8 +261,8 @@
         board-verdict? (util/=as-kw (:giver template-data) :lautakunta)]
     (merge data
            {:date-deltas (pack-verdict-dates category draft board-verdict?)
-            :plans       (pack-generics organization :plans template-data)
-            :reviews     (pack-generics organization :reviews template-data)}
+            :plans       (pack-dependencies draft :plans template-data)
+            :reviews     (pack-dependencies draft :reviews template-data)}
            (when board-verdict?
              {:boardname (:boardname draft)}))))
 
@@ -263,16 +279,8 @@
                            path
                            value
                            draft
-                           (merge
-                            {:settings (:draft (settings organization
-                                                         category))}
-                            #_(when-let [ref-gen (some->> path
-                                                        (util/intersection-as-kw [:plans :reviews])
-                                                        first)]
-                              (hash-map ref-gen
-                                        (map :id (generic-list organization
-                                                               category
-                                                               ref-gen))))))]
+                           {:settings (:draft (settings organization
+                                                        category))})]
     (when op ;; Value could be nil
       (let [mongo-path (util/kw-path (cons :verdict-templates.templates.$.draft
                                            path))]
@@ -284,7 +292,7 @@
                         timestamp)))
     processed))
 
-(defn- prune-template-data
+#_(defn- prune-template-data
   "Upon publishing the settings generics and template data must by
   synchronized."
   [settings gen-key template-data]
@@ -328,9 +336,8 @@
                      template-id
                      {$set {:verdict-templates.templates.$.published
                             {:published timestamp
-                             :data      (->> (draft-for-publishing template)
-                                             (prune-template-data settings :reviews)
-                                             (prune-template-data settings :plans))
+                             :data      (dissoc (draft-for-publishing template)
+                                                :reviews :plans)
                              :settings  settings}}})))
 
 (defn set-name [organization template-id timestamp name]

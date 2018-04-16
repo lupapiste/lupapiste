@@ -153,7 +153,8 @@
                                       acc)))
                                 {}
                                 dic)
-     :references settings}))
+     ;; Foremen, plans and reviews are initialized in separate init functions.
+     :references (dissoc settings :foremen :plans :reviews)}))
 
 
 ;; Argument map:
@@ -181,7 +182,39 @@
 (defn dict-included? [{:keys [draft]} dict]
   (contains? (-> draft :template :inclusions set) dict))
 
-(defn init--included-checks
+(defn- resolve-requirement-inclusion
+  "Dict is either :foremen, :plans or :reviews. Only empty requirement
+  is excluded."
+  [{:keys [template] :as initmap} dict]
+  (let [included (keyword (str (name dict) "-included"))]
+    (if (some-> initmap :draft :references dict seq)
+      (assoc-in initmap
+                [:draft :data included]
+                (not (section-removed? template dict)))
+      (update-in initmap
+                 [:draft :template :inclusions]
+                 util/difference-as-kw [dict included]))))
+
+(defn init--foremen
+  "Build a multi-select reference-list value according to template
+  data. The included toggle is initialized in `init--included-checks`
+  above."
+  [{:keys [template] :as initmap}]
+  (let [t-data  (-> template :published :data)
+        updated (reduce (fn [acc code]
+                          (let [codename (name code)
+                                inc-dict  (keyword (str codename "-included"))
+                                included? (inc-dict t-data)
+                                selected? (when included?
+                                            (code t-data))]
+                            (cond-> acc
+                              included? (update-in [:draft :references :foremen] conj codename)
+                              selected? (update-in [:draft :data :foremen] conj codename))))
+                        initmap
+                        shared/foreman-codes)]
+    (resolve-requirement-inclusion updated :foremen)))
+
+#_(defn init--included-checks
   "Included toggle value according to the template section status."
   [{:keys [template] :as initmap} & kw]
   (update-in initmap
@@ -195,6 +228,23 @@
                                 (not (section-removed? template k))))
                        data
                        kw))))
+
+(defn init--requirements-references
+  "Plans and reviews are defined in the published template settings."
+  [{:keys [template] :as initmap} dict]
+  (-<> initmap
+       (reduce (fn [acc {:keys [selected] :as item}]
+                 (let [id (mongo/create-id)]
+                   (cond-> (update-in acc
+                                      [:draft :references dict]
+                                      conj (-> item
+                                               (dissoc :selected)
+                                               (assoc :id id)))
+                    selected (update-in [:draft :data dict]
+                                        conj id))))
+               <>
+              (get-in template [:published :settings dict]))
+      (resolve-requirement-inclusion dict)))
 
 (defn init--verdict-dates
   "Include in verdict only those verdict dates that have been checked in
@@ -276,9 +326,11 @@
 (defmethod initialize-verdict-draft :r
   [initmap]
   (-> initmap
-      (init--included-checks :plans :reviews :foremen)
       (init--dict-by-application :handler general-handler)
       (init--dict-by-application :deviations application-deviations)
+      init--foremen
+      (init--requirements-references :plans)
+      (init--requirements-references :reviews)
       init--verdict-dates
       init--upload
       init--verdict-giver-type
@@ -310,6 +362,7 @@
                                       assoc
                                       :id  (mongo/create-id)
                                       :modified created))]
+    (>pprint draft)
     (action/update-application command
                                {$push {:pate-verdicts
                                        (sc/validate schemas/PateVerdict draft)}})

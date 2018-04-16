@@ -32,6 +32,7 @@
   (:require [clojure.set :as set]
             [clojure.string :as s]
             [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.shared-schemas :as schemas]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.pate.components :as pate-components]
@@ -45,7 +46,7 @@
             [sade.shared-util :as util]))
 
 (defn schema-type [options]
-  (-> options :schema (dissoc :required? :css) keys first keyword))
+  (-> options :schema (select-keys schemas/schema-type-keys) keys first keyword))
 
 (declare pate-list)
 
