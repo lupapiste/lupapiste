@@ -57,9 +57,9 @@
        (.setExceptionListener conn exception-listener)
        conn)))
 
-  (def broker-connection ^Connection (create-connection))
+  (defonce broker-connection ^Connection (create-connection))
 
-  (def session (.createSession broker-connection false Session/AUTO_ACKNOWLEDGE))
+  (defonce session (.createSession broker-connection Session/AUTO_ACKNOWLEDGE))
 
   (do
     (.start broker-connection)
