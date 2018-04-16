@@ -27,13 +27,13 @@
 
   (defn message-listener [cb]
     (reify MessageListener
-      (^void onMessage [_ ^Message m]
+      (onMessage [_ m]
         (condp instance? m
           BytesMessage (let [data (byte-array (.getBodyLength ^BytesMessage m))]
-                                       (.readBytes ^BytesMessage m data)
-                                       (cb data))
+                         (.readBytes ^BytesMessage m data)
+                         (cb data))
           ObjectMessage (cb (.getObject ^ObjectMessage m))
-          TextMessage (cb (.getText ^TextMessage m))
+          TextMessage   (cb (.getText ^TextMessage m))
           (error "Unknown JMS message type:" (type m))))))
 
   (def exception-listener
