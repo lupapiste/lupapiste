@@ -2,7 +2,6 @@
   (:require [taoensso.timbre :refer [infof]]
             [clj-http.cookies :as cookies]
             [monger.operators :refer :all]
-            [clojure.tools.reader.edn :as edn]
             [sade.http :as http]
             [sade.core :refer :all]
             [sade.env :as env]
