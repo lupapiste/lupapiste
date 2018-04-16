@@ -63,7 +63,8 @@
 
   (defonce broker-connection ^Connection (create-connection broker-url (env/value :jms)))
 
-  (defonce session (.createSession broker-connection Session/AUTO_ACKNOWLEDGE))
+  (defonce consumer-session (.createSession broker-connection Session/AUTO_ACKNOWLEDGE))
+  (defonce producer-session (.createSession broker-connection Session/AUTO_ACKNOWLEDGE))
 
   (do
     (.start broker-connection)
@@ -89,14 +90,14 @@
     If no message-fn is given, by default a TextMessage (string) is created.
     Producer is internally registered and closed on shutdown."
     ([^String queue-name]
-     (register-producer session (queue queue-name) #(.createTextMessage session %)))
+     (register-producer producer-session (queue queue-name) #(.createTextMessage producer-session %)))
     ([^String queue-name message-fn]
-     (register-producer session (queue queue-name) message-fn)))
+     (register-producer producer-session (queue queue-name) message-fn)))
 
   (defn create-nippy-producer
     "Producer that serializes data to byte message with nippy." ; props to bowerick/jms
     ([^String queue-name]
-      (create-nippy-producer session queue-name))
+      (create-nippy-producer producer-session queue-name))
     ([^Session session ^String queue-name]
      (letfn [(nippy-data [data]
                (doto
@@ -116,7 +117,7 @@
     ([^String endpoint callback-fn]
      (register-consumer endpoint callback-fn message-listener))
     ([^String endpoint callback-fn listener-fn]
-     (let [consumer-instance (doto (consumer session (queue endpoint))
+     (let [consumer-instance (doto (consumer consumer-session (queue endpoint))
                                (.setMessageListener (listener-fn callback-fn)))]
        (register :consumers consumer-instance)
        consumer-instance)))
