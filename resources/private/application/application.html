@@ -85,7 +85,7 @@
                                     <span data-bind="if: partyDocumentIndicator">
                                         <span data-bind="text: partyDocumentIndicator" id="applicationPartyDocumentIndicator" class="indicator"></span></span></a></li>
                             <li data-bind="if: $root.authorization.ok('tasks-tab-visible'), css: {'active': $parent.selectedTabName() === 'tasks'}">
-                                <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab" class="link-btn">
+                                <a data-bind="click: changeTab, css: tasksButtonClass" href="#" data-target="tasks" data-test-id="application-open-tasks-tab" class="link-btn">
                                     <!-- ko if: $root.authorization.ok('ya-application') -->
                                     <span data-bind="ltext: 'application.tabConstructionTimeTasksYA'"></span>
                                     <!-- /ko -->

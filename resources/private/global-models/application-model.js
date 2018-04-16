@@ -1033,6 +1033,14 @@ LUPAPISTE.ApplicationModel = function() {
     }
   });
 
+  self.tasksButtonClass = ko.pureComputed(function() {
+    if (lupapisteApp.models.applicationAuthModel.ok("tasks-tab-visible")) {
+      return "link-btn-inverse";
+    } else {
+      return "link-btn";
+    }
+  });
+
   self.requiredFieldSummaryButtonClass = ko.pureComputed(function() {
     if (lupapisteApp.models.applicationAuthModel.ok("approve-application") ||
         lupapisteApp.models.applicationAuthModel.ok("update-app-bulletin-op-description") ||
