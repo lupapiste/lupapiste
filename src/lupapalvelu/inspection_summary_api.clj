@@ -85,7 +85,8 @@
                 inspection-summary/application-has-R-permit-type-pre-check
                 (action/not-pre-check (partial permit/valid-permit-types
                                                {:R ["tyonjohtaja-hakemus"
-                                                    "tyonjohtaja-ilmoitus"]}))]
+                                                    "tyonjohtaja-ilmoitus"]}))
+                (app/reject-primary-operations #{:raktyo-aloit-loppuunsaat :jatkoaika})]
    :parameters [:id]
    :categories #{:inspection-summaries}
    :states states/post-verdict-states

@@ -3,6 +3,7 @@
   (:require [sade.core :refer :all]
             [sade.util :refer [fn->]]
             [lupapalvelu.action :as action :refer [defquery]]
+            [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.permit :as permit]
@@ -22,7 +23,8 @@
                           (fail :error.foreman.no-tasks)
                           (yax/ya-extension-app? application)
                           (fail :error.ya-extension.no-tasks)))
-                      (permit/validate-permit-type-is permit/R permit/YA)]}
+                      (permit/validate-permit-type-is permit/R permit/YA)
+                      (app/reject-primary-operations #{:raktyo-aloit-loppuunsaat :jatkoaika})]}
   [_])
 
 (defn- state-before-last-canceled [{{history :history} :application}]
