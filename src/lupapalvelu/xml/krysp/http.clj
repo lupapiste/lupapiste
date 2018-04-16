@@ -63,7 +63,7 @@
           (wrap-authentication http-conf)))))
 
 (when (env/feature? :jms)
- (defn message-handler
+(defn message-handler
   [payload]
   (let [{:keys [url xml http-conf]} payload]
     (http/post

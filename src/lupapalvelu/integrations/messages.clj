@@ -9,7 +9,7 @@
 
 (def create-id mongo/create-id)
 
-(def partners #{"ely" "mylly" "matti"})
+(def partners #{"ely" "mylly" "matti" "internal"})
 
 (sc/defschema IntegrationMessage
   {:id                            ssc/ObjectIdStr
@@ -17,7 +17,7 @@
    :messageType                   sc/Str
    (sc/optional-key :transferType) (sc/enum "http" "sftp" "jms")
    (sc/optional-key :partner)     (apply sc/enum partners)
-   :format                        (sc/enum "xml" "json")
+   :format                        (sc/enum "xml" "json" "clojure" "bytes")
    :created                       ssc/Timestamp
    :status                        (sc/enum "done" "published" "processing" "processed" "received")
    (sc/optional-key :external-reference) sc/Str
