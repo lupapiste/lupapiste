@@ -1,7 +1,8 @@
 (ns lupapalvelu.integrations.jms
   (:require [taoensso.timbre :refer [error errorf info infof tracef warnf]]
             [taoensso.nippy :as nippy]
-            [sade.env :as env])
+            [sade.env :as env]
+            [sade.strings :as ss])
   (:import (javax.jms ExceptionListener Connection Session Destination Queue
                       MessageProducer Message MessageListener
                       BytesMessage ObjectMessage TextMessage)
@@ -52,13 +53,15 @@
   (def broker-url (or (env/value :jms :broker-url) "vm://0"))
 
   (defn create-connection ^Connection
-    ([] (create-connection broker-url))
-    ([host]
-     (let [conn (.createConnection (ActiveMQJMSConnectionFactory. host))]
+    ([] (create-connection broker-url {}))
+    ([host {:keys [username password]}]
+     (let [conn (if (ss/not-blank? username)
+                  (.createConnection (ActiveMQJMSConnectionFactory. host) username password)
+                  (.createConnection (ActiveMQJMSConnectionFactory. host)))]
        (.setExceptionListener conn exception-listener)
        conn)))
 
-  (defonce broker-connection ^Connection (create-connection))
+  (defonce broker-connection ^Connection (create-connection broker-url (env/value :jms)))
 
   (defonce session (.createSession broker-connection Session/AUTO_ACKNOWLEDGE))
 
