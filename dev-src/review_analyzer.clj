@@ -72,21 +72,21 @@
 (defn run-analyzer [org-id]
   (let [org (mongo/by-id :organizations org-id)]
     (run! (partial run-for-app org)
-          (mongo/select :applications {:_id {$nin excluded}
-                                       :organization (:id org)
-                                       :tasks {"$elemMatch" {:created {"$gt" gt-ts, "$lt" lt-ts}
-                                                             :source.type "background"}}}))))
+          (mongo/snapshot :applications {:_id {$nin excluded}
+                                         :organization (:id org)
+                                         :tasks {"$elemMatch" {:created {"$gt" gt-ts, "$lt" lt-ts}
+                                                               :source.type "background"}}}))))
 
 
 
 (defn generate-mongo-clauses-to-file
   "Generates mongo $pull clauses into file, which remove 'wrong' reviews from applications."
   [org]
-  (doseq [app (mongo/select :applications
-                            {:_id {$nin excluded}
-                             :organization (:id org)
-                             :tasks {"$elemMatch" {:created {"$gt" gt-ts, "$lt" lt-ts}
-                                                   :source.type "background"}}})
+  (doseq [app (mongo/snapshot :applications
+                              {:_id {$nin excluded}
+                               :organization (:id org)
+                               :tasks {"$elemMatch" {:created {"$gt" gt-ts, "$lt" lt-ts}
+                                                     :source.type "background"}}})
           :let [out-f "/tmp/pull_reviews_mongo_updates.js"
                 submitted-ts (:submitted app)
                 xmls (-> (get-xml org app)

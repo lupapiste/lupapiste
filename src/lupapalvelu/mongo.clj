@@ -204,28 +204,43 @@
   `(query/with-collection (get-db) ~collection ~@body))
 
 (defn select
-  "Returns multiple entries by matching the monger query.
-   Cursor is snapshotted unless order-by clause is defined"
+  "Returns multiple entries by matching the monger query."
   ([collection]
     {:pre [collection]}
     (select collection {}))
   ([collection query]
     {:pre [collection (map? query)]}
     (map with-id (with-collection (name collection)
-                                        (query/find (remove-null-chars query))
-                                        (query/snapshot))))
+                                  (query/find (remove-null-chars query)))))
   ([collection query projection]
     {:pre [collection (map? query) (seq projection)]}
     (map with-id (with-collection (name collection)
-                                        (query/find (remove-null-chars query))
-                                        (query/fields (if (map? projection) (keys projection) projection))
-                                        (query/snapshot))))
+                                  (query/find (remove-null-chars query))
+                                  (query/fields (if (map? projection) (keys projection) projection)))))
   ([collection query projection order-by]
    {:pre [collection (map? query) (seq projection) (instance? clojure.lang.PersistentArrayMap order-by)]}
    (map with-id (with-collection (name collection)
-                  (query/find (remove-null-chars query))
-                  (query/fields (if (map? projection) (keys projection) projection))
-                  (query/sort order-by)))))
+                                 (query/find (remove-null-chars query))
+                                 (query/fields (if (map? projection) (keys projection) projection))
+                                 (query/sort order-by)))))
+
+(defn snapshot
+  "Returns multiple entries by matching the monger query.
+   Cursor is snapshotted, which will always cause a full collection scan. Use only if necessary."
+  ([collection]
+   {:pre [collection]}
+   (select collection {}))
+  ([collection query]
+   {:pre [collection (map? query)]}
+   (map with-id (with-collection (name collection)
+                                 (query/find (remove-null-chars query))
+                                 (query/snapshot))))
+  ([collection query projection]
+   {:pre [collection (map? query) (seq projection)]}
+   (map with-id (with-collection (name collection)
+                                 (query/find (remove-null-chars query))
+                                 (query/fields (if (map? projection) (keys projection) projection))
+                                 (query/snapshot)))))
 
 (defn select-one
   "Returns one entry by matching the monger query, nil if query did not match."
@@ -475,6 +490,8 @@
   (ensure-index :buildingCache {:propertyId 1} {:unique true})
   (ensure-index :ssoKeys {:ip 1} {:unique true})
   (ensure-index :assignments {:application.id 1, :recipient.id 1, :states.type 1})
+  (ensure-index :assignments {:application.organization 1})
+  (ensure-index :assignments {:status 1})
   (ensure-index :integration-messages {:application.id 1})
   (ensure-index :integration-messages {:created -1})
   (infof "ensure-indexes took %d ms" (- (now) ts)))
