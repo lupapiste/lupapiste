@@ -164,7 +164,7 @@
    })
 
 (defn- export [collection query fields]
-  (ok collection (mongo/select collection query fields)))
+  (ok collection (mongo/snapshot collection query fields)))
 
 (defn- resolve-price-class
   "priceClass = legacy price class, which is mapped in .csv in dw.
@@ -245,7 +245,7 @@
                 :verdicts 1
                 :documents.data.kaytto.kayttotarkoitus.value 1
                 :documents.schema-info.op.id 1}
-        raw-applications (mongo/select :applications query fields)
+        raw-applications (mongo/snapshot :applications query fields)
         applications-with-operations (map
                                        (fn [a] (assoc a :operations (application/get-operations a)))
                                        raw-applications)]
@@ -326,7 +326,7 @@
                 :secondaryOperations :sent :started :state :submitted
                 :documents.data.kaytto.kayttotarkoitus.value
                 :documents.schema-info.op.id]
-        raw-applications (mongo/select :applications query fields)]
+        raw-applications (mongo/snapshot :applications query fields)]
     (ok :applications (map application-to-salesforce raw-applications))))
 
 (defexport export-organizations

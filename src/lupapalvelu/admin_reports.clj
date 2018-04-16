@@ -97,23 +97,23 @@
       :error.yes-no-both)))
 
 (defn- user-list [company allow professional]
-  (mongo/select :users
-                (merge {}
-                       (when-not (= allow :both)
-                         {:allowDirectMarketing (= allow :yes)})
-                       (when-not (= professional :both)
-                         {:architect (= professional :yes)})
-                       (when-not (= company :both)
-                         {:company {$exists (= company :yes)}}))
-                {:lastName 1 :firstName 1 :email 1 :phone 1
-                 :companyName 1 :street 1 :zip 1 :city 1 :architect 1
-                 :allowDirectMarketing 1 :company.id 1 :company.role 1}))
+  (mongo/snapshot :users
+                  (merge {}
+                         (when-not (= allow :both)
+                           {:allowDirectMarketing (= allow :yes)})
+                         (when-not (= professional :both)
+                           {:architect (= professional :yes)})
+                         (when-not (= company :both)
+                           {:company {$exists (= company :yes)}}))
+                  {:lastName 1 :firstName 1 :email 1 :phone 1
+                   :companyName 1 :street 1 :zip 1 :city 1 :architect 1
+                   :allowDirectMarketing 1 :company.id 1 :company.role 1}))
 
 (defn- company-map []
   (reduce (fn [acc {:keys [id] :as company}]
             (assoc acc id (dissoc company :id)))
           {}
-          (mongo/select :companies {} [:y :name :locked :billingType])))
+          (mongo/snapshot :companies {} [:y :name :locked :billingType])))
 
 (defn- user-report-data [company allow professional]
   (let [users (users-spam-flags (user-list company allow professional))]
