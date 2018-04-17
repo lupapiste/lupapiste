@@ -32,6 +32,12 @@
                                         :id app-id
                                         :verdict-id verdict-id)
         verdict-data             (get-in verdict-draft [:verdict :data])
+        references               (:references verdict-draft)
+        ;; Every plan and review is selected in the fixture
+        plan-ids                 (->> references :plans (map :id))
+        review-ids               (->> references :reviews (map :id))
+        find-review-id           #(:id (util/find-by-key :fi % (:reviews references)))
+        find-plan-id             #(:id (util/find-by-key :fi % (:plans references)))
         {:keys [primaryOperation
                 buildings]}      (query-application pena app-id)]
     (fact "Buildings empty"                                 ; they could be populated, but not implemented yet
@@ -39,29 +45,27 @@
     (fact "Verdict draft creation OK"
       verdict-draft => ok?)
     (fact "Verdict data from minimal (+ handler, operator and address)"
-      verdict-data => {:handler               "Sonja Sibbo"
-                       :address               "Test Road 8"
-                       :bulletinOpDescription ""
-                       :operation             ""
-                       :deviations            ""
-                       :buildings             {(keyword (:id primaryOperation)) {:building-id   ""
-                                                                                 :description   ""
-                                                                                 :operation     "varasto-tms"
-                                                                                 :order         "0"
-                                                                                 :show-building true
-                                                                                 :tag           ""}}
-                       :verdict-text          "Ver Dict"
-                       :plans                 ["5a85960a809b5a1e454f3233" "5a85960a809b5a1e454f3234"]
-                       :foremen               ["vastaava-tj"]
-                       :plans-included        true
-                       :language              "fi"
-                       :reviews               ["5a7affbf5266a1d9c1581957"
-                                               "5a7affcc5266a1d9c1581958"
-                                               "5a7affe15266a1d9c1581959"]
-                       :foremen-included      true
-                       :neighbor-states       []
-                       :reviews-included      true
-                       :statements            []})
+      verdict-data => (just {:handler               "Sonja Sibbo"
+                             :address               "Test Road 8"
+                             :bulletinOpDescription ""
+                             :operation             ""
+                             :deviations            ""
+                             :buildings             {(keyword (:id primaryOperation)) {:building-id   ""
+                                                                                       :description   ""
+                                                                                       :operation     "varasto-tms"
+                                                                                       :order         "0"
+                                                                                       :show-building true
+                                                                                       :tag           ""}}
+                             :verdict-text          "Ver Dict"
+                             :plans                 (just plan-ids :in-any-order)
+                             :foremen               ["vastaava-tj"]
+                             :plans-included        true
+                             :language              "fi"
+                             :reviews               (just review-ids :in-any-order)
+                             :foremen-included      true
+                             :neighbor-states       []
+                             :reviews-included      true
+                             :statements            []}))
     (fact "while preparing verdict, VTJ-PRT and location is updated to application"
       (api-update-building-data-call app-id {:form-params  {:operationId        (:id primaryOperation)
                                                             :nationalBuildingId "1234567881"
@@ -90,7 +94,9 @@
 
     (fact "Only Aloituskokous and Loppukatselmus are used in verdict"
       (command sonja :edit-pate-verdict :id app-id :verdict-id verdict-id ; removes 'Katselmus'
-               :path [:reviews] :value ["5a7affbf5266a1d9c1581957" "5a7affcc5266a1d9c1581958"]) => no-errors?)
+               :path [:reviews]
+               :value [(find-review-id "Aloituskokous")
+                       (find-review-id "Loppukatselmus")]) => no-errors?)
     (fact "Publish PATE verdict with two reviews"
       (command sonja :publish-pate-verdict :id app-id
                :verdict-id verdict-id) => no-errors?)
@@ -102,24 +108,24 @@
         (fact "two" (count reviews) => 2)
         (facts "aloituskokous"
           (fact "katselmuksenLaji" (get-in aloituskokous [:data :katselmuksenLaji :value]) => "aloituskokous")
-          (fact "taskname correct" (:taskname aloituskokous) => (get (-> verdict-draft
-                                                                         :references
-                                                                         :reviews
-                                                                         first
-                                                                         :name)
-                                                                     (keyword (:language verdict-data))))
+          (fact "taskname correct" (:taskname aloituskokous)
+                => (get (->> verdict-draft
+                             :references
+                             :reviews
+                             (util/find-by-id (find-review-id "Aloituskokous")))
+                        (keyword (:language verdict-data))))
           (fact "vaadittuLupaehtona" (get-in aloituskokous [:data :vaadittuLupaehtona :value]) =>  true)
           (fact "Buildings"
             (fact "has one" (count (keys (get-in aloituskokous [:data :rakennus]))) => 1)
             (fact "VTJ-PRT" (get-in aloituskokous [:data :rakennus :0 :rakennus :valtakunnallinenNumero :value]) => "1234567881")))
         (facts "loppukatselmus"
           (fact "katselmuksenLaji" (get-in loppukatselmus [:data :katselmuksenLaji :value]) => "loppukatselmus")
-          (fact "taskname correct" (:taskname loppukatselmus) => (get (-> verdict-draft
-                                                                          :references
-                                                                          :reviews
-                                                                          second
-                                                                          :name)
-                                                                      (keyword (:language verdict-data))))
+          (fact "taskname correct" (:taskname loppukatselmus)
+                => (get (->> verdict-draft
+                             :references
+                             :reviews
+                             (util/find-by-id (find-review-id "Loppukatselmus")))
+                        (keyword (:language verdict-data))))
           (fact "vaadittuLupaehtona" (get-in loppukatselmus [:data :vaadittuLupaehtona :value]) =>  true)
           (fact "Buildings"
             (fact "has one" (count (keys (get-in loppukatselmus [:data :rakennus]))) => 1)

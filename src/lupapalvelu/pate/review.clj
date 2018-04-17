@@ -15,5 +15,5 @@
                                      :lasnaolijat ""
                                      :huomautukset {:kuvaus ""}
                                      :poikkeamat ""}}
-          review-name (get-in pate-review [:name (keyword (get-in verdict [:data :language] "fi"))])]
+          review-name (get pate-review (keyword (get-in verdict [:data :language] "fi")))]
       (tasks/new-task "task-katselmus" review-name data {:created ts} source))))

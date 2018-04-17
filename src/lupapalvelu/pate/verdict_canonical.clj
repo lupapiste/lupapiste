@@ -7,7 +7,7 @@
 (defn- vaadittu-katselmus-canonical [lang {{reviews :reviews} :references :as verdict} review-id]
   (let [review (util/find-by-id review-id reviews)]
     {:Katselmus {:katselmuksenLaji (pate-shared/review-type-map (or (keyword (:type review)) :ei-tiedossa))
-                 :tarkastuksenTaiKatselmuksenNimi (get-in review [:name (keyword lang)])
+                 :tarkastuksenTaiKatselmuksenNimi (get review (keyword lang))
                  :muuTunnustieto [#_{:MuuTunnus "yht:MuuTunnusType"}]}})) ; TODO: initialize review tasks and pass ids here
 
 (defn- maarays-seq-canonical [{data :data :as verdict}]
@@ -19,7 +19,7 @@
 
 (defn- vaadittu-erityissuunnitelma-canonical [lang {{plans :plans} :references :as verdict} plan-id]
   (let [plan (util/find-by-id plan-id plans)]
-    {:VaadittuErityissuunnitelma {:vaadittuErityissuunnitelma (get-in plan [:name (keyword lang)])
+    {:VaadittuErityissuunnitelma {:vaadittuErityissuunnitelma (get plan (keyword lang))
                                   :toteutumisPvm nil}}))
 
 (def ^:private foreman-role-mapping {:vv-tj "KVV-ty\u00f6njohtaja"
