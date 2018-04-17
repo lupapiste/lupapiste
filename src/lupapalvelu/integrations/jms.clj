@@ -1,11 +1,12 @@
 (ns lupapalvelu.integrations.jms
-  (:require [taoensso.timbre :refer [error errorf info infof tracef warnf]]
+  (:require [taoensso.timbre :refer [error errorf info infof tracef warnf fatal]]
             [taoensso.nippy :as nippy]
             [sade.env :as env]
-            [sade.strings :as ss])
+            [sade.strings :as ss]
+            [sade.util :as util])
   (:import (javax.jms ExceptionListener Connection Session Destination Queue
-                      MessageListener BytesMessage ObjectMessage TextMessage MessageConsumer MessageProducer)
-           (org.apache.activemq.artemis.jms.client ActiveMQJMSConnectionFactory)
+                      MessageListener BytesMessage ObjectMessage TextMessage MessageConsumer MessageProducer JMSException)
+           (org.apache.activemq.artemis.jms.client ActiveMQJMSConnectionFactory ActiveMQConnection)
            (org.apache.activemq.artemis.api.jms ActiveMQJMSClient)))
 
 (when (env/feature? :embedded-artemis)
@@ -43,13 +44,11 @@
           TextMessage   (cb (.getText ^TextMessage m))
           (error "Unknown JMS message type:" (type m))))))
 
-  (declare reconnect)
-
-  (defn exception-listener [state options]
+  (def exception-listener
     (reify ExceptionListener
       (onException [_ e]
-        (error e (str "JMS exception: " (.getMessage e)))
-        (reconnect state options))))
+        (error e "JMS exception, maybe it was a reconnect?" (.getMessage e))
+        (info "After exception, is connection started:" (.isStarted ^ActiveMQConnection (:conn @state))))))
 
   (defn queue ^Queue [name]
     (ActiveMQJMSClient/createQueue name))
@@ -60,15 +59,27 @@
 
   (def broker-url (or (env/value :jms :broker-url) "vm://0"))
 
+  (defn create-connection-factory ^ActiveMQJMSConnectionFactory [^String url connection-options]
+    (let [{:keys [retry-interval retry-multipier max-retry-interval reconnect-attempts]
+           :or   {retry-interval (* 2 1000)
+                  retry-multipier 2
+                  max-retry-interval (* 5 60 1000)          ; 5 mins
+                  reconnect-attempts -1}} connection-options]
+      (doto (ActiveMQJMSConnectionFactory. url)
+        (.setRetryInterval (util/->long retry-interval))
+        (.setRetryIntervalMultiplier (util/->double retry-multipier))
+        (.setMaxRetryInterval (util/->long max-retry-interval))
+        (.setReconnectAttempts (util/->int reconnect-attempts)))))
+
   (defn create-connection
     ([] (create-connection {:broker-url broker-url}))
     ([options]
-     (create-connection options (exception-listener state options)))
-    ([{:keys [^String broker-url username password]} ex-listener]
+     (create-connection options exception-listener))
+    ([{:keys [broker-url username password] :as opts} ex-listener]
      (try
        (let [conn (if (ss/not-blank? username)
-                    (.createConnection (ActiveMQJMSConnectionFactory. broker-url) username password)
-                    (.createConnection (ActiveMQJMSConnectionFactory. broker-url)))]
+                    (.createConnection (create-connection-factory broker-url opts) username password)
+                    (.createConnection (create-connection-factory broker-url opts)))]
          (.setExceptionListener conn ex-listener)
          (.start conn)
          conn)
@@ -76,22 +87,22 @@
          (error e "Error while connecting to JMS broker " broker-url ": " (.getMessage e))))))
 
   (defn ensure-connection [state options]
-    (loop [sleep-time 2000]
+    (loop [sleep-time 2000
+           try-times 5]
       (when-not (:conn @state)
         (if-let [conn (create-connection options)]
           (do
             (swap! state assoc :conn conn)
             (infof "Started JMS broker connection to %s" (:broker-url options))
             state)
-          (do
-            (warnf "Couldn't connect to broker %s, reconnecting in %s seconds" (:broker-url options) (/ sleep-time 1000))
-            (Thread/sleep sleep-time)
-            (recur (min (* 2 sleep-time) 600000)))))))
-
-  (defn reconnect [state options]
-    (.close ^Connection (:conn @state))
-    (swap! state assoc :conn nil)
-    (ensure-connection state options))
+          (if (zero? try-times)
+            (do
+              (error "Can't connect to JMS broker, aborting")
+              (throw (JMSException. "Connection failure")))
+            (do
+              (warnf "Couldn't connect to broker %s, reconnecting in %s seconds" (:broker-url options) (/ sleep-time 1000))
+              (Thread/sleep sleep-time)
+              (recur (min (* 2 sleep-time) 60000) (dec try-times))))))))
 
   (defn register-session [type]
     (swap! state assoc (keyword (str (name type) "-session")) (.createSession ^Connection (:conn @state) Session/AUTO_ACKNOWLEDGE)))
@@ -104,8 +115,7 @@
       (when-not (:producer-session @state)
         (register-session :producer))
       (catch Exception e
-        (error e "Couldn't initialize JMS connections" (.getMessage e))
-        e)))
+        (fatal e "Couldn't initialize JMS connections" (.getMessage e)))))
 
   ;;
   ;; Producers
