@@ -4,11 +4,14 @@
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.foreman :refer [foreman-app?]]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.permit :refer [validate-permit-type-is R YA]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as usr]
+            [lupapalvelu.ya-extension :refer [ya-extension-app?]]
             [lupapalvelu.attachment.util :as att-util]
             [sade.core :refer :all]
             [sade.env :as env]
@@ -17,6 +20,12 @@
 
 
 (defn in-post-verdict-state? [_ app] (contains? states/post-verdict-states (keyword (:state app))))
+
+(defn select-tasks-tab? [_ app]
+  (cond
+    (foreman-app? app) false
+    (ya-extension-app? app) false
+    :else (contains? #{"R" "YA"} (:permitType app))))
 
 (defn- full-name [first-name last-name]
   (ss/trim (str last-name \space first-name)))
@@ -197,7 +206,8 @@
                    {:field :applicantPhone :fn get-applicant-phone}
                    {:field :applicantCompanies :fn get-applicant-companies}
                    {:field :organizationMeta :fn organization-meta}
-                   {:field :stateSeq :fn #(sm/application-state-seq %2)}))
+                   {:field :stateSeq :fn #(sm/application-state-seq %2)}
+                   {:field :tasksTabShouldShow :fn select-tasks-tab?}))
 
 (defn- enrich-with-meta-fields [fields user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app fields))

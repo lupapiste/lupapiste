@@ -121,6 +121,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   // Application metadata fields
   self.inPostVerdictState = ko.observable(false);
+  self.tasksTabShouldShow = ko.observable(false);
   self.stateSeq = ko.observable([]);
   self.currentStateInSeq = ko.pureComputed(function() {return _.includes(self.stateSeq(), self.state());});
   self.inPostSubmittedState = ko.observable(false); // TODO: remove

@@ -457,14 +457,11 @@
 
         updateMetadataFields(application);
 
-        var tasksTabShouldShow = function(application) {
-          return _.includes(["R", "YA"], application.permitType) &&
-            !application.foreman && application.primaryOperation !== "ya-jatkoaika";
-        }
+        alert(application.tasksTabShouldShow) // DEBUG
 
         var fallbackTab = function(application) {
           if (application.inPostVerdictState) {
-            if (tasksTabShouldShow(application)) {
+            if (application.tasksTabShouldShow) {
               return "tasks";
             } else {
               return "applicationSummary";
