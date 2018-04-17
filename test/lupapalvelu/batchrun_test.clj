@@ -247,7 +247,7 @@
   (fact "single application"
     (batchrun/poll-verdicts-for-reviews :application-ids ["LP-ORG-2000-00001"]) => nil
 
-    (provided (#'lupapalvelu.mongo/select :applications {:_id {"$in" ["LP-ORG-2000-00001"]}})
+    (provided (#'lupapalvelu.mongo/snapshot :applications {:_id {"$in" ["LP-ORG-2000-00001"]}})
               => [{:id "LP-ORG-2000-00001" :permitType "TEST" :organization "org-id"}])
 
     (provided (#'lupapalvelu.batchrun/orgs-for-review-fetch "org-id")
@@ -291,7 +291,7 @@
     (fact
         (batchrun/poll-verdicts-for-reviews :application-ids ["lots-of-applications-ids"]) => nil
 
-        (provided (#'lupapalvelu.mongo/select :applications {:_id {"$in" ["lots-of-applications-ids"]}})
+        (provided (#'lupapalvelu.mongo/snapshot :applications {:_id {"$in" ["lots-of-applications-ids"]}})
                   => [{:id "LP-ORA-2000-00001" :permitType "TEST" :organization "org-id"}
                       {:id "LP-ORB-2000-00001" :permitType "TEST" :organization "org-id2"}
                       {:id "LP-ORB-2000-00002" :permitType "TEST" :organization "org-id2"}
