@@ -60,16 +60,15 @@
     (remove empty? (concat liitepohja op-metas signatures verdict-attachment))))
 
 
-(defn- get-Liite
-  [title link {{:keys [fileId version]} :latestVersion {:keys [type-id]} :type :as attachment} filename & [meta building-ids]]
+(defn- get-Liite [title link attachment type file-id filename & [meta building-ids]]
   {:kuvaus              title
    :linkkiliitteeseen   link
    :muokkausHetki       (util/to-xml-datetime (or (:modified attachment) (:created attachment)))
-   :versionumero        (str (:major version) "." (:minor version))
-   :tyyppi              type-id
+   :versionumero        1
+   :tyyppi              type
    :metatietotieto      meta
    :rakennustunnustieto building-ids
-   :fileId              fileId
+   :fileId              file-id
    :filename            filename})
 
 
@@ -124,7 +123,7 @@
                              link (str begin-of-link (if use-http-links? (attachment-url attachment) attachment-file-name))
                              meta (get-attachment-meta attachment application)
                              building-ids (get-attachment-building-ids attachment unwrapped-app)]]
-                   {:Liite (get-Liite attachment-title link attachment attachment-file-name meta building-ids)})))))
+                   {:Liite (get-Liite attachment-title link attachment type-id file-id attachment-file-name meta building-ids)})))))
 
 ;;
 ;;  Statement attachments
@@ -159,7 +158,7 @@
         link (str begin-of-link (if use-http-links? (attachment-url attachment) attachment-file-name))
         meta (get-attachment-meta attachment application)
         building-ids (get-attachment-building-ids attachment (tools/unwrapped application))]
-    {:Liite (get-Liite title link attachment attachment-file-name meta building-ids)}))
+    {:Liite (get-Liite title link attachment type file-id attachment-file-name meta building-ids)}))
 
 (defn get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
   (let [statement-attachments-by-id (group-by
@@ -179,5 +178,6 @@
         attachment-title (i18n/localize lang (ss/join "." ["attachmentType" type-group type-id]))
         use-http-links? (re-matches #"https?://.*" begin-of-link)
         link (str begin-of-link (if use-http-links? (attachment-url attachment) (:filename attachment)))
+        file-id (:fileId attachment)
         file-name (:filename attachment)]
-    (get-Liite attachment-title link attachment file-name)))
+    (get-Liite attachment-title link attachment type-id file-id file-name)))
