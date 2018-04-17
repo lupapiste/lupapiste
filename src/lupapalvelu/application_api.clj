@@ -870,8 +870,7 @@
         (util/to-local-date (:submitted app))))))
 
 (defn- validate-not-jatkolupa-app [{:keys [application]}]
-  (when (or (= :raktyo-aloit-loppuunsaat (-> application :primaryOperation :name keyword))
-            (= :ya-jatkoaika (-> application :primaryOperation :name keyword)))
+  (when (app/jatkoaika-application? application)
     (fail :error.cannot-apply-jatkolupa-for-jatkolupa)))
 
 ;;

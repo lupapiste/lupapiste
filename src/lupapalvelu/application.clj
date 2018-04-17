@@ -968,3 +968,9 @@
         secondary-buildings (filter #(not (= (:operationId %) primary-op-id)) (:buildings application))]
     (mapv #(doc-persistence/remove! command  %) secondary-building-docs)
     (action/update-application command {$pull {:buildings {:buildingId {$in (map :buildingId secondary-buildings)}}}})))
+
+(defn jatkoaika-application? [application]
+  (let [primary-operation (get-in application [:primaryOperation :name])]
+    (or (= primary-operation "raktyo-aloit-loppuunsaat")
+        (= primary-operation "jatkoaika")
+        (= primary-operation "ya-jatkoaika"))))

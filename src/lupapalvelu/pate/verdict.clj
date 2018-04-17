@@ -762,11 +762,6 @@
            (when (integer? lainvoimainen)
              {:lainvoimainen lainvoimainen}))))
 
-(defn- jatkoaika-application? [application]
-  (let [primary-operation (get-in application [:primaryOperation :name])]
-    (or (= primary-operation "raktyo-aloit-loppuunsaat")
-        (= primary-operation "jatkoaika"))))
-
 (defn accepted-verdict? [verdict]
   (some #{(keyword (get-in verdict [:data :verdict-code]))} [:hyvaksytty :myonnetty])) ; TODO Which verdict codes are accepted??
 
@@ -834,7 +829,7 @@
     (tiedonohjaus/mark-app-and-attachments-final! (:id application)
                                                   created)
 
-    (when (and (jatkoaika-application? application)
+    (when (and (app/jatkoaika-application? application)
                (accepted-verdict? verdict))
       (app/add-continuation-period
         (link-permit-application application)
