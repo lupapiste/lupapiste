@@ -457,8 +457,6 @@
 
         updateMetadataFields(application);
 
-        alert(application.tasksTabShouldShow) // DEBUG
-
         var fallbackTab = function(application) {
           if (application.inPostVerdictState) {
             if (application.tasksTabShouldShow) {
