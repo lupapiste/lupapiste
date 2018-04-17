@@ -4,7 +4,7 @@
             [sade.env :as env]
             [sade.strings :as ss])
   (:import (javax.jms ExceptionListener Connection Session Destination Queue
-                      MessageListener BytesMessage ObjectMessage TextMessage)
+                      MessageListener BytesMessage ObjectMessage TextMessage MessageConsumer MessageProducer)
            (org.apache.activemq.artemis.jms.client ActiveMQJMSConnectionFactory)
            (org.apache.activemq.artemis.api.jms ActiveMQJMSClient)))
 
@@ -15,9 +15,9 @@
 
 (when (env/feature? :jms)
 
-  (defonce state (atom {:producers []
-                        :consumers []
-                        :conn nil
+  (defonce state (atom {:producers        []
+                        :consumers        []
+                        :conn             nil
                         :producer-session nil
                         :consumer-session nil}))
 
@@ -60,11 +60,11 @@
 
   (def broker-url (or (env/value :jms :broker-url) "vm://0"))
 
-  (defn create-connection ^Connection
+  (defn create-connection
     ([] (create-connection {:broker-url broker-url}))
     ([options]
      (create-connection options (exception-listener state options)))
-    ([{:keys [broker-url username password]} ex-listener]
+    ([{:keys [^String broker-url username password]} ex-listener]
      (try
        (let [conn (if (ss/not-blank? username)
                     (.createConnection (ActiveMQJMSConnectionFactory. broker-url) username password)
@@ -89,12 +89,12 @@
             (recur (min (* 2 sleep-time) 600000)))))))
 
   (defn reconnect [state options]
-    (.close (:conn @state))
+    (.close ^Connection (:conn @state))
     (swap! state assoc :conn nil)
     (ensure-connection state options))
 
   (defn register-session [type]
-    (swap! state assoc (keyword (str (name type) "-session")) (.createSession (:conn @state) Session/AUTO_ACKNOWLEDGE)))
+    (swap! state assoc (keyword (str (name type) "-session")) (.createSession ^Connection (:conn @state) Session/AUTO_ACKNOWLEDGE)))
 
   (defn start! []
     (try
@@ -130,14 +130,14 @@
     If no message-fn is given, by default a TextMessage (string) is created.
     Producer is internally registered and closed on shutdown."
     ([^String queue-name]
-     (register-producer (producer-session) (queue queue-name) #(.createTextMessage (producer-session) %)))
+     (register-producer (producer-session) (queue queue-name) #(.createTextMessage ^Session (producer-session) %)))
     ([^String queue-name message-fn]
      (register-producer (producer-session) (queue queue-name) message-fn)))
 
   (defn create-nippy-producer
     "Producer that serializes data to byte message with nippy." ; props to bowerick/jms
     ([^String queue-name]
-      (create-nippy-producer (producer-session) queue-name))
+     (create-nippy-producer (producer-session) queue-name))
     ([^Session session ^String queue-name]
      (letfn [(nippy-data [data]
                (doto
@@ -180,9 +180,11 @@
   (defn close-all!
     "Closes all registered consumers and the broker connection."
     []
-    (doseq [conn (concat (:consumers @state) (:producers @state))]
+    (doseq [^MessageConsumer conn (:consumers @state)]
       (.close conn))
-    (.close (:conn @state))
+    (doseq [^MessageProducer conn (:producers @state)]
+      (.close conn))
+    (.close ^Connection (:conn @state))
 
     (when-let [artemis (ns-resolve 'artemis-server 'embedded-broker)]
       (info "Stopping Artemis...")
