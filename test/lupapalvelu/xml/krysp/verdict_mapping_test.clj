@@ -145,7 +145,7 @@
         (xml/get-text lp-xml [:paatostieto :poytakirja :liite :linkkiliitteeseen]) => "BEGIN_OF_LINK/LP-753-2018-90012 P\u00e4\u00e4t\u00f6s 21.03.2018 12:29.pdf")
 
       (fact "versio"
-        (xml/get-text lp-xml [:paatostieto :poytakirja :liite :versionumero]) => "1")
+        (xml/get-text lp-xml [:paatostieto :poytakirja :liite :versionumero]) => "0.1")
 
       (fact "muokkaushetki"
         (xml/get-text lp-xml [:paatostieto :poytakirja :liite :muokkausHetki]) => "2018-03-21T10:29:38")

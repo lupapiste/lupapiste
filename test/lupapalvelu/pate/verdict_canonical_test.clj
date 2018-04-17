@@ -347,7 +347,7 @@
     => {:kuvaus "P\u00e4\u00e4t\u00f6s"
         :linkkiliitteeseen "http://localhost:8000/api/raw/latest-attachment-version?attachment-id=5ab234139997d70535b952b5"
         :muokkausHetki "2018-03-21T10:29:38"
-        :versionumero 1
+        :versionumero "0.1"
         :tyyppi "paatos"
         :metatietotieto nil
         :rakennustunnustieto nil

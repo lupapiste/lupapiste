@@ -60,17 +60,16 @@
     (remove empty? (concat liitepohja op-metas signatures verdict-attachment))))
 
 
-(defn- get-Liite [title link attachment type file-id filename & [meta building-ids]]
+(defn- get-Liite [title link attachment type file-id filename version & [meta building-ids]]
   {:kuvaus              title
    :linkkiliitteeseen   link
    :muokkausHetki       (util/to-xml-datetime (or (:modified attachment) (:created attachment)))
-   :versionumero        1
+   :versionumero        (str (:major version) "." (:minor version))
    :tyyppi              type
    :metatietotieto      meta
    :rakennustunnustieto building-ids
    :fileId              file-id
    :filename            filename})
-
 
 (defn- get-attachment-building-ids [attachment application]
   (let [op-ids (attachment-operation-ids attachment application)
@@ -118,12 +117,13 @@
                                                 (str attachment-localized-name ": " (:contents attachment))
                                                 attachment-localized-name)
                              file-id (get-in attachment [:latestVersion :fileId])
+                             version (get-in attachment [:latestVersion :version])
                              use-http-links? (re-matches #"https?://.*" begin-of-link)
-                             attachment-file-name (when-not use-http-links? (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename])))
-                             link (str begin-of-link (if use-http-links? (attachment-url attachment) attachment-file-name))
+                             filename (when-not use-http-links? (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename])))
+                             link (str begin-of-link (if use-http-links? (attachment-url attachment) filename))
                              meta (get-attachment-meta attachment application)
                              building-ids (get-attachment-building-ids attachment unwrapped-app)]]
-                   {:Liite (get-Liite attachment-title link attachment type-id file-id attachment-file-name meta building-ids)})))))
+                   {:Liite (get-Liite attachment-title link attachment type-id file-id filename version meta building-ids)})))))
 
 ;;
 ;;  Statement attachments
@@ -153,12 +153,13 @@
   (let [type "lausunto"
         title (str (:title application) ": " type "-" (:id attachment))
         file-id (get-in attachment [:latestVersion :fileId])
+        version (get-in attachment [:latestVersion :version])
         use-http-links? (re-matches #"https?://.*" begin-of-link)
-        attachment-file-name (when-not use-http-links? (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename])))
-        link (str begin-of-link (if use-http-links? (attachment-url attachment) attachment-file-name))
+        filename (when-not use-http-links? (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename])))
+        link (str begin-of-link (if use-http-links? (attachment-url attachment) filename))
         meta (get-attachment-meta attachment application)
         building-ids (get-attachment-building-ids attachment (tools/unwrapped application))]
-    {:Liite (get-Liite title link attachment type file-id attachment-file-name meta building-ids)}))
+    {:Liite (get-Liite title link attachment type file-id filename version meta building-ids)}))
 
 (defn get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
   (let [statement-attachments-by-id (group-by
@@ -180,4 +181,4 @@
         link (str begin-of-link (if use-http-links? (attachment-url attachment) (:filename attachment)))
         file-id (:fileId attachment)
         file-name (:filename attachment)]
-    (get-Liite attachment-title link attachment type-id file-id file-name)))
+    (get-Liite attachment-title link attachment type-id file-id file-name (:version attachment))))
