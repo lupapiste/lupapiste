@@ -229,7 +229,7 @@
    Cursor is snapshotted, which will always cause a full collection scan. Use only if necessary."
   ([collection]
    {:pre [collection]}
-   (select collection {}))
+   (snapshot collection {}))
   ([collection query]
    {:pre [collection (map? query)]}
    (map with-id (with-collection (name collection)

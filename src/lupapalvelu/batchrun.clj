@@ -503,7 +503,7 @@
 (defn- organization-applications-for-review-fetching
   [organization-id permit-type projection & application-ids]
   (let [eligible-application-states (set/difference states/post-verdict-but-terminal #{:foremanVerdictGiven})]
-    (mongo/select :applications (merge {:state {$in eligible-application-states}
+    (mongo/snapshot :applications (merge {:state {$in eligible-application-states}
                                         :permitType permit-type
                                         :organization organization-id
                                         :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}
@@ -559,7 +559,7 @@
 (defn poll-verdicts-for-reviews
   [& {:keys [application-ids organization-ids overwrite-background-reviews?] :as options}]
   (let [applications  (when (seq application-ids)
-                        (mongo/select :applications {:_id {$in application-ids}}))
+                        (mongo/snapshot :applications {:_id {$in application-ids}}))
         permit-types  (-> (map (comp keyword :permitType) applications) distinct not-empty (or [:R]))
         organizations (->> (map :organization applications) distinct (concat organization-ids) (apply orgs-for-review-fetch))
         eraajo-user   (user/batchrun-user (map :id organizations))
