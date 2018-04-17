@@ -754,8 +754,10 @@
      (let [result  (init--requirements-references (assoc-in (draftee [:conditions :deviations :attachments
                                                                       :buildings :reviews])
                                                             [:template :published :settings :reviews]
-                                                            [{:fi "suomi" :sv "svenska" :en "english" :selected true}
-                                                             {:fi "imous" :sv "aksnevs" :en "hsilgne" :selected true}])
+                                                            [{:fi       "suomi" :sv   "svenska" :en "english"
+                                                              :selected true    :type "hello"}
+                                                             {:fi       "imous" :sv   "aksnevs" :en "hsilgne"
+                                                              :selected true    :type "olleh"}])
                                                   :reviews)
            find-id #(:id (util/find-by-key :fi % (get-in result [:draft :references :reviews])))]
        result => (check-draft :inclusions [:julkipano :anto :lainvoimainen
@@ -770,10 +772,12 @@
                                            :reviews      (just [{:fi "suomi"
                                                                  :sv "svenska"
                                                                  :en "english"
+                                                                 :type "hello"
                                                                  :id (find-id "suomi")}
                                                                 {:fi "imous"
                                                                  :sv "aksnevs"
                                                                  :en "hsilgne"
+                                                                 :type "olleh"
                                                                  :id (find-id "imous")}] :in-any-order)}
                               :data {:reviews-included false
                                      :reviews          (just [(find-id "suomi") (find-id "imous")] :in-any-order)})))
@@ -1055,28 +1059,28 @@
                         :references {:verdict-code ["osittain-myonnetty"]}
                         :data {}))
       (fact "initialize-verdict-draft"
-          (let [init (initialize-verdict-draft
-                      (assoc (assoc-in (draftee [:foremen]
-                                                :paatosteksti "This is verdict."
-                                                :conditions [{:condition "Stay calm"}
-                                                             {:condition "Carry on"}]
-                                                :verdict-dates ["anto" "voimassa"]
-                                                :vastaava-tj true
-                                                :vastaava-tj-included true
-                                                :tj false
-                                                :tj-included true
-                                                :vss-luokka true
-                                                :autopaikat true)
-                                       [:template :published :settings :reviews]
-                                       [{:fi "foo" :sv "foo" :en "foo" :selected true}
-                                        {:fi "bar" :sv "bar" :en "bar"}])
-                             :application
-                             {:handlers [{:general   true
-                                          :firstName "Bob"
-                                          :lastName  "Builder"}]
-                              :documents
-                              [{:schema-info {:name "hankkeen-kuvaus"}
-                                :data        {:poikkeamat {:value "Cannot live by your rules, man!"}}}]}))]
+        (let [init (initialize-verdict-draft
+                    (assoc (assoc-in (draftee [:foremen]
+                                              :paatosteksti "This is verdict."
+                                              :conditions [{:condition "Stay calm"}
+                                                           {:condition "Carry on"}]
+                                              :verdict-dates ["anto" "voimassa"]
+                                              :vastaava-tj true
+                                              :vastaava-tj-included true
+                                              :tj false
+                                              :tj-included true
+                                              :vss-luokka true
+                                              :autopaikat true)
+                                     [:template :published :settings :reviews]
+                                     [{:fi "foo" :sv "foo" :en "foo" :selected true}
+                                      {:fi "bar" :sv "bar" :en "bar"}])
+                           :application
+                           {:handlers [{:general   true
+                                        :firstName "Bob"
+                                        :lastName  "Builder"}]
+                            :documents
+                            [{:schema-info {:name "hankkeen-kuvaus"}
+                              :data        {:poikkeamat {:value "Cannot live by your rules, man!"}}}]}))]
           init => (check-draft :inclusions [:anto :voimassa :paatosteksti :foremen
                                             :foremen-included
                                             :automatic-verdict-dates
@@ -1090,16 +1094,16 @@
                                             :buildings.vss-luokka]
                                :giver       "viranhaltija"
                                :references {:verdict-code ["osittain-myonnetty"]
-                                            :foremen (just ["vastaava-tj" "tj"] :in-any-order)
-                                            :reviews (just [(just {:id mongo-id?
-                                                                   :fi "foo"
-                                                                   :sv "foo"
-                                                                   :en "foo"})
-                                                            (just {:id mongo-id?
-                                                                   :fi "bar"
-                                                                   :sv "bar"
-                                                                   :en "bar"})]
-                                                           :in-any-order)})
+                                            :foremen      (just ["vastaava-tj" "tj"] :in-any-order)
+                                            :reviews      (just [(just {:id mongo-id?
+                                                                        :fi "foo"
+                                                                        :sv "foo"
+                                                                        :en "foo"})
+                                                                 (just {:id mongo-id?
+                                                                        :fi "bar"
+                                                                        :sv "bar"
+                                                                        :en "bar"})]
+                                                                :in-any-order)})
           (-> init :draft :data
               :conditions vec flatten) => (just [mongo-id? {:condition "Stay calm"}
                                                  mongo-id? {:condition "Carry on"}])

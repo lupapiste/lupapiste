@@ -362,7 +362,6 @@
                                       assoc
                                       :id  (mongo/create-id)
                                       :modified created))]
-    (>pprint draft)
     (action/update-application command
                                {$push {:pate-verdicts
                                        (sc/validate schemas/PateVerdict draft)}})

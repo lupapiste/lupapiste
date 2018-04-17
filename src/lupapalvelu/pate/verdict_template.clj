@@ -73,10 +73,12 @@
                                                           {:verdict-templates 1})
                                     category)]
     (reduce (fn [acc rep-dict]
-              (assoc-in acc [:draft rep-dict]
-                     (sync-repeatings lang
-                                      (rep-dict s-data)
-                                      (rep-dict draft))))
+              (let [repeating-data (sync-repeatings lang
+                                          (rep-dict s-data)
+                                          (rep-dict draft))]
+                (if (empty? repeating-data)
+                  (util/dissoc-in acc [:draft rep-dict])
+                  (assoc-in acc [:draft rep-dict] repeating-data))))
             template
             (util/intersection-as-kw template-settings-dependencies
                                      (keys dic)))))
@@ -201,14 +203,6 @@
 (defn settings [organization category]
   (get-in organization [:verdict-templates :settings (keyword category)]))
 
-#_(defn- pack-generics [organization gen-key template-data]
-  (->> organization
-       :verdict-templates
-       gen-key
-       (remove :deleted)
-       (filter #(util/includes-as-kw? (gen-key template-data) (:id %)))
-       (map #(select-keys % [:id :name :type]))))
-
 (defn- pack-dependencies
   "Packs settings dependency (either :plans or :reviews). Only included
   items are packed. The selection status is packed as well. The result
@@ -266,8 +260,6 @@
            (when board-verdict?
              {:boardname (:boardname draft)}))))
 
-(declare generic-list)
-
 (defn save-draft-value
   "Error code on failure (see schemas for details)."
   [organization template-id timestamp path value]
@@ -291,16 +283,6 @@
                           {$set {mongo-path value}})
                         timestamp)))
     processed))
-
-#_(defn- prune-template-data
-  "Upon publishing the settings generics and template data must by
-  synchronized."
-  [settings gen-key template-data]
-  (update template-data gen-key (fn [ids]
-                                  (->> settings
-                                       gen-key
-                                       (map :id)
-                                       (util/intersection-as-kw ids)))))
 
 (defn- draft-for-publishing
   "Extracts template draft data for publishing. Keys with empty values
@@ -328,7 +310,7 @@
 (defn publish-verdict-template [organization template-id timestamp]
   (let [{:keys [draft category]
          :as   template} (verdict-template organization template-id)
-        settings         (sc/validate schemas/PatePublishedSettings
+        settings         (sc/validate schemas/PatePublishedTemplateSettings
                                       (published-settings organization
                                                           category
                                                           draft))]
@@ -415,92 +397,6 @@
                                               (verdict-template (organization-templates
                                                                  org-id)
                                                                 template-id)))))))
-
-;; Generic is a placeholder term that means either review or plan
-;; depending on the context. Namely, the subcollection argument in
-;; functions below is either :reviews or :plans.
-
-(defn new-generic [organization-id category name-key subcollection & extra]
-  (let [data (merge {:id       (mongo/create-id)
-                     :name     {:fi (i18n/localize :fi name-key)
-                                :sv (i18n/localize :sv name-key)
-                                :en (i18n/localize :en name-key)}
-                     :category category
-                     :deleted  false}
-                    (apply hash-map extra))]
-    (mongo/update-by-id :organizations
-                        organization-id
-                        {$push {(util/kw-path :verdict-templates subcollection)
-                                data}})
-    data))
-
-(defn generic-list [{verdict-templates :verdict-templates} category subcollection]
-  (filter #(util/=as-kw category (:category %))
-          (subcollection verdict-templates)))
-
-(defn generic [organization gen-id subcollection]
-  (some->> organization
-           :verdict-templates
-           subcollection
-           (util/find-by-id gen-id)))
-
-(defn generic-update [organization gen-id update subcollection & [timestamp]]
-  (mongo/update :organizations
-                {:_id                         (:id organization)
-                 (util/kw-path :verdict-templates
-                               subcollection) {$elemMatch {:id gen-id}}}
-                (if timestamp
-                  (assoc-in update
-                            [$set (settings-key (:category (generic organization
-                                                                    gen-id
-                                                                    subcollection))
-                                                :modified)]
-                            timestamp)
-                  update)))
-
-(defn set-generic-details [organization timestamp gen-id data subcollection & extra-keys]
-  (let [detail-updates
-        (reduce (fn [acc [k v]]
-                  (let [k      (keyword k)
-                        others (conj extra-keys :deleted)]
-                    (merge acc
-                           (cond
-                             (k #{:fi :sv :en})              {(str "name." (name k)) (ss/trim v)}
-                             (util/includes-as-kw? others k) {k v}))))
-                {}
-                data)]
-    (when (seq detail-updates)
-      (generic-update organization
-                     gen-id
-                     {$set (->> detail-updates
-                                (map (fn [[k v]]
-                                       [(util/kw-path :verdict-templates subcollection :$ k) v]))
-                                (into {}))}
-                     subcollection
-                     timestamp))))
-
-;; Reviews
-
-(defn new-review [organization-id category]
-  (new-generic organization-id category :pate.katselmus :reviews
-               :type :muu-katselmus))
-
-(defn review [organization review-id]
-  (generic organization review-id :reviews))
-
-(defn set-review-details [organization timestamp review-id data]
-  (set-generic-details organization timestamp review-id data :reviews :type))
-
-;; Plans
-
-(defn new-plan [organization-id category]
-  (new-generic organization-id category :pate.plans :plans))
-
-(defn plan [organization review-id]
-  (generic organization review-id :plans))
-
-(defn set-plan-details [organization timestamp review-id data]
-  (set-generic-details organization timestamp review-id data :plans))
 
 ;; Default operation verdict templates
 
