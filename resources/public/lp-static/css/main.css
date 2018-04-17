@@ -13873,7 +13873,7 @@ ul.tabs {
 .autocomplete-component .autocomplete-dropdown {
   width: inherit;
   position: absolute;
-  z-index: 1;
+  z-index: 10;
 }
 
 .autocomplete-component .autocomplete-dropdown input.autocomplete-input {
