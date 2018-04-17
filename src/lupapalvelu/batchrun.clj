@@ -116,14 +116,14 @@
 (defn statement-request-reminder []
   (let [timestamp-now (now)
         timestamp-1-week-ago (util/get-timestamp-ago :week 1)
-        apps (mongo/select :applications
-                           {:state {$in ["open" "submitted"]}
-                            :statements {$elemMatch {:requested (older-than timestamp-1-week-ago)
-                                                     :given nil
-                                                     $or [{:reminder-sent {$exists false}}
-                                                          {:reminder-sent nil}
-                                                          {:reminder-sent (older-than timestamp-1-week-ago)}]}}}
-                           [:statements :state :modified :infoRequest :title :address :municipality :primaryOperation])]
+        apps (mongo/snapshot :applications
+                             {:state {$in ["open" "submitted"]}
+                              :statements {$elemMatch {:requested (older-than timestamp-1-week-ago)
+                                                       :given nil
+                                                       $or [{:reminder-sent {$exists false}}
+                                                            {:reminder-sent nil}
+                                                            {:reminder-sent (older-than timestamp-1-week-ago)}]}}}
+                             [:statements :state :modified :infoRequest :title :address :municipality :primaryOperation])]
     (doseq [app apps
             statement (:statements app)
             :let [requested (:requested statement)
@@ -149,15 +149,15 @@
 (defn statement-reminder-due-date []
   (let [timestamp-now (now)
         timestamp-1-week-ago (util/get-timestamp-ago :week 1)
-        apps (mongo/select :applications
-                           {:state {$nin (map name (clojure.set/union states/post-verdict-states states/terminal-states))}
-                            :statements {$elemMatch {:given nil
-                                                     $and [{:dueDate {$exists true}}
-                                                           {:dueDate (older-than timestamp-now)}]
-                                                     $or [{:duedate-reminder-sent {$exists false}}
-                                                          {:duedate-reminder-sent nil}
-                                                          {:duedate-reminder-sent (older-than timestamp-1-week-ago)}]}}}
-                           [:statements :state :modified :infoRequest :title :address :municipality :primaryOperation])]
+        apps (mongo/snapshot :applications
+                             {:state      {$nin (map name (clojure.set/union states/post-verdict-states states/terminal-states))}
+                              :statements {$elemMatch {:given nil
+                                                       $and   [{:dueDate {$exists true}}
+                                                               {:dueDate (older-than timestamp-now)}]
+                                                       $or    [{:duedate-reminder-sent {$exists false}}
+                                                               {:duedate-reminder-sent nil}
+                                                               {:duedate-reminder-sent (older-than timestamp-1-week-ago)}]}}}
+                             [:statements :state :modified :infoRequest :title :address :municipality :primaryOperation])]
     (doseq [app apps
             statement (:statements app)
             :let [due-date (:dueDate statement)
@@ -181,11 +181,11 @@
 ;; "Neuvontapyynto: Neuvontapyyntoon ei ole vastattu viikon kuluessa eli neuvontapyynnon tila on avoin. Lahetetaan viikoittain uudelleen."
 (defn open-inforequest-reminder []
   (let [timestamp-1-week-ago (util/get-timestamp-ago :week 1)
-        oirs (mongo/select :open-inforequest-token {:created (older-than timestamp-1-week-ago)
-                                                    :last-used nil
-                                                    $or [{:reminder-sent {$exists false}}
-                                                         {:reminder-sent nil}
-                                                         {:reminder-sent (older-than timestamp-1-week-ago)}]})]
+        oirs (mongo/snapshot :open-inforequest-token {:created (older-than timestamp-1-week-ago)
+                                                      :last-used nil
+                                                      $or [{:reminder-sent {$exists false}}
+                                                           {:reminder-sent nil}
+                                                           {:reminder-sent (older-than timestamp-1-week-ago)}]})]
     (doseq [oir oirs]
       (let [application (mongo/by-id :applications (:application-id oir) [:state :modified :title :address :municipality :primaryOperation])]
         (logging/with-logging-context {:applicationId (:id application)}
@@ -201,12 +201,12 @@
 ;; "Naapurin kuuleminen: Kuulemisen tila on "Sahkoposti lahetetty", eika allekirjoitusta ole tehty viikon kuluessa ja hakemuksen tila on nakyy viranomaiselle tai hakemus jatetty. Muistutus lahetetaan kerran."
 (defn neighbor-reminder []
   (let [timestamp-1-week-ago (util/get-timestamp-ago :week 1)
-        apps (mongo/select :applications
-                           {:state {$in ["open" "submitted"]}
-                            :neighbors.status {$elemMatch {$and [{:state {$in ["email-sent"]}}
-                                                                 {:created (older-than timestamp-1-week-ago)}
-                                                                 ]}}}
-                           [:neighbors :state :modified :title :address :municipality :primaryOperation])]
+        apps (mongo/snapshot :applications
+                             {:state {$in ["open" "submitted"]}
+                              :neighbors.status {$elemMatch {$and [{:state {$in ["email-sent"]}}
+                                                                   {:created (older-than timestamp-1-week-ago)}
+                                                                   ]}}}
+                             [:neighbors :state :modified :title :address :municipality :primaryOperation])]
     (doseq [app apps
             neighbor (:neighbors app)
             :let [statuses (:status neighbor)]]
@@ -238,13 +238,13 @@
 ;; "YA hakemus: Hakemukselle merkitty tyoaika umpeutuu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
 (defn ya-work-time-is-expiring-reminder []
   (let [timestamp-1-week-in-future (util/get-timestamp-from-now :week 1)
-        apps (mongo/select :applications
-                           {:permitType "YA"
-                            :state {$in ["verdictGiven" "constructionStarted"]}
-                            ;; Cannot compare timestamp directly against date string here (e.g against "08.10.2015"). Must do it in function body.
-                            :documents {$elemMatch {:schema-info.name "tyoaika"}}
-                            :work-time-expiring-reminder-sent {$exists false}}
-                           [:documents :auth :state :modified :title :address :municipality :infoRequest :primaryOperation])]
+        apps (mongo/snapshot :applications
+                             {:permitType "YA"
+                              :state {$in ["verdictGiven" "constructionStarted"]}
+                              ;; Cannot compare timestamp directly against date string here (e.g against "08.10.2015"). Must do it in function body.
+                              :documents {$elemMatch {:schema-info.name "tyoaika"}}
+                              :work-time-expiring-reminder-sent {$exists false}}
+                             [:documents :auth :state :modified :title :address :municipality :infoRequest :primaryOperation])]
     (doseq [app apps
             :let [tyoaika-doc (some
                                 (fn [doc]
@@ -268,15 +268,15 @@
   vuotta. Lahetetaan kuukausittain uudelleen. Ei laheteta
   digitoiduille luville."
   []
-  (let [apps (mongo/select :applications
-                           {:state {$in ["draft" "open"]}
-                            :permitType {$ne "ARK"}
-                            $and [{:modified (older-than (util/get-timestamp-ago :month 1))}
-                                  {:modified (newer-than (util/get-timestamp-ago :month 6))}]
-                            $or [{:reminder-sent {$exists false}}
-                                 {:reminder-sent nil}
-                                 {:reminder-sent (older-than (util/get-timestamp-ago :month 1))}]}
-                           [:auth :state :modified :title :address :municipality :infoRequest :primaryOperation])]
+  (let [apps (mongo/snapshot :applications
+                             {:state {$in ["draft" "open"]}
+                              :permitType {$ne "ARK"}
+                              $and [{:modified (older-than (util/get-timestamp-ago :month 1))}
+                                    {:modified (newer-than (util/get-timestamp-ago :month 6))}]
+                              $or [{:reminder-sent {$exists false}}
+                                   {:reminder-sent nil}
+                                   {:reminder-sent (older-than (util/get-timestamp-ago :month 1))}]}
+                             [:auth :state :modified :title :address :municipality :infoRequest :primaryOperation])]
     (doseq [app apps]
       (logging/with-logging-context {:applicationId (:id app)}
         (notifications/notify! :reminder-application-state {:application app
@@ -503,7 +503,7 @@
 (defn- organization-applications-for-review-fetching
   [organization-id permit-type projection & application-ids]
   (let [eligible-application-states (set/difference states/post-verdict-but-terminal #{:foremanVerdictGiven})]
-    (mongo/select :applications (merge {:state {$in eligible-application-states}
+    (mongo/snapshot :applications (merge {:state {$in eligible-application-states}
                                         :permitType permit-type
                                         :organization organization-id
                                         :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}
@@ -559,7 +559,7 @@
 (defn poll-verdicts-for-reviews
   [& {:keys [application-ids organization-ids overwrite-background-reviews?] :as options}]
   (let [applications  (when (seq application-ids)
-                        (mongo/select :applications {:_id {$in application-ids}}))
+                        (mongo/snapshot :applications {:_id {$in application-ids}}))
         permit-types  (-> (map (comp keyword :permitType) applications) distinct not-empty (or [:R]))
         organizations (->> (map :organization applications) distinct (concat organization-ids) (apply orgs-for-review-fetch))
         eraajo-user   (user/batchrun-user (map :id organizations))
