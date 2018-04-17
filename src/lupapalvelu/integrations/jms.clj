@@ -186,15 +186,15 @@
 
     (when-let [artemis (ns-resolve 'artemis-server 'embedded-broker)]
       (info "Stopping Artemis...")
-      (.stop artemis))))
+      (.stop artemis)))
 
-  (start!)
+  (start!))
 
 (comment
   ; replissä testailut:
 
   ;; TextMessage
-  (register-consumer "testi" (fn [jee] (println "jee sai jotain:" jee)))
+  (create-consumer "testi" (fn [jee] (println "jee sai jotain:" jee)))
   (def testiprod (create-producer "testi"))
   ; => #'lupapalvelu.integrations.jms/testiprod
   (testiprod "stringi dataa")
