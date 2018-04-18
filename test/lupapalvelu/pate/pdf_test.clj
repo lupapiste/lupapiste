@@ -223,12 +223,12 @@
   (pdf/complexity {:lang       :fi
                    :dictionary {:complexity-text {:phrase-text {}}}
                    :verdict    {:data {:complexity-text "Tai nan le."}}})
-  => '(([:div.markup ([:p {} "Tai nan le."])]))
+  => '(([:div.markup ([:p {} "Tai nan le." [:br]])]))
   (pdf/complexity {:lang       :fi
                    :dictionary {:complexity-text {:phrase-text {}}}
                    :verdict    {:data {:complexity-text "Tai nan le."
                                        :complexity      "large"}}})
-  => ["Vaativa" '([:div.markup ([:p {}"Tai nan le."])])])
+  => ["Vaativa" '([:div.markup ([:p {}"Tai nan le." [:br]])])])
 
 (fact "statements"
   (pdf/statements {:lang    :fi
