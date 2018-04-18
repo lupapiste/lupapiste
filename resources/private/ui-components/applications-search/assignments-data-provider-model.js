@@ -142,5 +142,5 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
 
   hub.subscribe("assignmentService::assignmentCompleted", loadAssignments);
 
-  loadAssignments();
+  ko.computed(loadAssignments).extend({deferred: true});
 };
