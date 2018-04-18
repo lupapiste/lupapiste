@@ -22,7 +22,8 @@
 (defn select-tasks-tab? [_ app]
   (let [primaryOperation (keyword (get-in app [:primaryOperation :name]))]
     (and
-      (false? (contains? #{:tyonjohtajan-nimeaminen-v2 :ya-jatkoaika} primaryOperation))
+      (false? (contains? #{:tyonjohtajan-nimeaminen-v2 :ya-jatkoaika
+                           :raktyo-aloit-loppuunsaat :jatkoaika} primaryOperation))
       (contains? #{:R :YA} (-> app :permitType keyword)))))
 
 (defn- full-name [first-name last-name]
