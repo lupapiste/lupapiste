@@ -222,9 +222,8 @@
   (when (> (count searchText) (env/value :search-text-max-length))
     (fail! :error.search-text-is-too-long))
   (let [user-query  (domain/basic-application-query-for user)
-        user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)
-        query-total (mongo/count :applications query)
+        user-total  (future (if (mongo/select-one :applications user-query) 1 0))
         skip        (or (util/->long (:skip params)) 0)
         limit       (or (util/->long (:limit params)) 10)
         apps        (search query db-fields (make-sort params) skip limit)
@@ -236,9 +235,15 @@
                         #(domain/filter-application-content-for % user)
                         mongo/with-id)
                       apps)]
-    {:userTotalCount user-total
-     :totalCount query-total
-     :applications rows}))
+    {:applications rows
+     ; This is only used in the front-end to find out if the user has any applications at all. Full mongo count
+     ; is expensive, so we rather just check if the user has at least one application.
+     :userTotalCount @user-total}))
+
+(defn query-total-count [user params]
+  (let [user-query  (domain/basic-application-query-for user)
+        query       (make-query user-query params user)]
+    {:totalCount (mongo/count :applications query)}))
 
 ;;
 ;; Public API

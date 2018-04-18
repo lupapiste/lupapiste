@@ -7,7 +7,7 @@ LUPAPISTE.SearchSectionModel = function(params) {
   self.dataProvider = params.dataProvider;
 
   self.totalCount = ko.pureComputed(function() {
-    return self.dataProvider.data().totalCount;
+    return self.dataProvider.totalCount();
   });
 
   self.userTotalCount = ko.pureComputed(function() {
@@ -15,7 +15,7 @@ LUPAPISTE.SearchSectionModel = function(params) {
   });
 
   self.gotResults = ko.pureComputed(function() {
-    return self.totalCount() > 0;
+    return self.dataProvider.hasResults();
   });
 
   self.filter = {
