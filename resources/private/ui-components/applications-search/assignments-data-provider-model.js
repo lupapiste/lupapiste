@@ -134,6 +134,5 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
 
   hub.subscribe("assignmentService::assignmentCompleted", loadAssignments);
 
-  ko.computed(loadAssignments).extend({rateLimit: 0}); // http://knockoutjs.com/documentation/rateLimit-observable.html#example-3-avoiding-multiple-ajax-requests
-
+  loadAssignments();
 };
