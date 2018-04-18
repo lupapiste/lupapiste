@@ -47,9 +47,7 @@
                                           :template-id (-> pate-fixture/verdic-templates-setting
                                                            :templates
                                                            first
-                                                           :id))
-        verdict-draft            (query sonja :pate-verdict
-                                        :id app-id :verdict-id verdict-id)]
+                                                           :id))]
 
     (facts "Fill verdict data and publish verdict"
       (fact "Set automatic calculation of other dates"

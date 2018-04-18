@@ -19,13 +19,12 @@
     (command sonja :approve-application :id app-id :lang "fi") => ok?)
 
   (facts "Publish verdict for main application"
-    (let [verdict-draft (command sonja :new-pate-verdict-draft
-                                 :id app-id
-                                 :template-id (-> pate-fixture/verdic-templates-setting
-                                                  :templates
-                                                  first
-                                                  :id))
-          verdict-id    (get-in verdict-draft [:verdict :id])]
+    (let [{verdict-id :verdict-id} (command sonja :new-pate-verdict-draft
+                                            :id app-id
+                                            :template-id (-> pate-fixture/verdic-templates-setting
+                                                             :templates
+                                                             first
+                                                             :id))]
 
       (fact "Set automatic calculation of other dates"
         (command sonja :edit-pate-verdict :id app-id :verdict-id verdict-id
@@ -46,10 +45,9 @@
                                        :id continuation-app-id
                                        :description "Bulletin description")
           _                   (command sonja :approve-application :id continuation-app-id :lang "fi")
-          c-verdict-draft     (command sonja :new-pate-verdict-draft
+          {c-verdict-id :verdict-id}     (command sonja :new-pate-verdict-draft
                                        :id continuation-app-id
-                                       :template-id "5acc68c953b771ded5d45605")
-          c-verdict-id        (get-in c-verdict-draft [:verdict :id])]
+                                       :template-id "5acc68c953b771ded5d45605")]
 
       (facts "Publish PATE continuation verdict"
         (fact "Set automatic calculation of other dates"
