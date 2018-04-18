@@ -768,8 +768,8 @@
                              (map #(pate-tasks/condition->task verdict ts %)))]
     (remove nil? (lazy-cat review-tasks plans-tasks condition-tasks))))
 
-(defn log-task-katselmus-errors [tasks]
-  (when-let [errs (seq (mapv (partial tasks/task-doc-validation "task-katselmus") tasks))]
+(defn log-task-errors [tasks]
+  (when-let [errs (seq (mapv #(tasks/task-doc-validation (-> % :schema-info :name) %) tasks))]
     (doseq [err errs
             :when (seq err)
             sub-error err]
@@ -843,8 +843,7 @@
         {att-items :items
          update-fn :update-fn} (attachment-items command verdict)
         verdict                (update verdict :data update-fn)]
-
-    (log-task-katselmus-errors tasks) ; TODO cancel publishing if validation errors?
+    (log-task-errors tasks) ; TODO cancel publishing if validation errors?
     (verdict-update command
                     (util/deep-merge
                      {$set (merge

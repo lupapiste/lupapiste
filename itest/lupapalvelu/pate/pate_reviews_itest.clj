@@ -131,4 +131,16 @@
             (fact "has one" (count (keys (get-in loppukatselmus [:data :rakennus]))) => 1)
             (fact "VTJ-PRT" (get-in loppukatselmus [:data :rakennus :0 :rakennus :valtakunnallinenNumero :value]) => "1234567881")))
         #_(fact "can't delete because vaadittuLupaehtona"   ; TODO check this with dosent
-          (command sonja :delete-task :id app-id :taskId (:id aloituskokous)) => (partial expected-failure? :error.task-is-required))))))
+            (command sonja :delete-task :id app-id :taskId (:id aloituskokous)) => (partial expected-failure? :error.task-is-required))))
+    (facts "Plans have been created"
+      (let [plans (->> (query-application pena app-id)
+                           :tasks
+                           (filter #(= "task-lupamaarays" (get-in % [:schema-info :name]))))
+            find-plan #(util/find-by-key :taskname % plans)
+            plain     (find-plan "Suunnitelmat")
+            special   (find-plan "ErityisSuunnitelmat")]
+        (fact "Two plans"
+          plans => (just [plain special] :in-any-order))
+        (fact "Generated from verdict"
+          (:source plain) => {:type "verdict" :id verdict-id}
+          (:source special) => {:type "verdict" :id verdict-id})))))

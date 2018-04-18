@@ -562,6 +562,13 @@
 
 ;;; Verdicts
 
+
+(defn find-plan-id [references fi]
+  (:id (util/find-by-key :fi fi (:plans references))))
+
+(defn find-review-id [references fi]
+  (:id (util/find-by-key :fi fi (:reviews references))))
+
 (defn verdict-neighbors [app-id open-verdict]
   (facts "Verdict neighbors"
     (fact "Add two neighbors to the application"
@@ -719,21 +726,21 @@
 
 
 (facts "Verdicts"
-  (let [review1           (add-review :fi "K1" :sv "S1" :en "R1" :type :aloituskokous)
-        review2           (add-review :fi "K2" :sv "S2" :en "R2" :type :rakennekatselmus)
-        review3           (add-review :fi "K3" :sv "S3" :en "R3" :type :pohjakatselmus)
-        review4           (add-review :fi "K4" :sv "S4" :en "R4" :type :loppukatselmus)
-        plan1             (add-plan :fi "S1" :sv "P1" :en "P1")
-        plan2             (add-plan :fi "S2" :sv "P2" :en "P2")
-        plan3             (add-plan :fi "S3" :sv "P3" :en "P3")
-        plan4             (add-plan :fi "S4" :sv "P4" :en "P4")
+  (let [review1              (add-review :fi "K1" :sv "S1" :en "R1" :type :aloituskokous)
+        review2              (add-review :fi "Helsinki" :sv "Stockholm" :en "London" :type :rakennekatselmus)
+        review3              (add-review :fi "K3" :sv "S3" :en "R3" :type :pohjakatselmus)
+        review4              (add-review :fi "K4" :sv "S4" :en "R4" :type :loppukatselmus)
+        plan1                (add-plan :fi "S1" :sv "P1" :en "P1")
+        plan2                (add-plan :fi "Tampere" :sv "Oslo" :en "Washington")
+        plan3                (add-plan :fi "S3" :sv "P3" :en "P3")
+        plan4                (add-plan :fi "S4" :sv "P4" :en "P4")
         {template-id :id
-         draft :draft} (init-verdict-template sipoo :r)
-        good-condition   (add-template-condition template-id "Good condition")
-        empty-condition  (add-template-condition template-id nil)
-        blank-condition  (add-template-condition template-id "    ")
-        other-condition  (add-template-condition template-id "Other condition")
-        remove-condition (add-template-condition template-id "Remove condition")]
+         draft       :draft} (init-verdict-template sipoo :r)
+        good-condition       (add-template-condition template-id "Good condition")
+        empty-condition      (add-template-condition template-id nil)
+        blank-condition      (add-template-condition template-id "    ")
+        other-condition      (add-template-condition template-id "Other condition")
+        remove-condition     (add-template-condition template-id "Remove condition")]
     #_(>pprint draft)
     (fact "Remove condition"
       (remove-template-condition template-id remove-condition))
@@ -865,11 +872,7 @@
                                             errors) => (or err-kw
                                                            :error.invalid-value))
                                     (fact "No errors"
-                                      errors => nil)))
-                    plan-id (fn [fi]
-                              (:id (util/find-by-key :fi fi (:plans references))))
-                    review-id (fn [fi]
-                                (:id (util/find-by-key :fi fi (:reviews references))))]
+                                      errors => nil)))]
                 data => (contains {:language         "fi"
                                    :handler          ""
                                    :appeal           "Humble appeal."
@@ -882,12 +885,12 @@
                                    ;;:collateral       ""
                                    ;;:rights           ""
                                    :plans-included   true
-                                   :plans            [(plan-id "S2")]
+                                   :plans            [(find-plan-id references "Tampere")]
                                    :foremen-included true
                                    ;;:neighbors        ""
                                    :neighbor-states  []
                                    :reviews-included true
-                                   :reviews          [(review-id "K2")]
+                                   :reviews          [(find-review-id references "Helsinki")]
                                    :deviations       "Deviation from mean."
                                    :address          "Dongdaqiao Lu"
                                    :operation        "Description"})
@@ -965,13 +968,14 @@
                     (fact "Foremen"
                       foremen => (just ["vastaava-tj" "iv-tj" "erityis-tj"] :in-any-order))
                     (fact "Reviews"
-                      reviews =>  (just [{:id (review-id "K2") :fi "K2" :sv "S2" :en "R2"
+                      reviews =>  (just [{:id   (find-review-id references "Helsinki")
+                                          :fi "Helsinki" :sv "Stockholm" :en "London"
                                           :type "rakennekatselmus"}
-                                         {:id (review-id "K3") :fi "K3" :sv "S3" :en "R3"
+                                         {:id   (find-review-id references "K3") :fi "K3" :sv "S3" :en "R3"
                                           :type "pohjakatselmus"}] :in-any-order))
                     (fact "Plans"
-                      plans => (just [{:id (plan-id "S2") :fi "S2" :sv "P2" :en "P2"}
-                                      {:id (plan-id "S3") :fi "S3" :sv "P3" :en "P3"}]
+                      plans => (just [{:id (find-plan-id references "Tampere") :fi "Tampere" :sv "Oslo" :en "Washington"}
+                                      {:id (find-plan-id references "S3") :fi "S3" :sv "P3" :en "P3"}]
                                      :in-any-order))))
                 (facts "Verdict dates"
                   (fact "Set julkipano date"
@@ -1016,14 +1020,14 @@
                   (fact "Empty plans is OK"
                     (check-error (edit-verdict :plans [])))
                   (fact "Set good  plan"
-                    (check-error (edit-verdict :plans [(plan-id "S3")]))))
+                    (check-error (edit-verdict :plans [(find-plan-id references "S3")]))))
                 (facts "Verdict reviews"
                   (fact "Bad review not in the template"
                     (check-error (edit-verdict :reviews ["bad"]) :reviews))
                   (fact "Empty reviews is OK"
                     (check-error (edit-verdict :reviews [])))
                   (fact "Set good  review"
-                    (check-error (edit-verdict :reviews [(review-id "R3")]))))
+                    (check-error (edit-verdict :reviews [(find-review-id references "K3")]))))
                 (verdict-neighbors app-id open-verdict)
                 (facts "Verdict buildings"
                   (let [{doc-id :id} (util/find-first (util/fn-> :schema-info :op :id
@@ -1249,14 +1253,15 @@
                                :userId ronja-id
                                :roleId sipoo-general-handler-id) => ok?)
                     (fact "New verdict"
-                      (let  [{verdict-id :verdict-id}       (command sonja :new-pate-verdict-draft
-                                                                     :id app-id
-                                                                     :template-id template-id)
-                             {verdict :verdict}             (query sonja :pate-verdict
+                      (let  [{verdict-id :verdict-id}     (command sonja :new-pate-verdict-draft
                                                                    :id app-id
-                                                                   :verdict-id verdict-id)
-                             verdict-date                   (timestamp "27.9.2017")
-                             {data :data}                   verdict
+                                                                   :template-id template-id)
+                             {:keys [verdict references]} (query sonja :pate-verdict
+                                                                 :id app-id
+                                                                 :verdict-id verdict-id)
+                             verdict-date                 (timestamp "27.9.2017")
+                             {data :data}                 verdict
+
                              {open-verdict  :open
                               edit-verdict  :edit
                               check-changes :check-changes} (verdict-fn-factory verdict-id)]
@@ -1267,12 +1272,12 @@
                                  ;;:anto                  ""
                                  ;;:muutoksenhaku         ""
                                  :foremen-included false
-                                 :foremen          ["iv-tj" "erityis-tj"]
+                                 :foremen          ["iv-tj"]
                                  :verdict-code     "ehdollinen"
                                  :plans-included   false
-                                 :plans            [plan2]
+                                 :plans            [(find-plan-id references "Tampere")]
                                  :reviews-included false
-                                 :reviews          [review2]
+                                 :reviews          [(find-review-id references "Helsinki")]
                                  :address          "Dongdaqiao Lu"
                                  :operation        "Description"
                                  ;;:bulletinOpDescription ""
@@ -1380,9 +1385,9 @@
 
                             (facts "KuntaGML"
                               (let [xml (check-kuntagml application verdict-date)]
-                                (fact "Aloituskokous is London"
+                                (fact "Rakennekatselmus is London"
                                      (xml/get-text xml [:katselmuksenLaji])
-                                     => "aloituskokous"
+                                     => "rakennekatselmus"
                                      (xml/get-text xml [:tarkastuksenTaiKatselmuksenNimi])
                                      => "London")
                                 (fact "Plan is Washington"
