@@ -36,6 +36,14 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
 
   self.pending = ko.observable(false);
 
+  self.hasResults = self.disposedPureComputed(function() {
+    return !_.isEmpty(self.data().searchResults);
+  });
+
+  self.totalCount = self.disposedPureComputed(function() {
+    return self.data().totalCount;
+  });
+
   var stateClasses = {
     created: "lupicon-circle-attention",
     "targets-added": "lupicon-circle-attention",
@@ -134,6 +142,5 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
 
   hub.subscribe("assignmentService::assignmentCompleted", loadAssignments);
 
-  ko.computed(loadAssignments).extend({rateLimit: 0}); // http://knockoutjs.com/documentation/rateLimit-observable.html#example-3-avoiding-multiple-ajax-requests
-
+  loadAssignments();
 };

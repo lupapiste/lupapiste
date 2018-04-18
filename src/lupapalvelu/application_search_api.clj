@@ -27,6 +27,19 @@
                  :limit :searchText :skip :sort :operations :areas :areas-wgs84
                  :event]))))
 
+(defquery applications-search-total-count
+  {:description "Separate query for total result count, as it may be slow"
+   :parameters []
+   :user-roles #{:applicant :authority :financialAuthority}}
+  [{user :user data :data}]
+  (ok :data (search/query-total-count
+              user
+              (select-keys
+                data
+                [:tags :companyTags :organizations :applicationType :handlers
+                 :limit :searchText :skip :sort :operations :areas :areas-wgs84
+                 :event]))))
+
 (defquery applications-search-default
   {:description "The initial applications search. Returns data and used search."
    :parameters  []
