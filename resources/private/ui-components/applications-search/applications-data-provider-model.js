@@ -6,7 +6,6 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
 
   var defaultData = {applications: [],
-                     totalCount: -1,
                      userTotalCount: -1};
 
   var defaultSort = {field: "modified", asc: false};
@@ -24,6 +23,8 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
 
   self.data = ko.observable(defaultData);
 
+  self.totalCount = ko.observable(-1);
+
   self.results = ko.observableArray([]);
 
   self.searchResultType = ko.observable(params.searchResultType);
@@ -40,6 +41,10 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
 
   self.searchStartDate = ko.observable();
   self.searchEndDate = ko.observable();
+
+  self.hasResults = self.disposedPureComputed(function() {
+    return !_.isEmpty(self.data().applications);
+  });
 
   var latestSearchType = null;
 
@@ -182,6 +187,12 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
         self.initialized( true );
       })
       .call();
+      ajax.datatables("applications-search-total-count", fields)
+        .success(function( res ) {
+          self.totalCount(res.data.totalCount);
+        })
+        .onError("error.unauthorized", notify.ajaxError)
+        .call();
     }
   }
 

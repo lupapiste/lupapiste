@@ -36,6 +36,14 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
 
   self.pending = ko.observable(false);
 
+  self.hasResults = self.disposedPureComputed(function() {
+    return !_.isEmpty(self.data().searchResults);
+  });
+
+  self.totalCount = self.disposedPureComputed(function() {
+    return self.data().totalCount;
+  });
+
   var stateClasses = {
     created: "lupicon-circle-attention",
     "targets-added": "lupicon-circle-attention",
