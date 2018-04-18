@@ -26,7 +26,7 @@ Mikko fills some of the suunnittelija docs
 Sonja logs in and sends app to backing system
   Sonja logs in
   Open application  ${appname}  753-416-25-30
-  Approve application
+  Approve application with missing info
 
 Sonja fetches verdict from municipality KRYSP service
   Open tab  verdict

@@ -264,6 +264,6 @@ No handlers in application
   No such test id  handler-0
 
 Sonja approves application and becomes handler automatically
-  Approve application no dialogs
+  Approve application with missing info
   List handler is  0  Sibbo Sonja  Muutettu
   [Teardown]  Logout

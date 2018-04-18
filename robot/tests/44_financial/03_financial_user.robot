@@ -23,11 +23,11 @@ Sonja creates bunch of application with ARA funding
   Open application  sipoo-funding-app-3  753-416-25-33
   Submit application
   Wait until  Element should be visible by test id  h1-afterSubmitted
-  Approve application no dialogs
+  Approve application with missing info
   Open application  sipoo-funding-app-4  753-416-25-34
   Submit application
   Wait until  Element should be visible by test id  h1-afterSubmitted
-  Approve application no dialogs
+  Approve application with missing info
   Give verdict
   Logout
 

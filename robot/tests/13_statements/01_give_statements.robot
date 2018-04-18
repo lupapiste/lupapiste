@@ -258,7 +258,7 @@ Mikko logs in and submits application
 Sonja logs in and approves application
   Sonja logs in
   Open application  ${appname}  ${appPropertyId}
-  Approve application no dialogs
+  Approve application with missing info
 
 Sonja cannot invite any more statement givers
   Open tab  statement
