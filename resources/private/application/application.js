@@ -237,10 +237,10 @@
 
   function initExpiryDate(app) {
     app.showContinuationDate = false;
-    if (!_.isEmpty(app['pate-verdicts'])) {
-      var acceptedVerdicts = _.filter(app['pate-verdicts'], function(verdict) {
+    if (!_.isEmpty(app["pate-verdicts"])) {
+      var acceptedVerdicts = _.filter(app["pate-verdicts"], function(verdict) {
         return _.includes( ["myonnetty", "hyvaksytty"], // TODO: Which verdict codes are accepted??
-          verdict.data['verdict-code']);
+          verdict.data["verdict-code"]);
       });
       app.expiryDate = _.last(acceptedVerdicts).data.voimassa;
     }
