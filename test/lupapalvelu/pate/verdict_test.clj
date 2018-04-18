@@ -1012,3 +1012,11 @@
           (archive-info (assoc-in v [:data :handler-title] nil))
           => {:verdict-date  8765432
               :verdict-giver "Hank Handler"})))))
+
+(facts "continuation verdict"
+  (fact "accepted-verdict?" ; TODO Which verdict codes are accepted??
+    (accepted-verdict? {:data {:verdict-code "hyvaksytty"}}) => :hyvaksytty
+    (accepted-verdict? {:data {:verdict-code "myonnetty"}}) => :myonnetty
+    (accepted-verdict? {:data {:verdict-code "evatty"}}) => nil
+    (accepted-verdict? {:data {}}) => nil
+    (accepted-verdict? nil) => nil))

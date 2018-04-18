@@ -69,7 +69,68 @@
                 :name     "P\u00e4\u00e4t\u00f6spohja"
                 :category "r"
                 :modified created
-                :deleted  false}]
+                :deleted  false}
+               {:id "5acc68c953b771ded5d45605",
+                :draft {:verdict-dates ["voimassa" "anto"],
+                        :language "fi",
+                        :giver "viranhaltija",
+                        :verdict-code "hyvaksytty",
+                        :paatosteksti "\nVerdict given\n",
+                        :removed-sections {:appeal true,
+                                           :purpose true,
+                                           :buildings true,
+                                           :complexity true,
+                                           :plans true,
+                                           :foremen true,
+                                           :extra-info true,
+                                           :conditions true,
+                                           :rights true,
+                                           :reviews true,
+                                           :deviations true,
+                                           :neighbors true,
+                                           :statements true},
+                        :bulletinOpDescription "\nBulletin\n"},
+                :name "Jatkoaika",
+                :category "r",
+                :modified 1523345647736,
+                :deleted false,
+                :published {:published 1523345649254,
+                            :data {:verdict-dates ["voimassa" "anto"],
+                                   :bulletinOpDescription "\nBulletin\n",
+                                   :giver "viranhaltija",
+                                   :plans [],
+                                   :removed-sections {:appeal true,
+                                                      :purpose true,
+                                                      :buildings true,
+                                                      :complexity true,
+                                                      :plans true,
+                                                      :foremen true,
+                                                      :extra-info true,
+                                                      :conditions true,
+                                                      :rights true,
+                                                      :reviews true,
+                                                      :deviations true,
+                                                      :neighbors true,
+                                                      :statements true},
+                                   :verdict-code "hyvaksytty",
+                                   :language "fi",
+                                   :reviews [],
+                                   :paatosteksti "\nVerdict given\n"},
+                            :settings {:verdict-code ["evatty"
+                                                      "myonnetty"
+                                                      "osittain-myonnetty"
+                                                      "hyvaksytty"
+                                                      "annettu-lausunto"
+                                                      "ei-puollettu"],
+                                       :foremen ["erityis-tj"],
+                                       :date-deltas {:julkipano {:delta 1, :unit "days"},
+                                                     :anto {:delta 1, :unit "days"},
+                                                     :muutoksenhaku {:delta 1, :unit "days"},
+                                                     :lainvoimainen {:delta 1, :unit "days"},
+                                                     :aloitettava {:delta 1, :unit "years"},
+                                                     :voimassa {:delta 1, :unit "years"}},
+                                       :plans [],
+                                       :reviews []}}}]
    :settings  {:r {:draft    {:voimassa                 "1"
                               :julkipano                "2"
                               :boardname                "asd"

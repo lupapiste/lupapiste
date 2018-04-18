@@ -687,6 +687,12 @@
   (->> (usr/find-authorized-users-in-org org-id org-authz)
        (map #(select-keys % [:id :firstName :lastName]))))
 
+(defn add-continuation-period [application link-permit-id handler period-end]
+  (let [period {:handler               handler
+                :continuationAppId     link-permit-id
+                :continuationPeriodEnd period-end}]
+    (action/update-application (action/application->command application) {$push {:continuationPeriods period}})))
+
 ;; Replacing operation
 
 (defn- get-operation-schemas [organization op-name]
@@ -962,3 +968,9 @@
         secondary-buildings (filter #(not (= (:operationId %) primary-op-id)) (:buildings application))]
     (mapv #(doc-persistence/remove! command  %) secondary-building-docs)
     (action/update-application command {$pull {:buildings {:buildingId {$in (map :buildingId secondary-buildings)}}}})))
+
+(defn jatkoaika-application? [application]
+  (let [primary-operation (get-in application [:primaryOperation :name])]
+    (or (= primary-operation "raktyo-aloit-loppuunsaat")
+        (= primary-operation "jatkoaika")
+        (= primary-operation "ya-jatkoaika"))))

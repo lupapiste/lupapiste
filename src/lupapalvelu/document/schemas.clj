@@ -1294,6 +1294,10 @@
     :paths [[national-building-id]]
     :format " - %s"}])
 
+(def jatkoaika-pvm
+  [{:name "jatkoaika-paattyy" :type :date}
+   {:name "rakennustyo-aloitettu" :type :date}])
+
 ;;
 ;; schemas
 ;;
@@ -1314,6 +1318,14 @@
     :body [kuvaus
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width} ; Longest value in Helsinki production data
            rahoitus]}
+
+   {:info {:name "jatkoaika-hankkeen-kuvaus"
+           :subtype :hankkeen-kuvaus
+           :approvable true
+           :order 1}
+    :body (body
+            kuvaus
+            jatkoaika-pvm)}
 
    {:info {:name "aiemman-luvan-toimenpide"
            :i18name "uusiRakennus"

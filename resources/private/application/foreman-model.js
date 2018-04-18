@@ -22,7 +22,8 @@ LUPAPISTE.ForemanModel = function() {
   self.taskId = ko.observable();
   self.isVisible = ko.computed(function() {
     return util.getIn(self, ["application", "permitType"]) === "R" &&
-      !/tyonjohtajan-nimeaminen/.test(util.getIn(self, ["application", "primaryOperation", "name"]));
+       !/tyonjohtajan-nimeaminen/.test(util.getIn(self, ["application", "primaryOperation", "name"])) &&
+       !/raktyo-aloit-loppuunsaat/.test(util.getIn(self, ["application", "primaryOperation", "name"]));
   });
   var linkedForemanApps = ko.observableArray();
 

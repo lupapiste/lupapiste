@@ -227,6 +227,30 @@
     return _(doc.allowedActions).map(function(v,k) { return v.ok && k; }).includes("update-doc");
   }
 
+  function showExpiryDate(app) {
+    return  app.primaryOperation.name !== "raktyo-aloit-loppuunsaat"
+            && app.primaryOperation.name !== "jatkoaika"
+            && app.expiryDate > 0
+            && app.inPostVerdictState
+            && !app.isArchivingProject;
+  }
+
+  function initExpiryDate(app) {
+    app.showContinuationDate = false;
+    if (!_.isEmpty(app['pate-verdicts'])) {
+      var acceptedVerdicts = _.filter(app['pate-verdicts'], function(verdict) {
+        return _.includes( ["myonnetty", "hyvaksytty"], // TODO: Which verdict codes are accepted??
+          verdict.data['verdict-code']);
+      });
+      app.expiryDate = _.last(acceptedVerdicts).data.voimassa;
+    }
+    if (!_.isUndefined(app.continuationPeriods)) {
+      app.expiryDate = (_.last(app.continuationPeriods)).continuationPeriodEnd;
+      app.showContinuationDate = true;
+    }
+    app.showExpiryDate = showExpiryDate(app);
+  }
+
   function showApplication(applicationDetails, lightLoad) {
     isInitializing = true;
 
@@ -244,6 +268,7 @@
       applicationModel._js = app;
 
       initWarrantyDates(app);
+      initExpiryDate(app);
 
       // Update observables
       var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
