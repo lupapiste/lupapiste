@@ -110,7 +110,9 @@
   the id property of the target value or the value itself."
   (merge PateComponent
          ;; Path is interpreted by the implementation. In Pate the
-         ;; path typically refers to the settings.
+         ;; path typically refers to the settings. Note: if path
+         ;; resolves into map, it is implicitly transformed into
+         ;; vector of map values associated with :MAP-KEY property.
          {:path                              path-type
           ;; In addition to UI, type also affects validation: :select
           ;; only accepts single values. List is read-only.
@@ -134,8 +136,10 @@
           (sc/optional-key :term)
           {;; The path contains sources with corresponding fi, sv and
            ;; en localisations (if not extra-path given). The matching
-           ;; is done by :item-key
-           :path                         path-type
+           ;; is done by :item-key. If term is defined without :path
+           ;; then the target value is assumed to have lang
+           ;; properties.
+           (sc/optional-key :path)       path-type
            ;; Additional path within matched term that contains the
            ;; lang properties.
            (sc/optional-key :extra-path) path-type
@@ -252,7 +256,13 @@
 (defschema PateToggle
   (merge (dissoc PateComponent :css)
          {(sc/optional-key :value)  sc/Bool
-          (sc/optional-key :prefix) keyword-or-string}))
+          ;; Checkbox wrapper class prefix (see components/toggle).
+          (sc/optional-key :prefix) keyword-or-string
+          ;; By default the toggle text is determined by the
+          ;; localisation mechanisms. However, in some cases dynamic
+          ;; toggle text might be needed. :text-dict refers to a
+          ;; sibling dict that contains the the toggle text.
+          (sc/optional-key :text-dict) sc/Keyword}))
 
 (def pate-units
   (sc/enum :days :years :ha :m2 :m3 :kpl :section :eur))
@@ -285,6 +295,11 @@
           ;; locale into account. Default order is the items order.
           (sc/optional-key :sort-by)      (sc/enum :value :text)}))
 
+(defschema PateLocText
+  "Localisation term shown as text."
+  (assoc PateCss
+         :loc-text sc/Keyword))
+
 (defschema PateRequired
   {(sc/optional-key :required?) sc/Bool})
 
@@ -306,7 +321,7 @@
            (sc/conditional
             :reference-list (mex (required {:reference-list PateReferenceList}))
             :phrase-text    (mex (required {:phrase-text PatePhraseText}))
-            :loc-text       (mex {:loc-text sc/Keyword}) ;; Localisation term shown as text.
+            :loc-text       (mex PateLocText)
             :date-delta     (mex (required {:date-delta PateDateDelta}))
             :multi-select   (mex (required {:multi-select PateMultiSelect}))
             :reference      (mex (required {:reference PateReference}))
@@ -325,6 +340,12 @@
                                   (sc/optional-key :sort-by) sc/Keyword})))})
   ([schema-ref]
    (schema-types schema-ref nil)))
+
+;; Keys on the left side of the conditional above.
+(def schema-type-keys [:reference-list :phrase-text :loc-text :date-delta
+                       :multi-select :reference :link :button :placeholder
+                       :keymap :attachments :application-attachments
+                       :toggle :text :date :select :repeating])
 
 (defschema SchemaTypes
   (schema-types #'SchemaTypes))

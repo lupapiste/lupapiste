@@ -32,6 +32,7 @@
   (:require [clojure.set :as set]
             [clojure.string :as s]
             [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.shared-schemas :as schemas]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.pate.components :as pate-components]
@@ -45,7 +46,7 @@
             [sade.shared-util :as util]))
 
 (defn schema-type [options]
-  (-> options :schema (dissoc :required?) keys first keyword))
+  (-> options :schema (select-keys schemas/schema-type-keys) keys first keyword))
 
 (declare pate-list)
 
@@ -113,8 +114,9 @@
   (instantiate-default options wrap-label?))
 
 (defmethod instantiate :loc-text
-  [{:keys [schema]} & _]
+  [{:keys [schema] :as options} & _]
   [:span
+   {:class (path/css options)}
    (common/loc (name (:loc-text schema)))])
 
 
@@ -247,7 +249,7 @@
                     (let [row-options (path/schema-options options row-schema)]
                       ;; Row visibility
                       (when (path/visible? row-options)
-                        [:div.row {:class (some->> row-schema :css (map name) s/join )}
+                        [:div.row {:class (path/schema-css row-schema)}
                          (map (fn [{:keys [col align] :as cell-schema}]
                                 (let [cell-options (path/schema-options row-options
                                                                         cell-schema)]

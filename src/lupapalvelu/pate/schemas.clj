@@ -17,22 +17,16 @@
   {:id       ssc/ObjectIdStr
    :category (sc/enum "r" "p" "ya" "kt" "ymp")})
 
-(defschema PateName
-  {:fi sc/Str
-   :sv sc/Str
-   :en sc/Str})
+(defschema PateTerm
+  {:fi       sc/Str
+   :sv       sc/Str
+   :en       sc/Str})
 
-(defschema PateGeneric
-  "Generic is either review or plan."
-  (merge PateCategory
-         {:name    PateName
-          :deleted sc/Bool}))
+(defschema PateDependency
+  "Published settings depency of a template"
+  (merge PateTerm {:selected sc/Bool}))
 
 (def review-type (apply sc/enum (map name (keys shared/review-type-map))))
-
-(defschema PateSettingsReview
-  (merge PateGeneric
-         {:type review-type}))
 
 (defschema PateSavedSettings
   {:modified ssc/Timestamp
@@ -46,30 +40,30 @@
                                                 :unit  (sc/enum "days" "years")}]))
                                      (into {}))
    (sc/optional-key :foremen)   [(apply sc/enum (map name shared/foreman-codes))]
-   (sc/optional-key :reviews)   [{:id   ssc/ObjectIdStr
-                                  :name PateName
-                                  :type review-type}]
-   (sc/optional-key :plans)     [{:id   ssc/ObjectIdStr
-                                  :name PateName}]
+
    ;; Boardname included only when the verdict giver is Lautakunta.
    (sc/optional-key :boardname) sc/Str})
 
+(defschema PatePublishedTemplateSettings
+  (merge PatePublishedSettings
+         {(sc/optional-key :reviews) [(merge PateDependency
+                                             {:type review-type})]
+          (sc/optional-key :plans)   [PateDependency]}))
+
 (defschema PateSavedTemplate
   (merge PateCategory
-         {:name     sc/Str
-          :deleted  sc/Bool
-          :draft    sc/Any ;; draft is published data on publish.
-          :modified ssc/Timestamp
+         {:name                        sc/Str
+          :deleted                     sc/Bool
+          (sc/optional-key :draft)     sc/Any ;; draft is published data on publish.
+          :modified                    ssc/Timestamp
           (sc/optional-key :published) {:published ssc/Timestamp
                                         :data      sc/Any
-                                        :settings  PatePublishedSettings}}))
+                                        :settings  PatePublishedTemplateSettings}}))
 
 (defschema PateSavedVerdictTemplates
   {:templates [PateSavedTemplate]
    (sc/optional-key :settings)  {(sc/optional-key :r) PateSavedSettings
-                                 (sc/optional-key :p) PateSavedSettings}
-   (sc/optional-key :reviews)   [PateSettingsReview]
-   (sc/optional-key :plans)     [PateGeneric]})
+                                 (sc/optional-key :p) PateSavedSettings}})
 
 ;; Phrases
 
@@ -82,6 +76,16 @@
 
 ;; Verdicts
 
+(defschema PateVerdictReq
+  (merge PateTerm
+         {:id ssc/ObjectIdStr}))
+
+(defschema PateVerdictReferences
+  (merge PatePublishedSettings
+         {(sc/optional-key :reviews) [(merge PateVerdictReq
+                                             {:type review-type})]
+          (sc/optional-key :plans)   [PateVerdictReq]}))
+
 (defschema PateVerdict
   (merge PateCategory
          {;; Verdict is draft until it is published
@@ -89,7 +93,7 @@
           :modified                     ssc/Timestamp
           :schema-version               sc/Int
           :data                         sc/Any
-          (sc/optional-key :references) PatePublishedSettings
+          (sc/optional-key :references) PateVerdictReferences
           :template                     {:inclusions              [sc/Keyword]
                                          (sc/optional-key :giver) (sc/enum "viranhaltija"
                                                                            "lautakunta")}
@@ -190,7 +194,9 @@
                           (= (first canon-value) ""))))
        (check-items canon-value
                     (map #(get % (:item-key data) %)
-                         (get-in references (get-path data))))))))
+                         (util/pcond->> (get-in references (get-path data))
+                                        map? (map (fn [[k v]]
+                                                    (assoc v :MAP-KEY k))))))))))
 
 (defmethod validate-resolution :phrase-text
   [{:keys [path schema value data] :as options}]
@@ -379,12 +385,15 @@
   (->> schema
        :dictionary
        (filter (fn [[k v]]
-                 (:required? v)))
+                 (or (:required? v)
+                     (:repeating v))))
        (every? (fn [[k v]]
                  (cond
                    (:multi-select v) (not-empty (k data))
                    (:reference v)    true ;; Required only for highlighting purposes
                    (:date v)         (integer? (k data))
+                   (:repeating v)    (every? #(required-filled? {:dictionary (:repeating v)} %)
+                                             (some-> data k vals))
                    :else (ss/not-blank? (k data)))))))
 
 (defn section-dicts

@@ -77,6 +77,18 @@
                       (s/join " " msg)
                       div))))
 
+(def review-types [:muu-katselmus
+                   :muu-tarkastus
+                   :aloituskokous
+                   :paikan-merkitseminen
+                   :paikan-tarkastaminen
+                   :pohjakatselmus
+                   :rakennekatselmus
+                   :lvi-katselmus
+                   :osittainen-loppukatselmus
+                   :loppukatselmus
+                   :ei-tiedossa ])
+
 (defn reference-list [path extra]
   {:reference-list (merge {:label? false
                            :type   :multi-select
@@ -180,6 +192,143 @@
     schema))
 
 
+;; -----------------------------
+;; Settings subschemas
+;; -----------------------------
+
+(defn build-settings-schema
+  "Combines subschemas and validates the result."
+  [title & subschemas]
+  (sc/validate schemas/PateSettings
+               (assoc (apply combine-subschemas subschemas)
+                      :title title)))
+
+(def setsub-date-deltas
+  {:dictionary {:verdict-dates {:loc-text :pate-verdict-dates}
+                :plus          {:loc-text :plus}
+                :julkipano     (required {:date-delta {:unit :days}})
+                :anto          (required {:date-delta {:unit :days}})
+                :muutoksenhaku (required {:date-delta {:unit :days}})
+                :lainvoimainen (required {:date-delta {:unit :days}})
+                :aloitettava   (required {:date-delta {:unit :years}})
+                :voimassa      (required {:date-delta {:unit :years}})}
+   :section    {:id         :verdict-dates
+                :loc-prefix :pate-verdict-dates
+                :grid       {:columns    17
+                             :loc-prefix :pate-verdict
+                             :rows       [(date-delta-row verdict-dates)]}}})
+
+(def setsub-verdict-code
+  {:dictionary {:verdict-code
+                (required {:multi-select {:label? false
+                                          :items  (keys verdict-code-map)}})}
+   :section    {:id         :verdict
+                :required?  true
+                :loc-prefix :pate-settings.verdict
+                :grid       {:columns    1
+                             :loc-prefix :pate-r.verdict-code
+                             :rows       [[{:dict :verdict-code}]]}}})
+
+(def setsub-board ;; Lautakunta
+  {:dictionary {:lautakunta-muutoksenhaku (required {:date-delta {:unit :days}})
+                :boardname                (required {:text {}})}
+   :section {:id         :board
+             :loc-prefix :pate-verdict.giver.lautakunta
+             :grid       {:columns 4
+                          :rows    [[{:loc-prefix :pate-verdict.muutoksenhaku
+                                      :dict       :lautakunta-muutoksenhaku}]
+                                    [{:col        1
+                                      :align      :full
+                                      :loc-prefix :pate-settings.boardname
+                                      :dict       :boardname}]]}}})
+
+;; Must be included if reviews or plans is included.
+(def setsub-lang-titles
+  {:dictionary {:title-fi {:css      :pate-label.required
+                           :loc-text :pate-verdict.language.fi}
+                :title-sv {:css      :pate-label.required
+                           :loc-text :pate-verdict.language.sv}
+                :title-en {:css      :pate-label.required
+                           :loc-text :pate-verdict.language.en}}})
+
+(defn settings-repeating [{:keys [dict loc-prefix add-dict add-loc remove-dict]}]
+  {:dictionary {dict     {:repeating {:fi         (required {:text {:label? false}})
+                                      :sv         (required {:text {:label? false}})
+                                      :en         (required {:text {:label? false}})
+                                      remove-dict {:button {:i18nkey :remove
+                                                            :label?  false
+                                                            :icon    :lupicon-remove
+                                                            :css     [:primary :outline]
+                                                            :remove  dict}}}}
+                add-dict {:button {:icon    :lupicon-circle-plus
+                                   :i18nkey add-loc
+                                   :css     :positive
+                                   :add     dict}}}
+   :section    {:id         dict
+                :loc-prefix loc-prefix
+                :grid       {:columns 6
+                             :rows    [{:css      [:pate-label :row--tight]
+                                        :show? dict
+                                        :row      [{:dict :title-fi}
+                                                   {:dict :title-sv}
+                                                   {:dict :title-en}]}
+                                       {:css :row--tight
+                                        :row [{:col  6
+                                               :grid {:columns   6
+                                                      :repeating dict
+                                                      :rows      [{:css [:row--tight]
+                                                                   :row [{:align :full
+                                                                          :dict  :fi}
+                                                                         {:align :full
+                                                                          :dict  :sv}
+                                                                         {:align :full
+                                                                          :dict  :en}
+                                                                         {:dict remove-dict}]}]}}]}
+                                       [{:dict add-dict}]]}}})
+
+(def setsub-plans
+  (settings-repeating {:dict        :plans
+                       :loc-prefix  :pate.plans
+                       :add-dict    :add-plan
+                       :add-loc     :pate.add-plan
+                       :remove-dict :remove-plan}))
+
+(defn setsub-reviews [review-types]
+  (-> (settings-repeating {:dict        :reviews
+                           :loc-prefix  :pate-reviews
+                           :add-dict    :add-review
+                           :add-loc     :pate.add-review
+                           :remove-dict :remove-review})
+      (assoc-in [:dictionary :title-type] {:css      [:pate-label.required]
+                                           :loc-text :pate.review-type})
+      (assoc-in [:dictionary :reviews :repeating :type]
+                (required {:select {:label?     false
+                                    :loc-prefix :pate.review-type
+                                    :items      review-types
+                           :sort-by    :text}}))
+      (update-in [:section :grid :rows 0 :row] #(conj % {:dict :title-type}))
+      (update-in [:section :grid :rows 1 :row 0 :grid :rows 0 :row]
+                 #(concat (butlast %)
+                          [{:align :full :dict :type}]
+                          [(last %)]))))
+
+(def r-settings (build-settings-schema "pate-r"
+                                       setsub-date-deltas
+                                       setsub-verdict-code
+                                       setsub-board
+                                       setsub-lang-titles
+                                       setsub-plans
+                                       (setsub-reviews review-types)))
+
+(def p-settings (build-settings-schema "pate-p"
+                                       setsub-date-deltas
+                                       setsub-verdict-code
+                                       setsub-board))
+
+(defn settings-schema [category]
+  (case (keyword category)
+    :r r-settings
+    :p p-settings))
 
 ;; -----------------------------
 ;; Verdict template subschemas
@@ -265,27 +414,67 @@
                                       :dict :bulletinOpDescription}]]}}})
 
 (def temsub-foremen
-  {:dictionary {:foremen (reference-list :settings.foremen
-                                         {:item-loc-prefix :pate-r.foremen})}
-   :section    (multi-section :foremen :*ref.settings.foremen)
+  (->> foreman-codes
+       (map (fn [code]
+              (let [codename     (name code)
+                    included-key (keyword (str codename "-included"))]
+                {:toggle-key code
+                 :toggle     {:toggle {:i18nkey  (keyword (str "pate-r.foremen."
+                                                               codename))
+                                       :enabled? included-key
+                                       :label?   false}}
+
+                 :included-key included-key
+                 :included     {:toggle {:i18nkey :pate.available-in-verdict
+                                         :label?  false}}})))
+       (reduce (fn [acc {:keys [toggle-key toggle included-key included]}]
+                 (-> acc
+                     (assoc-in [:dictionary toggle-key] toggle)
+                     (assoc-in [:dictionary included-key] included)
+                     (update-in [:section :grid :rows]
+                                #(conj (vec %)
+                                       {:css :row--extra-tight
+                                        :row [{:col  2
+                                               :dict toggle-key}
+                                              {:col  2
+                                               :dict included-key}]}))))
+               {:section    {:id         :foremen
+                             :loc-prefix :pate-r.foremen
+                             :grid       {:columns 5
+                                          :rows    []}}
+                :removable? true})))
+
+(defn settings-dependencies [dict loc-prefix]
+  {:dictionary {dict {:repeating {:selected {:toggle {:enabled?  :-.included
+                                                      :label?    false
+                                                      :text-dict :text}}
+                                  :text     {:text {}}
+                                  :included {:toggle {:label?  false
+                                                      :i18nkey :pate.available-in-verdict}}}}}
+   :section    {:id         dict
+                :loc-prefix loc-prefix
+                :grid       {:columns 5
+                             :rows    [{:hide? dict
+                                        :css   :row--extra-tight
+                                        :row   [{:col  4
+                                                 :dict :link-to-settings-no-label}]}
+                                       {:css :row--extra-tight
+                                        :row [{:col   4
+                                               :show? dict
+                                               :grid  {:columns   4
+                                                       :repeating dict
+                                                       :rows      [{:css :row--extra-tight
+                                                                    :row [{:col  2
+                                                                           :dict :selected}
+                                                                          {:col  2
+                                                                           :dict :included}]}]}}]}]}}
    :removable? true})
 
 (def temsub-reviews
-  {:dictionary    {:reviews (reference-list :reviews
-                                            {:item-key :id
-                                             :term     {:path       [:reviews]
-                                                        :extra-path [:name]
-                                                        :match-key  :id}})}
-   :section       (multi-section :reviews :*ref.reviews)
-   :removable? true})
+  (settings-dependencies :reviews :pate-reviews))
 
 (def temsub-plans
-  {:dictionary {:plans (reference-list :plans {:item-key :id
-                                               :term     {:path       [:plans]
-                                                          :extra-path [:name]
-                                                          :match-key  :id}})}
-   :section    (multi-section :plans :*ref.plans)
-   :removable? true})
+  (settings-dependencies :plans :pate.plans))
 
 (def temsub-conditions ;; Muut lupaehdot
   {:dictionary    {:conditions    {:repeating {:condition        {:phrase-text {:i18nkey  :pate-condition
@@ -415,110 +604,6 @@
   (case (keyword category)
     :r r-verdict-template-schema
     :p p-verdict-template-schema))
-
-
-;; -----------------------------
-;; Settings subschemas
-;; -----------------------------
-
-(defn build-settings-schema
-  "Combines subschemas and validates the result."
-  [title & subschemas]
-  (sc/validate schemas/PateSettings
-               (assoc (apply combine-subschemas subschemas)
-                      :title title)))
-
-(def setsub-date-deltas
-  {:dictionary {:verdict-dates {:loc-text :pate-verdict-dates}
-                :plus          {:loc-text :plus}
-                :julkipano     (required {:date-delta {:unit :days}})
-                :anto          (required {:date-delta {:unit :days}})
-                :muutoksenhaku (required {:date-delta {:unit :days}})
-                :lainvoimainen (required {:date-delta {:unit :days}})
-                :aloitettava   (required {:date-delta {:unit :years}})
-                :voimassa      (required {:date-delta {:unit :years}})}
-   :section    {:id         :verdict-dates
-                :loc-prefix :pate-verdict-dates
-                :grid       {:columns    17
-                             :loc-prefix :pate-verdict
-                             :rows       [(date-delta-row verdict-dates)]}}})
-
-(def setsub-verdict-code
-  {:dictionary {:verdict-code
-                (required {:multi-select {:label? false
-                                          :items  (keys verdict-code-map)}})}
-   :section    {:id         :verdict
-                :required?  true
-                :loc-prefix :pate-settings.verdict
-                :grid       {:columns    1
-                             :loc-prefix :pate-r.verdict-code
-                             :rows       [[{:dict :verdict-code}]]}}})
-
-(def setsub-board ;; Lautakunta
-  {:dictionary {:lautakunta-muutoksenhaku (required {:date-delta {:unit :days}})
-                :boardname                (required {:text {}})}
-   :section {:id         :board
-             :loc-prefix :pate-verdict.giver.lautakunta
-             :grid       {:columns 4
-                          :rows    [[{:loc-prefix :pate-verdict.muutoksenhaku
-                                      :dict       :lautakunta-muutoksenhaku}]
-                                    [{:col        1
-                                      :align      :full
-                                      :loc-prefix :pate-settings.boardname
-                                      :dict       :boardname}]]}}})
-
-(def setsub-foremen
-  {:dictionary {:foremen {:multi-select {:label? false
-                                         :items  foreman-codes}}}
-   :section    {:id         :foremen
-                :loc-prefix :pate-settings.foremen
-                :grid       {:columns    1
-                             :loc-prefix :pate-r.foremen
-                             :rows       [[{:dict :foremen}]]}}})
-
-(def setsub-plans
-  {:dictionary {:plans {:reference-list {:label?   false
-                                         :path     [:plans]
-                                         :item-key :id
-                                         :type     :list
-                                         :sort?    true
-                                         :term     {:path       :plans
-                                                    :extra-path :name}}}}
-   :section    {:id         :plans
-                :loc-prefix :pate-settings.plans
-                :grid       {:columns 1
-                             :rows    [[{:dict :plans}]]}}})
-
-(def setsub-reviews
-  {:dictionary {:reviews {:reference-list {:label?   false
-                                           :path     [:reviews]
-                                           :item-key :id
-                                           :type     :list
-                                           :sort?    true
-                                           :term     {:path       :reviews
-                                                      :extra-path :name}}}}
-   :section    {:id         :reviews
-                :loc-prefix :pate-settings.reviews
-                :grid       {:columns 1
-                             :rows    [[{:dict :reviews}]]}}})
-
-(def r-settings (build-settings-schema "pate-r"
-                                       setsub-date-deltas
-                                       setsub-verdict-code
-                                       setsub-board
-                                       setsub-foremen
-                                       setsub-plans
-                                       setsub-reviews))
-
-(def p-settings (build-settings-schema "pate-p"
-                                       setsub-date-deltas
-                                       setsub-verdict-code
-                                       setsub-board))
-
-(defn settings-schema [category]
-  (case (keyword category)
-    :r r-settings
-    :p p-settings))
 
 ;; -----------------------------
 ;; Verdict subschemas
@@ -714,12 +799,9 @@
                                :type       :multi-select}
                               (when term?
                                 {:item-key :id
-                                 :term     {:path       path
-                                            :extra-path :name
-                                            :match-key  :id}})
+                                 :term     {}})
                               (when separator?
-                                {:separator " \u2013 "}))
-                       :template-dict kw}
+                                {:separator " \u2013 "}))}
                       ;; Included toggle
                       included required-in-verdict)))
            {}
@@ -730,8 +812,9 @@
    {:id   :requirements
     :grid {:columns 7
            :rows    (map (fn [dict]
-                           (let [check-path (keyword (str (name dict) "-included"))]
-                             {:show? [:OR :_meta.editing? check-path]
+                           (let [check-path (keyword (str (name dict) "-included"))
+                                 exist-path (keyword (str "?." (name dict)))]
+                             {:show? [:AND exist-path [:OR :_meta.editing? check-path]]
                               :row   [{:col  4
                                        :dict dict}
                                       {:col   2

@@ -73,9 +73,14 @@
                   :value value))
 
 (defn fetch-template [template-id callback]
-  (common/query "verdict-template"
+  (common/query :verdict-template
                 callback
                 :template-id template-id))
+
+(defn fetch-updated-template [template-id callback]
+  (common/command {:command  :update-and-open-verdict-template
+                   :success callback}
+                  :template-id template-id))
 
 (defn new-template [category callback]
   (common/command {:command "new-verdict-template"
@@ -110,31 +115,6 @@
                   :category category
                   :path path
                   :value value))
-
-;; Generic refers to either review or plan.
-
-(defn generics [generic-type category callback]
-  (common/query (js/sprintf "verdict-template-%ss"
-                            (name generic-type))
-                callback
-                :category category))
-
-(defn new-generic [generic-type category callback]
-  (common/command {:command (str "add-verdict-template-" (name generic-type))
-                   :success callback}
-                  :category category))
-
-(defn update-generic [generic-type gen-id callback & updates]
-  (apply (partial common/command {:command (str "update-verdict-template-"
-                                                (name generic-type))
-                                  :success (fn [{:keys [modified] :as response}]
-                                             (when (= (-> response generic-type :category)
-                                                      @state/current-category)
-                                               (swap! state/settings
-                                                      #(assoc % :modified modified)))
-                                             (callback response))}
-                  (keyword (str (name generic-type) "-id")) gen-id)
-         updates))
 
 ;; Phrases
 

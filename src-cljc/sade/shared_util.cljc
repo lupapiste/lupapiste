@@ -96,21 +96,28 @@
     v))
 
 (defn dissoc-in
-  "Dissociates an entry from a nested associative structure returning a new
-  nested structure. keys is a sequence of keys. Any empty maps that result
-  will not be present in the new structure.
-  Supports also vector index values among the keys sequence just like clojure.core/update-in does."
-  [m [k & ks :as keys]]
-  (if ks
-    (if-let [nextmap (get m k)]
-      (let [newmap (dissoc-in nextmap ks)]
-        (if (seq newmap)
-          (assoc m k newmap)
-          (dissoc m k)))
-      m)
-    (if (and (number? k) (sequential? m))
-      (drop-nth k m)
-      (dissoc m k))))
+  "Dissociates an entry from a nested associative structure returning a
+  new nested structure. keys is a sequence of keys. Any empty maps
+  that result will not be present in the new structure.  Supports also
+  vector index values among the keys sequence just like
+  `clojure.core/update-in` does."
+  [m [k & ks]]
+  (letfn [(rm [w i]
+            (cond
+              (map? w)        (dissoc w i)
+              (sequential? w) (drop-nth i w)
+              :else           w))
+          (add [w i x]
+            (cond-> w
+              (coll? w) (assoc i x)))]
+    (if ks
+      (if-let [next-m (get m k)]
+        (let [result (dissoc-in next-m ks)]
+          (if (empty? result)
+            (rm m k)
+            (add m k result)))
+        m)
+      (rm m k))))
 
 (defn edit-distance
   "Levenshtein distance between strings a and b using Wagner–Fischer

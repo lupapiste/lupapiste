@@ -61,7 +61,8 @@
                  :path [:verdict-code] :value "hyvaksytty") => no-errors?)
       (fact "Add plans"
         (command sonja :edit-pate-verdict :id app-id :verdict-id verdict-id
-                 :path [:plans] :value ["5a85960a809b5a1e454f3233" "5a85960a809b5a1e454f3234"]) => no-errors?)
+                 :path [:plans]
+                 :value (->> verdict-draft :references :plans (map :id))) => no-errors?)
       ;Add conditions
       (add-verdict-condition app-id verdict-id "ehto 1")
       (add-verdict-condition app-id verdict-id "ehto 2")

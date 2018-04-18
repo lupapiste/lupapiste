@@ -133,16 +133,24 @@
   (let [kw (util/kw-path id-path key)]
     (swap! (rum/cursor-in _meta [kw]) not)))
 
+(defn schema-css
+  "List of CSS class based on :css property."
+  [schema & other-classes]
+  (->> [(:css schema)
+        other-classes]
+       flatten
+       (map util/split-kw-path)
+       flatten
+       (remove nil?)
+       (map name)))
+
 (defn css
   "List of CSS classes based on current :css value and status
   classes (pate--edit, pate--view) from the latest _meta."
   [options & other-classes]
-  (->> [(if (meta-value options :editing?) "pate--edit" "pate--view")
-        (some-> options :schema :css)
-        other-classes]
-       flatten
-       (remove nil?)
-       (map name)))
+  (schema-css (:schema options)
+              (if (meta-value options :editing?) "pate--edit" "pate--view")
+              other-classes))
 
 (defn meta-updated
   "Calls _meta :updated if defined."
@@ -192,8 +200,9 @@
 
 (defn- truthy? [v]
   (boolean (cond
+             (map? v)        (not-empty v)
              (sequential? v) (seq v)
-             :else v)))
+             :else           v)))
 
 (defn- resolve-path
   "Resolve relative path. Relative path is denoted with + or -. The

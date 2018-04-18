@@ -73,6 +73,10 @@ $pate-grid-margin: 10px;
         padding-bottom: $marginS;
         margin: 0 0 0 0;
       }
+      &.row--extra-tight {
+        padding: 0;
+        margin: 0;
+      }
       &.row--indent {
         padding-left: $marginL;
         padding-top: 0;
@@ -315,12 +319,27 @@ div.pate-verdict-page {
 }
 
 div.pate-spin {
+  $size: 160px;
   width: 100%;
   text-align: center;
   > i {
-    display: block;
-    font-size: 4em;
+    margin: 0;
   }
+  > i:before {
+    display: inline-block;
+    color: $gray238;
+    @include rotate( spin );
+    font-size: $size - 4px;
+    vertical-align: middle;
+    text-align: center;
+    width: $size;
+    min-width: $size;
+    max-width: $size;
+    min-height: $size;
+    max-height: $size;
+    padding-bottom: 2px;
+  }
+
 }
 
 table.pate-verdicts-table {

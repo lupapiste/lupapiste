@@ -166,7 +166,7 @@
     (keys mapped-data)))
 
 (defn save-review-as-krysp
-  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that were sent."
   [{:keys [application organization user]} task lang]
   (let [permit-type (permit/permit-type application)]
     (when (org/krysp-integration? @organization permit-type)

@@ -15594,6 +15594,11 @@ button.rollup-button {
   margin: 0 0 0 0;
 }
 
+.pate-grid-1 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
+}
+
 .pate-grid-1 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
@@ -15726,6 +15731,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-2 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-2 > .row.row--indent {
@@ -15900,6 +15910,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-3 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-3 > .row.row--indent {
@@ -16114,6 +16129,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-4 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-4 > .row.row--indent {
@@ -16368,6 +16388,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-5 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-5 > .row.row--indent {
@@ -16662,6 +16687,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-6 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-6 > .row.row--indent {
@@ -16996,6 +17026,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-7 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-7 > .row.row--indent {
@@ -17370,6 +17405,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-8 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-8 > .row.row--indent {
@@ -17784,6 +17824,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-9 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-9 > .row.row--indent {
@@ -18238,6 +18283,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-10 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-10 > .row.row--indent {
@@ -18732,6 +18782,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-11 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-11 > .row.row--indent {
@@ -19266,6 +19321,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-12 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-12 > .row.row--indent {
@@ -19840,6 +19900,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-13 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-13 > .row.row--indent {
@@ -20454,6 +20519,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-14 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-14 > .row.row--indent {
@@ -21108,6 +21178,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-15 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-15 > .row.row--indent {
@@ -21802,6 +21877,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-16 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-16 > .row.row--indent {
@@ -22536,6 +22616,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-17 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-17 > .row.row--indent {
@@ -23310,6 +23395,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-18 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-18 > .row.row--indent {
@@ -24124,6 +24214,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-19 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-19 > .row.row--indent {
@@ -24978,6 +25073,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-20 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-20 > .row.row--indent {
@@ -25872,6 +25972,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-21 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-21 > .row.row--indent {
@@ -26806,6 +26911,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-22 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-22 > .row.row--indent {
@@ -27780,6 +27890,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.pate-grid-23 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
 }
 
 .pate-grid-23 > .row.row--indent {
@@ -28796,6 +28911,11 @@ button.rollup-button {
   margin: 0 0 0 0;
 }
 
+.pate-grid-24 > .row.row--extra-tight {
+  padding: 0;
+  margin: 0;
+}
+
 .pate-grid-24 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
@@ -29201,8 +29321,24 @@ div.pate-spin {
 }
 
 div.pate-spin > i {
-  display: block;
-  font-size: 4em;
+  margin: 0;
+}
+
+div.pate-spin > i:before {
+  display: inline-block;
+  color: #eeeeee;
+  -webkit-animation: spin 4s linear infinite;
+  -moz-animation: spin 4s linear infinite;
+  animation: spin 4s linear infinite;
+  font-size: 156px;
+  vertical-align: middle;
+  text-align: center;
+  width: 160px;
+  min-width: 160px;
+  max-width: 160px;
+  min-height: 160px;
+  max-height: 160px;
+  padding-bottom: 2px;
 }
 
 table.pate-verdicts-table {
