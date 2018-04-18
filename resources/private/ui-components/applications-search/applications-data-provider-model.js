@@ -168,7 +168,7 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
     // Create dependency to the observable
     var fields = searchFields();
     var currentSearchType = latestSearchType;
-    if( self.initialized() && cacheMiss()) {
+    if(cacheMiss()) {
       ajax.datatables("applications-search", fields)
       .success(function( res ) {
         if( currentSearchType === latestSearchType ) {
@@ -178,6 +178,9 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
       })
       .onError("error.unauthorized", notify.ajaxError)
       .pending(self.pending)
+      .complete( function() {
+        self.initialized( true );
+      })
       .call();
     }
   }
@@ -185,17 +188,4 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
   hub.onPageLoad("applications", _.wrap( true, fetchSearchResults ) );
 
   ko.computed( fetchSearchResults ).extend({deferred: true});
-
-  // Initialization
-  ajax.datatables("applications-search-default", {})
-  .success(function( res ) {
-    fieldsCache = res.search;
-    self.onSuccess( res );
-  })
-  .onError("error.unauthorized", notify.ajaxError)
-  .pending(self.pending)
-  .complete( function() {
-    self.initialized( true );
-  })
-  .call();
 };
