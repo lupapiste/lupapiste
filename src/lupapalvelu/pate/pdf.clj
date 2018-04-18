@@ -707,9 +707,10 @@
 
 (defn references [{:keys [lang verdict] :as options} kw]
   (let [ids (dict-value options kw)]
-    (->> (get-in verdict [references kw])
+    (->> (get-in verdict [:references kw])
          (filter #(util/includes-as-kw? ids (:id %)))
-         (map #(get-in % [:name (keyword lang)])))))
+         (map (keyword lang))
+         sort)))
 
 (defn conditions [options]
   (->> (dict-value options :conditions)

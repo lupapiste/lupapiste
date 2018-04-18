@@ -242,7 +242,7 @@
         return _.includes( ["myonnetty", "hyvaksytty"], // TODO: Which verdict codes are accepted??
           verdict.data["verdict-code"]);
       });
-      app.expiryDate = _.last(acceptedVerdicts).data.voimassa;
+      app.expiryDate = _.get(_.last(acceptedVerdicts), "data.voimassa");
     }
     if (!_.isUndefined(app.continuationPeriods)) {
       app.expiryDate = (_.last(app.continuationPeriods)).continuationPeriodEnd;
