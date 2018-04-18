@@ -5,7 +5,6 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.permit :refer [validate-permit-type-is R YA]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
