@@ -48,7 +48,7 @@
   If a line is not part of the list of blockquote it is then paragraph:
 
   Paragraph starts and
-  continues on the next line.
+  continues on the next line. The line break is preserved.
 
   After blank line, a new paragraph
   * List
@@ -104,8 +104,9 @@
   (insta/parser
    "<Lines>      := (Heading / List / Quote / Blank / Paragraph)+
     <EOL>        := <'\\r'? '\\n'>
-    WS           := <' '+>
+    WS           := <#'[ \\t]'+>
     WSEOL        := EOL
+    BR           := EOL
     Escape       := <'\\\\'> ( '*' | '/' | '_' | '^' | '\\\\'
                              | '.' | '#' | '-' | '+' | '|'
                              | '[' | ']' | '>' )
@@ -121,12 +122,13 @@
     List         := Spaces? (Bullet | Number) Regular+
     Number       := <#'[0-9]+\\.' WS>
     Title        := '#'+ <WS>
-    Heading      := <WS?> Title Regular+
+    Heading      := <WS?> Title Regular
     <QuoteMark>  := <'>' WS>
     Quote        := <WS>? QuoteMark Regular+
     <NotSpecial> := !(Bullet | Number | QuoteMark | Blank)
     <Regular>    := (<WS?> NotSpecial Texts <WS?>)+ WSEOL
-    Paragraph    := Regular+
+    <BRegular>   := (<WS?> NotSpecial Texts <WS?>)+ BR
+    Paragraph    := BRegular+
     Blank        := (WS? EOL)+
 "))
 
@@ -183,6 +185,7 @@
       :Escape (last x)
       :Bracket (last x)
       :WSEOL " "
+      :BR [:br]
       x)))
 
 (defn- ws-escape-all [x]
