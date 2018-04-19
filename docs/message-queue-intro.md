@@ -26,6 +26,18 @@ Alternatively you can fire up local instance by [installing Artemis](https://act
 * JMS transactions
 * Server side re-delivery delay
 
+# ActiveMQ Artemis server FAQ
+
+## Auto-create and auto-delete addresses?
+
+By default Artemis server is provisioned with "auto-create" set to true. This means it will auto-create queue, when message is sent to it. This is good for dynamic queues.
+On the contrary, also "auto-delete" feature is set to true by default. This means queue is deleted from broker when there are 0 consumers and 0 messages. In general this is fine too.
+
+It seems it's not possible to retain dynamically created queues between server restarts. When server is restarted, client consumers don't receive messages anymore to queues they subscribed. 
+Instead an exception is raised on server side when consumer re-connects to it with message "Queue X does not exists". This might be a bug in Artemis TODO.
+
+Read more about config possibilities from [Artemis documentation](https://activemq.apache.org/artemis/docs/latest/address-model.html#automatic-addressqueue-management).
+
 # JMS client FAQ
 
 ## Difference between persistent and non-persistent delivery?

@@ -5,7 +5,8 @@
             [sade.strings :as ss]
             [sade.util :as util])
   (:import (javax.jms ExceptionListener Connection Session Destination Queue
-                      MessageListener BytesMessage ObjectMessage TextMessage MessageConsumer MessageProducer JMSException)
+                      MessageListener BytesMessage ObjectMessage TextMessage
+                      MessageConsumer MessageProducer JMSException)
            (org.apache.activemq.artemis.jms.client ActiveMQJMSConnectionFactory ActiveMQConnection)
            (org.apache.activemq.artemis.api.jms ActiveMQJMSClient)))
 
