@@ -1105,6 +1105,7 @@ Approve application with missing info
 Approve application ok
   Open tab  requiredFieldSummary
   Click enabled by test id  approve-application-summaryTab
+  Confirm  dynamic-yes-no-confirm-dialog
   Confirm ok dialog
   Wait until  Application state should be  sent
 
