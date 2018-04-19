@@ -1,7 +1,15 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="parties-tab-template">
   <div id="application-parties-tab" class="tab-content" data-bind="with: application">
+
+    <!-- ko if: $root.foreman -->
+    <h1 data-bind="ltext: 'application.tabSupervisorInformation'"></h1>
+    <help-toggle params="lhtml: ['help.supervisorInformationDesc', 'company-invite.help']"></help-toggle>
+    <!-- /ko -->
+
+    <!-- ko if: !$root.foreman -->
     <h1 data-bind="ltext: 'application.tabParties'"></h1>
     <help-toggle params="lhtml: ['help.' + permitType() + '.PartiesDesc', 'company-invite.help']"></help-toggle>
+    <!-- /ko -->
 
     <!-- ko if: $parent.selectedTabName() === 'parties' && $root.authorization.ok("create-assignment") -->
     <create-assignment data-test-id="create-assignment-component"

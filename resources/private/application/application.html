@@ -81,7 +81,12 @@
                                     </span></a></li>
                             <li data-bind="css: {'active': $parent.selectedTabName() === 'parties'}">
                                 <a data-bind="click: changeTab" href="#" data-target="parties" data-test-id="application-open-parties-tab" class="link-btn">
+                                  <!-- ko if: $root.foreman -->
+                                    <span data-bind="ltext: 'application.tabSupervisorInformation'"></span>
+                                  <!-- /ko -->
+                                  <!-- ko if: !$root.foreman -->
                                     <span data-bind="ltext: 'application.tabParties'"></span>
+                                  <!-- /ko -->
                                     <span data-bind="if: partyDocumentIndicator">
                                         <span data-bind="text: partyDocumentIndicator" id="applicationPartyDocumentIndicator" class="indicator"></span></span></a></li>
                             <li data-bind="if: $root.authorization.ok('tasks-tab-visible'), css: {'active': $parent.selectedTabName() === 'tasks'}">
