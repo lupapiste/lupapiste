@@ -4,7 +4,7 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="publish-application-template">
       <h1 data-bind="ltext: 'bulletin'"></h1>
-      <span data-bind="component: { name: 'help-toggle', params: { lhtml: helpTextSupervisor } }"></span>
+      <span data-bind="component: { name: 'help-toggle', params: { lhtml: helpText } }"></span>
       <!-- ko if: notYetPublishedForApplicant -->
       <p data-bind="ltext: 'bulletin.application.notYetPublished'"></p>
       <!-- /ko -->
