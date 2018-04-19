@@ -63,6 +63,11 @@
    :loppukatselmus            "loppukatselmus"
    :ei-tiedossa               "ei tiedossa"})
 
+(def ya-review-type-map
+  {:aloituskatselmus "Aloituskatselmus"
+   :loppukatselmus   "Loppukatselmus"
+   :muu              "Muu valvontak\u00e4ynti"})
+
 (def foreman-codes [:vastaava-tj :vv-tj :iv-tj :erityis-tj :tj])
 
 (def verdict-dates [:julkipano :anto :muutoksenhaku :lainvoimainen

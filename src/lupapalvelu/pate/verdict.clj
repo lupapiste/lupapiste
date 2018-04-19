@@ -214,21 +214,6 @@
                         shared/foreman-codes)]
     (resolve-requirement-inclusion updated :foremen)))
 
-#_(defn init--included-checks
-  "Included toggle value according to the template section status."
-  [{:keys [template] :as initmap} & kw]
-  (update-in initmap
-             [:draft :data]
-             (fn [data]
-               (reduce (fn [acc k]
-                         (assoc acc
-                                (-> (name k)
-                                    (str "-included")
-                                    keyword)
-                                (not (section-removed? template k))))
-                       data
-                       kw))))
-
 (defn init--requirements-references
   "Plans and reviews are defined in the published template settings."
   [{:keys [template] :as initmap} dict]
