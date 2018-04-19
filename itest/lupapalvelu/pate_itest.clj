@@ -741,7 +741,6 @@
         blank-condition      (add-template-condition template-id "    ")
         other-condition      (add-template-condition template-id "Other condition")
         remove-condition     (add-template-condition template-id "Remove condition")]
-    #_(>pprint draft)
     (fact "Remove condition"
       (remove-template-condition template-id remove-condition))
     (fact "Full template without attachments"

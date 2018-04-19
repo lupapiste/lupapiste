@@ -522,6 +522,12 @@
        (map (partial app/populate-operation-info
                      (app/get-operations application)))))
 
+(defn- op-description [{primary     :primaryOperation
+                        secondaries :secondaryOperations} op]
+  (->> (cons primary secondaries)
+       (util/find-by-id (:id op))
+       :description))
+
 (defn buildings
   "Map of building infos: operation id is key and value map contains
   operation (loc-key), building-id (either national or manual id),
@@ -530,13 +536,12 @@
   (->> application
        app-documents-having-buildings
        (reduce (fn [acc {:keys [schema-info data]}]
-                 (let [{:keys [id name
-                               description]} (:op schema-info)]
+                 (let [{:keys [id name] :as op} (:op schema-info)]
                    (assoc acc
                           (keyword id)
                           (util/convert-values
                            {:operation   name
-                            :description description
+                            :description (op-description application op)
                             :building-id (->> [:valtakunnallinenNumero
                                                :manuaalinen_rakennusnro]
                                               (select-keys data)
@@ -567,7 +572,7 @@
          (util/indexed 1)
          (map (fn [[n {toimenpide :data {op :op} :schema-info}]]
                 (let [{:keys [rakennusnro valtakunnallinenNumero mitat kaytto tunnus]} toimenpide
-                      description-parts (remove ss/blank? [tunnus (:description op)])
+                      description-parts (remove ss/blank? [tunnus (op-description application op)])
                       building-update (get building-updates (:id op))
                       location (when-let [loc (:location building-update)] [(:x loc) (:y loc)])
                       location-wgs84 (when location (coord/convert "EPSG:3067" "WGS84" 5 location))]
