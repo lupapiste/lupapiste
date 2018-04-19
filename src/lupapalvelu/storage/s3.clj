@@ -36,8 +36,8 @@
                    (env/value :s3 :secret-key)
                    (env/value :s3 :endpoint))))
 
-(defn- ^String bucket-name [application-id]
-  (str "lupapiste-" env/target-env "-" (or (str/blank-as-nil application-id)
+(defn- ^String bucket-name [bucket]
+  (str "lupapiste-" env/target-env "-" (or (str/blank-as-nil bucket)
                                            "unlinked-files")))
 
 (defn- create-bucket-if-not-exists [bucket]
@@ -57,9 +57,9 @@
           {}
           metadata))
 
-(defn- do-put-object [application-id file-id filename content-type input-stream content-length metadata]
+(defn- do-put-object [bucket file-id filename content-type input-stream content-length metadata]
   {:pre [(map? metadata)]}
-  (create-bucket-if-not-exists (bucket-name application-id))
+  (create-bucket-if-not-exists (bucket-name bucket))
   (let [user-metadata (-> (generate-user-metadata metadata)
                           (assoc "uploaded" (str (now))
                                  "filename" filename))
@@ -67,12 +67,12 @@
                        (.setContentLength content-length)
                        (.setContentType content-type)
                        (.setUserMetadata user-metadata))
-                     (PutObjectRequest. (bucket-name application-id) file-id input-stream))]
+                     (PutObjectRequest. (bucket-name bucket) file-id input-stream))]
     (-> (.getRequestClientOptions request)
         (.setReadLimit 150001))
     (.putObject s3-client request)))
 
-(defn put-input-stream [application-id file-id filename content-type input-stream content-length & metadata]
+(defn put-input-stream [bucket file-id filename content-type input-stream content-length & metadata]
   {:pre [(string? file-id) (string? filename) (string? content-type)
          (instance? InputStream input-stream)
          (or (nil? metadata) (sequential? metadata))
@@ -80,15 +80,17 @@
   (->> (if (map? (first metadata))
          (first metadata)
          (apply hash-map metadata))
-       (do-put-object application-id file-id filename content-type input-stream content-length)))
+       (do-put-object bucket file-id filename content-type input-stream content-length)))
 
 (defn put-file-or-input-stream
   "Puts the provided content under the given id in a bucket generated from the application id.
    The content may be a (temp) file handle or an input stream.
    If it's a stream, consider using put-input-stream if the content length in bytes is known, as
    otherwise the stream will be copied to a byte array first, as S3 has to know the content length.
-   If application-id is nil, the object will go to the common temp file bucket."
-  [application-id file-id filename content-type is-or-file & metadata]
+
+   Bucket should be either an application id, a user id, a session id or nil. If it is nil, the
+   object will go to the common temp file bucket from which can be linked to an application later."
+  [bucket file-id filename content-type is-or-file & metadata]
   {:pre [(string? file-id) (string? filename) (string? content-type)
          (or (instance? File is-or-file) (instance? InputStream is-or-file))
          (or (nil? metadata) (sequential? metadata))
@@ -101,14 +103,14 @@
         (with-open [is is-or-file]
           (io/copy is bos))
         (let [content-bytes (.toByteArray bos)]
-          (do-put-object application-id
+          (do-put-object bucket
                          file-id
                          filename
                          content-type
                          (ByteArrayInputStream. content-bytes)
                          (alength content-bytes)
                          md)))
-      (do-put-object application-id
+      (do-put-object bucket
                      file-id
                      filename
                      content-type
