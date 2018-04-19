@@ -448,12 +448,12 @@
         users            (mongo/with-collection "users"
                            (query/find query)
                            (query/fields [:email :firstName :lastName :role :orgAuthz :enabled])
-                           (query/skip (util/->int (:iDisplayStart params) 0))
-                           (query/limit (util/->int (:iDisplayLength params) 16)))]
+                           (query/skip (util/->int (:start params) 0))
+                           (query/limit (util/->int (:length params) 16)))]
     {:rows     users
      :total    base-query-total
      :display  query-total
-     :echo     (str (util/->int (str (:sEcho params))))}))
+     :draw     (str (util/->int (str (:draw params))))}))
 
 ;;
 ;; ==============================================================================

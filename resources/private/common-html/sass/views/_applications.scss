@@ -92,7 +92,7 @@
   display: inline-block;
   width: $cols3;
   float: left;
-  .paginate_disabled_previous, .paginate_enabled_previous {
+  .paginate_button.previous {
     margin-right: $marginM;
   }
 }

@@ -572,11 +572,11 @@ btn.no-border {
 // DataTable tweaks.
 
 .dataTables_paginate {
-  .paginate_disabled_previous, .paginate_disabled_next {
+  .paginate_button {
     @extend .btn;
     @extend .secondary;
   }
-  .paginate_disabled_previous, .paginate_disabled_next {
+  .disabled {
     @extend .btn;
     @include disabled;
   }
