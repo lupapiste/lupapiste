@@ -5,7 +5,8 @@
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.document.rakennuslupa-canonical :as rakval-canon]))
+            [lupapalvelu.document.rakennuslupa-canonical :as rakval-canon]
+            [sade.strings :as str]))
 
 (defn- create-metatieto [k v]
   (when v
@@ -41,7 +42,7 @@
     (->> metas flatten (remove nil?) )))
 
 (defn- get-attachment-meta
-  [{:keys [signatures latestVersion id forPrinting] :as attachment} application]
+  [{:keys [signatures latestVersion id forPrinting contents] :as attachment} application]
   (let [op-metas (operation-attachment-meta attachment application)
         liitepohja [(create-metatieto "liiteId" id)]
         signatures (->> signatures
@@ -56,8 +57,10 @@
                                 (create-metatieto (str "allekirjoittajaAika_" count) created)]) (range))
                         (flatten)
                         (vec))
-        verdict-attachment (some->> forPrinting (create-metatieto "paatoksen liite") vector)]
-    (remove empty? (concat liitepohja op-metas signatures verdict-attachment))))
+        verdict-attachment (some->> forPrinting (create-metatieto "paatoksen liite") vector)
+        contents (when-not (str/blank? contents)
+                   [(create-metatieto "sisalto" contents)])]
+    (remove empty? (concat liitepohja op-metas signatures verdict-attachment contents))))
 
 
 (defn- get-Liite [title link attachment type file-id filename version & [meta building-ids]]
