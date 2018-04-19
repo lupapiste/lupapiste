@@ -47,8 +47,10 @@
                                           :template-id (-> pate-fixture/verdic-templates-setting
                                                            :templates
                                                            first
-                                                           :id))]
-
+                                                           :id))
+        {references :references} (query sonja :pate-verdict
+                                        :id app-id
+                                        :verdict-id verdict-id)]
     (facts "Fill verdict data and publish verdict"
       (fact "Set automatic calculation of other dates"
         (command sonja :edit-pate-verdict :id app-id :verdict-id verdict-id
@@ -62,7 +64,7 @@
       (fact "Add plans"
         (command sonja :edit-pate-verdict :id app-id :verdict-id verdict-id
                  :path [:plans]
-                 :value (->> verdict-draft :references :plans (map :id))) => no-errors?)
+                 :value (->> references :plans (map :id))) => no-errors?)
       ;Add conditions
       (add-verdict-condition app-id verdict-id "ehto 1")
       (add-verdict-condition app-id verdict-id "ehto 2")
@@ -73,7 +75,6 @@
 
     (let [application (query-application sonja app-id)
           tasks       (:tasks application)]
-
       (facts "Tasks are created into application"
         (fact "Plans"
           (util/find-first #(= (:taskname %) "Suunnitelmat") tasks) => (contains {:schema-info {:name    "task-lupamaarays"
