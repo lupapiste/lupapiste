@@ -635,12 +635,12 @@
 
 (defn feature-to-feature-info-sito  [feature]
   (when feature
-    {:id (first (xml-> feature :lupapiste:TUNNUS text))
-     :kuntanro (first (xml-> feature :lupapiste:KUNTA_ID text))
-     :kaavanro (first (xml-> feature :lupapiste:TUNNUS text))
-     :vahvistett_pvm (first (xml-> feature :lupapiste:VAHVISTETT text))
-     :linkki (first (xml-> feature :lupapiste:LINKKI text))
-     :type "sito"}))
+    {:id             (or (xml1-> feature :lupapiste:TUNNUS text) (xml1-> feature :lupapiste:Tunnus text))
+     :kuntanro       (or (xml1-> feature :lupapiste:KUNTA_ID text) (xml1-> feature :lupapiste:Kunta_Id text) (xml1-> feature :lupapiste:Kunta_ID text))
+     :kaavanro       (or (xml1-> feature :lupapiste:TUNNUS text) (xml1-> feature :lupapiste:Tunnus text))
+     :vahvistett_pvm (or (xml1-> feature :lupapiste:VAHVISTETT text) (xml1-> feature :lupapiste:Vahvistett text))
+     :linkki         (or (xml1-> feature :lupapiste:LINKKI text) (xml1-> feature :lupapiste:Linkki text))
+     :type           "sito"}))
 
 (defn feature-to-feature-info-liiteri-ak  [feature]
   (when feature
