@@ -66,15 +66,12 @@
 (def ya-review-type-map
   {:aloituskatselmus "Aloituskatselmus"
    :loppukatselmus   "Loppukatselmus"
-   :muu              "Muu valvontak\u00e4ynti"})
+   :valvonta         "Muu valvontak\u00e4ynti"})
 
 (def foreman-codes [:vastaava-tj :vv-tj :iv-tj :erityis-tj :tj])
 
 (def verdict-dates [:julkipano :anto :muutoksenhaku :lainvoimainen
                     :aloitettava :voimassa])
-
-(def p-verdict-dates [:julkipano :anto :valitus :lainvoimainen
-                      :aloitettava :voimassa])
 
 (defn pate-assert [pred & msg]
   (let [div "\n-------------------------------------------------------\n"]
@@ -82,17 +79,9 @@
                       (s/join " " msg)
                       div))))
 
-(def review-types [:muu-katselmus
-                   :muu-tarkastus
-                   :aloituskokous
-                   :paikan-merkitseminen
-                   :paikan-tarkastaminen
-                   :pohjakatselmus
-                   :rakennekatselmus
-                   :lvi-katselmus
-                   :osittainen-loppukatselmus
-                   :loppukatselmus
-                   :ei-tiedossa ])
+(def review-types (keys review-type-map))
+
+(def ya-review-types (keys ya-review-type-map))
 
 (defn reference-list [path extra]
   {:reference-list (merge {:label? false
@@ -330,10 +319,19 @@
                                        setsub-verdict-code
                                        setsub-board))
 
+(def ya-settings (build-settings-schema "pate-ya"
+                                        setsub-date-deltas
+                                        setsub-verdict-code
+                                        setsub-board
+                                        setsub-lang-titles
+                                        setsub-plans
+                                        (setsub-reviews ya-review-types)))
+
 (defn settings-schema [category]
   (case (keyword category)
     :r r-settings
-    :p p-settings))
+    :p p-settings
+    :ya ya-settings))
 
 ;; -----------------------------
 ;; Verdict template subschemas
@@ -604,11 +602,32 @@
                                  temsub-statements
                                  temsub-attachments))
 
+(def temsub-reviews-with-phrase
+  (-> (settings-dependencies :reviews :pate-reviews)
+      (assoc-in [:dictionary :review-info] {:phrase-text {:i18nkey :pate.review-info
+                                                          :category :yleinen}})
+      (update-in [:section :grid :rows] conj [{:col 4
+                                               :dict :review-info}])))
+
+(def temsub-inform-others
+  (text-subschema :inform-others :pate-inform-others.text))
+
+(def ya-verdict-template-schema
+  (build-verdict-template-schema temsub-verdict
+                                 temsub-bulletin
+                                 temsub-reviews-with-phrase
+                                 temsub-plans
+                                 temsub-conditions
+                                 temsub-inform-others
+                                 temsub-appeal
+                                 temsub-statements
+                                 temsub-attachments))
 
 (defn verdict-template-schema [category]
   (case (keyword category)
-    :r r-verdict-template-schema
-    :p p-verdict-template-schema))
+    :r  r-verdict-template-schema
+    :p  p-verdict-template-schema
+    :ya ya-verdict-template-schema))
 
 ;; -----------------------------
 ;; Verdict subschemas
@@ -661,7 +680,7 @@
                                        :type :application-id}})
 
 (defn versub-dates
-  "Verdict handler title is different in :r and :p verdicts."
+  "Verdict handler title could be specific to a category."
   [category]
   {:dictionary (assoc (->> verdict-dates
                            (map (fn [kw]
@@ -673,9 +692,9 @@
                       :verdict-date            (required {:date {}})
                       :automatic-verdict-dates {:toggle {}}
                       :handler               (required {:text {:loc-prefix
-                                                               (if (= category :r)
-                                                                 :pate-verdict.handler
-                                                                 :pate.prepper)}})
+                                                               (case category
+                                                                 :p :pate.prepper
+                                                                 :pate-verdict.handler)}})
                       :handler-title         {:text {:loc-prefix :pate-verdict.handler.title}}
                       :application-id        app-id-placeholder)
    :section    {:id   :pate-dates
@@ -1065,6 +1084,14 @@
                                               versub-buyout
                                               versub-fyi
                                               versub-attachments))
+
+#_(def versub-period
+  {:dictionary })
+
+(def ya-verdict-schema-1 (build-verdict-schema :ya 1
+                                               (versub-dates :ya)
+                                               versub-verdict
+                                               ))
 
 
 (defn verdict-schema
