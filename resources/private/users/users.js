@@ -79,7 +79,7 @@ var users = (function($) {
               draw:               Number(data.draw)};
     };
 
-    self.fetch = function(data, callback, settings) {
+    self.fetch = function(data, callback) {
       var params = _.reduce(self.filters, function(result, value, key) {
         result["filter-" + key] = value();
         return result;
