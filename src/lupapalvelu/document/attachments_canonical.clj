@@ -58,9 +58,10 @@
                         (flatten)
                         (vec))
         verdict-attachment (some->> forPrinting (create-metatieto "paatoksen liite") vector)
+        filename [(create-metatieto "tiedostonimi" (:filename latestVersion))]
         contents (when-not (str/blank? contents)
                    [(create-metatieto "sisalto" contents)])]
-    (remove empty? (concat liitepohja op-metas signatures verdict-attachment contents))))
+    (remove empty? (concat liitepohja op-metas signatures verdict-attachment contents filename))))
 
 
 (defn- get-Liite [title link attachment type file-id filename version & [meta building-ids]]
