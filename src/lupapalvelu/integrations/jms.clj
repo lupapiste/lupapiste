@@ -190,16 +190,18 @@
 
   (defn close-all!
     "Closes all registered consumers and the broker connection."
-    []
-    (doseq [^MessageConsumer conn (:consumers @state)]
-      (.close conn))
-    (doseq [^MessageProducer conn (:producers @state)]
-      (.close conn))
-    (.close ^Connection (:conn @state))
+    ([] (close-all! true))
+    ([close-embedded?]
+     (doseq [^MessageConsumer conn (:consumers @state)]
+       (.close conn))
+     (doseq [^MessageProducer conn (:producers @state)]
+       (.close conn))
+     (.close ^Connection (:conn @state))
 
-    (when-let [artemis (ns-resolve 'artemis-server 'embedded-broker)]
-      (info "Stopping Artemis...")
-      (.stop artemis)))
+     (when close-embedded?
+       (when-let [artemis (ns-resolve 'artemis-server 'embedded-broker)]
+         (info "Stopping Artemis...")
+         (.stop artemis)))))
 
   (start!))
 

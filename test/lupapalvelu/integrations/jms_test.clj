@@ -2,8 +2,9 @@
   (:require [midje.sweet :refer :all]
             [taoensso.timbre :refer [warnf]]
             [sade.env :as env]
-            [lupapalvelu.integrations.jms :refer :all])
-  (:import (javax.jms Queue MessageConsumer)))
+            [lupapalvelu.integrations.jms :refer :all :as jms])
+  (:import (javax.jms Queue MessageConsumer Connection)
+           (org.apache.activemq.artemis.jms.client ActiveMQConnection)))
 
 (def test-atom (atom nil))
 
@@ -14,6 +15,7 @@
       (let [broker @(ns-resolve 'artemis-server 'embedded-broker)]
         (.isStarted broker) => true
         (str broker) => #"ActiveMQServerImpl"))
+    (fact "Connection started" (.isStarted ^ActiveMQConnection (:conn @jms/state)) => true)
     (fact "Queue" (queue "tester") => (partial instance? Queue))
     (facts "Consumers"
       (fact "own fn"
