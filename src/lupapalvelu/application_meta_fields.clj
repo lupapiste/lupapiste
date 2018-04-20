@@ -18,6 +18,13 @@
 
 (defn in-post-verdict-state? [_ app] (contains? states/post-verdict-states (keyword (:state app))))
 
+(defn select-tasks-tab? [_ app]
+  (let [primaryOperation (keyword (get-in app [:primaryOperation :name]))]
+    (and
+      (false? (contains? #{:tyonjohtajan-nimeaminen-v2 :ya-jatkoaika
+                           :raktyo-aloit-loppuunsaat :jatkoaika} primaryOperation))
+      (contains? #{:R :YA} (-> app :permitType keyword)))))
+
 (defn- full-name [first-name last-name]
   (ss/trim (str last-name \space first-name)))
 
@@ -197,7 +204,8 @@
                    {:field :applicantPhone :fn get-applicant-phone}
                    {:field :applicantCompanies :fn get-applicant-companies}
                    {:field :organizationMeta :fn organization-meta}
-                   {:field :stateSeq :fn #(sm/application-state-seq %2)}))
+                   {:field :stateSeq :fn #(sm/application-state-seq %2)}
+                   {:field :tasksTabShouldShow :fn select-tasks-tab?}))
 
 (defn- enrich-with-meta-fields [fields user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app fields))

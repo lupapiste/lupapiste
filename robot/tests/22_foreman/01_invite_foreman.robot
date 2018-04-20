@@ -209,6 +209,7 @@ Applicant can move to linked foreman application and back
   Scroll and click test id  test-application-link-permit-lupapistetunnus
 
 Applicant can start invite flow from tasks tab
+  Sleep  2s
   Open tab  tasks
   Click enabled by test id  invite-other-foreman-button
   Wait until  Element should be visible  //div[@id='dialog-invite-foreman']

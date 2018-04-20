@@ -484,7 +484,7 @@
 
         var fallbackTab = function(application) {
           if (application.inPostVerdictState) {
-            if (authorizationModel.ok("tasks-tab-visible")) {
+            if (application.tasksTabShouldShow) {
               return "tasks";
             } else {
               return "applicationSummary";
@@ -510,8 +510,7 @@
 
   hub.subscribe("application-loaded", function(e) {
 
-
-    // in case the user chooses to navigatw between applications and inforequests
+    // in case the user chooses to navigate between applications and inforequests
     // by manually editing URL hash in the browser window, let's make sure that they land
     // on the correct page - this way we can prevent some mysterious errors resulting from
     // incorrect components being initialized as a result of being on the "wrong page".

@@ -127,6 +127,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   // Application metadata fields
   self.inPostVerdictState = ko.observable(false);
+  self.tasksTabShouldShow = ko.observable(false);
   self.stateSeq = ko.observable([]);
   self.currentStateInSeq = ko.pureComputed(function() {return _.includes(self.stateSeq(), self.state());});
   self.inPostSubmittedState = ko.observable(false); // TODO: remove
@@ -1051,6 +1052,14 @@ LUPAPISTE.ApplicationModel = function() {
       return "application.tabRequiredFieldSummary.afterSubmitted";
     } else {
       return "application.tabRequiredFieldSummary";
+    }
+  });
+
+  self.tasksButtonClass = ko.pureComputed(function() {
+    if (lupapisteApp.models.applicationAuthModel.ok("tasks-tab-visible")) {
+      return "link-btn-inverse";
+    } else {
+      return "link-btn";
     }
   });
 
