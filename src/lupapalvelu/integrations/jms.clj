@@ -206,7 +206,7 @@
   (start!))
 
 (comment
-  ; replissä testailut:
+  ; replissa testailut:
 
   ;; TextMessage
   (create-consumer "testi" (fn [jee] (println "jee sai jotain:" jee)))
