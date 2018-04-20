@@ -6,6 +6,7 @@
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict :refer :all]
+            [lupapalvelu.pate.verdict-template :as template]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.shared-schemas :refer [object-id-pattern]]
@@ -17,6 +18,9 @@
                    next-section insert-section
                    general-handler application-deviations
                    archive-info)
+
+(testable-privates lupapalvelu.pate.verdict-template
+                   template-inclusions)
 
 (facts next-section
   (fact "all arguments given"
@@ -162,8 +166,7 @@
    {:one   {:text             {}
             :template-section :t-first}
     :two   {:text             {}
-            :template-dict    :t-two
-            :template-section :t-second}
+            :template-dict    :t-two}
     :three {:date          {}
             :template-dict :t-three}
     :four  {:text {}}
@@ -203,18 +206,29 @@
                                                      :rows      [[{:dict :up}]]}}]]}}]})
 
 (def mock-template
-  {:dictionary {:t-two            {:toggle {}}
+  {:dictionary {:t-one            {:text {}}
+                :t-two            {:toggle {}}
                 :t-three          {:date {}}
                 :t-seven          {:repeating {:up {:text {}}}}
                 :removed-sections {:keymap {:t-first  false
                                             :t-second false
                                             :t-third  false
                                             :t-fourth false
-                                            :t-fifth  false}}}
+                                            :t-fifth  false
+                                            :t-sixth  false}}}
    :sections   [{:id   :t-first
                  :grid {:columns 2
+                        :rows    [[{:dict :t-one}]]} }
+                {:id   :t-second
+                 :grid {:columns 2
                         :rows    [[{:dict :t-two}
-                                   {:dict :t-three}]]} }]})
+                                   {:dict :t-three}]]} }
+                {:id   :t-third
+                 :grid {:columns 2
+                        :rows    [[{:dict :t-three}]]} }
+                {:id   :t-sixth
+                 :grid {:columns 2
+                        :rows    [[{:dict :t-seven}]]} }]})
 
 (facts "Build schemas"
   (fact "Dict missing"
@@ -349,7 +363,13 @@
     => #{:seven})
   (fact "Verdict tmeplate section"
     (schemas/section-dicts (-> mock-template :sections first))
-    => #{:t-two :t-three}))
+    => #{:t-one}
+    (schemas/section-dicts (-> mock-template :sections second))
+    => #{:t-two :t-three}
+    (schemas/section-dicts (-> mock-template :sections (nth 2)))
+    => #{:t-three}
+    (schemas/section-dicts (-> mock-template :sections last))
+    => #{:t-seven}))
 
 (facts "dict-sections"
   (fact "Verdict"
@@ -362,8 +382,10 @@
         :seven #{:fourth}})
   (fact "Template"
     (schemas/dict-sections (:sections mock-template))
-    => {:t-two   #{:t-first}
-        :t-three #{:t-first}}))
+    => {:t-one #{:t-first}
+        :t-two   #{:t-second}
+        :t-three #{:t-second  :t-third}
+        :t-seven #{:t-sixth}}))
 
 (fact "dicts->kw-paths"
   (dicts->kw-paths (:dictionary test-verdict))
@@ -373,91 +395,104 @@
             :six
             :seven.up] :in-any-order)
   (dicts->kw-paths (:dictionary mock-template))
-  => [:t-two :t-three :t-seven.up :removed-sections] :in-any-order)
+  => (just [:t-one :t-two :t-three :t-seven.up :removed-sections]
+           :in-any-order))
 
-(facts "Inclusions"
-  (fact "Every template section included"
-    (inclusions :r {:data {:removed-sections {:t-first  false
-                                              :t-second false
-                                              :t-third  false
-                                              :t-fourth false
-                                              :t-fifth  false}}})
-    => (just [:one :two :three :four
-              :five.r-one :five.r-two
-              :five.r-three.r-sub-one :five.r-three.r-sub-two
-              :six :seven.up] :in-any-order)
-    (provided (shared/verdict-schema :r) => test-verdict)
-    (inclusions :r {:data {}})
-    => (just [:one :two :three :four
-              :five.r-one :five.r-two
-              :five.r-three.r-sub-one :five.r-three.r-sub-two
-              :six :seven.up] :in-any-order)
-    (provided (shared/verdict-schema :r) => test-verdict))
-  (fact "Template sections t-first and t-second removed"
-    (inclusions :r {:data {:removed-sections {:t-first  true
-                                              :t-second true
-                                              :t-third  false
-                                              :t-fourth false
-                                              :t-fifth  false}}})
-    => (just [:three ;; Not removed since also in :third
-              :four
-              :five.r-one :five.r-two
-              :five.r-three.r-sub-one :five.r-three.r-sub-two
-              :six :seven.up] :in-any-order)
-    (provided (shared/verdict-schema :r) => test-verdict))
-    (fact "Template section t-third removed"
-      (inclusions :r {:data {:removed-sections {:t-first  false
-                                                :t-second false
-                                                :t-third  true
-                                                :t-fourth false
-                                                :t-fifth  false}}})
-    => (just [:one :two :three ;; Not removed since also in :second
-              :five.r-one :five.r-two
-              :five.r-three.r-sub-one :five.r-three.r-sub-two
-              :six :seven.up] :in-any-order)
-    (provided (shared/verdict-schema :r) => test-verdict))
-    (fact "Template section t-fourth removed"
-      (inclusions :r {:data {:removed-sections {:t-first  false
-                                                :t-second false
-                                                :t-third  false
-                                                :t-fourth true
-                                                :t-fifth  false}}})
-      => (just [:one :two ;; Not removed since dict's template-section overrides section's
-                :three ;; ;; Not removed since also in :second
-                :four :six :seven.up] :in-any-order)
-      (provided (shared/verdict-schema :r) => test-verdict))
-    (fact "Template section t-third and t-fourth removed"
-      (inclusions :r {:data {:removed-sections {:t-first  false
-                                                :t-second false
-                                                :t-third  true
-                                                :t-fourth true
-                                                :t-fifth  false}}})
-      => (just [:one :two ;; Not removed since dict's template-section overrides section's
-                :six :seven.up] :in-any-order)
-      (provided (shared/verdict-schema :r) => test-verdict))
-    (fact "Every template section removed"
-      (inclusions :r {:data {:removed-sections {:t-first  true
-                                                :t-second true
-                                                :t-third  true
-                                                :t-fourth true
-                                                :t-fifth  true}}})
-      => (just [:six])
-      (provided (shared/verdict-schema :r) => test-verdict)))
+(defn mocker [removed-sections]
+  (let [m {:removed-sections removed-sections}]
+    {:data       m
+     :inclusions (template-inclusions {:category :r
+                                       :draft    m})}))
+(against-background
+ [(shared/verdict-schema :r)          => test-verdict
+  (shared/verdict-template-schema :r) => mock-template]
+ (facts "Inclusions"
+   (fact "Every template section included"
+     (inclusions :r (mocker {:t-first  false
+                             :t-second false
+                             :t-third  false
+                             :t-fourth false
+                             :t-fifth  false}))
+     => (just [:one :two :three :four
+               :five.r-one :five.r-two
+               :five.r-three.r-sub-one :five.r-three.r-sub-two
+               :six :seven.up] :in-any-order)
+     (inclusions :r (mocker {}))
+     => (just [:one :two :three :four
+               :five.r-one :five.r-two
+               :five.r-three.r-sub-one :five.r-three.r-sub-two
+               :six :seven.up] :in-any-order))
+   (fact "Template sections t-first and t-second removed"
+     (inclusions :r (mocker {:t-first  true
+                             :t-second true
+                             :t-third  false
+                             :t-fourth false
+                             :t-fifth  false}))
+     => (just [:three ;; Not removed since also in :third
+               :four
+               :five.r-one :five.r-two
+               :five.r-three.r-sub-one :five.r-three.r-sub-two
+               :six :seven.up] :in-any-order))
+   (fact "Template section t-third removed"
+     (inclusions :r (mocker {:t-first  false
+                             :t-second false
+                             :t-third  true
+                             :t-fourth false
+                             :t-fifth  false}))
+     => (just [:one :two :three ;; Not removed since also in :second
+               :five.r-one :five.r-two
+               :five.r-three.r-sub-one :five.r-three.r-sub-two
+               :six :seven.up] :in-any-order))
+   (fact "Template section t-fourth removed"
+     (inclusions :r (mocker {:t-first  false
+                             :t-second false
+                             :t-third  false
+                             :t-fourth true
+                             :t-fifth  false}))
+     => (just [:one
+               :three ;; ;; Not removed since also in :second
+               :four :six :seven.up] :in-any-order))
+   (fact "Template section t-third and t-fourth removed"
+     (inclusions :r (mocker {:t-first  false
+                             :t-second false
+                             :t-third  true
+                             :t-fourth true
+                             :t-fifth  false}))
+     => (just [:one :six :seven.up] :in-any-order))
+   (fact "Template section t-third, t-fourth and t-sixth removed"
+     (inclusions :r (mocker {:t-first  false
+                             :t-second false
+                             :t-third  true
+                             :t-fourth true
+                             :t-fifth  false
+                             :t-sixth  true}))
+     => (just [:one :six] :in-any-order))
+   (fact "Every template section removed"
+     (inclusions :r (mocker {:t-first  true
+                             :t-second true
+                             :t-third  true
+                             :t-fourth true
+                             :t-fifth  true
+                             :t-sixth true}))
+     => (just [:six]))))
 
 (defn templater [removed & kvs]
-  (let [data   (apply hash-map kvs)
-        board? (:giver data)]
+  (let [data             (apply hash-map kvs)
+        board?           (:giver data)
+        removed-sections (zipmap removed (repeat true))
+        draft (assoc data
+                     :giver (if board?
+                              "lautakunta" "viranhaltija")
+                     :removed-sections removed-sections)]
     {:category  "r"
-     :published {:data     (assoc data
-                                  :giver (if board?
-                                           "lautakunta" "viranhaltija")
-                                  :removed-sections (zipmap removed
-                                                            (repeat true)))
+     :published {:data draft
+                 :inclusions (template-inclusions {:category :r :draft draft})
                  :settings (cond-> {:verdict-code ["osittain-myonnetty"]}
                              board? (assoc :boardname "Gate is boarding"))}}))
 
 (against-background
- [(shared/verdict-schema "r") => test-verdict]
+ [(shared/verdict-schema "r") => test-verdict
+  (shared/verdict-template-schema :r) => mock-template]
  (facts "Initialize mock verdict draft"
    (fact "default, no removed sections"
      (default-verdict-draft (templater [] :t-two "Hello"))
@@ -490,11 +525,9 @@
                                                    :t-seven [{:up "These"}
                                                              {:up "are"}
                                                              {:up "terms"}]))]
-       draft => (contains {:template   {:inclusions [:two
-                                                     :six :seven.up]}
+       draft => (contains {:template   {:inclusions [:six :seven.up]}
                            :references {:verdict-code ["osittain-myonnetty"]}})
 
-       (-> draft :data :two) => "Hello"
        (-> draft :data :seven vals) => (just [{:up "These"}
                                               {:up "are"}
                                               {:up "terms"}])
@@ -502,14 +535,21 @@
 
 (def mini-verdict-template
   {:dictionary
-   {:removed-sections {:keymap {:foremen     false
+   {:paatosteksti     {:phrase-text {:category :paatosteksti}}
+    :conditions       {:repeating {:condition {:phrase-text {:category :yleinen}}}}
+    :removed-sections {:keymap {:foremen     false
                                 :reviews     false
                                 :plans       false
                                 :attachments false
                                 :conditions  false
                                 :deviations  false
                                 :buildings   false}}}
-   :sections []})
+   :sections [{:id   :verdict
+               :grid {:columns 4
+                      :rows    [[{:dict :paatostekesti}]]}}
+              {:id   :conditions
+               :grid {:columns 4
+                      :rows    [[{:dict :conditions}]]}}]})
 
 (def mini-verdict
   {:version  1
@@ -529,23 +569,19 @@
     :conditions              {:repeating        {:condition
                                                  {:phrase-text {:category :yleinen}}
                                                  :remove-condition {:button {:remove :conditions}}}
-                              :template-section :conditions
                               :template-dict    :conditions}
     :add-condition           {:button           {:add :conditions}
                               :template-section :conditions}
     :deviations              {:phrase-text      {:category :yleinen}
                               :template-section :deviations}
     :foremen                 {:reference-list {:path :foremen
-                                               :type :multi-select}
-                              :template-dict  :foremen}
+                                               :type :multi-select}}
     :foremen-included        {:toggle {}}
     :reviews-included        {:toggle {}}
     :reviews                 {:reference-list {:path :reviews
-                                               :type :multi-select}
-                              :template-dict  :reviews}
+                                               :type :multi-select}}
     :plans                   {:reference-list {:path :plans
-                                               :type :multi-select}
-                              :template-dict  :plans}
+                                               :type :multi-select}}
     :plans-included          {:toggle {}}
     :upload                  {:attachments      {}
                               :template-section :attachments}
@@ -587,6 +623,7 @@
 
 (against-background
  [(shared/verdict-template-schema "r") => mini-verdict-template
+  (shared/verdict-template-schema :r) => mini-verdict-template
   (shared/verdict-schema "r")          => mini-verdict]
  (facts "Initialize verdict draft"
    (fact "Minis are valid"

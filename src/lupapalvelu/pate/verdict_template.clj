@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.verdict-template
-  (:require [lupapalvelu.action :as action]
+  (:require [clojure.set :as set]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n]
@@ -307,6 +308,34 @@
             {}
             (keys dictionary))))
 
+(defn- template-inclusions
+  "List if included top-level dicts. Dict is excluded if it belongs (only) to
+  removed section. The list is used when resolving the :template-dict
+  references in verdicts."
+  [{:keys [category draft]}]
+  (let [{:keys [dictionary
+                sections]}     (shared/verdict-template-schema category)
+        dict-secs              (schemas/dict-sections sections)
+        removed-sections       (->> (:removed-sections draft)
+                                    (map (fn [[k v]]
+                                           (when v k)))
+                                    (remove nil?)
+                                    set)
+
+        ]
+    (->> dict-secs
+         (reduce-kv (fn [acc dict sections]
+                      (cond-> acc
+                        (or (empty? sections)
+                            (not-empty (set/difference sections
+                                                       removed-sections)))
+                        (conj dict)))
+                    (util/difference-as-kw (keys dictionary)
+                                           (keys dict-secs)
+                                           [:removed-sections]))
+         ;; Strings due to smoke tests (values are strings in mongo)
+         (map name))))
+
 (defn publish-verdict-template [organization template-id timestamp]
   (let [{:keys [draft category]
          :as   template} (verdict-template organization template-id)
@@ -320,6 +349,7 @@
                             {:published timestamp
                              :data      (dissoc (draft-for-publishing template)
                                                 :reviews :plans)
+                             :inclusions (template-inclusions template)
                              :settings  settings}}})))
 
 (defn set-name [organization template-id timestamp name]

@@ -89,12 +89,24 @@
 
 (defn inclusions
   "List if kw-paths that denote the dicts included in the verdict. By
-  default, every dict is included, but can be excluded
-  via :template-dict and section-level :template-section
-  definitions. Note: if a :repeating is included, its every dict is
-  included."
+  default, every dict is included, but a dict is excluded if any
+  the following are true:
+
+  - Dict schema :template-section refers to a removed template section.
+
+  - Every section that dict belongs to has a :template-section that
+    refers to a removed template-section.
+
+  - Dict schema :template-dict refers to template dict that is not in
+    the template inclusions. In other words, the template dict is part
+    of a removed template section.
+
+  Note: if a :repeating is included, its every dict is included."
   [category published-template]
   (let [removed-tem-secs   (published-template-removed-sections published-template)
+        t-inclusions       (->> (:inclusions published-template)
+                                (map keyword)
+                                set)
         {:keys [dictionary
                 sections]} (shared/verdict-schema category)
         dic-sec            (schemas/dict-sections sections)
@@ -105,12 +117,14 @@
                                 set)]
     (->> (keys dictionary)
          (remove (fn [dict]
-                   (if-let [dict-ts (get-in dictionary
-                                            [dict :template-section])]
-                     (contains? removed-tem-secs dict-ts)
-                     (util/pcond->> (dict dic-sec)
-                                    seq (every? #(contains? removed-ver-secs
-                                                            %))))))
+                   (let [{tem-sec :template-section
+                          tem-dic :template-dict} (dict dictionary)
+                         in-sections              (dict dic-sec)]
+                     (or
+                      (contains? removed-tem-secs tem-sec)
+                      (and (seq in-sections)
+                           (empty? (set/difference in-sections removed-ver-secs)))
+                      (and tem-dic (not (contains? t-inclusions tem-dic)))))))
          (select-keys dictionary)
          dicts->kw-paths)))
 

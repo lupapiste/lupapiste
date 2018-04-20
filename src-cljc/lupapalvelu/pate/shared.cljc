@@ -882,7 +882,6 @@
 (def versub-appeal ;; Muutoksenhaku, vakuudet
   (phrase-versub :appeal :verdict.muutoksenhaku :muutoksenhaku
                  :show? :?.appeal
-                 :template-section :appeal
                  :template-dict :appeal))
 
 (def versub-statements
@@ -916,11 +915,9 @@
 
 (def versub-complexity ;; Vaativuus, rakennusoikeus, kaava
   {:dictionary {:complexity      (assoc complexity-select
-                                        :template-section :complexity
                                         :template-dict    :complexity)
                 :complexity-text {:phrase-text      {:label?   false
                                                      :category :vaativuus}
-                                  :template-section :complexity
                                   :template-dict    :complexity-text}
                 :rights          {:phrase-text      {:category :rakennusoikeus}
                                   :template-section :rights}
@@ -1085,27 +1082,38 @@
                                               versub-fyi
                                               versub-attachments))
 
-#_(def versub-period
-  {:dictionary })
+(def versub-dates-ya
+  (-> (versub-dates :ya)
+      (assoc-in [:dictionary :start-date] {:date {:i18nkey :tyoaika.tyoaika-alkaa-ms}})
+      (assoc-in [:dictionary :end-date] {:date {:i18nkey :tyoaika.tyoaika-paattyy-ms}})
+      (update-in [:section :grid :rows] conj [{:dict :start-date} {:dict :end-date}])))
+
+(def versub-inform-others ;; Lahiseudun asukkaita tiedotettava
+  (phrase-versub :inform-others :pate-inform-others :yleinen))
 
 (def ya-verdict-schema-1 (build-verdict-schema :ya 1
-                                               (versub-dates :ya)
+                                               versub-dates-ya
                                                versub-verdict
-                                               ))
+                                               versub-bulletin
+                                               versub-operation
+                                               versub-statements
+                                               versub-inform-others
+                                               versub-attachments))
 
 
 (defn verdict-schema
   "Nil version returns the latest version."
   ([category version]
    (let [schemas (case (keyword category)
-                   :r [r-verdict-schema-1]
-                   :p [p-verdict-schema-1]
+                   :r  [r-verdict-schema-1]
+                   :p  [p-verdict-schema-1]
+                   :ya [ya-verdict-schema-1]
                    (pate-assert false "Invalid schema category:" category))]
      (cond
-       (nil? version) (last schemas)
+       (nil? version)                     (last schemas)
        (and (pos? version)
             (<= version (count schemas))) (nth schemas (dec version))
-       :else (pate-assert false "Invalid schema version:" version))))
+       :else                              (pate-assert false "Invalid schema version:" version))))
   ([category]
    (verdict-schema category nil)))
 
