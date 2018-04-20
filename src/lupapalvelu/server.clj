@@ -235,7 +235,8 @@
   (stop-jetty!)
   (stop-jmx-server!)
   (stop-nrepl!)
-  (jms/close-all!)
+  (when (env/feature? :jms)
+    (jms/close-all!))
   (mongo/disconnect!))
 
 (defn -main [& _]
