@@ -75,12 +75,12 @@
 
 (def kuntagml-consumer (jms/create-nippy-consumer kuntagml-queue message-handler))
 
-(def nippy-consumer (jms/create-nippy-producer kuntagml-queue))
+(def nippy-producer (jms/create-nippy-producer kuntagml-queue))
 
 (sc/defn ^:always-validate send-xml-jms
   [type :- (apply sc/enum org/endpoint-types) xml :- sc/Str http-conf :- org/KryspHttpConf]
   (let [url (create-url type http-conf)]
-    (nippy-consumer {:url url :xml xml :http-conf http-conf})))
+    (nippy-producer {:url url :xml xml :http-conf http-conf})))
 )
 
 (sc/defn ^:always-validate send-xml
