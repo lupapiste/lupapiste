@@ -430,7 +430,8 @@
                    "Pvm." (str hyvaksymispvm)
                    "Vaihe" (str kaavanvaihe)
                    "Tyyppi" (str kaavatyyppi)},
-                  (for [maarays (xml-> features :gml:featureMember :akaava:Kaava :akaava:yhteisetkaavamaaraykset :akaava:Kaavamaarays)]
+                  (for [maarays (xml-> features :gml:featureMember :akaava:Kaava :akaava:yhteisetkaavamaaraykset :akaava:Kaavamaarays)
+                        :when (string? picurltemplate)]
                     {:pic (format picurltemplate muukaavatunnus (first(xml-> maarays :akaava:tunnus text)))
                      :desc (first(xml-> maarays :akaava:maaraysteksti_primaari text))})]))))
 
