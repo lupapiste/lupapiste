@@ -64,21 +64,15 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.titleForPartiesOrSupervisor = ko.pureComputed(function() {
-    var opName = util.getIn(self, ["primaryOperation", "name"]);
-    if (opName === "tyonjohtajan-nimeaminen-v2") {
-      return "application.tabSupervisorInformation";
-    } else {
-      return "application.tabParties";
-    }
+    return util.getIn(self, ["primaryOperation", "name"]) === "tyonjohtajan-nimeaminen-v2"
+      ? "application.tabSupervisorInformation"
+      : "application.tabParties";
   });
 
   self.descForPartiesOrSupervisor = ko.pureComputed(function() {
-    var opName = util.getIn(self, ["primaryOperation", "name"]);
-    if (opName === "tyonjohtajan-nimeaminen-v2") {
-      return "help.supervisorInformationDesc";
-    } else {
-      return "help." + self.permitType() + ".PartiesDesc";
-    }
+    return util.getIn(self, ["primaryOperation", "name"]) === "tyonjohtajan-nimeaminen-v2"
+      ? "help.supervisorInformationDesc"
+      : "help." + self.permitType() + ".PartiesDesc";
   });
 
   self.operationsCount = ko.observable();
