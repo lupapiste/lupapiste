@@ -310,7 +310,8 @@ var LUPAPISTE = LUPAPISTE || {};
         showCalendarMenuOptions: self.showCalendarMenuOptions,
         calendarMenubarVisible: self.calendarMenubarVisible,
         // TODO: sync with side-panel.js sidePanelPages
-        sidePanelPages: ["application","attachment","statement","neighbors","verdict"]
+        sidePanelPages: ["application","attachment","statement","neighbors","verdict"],
+        isAuthorityAdmin: lupapisteApp.models.currentUser.isAuthorityAdmin
       };
 
       $("#app").applyBindings(lupapisteApp.models.rootVMO);
