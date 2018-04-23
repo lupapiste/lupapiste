@@ -91,7 +91,14 @@ LUPAPISTE.CurrentUser = function() {
   }
 
   self.isAuthorityAdmin = ko.pureComputed(function() {
-    return self.role() === "authorityAdmin";
+    if (self.role() !== "authority") return false;
+    return _(self.orgAuthz())
+      .values()
+      .some(function(orgRoles) {
+        return orgRoles().some(function(role) {
+          return role === "authorityAdmin";
+        });
+      })
   });
 
   self.isAuthority = ko.pureComputed(function() {
