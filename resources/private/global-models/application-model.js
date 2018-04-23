@@ -63,6 +63,24 @@ LUPAPISTE.ApplicationModel = function() {
     return !self.permitSubtype() && !_.isEmpty(self.permitSubtypes());
   });
 
+  self.titleForPartiesOrSupervisor = ko.pureComputed(function() {
+    var opName = util.getIn(self, ["primaryOperation", "name"]);
+    if (opName === "tyonjohtajan-nimeaminen-v2") {
+      return "application.tabSupervisorInformation";
+    } else {
+      return "application.tabParties";
+    }
+  });
+
+  self.descForPartiesOrSupervisor = ko.pureComputed(function() {
+    var opName = util.getIn(self, ["primaryOperation", "name"]);
+    if (opName === "tyonjohtajan-nimeaminen-v2") {
+      return "help.supervisorInformationDesc";
+    } else {
+      return "help." + self.permitType() + ".PartiesDesc";
+    }
+  });
+
   self.operationsCount = ko.observable();
   self.applicant = ko.observable();
   self.creator = ko.observable();
@@ -166,6 +184,10 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.isArchivingProject = ko.pureComputed(function() {
     return self.permitType() === "ARK";
+  });
+
+  self.isSupervisorAppointment = ko.pureComputed(function() {
+    return self.primaryOperationName() === "Työnjohtajan nimeäminen";
   });
 
   self.openTask = function( taskId ) {
