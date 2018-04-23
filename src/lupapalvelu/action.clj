@@ -623,7 +623,7 @@
           response (run command execute-validators true)
           after    (System/currentTimeMillis)]
       (debug action "->" (:ok response) "(took" (- after before) "ms)")
-      (swap! actions update-in [(keyword action) :call-count] #(if % (inc %) 1))
+      (swap! actions update-in [(keyword action) :call-count] (fnil inc 0))
       response)))
 
 (defn validate [command]
