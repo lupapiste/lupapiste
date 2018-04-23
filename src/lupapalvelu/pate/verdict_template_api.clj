@@ -66,10 +66,10 @@
                                             created
                                             lang
                                             category)
-             :filled false)))
+        :filled false)))
 
 (defcommand set-verdict-template-name
-  {:description "Name cannot be empty."
+  {:description      "Name cannot be empty."
    :feature          :pate
    :parameters       [template-id name]
    :input-validators [(partial action/non-blank-parameters [:name])]
@@ -95,7 +95,7 @@
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable)]}
   [{:keys [created] :as command}]
-  (let [organization   (template/command->organization command)
+  (let [organization (template/command->organization command)
         {data :data
          :as  updated} (template/save-draft-value organization
                                                   template-id
@@ -103,7 +103,7 @@
                                                   path
                                                   value)]
     (if data
-      (ok  (template/changes-response
+      (ok (template/changes-response
             {:modified created
              :filled   (template/template-filled? {:data data})}
             updated))
@@ -158,14 +158,14 @@
                                                template-id)))
 
 (defcommand update-and-open-verdict-template
-  {:description "Like verdict-template but also updates the template's
+  {:description      "Like verdict-template but also updates the template's
   settings dependencies."
-   :feature :pate
-   :user-roles #{:authorityAdmin}
-   :parameters [template-id]
+   :feature          :pate
+   :user-roles       #{:authorityAdmin}
+   :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
-   :pre-checks [pate-enabled
-                (template/verdict-template-check :editable)]}
+   :pre-checks       [pate-enabled
+                      (template/verdict-template-check :editable)]}
   [command]
   (ok (template/verdict-template-update-and-open command)))
 
@@ -199,8 +199,8 @@
                                                template-id
                                                created
                                                lang)
-               :filled (template/template-filled? {:org-id      (:id organization)
-                                                   :template-id template-id})))))
+          :filled (template/template-filled? {:org-id      (:id organization)
+                                              :template-id template-id})))))
 
 ;; ----------------------------------
 ;; Verdict template settings API
@@ -240,10 +240,10 @@
                                                                  value)]
       (if data
         (ok (template/changes-response
-             {:modified created
-              :filled (template/settings-filled? {:data data}
-                                                 category)}
-             updated))
+              {:modified created
+               :filled   (template/settings-filled? {:data data}
+                                                    category)}
+              updated))
         (template/error-response updated)))))
 
 

@@ -21,17 +21,17 @@
     (fail :error.invalid-permit-type)))
 
 (defcommand save-asianhallinta-config
-  {:parameters [permitType municipality enabled version]
+  {:parameters       [permitType municipality enabled version]
    :input-validators [(partial action/non-blank-parameters [:permitType :municipality])
                       (partial action/string-parameters [:version])
                       (partial action/boolean-parameters [:enabled])
                       not-r-permit]
-   :user-roles #{:authorityAdmin}}
+   :user-roles       #{:authorityAdmin}}
   [{user :user}]
   (let [organization-id (user/authority-admins-organization-id user)]
     (mongo/update-by-query :organizations
-       {:_id organization-id
-        :scope {$elemMatch {:permitType permitType :municipality municipality}}}
-       {$set {:scope.$.caseManagement.enabled enabled
-              :scope.$.caseManagement.version version}})
+      {:_id   organization-id
+       :scope {$elemMatch {:permitType permitType :municipality municipality}}}
+      {$set {:scope.$.caseManagement.enabled enabled
+             :scope.$.caseManagement.version version}})
     (ok)))

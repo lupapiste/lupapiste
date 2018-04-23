@@ -43,7 +43,7 @@
     (fail :error.start-greater-than-end)))
 
 (defraw applications-between-xlsx
-  {:description "Excel with applications that have been submitted between given timeperiod.
+  {:description      "Excel with applications that have been submitted between given timeperiod.
                  Period can be max one year window."
    :parameters       [startTs endTs]
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])
@@ -66,7 +66,7 @@
                       excluded-operations))))
 
 (defraw parties-between-xlsx                                ; LPK-3053
-  {:description "Excel to list parties for applications. Period can be max one year window."
+  {:description      "Excel to list parties for applications. Period can be max one year window."
    :parameters       [startTs endTs]
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])
                       start-gt-end
@@ -86,7 +86,7 @@
                       lang))))
 
 (defraw post-verdict-xlsx                                   ; LPK-3517
-  {:description "Excel to list applications in post verdict state"
+  {:description      "Excel to list applications in post verdict state"
    :parameters       [startTs endTs]
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])
                       start-gt-end
@@ -113,7 +113,7 @@
    :user-roles       #{:applicant :authority}
    :pre-checks       [(com/validate-has-company-role :admin)]}
   [{user :user {lang :lang} :data}]
-  (let [company (get-in user [:company :id])
+  (let [company             (get-in user [:company :id])
         resulting-file-name (str (i18n/localize lang "company.reports.excel.filename")
                                  "_"
                                  (util/to-xml-date (now))

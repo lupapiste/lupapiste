@@ -25,32 +25,32 @@
       (fail :error.command-illegal-state))))
 
 (defquery available-tos-functions
-  {:user-roles #{:anonymous}
-   :parameters [organizationId]
+  {:user-roles       #{:anonymous}
+   :parameters       [organizationId]
    :input-validators [(partial non-blank-parameters [:organizationId])]}
   (let [functions (t/available-tos-functions organizationId)]
     (ok :functions functions)))
 
 (defn- store-function-code [operation function-code user]
-  (let [orgId (user/authority-admins-organization-id user)
-        organization (o/get-organization orgId)
+  (let [orgId            (user/authority-admins-organization-id user)
+        organization     (o/get-organization orgId)
         operation-valid? (some #{operation} (concat (:selected-operations organization) (map name operations/archiving-project-operations)))
-        code-valid? (some #{function-code} (map :code (t/available-tos-functions orgId)))]
+        code-valid?      (some #{function-code} (map :code (t/available-tos-functions orgId)))]
     (if (and operation-valid? code-valid?)
       (do (o/update-organization orgId {$set {(str "operations-tos-functions." operation) function-code}})
           (ok))
       (fail "error.unknown-operation"))))
 
 (defcommand set-tos-function-for-operation
-  {:parameters [operation functionCode]
-   :user-roles #{:authorityAdmin}
+  {:parameters       [operation functionCode]
+   :user-roles       #{:authorityAdmin}
    :input-validators [(partial non-blank-parameters [:functionCode :operation])]}
   [{user :user}]
   (store-function-code operation functionCode user))
 
 (defcommand remove-tos-function-from-operation
-  {:parameters [operation]
-   :user-roles #{:authorityAdmin}
+  {:parameters       [operation]
+   :user-roles       #{:authorityAdmin}
    :input-validators [(partial non-blank-parameters [:operation])]}
   [{user :user}]
   (let [orgId (user/authority-admins-organization-id user)]
@@ -59,44 +59,44 @@
 
 (defn- update-tos-metadata [function-code {:keys [application created user] :as command} & [correction-reason]]
   (if-let [tos-function-map (t/tos-function-with-name function-code (:organization application))]
-    (let [orgId (:organization application)
+    (let [orgId               (:organization application)
           updated-attachments (pmap #(t/document-with-updated-metadata % orgId function-code application) (:attachments application))
           {updated-metadata :metadata} (t/document-with-updated-metadata application orgId function-code application "hakemus")
-          process-metadata (t/calculate-process-metadata (t/metadata-for-process orgId function-code) updated-metadata updated-attachments)]
+          process-metadata    (t/calculate-process-metadata (t/metadata-for-process orgId function-code) updated-metadata updated-attachments)]
       (action/update-application command
-                                 {$set {:modified created
-                                        :tosFunction function-code
-                                        :metadata updated-metadata
-                                        :processMetadata process-metadata
-                                        :attachments updated-attachments}
+                                 {$set  {:modified        created
+                                         :tosFunction     function-code
+                                         :metadata        updated-metadata
+                                         :processMetadata process-metadata
+                                         :attachments     updated-attachments}
                                   $push {:history (a/tos-history-entry tos-function-map created user correction-reason)}})
       (ok))
     (fail "error.invalid-tos-function")))
 
 (defcommand set-tos-function-for-application
-  {:parameters [:id functionCode]
+  {:parameters       [:id functionCode]
    :input-validators [(partial non-blank-parameters [:id :functionCode])]
-   :user-roles #{:authority}
-   :states (conj states/pre-verdict-but-draft :underReview)}
+   :user-roles       #{:authority}
+   :states           (conj states/pre-verdict-but-draft :underReview)}
   [command]
   (update-tos-metadata functionCode command))
 
 (defcommand force-fix-tos-function-for-application
-  {:parameters [:id functionCode reason]
+  {:parameters       [:id functionCode reason]
    :input-validators [(partial non-blank-parameters [:id :functionCode :reason])]
-   :user-roles #{:authority}
+   :user-roles       #{:authority}
    :org-authz-roles  #{:archivist}
-   :states states/all-but-draft
-   :pre-checks [permit/is-not-archiving-project]}
+   :states           states/all-but-draft
+   :pre-checks       [permit/is-not-archiving-project]}
   [command]
   (update-tos-metadata functionCode command reason))
 
 (def schema-to-input-type-map
-  {s/Str "text"
+  {s/Str           "text"
    tms/NonEmptyStr "text"
-   tms/Vuodet "number"
-   s/Bool "checkbox"
-   s/Inst "date"})
+   tms/Vuodet      "number"
+   s/Bool          "checkbox"
+   s/Inst          "date"})
 
 (def editable-metadata-fields
   (->> (remove #(= tms/Tila %) tms/asiakirja-metadata-fields)
@@ -115,17 +115,17 @@
                               (dissoc :schema))))
 
 (defquery tos-metadata-schema
-  {:user-roles #{:anonymous}
-   :parameters [schema]
+  {:user-roles       #{:anonymous}
+   :parameters       [schema]
    :input-validators [(partial non-blank-parameters [:schema])]}
   (let [fields (if (= "caseFile" schema) tms/common-metadata-fields editable-metadata-fields)]
     (ok :schema (map metadata-schema-for-ui fields))))
 
 (defn- revert-unauthorized-modifications [new-metadata old-metadata roles]
-  (let [disallowed-metadata (filter (fn [field] (when-let [role (:require-role field)]
-                                                  (not (contains? roles role))))
-                              editable-metadata-fields)
-        disallowed-keys (map :type disallowed-metadata)
+  (let [disallowed-metadata  (filter (fn [field] (when-let [role (:require-role field)]
+                                                   (not (contains? roles role))))
+                                     editable-metadata-fields)
+        disallowed-keys      (map :type disallowed-metadata)
         replacement-metadata (select-keys old-metadata disallowed-keys)]
     (merge new-metadata replacement-metadata)))
 
@@ -138,17 +138,17 @@
 
 (defn- update-document-metadata [document metadata user-roles application]
   (let [old-metadata (schema-utils/coerce-metadata-to-schema tms/AsiakirjaMetaDataMap (:metadata document))
-        metadata (-> (schema-utils/coerce-metadata-to-schema tms/AsiakirjaMetaDataMap metadata)
-                     (revert-unauthorized-modifications old-metadata user-roles)
-                     (t/update-end-dates (:verdicts application))
-                     (assoc :tila (or (:tila old-metadata) :luonnos))
-                     sanitize-metadata)]
+        metadata     (-> (schema-utils/coerce-metadata-to-schema tms/AsiakirjaMetaDataMap metadata)
+                         (revert-unauthorized-modifications old-metadata user-roles)
+                         (t/update-end-dates (:verdicts application))
+                         (assoc :tila (or (:tila old-metadata) :luonnos))
+                         sanitize-metadata)]
     (assoc document :metadata metadata)))
 
 (defn- update-application-child-metadata! [{:keys [application created user] :as command} child-type id metadata]
   (if-let [child (first (filter #(= (:id %) id) (child-type application)))]
-    (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
-          updated-child (update-document-metadata child metadata user-roles application)
+    (let [user-roles       (get-in user [:orgAuthz (keyword (:organization application))])
+          updated-child    (update-document-metadata child metadata user-roles application)
           updated-children (-> (remove #(= % child) (child-type application)) (conj updated-child))]
       (action/update-application command {$set {:modified created child-type updated-children}})
       (t/update-process-retention-period (:id application) created)
@@ -163,23 +163,23 @@
         sanitize-metadata)))
 
 (defcommand store-tos-metadata-for-attachment
-  {:parameters [:id attachmentId metadata]
-   :categories #{:attachments}
+  {:parameters       [:id attachmentId metadata]
+   :categories       #{:attachments}
    :input-validators [(partial non-blank-parameters [:id :attachmentId])
                       (partial action/map-parameters [:metadata])]
-   :user-roles #{:authority}
-   :states states/all-but-draft
-   :pre-checks [(partial target-is-not-archived :attachment)]}
+   :user-roles       #{:authority}
+   :states           states/all-but-draft
+   :pre-checks       [(partial target-is-not-archived :attachment)]}
   [command]
   (update-application-child-metadata! command :attachments attachmentId metadata))
 
 (defcommand store-tos-metadata-for-application
-  {:parameters [:id metadata]
+  {:parameters       [:id metadata]
    :input-validators [(partial non-blank-parameters [:id])
                       (partial action/map-parameters [:metadata])]
-   :user-roles #{:authority}
-   :states states/all-but-draft
-   :pre-checks [(partial target-is-not-archived :application)]}
+   :user-roles       #{:authority}
+   :states           states/all-but-draft
+   :pre-checks       [(partial target-is-not-archived :application)]}
   [{:keys [application created user] :as command}]
   (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
         {processed-metadata :metadata} (update-document-metadata application metadata user-roles application)]
@@ -189,54 +189,54 @@
     (ok {:metadata processed-metadata})))
 
 (defcommand store-tos-metadata-for-process
-  {:parameters [:id metadata]
+  {:parameters       [:id metadata]
    :input-validators [(partial non-blank-parameters [:id])
                       (partial action/map-parameters [:metadata])]
-   :user-roles #{:authority}
-   :states states/all-but-draft
-   :pre-checks [(partial target-is-not-archived :process)]}
+   :user-roles       #{:authority}
+   :states           states/all-but-draft
+   :pre-checks       [(partial target-is-not-archived :process)]}
   [{:keys [application created user] :as command}]
-  (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
+  (let [user-roles         (get-in user [:orgAuthz (keyword (:organization application))])
         processed-metadata (-> (process-case-file-metadata (:processMetadata application) metadata user-roles)
                                (t/update-end-dates (:verdicts application))
                                (t/calculate-process-metadata (:metadata application) (:attachments application)))]
-    (action/update-application command {$set {:modified created
+    (action/update-application command {$set {:modified        created
                                               :processMetadata processed-metadata}})
     (ok {:metadata processed-metadata})))
 
 (defcommand set-myyntipalvelu-for-attachment
-  {:parameters [:id attachmentId myyntipalvelu]
-   :categories #{:attachments}
+  {:parameters       [:id attachmentId myyntipalvelu]
+   :categories       #{:attachments}
    :input-validators [(partial non-blank-parameters [:id :attachmentId])
                       (partial boolean-parameters [:myyntipalvelu])]
-   :user-roles #{:authority}
-   :org-authz-roles #{:authority :archivist :digitizer}
-   :states states/all-but-draft
-   :pre-checks [(partial target-is-not-archived :attachment)]}
-   [{:keys [application created]}]
-   (if (pos? (t/update-metadata-attribute! application created attachmentId :myyntipalvelu myyntipalvelu))
-     (ok)
-     (fail :error.invalid-id)))
+   :user-roles       #{:authority}
+   :org-authz-roles  #{:authority :archivist :digitizer}
+   :states           states/all-but-draft
+   :pre-checks       [(partial target-is-not-archived :attachment)]}
+  [{:keys [application created]}]
+  (if (pos? (t/update-metadata-attribute! application created attachmentId :myyntipalvelu myyntipalvelu))
+    (ok)
+    (fail :error.invalid-id)))
 
 (defquery case-file-data
-  {:parameters [:id lang]
+  {:parameters       [:id lang]
    :input-validators [(partial action/non-blank-parameters [:lang])]
-   :user-roles #{:authority}
-   :states states/all-application-states
-   :pre-checks [(permit/validate-permit-type-is-not permit/ARK)]}
+   :user-roles       #{:authority}
+   :states           states/all-application-states
+   :pre-checks       [(permit/validate-permit-type-is-not permit/ARK)]}
   [{:keys [application]}]
   (ok :process (t/generate-case-file-data application lang)))
 
 (defquery tos-operations-enabled
   {:user-roles #{:authority}
    :categories #{:attachments}
-   :states states/all-application-or-archiving-project-states}
+   :states     states/all-application-or-archiving-project-states}
   (ok))
 
 
 (defquery common-area-application
   {:parameters [id]
-   :states states/all-states
+   :states     states/all-states
    :user-roles #{:applicant :authority}
    :pre-checks [(permit/validate-permit-type-is permit/YA)]}
   [_])
