@@ -63,6 +63,18 @@ LUPAPISTE.ApplicationModel = function() {
     return !self.permitSubtype() && !_.isEmpty(self.permitSubtypes());
   });
 
+  self.titleForPartiesOrSupervisor = ko.pureComputed(function() {
+    return util.getIn(self, ["primaryOperation", "name"]) === "tyonjohtajan-nimeaminen-v2"
+      ? "application.tabSupervisorInformation"
+      : "application.tabParties";
+  });
+
+  self.descForPartiesOrSupervisor = ko.pureComputed(function() {
+    return util.getIn(self, ["primaryOperation", "name"]) === "tyonjohtajan-nimeaminen-v2"
+      ? "help.supervisorInformationDesc"
+      : "help." + self.permitType() + ".PartiesDesc";
+  });
+
   self.operationsCount = ko.observable();
   self.applicant = ko.observable();
   self.creator = ko.observable();
