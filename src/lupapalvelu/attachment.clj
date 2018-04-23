@@ -36,7 +36,10 @@
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as usr]
-            [me.raynes.fs :as fs])
+            [me.raynes.fs :as fs]
+            [sade.env :as env]
+            [lupapalvelu.storage.file-storage :as storage]
+            [sade.shared-schemas :as sssc])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File InputStream]))
 
@@ -112,9 +115,10 @@
 (defschema Version
   "Attachment version"
   {:version                              VersionNumber
-   :fileId                               (sc/maybe ssc/ObjectIdStr)  ;; fileId in GridFS, nil if the file has been deleted when archived
-   :originalFileId                       (sc/maybe ssc/ObjectIdStr)  ;; fileId of the unrotated/unconverted file
+   :fileId                               (sc/maybe sssc/UUIDStr)  ;; fileId in GridFS, nil if the file has been deleted when archived
+   :originalFileId                       (sc/maybe sssc/UUIDStr)  ;; fileId of the unrotated/unconverted file
    (sc/optional-key :onkaloFileId)       AttachmentId                ;; id in Onkalo, if archived. Should equal attachment id.
+   :storageSystem                        (sc/enum :mongodb :s3)
    :created                              ssc/Timestamp
    ;; Timestamp for the latest "non-versioning" operation (e.g.,
    ;; rotation, pdf/a conversion). Thus, modified can be present only
@@ -488,6 +492,7 @@
         {:version        version-number
          :fileId         fileId
          :originalFileId (or original-file-id fileId)
+         :storageSystem  (if (env/feature? :s3) :s3 :mongodb)
          :created        created
          :user           (usr/summary user)
          ;; File name will be presented in ASCII when the file is downloaded.
@@ -497,7 +502,7 @@
          :size           size
          :stamped        (boolean stamped)
          :archivable     (boolean archivable)}
-        :modified       modified
+        :modified modified
         :archivabilityError archivabilityError
         :missing-fonts missing-fonts
         :autoConversion autoConversion
@@ -776,7 +781,7 @@
         converted-filedata (when (:autoConversion conversion-result)
                              ; upload and return new fileId for converted file
                              (file-upload/save-file (select-keys conversion-result [:content :filename])
-                                                    {:application (:id application) :linked false}))]
+                                                    {:linked false}))]
     {:result conversion-result
      :file converted-filedata}))
 
@@ -795,7 +800,7 @@
                                                      (auth/application-authority? application user))))
         linked-version     (set-attachment-version! application user attachment options)]
     (preview/preview-image! (:id application) (:fileId options) (:filename options) (:contentType options))
-    (link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
+    (storage/link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
     (cleanup-temp-file (:result conversion-data))
     linked-version))
 
@@ -807,7 +812,7 @@
    5) Links file as new version to attachment. If conversion was made, converted file is used (originalFileId points to original file)
    Returns attached version."
   [{:keys [application] :as command} attachment-options file-options]
-  (let [original-filedata   (file-upload/save-file file-options {:application (:id application) :linked false})
+  (let [original-filedata   (file-upload/save-file file-options {:linked false})
         content            (if (instance? File (:content file-options))
                              (:content file-options)
                              ;; stream is consumed at this point, load from mongo
@@ -927,7 +932,7 @@
       (warn "Attachment" (:id attachment) "mime type" (keyword contentType) "is not convertible to PDF/A")
 
       :else
-      (if-let [file-content (mongo/download fileId)]
+      (if-let [file-content (storage/download fileId)]
         (let [{:keys [result file] :as conversion-data} (->> (update file-content :content apply [])
                                                              (conversion application))]
           (if (and (:archivable result) (:fileId file))

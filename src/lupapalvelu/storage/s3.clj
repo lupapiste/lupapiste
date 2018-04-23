@@ -5,7 +5,8 @@
             [clojure.java.io :as io]
             [clojure.walk :refer [keywordize-keys]]
             [sade.strings :as str]
-            [sade.util :as util])
+            [sade.util :as util]
+            [sade.strings :as ss])
   (:import [java.io InputStream ByteArrayOutputStream File FileInputStream ByteArrayInputStream]
            [com.amazonaws.services.s3.model PutObjectRequest CreateBucketRequest CannedAccessControlList
                                             SetBucketVersioningConfigurationRequest BucketVersioningConfiguration
@@ -37,7 +38,7 @@
                    (env/value :s3 :endpoint))))
 
 (defn- ^String bucket-name [bucket]
-  (str "lupapiste-" env/target-env "-" (or (str/blank-as-nil bucket)
+  (str "lupapiste-" env/target-env "-" (or (ss/lower-case (str/blank-as-nil bucket))
                                            "unlinked-files")))
 
 (defn- create-bucket-if-not-exists [bucket]
@@ -59,18 +60,21 @@
 
 (defn- do-put-object [bucket file-id filename content-type input-stream content-length metadata]
   {:pre [(map? metadata)]}
-  (create-bucket-if-not-exists (bucket-name bucket))
-  (let [user-metadata (-> (generate-user-metadata metadata)
-                          (assoc "uploaded" (str (now))
-                                 "filename" filename))
-        request (->> (doto (ObjectMetadata.)
-                       (.setContentLength content-length)
-                       (.setContentType content-type)
-                       (.setUserMetadata user-metadata))
-                     (PutObjectRequest. (bucket-name bucket) file-id input-stream))]
-    (-> (.getRequestClientOptions request)
-        (.setReadLimit 150001))
-    (.putObject s3-client request)))
+  (let [actual-bucket (bucket-name bucket)]
+    (create-bucket-if-not-exists actual-bucket)
+    (let [user-metadata (-> (generate-user-metadata metadata)
+                            (assoc "uploaded" (str (now))
+                                   "filename" filename))
+          request (->> (doto (ObjectMetadata.)
+                         (.setContentLength content-length)
+                         (.setContentType content-type)
+                         (.setUserMetadata user-metadata))
+                       (PutObjectRequest. actual-bucket file-id input-stream))]
+      (-> (.getRequestClientOptions request)
+          (.setReadLimit 150001))
+      (.putObject s3-client request)
+      (timbre/debug "Object" file-id "uploaded to bucket" actual-bucket)
+      {:length content-length})))
 
 (defn put-input-stream [bucket file-id filename content-type input-stream content-length & metadata]
   {:pre [(string? file-id) (string? filename) (string? content-type)
@@ -143,3 +147,6 @@
        :application application-id})
     (catch AmazonS3Exception ex
       (timbre/error ex "Error occurred when trying to retrieve" file-id "from S3 bucket" (bucket-name application-id)))))
+
+(defn object-exists? [bucket id]
+  (.doesObjectExist s3-client bucket id))

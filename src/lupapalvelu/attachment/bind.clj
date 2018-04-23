@@ -7,20 +7,20 @@
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.preview :as preview]
             [lupapalvelu.job :as job]
-            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.storage.file-storage :as storage]
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
             [lupapalvelu.authorization :as auth]
             [lupapiste-commons.attachment-types :as att-types]
             [sade.schemas :as ssc]
-            [sade.strings :as ss]))
+            [sade.shared-schemas :as sssc]))
 
 (sc/defschema NewVersion
-  {(sc/required-key :fileId)           ssc/ObjectIdStr
+  {(sc/required-key :fileId)           sssc/UUIDStr
    (sc/required-key :attachmentId)     sc/Str})
 
 (sc/defschema NewAttachment
-  {(sc/required-key :fileId)           ssc/ObjectIdStr
+  {(sc/required-key :fileId)           sssc/UUIDStr
    (sc/required-key :type)             att/Type
    (sc/required-key :group)            (sc/maybe {:groupType  (apply sc/enum att-tags/attachment-groups)
                                                   (sc/optional-key :operations) [{(sc/optional-key :id)   ssc/ObjectIdStr
@@ -70,7 +70,7 @@
                           (:file conversion-data))
         linked-version (att/set-attachment-version! application user attachment version-options)]
     (preview/preview-image! (:id application) (:fileId version-options) (:filename version-options) (:contentType version-options))
-    (att/link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
+    (storage/link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
     (att/cleanup-temp-file (:result conversion-data))
     (assoc linked-version :type (or (:type linked-version) (:type attachment)))))
 
@@ -78,8 +78,8 @@
   (reduce
     (fn [results {:keys [fileId type] :as filedata}]
       (job/update job-id assoc fileId {:status :working :fileId fileId})
-      (if-let [mongo-file (mongo/download fileId)]
-        (let [result (bind-single-attachment! command mongo-file filedata (map :attachment-id results))]
+      (if-let [unlinked-file (storage/download fileId)]
+        (let [result (bind-single-attachment! command unlinked-file filedata (map :attachment-id results))]
           (job/update job-id assoc fileId {:status :done :fileId fileId})
           (conj results {:original-file-id fileId
                          :fileId (:fileId result)

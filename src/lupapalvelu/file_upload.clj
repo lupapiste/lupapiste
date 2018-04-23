@@ -12,7 +12,9 @@
             [sade.env :as env]
             [lupapalvelu.building :as building]
             [lupapalvelu.attachment.tags :as att-tags]
-            [lupapalvelu.roles :as roles])
+            [lupapalvelu.roles :as roles]
+            [lupapalvelu.storage.file-storage :as storage]
+            [clj-uuid :as uuid])
   (:import (java.io File InputStream)))
 
 (def FileData
@@ -36,11 +38,10 @@
   (let [metadata (if (map? (first metadata))
                    (first metadata)
                    (apply hash-map metadata))
-        file-id            (or (:fileId filedata) (mongo/create-id))
+        file-id            (or (:fileId filedata) (str (uuid/v1)))
         sanitized-filename (mime/sanitize-filename (:filename filedata))
         content-type       (mime/mime-type sanitized-filename)
-
-        result (mongo/upload file-id sanitized-filename content-type (:content filedata) metadata)]
+        result (storage/upload file-id sanitized-filename content-type (:content filedata) metadata)]
     {:fileId file-id
      :filename sanitized-filename
      :size (or (:size filedata) (:length result))

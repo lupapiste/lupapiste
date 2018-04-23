@@ -13,6 +13,11 @@
 (def ObjectIdStr
   (sc/pred (partial matches? object-id-pattern) "ObjectId hex string"))
 
+(def uuid-pattern #"^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$")
+
+(def UUIDStr
+  (sc/pred (partial matches? uuid-pattern) "UUID hex string"))
+
 (defn in-lower-case? [^String s]
   (if s
     (= s (.toLowerCase s))
