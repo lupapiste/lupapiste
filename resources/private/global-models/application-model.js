@@ -186,10 +186,6 @@ LUPAPISTE.ApplicationModel = function() {
     return self.permitType() === "ARK";
   });
 
-  self.isSupervisorAppointment = ko.pureComputed(function() {
-    return self.primaryOperationName() === "Työnjohtajan nimeäminen";
-  });
-
   self.openTask = function( taskId ) {
     hub.send( "scrollService::push");
     taskPageController.setApplicationModelAndTaskId(self._js, taskId);
