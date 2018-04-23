@@ -63,7 +63,7 @@
     :street "Paapankuja 12"
     :phone "0102030405"
     :email "tampere-ya@example.com"
-    :role "authorityAdmin"
+    :role "authority"
     :zip "10203"
     :orgAuthz {:837-YA #{:authorityAdmin}}
     :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereYAapikey"}}
@@ -78,7 +78,7 @@
     :street "Paapankuja 12"
     :phone "0102030405"
     :email "tampere@example.com"
-    :role "authorityAdmin"
+    :role "authority"
     :zip "10203"
     :orgAuthz {:837-R #{:authorityAdmin}}
     :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereapikey"}}
@@ -143,7 +143,7 @@
     :street "Paapankuja 12"
     :phone "0102030405"
     :email "kuopio-ya@example.com"
-    :role "authorityAdmin"
+    :role "authority"
     :zip "10203"
     :orgAuthz {:297-YA #{:authorityAdmin}}
     :private {:password "$2a$10$YceveAiQXbeUs65B4FZ6lez/itf0UEXooHcZlygI2WnQGhF0dJ1jO"}}
@@ -180,7 +180,7 @@
     :street "Paapankuja 12"
     :phone "0102030405"
     :email "kuopio-r@kuopio.fi"
-    :role "authorityAdmin"
+    :role "authority"
     :zip "10203"
     :orgAuthz {:297-R #{:authorityAdmin}}
     :private {:password "$2a$10$YceveAiQXbeUs65B4FZ6lez/itf0UEXooHcZlygI2WnQGhF0dJ1jO"
@@ -192,7 +192,7 @@
    {:id "50ac77ecc2e6c2ea6e73f83e"
     :email "admin@sipoo.fi"
     :enabled true
-    :role "authorityAdmin"
+    :role "authority"
     :orgAuthz {:753-R #{:authorityAdmin}}
     :firstName "Simo"
     :language "fi"
@@ -205,7 +205,7 @@
    {:id "50ac77eaf2e6c2ea6e73f81e"
     :email "admin-ya@sipoo.fi"
     :enabled true
-    :role "authorityAdmin"
+    :role "authority"
     :orgAuthz {:753-YA #{:authorityAdmin}}
     :firstName "Simo"
     :language "fi"
@@ -338,7 +338,7 @@
     :email "ymp-admin@oulu.fi"
     :enabled true
     :language "fi"
-    :role "authorityAdmin"
+    :role "authority"
     :orgAuthz {:564-YMP #{:authorityAdmin}}
     :firstName "Oulu Ymp"
     :lastName "Admin"
@@ -387,7 +387,7 @@
    {:id "50ac77ecd2e6c2ea6e73f83f"
     :email "admin@naantali.fi"
     :enabled true
-    :role "authorityAdmin"
+    :role "authority"
     :orgAuthz {:529-R #{:authorityAdmin}}
     :firstName "Admin"
     :language "fi"
@@ -429,7 +429,7 @@
     :email "admin@jarvenpaa.fi"
     :enabled true
     :language "fi"
-    :role "authorityAdmin"
+    :role "authority"
     :orgAuthz {:186-R #{:authorityAdmin}}
     :firstName "Admin"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
@@ -542,7 +542,7 @@
    {:id "50ac77ecc2e6c2ea6e73f665"
     :email "admin@hel.fi"
     :enabled true
-    :role "authorityAdmin"
+    :role "authority"
     :orgAuthz {:091-R #{:authorityAdmin}}
     :firstName "Heikki"
     :language "fi"
