@@ -223,14 +223,15 @@
 
 (defn- pack-verdict-dates
   "Since the date calculation is cumulative we always store every delta
-  into kw-delta map. Empty deltas are zeros. For board-verdicts the
-  appeal date (muutoksenhaku) is different."
+  into kw-delta map. Including those that are not even in the current
+  schema. Empty deltas are zeros. For board-verdicts the appeal
+  date (muutoksenhaku) is different."
   [category draft board-verdict?]
   (let [{dic :dictionary} (shared/settings-schema category)]
     (cond-> (->> shared/verdict-dates
                  (map (fn [k]
                         [k {:delta (-> draft k schemas/parse-int)
-                            :unit (name (get-in dic [k :date-delta :unit]))}]))
+                            :unit (name (get-in dic [k :date-delta :unit] :days))}]))
                  (into {}))
       board-verdict? (assoc :muutoksenhaku {:delta (-> draft
                                                        :lautakunta-muutoksenhaku

@@ -70,8 +70,12 @@
 
 (def foreman-codes [:vastaava-tj :vv-tj :iv-tj :erityis-tj :tj])
 
+;; Verdict dates must include every possible date key.
 (def verdict-dates [:julkipano :anto :muutoksenhaku :lainvoimainen
                     :aloitettava :voimassa])
+
+(def ya-verdict-dates [:julkipano :anto :muutoksenhaku :lainvoimainen
+                       :aloitettava])
 
 (defn pate-assert [pred & msg]
   (let [div "\n-------------------------------------------------------\n"]
@@ -197,20 +201,23 @@
                (assoc (apply combine-subschemas subschemas)
                       :title title)))
 
-(def setsub-date-deltas
-  {:dictionary {:verdict-dates {:loc-text :pate-verdict-dates}
-                :plus          {:loc-text :plus}
-                :julkipano     (required {:date-delta {:unit :days}})
-                :anto          (required {:date-delta {:unit :days}})
-                :muutoksenhaku (required {:date-delta {:unit :days}})
-                :lainvoimainen (required {:date-delta {:unit :days}})
-                :aloitettava   (required {:date-delta {:unit :years}})
-                :voimassa      (required {:date-delta {:unit :years}})}
-   :section    {:id         :verdict-dates
-                :loc-prefix :pate-verdict-dates
-                :grid       {:columns    17
-                             :loc-prefix :pate-verdict
-                             :rows       [(date-delta-row verdict-dates)]}}})
+(defn setsub-date-deltas
+  "Dates is vector of date dict keys."
+  [dates]
+  (let [date-dicts {:julkipano     (required {:date-delta {:unit :days}})
+                    :anto          (required {:date-delta {:unit :days}})
+                    :muutoksenhaku (required {:date-delta {:unit :days}})
+                    :lainvoimainen (required {:date-delta {:unit :days}})
+                    :aloitettava   (required {:date-delta {:unit :years}})
+                    :voimassa      (required {:date-delta {:unit :years}})}]
+    {:dictionary (merge {:verdict-dates {:loc-text :pate-verdict-dates}
+                         :plus          {:loc-text :plus}}
+                        (select-keys date-dicts dates))
+     :section    {:id         :verdict-dates
+                  :loc-prefix :pate-verdict-dates
+                  :grid       {:columns    17
+                               :loc-prefix :pate-verdict
+                               :rows       [(date-delta-row dates)]}}}))
 
 (def setsub-verdict-code
   {:dictionary {:verdict-code
@@ -307,7 +314,7 @@
                           [(last %)]))))
 
 (def r-settings (build-settings-schema "pate-r"
-                                       setsub-date-deltas
+                                       (setsub-date-deltas verdict-dates)
                                        setsub-verdict-code
                                        setsub-board
                                        setsub-lang-titles
@@ -315,12 +322,12 @@
                                        (setsub-reviews review-types)))
 
 (def p-settings (build-settings-schema "pate-p"
-                                       setsub-date-deltas
+                                       (setsub-date-deltas verdict-dates)
                                        setsub-verdict-code
                                        setsub-board))
 
 (def ya-settings (build-settings-schema "pate-ya"
-                                        setsub-date-deltas
+                                        (setsub-date-deltas ya-verdict-dates)
                                         setsub-verdict-code
                                         setsub-board
                                         setsub-lang-titles
@@ -375,9 +382,9 @@
   ([dict loc-ext]
    (text-subschema dict loc-ext true)))
 
-(def temsub-verdict
+(defn temsub-verdict [dates]
   {:dictionary {:language         language-select
-                :verdict-dates    {:multi-select {:items           verdict-dates
+                :verdict-dates    {:multi-select {:items           dates
                                                   :sort?           false
                                                   :i18nkey         :pate-verdict-dates
                                                   :item-loc-prefix :pate-verdict}}
@@ -569,7 +576,7 @@
 
 
 (def r-verdict-template-schema
-  (build-verdict-template-schema temsub-verdict
+  (build-verdict-template-schema (temsub-verdict verdict-dates)
                                  temsub-bulletin
                                  temsub-foremen
                                  temsub-reviews
@@ -590,7 +597,7 @@
   (text-subschema :start-info :pate-start-info.text))
 
 (def p-verdict-template-schema
-  (build-verdict-template-schema temsub-verdict
+  (build-verdict-template-schema (temsub-verdict verdict-dates)
                                  temsub-bulletin
                                  temsub-conditions
                                  temsub-neighbors
@@ -613,7 +620,7 @@
   (text-subschema :inform-others :pate-inform-others.text))
 
 (def ya-verdict-template-schema
-  (build-verdict-template-schema temsub-verdict
+  (build-verdict-template-schema (temsub-verdict ya-verdict-dates)
                                  temsub-bulletin
                                  temsub-reviews-with-phrase
                                  temsub-plans
@@ -745,55 +752,62 @@
                                  [{:dict  :address
                                    :align :full}]]}}})
 
-(def versub-verdict
-  {:dictionary {:boardname        {:reference {:path :*ref.boardname}}
-                :verdict-section  (required {:text {:before :section}})
-                :verdict-code     (required {:reference-list {:path       :verdict-code
-                                                              :type       :select
-                                                              :loc-prefix :pate-r.verdict-code}
-                                             :template-dict  :verdict-code})
-                :verdict-text     (required {:phrase-text   {:category :paatosteksti}
-                                             :template-dict :paatosteksti})
-                :verdict-text-ref (required {:reference {:path :verdict-text}})
-                :collateral       {:text {:after :eur}}
-                :collateral-flag  {:toggle {:loc-prefix :pate-collateral.flag}}
-                :collateral-date  {:date {}}
-                :collateral-type  collateral-type-select}
-   :section    {:id   :pate-verdict
-                :grid {:columns 7
-                       :rows    [[{:col        2
-                                   :loc-prefix :pate-verdict.giver
-                                   :hide?      :_meta.editing?
-                                   :dict       :boardname}
-                                  {:col        1
-                                   :show?      [:OR :*ref.boardname :verdict-section]
-                                   :loc-prefix :pate-verdict.section
-                                   :dict       :verdict-section}
-                                  {:show? [:AND :_meta.editing? :?.boardname]}
-                                  {:col   2
-                                   :align :full
-                                   :dict  :verdict-code}]
-                                 [{:col   5
-                                   :id    "paatosteksti"
-                                   :show? :_meta.editing?
-                                   :dict  :verdict-text}
-                                  {:col   5
-                                   :hide? :_meta.editing?
-                                   :dict  :verdict-text-ref}]
-                                 {:show? :_meta.editing?
-                                  :css   [:row--tight]
-                                  :row   [{:col  3
-                                           :dict :collateral-flag}]}
-                                 {:show?      [:AND :?.collateral :collateral-flag]
-                                  :loc-prefix :pate
-                                  :row        [{:col  2
-                                                :id   :collateral-date
-                                                :dict :collateral-date}
-                                               {:col  2
-                                                :id   :collateral
-                                                :dict :collateral}
-                                               {:col  2
-                                                :dict :collateral-type}]}]}}})
+(defn versub-verdict
+  "Collateral part (toggle, amount, type, date) included only when
+  collateral? is true."
+  [collateral?]
+  (let [verdict {:dictionary (merge {:boardname        {:reference {:path :*ref.boardname}}
+                                     :verdict-section  (required {:text {:before :section}})
+                                     :verdict-code     (required {:reference-list {:path       :verdict-code
+                                                                                   :type       :select
+                                                                                   :loc-prefix :pate-r.verdict-code}
+                                                                  :template-dict  :verdict-code})
+                                     :verdict-text     (required {:phrase-text   {:category :paatosteksti}
+                                                                  :template-dict :paatosteksti})
+                                     :verdict-text-ref (required {:reference {:path :verdict-text}})}
+                                    (when collateral? {:collateral      {:text {:after :eur}}
+                                                       :collateral-flag {:toggle {:loc-prefix :pate-collateral.flag}}
+                                                       :collateral-date {:date {}}
+                                                       :collateral-type collateral-type-select}))
+                 :section    {:id   :pate-verdict
+                              :grid {:columns 7
+                                     :rows    [[{:col        2
+                                                 :loc-prefix :pate-verdict.giver
+                                                 :hide?      :_meta.editing?
+                                                 :dict       :boardname}
+                                                {:col        1
+                                                 :show?      [:OR :*ref.boardname :verdict-section]
+                                                 :loc-prefix :pate-verdict.section
+                                                 :dict       :verdict-section}
+                                                {:show? [:AND :_meta.editing? :?.boardname]}
+                                                {:col   2
+                                                 :align :full
+                                                 :dict  :verdict-code}]
+                                               [{:col   5
+                                                 :id    "paatosteksti"
+                                                 :show? :_meta.editing?
+                                                 :dict  :verdict-text}
+                                                {:col   5
+                                                 :hide? :_meta.editing?
+                                                 :dict  :verdict-text-ref}]
+                                               ]}}}]
+    (cond-> verdict
+      collateral? (update-in [:section :grid :rows]
+                             concat
+                             [{:show? :_meta.editing?
+                               :css   [:row--tight]
+                               :row   [{:col  3
+                                        :dict :collateral-flag}]}
+                              {:show?      [:AND :?.collateral :collateral-flag]
+                               :loc-prefix :pate
+                               :row        [{:col  2
+                                             :id   :collateral-date
+                                             :dict :collateral-date}
+                                            {:col  2
+                                             :id   :collateral
+                                             :dict :collateral}
+                                            {:col  2
+                                             :dict :collateral-type}]}]))))
 
 (def versub-bulletin
   {:dictionary
@@ -809,44 +823,52 @@
                                       :id   "toimenpide-julkipanoon"
                                       :dict :bulletinOpDescription}]]}}})
 
-(def versub-requirements ;; Foremen, plans, reviews
-  {:dictionary
-   (reduce (fn [acc [loc-prefix kw term? separator?]]
-             (let [included (keyword (str (name kw) "-included"))
-                   path     kw]
-               (assoc acc
-                      (util/kw-path kw)
-                      {:reference-list
-                       (merge {:enabled?   included
-                               :loc-prefix loc-prefix
-                               :path       path
-                               :type       :multi-select}
-                              (when term?
-                                {:item-key :id
-                                 :term     {}})
-                              (when separator?
-                                {:separator " \u2013 "}))}
-                      ;; Included toggle
-                      included required-in-verdict)))
-           {}
-           [[:pate-r.foremen :foremen false false]
-            [:pate-plans :plans true false]
-            [:pate-reviews :reviews true true]])
-   :section
-   {:id   :requirements
-    :grid {:columns 7
-           :rows    (map (fn [dict]
-                           (let [check-path (keyword (str (name dict) "-included"))
-                                 exist-path (keyword (str "?." (name dict)))]
-                             {:show? [:AND exist-path [:OR :_meta.editing? check-path]]
-                              :row   [{:col  4
-                                       :dict dict}
-                                      {:col   2
-                                       :align :right
-                                       :show? :_meta.editing?
-                                       :id    "included"
-                                       :dict  check-path}]}))
-                         [:foremen :plans :reviews])}}})
+(defn versub-requirements
+  "Supported arguments: :foremen, :plans and :reviews."
+  [& args]
+  (let [{foremen? :foremen
+         plans?   :plans
+         reviews? :reviews} (zipmap args (repeat true))]
+    {:dictionary
+     (->> [(when foremen? [:pate-r.foremen :foremen false false])
+           (when plans? [:pate-plans :plans true false])
+           (when reviews? [:pate-reviews :reviews true true])]
+          (remove nil?)
+          (reduce (fn [acc [loc-prefix kw term? separator?]]
+                    (let [included (keyword (str (name kw) "-included"))
+                          path     kw]
+                      (assoc acc
+                             (util/kw-path kw)
+                             {:reference-list
+                              (merge {:enabled?   included
+                                      :loc-prefix loc-prefix
+                                      :path       path
+                                      :type       :multi-select}
+                                     (when term?
+                                       {:item-key :id
+                                        :term     {}})
+                                     (when separator?
+                                       {:separator " \u2013 "}))}
+                             ;; Included toggle
+                             included required-in-verdict)))
+                  {}))
+     :section
+     {:id   :requirements
+      :grid {:columns 7
+             :rows    (map (fn [dict]
+                             (let [check-path (keyword (str (name dict) "-included"))
+                                   exist-path (keyword (str "?." (name dict)))]
+                               {:show? [:AND exist-path [:OR :_meta.editing? check-path]]
+                                :row   [{:col  4
+                                         :dict dict}
+                                        {:col   2
+                                         :align :right
+                                         :show? :_meta.editing?
+                                         :id    "included"
+                                         :dict  check-path}]}))
+                           (remove nil? [(when foremen? :foremen)
+                                         (when plans?   :plans)
+                                         (when reviews? :reviews)]))}}}))
 
 (def versub-conditions ;; Muut lupaehdot
   {:dictionary
@@ -1025,10 +1047,10 @@
 
 (def r-verdict-schema-1 (build-verdict-schema :r 1
                                               (versub-dates :r)
-                                              versub-verdict
+                                              (versub-verdict true)
                                               versub-bulletin
                                               versub-operation
-                                              versub-requirements
+                                              (versub-requirements :foremen :plans :reviews)
                                               versub-conditions
                                               versub-appeal
                                               versub-statements
@@ -1065,7 +1087,7 @@
 
 (def p-verdict-schema-1 (build-verdict-schema :p 1
                                               (versub-dates :p)
-                                              versub-verdict
+                                              (versub-verdict true)
                                               versub-bulletin
                                               versub-operation
                                               versub-conditions
@@ -1088,18 +1110,28 @@
       (assoc-in [:dictionary :end-date] {:date {:i18nkey :tyoaika.tyoaika-paattyy-ms}})
       (update-in [:section :grid :rows] conj [{:dict :start-date} {:dict :end-date}])))
 
+(def versub-requirements-ya
+  (-> (versub-requirements :plans :reviews)
+      (assoc-in [:dictionary :review-info] {:phrase-text   {:i18nkey  :pate.review-info
+                                                            :category :yleinen}
+                                            :template-dict :review-info})
+      (update-in [:section :grid :rows] concat [[{:col  4
+                                                  :dict :review-info}]])))
+
 (def versub-inform-others ;; Lahiseudun asukkaita tiedotettava
   (phrase-versub :inform-others :pate-inform-others :yleinen))
 
 (def ya-verdict-schema-1 (build-verdict-schema :ya 1
                                                versub-dates-ya
-                                               versub-verdict
+                                               (versub-verdict false)
                                                versub-bulletin
                                                versub-operation
+                                               versub-requirements-ya
+                                               versub-conditions
+                                               versub-appeal
                                                versub-statements
                                                versub-inform-others
                                                versub-attachments))
-
 
 (defn verdict-schema
   "Nil version returns the latest version."

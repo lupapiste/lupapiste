@@ -566,10 +566,10 @@
     :automatic-verdict-dates {:toggle {}}
     :paatosteksti            {:phrase-text   {:category :paatosteksti}
                               :template-dict :paatosteksti}
-    :conditions              {:repeating        {:condition
-                                                 {:phrase-text {:category :yleinen}}
-                                                 :remove-condition {:button {:remove :conditions}}}
-                              :template-dict    :conditions}
+    :conditions              {:repeating     {:condition
+                                              {:phrase-text {:category :yleinen}}
+                                              :remove-condition {:button {:remove :conditions}}}
+                              :template-dict :conditions}
     :add-condition           {:button           {:add :conditions}
                               :template-section :conditions}
     :deviations              {:phrase-text      {:category :yleinen}
@@ -592,7 +592,9 @@
                                                  :autopaikat-yhteensa    {:text {}}
                                                  :vss-luokka             {:text {}}
                                                  :paloluokka             {:text {}}}
-                              :template-section :buildings}}
+                              :template-section :buildings}
+    :start-date              {:date {}}
+    :end-date                {:date {}}}
    :sections []})
 
 (defn draftee [& args]
@@ -641,8 +643,8 @@
                                   :voimassa :muutoksenhaku :aloitettava
                                   :handler :paatosteksti :plans
                                   :plans-included :reviews :reviews-included
-                                  :automatic-verdict-dates
-                                  :verdict-section :boardname]
+                                  :automatic-verdict-dates :verdict-section
+                                  :boardname :start-date :end-date]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {}))
    (fact "init foremen: no foremen included"
@@ -657,8 +659,8 @@
                                   :voimassa :muutoksenhaku :aloitettava
                                   :handler :paatosteksti :plans
                                   :plans-included :reviews :reviews-included
-                                  :automatic-verdict-dates
-                                  :verdict-section :boardname]
+                                  :automatic-verdict-dates  :start-date
+                                  :end-date :verdict-section :boardname]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {}))
    (fact "init foremen: three foremen included, one selected"
@@ -679,7 +681,8 @@
                                   :plans-included :reviews :reviews-included
                                   :automatic-verdict-dates
                                   :verdict-section :boardname
-                                  :foremen :foremen-included]
+                                  :foremen :foremen-included
+                                  :start-date :end-date]
                      :references {:verdict-code ["osittain-myonnetty"]
                                   :foremen      (just ["vastaava-tj" "vv-tj" "iv-tj"]
                                                       :in-any-order)}
@@ -704,7 +707,8 @@
                                   :plans-included :reviews :reviews-included
                                   :automatic-verdict-dates
                                   :verdict-section :boardname
-                                  :foremen :foremen-included]
+                                  :foremen :foremen-included
+                                  :start-date :end-date]
                      :references {:verdict-code ["osittain-myonnetty"]
                                   :foremen      (just ["vastaava-tj" "vv-tj" "iv-tj"
                                                        "erityis-tj" "tj"]
@@ -724,7 +728,8 @@
                                   :reviews :reviews-included
                                   :foremen :foremen-included
                                   :automatic-verdict-dates
-                                  :verdict-section :boardname]
+                                  :verdict-section :boardname
+                                  :start-date :end-date]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {}))
    (fact "Init requirements references: no reviews"
@@ -737,7 +742,8 @@
                                   :plans :plans-included
                                   :foremen :foremen-included
                                   :automatic-verdict-dates
-                                  :verdict-section :boardname]
+                                  :verdict-section :boardname
+                                  :start-date :end-date]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {}))
    (fact "Init requirements references: plan, not selected"
@@ -753,7 +759,8 @@
                                   :plans :plans-included
                                   :foremen :foremen-included
                                   :automatic-verdict-dates
-                                  :verdict-section :boardname]
+                                  :verdict-section :boardname
+                                  :start-date :end-date]
                      :references {:verdict-code ["osittain-myonnetty"]
                                   :plans        (just [(just {:fi "suomi"
                                                               :sv "svenska"
@@ -775,7 +782,8 @@
                                            :plans :plans-included
                                            :foremen :foremen-included
                                            :automatic-verdict-dates
-                                           :verdict-section :boardname]
+                                           :verdict-section :boardname
+                                           :start-date :end-date]
                               :references {:verdict-code ["osittain-myonnetty"]
                                            :plans        (just [{:fi "suomi"
                                                                  :sv "svenska"
@@ -804,7 +812,8 @@
                                            :plans :plans-included
                                            :foremen :foremen-included
                                            :automatic-verdict-dates
-                                           :verdict-section :boardname]
+                                           :verdict-section :boardname
+                                           :start-date :end-date]
                               :references {:verdict-code ["osittain-myonnetty"]
                                            :reviews      (just [{:fi "suomi"
                                                                  :sv "svenska"
@@ -826,7 +835,8 @@
      => (check-draft :inclusions [:handler :paatosteksti :foremen
                                   :foremen-included :plans
                                   :verdict-section :boardname
-                                  :plans-included :reviews :reviews-included]
+                                  :plans-included :reviews :reviews-included
+                                   :start-date :end-date]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data       {})
      (init--verdict-dates (draftee [:conditions :deviations :attachments
@@ -839,7 +849,8 @@
                                   :verdict-section :boardname
                                   :plans-included :reviews :reviews-included
                                   :julkipano :anto :voimassa
-                                  :automatic-verdict-dates]
+                                  :automatic-verdict-dates
+                                  :start-date :end-date]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data       {}))
    (fact "init upload: upload unchecked"
@@ -857,7 +868,8 @@
                                   :attachments :buildings.rakennetut-autopaikat
                                   :buildings.kiinteiston-autopaikat
                                   :buildings.autopaikat-yhteensa
-                                  :buildings.vss-luokka :buildings.paloluokka]
+                                  :buildings.vss-luokka :buildings.paloluokka
+                                  :start-date :end-date]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {}))
    (fact "init upload: upload checked"
@@ -876,7 +888,8 @@
                                   :buildings.rakennetut-autopaikat
                                   :buildings.kiinteiston-autopaikat
                                   :buildings.autopaikat-yhteensa
-                                  :buildings.vss-luokka :buildings.paloluokka]
+                                  :buildings.vss-luokka :buildings.paloluokka
+                                  :start-date :end-date]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {}))
    (fact "init upload: upload checked, attachments removed"
@@ -894,7 +907,8 @@
                                   :buildings.rakennetut-autopaikat
                                   :buildings.kiinteiston-autopaikat
                                   :buildings.autopaikat-yhteensa
-                                  :buildings.vss-luokka :buildings.paloluokka]
+                                  :buildings.vss-luokka :buildings.paloluokka
+                                  :start-date :end-date]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {}))
    (fact "init upload: upload unchecked, attachments removed"
@@ -912,7 +926,8 @@
                                   :buildings.rakennetut-autopaikat
                                   :buildings.kiinteiston-autopaikat
                                   :buildings.autopaikat-yhteensa
-                                  :buildings.vss-luokka :buildings.paloluokka]
+                                  :buildings.vss-luokka :buildings.paloluokka
+                                  :start-date :end-date]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {}))
    (fact "init verdict giver type: viranhaltija"
@@ -924,7 +939,7 @@
                                   :foremen-included :plans
                                   :automatic-verdict-dates
                                   :plans-included :reviews
-                                  :reviews-included ]
+                                  :reviews-included :start-date :end-date]
                      :giver "viranhaltija"
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {}))
@@ -939,7 +954,7 @@
                                   :verdict-section :boardname
                                   :automatic-verdict-dates
                                   :plans-included :reviews
-                                  :reviews-included]
+                                  :reviews-included :start-date :end-date]
                      :giver "lautakunta"
                      :references {:boardname    "Gate is boarding"
                                   :verdict-code ["osittain-myonnetty"]}
@@ -956,7 +971,7 @@
                                   :automatic-verdict-dates
                                   :verdict-section :boardname
                                   :plans-included :reviews
-                                  :reviews-included]
+                                  :reviews-included :start-date :end-date]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {:handler ""}))
    (fact "init by application: handler - Bob Builder"
@@ -973,7 +988,7 @@
                                   :automatic-verdict-dates
                                   :verdict-section :boardname
                                   :plans-included :reviews
-                                  :reviews-included]
+                                  :reviews-included :start-date :end-date]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {:handler "Bob Builder"}))
    (fact "init by application: deviations - no deviations"
@@ -988,7 +1003,8 @@
                                   :automatic-verdict-dates
                                   :verdict-section :boardname
                                   :plans-included :reviews
-                                  :reviews-included :deviations]
+                                  :reviews-included :deviations
+                                  :start-date :end-date]
                      :references {:verdict-code ["osittain-myonnetty"]}
                      :data {:deviations ""}))
       (fact "init by application: deviations - Cannot live by your rules, man!"
@@ -1005,7 +1021,8 @@
                                      :automatic-verdict-dates
                                      :plans-included :reviews
                                      :verdict-section :boardname
-                                     :reviews-included :deviations]
+                                     :reviews-included :deviations
+                                     :start-date :end-date]
                         :references {:verdict-code ["osittain-myonnetty"]}
                         :data {:deviations "Cannot live by your rules, man!"}))
       (fact "init by application: deviations - template section removed"
@@ -1023,7 +1040,7 @@
                                      :verdict-section :boardname
                                      :automatic-verdict-dates
                                      :plans-included :reviews
-                                     :reviews-included]
+                                     :reviews-included :start-date :end-date]
                         :references {:verdict-code ["osittain-myonnetty"]}
                         :data {}))
       (fact "init buildings: no buildings, no template data"
@@ -1035,7 +1052,7 @@
                                      :foremen-included :plans
                                      :plans-included :reviews
                                      :verdict-section :boardname
-                                     :reviews-included]
+                                     :reviews-included :start-date :end-date]
                         :references {:verdict-code ["osittain-myonnetty"]}
                         :data {}))
       (fact "init buildings: no buildings, template data"
@@ -1048,7 +1065,7 @@
                                      :foremen-included :plans
                                      :verdict-section :boardname
                                      :plans-included :reviews
-                                     :reviews-included]
+                                     :reviews-included :start-date :end-date]
                         :references {:verdict-code ["osittain-myonnetty"]}
                         :data {}))
       (fact "init buildings: buildings, no template data"
@@ -1060,7 +1077,7 @@
                                      :verdict-section :boardname
                                      :automatic-verdict-dates
                                      :plans-included :reviews
-                                     :reviews-included]
+                                     :reviews-included :start-date :end-date]
                         :references {:verdict-code ["osittain-myonnetty"]}
                         :data {}))
       (fact "init buildings: buildings, autopaikat"
@@ -1076,7 +1093,8 @@
                                      :automatic-verdict-dates
                                      :buildings.rakennetut-autopaikat
                                      :buildings.kiinteiston-autopaikat
-                                     :buildings.autopaikat-yhteensa]
+                                     :buildings.autopaikat-yhteensa
+                                     :start-date :end-date]
                         :references {:verdict-code ["osittain-myonnetty"]}
                         :data {}))
       (fact "init buildings: buildings, vss-luokka and paloluokka"
@@ -1092,7 +1110,8 @@
                                      :reviews-included
                                      :automatic-verdict-dates
                                      :buildings.vss-luokka
-                                     :buildings.paloluokka]
+                                     :buildings.paloluokka
+                                      :start-date :end-date]
                         :references {:verdict-code ["osittain-myonnetty"]}
                         :data {}))
       (fact "initialize-verdict-draft"
@@ -1128,7 +1147,8 @@
                                             :buildings.rakennetut-autopaikat
                                             :buildings.kiinteiston-autopaikat
                                             :buildings.autopaikat-yhteensa
-                                            :buildings.vss-luokka]
+                                            :buildings.vss-luokka
+                                            :start-date :end-date]
                                :giver       "viranhaltija"
                                :references {:verdict-code ["osittain-myonnetty"]
                                             :foremen      (just ["vastaava-tj" "tj"] :in-any-order)

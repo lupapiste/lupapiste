@@ -5,6 +5,7 @@
             [garden.core :as garden]
             [garden.selectors :as sel]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-meta-fields :as app-meta]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.bind :as bind]
             [lupapalvelu.document.tools :as tools]
@@ -188,19 +189,21 @@
 (defn entry--simple
   ([dict styles]
    [{:loc    (case dict
-               :address    :pate.address
-               :buyout     :pate.buyout
-               :collateral :pate-collateral
-               :deviations :pate-deviations
-               :extra-info :pate-extra-info
-               :fyi        :pate.fyi
-               :giving     :pate.verdict-giving
-               :legalese   :pate.legalese
-               :next-steps :pate.next-steps
-               :purpose    :pate-purpose
-               :rationale  :pate.verdict-rationale
-               :rights     :pate-rights
-               :start-info :pate-start-info)
+               :address       :pate.address
+               :buyout        :pate.buyout
+               :collateral    :pate-collateral
+               :deviations    :pate-deviations
+               :extra-info    :pate-extra-info
+               :fyi           :pate.fyi
+               :giving        :pate.verdict-giving
+               :legalese      :pate.legalese
+               :next-steps    :pate.next-steps
+               :purpose       :pate-purpose
+               :rationale     :pate.verdict-rationale
+               :rights        :pate-rights
+               :start-info    :pate-start-info
+               :neighbors     :phrase.category.naapurit
+               :inform-others :pate-inform-others)
      :source {:dict dict}
      :styles styles}])
   ([dict]
@@ -291,10 +294,9 @@
 (def entry--statements '([{:loc      :statement.lausunto
                            :loc-many :pate-statements
                            :source   :statements
-                           :styles   [:bold :border-top]}]
-                         [{:loc    :phrase.category.naapurit
-                           :source {:dict :neighbors}
-                           :styles [:bold :pad-before]}]))
+                           :styles   [:bold :border-top]}]))
+
+(def entry--neighbors (entry--simple :neighbors [:bold :pad-before]))
 
 (def entry--attachments [{:loc      :pdf.attachment
                           :loc-many :verdict.attachments
@@ -327,6 +329,9 @@
                       :source   :reviews
                       :styles   :pad-before}])
 
+(def entry--review-info [{:loc    :empty
+                          :source :review-info}])
+
 (def entry--plans [{:loc      :pdf.required-plan
                     :loc-many :verdict.vaaditutErityissuunnitelmat
                     :source   :plans
@@ -358,13 +363,32 @@
                       :source {:dict :anto}}]
                     [{:loc    :pdf.muutoksenhaku
                       :source :muutoksenhaku}]
-                    [{:loc    :pdf.vomassa
-                      :source :vomassaolo}]))
+                    [{:loc    :pdf.voimassa
+                      :source :voimassaolo}]))
+
+(def entry--dates-ya '([{:loc    :pdf.julkipano
+                         :source {:dict :julkipano}}]
+                       [{:loc    :pdf.anto
+                         :source {:dict :anto}}]
+                       [{:loc    :pdf.muutoksenhaku
+                         :source :muutoksenhaku}]
+                       [{:loc    :pdf.voimassa
+                         :source :voimassaolo-ya}]))
 
 (def entry--appeal ;; Page break
   [{:loc    :pate-verdict.muutoksenhaku
     :source {:dict :appeal}
     :styles [:bold :page-break]}])
+
+(def entry--link-permits '([{:loc      :linkPermit.dialog.header
+                             :loc-many :application.linkPermits
+                             :source :link-permits
+                             :styles :pad-before}
+                            {:path :id
+                             :styles :nowrap}
+                            {:path :operation
+                             :loc-prefix :operations}]))
+
 
 (defn combine-entries
   "Entries that are lists (not vectors!) are interpreted as multiple
@@ -391,6 +415,7 @@
                              entry--buildings
                              (entry--simple :deviations)
                              entry--statements
+                             entry--neighbors
                              entry--attachments
                              entry--verdict
                              entry--foremen
@@ -413,6 +438,7 @@
                              entry--operation
                              (entry--simple :deviations)
                              entry--statements
+                             entry--neighbors
                              (entry--simple :start-info)
                              entry--conditions
                              (entry--verdict-giver :pate.prepper)
@@ -430,9 +456,31 @@
 
 (sc/validate PdfLayout p-pdf-layout)
 
+(def ya-pdf-layout
+  {:left-width 30
+   :entries (combine-entries entry--application-id
+                             entry--rakennuspaikka
+                             (entry--applicant :pdf.achiever :pdf.achievers)
+                             entry--operation
+                             entry--statements
+                             (entry--simple :inform-others)
+                             entry--attachments
+                             entry--verdict
+                             entry--reviews
+                             entry--review-info
+                             entry--plans
+                             entry--conditions
+                             (entry--verdict-giver :applications.authority)
+                             entry--dates-ya
+                             entry--link-permits
+                             entry--appeal)})
+
+(sc/validate PdfLayout ya-pdf-layout)
+
 (def pdf-layouts
-  {:r r-pdf-layout
-   :p p-pdf-layout})
+  {:r  r-pdf-layout
+   :p  p-pdf-layout
+   :ya ya-pdf-layout})
 
 
 (defn join-non-blanks
@@ -705,12 +753,20 @@
                :amount amount}))
        (sort-by :text)))
 
+(defn references-included? [{:keys [verdict]} kw]
+  (get-in verdict [:data (keyword (str (name kw) "-included"))]))
+
 (defn references [{:keys [lang verdict] :as options} kw]
-  (let [ids (dict-value options kw)]
-    (->> (get-in verdict [:references kw])
-         (filter #(util/includes-as-kw? ids (:id %)))
-         (map (keyword lang))
-         sort)))
+  (when (references-included? options kw)
+    (let [ids (dict-value options kw)]
+     (->> (get-in verdict [:references kw])
+          (filter #(util/includes-as-kw? ids (:id %)))
+          (map (keyword lang))
+          sort))))
+
+(defn review-info [options]
+  (when (references-included? options :reviews)
+    (dict-value options :review-info)))
 
 (defn conditions [options]
   (->> (dict-value options :conditions)
@@ -750,6 +806,13 @@
        (remove ss/blank?)
        (ss/join " ")))
 
+(defn link-permits
+  "Since link-permits resolutive is quite database intensive operation
+  it is only done for YA category."
+  [{:keys [verdict application]}]
+  (when (util/=as-kw :ya (:category verdict))
+    (:linkPermitData (app-meta/enrich-with-link-permit-data application))))
+
 (defn verdict-properties
   "Adds all kinds of different properties to the options. It is then up
   to category-specific verdict-body methods and corresponding
@@ -786,6 +849,7 @@
                         flatten)
          :attachments (verdict-attachments opts)
          :reviews (references opts :reviews)
+         :review-info (review-info opts)
          :plans   (references opts :plans)
          :conditions (conditions opts)
          :statements (statements opts)
@@ -801,7 +865,14 @@
                                                       :aloitettava)
                                           (dict-value opts
                                                       :voimassa))
-         :handler (handler opts))))
+         :voimassaolo-ya (loc-fill-non-blank lang
+                                          :pdf.voimassa.text
+                                          (dict-value opts
+                                                      :start-date)
+                                          (dict-value opts
+                                                      :end-date))
+         :handler (handler opts)
+         :link-permits (link-permits opts))))
 
 (defn verdict-body [{verdict :verdict :as options}]
   (->> verdict
@@ -815,24 +886,24 @@
   [:div.header
    [:div.section.header
     [:div.row.pad-after
-     [:div.cell.cell--30
+     [:div.cell.cell--40
       (organization-name lang application)
       (when-let [boardname (some-> verdict :references :boardname)]
         [:div boardname])]
-     [:div.cell.cell--40.center
+     [:div.cell.cell--20.center
       [:div (if published
               (i18n/localize lang (case (keyword category)
                                     :p :pdf.poikkeamispaatos
                                     :attachmentType.paatoksenteko.paatos))
               [:span.preview (i18n/localize lang :pdf.preview)])]]
-     [:div.cell.cell--30.right
+     [:div.cell.cell--40.right
       [:div.permit (i18n/localize lang :pdf category :permit)]]]
     [:div.row
-     [:div.cell.cell--30
+     [:div.cell.cell--40
       (add-unit lang :section (dict-value verdict :verdict-section))]
-     [:div.cell.cell--40.center
+     [:div.cell.cell--20.center
       [:div (dict-value verdict :verdict-date)]]
-     [:div.cell.cell--30.right (i18n/localize lang :pdf.page) " " [:span#page-number ""]]]]])
+     [:div.cell.cell--40.right (i18n/localize lang :pdf.page) " " [:span#page-number ""]]]]])
 
 (defn verdict-footer []
   [:div.footer
