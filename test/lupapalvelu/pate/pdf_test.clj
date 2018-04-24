@@ -337,3 +337,21 @@
            [{:text [:strong "Burn! \u2013 12345"] :amount ""}
             {:text "Kiinteist\u00f6n autopaikat" :amount "2"}
             {:text "Autopaikat yhteens\u00e4" :amount "4"}]]])))
+
+(facts "references"
+  (let [refs {:reviews [{:id "id1" :fi "Yksi" :sv "Ett" :en "One"}
+                        {:id "id2" :fi "Kaksi" :sv "Två" :en "Two"}
+                        {:id "id3" :fi "Kolme" :sv "Tre" :en "Three"}
+                        {:id "id4" :fi "Neljä" :sv "Fyra" :en "Four"}]}]
+    (fact "not included"
+      (pdf/references {:lang    :fi
+                       :verdict {:data       {:reviews-included false
+                                              :reviews          ["id1" "id3"]}
+                                 :references refs}} :reviews)
+      => nil)
+    (fact "Included"
+      (pdf/references {:lang    :fi
+                       :verdict {:data       {:reviews-included true
+                                              :reviews          ["id1" "bad" "id3"]}
+                                 :references refs}} :reviews)
+      => ["Kolme" "Yksi"])))

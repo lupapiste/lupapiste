@@ -324,12 +324,21 @@
                                                      buildings-inclusion-keys)
                               buildings-inclusion))))))
 
+(defn- integer-or-nil [value]
+  (when (integer? value)
+    value))
+
 (defn init--permit-period
   "YA verdict start and end dates are copied from tyoaika document"
   [{:keys [application] :as initmap}]
-  (let [doc-data (:data (domain/get-document-by-name application "tyoaika"))
-        starts (get-in doc-data [:tyoaika-alkaa-ms :value])
-        ends (get-in doc-data [:tyoaika-paattyy-ms :value])]
+  (let [doc-data (:data (domain/get-document-by-name application
+                                                     "tyoaika"))
+        starts (and (dict-included? initmap :start-date)
+                    (integer-or-nil (get-in doc-data
+                                            [:tyoaika-alkaa-ms :value])))
+        ends (and (dict-included? initmap :end-date)
+                  (integer-or-nil (get-in doc-data
+                                          [:tyoaika-paattyy-ms :value])))]
     (cond-> initmap
       starts (assoc-in [:draft :data :start-date] starts)
       ends (assoc-in [:draft :data :end-date] ends))))

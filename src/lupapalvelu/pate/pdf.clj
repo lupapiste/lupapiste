@@ -749,7 +749,7 @@
 (defn verdict-attachments [{lang :lang :as options}]
   (->> (dict-value options :attachments)
        (map (fn [{:keys [type-group type-id amount]}]
-              {:text (i18n/localize lang :attachmentType type-group type-id)
+              {:text   (i18n/localize lang :attachmentType type-group type-id)
                :amount amount}))
        (sort-by :text)))
 

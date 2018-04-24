@@ -17,7 +17,7 @@
 (testable-privates lupapalvelu.pate.verdict
                    next-section insert-section
                    general-handler application-deviations
-                   archive-info)
+                   archive-info application-operation)
 
 (testable-privates lupapalvelu.pate.verdict-template
                    template-inclusions)
@@ -543,7 +543,8 @@
                                 :attachments false
                                 :conditions  false
                                 :deviations  false
-                                :buildings   false}}}
+                                :buildings   false
+                                :random      false}}}
    :sections [{:id   :verdict
                :grid {:columns 4
                       :rows    [[{:dict :paatostekesti}]]}}
@@ -593,8 +594,10 @@
                                                  :vss-luokka             {:text {}}
                                                  :paloluokka             {:text {}}}
                               :template-section :buildings}
-    :start-date              {:date {}}
-    :end-date                {:date {}}}
+    :start-date              {:date             {}
+                              :template-section :random}
+    :end-date                {:date             {}
+                              :template-section :random}}
    :sections []})
 
 (defn draftee [& args]
@@ -815,16 +818,16 @@
                                            :verdict-section :boardname
                                            :start-date :end-date]
                               :references {:verdict-code ["osittain-myonnetty"]
-                                           :reviews      (just [{:fi "suomi"
-                                                                 :sv "svenska"
-                                                                 :en "english"
+                                           :reviews      (just [{:fi   "suomi"
+                                                                 :sv   "svenska"
+                                                                 :en   "english"
                                                                  :type "hello"
-                                                                 :id (find-id "suomi")}
-                                                                {:fi "imous"
-                                                                 :sv "aksnevs"
-                                                                 :en "hsilgne"
+                                                                 :id   (find-id "suomi")}
+                                                                {:fi   "imous"
+                                                                 :sv   "aksnevs"
+                                                                 :en   "hsilgne"
                                                                  :type "olleh"
-                                                                 :id (find-id "imous")}] :in-any-order)}
+                                                                 :id   (find-id "imous")}] :in-any-order)}
                               :data {:reviews-included false
                                      :reviews          (just [(find-id "suomi") (find-id "imous")] :in-any-order)})))
 
@@ -1043,6 +1046,81 @@
                                      :reviews-included :start-date :end-date]
                         :references {:verdict-code ["osittain-myonnetty"]}
                         :data {}))
+      (fact "init by application: operation - dict not included"
+        (init--dict-by-application (assoc (draftee [:conditions :attachments
+                                                    :deviations :buildings])
+                                          :application
+                                          {:documents
+                                           [{:schema-info {:name    "hankkeen-kuvaus"
+                                                           :subtype "hankkeen-kuvaus"}
+                                             :data        {:kuvaus {:value "Co-operation"}}}]})
+                                   :operation application-operation)
+        => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
+                                     :lainvoimainen :voimassa :aloitettava
+                                     :handler :paatosteksti :foremen
+                                     :foremen-included :plans
+                                     :verdict-section :boardname
+                                     :automatic-verdict-dates
+                                     :plans-included :reviews
+                                     :reviews-included :start-date :end-date]
+                        :references {:verdict-code ["osittain-myonnetty"]}
+                        :data {}))
+      (fact "init by application: operation - dict included, R application"
+        (init--dict-by-application (assoc (draftee [:conditions :attachments
+                                                    :deviations :buildings])
+                                          :application
+                                          {:documents
+                                           [{:schema-info {:name    "hankkeen-kuvaus"
+                                                           :subtype "hankkeen-kuvaus"}
+                                             :data        {:kuvaus {:value "Co-operation"}}}]})
+                                   :handler application-operation)
+        => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
+                                     :lainvoimainen :voimassa :aloitettava
+                                     :handler :paatosteksti :foremen
+                                     :foremen-included :plans
+                                     :verdict-section :boardname
+                                     :automatic-verdict-dates
+                                     :plans-included :reviews
+                                     :reviews-included :start-date :end-date]
+                        :references {:verdict-code ["osittain-myonnetty"]}
+                        :data {:handler "Co-operation"}))
+      (fact "init by application: operation - dict included, YA application"
+        (init--dict-by-application (assoc (draftee [:conditions :attachments
+                                                    :deviations :buildings])
+                                          :application
+                                          {:documents
+                                           [{:schema-info {:name    "hankkeen-kuvaus-ya"
+                                                           :subtype "hankkeen-kuvaus"}
+                                             :data        {:kayttotarkoitus {:value "Co-operation"}}}]})
+                                   :handler application-operation)
+        => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
+                                     :lainvoimainen :voimassa :aloitettava
+                                     :handler :paatosteksti :foremen
+                                     :foremen-included :plans
+                                     :verdict-section :boardname
+                                     :automatic-verdict-dates
+                                     :plans-included :reviews
+                                     :reviews-included :start-date :end-date]
+                        :references {:verdict-code ["osittain-myonnetty"]}
+                        :data {:handler "Co-operation"}))
+      (fact "init by application: operation - dict included, no document"
+        (init--dict-by-application (assoc (draftee [:conditions :attachments
+                                                    :deviations :buildings])
+                                          :application
+                                          {:documents
+                                           [{:schema-info {:name "some-document"}
+                                             :data        {:kayttotarkoitus {:value "Co-operation"}}}]})
+                                   :handler application-operation)
+        => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
+                                     :lainvoimainen :voimassa :aloitettava
+                                     :handler :paatosteksti :foremen
+                                     :foremen-included :plans
+                                     :verdict-section :boardname
+                                     :automatic-verdict-dates
+                                     :plans-included :reviews
+                                     :reviews-included :start-date :end-date]
+                        :references {:verdict-code ["osittain-myonnetty"]}
+                        :data {:handler ""}))
       (fact "init buildings: no buildings, no template data"
         (init--buildings (draftee [:conditions :deviations :attachments :buildings]))
         => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
@@ -1111,9 +1189,75 @@
                                      :automatic-verdict-dates
                                      :buildings.vss-luokka
                                      :buildings.paloluokka
-                                      :start-date :end-date]
+                                     :start-date :end-date]
                         :references {:verdict-code ["osittain-myonnetty"]}
                         :data {}))
+      (fact "init permit period: no template section"
+        (init--permit-period (assoc (draftee [:conditions :deviations :attachments
+                                              :buildings :random])
+                                    :application {:documents [{:schema-info {:name "tyoaika"}
+                                                               :data        {:tyoaika-alkaa-ms   {:value 12345}
+                                                                             :tyoaika-paattyy-ms {:value 54321}}}]}))
+        => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
+                                     :lainvoimainen :voimassa :aloitettava
+                                     :handler :paatosteksti :foremen
+                                     :foremen-included :plans
+                                     :verdict-section :boardname
+                                     :automatic-verdict-dates
+                                     :plans-included :reviews
+                                     :reviews-included]
+                        :references {:verdict-code ["osittain-myonnetty"]}
+                        :data {}))
+      (fact "init permit period: all OK"
+        (init--permit-period (assoc (draftee [:conditions :deviations :attachments
+                                              :buildings])
+                                    :application {:documents [{:schema-info {:name "tyoaika"}
+                                                               :data        {:tyoaika-alkaa-ms   {:value 12345}
+                                                                             :tyoaika-paattyy-ms {:value 54321}}}]}))
+        => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
+                                     :lainvoimainen :voimassa :aloitettava
+                                     :handler :paatosteksti :foremen
+                                     :foremen-included :plans
+                                     :verdict-section :boardname
+                                     :automatic-verdict-dates
+                                     :plans-included :reviews
+                                     :reviews-included
+                                     :start-date :end-date]
+                        :references {:verdict-code ["osittain-myonnetty"]}
+                        :data {:start-date 12345 :end-date 54321}))
+      (fact "init permit period: not integer :tyoaika-alkaa-ms"
+        (init--permit-period (assoc (draftee [:conditions :deviations :attachments
+                                              :buildings])
+                                    :application {:documents [{:schema-info {:name "tyoaika"}
+                                                               :data        {:tyoaika-alkaa-ms   {:value ""}
+                                                                             :tyoaika-paattyy-ms {:value 54321}}}]}))
+        => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
+                                     :lainvoimainen :voimassa :aloitettava
+                                     :handler :paatosteksti :foremen
+                                     :foremen-included :plans
+                                     :verdict-section :boardname
+                                     :automatic-verdict-dates
+                                     :plans-included :reviews
+                                     :reviews-included
+                                     :start-date :end-date]
+                        :references {:verdict-code ["osittain-myonnetty"]}
+                        :data {:end-date 54321}))
+      (fact "init permit period: not-integer :tyoaika-paattyy-ms"
+        (init--permit-period (assoc (draftee [:conditions :deviations :attachments
+                                              :buildings])
+                                    :application {:documents [{:schema-info {:name "tyoaika"}
+                                                               :data        {:tyoaika-alkaa-ms {:value 12345}}}]}))
+        => (check-draft :inclusions [:julkipano :anto :muutoksenhaku
+                                     :lainvoimainen :voimassa :aloitettava
+                                     :handler :paatosteksti :foremen
+                                     :foremen-included :plans
+                                     :verdict-section :boardname
+                                     :automatic-verdict-dates
+                                     :plans-included :reviews
+                                     :reviews-included
+                                     :start-date :end-date]
+                        :references {:verdict-code ["osittain-myonnetty"]}
+                        :data {:start-date 12345}))
       (fact "initialize-verdict-draft"
         (let [init (initialize-verdict-draft
                     (assoc (assoc-in (draftee [:foremen]
