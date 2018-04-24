@@ -355,3 +355,19 @@
                                               :reviews          ["id1" "bad" "id3"]}
                                  :references refs}} :reviews)
       => ["Kolme" "Yksi"])))
+
+(facts "conditions"
+  (fact "No conditions"
+    (pdf/conditions {:verdict {:data {}}})
+    => nil)
+  (fact "Only empty conditions"
+    (pdf/conditions {:verdict {:data {:conditions {:bbb {:condition ""}
+                                                   :ccc {}
+                                                   :aaa {:condition "    "}}}}})
+    => nil)
+  (fact "Some conditions"
+    (pdf/conditions {:verdict {:data {:conditions {:bbb {:condition "Should be last."}
+                                                   :ccc {:condition "  "}
+                                                   :aaa {:condition "Probably first."}}}}})
+    => [[:div.markup '(([:p {} "Probably first." [:br]])
+                       ([:p {} "Should be last." [:br]]))]]))

@@ -340,7 +340,7 @@
 (def entry--conditions [{:loc      :pdf.condition
                          :loc-many :pdf.conditions
                          :source   :conditions
-                         :styles   [:pad-before :spaced]}])
+                         :styles   [:pad-before]}])
 
 (def entry--collateral [{:loc    :pate-collateral
                          :source :collateral
@@ -748,6 +748,8 @@
 
 (defn verdict-attachments [{lang :lang :as options}]
   (->> (dict-value options :attachments)
+       ;; We do not show attachments in preview
+       (filter :type-group)
        (map (fn [{:keys [type-group type-id amount]}]
               {:text   (i18n/localize lang :attachmentType type-group type-id)
                :amount amount}))
@@ -769,12 +771,16 @@
     (dict-value options :review-info)))
 
 (defn conditions [options]
-  (->> (dict-value options :conditions)
-       (map (fn [[k v]]
-              {:id   (name k)
-               :text (:condition v)}))
-       (sort-by :id)
-       (map (comp markup/markup->tags :text))))
+  (let [tags (->> (dict-value options :conditions)
+                  (map (fn [[k v]]
+                         {:id   (name k)
+                          :text (ss/trim (:condition v))}))
+                  (remove (comp ss/blank? :text))
+                  (sort-by :id)
+                  (map (comp markup/markup->tags :text)))]
+    (when (seq tags)
+      ;; Extra "layer" needed for proper entry-row layout.
+      [[:div.markup tags]])))
 
 (defn statements [{lang :lang :as options}]
   (->> (dict-value options :statements)
