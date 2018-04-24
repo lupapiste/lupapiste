@@ -335,7 +335,7 @@
             :date           (fun (required {:date PateDate}))
             :select         (fun (required {:select PateSelect}))
             :repeating      (fun {:repeating (sc/recursive schema-ref)
-                              ;; The value is a key in the repeating dictionary.
+                                  ;; The value is a key in the repeating dictionary.
                                   (sc/optional-key :sort-by) sc/Keyword})))})
   ([schema-ref]
    (schema-types schema-ref nil)))

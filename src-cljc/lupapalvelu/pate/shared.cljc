@@ -172,6 +172,10 @@
                    (set/union acc key-set)))
                #{})))
 
+(defn check-unique-section-ids [sections]
+  (doseq [[k v] (group-by :id sections)]
+    (pate-assert (= (count v) 1) "Duplicate section id:" k)))
+
 (defn combine-subschemas
   "Combines given subschemas into one schema. Throws if dictionary keys
   overlap or sections refer to a :dict that does not exist."
@@ -187,6 +191,7 @@
                        subschemas)]
     (check-dicts (:dictionary schema)
                  (:sections schema))
+    (check-unique-section-ids (:sections schema))
     schema))
 
 
@@ -460,7 +465,8 @@
                                                       :text-dict :text}}
                                   :text     {:text {}}
                                   :included {:toggle {:label?  false
-                                                      :i18nkey :pate.available-in-verdict}}}}}
+                                                      :i18nkey :pate.available-in-verdict}}}
+                      :sort-by :text}}
    :section    {:id         dict
                 :loc-prefix loc-prefix
                 :grid       {:columns 5

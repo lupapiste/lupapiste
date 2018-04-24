@@ -251,6 +251,13 @@
                                                    :har {:text {}}
                                                    :baz {:toggle {}}}}])
     => (throws AssertionError))
+  (fact "Unique section ids"
+    (shared/check-unique-section-ids (:sections mock-template))
+    => nil)
+  (fact "Non-unique section ids"
+    (shared/check-unique-section-ids (cons {:id :t-second}
+                                           (:sections mock-template)))
+    => (throws AssertionError))
   (fact "Combine subschemas"
     (shared/combine-subschemas {:dictionary {:foo {:toggle {}}
                                              :bar {:text {}}}
