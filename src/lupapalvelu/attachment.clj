@@ -690,26 +690,31 @@
 (defn get-attachment-file-as!
   "Returns the attachment file if user has access to application and the attachment, otherwise nil."
   [user file-id]
-  (when-let [attachment-file (mongo/download file-id)]
-    (when-let [application (and (:application attachment-file) (get-application-as (:application attachment-file) user :include-canceled-apps? true))]
-      (when (and (seq application) (access/can-access-attachment-file? user file-id application)) attachment-file))))
+  (when-let [application (get-application-as {$or [{:attachments.versions.fileId file-id}
+                                                   {:attachments.versions.originalFileId file-id}]}
+                                             user
+                                             :include-canceled-apps? true)]
+    (when (and (seq application)
+               (access/can-access-attachment-file? user file-id application))
+      (storage/download application file-id))))
 
 (defn get-attachment-file!
   "Returns the attachment file without access checking, otherwise nil."
   [file-id]
-  (when-let [attachment-file (mongo/download file-id)]
-    (when-let [application (and (:application attachment-file) (get-application-no-access-checking (:application attachment-file)))]
-      (when (seq application) attachment-file))))
+  (when-let [application (get-application-no-access-checking {$or [{:attachments.versions.fileId file-id}
+                                                                   {:attachments.versions.originalFileId file-id}]})]
+    (when (seq application)
+      (storage/download application file-id))))
 
 (defn- get-attachment-version-file [application attachment {:keys [fileId onkaloFileId filename contentType]} user preview?]
   (when (or (not user) (access/can-access-attachment? user application attachment))
     (cond
       fileId
       (if preview?
-        (or (mongo/download (str fileId "-preview"))
+        (or (storage/download-preview (:id application) fileId attachment)
             ;; Generate preview if not previously done. It's async, so it can't be returned in this request.
             (preview/generate-preview-and-return-placeholder! (:id application) fileId filename contentType))
-        (mongo/download fileId))
+        (storage/download (:id application) fileId attachment))
 
       onkaloFileId
       (merge
@@ -762,7 +767,7 @@
 
 (defn output-file
   [file-id session-id]
-  (if-let [attachment-file (mongo/download-find {:_id file-id :metadata.sessionId session-id})]
+  (if-let [attachment-file (storage/download-session-file session-id file-id)]
     (update (attachment-200-response attachment-file (ss/encode-filename (:filename attachment-file)))
             :headers
             http/no-cache-headers)

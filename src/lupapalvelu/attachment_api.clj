@@ -38,7 +38,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.attachment.stamps :as stamps]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.storage.file-storage :as storage]))
 
 ;; Action category: attachments
 
@@ -590,15 +591,14 @@
                                                 :user user}
                                                :autoConversion autoConversion)]
         (when-not (= "application/pdf" (:contentType latest-version)) (fail! :error.not-pdf))
-        (with-open [content ((:content (mongo/download fileId)))]
+        (with-open [content ((:content (storage/download (:id application) fileId attachment)))]
           (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)
           (att/upload-and-attach! {:application application :user user} ; NOTE: user is user from attachment version
                                          attachment-options
                                          {:content temp-pdf
                                           :filename filename
                                           :content-type contentType
-                                          :size (.length temp-pdf)}
-                                         ))
+                                          :size (.length temp-pdf)}))
         (ok)))
     (fail :error.unknown)))
 
