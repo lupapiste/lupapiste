@@ -67,6 +67,16 @@
      (get-in data [:kayttotarkoitus :value]) ;; YA
      "")))
 
+(defn verdict-type
+  "YA verdicts come in different types. The initial value is extracted
+  from the primary operation name."
+  [{primary-op :primaryOperation}]
+  (let [regex (->> shared/ya-verdict-types
+                   (map name)
+                   (ss/join "|")
+                   re-pattern)]
+    (re-find regex (:name primary-op))))
+
 (defn dicts->kw-paths
   [dictionary]
   (->> dictionary
@@ -343,6 +353,8 @@
       starts (assoc-in [:draft :data :start-date] starts)
       ends (assoc-in [:draft :data :end-date] ends))))
 
+
+
 (defmethod initialize-verdict-draft :r
   [initmap]
   (-> initmap
@@ -374,6 +386,7 @@
   (-> initmap
       (init--dict-by-application :handler general-handler)
       init--verdict-dates
+      (init--dict-by-application :verdict-type verdict-type)
       (init--requirements-references :plans)
       (init--requirements-references :reviews)
       init--upload

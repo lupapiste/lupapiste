@@ -534,10 +534,20 @@
   (get-in (domain/get-document-by-name application (name doc-name))
           (cons :data (pathify kw-path))))
 
-(defn dict-value [{:keys [dictionary verdict]} kw-path]
-  (let [path             (pathify kw-path)
-        value            (get-in verdict (cons :data path))
-        {schema :schema} (shared/dict-resolve path dictionary)]
+(defn dict-value
+  "Dictionary value for the given kw-path. Options can either
+  have :verdict key or be verdict itself. The returned values are
+  transformed into friendly formats (e.g., timestamp -> date)"
+  [options kw-path]
+  (let [{:keys [category schema-version
+                data]}   (get options :verdict options)
+        path             (pathify kw-path)
+        value            (get-in data  path)
+        {schema :schema} (shared/dict-resolve path
+                                              (:dictionary
+                                               (shared/verdict-schema
+                                                category
+                                                schema-version)))]
     (cond
       (and (:phrase-text schema) (ss/not-blank? value))
       (list [:div.markup (markup/markup->tags value)])
@@ -650,7 +660,7 @@
        unit (add-unit lang unit))]))
 
 (defn entry-row
-  [left-width {:keys [lang dictionary] :as data} [{:keys [loc loc-many source styles]} & cells]]
+  [left-width {:keys [lang] :as data} [{:keys [loc loc-many source styles]} & cells]]
   (let [source-value (util/pcond-> (resolve-source data source) string? ss/trim)
         multiple?    (and (sequential? source-value)
                           (> (count source-value) 1))]
@@ -826,22 +836,18 @@
   [{:keys [lang application verdict] :as options}]
   (let [buildings                (verdict-buildings options)
         {:keys [category
-                schema-version]} verdict
-        opts                     (assoc options
-                                        :dictionary
-                                        (:dictionary (shared/verdict-schema category
-                                                                            schema-version)))]
-    (assoc opts
+                schema-version]} verdict]
+    (assoc options
            :application-id (:id application)
            :property-id (property-id application)
-           :applicants (->> (applicants opts)
+           :applicants (->> (applicants options)
                             (map #(format "%s\n%s"
                                         (:name %) (:address %)))
                           (interpose "\n"))
-         :operations (assoc-in (operations opts)
+         :operations (assoc-in (operations options)
                                [0 ::styles :text] :bold)
-         :complexity (complexity opts)
-         :designers (designers opts)
+         :complexity (complexity options)
+         :designers (designers options)
          :primary (primary-operation-data application)
          :paloluokka (->> buildings
                           (map :paloluokka)
@@ -853,32 +859,32 @@
                         (interpose {:text    "" :amount ""
                                     ::styles {:row :pad-before}})
                         flatten)
-         :attachments (verdict-attachments opts)
-         :reviews (references opts :reviews)
-         :review-info (review-info opts)
-         :plans   (references opts :plans)
-         :conditions (conditions opts)
-         :statements (statements opts)
-         :collateral (collateral opts)
+         :attachments (verdict-attachments options)
+         :reviews (references options :reviews)
+         :review-info (review-info options)
+         :plans   (references options :plans)
+         :conditions (conditions options)
+         :statements (statements options)
+         :collateral (collateral options)
          :organization (organization-name lang application)
          :muutoksenhaku (loc-fill-non-blank lang
                                             :pdf.not-later-than
-                                            (dict-value opts
+                                            (dict-value options
                                                         :muutoksenhaku))
          :voimassaolo (loc-fill-non-blank lang
                                           :pdf.voimassa.text
-                                          (dict-value opts
+                                          (dict-value options
                                                       :aloitettava)
-                                          (dict-value opts
+                                          (dict-value options
                                                       :voimassa))
          :voimassaolo-ya (loc-fill-non-blank lang
-                                          :pdf.voimassa.text
-                                          (dict-value opts
+                                          :pdf.voimassaolo-ya
+                                          (dict-value options
                                                       :start-date)
-                                          (dict-value opts
+                                          (dict-value options
                                                       :end-date))
-         :handler (handler opts)
-         :link-permits (link-permits opts))))
+         :handler (handler options)
+         :link-permits (link-permits options))))
 
 (defn verdict-body [{verdict :verdict :as options}]
   (->> verdict
@@ -903,7 +909,10 @@
                                     :attachmentType.paatoksenteko.paatos))
               [:span.preview (i18n/localize lang :pdf.preview)])]]
      [:div.cell.cell--40.right
-      [:div.permit (i18n/localize lang :pdf category :permit)]]]
+      [:div.permit (case (keyword category)
+                     :ya (i18n/localize lang :pate.verdict-type
+                                        (dict-value verdict :verdict-type))
+                     (i18n/localize lang :pdf category :permit))]]]
     [:div.row
      [:div.cell.cell--40
       (add-unit lang :section (dict-value verdict :verdict-section))]

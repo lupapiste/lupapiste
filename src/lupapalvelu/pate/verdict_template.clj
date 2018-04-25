@@ -310,18 +310,23 @@
             (keys dictionary))))
 
 (defn- template-inclusions
-  "List if included top-level dicts. Dict is excluded if it belongs (only) to
-  removed section. The list is used when resolving the :template-dict
+  "List if included top-level dicts. Dict is excluded if it
+  belongs (only) to removed section and the section is not always
+  included. The list is used when resolving the :template-dict
   references in verdicts."
   [{:keys [category draft]}]
   (let [{:keys [dictionary
                 sections]}     (shared/verdict-template-schema category)
         dict-secs              (schemas/dict-sections sections)
-        removed-sections       (->> (:removed-sections draft)
-                                    (map (fn [[k v]]
-                                           (when v k)))
-                                    (remove nil?)
+        always-included        (->> (filter :always-included? sections)
+                                    (map :id)
                                     set)
+        removed-sections       (set/difference (->> (:removed-sections draft)
+                                                    (map (fn [[k v]]
+                                                           (when v k)))
+                                                    (remove nil?)
+                                                    set)
+                                               always-included)
 
         ]
     (->> dict-secs

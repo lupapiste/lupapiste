@@ -68,6 +68,10 @@
    :loppukatselmus   "Loppukatselmus"
    :valvonta         "Muu valvontak\u00e4ynti"})
 
+;; Each type must be part of the corresponding operation names (e.g.,
+;; ya-katulupa-maalampotyot -> katulupa)
+(def ya-verdict-types [:sijoituslupa :kayttolupa :katulupa :jatkoaika])
+
 (def foreman-codes [:vastaava-tj :vv-tj :iv-tj :erityis-tj :tj])
 
 ;; Verdict dates must include every possible date key.
@@ -617,10 +621,11 @@
 
 (def temsub-reviews-with-phrase
   (-> (settings-dependencies :reviews :pate-reviews)
-      (assoc-in [:dictionary :review-info] {:phrase-text {:i18nkey :pate.review-info
+      (assoc-in [:dictionary :review-info] {:phrase-text {:i18nkey  :pate.review-info
                                                           :category :yleinen}})
-      (update-in [:section :grid :rows] conj [{:col 4
-                                               :dict :review-info}])))
+      (update-in [:section :grid :rows] conj [{:col   4
+                                               :dict  :review-info}])
+      (assoc-in [:section :always-included?] true)))
 
 (def temsub-inform-others
   (text-subschema :inform-others :pate-inform-others.text))
@@ -1112,24 +1117,41 @@
 
 (def versub-dates-ya
   (-> (versub-dates :ya)
-      (assoc-in [:dictionary :start-date] {:date {:i18nkey :tyoaika.tyoaika-alkaa-ms}})
-      (assoc-in [:dictionary :end-date] {:date {:i18nkey :tyoaika.tyoaika-paattyy-ms}})
-      (update-in [:section :grid :rows] conj [{:dict :start-date} {:dict :end-date}])))
+      (assoc-in [:dictionary :start-date]
+                {:date      {:i18nkey :tyoaika.tyoaika-alkaa-ms}
+                 :required? true})
+      (assoc-in [:dictionary :end-date]
+                {:date      {:i18nkey :tyoaika.tyoaika-paattyy-ms}
+                 :required? true})
+      (update-in [:section :grid :rows]
+                 conj
+                 [{:dict :start-date} {:dict :end-date}])))
 
 (def versub-requirements-ya
   (-> (versub-requirements :plans :reviews)
       (assoc-in [:dictionary :review-info] {:phrase-text   {:i18nkey  :pate.review-info
                                                             :category :yleinen}
                                             :template-dict :review-info})
-      (update-in [:section :grid :rows] concat [[{:col  4
-                                                  :dict :review-info}]])))
+      (update-in [:section :grid :rows] concat [[{:col   4
+                                                  :show? :reviews-included
+                                                  :dict  :review-info}]])))
 
 (def versub-inform-others ;; Lahiseudun asukkaita tiedotettava
   (phrase-versub :inform-others :pate-inform-others :yleinen))
 
+(def versub-verdict-ya
+  (-> (versub-verdict false)
+      (assoc-in [:dictionary :verdict-type]
+                {:select    {:loc-prefix :pate.verdict-type
+                             :items      ya-verdict-types
+                             :sort-by    :text}
+                 :required? true})
+      (update-in [:section :grid :rows 0]
+                 #(cons {:dict :verdict-type} %))))
+
 (def ya-verdict-schema-1 (build-verdict-schema :ya 1
                                                versub-dates-ya
-                                               (versub-verdict false)
+                                               versub-verdict-ya
                                                versub-bulletin
                                                versub-operation
                                                versub-requirements-ya

@@ -432,13 +432,22 @@
          {:id   sc/Keyword ;; Also title localization key
           :grid PateGrid}))
 
+(defschema PateVerdictTemplateSection
+  (assoc PateSection
+         ;; By default section dicts are included only if the section
+         ;; itself is included. However, sometimes this approach is
+         ;; too restrictive (e.g., for extra reviews section
+         ;; dicts). If :always-included? is true, then the section
+         ;; dicts are never excluded.
+         (sc/optional-key :always-included?) sc/Bool))
+
 (defschema PateVerdictTemplate
   (merge Dictionary
          PateMeta
          {(sc/optional-key :id)       sc/Str
           (sc/optional-key :modified) sc/Int
           (sc/optional-key :name)     sc/Str ;; Non-localized raw string
-          :sections                   [PateSection]}))
+          :sections                   [PateVerdictTemplateSection]}))
 
 (defschema PateSettings
   (merge Dictionary

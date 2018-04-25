@@ -37,22 +37,25 @@
                                                :four-two {:text {}}}}
                 :five             {:text {}}
                 :removed-sections {:keymap {:first  false
-                                            :second false}}}
+                                            :second false
+                                            :third  false}}}
    :sections   [{:id   :first
                  :grid {:columns 4
                         :rows    [[{:dict :one}]]}}
-                {:id   :second
-                 :grid {:columns 4
-                        :rows    [[{:dict :one} {:dict :two}]]}}
-                {:id   :third
-                 :grid {:columns 4
-                        :rows    [[{:dict :three}]
-                                  [{:grid {:columns   2
-                                           :repeating :four
-                                           :rows      [[{:dict :four-one}
-                                                        {:dict :four-two}]]}}]]}}]})
+                {:id               :second
+                 :always-included? false
+                 :grid             {:columns 4
+                                    :rows    [[{:dict :one} {:dict :two}]]}}
+                {:id               :third
+                 :always-included? true
+                 :grid             {:columns 4
+                                    :rows    [[{:dict :three}]
+                                              [{:grid {:columns   2
+                                                       :repeating :four
+                                                       :rows      [[{:dict :four-one}
+                                                                    {:dict :four-two}]]}}]]}}]})
 
-(fact "Test templae is valid"
+(fact "Test template is valid"
   (sc/validate shared-schemas/PateVerdictTemplate test-template)
   => test-template)
 
@@ -90,8 +93,13 @@
     (template-inclusions {:category :r :draft {:removed-sections {:second true}}})
     => (just ["one" "three" "four" "five"] :in-any-order)
     (provided (shared/verdict-template-schema :r) => test-template))
-  (fact "Both sections removed"
+  (fact "Third section removed"
+    (template-inclusions {:category :r :draft {:removed-sections {:third true}}})
+    => (just ["one" "two" "three" "four" "five"] :in-any-order)
+    (provided (shared/verdict-template-schema :r) => test-template))
+  (fact "Every section removed"
     (template-inclusions {:category :r :draft {:removed-sections {:first  true
-                                                         :second true}}})
+                                                                  :second true
+                                                                  :third  true}}})
     => (just ["three" "four" "five"] :in-any-order)
     (provided (shared/verdict-template-schema :r) => test-template)))
