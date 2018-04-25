@@ -523,6 +523,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   hub.subscribe("update-doc-success", checkForNonApprovedDesigners);
   hub.subscribe("application-model-updated", checkForNonApprovedDesigners);
+  hub.subscribe({eventType:"approval-status", broadcast: true}, _.debounce(checkForNonApprovedDesigners));
 
   self.approveApplication = function() {
     if (self.stateChanged()) {
