@@ -9,7 +9,7 @@
 (defonce permission-tree (atom {}))
 
 (def ^:private Scope sc/Keyword)
-(def ^:private Role  sc/Keyword)
+(def ^:private Role sc/Keyword)
 (defn- permission-schema [context-type]
   (sc/constrained sc/Keyword (fn-> namespace name (= (name context-type)))
                   "Permission namespace equals context-type"))
@@ -20,9 +20,9 @@
 
 (defn load-permissions! []
   (let [this-path (util/this-jar lupapalvelu.main)
-        files (if (ss/ends-with this-path ".jar") ; are we inside jar
-                (filter #(ss/ends-with % ".edn") (util/list-jar this-path "permissions/"))
-                (map #(.getName %) (util/get-files-by-regex "resources/permissions/" #".+\.edn$")))]
+        files     (if (ss/ends-with this-path ".jar")       ; are we inside jar
+                    (filter #(ss/ends-with % ".edn") (util/list-jar this-path "permissions/"))
+                    (map #(.getName %) (util/get-files-by-regex "resources/permissions/" #".+\.edn$")))]
     (reset! permission-tree {})
     (doseq [file files]
       (defpermissions (->> file (re-find #"(.*)(.edn)") second) (util/read-edn-resource (str "permissions/" file))))))
@@ -71,10 +71,10 @@
 
 (defn- apply-company-restrictions [{company-submitter :submit} permissions]
   (cond-> permissions
-    (not company-submitter) submit-restriction))
+          (not company-submitter) submit-restriction))
 
 (defn get-company-permissions [{{{company-id :id company-role :role :as company} :company} :user
-                                {auth :auth} :application :as command}]
+                                {auth :auth}                                               :application :as command}]
   (when company-id
     (->> auth
          (filter (every-pred (comp #{company-id} :id)
@@ -117,9 +117,9 @@
    :permissions #{:global/permissions :application/permissions ... :thing/permissions}}"
   [context-name [command-param] & body]
   (let [cmd (cond
-              (:as command-param)  command-param
+              (:as command-param) command-param
               (map? command-param) (assoc command-param :as (gensym "cmd"))
-              :else                {:as command-param})]
+              :else {:as command-param})]
     `(defn ~context-name [~cmd]
        (let [ctx#   (do ~@body)
              perms# (->> (:context-roles ctx#)
@@ -130,9 +130,9 @@
 
 (def ContextMatcher
   (sc/conditional
-   set?     #{sc/Keyword}
-   fn?      sc/Any
-   map?     {sc/Keyword (sc/recursive #'ContextMatcher)}))
+    set? #{sc/Keyword}
+    fn? sc/Any
+    map? {sc/Keyword (sc/recursive #'ContextMatcher)}))
 
 (def RequiredPermission
   (sc/constrained sc/Keyword known-permission?))
@@ -142,7 +142,7 @@
     (map? ctx-matcher) (every? (fn [[k v]] (matching-context? v (k context))) ctx-matcher)
     (nil? ctx-matcher) true
     (set? ctx-matcher) (contains? ctx-matcher (keyword context))
-    (fn? ctx-matcher)  (ctx-matcher context)))
+    (fn? ctx-matcher) (ctx-matcher context)))
 
 (defn get-required-permissions [{permissions :permissions} command]
   (or (util/find-first (util/fn-> :context (matching-context? command)) permissions)
