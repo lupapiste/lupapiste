@@ -312,31 +312,30 @@
   schema-ref: Reference to the encompassing schema
               (e.g., #'SchemaTypes)
 
-  extra: (optional) Map of extra dict schema properties
-                   (see VerdictSchemaTypes). Note that the properties
-                   are added to every dict schema."
-  ([schema-ref extra]
+  fun: (optional) If given, called for every dict schema
+                  (see VerdictSchemaTypes)"
+  ([schema-ref fun]
    {sc/Keyword
-    (letfn [(mex [m] (merge m extra))]
+    (let [fun (or fun identity)]
            (sc/conditional
-            :reference-list (mex (required {:reference-list PateReferenceList}))
-            :phrase-text    (mex (required {:phrase-text PatePhraseText}))
-            :loc-text       (mex PateLocText)
-            :date-delta     (mex (required {:date-delta PateDateDelta}))
-            :multi-select   (mex (required {:multi-select PateMultiSelect}))
-            :reference      (mex (required {:reference PateReference}))
-            :link           (mex {:link PateLink})
-            :button         (mex {:button PateButton})
-            :placeholder    (mex {:placeholder PatePlaceholder})
-            :keymap         (mex {:keymap KeyMap})
-            :attachments    (mex {:attachments PateAttachments})
-            :application-attachments (mex {:application-attachments PateComponent})
-            :toggle         (mex {:toggle PateToggle})
-            :text           (mex (required {:text PateText}))
-            :date           (mex (required {:date PateDate}))
-            :select         (mex (required {:select PateSelect}))
-            :repeating      (mex {:repeating (sc/recursive schema-ref)
-                              ;; The value is a key in the repeating dictionary.
+            :reference-list (fun (required {:reference-list PateReferenceList}))
+            :phrase-text    (fun (required {:phrase-text PatePhraseText}))
+            :loc-text       (fun PateLocText)
+            :date-delta     (fun (required {:date-delta PateDateDelta}))
+            :multi-select   (fun (required {:multi-select PateMultiSelect}))
+            :reference      (fun (required {:reference PateReference}))
+            :link           (fun {:link PateLink})
+            :button         (fun {:button PateButton})
+            :placeholder    (fun {:placeholder PatePlaceholder})
+            :keymap         (fun {:keymap KeyMap})
+            :attachments    (fun {:attachments PateAttachments})
+            :application-attachments (fun {:application-attachments PateComponent})
+            :toggle         (fun {:toggle PateToggle})
+            :text           (fun (required {:text PateText}))
+            :date           (fun (required {:date PateDate}))
+            :select         (fun (required {:select PateSelect}))
+            :repeating      (fun {:repeating (sc/recursive schema-ref)
+                                  ;; The value is a key in the repeating dictionary.
                                   (sc/optional-key :sort-by) sc/Keyword})))})
   ([schema-ref]
    (schema-types schema-ref nil)))
@@ -433,13 +432,22 @@
          {:id   sc/Keyword ;; Also title localization key
           :grid PateGrid}))
 
+(defschema PateVerdictTemplateSection
+  (assoc PateSection
+         ;; By default section dicts are included only if the section
+         ;; itself is included. However, sometimes this approach is
+         ;; too restrictive (e.g., for extra reviews section
+         ;; dicts). If :always-included? is true, then the section
+         ;; dicts are never excluded.
+         (sc/optional-key :always-included?) sc/Bool))
+
 (defschema PateVerdictTemplate
   (merge Dictionary
          PateMeta
          {(sc/optional-key :id)       sc/Str
           (sc/optional-key :modified) sc/Int
           (sc/optional-key :name)     sc/Str ;; Non-localized raw string
-          :sections                   [PateSection]}))
+          :sections                   [PateVerdictTemplateSection]}))
 
 (defschema PateSettings
   (merge Dictionary
@@ -450,12 +458,15 @@
 
 (defschema PateVerdictSchemaTypes
   (schema-types #'PateVerdictSchemaTypes
-                {;; If the section is removed in the template, this
-                 ;; dict is excluded in the verdict.
-                 (sc/optional-key :template-section) sc/Keyword
-                 ;; The template-dict provides the initial value to
-                 ;; this verdict dict.
-                 (sc/optional-key :template-dict)    sc/Keyword}))
+                (fn [schema]
+                  (only-one-of [:template-section :template-dict]
+                               (merge schema
+                                      {;; If the section is removed in the template, this
+                                       ;; dict is excluded in the verdict.
+                                       (sc/optional-key :template-section) sc/Keyword
+                                       ;; The template-dict provides the initial value to
+                                       ;; this verdict dict.
+                                       (sc/optional-key :template-dict)    sc/Keyword})))))
 
 (defschema PateVerdictDictionary
   {:dictionary PateVerdictSchemaTypes})

@@ -233,8 +233,10 @@
         sort-key (get-in dictionary (path/extend path repeating :sort-by))]
     (if sort-key
       (->> r-map
-           (sort-by (fn [[_ a] [_ b]]
-                      (compare (sort-key a) (sort-key b))))
+           (sort-by (fn [[_ m]]
+                      (let [v (sort-key m)]
+                        (cond-> v
+                          (string? v) s/lower-case))))
            (map first))
       (keys r-map))))
 

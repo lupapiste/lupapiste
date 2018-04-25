@@ -59,11 +59,23 @@
       :data :poikkeamat :value
       (or "")))
 
-(defn- application-operation [application]
-  (-> (domain/get-document-by-name application
-                                   "hankkeen-kuvaus")
-      :data :kuvaus :value
-      (or "")))
+(defn- application-operation [{documents :documents}]
+  (let  [{data :data} (first (domain/get-documents-by-subtype documents
+                                                              :hankkeen-kuvaus))]
+    (or
+     (get-in data [:kuvaus :value]) ;; R
+     (get-in data [:kayttotarkoitus :value]) ;; YA
+     "")))
+
+(defn verdict-type
+  "YA verdicts come in different types. The initial value is extracted
+  from the primary operation name."
+  [{primary-op :primaryOperation}]
+  (let [regex (->> shared/ya-verdict-types
+                   (map name)
+                   (ss/join "|")
+                   re-pattern)]
+    (re-find regex (:name primary-op))))
 
 (defn dicts->kw-paths
   [dictionary]
@@ -89,12 +101,24 @@
 
 (defn inclusions
   "List if kw-paths that denote the dicts included in the verdict. By
-  default, every dict is included, but can be excluded
-  via :template-dict and section-level :template-section
-  definitions. Note: if a :repeating is included, its every dict is
-  included."
+  default, every dict is included, but a dict is excluded if any
+  the following are true:
+
+  - Dict schema :template-section refers to a removed template section.
+
+  - Every section that dict belongs to has a :template-section that
+    refers to a removed template-section.
+
+  - Dict schema :template-dict refers to template dict that is not in
+    the template inclusions. In other words, the template dict is part
+    of a removed template section.
+
+  Note: if a :repeating is included, its every dict is included."
   [category published-template]
   (let [removed-tem-secs   (published-template-removed-sections published-template)
+        t-inclusions       (->> (:inclusions published-template)
+                                (map keyword)
+                                set)
         {:keys [dictionary
                 sections]} (shared/verdict-schema category)
         dic-sec            (schemas/dict-sections sections)
@@ -105,12 +129,14 @@
                                 set)]
     (->> (keys dictionary)
          (remove (fn [dict]
-                   (if-let [dict-ts (get-in dictionary
-                                            [dict :template-section])]
-                     (contains? removed-tem-secs dict-ts)
-                     (util/pcond->> (dict dic-sec)
-                                    seq (every? #(contains? removed-ver-secs
-                                                            %))))))
+                   (let [{tem-sec :template-section
+                          tem-dic :template-dict} (dict dictionary)
+                         in-sections              (dict dic-sec)]
+                     (or
+                      (contains? removed-tem-secs tem-sec)
+                      (and (seq in-sections)
+                           (empty? (set/difference in-sections removed-ver-secs)))
+                      (and tem-dic (not (contains? t-inclusions tem-dic)))))))
          (select-keys dictionary)
          dicts->kw-paths)))
 
@@ -214,21 +240,6 @@
                         shared/foreman-codes)]
     (resolve-requirement-inclusion updated :foremen)))
 
-#_(defn init--included-checks
-  "Included toggle value according to the template section status."
-  [{:keys [template] :as initmap} & kw]
-  (update-in initmap
-             [:draft :data]
-             (fn [data]
-               (reduce (fn [acc k]
-                         (assoc acc
-                                (-> (name k)
-                                    (str "-included")
-                                    keyword)
-                                (not (section-removed? template k))))
-                       data
-                       kw))))
-
 (defn init--requirements-references
   "Plans and reviews are defined in the published template settings."
   [{:keys [template] :as initmap} dict]
@@ -323,6 +334,27 @@
                                                      buildings-inclusion-keys)
                               buildings-inclusion))))))
 
+(defn- integer-or-nil [value]
+  (when (integer? value)
+    value))
+
+(defn init--permit-period
+  "YA verdict start and end dates are copied from tyoaika document"
+  [{:keys [application] :as initmap}]
+  (let [doc-data (:data (domain/get-document-by-name application
+                                                     "tyoaika"))
+        starts (and (dict-included? initmap :start-date)
+                    (integer-or-nil (get-in doc-data
+                                            [:tyoaika-alkaa-ms :value])))
+        ends (and (dict-included? initmap :end-date)
+                  (integer-or-nil (get-in doc-data
+                                          [:tyoaika-paattyy-ms :value])))]
+    (cond-> initmap
+      starts (assoc-in [:draft :data :start-date] starts)
+      ends (assoc-in [:draft :data :end-date] ends))))
+
+
+
 (defmethod initialize-verdict-draft :r
   [initmap]
   (-> initmap
@@ -348,6 +380,20 @@
       init--verdict-giver-type
       (init--dict-by-application :operation application-operation)
       (init--dict-by-application :address :address)))
+
+(defmethod initialize-verdict-draft :ya
+  [initmap]
+  (-> initmap
+      (init--dict-by-application :handler general-handler)
+      init--verdict-dates
+      (init--dict-by-application :verdict-type verdict-type)
+      (init--requirements-references :plans)
+      (init--requirements-references :reviews)
+      init--upload
+      init--verdict-giver-type
+      (init--dict-by-application :operation application-operation)
+      (init--dict-by-application :address :address)
+      init--permit-period))
 
 (declare enrich-verdict)
 
@@ -463,16 +509,16 @@
 ;; Changes is called after value has already been updated into mongo.
 ;; The method result is a changes for verdict data.
 (defmulti changes (fn [{:keys [category path]}]
-                    ;; Dispatcher result: [:category :last-path-part]
-                    [category (keyword (last path))]))
+                    ;; Dispatcher result: :last-path-part
+                    (keyword (last path))))
 
 (defmethod changes :default [_])
 
-(defmethod changes [:r :verdict-date]
+(defmethod changes :verdict-date
   [options]
   (update-automatic-verdict-dates options))
 
-(defmethod changes [:r :automatic-verdict-dates]
+(defmethod changes :automatic-verdict-dates
   [options]
   (update-automatic-verdict-dates options))
 
@@ -658,33 +704,28 @@
          (filter :given statements)
          statements)))
 
-(defmulti enrich-verdict
+(defn enrich-verdict
   "Augments verdict data, but MUST NOT update mongo (this is called from
-  query actions, too)."
-  (fn [command & _]
-    (command->category command)))
-
-(defmethod enrich-verdict :default [_ verdict & _]
-  verdict)
-
-(defmethod enrich-verdict :r
-  ;; If final? is truthy than the enrichment is part of publishing.
-  [{:keys [application]} {:keys [data template] :as verdict} & [final?]]
-  (let [inc-set  (->> template
-                      :inclusions
-                      (map keyword)
-                      set)
-        addons (merge
-                (when (util/intersection-as-kw inc-set
-                                               buildings-inclusion-keys)
-                  {:buildings (merge-buildings (buildings application)
-                                               (:buildings data))})
-                ;; Neighbors added if in the template
-                (when (:neighbors inc-set)
-                  {:neighbor-states (neighbor-states application)})
-                (when (:statements inc-set)
-                  {:statements (statements application final?)}))]
-    (assoc verdict :data (merge data addons))))
+  query actions, too).  If final? is truthy then the enrichment is
+  part of publishing."
+  ([{:keys [application]} {:keys [data template] :as verdict} final?]
+   (let [inc-set  (->> template
+                       :inclusions
+                       (map keyword)
+                       set)
+         addons (merge
+                 (when (util/intersection-as-kw inc-set
+                                                buildings-inclusion-keys)
+                   {:buildings (merge-buildings (buildings application)
+                                                (:buildings data))})
+                 ;; Neighbors added if in the template
+                 (when (:neighbors inc-set)
+                   {:neighbor-states (neighbor-states application)})
+                 (when (:statements inc-set)
+                   {:statements (statements application final?)}))]
+     (assoc verdict :data (merge data addons))))
+  ([command verdict]
+   (enrich-verdict command verdict false)))
 
 (defn open-verdict [{:keys [application] :as command}]
   (let [{:keys [data published template]
@@ -741,13 +782,13 @@
                  :type-id    (keyword (:type-id type))
                  :id         id})))))
 
-;; Each method returns a map with the following properties
-;;  items: Attachment items (verdict-attachment-items result)
-;;  update-fn: Function that takes verdict data as argument and updates it.
-(defmulti attachment-items (fn [command _]
-                             (command->category command)))
+(defn attachment-items
+  "Returns a map with the following properties:
 
-(defmethod attachment-items :r
+    items: Attachment items (`verdict-attachment-items` result)
+
+    update-fn: Function that takes verdict data as argument and
+               updates it."
   [command verdict]
   (let [items (verdict-attachment-items command
                                         verdict
@@ -782,23 +823,6 @@
              (get-in sub-error [:document :id])
              (get-in sub-error [:element :locKey])
              (get-in sub-error [:result])))))
-
-(defmethod attachment-items :p
-  [command verdict]
-  (let [items (verdict-attachment-items command
-                                        verdict
-                                        :attachments)]
-    {:items     items
-     :update-fn (fn [data]
-                  (assoc data
-                    :attachments
-                    (->> (cons {:type-group :paatoksenteko
-                                :type-id    :paatos}
-                               items)
-                         (group-by #(select-keys % [:type-group
-                                                    :type-id]))
-                         (map (fn [[k v]]
-                                (assoc k :amount (count v)))))))}))
 
 (defn- archive-info
   "Convenience info map is stored into verdict for archiving purposes."

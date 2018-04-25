@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.verdict-template
-  (:require [lupapalvelu.action :as action]
+  (:require [clojure.set :as set]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n]
@@ -222,14 +223,15 @@
 
 (defn- pack-verdict-dates
   "Since the date calculation is cumulative we always store every delta
-  into kw-delta map. Empty deltas are zeros. For board-verdicts the
-  appeal date (muutoksenhaku) is different."
+  into kw-delta map. Including those that are not even in the current
+  schema. Empty deltas are zeros. For board-verdicts the appeal
+  date (muutoksenhaku) is different."
   [category draft board-verdict?]
   (let [{dic :dictionary} (shared/settings-schema category)]
     (cond-> (->> shared/verdict-dates
                  (map (fn [k]
                         [k {:delta (-> draft k schemas/parse-int)
-                            :unit (name (get-in dic [k :date-delta :unit]))}]))
+                            :unit (name (get-in dic [k :date-delta :unit] :days))}]))
                  (into {}))
       board-verdict? (assoc :muutoksenhaku {:delta (-> draft
                                                        :lautakunta-muutoksenhaku
@@ -307,6 +309,39 @@
             {}
             (keys dictionary))))
 
+(defn- template-inclusions
+  "List if included top-level dicts. Dict is excluded if it
+  belongs (only) to removed section and the section is not always
+  included. The list is used when resolving the :template-dict
+  references in verdicts."
+  [{:keys [category draft]}]
+  (let [{:keys [dictionary
+                sections]}     (shared/verdict-template-schema category)
+        dict-secs              (schemas/dict-sections sections)
+        always-included        (->> (filter :always-included? sections)
+                                    (map :id)
+                                    set)
+        removed-sections       (set/difference (->> (:removed-sections draft)
+                                                    (map (fn [[k v]]
+                                                           (when v k)))
+                                                    (remove nil?)
+                                                    set)
+                                               always-included)
+
+        ]
+    (->> dict-secs
+         (reduce-kv (fn [acc dict sections]
+                      (cond-> acc
+                        (or (empty? sections)
+                            (not-empty (set/difference sections
+                                                       removed-sections)))
+                        (conj dict)))
+                    (util/difference-as-kw (keys dictionary)
+                                           (keys dict-secs)
+                                           [:removed-sections]))
+         ;; Strings due to smoke tests (values are strings in mongo)
+         (map name))))
+
 (defn publish-verdict-template [organization template-id timestamp]
   (let [{:keys [draft category]
          :as   template} (verdict-template organization template-id)
@@ -320,6 +355,7 @@
                             {:published timestamp
                              :data      (dissoc (draft-for-publishing template)
                                                 :reviews :plans)
+                             :inclusions (template-inclusions template)
                              :settings  settings}}})))
 
 (defn set-name [organization template-id timestamp name]
