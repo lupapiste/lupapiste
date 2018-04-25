@@ -93,7 +93,7 @@ LUPAPISTE.RejectNoteModel = function( params ) {
 
     // Group
     if( path ) {
-      self.addHubListener( "approval-status-" + docModel.docId,
+      self.addHubListener( {eventType: "approval-status", docId: docModel.docId},
                            function( event ) {
                              if( _.isEqual( event.path, path )) {
                                var v  = _.get( event, "approval.value");
@@ -111,7 +111,7 @@ LUPAPISTE.RejectNoteModel = function( params ) {
         }
       };
 
-      self.addHubListener( "document-approval-" + docModel.docId,
+      self.addHubListener( {eventType: "document-approval", docId: docModel.docId},
                            docEventHandler );
       // Sometimes the redrawnDocumentApprovalState is not defined.
       // The root cause is still mystery, but let's circumvent the problem.
