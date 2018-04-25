@@ -144,6 +144,6 @@
     (set? ctx-matcher) (contains? ctx-matcher (keyword context))
     (fn? ctx-matcher)  (ctx-matcher context)))
 
-(defn get-required-permissions [{permissions :permissions :as command-meta} command]
+(defn get-required-permissions [{permissions :permissions} command]
   (or (util/find-first (util/fn-> :context (matching-context? command)) permissions)
       {:required [:global/not-allowed]}))
