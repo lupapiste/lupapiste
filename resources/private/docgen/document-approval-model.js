@@ -81,7 +81,7 @@ LUPAPISTE.DocumentApprovalModel = function(docModel) {
 
   self.changeStatus = function(flag) {
     docModel.updateApproval([], flag, self.masterApproval);
-    hub.send({eventType: "document-approval", docId: docModel.docId}, {approved: flag});
+    hub.send("document-approval", {docId: docModel.docId, approved: flag});
   };
 
   // reset approval when document is updated
