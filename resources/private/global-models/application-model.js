@@ -502,6 +502,9 @@ LUPAPISTE.ApplicationModel = function() {
     var nonApproved = _(docgen.nonApprovedDocuments()).filter(function(docModel) {
         return docModel.schema.info.subtype === "suunnittelija" && !docModel.docDisabled;
       })
+      .filter(function(designerDoc) {
+        return !self.inPostVerdictState() ? true : designerDoc.schema.info["post-verdict-party"];
+      })
       .map(function(docModel) {
         var title = loc([docModel.schemaName, "_group_label"]);
         var accordionService = lupapisteApp.services.accordionService;
@@ -520,6 +523,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   hub.subscribe("update-doc-success", checkForNonApprovedDesigners);
   hub.subscribe("application-model-updated", checkForNonApprovedDesigners);
+  hub.subscribe({eventType:"approval-status", broadcast: true}, _.debounce(checkForNonApprovedDesigners));
 
   self.approveApplication = function() {
     if (self.stateChanged()) {
