@@ -1,6 +1,7 @@
 (ns lupapalvelu.integrations.jms
   (:require [taoensso.timbre :refer [error errorf info infof tracef warnf fatal]]
             [taoensso.nippy :as nippy]
+            [lupapiste-jms.client :as jms]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util])
@@ -8,7 +9,8 @@
                       MessageListener BytesMessage ObjectMessage TextMessage
                       MessageConsumer MessageProducer JMSException)
            (org.apache.activemq.artemis.jms.client ActiveMQJMSConnectionFactory ActiveMQConnection)
-           (org.apache.activemq.artemis.api.jms ActiveMQJMSClient)))
+           (org.apache.activemq.artemis.api.jms ActiveMQJMSClient)
+           (clojure.lang IPersistentMap ISeq)))
 
 (when (env/feature? :embedded-artemis)
   ; This works only with :dev profile
@@ -78,10 +80,10 @@
      (create-connection options exception-listener))
     ([{:keys [broker-url username password] :as opts} ex-listener]
      (try
-       (let [conn (if (ss/not-blank? username)
-                    (.createConnection (create-connection-factory broker-url opts) username password)
-                    (.createConnection (create-connection-factory broker-url opts)))]
-         (.setExceptionListener conn ex-listener)
+       (let [factory (create-connection-factory broker-url opts)
+             conn (if (ss/not-blank? username)
+                    (jms/create-connection factory {:username username :password password :ex-listener ex-listener})
+                    (jms/create-connection factory {:ex-listener ex-listener}))]
          (.start conn)
          conn)
        (catch Exception e
@@ -106,7 +108,7 @@
               (recur (min (* 2 sleep-time) 60000) (dec try-times))))))))
 
   (defn register-session [type]
-    (swap! state assoc (keyword (str (name type) "-session")) (.createSession ^Connection (:conn @state) Session/AUTO_ACKNOWLEDGE)))
+    (swap! state assoc (keyword (str (name type) "-session")) (jms/create-session ^Connection (:conn @state) Session/AUTO_ACKNOWLEDGE)))
 
   (defn start! []
     (try
@@ -117,6 +119,14 @@
         (register-session :producer))
       (catch Exception e
         (fatal e "Couldn't initialize JMS connections" (.getMessage e)))))
+
+  (extend-protocol jms/MessageCreator
+    IPersistentMap
+    (create-mesage [data session]
+      (create-message (nippy/freeze data) session))
+    ISeq
+    (create-message [data session]
+      (create-message (nippy/freeze data) session)))
 
   ;;
   ;; Producers
@@ -129,10 +139,9 @@
     "Creates a producer to queue in given session.
     Returns one arity function which takes data to be sent to queue."
     [^Session session ^Destination queue message-fn]
-    (let [producer (.createProducer session queue)]
+    (let [producer (jms/create-producer session queue)]
       (register-conj :producers producer)
-      (fn [data]
-        (.send producer (message-fn data)))))
+      (jms/producer-fn producer message-fn)))
 
   (defn create-producer
     "Creates a producer to given queue (string) in default session.
@@ -141,7 +150,7 @@
     If no message-fn is given, by default a TextMessage (string) is created.
     Producer is internally registered and closed on shutdown."
     ([^String queue-name]
-     (register-producer (producer-session) (queue queue-name) #(.createTextMessage ^Session (producer-session) %)))
+     (register-producer (producer-session) (queue queue-name) (partial jms/create-text-message (producer-session))))
     ([^String queue-name message-fn]
      (register-producer (producer-session) (queue queue-name) message-fn)))
 
@@ -150,11 +159,7 @@
     ([^String queue-name]
      (create-nippy-producer (producer-session) queue-name))
     ([^Session session ^String queue-name]
-     (letfn [(nippy-data [data]
-               (doto
-                 (.createBytesMessage session)
-                 (.writeBytes ^bytes (nippy/freeze data))))]
-       (create-producer queue-name nippy-data))))
+     (create-producer queue-name #(jms/create-message (nippy/freeze %) session))))
 
   ;;
   ;; Consumers
