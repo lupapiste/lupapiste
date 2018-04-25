@@ -98,7 +98,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                            extraParams ))
       .success( function( result ) {
       cb( result.approval );
-      self.approvalHubSend( result.approval, path );
+      if (cmd !== "reject-doc-note") {
+        self.approvalHubSend( result.approval, path );
+      }
       window.Stickyfill.rebuild();
     })
     .call();
