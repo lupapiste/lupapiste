@@ -3,8 +3,7 @@
             [lupapalvelu.mongo :as mongo]
             [sade.env :as env]
             [sade.strings :as ss]
-            [monger.operators :refer :all]
-            [sade.util :as util]))
+            [monger.operators :refer :all]))
 
 (defn upload [file-id filename content-type content metadata]
   {:pre [(map? metadata)]}

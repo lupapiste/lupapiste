@@ -43,14 +43,15 @@
                               preview-filename))))
 
 (defn- s3-preview! [application-id file-id filename content-type preview-file-id preview-filename]
-  (when (s3/object-exists? application-id file-id)
+  (if (s3/object-exists? application-id file-id)
     (download-and-generate! (partial s3/download application-id)
                             application-id
                             file-id
                             filename
                             content-type
                             preview-file-id
-                            preview-filename)))
+                            preview-filename)
+    (throw (Exception. (str "Attachment file " file-id " for application " application-id " not found in S3")))))
 
 (defn preview-image!
   "Creates a preview image in a separate thread pool."

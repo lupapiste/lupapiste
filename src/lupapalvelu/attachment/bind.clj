@@ -41,8 +41,8 @@
         config-by-group (get type-config (keyword typeGroup))]
     (util/contains-value? config-by-group (keyword typeId))))
 
-(defn bind-single-attachment! [{:keys [application user created]} mongo-file {:keys [fileId type attachmentId contents] :as filedata} exclude-ids]
-  (let [conversion-data       (att/conversion application (assoc mongo-file :content ((:content mongo-file))))
+(defn bind-single-attachment! [{:keys [application user created]} unlinked-file {:keys [fileId type attachmentId contents] :as filedata} exclude-ids]
+  (let [conversion-data       (att/conversion application (assoc unlinked-file :content ((:content unlinked-file))))
         is-authority          (usr/user-is-authority-in-organization? user (:organization application))
         automatic-ok-enabled  (org/get-organization-auto-ok (:organization application))
         placeholder-id        (or attachmentId
@@ -55,7 +55,7 @@
                                                         :created         created
                                                         :attachment-type type)))
         version-options (merge
-                          (select-keys mongo-file [:fileId :filename :contentType :size])
+                          (select-keys unlinked-file [:fileId :filename :contentType :size])
                           (select-keys filedata [:contents :drawingNumber :group :constructionTime :sign :target])
                           (util/assoc-when {:created          created
                                             :original-file-id fileId}
@@ -70,9 +70,9 @@
                           (:file conversion-data))
         linked-version (att/set-attachment-version! application user attachment version-options)
         {:keys [fileId originalFileId]} linked-version]
-    (preview/preview-image! (:id application) (:fileId version-options) (:filename version-options) (:contentType version-options))
     (storage/link-files-to-application (:id application) (cond-> [originalFileId]
                                                                  (not= fileId originalFileId) (conj fileId)))
+    (preview/preview-image! (:id application) (:fileId version-options) (:filename version-options) (:contentType version-options))
     (att/cleanup-temp-file (:result conversion-data))
     (assoc linked-version :type (or (:type linked-version) (:type attachment)))))
 

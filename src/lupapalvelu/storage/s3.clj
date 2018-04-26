@@ -128,7 +128,8 @@
         target-bucket (bucket-name application-id)]
     (create-bucket-if-not-exists target-bucket)
     (.copyObject s3-client temp-bucket file-id target-bucket file-id)
-    (.deleteObject s3-client temp-bucket file-id)))
+    (.deleteObject s3-client temp-bucket file-id)
+    (timbre/debug "Object" file-id "moved from" temp-bucket "to" target-bucket)))
 
 (defn download [application-id file-id]
   {:pre [(string? file-id)]}
@@ -149,4 +150,4 @@
       (timbre/error ex "Error occurred when trying to retrieve" file-id "from S3 bucket" (bucket-name application-id)))))
 
 (defn object-exists? [bucket id]
-  (.doesObjectExist s3-client bucket id))
+  (.doesObjectExist s3-client (bucket-name bucket) id))
