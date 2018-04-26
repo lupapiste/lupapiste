@@ -1339,6 +1339,10 @@
    (sc/optional-key :subtypes) [(sc/maybe sc/Keyword)]
    (sc/optional-key :state-graph-resolver) util/Fn
 
+   ; Structure types for r-operations
+   (sc/optional-key :building) sc/Bool
+   (sc/optional-key :structure) sc/Bool
+
    ; Can be added to existing application (or only created with a new application)
    :add-operation-allowed sc/Bool
 
