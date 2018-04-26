@@ -159,23 +159,26 @@
 
 (facts get-organization-permissions
   (fact "existing role"
-    (get-organization-permissions {:application {:organization "123-T"} :user {:orgAuthz {:123-T ["org-tester"]}}})
+    (get-organization-permissions {:application {:organization "123-T"}
+                                   :user {:orgAuthz {:123-T ["org-tester"]}}})
     => #{:test/do}
 
     (provided (get-permissions-by-role :organization "org-tester") => #{:test/do}))
 
   (fact "existing multiple roles"
-    (get-organization-permissions {:application {:organization "123-T"} :user {:orgAuthz {:123-T ["org-tester"
-                                                                                                  "org-mighty"]}}})
+    (get-organization-permissions {:application {:organization "123-T"}
+                                   :user {:orgAuthz {:123-T ["org-tester"
+                                                             "org-mighty"]}}})
     => #{:test/do :test/test :test/do-anything}
 
     (provided (get-permissions-by-role :organization "org-tester") => #{:test/do :test/test})
     (provided (get-permissions-by-role :organization "org-mighty") => #{:test/do-anything :test/test}))
 
   (fact "existing role - multiple organizations"
-    (get-organization-permissions {:application {:organization "123-T"} :user {:orgAuthz {:123-T ["org-nocando"
-                                                                                                  "org-mighty"]
-                                                                                          :100-T ["org-tester"]}}})
+    (get-organization-permissions {:application {:organization "123-T"}
+                                   :user {:orgAuthz {:123-T ["org-nocando"
+                                                             "org-mighty"]
+                                                     :100-T ["org-tester"]}}})
     => #{:test/test :test/do-anything}
 
     (provided (get-permissions-by-role :organization "org-mighty") => #{:test/do-anything :test/test})
@@ -188,7 +191,8 @@
     (provided (get-permissions-by-role :organization "org-tester") => #{:test/do}))
 
   (fact "without application - two orgs"
-    (get-organization-permissions {:user {:orgAuthz {:123-T ["org-tester"] :321-T ["archiver"]}}})
+    (get-organization-permissions {:user {:orgAuthz {:123-T ["org-tester"]
+                                                     :321-T ["archiver"]}}})
     => #{:test/do :test/archive}
 
     (provided (get-permissions-by-role :organization "org-tester") => #{:test/do}
