@@ -14,8 +14,7 @@
 
 (defn- find-by-file-id [id {:keys [versions]}]
   (->> versions
-       (filter (fn [{:keys [fileId originalFileId]}]
-                 (#{fileId originalFileId} id)))
+       (filter #((set ((juxt :fileId :originalFileId) %)) id))
        first))
 
 (defn- find-by-file-id-from-attachments [id attachments]

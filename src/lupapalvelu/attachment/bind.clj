@@ -68,9 +68,11 @@
                                                                                                                    filedata))))
                           (:result conversion-data)
                           (:file conversion-data))
-        linked-version (att/set-attachment-version! application user attachment version-options)]
+        linked-version (att/set-attachment-version! application user attachment version-options)
+        {:keys [fileId originalFileId]} linked-version]
     (preview/preview-image! (:id application) (:fileId version-options) (:filename version-options) (:contentType version-options))
-    (storage/link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
+    (storage/link-files-to-application (:id application) (cond-> [originalFileId]
+                                                                 (not= fileId originalFileId) (conj fileId)))
     (att/cleanup-temp-file (:result conversion-data))
     (assoc linked-version :type (or (:type linked-version) (:type attachment)))))
 

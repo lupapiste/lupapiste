@@ -41,7 +41,7 @@
             [lupapalvelu.storage.file-storage :as storage]
             [sade.shared-schemas :as sssc])
   (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File InputStream]))
+           [java.io File InputStream ByteArrayInputStream]))
 
 
 ;;
@@ -803,11 +803,19 @@
                                                    (assoc attachment-options
                                                      :requested-by-authority
                                                      (auth/application-authority? application user))))
-        linked-version     (set-attachment-version! application user attachment options)]
+        linked-version     (set-attachment-version! application user attachment options)
+        {:keys [fileId originalFileId]} linked-version]
     (preview/preview-image! (:id application) (:fileId options) (:filename options) (:contentType options))
-    (storage/link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
+    (storage/link-files-to-application (:id application) (cond-> [originalFileId]
+                                                                 (not= fileId originalFileId) (conj fileId)))
     (cleanup-temp-file (:result conversion-data))
     linked-version))
+
+(defn- reusable-content [is-or-file]
+  (if (instance? File is-or-file)
+    ; File is reusable as is
+    is-or-file
+    (ByteArrayInputStream. (files/slurp-bytes is-or-file))))
 
 (defn upload-and-attach!
   "1) Uploads original file to GridFS
@@ -817,12 +825,11 @@
    5) Links file as new version to attachment. If conversion was made, converted file is used (originalFileId points to original file)
    Returns attached version."
   [{:keys [application] :as command} attachment-options file-options]
-  (let [original-filedata   (file-upload/save-file file-options {:linked false})
-        content            (if (instance? File (:content file-options))
-                             (:content file-options)
-                             ;; stream is consumed at this point, load from mongo
-                             ((-> original-filedata :fileId mongo/download :content)))
-        conversion-data    (conversion application (assoc original-filedata :content content))]
+  (let [content           (reusable-content (:content file-options))
+        original-filedata (file-upload/save-file (assoc file-options :content content) {:linked false})
+        _                 (when (instance? ByteArrayInputStream content)
+                            (.reset content))
+        conversion-data   (conversion application (assoc original-filedata :content content))]
     (attach! command attachment-options original-filedata conversion-data)))
 
 (defn- append-stream [zip file-name in]
