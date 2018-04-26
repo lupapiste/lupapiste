@@ -159,9 +159,9 @@
                       (partial action/vector-parameters [:updates])]
    :contexts         [document-context]
    :permissions      document-edit-permissions
-   :pre-checks       [doc-disabled-validator
-                      validate-created-after-verdict
-                      validate-post-verdict-not-approved]}
+   :pre-checks       [(editable-by-state? (set/union states/update-doc-states [:verdictGiven]))
+                      doc-disabled-validator
+                      validate-created-after-verdict]}
   [command]
   (doc-persistence/update! command doc updates "documents"))
 

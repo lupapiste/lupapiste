@@ -1540,6 +1540,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (label) {
       label.appendChild(loader);
     }
+
+    if (self.docPostVerdictEdit) {
+      $(event.target).addClass("source-value-changed");
+    }
+
     saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
   }
 
@@ -1625,24 +1630,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     appendElements(elements, self.schema, self.model, []);
     // Disable fields and hide if the form is not editable
     if (!self.authorizationModel.ok(getUpdateCommand()) || self.isDisabled) {
-      if (!self.docPostVerdictEdit) {
-        $(elements).find("input, textarea").attr("readonly", true).unbind("focus");
-        $(elements).find("select, input[type=checkbox], input[type=radio]").attr("disabled", true);
-      }
+      $(elements).find("input, textarea").attr("readonly", true).unbind("focus");
+      $(elements).find("select, input[type=checkbox], input[type=radio]").attr("disabled", true);
       // TODO a better way would be to hide each individual button based on authorizationModel.ok
       $(elements).find("button").hide();
     }
 
-/*    if (self.schema.info.editable) {
-      console.log("******* Ja minä **********");
-      console.log(self);
-      console.log(" ****** ******* *******");
-
-      _.each($(elements).find("button"), function (button) {
-        //button.show();
-      });
-    }*/
-
+    if (self.authorizationModel.ok("update-post-verdict-doc")) {
+      $(elements).find("button").hide();
+    }
 
     return section.append( contents.append( $(elements)));
   }

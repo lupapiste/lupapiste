@@ -54,12 +54,6 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
           || !(self.service.isWhitelisted( self.schema ))
           || !self.authModel.ok(self.service.getUpdateCommand(self.documentId))
           || util.getIn(params, ["model", "disabled"]);
-    console.log("TAULUN DISAPLOINTI ::: ");
-    console.log(params.isDisabled);
-    console.log(!(self.service.isWhitelisted( self.schema )));
-    console.log(!self.authModel.ok(self.service.getUpdateCommand(self.documentId)));
-    console.log(self.service.getUpdateCommand(self.documentId));
-    console.log(" **** **** **** ***** ****");
     var authDisabled = authState( "disabled" );
     if( _.isBoolean( authDisabled ) ) {
       disabled = disabled || authDisabled;
