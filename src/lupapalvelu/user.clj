@@ -295,6 +295,7 @@
     set))
 
 (defn authority-admins-organization-id [user]
+  ; FIXME:
   (first (organization-ids-by-roles user #{:authorityAdmin})))
 
 (defn authority-admins-organization
