@@ -1006,7 +1006,7 @@
    :optional-parameters [org lang]
    :input-validators    [org/valid-feed-format org/valid-org i18n/valid-language]
    :user-roles          #{:anonymous}}
-  ((memo/ttl waste-ads/waste-ads :ttl/threshold 900000)     ; 15 min
+  ((memo/ttl waste-ads/waste-ads :ttl/threshold 900000)                         ; 15 min
     (ss/upper-case org)
     (-> fmt ss/lower-case keyword)
     (-> (or lang :fi) ss/lower-case keyword)))
