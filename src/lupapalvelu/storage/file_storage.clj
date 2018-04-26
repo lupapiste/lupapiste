@@ -5,11 +5,15 @@
             [sade.strings :as ss]
             [monger.operators :refer :all]))
 
-(defn upload [file-id filename content-type content metadata]
+;; UPLOAD
+
+(defn upload [file-id filename content-type content {:keys [application user-id] :as metadata}]
   {:pre [(map? metadata)]}
   (if (env/feature? :s3)
-    (s3/put-file-or-input-stream (:application metadata) file-id filename content-type content metadata)
+    (s3/put-file-or-input-stream (or application user-id) file-id filename content-type content metadata)
     (mongo/upload file-id filename content-type content metadata)))
+
+;; DOWNLOAD
 
 (defn- find-by-file-id [id {:keys [versions]}]
   (->> versions
@@ -38,6 +42,25 @@
        (s3/download application-id file-id)
        (mongo/download-find {:_id file-id})))))
 
+(defn- find-user-attachment-storage-system [user-id file-id]
+  (->> (mongo/select-one :users
+                         {:_id                        user-id
+                          :attachments.attachment-id file-id}
+                         [:attachments.$])
+       :attachments
+       first
+       :storageSystem))
+
+(defn ^{:perfmon-exclude true} download-user-attachment
+  "Downloads user attachment file from Mongo GridFS or S3"
+  ([user-id file-id]
+   (->> (find-user-attachment-storage-system user-id file-id)
+        (download-user-attachment user-id file-id)))
+  ([user-id file-id storage-system]
+   (if (and (env/feature? :s3) (= (keyword storage-system) :s3))
+     (s3/download user-id file-id)
+     (mongo/download-find {:_id file-id :metadata.user-id user-id}))))
+
 (defn ^{:perfmon-exclude true} download-preview
   "Downloads preview file from Mongo GridFS or S3"
   [application-id file-id attachment]
@@ -52,6 +75,8 @@
     (s3/download session-id file-id)
     (mongo/download-find {:_id file-id :metadata.sessionId session-id})))
 
+;; LINK
+
 (defn link-files-to-application [app-id fileIds]
   {:pre [(seq fileIds) (not-any? ss/blank? (conj fileIds app-id))]}
   (if (env/feature? :s3)
@@ -59,3 +84,15 @@
       (s3/link-file-object-to-application app-id file-id))
     (mongo/update-by-query :fs.files {:_id {$in fileIds}} {$set {:metadata.application app-id
                                                                  :metadata.linked true}})))
+
+;; DELETE
+
+(defn ^{:perfmon-exclude true} delete-user-attachment
+  "Downloads user attachment file from Mongo GridFS or S3"
+  ([user-id file-id]
+   (->> (find-user-attachment-storage-system user-id file-id)
+        (delete-user-attachment user-id file-id)))
+  ([user-id file-id storage-system]
+   (if (and (env/feature? :s3) (= (keyword storage-system) :s3))
+     (s3/delete user-id file-id)
+     (mongo/delete-file {:id file-id :metadata.user-id user-id}))))

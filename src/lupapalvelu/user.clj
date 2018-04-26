@@ -94,7 +94,8 @@
                                                     :file-name  sc/Str
                                                     :content-type  sc/Str
                                                     :size  sc/Num
-                                                    :created ssc/Timestamp}]
+                                                    :created ssc/Timestamp
+                                                    :storageSystem (sc/enum :mongodb :s3)}]
            (sc/optional-key :company)             {:id sc/Str :role (sc/enum "admin" "user") :submit sc/Bool}
            (sc/optional-key :partnerApplications) {(sc/optional-key :rakentajafi) {:id sc/Str
                                                                                    :created ssc/Timestamp

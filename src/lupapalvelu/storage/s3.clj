@@ -151,3 +151,7 @@
 
 (defn object-exists? [bucket id]
   (.doesObjectExist s3-client (bucket-name bucket) id))
+
+(defn delete [bucket id]
+  (.deleteObject s3-client (bucket-name bucket) id)
+  (timbre/debug "Object" id "deleted from" (bucket-name bucket)))
