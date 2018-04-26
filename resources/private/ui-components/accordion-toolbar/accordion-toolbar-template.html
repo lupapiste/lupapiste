@@ -93,6 +93,15 @@
         <i class="lupicon-check"></i>
         <span data-bind="ltext: 'document.approve'"></span>
       </button>
+
+      <!-- ko if: showToggleEdit() -->
+      <button class="positive is-right"
+              data-bind="click: toggleEdit">
+        <i class="lupicon-pen"></i>
+        <span data-bind="ltext: 'document.edit'"></span>
+      </button>
+      <!-- /ko -->
+
       <!-- ko if: showIdentifierEditors -->
       <div class="identifier-editors container-bubble" data-test-id="identifier-editors" data-bind="event: {keydown: closeEditors}">
        <!-- ko if: isArchiveProject() -->

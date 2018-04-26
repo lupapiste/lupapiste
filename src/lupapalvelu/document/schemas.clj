@@ -53,7 +53,7 @@
 
 (def info-keys #{:name :type :subtype :version
                  :i18name :i18nprefix
-                 :approvable :removable-by :last-removable-by
+                 :approvable :removable-by :last-removable-by :editable
                  :disableable
                  :user-authz-roles
                  :group-help :section-help
@@ -689,6 +689,7 @@
 
 (def kaytto {:name "kaytto"
              :type :group
+             :editable true
              :body [{:name "rakentajaTyyppi" :type :select :sortBy :displayname :required true
                      :body [{:name "liiketaloudellinen"}
                             {:name "muu"}
@@ -701,6 +702,7 @@
 
 (def mitat {:name "mitat"
             :type :group
+            :editable true
             :body [{:name "tilavuus" :type :string :size :s :unit :m3 :subtype :number :min 0 :max 9999999}
                    {:name "kerrosala" :type :string :size :s :unit :m2 :subtype :number :min 0 :max 9999999}
                    {:name "rakennusoikeudellinenKerrosala" :type :string :size :s :unit :m2 :subtype :number :min 1 :max 9999999}
@@ -1349,6 +1351,7 @@
 
    {:info {:name "uusiRakennus"
            :approvable true
+           :editable true
            :accordion-fields buildingid-accordion-paths}
     :body (body tunnus
                 rakennuksen-omistajat

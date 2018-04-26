@@ -14,7 +14,8 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as user]))
+            [lupapalvelu.user :as user]
+            [clojure.set :as set]))
 
 
 ;; Action category: documents & tasks
@@ -146,6 +147,19 @@
    :permissions      document-edit-permissions
    :pre-checks       [(editable-by-state? states/update-doc-states)
                       doc-disabled-validator
+                      validate-created-after-verdict
+                      validate-post-verdict-not-approved]}
+  [command]
+  (doc-persistence/update! command doc updates "documents"))
+
+(defcommand update-post-verdict-doc
+  {:parameters       [id doc updates]
+   :categories       #{:documents}
+   :input-validators [(partial action/non-blank-parameters [:id :doc])
+                      (partial action/vector-parameters [:updates])]
+   :contexts         [document-context]
+   :permissions      document-edit-permissions
+   :pre-checks       [doc-disabled-validator
                       validate-created-after-verdict
                       validate-post-verdict-not-approved]}
   [command]

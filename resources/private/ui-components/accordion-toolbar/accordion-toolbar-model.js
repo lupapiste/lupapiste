@@ -202,6 +202,14 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     }
   });
 
+  self.toggleEdit = function () {
+    self.docModel.docPostVerdictEdit = true;
+    self.docModel.redraw();
+  };
+
+  self.showToggleEdit = function () {
+    return self.docModel.schema.info.editable;
+  };
 
 
   /*************
