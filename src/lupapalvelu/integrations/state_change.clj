@@ -16,6 +16,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.integrations.messages :as messages]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]))
 

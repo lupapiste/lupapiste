@@ -53,7 +53,8 @@
         wgs (coord/convert "EPSG:3067" "WGS84" 5 location)]
     {:id               (ssg/generate ssc/ApplicationId)
      :propertyId       "29703401070010"
-     :infoRequest      false :permitType "R"
+     :infoRequest      false
+     :permitType "R"
      :primaryOperation {:name "pientalo-laaj" :id "57603a99edf02d7047774554"}
      :address          "address"
      :municipality     "123"
