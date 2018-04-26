@@ -167,6 +167,7 @@
   :java-source-paths ["java-src"]
   :cljsbuild {:builds {:rum {:source-paths ^:replace ["src-cljs" "src-cljc"]}}}
   :profiles {:dev      {:dependencies   [[midje "1.9.1"]
+                                         [com.cemerick/pomegranate "1.0.0"]                                             ; midje.repl needs this
                                          [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                          [com.raspasov/clj-ssh "0.5.12"]
                                          [org.apache.activemq/artemis-jms-server "2.5.0"]
