@@ -217,9 +217,15 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   };
 
   self.sendEdit = function () {
-    console.log("send");
-    self.docModel.docPostVerdictEdit = false;
-    self.docModel.redraw();
+    ajax.command("send-doc-updates", {id: self.docModel.appId, docId: self.docModel.docId})
+      .success(function() {
+        self.docModel.docPostVerdictEdit = false;
+        self.docModel.redraw();
+      })
+      .error(function(e) {
+        notify.ajaxError(e);
+      })
+      .call();
   };
 
   self.closeEdit = function () {

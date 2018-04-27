@@ -165,6 +165,18 @@
   [command]
   (doc-persistence/update! command doc updates "documents"))
 
+(defcommand send-doc-updates
+  {:parameters       [id docId]
+   :categories       #{:documents}
+   :input-validators [(partial action/non-blank-parameters [:id :docId])]
+   :contexts         [document-context]
+   :permissions      document-edit-permissions
+   :pre-checks       [(editable-by-state? (set/union states/update-doc-states [:verdictGiven]))
+                      doc-disabled-validator
+                      validate-created-after-verdict]}
+  [command]
+  (println "send"))
+
 (defcommand update-task
   {:parameters       [id doc updates]
    :categories       #{:tasks}
