@@ -3,6 +3,7 @@
 Documentation   Application invites
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Resource        ../25_company/company_resource.robot
 
 *** Test Cases ***
 
@@ -132,11 +133,33 @@ Solita accepts invite
 
 Kaino Solita opens the application
   Open application  ${appname}  ${propertyId}
+  Open tab  parties
+
+Kaino can unsubscribe notifications
+  Click visible test id  unsubscribeNotifications
+
+Kaino can now subscribe notifications
+  Click visible test id  subscribeNotifications
+
+Let's add Pena to Solita
+  Open company user listing
+  Invite existing user  pena@example.com  Pena  Panaani
+  Accept invitation  pena@example.com
+  [Teardown]  logout
+
+Pena can open application but cannot manage subscriptions
+  Pena logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  parties
+  Element should be visible  jquery=div.authorized-parties
+  No such test id  unsubscribeNotifications
+  No such test id  subscribeNotifications
   [Teardown]  logout
 
 Sonja (the Authority) is not allowed to invite people
   Sonja logs in
   Open application  ${appname}  ${propertyId}
+  Open tab  parties
   Element should not be visible  xpath=//*[@data-test-id='application-add-invite']
   [Teardown]  logout
 
@@ -167,11 +190,12 @@ Solita is not included in the hakija person select
   Person selector includes  hakija-r  henkilo.userId  Kaino  0
 
 Solita is included in the paasuunnittelija person select
-  # Empty, Mikko, Teppo and Kaino
-  Person selector count is  paasuunnittelija  userId  4
+  # Empty, Mikko, Teppo, Kaino and Pena
+  Person selector count is  paasuunnittelija  userId  5
   Person selector includes  paasuunnittelija  userId  Mikko
   Person selector includes  paasuunnittelija  userId  Teppo
   Person selector includes  paasuunnittelija  userId  Solita Kaino, Solita Oy
+  Person selector includes  paasuunnittelija  userId  Panaani Pena, Solita Oy
 
 # Tyonjohtaja on poistettu tavallisilta R-hakemuksilta (LUPA-1603).
 # Testataan tyonjohtajan kutsuminen erikseen omalla hakemuksellaan.
@@ -194,7 +218,7 @@ Mikko invites previously unknown user Unto as tyonjohtaja
 Unto hasn't accepted auth, so it can't be upgreded
   Element should not be visible by test id  change-auth-unto@example.com
 
-Mikko deletes auhtorzation from Unto
+Mikko deletes authorization from Unto
   Click by test id  remove-auth-unto@example.com
   Confirm yes no dialog
   Wait until  Invite count is  0

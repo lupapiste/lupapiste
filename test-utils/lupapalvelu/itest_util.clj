@@ -540,7 +540,7 @@
   "Returns a list of emails and clears the inbox"
   []
   (Thread/sleep 20) ; A little wait to allow mails to be delivered
-  (let [{:keys [ok messages]} (query pena :sent-emails :reset true)] ; query with any user will do
+  (let [{:keys [ok messages]} (query admin :sent-emails :reset true)] ; query with any user will do
     (assert ok)
     messages))
 
