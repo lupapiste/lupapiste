@@ -5,7 +5,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util])
-  (:import (javax.jms ExceptionListener Connection Session Destination Queue
+  (:import (javax.jms ExceptionListener Connection Session Queue
                       MessageListener BytesMessage ObjectMessage TextMessage
                       MessageConsumer MessageProducer JMSException)
            (org.apache.activemq.artemis.jms.client ActiveMQJMSConnectionFactory ActiveMQConnection)
@@ -133,10 +133,10 @@
     "Creates a producer to given queue (string) into producer-session.
     Returns function, which is called with data enroute to destination.
     message-fn must return instance of javax.jms.Message.
-    If no message-fn is given, by default a TextMessage (string) is created.
+    If no message-fn is given, message type is inferred from data with jms/MessageCreator protocol.
     Producer is internally registered and closed on shutdown."
     ([queue-name]
-     (create-producer (producer-session) queue-name (partial jms/create-text-message (producer-session))))
+     (create-producer (producer-session) queue-name #(jms/create-message % (producer-session))))
     ([session queue-name message-fn]
      (-> (jms/create-producer session (queue queue-name))
          (register-producer)
