@@ -194,7 +194,7 @@
   (let [caller-email (:email caller)
         user-email   (:email user-data)]
 
-    (if (usr/admin? caller)                                 ; TODO: Admin is not allowed to update userdata since restruction fromUserUpdate schema. How this should work?
+    (if (usr/admin? caller)                                                     ; TODO: Admin is not allowed to update userdata since restruction fromUserUpdate schema. How this should work?
       (when (= user-email caller-email) (fail! :error.unauthorized :desc "admin may not change his/her own data"))
       (when (not= user-email caller-email) (fail! :error.unauthorized :desc "can't edit others data")))
 

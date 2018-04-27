@@ -65,7 +65,7 @@
                       lang
                       excluded-operations))))
 
-(defraw parties-between-xlsx                                ; LPK-3053
+(defraw parties-between-xlsx                                                    ; LPK-3053
   {:description      "Excel to list parties for applications. Period can be max one year window."
    :parameters       [startTs endTs]
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])
@@ -85,7 +85,7 @@
                       (util/to-long endTs)
                       lang))))
 
-(defraw post-verdict-xlsx                                   ; LPK-3517
+(defraw post-verdict-xlsx                                                       ; LPK-3517
   {:description      "Excel to list applications in post verdict state"
    :parameters       [startTs endTs]
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])

@@ -153,7 +153,7 @@
   {:parameters       [id]
    :description      "Returns possible ELY statement types for application"
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :user-roles       #{:authority}                          ; default-org-authz-roles
+   :user-roles       #{:authority}                                              ; default-org-authz-roles
    :states           (states/all-application-states-but :draft :canceled)}
   [{{:keys [permitType]} :application}]
   (ok :statementTypes (permit/get-metadata permitType :ely-statement-types)))

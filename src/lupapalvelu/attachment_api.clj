@@ -428,7 +428,7 @@
 ;;
 
 (defraw "view-attachment"
-  {:parameters       [:attachment-id]                       ; Note that this is actually file id
+  {:parameters       [:attachment-id]                                           ; Note that this is actually file id
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
@@ -447,7 +447,7 @@
   (att/output-file fileId (:id session)))
 
 (defraw "download-attachment"
-  {:parameters       [:attachment-id]                       ; Note that this is actually file id
+  {:parameters       [:attachment-id]                                           ; Note that this is actually file id
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
@@ -466,7 +466,7 @@
   (att/output-attachment (att/get-attachment-latest-version-file user attachment-id (= preview "true")) (= download "true")))
 
 (defraw "download-bulletin-attachment"
-  {:parameters       [attachment-id]                        ; Note that this is actually file id
+  {:parameters       [attachment-id]                                            ; Note that this is actually file id
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles       #{:anonymous}}
@@ -542,7 +542,7 @@
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
   (let [file-options       {:filename filename :size size :content tempfile}
-        attachment-options {:attachment-id   attachmentId   ; options for attachment creation (not version)
+        attachment-options {:attachment-id   attachmentId                       ; options for attachment creation (not version)
                             :attachment-type attachmentType
                             :group           group
                             :created         created
