@@ -805,9 +805,9 @@
                                                      (auth/application-authority? application user))))
         linked-version     (set-attachment-version! application user attachment options)
         {:keys [fileId originalFileId]} linked-version]
-    (preview/preview-image! (:id application) (:fileId options) (:filename options) (:contentType options))
     (storage/link-files-to-application (:id application) (cond-> [originalFileId]
                                                                  (not= fileId originalFileId) (conj fileId)))
+    (preview/preview-image! (:id application) (:fileId options) (:filename options) (:contentType options))
     (cleanup-temp-file (:result conversion-data))
     linked-version))
 
@@ -950,8 +950,8 @@
           (if (and (:archivable result) (:fileId file))
             ; If the file is already valid PDF/A, there's no conversion and thus no fileId
             (do (update-latest-version-file! application attachment conversion-data (now))
-                (preview/preview-image! (:id application) (:fileId file) (:filename file) (:contentType file))
                 (link-files-to-application (:id application) [(:fileId file)])
+                (preview/preview-image! (:id application) (:fileId file) (:filename file) (:contentType file))
                 (cleanup-temp-file result)
                 result)
             (do (when-not (:archivable result)
