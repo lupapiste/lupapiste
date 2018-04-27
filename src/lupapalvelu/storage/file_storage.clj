@@ -3,7 +3,8 @@
             [lupapalvelu.mongo :as mongo]
             [sade.env :as env]
             [sade.strings :as ss]
-            [monger.operators :refer :all]))
+            [monger.operators :refer :all])
+  (:import [java.io ByteArrayInputStream]))
 
 ;; UPLOAD
 
@@ -12,6 +13,14 @@
   (if (env/feature? :s3)
     (s3/put-file-or-input-stream (or application user-id) file-id filename content-type content metadata)
     (mongo/upload file-id filename content-type content metadata)))
+
+(def process-bucket "sign-process")
+
+(defn upload-process-file [process-id filename content-type ^ByteArrayInputStream is metadata]
+  {:pre [(map? metadata)]}
+  (if (env/feature? :s3)
+    (s3/put-input-stream process-bucket process-id filename content-type is (.available is) metadata)
+    (mongo/upload process-id filename content-type is metadata)))
 
 ;; DOWNLOAD
 
@@ -75,6 +84,12 @@
     (s3/download session-id file-id)
     (mongo/download-find {:_id file-id :metadata.sessionId session-id})))
 
+(defn ^{:perfmon-exclude true} download-process-file
+  [process-id]
+  (if (env/feature? :s3)
+    (s3/download process-bucket process-id)
+    (mongo/download-find {:_id process-id})))
+
 ;; LINK
 
 (defn link-files-to-application [app-id fileIds]
@@ -96,3 +111,9 @@
    (if (and (env/feature? :s3) (= (keyword storage-system) :s3))
      (s3/delete user-id file-id)
      (mongo/delete-file {:id file-id :metadata.user-id user-id}))))
+
+(defn ^{:perfmon-exclude true} delete-process-file
+  [process-id]
+  (if (env/feature? :s3)
+    (s3/delete process-bucket process-id)
+    (mongo/delete-file {:_id process-id})))

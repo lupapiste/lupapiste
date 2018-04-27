@@ -14,7 +14,8 @@
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer [now]]
             [sade.env :as env]
-            [sade.crypt :as c])
+            [sade.crypt :as c]
+            [lupapalvelu.storage.file-storage :as storage])
   (:import [org.joda.time DateTime DateTimeZone]))
 
 (warn "Starting Onnistuu.fi dummy server...")
@@ -115,8 +116,9 @@
       "fake"      (respond-fake process))))
 
 (defpage [:get "/dev/dummy-onnistuu/doc/:stamp"] {:keys [stamp]}
-  (if-let [pdf (mongo/download-find {:metadata.process.stamp stamp})]
-    (let [{:keys [content contentType]} pdf
-          document (content)]
-      (->> (content) (resp/status 200) (resp/content-type contentType)))
+  (if-let [process-id (:id (mongo/select-one :sign-processes {:stamp stamp} [:_id]))]
+    (if-let [pdf (storage/download-process-file process-id)]
+      (let [{:keys [content contentType]} pdf]
+        (->> (content) (resp/status 200) (resp/content-type contentType)))
+      (resp/status 404 "Not found"))
     (resp/status 404 "Not found")))
