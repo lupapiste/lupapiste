@@ -9,8 +9,7 @@
                       MessageListener BytesMessage ObjectMessage TextMessage
                       MessageConsumer MessageProducer JMSException)
            (org.apache.activemq.artemis.jms.client ActiveMQJMSConnectionFactory ActiveMQConnection)
-           (org.apache.activemq.artemis.api.jms ActiveMQJMSClient)
-           (clojure.lang IPersistentMap ISeq)))
+           (org.apache.activemq.artemis.api.jms ActiveMQJMSClient)))
 
 (when (env/feature? :embedded-artemis)
   ; This works only with :dev profile
@@ -117,15 +116,7 @@
         (register-session :producer))
       (catch Exception e
         (fatal e "Couldn't initialize JMS connections" (.getMessage e)))))
-
-  (extend-protocol jms/MessageCreator
-    IPersistentMap
-    (create-mesage [data session]
-      (create-message (nippy/freeze data) session))
-    ISeq
-    (create-message [data session]
-      (create-message (nippy/freeze data) session)))
-
+  
   ;;
   ;; Producers
   ;;
