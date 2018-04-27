@@ -163,10 +163,10 @@
 
   (defn create-consumer
     "Creates, register and starts consumer to given endpoint. Returns consumer instance."
-    ([endpoint callback-fn]
-     (create-consumer (consumer-session) endpoint callback-fn))
-    ([session endpoint callback-fn]
-     (-> (jms/listen session (queue endpoint) (message-listener callback-fn))
+    ([endpoint-name callback-fn]
+     (create-consumer (consumer-session) endpoint-name callback-fn))
+    ([session endpoint-name callback-fn]
+     (-> (jms/listen session (queue endpoint-name) (message-listener callback-fn))
          (register-consumer))))
 
   (defn create-nippy-consumer
