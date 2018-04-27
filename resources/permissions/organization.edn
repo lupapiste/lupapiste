@@ -1,10 +1,8 @@
 {:global       {:admin              #{:organization/convert-inforequests}
                 ; FIXME: drop this
                 :authorityAdmin     #{:organization/check-permanent-archive-enabled}}
- :organization {:authority          #{:organization/read
-                                      :organization/check-permanent-archive-enabled}
-                :authorityAdmin     #{:organization/read
-                                      :organization/write
+ :organization {:authority          #{:organization/check-permanent-archive-enabled}
+                :authorityAdmin     #{:organization/admin
                                       :organization/check-permanent-archive-enabled}
                 :approver           #{:organization/check-permanent-archive-enabled}
                 :tos-editor         #{:organization/check-permanent-archive-enabled}
