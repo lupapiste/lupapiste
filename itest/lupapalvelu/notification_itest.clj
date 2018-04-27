@@ -27,9 +27,6 @@
   (fact "Teppo accepts invitation"
     (http-token-call (token-from-email (email-for-key teppo)))))
 
-#_(defn extract-email [to-field]
-  (last (re-find #"<(.*)>" to-field)))
-
 (defn check-emails [& recipient-apikeys]
   (if (seq recipient-apikeys)
     (fact "Email recipients"

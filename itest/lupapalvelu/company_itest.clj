@@ -441,12 +441,15 @@
                       :email "teppo@example.com" :admin false :submit true))
        (let [teppo-token (token-from-email "teppo@example.com" (last-email))]
          (facts "Kaino invites Pena and Unknown to Solita"
-           (let [_                                                                                                                                                                                                                                                                     (command kaino :company-invite-user :firstName "Pena" :lastName "Panaani"
-                                                                                                                                                                                                                                                                                                :email "pena@example.com" :admin false :submit true)    => ok?
-                 pena-token                                                                                                                                                                                                                                                            (token-from-email "pena@example.com" (last-email))
-                 _                                                                                                                                                                                                                                                                     (command kaino :company-add-user :firstName "Bu" :lastName "Zhi Dao"
-                                                                                                                                                                                                                                                                                                :email "unknown@example.com" :admin false :submit true) => ok?
-                 unknown-token                                                                                                                                                                                                                                                         (token-from-email "unknown@example.com" (last-email))]
+           (let [_             (command kaino :company-invite-user
+                                        :firstName "Pena" :lastName "Panaani"
+                                        :email "pena@example.com" :admin false :submit true)
+                 =>            ok?
+                 pena-token    (token-from-email "pena@example.com" (last-email))
+                 _             (command kaino :company-add-user :firstName "Bu" :lastName "Zhi Dao"
+                                        :email "unknown@example.com" :admin false :submit true)
+                 =>            ok?
+                 unknown-token (token-from-email "unknown@example.com" (last-email))]
                   (fact "Admin locks Solita again"
                         (command admin :company-lock :company "solita" :timestamp (- (now) 10000)) => ok?)
                   (fact "Kaino nukes locked company"
