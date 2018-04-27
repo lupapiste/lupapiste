@@ -718,3 +718,34 @@
 (facts "not-pre-check"
   ((not-pre-check (constantly {:ok false :error "error"})) {}) => nil?
   ((not-pre-check (constantly nil)) {}) => fail?)
+
+(facts "only users with :organization/admin permission can execute restricted actions"
+  (against-background
+    (get-actions)
+    => {:test-command {:type        :command
+                       :permissions [{:required [:organization/admin]}]}}
+
+    (lupapalvelu.permissions/get-permissions-by-role :global :authority)
+    => #{})
+
+  (fact
+    (validate {:action "test-command"
+               :user   {:id            "authority"
+                        :organizations ["ankkalinna"]
+                        :orgAuthz      {:ankkalinna #{:authority}}
+                        :role          :authority}
+               :data   {}})
+    => {:ok false, :text "error.unauthorized"}
+    (provided (lupapalvelu.permissions/get-permissions-by-role :organization :authority) => #{}))
+
+  (fact
+    (validate {:action "test-command"
+               :user   {:id            "authority-admin"
+                        :organizations ["ankkalinna"]
+                        :orgAuthz      {:ankkalinna #{:authorityAdmin}}
+                        :role          :authority}
+               :data   {}})
+    => {:ok true}
+    (provided (lupapalvelu.permissions/get-permissions-by-role :organization :authorityAdmin) => #{:organization/admin}))
+  )
+
