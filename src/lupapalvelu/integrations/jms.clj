@@ -40,9 +40,7 @@
           (when (< 1 delivery-count)
             (warnf "Message delivered already %d times" delivery-count)))
         (condp instance? m
-          BytesMessage (let [data (byte-array (.getBodyLength ^BytesMessage m))]
-                         (.readBytes ^BytesMessage m data)
-                         (cb data))
+          BytesMessage  (cb (jms/byte-message-as-array m))
           ObjectMessage (cb (.getObject ^ObjectMessage m))
           TextMessage   (cb (.getText ^TextMessage m))
           (error "Unknown JMS message type:" (type m))))))
@@ -136,30 +134,29 @@
     (get @state :producer-session))
 
   (defn register-producer
-    "Creates a producer to queue in given session.
-    Returns one arity function which takes data to be sent to queue."
-    [^Session session ^Destination queue message-fn]
-    (let [producer (jms/create-producer session queue)]
-      (register-conj :producers producer)
-      (jms/producer-fn producer message-fn)))
+    "Register producer to state and return it."
+    [producer]
+    (register-conj :producers producer))
 
   (defn create-producer
-    "Creates a producer to given queue (string) in default session.
+    "Creates a producer to given queue (string) into producer-session.
     Returns function, which is called with data enroute to destination.
     message-fn must return instance of javax.jms.Message.
     If no message-fn is given, by default a TextMessage (string) is created.
     Producer is internally registered and closed on shutdown."
-    ([^String queue-name]
-     (register-producer (producer-session) (queue queue-name) (partial jms/create-text-message (producer-session))))
-    ([^String queue-name message-fn]
-     (register-producer (producer-session) (queue queue-name) message-fn)))
+    ([queue-name]
+     (create-producer (producer-session) queue-name (partial jms/create-text-message (producer-session))))
+    ([session queue-name message-fn]
+     (-> (jms/create-producer session (queue queue-name))
+         (register-producer)
+         (jms/producer-fn message-fn))))
 
   (defn create-nippy-producer
     "Producer that serializes data to byte message with nippy." ; props to bowerick/jms
-    ([^String queue-name]
+    ([queue-name]
      (create-nippy-producer (producer-session) queue-name))
-    ([^Session session ^String queue-name]
-     (create-producer queue-name #(jms/create-message (nippy/freeze %) session))))
+    ([session queue-name]
+     (create-producer session queue-name #(jms/create-message (nippy/freeze %) session))))
 
   ;;
   ;; Consumers
@@ -169,24 +166,21 @@
     (get @state :consumer-session))
 
   (defn register-consumer
-    "Create consumer to queue in given session.
-    callback-fn receives the data, listener-fn creates the MessageListener."
-    [^Session session ^Destination queue callback-fn listener-fn]
-    (let [consumer-instance (doto (.createConsumer session queue)
-                              (.setMessageListener (listener-fn callback-fn)))]
-      (register-conj :consumers consumer-instance)
-      consumer-instance))
+    "Register consumer to state and return it."
+    [consumer-instance]
+    (register-conj :consumers consumer-instance))
 
   (defn create-consumer
     "Creates, register and starts consumer to given endpoint. Returns consumer instance."
-    ([^String endpoint callback-fn]
-     (create-consumer endpoint callback-fn message-listener))
-    ([^String endpoint callback-fn listener-fn]
-     (register-consumer (consumer-session) (queue endpoint) callback-fn listener-fn)))
+    ([endpoint callback-fn]
+     (create-consumer (consumer-session) endpoint callback-fn))
+    ([session endpoint callback-fn]
+     (-> (jms/listen session (queue endpoint) (message-listener callback-fn))
+         (register-consumer))))
 
   (defn create-nippy-consumer
     "Creates and returns consumer to endpoint, that deserializes JMS data with nippy/thaw."
-    [^String endpoint callback-fn]
+    [endpoint callback-fn]
     (create-consumer endpoint (fn [^bytes data] (callback-fn (nippy/thaw data)))))
 
   ;;
