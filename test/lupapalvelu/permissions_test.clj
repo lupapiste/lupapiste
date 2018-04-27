@@ -290,10 +290,10 @@
     (provided (get-permissions-by-role :application "another-role") => #{:test/do :test/test})))
 
 (defcontext test-context [{{id :test-id field :test-field} :test-user coll :test-coll}]
-            (let [things (filter (comp #{id} :id) coll)]
-              {:context-scope :test-scope
-               :context-roles (map :role things)
-               :thing         (first things)}))
+  (let [things (filter (comp #{id} :id) coll)]
+    {:context-scope :test-scope
+     :context-roles (map :role things)
+     :thing         (first things)}))
 
 (facts "defcontext"
   (facts test-context
