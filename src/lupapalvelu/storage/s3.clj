@@ -6,7 +6,9 @@
             [clojure.walk :refer [keywordize-keys]]
             [sade.strings :as str]
             [sade.util :as util]
-            [sade.strings :as ss])
+            [sade.strings :as ss]
+            [sade.crypt :as c]
+            [ring.util.codec :as codec])
   (:import [java.io InputStream ByteArrayOutputStream File FileInputStream ByteArrayInputStream]
            [com.amazonaws.services.s3.model PutObjectRequest CreateBucketRequest CannedAccessControlList
                                             SetBucketVersioningConfigurationRequest BucketVersioningConfiguration
@@ -54,27 +56,34 @@
 (defn- generate-user-metadata [metadata]
   "Returns a Java Map<String,String> compatible map"
   (reduce (fn [result [k v]]
-            (assoc result (name k) (if (keyword? v) (name v) (str v))))
+            (assoc result (name k) (-> (if (keyword? v)
+                                         (name v)
+                                         (str v))
+                                       codec/url-encode)))
           {}
           metadata))
 
 (defn- do-put-object [bucket file-id filename content-type input-stream content-length metadata]
   {:pre [(map? metadata)]}
-  (let [actual-bucket (bucket-name bucket)]
-    (create-bucket-if-not-exists actual-bucket)
-    (let [user-metadata (-> (generate-user-metadata metadata)
-                            (assoc "uploaded" (str (now))
-                                   "filename" filename))
-          request (->> (doto (ObjectMetadata.)
-                         (.setContentLength content-length)
-                         (.setContentType content-type)
-                         (.setUserMetadata user-metadata))
-                       (PutObjectRequest. actual-bucket file-id input-stream))]
-      (-> (.getRequestClientOptions request)
-          (.setReadLimit 150001))
-      (.putObject s3-client request)
-      (timbre/debug "Object" file-id "uploaded to bucket" actual-bucket)
-      {:length content-length})))
+  (try
+    (let [actual-bucket (bucket-name bucket)]
+      (create-bucket-if-not-exists actual-bucket)
+      (let [user-metadata (-> (generate-user-metadata metadata)
+                              (assoc "uploaded" (str (now))
+                                     "filename" (codec/url-encode filename)))
+            request (->> (doto (ObjectMetadata.)
+                           (.setContentLength content-length)
+                           (.setContentType content-type)
+                           (.setUserMetadata user-metadata))
+                         (PutObjectRequest. actual-bucket file-id input-stream))]
+        (-> (.getRequestClientOptions request)
+            (.setReadLimit 150001))
+        (.putObject s3-client request)
+        (timbre/debug "Object" file-id "uploaded to bucket" actual-bucket)
+        {:length content-length}))
+    (catch AmazonS3Exception e
+      (timbre/error e "Could not upload object" file-id "to bucket" (bucket-name bucket))
+      (throw e))))
 
 (defn put-input-stream [bucket file-id filename content-type input-stream content-length & metadata]
   {:pre [(string? file-id) (string? filename) (string? content-type)
@@ -135,16 +144,19 @@
   {:pre [(string? file-id)]}
   (try
     (let [object (.getObject s3-client (bucket-name application-id) ^String file-id)
-          metadata (.getObjectMetadata object)]
+          metadata (.getObjectMetadata object)
+          user-metadata (->> (.getUserMetadata metadata)
+                             (into {})
+                             (map (fn [[k v]]
+                                    [(keyword k) (codec/url-decode v)]))
+                             (into {}))]
       {:content     (fn [] (.getObjectContent object))
        :contentType (.getContentType metadata)
        :size        (.getContentLength metadata)
-       :filename    (get (.getUserMetadata metadata) "filename")
+       :filename    (:filename user-metadata)
        :fileId      file-id
-       :metadata    (-> (into {} (.getUserMetadata metadata))
-                        (dissoc "filename")
-                        (update "uploaded" util/->int)
-                        (keywordize-keys))
+       :metadata    (-> (dissoc user-metadata :filename)
+                        (update :uploaded util/->int))
        :application application-id})
     (catch AmazonS3Exception ex
       (timbre/error ex "Error occurred when trying to retrieve" file-id "from S3 bucket" (bucket-name application-id)))))
