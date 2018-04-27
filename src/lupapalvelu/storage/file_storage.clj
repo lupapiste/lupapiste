@@ -8,13 +8,16 @@
 
 ;; UPLOAD
 
-(defn upload [file-id filename content-type content {:keys [application user-id] :as metadata}]
+(defn upload [file-id filename content-type content {:keys [application user-id sessionId] :as metadata}]
   {:pre [(map? metadata)]}
   (if (env/feature? :s3)
-    (s3/put-file-or-input-stream (or application user-id) file-id filename content-type content metadata)
+    (s3/put-file-or-input-stream (or application user-id sessionId) file-id filename content-type content metadata)
     (mongo/upload file-id filename content-type content metadata)))
 
 (def process-bucket "sign-process")
+
+(defn bulletin-bucket [id]
+  (str id "-bulletin"))
 
 (defn upload-process-file [process-id filename content-type ^ByteArrayInputStream is metadata]
   {:pre [(map? metadata)]}
@@ -60,6 +63,15 @@
        first
        :storageSystem))
 
+(defn- find-bulletin-comment-attachment-storage-system [bulletin-id file-id]
+  (->> (mongo/select-one :application-bulletin-comments
+                         {:_id                bulletin-id
+                          :attachments.fileId file-id}
+                         [:attachments.$])
+       :attachments
+       first
+       :storageSystem))
+
 (defn ^{:perfmon-exclude true} download-user-attachment
   "Downloads user attachment file from Mongo GridFS or S3"
   ([user-id file-id]
@@ -90,15 +102,36 @@
     (s3/download process-bucket process-id)
     (mongo/download-find {:_id process-id})))
 
+(defn ^{:perfmon-exclude true} download-bulletin-file
+  [bulletin-id file-id storage-system]
+  (if (and (env/feature? :s3) (= (keyword storage-system) :s3))
+    (s3/download (bulletin-bucket bulletin-id) file-id)
+    (mongo/download-find {:_id file-id :metadata.bulletinId bulletin-id})))
+
 ;; LINK
 
-(defn link-files-to-application [app-id fileIds]
-  {:pre [(seq fileIds) (not-any? ss/blank? (conj fileIds app-id))]}
+(defn link-files-to-application [app-id file-ids]
+  {:pre [(seq file-ids) (not-any? ss/blank? (conj file-ids app-id))]}
   (if (env/feature? :s3)
-    (doseq [file-id fileIds]
-      (s3/link-file-object-to-application app-id file-id))
-    (mongo/update-by-query :fs.files {:_id {$in fileIds}} {$set {:metadata.application app-id
-                                                                 :metadata.linked true}})))
+    (doseq [file-id file-ids]
+      (s3/move-file-object app-id file-id))
+    (mongo/update-by-query :fs.files {:_id {$in file-ids}} {$set {:metadata.application app-id
+                                                                  :metadata.linked true}})))
+
+(defn link-files-to-bulletin [session-id bulletin-id file-ids]
+  {:pre [(seq file-ids) (not-any? ss/blank? (conj file-ids bulletin-id))]}
+  (if (env/feature? :s3)
+    (doseq [file-id file-ids]
+      (s3/move-file-object session-id (bulletin-bucket bulletin-id) file-id))
+    (mongo/update-by-query :fs.files {:_id {$in file-ids}} {$set {:metadata.bulletinId bulletin-id
+                                                                  :metadata.linked true}})))
+
+(defn session-files-exist? [session-id file-ids]
+  {:pre [(seq file-ids) (not-any? ss/blank? (conj file-ids session-id))]}
+  (->> (if (env/feature? :s3)
+         (map #(s3/object-exists? session-id %) file-ids)
+         (map #(mongo/any? :fs.files {:_id % :metadata.sessionId session-id}) file-ids))
+       (every? true?)))
 
 ;; DELETE
 

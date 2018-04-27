@@ -20,7 +20,10 @@
             [lupapalvelu.permit :as permit]
             [sade.strings :as ss]
             [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.application :as app]))
+            [lupapalvelu.application :as app]
+            [lupapalvelu.storage.file-storage :as storage]
+            [sade.shared-schemas :as sssc]
+            [sade.env :as env]))
 
 (sc/defschema ApplicationBulletin
   {:id             sc/Str
@@ -39,9 +42,9 @@
    (sc/optional-key :pate-verdict) sc/Any})
 
 (sc/defschema CommentFile
-  {:fileId ssc/ObjectIdStr
-   :filename sc/Str
-   :size sc/Int
+  {:fileId      (sc/either ssc/ObjectIdStr sssc/UUIDStr)
+   :filename    sc/Str
+   :size        sc/Int
    :contentType sc/Str})
 
 (def comment-file-checker (sc/checker CommentFile))
@@ -192,7 +195,8 @@
                      :comment      comment
                      :created      created
                      :contact-info contact-info
-                     :attachments  files}]
+                     :attachments  (map #(assoc % :storageSystem (if (env/feature? :s3) :s3 :mongodb))
+                                        files)}]
     new-comment))
 
 (defn get-bulletin
@@ -213,11 +217,13 @@
       (when (seq bulletin) attachment-file))))
 
 (defn get-bulletin-comment-attachment-file-as
-  "Returns the attachment file if user has access to application, otherwise nil."
+  "Returns the bulletin attachment file if user has access to application, otherwise nil."
   [user file-id]
-  (when-let [attachment-file (mongo/download file-id)]
-    (when-let [application (lupapalvelu.domain/get-application-as (get-in attachment-file [:metadata :bulletinId]) user :include-canceled-apps? true)]
-      (when (seq application) attachment-file))))
+  (when-let [comment (mongo/select-one :application-bulletin-comments
+                                       {:attachments.fileId file-id}
+                                       [:attachments.$ :bulletinId])]
+    (when (seq (lupapalvelu.domain/get-application-as (:bulletinId comment) user :include-canceled-apps? true))
+      (storage/download-bulletin-file (:bulletinId comment) file-id (-> comment :attachments first :storageSystem)))))
 
 ;;
 ;; Updates
@@ -236,11 +242,6 @@
   "Updates bulletin with upsert set to true."
   [bulletin-id changes]
   (update-bulletin bulletin-id {} changes :upsert true))
-
-(defn update-file-metadata [bulletin-id comment-id files]
-  (mongo/update-file-by-query {:_id {$in (map :fileId files)}} {$set {:metadata.linked     true
-                                                                      :metadata.bulletinId bulletin-id
-                                                                      :metadata.commentId  comment-id}}))
 
 ;;;
 ;;; Date checkers

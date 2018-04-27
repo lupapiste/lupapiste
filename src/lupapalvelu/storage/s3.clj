@@ -131,14 +131,20 @@
                      (.length is-or-file)
                      md))))
 
-(defn link-file-object-to-application [application-id file-id]
-  {:pre [(string? application-id) (string? file-id)]}
-  (let [temp-bucket (bucket-name nil)
-        target-bucket (bucket-name application-id)]
-    (create-bucket-if-not-exists target-bucket)
-    (.copyObject s3-client temp-bucket file-id target-bucket file-id)
-    (.deleteObject s3-client temp-bucket file-id)
-    (timbre/debug "Object" file-id "moved from" temp-bucket "to" target-bucket)))
+(defn move-file-object
+  "Moves object within the storage system from one bucket to another by copying the object
+   and then deleting it from the source bucket.
+   Source bucket for the two-arity version is the default temp file buvket."
+  ([to-bucket file-id]
+   (move-file-object nil to-bucket file-id))
+  ([from-bucket to-bucket file-id]
+   {:pre [(string? to-bucket) (string? file-id)]}
+   (let [from-bucket (bucket-name from-bucket)
+         target-bucket (bucket-name to-bucket)]
+     (create-bucket-if-not-exists target-bucket)
+     (.copyObject s3-client from-bucket file-id target-bucket file-id)
+     (.deleteObject s3-client from-bucket file-id)
+     (timbre/debug "Object" file-id "moved from" from-bucket "to" target-bucket))))
 
 (defn download [application-id file-id]
   {:pre [(string? file-id)]}
