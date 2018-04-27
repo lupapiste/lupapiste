@@ -116,7 +116,7 @@
         (register-session :producer))
       (catch Exception e
         (fatal e "Couldn't initialize JMS connections" (.getMessage e)))))
-  
+
   ;;
   ;; Producers
   ;;
@@ -172,7 +172,14 @@
   (defn create-nippy-consumer
     "Creates and returns consumer to endpoint, that deserializes JMS data with nippy/thaw."
     [endpoint callback-fn]
-    (create-consumer endpoint (fn [^bytes data] (callback-fn (nippy/thaw data)))))
+    (create-consumer
+      endpoint
+      (fn [^bytes data]
+        (try
+          (let [clj-data (nippy/thaw data)]
+            (callback-fn clj-data))
+          (catch ClassCastException e
+            (errorf e "Couldn't cast JMS message to Clojure data with nippy, ignoring callback."))))))
 
   ;;
   ;; misc
