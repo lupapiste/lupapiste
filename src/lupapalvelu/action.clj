@@ -31,19 +31,19 @@
 (def ^:dynamic *created-timestamp-for-test-actions* nil)
 
 (defn action [name & {:keys [user type data] :or {user nil type :action data {}}}]
-  {:action name
-   :user user
-   :type type
+  {:action  name
+   :user    user
+   :type    type
    :created (or *created-timestamp-for-test-actions* (now))
-   :data data})
+   :data    data})
 
 
 (defn make-command
-  ([name data]      (make-command name nil data))
+  ([name data] (make-command name nil data))
   ([name user data] (action name :user user :data data :type :command)))
 
-(defn make-query  [name data] (action name :type :query :data data))
-(defn make-raw    [name data] (action name :type :raw :data data))
+(defn make-query [name data] (action name :type :query :data data))
+(defn make-raw [name data] (action name :type :raw :data data))
 (defn make-export [name data] (action name :type :export :data data))
 
 ;;
@@ -93,9 +93,9 @@
    Blank address passes the validation."
   ([command] (email-validator :email command))
   ([email-param-name command]
-    (let [email (get-in command [:data email-param-name])]
-      (when-not (dns/email-and-domain-valid? (ss/canonize-email email))
-        (fail :error.email)))))
+   (let [email (get-in command [:data email-param-name])]
+     (when-not (dns/email-and-domain-valid? (ss/canonize-email email))
+       (fail :error.email)))))
 
 (defn validate-url [url]
   (when-not (v/http-url? url)
@@ -117,8 +117,8 @@
 
 (defn notify
   [notification]
-   (fn [command status]
-     (notifications/notify! notification command status)))
+  (fn [command status]
+    (notifications/notify! notification command status)))
 
 (defn with-application [command function]
   (if-let [id (-> command :data :id)]
@@ -144,23 +144,23 @@
   (or
     (vector-parameters params command)
     (filter-params-of-command params command
-      (partial some #(or (not (string? %)) (ss/blank? %)))
-      :error.vector-parameters-with-blank-items )))
+                              (partial some #(or (not (string? %)) (ss/blank? %)))
+                              :error.vector-parameters-with-blank-items)))
 
 (defn vector-parameters-with-at-least-n-non-blank-items [n params command]
   (or
     (vector-parameters-with-non-blank-items params command)
     (filter-params-of-command params command
-      #(> n (count %))
-      :error.vector-parameters-with-items-missing-required-keys)))
+                              #(> n (count %))
+                              :error.vector-parameters-with-items-missing-required-keys)))
 
 (defn vector-parameters-with-map-items-with-required-keys [params required-keys command]
   (or
     (vector-parameters params command)
     (filter-params-of-command params command
-      (partial some #(not (and (map? %) (util/every-key-in-map? % required-keys))))
-      :error.vector-parameters-with-items-missing-required-keys
-      {:required-keys required-keys})))
+                              (partial some #(not (and (map? %) (util/every-key-in-map? % required-keys))))
+                              :error.vector-parameters-with-items-missing-required-keys
+                              {:required-keys required-keys})))
 
 (defn vector-parameter-of [param pred command]
   (or
@@ -215,9 +215,9 @@
   (or
     (map-parameters params command)
     (filter-params-of-command params command
-      #(not (util/every-key-in-map? % required-keys))
-      :error.map-parameters-with-required-keys
-      {:required-keys required-keys})))
+                              #(not (util/every-key-in-map? % required-keys))
+                              :error.map-parameters-with-required-keys
+                              {:required-keys required-keys})))
 
 (defn non-empty-map-parameters [params command]
   (or
@@ -245,9 +245,9 @@
 (defn- localization? [mode maybe-localization]
   (and (map? maybe-localization)
        (case mode
-         :partial    (every? i18n/languages (keys maybe-localization))
-         :all        (= i18n/languages (set (keys maybe-localization)))
-         :supported  (every? (set (keys maybe-localization)) i18n/languages))
+         :partial (every? i18n/languages (keys maybe-localization))
+         :all (= i18n/languages (set (keys maybe-localization)))
+         :supported (every? (set (keys maybe-localization)) i18n/languages))
        (every? string? (vals maybe-localization))))
 
 (defn partial-localization-parameters
@@ -281,33 +281,33 @@
   "Get current application from command (or fail) and run changes into it.
    Optionally returns the number of updated applications."
   ([command changes]
-    (update-application command {} changes))
+   (update-application command {} changes))
   ([command mongo-query changes & {:keys [return-count?]}]
 
-    (when-let [new-state (get-in changes [$set :state])]
-      (assert
-        (or
-          ; Require history entry
-          (seq (get-in changes [$push :history]))
-          ; Inforequest state chenges don't require logging
-          (states/all-inforequest-states new-state)
-          ; delete-verdict commands sets state back, but no logging is required (LPK-917)
-          (seq (get-in changes [$pull :verdicts])))
-        "event must be pushed to history array when state is set")
-      (if (env/dev-mode?)
-        (when-not (map? (:user command))
-          (fatalf "no user defined in command '%s' for update-application call, new state was %s" (:action command) new-state))
-        (when-not (map? (:user command))
-          (warnf "no user defined in command '%s' for update-application call, new state was %s" (:action command) new-state))))
+   (when-let [new-state (get-in changes [$set :state])]
+     (assert
+       (or
+         ; Require history entry
+         (seq (get-in changes [$push :history]))
+         ; Inforequest state chenges don't require logging
+         (states/all-inforequest-states new-state)
+         ; delete-verdict commands sets state back, but no logging is required (LPK-917)
+         (seq (get-in changes [$pull :verdicts])))
+       "event must be pushed to history array when state is set")
+     (if (env/dev-mode?)
+       (when-not (map? (:user command))
+         (fatalf "no user defined in command '%s' for update-application call, new state was %s" (:action command) new-state))
+       (when-not (map? (:user command))
+         (warnf "no user defined in command '%s' for update-application call, new state was %s" (:action command) new-state))))
 
-    (with-application command
-      (fn [{:keys [id organization]}]
-        (let [n (mongo/update-by-query :applications (assoc mongo-query :_id id) changes)]
-          (when-let [new-state (get-in changes [$set :state])]
-            (when (and (env/feature? :pate-json) organization (org/pate-org? organization))
-              (util/future*
-                (state-change/trigger-state-change command new-state))))
-          (if return-count? n nil))))))
+   (with-application command
+                     (fn [{:keys [id organization]}]
+                       (let [n (mongo/update-by-query :applications (assoc mongo-query :_id id) changes)]
+                         (when-let [new-state (get-in changes [$set :state])]
+                           (when (and (env/feature? :pate-json) organization (org/pate-org? organization))
+                             (util/future*
+                               (state-change/trigger-state-change command new-state))))
+                         (if return-count? n nil))))))
 
 (defn application->command
   "Creates a command data structure that is suitable for update-application and with-application functions.
@@ -316,7 +316,7 @@
    (application->command application nil))
   ([{id :id :as application} user]
    (util/assoc-when
-     {:data {:id id}
+     {:data        {:id id}
       :application application}
      :user user)))
 
@@ -334,9 +334,9 @@
 (defn serializable-actions []
   (into {} (for [[k v] (get-actions)]
              [k (-> v
-                  (dissoc :handler :pre-checks :input-validators :on-success
-                          :contexts :permissions)           ; FIXME serialize permissions
-                  (assoc :name k))])))
+                    (dissoc :handler :pre-checks :input-validators :on-success
+                            :contexts :permissions)                             ; FIXME serialize permissions
+                    (assoc :name k))])))
 
 ;;
 ;; Command router
@@ -354,7 +354,7 @@
 
 (defn- has-required-user-role [command {user-roles :user-roles parameters :parameters :as meta-data}]
   (let [allowed-roles (or user-roles #{})
-        user-role (-> command :user :role keyword)]
+        user-role     (-> command :user :role keyword)]
     (or (nil? user-roles) (allowed-roles :anonymous) (allowed-roles user-role) (allowed-financial-authority allowed-roles user-role parameters))))
 
 (defn meta-data [{command :action}]
@@ -370,7 +370,7 @@
     (let [{:keys [action web]} command
           {:keys [user-agent client-ip]} web]
       (errorf "action '%s' not found. User agent '%s' from %s"
-             (log/sanitize 50 action) (log/sanitize 100 user-agent) client-ip)
+              (log/sanitize 50 action) (log/sanitize 100 user-agent) client-ip)
       (fail :error.invalid-command))))
 
 (defn missing-feature [command]
@@ -392,7 +392,7 @@
   (when (and (let [md (meta-data command)]
                (case (:type md)
                  :command true
-                 :raw     (= :post (get-in command [:web :method]))
+                 :raw (= :post (get-in command [:web :method]))
                  false))
              (get-in command [:user :impersonating]))
     unauthorized))
@@ -435,17 +435,17 @@
 (defn executed
   ([command] (executed (:action command) command))
   ([name command]
-    (let [meta-data (get-meta name)]
-      (or
-        (if-let [handler (:handler meta-data)]
-          (let [result (handler command)
-                masked-command (assoc (masked command) :ns (:ns meta-data))]
-            (if (or (= :raw (:type command)) (nil? result) (ok? result))
-              (log/log-event :info masked-command)
-              (log/log-event :warning masked-command))
-            result)
-          (infof "no handler for action '%s'" name))
-        (ok)))))
+   (let [meta-data (get-meta name)]
+     (or
+       (if-let [handler (:handler meta-data)]
+         (let [result         (handler command)
+               masked-command (assoc (masked command) :ns (:ns meta-data))]
+           (if (or (= :raw (:type command)) (nil? result) (ok? result))
+             (log/log-event :info masked-command)
+             (log/log-event :warning masked-command))
+           result)
+         (infof "no handler for action '%s'" name))
+       (ok)))))
 
 (def authorize-validators [check-lockdown
                            missing-feature
@@ -453,9 +453,9 @@
                            impersonation])
 
 (def execute-validators (conj authorize-validators
-                          invalid-type
-                          missing-parameters
-                          input-validators-fail))
+                              invalid-type
+                              missing-parameters
+                              input-validators-fail))
 
 (defn access-denied-by-insufficient-permissions [{user-permissions :permissions :as command}]
   (let [permissions (permissions/get-required-permissions (meta-data command) command)]
@@ -521,9 +521,9 @@
 (defn get-post-fns [{ok :ok} {:keys [on-complete on-success on-fail]}]
   (letfn [(->vec [v]
             (cond
-              (nil? v)         nil
-              (sequential? v)  v
-              :else            [v]))]
+              (nil? v) nil
+              (sequential? v) v
+              :else [v]))]
     (concat (->vec on-complete) (->vec (if ok on-success on-fail)))))
 
 (defn invoke-post-fns! [fns command status]
@@ -547,33 +547,33 @@
   (try+
     (or
       (some #(% command) validators)
-      (let [application (get-application command)
+      (let [application           (get-application command)
             ^{:doc "Organization as delay"}
-            organization (when application
-                           (delay (org/get-organization (:organization application))))
+            organization          (when application
+                                    (delay (org/get-organization (:organization application))))
             ^{:doc "Application assignments as delay"}
-            assignments (when application
-                          (delay (mongo/select :assignments
-                                               {:application.id (:id application)
-                                                :status {$ne "canceled"}})))
+            assignments           (when application
+                                    (delay (mongo/select :assignments
+                                                         {:application.id (:id application)
+                                                          :status         {$ne "canceled"}})))
             application-bulletins (delay
-                                   (when application
-                                     (mongo/select :application-bulletins
-                                                   ;; TODO: proper query for all application bulletins
-                                                   {:_id (:id application)})))
-            user-organizations (lazy-seq (usr/get-organizations (:user command)))
-            company (when-let [company-id (get-in command [:user :company :id])]
-                      (delay (mongo/by-id :companies company-id)))
-            command (-> {:application application
-                         :application-bulletins application-bulletins
-                         :organization organization
-                         :user-organizations user-organizations
-                         :company company
-                         :application-assignments assignments}
-                        (merge command)
-                        (update :user update-user-application-role application)
-                        enrich-default-permissions
-                        enrich-action-contexts)]
+                                    (when application
+                                      (mongo/select :application-bulletins
+                                                    ;; TODO: proper query for all application bulletins
+                                                    {:_id (:id application)})))
+            user-organizations    (lazy-seq (usr/get-organizations (:user command)))
+            company               (when-let [company-id (get-in command [:user :company :id])]
+                                    (delay (mongo/by-id :companies company-id)))
+            command               (-> {:application             application
+                                       :application-bulletins   application-bulletins
+                                       :organization            organization
+                                       :user-organizations      user-organizations
+                                       :company                 company
+                                       :application-assignments assignments}
+                                      (merge command)
+                                      (update :user update-user-application-role application)
+                                      enrich-default-permissions
+                                      enrich-action-contexts)]
         (or
           (not-authorized-to-application command)
           (access-denied-by-insufficient-permissions command)
@@ -587,11 +587,11 @@
     (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
       (do
         (errorf "fail! in action: \"%s\" [%s:%s]: %s (%s)"
-          (:action command)
-          (:sade.core/file all)
-          (:sade.core/line all)
-          text
-          (dissoc all :text :sade.core/type :sade.core/file :sade.core/line))
+                (:action command)
+                (:sade.core/file all)
+                (:sade.core/line all)
+                text
+                (dissoc all :text :sade.core/type :sade.core/file :sade.core/line))
         (when execute? (log/log-event :error (masked command)))
         (fail text (dissoc all :sade.core/type :sade.core/file :sade.core/line))))
     (catch response? resp
@@ -640,45 +640,45 @@
 (def ActionMetaData
   {
    ; Set of user role keywords. Use :user-roles #{:anonymous} to grant access to anyone.
-   (sc/optional-key :user-roles) (subset-of roles/all-user-roles)
+   (sc/optional-key :user-roles)          (subset-of roles/all-user-roles)
    ; Parameters can be keywords or symbols. Symbols will be available in the action body.
    ; If a parameter is missing from request, an error will be raised.
-   (sc/optional-key :parameters)  [(sc/cond-pre sc/Keyword sc/Symbol)]
-   (sc/optional-key :optional-parameters)  [(sc/cond-pre sc/Keyword sc/Symbol)]
+   (sc/optional-key :parameters)          [(sc/cond-pre sc/Keyword sc/Symbol)]
+   (sc/optional-key :optional-parameters) [(sc/cond-pre sc/Keyword sc/Symbol)]
    ; Set of categories for use of allowed-actions-for-cateory
-   (sc/optional-key :categories)   #{sc/Keyword}
+   (sc/optional-key :categories)          #{sc/Keyword}
    ; Set of application context role keywords.
-   (sc/optional-key :user-authz-roles)  (subset-of roles/all-authz-roles)
+   (sc/optional-key :user-authz-roles)    (subset-of roles/all-authz-roles)
    ; Set of application organization context role keywords
-   (sc/optional-key :org-authz-roles) (subset-of roles/all-org-authz-roles)
+   (sc/optional-key :org-authz-roles)     (subset-of roles/all-org-authz-roles)
    ; Documentation string.
-   (sc/optional-key :description) sc/Str
+   (sc/optional-key :description)         sc/Str
    ; Documents that the action will be sending (email) notifications.
-   (sc/optional-key :notified)    sc/Bool
+   (sc/optional-key :notified)            sc/Bool
    ; Prechecks one parameter: the command, which has :application associated.
    ; Command does not have :data when pre-check is called on validation phase (allowed-actions)
    ; but has :data when pre-check is called during action execution.
-   (sc/optional-key :pre-checks)  [(sc/cond-pre util/IFn sc/Symbol)]
+   (sc/optional-key :pre-checks)          [(sc/cond-pre util/IFn sc/Symbol)]
    ; Input validators take one parameter, the command. Application is not yet available.
-   (sc/optional-key :input-validators)  [(sc/cond-pre util/Fn sc/Symbol)]
+   (sc/optional-key :input-validators)    [(sc/cond-pre util/Fn sc/Symbol)]
    ; Application state keywords
-   (sc/optional-key :states)      (sc/if map?
-                                    {(apply sc/enum roles/all-user-roles) (subset-of states/all-states)}
-                                    (subset-of states/all-states))
-   (sc/optional-key :contexts)    [(sc/pred fn? "context extender function")]
-   (sc/optional-key :permissions) (sc/constrained [{(sc/optional-key :description) sc/Str
-                                                    (sc/optional-key :context) permissions/ContextMatcher
-                                                    :required [permissions/RequiredPermission]}]
-                                                  (util/fn->> butlast (every? :context))
-                                                  "key :context is required for all but last element of permissions")
-   (sc/optional-key :on-complete) (sc/cond-pre util/Fn [util/Fn])
-   (sc/optional-key :on-success)  (sc/cond-pre util/Fn [util/Fn])
-   (sc/optional-key :on-fail)     (sc/cond-pre util/Fn [util/Fn])
+   (sc/optional-key :states)              (sc/if map?
+                                            {(apply sc/enum roles/all-user-roles) (subset-of states/all-states)}
+                                            (subset-of states/all-states))
+   (sc/optional-key :contexts)            [(sc/pred fn? "context extender function")]
+   (sc/optional-key :permissions)         (sc/constrained [{(sc/optional-key :description) sc/Str
+                                                            (sc/optional-key :context)     permissions/ContextMatcher
+                                                            :required                      [permissions/RequiredPermission]}]
+                                                          (util/fn->> butlast (every? :context))
+                                                          "key :context is required for all but last element of permissions")
+   (sc/optional-key :on-complete)         (sc/cond-pre util/Fn [util/Fn])
+   (sc/optional-key :on-success)          (sc/cond-pre util/Fn [util/Fn])
+   (sc/optional-key :on-fail)             (sc/cond-pre util/Fn [util/Fn])
    ; Allow command execution even if the system is in readonly mode.
-   (sc/optional-key :allowed-in-lockdown)    sc/Bool
+   (sc/optional-key :allowed-in-lockdown) sc/Bool
    ; Feature flag name. Action is run only if the feature flag is true.
    ; If you have feature.some-feature properties file, use :feature :some-feature in action meta data
-   (sc/optional-key :feature)     sc/Keyword})
+   (sc/optional-key :feature)             sc/Keyword})
 
 (defn register-action [action-type action-name meta-data line ns-str handler]
   {:pre [(keyword? action-type)
@@ -702,7 +702,7 @@
           (str "You must define :user-roles or :permissions meta data for " action-name))
 
   (assert (or (ss/ends-with ns-str "-api") (ss/ends-with ns-str "-test") (ss/starts-with (ss/suffix ns-str ".") "dummy"))
-    (str "Please define actions in *-api namespaces. Offending action: " action-name " at " ns-str ":" line))
+          (str "Please define actions in *-api namespaces. Offending action: " action-name " at " ns-str ":" line))
 
   (assert
     (if (some #(= % :id) (:parameters meta-data))
@@ -710,13 +710,13 @@
       true)
     (str "You must define :permissions, :states or :pre-checks meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
 
-  (assert (or  (nil? (:states meta-data)) (set? (:states meta-data)) (-> meta-data :states keys set (= (:user-roles meta-data))))
-    (str "Keys of :states should match :user-roles for " action-name " when :states is defined as a map."))
+  (assert (or (nil? (:states meta-data)) (set? (:states meta-data)) (-> meta-data :states keys set (= (:user-roles meta-data))))
+          (str "Keys of :states should match :user-roles for " action-name " when :states is defined as a map."))
 
   (assert (or (seq (:input-validators meta-data))
               (empty? (:parameters meta-data))
               (some #{:id} (:parameters meta-data)))
-    (str "Input validators must be defined for " action-name))
+          (str "Input validators must be defined for " action-name))
 
   (assert (or (empty? (:org-authz-roles meta-data))
               (some #{:id} (:parameters meta-data)))
@@ -727,23 +727,23 @@
 
     (tracef "registering %s: '%s' (%s:%s)" (name action-type) action-name ns-str line)
     (swap! actions assoc
-      action-keyword
-      (merge
-       {:user-authz-roles (cond
-                            (nil? user-roles) roles/all-authz-roles
-                            (= #{:authority} user-roles) #{} ;; By default, authority gets authorization fron organization role
-                            :else (roles/default-user-authz action-type))
-        :org-authz-roles (cond
-                           (nil? user-roles) roles/all-org-authz-roles
-                           (some user-roles [:authority :oirAuthority]) roles/default-org-authz-roles
-                           (user-roles :anonymous) roles/all-org-authz-roles)
-        :permissions     [{:required []}]} ; no permissions required by default
-        meta-data
-        {:type action-type
-         :ns ns-str
-         :line line
-         :handler handler
-         :call-count 0}))))
+           action-keyword
+           (merge
+             {:user-authz-roles (cond
+                                  (nil? user-roles) roles/all-authz-roles
+                                  (= #{:authority} user-roles) #{}              ;; By default, authority gets authorization fron organization role
+                                  :else (roles/default-user-authz action-type))
+              :org-authz-roles  (cond
+                                  (nil? user-roles) roles/all-org-authz-roles
+                                  (some user-roles [:authority :oirAuthority]) roles/default-org-authz-roles
+                                  (user-roles :anonymous) roles/all-org-authz-roles)
+              :permissions      [{:required []}]}                               ; no permissions required by default
+             meta-data
+             {:type       action-type
+              :ns         ns-str
+              :line       line
+              :handler    handler
+              :call-count 0}))))
 
 (defmacro defaction [form-meta action-type action-name & args]
   (let [doc-string  (when (string? (first args)) (first args))
@@ -773,9 +773,9 @@
          ([request#] (~handler request#))))))
 
 (defmacro defcommand [& args] `(defaction ~(meta &form) :command ~@args))
-(defmacro defquery   [& args] `(defaction ~(meta &form) :query ~@args))
-(defmacro defraw     [& args] `(defaction ~(meta &form) :raw ~@args))
-(defmacro defexport  [& args] `(defaction ~(meta &form) :export ~@args))
+(defmacro defquery [& args] `(defaction ~(meta &form) :query ~@args))
+(defmacro defraw [& args] `(defaction ~(meta &form) :raw ~@args))
+(defmacro defexport [& args] `(defaction ~(meta &form) :export ~@args))
 
 (sc/defschema ActionType
   (sc/enum [:command
@@ -791,14 +791,14 @@
 (sc/defschema ActionBase
   "Has the bare minimum fields of an action that allow it to be run without
    executing."
-  {:user usr/User
-   :type ActionType
-   :data ActionData
+  {:user  usr/User
+   :type  ActionType
+   :data  ActionData
    sc/Any sc/Any})
 
 (sc/defschema ActionSkeleton
-  {:user usr/User
-   :data ActionData
+  {:user  usr/User
+   :data  ActionData
    sc/Any sc/Any})
 
 (sc/defn build-action :- ActionBase
