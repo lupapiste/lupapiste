@@ -9,7 +9,8 @@
 
 
 (defquery asianhallinta-config
-  {:user-roles #{:authorityAdmin}}
+  {:user-roles  #{:authority}
+   :permissions [{:required [:organization/admin]}]}
   [{user :user}]
   (let [organization-id (user/authority-admins-organization-id user)]
     (if-let [{:keys [scope]} (org/get-organization organization-id)]
@@ -26,7 +27,8 @@
                       (partial action/string-parameters [:version])
                       (partial action/boolean-parameters [:enabled])
                       not-r-permit]
-   :user-roles       #{:authorityAdmin}}
+   :user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (let [organization-id (user/authority-admins-organization-id user)]
     (mongo/update-by-query :organizations

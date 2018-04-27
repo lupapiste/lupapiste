@@ -23,7 +23,8 @@
 (defquery organization-inspection-summary-settings
   {:description "Inspection summary templates for given organization."
    :pre-checks  [inspection-summary/inspection-summary-api-auth-admin-pre-check]
-   :user-roles  #{:authorityAdmin}}
+   :user-roles  #{:authority}
+   :permissions [{:required [:organization/admin]}]}
   [{user :user}]
   (ok (inspection-summary/settings-for-organization (usr/authority-admins-organization-id user))))
 
@@ -32,7 +33,8 @@
    :parameters       [templateText name]
    :input-validators [(partial action/non-blank-parameters [:templateText :name])]
    :pre-checks       [inspection-summary/inspection-summary-api-auth-admin-pre-check]
-   :user-roles       #{:authorityAdmin}}
+   :user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (let [organizationId (usr/authority-admins-organization-id user)]
     (ok :id (inspection-summary/create-template-for-organization organizationId name templateText))))
@@ -42,7 +44,8 @@
    :parameters       [templateId]
    :input-validators [(partial action/non-blank-parameters [:templateId])]
    :pre-checks       [inspection-summary/inspection-summary-api-auth-admin-pre-check]
-   :user-roles       #{:authorityAdmin}}
+   :user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (let [organizationId (usr/authority-admins-organization-id user)]
     (if (= (inspection-summary/delete-template organizationId templateId) 1)
@@ -54,7 +57,8 @@
    :parameters       [name templateId templateText]
    :input-validators [(partial action/non-blank-parameters [:name :templateId :templateText])]
    :pre-checks       [inspection-summary/inspection-summary-api-auth-admin-pre-check]
-   :user-roles       #{:authorityAdmin}}
+   :user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (let [organizationId (usr/authority-admins-organization-id user)]
     (if (= (inspection-summary/update-template organizationId templateId name templateText) 1)
@@ -67,7 +71,8 @@
    :input-validators [(partial action/non-blank-parameters [:operationId :templateId])]
    :pre-checks       [inspection-summary/inspection-summary-api-auth-admin-pre-check
                       inspection-summary/operation-has-R-permit-type]
-   :user-roles       #{:authorityAdmin}}
+   :user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (let [organizationId (usr/authority-admins-organization-id user)]
     (inspection-summary/set-default-template-for-operation organizationId operationId templateId)))

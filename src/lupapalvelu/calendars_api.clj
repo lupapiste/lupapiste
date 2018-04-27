@@ -184,9 +184,10 @@
     (ok :calendar calendar)))
 
 (defquery calendars-for-authority-admin
-  {:user-roles #{:authorityAdmin}
-   :feature    :ajanvaraus
-   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin})]}
+  {:user-roles  #{:authority}
+   :permissions [{:required [:organization/admin]}]
+   :feature     :ajanvaraus
+   :pre-checks  [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin})]}
   [{user :user}]
   (let [admin-in-organization-id (usr/authority-admins-organization-id user)
         users                    (usr/authority-users-in-organizations [admin-in-organization-id])
@@ -197,7 +198,8 @@
       (fail :resources.backend-error))))
 
 (defcommand set-calendar-enabled-for-authority
-  {:user-roles       #{:authorityAdmin}
+  {:user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]
    :parameters       [userId enabled]
    :input-validators [(partial action/non-blank-parameters [:userId])
                       (partial action/boolean-parameters [:enabled])]
@@ -275,7 +277,8 @@
     (ok :result (delete-command (str "reservationslots/" slotId)))))
 
 (defcommand add-reservation-type-for-organization
-  {:user-roles       #{:authorityAdmin}
+  {:user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]
    :parameters       [reservationType]
    :input-validators [(partial action/non-blank-parameters [:reservationType])]
    :feature          :ajanvaraus
@@ -297,7 +300,8 @@
       :reservationTypes (reservation-types organizationId)))
 
 (defcommand update-reservation-type
-  {:user-roles       #{:authorityAdmin}
+  {:user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]
    :parameters       [reservationTypeId name]
    :input-validators [(partial action/number-parameters [:reservationTypeId])
                       (partial action/non-blank-parameters [:name])]
@@ -307,7 +311,8 @@
   (ok :reservationTypes (put-command (str "reservation-types/" reservationTypeId) {:name name})))
 
 (defcommand delete-reservation-type
-  {:user-roles       #{:authorityAdmin}
+  {:user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]
    :parameters       [reservationTypeId]
    :input-validators [(partial action/number-parameters [:reservationTypeId])]
    :feature          :ajanvaraus

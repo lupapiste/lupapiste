@@ -9,7 +9,8 @@
 
 (defquery organization-phrases
   {:description "Phrases for the authority admin's organization."
-   :user-roles  #{:authorityAdmin}
+   :user-roles  #{:authority}
+   :permissions [{:required [:organization/admin]}]
    :feature     :pate}
   [command]
   (ok :phrases (get (template/command->organization command)
@@ -29,7 +30,8 @@
 
 (defcommand upsert-phrase
   {:description         "Update old or create new phrase."
-   :user-roles          #{:authorityAdmin}
+   :user-roles          #{:authority}
+   :permissions         [{:required [:organization/admin]}]
    :parameters          [category tag phrase]
    :optional-parameters [phrase-id]
    :input-validators    [phrases/valid-category
@@ -41,7 +43,8 @@
 
 (defcommand delete-phrase
   {:description      "Delete an existing phrase."
-   :user-roles       #{:authorityAdmin}
+   :user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]
    :parameters       [phrase-id]
    :input-validators [(partial action/non-blank-parameters [:phrase-id])]
    :pre-checks       [phrases/phrase-id-exists]

@@ -98,7 +98,8 @@
   (ok :data (usr/users-for-datatables caller params)))
 
 (defquery user-for-edit-authority
-  {:user-roles       #{:authorityAdmin}
+  {:user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]
    :parameters       [authority-id]
    :input-validators [(partial action/non-blank-parameters [:authority-id])]}
   [{auth-admin :user}]
@@ -365,7 +366,8 @@
                       action/email-validator
                       (partial allowed-roles organization/authority-roles)]
    :notified         true
-   :user-roles       #{:authorityAdmin}}
+   :user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]}
   [{caller :user}]
   (let [organization-id (usr/authority-admins-organization-id caller)
         actual-roles    (organization/filter-valid-user-roles-in-organization organization-id roles)
@@ -383,7 +385,8 @@
   {:parameters       [email]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :user-roles       #{:authorityAdmin}}
+   :user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]}
   [{caller :user}]
   (let [organization-id (usr/authority-admins-organization-id caller)]
     (usr/update-user-by-email email {:role "authority"} {$unset {(str "orgAuthz." organization-id) ""}})))
@@ -393,7 +396,8 @@
    :input-validators [(partial action/non-blank-parameters [:email])
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
                       (partial allowed-roles organization/authority-roles)]
-   :user-roles       #{:authorityAdmin}}
+   :user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]}
   [{caller :user}]
   (let [organization-id (usr/authority-admins-organization-id caller)
         actual-roles    (organization/filter-valid-user-roles-in-organization organization-id roles)]
@@ -409,7 +413,8 @@
 (defcommand update-auth-info
   {:parameters       [firstName lastName email new-email]
    :input-validators [(partial action/non-blank-parameters [:firstName :lastName :email :new-email])]
-   :user-roles       #{:authorityAdmin}}
+   :user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]}
   [{auth-admin :user}]
   (let [authority           (usr/find-user {:email email})
         valid-org?          (uu/auth-admin-can-view-authority? authority auth-admin)

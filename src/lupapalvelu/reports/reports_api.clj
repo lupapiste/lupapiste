@@ -17,7 +17,8 @@
     (excel/excel-response filename body error-message)))
 
 (defraw open-applications-xlsx
-  {:user-roles #{:authorityAdmin}}
+  {:user-roles  #{:authority}
+   :permissions [{:required [:organization/admin]}]}
   [{user :user {lang :lang} :data}]
   (let [orgId               (usr/authority-admins-organization-id user)
         excluded-operations [:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2]
@@ -49,7 +50,8 @@
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])
                       start-gt-end
                       max-month-window]
-   :user-roles       #{:authorityAdmin}}
+   :user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user {lang :lang} :data}]
   (let [orgId               (usr/authority-admins-organization-id user)
         excluded-operations [:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :aiemmalla-luvalla-hakeminen]
@@ -71,7 +73,8 @@
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])
                       start-gt-end
                       max-month-window]
-   :user-roles       #{:authorityAdmin}}
+   :user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user {lang :lang} :data ts :created}]
   (let [orgId               (usr/authority-admins-organization-id user)
         resulting-file-name (str (i18n/localize lang "applications.report.parties-between.file-name")
@@ -91,7 +94,8 @@
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])
                       start-gt-end
                       max-month-window]
-   :user-roles       #{:authorityAdmin}}
+   :user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user {lang :lang} :data ts :created}]
   (let [orgId               (usr/authority-admins-organization-id user)
         resulting-file-name (str (i18n/localize lang "applications.report.post-verdict.file-name")

@@ -29,7 +29,8 @@
 ;;
 
 (defquery get-organizations-statement-givers
-  {:user-roles #{:authorityAdmin}}
+  {:user-roles  #{:authority}
+   :permissions [{:required [:organization/admin]}]}
   [{user :user}]
   (let [org-id (usr/authority-admins-organization-id user)]
     (statement/fetch-organization-statement-givers org-id)))
@@ -56,7 +57,8 @@
                                                 (if (usr/financial-authority? user)
                                                   (fail! :error.is-financial-authority)))))]
    :notified            true
-   :user-roles          #{:authorityAdmin}}
+   :user-roles          #{:authority}
+   :permissions         [{:required [:organization/admin]}]}
   [{data :data user :user}]
   (let [organization       (organization/get-organization (usr/authority-admins-organization-id user))
         email              (ss/canonize-email email)
@@ -80,7 +82,8 @@
 (defcommand delete-statement-giver
   {:parameters       [personId]
    :input-validators [(partial action/non-blank-parameters [:personId])]
-   :user-roles       #{:authorityAdmin}}
+   :user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (organization/update-organization
     (usr/authority-admins-organization-id user)

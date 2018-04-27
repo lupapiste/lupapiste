@@ -43,14 +43,16 @@
 
 (defcommand set-tos-function-for-operation
   {:parameters       [operation functionCode]
-   :user-roles       #{:authorityAdmin}
+   :user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]
    :input-validators [(partial non-blank-parameters [:functionCode :operation])]}
   [{user :user}]
   (store-function-code operation functionCode user))
 
 (defcommand remove-tos-function-from-operation
   {:parameters       [operation]
-   :user-roles       #{:authorityAdmin}
+   :user-roles       #{:authority}
+   :permissions      [{:required [:organization/admin]}]
    :input-validators [(partial non-blank-parameters [:operation])]}
   [{user :user}]
   (let [orgId (user/authority-admins-organization-id user)]
