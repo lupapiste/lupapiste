@@ -10,23 +10,6 @@
 
 (last-email) ; inbox zero
 
-
-(facts "Setup company"
-  (fact "Add Mikko as admin to Esimerkki Oy"
-    (command erkki :company-invite-user
-             :email (email-for-key mikko)
-             :admin true
-             :submit true) => ok?)
-  (fact "Mikko accepts invitation"
-    (http-token-call (token-from-email (email-for-key mikko))))
-  (fact "Add Teppo as regular user to Esimerkki Oy"
-    (command erkki :company-invite-user
-             :email (email-for-key teppo)
-             :admin false
-             :submit true) => ok?)
-  (fact "Teppo accepts invitation"
-    (http-token-call (token-from-email (email-for-key teppo)))))
-
 (defn check-emails [& recipient-apikeys]
   (if (seq recipient-apikeys)
     (fact "Email recipients"
@@ -36,6 +19,22 @@
                :in-any-order))
     (fact "No emails"
       (sent-emails) => empty?)))
+
+(defn add-to-company [apikey admin?]
+  (let [email (email-for-key apikey)
+        role  (if admin? "admin" "regular user")]
+    (fact {:midje/description (format "Add %s to Esimerkki Oy as %s."
+                                      email role)}
+      (command erkki :company-invite-user
+               :email email
+               :admin admin?
+               :submit true) => ok?)
+    (fact {:midje/description (str email " accepts invitation.")}
+      (http-token-call (token-from-email email)))))
+
+(facts "Setup company"
+  (add-to-company mikko true)
+  (add-to-company teppo false))
 
 (facts "Subscription"
   (let [{:keys [id]} (create-and-submit-application pena :propertyId sipoo-property-id)]
@@ -130,4 +129,9 @@
 
     (fact "Application state changes: emails!"
       (command sonja :check-for-verdict :id id) => ok?
+      (check-emails pena erkki))
+
+    (fact "Pena is added to company but still receives mails only once"
+      (add-to-company pena true)
+      (comment-application sonja id false) => ok?
       (check-emails pena erkki))))
