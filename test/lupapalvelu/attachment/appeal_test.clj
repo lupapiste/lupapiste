@@ -5,7 +5,8 @@
             [lupapalvelu.attachment.appeal :refer :all]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.attachment.preview :as preview]))
+            [lupapalvelu.attachment.preview :as preview]
+            [clj-uuid :as uuid]))
 
 (testable-privates lupapalvelu.attachment.appeal create-appeal-attachment-data!)
 
@@ -15,7 +16,7 @@
                                                                                              :archivabilityError :not-validated}
           (preview/preview-image! anything anything anything anything) => nil]
          (fact "appeal-attachment-data"
-               (let [file-id  (mongo/create-id)
+               (let [file-id  (str (uuid/v1))
                      file-obj {:content (constantly nil),
                                :contentType "application/pdf",
                                :size 123,
