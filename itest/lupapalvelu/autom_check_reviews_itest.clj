@@ -30,7 +30,8 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as app-from-krysp]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.review :as review])
+            [lupapalvelu.review :as review]
+            [lupapalvelu.storage.file-storage :as storage])
   (:import [org.xml.sax SAXParseException]))
 
 (def db-name (str "test_autom-check-reviews-itest_" (now)))
@@ -340,7 +341,7 @@
               last-attachment-id (last (get-attachment-ids updated-application))
               last-attachment-file-id (att/attachment-latest-file-id updated-application last-attachment-id)]
           (files/with-temp-file temp-pdf-path
-            (with-open [content-fios ((:content (mongo/download last-attachment-file-id)))]
+            (with-open [content-fios ((:content (storage/download updated-application last-attachment-file-id)))]
               (pdftk/uncompress-pdf content-fios (.getAbsolutePath temp-pdf-path)))
             ; Note that these checks are highly dependent on the PDF structure. Check if your (raw source) PDF content has changed if these fail.
             (re-seq #"(?ms)\(Kiinteist.{1,4}tunnus\).{1,200}18600303560006" (slurp temp-pdf-path :encoding "ISO-8859-1")) => not-empty

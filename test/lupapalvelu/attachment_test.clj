@@ -22,7 +22,8 @@
             [sade.schemas :as ssc]
             [sade.schema-generators :as ssg]
             [lupapalvelu.attachment.onkalo-client :as oc]
-            [lupapalvelu.action :as action]))
+            [lupapalvelu.action :as action]
+            [lupapalvelu.storage.file-storage :as storage]))
 
 (testable-privates lupapalvelu.attachment
                    attachment-file-ids
@@ -582,14 +583,15 @@
                                                        :tila :arkistoitu}
                                             :auth [{:role "uploader"
                                                     :id "foo"}]})
-        application {:id "LP-XXX-2017-00001"
+        app-id "LP-XXX-2017-00001"
+        application {:id app-id
                      :attachments [attachment]
                      :organization "186-R"
                      :auth [{:role "writer"
                              :id "foo"}]}]
     (against-background
-      [(mongo/download file-id) => {:contents :from-mongo}
-       (mongo/download (str file-id "-preview")) => {:contents :from-mongo-preview}
+      [(storage/download app-id file-id attachment) => {:contents :from-mongo}
+       (storage/download-preview app-id file-id attachment) => {:contents :from-mongo-preview}
        (oc/get-file "186-R" onkalo-file-id false) => {:contents :from-onkalo}
        (oc/get-file "186-R" onkalo-file-id true) => {:contents :from-onkalo-preview}]
 
@@ -616,14 +618,14 @@
           app2 (assoc application :attachments [att2])]
 
       (against-background
-        [(mongo/delete-file-by-id file-id) => true
-         (mongo/delete-file-by-id original-file-id) => true
-         (mongo/delete-file-by-id (str file-id "-preview")) => true
-         (mongo/delete-file-by-id (str original-file-id "-preview")) => true
-         (mongo/delete-file-by-id file-id-2) => true
-         (mongo/delete-file-by-id original-file-id-2) => true
-         (mongo/delete-file-by-id (str file-id-2 "-preview")) => true
-         (mongo/delete-file-by-id (str original-file-id-2 "-preview")) => true
+        [(storage/delete app2 file-id) => true
+         (storage/delete app2 original-file-id) => true
+         (storage/delete app2 (str file-id "-preview")) => true
+         (storage/delete app2 (str original-file-id "-preview")) => true
+         (storage/delete app2 file-id-2) => true
+         (storage/delete app2 original-file-id-2) => true
+         (storage/delete app2 (str file-id-2 "-preview")) => true
+         (storage/delete app2 (str original-file-id-2 "-preview")) => true
          (action/update-application
            (action/application->command app2)
            {:attachments.id id}
