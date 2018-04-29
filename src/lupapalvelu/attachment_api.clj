@@ -39,7 +39,8 @@
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.attachment.stamps :as stamps]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.storage.file-storage :as storage]))
+            [lupapalvelu.storage.file-storage :as storage]
+            [lupapalvelu.vetuma :as vetuma]))
 
 ;; Action category: attachments
 
@@ -463,15 +464,16 @@
    :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
    :user-authz-roles roles/all-authz-roles}
   [{{:keys [attachment-id download preview]} :data user :user}]
+  (println (vetuma/session-id))
   (att/output-attachment (att/get-attachment-latest-version-file user attachment-id (= preview "true")) (= download "true")))
 
 (defraw "download-bulletin-attachment"
-  {:parameters       [attachment-id]  ; Note that this is actually file id
+  {:parameters       [bulletin-id attachment-id]  ; Note that this is actually file id
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles       #{:anonymous}}
   [_]
-  (att/output-attachment attachment-id true bulletins/get-bulletin-attachment))
+  (att/output-attachment attachment-id true (partial bulletins/get-bulletin-attachment bulletin-id)))
 
 (defraw "download-all-attachments"
   {:parameters [:id]

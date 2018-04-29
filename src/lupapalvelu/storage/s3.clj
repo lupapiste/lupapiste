@@ -86,7 +86,7 @@
       (throw e))))
 
 (defn put-input-stream [bucket file-id filename content-type input-stream content-length & metadata]
-  {:pre [(string? file-id) (string? filename) (string? content-type)
+  {:pre [(string? bucket) (string? file-id) (string? filename) (string? content-type)
          (instance? InputStream input-stream)
          (or (nil? metadata) (sequential? metadata))
          (or (even? (count metadata)) (map? (first metadata)))]}
@@ -104,7 +104,7 @@
    Bucket should be either an application id, a user id, a session id or nil. If it is nil, the
    object will go to the common temp file bucket from which can be linked to an application later."
   [bucket file-id filename content-type is-or-file & metadata]
-  {:pre [(string? file-id) (string? filename) (string? content-type)
+  {:pre [(string? bucket) (string? file-id) (string? filename) (string? content-type)
          (or (instance? File is-or-file) (instance? InputStream is-or-file))
          (or (nil? metadata) (sequential? metadata))
          (or (even? (count metadata)) (map? (first metadata)))]}

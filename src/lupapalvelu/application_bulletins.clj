@@ -154,7 +154,7 @@
         attachments (->> (:attachments application)
                          (filter #(and (:latestVersion %) (metadata/public-attachment? %)))
                          (map #(select-keys % attachment-snapshot-fields))
-                         (map #(update % :latestVersion (fn [v] (select-keys v [:filename :contentType :fileId :size])))))
+                         (map #(update % :latestVersion (fn [v] (select-keys v [:filename :contentType :fileId :size :storageSystem])))))
         app-snapshot (assoc app-snapshot
                        :id (mongo/create-id)
                        :application-id applicationId
@@ -211,10 +211,14 @@
   ([query projection]
     (mongo/select-one :application-bulletins query projection)))
 
-(defn get-bulletin-attachment [attachment-id]
-  (when-let [attachment-file (mongo/download attachment-id)]
-    (when-let [bulletin (get-bulletin (:application attachment-file))]
-      (when (seq bulletin) attachment-file))))
+(defn get-bulletin-attachment [bulletin-id file-id]
+  (when-let [bulletin (get-bulletin bulletin-id)]
+    (when-let [attachment (->> (:versions bulletin)
+                               last
+                               :attachments
+                               (filter #(= (get-in % [:latestVersion :fileId]) file-id))
+                               first)]
+      (storage/download-from-system bulletin-id file-id (get-in attachment [:latestVersion :storageSystem])))))
 
 (defn get-bulletin-comment-attachment-file-as
   "Returns the bulletin attachment file if user has access to application, otherwise nil."
@@ -223,7 +227,7 @@
                                        {:attachments.fileId file-id}
                                        [:attachments.$ :bulletinId])]
     (when (seq (lupapalvelu.domain/get-application-as (:bulletinId comment) user :include-canceled-apps? true))
-      (storage/download-bulletin-file (:bulletinId comment) file-id (-> comment :attachments first :storageSystem)))))
+      (storage/download-bulletin-comment-file (:bulletinId comment) file-id (-> comment :attachments first :storageSystem)))))
 
 ;;
 ;; Updates

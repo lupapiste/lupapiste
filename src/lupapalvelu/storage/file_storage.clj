@@ -8,10 +8,15 @@
 
 ;; UPLOAD
 
+(defn session-bucket [id]
+  (when id
+    (str "unlinked-" id)))
+
 (defn upload [file-id filename content-type content {:keys [application user-id sessionId] :as metadata}]
   {:pre [(map? metadata)]}
   (if (env/feature? :s3)
-    (s3/put-file-or-input-stream (or application user-id sessionId) file-id filename content-type content metadata)
+    (let [bucket (or application user-id (session-bucket sessionId))]
+      (s3/put-file-or-input-stream bucket file-id filename content-type content metadata))
     (mongo/upload file-id filename content-type content metadata)))
 
 (def process-bucket "sign-process")
@@ -54,19 +59,16 @@
        (s3/download application-id file-id)
        (mongo/download-find {:_id file-id})))))
 
+(defn ^{:perfmon-exclude true} download-from-system
+  [application-id file-id storage-system]
+  (if (= (keyword storage-system) :s3)
+    (s3/download application-id file-id)
+    (mongo/download-find {:_id file-id})))
+
 (defn- find-user-attachment-storage-system [user-id file-id]
   (->> (mongo/select-one :users
                          {:_id                        user-id
                           :attachments.attachment-id file-id}
-                         [:attachments.$])
-       :attachments
-       first
-       :storageSystem))
-
-(defn- find-bulletin-comment-attachment-storage-system [bulletin-id file-id]
-  (->> (mongo/select-one :application-bulletin-comments
-                         {:_id                bulletin-id
-                          :attachments.fileId file-id}
                          [:attachments.$])
        :attachments
        first
@@ -93,7 +95,7 @@
 (defn ^{:perfmon-exclude true} download-session-file
   [session-id file-id]
   (if (env/feature? :s3)
-    (s3/download session-id file-id)
+    (s3/download (session-bucket session-id) file-id)
     (mongo/download-find {:_id file-id :metadata.sessionId session-id})))
 
 (defn ^{:perfmon-exclude true} download-process-file
@@ -102,7 +104,7 @@
     (s3/download process-bucket process-id)
     (mongo/download-find {:_id process-id})))
 
-(defn ^{:perfmon-exclude true} download-bulletin-file
+(defn ^{:perfmon-exclude true} download-bulletin-comment-file
   [bulletin-id file-id storage-system]
   (if (and (env/feature? :s3) (= (keyword storage-system) :s3))
     (s3/download (bulletin-bucket bulletin-id) file-id)
@@ -110,11 +112,11 @@
 
 ;; LINK
 
-(defn link-files-to-application [app-id file-ids]
+(defn link-files-to-application [session-id app-id file-ids]
   {:pre [(seq file-ids) (not-any? ss/blank? (conj file-ids app-id))]}
   (if (env/feature? :s3)
     (doseq [file-id file-ids]
-      (s3/move-file-object app-id file-id))
+      (s3/move-file-object (session-bucket session-id) app-id file-id))
     (mongo/update-by-query :fs.files {:_id {$in file-ids}} {$set {:metadata.application app-id
                                                                   :metadata.linked true}})))
 
@@ -122,14 +124,14 @@
   {:pre [(seq file-ids) (not-any? ss/blank? (conj file-ids bulletin-id))]}
   (if (env/feature? :s3)
     (doseq [file-id file-ids]
-      (s3/move-file-object session-id (bulletin-bucket bulletin-id) file-id))
+      (s3/move-file-object (session-bucket session-id) (bulletin-bucket bulletin-id) file-id))
     (mongo/update-by-query :fs.files {:_id {$in file-ids}} {$set {:metadata.bulletinId bulletin-id
                                                                   :metadata.linked true}})))
 
 (defn session-files-exist? [session-id file-ids]
   {:pre [(seq file-ids) (not-any? ss/blank? (conj file-ids session-id))]}
   (->> (if (env/feature? :s3)
-         (map #(s3/object-exists? session-id %) file-ids)
+         (map #(s3/object-exists? (session-bucket session-id) %) file-ids)
          (map #(mongo/any? :fs.files {:_id % :metadata.sessionId session-id}) file-ids))
        (every? true?)))
 
