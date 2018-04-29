@@ -8,7 +8,8 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.crypt :as c]
-            [ring.util.codec :as codec])
+            [ring.util.codec :as codec]
+            [lupapalvelu.mongo :as mongo])
   (:import [java.io InputStream ByteArrayOutputStream File FileInputStream ByteArrayInputStream]
            [com.amazonaws.services.s3.model PutObjectRequest CreateBucketRequest CannedAccessControlList
                                             SetBucketVersioningConfigurationRequest BucketVersioningConfiguration
@@ -40,18 +41,20 @@
                    (env/value :s3 :endpoint))))
 
 (defn- ^String bucket-name [bucket]
-  (str "lupapiste-" env/target-env "-" (or (ss/lower-case (str/blank-as-nil bucket))
-                                           "unlinked-files")))
+  (str "lp-"
+       env/target-env
+       "-"
+       (when (str/starts-with mongo/*db-name* "test")
+         "test-")
+       (or (ss/lower-case (str/blank-as-nil bucket))
+           "unlinked-files")))
 
 (defn- create-bucket-if-not-exists [bucket]
   (when-not (.doesBucketExist s3-client bucket)
     (timbre/info "Creating object storage bucket" bucket)
     (->> (doto (CreateBucketRequest. bucket)
            (.setCannedAcl CannedAccessControlList/Private))
-         (.createBucket s3-client ))
-    (->> (BucketVersioningConfiguration. BucketVersioningConfiguration/ENABLED)
-         (SetBucketVersioningConfigurationRequest. bucket)
-         (.setBucketVersioningConfiguration s3-client))))
+         (.createBucket s3-client))))
 
 (defn- generate-user-metadata [metadata]
   "Returns a Java Map<String,String> compatible map"
