@@ -4,8 +4,8 @@
             [clojure.java.io :as io]
             [sade.core :refer :all]
             [sade.strings :as ss]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.pdf.pdf-export :as pdf-export]))
+            [lupapalvelu.pdf.pdf-export :as pdf-export]
+            [lupapalvelu.storage.file-storage :as storage]))
 
 (defn get-file-name-on-server [file-id file-name]
   (str file-id "_" (ss/encode-filename file-name)))
@@ -16,11 +16,11 @@
 (defn get-current-filename [application-id]
   (str application-id "_current_application.pdf"))
 
-(defn- write-attachments [attachments output-dir]
+(defn- write-attachments [application attachments output-dir]
   (doseq [attachment attachments]
     (when-let [filename (:filename attachment)]
       (let [file-id (:fileId attachment)
-            attachment-file (mongo/download file-id)
+            attachment-file (storage/download (:id application) file-id attachment)
             content (:content attachment-file)
             attachment-file-name (str output-dir "/" filename)
             attachment-file (io/file attachment-file-name)]
@@ -65,7 +65,7 @@
         (error e (.getMessage e))
         (fail! :error.sftp.user.does.not.exist :details (.getMessage e))))
 
-    (write-attachments attachments output-dir)
+    (write-attachments application attachments output-dir)
 
     (when (and submitted-application lang)
       (write-application-pdf-versions output-dir application submitted-application lang))
