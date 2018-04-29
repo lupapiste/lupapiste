@@ -5,8 +5,8 @@
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.preview :as preview]
             [lupapalvelu.attachment :as att]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.file-upload :as file-upload]))
+            [lupapalvelu.file-upload :as file-upload]
+            [lupapalvelu.storage.file-storage :as storage]))
 
 
 (defn- create-appeal-attachment-data!
@@ -45,8 +45,8 @@
 (defn new-appeal-attachment-updates!
   "Return $push operation for attachments, with attachments created for given fileIds.
    As a side effect, creates converted PDF/A version to mongo for PDF files (if applicable)."
-  [command appeal-id appeal-type fileIds]
-  (let [file-objects    (seq (mongo/download-find-many {:_id {$in fileIds}}))
+  [{:keys [application] :as command} appeal-id appeal-type fileIds]
+  (let [file-objects    (seq (storage/download-many application fileIds))
         new-attachments (map
                           (partial
                             create-appeal-attachment-data!
