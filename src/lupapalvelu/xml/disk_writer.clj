@@ -20,7 +20,7 @@
   (doseq [attachment attachments]
     (when-let [filename (:filename attachment)]
       (let [file-id (:fileId attachment)
-            attachment-file (storage/download (:id application) file-id attachment)
+            attachment-file (storage/download application file-id)
             content (:content attachment-file)
             attachment-file-name (str output-dir "/" filename)
             attachment-file (io/file attachment-file-name)]
