@@ -434,9 +434,9 @@
                        #{:ok :requires_user_action})
            :cannot-delete))))
 
-(defn delete-attachment-file-and-preview! [file-id]
-  (mongo/delete-file-by-id file-id)
-  (mongo/delete-file-by-id (str file-id "-preview")))
+(defn delete-attachment-file-and-preview! [application file-id]
+  (storage/delete application file-id)
+  (storage/delete application (str file-id "-preview")))
 
 (defn delete-archived-attachments-files-from-mongo! [application {:keys [metadata latestVersion versions id]}]
   {:pre [(= :arkistoitu (keyword (:tila metadata)))
@@ -444,8 +444,8 @@
   (->> versions
        (map-indexed
          (fn [idx {:keys [fileId originalFileId]}]
-           (delete-attachment-file-and-preview! fileId)
-           (delete-attachment-file-and-preview! originalFileId)
+           (delete-attachment-file-and-preview! application fileId)
+           (delete-attachment-file-and-preview! application originalFileId)
            (let [version-path (str "attachments.$.versions." idx)]
              (update-application
                (application->command application)
@@ -548,12 +548,12 @@
        (when-not version-index
          {$push {:attachments.$.versions version-model}})))))
 
-(defn- remove-old-files! [{old-versions :versions} {file-id :fileId original-file-id :originalFileId :as new-version}]
+(defn- remove-old-files! [application {old-versions :versions} {file-id :fileId original-file-id :originalFileId :as new-version}]
   (some->> (filter (comp #{original-file-id} :originalFileId) old-versions)
            (first)
            ((juxt :fileId :originalFileId))
            (remove (set [file-id original-file-id]))
-           (run! delete-attachment-file-and-preview!)))
+           (run! (partial delete-attachment-file-and-preview! application))))
 
 (defn- attachment-comment-updates [application user attachment {:keys [comment? comment-text created]
                                                                 :or   {comment? true}}]
@@ -586,7 +586,7 @@
            update-result (update-application (application->command application) mongo-query mongo-updates :return-count? true)]
 
        (cond (pos? update-result)
-             (do (remove-old-files! attachment version-model)
+             (do (remove-old-files! application attachment version-model)
                  (assoc version-model :id attachment-id))
 
              (pos? retries-left)
@@ -656,7 +656,7 @@
       (info "1/4 deleting assignments regarding attachments" ids-str)
       (run! (partial assignment/remove-target-from-assignments (:id application)) attachment-ids)
       (info "2/4 deleting files of attachments" ids-str)
-      (run! delete-attachment-file-and-preview! (get-file-ids-for-attachments-ids application attachment-ids))
+      (run! (partial delete-attachment-file-and-preview! application) (get-file-ids-for-attachments-ids application attachment-ids))
       (info "3/4 deleted files of attachments" ids-str)
       (update-application (application->command application) {$pull {:attachments {:id {$in attachment-ids}}}})
       (info "4/4 deleted meta-data of attachments" ids-str)))
@@ -669,7 +669,7 @@
   (let [attachment (get-attachment-info application attachment-id)
         latest-version (latest-version-after-removing-file attachment file-id)]
     (infof "1/3 deleting files [%s] of attachment %s" (ss/join ", " (set [file-id original-file-id])) attachment-id)
-    (run! delete-attachment-file-and-preview! (set [file-id original-file-id]))
+    (run! (partial delete-attachment-file-and-preview! application) (set [file-id original-file-id]))
     (infof "2/3 deleted file %s of attachment %s" file-id attachment-id)
     (update-application
      (application->command application)

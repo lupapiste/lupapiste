@@ -1,12 +1,10 @@
 (ns lupapalvelu.premises
   (:require [dk.ative.docjure.spreadsheet :as spreadsheet]
             [lupapalvelu.action :as action]
-            [lupapalvelu.attachment :as att]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.reports.excel :as excel]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xls-muuntaja-client :as xmc]
@@ -17,7 +15,8 @@
             [sade.util :as util]
             [slingshot.slingshot :refer [throw+]]
             [taoensso.timbre :as timbre]
-            [clojure.set :as set])
+            [clojure.set :as set]
+            [lupapalvelu.storage.file-storage :as storage])
   (:import (java.io OutputStream)))
 
 (defn get-huoneistot-from-application [doc-id application]
@@ -154,12 +153,13 @@
                                     (nil? csv-data) {:ok false :text "error.illegal-premises-excel-file"}
                                     (empty? premises-data) {:ok false :text "error.illegal-premises-excel-data"}
                                     :else {:ok false})]
-    (let [old-ifc-fileId      (-> application :ifc-data :fileId)]
+    (let [old-ifc-fileId (-> application :ifc-data :fileId)]
       (action/update-application command {$set {:ifc-data {:fileId   (:fileId save-response)
                                                            :filename (:filename save-response)
                                                            :modified created
                                                            :user     (usr/summary user)}}})
-      (when old-ifc-fileId (mongo/delete-file-by-id old-ifc-fileId)))
+      (when old-ifc-fileId
+        (storage/delete-from-any-system application old-ifc-fileId)))
     (->> return-map
          (resp/json)
          (resp/status 200))))

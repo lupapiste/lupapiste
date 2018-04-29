@@ -144,8 +144,25 @@
 
 ;; DELETE
 
+(defn delete [application file-id]
+  (let [{:keys [storageSystem]} (find-by-file-id-from-attachments file-id (:attachments application))]
+    (if (and (env/feature? :s3) (= (keyword storageSystem) :s3))
+      (s3/delete (:id application) file-id)
+      (mongo/delete-file-by-id file-id))))
+
+(defn delete-session-file
+  "Deletes a file uploaded to temporary storage with session id.
+   Guarantees that the file is not linked to anything at the time of deletion."
+  [session-id file-id]
+  (if (env/feature? :s3)
+    (s3/delete (session-bucket session-id) file-id)
+    (mongo/delete-file {:_id file-id
+                        :metadata.sessionId session-id
+                        :metadata.application {$exists false}
+                        :metadata.bulletinId {$exists false}
+                        :linked false})))
+
 (defn ^{:perfmon-exclude true} delete-user-attachment
-  "Downloads user attachment file from Mongo GridFS or S3"
   ([user-id file-id]
    (->> (find-user-attachment-storage-system user-id file-id)
         (delete-user-attachment user-id file-id)))
@@ -159,3 +176,8 @@
   (if (env/feature? :s3)
     (s3/delete process-bucket process-id)
     (mongo/delete-file {:_id process-id})))
+
+(defn delete-from-any-system [application-id file-id]
+  (mongo/delete-file-by-id file-id)
+  (when (env/feature? :s3)
+    (s3/delete application-id file-id)))
