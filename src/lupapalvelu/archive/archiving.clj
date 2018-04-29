@@ -29,8 +29,8 @@
             [lupapalvelu.domain :as domain]
             [lupapiste-commons.schema-utils :as su]
             [lupapalvelu.states :as states]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.permit :as permit])
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.storage.file-storage :as storage])
   (:import [java.io InputStream]))
 
 (defonce upload-threadpool (threads/threadpool 10 "archive-upload-worker"))
@@ -124,6 +124,7 @@
 (defn- upload-and-set-state
   "Does the actual archiving in a different thread pool"
   [id is-or-file-fn content-type metadata-fn {app-id :id :as application} now state-update-fn user]
+  {:pre [(every? some? [id is-or-file-fn content-type metadata-fn app-id now state-update-fn user])]}
   (info "Trying to archive attachment id" id "from application" app-id)
   (do (state-update-fn :arkistoidaan application now id)
       (threads/submit
@@ -355,7 +356,7 @@
           case-file-archive-id (str id "-case-file")
           case-file-xml-id     (str case-file-archive-id "-xml")
           file-ids (map #(get-in % [:latestVersion :fileId]) selected-attachments)
-          gridfs-results (->> (mongo/download-find-many {:_id {$in file-ids}})
+          gridfs-results (->> (storage/download-many application file-ids)
                               (map (fn [{:keys [fileId] :as res}] [fileId res]))
                               (into {}))]
       (when (and (document-ids application-archive-id)

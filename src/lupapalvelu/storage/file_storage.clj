@@ -59,6 +59,13 @@
        (s3/download application-id file-id)
        (mongo/download-find {:_id file-id})))))
 
+(defn download-many
+  "Downloads multiple files from Mongo GridFS or S3"
+  [application file-ids]
+  (if (env/feature? :s3)
+    (pmap #(download application %) file-ids)
+    (mongo/download-find-many {:_id {$in file-ids}})))
+
 (defn ^{:perfmon-exclude true} download-from-system
   [application-id file-id storage-system]
   (if (= (keyword storage-system) :s3)
