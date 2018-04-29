@@ -25,7 +25,7 @@
                  versions2 (ssg/generator [Version] {VersionNumber not-static-version-generator})
                  signature (ssg/generator SignatureWithOutFileId {VersionNumber static-version-generator 
                                                                   Timestamp timestamp-after-generator})
-                 file-id   ssg/object-id]
+                 file-id   ssg/uuid]
                 (let [versions (concat versions1 [(assoc matching-version :fileId file-id)] versions2)
                       updated (set-signature-fileId versions signature)]
                   (is (= (:fileId updated) file-id) "File id not updated properly")
@@ -51,7 +51,7 @@
                                          (ssg/generator SignatureWithOutFileId 
                                                         {VersionNumber (gen/such-that (comp not vns) 
                                                                                       (ssg/generator VersionNumber))})
-                                         (gen/vector ssg/object-id (count vns))))))]
+                                         (gen/vector ssg/uuid (count vns))))))]
                 (let [versions   (first versions+signatures)
                       signatures (second versions+signatures)
                       not-matching-signature (last versions+signatures)

@@ -23,7 +23,8 @@
             [sade.schema-generators :as ssg]
             [lupapalvelu.attachment.onkalo-client :as oc]
             [lupapalvelu.action :as action]
-            [lupapalvelu.storage.file-storage :as storage]))
+            [lupapalvelu.storage.file-storage :as storage]
+            [sade.shared-schemas :as sssc]))
 
 (testable-privates lupapalvelu.attachment
                    attachment-file-ids
@@ -311,7 +312,7 @@
 
 (defspec make-version-new-attachment {:num-tests 20 :max-size 100}
   (prop/for-all [attachment      (ssg/generator Attachment {Version nil  [Version] (gen/elements [[]])})
-                 file-id         (ssg/generator ssc/ObjectIdStr)
+                 file-id         (ssg/generator sssc/UUIDStr)
                  archivability   (ssg/generator (sc/maybe {:archivable         sc/Bool
                                                            :archivabilityError (apply sc/enum nil conversion/archivability-errors)
                                                            :missing-fonts      (sc/eq ["Arial"])
@@ -345,7 +346,7 @@
                                                                           (assoc opt :fileId (last fids) :original-file-id (first fids))])
                                                 (gen/tuple (ssg/generator Attachment {Version nil [Version] (gen/elements [[]])})
                                                            (ssg/generator Version)
-                                                           (gen/vector-distinct ssg/object-id {:num-elements 2})
+                                                           (gen/vector-distinct ssg/uuid {:num-elements 2})
                                                            (ssg/generator {:filename sc/Str
                                                                            :contentType sc/Str
                                                                            :size sc/Int
@@ -364,7 +365,7 @@
 (defspec build-version-updates-new-attachment {:num-tests 20 :max-size 100}
   (prop/for-all [attachment     (ssg/generator Attachment {Version nil [Version] (gen/elements [[]])})
                  version-model  (ssg/generator Version)
-                 file-id        (ssg/generator ssc/ObjectIdStr)
+                 file-id        (ssg/generator sssc/UUIDStr)
                  user           (ssg/generator user/SummaryUser)
                  options        (ssg/generator {:created      ssc/Timestamp
                                                 :target       (sc/maybe Target)

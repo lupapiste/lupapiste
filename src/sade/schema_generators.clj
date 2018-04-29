@@ -9,8 +9,7 @@
             [clj-time.coerce :as ctc]
             [clojure.string :as s]
             [clojure.test.check.generators :as gen]
-            [sade.shared-schemas :as sssc]
-            [clj-uuid :as uuid]))
+            [sade.shared-schemas :as sssc]))
 
 (defonce static-schema-generators (atom {}))
 (defonce dynamic-schema-generator-constructors (atom {}))
@@ -192,7 +191,7 @@
 
 (register-generator ssc/ObjectIdStr object-id)
 
-(def uuid (gen/return (str (uuid/v1))))
+(def uuid (gen/fmap str gen/uuid))
 
 (register-generator sssc/UUIDStr uuid)
 
