@@ -144,10 +144,13 @@
    {:pre [(string? to-bucket) (string? file-id)]}
    (let [from-bucket (bucket-name from-bucket)
          target-bucket (bucket-name to-bucket)]
-     (create-bucket-if-not-exists target-bucket)
-     (.copyObject s3-client from-bucket file-id target-bucket file-id)
-     (.deleteObject s3-client from-bucket file-id)
-     (timbre/debug "Object" file-id "moved from" from-bucket "to" target-bucket))))
+     (try
+       (create-bucket-if-not-exists target-bucket)
+       (.copyObject s3-client from-bucket file-id target-bucket file-id)
+       (.deleteObject s3-client from-bucket file-id)
+       (timbre/debug "Object" file-id "moved from" from-bucket "to" target-bucket)
+       (catch AmazonS3Exception ex
+         (timbre/error ex "Could not move" file-id "from" from-bucket "to" target-bucket))))))
 
 (defn download [application-id file-id]
   {:pre [(string? file-id)]}
