@@ -42,7 +42,7 @@
             [sade.shared-schemas :as sssc]
             [lupapalvelu.vetuma :as vetuma])
   (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File InputStream ByteArrayInputStream]))
+           [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream]))
 
 
 ;;
@@ -812,7 +812,10 @@
   (if (instance? File is-or-file)
     ; File is reusable as is
     is-or-file
-    (ByteArrayInputStream. (files/slurp-bytes is-or-file))))
+    (with-open [is is-or-file
+                out (ByteArrayOutputStream.)]
+      (io/copy is out)
+      (ByteArrayInputStream. (.toByteArray out)))))
 
 (defn upload-and-attach!
   "1) Uploads original file to GridFS
