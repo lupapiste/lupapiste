@@ -203,7 +203,7 @@
         katselmukset      (filter (partial task-by-type "katselmus") tasks)
         loppukatselmus    (util/find-by-key :taskname "loppukatselmus" katselmukset)
         loppukatselmus-id (:id loppukatselmus)
-        url               (str (server-address) "/dev/fileinfo/")]
+        url               (str (server-address) "/dev/fileinfo/" application-id "/")]
     (fact "final review template exists from verdict"
       loppukatselmus => truthy)
 
