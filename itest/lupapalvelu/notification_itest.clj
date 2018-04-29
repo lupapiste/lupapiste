@@ -20,7 +20,7 @@
     (fact "No emails"
       (sent-emails) => empty?)))
 
-(defn add-to-company [apikey admin?]
+(defn add-to-company [apikey admin? & [accept?]]
   (let [email (email-for-key apikey)
         role  (if admin? "admin" "regular user")]
     (fact {:midje/description (format "Add %s to Esimerkki Oy as %s."
@@ -29,15 +29,18 @@
                :email email
                :admin admin?
                :submit true) => ok?)
-    (fact {:midje/description (str email " accepts invitation.")}
-      (http-token-call (token-from-email email)))))
+    (let [token (token-from-email email)]
+      (when-not (false? accept?)
+        (fact {:midje/description (str email " accepts invitation.")}
+          (http-token-call token)))
+      token)))
 
 (facts "Setup company"
-  (add-to-company mikko true)
   (add-to-company teppo false))
 
 (facts "Subscription"
-  (let [{:keys [id]} (create-and-submit-application pena :propertyId sipoo-property-id)]
+  (let [{:keys [id]} (create-and-submit-application pena :propertyId sipoo-property-id)
+        token        (add-to-company mikko true false)]
 
     (fact "Application was created" id => truthy)
 
@@ -52,13 +55,18 @@
       (check-emails pena))
 
     (fact "Company accepts invitation"
-      (command mikko :approve-invite :id id :invite-type "company") => ok?)
+      (command erkki :approve-invite :id id :invite-type "company") => ok?)
 
-    (fact "applicant and company admins get email"
+    (fact "Applicant and company admin get email. Mikko does not."
+      (comment-application sonja id false) => ok?
+      (check-emails pena erkki))
+
+    (fact "Mikko accepts company invitation and starts receiving emails"
+      (http-token-call token)
       (comment-application sonja id false) => ok?
       (check-emails pena erkki mikko))
 
-    (fact "pena unsubscribes, no more email for him"
+    (fact "Pena unsubscribes, no more email for him"
       (command pena :unsubscribe-notifications :id id :username "pena") => ok?
       (comment-application sonja id false) => ok?
       (check-emails erkki mikko))
