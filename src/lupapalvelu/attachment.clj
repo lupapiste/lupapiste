@@ -233,11 +233,6 @@
 ;; Api
 ;;
 
-(defn link-files-to-application [app-id fileIds]
-  {:pre [(string? app-id)]}
-  (mongo/update-by-query :fs.files {:_id {$in fileIds}} {$set {:metadata.application app-id
-                                                               :metadata.linked true}}))
-
 (defn- by-file-ids [file-ids {versions :versions :as attachment}]
   (some (comp (set file-ids) :fileId) versions))
 
@@ -939,7 +934,8 @@
    Updates archivability data in the latest version file even if conversion fails."
   [application attachment]
   {:pre [(map? application) (:id application) (:attachments application)]}
-  (let [{:keys [archivable contentType fileId]} (:latestVersion attachment)]
+  (let [{:keys [archivable contentType fileId]} (:latestVersion attachment)
+        session-id "pdfa-conversion"]
     (cond
       archivable
       (info "Attachment" (:id attachment) "is already archivable, ignoring")
@@ -950,11 +946,11 @@
       :else
       (if-let [file-content (storage/download (:id application) fileId)]
         (let [{:keys [result file] :as conversion-data} (->> (update file-content :content apply [])
-                                                             (conversion "pdfa-conversion" application))]
+                                                             (conversion session-id application))]
           (if (and (:archivable result) (:fileId file))
             ; If the file is already valid PDF/A, there's no conversion and thus no fileId
             (do (update-latest-version-file! application attachment conversion-data (now))
-                (link-files-to-application (:id application) [(:fileId file)])
+                (storage/link-files-to-application session-id (:id application) [(:fileId file)])
                 (preview/preview-image! (:id application) (:fileId file) (:filename file) (:contentType file))
                 (cleanup-temp-file result)
                 result)

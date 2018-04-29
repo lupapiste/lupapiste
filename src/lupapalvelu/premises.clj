@@ -16,7 +16,8 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [slingshot.slingshot :refer [throw+]]
-            [taoensso.timbre :as timbre])
+            [taoensso.timbre :as timbre]
+            [clojure.set :as set])
   (:import (java.io OutputStream)))
 
 (defn get-huoneistot-from-application [doc-id application]
@@ -144,23 +145,21 @@
                                     (-> premises-data (save-premises-data command doc) :ok))
         save-response             (when file-updated?
                                     (timbre/info "Premises updated by premises Excel file in application")
-                                    (->> (first files)
-                                         ((fn [file] {:filename (:filename file) :content (:tempfile file)}))
-                                         (file-upload/save-file)))
-        file-linked?              (when (:fileId save-response)
-                                    (= 1 (att/link-files-to-application app-id [(:fileId save-response)])))
+                                    (-> (first files)
+                                        (select-keys [:filename :tempfile])
+                                        (set/rename-keys {:tempfile :content})
+                                        (file-upload/save-file :application app-id :linked true)))
         return-map                (cond
                                     file-updated? {:ok true}
                                     (nil? csv-data) {:ok false :text "error.illegal-premises-excel-file"}
                                     (empty? premises-data) {:ok false :text "error.illegal-premises-excel-data"}
                                     :else {:ok false})]
-    (when file-linked?
-      (let [old-ifc-fileId      (-> application :ifc-data :fileId)]
-        (action/update-application command {$set {:ifc-data {:fileId   (:fileId save-response)
-                                                             :filename (:filename save-response)
-                                                             :modified created
-                                                             :user     (usr/summary user)}}})
-        (when old-ifc-fileId (mongo/delete-file-by-id old-ifc-fileId))))
+    (let [old-ifc-fileId      (-> application :ifc-data :fileId)]
+      (action/update-application command {$set {:ifc-data {:fileId   (:fileId save-response)
+                                                           :filename (:filename save-response)
+                                                           :modified created
+                                                           :user     (usr/summary user)}}})
+      (when old-ifc-fileId (mongo/delete-file-by-id old-ifc-fileId)))
     (->> return-map
          (resp/json)
          (resp/status 200))))
