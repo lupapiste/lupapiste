@@ -112,10 +112,6 @@
        (let [ks (-> data :operations first keys set)]
          (fact "building key not present"
                (contains? ks :building) => false)))
-     (structure-is-present [data]
-       (let [ks (-> data :operations first keys set)]
-         (fact "structure key not present"
-               (contains? ks :structure) => true)))
      (run-test
        [app test-fn]
        (when-let [new-state (sm/next-state app)]
@@ -135,11 +131,7 @@
         (run-test (assoc app :state initial-state) manual-building-id-test)))
     (fact "permitType P"
       (let [app (app-with-docs [new-building-data])]
-        (run-test (assoc app :state initial-state :permitType "P") building-not-present)))
-    (fact "new structure"
-      (let [app (app-with-docs [new-structure-data])
-            app-with-structure-operation (assoc app :primaryOperation {:name "aita" :id "123"})]
-        (run-test app-with-structure-operation building-not-present)))))
+        (run-test (assoc app :state initial-state :permitType "P") building-not-present)))))
 
 (fact "permitSubtype"
   (fact "if no key, nil"
@@ -151,3 +143,12 @@
   (fact "ok"
     (-> (assoc (app-with-docs [new-building-data]) :state "open" :permitSubtype "testi")
         (mjson/state-change-data "submitted")) => (contains {:permitSubtype "testi"})))
+
+(fact "presence of :building and :structure keys"
+  (let [app (app-with-docs [new-structure-data])
+        state-change-data (assoc app :state "open" :primaryOperation {:name "aita" :id "57603a99edf02d7047774554"})
+        value (mjson/state-change-data state-change-data "submitted")]
+    (fact "message for structure does not contain :building flag"
+      (contains? (set (keys (first (:operations value)))) :building) => false)
+    (fact "message for structure does contain :structure flag"
+      (contains? (set (keys (first (:operations value)))) :structure) => true)))

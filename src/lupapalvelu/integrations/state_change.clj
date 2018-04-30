@@ -27,7 +27,8 @@
     (ssu/select-keys app-schema/Operation [:id :name :description])
     displayName
     {(sc/optional-key :building) {:new sc/Bool
-                                  (sc/optional-key :buildingId) sc/Str}}))
+                                  (sc/optional-key :buildingId) sc/Str}
+     (sc/optional-key :structure) sc/Bool}))
 
 (def base-keys
   [:address :infoRequest :municipality
@@ -69,12 +70,12 @@
     (get-in doc [:data (keyword building-id-other-key)])
     (get-in doc [:data (keyword schemas/national-building-id)])))
 
-(defn building? [document]
-  (let [metadata (operations/get-operation-metadata (:name document))]
+(defn building? [operation]
+  (let [metadata (operations/get-operation-metadata (:name operation))]
     (contains? metadata :building)))
 
-(defn structure? [document]
-  (let [metadata (operations/get-operation-metadata (:name document))]
+(defn structure? [operation]
+  (let [metadata (operations/get-operation-metadata (:name operation))]
     (contains? metadata :structure)))
 
 (defn get-building-data [document]
@@ -83,22 +84,26 @@
       {:new false :buildingId (get-building-id select-value unwrapped)}
       {:new true})))
 
-(defn enrich-operation-with-building [{:keys [documents] :as app} operation]
+(defn enrich-operation
+  "Add :building or :structure key to operation if necessary."
+  [{:keys [documents] :as app} operation]
   (if-let [op-doc (and
                     (util/=as-kw (permit/permit-type app) :R)
-                    (building? operation)
+                    (or (building? operation) (structure? operation))
                     (->> documents
                          (util/find-first
                            #(= (:id operation)
                                (get-in % [:schema-info :op :id])))))]
-    (util/assoc-when operation :building (get-building-data op-doc))
+    (if (building? operation)
+      (util/assoc-when operation :building (get-building-data op-doc))
+      (assoc operation :structure true))
     operation))
 
 (sc/defn ^:always-validate build-operations :- [Operation]
   [{:keys [primaryOperation secondaryOperations] :as app}]
   (->> (cons (get-op-data primaryOperation)
              (map get-op-data secondaryOperations))
-       (map (partial enrich-operation-with-building app))))
+       (map (partial enrich-operation app))))
 
 (defn make-app-link [id lang]
   (str (env/value :host) "/app/" (name lang) "/authority" "#!/application/" id))
