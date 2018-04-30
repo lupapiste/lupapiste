@@ -54,9 +54,7 @@
                                         nil nil)
   => [ {:email "a@foo.com"} {:email "b@foo.com"} {:email "c@foo.com"}]
   (provided
-   (usr/get-users {"$or" [{:company.id   {"$in" []}
-                           :company.role :admin}
-                          {:_id {"$in" ["a" "b" "c"]}}]})
+   (usr/get-users {:_id {"$in" ["a" "b" "c"]}})
    => [{:email "a@foo.com"}
        {:email "b@foo.com"}
        {:email "c@foo.com"}]))
@@ -69,9 +67,7 @@
                                         nil nil)
   => [ {:email "a@foo.com"} {:email "b@foo.com"}]
   (provided
-   (usr/get-users {"$or" [{:company.id   {"$in" []}
-                           :company.role :admin}
-                          {:_id {"$in" ["a" "b"]}}]})
+   (usr/get-users {:_id {"$in" ["a" "b"]}})
    => [{:email "a@foo.com"} {:email "b@foo.com"}]))
 
 (fact "Every user except with role reader get email"
@@ -82,9 +78,7 @@
                                         nil [:reader])
   => [ {:email "a@foo.com"} {:email "b@foo.com"}]
   (provided
-   (usr/get-users {"$or" [{:company.id   {"$in" []}
-                           :company.role :admin}
-                          {:_id {"$in" ["a" "b"]}}]})
+   (usr/get-users {:_id {"$in" ["a" "b"]}})
    => [{:email "a@foo.com"} {:email "b@foo.com"}]))
 
 (fact "Only writers get email"
@@ -97,9 +91,7 @@
                                         [:writer] nil)
   => [ {:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]
   (provided
-   (usr/get-users {"$or" [{:company.id   {"$in" []}
-                           :company.role :admin}
-                          {:_id {"$in" ["w1" "w2" "w3"]}}]})
+   (usr/get-users {:_id {"$in" ["w1" "w2" "w3"]}})
    => [{:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]))
 
 (fact "Only writers get email (foreman exlusion overrides include))"
@@ -112,9 +104,7 @@
                                         [:foreman :writer] [:foreman])
   => [ {:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]
   (provided
-   (usr/get-users {"$or" [{:company.id   {"$in" []}
-                           :company.role :admin}
-                          {:_id {"$in" ["w1" "w2" "w3"]}}]})
+   (usr/get-users {:_id {"$in" ["w1" "w2" "w3"]}})
    => [{:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]))
 
 (fact "Unsubscription prevents email"
@@ -126,9 +116,7 @@
     nil nil)
   => [{:email "a@foo.com"} {:email "c@foo.com"}]
   (provided
-   (usr/get-users {"$or" [{:company.id   {"$in" []}
-                           :company.role :admin}
-                          {:_id {"$in" ["a" "c"]}}]})
+   (usr/get-users {:_id {"$in" ["a" "c"]}})
    => [{:email "a@foo.com"} {:email "c@foo.com"}]))
 
 (fact "Company admins get email"

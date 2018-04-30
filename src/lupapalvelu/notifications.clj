@@ -84,9 +84,11 @@
                                         (reduce-kv (fn [acc k v]
                                                      (assoc acc k (map :id v)))
                                                    {}))]
-    (usr/get-users {$or [{:company.id   {$in (or companies [])}
-                          :company.role :admin}
-                         {:_id {$in (or others [])}}]})))
+    (usr/get-users (if (seq companies)
+                     {$or [{:company.id   {$in (or companies [])}
+                           :company.role :admin}
+                           {:_id {$in (or others [])}}]}
+                     {:_id {$in (or others [])}}))))
 
 ;;
 ;; Model creation functions

@@ -367,6 +367,7 @@
                                    :propertyId sipoo-property-id
                                    :address "Sanyuanqiao") => ok?]
            (count auth) => 1
+           (:type auth) => nil
            (map :role auth) => ["writer"]))
        (fact "Company can be queried"
              (query kaino :company :company "solita" :users true) => ok?)
