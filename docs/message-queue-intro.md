@@ -6,6 +6,8 @@ JMS gives good encapsulation for basic messaging needs.
 
 JMS is supported by large variety of brokers, which enables to change the underlying message broker without affecting client implementations.
 
+A [jms-client wrapper](https://github.com/lupapiste/jms-client) for common JMS stuff is used at project, feel free to contribute.
+
 # ActiveMQ Artemis
 
 Lupapiste currently uses [ActiveMQ Artemis](https://activemq.apache.org/artemis/index.html) as message broker. It's a results of merging ActiveMQ and HornetQ into one product.
@@ -20,6 +22,14 @@ Artemis itself is [protocol agnostic](https://activemq.apache.org/artemis/docs/l
 Locally an embedded ActiveMQ Artemis broker is started, this can be controlled with `:embedded-broker` feature flag. See `artemis-server` namespace.
 
 Alternatively you can fire up local instance by [installing Artemis](https://activemq.apache.org/artemis/download.html), and then setting JMS properties. See example in [local.properties](../resources/local.properties).
+
+## JMS client library
+
+The [jms-client](https://github.com/lupapiste/jms-client) library provides common stuff for working with JMS stuff in Clojure.
+
+For example if you wan't to connect to broker of your choice, you can create an appropriate ConnectionFactory and juse jms/create-connection to create actual javax.jms.Connection for you.
+
+Client side must deal with state, the provided client is just a thing wrapper for common stuff.   
 
 # TODOs
 
