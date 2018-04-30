@@ -695,7 +695,6 @@
                              val-in-result))
                          res
                          (select-keys meta-data (keys res)))]
-
       (throw (AssertionError. (str "Action '" action-name "' has invalid meta data: " invalid-meta ", schema-error: " res)))))
 
   (assert (or (seq (:user-roles meta-data)) (seq (:permissions meta-data)))
