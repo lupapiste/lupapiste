@@ -18,7 +18,7 @@
             [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.pate.schemas :refer [PateSavedVerdictTemplates Phrase]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.permissions :refer [defcontext] :as permissions]
+            [lupapalvelu.permissions :refer [defcontext]]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.wfs :as wfs]
             [lupapiste-commons.archive-metadata-schema :as archive-schema]
