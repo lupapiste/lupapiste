@@ -156,6 +156,10 @@
      :context-roles (->> (vals org-authz)
                          (reduce into #{}))}))
 
+(defcontext users-context [command]
+  {:context-scope :users
+   :context-roles (->> command :user :orgAuthz vals (reduce into #{}))})
+
 (defn full-name [{:keys [firstName lastName]}] (str firstName " " lastName))
 
 (defn non-private
@@ -221,7 +225,7 @@
     (oir-authority? user)))
 
 (defn authority? [{role :role}]
-  (contains? #{:authority} (keyword role)))
+  (= :authority (keyword role)))
 
 (defn verified-person-id? [{pid :personId source :personIdSource :as user}]
   (and (ss/not-blank? pid) (util/=as-kw :identification-service source)))
