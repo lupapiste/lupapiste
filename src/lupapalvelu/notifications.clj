@@ -1,19 +1,21 @@
 (ns lupapalvelu.notifications
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [monger.operators :refer [$in]]
-            [schema.core :as sc]
+  (:require [cljstache.core :as clostache]
             [clojure.set :as set]
             [clojure.string :as s]
-            [cljstache.core :as clostache]
-            [sade.util :refer [future* to-local-date fn->]]
-            [sade.env :as env]
-            [sade.strings :as ss]
-            [sade.util :as util]
             [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.email :as email]
             [lupapalvelu.i18n :refer [loc] :as i18n]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.roles :as roles]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [monger.operators :refer :all]
+            [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.strings :as ss]
+            [sade.util :refer [future* to-local-date fn->]]
+            [sade.util :as util]
+            [schema.core :as sc]
+            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]))
 
 ;;
 ;; Helpers
@@ -64,18 +66,29 @@
     (str "Lupapiste: " subject-text)))
 
 (defn- get-email-recipients-for-application
-  "Emails are sent to everyone in auth array except those who haven't accepted invite or have unsubscribed emails.
-   More specific set recipients can be defined by user roles."
+  "Emails are sent to everyone in auth array except those who haven't
+  accepted invite or have unsubscribed emails. More specific set
+  recipients can be defined by user roles. For company auths the
+  recipients include every admin user. Locked companies are also
+  included."
   [{:keys [auth]} included-roles excluded-roles]
   {:post [(every? map? %)]}
-  (let [recipient-roles (set/difference (set (or (seq included-roles) roles/all-authz-roles))
-                                        (set excluded-roles))]
-    (->> (filter (comp recipient-roles keyword :role) auth)
-         (remove :invite)
-         (remove :unsubscribed)
-         (remove (comp (partial = "company") :type))
-         (map :id)
-         (#(usr/get-users {:id {$in %}})))))
+  (let [recipient-roles            (set/difference (set (or (seq included-roles) roles/all-authz-roles))
+                                                   (set excluded-roles))
+        {:keys [companies others]} (->> (filter (comp recipient-roles keyword :role) auth)
+                                        (remove :invite)
+                                        (remove :unsubscribed)
+                                        (group-by #(if (util/=as-kw (:type %) :company)
+                                                     :companies
+                                                     :others))
+                                        (reduce-kv (fn [acc k v]
+                                                     (assoc acc k (map :id v)))
+                                                   {}))]
+    (usr/get-users (if (seq companies)
+                     {$or [{:company.id   {$in (or companies [])}
+                           :company.role :admin}
+                           {:_id {$in (or others [])}}]}
+                     {:_id {$in (or others [])}}))))
 
 ;;
 ;; Model creation functions

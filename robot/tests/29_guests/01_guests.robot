@@ -6,6 +6,7 @@ Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource       ../13_statements/statement_resource.robot
 Resource        guest_resource.robot
+Variables       ../06_attachments/variables.py
 
 *** Test Cases ***
 
@@ -61,6 +62,10 @@ Pena creates an application
   Pena logs in
   Create application the fast way  ${appname}  ${propertyid}    kerrostalo-rivitalo
 
+Pena adds attachment
+  Open tab  attachments
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Muu  Asuinkerrostalon tai rivitalon rakentaminen
+
 No guests yet
   Open tab  parties
   Wait test id visible  application-guest-add
@@ -71,6 +76,16 @@ Add bubble sanity check
 Pena invites some random guest
   Set Suite Variable  ${random}  some.random@example.com
   Invite application guest  ${random}  Hello!
+  Guest table contains  ${random}
+
+Pena visits attachment
+  Open tab  attachments
+  Scroll to  tr[data-test-type='muut.muu']
+  Open attachment details  muut.muu
+  Return to application
+
+Guest table should be visible
+  Open tab  parties
   Guest table contains  ${random}
 
 Pena invites Mikko as guest
@@ -91,7 +106,7 @@ Pena submits application
   Submit application
 
 Pena enters a comment to the application
-  Add comment  This be not visible to Mikko :)
+  Add comment  This is not visible to Mikko :)
   [Teardown]  Logout
 
 # -------------------------------------
