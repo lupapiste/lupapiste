@@ -14,9 +14,9 @@
             [lupapalvelu.application-schema :as app-schema]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.integrations.messages :as messages]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]))
 
@@ -69,6 +69,14 @@
     (get-in doc [:data (keyword building-id-other-key)])
     (get-in doc [:data (keyword schemas/national-building-id)])))
 
+(defn building? [document]
+  (let [metadata (operations/get-operation-metadata (:name document))]
+    (contains? metadata :building)))
+
+(defn structure? [document]
+  (let [metadata (operations/get-operation-metadata (:name document))]
+    (contains? metadata :structure)))
+
 (defn get-building-data [document]
   (let [unwrapped (tools/unwrapped document)]
     (if-let [select-value (get-in unwrapped [:data :buildingId])]        ; has 'existing' building
@@ -78,6 +86,7 @@
 (defn enrich-operation-with-building [{:keys [documents] :as app} operation]
   (if-let [op-doc (and
                     (util/=as-kw (permit/permit-type app) :R)
+                    (building? operation)
                     (->> documents
                          (util/find-first
                            #(= (:id operation)

@@ -48,6 +48,21 @@
           :mitat {}
           :valtakunnallinenNumero {:value "123"}}})
 
+(def new-structure-data
+  {:id "foo-structure"
+   :schema-info {:op {:id "57603a99edf02d7047774554"
+                      :name "Aita",
+                      :description nil,
+                      :created 1505822832171}
+                 :name "kaupunkikuvatoimenpide-ei-tunnusta"}
+   :data {:rakennuksenOmistajat {:0 {}}
+          :varusteet {}
+          :verkostoliittymat {}
+          :huoneistot {:0 {}}
+          :tunnus {:value "Tunnus"}
+          :mitat {}
+          :valtakunnallinenNumero {:value "123"}}})
+
 (defn app-with-docs [documents]
   (let [location [444444.0 6666666.0]
         wgs (coord/convert "EPSG:3067" "WGS84" 5 location)]
@@ -94,8 +109,13 @@
                                                           (get-in old-building-manuaalinen-rakennusnumero
                                                                   [:data :manuaalinen_rakennusnro :value])]])))
      (building-not-present [data]
-       (fact "building key not present"
-         (not-any? #(contains? (set (keys %)) :building) (:operations data)) => true))
+       (let [ks (-> data :operations first keys set)]
+         (fact "building key not present"
+               (contains? ks :building) => false)))
+     (structure-is-present [data]
+       (let [ks (-> data :operations first keys set)]
+         (fact "structure key not present"
+               (contains? ks :structure) => true)))
      (run-test
        [app test-fn]
        (when-let [new-state (sm/next-state app)]
@@ -115,7 +135,11 @@
         (run-test (assoc app :state initial-state) manual-building-id-test)))
     (fact "permitType P"
       (let [app (app-with-docs [new-building-data])]
-        (run-test (assoc app :state initial-state :permitType "P") building-not-present)))))
+        (run-test (assoc app :state initial-state :permitType "P") building-not-present)))
+    (fact "new structure"
+      (let [app (app-with-docs [new-structure-data])
+            app-with-structure-operation (assoc app :primaryOperation {:name "aita" :id "123"})]
+        (run-test app-with-structure-operation building-not-present)))))
 
 (fact "permitSubtype"
   (fact "if no key, nil"

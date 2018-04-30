@@ -5,7 +5,6 @@
             [sade.core :refer :all]
             [sade.strings :as ss]
             [monger.operators :refer :all]
-            [lupapalvelu.action :refer [defquery]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.waste-schemas :as waste-schemas]
             [lupapalvelu.document.poikkeamis-schemas]
