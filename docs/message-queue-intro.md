@@ -33,26 +33,60 @@ Client side must deal with state, the provided client is just a thing wrapper fo
 
 # TODOs
 
-* JMS transactions
 * Server side re-delivery delay
 
-# ActiveMQ Artemis server FAQ
-
-## Auto-create and auto-delete addresses?
-
-By default Artemis server is provisioned with "auto-create" set to true. This means it will auto-create queue, when message is sent to it. This is good for dynamic queues.
-On the contrary, also "auto-delete" feature is set to true by default. This means queue is deleted from broker when there are 0 consumers and 0 messages. In general this is fine too.
-
-~~It seems it's not possible to retain dynamically created queues between server restarts. When server is restarted, client consumers don't receive messages anymore to queues they subscribed. 
-Instead an exception is raised on server side when consumer re-connects to it with message "Queue X does not exists".~~ This might be a bug in Artemis UPDATE: yes it's a bug: https://issues.apache.org/jira/browse/ARTEMIS-1818.
-
-Read more about config possibilities from [Artemis documentation](https://activemq.apache.org/artemis/docs/latest/address-model.html#automatic-addressqueue-management).
-
 # JMS client FAQ
+
+## Session modes
+
+Session mode defines how messages are acknowledged to the broker. There are for modes avaialble in general:
+
+1. AUTO_ACKNOWLEDGE
+2. CLIENT_ACKNOWLEDGE
+3. DUPS_OK_ACKNOWLEDGE
+4. SESSION_TRANSACTED
+
+Most likely in Lupapiste cases, AUTO_ACKNOWLEDGE is fine. If performance is critical in broker side, DUPS_OK_ACKNOWLEDGE could be used. Short descriptions of each:
+
+### AUTO_ACKNOWLEDGE
+
+When message is received and handled, message is automatically acknowledged to the broker.
+
+More precisly:
+
+>If the receiver uses the MessageListener interface, the message is automatically acknowledged when it successfully returns from the onMessage() method.
+
+If an exception is raised during onMessage, message is automatically rolled back to broker for redelivery.
+
+Thus implementing client doesn't need any special "acknowledging" code: handling callback function successfully does the trick.
+
+### CLIENT_ACKNOWLEDGE
+
+With this mode, the client application needs to explicitly call `message.acknowledge()` for a received message, to acknowledge broker that the message is delivered successfully.
+
+If this mode is used, client should be ensured to acknowledge message in reasonable time, as it might cause performance problems when acknowledgements are queued.
+
+### DUPS_OK_ACKNOWLEDGE
+
+Acknowledgements sent back to broker are batched to reduce network roundtrips and increase performance. Thus it's possible that broker re-delivers messages, if it doesn't receive acknowledgement in time.
+
+Client application code needs to check, if received message is already handled. If that needs possibly slow database queries, the JMS message can be inspected with `message.getJMSRedelivered()` or `message.getIntProperty("JMSXDeliveryCount")` to see if the message in question is already redelivered.
+
+### SESSION_TRANSACTED
+
+A transacted session can be created. Transaction is never excplicitly started, but `session.commit()` and `session.rollback()` methods can be used to control wheter message(s) should be rolled back or not. 
+
+>The transacted session uses a chained-transaction model. In a chained-transaction model, an application does not explicitly start a transaction.
+
+Transaction logic is provided in consumer side code. 
+
+Good explanation _Transacted session_ can be found from [JavaWolrd](https://www.javaworld.com/article/2074123/java-web-development/transaction-and-redelivery-in-jms.html?page=2).
 
 ## Difference between persistent and non-persistent delivery?
 
 Non-persistent deliveries are not saved on disk in the broker, while persistent messages are. More at [ActiveMQ site](http://activemq.apache.org/what-is-the-difference-between-persistent-and-non-persistent-delivery.html).
+
+This can be even controlled pe
 
 ## Shared or individual connection/session per message?
 
@@ -94,3 +128,15 @@ If during lost connection we try to send a message to producer, it will block un
 
 So the client should have some kind of recovery for these situations.
 
+
+# ActiveMQ Artemis server FAQ
+
+## Auto-create and auto-delete addresses?
+
+By default Artemis server is provisioned with "auto-create" set to true. This means it will auto-create queue, when message is sent to it. This is good for dynamic queues.
+On the contrary, also "auto-delete" feature is set to true by default. This means queue is deleted from broker when there are 0 consumers and 0 messages. In general this is fine too, as queue is re-created when consumers connect to it or producer procudes a message.
+
+~~It seems it's not possible to retain dynamically created queues between server restarts. When server is restarted, client consumers don't receive messages anymore to queues they subscribed. 
+Instead an exception is raised on server side when consumer re-connects to it with message "Queue X does not exists".~~ This might be a bug in Artemis UPDATE: yes it's a bug: https://issues.apache.org/jira/browse/ARTEMIS-1818.
+
+Read more about config possibilities from [Artemis documentation](https://activemq.apache.org/artemis/docs/latest/address-model.html#automatic-addressqueue-management).

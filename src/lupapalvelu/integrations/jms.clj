@@ -170,7 +170,8 @@
          (register-consumer))))
 
   (defn create-nippy-consumer
-    "Creates and returns consumer to endpoint, that deserializes JMS data with nippy/thaw."
+    "Creates and returns consumer to endpoint, that deserializes JMS data with nippy/thaw.
+    Uses default consumer session created in this namespace."
     [endpoint callback-fn]
     (create-consumer
       endpoint
