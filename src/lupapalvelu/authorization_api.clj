@@ -285,10 +285,17 @@
    :pre-checks  [(partial restrictions/check-auth-restriction-is-enabled-by-user :others :application/submit)]}
   [_])
 
+(defn- auth-company-admin? [{:keys [type id]} {:keys [company]}]
+  (and (util/=as-kw  type :company)
+       (= id (:id company))
+       (util/=as-kw :admin (:role company))))
+
 (defn- manage-unsubscription [{application :application user :user :as command} unsubscribe?]
   (let [username (get-in command [:data :username])]
     (if (or (= username (:username user))
-            (some (partial = (:organization application)) (user/organization-ids-by-roles user #{:authority})))
+            (some (partial = (:organization application)) (user/organization-ids-by-roles user #{:authority}))
+            (auth-company-admin? (util/find-by-key :username username (:auth application))
+                                 user))
       (update-application command
         {:auth {$elemMatch {:username username}}}
         {$set {:auth.$.unsubscribed unsubscribe?}})
