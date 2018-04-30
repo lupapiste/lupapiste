@@ -4,7 +4,7 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.application-api]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.open-inforequest]
             [sade.dummy-email-server :as dummy]
             [sade.env :as env]))
@@ -49,57 +49,105 @@
 (fact "Every user gets an email"
   (get-email-recipients-for-application { :auth [{:id "a" :role "writer"}
                                                  {:id "b" :role "foreman"}
-                                                 {:id "c" :role "reader"}] :title "title" }
-                                        nil nil) => [ {:email "a@foo.com"} {:email "b@foo.com"} {:email "c@foo.com"}]
+                                                 {:id "c" :role "reader"}]
+                                         :title "title" }
+                                        nil nil)
+  => [ {:email "a@foo.com"} {:email "b@foo.com"} {:email "c@foo.com"}]
   (provided
-    (user/get-users {:id {"$in" ["a" "b" "c"]}}) => [{:email "a@foo.com"}
-                                                     {:email "b@foo.com"}
-                                                     {:email "c@foo.com"}]))
+   (usr/get-users {"$or" [{:company.id   {"$in" []}
+                           :company.role :admin}
+                          {:_id {"$in" ["a" "b" "c"]}}]})
+   => [{:email "a@foo.com"}
+       {:email "b@foo.com"}
+       {:email "c@foo.com"}]))
 
 (fact "Every user except with role invalid get email"
   (get-email-recipients-for-application { :auth [{:id "a" :role "writer"}
                                                  {:id "b" :role "reader"}
-                                                 {:id "c" :role "invalid"}] :title "title" }
-                                        nil nil) => [ {:email "a@foo.com"} {:email "b@foo.com"}]
+                                                 {:id "c" :role "invalid"}]
+                                         :title "title" }
+                                        nil nil)
+  => [ {:email "a@foo.com"} {:email "b@foo.com"}]
   (provided
-    (user/get-users {:id {"$in" ["a" "b"]}}) => [{:email "a@foo.com"} {:email "b@foo.com"}]))
+   (usr/get-users {"$or" [{:company.id   {"$in" []}
+                           :company.role :admin}
+                          {:_id {"$in" ["a" "b"]}}]})
+   => [{:email "a@foo.com"} {:email "b@foo.com"}]))
 
 (fact "Every user except with role reader get email"
   (get-email-recipients-for-application { :auth [{:id "a" :role "writer"}
                                                  {:id "b" :role "foreman"}
-                                                 {:id "c" :role "reader"}] :title "title" }
-                                        nil [:reader]) => [ {:email "a@foo.com"} {:email "b@foo.com"}]
+                                                 {:id "c" :role "reader"}]
+                                         :title "title" }
+                                        nil [:reader])
+  => [ {:email "a@foo.com"} {:email "b@foo.com"}]
   (provided
-    (user/get-users {:id {"$in" ["a" "b"]}}) => [{:email "a@foo.com"} {:email "b@foo.com"}]))
+   (usr/get-users {"$or" [{:company.id   {"$in" []}
+                           :company.role :admin}
+                          {:_id {"$in" ["a" "b"]}}]})
+   => [{:email "a@foo.com"} {:email "b@foo.com"}]))
 
 (fact "Only writers get email"
   (get-email-recipients-for-application { :auth [{:id "a" :role "foreman"}
                                                  {:id "w1" :role "writer"}
                                                  {:id "w2" :role "writer"}
                                                  {:id "w3" :role "writer"}
-                                                 {:id "c" :role "reader"}] :title "title" }
-                                        [:writer] nil) => [ {:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]
+                                                 {:id "c" :role "reader"}]
+                                         :title "title" }
+                                        [:writer] nil)
+  => [ {:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]
   (provided
-    (user/get-users {:id {"$in" ["w1" "w2" "w3"]}}) => [{:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]))
+   (usr/get-users {"$or" [{:company.id   {"$in" []}
+                           :company.role :admin}
+                          {:_id {"$in" ["w1" "w2" "w3"]}}]})
+   => [{:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]))
 
 (fact "Only writers get email (foreman exlusion overrides include))"
   (get-email-recipients-for-application { :auth [{:id "a" :role "foreman"}
                                                  {:id "w1" :role "writer"}
                                                  {:id "w2" :role "writer"}
                                                  {:id "w3" :role "writer"}
-                                                 {:id "c" :role "reader"}] :title "title" }
-                                        [:foreman :writer] [:foreman]) => [ {:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]
+                                                 {:id "c" :role "reader"}]
+                                         :title "title" }
+                                        [:foreman :writer] [:foreman])
+  => [ {:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]
   (provided
-    (user/get-users {:id {"$in" ["w1" "w2" "w3"]}}) => [{:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]))
+   (usr/get-users {"$or" [{:company.id   {"$in" []}
+                           :company.role :admin}
+                          {:_id {"$in" ["w1" "w2" "w3"]}}]})
+   => [{:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]))
 
-(fact "Unsubsribtion prevents email"
+(fact "Unsubscription prevents email"
   (get-email-recipients-for-application
-    {:auth [{:id "a" :role "foreman" :unsubscribed false}
+   {:auth  [{:id "a" :role "foreman" :unsubscribed false}
             {:id "b" :role "writer" :unsubscribed true}
-            {:id "c" :role "reader"}] :title "title" }
-    nil nil) => [{:email "a@foo.com"} {:email "c@foo.com"}]
+            {:id "c" :role "reader"}]
+    :title "title" }
+    nil nil)
+  => [{:email "a@foo.com"} {:email "c@foo.com"}]
   (provided
-    (user/get-users {:id {"$in" ["a" "c"]}}) => [{:email "a@foo.com"} {:email "c@foo.com"}]))
+   (usr/get-users {"$or" [{:company.id   {"$in" []}
+                           :company.role :admin}
+                          {:_id {"$in" ["a" "c"]}}]})
+   => [{:email "a@foo.com"} {:email "c@foo.com"}]))
+
+(fact "Company admins get email"
+  (get-email-recipients-for-application {:auth [{:id "regular" :role "writer"}
+                                                {:id "com"
+                                                 :type "company"
+                                                 :role "writer"}]
+                                         :title "title"}
+                                        [:writer] nil)
+  => [{:email "joe.regular@example.org"}
+      {:email "admin1@example.com"}
+      {:email "admin2@example.com"}]
+  (provided
+   (usr/get-users {"$or" [{:company.id   {"$in" ["com"]}
+                           :company.role :admin}
+                          {:_id {"$in" ["regular"]}}]})
+   => [{:email "joe.regular@example.org"}
+       {:email "admin1@example.com"}
+       {:email "admin2@example.com"}]))
 
 (testable-privates lupapalvelu.open-inforequest base-email-model)
 (fact "Email for sending an open inforequest is like"
@@ -108,7 +156,8 @@
   (let  [model (base-email-model {:data {:token-id "123"}} nil {})]
     (doseq [lang i18n/supported-langs]
       (fact {:midje/description (name lang)}
-        ((:link model) lang) => (str "http://lupapiste.fi/api/raw/openinforequest?token-id=123&lang=" (name lang))))))
+        ((:link model) lang)
+        => (str "http://lupapiste.fi/api/raw/openinforequest?token-id=123&lang=" (name lang))))))
 
 (fact "Unknown config"
   (notify! :foo {}) => (throws AssertionError))
@@ -117,12 +166,12 @@
 
 (fact "organization-on-submit email"
   (against-background [(lupapalvelu.organization/get-organization "Foo") => {:notifications {:submit-notification-emails ["foo-org@example.com"]}}])
-  (notify! :organization-on-submit {:application {:address "Foostreet 1",
-                                                  :municipality "753",
-                                                  :state "submitted"
+  (notify! :organization-on-submit {:application {:address          "Foostreet 1",
+                                                  :municipality     "753",
+                                                  :state            "submitted"
                                                   :primaryOperation {:name "kerrostalo-rivitalo"}
-                                                  :organization "Foo",
-                                                  :_applicantIndex ["Foo 1", "Foo 2"]}})
+                                                  :organization     "Foo",
+                                                  :_applicantIndex  ["Foo 1", "Foo 2"]}})
   (Thread/sleep 100)
   (let [msg (last (dummy/messages))]
     (:subject msg) => (contains "Foostreet 1, Sipoo - uusi hakemus")
@@ -132,11 +181,11 @@
 
 
 (defemail :test {:recipients-fn :recipients
-                 :model-fn (constantly
-                             {:hi  ""
-                              :hej ""
-                              :moi ""})
-                 :template "testbody.md"})
+                 :model-fn      (constantly
+                                 {:hi  ""
+                                  :hej ""
+                                  :moi ""})
+                 :template      "testbody.md"})
 
 (defn- notify-invite! [user]
   (notify! :test {:recipients [user]}))

@@ -80,7 +80,7 @@
     (let [{:keys [x y municipality] :as body} (json/decode (:body response) true)]
       (fact "response is a map"
         (map? body) => true
-        (keys body) => (contains #{:x :y :municipality})
+        (keys body) => (contains #{:x :y :municipality} :gaps-ok)
         x => string?
         y => string?)
       (fact "also municipality is returned"
