@@ -116,17 +116,17 @@
       (fail :error.unauthorized))))
 
 (defendpoint "/rest/user"
-             {:summary             "Returns details of the user associated to the provided access token"
-              :description         ""
-              :parameters          []
-              :optional-parameters [:dummy-role sc/Str]
-              :oauth-scope         :read
-              :returns             usr/UserForRestEndpoint}
-             (let [company-id (get-in user [:company :id])
-                   company    (when company-id (company/find-company-by-id company-id))]
-               (cond-> (select-keys user [:role :email :firstName :lastName])
-                       (and (env/feature? :dummy-rest-user-role) dummy-role) (assoc :role dummy-role)
-                       company (assoc :company {:id company-id :name (:name company)}))))
+  {:summary             "Returns details of the user associated to the provided access token"
+   :description         ""
+   :parameters          []
+   :optional-parameters [:dummy-role sc/Str]
+   :oauth-scope         :read
+   :returns             usr/UserForRestEndpoint}
+  (let [company-id (get-in user [:company :id])
+        company    (when company-id (company/find-company-by-id company-id))]
+    (cond-> (select-keys user [:role :email :firstName :lastName])
+            (and (env/feature? :dummy-rest-user-role) dummy-role) (assoc :role dummy-role)
+            company (assoc :company {:id company-id :name (:name company)}))))
 
 ;;
 ;; ==============================================================================
