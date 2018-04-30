@@ -145,10 +145,10 @@
         (mjson/state-change-data "submitted")) => (contains {:permitSubtype "testi"})))
 
 (fact "presence of :building and :structure keys"
-  (let [app (app-with-docs [new-structure-data])
-        state-change-data (assoc app :state "open" :primaryOperation {:name "aita" :id "57603a99edf02d7047774554"})
-        value (mjson/state-change-data state-change-data "submitted")]
+  (let [state-change-data (assoc (app-with-docs [new-structure-data]) :state "open" :primaryOperation {:name "aita" :id "57603a99edf02d7047774554"})
+        change-report (mjson/state-change-data state-change-data "submitted")
+        operation-keys (-> change-report :operations first keys set)]
     (fact "message for structure does not contain :building flag"
-      (contains? (set (keys (first (:operations value)))) :building) => false)
+      (contains? operation-keys :building) => false)
     (fact "message for structure does contain :structure flag"
-      (contains? (set (keys (first (:operations value)))) :structure) => true)))
+      (contains? operation-keys :structure) => true)))
