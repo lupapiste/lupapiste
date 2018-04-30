@@ -343,7 +343,7 @@
   [{user :user}]
   (if-let [full-user (get-user user)]
     (ok (select-keys full-user [:applicationFilters :foremanFilters :defaultFilter]))
-    (fail)))
+    (fail :error.user-not-found)))
 
 ;;
 ;; Change organization data:
