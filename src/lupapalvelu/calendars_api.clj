@@ -173,7 +173,7 @@
   {:parameters       [calendarId userId]
    :feature          :ajanvaraus
    :input-validators [(partial action/non-blank-parameters [:calendarId :userId])]
-   :user-roles       #{:authorityAdmin :authority}
+   :user-roles       #{:authority}
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
   [{user :user}]
   (let [calendar (get-calendar calendarId userId)]
@@ -213,7 +213,7 @@
       (ok :calendarId (disable-calendar userId orgId) :disabled true))))
 
 (defquery calendar-slots
-  {:user-roles       #{:authorityAdmin :authority}
+  {:user-roles       #{:authority}
    :parameters       [calendarId year week]
    :input-validators [(partial action/non-blank-parameters [:calendarId :year :week])]
    :feature          :ajanvaraus
@@ -233,7 +233,7 @@
        (every? number? (:reservationTypes m))))
 
 (defcommand create-calendar-slots
-  {:user-roles       #{:authorityAdmin :authority}
+  {:user-roles       #{:authority}
    :parameters       [calendarId slots]
    :input-validators [(partial action/number-parameters [:calendarId])
                       (partial action/vector-parameter-of :slots valid-frontend-slot?)]
@@ -249,7 +249,7 @@
        (ok :result)))
 
 (defcommand update-calendar-slot
-  {:user-roles       #{:authorityAdmin :authority}
+  {:user-roles       #{:authority}
    :parameters       [slotId reservationTypeIds]
    :input-validators [(partial action/number-parameters [:slotId])
                       (partial action/vector-parameters [:reservationTypeIds])]
@@ -263,7 +263,7 @@
     (ok :result (put-command (str "reservationslots/" slotId) {:capacity 1 :reservationTypeIds reservationTypeIds}))))
 
 (defcommand delete-calendar-slot
-  {:user-roles       #{:authorityAdmin :authority}
+  {:user-roles       #{:authority}
    :parameters       [slotId]
    :input-validators [(partial action/number-parameters [:slotId])]
    :feature          :ajanvaraus
@@ -289,7 +289,7 @@
                                                   :organization    (usr/authority-admins-organization-id user)})))
 
 (defquery reservation-types-for-organization
-  {:user-roles       #{:authorityAdmin :authority}
+  {:user-roles       #{:authority}
    :parameters       [organizationId]
    :input-validators [(partial action/non-blank-parameters [:organizationId])]
    :feature          :ajanvaraus

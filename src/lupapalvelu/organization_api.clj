@@ -416,7 +416,7 @@
   {:description      "Returns selected operations of all the organizations who have a scope with the given municipality.
                  If a \"permitType\" parameter is given, returns selected operations for only that organization (the municipality + permitType combination)."
    :parameters       [:municipality]
-   :user-roles       #{:applicant :authority :authorityAdmin}
+   :user-roles       #{:applicant :authority}
    :input-validators [(partial non-blank-parameters [:municipality])]}
   [{{:keys [municipality permitType]} :data}]
   (when-let [organizations (org/resolve-organizations municipality permitType)]
@@ -935,14 +935,14 @@
   {:description      "Organization tags for the application. For statement
   givers, only the organization statement givers are authorized."
    :user-authz-roles #{:statementGiver}
-   :user-roles       #{:authorityAdmin :authority :applicant}
+   :user-roles       #{:authority :applicant}
    :pre-checks       [org/statement-giver-in-organization]}
   [{organization :organization}]
   (ok :tags (:tags @organization)))
 
 (defquery get-organization-areas
   {:user-authz-roles #{:statementGiver}
-   :user-roles       #{:authorityAdmin :authority}}
+   :user-roles       #{:authority}}
   [{{:keys [orgAuthz] :as user} :user}]
   (if (seq orgAuthz)
     (let [organization-areas (mongo/select
