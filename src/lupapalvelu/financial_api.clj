@@ -9,7 +9,7 @@
   {:parameters [:email]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :user-roles #{:admin :authorityAdmin}
+   :permissions [{:required [:users/create-financial-handler]}]
    :feature :financial}
   [{user-data :data user :user}]
     (financial/create-financial-handler user-data user))

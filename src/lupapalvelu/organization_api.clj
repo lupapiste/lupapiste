@@ -852,7 +852,7 @@
 (defcommand update-organization-name
   {:description      "Updates organization name for different languages. 'name' should be a map with lang-id as key and name as value."
    :parameters       [org-id name]
-   :user-roles       #{:authorityAdmin :admin}
+   :permissions [{:required [:organization/update-name]}]
    :pre-checks       [(fn [{{org-id :org-id} :data user :user}]
                         (when-not (or (usr/admin? user)
                                       (= org-id (usr/authority-admins-organization-id user)))
@@ -868,7 +868,7 @@
 
 (defcommand pseudo-update-organization-name
   {:description "Pseudo command for differentiating impersonation."
-   :user-roles  #{:authorityAdmin :admin}}
+   :permissions [{:required [:organization/update-name]}]}
   [_])
 
 (defquery available-backend-systems
@@ -920,8 +920,8 @@
       (fail :warning.tags.removing-from-applications :applications tag-applications))))
 
 (defquery get-organization-tags
-  {:user-roles #{:authorityAdmin :authority}}
-  [{{:keys [orgAuthz] :as user} :user}]
+  {:permissions [{:required [:organization/tags]}]}
+  [{{:keys [orgAuthz]} :user}]
   (if (seq orgAuthz)
     (let [organization-tags (mongo/select
                               :organizations

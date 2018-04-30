@@ -93,7 +93,7 @@
     (ok :user (usr/get-user-by-email email))))
 
 (defquery users-for-datatables
-  {:user-roles #{:admin :authorityAdmin}}
+  {:permissions [{:required [:users/admin-query]}]}
   [{caller :user {params :params} :data}]
   (ok :data (usr/users-for-datatables caller params)))
 
@@ -147,7 +147,7 @@
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
    :notified         true
-   :user-roles       #{:admin :authorityAdmin}}
+   :permissions      [{:required [:users/create]}]}
   [{user-data :data caller :user}]
   (uu/create-and-notify-user caller user-data))
 
@@ -219,9 +219,9 @@
     (fail :error.user.trying-to-update-verified-person-id)))
 
 (defcommand update-user
-  {:user-roles       #{:applicant :authority :authorityAdmin :admin :financialAuthority}
-   :input-validators [validate-updatable-user]
-   :pre-checks       [validate-person-id-update-is-allowed!]}
+  {:input-validators [validate-updatable-user]
+   :pre-checks       [validate-person-id-update-is-allowed!]
+   :permissions      [{:required [:users/update]}]}
   [{caller :user {person-id :personId :as user-data} :data :as command}]
   (let [email     (ss/canonize-email (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
@@ -462,7 +462,7 @@
 (defcommand change-passwd
   {:parameters       [oldPassword newPassword]
    :input-validators [(partial action/non-blank-parameters [:oldPassword :newPassword])]
-   :user-roles       #{:applicant :authority :authorityAdmin :admin :financialAuthority}}
+   :user-roles       (disj roles/all-authenticated-user-roles :oirAuthority)}
   [{{user-id :id :as user} :user}]
   (let [user-data (mongo/by-id :users user-id)]
     (if (security/check-password oldPassword (-> user-data :private :password))
@@ -671,7 +671,7 @@
 ;;
 
 (defquery user-attachments
-  {:user-roles #{:applicant :authority :authorityAdmin :admin}}
+  {:user-roles #{:applicant :authority}}
   [{user :user}]
   (if-let [current-user (usr/get-user-by-id (:id user))]
     (ok :attachments (:attachments current-user))
@@ -826,7 +826,7 @@
   [_])
 
 (defquery calendars-enabled
-  {:user-roles #{:authority :authorityAdmin :applicant}
+  {:user-roles #{:authority :applicant}
    :pre-checks [(fn [_]
                   (when-not (and (env/value :ajanvaraus :host) (env/value :ajanvaraus :username) (env/value :ajanvaraus :password))
                     unauthorized))
