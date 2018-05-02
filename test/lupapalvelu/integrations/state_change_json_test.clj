@@ -157,15 +157,18 @@
                                                       {:name "tyonjohtajan-nimeaminen-v2" :id "57603a99edf02d7047774554"}])
         change-report (mjson/state-change-data app-with-ops "submitted")
         operations (:operations change-report)]
-    (fact "primary operation contains the flag :building"
-      (contains? (first operations) :building) => true)
-    (fact "primary operation does not contain the flag :building"
-      (contains? (first operations) :structure) => false)
-    (fact "first secondary operation does not contain the flag :building"
-      (contains? (second operations) :building) => false)
-    (fact "first secondary operation contains the flag :structure"
-      (contains? (second operations) :structure) => true)
-    (fact "last operations does not contain either :building or structure"
-      (contains? (last operations) :building) => false)
-    (fact "first secondary operation contains the flag :structure"
-      (contains? (last operations) :structure) => false)))
+    (facts "primary operation (pientalo)"
+      (fact "contains the flag :building"
+        (contains? (first operations) :building) => true)
+      (fact "does not contain the flag :structure"
+        (contains? (first operations) :structure) => false))
+    (facts "mainoslaite"
+      (fact "does not contain the flag :building"
+        (contains? (second operations) :building) => false)
+      (fact "contains the flag :structure"
+        (contains? (second operations) :structure) => true)
+    (facts "työnjohtajan nimeäminen"
+      (fact "does not contain :building"
+        (contains? (last operations) :building) => false))
+      (fact "does not contain :structure"
+        (contains? (last operations) :structure) => false))))
