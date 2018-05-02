@@ -126,6 +126,8 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.isRejected = hasRole && self.approvalModel.isRejected;
   self.isSummaryRejected = hasRole && self.approvalModel.isSummaryRejected;
   self.details = self.approvalModel.details;
+  self.editNote = ko.observable(self.docModel.editNote());
+  self.sentNote = ko.observable(self.docModel.sentNote());
 
   self.approveTestId = self.docModel.approvalTestId( [], APPROVE );
   self.rejectTestId = self.docModel.approvalTestId( [], REJECT );
@@ -142,6 +144,8 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.reject  = _.partial( self.approvalModel.changeStatus, false );
   self.approve = _.partial( self.approvalModel.changeStatus, true );
 
+  self.showEditNote = ko.observable(self.docModel.isPostVerdictEdited());
+  self.showSentNote = ko.observable(self.docModel.isPostVerdictSent());
 
   self.canBeDisabled = self.disposedPureComputed(function () {
     return self.auth.ok("set-doc-status");
@@ -220,6 +224,8 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     ajax.command("send-doc-updates", {id: self.docModel.appId, docId: self.docModel.docId})
       .success(function() {
         self.docModel.docPostVerdictEdit = false;
+        self.showSentNote(self.docModel.isPostVerdictSent());
+        self.sentNote(self.docModel.sentNote());
         self.docModel.redraw();
       })
       .error(function(e) {
@@ -229,8 +235,9 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   };
 
   self.closeEdit = function () {
-    console.log("close");
     self.docModel.docPostVerdictEdit = false;
+    self.showEditNote(self.docModel.isPostVerdictEdited());
+    self.editNote(self.docModel.editNote());
     self.docModel.redraw();
   };
 

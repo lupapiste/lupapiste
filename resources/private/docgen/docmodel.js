@@ -171,6 +171,35 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.approvalModel = new LUPAPISTE.DocumentApprovalModel(self);
   self.isApproved = self.approvalModel.isApproved;
 
+  self.isPostVerdictEdited = function () {
+    return self.meta && _.get( self.meta, "_post_verdict_edit.timestamp") > 0;
+  };
+
+  self.isPostVerdictSent = function () {
+    return self.meta && _.get( self.meta, "_post_verdict_sent.timestamp") > 0;
+  };
+
+  self.noteText = function(noteData, type) {
+    var text = null;
+    if(noteData && noteData.user && noteData.timestamp) {
+      text = sprintf("%s %s%s %s %s",
+        loc(["document", type]),
+        moment(noteData.timestamp).format("D.M.YYYY HH:mm"),
+        ":",
+        noteData.user.firstName,
+        noteData.user.lastName);
+    }
+    return text;
+  };
+
+  self.editNote = function () {
+    return self.noteText(_.get( self.meta, "_post_verdict_edit"), "edited");
+  };
+
+  self.sentNote = function () {
+    return self.noteText(_.get( self.meta, "_post_verdict_sent"), "sent");
+  };
+
   //----------------------------------------------------------------------
 
   // Returns id if we are in the testing mode, otherwise null.

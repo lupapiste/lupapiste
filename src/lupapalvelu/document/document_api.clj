@@ -13,8 +13,11 @@
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.pate.verdict :as pate-verdict]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp]
             [clojure.set :as set]))
 
 
@@ -163,19 +166,28 @@
                       doc-disabled-validator
                       validate-created-after-verdict]}
   [command]
-  (doc-persistence/update! command doc updates "documents"))
+  (let [[path _] (first updates)
+        path-prefix (first (ss/split path #"\."))]
+    (if (= "rakennuksenOmistajat" path-prefix)
+      (fail :error.document-not-editable-in-current-state)
+      (do
+        (doc-persistence/set-edited-timestamp command doc)
+        (doc-persistence/update! command doc updates "documents")))))
 
 (defcommand send-doc-updates
   {:parameters       [id docId]
    :categories       #{:documents}
-   :input-validators [(partial action/non-blank-parameters [:id :docId])]
+   :input-validators [(partial action/non-blank-parameters [:id])]
    :contexts         [document-context]
    :permissions      document-edit-permissions
    :pre-checks       [(editable-by-state? (set/union states/update-doc-states [:verdictGiven]))
                       doc-disabled-validator
                       validate-created-after-verdict]}
-  [command]
-  (println "send"))
+  [{:keys [organization application] :as command}]
+  (when (org/krysp-integration? @organization (:permitType application))
+    (krysp/verdict-as-kuntagml command (pate-verdict/latest-published-pate-verdict command)))
+  (doc-persistence/set-sent-timestamp command docId)
+  (ok))
 
 (defcommand update-task
   {:parameters       [id doc updates]

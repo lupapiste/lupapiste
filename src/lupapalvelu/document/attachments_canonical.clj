@@ -177,12 +177,13 @@
     (not-empty canonical-attachments)))
 
 (defn verdict-attachment-canonical [lang verdict begin-of-link]
-  (let [attachment (:verdict-attachment verdict)
-        type-id (name (get-in attachment [:type :type-id]))
-        type-group (name (get-in attachment [:type :type-group]))
-        attachment-title (i18n/localize lang (ss/join "." ["attachmentType" type-group type-id]))
-        use-http-links? (re-matches #"https?://.*" begin-of-link)
-        link (str begin-of-link (if use-http-links? (attachment-url attachment) (:filename attachment)))
-        file-id (:fileId attachment)
-        file-name (:filename attachment)]
-    (get-Liite attachment-title link attachment type-id file-id file-name (:version attachment))))
+  (when (some? (:verdict-attachment verdict))
+    (let [attachment (:verdict-attachment verdict)
+          type-id (name (get-in attachment [:type :type-id]))
+          type-group (name (get-in attachment [:type :type-group]))
+          attachment-title (i18n/localize lang (ss/join "." ["attachmentType" type-group type-id]))
+          use-http-links? (re-matches #"https?://.*" begin-of-link)
+          link (str begin-of-link (if use-http-links? (attachment-url attachment) (:filename attachment)))
+          file-id (:fileId attachment)
+          file-name (:filename attachment)]
+      (get-Liite attachment-title link attachment type-id file-id file-name (:version attachment)))))
