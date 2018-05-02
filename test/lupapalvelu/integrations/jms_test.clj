@@ -33,7 +33,7 @@
             (Thread/sleep 10)                               ; non-deterministic wait for message delivery
             @test-atom => "test1")
           (fact "wrong type -> exception"
-            (prod {:foo 1}) => (throws ClassCastException))))
+            (prod {:foo 1}) => (throws IllegalArgumentException))))
       (fact "Nippy producer can be also used"
         (let [nippy (create-nippy-producer "nippy.queue")]
           nippy => fn?
