@@ -128,6 +128,16 @@ If during lost connection we try to send a message to producer, it will block un
 
 So the client should have some kind of recovery for these situations.
 
+## Message redelivery
+
+If broker's message delivery is unsuccessful (client-side exception for example), message is redelivered 10 times. If message can't be handled successfully, the broker will throw message to DLQ (Dead Letter Queue).
+
+From DLQ, messages can be rerouted to other queue using management console UI (manual retry for example)
+
+Default setup does 10 redeliveries with delay of 0. Adding some redelivery delay for queues is couraged.
+
+More information about configuring from [Artemis docs](https://activemq.apache.org/artemis/docs/latest/undelivered-messages.html).
+
 
 # ActiveMQ Artemis server FAQ
 
