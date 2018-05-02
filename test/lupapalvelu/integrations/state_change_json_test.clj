@@ -109,9 +109,9 @@
                                                           (get-in old-building-manuaalinen-rakennusnumero
                                                                   [:data :manuaalinen_rakennusnro :value])]])))
      (building-not-present [data]
-       (let [ks (-> data :operations first keys set)]
-         (fact "building key not present"
-               (contains? ks :building) => false)))
+       (fact "building key not present"
+         (not-any? #(contains? (set (keys %)) :building) (:operations data)) => true))
+
      (run-test
        [app test-fn]
        (when-let [new-state (sm/next-state app)]
@@ -152,3 +152,24 @@
       (contains? operation-keys :building) => false)
     (fact "message for structure does contain :structure flag"
       (contains? operation-keys :structure) => true)))
+
+(fact "multiple operations in single application"
+  (let [app (app-with-docs [new-building-data])
+        app-with-ops (assoc app :state "open"
+                                :primaryOperation {:name "pientalo" :id "57603a99edf02d7047774554"}
+                                :secondaryOperations [{:name "mainoslaite" :id "57603a99edf02d7047774554"}
+                                                      {:name "tyonjohtajan-nimeaminen-v2" :id "57603a99edf02d7047774554"}])
+        change-report (mjson/state-change-data app-with-ops "submitted")
+        operations (:operations change-report)]
+    (fact "primary operation contains the flag :building"
+      (contains? (first operations) :building) => true)
+    (fact "primary operation does not contain the flag :building"
+      (contains? (first operations) :structure) => false)
+    (fact "first secondary operation does not contain the flag :building"
+      (contains? (second operations) :building) => false)
+    (fact "first secondary operation contains the flag :structure"
+      (contains? (second operations) :structure) => true)
+    (fact "last operations does not contain either :building or structure"
+      (contains? (last operations) :building) => false)
+    (fact "first secondary operation contains the flag :structure"
+      (contains? (last operations) :structure) => false)))
