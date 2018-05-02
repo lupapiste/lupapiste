@@ -61,7 +61,11 @@ Sonja rejects primary operation with note
   Reject with note and lose focus  rakennuksen-muuttaminen  rakennuksen-muuttaminen  Bad operation
 
 Sonja rejects kaytto with note
+  Click approve  kaytto
+  Sonja accordion negated  rakennuksen-muuttaminen
   Reject with note and save  kaytto  rakennuksen-muuttaminen-kaytto  Bad usage
+  # main + sub rejected, no OKs -> whole accordion rejected
+  Sonja accordion rejected  rakennuksen-muuttaminen
   Click approve  kaytto
   Reject note is  rakennuksen-muuttaminen-kaytto  Bad usage
   Reject with note but cancel  kaytto  rakennuksen-muuttaminen-kaytto  foobar

@@ -13,8 +13,8 @@ LUPAPISTE.ComponentBaseModel = function() {
     hub.send(service + "::" + event, data);
   };
 
-  self.addHubListener = function( event, fn ) {
-    hubSubscriptions.push(hub.subscribe( event, fn ));
+  self.addHubListener = function( filter, fn ) {
+    hubSubscriptions.push(hub.subscribe( filter, fn ));
   };
 
   self.addEventListener = function(service, event, fn) {

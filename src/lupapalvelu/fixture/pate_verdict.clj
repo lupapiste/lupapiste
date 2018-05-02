@@ -47,6 +47,41 @@
                                         :paatosteksti          "Ver Dict"
                                         :upload                true
                                         :paloluokka            true}
+                            :inclusions ["appeal"
+                                         "verdict-dates"
+                                         "vss-luokka"
+                                         "bulletinOpDescription"
+                                         "purpose"
+                                         "giver"
+                                         "complexity"
+                                         "plans"
+                                         "autopaikat"
+                                         "tj"
+                                         "tj-included"
+                                         "link-to-settings"
+                                         "verdict-code"
+                                         "complexity-text"
+                                         "extra-info"
+                                         "iv-tj"
+                                         "conditions"
+                                         "rights"
+                                         "iv-tj-included"
+                                         "language"
+                                         "erityis-tj-included"
+                                         "vv-tj-included"
+                                         "reviews"
+                                         "paatosteksti"
+                                         "vastaava-tj"
+                                         "deviations"
+                                         "neighbors"
+                                         "vastaava-tj-included"
+                                         "link-to-settings-no-label"
+                                         "vv-tj"
+                                         "upload"
+                                         "statements"
+                                         "erityis-tj"
+                                         "add-condition"
+                                         "paloluokka"]
                             :settings  {:verdict-code ["evatty" "hyvaksytty" "myonnetty" "ehdollinen" "annettu-lausunto"]
                                         :foremen      ["vastaava-tj"]
                                         :date-deltas  {:julkipano     {:delta 2 :unit "days"}
@@ -116,7 +151,15 @@
                                    :verdict-code "hyvaksytty",
                                    :language "fi",
                                    :reviews [],
-                                   :paatosteksti "\nVerdict given\n"},
+                                   :paatosteksti "\nVerdict given\n"}
+                            :inclusions ["verdict-dates"
+                                         "bulletinOpDescription"
+                                         "giver"
+                                         "link-to-settings"
+                                         "verdict-code"
+                                         "language"
+                                         "paatosteksti"
+                                         "upload"]
                             :settings {:verdict-code ["evatty"
                                                       "myonnetty"
                                                       "osittain-myonnetty"

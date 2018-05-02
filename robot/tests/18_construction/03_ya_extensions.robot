@@ -72,6 +72,8 @@ Pena inputs proper extension dates returns to the original application
   Input text with jQuery  input.hasDatepicker[data-docgen-path=tyoaika-alkaa-pvm]  20.09.2016
   Check accordion text  tyo-aika-for-jatkoaika  LUPA-AIKA  20.9.2016 \u2013 10.10.2016
   Follow link permit
+  Element should be visible by test id  permit-subtype-text
+  Permit subtype is  Työlupa
 
 Pena now sees extensions table
   Open tab  tasks
@@ -171,6 +173,7 @@ Create extension
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
   Set dates  ${start}  ${end}
   Run keyword if  ${follow}  Follow link permit
+  Run keyword if  ${follow}  Element should be visible by test id  permit-subtype-text
 
 
 Follow link permit

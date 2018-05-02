@@ -82,8 +82,6 @@ var LUPAPISTE = LUPAPISTE || {};
           }
 
           page$.addClass("visible");
-          // Set focus on the first field
-          util.autofocus(page$);
         }
         window.scrollTo(0, 0);
         self.currentPage = pageId;

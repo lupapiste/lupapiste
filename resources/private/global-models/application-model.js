@@ -63,6 +63,18 @@ LUPAPISTE.ApplicationModel = function() {
     return !self.permitSubtype() && !_.isEmpty(self.permitSubtypes());
   });
 
+  self.titleForPartiesOrSupervisor = ko.pureComputed(function() {
+    return util.getIn(self, ["primaryOperation", "name"]) === "tyonjohtajan-nimeaminen-v2"
+      ? "application.tabSupervisorInformation"
+      : "application.tabParties";
+  });
+
+  self.descForPartiesOrSupervisor = ko.pureComputed(function() {
+    return util.getIn(self, ["primaryOperation", "name"]) === "tyonjohtajan-nimeaminen-v2"
+      ? "help.supervisorInformationDesc"
+      : "help." + self.permitType() + ".PartiesDesc";
+  });
+
   self.operationsCount = ko.observable();
   self.applicant = ko.observable();
   self.creator = ko.observable();
@@ -490,6 +502,9 @@ LUPAPISTE.ApplicationModel = function() {
     var nonApproved = _(docgen.nonApprovedDocuments()).filter(function(docModel) {
         return docModel.schema.info.subtype === "suunnittelija" && !docModel.docDisabled;
       })
+      .filter(function(designerDoc) {
+        return !self.inPostVerdictState() ? true : designerDoc.schema.info["post-verdict-party"];
+      })
       .map(function(docModel) {
         var title = loc([docModel.schemaName, "_group_label"]);
         var accordionService = lupapisteApp.services.accordionService;
@@ -508,6 +523,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   hub.subscribe("update-doc-success", checkForNonApprovedDesigners);
   hub.subscribe("application-model-updated", checkForNonApprovedDesigners);
+  hub.subscribe({eventType:"approval-status", broadcast: true}, _.debounce(checkForNonApprovedDesigners));
 
   self.approveApplication = function() {
     if (self.stateChanged()) {
@@ -628,11 +644,16 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.canSubscribe = function(model) {
-    return model.role() !== "statementGiver" &&
-           lupapisteApp.models.currentUser &&
-           (lupapisteApp.models.currentUser.isAuthority() || lupapisteApp.models.currentUser.id() ===  model.id()) &&
-           lupapisteApp.models.applicationAuthModel.ok("subscribe-notifications") &&
-           lupapisteApp.models.applicationAuthModel.ok("unsubscribe-notifications");
+    var user = lupapisteApp.models.currentUser;
+    return model.role() !== "statementGiver"
+        && user
+        && (user.isAuthority()
+          || user.id() ===  model.id()
+          || (user.isCompanyUser()
+            && user.company.id() === model.id()
+            && user.company.role() === "admin"))
+        && lupapisteApp.models.applicationAuthModel.ok("subscribe-notifications")
+        && lupapisteApp.models.applicationAuthModel.ok("unsubscribe-notifications");
   };
 
   self.manageSubscription = function(command, model) {

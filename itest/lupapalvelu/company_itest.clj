@@ -341,12 +341,12 @@
              (query kaino :user-company-locked) => ok?)
        (fact "Companies listing no longer includes Solita"
          (:companies (query pena :companies))
-         => (just [{:id "esimerkki"
-                    :name "Esimerkki Oy"
-                    :y "7208863-8"
+         => (just [{:id       "esimerkki"
+                    :name     "Esimerkki Oy"
+                    :y        "7208863-8"
                     :address1 "Merkintie 88"
-                    :zip "12345"
-                    :po "Humppila"}]))
+                    :zip      "12345"
+                    :po       "Humppila"}]))
        (fact "Erkki updates Esimerkki company contact info"
          (command erkki :company-update
                   :company "esimerkki"
@@ -355,29 +355,31 @@
                             :contactPo      "Town"}) => ok?)
        (fact "Companies listing changes accordingly"
          (:companies (query pena :companies))
-         => (just [{:id "esimerkki"
-                    :name "Esimerkki Oy"
-                    :y "7208863-8"
+         => (just [{:id       "esimerkki"
+                    :name     "Esimerkki Oy"
+                    :y        "7208863-8"
                     :address1 "Street"
-                    :zip "88888"
-                    :po "Town"}]))
+                    :zip      "88888"
+                    :po       "Town"}]))
        (fact "Company is not authed to new applications"
-         (let [{auth :auth} (create-application kaino
-                                                :propertyId sipoo-property-id
-                                                :address "Sanyuanqiao") => ok?]
-               (count auth) => 1
-               (map :role auth) => ["writer"]))
+         (let [{auth :auth}
+               (create-application kaino
+                                   :propertyId sipoo-property-id
+                                   :address "Sanyuanqiao") => ok?]
+           (count auth) => 1
+           (:type auth) => nil
+           (map :role auth) => ["writer"]))
        (fact "Company can be queried"
              (query kaino :company :company "solita" :users true) => ok?)
        (fact "Company cannot be updated"
-             (command kaino :company-update :company "solita" :updates {:po "Beijing"})
+         (command kaino :company-update :company "solita" :updates {:po "Beijing"})
              => locked-err)
        (fact "Users cannot be added to the company"
              (command kaino :company-add-user :firstName "Hii" :lastName "Hoo"
                       :email "hii.hoo@example.com" :admin true :submit true)
              => locked-err)
        (let [{solitans :users} (query kaino :company :company "solita" :users true)
-             {foo-id :id} (util/find-by-key :email "foo@example.com" solitans)]
+             {foo-id :id}      (util/find-by-key :email "foo@example.com" solitans)]
          (fact "User details cannot be changed"
                (command kaino :company-user-update
                         :user-id foo-id
@@ -391,58 +393,76 @@
            (fact "Login not possible for dummy"
              (let [{body :body :as login} (-> (str (server-address) "/api/login")
                                               (http-post {:form-params {:username "foo@example.com" :password "foofaafoo"}
-                                                        :as :json}))]
+                                                          :as          :json}))]
                body => fail?
                (:text body) => "error.login"
                login => http200?))
            (fact "User is notified via email"
              (let [email (last-email)
-                   body (get-in email [:body :plain])]
+                   body  (get-in email [:body :plain])]
                email => truthy
                (:subject email) => (contains "Yritystilist\u00e4 poisto")
                body => (contains #"Solita Oy Yritystilin.+on poistanut")
                (fact "register link exists"
                  body => (contains #"#!/register"))))))
        (fact "Unlock company"
-             (command admin :company-lock :company "solita" :timestamp "unlock") => ok?)
+         (command admin :company-lock :company "solita" :timestamp 0) => ok?)
        (fact "Locked pseudo-query fails"
-             (query kaino :user-company-locked) => fail?)
+         (query kaino :user-company-locked) => fail?)
+       (fact "Solita is listed in the companies query"
+         (:companies (query pena :companies))
+         => (just [{:id       "esimerkki"
+                    :name     "Esimerkki Oy"
+                    :y        "7208863-8"
+                    :address1 "Street"
+                    :zip      "88888"
+                    :po       "Town"}
+                   {:id       "solita"
+                    :name     "Solita Oy"
+                    :y        "1060155-5"
+                    :address1 "\u00c5kerlundinkatu 11"
+                    :zip      "33100"
+                    :po       "Tampere"}] :in-any-order))
        (fact "Company is authed to new applications"
-             (let [{auth :auth} (create-application kaino
-                                         :propertyId sipoo-property-id
-                                         :address "Dongzhimen") => ok?]
-               (map :type auth) => ["company"]))
+         (let [{auth :auth}
+               (create-application kaino
+                                   :propertyId sipoo-property-id
+                                   :address "Dongzhimen") => ok?]
+           (map :type auth) => ["company"]))
        (fact "Company can now be updated"
-             (command kaino :company-update :company "solita" :updates {:po "Beijing"}) => ok?)
+         (command kaino :company-update :company "solita" :updates {:po "Beijing"}) => ok?)
        (fact "Nuking is not an option for unlocked company"
-             (command kaino :company-user-delete-all) => (contains {:text "error.company-not-locked"}))
+         (command kaino :company-user-delete-all) => (contains {:text "error.company-not-locked"}))
        (fact "Admin locks Solita in the future"
              (command admin :company-lock :company "solita" :timestamp (+ (now) 10000)) => ok?)
        (fact "Company can now also be updated"
-             (command kaino :company-update :company "solita" :updates {:po "Chaoyang"}) => ok?)
+         (command kaino :company-update :company "solita" :updates {:po "Chaoyang"}) => ok?)
        (fact "Erkki invites Teppo to Esimerkki"
              (command erkki :company-invite-user :firstName "Teppo" :lastName "Nieminen"
                       :email "teppo@example.com" :admin false :submit true))
        (let [teppo-token (token-from-email "teppo@example.com" (last-email))]
          (facts "Kaino invites Pena and Unknown to Solita"
-                (let [_ (command kaino :company-invite-user :firstName "Pena" :lastName "Panaani"
-                                 :email "pena@example.com" :admin false :submit true) => ok?
-                      pena-token (token-from-email "pena@example.com" (last-email))
-                      _ (command kaino :company-add-user :firstName "Bu" :lastName "Zhi Dao"
-                                 :email "unknown@example.com" :admin false :submit true) => ok?
-                      unknown-token (token-from-email "unknown@example.com" (last-email))]
+           (let [_             (command kaino :company-invite-user
+                                        :firstName "Pena" :lastName "Panaani"
+                                        :email "pena@example.com" :admin false :submit true)
+                 =>            ok?
+                 pena-token    (token-from-email "pena@example.com" (last-email))
+                 _             (command kaino :company-add-user :firstName "Bu" :lastName "Zhi Dao"
+                                        :email "unknown@example.com" :admin false :submit true)
+                 =>            ok?
+                 unknown-token (token-from-email "unknown@example.com" (last-email))]
                   (fact "Admin locks Solita again"
                         (command admin :company-lock :company "solita" :timestamp (- (now) 10000)) => ok?)
                   (fact "Kaino nukes locked company"
                         (command kaino :company-user-delete-all) => ok?)
                   (fact "Pena's invitation has been rescinded"
-                        (http-token-call pena-token {:ok true}) => (contains {:status 404}))
+                    (http-token-call pena-token {:ok true}) => (contains {:status 404}))
                   (fact "Pena can still login"
                         (command pena :login :username "pena" :password "pena") => ok?)
                   (fact "Unknown's invitation has been rescinded"
-                        (http-token-call unknown-token {:ok true}) => (contains {:status 404}))))
+                    (http-token-call unknown-token {:ok true}) => (contains {:status 404}))))
          (fact "Teppo's invitation is untouched"
-               (http-token-call teppo-token {:ok true}) => (contains {:status 200}))
+           (http-token-call teppo-token {:ok true}) => (contains {:status 200}))
          (fact "Erkki can still login"
                (command erkki :login :username "erkki@example.com" :password "esimerkki") => ok?))
        (fact "Kaino cannot login"

@@ -26,7 +26,11 @@
   "Published settings depency of a template"
   (merge PateTerm {:selected sc/Bool}))
 
-(def review-type (apply sc/enum (map name (keys shared/review-type-map))))
+(def review-type (->> (concat shared/review-types
+                              shared/ya-review-types)
+                      distinct
+                      (map name)
+                      (apply sc/enum)))
 
 (defschema PateSavedSettings
   {:modified ssc/Timestamp
@@ -56,14 +60,16 @@
           :deleted                     sc/Bool
           (sc/optional-key :draft)     sc/Any ;; draft is published data on publish.
           :modified                    ssc/Timestamp
-          (sc/optional-key :published) {:published ssc/Timestamp
-                                        :data      sc/Any
-                                        :settings  PatePublishedTemplateSettings}}))
+          (sc/optional-key :published) {:published  ssc/Timestamp
+                                        :data       sc/Any
+                                        :inclusions [sc/Str]
+                                        :settings   PatePublishedTemplateSettings}}))
 
 (defschema PateSavedVerdictTemplates
-  {:templates [PateSavedTemplate]
-   (sc/optional-key :settings)  {(sc/optional-key :r) PateSavedSettings
-                                 (sc/optional-key :p) PateSavedSettings}})
+  {:templates                  [PateSavedTemplate]
+   (sc/optional-key :settings) {(sc/optional-key :r)  PateSavedSettings
+                                (sc/optional-key :p)  PateSavedSettings
+                                (sc/optional-key :ya) PateSavedSettings}})
 
 ;; Phrases
 

@@ -38776,7 +38776,7 @@ div.summary-button-bar {
 .feature:not(.feature--no-border) {
   border: orange dotted medium !important;
   border-radius: 10px;
-  min-height: 44px;
+  min-height: 42px;
 }
 
 .feature:not(.feature--no-border) .legend {
