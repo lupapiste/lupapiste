@@ -158,17 +158,20 @@
         change-report (mjson/state-change-data app-with-ops "submitted")
         operations (:operations change-report)]
     (facts "primary operation (pientalo)"
-      (fact "contains the flag :building"
-        (contains? (first operations) :building) => true)
-      (fact "does not contain the flag :structure"
-        (contains? (first operations) :structure) => false))
+      (let [pientalo (first operations)]
+        (fact "contains the flag :building"
+          (contains? pientalo :building) => true)
+        (fact "does not contain the flag :structure"
+          (contains? pientalo :structure) => false)))
     (facts "mainoslaite"
-      (fact "does not contain the flag :building"
-        (contains? (second operations) :building) => false)
-      (fact "contains the flag :structure"
-        (contains? (second operations) :structure) => true)
+      (let [mainoslaite (second operations)]
+        (fact "does not contain the flag :building"
+          (contains? mainoslaite :building) => false)
+        (fact "contains the flag :structure"
+          (contains? mainoslaite :structure) => true))
     (facts "työnjohtajan nimeäminen"
-      (fact "does not contain :building"
-        (contains? (last operations) :building) => false))
-      (fact "does not contain :structure"
-        (contains? (last operations) :structure) => false))))
+      (let [tyonjohtaja (last operations)]
+        (fact "does not contain :building"
+          (contains? tyonjohtaja :building) => false)
+        (fact "does not contain :structure"
+          (contains? tyonjohtaja :structure) => false))))))
