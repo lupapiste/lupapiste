@@ -168,10 +168,10 @@
         (fact "does not contain the flag :building"
           (contains? mainoslaite :building) => false)
         (fact "contains the flag :structure"
-          (contains? mainoslaite :structure) => true))
+          (contains? mainoslaite :structure) => true)))
     (facts "työnjohtajan nimeäminen"
       (let [tyonjohtaja (last operations)]
         (fact "does not contain :building"
           (contains? tyonjohtaja :building) => false)
         (fact "does not contain :structure"
-          (contains? tyonjohtaja :structure) => false))))))
+          (contains? tyonjohtaja :structure) => false)))))
