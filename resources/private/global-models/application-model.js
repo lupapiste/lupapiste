@@ -644,11 +644,16 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.canSubscribe = function(model) {
-    return model.role() !== "statementGiver" &&
-           lupapisteApp.models.currentUser &&
-           (lupapisteApp.models.currentUser.isAuthority() || lupapisteApp.models.currentUser.id() ===  model.id()) &&
-           lupapisteApp.models.applicationAuthModel.ok("subscribe-notifications") &&
-           lupapisteApp.models.applicationAuthModel.ok("unsubscribe-notifications");
+    var user = lupapisteApp.models.currentUser;
+    return model.role() !== "statementGiver"
+        && user
+        && (user.isAuthority()
+          || user.id() ===  model.id()
+          || (user.isCompanyUser()
+            && user.company.id() === model.id()
+            && user.company.role() === "admin"))
+        && lupapisteApp.models.applicationAuthModel.ok("subscribe-notifications")
+        && lupapisteApp.models.applicationAuthModel.ok("unsubscribe-notifications");
   };
 
   self.manageSubscription = function(command, model) {
