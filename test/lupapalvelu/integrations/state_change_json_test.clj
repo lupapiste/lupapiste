@@ -51,17 +51,13 @@
 (def new-structure-data
   {:id "foo-structure"
    :schema-info {:op {:id "57603a99edf02d7047774554"
-                      :name "Aita",
-                      :description nil,
+                      :name "Aita"
+                      :description nil
                       :created 1505822832171}
                  :name "kaupunkikuvatoimenpide-ei-tunnusta"}
-   :data {:rakennuksenOmistajat {:0 {}}
-          :varusteet {}
-          :verkostoliittymat {}
-          :huoneistot {:0 {}}
-          :tunnus {:value "Tunnus"}
-          :mitat {}
-          :valtakunnallinenNumero {:value "123"}}})
+   :data {:kokonaisala {:value "4"}
+          :kayttotarkoitus {:value "Aallonmurtaja"}
+          :kuvaus {:value "text"}}})
 
 (defn app-with-docs [documents]
   (let [location [444444.0 6666666.0]
