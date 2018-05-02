@@ -11,6 +11,9 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.states :as states]))
 
+(testable-privates lupapalvelu.application-search
+                   parse-search-term)
+
 (facts "operation-names"
   (operation-names "bil") => ["auto-katos" "kiinteistonmuodostus"]
   (operation-names "grilli") => ["auto-katos"]
@@ -149,7 +152,7 @@
 (facts "Building ID search"
   (make-text-query "123456001M") => {:buildings.nationalId "123456001M"})
 
-(fact "Should make event quyery with correct event type"
+(fact "Should make event query with correct event type"
       (make-query {} {:event {:eventType ["warranty-period-end"], :start 123, :end 134}} {})
        => {"$and" [{"$and" [{:permitType {"$ne" "ARK"} :state {"$ne" "canceled"}} {"$or" [{:state {"$ne" "draft"}} {:organization {"$nin" ()}}]}]}
                   {"$and" [{:warrantyEnd {"$gte" 123, "$lt" 134}}]}]})
@@ -202,3 +205,32 @@
     (provided
       (organization/earliest-archive-enabled-ts ["091-R"]) => 1451599200000
       (organization/earliest-archive-enabled-ts ["092-R"]) => 1485900000000)))
+
+(facts "parse-search-term"
+  (fact "No municipality"
+    (parse-search-term "hello, world")
+    => {:term           "hello, world"
+        :municipalities #{}})
+  (fact "Just the municipality part"
+    (parse-search-term "Vantaa")
+    => {:term           ""
+        :municipalities #{"092"}})
+  (fact "Just the municipality part: one municipality"
+    (parse-search-term "Vantaa")
+    => {:term           ""
+        :municipalities #{"092"}})
+  (fact "Just the municipality part: multiple municipalities"
+    (parse-search-term "Ii")
+    => {:term           ""
+        ;; Ii, Iisalmi, Iitti
+        :municipalities #{"139" "140" "142"}})
+  (fact "Both parts"
+    (parse-search-term "Dongdaqiao Lu 88, Hu")
+    => {:term           "Dongdaqiao Lu 88"
+        ;; Huittinen, Humppila
+        :municipalities #{"102" "103"}})
+  (fact "Preceding whitespace is not mandatory"
+    (parse-search-term "Dongdaqiao Lu 88,Hum")
+    => {:term           "Dongdaqiao Lu 88"
+        ;; Humppila
+        :municipalities #{"103"}}))
