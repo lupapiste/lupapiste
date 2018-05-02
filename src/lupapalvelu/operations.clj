@@ -949,6 +949,7 @@
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
                                  :asianhallinta false
+                                 :structure true
                                  :state-graph-resolver state-machine-resolver}
    :muu-rakentaminen            {:schema "kaupunkikuvatoimenpide"
                                  :permit-type permit/R
@@ -961,6 +962,7 @@
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
                                  :asianhallinta false
+                                 :structure true
                                  :state-graph-resolver state-machine-resolver}
 
    :purkaminen                  {:schema "purkaminen"
@@ -975,6 +977,7 @@
                                  :copying-allowed true
                                  :min-outgoing-link-permits 0
                                  :asianhallinta false
+                                 :building true
                                  :state-graph-resolver state-machine-resolver}
 
    :kaivuu                      {:schema "maisematyo"

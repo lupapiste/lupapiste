@@ -72,11 +72,11 @@
 
 (defn building? [operation]
   (let [metadata (operations/get-operation-metadata (:name operation))]
-    (contains? metadata :building)))
+    (true? (:building metadata))))
 
 (defn structure? [operation]
   (let [metadata (operations/get-operation-metadata (:name operation))]
-    (contains? metadata :structure)))
+    (true? (:structure metadata))))
 
 (defn get-building-data [document]
   (let [unwrapped (tools/unwrapped document)]
@@ -89,14 +89,14 @@
   [{:keys [documents] :as app} operation]
   (if-let [op-doc (and
                     (util/=as-kw (permit/permit-type app) :R)
-                    (or (building? operation) (structure? operation))
                     (->> documents
                          (util/find-first
                            #(= (:id operation)
                                (get-in % [:schema-info :op :id])))))]
-    (if (building? operation)
-      (util/assoc-when operation :building (get-building-data op-doc))
-      (assoc operation :structure true))
+    (cond
+      (building? operation) (util/assoc-when operation :building (get-building-data op-doc))
+      (structure? operation) (assoc operation :structure true)
+      :else operation)
     operation))
 
 (sc/defn ^:always-validate build-operations :- [Operation]
