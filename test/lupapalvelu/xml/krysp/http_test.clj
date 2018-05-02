@@ -94,4 +94,5 @@
         (facts "consumer caught message"
           (fact "one message" (count @msgs) => 1)
           (fact "data is clojure and xml-string"
-            (:xml (first @msgs)) => xml-string))))))
+            (:xml (first @msgs)) => xml-string)))))
+  (.close consumer))

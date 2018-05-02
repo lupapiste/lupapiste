@@ -3,7 +3,7 @@
             [taoensso.timbre :refer [warnf]]
             [sade.env :as env]
             [lupapalvelu.integrations.jms :refer :all :as jms])
-  (:import (javax.jms Queue MessageConsumer Connection)
+  (:import (javax.jms Queue MessageConsumer)
            (org.apache.activemq.artemis.jms.client ActiveMQConnection)))
 
 (def test-atom (atom nil))
