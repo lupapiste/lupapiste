@@ -15,7 +15,6 @@
   {:description      "Enable/disable Suti support."
    :parameters       [flag]
    :input-validators [(partial action/boolean-parameters [:flag])]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (org/toggle-group-enabled (usr/authority-admins-organization-id user) :suti flag))
@@ -25,7 +24,6 @@
    :parameters       [operationId flag]
    :input-validators [(partial op/visible-operation :operationId)
                       (partial action/boolean-parameters [:flag])]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (org/toggle-group-operation (usr/authority-admins-organization user)
@@ -35,14 +33,12 @@
 
 (defquery suti-admin-details
   {:description "Suti details for the current authority admin's organization."
-   :user-roles  #{:authority}
    :permissions [{:required [:organization/admin]}]}
   [{user :user}]
   (ok :suti (suti/organization-details (usr/authority-admins-organization user))))
 
 (defquery suti-operations
   {:description "Suti operations for the current authority admin's organization."
-   :user-roles  #{:authority}
    :permissions [{:required [:organization/admin]}]}
   [{user :user}]
   (ok :operations (-> user usr/authority-admins-organization :suti :operations)))
@@ -51,7 +47,6 @@
   {:description      "Public Suti URL. Not to be confused with the Suti backend."
    :parameters       [www]
    :input-validators [(partial action/validate-optional-url :www)]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (suti/set-www (usr/authority-admins-organization user) (ss/trim www)))

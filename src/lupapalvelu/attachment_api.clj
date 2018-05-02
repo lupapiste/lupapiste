@@ -610,7 +610,6 @@
                       (partial action/boolean-parameters [:qrCode])
                       (partial action/parameters-matching-schema [:position] (:position StampTemplate))
                       (partial action/parameters-matching-schema [:rows] (:rows StampTemplate))]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]}
   [{{stamp-id :stamp-id :as data} :data user :user}]
   (let [stamp (assoc (select-keys data [:name :position :background :page :qrCode :rows]) :id (or stamp-id (mongo/create-id)))]
@@ -626,7 +625,6 @@
 (defcommand delete-stamp-template
   {:parameters       [stamp-id]
    :input-validators [(partial action/non-blank-parameters [:stamp-id])]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (->> {$pull {:stamps {:id stamp-id}}}
@@ -634,8 +632,7 @@
   (ok))
 
 (defquery stamp-templates
-  {:user-roles  #{:authority}
-   :permissions [{:required [:organization/admin]}]}
+  {:permissions [{:required [:organization/admin]}]}
   [{user :user}]
   (let [org-id (usr/authority-admins-organization-id user)]
     (ok :stamps (:stamps (organization/get-organization (name org-id) [:stamps])))))

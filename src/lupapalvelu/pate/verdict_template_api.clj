@@ -47,7 +47,6 @@
   {:description "Pseudo-query that fails if Pate is not enabled in
   the organization"
    :feature     :pate
-   :user-roles  #{:authority}
    :permissions [{:required [:organization/admin]}]
    :pre-checks  [pate-enabled]}
   [_])
@@ -57,7 +56,6 @@
   {:description      "Creates new empty template. Returns template id, name
   and draft."
    :feature          :pate
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
@@ -77,7 +75,6 @@
    :input-validators [(partial action/non-blank-parameters [:name])]
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable)]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]}
   [{created :created :as command}]
   (template/set-name (template/command->organization command)
@@ -90,7 +87,6 @@
   {:description      "Incremental save support for verdict template
   drafts. Returns modified timestamp."
    :feature          :pate
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]
    :parameters       [template-id path value]
    ;; Value is validated upon saving according to the schema.
@@ -117,7 +113,6 @@
   {:description      "Publish creates a frozen snapshot of the current
   template draft. The snapshot includes also the current settings."
    :feature          :pate
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
@@ -133,7 +128,6 @@
   {:description "Id, name, modified, published and deleted maps for
   every verdict template."
    :feature     :pate
-   :user-roles  #{:authority}
    :permissions [{:required [:organization/admin]}]
    :pre-checks  [pate-enabled]}
   [command]
@@ -145,7 +139,6 @@
 (defquery verdict-template-categories
   {:description "Categories for the user's organization"
    :feature     :pate
-   :user-roles  #{:authority}
    :permissions [{:required [:organization/admin]}]
    :pre-checks  [pate-enabled]}
   [command]
@@ -155,7 +148,6 @@
   {:description      "Verdict template summary plus draft data. The
   template must be editable."
    :feature          :pate
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
@@ -169,7 +161,6 @@
   {:description      "Like verdict-template but also updates the template's
   settings dependencies."
    :feature          :pate
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
@@ -181,7 +172,6 @@
 (defcommand toggle-delete-verdict-template
   {:description      "Toggle template's deletion status"
    :feature          :pate
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]
    :parameters       [template-id delete]
    :input-validators [(partial action/non-blank-parameters [:template-id])
@@ -198,7 +188,6 @@
   have any published versions. In other words, the draft of the
   original is copied."
    :feature          :pate
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
@@ -220,7 +209,6 @@
 (defquery verdict-template-settings
   {:description      "Settings matching the category or empty response."
    :feature          :pate
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
@@ -236,7 +224,6 @@
   {:description      "Incremental save support for verdict template
   settings. Returns modified timestamp. Creates settings if needed."
    :feature          :pate
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]
    :parameters       [category path value]
    ;; Value is validated against schema on saving.
@@ -291,7 +278,6 @@
   {:description "Map where keys are operations and values template
   ids. Deleted templates are filtered out."
    :feature     :pate
-   :user-roles  #{:authority}
    :permissions [{:required [:organization/admin]}]
    :pre-checks  [pate-enabled]}
   [command]
@@ -301,7 +287,6 @@
   {:description      "Set default verdict template for a selected operation
   in the organization."
    :feature          :pate
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]
    :parameters       [operation template-id]
    :input-validators [(partial action/non-blank-parameters [:operation])]

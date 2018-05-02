@@ -17,8 +17,7 @@
     (excel/excel-response filename body error-message)))
 
 (defraw open-applications-xlsx
-  {:user-roles  #{:authority}
-   :permissions [{:required [:organization/admin]}]}
+  {:permissions [{:required [:organization/admin]}]}
   [{user :user {lang :lang} :data}]
   (let [orgId               (usr/authority-admins-organization-id user)
         excluded-operations [:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2]
@@ -50,7 +49,6 @@
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])
                       start-gt-end
                       max-month-window]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]}
   [{user :user {lang :lang} :data}]
   (let [orgId               (usr/authority-admins-organization-id user)
@@ -73,7 +71,6 @@
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])
                       start-gt-end
                       max-month-window]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]}
   [{user :user {lang :lang} :data ts :created}]
   (let [orgId               (usr/authority-admins-organization-id user)
@@ -94,7 +91,6 @@
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])
                       start-gt-end
                       max-month-window]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]}
   [{user :user {lang :lang} :data ts :created}]
   (let [orgId               (usr/authority-admins-organization-id user)

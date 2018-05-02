@@ -98,8 +98,7 @@
   (ok :data (usr/users-for-datatables caller params)))
 
 (defquery user-for-edit-authority
-  {:user-roles       #{:authority}
-   :permissions      [{:required [:organization/admin]}]
+  {:permissions      [{:required [:organization/admin]}]
    :parameters       [authority-id]
    :input-validators [(partial action/non-blank-parameters [:authority-id])]}
   [{auth-admin :user}]
@@ -366,7 +365,6 @@
                       action/email-validator
                       (partial allowed-roles organization/authority-roles)]
    :notified         true
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]}
   [{caller :user}]
   (let [organization-id (usr/authority-admins-organization-id caller)
@@ -385,7 +383,6 @@
   {:parameters       [email]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]}
   [{caller :user}]
   (let [organization-id (usr/authority-admins-organization-id caller)]
@@ -396,7 +393,6 @@
    :input-validators [(partial action/non-blank-parameters [:email])
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
                       (partial allowed-roles organization/authority-roles)]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]}
   [{caller :user}]
   (let [organization-id (usr/authority-admins-organization-id caller)
@@ -413,7 +409,6 @@
 (defcommand update-auth-info
   {:parameters       [firstName lastName email new-email]
    :input-validators [(partial action/non-blank-parameters [:firstName :lastName :email :new-email])]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]}
   [{auth-admin :user}]
   (let [authority           (usr/find-user {:email email})

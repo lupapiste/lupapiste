@@ -23,7 +23,6 @@
 (defquery organization-inspection-summary-settings
   {:description "Inspection summary templates for given organization."
    :pre-checks  [inspection-summary/inspection-summary-api-auth-admin-pre-check]
-   :user-roles  #{:authority}
    :permissions [{:required [:organization/admin]}]}
   [{user :user}]
   (ok (inspection-summary/settings-for-organization (usr/authority-admins-organization-id user))))
@@ -33,7 +32,6 @@
    :parameters       [templateText name]
    :input-validators [(partial action/non-blank-parameters [:templateText :name])]
    :pre-checks       [inspection-summary/inspection-summary-api-auth-admin-pre-check]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (let [organizationId (usr/authority-admins-organization-id user)]
@@ -44,7 +42,6 @@
    :parameters       [templateId]
    :input-validators [(partial action/non-blank-parameters [:templateId])]
    :pre-checks       [inspection-summary/inspection-summary-api-auth-admin-pre-check]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (let [organizationId (usr/authority-admins-organization-id user)]
@@ -57,7 +54,6 @@
    :parameters       [name templateId templateText]
    :input-validators [(partial action/non-blank-parameters [:name :templateId :templateText])]
    :pre-checks       [inspection-summary/inspection-summary-api-auth-admin-pre-check]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (let [organizationId (usr/authority-admins-organization-id user)]
@@ -71,7 +67,6 @@
    :input-validators [(partial action/non-blank-parameters [:operationId :templateId])]
    :pre-checks       [inspection-summary/inspection-summary-api-auth-admin-pre-check
                       inspection-summary/operation-has-R-permit-type]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (let [organizationId (usr/authority-admins-organization-id user)]

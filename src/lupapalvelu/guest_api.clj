@@ -15,7 +15,6 @@
 (defquery resolve-guest-authority-candidate
   {:parameters       [email]
    :input-validators [(partial action/non-blank-parameters [:email])]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]
    :description      "Checks if the given email already maps to a user in
    the system. If so, the response contains name information and
@@ -29,27 +28,23 @@
   {:parameters       [email firstName lastName description]
    :input-validators [(partial action/non-blank-parameters [:email :firstName :lastName])
                       action/email-validator]
-   :user-roles       #{:authority}
    :permissions      [{:required [:organization/admin]}]
    :description      "Add or update organization's guest authority."}
   [{admin :user}]
   (guest/update-guest-authority-organization admin email firstName lastName description))
 
 (defquery guest-authorities-organization
-  {:user-roles  #{:authority}
-   :permissions [{:required [:organization/admin]}]
+  {:permissions [{:required [:organization/admin]}]
    :description "List of guest authorities for the authority admin's
    organization."}
   [{admin :user}]
   (ok :guestAuthorities (guest/organization-guest-authorities (usr/authority-admins-organization-id admin))))
 
-(defcommand remove-guest-authority-organization {:description      "Removes
-  guestAuthority from organisation and from every (applicable)
-  application within the organization."
-                                                 :parameters       [email]
-                                                 :input-validators [(partial action/non-blank-parameters [:email])]
-                                                 :user-roles       #{:authority}
-                                                 :permissions      [{:required [:organization/admin]}]}
+(defcommand remove-guest-authority-organization
+  {:description      "Removes guestAuthority from organisation and from every (applicable) application within the organization."
+   :parameters       [email]
+   :input-validators [(partial action/non-blank-parameters [:email])]
+   :permissions      [{:required [:organization/admin]}]}
   [{admin :user}]
   (ok :applications (guest/remove-guest-authority-organization admin email)))
 
