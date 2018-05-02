@@ -87,7 +87,7 @@
           ; instantly to consumer.
           (throw e))))))
 
-(def kuntagml-queue "application.kuntagml.http")
+(def kuntagml-queue "lupapiste/kuntagml.http")
 
 (defonce kuntagml-consumer (jms/create-nippy-consumer kuntagml-queue message-handler))
 
