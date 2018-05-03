@@ -2,7 +2,9 @@
   "Embedded ActiveMQ Artemis server"
   (:require [taoensso.timbre :refer [info infof]])
   (:import (org.apache.activemq.artemis.core.config.impl ConfigurationImpl)
-           (org.apache.activemq.artemis.core.server ActiveMQServers ActiveMQServer)))
+           (org.apache.activemq.artemis.core.server ActiveMQServers ActiveMQServer)
+           (org.apache.activemq.artemis.core.settings.impl AddressSettings)
+           (org.apache.activemq.artemis.api.core SimpleString)))
 
 (info "Requiring ActiveMQ Artemis...")
 (def conf (doto (ConfigurationImpl.)
@@ -12,7 +14,12 @@
             (.setBindingsDirectory "target/artemis_bindings")
             (.setLargeMessagesDirectory "target/artemis_largemessages")
             (.setSecurityEnabled false)
-            (.addAcceptorConfiguration "invm" "vm://0")))
+            (.addAcceptorConfiguration "invm" "vm://0")
+            (.addAddressesSetting "#"
+                                 (doto (AddressSettings.)
+                                   (.setDeadLetterAddress (SimpleString. "DLQ"))
+                                   (.setExpiryAddress (SimpleString. "Expired"))
+                                   (.setMaxDeliveryAttempts 5)))))
 
 (def embedded-broker ^ActiveMQServer
   (ActiveMQServers/newActiveMQServer conf))
