@@ -151,4 +151,8 @@
     (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R" :timestamp (to-long 2018 5 3)}
                                                             {:organization "753-R" :timestamp (to-long 2018 6 3)}])
     => (contains [{:id "753-R" :date "2018-05-31" :quantity 1} {:id "753-R" :date "2018-06-30" :quantity 1}]
-                 :in-any-order)))
+                 :in-any-order))
+  (fact "throws on invalid input data"
+        (exports/onkalo-log-entries->salesforce-export-entries [{:not-organization "753-R" :timestamp (to-long 2018 5 3)}
+                                                                {:organization "753-R" :timestamp (to-long 2018 6 3)}])
+        => (throws #"does not match schema")))

@@ -57,8 +57,7 @@
     (ok :applications (map application-to-salesforce raw-applications))))
 
 (defexport export-archive-api-usage
-  {:user-roles #{:trusted-salesforce}
-   :on-success exports/validate-archive-api-export-data}
+  {:user-roles #{:trusted-salesforce}}
   [{{start-ts :startTimestampMillis
      end-ts   :endTimestampMillis} :data user :user}]
   (ok :documents (exports/archive-api-usage-to-salesforce start-ts end-ts)))

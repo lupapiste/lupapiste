@@ -340,17 +340,10 @@
 (defn get-onkalo-api-logs!
   "A dummy implementation for actually fetching Onkalo logs from Mongo"
   [start-ts end-ts]
-  (let [number-of-entries 0]
+  (let [number-of-entries (rand-int 50)]
     (repeatedly number-of-entries #(dummy-onkalo-log-entry start-ts end-ts))))
 
 (defn archive-api-usage-to-salesforce
   [start-ts end-ts]
   (-> (get-onkalo-api-logs! (or start-ts (now)) (or end-ts (now)))
       onkalo-log-entries->salesforce-export-entries))
-
-
-(defn validate-archive-api-export-data
-  "Validate output data against schema."
-  [_ {:keys [documents]}]
-  (doseq [usage-entry documents]
-    (sc/validate SalesforceExportApplication exported-application)))
