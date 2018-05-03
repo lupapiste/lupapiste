@@ -71,14 +71,15 @@
     (create-url :review {:url "http://testi.fi" :path {:application "testi/" :review "katselmus"}}) => "http://testi.fi/katselmus"))
 
 
-(env/feature? :jms
+(when (and (env/feature? :embedded-artemis) (env/feature? :jms))
   (def msgs (atom []))
   (def app-id "LP-123-1970-99999")
   (def test-queue-name (str kuntagml-queue "_test" (now)))
   (def xml-string "<?xml ?>><jee>testi</jee>")
   (defn handler [data] (swap! msgs conj data))
   (def consumer (jms/create-nippy-consumer test-queue-name handler))
-  (with-redefs [lupapalvelu.xml.krysp.http/nippy-producer (jms/create-nippy-producer test-queue-name)]
+  (def test-producer (jms/create-nippy-producer test-queue-name))
+  (with-redefs [lupapalvelu.xml.krysp.http/nippy-producer test-producer]
     (facts "JMS"
       (against-background
         [(lupapalvelu.integrations.messages/save anything) => nil

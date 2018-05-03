@@ -19,8 +19,7 @@
                                                    :y 6823200
                                                    :propertyId "83712103620001"
                                                    :address "Pub Harald")
-            application (query-application local-query pena application-id)
-            ts (now)]
+            application (query-application local-query pena application-id)]
         (generate-documents application pena true)
         (local-command pena :submit-application :id application-id) => ok?
 
