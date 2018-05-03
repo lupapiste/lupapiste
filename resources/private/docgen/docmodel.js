@@ -1667,7 +1667,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (self.docPostVerdictEdit && self.authorizationModel.ok("update-post-verdict-doc")) {
       $(elements).find("button").hide();
-      $(elements).find("div[data-repeating-id=rakennuksenOmistajat]").css({'pointer-events': 'none'});
+      $(elements).find("div[data-repeating-id=rakennuksenOmistajat]").css({"pointer-events": "none"});
     }
 
     return section.append( contents.append( $(elements)));

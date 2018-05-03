@@ -1,9 +1,12 @@
 (ns lupapalvelu.document.document-api-itest
   (:require [midje.sweet :refer :all]
+            [sade.core :as core]
             [sade.util :refer [fn->] :as util]
             [lupapalvelu.application :refer [get-operations]]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.fixture.pate-verdict :as pate-fixture]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.pate-itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.attachment :as attachment]))
 
@@ -380,3 +383,72 @@
         (command pena :remove-doc :id application-id :docId (:doc suunnittelija-resp)) => ok?)
       (fact "pre-verdit suunnittelija doc can NOT be removed"
         (command pena :remove-doc :id application-id :docId (:id pre-verdict-suunnittelija)) => (partial expected-failure? :error.document.post-verdict-deletion)))))
+
+(facts "PATE - post-verdict document modifications"
+  (let [application (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
+        application-id (:id application)
+        documents (:documents application)
+        building-doc (domain/get-document-by-name documents "uusiRakennus")
+        building-doc-id (:id building-doc)
+        _ (command pena :update-doc :id application-id :doc (:id building-doc) :updates [["mitat.tilavuus" "1000"]
+                                                                                         ["mitat.kerrosala" "300"]
+                                                                                         ["mitat.kokonaisala" "500"]
+                                                                                         ["mitat.kerrosluku" "2"]]) => ok?
+        _ (command sonja :update-app-bulletin-op-description :id application-id :description "Bulletin description") => ok?
+        _ (command sonja :approve-application :id application-id :lang "fi") => ok?]
+
+    (fact "Documents cant be modified before verdict is given"
+      (command sonja :update-post-verdict-doc :id application-id :doc (:id building-doc) :updates [["mitat.tilavuus" "2000"]])
+        => (partial expected-failure? :error.command-illegal-state))
+
+    (facts "Publish verdict for application"
+      (let [{verdict-id :verdict-id} (command sonja :new-pate-verdict-draft
+                                              :id application-id
+                                              :template-id (-> pate-fixture/verdic-templates-setting
+                                                               :templates
+                                                               first
+                                                               :id))]
+
+        (fact "Set automatic calculation of other dates"
+          (command sonja :edit-pate-verdict :id application-id :verdict-id verdict-id
+                   :path [:automatic-verdict-dates] :value true) => no-errors?)
+        (fact "Verdict date"
+          (command sonja :edit-pate-verdict :id application-id :verdict-id verdict-id
+                   :path [:verdict-date] :value (core/now)) => no-errors?)
+        (fact "Verdict code"
+          (command sonja :edit-pate-verdict :id application-id :verdict-id verdict-id
+                   :path [:verdict-code] :value "hyvaksytty") => no-errors?)
+        (command sonja :publish-pate-verdict :id application-id :verdict-id verdict-id) => no-errors?))
+
+    (fact "Now document can be modified"
+      (command sonja :update-post-verdict-doc :id application-id :doc building-doc-id :updates [["mitat.tilavuus" "2000"]
+                                                                                                   ["mitat.kerrosala" "600"]
+                                                                                                   ["mitat.kokonaisala" "1000"]
+                                                                                                   ["mitat.kerrosluku" "3"]]) => ok?)
+
+    (fact "But no owner details can be modified"
+      (command sonja :update-post-verdict-doc :id application-id :doc building-doc-id :updates [["rakennuksenOmistajat.henkilo.henkilotiedot.etunimi" "Herkko"]])
+        => (partial expected-failure? :error.document-not-editable-in-current-state))
+
+    (fact "Document is modified"
+      (let [updated-app (query-application sonja application-id)
+            updated-docs (:documents updated-app)
+            updated-building-doc (domain/get-document-by-name updated-docs "uusiRakennus")]
+
+        (get-in updated-building-doc [:data :mitat :tilavuus :value]) => "2000"
+        (get-in updated-building-doc [:data :mitat :kerrosala :value]) => "600"
+        (get-in updated-building-doc [:data :mitat :kokonaisala :value]) => "1000"
+        (get-in updated-building-doc [:data :mitat :kerrosluku :value]) => "3"
+
+        (fact "There is also meta data"
+          (get-in updated-building-doc [:meta :_post_verdict_edit :timestamp]) => some?
+          (get-in updated-building-doc [:meta :_post_verdict_edit :user :firstName]) => "Sonja")))
+
+    (fact "Sending modified document to backend"
+      (command sonja :send-doc-updates :id application-id :docId building-doc-id) => ok?)
+
+    (fact "And now there is also sent meta data"
+      (let [final-app (query-application sonja application-id)
+            final-building-doc (domain/get-document-by-name (:documents final-app) "uusiRakennus")]
+        (get-in final-building-doc [:meta :_post_verdict_sent :timestamp]) => some?
+        (get-in final-building-doc [:meta :_post_verdict_sent :user :firstName]) => "Sonja"))))
