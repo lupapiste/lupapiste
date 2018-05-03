@@ -6,7 +6,7 @@
             [sade.core :refer [ok]]
             [lupapalvelu.action :refer [defexport] :as action]
             [lupapalvelu.application :as application]
-            [lupapalvelu.exports :refer [application-to-salesforce exported-application validate-application-export-data]]
+            [lupapalvelu.exports :as exports :refer [application-to-salesforce exported-application validate-application-export-data]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]))
 
@@ -56,13 +56,12 @@
         raw-applications (mongo/snapshot :applications query fields)]
     (ok :applications (map application-to-salesforce raw-applications))))
 
-#_(defexport export-archive-api-usage
+(defexport export-archive-api-usage
   {:user-roles #{:trusted-salesforce}
-   :on-success validate-archive-api-export-data}
-  [{{after  :startTimestampMillis
-     before :endTimestampMillis} :data user :user}]
-
-  (ok :applications (map application-to-salesforce raw-applications)))
+   :on-success exports/validate-archive-api-export-data}
+  [{{start-ts :startTimestampMillis
+     end-ts   :endTimestampMillis} :data user :user}]
+  (ok :documents (exports/archive-api-usage-to-salesforce start-ts end-ts)))
 
 
 (defexport export-organizations

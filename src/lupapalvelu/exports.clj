@@ -4,6 +4,7 @@
             [clj-time.coerce :as tc]
             [clj-time.core :as t]
             [schema.core :as sc]
+            [sade.core :refer [now]]
             [sade.excel-reader :as xls]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
@@ -13,6 +14,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]))
 
@@ -304,9 +306,22 @@
       tc/to-long
       util/to-xml-date))
 
-(defn onkalo-log-entries->salesforce-export-entries
+(sc/defschema ArchiveApiUsageLogEntry
+  "Schema for API usage log entries, produced by Onkalo"
+  {:organization org/OrgId
+   :timestamp sc/Int
+   sc/Keyword sc/Any}) ; Rest of the data TBD
+
+(sc/defschema SalesforceExportArchiveApiUsageEntry
+  "Schema for archive API usage entry, exported to Salesforce"
+  {:id       org/OrgId
+   :date     (ssc/date-string "YYYY-MM-dd")
+   :quantity ssc/Nat})
+
+(sc/defn ^:always-validate
+  onkalo-log-entries->salesforce-export-entries :- [SalesforceExportArchiveApiUsageEntry]
   "Maps onkalo log entries into data consumed by the salesforce integration."
-  [log-entries]
+  [log-entries :- [ArchiveApiUsageLogEntry]]
   (->> log-entries
        (map (fn-> (select-keys [:organization :timestamp])
                   (update :timestamp timestamp->end-of-month-date-string)
@@ -314,3 +329,28 @@
        (group-by (juxt :id :date))
        (util/map-values count)
        (map (fn [[[org-id date] count]] {:id org-id :date date :quantity count}))))
+
+
+(defn- dummy-onkalo-log-entry [start-ts end-ts]
+  {:organization (rand-nth ["753-R" "091-R" "092-R" "837-R" "297-R"])
+   :timestamp (+ start-ts (rand-int (- end-ts start-ts)))
+   :filename "foo"
+   :file-id "bar"})
+
+(defn get-onkalo-api-logs!
+  "A dummy implementation for actually fetching Onkalo logs from Mongo"
+  [start-ts end-ts]
+  (let [number-of-entries 0]
+    (repeatedly number-of-entries #(dummy-onkalo-log-entry start-ts end-ts))))
+
+(defn archive-api-usage-to-salesforce
+  [start-ts end-ts]
+  (-> (get-onkalo-api-logs! (or start-ts (now)) (or end-ts (now)))
+      onkalo-log-entries->salesforce-export-entries))
+
+
+(defn validate-archive-api-export-data
+  "Validate output data against schema."
+  [_ {:keys [documents]}]
+  (doseq [usage-entry documents]
+    (sc/validate SalesforceExportApplication exported-application)))
