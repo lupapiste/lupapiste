@@ -234,6 +234,7 @@
    (sc/optional-key :tags) [Tag]
    (sc/optional-key :validate-verdict-given-date) sc/Bool
    (sc/optional-key :automatic-review-fetch-enabled) sc/Bool
+   (sc/optional-key :automatic-review-generation-enabled) sc/Bool
    (sc/optional-key :vendor-backend-redirect) {(sc/optional-key :vendor-backend-url-for-backend-id) ssc/OptionalHttpUrl
                                                (sc/optional-key :vendor-backend-url-for-lp-id)      ssc/OptionalHttpUrl}
    (sc/optional-key :use-attachment-links-integration) sc/Bool
