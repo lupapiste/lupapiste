@@ -48,12 +48,24 @@
           :mitat {}
           :valtakunnallinenNumero {:value "123"}}})
 
+(def new-structure-data
+  {:id "foo-structure"
+   :schema-info {:op {:id "57603a99edf02d7047774554"
+                      :name "Aita"
+                      :description nil
+                      :created 1505822832171}
+                 :name "kaupunkikuvatoimenpide-ei-tunnusta"}
+   :data {:kokonaisala {:value "4"}
+          :kayttotarkoitus {:value "Aallonmurtaja"}
+          :kuvaus {:value "text"}}})
+
 (defn app-with-docs [documents]
   (let [location [444444.0 6666666.0]
         wgs (coord/convert "EPSG:3067" "WGS84" 5 location)]
     {:id               (ssg/generate ssc/ApplicationId)
      :propertyId       "29703401070010"
-     :infoRequest      false :permitType "R"
+     :infoRequest      false
+     :permitType "R"
      :primaryOperation {:name "pientalo-laaj" :id "57603a99edf02d7047774554"}
      :address          "address"
      :municipality     "123"
@@ -95,6 +107,7 @@
      (building-not-present [data]
        (fact "building key not present"
          (not-any? #(contains? (set (keys %)) :building) (:operations data)) => true))
+
      (run-test
        [app test-fn]
        (when-let [new-state (sm/next-state app)]
@@ -126,3 +139,39 @@
   (fact "ok"
     (-> (assoc (app-with-docs [new-building-data]) :state "open" :permitSubtype "testi")
         (mjson/state-change-data "submitted")) => (contains {:permitSubtype "testi"})))
+
+(fact "presence of :building and :structure keys"
+  (let [state-change-data (assoc (app-with-docs [new-structure-data]) :state "open" :primaryOperation {:name "aita" :id "57603a99edf02d7047774554"})
+        change-report (mjson/state-change-data state-change-data "submitted")
+        operation-keys (-> change-report :operations first keys set)]
+    (fact "message for structure does not contain :building flag"
+      (contains? operation-keys :building) => false)
+    (fact "message for structure does contain :structure flag"
+      (contains? operation-keys :structure) => true)))
+
+(fact "multiple operations in single application"
+  (let [app (app-with-docs [new-building-data])
+        app-with-ops (assoc app :state "open"
+                                :primaryOperation {:name "pientalo" :id "57603a99edf02d7047774554"}
+                                :secondaryOperations [{:name "mainoslaite" :id "57603a99edf02d7047774554"}
+                                                      {:name "tyonjohtajan-nimeaminen-v2" :id "57603a99edf02d7047774554"}])
+        change-report (mjson/state-change-data app-with-ops "submitted")
+        operations (:operations change-report)]
+    (facts "primary operation (pientalo)"
+      (let [pientalo (first operations)]
+        (fact "contains the flag :building"
+          (contains? pientalo :building) => true)
+        (fact "does not contain the flag :structure"
+          (contains? pientalo :structure) => false)))
+    (facts "mainoslaite"
+      (let [mainoslaite (second operations)]
+        (fact "does not contain the flag :building"
+          (contains? mainoslaite :building) => false)
+        (fact "contains the flag :structure"
+          (contains? mainoslaite :structure) => true)))
+    (facts "tyonjohtajan nimeaminen"
+      (let [tyonjohtaja (last operations)]
+        (fact "does not contain :building"
+          (contains? tyonjohtaja :building) => false)
+        (fact "does not contain :structure"
+          (contains? tyonjohtaja :structure) => false)))))
