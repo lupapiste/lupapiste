@@ -208,7 +208,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
 
   self.showToggleEdit = function () {
     return self.docModel.schema.info.editable &&
-           "verdictGiven" === _.get(self.docModel, ["application", "state"]);
+           self.docModel.authorizationModel.ok("update-post-verdict-doc");
   };
 
   self.editMode = function () {

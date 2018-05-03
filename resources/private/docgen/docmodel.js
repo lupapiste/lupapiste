@@ -251,7 +251,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   };
 
   function getUpdateCommand() {
-    if (self.docPostVerdictEdit) {
+    if (self.docPostVerdictEdit && self.authorizationModel.ok("update-post-verdict-doc")) {
       return "update-post-verdict-doc";
     }
     return (options && options.updateCommand) ? options.updateCommand : "update-doc";
@@ -1665,7 +1665,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       $(elements).find("button").hide();
     }
 
-    if (self.authorizationModel.ok("update-post-verdict-doc")) {
+    if (self.docPostVerdictEdit && self.authorizationModel.ok("update-post-verdict-doc")) {
       $(elements).find("button").hide();
       $(elements).find("div[data-repeating-id=rakennuksenOmistajat]").css({'pointer-events': 'none'});
     }

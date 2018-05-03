@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error]]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! unauthorized unauthorized! now]]
+            [sade.env :as env]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.application :as application]
@@ -63,6 +64,14 @@
       (when-not (-> (schemas/get-schema schema-version schema-name)
                     (state-valid-by-schema? :addable-in-states default-states state))
         (fail :error.document.post-verdict-addition)))))
+
+(defn pate-enabled
+  "Pre-checker that fails if Pate is not enabled in the application organization."
+  [{:keys [organization]}]
+  (when (or (and organization
+                 (not (:pate-enabled @organization)))
+            (not (env/enable-feature! :pate-json)))
+    (fail :error.pate-disabled)))
 
 (defquery document
   {:parameters       [:id doc collection]
@@ -160,9 +169,11 @@
    :categories       #{:documents}
    :input-validators [(partial action/non-blank-parameters [:id :doc])
                       (partial action/vector-parameters [:updates])]
+   :states           states/post-verdict-states
    :contexts         [document-context]
    :permissions      document-edit-permissions
-   :pre-checks       [(editable-by-state? (set/union states/update-doc-states [:verdictGiven]))
+   :pre-checks       [pate-enabled
+                      (editable-by-state? (set/union states/update-doc-states [:verdictGiven]))
                       doc-disabled-validator
                       validate-created-after-verdict]}
   [command]
@@ -178,9 +189,11 @@
   {:parameters       [id docId]
    :categories       #{:documents}
    :input-validators [(partial action/non-blank-parameters [:id])]
+   :states           states/post-verdict-states
    :contexts         [document-context]
    :permissions      document-edit-permissions
-   :pre-checks       [(editable-by-state? (set/union states/update-doc-states [:verdictGiven]))
+   :pre-checks       [pate-enabled
+                      (editable-by-state? (set/union states/update-doc-states [:verdictGiven]))
                       doc-disabled-validator
                       validate-created-after-verdict]}
   [{:keys [organization application] :as command}]
