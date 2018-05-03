@@ -385,6 +385,7 @@
         (command pena :remove-doc :id application-id :docId (:id pre-verdict-suunnittelija)) => (partial expected-failure? :error.document.post-verdict-deletion)))))
 
 (facts "PATE - post-verdict document modifications"
+  (apply-remote-fixture "pate-verdict")
   (let [application (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
         application-id (:id application)
         documents (:documents application)
