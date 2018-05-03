@@ -2,7 +2,9 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [clojure.set :refer [difference]]
-            [lupapalvelu.exports :refer [exported-application kayttotarkoitus-hinnasto price-classes-for-operation permit-type-price-codes]]
+            [clj-time.core :as t]
+            [clj-time.coerce :as tc]
+            [lupapalvelu.exports :as exports :refer [exported-application kayttotarkoitus-hinnasto price-classes-for-operation permit-type-price-codes]]
             [lupapalvelu.application :as app]
             [lupapalvelu.operations :as ops]
             [lupapalvelu.domain :as domain]
@@ -109,3 +111,44 @@
                              :paatospvm 9
                              :anto 9
                              :lainvoimainen 11}]}))
+
+;;
+;; Export Onkalo API usage
+;;
+(defn to-long [& args]
+  (-> (apply t/date-time args) tc/to-long))
+
+(facts timestamp->end-of-month-date-string
+  (fact "returns timestamp string representing the last day of the timestamp's month"
+    (exports/timestamp->end-of-month-date-string (to-long 2018 5 3 9 45 54))
+    => "2018-05-31")
+  (fact "handles leap days"
+    (exports/timestamp->end-of-month-date-string (to-long 2016 2 21 10 11 0))
+    => "2016-02-29"
+    (exports/timestamp->end-of-month-date-string (to-long 2016 2 29 10 11 0))
+    => "2016-02-29")
+  (fact "interprets timestamps in Helsinki time zone"
+    (exports/timestamp->end-of-month-date-string (to-long 2018 5 31 23 59 0))
+    => "2018-06-30"))
+
+(facts onkalo-log-entries->salesforce-export-entries
+  (fact "no log entries results in no export entries"
+    (exports/onkalo-log-entries->salesforce-export-entries []) => [])
+  (fact "single entry results in single entry"
+    (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R"
+                                                             :timestamp (to-long 2018 5 3)}])
+    => [{:id "753-R" :date "2018-05-31" :quantity 1}])
+  (fact "quantity shows the number of entries for given organization in given month"
+    (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R" :timestamp (to-long 2018 5 3)}
+                                                            {:organization "753-R" :timestamp (to-long 2018 5 3)}])
+    => [{:id "753-R" :date "2018-05-31" :quantity 2}])
+  (fact "each organization has own entries"
+    (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R" :timestamp (to-long 2018 5 3)}
+                                                            {:organization "091-R" :timestamp (to-long 2018 5 3)}])
+    => (contains [{:id "753-R" :date "2018-05-31" :quantity 1} {:id "091-R" :date "2018-05-31" :quantity 1}]
+                 :in-any-order))
+  (fact "each month has own entries"
+    (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R" :timestamp (to-long 2018 5 3)}
+                                                            {:organization "753-R" :timestamp (to-long 2018 6 3)}])
+    => (contains [{:id "753-R" :date "2018-05-31" :quantity 1} {:id "753-R" :date "2018-06-30" :quantity 1}]
+                 :in-any-order)))

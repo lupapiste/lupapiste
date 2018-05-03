@@ -1,10 +1,13 @@
 (ns lupapalvelu.exports
   "This namespace contains functionality used by the export API"
-  (:require [schema.core :as sc]
+  (:require [clojure.set :refer [rename-keys]]
+            [clj-time.coerce :as tc]
+            [clj-time.core :as t]
+            [schema.core :as sc]
             [sade.excel-reader :as xls]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
-            [sade.util :as util]
+            [sade.util :as util :refer [fn->]]
             [lupapalvelu.application :as application]
             [lupapalvelu.archiving :as archiving]
             [lupapalvelu.document.tools :as tools]
@@ -283,3 +286,31 @@
   [_ {:keys [applications]}]
   (doseq [exported-application applications]
     (sc/validate SalesforceExportApplication exported-application)))
+
+
+;;
+;; Export Onkalo API usage
+;;
+
+(defn timestamp->end-of-month-date-string
+  "Given Unix timestamp in milliseconds, returns a string
+  representation of the last day of the month in which the timestamp
+  resides."
+  [^Long ts]
+  (-> ts
+      tc/from-long
+      (t/to-time-zone (t/time-zone-for-id "Europe/Helsinki"))
+      t/last-day-of-the-month
+      tc/to-long
+      util/to-xml-date))
+
+(defn onkalo-log-entries->salesforce-export-entries
+  "Maps onkalo log entries into data consumed by the salesforce integration."
+  [log-entries]
+  (->> log-entries
+       (map (fn-> (select-keys [:organization :timestamp])
+                  (update :timestamp timestamp->end-of-month-date-string)
+                  (rename-keys {:organization :id :timestamp :date})))
+       (group-by (juxt :id :date))
+       (util/map-values count)
+       (map (fn [[[org-id date] count]] {:id org-id :date date :quantity count}))))
