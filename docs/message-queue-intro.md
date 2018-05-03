@@ -86,8 +86,6 @@ Good explanation _Transacted session_ can be found from [JavaWolrd](https://www.
 
 Non-persistent deliveries are not saved on disk in the broker, while persistent messages are. More at [ActiveMQ site](http://activemq.apache.org/what-is-the-difference-between-persistent-and-non-persistent-delivery.html).
 
-This can be even controlled pe
-
 ## Shared or individual connection/session per message?
 
 This seems to be source of some debate. 
