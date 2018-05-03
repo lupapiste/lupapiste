@@ -207,6 +207,9 @@
       (organization/earliest-archive-enabled-ts ["092-R"]) => 1485900000000)))
 
 (facts "parse-search-term"
+  (fact "Empty terms"
+    (parse-search-term "") => {:term "" :municipalities nil}
+    (parse-search-term nil) => {:term nil :municipalities nil})
   (fact "No municipality"
     (parse-search-term "hello, world")
     => {:term           "hello, world"
@@ -229,8 +232,13 @@
     => {:term           "Dongdaqiao Lu 88"
         ;; Huittinen, Humppila
         :municipalities #{"102" "103"}})
-  (fact "Preceding whitespace is not mandatory"
+  (fact "Preceding whitespace is not mandatory: comma"
     (parse-search-term "Dongdaqiao Lu 88,Hum")
     => {:term           "Dongdaqiao Lu 88"
         ;; Humppila
-        :municipalities #{"103"}}))
+        :municipalities #{"103"}})
+  (fact "Preceding whitespace is not mandatory: dot"
+    (parse-search-term "Gongti Nan Lu.Hui")
+    => {:term           "Gongti Nan Lu"
+        ;; Huittien
+        :municipalities #{"102"}}))
