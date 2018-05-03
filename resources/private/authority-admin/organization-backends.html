@@ -126,6 +126,13 @@
             <label for="automatic-review-fetch-enabled" class="checkbox-label"
                    data-bind="ltext: 'auth-admin.automatic-review-fetch.enabled'"></label>
           </div>
+          <div class="checkbox-wrapper">
+            <input type="checkbox" id="automatic-review-generation-enabled"
+                   data-bind="checked: organization.automaticReviewGenerationEnabled,
+                              enable: lupapisteApp.models.globalAuthModel.ok('set-organization-review-generation-enabled')" />
+            <label for="automatic-review-generation-enabled" class="checkbox-label"
+                   data-bind="ltext: 'auth-admin.automatic-review-generation.enabled'"></label>
+          </div>
         </div>
       </section>
 
