@@ -631,7 +631,9 @@
         (fail! :error.unknown-operation))
       ;; TODO update also :app-links apptype if application is linked to other apps (loose WriteConcern ok?)
       (action/update-application command {$set {:primaryOperation    new-primary-op
-                                                :secondaryOperations new-secondary-ops}}))))
+                                                :secondaryOperations new-secondary-ops}})
+      {:primaryOperation    new-primary-op
+       :secondaryOperations new-secondary-ops})))
 
 ;;
 ;; Link permit
