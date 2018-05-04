@@ -61,8 +61,7 @@
 
   (defn create-connection-factory ^ActiveMQJMSConnectionFactory [^String url connection-options]
     (let [{:keys [retry-interval retry-multipier max-retry-interval reconnect-attempts consumer-window-size]
-           :or   {consumer-window-size 0                    ; no buffering on client side
-                  retry-interval (* 2 1000)
+           :or   {retry-interval (* 2 1000)
                   retry-multipier 2
                   max-retry-interval (* 5 60 1000)          ; 5 mins
                   reconnect-attempts -1}} connection-options]
@@ -70,8 +69,7 @@
         (.setRetryInterval (util/->long retry-interval))
         (.setRetryIntervalMultiplier (util/->double retry-multipier))
         (.setMaxRetryInterval (util/->long max-retry-interval))
-        (.setReconnectAttempts (util/->int reconnect-attempts))
-        (.setConsumerWindowSize (util/->int consumer-window-size)))))
+        (.setReconnectAttempts (util/->int reconnect-attempts)))))
 
   (defn create-connection
     ([] (create-connection {:broker-url broker-url}))
