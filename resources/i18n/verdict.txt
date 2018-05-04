@@ -222,7 +222,7 @@
 "verdict.muutoksenhaku.no-extra" "sv" "Inga tilläggsuppgifter."
 "verdict.muutoksenhaku.paattyy" "en" "Time for appeal ends"
 "verdict.muutoksenhaku.paattyy" "fi" "Muutoksenhakuaika päättyy"
-"verdict.muutoksenhaku.paattyy" "sv" "Tiden för ändringssökände avslutar"
+"verdict.muutoksenhaku.paattyy" "sv" "Tiden för ändringssökande avslutar"
 "verdict.muutoksenhaku.poista" "en" "Delete"
 "verdict.muutoksenhaku.poista" "fi" "Poista"
 "verdict.muutoksenhaku.poista" "sv" "Radera"
