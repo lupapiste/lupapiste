@@ -229,7 +229,7 @@
       (fact "Solita admin can change"
         (command admin :company-update :company company-id :updates {:billingType "yearly"}) => ok?)
       (fact "Kaino can't change"
-        (command kaino :company-update :company company-id :updates {:billingType "yearly"}) => unauthorized?))
+        (command kaino :company-update :company company-id :updates {:billingType "monthly"}) => unauthorized?))
 
     (fact "When company has max count of users, new member can't be invited"
       (command kaino :company-invite-user :email "pena@example.com" :admin false :submit true) => (partial expected-failure? "error.company-user-limit-exceeded"))))
@@ -577,6 +577,17 @@
       (-> resp :company :tags count) => 1
       (get-in resp [:company :tags 0 :id]) => "7a67a67a67a67a67a67a67a6"
       (get-in resp [:company :tags 0 :label]) => "Projekti666")))
+
+(facts "company tags and custom account type (LPK-3762)"
+  (fact "Esimerkki Oy to custom"
+    (let [esimerkki (:company (command admin :company-update
+                                       :company "esimerkki"
+                                       :updates {:accountType        :custom
+                                                 :customAccountLimit 88}))]
+      esimerkki => (contains {:accountType "custom"})
+      (fact "Set a tag"
+        (command erkki :save-company-tags :tags (conj (:tags esimerkki) {:label "bugfix"}))
+        => ok?))))
 
 (facts "adding company tags to application"
 
