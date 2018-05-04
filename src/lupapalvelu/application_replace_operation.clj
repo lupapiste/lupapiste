@@ -1,13 +1,21 @@
 (ns lupapalvelu.application-replace-operation
-  (:require [lupapalvelu.action :as action]
+  (:require [clojure.set :as set]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.document.document-api :as doc-api]
+            [lupapalvelu.document.waste-schemas :as waste-schemas]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.document.schemas :as schemas]
             [monger.operators :refer :all]
-            [sade.core :refer :all]
-            [lupapalvelu.domain :as domain]))
+            [sade.core :refer :all]))
+
+;;
+;; Attachments
+;;
 
 (defn get-operation-by-key [application key value]
   (->> application
@@ -90,10 +98,77 @@
   (let [replace-updates (replace-old-op-with-new-updates (:attachments application) old-op new-op)]
     (when (seq replace-updates) (action/update-application command {$set replace-updates}))))
 
+;;
+;; Documents
+;;
+
+
+(defn- get-document-schema-names-for-operation [organization operation]
+  (let [op-info (op/operations (keyword (:name operation)))]
+    (->> (when (not-empty (:org-required op-info)) ((apply juxt (:org-required op-info)) organization))
+         (concat (:required op-info)))))
+
+(defn- required-document-schema-names-by-op [organization application]
+  (->> (cons (:primaryOperation application) (:secondaryOperations application))
+       (reduce #(assoc %1 (keyword (:name %2)) (set (get-document-schema-names-for-operation organization %2))) {})))
+
+(defn- copy-old-document-data [old-doc new-doc]
+  (let [new-data-keys       (-> new-doc :data (keys))
+        document-data (-> old-doc :data (select-keys new-data-keys))]
+    (assoc new-doc :data (merge (:data new-doc) document-data))))
+
+(defn- create-document [doc-name application created & [old-document]]
+  (let [op-name (:name (get-operation-by-key application :created created))
+        document-schema (schemas/get-schema (:schema-version application) doc-name)
+        new-document (app/make-document application op-name created nil document-schema)]
+    (if old-document
+      (copy-old-document-data old-document new-document)
+      new-document)))
+
+(defn- update-documents [{created :created :as command} organization app-id]
+  (let [application                             (domain/get-application-no-access-checking app-id)
+        app-doc-names                           (->> application :documents (map #(-> % :schema-info :name)) (set))
+        required-document-names-by-op           (required-document-schema-names-by-op organization application)
+        required-document-names                 (apply set/union (vals required-document-names-by-op))
+
+        rakennusjatesuunnitelma                 (or (app-doc-names waste-schemas/basic-construction-waste-plan-name)
+                                                    (app-doc-names waste-schemas/extended-construction-waste-report-name))
+        should-contain-rakennusjatesuunnitelma? (or (required-document-names waste-schemas/basic-construction-waste-plan-name)
+                                                    (required-document-names waste-schemas/extended-construction-waste-report-name))
+        new-rakennusjatesuunnitelma-document    (when (and (not rakennusjatesuunnitelma)
+                                                           should-contain-rakennusjatesuunnitelma?)
+                                                  (create-document should-contain-rakennusjatesuunnitelma? application created))
+
+        rakennuspaikka-document                 (domain/get-document-by-type application "location") ;; TODO what to do when primary operation does not need "rakennuspaikka" -document but secondary does
+        correct-rakennuspaikka-document?        (required-document-names (:name rakennuspaikka-document))
+        new-rakennuspaikka-document             (when (not correct-rakennuspaikka-document?)
+                                                  (-> (or (required-document-names "rakennuspaikka")
+                                                          (required-document-names "rakennuspaikka-ilman-ilmoitusta"))
+                                                      (create-document application created rakennuspaikka-document)))
+
+        documents-to-be-removed                 (remove nil?
+                                                        [(when (and new-rakennuspaikka-document
+                                                                    (-> rakennuspaikka-document :schema-info :repeating (not)))
+                                                           (:id rakennuspaikka-document))
+                                                         (when (and rakennusjatesuunnitelma
+                                                                    (not should-contain-rakennusjatesuunnitelma?))
+                                                           (:id rakennusjatesuunnitelma))])
+        documents-to-be-added                   (remove nil? [new-rakennusjatesuunnitelma-document new-rakennuspaikka-document])
+        updated-command                         (assoc command :application application)]
+    (when (seq documents-to-be-removed)
+      (action/update-application updated-command {$pull {:documents {:id {$in documents-to-be-removed}}}}))
+    (when (seq documents-to-be-added)
+      (action/update-application updated-command {$push {:documents {$each documents-to-be-added}}}))))
+
+;;
+;;
+;;
+
 (defn replace-operation
-  [{{app-id :id :as application} :application created :created :as command} op-id operation]
+  [{{app-id :id :as application} :application org :organization created :created :as command} op-id operation]
   (app/add-operation command app-id operation)
-  (let [primary-op?     (= op-id (-> application :primaryOperation :id))
+  (let [organization    @org
+        primary-op?     (= op-id (-> application :primaryOperation :id))
         updated-app     (domain/get-application-no-access-checking app-id)
         new-op          (get-operation-by-key updated-app :created created)
         old-op          (get-operation-by-key updated-app :id op-id)
@@ -104,4 +179,5 @@
         updated-command (assoc updated-command :application updated-app)]
     (move-attachments-from-old-op-to-new updated-command new-op old-op)
     (remove-not-needed-attachment-templates updated-command new-op old-op)
-    (doc-api/do-remove-doc! updated-command old-op-doc app-id (:id old-op-doc))))
+    (doc-api/do-remove-doc! updated-command old-op-doc app-id (:id old-op-doc))
+    (update-documents updated-command organization app-id)))

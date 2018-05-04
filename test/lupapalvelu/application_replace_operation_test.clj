@@ -8,7 +8,8 @@
                    get-operation-by-key replace-op-in-attachment single-operation-attachment?
                    get-existing-operation-attachment-types non-empty-attachment? coll-contains-not-type?
                    new-attachment-duplicates not-needed-templates required-attachments-for-operations
-                   replace-operation-in-attachment?)
+                   replace-operation-in-attachment? get-document-schema-names-for-operation
+                   required-document-schema-names-by-op copy-old-document-data)
 
 (facts "attachments when replacing primary operation"
        (let [op-1           {:name "kerrostalo-rivitalo"
@@ -105,3 +106,35 @@
              (replace-operation-in-attachment? new-op-att-types op-1 attachment-2) => false
              (replace-operation-in-attachment? new-op-att-types op-1 attachment-3) => false
              (replace-operation-in-attachment? new-op-att-types op-1 attachment-4) => true))))
+
+(facts "documents when replacing operation"
+  (let [org {:selected-operations [:tontin-ajoliittyman-muutos :auto-katos]
+             :extended-construction-waste-report-enabled false}
+        app {:primaryOperation {:name :auto-katos}
+             :secondaryOperations [{:name :tontin-ajoliittyman-muutos}]}]
+
+  (fact "document schema names for operation"
+    (get-document-schema-names-for-operation org {:name "tontin-ajoliittyman-muutos"})
+    => ["hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka-ilman-ilmoitusta" "suunnittelija"]
+
+    (get-document-schema-names-for-operation org {:name "auto-katos"})
+    => (concat ["hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"]
+               ["rakennusjatesuunnitelma"]))
+
+  (fact "getting document schema names by operation"
+    (required-document-schema-names-by-op org app)
+    => {:auto-katos #{"hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "rakennusjatesuunnitelma"}
+        :tontin-ajoliittyman-muutos #{"hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka-ilman-ilmoitusta" "suunnittelija"}})
+
+  (fact "copying existing document data to new doc"
+    (copy-old-document-data {:data {:a 1 :b 2 :c 3 :d 4}} {:data {:a nil :b nil :c nil}})
+    => {:data {:a 1 :b 2 :c 3}}
+
+    (copy-old-document-data {:data {:a 1 :b 2 :c 3}} {:data {:a nil :b nil :c nil :d nil}})
+    => {:data {:a 1 :b 2 :c 3 :d nil}}
+
+    (copy-old-document-data {:data {:a 1 :b 2 :c 3 :d 4} :foo "bar"} {:data {:a nil :b nil :c nil}})
+    => {:data {:a 1 :b 2 :c 3}}
+
+    (copy-old-document-data {:data {:a 1 :b 2 :c 3 :d 4}} {:data {:a nil :b nil :c nil} :foo "bar"})
+    => {:data {:a 1 :b 2 :c 3} :foo "bar"})))
