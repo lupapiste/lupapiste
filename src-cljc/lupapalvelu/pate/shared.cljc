@@ -219,11 +219,11 @@
                     :lainvoimainen (required {:date-delta {:unit :days}})
                     :aloitettava   (required {:date-delta {:unit :years}})
                     :voimassa      (required {:date-delta {:unit :years}})}]
-    {:dictionary (merge {:verdict-dates {:loc-text :pate-verdict-dates}
+    {:dictionary (merge {:verdict-dates {:loc-text :pate-verdict-dates-settings}
                          :plus          {:loc-text :plus}}
                         (select-keys date-dicts dates))
      :section    {:id         :verdict-dates
-                  :loc-prefix :pate-verdict-dates
+                  :loc-prefix :pate-verdict-dates-settings
                   :grid       {:columns    17
                                :loc-prefix :pate-verdict
                                :rows       [(date-delta-row dates)]}}}))
@@ -243,7 +243,7 @@
   {:dictionary {:lautakunta-muutoksenhaku (required {:date-delta {:unit :days}})
                 :boardname                (required {:text {}})}
    :section {:id         :board
-             :loc-prefix :pate-verdict.giver.lautakunta
+             :loc-prefix :pate-settings.boardname-title
              :grid       {:columns 4
                           :rows    [[{:loc-prefix :pate-verdict.muutoksenhaku
                                       :dict       :lautakunta-muutoksenhaku}]
@@ -298,14 +298,14 @@
 
 (def setsub-plans
   (settings-repeating {:dict        :plans
-                       :loc-prefix  :pate.plans
+                       :loc-prefix  :pate-settings.plans
                        :add-dict    :add-plan
                        :add-loc     :pate.add-plan
                        :remove-dict :remove-plan}))
 
 (defn setsub-reviews [review-types]
   (-> (settings-repeating {:dict        :reviews
-                           :loc-prefix  :pate-reviews
+                           :loc-prefix  :pate-settings.reviews
                            :add-dict    :add-review
                            :add-loc     :pate.add-review
                            :remove-dict :remove-review})
@@ -403,7 +403,7 @@
                                                     :loc-prefix :pate-r.verdict-code}}
                 :paatosteksti     {:phrase-text {:category :paatosteksti}}}
    :section    {:id         :verdict
-                :loc-prefix :pate-verdict
+                :loc-prefix :pate-verdict-template.verdict-info
                 :grid       {:columns 12
                              :rows    [[{:col  6
                                          :dict :language}]
@@ -421,6 +421,7 @@
                                          :show? :*ref.settings.verdict-code
                                          :dict  :verdict-code}]
                                        [{:col  12
+                                         :loc-prefix :pate-verdict
                                          :dict :paatosteksti}]]}}})
 
 (def temsub-bulletin
@@ -438,14 +439,15 @@
               (let [codename     (name code)
                     included-key (keyword (str codename "-included"))]
                 {:toggle-key code
-                 :toggle     {:toggle {:i18nkey  (keyword (str "pate-r.foremen."
-                                                               codename))
-                                       :enabled? included-key
-                                       :label?   false}}
 
+                 :included     {:toggle {:i18nkey  (keyword (str "pate-r.foremen."
+                                                               codename))
+                                         :label?  false}}
                  :included-key included-key
-                 :included     {:toggle {:i18nkey :pate.available-in-verdict
-                                         :label?  false}}})))
+                 :toggle     {:toggle {:i18nkey :pate.available-in-verdict
+                                       :enabled? included-key
+                                       :label?   false}}})))
+
        (reduce (fn [acc {:keys [toggle-key toggle included-key included]}]
                  (-> acc
                      (assoc-in [:dictionary toggle-key] toggle)
@@ -454,9 +456,9 @@
                                 #(conj (vec %)
                                        {:css :row--extra-tight
                                         :row [{:col  2
-                                               :dict toggle-key}
+                                               :dict included-key}
                                               {:col  2
-                                               :dict included-key}]}))))
+                                               :dict toggle-key}]}))))
                {:section    {:id         :foremen
                              :loc-prefix :pate-r.foremen
                              :grid       {:columns 5
@@ -464,11 +466,11 @@
                 :removable? true})))
 
 (defn settings-dependencies [dict loc-prefix]
-  {:dictionary {dict {:repeating {:selected {:toggle {:enabled?  :-.included
-                                                      :label?    false
+  {:dictionary {dict {:repeating {:included {:toggle {:label?    false
                                                       :text-dict :text}}
                                   :text     {:text {}}
-                                  :included {:toggle {:label?  false
+                                  :selected {:toggle {:enabled?  :-.included
+                                                      :label?  false
                                                       :i18nkey :pate.available-in-verdict}}}
                       :sort-by :text}}
    :section    {:id         dict
@@ -485,9 +487,9 @@
                                                        :repeating dict
                                                        :rows      [{:css :row--extra-tight
                                                                     :row [{:col  2
-                                                                           :dict :selected}
+                                                                           :dict :included}
                                                                           {:col  2
-                                                                           :dict :included}]}]}}]}]}}
+                                                                           :dict :selected}]}]}}]}]}}
    :removable? true})
 
 (def temsub-reviews
@@ -524,7 +526,7 @@
 
 (def temsub-appeal
   {:dictionary {:appeal {:phrase-text {:category :muutoksenhaku
-                                       :i18nkey  :phrase.category.muutoksenhaku}}}
+                                       :i18nkey  :pate-appeal-title}}}
    :section    {:id         :appeal
                 :loc-prefix :pate-appeal
                 :grid       {:columns 1
@@ -842,7 +844,7 @@
          reviews? :reviews} (zipmap args (repeat true))]
     {:dictionary
      (->> [(when foremen? [:pate-r.foremen :foremen false false])
-           (when plans? [:pate-plans :plans true false])
+           (when plans? [:pate.plans :plans true false])
            (when reviews? [:pate-reviews :reviews true true])]
           (remove nil?)
           (reduce (fn [acc [loc-prefix kw term? separator?]]
@@ -958,7 +960,7 @@
                                   :template-section :purpose}}
    :section
    {:id         :complexity
-    :loc-prefix :pate.complexity
+    :loc-prefix :pate-complexity
     :show?      [:OR :?.complexity :?.rights :?.purpose]
     :grid       {:columns 7
                  :rows    [{:show? :?.complexity
