@@ -11,6 +11,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.factlet :as fl]
             [lupapalvelu.operations :as op]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.xml.emit :refer :all]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer :all]
             [midje.sweet :refer :all]
@@ -947,6 +948,8 @@
 (testable-privates lupapalvelu.document.rakennuslupa-canonical get-operations)
 
 (facts "Toimenpiteet - operation canonical is implemented for all r-operation documents"
+  (against-background
+    (org/pate-org? irrelevant) => false)
   (let [operations (map (partial hash-map :id) (range 100))
         actions (->> (vals op/r-operations)
                      (map (util/fn->> :schema (assoc {} :name)))
@@ -1026,6 +1029,8 @@
 (testable-privates lupapalvelu.document.rakennuslupa-canonical get-rakennus)
 
 (facts "When muu-lammonlahde is empty, lammonlahde is used"
+  (against-background
+    (org/pate-org? irrelevant) => false)
   (let [doc (tools/unwrapped {:schema-info {:name "uusiRakennus"}
                               :data {:lammitys {:lammitystapa {:value nil}
                                                :lammonlahde  {:value "turve"}
@@ -1034,6 +1039,8 @@
     (fact (:polttoaine (:lammonlahde (:rakennuksenTiedot rakennus))) => "turve")))
 
 (fact "LPK-427: When energiatehokkuusluku is set, energiatehokkuusluvunYksikko is included"
+  (against-background
+    (org/pate-org? irrelevant) => false)
   (let [doc (tools/unwrapped {:schema-info {:name "uusiRakennus"}
                               :data {:luokitus {:energiatehokkuusluku {:value "124"}
                                                 :energiatehokkuusluvunYksikko {:value "kWh/m2"}}}})
@@ -1041,6 +1048,8 @@
     (get-in rakennus [:rakennuksenTiedot :energiatehokkuusluvunYksikko]) => "kWh/m2"))
 
 (fact "LPK-427: When energiatehokkuusluku is not set, energiatehokkuusluvunYksikko is excluded"
+  (against-background
+    (org/pate-org? irrelevant) => false)
   (let [doc (tools/unwrapped {:schema-info {:name "uusiRakennus"}
                               :data {:luokitus {:energiatehokkuusluku {:value ""}
                                                 :energiatehokkuusluvunYksikko {:value "kWh/m2"}}}})
@@ -1048,6 +1057,8 @@
     (get-in rakennus [:rakennuksenTiedot :energiatehokkuusluvunYksikko]) => nil))
 
 (facts "When muu-lammonlahde is specified, it is used"
+  (against-background
+    (org/pate-org? irrelevant) => false)
   (let [doc (tools/unwrapped {:schema-info {:name "uusiRakennus"}
                               :data {:lammitys {:lammitystapa {:value nil}
                                                 :lammonlahde  {:value "other"}
@@ -1056,6 +1067,8 @@
     (fact (:muu (:lammonlahde (:rakennuksenTiedot rakennus))) => "fuusioenergialla")))
 
 (facts "rakennuksenTiedot"
+  (against-background
+    (org/pate-org? irrelevant) => false)
   (let [doc (tools/unwrapped (assoc-in uusi-rakennus [:data :varusteet :liitettyJatevesijarjestelmaanKytkin :value] true))
         {tiedot :rakennuksenTiedot} (get-rakennus application-rakennuslupa doc)]
 
@@ -1113,86 +1126,133 @@
     (= actual (-> version (:created) (util/to-xml-date)))
     (ss/blank? actual)))
 
-(fl/facts* "Canonical model is correct"
-  (let [canonical (application-to-canonical application-rakennuslupa "sv") => truthy
-        rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
-        rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
-        rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
+(facts "Canonical model is correct"
+  (against-background
+    (org/pate-org? irrelevant) => false)
+  (let [canonical (application-to-canonical application-rakennuslupa "sv")
+        rakennusvalvonta (:Rakennusvalvonta canonical)
+        rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta)
+        rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto)
 
-        toimituksenTiedot (:toimituksenTiedot rakennusvalvonta) => truthy
-        aineistonnimi (:aineistonnimi toimituksenTiedot ) => "s"
-        lausuntotieto (first (:lausuntotieto rakennusvalvontaasia))  => truthy
-        Lausunto (:Lausunto lausuntotieto) => truthy
-        viranomainen (:viranomainen Lausunto) => "Paloviranomainen"
-        pyyntoPvm (:pyyntoPvm Lausunto) => "2013-05-09"
-        lausuntotieto (:lausuntotieto Lausunto) => truthy
-        LL (:Lausunto lausuntotieto) => truthy  ;Lausunto oli jo kaytossa, siksi LL
-        viranomainen (:viranomainen LL) => "Paloviranomainen"
-        lausunto (:lausunto LL) => "Savupiippu pit\u00e4\u00e4 olla."
-        lausuntoPvm (:lausuntoPvm LL) => "2013-05-09"
-        Puolto (-> LL :puoltotieto :Puolto) => truthy
-        puolto (:puolto Puolto) => "ehdollinen"
+        toimituksenTiedot (:toimituksenTiedot rakennusvalvonta)
+        aineistonnimi (:aineistonnimi toimituksenTiedot )
+        lausuntotieto (first (:lausuntotieto rakennusvalvontaasia))
+        Lausunto (:Lausunto lausuntotieto)
+        viranomainen (:viranomainen Lausunto)
+        pyyntoPvm (:pyyntoPvm Lausunto)
+        lausuntotieto (:lausuntotieto Lausunto)
+        LL (:Lausunto lausuntotieto)  ;Lausunto oli jo kaytossa, siksi LL
+        viranomainen (:viranomainen LL)
+        lausunto (:lausunto LL)
+        lausuntoPvm (:lausuntoPvm LL)
+        Puolto (-> LL :puoltotieto :Puolto)
+        puolto (:puolto Puolto)
 
-        osapuolettieto (:osapuolettieto rakennusvalvontaasia) => truthy
-        osapuolet (:Osapuolet osapuolettieto) => truthy
-        osapuolitieto-hakija (first (:osapuolitieto osapuolet)) => truthy
-        osapuolitieto-hakijan-asiamies (first (filter #(= (get-in % [:Osapuoli :kuntaRooliKoodi]) "Hakijan asiamies") (:osapuolitieto osapuolet))) => truthy
-        hakija-osapuoli1 (:Osapuoli osapuolitieto-hakija) => truthy
-        hakijan-asiamies1 (:Osapuoli osapuolitieto-hakijan-asiamies) => truthy
-        suunnittelijat (:suunnittelijatieto osapuolet) => truthy
-        paasuunnitelija (:Suunnittelija (last suunnittelijat)) => truthy
-        tyonjohtajat (:tyonjohtajatieto osapuolet) => truthy
-        tyonjohtajatieto (:Tyonjohtaja (last tyonjohtajat)) => truthy
+        osapuolettieto (:osapuolettieto rakennusvalvontaasia)
+        osapuolet (:Osapuolet osapuolettieto)
+        osapuolitieto-hakija (first (:osapuolitieto osapuolet))
+        osapuolitieto-hakijan-asiamies (first (filter #(= (get-in % [:Osapuoli :kuntaRooliKoodi]) "Hakijan asiamies") (:osapuolitieto osapuolet)))
+        hakija-osapuoli1 (:Osapuoli osapuolitieto-hakija)
+        hakijan-asiamies1 (:Osapuoli osapuolitieto-hakijan-asiamies)
+        suunnittelijat (:suunnittelijatieto osapuolet)
+        paasuunnitelija (:Suunnittelija (last suunnittelijat))
+        tyonjohtajat (:tyonjohtajatieto osapuolet)
+        tyonjohtajatieto (:Tyonjohtaja (last tyonjohtajat))
 
-        ;naapuritieto (:naapuritieto osapuolet) => truthy
-        ;naapuricount (count naapuritieto) => 2
-        ;naapuri (first naapuritieto) => truthy
-        ;Naapuri (:Naapuri naapuri) => truthy
-        ;naapuri-henkilo (:henkilo Naapuri) => "PORTAALIA TESTAA"
-        ;kiiteistotunnus (:kiinteistotunnus Naapuri) => "75342600060211"
-        ;hallintasuhde (:hallintasuhde Naapuri) => "Ei tiedossa"
+        sijaistus (:sijaistustieto tyonjohtajatieto)
+        sijaistus (:Sijaistus (last sijaistus))
+        rakennuspaikkatiedot (:rakennuspaikkatieto rakennusvalvontaasia)
+        rakennuspaikkatieto (first rakennuspaikkatiedot)
+        rakennuspaikka (:Rakennuspaikka rakennuspaikkatieto)
+        rakennuspaikanKiinteistotieto (:rakennuspaikanKiinteistotieto rakennuspaikka)
+        RakennuspaikanKiinteistotieto (:RakennuspaikanKiinteisto rakennuspaikanKiinteistotieto)
+        kiinteistotieto (:kiinteistotieto RakennuspaikanKiinteistotieto)
+        Kiinteisto (:Kiinteisto kiinteistotieto)
+        kaavatilanne (:kaavatilanne rakennuspaikka)
+        toimenpiteet(:toimenpidetieto rakennusvalvontaasia)
 
-        ;naapuri (last naapuritieto) => truthy
-        ;Naapuri (:Naapuri naapuri) => truthy
-        ;naapuri-henkilo (:henkilo Naapuri) => "L\u00f6nnqvist, Rauno Georg Christian"
-        ;kiiteistotunnus (:kiinteistotunnus Naapuri) => "75342600090092"
-        ;hallintasuhde (:hallintasuhde Naapuri) => "Ei tiedossa"
+        toimenpide (:Toimenpide (nth toimenpiteet 1))
+        muu-muutostyo (:Toimenpide (nth toimenpiteet 0))
+        laajennus-t (:Toimenpide (nth toimenpiteet 2))
+        purku-t (:Toimenpide (nth toimenpiteet 4))
+        kaupunkikuva-t (:Toimenpide (nth toimenpiteet 3))
 
-        sijaistus (:sijaistustieto tyonjohtajatieto) => truthy
-        sijaistus (:Sijaistus (last sijaistus)) = truthy
-        rakennuspaikkatiedot (:rakennuspaikkatieto rakennusvalvontaasia) => truthy
-        rakennuspaikkatieto (first rakennuspaikkatiedot) => truthy
-        rakennuspaikka (:Rakennuspaikka rakennuspaikkatieto) => truthy
-        rakennuspaikanKiinteistotieto (:rakennuspaikanKiinteistotieto rakennuspaikka) => truthy
-        RakennuspaikanKiinteistotieto (:RakennuspaikanKiinteisto rakennuspaikanKiinteistotieto) => truthy
-        kiinteistotieto (:kiinteistotieto RakennuspaikanKiinteistotieto) => truthy
-        Kiinteisto (:Kiinteisto kiinteistotieto) => truthy
-        kaavatilanne (:kaavatilanne rakennuspaikka) => truthy
-        toimenpiteet(:toimenpidetieto rakennusvalvontaasia) => truthy
+        rakennustieto (:rakennustieto toimenpide)
+        rakennus (:Rakennus rakennustieto)
+        rakennuksen-omistajatieto (:Omistaja(first (:omistajatieto rakennus)))
+        rakennuksentiedot (:rakennuksenTiedot rakennus)
+        lisatiedot (:lisatiedot rakennusvalvontaasia)
+        Lisatiedot (:Lisatiedot lisatiedot)
+        kayttotapaus (:kayttotapaus rakennusvalvontaasia)
+        asianTiedot (:asianTiedot rakennusvalvontaasia)
+        Asiantiedot (:Asiantiedot asianTiedot)
+        vahainen-poikkeaminen (:vahainenPoikkeaminen Asiantiedot)
+        rakennusvalvontasian-kuvaus (:rakennusvalvontaasianKuvaus Asiantiedot)
+        luvanTunnisteTiedot (:luvanTunnisteTiedot rakennusvalvontaasia)
+        LupaTunnus (:LupaTunnus luvanTunnisteTiedot)
+        muuTunnustieto (:muuTunnustieto LupaTunnus)
+        MuuTunnus (:MuuTunnus muuTunnustieto)
+        kasittelynTilatieto (:kasittelynTilatieto rakennusvalvontaasia)
+        avainsanatieto (:avainsanaTieto rakennusvalvontaasia)]
 
-        toimenpide (:Toimenpide (nth toimenpiteet 1)) => truthy
-        muu-muutostyo (:Toimenpide (nth toimenpiteet 0)) => truthy
-        laajennus-t (:Toimenpide (nth toimenpiteet 2)) => truthy
-        purku-t (:Toimenpide (nth toimenpiteet 4)) => truthy
-        kaupunkikuva-t (:Toimenpide (nth toimenpiteet 3)) => truthy
-
-        rakennustieto (:rakennustieto toimenpide) => truthy
-        rakennus (:Rakennus rakennustieto) => truthy
-        rakennuksen-omistajatieto (:Omistaja(first (:omistajatieto rakennus))) => truthy
-        rakennuksentiedot (:rakennuksenTiedot rakennus) => truthy
-        lisatiedot (:lisatiedot rakennusvalvontaasia) => truthy
-        Lisatiedot (:Lisatiedot lisatiedot) => truthy
-        kayttotapaus (:kayttotapaus rakennusvalvontaasia) => truthy
-        asianTiedot (:asianTiedot rakennusvalvontaasia) => truthy
-        Asiantiedot (:Asiantiedot asianTiedot) => truthy
-        vahainen-poikkeaminen (:vahainenPoikkeaminen Asiantiedot) => truthy
-        rakennusvalvontasian-kuvaus (:rakennusvalvontaasianKuvaus Asiantiedot) => truthy
-        luvanTunnisteTiedot (:luvanTunnisteTiedot rakennusvalvontaasia) => truthy
-        LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
-        muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
-        MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
-        kasittelynTilatieto (:kasittelynTilatieto rakennusvalvontaasia) => truthy
-        avainsanatieto (:avainsanaTieto rakennusvalvontaasia) => truthy]
+    (fact "canonical"                       canonical => truthy)
+    (fact "rakennusvalvonta"                rakennusvalvonta => truthy)
+    (fact "rakennusvalvontaasiatieto"       rakennusvalvontaasiatieto => truthy)
+    (fact "rakennusvalvontaasia"            rakennusvalvontaasia => truthy)
+    (fact "toimituksenTiedot"               toimituksenTiedot => truthy)
+    (fact "aineistonnimi"                   aineistonnimi => truthy)
+    (fact "lausuntotieto"                   lausuntotieto => truthy)
+    (fact "Lausunto"                        Lausunto => truthy)
+    (fact "viranomainen"                    viranomainen => truthy)
+    (fact "pyyntoPvm"                       pyyntoPvm => truthy)
+    (fact "lausuntotieto"                   lausuntotieto => truthy)
+    (fact "LL"                              LL => truthy)  ;Lausunto oli jo kaytossa, siksi LL
+    (fact "viranomainen"                    viranomainen => truthy)
+    (fact "lausunto"                        lausunto => truthy)
+    (fact "lausuntoPvm"                     lausuntoPvm => truthy)
+    (fact "Puolto"                          Puolto => truthy)
+    (fact "puolto"                          puolto => truthy)
+    (fact "osapuolettieto"                  osapuolettieto => truthy)
+    (fact "osapuolet"                       osapuolet => truthy)
+    (fact "osapuolitieto-hakija"            osapuolitieto-hakija  => truthy)
+    (fact "osapuolitieto-hakijan-asiamies"  osapuolitieto-hakijan-asiamies => truthy)
+    (fact "hakija-osapuoli1"                hakija-osapuoli1 => truthy)
+    (fact "hakijan-asiamies1"               hakijan-asiamies1 => truthy)
+    (fact "suunnittelijat"                  suunnittelijat => truthy)
+    (fact "paasuunnitelija"                 paasuunnitelija => truthy)
+    (fact "tyonjohtajat"                    tyonjohtajat => truthy)
+    (fact "tyonjohtajatieto"                tyonjohtajatieto => truthy)
+    (fact "rakennuspaikkatiedot"            rakennuspaikkatiedot => truthy)
+    (fact "rakennuspaikkatieto"             rakennuspaikkatieto => truthy)
+    (fact "rakennuspaikka"                  rakennuspaikka => truthy)
+    (fact "rakennuspaikanKiinteistotieto"   rakennuspaikanKiinteistotieto => truthy)
+    (fact "RakennuspaikanKiinteistotieto"   RakennuspaikanKiinteistotieto => truthy)
+    (fact "kiinteistotieto"                 kiinteistotieto => truthy)
+    (fact "Kiinteisto"                      Kiinteisto => truthy)
+    (fact "Kiinteisto"                      Kiinteisto => truthy)
+    (fact "toimenpiteet"                    toimenpiteet => truthy
+    (fact "toimenpide"                      toimenpide => truthy)
+    (fact "muu-muutostyo"                   muu-muutostyo => truthy)
+    (fact "laajennus-t"                     laajennus-t => truthy)
+    (fact "purku-t"                         purku-t => truthy)
+    (fact "kaupunkikuva-t"                  kaupunkikuva-t  => truthy)
+    (fact "rakennustieto"                   rakennustieto => truthy)
+    (fact "rakennus"                        rakennus => truthy)
+    (fact "rakennuksen-omistajatieto"       rakennuksen-omistajatieto => truthy)
+    (fact "rakennuksentiedot"               rakennuksentiedot => truthy)
+    (fact "lisatiedot"                      lisatiedot => truthy)
+    (fact "Lisatiedot"                      Lisatiedot => truthy)
+    (fact "kayttotapaus"                    kayttotapaus => truthy)
+    (fact "asianTiedot"                     asianTiedot => truthy)
+    (fact "Asiantiedot"                     Asiantiedot => truthy)
+    (fact "vahainen-poikkeaminen"           vahainen-poikkeaminen => truthy)
+    (fact "rakennusvalvontasian-kuvaus"     rakennusvalvontasian-kuvaus => truthy)
+    (fact "luvanTunnisteTiedot"             luvanTunnisteTiedot => truthy)
+    (fact "LupaTunnus"                      LupaTunnus => truthy)
+    (fact "muuTunnustieto"                  muuTunnustieto => truthy)
+    (fact "MuuTunnus"                       MuuTunnus => truthy)
+    (fact "kasittelynTilatieto"             kasittelynTilatieto => truthy)
+    (fact "avainsanatieto"                  avainsanatieto => truthy)
 
     (fact "contains nil" (util/contains-value? canonical nil?) => falsey)
     (fact "paasuunnitelija" paasuunnitelija => (contains {:suunnittelijaRoolikoodi "p\u00e4\u00e4suunnittelija"}))
@@ -1291,22 +1351,36 @@
           (:lausuntotieto lausunto2) => nil
           (keys lausunto2) => (just [:id :pyyntoPvm :viranomainen] :in-any-order))))
 
-    (fact "menttelyTos" (:menettelyTOS rakennusvalvontaasia) => "tos menettely")))
+    (fact "menttelyTos" (:menettelyTOS rakennusvalvontaasia) => "tos menettely"))))
 
-(fl/facts* "Canonical model ilman ilmoitusta is correct"
-  (let [canonical (application-to-canonical application-rakennuslupa-ilman-ilmoitusta "sv") => truthy
-        rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
-        rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
-        rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
-        rakennuspaikkatiedot (:rakennuspaikkatieto rakennusvalvontaasia) => truthy
-        rakennuspaikkatieto2 (first rakennuspaikkatiedot) => truthy
-        rakennuspaikka2 (:Rakennuspaikka rakennuspaikkatieto2) => truthy
-        rakennuspaikanKiinteistotieto2 (:rakennuspaikanKiinteistotieto rakennuspaikka2) => truthy
-        RakennuspaikanKiinteistotieto2 (:RakennuspaikanKiinteisto rakennuspaikanKiinteistotieto2) => truthy
-        kiinteistotieto2 (:kiinteistotieto RakennuspaikanKiinteistotieto2) => truthy
-        Kiinteisto2 (:Kiinteisto kiinteistotieto2) => truthy
-        kaavatilanne2 (:kaavatilanne rakennuspaikka2) => truthy]
+(facts "Canonical model ilman ilmoitusta is correct"
+  (against-background
+    (org/pate-org? irrelevant) => false)
+  (let [canonical (application-to-canonical application-rakennuslupa-ilman-ilmoitusta "sv")
+        rakennusvalvonta (:Rakennusvalvonta canonical)
+        rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta)
+        rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto)
+        rakennuspaikkatiedot (:rakennuspaikkatieto rakennusvalvontaasia)
+        rakennuspaikkatieto2 (first rakennuspaikkatiedot)
+        rakennuspaikka2 (:Rakennuspaikka rakennuspaikkatieto2)
+        rakennuspaikanKiinteistotieto2 (:rakennuspaikanKiinteistotieto rakennuspaikka2)
+        RakennuspaikanKiinteistotieto2 (:RakennuspaikanKiinteisto rakennuspaikanKiinteistotieto2)
+        kiinteistotieto2 (:kiinteistotieto RakennuspaikanKiinteistotieto2)
+        Kiinteisto2 (:Kiinteisto kiinteistotieto2)
+        kaavatilanne2 (:kaavatilanne rakennuspaikka2)]
 
+    (fact "canonical" canonical => truthy)
+    (fact "rakennusvalvonta" (:Rakennusvalvonta canonical) => truthy)
+    (fact "rakennusvalvontaasiatieto" (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy)
+    (fact "rakennusvalvontaasia" (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy)
+    (fact "rakennuspaikkatiedot" (:rakennuspaikkatieto rakennusvalvontaasia) => truthy)
+    (fact "rakennuspaikkatieto2" (first rakennuspaikkatiedot) => truthy)
+    (fact "rakennuspaikka2" (:Rakennuspaikka rakennuspaikkatieto2) => truthy)
+    (fact "rakennuspaikanKiinteistotieto2" (:rakennuspaikanKiinteistotieto rakennuspaikka2) => truthy)
+    (fact "RakennuspaikanKiinteistotieto2" (:RakennuspaikanKiinteisto rakennuspaikanKiinteistotieto2) => truthy)
+    (fact "kiinteistotieto2" (:kiinteistotieto RakennuspaikanKiinteistotieto2) => truthy)
+    (fact "Kiinteisto2" (:Kiinteisto kiinteistotieto2) => truthy)
+    (fact "kaavatilanne2" (:kaavatilanne rakennuspaikka2) => truthy)
     (fact "contains nil" (util/contains-value? canonical nil?) => falsey)
     (fact "rakennuspaikkojen maara" (count rakennuspaikkatiedot) => 1)
     (fact "tilanNimi (ilman ilmoitusta)" (:tilannimi Kiinteisto2) => "Eramaa")
@@ -1319,14 +1393,22 @@
       (fact "mapping has added correct :kaavanaste to canonical" (:kaavanaste rakennuspaikka2) => "ei tiedossa"))))
 
 
-(fl/facts* "Canonical model has correct puolto"
+(facts "Canonical model has correct puolto"
+  (against-background
+    (org/pate-org? irrelevant) => false)
   (let [application (assoc-in application-rakennuslupa [:statements 0 :status] "palautettu")
-        canonical (application-to-canonical application "sv") => truthy
-        rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
-        rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
-        rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
-        puolto (-> rakennusvalvontaasia :lausuntotieto first :Lausunto :lausuntotieto :Lausunto :puoltotieto :Puolto :puolto) => truthy]
-    puolto => "palautettu"))
+        canonical (application-to-canonical application "sv")
+        rakennusvalvonta (:Rakennusvalvonta canonical)
+        rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta)
+        rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto)
+        puolto (-> rakennusvalvontaasia :lausuntotieto first :Lausunto :lausuntotieto :Lausunto :puoltotieto :Puolto :puolto)]
+
+    (fact "canonical" (application-to-canonical application "sv") => truthy)
+    (fact "rakennusvalvonta" (:Rakennusvalvonta canonical) => truthy)
+    (fact "rakennusvalvontaasiatieto" (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy)
+    (fact "rakennusvalvontaasia" (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy)
+    (fact "puolto" (-> rakennusvalvontaasia :lausuntotieto first :Lausunto :lausuntotieto :Lausunto :puoltotieto :Puolto :puolto) => truthy)
+    (fact "puolto value" puolto => "palautettu")))
 
 (defn check-common-tyonjohtaja-canonical [case application]
   (fact {:midje/description (str case " canonical")}
