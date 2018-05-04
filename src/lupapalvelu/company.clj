@@ -268,7 +268,8 @@
    (assoc data :customAccountLimit nil)))
 
 (defn account-type-changing-with-custom? [{old-type :accountType} {new-type :accountType}]
-  (and (not= old-type new-type)
+  (and new-type
+       (not= old-type new-type)
        (or (= :custom (keyword old-type))
            (= :custom (keyword new-type)))))
 
