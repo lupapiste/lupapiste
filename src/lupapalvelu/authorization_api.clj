@@ -304,9 +304,8 @@
 
 (defn- pate-enabled
   [{:keys [organization]}]
-  (when (or (and organization
-                 (not (:pate-enabled @organization)))
-            (not (env/enable-feature! :pate-json)))
+  (when (and organization
+             (not (:pate-enabled @organization)))
     (fail :error.pate-disabled)))
 
 (defcommand unsubscribe-notifications
