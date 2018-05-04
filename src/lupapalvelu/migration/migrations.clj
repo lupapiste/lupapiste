@@ -3826,6 +3826,15 @@
                            {$push {:history {:state "ready"
                                              :ts ts
                                              :user usr/migration-user-summary}}})))
+
+(defmigration remove-handlers-from-drafts
+  {:apply-when (pos? (mongo/count :applications {:state      "draft"
+                                                 :handlers.0 {$exists true}}))}
+  (mongo/update-by-query :applications
+                         {:state      "draft"
+                          :handlers.0 {$exists true}}
+                         {$set {:handlers []}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

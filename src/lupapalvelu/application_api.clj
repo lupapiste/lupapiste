@@ -639,22 +639,23 @@
       (archiving-util/mark-application-archived-if-done application (:created command) user))))
 
 (defcommand return-to-draft
-  {:description "Returns the application to draft state."
+  {:description      "Returns the application to draft state."
    :parameters       [id text lang]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :permissions      [{:required [:application/change-state]}]
-   :states #{:submitted}
-   :pre-checks [(partial sm/validate-state-transition :draft)]
-   :on-success (notify :application-return-to-draft)}
+   :states           #{:submitted}
+   :pre-checks       [(partial sm/validate-state-transition :draft)]
+   :on-success       (notify :application-return-to-draft)}
   [{{:keys [role] :as user}         :user
     {:keys [state] :as application} :application
     created                         :created
-    :as command}]
+    :as                             command}]
   (->> (util/deep-merge
         (app-state/state-transition-update :draft created application user)
         (when (seq text)
           (comment/comment-mongo-update state text {:type "application"} role false user nil created))
-        {$set {:submitted nil}})
+        {$set {:submitted nil
+               :handlers  []}})
        (update-application command)))
 
 (defcommand change-warranty-start-date
