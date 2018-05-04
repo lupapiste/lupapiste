@@ -207,7 +207,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   });
 
   self.showToggleEdit = function () {
-    return self.docModel.schema.info.editable &&
+    return self.docModel.schema.info["post-verdict-editable"] &&
            self.docModel.authorizationModel.ok("update-post-verdict-doc");
   };
 

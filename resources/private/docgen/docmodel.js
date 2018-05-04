@@ -172,20 +172,19 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.isApproved = self.approvalModel.isApproved;
 
   self.isPostVerdictEdited = function () {
-    return self.meta && _.get( self.meta, "_post_verdict_edit.timestamp") > 0;
+    return _.get( self.meta, "_post_verdict_edit.timestamp") > 0;
   };
 
   self.isPostVerdictSent = function () {
-    return self.meta && _.get( self.meta, "_post_verdict_sent.timestamp") > 0;
+    return _.get( self.meta, "_post_verdict_sent.timestamp") > 0;
   };
 
   self.noteText = function(noteData, type) {
     var text = null;
     if(noteData && noteData.user && noteData.timestamp) {
-      text = sprintf("%s %s%s %s %s",
+      text = sprintf("%s %s: %s %s",
         loc(["document", type]),
         moment(noteData.timestamp).format("D.M.YYYY HH:mm"),
-        ":",
         noteData.user.firstName,
         noteData.user.lastName);
     }
@@ -254,7 +253,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (self.docPostVerdictEdit && self.authorizationModel.ok("update-post-verdict-doc")) {
       return "update-post-verdict-doc";
     }
-    return (options && options.updateCommand) ? options.updateCommand : "update-doc";
+    return _.get( options, "updateCommand", "update-doc" );
   }
 
   // Element constructors

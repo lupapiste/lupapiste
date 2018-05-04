@@ -188,7 +188,7 @@
 (defcommand send-doc-updates
   {:parameters       [id docId]
    :categories       #{:documents}
-   :input-validators [(partial action/non-blank-parameters [:id])]
+   :input-validators [(partial action/non-blank-parameters [:id :docId])]
    :states           states/post-verdict-states
    :contexts         [document-context]
    :permissions      document-edit-permissions

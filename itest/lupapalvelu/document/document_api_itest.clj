@@ -423,9 +423,9 @@
 
     (fact "Now document can be modified"
       (command sonja :update-post-verdict-doc :id application-id :doc building-doc-id :updates [["mitat.tilavuus" "2000"]
-                                                                                                   ["mitat.kerrosala" "600"]
-                                                                                                   ["mitat.kokonaisala" "1000"]
-                                                                                                   ["mitat.kerrosluku" "3"]]) => ok?)
+                                                                                                ["mitat.kerrosala" "600"]
+                                                                                                ["mitat.kokonaisala" "1000"]
+                                                                                                ["mitat.kerrosluku" "3"]]) => ok?)
 
     (fact "But no owner details can be modified"
       (command sonja :update-post-verdict-doc :id application-id :doc building-doc-id :updates [["rakennuksenOmistajat.henkilo.henkilotiedot.etunimi" "Herkko"]])

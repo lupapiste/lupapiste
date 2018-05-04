@@ -312,7 +312,6 @@
    (opt :uicomponent)          sc/Keyword   ;; Component name for special components
    (opt :layout)               (sc/enum :vertical :horizontal) ;; Force group layout
    (opt :approvable)           sc/Bool      ;; Approvable by authority
-   (opt :editable)             sc/Bool      ;; Editable by authority after PATE verdict is given
    (opt :repeating)            sc/Bool      ;; Array of groups
    (opt :repeating-init-empty) sc/Bool      ;; Init repeating group as empty array (default false)
    (opt :removable)            sc/Bool      ;;
@@ -379,7 +378,7 @@
           (opt :group-help)                  (sc/maybe sc/Str) ;; TODO: remove nils?
           (opt :section-help)                (sc/maybe sc/Str) ;; TODO: remove nils?
           (opt :approvable)                  sc/Bool    ;;
-          (opt :editable)                    (sc/maybe sc/Bool) ;;
+          (opt :post-verdict-editable)       sc/Bool    ;; Editable by authority after PATE verdict is given
           (opt :repeating)                   sc/Bool    ;;
           (opt :removable-by)                (sc/enum :authority :all :none)
           (opt :disableable)                 sc/Bool    ;;
