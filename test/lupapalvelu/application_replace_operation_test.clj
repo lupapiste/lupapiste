@@ -7,8 +7,8 @@
 (testable-privates lupapalvelu.application-replace-operation
                    get-operation-by-key replace-op-in-attachment single-operation-attachment?
                    get-existing-operation-attachment-types non-empty-attachment? coll-contains-not-type?
-                   updated-new-op-attachments remove-new-attachment-duplicates required-attachments-for-operations
-                   remove-not-needed-attachment-templates)
+                   new-attachment-duplicates not-needed-templates required-attachments-for-operations
+                   replace-operation-in-attachment?)
 
 (facts "attachments when replacing primary operation"
        (let [op-1           {:name "kerrostalo-rivitalo"
@@ -40,7 +40,21 @@
              attachment-6 {:type {:type-group "paapiirustus" :type-id "julkisivupiirros"}
                            :versions []
                            :id "6"
-                           :op [op-1]}]
+                           :op [op-1]}
+             attachment-7 {:type {:type-group "ennakkoluvat_ja_lausunnot" :type-id "naapurin_kuuleminen"}
+                           :versions []
+                           :id "7"
+                           :op []}
+             attachment-8  {:type {:type-group "paapiirustus" :type-id "leikkauspiirros"}
+                            :versions []
+                            :id "8"
+                            :op [op-3]}
+             application-1 {:attachments [attachment-1 attachment-3 attachment-7]
+                            :primaryOperation op-1
+                            :secondaryOperations [op-3]}
+             application-2 {:attachments [attachment-5]
+                            :primaryOperation op-1
+                            :secondaryOperations [op-3]}]
 
          (fact "getting operations in application by key and value pair"
            (get-operation-by-key {:secondaryOperations [{:a 1 :c "d"} {:b 2 :e "f"}]} :a 1)
@@ -70,16 +84,24 @@
            (non-empty-attachment? attachment-1) => true
            (non-empty-attachment? attachment-4) => false)
 
-         (fact "a collection of attachments has the attachment in question"
+         (fact "a collection of attachments has the attachment in question of attachments to be deleted"
            (coll-contains-not-type? [attachment-1 attachment-2 attachment-3] attachment-3) => false
            (coll-contains-not-type? [attachment-1 attachment-2 attachment-3] attachment-5) => true)
 
-         (fact "new operation gets to keep all uploaded attachments, and those empty attachment that don't have uploded attachment"
-           (updated-new-op-attachments [] [attachment-1 attachment-3])
-           => [attachment-1 attachment-3]
+         (fact "empty attachments that are duplicates appear on a list"
+           (new-attachment-duplicates [attachment-1 attachment-4 attachment-6] op-1) => ["6"]
+           (new-attachment-duplicates [attachment-4 attachment-6] op-1) => [])
 
-           (updated-new-op-attachments [attachment-4 attachment-5] [])
-           => [attachment-5 attachment-4]
+         (fact "not needed empty attachments appear on a list of attachments to be deleted"
+           (not-needed-templates "753-R" application-1 {:id "3"}) => ["7"]
+           (not-needed-templates "753-R" application-2 {:id "3"}) => []
+           (provided (#'lupapalvelu.application-replace-operation/required-attachments-for-operations anything anything)
+                     => #{{:type-group "paapiirustus" :type-id "leikkauspiirros"}}))
 
-           (updated-new-op-attachments [attachment-4 attachment-5] [attachment-1 attachment-3])
-           => [attachment-5 attachment-1 attachment-3])))
+         (fact "operation in attachment is replaced when necessary"
+           (let [new-op-att-types #{{:type-group "paapiirustus" :type-id "julkisivupiirros"}
+                                    {:type-group "paapiirustus" :type-id "pohjapiirustus"}}]
+             (replace-operation-in-attachment? new-op-att-types op-1 attachment-1) => true
+             (replace-operation-in-attachment? new-op-att-types op-1 attachment-2) => false
+             (replace-operation-in-attachment? new-op-att-types op-1 attachment-3) => false
+             (replace-operation-in-attachment? new-op-att-types op-1 attachment-4) => true))))
