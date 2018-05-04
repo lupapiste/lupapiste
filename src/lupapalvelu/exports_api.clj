@@ -1,14 +1,15 @@
 (ns lupapalvelu.exports-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [monger.operators :refer :all]
-            [sade.strings :as ss]
-            [sade.util :as util]
             [sade.core :refer [ok]]
+            [sade.env :as env]
+            [sade.util :as util]
+            [sade.strings :as ss]
             [lupapalvelu.action :refer [defexport] :as action]
             [lupapalvelu.application :as application]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.exports :as exports :refer [application-to-salesforce exported-application validate-application-export-data]]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.domain :as domain]))
+            [lupapalvelu.mongo :as mongo]))
 
 
 (defn- export [collection query fields]
@@ -56,11 +57,12 @@
         raw-applications (mongo/snapshot :applications query fields)]
     (ok :applications (map application-to-salesforce raw-applications))))
 
-(defexport export-archive-api-usage
-  {:user-roles #{:trusted-salesforce}}
-  [{{start-ts :startTimestampMillis
-     end-ts   :endTimestampMillis} :data user :user}]
-  (ok :documents (exports/archive-api-usage-to-salesforce start-ts end-ts)))
+(when (env/feature? :api-usage-export)
+  (defexport export-archive-api-usage
+   {:user-roles #{:trusted-salesforce}}
+   [{{start-ts :startTimestampMillis
+      end-ts   :endTimestampMillis} :data user :user}]
+   (ok :documents (exports/archive-api-usage-to-salesforce start-ts end-ts))))
 
 
 (defexport export-organizations

@@ -2,6 +2,7 @@
   (:require [lupapalvelu.itest-util :refer :all]
             [midje.sweet :refer :all]
             [sade.core :refer [now]]
+            [sade.env :as env]
             [sade.strings :as ss]))
 
 (apply-remote-minimal)
@@ -134,25 +135,26 @@
           (fact "suffix" (:description op) => #(ss/ends-with % "..."))
           (fact "length 255" (count (:description op)) => 255))))))
 
-(facts "Archive API usage Salesforce export"
-  (let [endpoint (str (server-address) "/data-api/json/export-archive-api-usage")]
-    (doseq [tester [{:role "trusted-etl"
-                     :auth ["solita-etl" "solita-etl"]}
-                    {:role "applicant"
-                     :auth ["pena" "pena"]}]]
-      (fact {:midje/description (str (:role tester) "not allowed")}
-        (:body (decoded-get endpoint
-                            {:basic-auth (:auth tester)
-                             :follow-redirects false
-                             :throw-exceptions false})) => unauthorized?))
-    (let [resp (decoded-get endpoint
-                            {:basic-auth       ["salesforce-etl" "salesforce-etl"]
-                             :follow-redirects false
-                             :throw-exceptions false})
-          data (get-in resp [:body :documents])]
-      (fact "correct credentials"
-        (:status resp) => 200)
+(when (env/feature? :api-usage-export)
+  (facts "Archive API usage Salesforce export"
+    (let [endpoint (str (server-address) "/data-api/json/export-archive-api-usage")]
+      (doseq [tester [{:role "trusted-etl"
+                       :auth ["solita-etl" "solita-etl"]}
+                      {:role "applicant"
+                       :auth ["pena" "pena"]}]]
+        (fact {:midje/description (str (:role tester) "not allowed")}
+          (:body (decoded-get endpoint
+                              {:basic-auth (:auth tester)
+                               :follow-redirects false
+                               :throw-exceptions false})) => unauthorized?))
+      (let [resp (decoded-get endpoint
+                              {:basic-auth       ["salesforce-etl" "salesforce-etl"]
+                               :follow-redirects false
+                               :throw-exceptions false})
+            data (get-in resp [:body :documents])]
+        (fact "correct credentials"
+          (:status resp) => 200)
 
-      (fact "correct keys"
-        (when (count data)
-          (-> data first keys) => (contains #{:id :date :quantity} :gaps-ok))))))
+        (fact "correct keys"
+          (when (count data)
+            (-> data first keys) => (contains #{:id :date :quantity} :gaps-ok)))))))
