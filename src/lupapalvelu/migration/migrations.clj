@@ -3784,7 +3784,7 @@
         waste-document (when op-name
                          (->> (schemas/get-schema schema-version waste-schema-name)
                               (application/make-document application op-name (sade.core/now) nil)))]
-    (when waste-document
+    (when (and waste-document (not= (:state application) "canceled"))
       (action/update-application (action/application->command application)
                                  {$push {:documents waste-document}}))))
 
@@ -3810,7 +3810,7 @@
                                      (schemas/get-schema schema-version)))
         rakennuspaikka-document (when rakennuspaikka-schema
                                   (application/make-document application op-name (sade.core/now) nil rakennuspaikka-schema))]
-    (when rakennuspaikka-document
+    (when (and rakennuspaikka-document (not= (:state application) "canceled"))
       (action/update-application (action/application->command application)
                                  {$push {:documents rakennuspaikka-document}}))))
 
