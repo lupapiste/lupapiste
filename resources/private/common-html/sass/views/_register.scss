@@ -22,6 +22,11 @@
       width: 100%;
       height: auto;
       min-height: 32px;
+      label.checkbox-required::after {
+        color: $lp-orange;
+        content: "*";
+        display: inline;
+      }
     }
   }
 

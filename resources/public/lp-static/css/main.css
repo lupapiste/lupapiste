@@ -36343,6 +36343,12 @@ table.default-digitalization-location {
   min-height: 32px;
 }
 
+.register-form .form-entry.register-checkbox label.checkbox-required::after {
+  color: #f39129;
+  content: "*";
+  display: inline;
+}
+
 .register-form .register-error {
   position: relative;
   margin: 6px 0;
