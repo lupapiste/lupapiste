@@ -74,7 +74,9 @@
 
   (def broker-url (or (env/value :jms :broker-url) "vm://0"))
 
-  (defn create-connection-factory ^ActiveMQJMSConnectionFactory [^String url connection-options]
+  (def connection-properties (merge (env/value :jms) {:broker-url broker-url}))
+
+  (defn create-connection-factory ^ActiveMQJMSConnectionFactory [{^String url :broker-url :as connection-options}]
     (let [{:keys [retry-interval retry-multipier max-retry-interval reconnect-attempts]
            :or   {retry-interval (* 2 1000)
                   retry-multipier 2
@@ -86,14 +88,15 @@
         (.setMaxRetryInterval (util/->long max-retry-interval))
         (.setReconnectAttempts (util/->int reconnect-attempts)))))
 
+  (def default-connection-factory (create-connection-factory connection-properties))
+
   (defn create-connection
     ([] (create-connection {:broker-url broker-url}))
     ([options]
-     (create-connection options exception-listener))
-    ([{:keys [broker-url username password] :as opts} ex-listener]
+     (create-connection default-connection-factory options exception-listener))
+    ([factory {:keys [broker-url username password]} ex-listener]
      (try
-       (let [factory (create-connection-factory broker-url opts)
-             conn (if (ss/not-blank? username)
+       (let [conn (if (ss/not-blank? username)
                     (jms/create-connection factory {:username username :password password :ex-listener ex-listener})
                     (jms/create-connection factory {:ex-listener ex-listener}))]
          (.start conn)
@@ -121,7 +124,7 @@
 
   (defn start! []
     (try
-      (ensure-connection state (merge (env/value :jms) {:broker-url broker-url}))
+      (ensure-connection state connection-properties)
       (catch Exception e
         (fatal e "Couldn't initialize JMS connections" (.getMessage e)))))
 
