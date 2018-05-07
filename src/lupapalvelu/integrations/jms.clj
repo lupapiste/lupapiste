@@ -104,16 +104,13 @@
               (Thread/sleep sleep-time)
               (recur (min (* 2 sleep-time) 60000) (dec try-times))))))))
 
-  (defn register-session [type]
-    (swap! state assoc (keyword (str (name type) "-session")) (jms/create-session ^Connection (:conn @state) Session/AUTO_ACKNOWLEDGE)))
+  (defn register-session [session type]
+    (swap! state assoc (keyword (str (name type) "-session")) session)
+    session)
 
   (defn start! []
     (try
       (ensure-connection state (merge (env/value :jms) {:broker-url broker-url}))
-      (when-not (:consumer-session @state)
-        (register-session :consumer))
-      (when-not (:producer-session @state)
-        (register-session :producer))
       (catch Exception e
         (fatal e "Couldn't initialize JMS connections" (.getMessage e)))))
 
@@ -122,7 +119,8 @@
   ;;
 
   (defn producer-session []
-    (get @state :producer-session))
+    (or (get @state :producer-session)
+        (register-session (jms/create-session ^Connection (:conn @state) Session/AUTO_ACKNOWLEDGE) :producer)))
 
   (defn register-producer
     "Register producer to state and return it."
@@ -154,7 +152,8 @@
   ;;
 
   (defn consumer-session []
-    (get @state :consumer-session))
+    (or (get @state :consumer-session)
+        (register-session (jms/create-session ^Connection (:conn @state) Session/AUTO_ACKNOWLEDGE) :consumer)))
 
   (defn register-consumer
     "Register consumer to state and return it."
