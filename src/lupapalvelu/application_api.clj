@@ -487,18 +487,7 @@
    :pre-checks       [add-operation-allowed?
                       multiple-operations-supported?]}
   [command]
-  (app/add-operation command id operation)
-  #_(let [op (app/make-op operation created)
-        new-docs (app/make-documents nil created @organization op application)
-        attachments (:attachments (domain/get-application-no-access-checking id {:attachments true}))
-        new-attachments (app/make-attachments created op @organization app-state tos-function :existing-attachments-types (map :type attachments))
-        attachment-updates (app/multioperation-attachment-updates op @organization attachments)]
-    (update-application command {$push {:secondaryOperations  op
-                                        :documents   {$each new-docs}
-                                        :attachments {$each new-attachments}}
-                                 $set  {:modified created}})
-    ;; Cannot update existing array and push new items into it same time with one update
-    (when (not-empty attachment-updates) (update-application command attachment-updates))))
+  (app/add-operation command id operation))
 
 (defcommand update-op-description
   {:parameters [id op-id desc]
@@ -526,21 +515,7 @@
                  {:required [:application/edit-operation]}]}
   [{:keys [application] :as command}]
   (app/change-primary-operation command id secondaryOperationId)
-  (ok)
-  #_(let [old-primary-op (:primaryOperation application)
-        old-secondary-ops (:secondaryOperations application)
-        new-primary-op (first (filter #(= secondaryOperationId (:id %)) old-secondary-ops))
-        secondary-ops-without-old-primary-op (remove #{new-primary-op} old-secondary-ops)
-        new-secondary-ops (if old-primary-op ; production data contains applications with nil in primaryOperation
-                            (conj secondary-ops-without-old-primary-op old-primary-op)
-                            secondary-ops-without-old-primary-op)]
-    (when-not (= (:id old-primary-op) secondaryOperationId)
-      (when-not new-primary-op
-        (fail! :error.unknown-operation))
-      ;; TODO update also :app-links apptype if application is linked to other apps (loose WriteConcern ok?)
-      (update-application command {$set {:primaryOperation    new-primary-op
-                                         :secondaryOperations new-secondary-ops}}))
-    (ok)))
+  (ok))
 
 (defn- replace-operation-allowed-pre-check [{application :application}]
   (when (or (foreman/foreman-app? application)
