@@ -78,11 +78,11 @@
                 (update :headers merge (create-headers (:headers http-conf)))
                 (wrap-authentication http-conf)))
           (imessages/update-message message-id {$set {:acknowledged (now) :status "done"}} WriteConcern/UNACKNOWLEDGED)
-          (.commit session)
+          (jms/commit session)
           (infof "KuntaGML (id: %s) consumed and acknowledged from queue successfully" message-id)
           (catch Exception e    ; this is most likely a slingshot exception from clj-http
             (errorf "Error when sending consumed KuntaGML message to %s: %s. Message rollback initiated." url (.getMessage e))
-            (.rollback session)))))))
+            (jms/rollback session)))))))
 
 (def kuntagml-queue "lupapiste/kuntagml.http")
 

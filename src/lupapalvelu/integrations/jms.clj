@@ -62,6 +62,9 @@
     (swap! state update (keyword (str (name type) "-session")) conj session)
     session)
 
+  (defn commit [^Session sess] (.commit sess))
+  (defn rollback [^Session sess] (.rollback sess))
+
   ;;
   ;; Connection
   ;;
