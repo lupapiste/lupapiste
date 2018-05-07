@@ -99,7 +99,7 @@ Name layer
 
 Remove layer
   [Arguments]  ${index}
-  Scroll to  [data-test-id=layer${index}-remove]
+  Scroll to test id  layers-add
   Click link  jquery=[data-test-id=layer${index}-remove]
 
 Check layer value
