@@ -2,6 +2,7 @@
   "API for commands/functions working with integrations (ie. KRYSP, Asianhallinta)"
   (:require [taoensso.timbre :refer [infof info error errorf]]
             [clojure.java.io :as io]
+            [clojure.set :as set]
             [noir.response :as resp]
             [monger.operators :refer [$in $set $unset $push $each $elemMatch]]
             [lupapalvelu.action :refer [defcommand defquery defraw update-application] :as action]
@@ -10,6 +11,7 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.autologin :as autologin]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
@@ -19,6 +21,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as operations]
+            [lupapalvelu.pate.verdict :as pate-verdict]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.rest.config :as config]
             [lupapalvelu.roles :as roles]
@@ -483,3 +486,63 @@
    :user-roles #{:anonymous}}
   [_]
   (ok (config/current-configuration)))
+
+;;
+;;  RH data modifications to documents
+;;
+(defn pate-enabled
+  "Pre-checker that fails if Pate is not enabled in the application organization."
+  [{:keys [organization]}]
+  (when (and organization
+             (not (:pate-enabled @organization)))
+    (fail :error.pate-disabled)))
+
+(defn editable-by-state?
+  "Pre-check to determine if documents are editable in abnormal states"
+  [default-states]
+  (fn [{document :document {state :state} :application}]
+    (when document
+      (when-not (-> document
+                    (model/get-document-schema)
+                    (doc/state-valid-by-schema? :editable-in-states default-states state))
+        (fail :error.document-not-editable-in-current-state)))))
+
+(defcommand update-post-verdict-doc
+  {:parameters       [id doc updates]
+   :categories       #{:documents}
+   :input-validators [(partial action/non-blank-parameters [:id :doc])
+                      (partial action/vector-parameters [:updates])]
+   :states           states/post-verdict-states
+   :user-roles       #{:authority}
+   :org-authz-roles  #{:approver}
+   :pre-checks       [pate-enabled
+                      (editable-by-state? (set/union states/update-doc-states [:verdictGiven]))
+                      doc/doc-disabled-validator
+                      doc/validate-created-after-verdict]}
+  [command]
+  (let [[path _] (first updates)
+        path-prefix (first (ss/split path #"\."))]
+    (if (= "rakennuksenOmistajat" path-prefix)
+      (fail :error.document-not-editable-in-current-state)
+      (do
+        (doc-persistence/set-edited-timestamp command doc)
+        (doc-persistence/update! command doc updates "documents")))))
+
+(defcommand send-doc-updates
+  {:parameters       [id docId]
+   :categories       #{:documents}
+   :input-validators [(partial action/non-blank-parameters [:id :docId])]
+   :states           states/post-verdict-states
+   :user-roles       #{:authority}
+   :org-authz-roles  #{:approver}
+   :pre-checks       [pate-enabled
+                      (editable-by-state? (set/union states/update-doc-states [:verdictGiven]))
+                      doc/doc-disabled-validator
+                      doc/validate-created-after-verdict]}
+  [{:keys [organization application] :as command}]
+  (when (org/krysp-integration? @organization (:permitType application))
+    (mapping-to-krysp/verdict-as-kuntagml command (-> (pate-verdict/latest-published-pate-verdict command)
+                                                      (assoc :usage "RH-tietojen muutos"))))
+  (doc-persistence/set-sent-timestamp command docId)
+  (ok))
+

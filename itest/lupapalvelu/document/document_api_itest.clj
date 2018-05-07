@@ -1,14 +1,21 @@
 (ns lupapalvelu.document.document-api-itest
   (:require [midje.sweet :refer :all]
+            [clojure.data.xml :refer [parse]]
+            [clojure.java.io :as io]
             [sade.core :as core]
+            [sade.env :as env]
+            [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
+            [sade.xml :as xml]
             [lupapalvelu.application :refer [get-operations]]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.fixture.pate-verdict :as pate-fixture]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.pate-itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.attachment :as attachment]))
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.xml.validator :refer [validate]]))
 
 (apply-remote-minimal)
 
@@ -384,6 +391,32 @@
       (fact "pre-verdit suunnittelija doc can NOT be removed"
         (command pena :remove-doc :id application-id :docId (:id pre-verdict-suunnittelija)) => (partial expected-failure? :error.document.post-verdict-deletion)))))
 
+(defn get-valid-krysp-xml [application]
+  (let [permit-type         (keyword (permit/permit-type application))
+        organization        (organization-from-minimal-by-id (:organization application))
+        sftp-user           (get-in organization [:krysp permit-type :ftpUser])
+        krysp-version       (get-in organization [:krysp permit-type :version])
+        permit-type-dir     (permit/get-sftp-directory permit-type)
+        output-dir          (str "target/" sftp-user permit-type-dir "/")
+        sftp-server         (subs (env/value :fileserver-address) 7)
+        target-file-name    (str "target/Downloaded-" (:id application) "-" (core/now) ".xml")
+        filename-start-with (:id application)
+        xml-file (if get-files-from-sftp-server?
+                   (io/file (get-file-from-server
+                              sftp-user
+                              sftp-server
+                              filename-start-with
+                              target-file-name
+                              (str permit-type-dir "/")))
+                   (io/file (get-local-filename output-dir filename-start-with)))
+        xml-as-string (slurp xml-file)
+        xml (parse xml-file)]
+
+    (fact "Correctly named xml file is created" (.exists xml-file) => true)
+    (fact "XML file is valid"
+      (validate xml-as-string (:permitType application) krysp-version))
+    xml))
+
 (facts "PATE - post-verdict document modifications"
   (apply-remote-fixture "pate-verdict")
   (let [application (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
@@ -427,6 +460,10 @@
                                                                                                 ["mitat.kokonaisala" "1000"]
                                                                                                 ["mitat.kerrosluku" "3"]]) => ok?)
 
+    (fact "Applicant still cant modife documents"
+      (command pena :update-post-verdict-doc :id application-id :doc building-doc-id :updates [["mitat.tilavuus" "5000"]])
+        => (partial expected-failure? :error.unauthorized))
+
     (fact "But no owner details can be modified"
       (command sonja :update-post-verdict-doc :id application-id :doc building-doc-id :updates [["rakennuksenOmistajat.henkilo.henkilotiedot.etunimi" "Herkko"]])
         => (partial expected-failure? :error.document-not-editable-in-current-state))
@@ -445,11 +482,29 @@
           (get-in updated-building-doc [:meta :_post_verdict_edit :timestamp]) => some?
           (get-in updated-building-doc [:meta :_post_verdict_edit :user :firstName]) => "Sonja")))
 
+    (fact "Applicant cant send modified document to backend"
+      (command pena :send-doc-updates :id application-id :docId building-doc-id)
+        => (partial expected-failure? :error.unauthorized))
+
     (fact "Sending modified document to backend"
       (command sonja :send-doc-updates :id application-id :docId building-doc-id) => ok?)
 
-    (fact "And now there is also sent meta data"
-      (let [final-app (query-application sonja application-id)
-            final-building-doc (domain/get-document-by-name (:documents final-app) "uusiRakennus")]
+
+    (let [final-app (query-application sonja application-id)
+          final-building-doc (domain/get-document-by-name (:documents final-app) "uusiRakennus")]
+
+      (fact "And now there is also sent meta data"
         (get-in final-building-doc [:meta :_post_verdict_sent :timestamp]) => some?
-        (get-in final-building-doc [:meta :_post_verdict_sent :user :firstName]) => "Sonja"))))
+        (get-in final-building-doc [:meta :_post_verdict_sent :user :firstName]) => "Sonja")
+
+      (fact "KuntaGML xml contains modified fields"
+        (let [xml (get-valid-krysp-xml final-app)
+              building-path [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto :Rakennus :rakennuksenTiedot]
+              asia-path [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
+              building-element (xml/select xml building-path)
+              asia-element (xml/select xml asia-path)]
+          (xml/get-text (first building-element) [:tilavuus]) => "2000"
+          (xml/get-text (first building-element) [:kerrosala]) => "600"
+          (xml/get-text (first building-element) [:kokonaisala]) => "1000"
+          (xml/get-text (first building-element) [:kerrosluku]) => "3"
+          (xml/get-text (first asia-element) [:kayttotapaus]) => "RH-tietojen muutos")))))
