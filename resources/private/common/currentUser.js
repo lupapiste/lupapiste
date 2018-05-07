@@ -101,6 +101,48 @@ LUPAPISTE.CurrentUser = function() {
       })
   });
 
+  /**
+   * A vector of roles available for current user. Each element in vector is a vector
+   * consisting role, and optionally a second element indicating the organization.
+   *
+   * Example:
+   * <code>
+   *   [
+   *     ["authority",      "753-R"],
+   *     ["authority",      "297-R"],
+   *     ["authorityAdmin", "297-R"]
+   *   ]
+   * </code>
+   *
+   * If the user can't change role the value is [].
+   */
+
+  // _.reduce(orgAuthz, (acc, rolez, org) => { _.each(rolez(), role => acc.push([role, org])); return acc; }, [])
+
+  self.availableRoles = ko.pureComputed(function() {
+    // Currently, multiple roles are available only for authority users that have
+    // authRolez role for more than one municipality. Later this could
+    // be extended to other cases too.
+    if (self.role() !== "authority") return [];
+    return _.reduce(
+      self.orgAuthz(),
+      function(acc, rolez, org) {
+        _.forEach(ko.unwrap(rolez), function(role) {
+          acc.push([role, org]);
+        });
+        return acc;
+      },
+      []);
+  });
+
+  /**
+   * A boolean value indicating if the user has multiple roles available.
+   */
+
+  self.hasMultipleRoles = ko.pureComputed(function() {
+    return self.availableRoles().length > 1;
+  });
+
   self.isAuthority = ko.pureComputed(function() {
     return self.role() === "authority" && !isOutsideAuthority();
   });

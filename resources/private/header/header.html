@@ -70,12 +70,20 @@
                       data-bind="text: lupapisteApp.models.currentUser.displayName, attr: {'data-test-role' : lupapisteApp.models.currentUser.role}"></span>
               </a>
             </div>
-            <div class="header-box" data-bind="visible: $root.isAuthorityAdmin">
+            <!-- Role switcher -->
+            <div class="header-box" data-bind="visible: $root.roleSelector.showRoleSelector">
+              <a href="/" title="Foffoo">
+                <span data-bind="text: $root.roleSelector.availableRoles"></span>
+              </a>
+              <!-- FIXME: need better icon -->
+              <!--
               <a href="/app/fi/authority-admin" data-bind="attr: {'title': loc('authority-admin')}">
                 <span class="lupicon-log-out"></span>
                 <span class="narrow-hide" data-bind="text: 'Admin'"></span>
               </a>
+              -->
             </div>
+
             <div id="logout-header-box" class="header-box">
               <a data-bind="attr: {href: '/app/' + $root.currentLanguage + '/logout', 'title': loc('logout')}">
                 <span class="lupicon-log-out"></span>

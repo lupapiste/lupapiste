@@ -262,6 +262,19 @@ var LUPAPISTE = LUPAPISTE || {};
       self.calendarsEnabledInAuthModel(lupapisteApp.models.globalAuthModel.ok("calendars-enabled"));
     });
 
+    function RoleSelector(models) {
+      const self = this;
+
+      self.showRoleSelector = ko.pureComputed(function() {
+        return models.currentUser ? models.currentUser.hasMultipleRoles() : false;
+      });
+
+      self.availableRoles = ko.pureComputed(function() {
+        console.log("availableRoles:", models.currentUser.availableRoles());
+        return models.currentUser ? models.currentUser.availableRoles() : [];
+      });
+    }
+
     /**
      * Complete the App initialization after DOM is loaded.
      */
@@ -300,7 +313,7 @@ var LUPAPISTE = LUPAPISTE || {};
         }
       }
 
-      var model = {
+      const model = {
         currentLanguage: loc.getCurrentLanguage(),
         openStartPage: openStartPage,
         showUserMenu: self.showUserMenu,
@@ -309,7 +322,8 @@ var LUPAPISTE = LUPAPISTE || {};
         calendarMenubarVisible: self.calendarMenubarVisible,
         // TODO: sync with side-panel.js sidePanelPages
         sidePanelPages: ["application","attachment","statement","neighbors","verdict"],
-        isAuthorityAdmin: lupapisteApp.models.currentUser.isAuthorityAdmin
+        // Role selector:
+        roleSelector: new RoleSelector(self.models)
       };
 
       $("#app").applyBindings(lupapisteApp.models.rootVMO);
