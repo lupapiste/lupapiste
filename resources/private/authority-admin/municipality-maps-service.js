@@ -85,7 +85,7 @@ LUPAPISTE.MunicipalityMapsService = function() {
     if( server && server.url ) {
       error( false );
       waiting( true );
-      ajax.get(PROXY).param("request", "GetCapabilities").param("service", "wms")
+      ajax.get(PROXY).param("request", "GetCapabilities").param("service", "WMS")
         .success(function( data ) {
            error( false );
            var parsedCaps = null;
