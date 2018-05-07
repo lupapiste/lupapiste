@@ -59,6 +59,9 @@
   ;; Connection
   ;;
 
+  (defn get-default-connection []
+    (get @state :conn))
+
   (def broker-url (or (env/value :jms :broker-url) "vm://0"))
 
   (defn create-connection-factory ^ActiveMQJMSConnectionFactory [^String url connection-options]
@@ -91,7 +94,7 @@
   (defn ensure-connection [state options]
     (loop [sleep-time 2000
            try-times 5]
-      (when-not (:conn @state)
+      (when-not (get-default-connection)
         (if-let [conn (create-connection options)]
           (do
             (swap! state assoc :conn conn)
@@ -122,7 +125,7 @@
 
   (defn producer-session []
     (or (get-in @state [:producer-session 0])
-        (register-session (jms/create-session ^Connection (:conn @state) Session/AUTO_ACKNOWLEDGE) :producer)))
+        (register-session (jms/create-session ^Connection (get-default-connection) Session/AUTO_ACKNOWLEDGE) :producer)))
 
   (defn register-producer
     "Register producer to state and return it."
@@ -155,7 +158,7 @@
 
   (defn consumer-session []
     (or (get-in @state [:consumer-session 0])
-        (register-session (jms/create-session ^Connection (:conn @state) Session/AUTO_ACKNOWLEDGE) :consumer)))
+        (register-session (jms/create-session ^Connection (get-default-connection) Session/AUTO_ACKNOWLEDGE) :consumer)))
 
   (defn register-consumer
     "Register consumer to state and return it."
@@ -198,7 +201,7 @@
        (.close conn))
      (doseq [^MessageProducer conn (:producers @state)]
        (.close conn))
-     (.close ^Connection (:conn @state))
+     (.close ^Connection (get-default-connection))
 
      (when close-embedded?
        (when-let [artemis (ns-resolve 'artemis-server 'embedded-broker)]
