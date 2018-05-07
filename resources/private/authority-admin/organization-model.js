@@ -147,8 +147,10 @@ LUPAPISTE.OrganizationModel = function () {
   });
 
   self.automaticReviewFetchEnabled.subscribe(function(automaticReviewFetchEnabled) {
-    if (self.automaticReviewGenerationEnabled()) { // If automatic review fetching is off, then automatic review generation must also be.
+    if (!self.automaticReviewFetchEnabled()) { // If automatic review fetching is off, then automatic review generation must also be.
       self.automaticReviewGenerationEnabled(false);
+    } else {
+      self.automaticReviewGenerationEnabled(true);
     }
     if (self.initialized) {
       ajax.command("set-organization-review-fetch-enabled", { enabled: automaticReviewFetchEnabled })
