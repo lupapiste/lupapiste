@@ -110,18 +110,22 @@
 (defn- in-role? [role request]
   (= role (keyword (:role (usr/current-user request)))))
 
+(defn- user-has-org-role?
+  "check that given user has top-level role `:authority` and given `org-role` in some
+   of her organizations."
+  [org-role user]
+  (and (->> user
+            :role
+            (= "authority"))
+       (->> user
+            :orgAuthz
+            (some (comp org-role val)))))
+
 (defn- has-org-role?
   "check that current user has top-level role `:authority` and given `org-role` in some
    of her organizations."
   [org-role request]
-  (let [user (usr/current-user request)]
-    (and (->> user
-              :role
-              (= "authority"))
-         (->> user
-              :orgAuthz
-              (map val)
-              (some org-role)))))
+  (user-has-org-role? org-role (usr/current-user request)))
 
 (def applicant? (partial in-role? :applicant))
 (def authority? (partial in-role? :authority))
