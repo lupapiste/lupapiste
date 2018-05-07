@@ -7,6 +7,7 @@
            (org.apache.activemq.artemis.api.core SimpleString)))
 
 (info "Requiring ActiveMQ Artemis...")
+(def delivery-attempts 5)
 (def conf (doto (ConfigurationImpl.)
             (.setPersistenceEnabled false)
             (.setJournalDirectory "target/artemis_journal")
@@ -19,9 +20,9 @@
                                  (doto (AddressSettings.)
                                    (.setDeadLetterAddress (SimpleString. "DLQ"))
                                    (.setExpiryAddress (SimpleString. "Expired"))
-                                   (.setMaxDeliveryAttempts 5)))))
+                                   (.setMaxDeliveryAttempts delivery-attempts)))))
 
-(def embedded-broker ^ActiveMQServer
+(defonce embedded-broker ^ActiveMQServer
   (ActiveMQServers/newActiveMQServer conf))
 
 (defn start []
