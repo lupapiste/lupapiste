@@ -352,14 +352,12 @@
                       ram/attachment-type-allows-ram
                       att/validate-not-included-in-published-bulletin]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
-   :notified         true
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles roles/writer-roles-with-foreman
    :states           (difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})}
   [{application :application {attachment-id :attachmentId} :data created :created}]
   (if-let [attachment-id (ram/create-ram-attachment! application attachment-id created)]
-    (do (ram/notify-new-ram-attachment! application attachment-id created)
-        (ok :applicationId id :attachmentId attachment-id))
+    (ok :applicationId id :attachmentId attachment-id)
     (fail :error.attachment-placeholder)))
 
 ;;

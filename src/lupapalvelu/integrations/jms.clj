@@ -18,11 +18,11 @@
 
 (when (env/feature? :jms)
 
-  (defonce state (atom {:producers        []
-                        :consumers        []
-                        :conn             nil
-                        :producer-session nil
-                        :consumer-session nil}))
+  (defonce state (atom {:producers         []
+                        :consumers         []
+                        :conn              nil
+                        :producer-sessions []
+                        :consumer-sessions []}))
 
   (defn register [type fn object]
     (swap! state update type fn object)
@@ -53,9 +53,24 @@
   (defn queue ^Queue [name]
     (ActiveMQJMSClient/createQueue name))
 
+  (def create-session jms/create-session)
+
+  (defn create-transacted-session [conn]
+    (jms/create-session conn Session/SESSION_TRANSACTED))
+
+  (defn register-session [session type]
+    (swap! state update (keyword (str (name type) "-session")) conj session)
+    session)
+
+  (defn commit [^Session sess] (.commit sess))
+  (defn rollback [^Session sess] (.rollback sess))
+
   ;;
   ;; Connection
   ;;
+
+  (defn get-default-connection []
+    (get @state :conn))
 
   (def broker-url (or (env/value :jms :broker-url) "vm://0"))
 
@@ -89,7 +104,7 @@
   (defn ensure-connection [state options]
     (loop [sleep-time 2000
            try-times 5]
-      (when-not (:conn @state)
+      (when-not (get-default-connection)
         (if-let [conn (create-connection options)]
           (do
             (swap! state assoc :conn conn)
@@ -104,16 +119,9 @@
               (Thread/sleep sleep-time)
               (recur (min (* 2 sleep-time) 60000) (dec try-times))))))))
 
-  (defn register-session [type]
-    (swap! state assoc (keyword (str (name type) "-session")) (jms/create-session ^Connection (:conn @state) Session/AUTO_ACKNOWLEDGE)))
-
   (defn start! []
     (try
       (ensure-connection state (merge (env/value :jms) {:broker-url broker-url}))
-      (when-not (:consumer-session @state)
-        (register-session :consumer))
-      (when-not (:producer-session @state)
-        (register-session :producer))
       (catch Exception e
         (fatal e "Couldn't initialize JMS connections" (.getMessage e)))))
 
@@ -122,7 +130,8 @@
   ;;
 
   (defn producer-session []
-    (get @state :producer-session))
+    (or (get-in @state [:producer-session 0])
+        (register-session (jms/create-session ^Connection (get-default-connection) Session/AUTO_ACKNOWLEDGE) :producer)))
 
   (defn register-producer
     "Register producer to state and return it."
@@ -154,7 +163,8 @@
   ;;
 
   (defn consumer-session []
-    (get @state :consumer-session))
+    (or (get-in @state [:consumer-session 0])
+        (register-session (jms/create-session ^Connection (get-default-connection) Session/AUTO_ACKNOWLEDGE) :consumer)))
 
   (defn register-consumer
     "Register consumer to state and return it."
@@ -169,17 +179,21 @@
      (-> (jms/listen session (queue endpoint-name) (message-listener callback-fn))
          (register-consumer))))
 
+  (defn nippy-callbacker [callback]
+    (fn [^bytes data]
+      (try
+        (let [clj-data (nippy/thaw data)]
+          (callback clj-data))
+        (catch ClassCastException e
+          (errorf e "Couldn't cast JMS message to Clojure data with nippy, ignoring callback.")))))
+
   (defn create-nippy-consumer
-    "Creates and returns consumer to endpoint, that deserializes JMS data with nippy/thaw."
-    [endpoint callback-fn]
-    (create-consumer
-      endpoint
-      (fn [^bytes data]
-        (try
-          (let [clj-data (nippy/thaw data)]
-            (callback-fn clj-data))
-          (catch ClassCastException e
-            (errorf e "Couldn't cast JMS message to Clojure data with nippy, ignoring callback."))))))
+    "Creates and returns consumer to endpoint, that deserializes JMS data with nippy/thaw.
+    Uses default consumer session created in this namespace."
+    ([endpoint callback-fn]
+     (create-consumer endpoint (nippy-callbacker callback-fn)))
+    ([session endpoint callback-fn]
+     (create-consumer session endpoint (nippy-callbacker callback-fn))))
 
   ;;
   ;; misc
@@ -193,7 +207,7 @@
        (.close conn))
      (doseq [^MessageProducer conn (:producers @state)]
        (.close conn))
-     (.close ^Connection (:conn @state))
+     (.close ^Connection (get-default-connection))
 
      (when close-embedded?
        (when-let [artemis (ns-resolve 'artemis-server 'embedded-broker)]
@@ -219,4 +233,45 @@
   (nippy {:testi true :nimi "Nippy" :version 1})
   ;=> nil
   ; nippy dataa: {:testi true, :nimi Nippy, :version 1}
+
+  ; testing redeliveries with SESSION_TRANSACTED
+  (def error-prod (create-producer "boom"))
+  (def transacted-session (create-transacted-session (get-default-connection)))
+  (def consumer (create-consumer
+                  transacted-session
+                  "boom"
+                  (fn [msg]
+                    (try
+                      (if (= "boom" msg)
+                        (throw (IllegalAccessException. "sorry"))
+                        (println "got message:" msg))
+                      (.commit transacted-session)
+                      (catch Exception e
+                        (println "errori")
+                        (.rollback transacted-session))))))
+  (error-prod "moi")
+  ;=> nil
+  ;got message: moi
+  (error-prod "boom")
+  ;=> nil
+  ;errori
+  ;WARN 2018-05-07 12:32:31.145 [] [] [] lupapalvelu.integrations.jms - Message delivered already 2 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.151 [] [] [] lupapalvelu.integrations.jms - Message delivered already 3 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.156 [] [] [] lupapalvelu.integrations.jms - Message delivered already 4 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.161 [] [] [] lupapalvelu.integrations.jms - Message delivered already 5 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.166 [] [] [] lupapalvelu.integrations.jms - Message delivered already 6 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.170 [] [] [] lupapalvelu.integrations.jms - Message delivered already 7 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.175 [] [] [] lupapalvelu.integrations.jms - Message delivered already 8 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.180 [] [] [] lupapalvelu.integrations.jms - Message delivered already 9 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.183 [] [] [] lupapalvelu.integrations.jms - Message delivered already 10 times
+  ;errori
+
   )

@@ -58,6 +58,7 @@ Mikko should be able to add attachment
 
 Mikko opens inforequest for renaming and cancellation
   Open inforequest  ${inforequest-cancelling}  ${propertyId}
+  Test id text is  inforequest-description  Neuvontapyyntösi on nyt viranomaisen nähtävissä. Jos haluat kysyä lisää aiheeseen liittyviä kysymyksiä, voit kirjoittaa keskusteluun uusia viestejä.
 
 Mikko changes inforequest address
   Page should contain  ${inforequest-cancelling}
@@ -74,10 +75,18 @@ Mikko cancels an inforequest
   Click enabled by test id  inforequest-cancel-btn
   Confirm  dynamic-yes-no-confirm-dialog
 
-Mikko does not see the cancelled inforequest
+Mikko does not see the cancelled inforequest in the applications tab
   Wait until  Element should be visible  applications-list
   Wait Until  Inforequest is not visible  ${inforequest-cancelling}
   Wait Until  Inforequest is not visible  ${newName}
+
+The canceled inforequest is visible in canceled tab
+  Open search tab  canceled
+  Wait until  Element should be visible  jquery=td[data-test-row-state=canceled]
+
+Mikko opens canceled inforequest
+  Click element  jquery=tr.application-row:visible
+  Test id text is  inforequest-description  Neuvontapyyntö on peruutettu.
 
 Mikko waits until the first inforequest is answered
   Logout
@@ -142,5 +151,3 @@ Inforequest is not assigned
 Inforequest is assigned to
   [Arguments]  ${address}  ${name}
   Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td[@data-test-col-name='authority']//span  ${name}
-
-

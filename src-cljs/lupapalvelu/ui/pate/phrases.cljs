@@ -76,7 +76,7 @@
      (let [phrase (:phrase @local*)]
        [:div.col--full
         (components/tabbar {:selected* tab*
-                            :tabs      [{:text-loc :edit
+                            :tabs      [{:text-loc :pate.edit-tab
                                          :id       ::edit}
                                         {:text-loc :pdf.preview
                                          :id       ::preview}]})

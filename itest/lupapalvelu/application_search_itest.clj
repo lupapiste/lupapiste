@@ -93,6 +93,14 @@
       (search (ss/join (repeat 50 "1234567890"))) => ok?
       (search (ss/join (repeat 51 "1234567890"))) => fail?)
 
+    (facts "With municipality"
+      (fact "Wrong municipality" (search "hakukuja, Vantaa") => no-results?)
+      (fact "Correct municipality" (search "hakukuja, Sip") => id-matches?)
+      (fact "Bad municipality" (search "hakukuja, Sipoot") => no-results?)
+      (fact "Municipality must be the last part" (search "hakukuja, Sipoo 123") => no-results?)
+      (fact "Municipality only" (search "Sipoo") => id-matches?)
+      (fact "Internal punctuation does not matter" (search "  Hakukuja ___123,,,Sip  ") => id-matches?))
+
     (fact "Submitted application is returned by latest-applications"
       (let [resp (query pena :latest-applications)
             applications (:applications resp)

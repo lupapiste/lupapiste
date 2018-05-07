@@ -13253,6 +13253,10 @@ ul.tabs {
   width: auto;
 }
 
+.autosized.autosized--wider {
+  min-width: 25em;
+}
+
 .autosized-yes-no {
   min-height: 144px;
   height: auto;
@@ -36337,6 +36341,12 @@ table.default-digitalization-location {
   width: 100%;
   height: auto;
   min-height: 32px;
+}
+
+.register-form .form-entry.register-checkbox label.checkbox-required::after {
+  color: #f39129;
+  content: "*";
+  display: inline;
 }
 
 .register-form .register-error {
