@@ -18,11 +18,11 @@
 
 (when (env/feature? :jms)
 
-  (defonce state (atom {:producers        []
-                        :consumers        []
-                        :conn             nil
-                        :producer-session nil
-                        :consumer-session nil}))
+  (defonce state (atom {:producers         []
+                        :consumers         []
+                        :conn              nil
+                        :producer-sessions []
+                        :consumer-sessions []}))
 
   (defn register [type fn object]
     (swap! state update type fn object)
@@ -105,7 +105,7 @@
               (recur (min (* 2 sleep-time) 60000) (dec try-times))))))))
 
   (defn register-session [session type]
-    (swap! state assoc (keyword (str (name type) "-session")) session)
+    (swap! state update (keyword (str (name type) "-session")) conj session)
     session)
 
   (defn start! []
@@ -119,7 +119,7 @@
   ;;
 
   (defn producer-session []
-    (or (get @state :producer-session)
+    (or (get-in @state [:producer-session 0])
         (register-session (jms/create-session ^Connection (:conn @state) Session/AUTO_ACKNOWLEDGE) :producer)))
 
   (defn register-producer
@@ -152,7 +152,7 @@
   ;;
 
   (defn consumer-session []
-    (or (get @state :consumer-session)
+    (or (get-in @state [:consumer-session 0])
         (register-session (jms/create-session ^Connection (:conn @state) Session/AUTO_ACKNOWLEDGE) :consumer)))
 
   (defn register-consumer
