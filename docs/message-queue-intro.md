@@ -78,11 +78,11 @@ Client application code needs to check, if received message is already handled. 
 
 ### SESSION_TRANSACTED
 
-A transacted session can be created. Transaction is never excplicitly started, but `session.commit()` and `session.rollback()` methods can be used to control wheter message(s) should be rolled back or not. 
+A transacted session can be created. Transaction is never excplicitly started, but `session.commit()` and `session.rollback()` methods can be used to control wheter message(s) should be rolled back or acknowledged to broker. 
 
 >The transacted session uses a chained-transaction model. In a chained-transaction model, an application does not explicitly start a transaction.
 
-Transaction logic is provided in consumer side code. 
+Transaction logic is provided in consumer side code. See `lupapalvelu.xml.krysp.http` namespace for example.
 
 Good explanation _Transacted session_ can be found from [JavaWolrd](https://www.javaworld.com/article/2074123/java-web-development/transaction-and-redelivery-in-jms.html?page=2).
 

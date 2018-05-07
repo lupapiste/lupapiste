@@ -230,4 +230,45 @@
   (nippy {:testi true :nimi "Nippy" :version 1})
   ;=> nil
   ; nippy dataa: {:testi true, :nimi Nippy, :version 1}
+
+  ; testing redeliveries with SESSION_TRANSACTED
+  (def error-prod (create-producer "boom"))
+  (def transacted-session (create-transacted-session (get-default-connection)))
+  (def consumer (create-consumer
+                  transacted-session
+                  "boom"
+                  (fn [msg]
+                    (try
+                      (if (= "boom" msg)
+                        (throw (IllegalAccessException. "sorry"))
+                        (println "got message:" msg))
+                      (.commit transacted-session)
+                      (catch Exception e
+                        (println "errori")
+                        (.rollback transacted-session))))))
+  (error-prod "moi")
+  ;=> nil
+  ;got message: moi
+  (error-prod "boom")
+  ;=> nil
+  ;errori
+  ;WARN 2018-05-07 12:32:31.145 [] [] [] lupapalvelu.integrations.jms - Message delivered already 2 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.151 [] [] [] lupapalvelu.integrations.jms - Message delivered already 3 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.156 [] [] [] lupapalvelu.integrations.jms - Message delivered already 4 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.161 [] [] [] lupapalvelu.integrations.jms - Message delivered already 5 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.166 [] [] [] lupapalvelu.integrations.jms - Message delivered already 6 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.170 [] [] [] lupapalvelu.integrations.jms - Message delivered already 7 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.175 [] [] [] lupapalvelu.integrations.jms - Message delivered already 8 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.180 [] [] [] lupapalvelu.integrations.jms - Message delivered already 9 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.183 [] [] [] lupapalvelu.integrations.jms - Message delivered already 10 times
+  ;errori
+
   )

@@ -31,10 +31,10 @@
                          (println "data:" data)
                          (swap! state update :deliveries inc)
                          (try
-                           (if (= "boom!" data)
-                             (throw (IllegalAccessException. "sorry"))
+                           (case data
+                             "boom!" (throw (IllegalAccessException. "sorry"))
+                             "commit" (.commit transacted-session)
                              (swap! state update :msgs conj data))
-                           (.commit transacted-session)
                            (catch Exception _
                              (.rollback transacted-session)))))]
         (fact "Normal delivery -> 1"
@@ -43,12 +43,27 @@
           (:deliveries @state) => 1
           (count (:msgs @state)) => 1
           (first (:msgs @state)) => "test1")
-        (fact "Delivery with exception"
+        ; commit previously sent messages
+        (prod "commit") => nil
+        (fact "Redelivery after rollback"
           (prod "boom!") => nil
           ; wait for all redeliveris to happen
-          (Thread/sleep 1000)
+          (Thread/sleep 500)
           (fact "Redeliveries occured"
-            (:deliveries @state) => 11)
+            (:deliveries @state) => 12)                     ; "test1" + "commit" + (* 10 "boom!")
           (fact "Just the previous messsage handled"
             (count (:msgs @state)) => 1
-            (first (:msgs @state)) => "test1"))))))
+            (first (:msgs @state)) => "test1"))
+        ; reset state
+        (reset! state {:deliveries 0 :msgs []})
+        (fact "Rollback uncommited messages"
+          (fact "commit msg1"
+            (prod "msg1") => nil
+            (prod "commit") => nil)
+          (fact "don't commit msg2 before rollback"
+            (prod "msg2") => nil
+            (prod "boom!") => nil)
+          (Thread/sleep 500)
+          (fact "msg2 was also redelivered each time"
+            (:deliveries @state) => 22)                     ; "msg1" + "commit" + (* 10 "msg2") + (* 10 "boom!")
+          )))))
