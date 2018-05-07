@@ -53,6 +53,8 @@
   (defn queue ^Queue [name]
     (ActiveMQJMSClient/createQueue name))
 
+  (def create-session jms/create-session)
+
   ;;
   ;; Connection
   ;;
@@ -168,18 +170,21 @@
      (-> (jms/listen session (queue endpoint-name) (message-listener callback-fn))
          (register-consumer))))
 
+  (defn nippy-callbacker [callback]
+    (fn [^bytes data]
+      (try
+        (let [clj-data (nippy/thaw data)]
+          (callback clj-data))
+        (catch ClassCastException e
+          (errorf e "Couldn't cast JMS message to Clojure data with nippy, ignoring callback.")))))
+
   (defn create-nippy-consumer
     "Creates and returns consumer to endpoint, that deserializes JMS data with nippy/thaw.
     Uses default consumer session created in this namespace."
-    [endpoint callback-fn]
-    (create-consumer
-      endpoint
-      (fn [^bytes data]
-        (try
-          (let [clj-data (nippy/thaw data)]
-            (callback-fn clj-data))
-          (catch ClassCastException e
-            (errorf e "Couldn't cast JMS message to Clojure data with nippy, ignoring callback."))))))
+    ([endpoint callback-fn]
+     (create-consumer endpoint (nippy-callbacker callback-fn)))
+    ([session endpoint callback-fn]
+     (create-consumer session endpoint (nippy-callbacker callback-fn))))
 
   ;;
   ;; misc

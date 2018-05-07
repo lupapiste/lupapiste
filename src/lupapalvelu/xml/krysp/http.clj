@@ -16,8 +16,8 @@
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org])
-  (:import (com.mongodb WriteConcern)))
-
+  (:import (com.mongodb WriteConcern)
+           (javax.jms Session)))
 
 (defn- with-krysp-defaults [options]
   (merge
@@ -65,28 +65,30 @@
           (wrap-authentication http-conf)))))
 
 (when (env/feature? :jms)
-(defn message-handler
-  [payload]
-  (let [{:keys [message-id url xml http-conf options]} payload]
-    (logging/with-logging-context {:userId (:user-id options) :applicationId (:application-id options)}
-      ; If we would handle duplicates in client code, in theory we could use Session/DUPS_OK_ACKNOWLEDGE mode
-      ; to reduce newtork roundtrips to broker. See message-queue-intro.md.
-      (try
-        (http/post
-          url
-          (-> (with-krysp-defaults {:body xml})
-              (update :headers merge (create-headers (:headers http-conf)))
-              (wrap-authentication http-conf)))
-        (infof "KuntaGML (id: %s) consumed from queue successfully" message-id)
-        (imessages/update-message message-id {$set {:acknowledged (now) :status "done"}} WriteConcern/UNACKNOWLEDGED)
-        (catch Exception e      ; this is most likely a slingshot exception from clj-http
-          (errorf "Error when sending consumed KuntaGML message to %s: %s" url (.getMessage e))
-          ; TODO: You shouldn't throw exceptions from consumer's onMessage function. Use Session/SESSION_TRANSTANCTED to handle acknowledging properly.
-          (throw e))))))
+(defn create-message-handler [^Session session]
+  (fn [payload]
+    (let [{:keys [message-id url xml http-conf options]} payload]
+      (logging/with-logging-context {:userId (:user-id options) :applicationId (:application-id options)}
+        ; If we would handle duplicates in client code, in theory we could use Session/DUPS_OK_ACKNOWLEDGE mode
+        ; to reduce newtork roundtrips to broker. See message-queue-intro.md.
+        (try
+          (http/post
+            url
+            (-> (with-krysp-defaults {:body xml})
+                (update :headers merge (create-headers (:headers http-conf)))
+                (wrap-authentication http-conf)))
+          (imessages/update-message message-id {$set {:acknowledged (now) :status "done"}} WriteConcern/UNACKNOWLEDGED)
+          (.commit session)
+          (infof "KuntaGML (id: %s) consumed and acknowledged from queue successfully" message-id)
+          (catch Exception e    ; this is most likely a slingshot exception from clj-http
+            (errorf "Error when sending consumed KuntaGML message to %s: %s. Message rollback initiated." url (.getMessage e))
+            (.rollback session)))))))
 
 (def kuntagml-queue "lupapiste/kuntagml.http")
 
-(defonce kuntagml-consumer (jms/create-nippy-consumer kuntagml-queue message-handler))
+(def kuntagml-transacted-session (jms/register-session (jms/create-session (:conn @jms/state) Session/SESSION_TRANSACTED) :consumer))
+
+(defonce kuntagml-consumer (jms/create-nippy-consumer kuntagml-transacted-session kuntagml-queue (create-message-handler kuntagml-transacted-session)))
 
 (def nippy-producer (jms/create-nippy-producer kuntagml-queue))
 
@@ -95,8 +97,7 @@
 (sc/defn ^:always-validate send-xml-jms
   [id :- ssc/ObjectIdStr type :- (apply sc/enum org/endpoint-types) xml :- sc/Str http-conf :- org/KryspHttpConf options :- opts-schema]
   (let [url (create-url type http-conf)]
-    (nippy-producer {:message-id id :url url :xml xml :http-conf http-conf :options options})))
-)
+    (nippy-producer {:message-id id :url url :xml xml :http-conf http-conf :options options}))))
 
 (sc/defn ^:always-validate send-xml
   [application user type :- (apply sc/enum org/endpoint-types) xml :- sc/Str http-conf :- org/KryspHttpConf]
