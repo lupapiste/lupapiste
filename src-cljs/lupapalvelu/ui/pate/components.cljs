@@ -244,7 +244,7 @@
         [:div.col-12.col--full
          (components/tabbar {:selected* tab*
                              :tabs     [{:id       ::edit
-                                         :text-loc :edit}
+                                         :text-loc :pate.edit-tab}
                                         {:id       ::preview
                                          :text-loc :pdf.preview}]})
          (if (= tab ::edit)

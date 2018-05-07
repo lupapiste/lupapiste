@@ -567,9 +567,10 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.toApproveApplication = function () {
-    if (self.hasFieldWarnings()
+    if (lupapisteApp.models.applicationAuthModel.ok("pate-enabled-basic") &&
+      (self.hasFieldWarnings()
         || self.hasIncorrectlyFilledRequiredFields()
-        || self.hasMissingRequiredAttachments()) {
+        || self.hasMissingRequiredAttachments())) {
       LUPAPISTE.ModalDialog.showDynamicYesNo(
         loc("application.approve.missing-required-info.warning-title"),
         loc("application.approve.missing-required-info.warning-text"),
