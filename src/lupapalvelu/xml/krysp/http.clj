@@ -65,7 +65,7 @@
           (wrap-authentication http-conf)))))
 
 (when (env/feature? :jms)
-(defn create-message-handler [^Session session]
+(defn create-kuntagml-message-handler [^Session session]
   (fn [payload]
     (let [{:keys [message-id url xml http-conf options]} payload]
       (logging/with-logging-context {:userId (:user-id options) :applicationId (:application-id options)}
@@ -86,9 +86,14 @@
 
 (def kuntagml-queue "lupapiste/kuntagml.http")
 
-(def kuntagml-transacted-session (jms/register-session (jms/create-session (:conn @jms/state) Session/SESSION_TRANSACTED) :consumer))
+(def kuntagml-transacted-session (-> (jms/get-default-connection)
+                                     (jms/create-transacted-session)
+                                     (jms/register-session :consumer)))
 
-(defonce kuntagml-consumer (jms/create-nippy-consumer kuntagml-transacted-session kuntagml-queue (create-message-handler kuntagml-transacted-session)))
+(defonce kuntagml-consumer (jms/create-nippy-consumer
+                             kuntagml-transacted-session
+                             kuntagml-queue
+                             (create-kuntagml-message-handler kuntagml-transacted-session)))
 
 (def nippy-producer (jms/create-nippy-producer kuntagml-queue))
 

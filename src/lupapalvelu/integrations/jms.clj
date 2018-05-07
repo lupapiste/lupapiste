@@ -55,6 +55,13 @@
 
   (def create-session jms/create-session)
 
+  (defn create-transacted-session [conn]
+    (jms/create-session conn Session/SESSION_TRANSACTED))
+
+  (defn register-session [session type]
+    (swap! state update (keyword (str (name type) "-session")) conj session)
+    session)
+
   ;;
   ;; Connection
   ;;
@@ -108,10 +115,6 @@
               (warnf "Couldn't connect to broker %s, reconnecting in %s seconds" (:broker-url options) (/ sleep-time 1000))
               (Thread/sleep sleep-time)
               (recur (min (* 2 sleep-time) 60000) (dec try-times))))))))
-
-  (defn register-session [session type]
-    (swap! state update (keyword (str (name type) "-session")) conj session)
-    session)
 
   (defn start! []
     (try
