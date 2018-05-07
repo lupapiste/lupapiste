@@ -3,8 +3,8 @@ var LUPAPISTE = LUPAPISTE || {};
 (function($) {
   "use strict";
 
-  var startPageHref = window.location.href.replace(window.location.hash, "");
-  var mainWindow = !window.parent || window.parent === window;
+  const startPageHref = window.location.href.replace(window.location.hash, "");
+  const mainWindow = !window.parent || window.parent === window;
   if (mainWindow) {
     window.name = "lupapiste";
   }
@@ -21,7 +21,7 @@ var LUPAPISTE = LUPAPISTE || {};
    * @param
    */
   LUPAPISTE.App = function (params) {
-    var self = this;
+    const self = this;
 
     self.defaultTitle = document.title;
 
@@ -58,8 +58,8 @@ var LUPAPISTE = LUPAPISTE || {};
     };
 
     self.openPage = function (path) {
-      var pageId = path[0];
-      var pagePath = path.splice(1, path.length - 1);
+      const pageId = path[0];
+      const pagePath = path.splice(1, path.length - 1);
 
       trace("pageId", pageId, "pagePath", pagePath);
 
@@ -68,7 +68,7 @@ var LUPAPISTE = LUPAPISTE || {};
         if (!_.includes(self.componentPages, pageId) || !self.currentPage) {
           $(".page").removeClass("visible");
 
-          var page$ = $("#" + pageId);
+          let page$ = $("#" + pageId);
           if (page$.length === 0) {
             pageId = self.startPage;
             pagePath = [];
@@ -92,7 +92,7 @@ var LUPAPISTE = LUPAPISTE || {};
       hub.send("page-load", { pageId: pageId, pagePath: pagePath, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
 
       if (self.previousHash !== self.currentHash) {
-        var previousPageId = self.previousHash.split("/")[0];
+        const previousPageId = self.previousHash.split("/")[0];
         hub.send("page-unload", { pageId: previousPageId, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
       }
     };
@@ -105,14 +105,14 @@ var LUPAPISTE = LUPAPISTE || {};
 
       self.currentHash = (location.hash || "").substr(3);
 
-      var q = self.currentHash.indexOf("?");
+      const q = self.currentHash.indexOf("?");
       if (q > -1) {
         self.currentHash = self.currentHash.substring(0,q);
       }
 
       if (self.currentHash === "") {
         if (_.isFunction(window.location.replace)) {
-          var hasHash = _.endsWith(startPageHref, "#");
+          const hasHash = _.endsWith(startPageHref, "#");
           window.location.replace(startPageHref + (hasHash ? "!/" : "#!/") + self.startPage);
         } else {
           pageutil.openPage(self.startPage);
@@ -120,7 +120,7 @@ var LUPAPISTE = LUPAPISTE || {};
         return;
       }
 
-      var path = self.currentHash.split("/");
+      const path = self.currentHash.split("/");
 
       if (!self.allowAnonymous && self.session === undefined) {
         ajax.query("user")
@@ -168,11 +168,11 @@ var LUPAPISTE = LUPAPISTE || {};
     };
 
     self.getHashbangUrl = function() {
-      var href = window.location.href;
-      var hash = window.location.hash;
-      var separator = href.indexOf("?") >= 0 ? "&" : "?";
+      const href = window.location.href;
+      const hash = window.location.hash;
+      const separator = href.indexOf("?") >= 0 ? "&" : "?";
       if (hash && hash.length > 0) {
-        var withoutHash = href.substring(0, href.indexOf("#"));
+        const withoutHash = href.substring(0, href.indexOf("#"));
         return withoutHash + separator + "redirect-after-login=" + encodeURIComponent(hash.substring(1, hash.length));
       } else {
         // No hashbang. Go directly to front page.
@@ -185,9 +185,9 @@ var LUPAPISTE = LUPAPISTE || {};
       return false;
     };
 
-    var offline = false;
-    var wasLoggedIn = false;
-    var lockdown = false;
+    let offline = false;
+    let wasLoggedIn = false;
+    let lockdown = false;
 
     function unlock() {
       if (lockdown) {
@@ -239,7 +239,7 @@ var LUPAPISTE = LUPAPISTE || {};
       });
     };
 
-    var isAuthorizedToTosAndSearch = function() {
+    const isAuthorizedToTosAndSearch = function() {
       return lupapisteApp.models.globalAuthModel.ok("permanent-archive-enabled") &&
         lupapisteApp.models.globalAuthModel.ok("tos-operations-enabled");
     };
@@ -248,8 +248,8 @@ var LUPAPISTE = LUPAPISTE || {};
 
     self.showArchiveMenuOptions = ko.observable(false);
     self.showCalendarMenuOptions = ko.pureComputed(function() {
-      var isApplicant = lupapisteApp.models.currentUser.isApplicant();
-      var enabledInAuthModel = self.calendarsEnabledInAuthModel();
+      const isApplicant = lupapisteApp.models.currentUser.isApplicant();
+      const enabledInAuthModel = self.calendarsEnabledInAuthModel();
       return enabledInAuthModel || (isApplicant && features.enabled("ajanvaraus"));
     });
 
