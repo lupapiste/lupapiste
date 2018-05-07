@@ -2,7 +2,8 @@
   "use strict";
 
   function Languages() {
-    var self = this;
+    const self = this;
+
     self.languages = loc.getSupportedLanguages();
     self.languageMenuVisible = ko.observable(false);
     self.currentLanguage = loc.getCurrentLanguage();
@@ -28,10 +29,11 @@
     $(document).on( "click", cancel );
   }
 
-  var langs = new Languages();
+  const langs = new Languages();
 
   $(function() {
-    $( "#language-select").applyBindings( langs );
-    $( ".language-menu").applyBindings( langs );
+    $("#language-select").applyBindings(langs);
+    $(".language-menu").applyBindings(langs);
   });
+
 })();
