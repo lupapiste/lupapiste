@@ -114,15 +114,20 @@
                                           :operations (and operations (map att/->attachment-operation operations))))))))
 
 (defn make-bind-job
+  "postprocess-fn can be either a function or a list of functions."
   [command file-infos & {:keys [preprocess-ref postprocess-fn]
                          :or   {preprocess-ref (delay (ok))
                                 postprocess-fn identity}}]
-  (let [coerced-file-infos (->> (map coerce-bindable-file file-infos) (sc/validate [BindableFile]))
-        job (-> (zipmap (map :fileId coerced-file-infos) (map #(assoc % :status :pending) coerced-file-infos))
-                (job/start bind-job-status))]
+  (let [coerced-file-infos (->> (map coerce-bindable-file file-infos)
+                                (sc/validate [BindableFile]))
+        job                (-> (zipmap (map :fileId coerced-file-infos)
+                                       (map #(assoc % :status :pending)
+                                            coerced-file-infos))
+                               (job/start bind-job-status))]
     (util/future*
      (if (ok? @preprocess-ref)
-       (-> (bind-attachments! command coerced-file-infos (:id job))
-           (postprocess-fn))
+       (let [results (bind-attachments! command coerced-file-infos (:id job))]
+         (doseq [fun (flatten [postprocess-fn])]
+           (fun results)))
        (cancel-job (:id job) (assoc @preprocess-ref :status :error))))
     job))

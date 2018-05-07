@@ -21,7 +21,7 @@
         source (if re-stamp? (second versions) (first versions))]
     (assoc (select-keys source [:contentType :fileId :filename :size])
       :signatures (when-not re-stamp?
-                    (seq (filter #(= (:fileId (first versions)) (:fileId %))
+                    (seq (filter #(= (-> versions first :version) (:version %))
                                  (:signatures attachment))))
       :stamped-original-file-id (when re-stamp? (:originalFileId (first versions)))
       :operation-ids (set (att-util/get-operation-ids attachment))
