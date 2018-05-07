@@ -268,7 +268,8 @@
    (assoc data :customAccountLimit nil)))
 
 (defn account-type-changing-with-custom? [{old-type :accountType} {new-type :accountType}]
-  (and (not= old-type new-type)
+  (and new-type
+       (not= old-type new-type)
        (or (= :custom (keyword old-type))
            (= :custom (keyword new-type)))))
 
@@ -337,10 +338,12 @@
                      created)
     (fail :error.company-not-locked)))
 
-(defn check-invitation-accepted [{{auth :auth} :application {{company-id :id} :company} :user}]
-  (when (and auth (->> (filter (comp #{company-id} :id) auth)
-                       (not-any? :inviteAccepted)))
-    (fail :error.company-has-not-accepted-invite)))
+(defn check-company-authorized [{{auth :auth} :application {{company-id :id} :company} :user}]
+  (when auth
+    (let [company-auths (filter (comp #{company-id} :id) auth)]
+      (when (or (empty? company-auths)
+                (some :invite company-auths))
+        (fail :error.company-has-not-accepted-invite)))))
 
 (defn authorized-to-apply-submit-restriction-to-other-auths [{company :company}]
   (when-not (:submitRestrictor (and company @company))
@@ -599,8 +602,7 @@
   (when-not (and company  (not (:submit company)))
     (fail :error.authorized)))
 
-(defn company-denies-invitations? [application user]
-  (let [user-company-id (get-in user [:company :id])
-        company (find-company-by-id user-company-id)
-        invites-denied (:invitationDenied company)]
-    (and invites-denied (empty? (auth/get-auth application user-company-id)))))
+(defn company-denies-invitations? [application company-id]
+  (and (ss/not-blank? company-id)
+       (empty? (auth/get-auth application company-id))
+       (:invitationDenied (find-company-by-id company-id))))

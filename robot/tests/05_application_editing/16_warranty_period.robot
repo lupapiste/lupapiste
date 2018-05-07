@@ -16,6 +16,7 @@ Olli-ya submits the application, approves it and gives it a verdict
   Submit application
   Open tab  requiredFieldSummary
   Click enabled by test id  approve-application-summaryTab
+  Confirm  dynamic-yes-no-confirm-dialog
   Confirm notification dialog
   Open tab  verdict
   Submit empty verdict  verdictGiven  1

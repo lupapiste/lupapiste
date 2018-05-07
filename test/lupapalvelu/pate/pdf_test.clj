@@ -1,7 +1,9 @@
 (ns lupapalvelu.pate.pdf-test
   "PDF testing concentrates mainly on the source value resolution."
-  (:require [midje.sweet :refer :all]
-            [lupapalvelu.pate.pdf :as pdf]))
+  (:require [lupapalvelu.application :as app]
+            [lupapalvelu.pate.pdf :as pdf]
+            [lupapalvelu.pate.shared :as shared]
+            [midje.sweet :refer :all]))
 
 (fact "join-non-blanks"
   (pdf/join-non-blanks "-" "foo" " " "bar" nil "baz")
@@ -78,10 +80,47 @@
               {:name    "Foreign Firm"
                :address "Guang Hua Lu, 88 Beijing, Kiina"}] :in-any-order)))
 
-(fact "pathify"
+(facts "pathify"
   (pdf/pathify :hello.world.foo.bar) => [:hello :world :foo :bar]
   (pdf/pathify :hello) => [:hello]
   (pdf/pathify "hello.world") => [:hello :world])
+
+(facts "doc-value"
+  (let [app {:documents [{:schema-info {:name "foo"}
+                          :data {:bar {:baz "hello"}}}]}]
+    (pdf/doc-value app :foo :hii.hoo) => nil
+    (pdf/doc-value app :foo :bar) => {:baz "hello"}
+    (pdf/doc-value app :foo :bar.baz) => "hello"
+    (pdf/doc-value app :bad :bar.baz) => nil
+    (pdf/doc-value app :foo :bar.baz.bam) => nil))
+
+(facts "dict-value"
+  (against-background (shared/verdict-schema :r nil)
+                      => {:dictionary {:ts   {:date {}}
+                                       :txt  {:phrase-text {:category :yleinen}}
+                                       :foo  {:text {}}
+                                       :list {:repeating {:day  {:date {}}
+                                                          :word {:phrase-text {:category :yleinen}}
+                                                          :bar  {:toggle {}}}}}})
+  (let [verdict {:category :r
+                 :data     {:ts   1524648212778
+                            :txt  "_markup text_"
+                            :foo  "*regular text*"
+                            :list {:id1 {:day  1524733200000
+                                         :word "### Title"
+                                         :bar  true}}}}]
+    (pdf/dict-value verdict :ts)
+    => "25.4.2018"
+    (pdf/dict-value verdict :txt)
+    => '([:div.markup ([:p {} [:span.underline {} "markup text"] [:br]])])
+    (pdf/dict-value verdict :foo)
+    => "*regular text*"
+    (pdf/dict-value {:verdict verdict} :list.id1.day)
+    => "26.4.2018"
+    (pdf/dict-value verdict :list.id1.word)
+    => '([:div.markup ([:h3 {} "Title"])])
+    (pdf/dict-value {:verdict verdict} :list.id1.bar)
+    => true))
 
 (fact "add-unit"
   (pdf/add-unit :fi :ha " ") => nil
@@ -94,7 +133,7 @@
   (pdf/add-unit :fi :section 88) => "\u00a788"
   (pdf/add-unit :fi :eur "foo") => "foo\u20ac")
 
-(fact "property-id"
+(facts "property-id"
   (pdf/property-id {:propertyId "75341600550007"
                     :documents []})
   => "753-416-55-7"
@@ -107,7 +146,7 @@
                                  :data {:kiinteisto {:maaraalaTunnus " "}}}]})
   => "753-416-55-7")
 
-(fact "value-or-other"
+(facts "value-or-other"
   (pdf/value-or-other :fi "other" "world" :hii :hoo)
   => "world"
   (pdf/value-or-other :fi "yleinen" "world" :phrase :category)
@@ -189,49 +228,200 @@
                        :in-any-order))))
 
 (fact "collateral"
-  (pdf/collateral :fi {:data {:collateral-flag true
-                              :collateral      "20 000"
-                              :collateral-type "shekki"
-                              :collateral-date "5.2.2018"}})
+  (pdf/collateral {:lang    :fi
+                   :verdict {:category :r
+                             :data     {:collateral-flag true
+                                        :collateral      "20 000"
+                                        :collateral-type "shekki"
+                                        :collateral-date "5.2.2018"}}})
   => "20 000\u20ac, Shekki, 5.2.2018"
-  (pdf/collateral :fi {:data {:collateral-flag true
-                              :collateral "20 000"}})
+  (pdf/collateral {:lang    :fi
+                   :verdict {:category :r
+                             :data     {:collateral-flag true
+                                        :collateral      "20 000"}}})
   => "20 000\u20ac"
-  (pdf/collateral :fi {:data {:collateral-flag true}})
+  (pdf/collateral {:lang    :fi
+                   :verdict {:category :r
+                             :data     {:collateral-flag true}}})
   => ""
-  (pdf/collateral :fi {:data {:collateral-flag false
-                              :collateral      "20 000"
-                              :collateral-type "shekki"
-                              :collateral-date "5.2.2018"}})
+  (pdf/collateral {:lang    :fi
+                   :verdict {:category :r
+                             :data     {:collateral-flag false
+                                        :collateral      "20 000"
+                                        :collateral-type "shekki"
+                                        :collateral-date "5.2.2018"}}})
   => nil
-  (pdf/collateral :fi {:data {}}) => nil)
+  (pdf/collateral {:lang    :fi
+                   :verdict {:category :r
+                             :data     {}}}) => nil)
 
 (fact "complexity"
-  (pdf/complexity :fi {:data {}})
+  (pdf/complexity {:lang :fi :verdict {:category :r
+                                       :data     {}}})
   => nil
-  (pdf/complexity :fi {:data {:complexity "large"}})
+  (pdf/complexity {:lang :fi :verdict {:category :r
+                                       :data     {:complexity "large"}}})
   => ["Vaativa"]
-  (pdf/complexity :fi {:data {:complexity-text "Tai nan le."}})
-  => ["Tai nan le."]
-  (pdf/complexity :fi {:data {:complexity-text "Tai nan le."
-                              :complexity "large"}})
-  => ["Vaativa" "Tai nan le."])
+  (pdf/complexity {:lang    :fi
+                   :verdict {:category :r
+                             :data     {:complexity-text "Tai nan le."}}})
+  => '(([:div.markup ([:p {} "Tai nan le." [:br]])]))
+  (pdf/complexity {:lang    :fi
+                   :verdict {:category :r
+                             :data     {:complexity-text "Tai nan le."
+                                        :complexity      "large"}}})
+  => ["Vaativa" '([:div.markup ([:p {}"Tai nan le." [:br]])])])
 
 (fact "statements"
-  (pdf/statements :fi {:data {}})
+  (pdf/statements {:lang    :fi
+                   :verdict {:category :r
+                             :data     {}}})
   => nil
-  (pdf/statements :fi {:data {:statements [{:given 1518017023967
-                                            :text "Stakeholder"
-                                            :status "ei-huomautettavaa"}
-                                           {:given 1517930824494
-                                            :text "Interested"
-                                            :status "ehdollinen"}]}})
+  (pdf/statements {:lang    :fi
+                   :verdict {:category :r
+                             :data     {:statements [{:given  1518017023967
+                                                      :text   "Stakeholder"
+                                                      :status "ei-huomautettavaa"}
+                                                     {:given  1517930824494
+                                                      :text   "Interested"
+                                                      :status "ehdollinen"}]}}})
   => ["Stakeholder, 7.2.2018, Ei huomautettavaa"
       "Interested, 6.2.2018, Ehdollinen"])
 
 (fact "handler"
-  (pdf/handler {:data {}}) => ""
-  (pdf/handler {:data {:handler "Hank Handler  "}}) => "Hank Handler"
-  (pdf/handler {:data {:handler " Hank Handler"
-                       :handler-title "Title"}}) => "Title Hank Handler"
-  (pdf/handler {:data {:handler-title " Title  "}}) => "Title")
+  (pdf/handler {:verdict {:category :r
+                          :data     {}}}) => ""
+  (pdf/handler {:verdict {:category :r
+                          :data     {:handler "Hank Handler  "}}})
+  => "Hank Handler"
+  (pdf/handler {:verdict {:category :r
+                          :data     {:handler       " Hank Handler"
+                                     :handler-title "Title"}}})
+  => "Title Hank Handler"
+  (pdf/handler {:verdict {:category :r
+                          :data     {:handler-title " Title  "}}})
+  => "Title")
+
+(facts "Application operations"
+  (let [app             {:documents           [{:schema-info {:op {:id   "op2"
+                                                                   :name "purkaminen"}}}
+                                               {:schema-info {:op {:id   "op1"
+                                                                   :name "sisatila-muutos"}}
+                                                :data        {:foo "bar"}}]
+                         :primaryOperation    {:id "op1"}
+                         :secondaryOperations [{:id "op2" :created 1}]}
+        sisatila-muutos "Rakennuksen sis\u00e4tilojen muutos (k\u00e4ytt\u00f6tarkoitus ja/tai muu merkitt\u00e4v\u00e4 sis\u00e4muutos)"
+        purkaminen      "Rakennuksen purkaminen"]
+    (fact "Primary operation data"
+      (pdf/primary-operation-data app)
+      => {:foo "bar"})
+    (fact "Operation infos"
+      (pdf/operation-infos app)
+      => [{:id   "op1"
+           :name "sisatila-muutos"}
+          {:id   "op2"
+           :name "purkaminen"}])
+    (fact "operations: no operation dict"
+      (pdf/operations {:lang "fi" :verdict {} :application app})
+      => [{:text sisatila-muutos}
+          {:text purkaminen}])
+    (fact "operations: blank operation dict"
+      (pdf/operations {:lang "fi" :verdict {:data {:operation "   "}} :application app})
+      => [{:text sisatila-muutos}
+          {:text purkaminen}])
+    (fact "operations: operation dict"
+      (pdf/operations {:lang "fi" :verdict {:data {:operation "  Grand Design   "}} :application app})
+      => [{:text "Grand Design"}
+          {:text purkaminen}])))
+
+(facts "Buildings"
+  (let [app     {:documents           [{:schema-info {:op {:id   "op2"
+                                                           :name "purkaminen"}}}
+                                       {:schema-info {:op {:id   "op1"
+                                                           :name "pientalo"}}
+                                        :data        {:foo "bar"}}]
+                 :primaryOperation    {:id "op1"}
+                 :secondaryOperations [{:id "op2" :created 1}]}
+        build1  {:kiinteiston-autopaikat "1"
+                 :autopaikat-yhteensa    "3"
+                 :tag                    "Foo"
+                 :description            "Foobar"
+                 :show-building          true}
+        build2  {:kiinteiston-autopaikat "2"
+                 :autopaikat-yhteensa    "4"
+                 :description            "Burn!"
+                 :building-id            "12345"
+                 :show-building          true}
+        verdict {:category :r
+                 :data     {:buildings {:op2 build2
+                                        :op1 build1}}}]
+    (fact "Verdict buildings: no buildings"
+      (pdf/verdict-buildings {:application app :verdict {:category :r}})
+      => [])
+    (fact "Verdict buildings: two buildings"
+      (pdf/verdict-buildings {:application app :verdict verdict})
+      => [build1 build2])
+    (fact "Verdict buildings: other building deselected"
+      (pdf/verdict-buildings {:application app
+                              :verdict     (update-in verdict
+                                                      [:data :buildings :op2 :show-building]
+                                                      not)})
+      => [build1])
+    (fact "Building parking: building 1"
+      (pdf/building-parking "fi" build1)
+      => [{:text [:strong "Foo: Foobar"] :amount ""}
+          {:text "Kiinteist\u00f6n autopaikat" :amount "1"}
+          {:text "Autopaikat yhteens\u00e4" :amount "3"}])
+    (fact "Building parking: building 2"
+      (pdf/building-parking "fi" build2)
+      => [{:text [:strong "Burn! \u2013 12345"] :amount ""}
+          {:text "Kiinteist\u00f6n autopaikat" :amount "2"}
+          {:text "Autopaikat yhteens\u00e4" :amount "4"}])
+    (fact "Parking section: both buildings"
+      (pdf/parking-section :fi [build1 build2])
+      => [:div.section
+          [[{:text [:strong "Foo: Foobar"] :amount ""}
+            {:text "Kiinteist\u00f6n autopaikat" :amount "1"}
+            {:text "Autopaikat yhteens\u00e4" :amount "3"}]
+           [{:text [:strong "Burn! \u2013 12345"] :amount ""}
+            {:text "Kiinteist\u00f6n autopaikat" :amount "2"}
+            {:text "Autopaikat yhteens\u00e4" :amount "4"}]]])))
+
+(facts "references"
+  (let [refs {:reviews [{:id "id1" :fi "Yksi" :sv "Ett" :en "One"}
+                        {:id "id2" :fi "Kaksi" :sv "Tv\u00e5" :en "Two"}
+                        {:id "id3" :fi "Kolme" :sv "Tre" :en "Three"}
+                        {:id "id4" :fi "Nelj\u00e4" :sv "Fyra" :en "Four"}]}]
+    (fact "not included"
+      (pdf/references {:lang    :fi
+                       :verdict {:category   :r
+                                 :data       {:reviews-included false
+                                              :reviews          ["id1" "id3"]}
+                                 :references refs}} :reviews)
+      => nil)
+    (fact "Included"
+      (pdf/references {:lang    :fi
+                       :verdict {:category   :r
+                                 :data       {:reviews-included true
+                                              :reviews          ["id1" "bad" "id3"]}
+                                 :references refs}} :reviews)
+      => ["Kolme" "Yksi"])))
+
+(facts "conditions"
+  (fact "No conditions"
+    (pdf/conditions {:verdict {:category :r
+                               :data     {}}})
+    => nil)
+  (fact "Only empty conditions"
+    (pdf/conditions {:verdict {:category :r
+                               :data     {:conditions {:bbb {:condition ""}
+                                                       :ccc {}
+                                                       :aaa {:condition "    "}}}}})
+    => nil)
+  (fact "Some conditions"
+    (pdf/conditions {:verdict {:category :r
+                               :data     {:conditions {:bbb {:condition "Should be last."}
+                                                       :ccc {:condition "  "}
+                                                       :aaa {:condition "Probably first."}}}}})
+    => [[:div.markup '(([:p {} "Probably first." [:br]])
+                       ([:p {} "Should be last." [:br]]))]]))

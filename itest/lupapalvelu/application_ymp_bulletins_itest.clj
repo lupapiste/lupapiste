@@ -40,9 +40,9 @@
                                            :x 430109.3125 :y 7210461.375
                                            :address "Oulu 10")
         app-id (:id app)
-        _ (upload-attachment pena app-id {:id "" :type {:type-group "muut" :type-id "muu"}} true) => true
-        _ (upload-attachment pena app-id {:id "" :type {:type-group "kartat" :type-id "jatteen-sijainti"}} true) => true
-        _ (upload-attachment pena app-id {:id "" :type {:type-group "jatteen_kerays" :type-id "vastaanottopaikan_tiedot"}} true) => true
+        _ (upload-file-and-bind pena app-id {:type {:type-group "muut" :type-id "muu"}}) => true
+        _ (upload-file-and-bind pena app-id {:type {:type-group "kartat" :type-id "jatteen-sijainti"}}) => true
+        _ (upload-file-and-bind pena app-id {:type {:type-group "jatteen_kerays" :type-id "vastaanottopaikan_tiedot"}}) => true
         {attachments :attachments} (query-application pena app-id)]
     (fact "Pena sets CV not public"
       (command pena :set-attachment-visibility :id app-id :attachmentId (:id (first attachments)) :value "asiakas-ja-viranomainen") => ok?)
@@ -249,7 +249,7 @@
         (let [bulletin (query-bulletin local-query pena (:id oulu-app))]
           (keys bulletin) => (just [:id :_applicantIndex :address :applicant :attachments :versionId
                                     :bulletinState :documents :location :modified :municipality
-                                    :primaryOperation :propertyId :state :stateSeq :canComment
+                                    :primaryOperation :propertyId :state :stateSeq :canComment :pate-verdicts
                                     :verdicts :tasks :application-id :verdictData :category :bulletinOpDescription
                                     :proclamationText :proclamationEndsAt :proclamationStartsAt] :in-any-order)
           (fact "attachments only contain specified keys and nothing else"

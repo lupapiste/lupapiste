@@ -354,10 +354,12 @@
         attachment1 (-> application :attachments first)]
     (:state application) => "verdictGiven"
     (count (:attachments application)) => 6
+    (fact "type check"
+      (:type attachment1) => {:type-group "paapiirustus" :type-id "asemapiirros"})
     (fact "Uploading versions to pre-verdict attachment is not possible"
       (upload-attachment pena application-id attachment1 false :filename "dev-resources/test-pdf.pdf"))
     (fact "Uploading new post-verdict attachment is possible"
-      (upload-attachment pena application-id {:id "" :type {:type-group "selvitykset" :type-id "energiatodistus"}} true :filename "dev-resources/test-pdf.pdf"))
+      (upload-attachment pena application-id {:type {:type-group "selvitykset" :type-id "energiatodistus"}} true :filename "dev-resources/test-pdf.pdf"))
 
     (count (:attachments (query-application pena application-id))) => 7))
 
@@ -730,7 +732,7 @@
         (attachment-comments-match application)))
 
     (facts "Mikko uploads personal CV"
-      (upload-attachment mikko application-id {:id "" :type {:type-group "osapuolet" :type-id "cv"}} true) => truthy
+      (upload-attachment mikko application-id {:type {:type-group "osapuolet" :type-id "cv"}} true) => truthy
       (let [{attachments :attachments} (query-application mikko application-id)
             mikko-att (last attachments)]
         (fact "Mikko has auth"
@@ -766,8 +768,8 @@
     (command pena :submit-application :id application-id) => ok?
 
     (fact "Veikko uploads only-authority attachment"
-      (upload-attachment veikko application-id {:id "" :type {:type-group "ennakkoluvat_ja_lausunnot"
-                                                              :type-id "elyn_tai_kunnan_poikkeamapaatos"}} true) => truthy)
+      (upload-attachment veikko application-id {:type {:type-group "ennakkoluvat_ja_lausunnot"
+                                                       :type-id "elyn_tai_kunnan_poikkeamapaatos"}} true) => truthy)
     (let [{attachments :attachments} (query-application veikko application-id)
           veikko-att (last attachments)]
       (count attachments) => 6
@@ -786,8 +788,8 @@
           (attachment-comments-match app))))
 
     (fact "Veikko uploads attachment for parties"
-      (upload-attachment veikko application-id {:id "" :type {:type-group "ennakkoluvat_ja_lausunnot"
-                                                                  :type-id "naapurin_suostumus"}} true) => truthy)
+      (upload-attachment veikko application-id {:type {:type-group "ennakkoluvat_ja_lausunnot"
+                                                       :type-id "naapurin_suostumus"}} true) => truthy)
 
     (let [{attachments :attachments} (query-application veikko application-id)
           veikko-att-id (:id (last attachments))

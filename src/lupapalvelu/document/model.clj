@@ -462,34 +462,6 @@
 ;; Approvals
 ;;
 
-(defn ->approved
-  "Approval meta data model. To be used within with-timestamp."
-  [status user]
-  {:value status
-   :user (select-keys user [:id :firstName :lastName])
-   :timestamp (current-timestamp)})
-
-
-(defn apply-approval
-  "Merges approval meta data into a map.
-   To be used within with-timestamp or with a given timestamp."
-  ([document path status user]
-    (assoc-in document (filter (comp not nil?) (flatten [:meta path :_approved])) (->approved status user)))
-  ([document path status user timestamp]
-    (with-timestamp timestamp (apply-approval document path status user))))
-
-(defn approvable?
-  ([document] (approvable? document nil nil))
-  ([document path] (approvable? document nil path))
-  ([document schema path]
-    (if (seq path)
-      (let [schema      (or schema (get-document-schema document))
-            schema-body (:body schema)
-            str-path    (map #(if (keyword? %) (name %) %) path)
-            element     (keywordize-keys (find-by-name schema-body str-path))]
-        (true? (:approvable element)))
-      (true? (get-in document [:schema-info :approvable])))))
-
 (defn modifications-since-approvals
   ([{:keys [schema-info data meta] :as document}]
     (let [schema (and schema-info (schemas/get-schema (:version schema-info) (:name schema-info)))
@@ -613,7 +585,7 @@
       (boolean (find-by-name schema-body full-path)))))
 
 (defn good-flag? [flag]
-  (or (nil? flag) (util/boolean? flag)))
+  (or (nil? flag) (boolean? flag)))
 
 (defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId turvakieltokytkin
                          companyName companyId allowDirectMarketing

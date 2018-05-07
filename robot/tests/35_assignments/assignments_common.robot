@@ -61,4 +61,3 @@ Edit handler
   [Arguments]  ${index}  ${person}  ${role}
   Select from autocomplete by test id  edit-person-${index}  ${person}
   Select from autocomplete by test id  edit-role-${index}  ${role}
-  Positive indicator should be visible

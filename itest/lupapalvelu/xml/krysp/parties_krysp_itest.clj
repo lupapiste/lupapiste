@@ -70,12 +70,15 @@
         pre-verdict-suunnittelija1 (domain/get-document-by-name application "suunnittelija")
         pre-verdict-suunnittelija2 (command pena :create-doc :id application-id :schemaName "suunnittelija") => ok?
         pre-verdict-suunnittelija3 (command pena :create-doc :id application-id :schemaName "suunnittelija") => ok?
+        pre-verdict-non-approved (command pena :create-doc :id application-id :schemaName "suunnittelija") => ok?
         _ (command pena :update-doc :id application-id :doc (:id pre-verdict-suunnittelija1) :updates [["henkilotiedot.etunimi" "Pre1"]
                                                                                                        ["henkilotiedot.sukunimi" "Suunnittelija"]]) => ok?
         _ (command pena :update-doc :id application-id :doc (:doc pre-verdict-suunnittelija2) :updates [["henkilotiedot.etunimi" "Pre2"]
                                                                                                         ["henkilotiedot.sukunimi" "Suunnittelija"]]) => ok?
         _ (command pena :update-doc :id application-id :doc (:doc pre-verdict-suunnittelija3) :updates [["henkilotiedot.etunimi" "Pre3"]
                                                                                                         ["henkilotiedot.sukunimi" "Suunnittelija"]]) => ok?
+        _ (command pena :update-doc :id application-id :doc (:doc pre-verdict-non-approved) :updates [["henkilotiedot.etunimi" "Non-Approved"]
+                                                                                                      ["henkilotiedot.sukunimi" "Suunnittelija"]]) => ok?
         ]
 
     (command pena :submit-application :id application-id) => ok?
@@ -155,28 +158,36 @@
           (fact "kayttotapaus is set"
             (xml/get-text xml (conj asia-path :kayttotapaus)) => "Uuden suunnittelijan nime\u00e4minen"))
 
-        (fact "Sonja approves Post3 and sends designers again"
+        (fact "Sonja approves Post3 and Non-Approved and sends designers again"
           (command sonja :approve-doc :id application-id :doc (:doc post-verdict-suunnittelija3) :path nil :collection "documents") => ok?
+          (command sonja :approve-doc :id application-id :doc (:doc pre-verdict-non-approved) :path nil :collection "documents") => ok?
           (let [second-resp (command sonja :parties-as-krysp :id application-id :lang "fi")
                 application (query-application sonja application-id)
                 first-xml (get-valid-krysp-xml application (get-doc-id-filename-pred (:doc post-verdict-suunnittelija1)))
                 second-xml (get-valid-krysp-xml application (get-doc-id-filename-pred (:doc post-verdict-suunnittelija3)))
+                pre-verdict-designer-xml (get-valid-krysp-xml application (get-doc-id-filename-pred (:doc pre-verdict-non-approved)))
                 designers-path [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :suunnittelijatieto]
                 first-designer-elements (xml/select first-xml designers-path)
-                second-designer-elements (xml/select second-xml designers-path)]
+                second-designer-elements (xml/select second-xml designers-path)
+                third-designer-elements (xml/select pre-verdict-designer-xml designers-path)]
             second-resp => ok?
             (count (:transfers application)) => 3
-            (fact "two documents have been sent"
-              (:sentDocuments second-resp) => (just [(:doc post-verdict-suunnittelija1)
+            (fact "three documents have been sent"
+              (:sentDocuments second-resp) => (just [(:doc pre-verdict-non-approved)
+                                                     (:doc post-verdict-suunnittelija1)
                                                      (:doc post-verdict-suunnittelija3)]))
             (fact "Post1 in KRSYP message"
               (count first-designer-elements) => 1
               (xml/get-text (first first-designer-elements) [:henkilo :etunimi]) => "Post1")
             (fact "Post3 in KRSYP message"
               (count second-designer-elements) => 1
-              (xml/get-text (first second-designer-elements) [:henkilo :etunimi]) => "Post3"))
-          (command admin :set-kuntagml-http-endpoint :partner "matti"
+              (xml/get-text (first second-designer-elements) [:henkilo :etunimi]) => "Post3")
+            (fact "Non-Approved designer also in KRYSP"
+              (count third-designer-elements) => 1
+              (xml/get-text (first third-designer-elements) [:henkilo :etunimi]) => "Non-Approved"))
+          (fact "HTTP disabled -> can't send"
+            (command admin :set-kuntagml-http-endpoint :partner "matti"
                    :url (str (server-address) "/dev/krysp/receiver") :organization "753-R" :permitType "R"
                    :username "kuntagml" :password "kryspi") => ok?
           (command sonja :parties-as-krysp :id application-id :lang "fi") => (partial expected-failure? :error.integration.krysp-http)
-          (command admin :delete-kuntagml-http-endpoint :organization "753-R" :permitType "R") => ok?)))))
+          (command admin :delete-kuntagml-http-endpoint :organization "753-R" :permitType "R") => ok?))))))

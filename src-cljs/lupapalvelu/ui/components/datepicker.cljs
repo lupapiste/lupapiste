@@ -58,30 +58,34 @@
     [pikaday-options]: Map of Pikaday options that override the
            defaults. Map keys will be camelCased automatically."
   [date-key & [pikaday-options]]
-  {:did-mount
-   (fn [state]
-     (let [dom-node        (rum/dom-node state)
-           date*           (date-key state)
-           lang            (js/loc.getCurrentLanguage)
-           default-options {:format           (loc "date.format")
-                            :show-week-number true
-                            :first-day        1
-                            :position         "bottom left"
-                            :field            dom-node
-                            :i18n             (pikaday-i18n)
-                            :on-select        #(reset! date* %)}
-           opts            (opts-transform (merge default-options
-                                                  pikaday-options))
-           pikaday*        (atom (js/Pikaday. opts))
-           update-fn       #(when-let [m (js/util.toMoment @date* lang)]
-                              (.setMoment @pikaday* m true))]
-       (update-fn)
-       (add-watch date* :update-instance update-fn)
-       (assoc state ::pikaday pikaday*)))
-   :will-unmount
-   (fn [state]
-     (.destroy (-> state ::pikaday deref))
-     (remove-watch (date-key state) :update-instance))})
+  (letfn [(dispose [state]
+            (some-> state ::pikaday deref .destroy)
+            (remove-watch (date-key state) :update-instance))
+          (bind-pikaday [state]
+            ;; Just in case
+            (dispose state)
+            (let [dom-node        (rum/dom-node state)
+                  date*           (date-key state)
+                  lang            (js/loc.getCurrentLanguage)
+                  default-options {:format           (loc "date.format")
+                                   :show-week-number true
+                                   :first-day        1
+                                   :position         "bottom left"
+                                   :field            dom-node
+                                   :i18n             (pikaday-i18n)
+                                   :on-select        #(reset! date* %)}
+                  opts            (opts-transform (merge default-options
+                                                         pikaday-options))
+                  pikaday*        (atom (js/Pikaday. opts))
+                  update-fn       #(when-let [m (js/util.toMoment @date* lang)]
+                                     (.setMoment @pikaday* m true))]
+        (update-fn)
+        (add-watch date* :update-instance update-fn)
+        (assoc state ::pikaday pikaday*)))]
+
+    {:did-mount    bind-pikaday
+     :did-update   bind-pikaday
+     :will-unmount dispose}))
 
 
 (rum/defcs datepicker < (datepicker-mixin)

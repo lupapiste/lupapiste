@@ -67,7 +67,7 @@
    :input-validators [doc-persistence/validate-collection]
    :permissions      [{:required [:application/read]}]}
   [{:keys [application user]}]
-  (if-let [document (doc-persistence/by-id application collection doc)]
+  (if-let [document (tools/by-id application collection doc)]
     (ok :document (application/process-document-or-task user application document))
     (fail :error.document-not-found)))
 

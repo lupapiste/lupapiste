@@ -19,8 +19,6 @@
 (defn replace-in-schema [schema replaceable replacing]
   (walk/postwalk (fn [subschema] (if (= replaceable subschema) replacing subschema)) schema))
 
-(defn- any? [x] true)
-
 (defmacro catch-all
   "Macro for catching all exceptions and returning the thrown value if any.
    Otherwise evaluates to the result of the given expression. Useful for testing

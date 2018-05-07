@@ -189,7 +189,7 @@
 
 (facts remove-application-handler
   (let [{app-id :id :as application} (create-and-submit-application pena :propertyId sipoo-property-id)
-        resp     (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId ronja-id)]
+        resp (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId ronja-id)]
 
     (fact "Handler is added"
       resp => ok?)
@@ -885,6 +885,12 @@
           emails => (partial some (comp (partial re-find (re-pattern (email-for-key mikko))) :to))))))
   (let [application-id (create-app-id teppo :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
     (command teppo :submit-application :id application-id)
+    (fact "Set Ronja as the handler"
+      (command sonja :upsert-application-handler
+               :id application-id
+               :roleId "abba1111111111111111acdc"
+               :userId ronja-id) => ok?
+      (-> (query-application sonja application-id) :handlers first :userId) => ronja-id)
     (return-to-draft sonja application-id)
 
     (let [email (last-email)]
@@ -900,7 +906,9 @@
       (fact "The authority's comments are also stored in application comments"
         (-> application :comments last :text) => "comment-text")
       (fact "Application's submission date is nil"
-        (-> application :submitted) => nil?))))
+        (-> application :submitted) => nil?)
+      (fact "Application has no handlers"
+        (:handlers application) => empty?))))
 
 (facts "Authority can create application in other organisation"
        (let [application-id (create-app-id luukas

@@ -49,6 +49,6 @@
       .call();
   }
 
-  $(window).load(loadTimingData);
+  window.addEventListener("load", loadTimingData);
 
 })(jQuery);

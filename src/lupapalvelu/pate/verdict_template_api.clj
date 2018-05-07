@@ -27,23 +27,6 @@
                                     category)
       (fail :error.invalid-category))))
 
-(defn settings-generic-editable
-  "Generic (a subcollection item) exists and is not deleted. Even if
-  the generic is deleted, it is editable if the update includes
-  deleted parameter with false value."
-  [subcollection]
-  (fn [{:keys [data user] :as command}]
-    (when-let [gen-id (case subcollection
-                        :reviews (:review-id data)
-                        :plans   (:plan-id data)
-                        false)]
-      (if-let [generic (template/generic (template/command->organization command)
-                                         gen-id
-                                         subcollection)]
-        (when (and (:deleted generic) (-> data :deleted false? not))
-          (fail :error.settings-item-deleted))
-        (fail :error.settings-item-not-found)))))
-
 ;; ----------------------------------
 ;; Input-validators
 ;; ----------------------------------
@@ -55,28 +38,6 @@
   #(when-not (set/subset? (->> % :data keys (map keyword) set)
                           (set params))
      (fail :error.unsupported-parameters)))
-
-(defn- settings-generic-details-valid
-  "None of the details is mandatory."
-  [{data :data}]
-  (some (fn [[k v]]
-          (let [k (keyword k)]
-            (cond
-              (k #{:fi :sv :en})
-              (when (ss/blank? v)
-                (fail :error.name-blank))
-              (= k :deleted)
-              (when-not (or (false? v) (true? v))
-                (fail :error.deleted-not-boolean)))))
-        data))
-
-(defn- settings-review-details-valid
-  "None of the details is mandatory."
-  [{{type :type} :data}]
-  (when (and type
-             (not (util/includes-as-kw? (keys shared/review-type-map)
-                                        type)))
-    (fail :error.invalid-review-type)))
 
 ;; ----------------------------------
 ;; Verdict template API
@@ -193,12 +154,20 @@
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable)]}
   [command]
-  (let [organization (template/command->organization command)
-        template     (template/verdict-template organization template-id)]
-    (ok (assoc (template/verdict-template-summary template)
-               :draft (:draft template)
-               :filled (template/template-filled? {:org-id   (:id organization)
-                                                   :template template})))))
+  (ok (template/verdict-template-response-data (template/command->organization command)
+                                               template-id)))
+
+(defcommand update-and-open-verdict-template
+  {:description "Like verdict-template but also updates the template's
+  settings dependencies."
+   :feature :pate
+   :user-roles #{:authorityAdmin}
+   :parameters [template-id]
+   :input-validators [(partial action/non-blank-parameters [:template-id])]
+   :pre-checks [pate-enabled
+                (template/verdict-template-check :editable)]}
+  [command]
+  (ok (template/verdict-template-update-and-open command)))
 
 (defcommand toggle-delete-verdict-template
   {:description      "Toggle template's deletion status"
@@ -270,116 +239,13 @@
                                                                  path
                                                                  value)]
       (if data
-        (ok :modified created
-            :filled (template/settings-filled? {:data data}
-                                               category))
-       (template/error-response updated)))))
+        (ok (template/changes-response
+             {:modified created
+              :filled (template/settings-filled? {:data data}
+                                                 category)}
+             updated))
+        (template/error-response updated)))))
 
-;; ----------------------------------
-;; Verdict template reviews API
-;; ----------------------------------
-
-(defquery verdict-template-reviews
-  {:description      "Reviews matching the category"
-   :feature          :pate
-   :user-roles       #{:authorityAdmin}
-   :parameters       [category]
-   :input-validators [(partial action/non-blank-parameters [:category])]
-   :pre-checks       [pate-enabled
-                      valid-category]}
-  [command]
-  (ok :reviews (template/generic-list (template/command->organization command)
-                                      category
-                                      :reviews)))
-
-(defcommand add-verdict-template-review
-  {:description      "Creates empty review for the settings
-  category. Returns review."
-   :feature          :pate
-   :user-roles       #{:authorityAdmin}
-   :parameters       [category]
-   :input-validators [(partial action/non-blank-parameters [:category])]
-   :pre-checks       [pate-enabled
-                      valid-category]}
-  [{user :user}]
-  (ok :review (template/new-review (usr/authority-admins-organization-id user)
-                                   category)))
-
-(defcommand update-verdict-template-review
-  {:description         "Updates review details according to the
-  parameters. Returns the updated review."
-   :feature             :pate
-   :user-roles          #{:authorityAdmin}
-   :parameters          [review-id]
-   :optional-parameters [fi sv en type deleted]
-   :input-validators    [(partial action/non-blank-parameters [:review-id])
-                         (supported-parameters :review-id :fi :sv :en
-                                               :type :deleted)
-                         settings-generic-details-valid
-                         settings-review-details-valid]
-   :pre-checks          [pate-enabled
-                         (settings-generic-editable :reviews)]}
-  [{:keys [created user data] :as command}]
-  (template/set-review-details (template/command->organization command)
-                               created
-                               review-id
-                               data)
-  ;; The organization has changed.
-  (ok :review (template/review (usr/authority-admins-organization user)
-                               review-id)
-      :modified created))
-
-;; ----------------------------------
-;; Verdict template plans API
-;; ----------------------------------
-
-(defquery verdict-template-plans
-  {:description      "Plans matching the category"
-   :feature          :pate
-   :user-roles       #{:authorityAdmin}
-   :parameters       [category]
-   :input-validators [(partial action/non-blank-parameters [:category])]
-   :pre-checks       [pate-enabled
-                      valid-category]}
-  [command]
-  (ok :plans (template/generic-list (template/command->organization command)
-                                    category
-                                    :plans)))
-
-(defcommand add-verdict-template-plan
-  {:description      "Creates empty plan for the settings
-  category. Returns plan."
-   :feature          :pate
-   :user-roles       #{:authorityAdmin}
-   :parameters       [category]
-   :input-validators [(partial action/non-blank-parameters [:category])]
-   :pre-checks       [pate-enabled
-                      valid-category]}
-  [{user :user}]
-  (ok :plan (template/new-plan (usr/authority-admins-organization-id user)
-                               category)))
-
-(defcommand update-verdict-template-plan
-  {:description         "Updates plan details according to the
-  parameters. Returns the updated plan."
-   :feature             :pate
-   :user-roles          #{:authorityAdmin}
-   :parameters          [plan-id]
-   :optional-parameters [fi sv en type deleted]
-   :input-validators    [(partial action/non-blank-parameters [:plan-id])
-                         (supported-parameters :plan-id :fi :sv :en :deleted)
-                         settings-generic-details-valid]
-   :pre-checks          [pate-enabled
-                         (settings-generic-editable :plans)]}
-  [{:keys [created user data] :as command}]
-  (template/set-plan-details (template/command->organization command)
-                             created
-                             plan-id
-                             data)
-  ;; The organization has changed.
-  (ok :plan (template/plan (usr/authority-admins-organization user)
-                           plan-id)
-      :modified created))
 
 ;; ------------------------------------------
 ;; Default verdict templates for operations

@@ -615,22 +615,23 @@
       (archiving-util/mark-application-archived-if-done application (:created command) user))))
 
 (defcommand return-to-draft
-  {:description "Returns the application to draft state."
+  {:description      "Returns the application to draft state."
    :parameters       [id text lang]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :permissions      [{:required [:application/change-state]}]
-   :states #{:submitted}
-   :pre-checks [(partial sm/validate-state-transition :draft)]
-   :on-success (notify :application-return-to-draft)}
+   :states           #{:submitted}
+   :pre-checks       [(partial sm/validate-state-transition :draft)]
+   :on-success       (notify :application-return-to-draft)}
   [{{:keys [role] :as user}         :user
     {:keys [state] :as application} :application
     created                         :created
-    :as command}]
+    :as                             command}]
   (->> (util/deep-merge
         (app-state/state-transition-update :draft created application user)
         (when (seq text)
           (comment/comment-mongo-update state text {:type "application"} role false user nil created))
-        {$set {:submitted nil}})
+        {$set {:submitted nil
+               :handlers  []}})
        (update-application command)))
 
 (defcommand change-warranty-start-date
@@ -847,18 +848,34 @@
         (util/to-local-date (:submitted app))))))
 
 (defn- validate-not-jatkolupa-app [{:keys [application]}]
-  (when (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
+  (when (app/jatkoaika-application? application)
     (fail :error.cannot-apply-jatkolupa-for-jatkolupa)))
+
+;;
+;; ************
+;; Lain mukaan hankeen aloituspvm on hakupvm + 21pv, tai kunnan paatospvm jos se on tata aiempi.
+;; kts.  http://www.finlex.fi/fi/laki/alkup/2005/20050547 ,  14 a pykala
+;; ************
+;;
+(defn- ya-continuation-app-docs [application continuation-app]
+  (let [tyoaika-alkaa-pvm (get-tyoaika-alkaa-from-ya-app application)
+        tyo-aika-for-jatkoaika-doc (-> continuation-app
+                                       (domain/get-document-by-name "tyo-aika-for-jatkoaika")
+                                       (assoc-in [:data :tyoaika-alkaa-pvm :value] tyoaika-alkaa-pvm))]
+    (concat
+      [(domain/get-document-by-name continuation-app "hankkeen-kuvaus-jatkoaika") tyo-aika-for-jatkoaika-doc]
+      (map #(-> (domain/get-document-by-name application %) model/without-user-id) ["hakija-ya" "yleiset-alueet-maksaja"]))))
 
 (defcommand create-continuation-period-permit
   {:parameters ["id"]
    :permissions [{:required [:application/create-continuation-period-permit]}]
    :states     #{:verdictGiven :constructionStarted}
-   :pre-checks [(permit/validate-permit-type-is permit/YA) validate-not-jatkolupa-app]}
+   :pre-checks [validate-not-jatkolupa-app]}
   [{:keys [created user application] :as command}]
 
-  (let [continuation-app (app/do-create-application
-                           (assoc command :data {:operation    "ya-jatkoaika"
+  (let [permit-type      (:permitType application)
+        continuation-app (app/do-create-application
+                           (assoc command :data {:operation    (if (= permit/R permit-type) "raktyo-aloit-loppuunsaat" "ya-jatkoaika")
                                                  :x            (-> application :location first)
                                                  :y            (-> application :location second)
                                                  :address      (:address application)
@@ -867,19 +884,9 @@
                                                  :infoRequest  false
                                                  :messages     []}))
         continuation-app (merge continuation-app {:handlers (:handlers application)})
-        ;;
-        ;; ************
-        ;; Lain mukaan hankeen aloituspvm on hakupvm + 21pv, tai kunnan paatospvm jos se on tata aiempi.
-        ;; kts.  http://www.finlex.fi/fi/laki/alkup/2005/20050547 ,  14 a pykala
-        ;; ************
-        ;;
-        tyoaika-alkaa-pvm (get-tyoaika-alkaa-from-ya-app application)
-        tyo-aika-for-jatkoaika-doc (-> continuation-app
-                                       (domain/get-document-by-name "tyo-aika-for-jatkoaika")
-                                       (assoc-in [:data :tyoaika-alkaa-pvm :value] tyoaika-alkaa-pvm))
-        docs (concat
-               [(domain/get-document-by-name continuation-app "hankkeen-kuvaus-jatkoaika") tyo-aika-for-jatkoaika-doc]
-               (map #(-> (domain/get-document-by-name application %) model/without-user-id) ["hakija-ya" "yleiset-alueet-maksaja"]))
+        docs             (if (= permit/YA permit-type)
+                           (ya-continuation-app-docs application continuation-app)
+                           (:documents continuation-app))
         continuation-app (assoc continuation-app :documents docs)]
 
     (app/do-add-link-permit continuation-app (:id application))

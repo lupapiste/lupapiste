@@ -370,7 +370,7 @@
 (defquery application-statement-tab-visible
           {:description      "Pseudo query for tab visibility logic"
            :parameters       [:id]
-           :states           (states/all-application-states-but [:draft])
+           :states           states/pre-verdict-but-draft
            :user-roles       #{:authority :applicant}
            :user-authz-roles roles/all-authz-writer-roles
            :pre-checks       [permit/is-not-archiving-project

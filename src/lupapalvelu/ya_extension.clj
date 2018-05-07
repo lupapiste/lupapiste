@@ -23,6 +23,7 @@
           (or (:appsLinkingToUs application)
               (:appsLinkingToUs (meta-fields/enrich-with-link-permit-data
                                 application)))))
+
 (defn ya-extension-app? [application]
   (su/=as-kw (-> application :primaryOperation :name) :ya-jatkoaika))
 

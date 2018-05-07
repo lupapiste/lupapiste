@@ -247,26 +247,33 @@
                         (assoc-in document (flatten [:data (:path result) :validationResult]) (:result result)))]
     (assoc (reduce create-result document all-results) :validationErrors all-results)))
 
-(defn populate-operation-info [operations {info :schema-info :as doc}]
+(defn populate-operation-info [operation-map {info :schema-info :as doc}]
   (if (:op info)
-    (if-let [operation (util/find-first #(= (:id %) (get-in info [:op :id])) operations)]
+    (if-let [operation (get operation-map (get-in info [:op :id]))]
       (assoc-in doc [:schema-info :op] operation)
       (do
         (warnf "Couldn't find operation %s for doc %s " (get-in info [:op :id]) (:id doc))
         doc))
     doc))
 
+(defn id-to-operation-map [application]
+  (->> (get-operations application)
+       (reduce (fn [opmap {:keys [id] :as op}]
+                 (assoc opmap id op))
+               {})))
+
 (defn process-document-or-task [user application doc]
   (->> (validate application doc)
-       (populate-operation-info (get-operations application))
+       (populate-operation-info (id-to-operation-map application))
        ((app-utils/person-id-masker-for-user user application))
        (enrich-single-doc-disabled-flag user application)))
 
-(defn- process-documents-and-tasks [user application]
-  (let [mapper (partial process-document-or-task user application)]
-    (-> application
-      (update :documents (partial map mapper))
-      (update :tasks (partial map mapper)))))
+(defn- process-documents-and-tasks [user {:keys [documents tasks] :as application}]
+  (let [mapper (partial process-document-or-task user application)
+        fdocs (future (pmap mapper documents))
+        ftasks (future (pmap mapper tasks))]
+    (assoc application :documents @fdocs
+                       :tasks @ftasks)))
 
 (defn ->location [x y]
   [(util/->double x) (util/->double y)])
@@ -726,6 +733,12 @@
   (->> (usr/find-authorized-users-in-org org-id org-authz)
        (map #(select-keys % [:id :firstName :lastName]))))
 
+(defn add-continuation-period [application link-permit-id handler period-end]
+  (let [period {:handler               handler
+                :continuationAppId     link-permit-id
+                :continuationPeriodEnd period-end}]
+    (action/update-application (action/application->command application) {$push {:continuationPeriods period}})))
+
 ;; Cancellation
 
 (defn- remove-app-links [id]
@@ -857,3 +870,9 @@
         secondary-buildings (filter #(not (= (:operationId %) primary-op-id)) (:buildings application))]
     (mapv #(doc-persistence/remove! command  %) secondary-building-docs)
     (action/update-application command {$pull {:buildings {:buildingId {$in (map :buildingId secondary-buildings)}}}})))
+
+(defn jatkoaika-application? [application]
+  (let [primary-operation (get-in application [:primaryOperation :name])]
+    (or (= primary-operation "raktyo-aloit-loppuunsaat")
+        (= primary-operation "jatkoaika")
+        (= primary-operation "ya-jatkoaika"))))

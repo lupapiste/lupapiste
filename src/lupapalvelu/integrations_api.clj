@@ -235,7 +235,7 @@
   (let [{url :url credentials :credentials} (org/get-building-wfs application)
         clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))]
     (if (or clear-ids? url)
-      (let [document     (doc-persistence/by-id application collection documentId)
+      (let [document     (tools/by-id application collection documentId)
             schema       (schemas/get-schema (:schema-info document))
             converted-doc (when overwrite ; don't clean data if user doesn't wish to override
                             (model/convert-document-data ; remove old krysp data

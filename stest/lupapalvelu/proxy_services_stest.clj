@@ -27,21 +27,22 @@
 
 (facts "find-addresses-proxy"
   (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
-  (let [r (proxy-request mikko :find-address :term "piiriniitynkatu 9, tampere" :lang "fi")]
-    (fact r =contains=> {:kind         "address"
-                         :type         "street-number-city"
-                         :street       "Piiriniitynkatu"
-                         :number       "9"
-                         :municipality "837"
-                         :name         {:fi "Tampere" :sv "Tammerfors"}})
-    (fact (-> r first :location keys) => (just #{:x :y})))
+  (let [r (first (proxy-request mikko :find-address :term "piiriniitynkatu 9, tampere" :lang "fi"))]
+    (fact r => (contains {:kind         "address"
+                          :type         "street-number-city"
+                          :street       "Piiriniitynkatu"
+                          :number       "9"
+                          :municipality "837"
+                          :name         {:fi "Tampere" :sv "Tammerfors"}}))
+    (fact (-> r :location keys) => (just #{:x :y})))
   (let [r (proxy-request mikko :find-address :term "piiriniitynkatu" :lang "fi")]
-    (fact r =contains=> [{:kind         "address"
+    (fact r => (contains {:kind         "address"
                           :type         "street"
                           :street       "Piiriniitynkatu"
                           :number       "1"
+                          :location     {:x "320531.265" :y "6825180.25"}
                           :name         {:fi "Tampere" :sv "Tammerfors"}
-                          :municipality "837"}])
+                          :municipality "837"}))
     (fact (-> r first :location keys) => (just #{:x :y})))
 
   (facts "empty query, empty response"
@@ -52,18 +53,20 @@
   (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 9, tampere" :lang "fi"}})
         r (json/decode (:body response) true)]
     (fact (:suggestions r) => ["Piiriniitynkatu 9, Tampere"])
-    (fact (:data r) =contains=> [{:street       "Piiriniitynkatu",
+    (fact (:data r) => (contains {:street       "Piiriniitynkatu",
+                                  :location     {:x "320371.953" :y "6825180.72"}
                                   :number       "9",
                                   :name         {:fi "Tampere" :sv "Tammerfors"}
-                                  :municipality "837"}])
+                                  :municipality "837"}))
     (fact (-> r :data first :location keys) => (just #{:x :y})))
   (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 19, tampere" :lang "fi"}})
         r (json/decode (:body response) true)]
     (fact (:suggestions r) => ["Piiriniitynkatu 19, Tampere"])
-    (fact (:data r) =contains=> [{:street       "Piiriniitynkatu",
+    (fact (:data r) => (contains {:street       "Piiriniitynkatu",
+                                  :location     {:x "320199.606" :y "6825190.72"}
                                   :number       "19",
                                   :name         {:fi "Tampere" :sv "Tammerfors"}
-                                  :municipality "837"}])
+                                  :municipality "837"}))
     (fact (-> r :data first :location keys) => (just #{:x :y}))))
 
 (facts "location-by-property-id"
@@ -77,7 +80,7 @@
     (let [{:keys [x y municipality] :as body} (json/decode (:body response) true)]
       (fact "response is a map"
         (map? body) => true
-        (keys body) => (contains #{:x :y :municipality})
+        (keys body) => (contains #{:x :y :municipality} :gaps-ok)
         x => string?
         y => string?)
       (fact "also municipality is returned"
@@ -336,7 +339,7 @@
   (fact "get-addresses-proxy - this may fail if Turku backend doesn't respond, as MML fallback has different coords"
     (let [response (get-addresses-proxy {:params {:query "Linnankatu 80, Turku" :lang "fi"}})
           body (json/decode (:body response) true)]
-      (fact (:suggestions body) =contains=> "Linnankatu 80, Turku")
+      (fact (:suggestions body) => (contains "Linnankatu 80, Turku"))
       (fact (first (:data body)) => (contains {:street "Linnankatu",
                                               :number "80",
                                               :name {:fi "Turku" :sv "\u00c5bo"}
@@ -356,7 +359,7 @@
   (fact "get-addresses-proxy"
     (let [response (get-addresses-proxy {:params {:query "Liljankuja 6, helsinki" :lang "fi"}})
           body (json/decode (:body response) true)]
-      (fact (:suggestions body) =contains=> "Liljankuja 6, Helsinki")
+      (fact (:suggestions body) => (contains "Liljankuja 6, Helsinki"))
       (fact (first (:data body)) => {:street "Liljankuja",
                                      :number "6",
                                      :name {:fi "Helsinki" :sv "Helsingfors"}
@@ -392,6 +395,21 @@
       (fact (:number body) => "222")
       (fact (:fi (:name body)) => "Salo")
       )))
+
+(facts "Get address from Porvoo municipality server"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "https://sitogis.sito.fi/ows/handler.ashx?xmlset=porvoo"})
+  (fact "address-by-point-proxy"
+    (let [response (address-by-point-proxy {:params {:lang "fi" :x "425909" :y "6695518"}})
+          body (json/decode (:body response) true)]
+      (fact (:street body) => "Laamanninkatu")
+      (fact (:number body) => "1")
+      (fact (:fi (:name body)) => "Porvoo")
+      ))
+  (fact "NLS responds something else"
+    (->> (wfs/address-by-point 425909 6695518)
+         (wfs/feature-to-address-details "fi")) => (contains [:municipality "638"]
+                                                             [:street "Aleksanterinkaari"]
+                                                             [:number "12"])))
 
 (facts "Municipality number with address"
   (against-background (org/get-krysp-wfs anything :osoitteet) => nil)

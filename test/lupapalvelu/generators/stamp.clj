@@ -1,9 +1,9 @@
 (ns lupapalvelu.generators.stamp
-  (require [clojure.test.check.generators :as gen]
-           [lupapalvelu.attachment.stamp-schema :as stamp-schema]
-           [schema.core :as sc]
-           [sade.util :refer [map-values]]
-           [sade.schema-generators :as ssg]))
+  (:require [clojure.test.check.generators :as gen]
+            [lupapalvelu.attachment.stamp-schema :as stamp-schema]
+            [schema.core :as sc]
+            [sade.util :refer [map-values]]
+            [sade.schema-generators :as ssg]))
 
 (def simple-tag-gen
   (gen/let [string? gen/boolean

@@ -3,6 +3,8 @@ LUPAPISTE.ApplicationGuestsModel = function() {
 
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+
   self.emailId = _.uniqueId( "guest-email-");
   self.messageId = _.uniqueId( "guest-message-");
 
@@ -21,7 +23,7 @@ LUPAPISTE.ApplicationGuestsModel = function() {
   self.allGuestAuthorities = ko.observableArray();
 
   function appId() {
-    return lupapisteApp.models.application.id();
+    return lupapisteApp.services.contextService.applicationId();
   }
 
   function currentUsername() {
@@ -94,14 +96,12 @@ LUPAPISTE.ApplicationGuestsModel = function() {
     .call();
   };
 
-  // Initialization and reacting to updates outside of
-  // the component.
-  var hubId = hub.subscribe( "application-model-updated", function() {
+  function fetchAll() {
     if( self.isAuthority()) {
       fetchGuestAuthorities();
     }
     fetchGuests();
-  });
+  }
 
   // Resolved list of of guest authorities that only include those
   // authorities that have not yet been given access
@@ -186,5 +186,9 @@ LUPAPISTE.ApplicationGuestsModel = function() {
     mandatory: ko.pureComputed( _.negate( self.sendEnabled) )
   };
 
-  self.dispose = _.partial( hub.unsubscribe, hubId);
+  if( appId() ) {
+    fetchAll();
+  }
+
+  self.addHubListener( "contextService::enter", fetchAll );
 };

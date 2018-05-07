@@ -5,7 +5,8 @@
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.core :refer [ok fail fail! unauthorized]]
-            [sade.util :as util]
+            [sade.env :as env]
+            [sade.util :as util :refer [=as-kw]]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application notify] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.authorization :as auth]
@@ -67,7 +68,8 @@
   (let [email (ss/canonize-email email)
         existing-auth (auth/get-auth application (:id (user/get-user-by-email email)))
         existing-role (keyword (get-in existing-auth [:invite :role] (:role existing-auth)))
-        denied-by-company (company/company-denies-invitations? application (user/get-user-by-email email))]
+        denied-by-company (->> (get-in (user/get-user-by-email email) [:company :id])
+                               (company/company-denies-invitations? application))]
     (cond
       (#{:reader :guest} existing-role)
       (fail :invite.already-has-reader-auth :existing-role existing-role)
@@ -117,13 +119,22 @@
       :company (company/authorized-to-apply-submit-restriction-to-other-auths command)
       (fail :error.not-allowed-to-apply-submit-restriction))))
 
+(defn submitRestrictor-company-authorized [{{:keys [invite-type]} :data
+                                            company :company
+                                            :as command}]
+  (when (and invite-type (not (=as-kw invite-type :company)))
+    (when-let [company (and company @company)]
+      (when (:submitRestrictor company)
+        (company/check-company-authorized command)))))
+
 (defcommand approve-invite
   {:parameters [id]
    :optional-parameters [invite-type apply-submit-restriction]
    :user-roles #{:applicant}
    :user-authz-roles roles/default-authz-reader-roles
    :states     states/all-application-states
-   :pre-checks [authorized-to-apply-submit-restriction]}
+   :pre-checks [authorized-to-apply-submit-restriction
+                submitRestrictor-company-authorized]}
   [{created :created  {user-id :id {company-id :id company-role :role} :company :as user} :user application :application :as command}]
   (let [auth-id       (cond (not (util/=as-kw invite-type :company)) user-id
                             (util/=as-kw company-role :admin)        company-id)
@@ -175,6 +186,21 @@
 ;; Auhtorizations
 ;;
 
+(defn no-company-users-in-auths-when-company-denies-invitations
+  "Precheck for company auth removal for companies that have set :invitationDenied
+  flag on. To remove company, all company users have to be removed first."
+  [{{auth-id :id type :type} :auth-entry {auth :auth :as application} :application}]
+  (when (and (util/=as-kw :company type)
+             (:invitationDenied (company/find-company-by-id auth-id)))
+
+    (let [company-users-ids  (->> (mongo/select :users {:company.id auth-id} [:_id])
+                                  (map :id))
+          company-user-auths (filter (comp (set company-users-ids) :id) auth)]
+
+      (when (not-empty company-user-auths)
+        (fail :error.company-users-have-to-be-removed-before-company
+              :users (map #(select-keys % [:firstName :lastName]) company-user-auths))))))
+
 (defcontext auth-entry-context [{{auth :auth auth-restrictions :authRestrictions} :application
                                  {username :username} :data
                                  {user-id :id {company-id :id} :company} :user}]
@@ -202,7 +228,8 @@
                   :required [:application/edit-restricting-auth]}
 
                  {:required [:application/edit-auth]}]
-   :states     (states/all-application-states-but [:canceled])}
+   :states     (states/all-application-states-but [:canceled])
+   :pre-checks [no-company-users-in-auths-when-company-denies-invitations]}
   [command]
   (do-remove-auth command username))
 
@@ -244,7 +271,7 @@
    :parameters  [id apply-submit-restriction]
    :permissions [{:required [:application/edit]}]
    :pre-checks  [company/authorized-to-apply-submit-restriction-to-other-auths
-                 company/check-invitation-accepted]}
+                 company/check-company-authorized]}
   [{{user-id :id {company-id :id} :company} :user application :application :as command}]
   (let [auth (or (auth/get-auth application company-id)
                  (auth/get-auth application user-id))]
@@ -259,14 +286,27 @@
    :pre-checks  [(partial restrictions/check-auth-restriction-is-enabled-by-user :others :application/submit)]}
   [_])
 
+(defn- auth-company-admin? [{:keys [type id]} {:keys [company]}]
+  (and (util/=as-kw  type :company)
+       (= id (:id company))
+       (util/=as-kw :admin (:role company))))
+
 (defn- manage-unsubscription [{application :application user :user :as command} unsubscribe?]
   (let [username (get-in command [:data :username])]
     (if (or (= username (:username user))
-            (some (partial = (:organization application)) (user/organization-ids-by-roles user #{:authority})))
+            (some (partial = (:organization application)) (user/organization-ids-by-roles user #{:authority}))
+            (auth-company-admin? (util/find-by-key :username username (:auth application))
+                                 user))
       (update-application command
         {:auth {$elemMatch {:username username}}}
         {$set {:auth.$.unsubscribed unsubscribe?}})
       unauthorized)))
+
+(defn- pate-enabled
+  [{:keys [organization]}]
+  (when (and organization
+             (not (:pate-enabled @organization)))
+    (fail :error.pate-disabled)))
 
 (defcommand unsubscribe-notifications
   {:parameters [:id :username]
@@ -287,3 +327,10 @@
    :pre-checks [application/validate-authority-in-drafts]}
   [command]
   (manage-unsubscription command false))
+
+(defquery pate-enabled-basic
+  {:description "Pre-checker that fails if Pate is not enabled in the application organization."
+   :feature     :pate
+   :user-roles  #{:applicant :authority}
+   :pre-checks  [pate-enabled]}
+  [_])

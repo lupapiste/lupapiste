@@ -75,13 +75,28 @@
   (reset! state/current-view {:view (if template ::template ::list)}))
 
 (defn open-template [template-id]
-  (service/fetch-template template-id reset-template))
+  ((if (state/auth? :update-and-open-verdict-template)
+     service/fetch-updated-template
+     service/fetch-template) template-id reset-template))
+
+(defn update-settings-dependencies [{:keys [modified draft]}]
+  (when-not (= (path/value [:info :modified] state/current-template)
+               modified)
+    (swap! state/current-template
+           (fn [template]
+             (-> template
+                 (update :state #(merge % (select-keys draft
+                                                       [:plans :reviews])))
+                 (assoc-in [:info :modified] modified))))))
 
 (defn with-back-button [component]
   [:div
    [:button.ghost
     {:on-click #(if-let [template-id (path/value :back state/current-view)]
-                  (open-template template-id)
+                  (do (when (state/auth? :update-and-open-verdict-template)
+                        (service/fetch-updated-template template-id
+                                                        update-settings-dependencies))
+                      (reset! state/current-view {:view ::template}))
                   (reset-template nil))}
     [:i.lupicon-chevron-left]
     [:span (common/loc "back")]]
@@ -205,9 +220,9 @@
        (with-back-button
          (verdict-template
           (merge
-           {:schema     (dissoc (shared/default-verdict-template (keyword @state/current-category))
+           {:schema     (dissoc (shared/verdict-template-schema @state/current-category)
                                 :dictionary)
-            :dictionary (:dictionary (shared/default-verdict-template (keyword @state/current-category)))
+            :dictionary (:dictionary (shared/verdict-template-schema @state/current-category))
             :references state/references}
            (state/select-keys state/current-template [:state :info :_meta]))))
 
@@ -215,7 +230,7 @@
        [:div (verdict-template-list) (phrases/phrases-table)]
 
        ::settings
-       (when-let [full-schema ((keyword @state/current-category) shared/settings-schemas)]
+       (when-let [full-schema (shared/settings-schema @state/current-category)]
          (with-back-button
            (settings/verdict-template-settings
             (merge

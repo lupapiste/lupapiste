@@ -53,9 +53,25 @@
         :d '({:a 11} {} :c nil)
         :e [{:a "a"} {} "c" nil]}))
 
-(facts
+(facts "dissoc-in"
   (fact (dissoc-in {:a {:b \b :c \c}} [:a :b]) => {:a {:c \c}})
-  (fact (dissoc-in {:a {:b \b :c \c}} [:a :x]) => {:a {:b \b :c \c}}))
+  (fact (dissoc-in {:a {:b \b :c \c}} [:a :x]) => {:a {:b \b :c \c}})
+  (fact (dissoc-in {:a {:b "hello"}} [:a :b :c]) => {:a {:b "hello"}})
+  (fact (dissoc-in {:a {:b ["x" "y" {:foo {:bar "hello"}}]}} [:a :b 2 :foo :bar])
+    => {:a {:b ["x" "y"]}})
+  (fact (dissoc-in {:a {:b ["x" "y" {:foo {:bar "hello"}}]}} [:a :b 2 :foo :bar :zoom])
+    => {:a {:b ["x" "y" {:foo {:bar "hello"}}]}})
+  (fact (dissoc-in {:a {:b ["x" "y" {:foo {:bar "hello"}}]}} [:a :b 2])
+    => {:a {:b ["x" "y"]}})
+  (fact (dissoc-in {:a {:b ["x" "y" {:foo {:bar "hello"}}]}} [:a :b])
+    => {})
+  (fact (dissoc-in {:a [[{:b "hii"}]]} [:a 0 0 :b]) => {})
+  (fact (dissoc-in [{:a [[{:b "hii"}]]}] [0 :a 0 0 :b]) => [])
+  (fact (dissoc-in [2 [3 [4 [[5]]]]] [1 1 1 0 0]) => [2 [3 [4]]])
+  (fact (dissoc-in [2 [3 [4 [[5]]]]] [1 1 1 0]) => [2 [3 [4]]])
+  (fact (dissoc-in [2 [3 [4 [[5]]]]] [1 1 1]) => [2 [3 [4]]])
+  (fact (dissoc-in [2 [3 [4 [[5]]]]] [1 1]) => [2 [3]])
+  (fact (dissoc-in [2 [3 [4 [[5]]]]] [1]) => [2]))
 
 (facts
   (fact (select {:a \a :b \b :c \c} [:a :c]) => [\a \c])
@@ -504,6 +520,19 @@
   (fact "nil safe"
     (difference-as-kw ["yi" :er "san"] '(:yi "er" :si) ["liu"] nil nil)
     => [:san]))
+
+(facts "union-as-kw"
+  (fact "s, kw, nil"
+    (union-as-kw ["yi" :er "san" nil]) => [:yi :er :san])
+  (fact "no duplicates"
+    (union-as-kw ["yi" :er "san" nil]
+                 [:yi :er nil "si"])
+    => [:yi :er :san :si])
+  (fact "Nil safe"
+    (union-as-kw nil) => []
+    (union-as-kw nil nil) => []
+    (union-as-kw []) => []
+    (union-as-kw [] []) => []))
 
 (facts get-in-tree
   (fact "single level"

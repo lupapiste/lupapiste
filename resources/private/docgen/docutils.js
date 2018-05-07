@@ -89,7 +89,7 @@ var docutils = (function () {
 
   function showError(e) {
     var element = findErrorElement(e);
-    if (element && element.children && element.children().size()) {
+    if (element && element.children && !_.isEmpty(element.children())) {
       element.stop();
       element.fadeIn("slow").css("display", "block");
     }

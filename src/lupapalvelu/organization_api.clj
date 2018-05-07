@@ -174,7 +174,7 @@
   [{{:keys [notificationEmail descriptionsFromBackendSystem]} :data}]
   (when (and notificationEmail (not (v/valid-email? notificationEmail))
              (fail! :error.email)))
-  (when (and descriptionsFromBackendSystem (not (util/boolean? descriptionsFromBackendSystem)))
+  (when (and descriptionsFromBackendSystem (not (boolean? descriptionsFromBackendSystem)))
     (fail! :error.invalid-value)))
 
 (defcommand update-organization-bulletin-scope
@@ -617,12 +617,15 @@
                                              (assoc :permanent-archive-in-use-since date))})
       (ok))))
 
-(defn split-emails [emails] (ss/split emails #"[\s,;]+"))
+(defn split-emails
+  "Splits and canonizes emails string"
+  [emails]
+  (map ss/canonize-email (ss/split emails #"[\s,;]+")))
 
 (def email-list-validators [(partial action/string-parameters [:emails])
                             (fn [{{emails :emails} :data}]
                               (let [splitted (split-emails emails)]
-                                (when (and (not (ss/blank? emails)) (some (complement v/valid-email?) splitted))
+                                (when (and (not (ss/blank? emails)) (some (partial sc/check ssc/Email) splitted))
                                   (fail :error.email))))])
 
 (defcommand set-organization-neighbor-order-email
@@ -693,21 +696,22 @@
       (fail :error.unknown-organization))))
 
 (defcommand set-krysp-endpoint
-  {:parameters [:url username password permitType version]
+  {:parameters [url username password permitType version]
    :user-roles #{:authorityAdmin}
    :input-validators [(fn [{{permit-type :permitType} :data}]
                         (when-not (or
                                     (= "osoitteet" permit-type)
                                     (permit/valid-permit-type? permit-type))
                           (fail :error.missing-parameters :parameters [:permitType])))
-                      (partial validate-optional-url :url)]}
+                      (partial validate-optional-url :url)
+                      (partial action/string-parameters [:url :username :password :permitType :version])]}
   [{data :data user :user}]
   (let [url             (-> data :url ss/trim)
         organization-id (usr/authority-admins-organization-id user)
         krysp-config    (org/get-krysp-wfs {:_id organization-id} permitType)
         password        (if (s/blank? password) (second (:credentials krysp-config)) password)]
     (if (or (s/blank? url) (wfs/wfs-is-alive? url username password))
-      (org/set-krysp-endpoint organization-id url username password permitType version)
+      (org/set-krysp-endpoint organization-id url username password permitType version krysp-config)
       (fail :auth-admin.legacyNotResponding))))
 
 (defcommand set-kuntagml-http-endpoint

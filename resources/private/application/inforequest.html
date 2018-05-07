@@ -120,8 +120,9 @@
             <a data-bind="attr: {href: LUPAPISTE.config.wannaJoinUrl}, ltext: 'oir.wanna-join.link'" href="#" target="_blank"></a>
           </h2>
         </div>
-
-        <div data-bind="lhtml: 'inforequest.desc'" class="operation-info"></div>
+        <div data-bind="lhtml: application.state() === 'canceled' ? 'inforequest.desc-canceled' : 'inforequest.desc',
+                        testId: 'inforequest-description'"
+             class="operation-info"></div>
         <div class="organizationLinks">
           <organization-links></organization-links>
         </div>

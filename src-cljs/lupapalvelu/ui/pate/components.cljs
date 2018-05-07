@@ -13,13 +13,16 @@
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
-(defn- state-change-callback
+(defn- change-state
   "Updates state according to value."
+  [{:keys [state path] :as options} value]
+  (when (common/reset-if-needed! (path/state path state)
+                                 value)
+    (path/meta-updated options)))
+
+(defn- state-change-callback
   [{:keys [state path] :as options}]
-  (fn [value]
-    (when (common/reset-if-needed! (path/state path state)
-                                   value)
-      (path/meta-updated options))))
+  (partial change-state options))
 
 (defn show-label? [{label? :label?} wrap-label?]
   (and wrap-label? (not (false? label?))))
@@ -90,19 +93,26 @@
         {:keys [extra-path match-key] term-path :path} term
         extra-path                                     (path/pathify extra-path)
         term-path                                      (path/pathify term-path)
-        match-key                                      (or match-key item-key)]
-    (->> (path/value (path/pathify (:path schema)) references )
+        match-key                                      (or match-key item-key)
+        target                                         (path/value (path/pathify (:path schema))
+                                                                   references )]
+    (->> (cond->> target
+           (map? target) (map (fn [[k v]]
+                                (assoc v :MAP-KEY k))))
+         ;; TODO: :ignored in schema
          (remove :deleted) ; Safe for non-maps
          (map (fn [x]
                 (let [v (if item-key (item-key x) x)]
                   {:value v
                    :text  (cond
-                            (and match-key term-path) (-> (util/find-by-key match-key
-                                                                            v
-                                                                            (path/value term-path
-                                                                                        references))
-                                                          (get-in (cond->> [(keyword (common/get-current-language))]
-                                                                    extra-path (concat extra-path))))
+                            (and match-key term) (-> (if term-path
+                                                       (util/find-by-key match-key
+                                                                         v
+                                                                         (path/value term-path
+                                                                                     references))
+                                                       x)
+                                                     (get-in (cond->> [(keyword (common/get-current-language))]
+                                                               extra-path (concat extra-path))))
                             item-loc-prefix           (path/loc [item-loc-prefix v])
                             :else                     (path/loc options v))})))
          distinct
@@ -203,9 +213,9 @@
                                 sel-end   (.-selectionEnd text-node)
                                 old-text  (or (path/value path state) "")]
                             (reset! replaced* (subs old-text sel-start sel-end))
-                            (update-text (s/join (concat (take sel-start old-text)
-                                                         (str "\n" % "\n")
-                                                         (drop sel-end old-text)))))
+                            (update-text (s/triml (s/join (concat (take sel-start old-text)
+                                                                  (str "\n" % "\n")
+                                                                  (drop sel-end old-text))))))
               :disabled? disabled?
               :clear?    true})]]
           [:div.col-4.col--right
@@ -234,7 +244,7 @@
         [:div.col-12.col--full
          (components/tabbar {:selected* tab*
                              :tabs     [{:id       ::edit
-                                         :text-loc :edit}
+                                         :text-loc :pate.edit-tab}
                                         {:id       ::preview
                                          :text-loc :pdf.preview}]})
          (if (= tab ::edit)
@@ -273,7 +283,7 @@
                                   [:i {:class icon}])
                                 (when text?
                                   [:span (path/loc options)])])]
-    (if (show-label? options wrap-label?)
+    (if (show-label? schema wrap-label?)
       [:div.col--vertical
        (common/empty-label :pate-label)
        button]
@@ -287,7 +297,11 @@
                    (path/state path state)
                    {:callback  #(path/meta-updated options)
                     :disabled? (path/disabled? options)
-                    :text      (path/loc options)
+                    :text      (if-let [dict (:text-dict schema)]
+                                 (path/react (butlast path)
+                                             state
+                                             dict)
+                                 (path/loc options))
                     :prefix    (:prefix schema)})
     :wrap-label?  wrap-label?
     :empty-label? true}))
@@ -354,13 +368,21 @@
              wrap-label?))
 
 (rum/defc pate-date < rum/reactive
+  "Pate dates are always timestamps (ms from epoch). Since date-edit
+  component handles Finnish date strings, we must do some transforming
+  back and forth. Timestamp is marked in the noon of the date."
   [{:keys [path state] :as options} & [wrap-label?]]
   (label-wrap-if-needed
    options
    {:component (components/date-edit
-                (path/react path state)
+                (js/util.finnishDate (path/react path state))
                 (pate-attr options
-                           {:callback (state-change-callback options)
+                           {:callback (fn [datestring]
+                                        (change-state options
+                                                      (some-> datestring
+                                                              (js/util.toMoment "fi")
+                                                              .valueOf
+                                                              (+ (* 1000 3600 12)))))
                             :disabled (path/disabled? options)}))
     :wrap-label? wrap-label?}))
 

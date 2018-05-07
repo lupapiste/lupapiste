@@ -1,0 +1,20 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="remove-invitation-denied-company-error-dialog-template">
+      <div class="content">
+        <p data-bind="ltext: text" class="dialog-desc"></p>
+        <p>
+          <span data-bind="ltext: 'company.authorized-users-of-the-company'"></span>
+          <span>:</span>
+          <ul data-bind="foreach: users">
+            <li>
+              <span data-bind="text: firstName"></span>
+              <span data-bind="text: lastName"></span>
+            </li>
+          </ul>
+        </p>
+      </div>
+
+      <div class="button-group ok">
+      <div data-bind="component: {name:'ok-button-group',
+                                  params: {okFn: ok, okTitle: 'ok'}}"></div>
+      </div>
+</script>

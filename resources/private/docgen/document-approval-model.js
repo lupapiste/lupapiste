@@ -30,8 +30,6 @@ LUPAPISTE.DocumentApprovalModel = function(docModel) {
                    } );
   }
 
-  var lastSent = {};
-
   self.approval = ko.pureComputed( function() {
     var master = safeMaster();
     var later = laterGroups();
@@ -41,11 +39,6 @@ LUPAPISTE.DocumentApprovalModel = function(docModel) {
                           })
                ? master
                : {value: NEUTRAL};
-    if( !_.isEqual(lastSent, result)) {
-      lastSent = result;
-      // Master (this) has changed, let's notify every group.
-      docModel.approvalHubSend( result, []);
-    }
     return result;
   });
 
@@ -81,7 +74,7 @@ LUPAPISTE.DocumentApprovalModel = function(docModel) {
 
   self.changeStatus = function(flag) {
     docModel.updateApproval([], flag, self.masterApproval);
-    hub.send( "document-approval-" + docModel.docId, {approved: flag});
+    hub.send("document-approval", {docId: docModel.docId, approved: flag});
   };
 
   // reset approval when document is updated

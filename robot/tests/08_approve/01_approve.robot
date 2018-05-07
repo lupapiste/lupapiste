@@ -114,7 +114,7 @@ Integration message monotor button is not enabled
   Test id disabled  show-integration-messages
 
 Sonja approves application
-  Approve application
+  Approve application with missing info
 
 Integration message monitor button is enabled
   Test id enabled  show-integration-messages

@@ -133,16 +133,24 @@
   (let [kw (util/kw-path id-path key)]
     (swap! (rum/cursor-in _meta [kw]) not)))
 
+(defn schema-css
+  "List of CSS class based on :css property."
+  [schema & other-classes]
+  (->> [(:css schema)
+        other-classes]
+       flatten
+       (map util/split-kw-path)
+       flatten
+       (remove nil?)
+       (map name)))
+
 (defn css
   "List of CSS classes based on current :css value and status
   classes (pate--edit, pate--view) from the latest _meta."
   [options & other-classes]
-  (->> [(if (meta-value options :editing?) "pate--edit" "pate--view")
-        (some-> options :schema :css)
-        other-classes]
-       flatten
-       (remove nil?)
-       (map name)))
+  (schema-css (:schema options)
+              (if (meta-value options :editing?) "pate--edit" "pate--view")
+              other-classes))
 
 (defn meta-updated
   "Calls _meta :updated if defined."
@@ -162,17 +170,39 @@
     (util/split-kw-path path)
     path))
 
+(defn- inclusion-status
+  "Tri-state inclusion status: true, false or nil.
+  Every other path part is considered repeating id and ignored."
+  [path inclusions]
+  (when (seq inclusions)
+    (let [kws (loop [[x & xs] path
+                       result   []]
+                  ;; Every other part is id
+                  (if x
+                    (recur (drop 1 xs) (conj result x))
+                    result))]
+      (boolean (some (fn [kw]
+                       (= kws (take (count kws)
+                                    (util/split-kw-path kw))))
+                     inclusions)))))
+
 (defn- has-path?
-  "True if the path value in the state is not nil. No existing path
-  should resolve into nil value. Note: this is not reactive, since the
-  idea is that the state 'structure' is not dynamic."
-  [path state]
-  (-> (value path state) nil? not))
+  "If inclusions are available the result is determined by
+  inclusion-status: true, if the path is valid for the current schema
+  with inclusions. If inclusions is empty/nil the result is true if
+  the path value in the state is not nil. Note: this is not reactive,
+  since the idea is that the state 'structure' is not dynamic."
+  [path state inclusions]
+  (let [inc-status (inclusion-status path inclusions)]
+    (if (boolean? inc-status)
+      inc-status
+      (-> (value path state) nil? not))))
 
 (defn- truthy? [v]
   (boolean (cond
+             (map? v)        (not-empty v)
              (sequential? v) (seq v)
-             :else v)))
+             :else           v)))
 
 (defn- resolve-path
   "Resolve relative path. Relative path is denoted with + or -. The
@@ -225,7 +255,7 @@
                ((case op "=" = "!=" not=) expected (str value)))
              truthy?)}))
 
-(defn- path-truthy? [{state :state :as options} kw-path]
+(defn- path-truthy? [{:keys [state info] :as options} kw-path]
   (let [{:keys [path fun?]} (parse-path-condition kw-path)
         [x & k :as path] (resolve-path options path)]
     (fun? (case x
@@ -233,7 +263,8 @@
             :*ref  (let [r (react k (:references options))]
                      (cond->> r
                        (sequential? r) (remove :deleted)))
-            :?      (has-path? k state)
+            :?      (has-path? k state (when info
+                                         (:inclusions @info)))
             (react path state)))))
 
 (defn- eval-state-condition [options condition]
@@ -285,12 +316,26 @@
 
 (defn visible?
   "Similar to enabled? but for show? and hide? properties."
-  [{schema :schema :as options}]
+  [options]
   (good? options
          (climb-to-condition options :show?)
          (climb-to-condition options :hide?)))
 
 (defn not-visible? [options] (not (visible? options)))
+
+(defn item-visible?
+  "Layout item (grid cell or list item) visibility is determined both
+  by explicit :show?/:hide? definitions and whether the item is
+  included in inclusions."
+  [{:keys [schema path info] :as options}]
+  (let [part       (or (:dict schema) (:repeating schema))
+        inc-status (when part
+                     (inclusion-status (extend path part)
+                                       (when info
+                                         (:inclusions @info))))]
+    (if (false? inc-status)
+      false
+      (visible? options))))
 
 (defn required?
   "True if the parent schema has :required? flag. Why parent and not the

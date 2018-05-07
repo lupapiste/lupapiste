@@ -83,6 +83,7 @@
     if (isInitializing || !authorizationModel.ok("change-permit-sub-type")) { return; }
 
     ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
+      .processing(applicationModel.processing)
       .success(function(resp) {
         util.showSavedIndicator(resp);
         applicationModel.lightReload();
@@ -226,6 +227,30 @@
     return _(doc.allowedActions).map(function(v,k) { return v.ok && k; }).includes("update-doc");
   }
 
+  function showExpiryDate(app) {
+    return  app.primaryOperation.name !== "raktyo-aloit-loppuunsaat"
+            && app.primaryOperation.name !== "jatkoaika"
+            && app.expiryDate > 0
+            && app.inPostVerdictState
+            && !app.isArchivingProject;
+  }
+
+  function initExpiryDate(app) {
+    app.showContinuationDate = false;
+    if (!_.isEmpty(app["pate-verdicts"])) {
+      var acceptedVerdicts = _.filter(app["pate-verdicts"], function(verdict) {
+        return _.includes( ["myonnetty", "hyvaksytty"], // TODO: Which verdict codes are accepted??
+          verdict.data["verdict-code"]);
+      });
+      app.expiryDate = _.get(_.last(acceptedVerdicts), "data.voimassa");
+    }
+    if (!_.isUndefined(app.continuationPeriods)) {
+      app.expiryDate = (_.last(app.continuationPeriods)).continuationPeriodEnd;
+      app.showContinuationDate = true;
+    }
+    app.showExpiryDate = showExpiryDate(app);
+  }
+
   function showApplication(applicationDetails, lightLoad) {
     isInitializing = true;
 
@@ -243,6 +268,7 @@
       applicationModel._js = app;
 
       initWarrantyDates(app);
+      initExpiryDate(app);
 
       // Update observables
       var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
@@ -458,7 +484,7 @@
 
         var fallbackTab = function(application) {
           if (application.inPostVerdictState) {
-            if (authorizationModel.ok("tasks-tab-visible")) {
+            if (application.tasksTabShouldShow) {
               return "tasks";
             } else {
               return "applicationSummary";
@@ -484,8 +510,7 @@
 
   hub.subscribe("application-loaded", function(e) {
 
-
-    // in case the user chooses to navigatw between applications and inforequests
+    // in case the user chooses to navigate between applications and inforequests
     // by manually editing URL hash in the browser window, let's make sure that they land
     // on the correct page - this way we can prevent some mysterious errors resulting from
     // incorrect components being initialized as a result of being on the "wrong page".

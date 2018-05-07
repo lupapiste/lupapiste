@@ -8,7 +8,8 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.organization :as org]))
 
 (defn- muutostapa
   "If muutostapa is hidden and has a default value via schema the
@@ -22,11 +23,14 @@
       default
       (:muutostapa huoneisto))))
 
+(defn- get-huoneistot-schema [schema-name]
+  (->> {:name schema-name}
+       schemas/get-schema
+       :body
+       (util/find-by-key :name "huoneistot")))
+
 (defn- get-huoneisto-data [huoneistot schema-name]
-  (let [schema     (->> {:name schema-name}
-                        schemas/get-schema
-                        :body
-                        (util/find-by-key :name "huoneistot"))
+  (let [schema     (get-huoneistot-schema schema-name)
         huoneistot (vals (into (sorted-map) huoneistot))]
     (for [huoneisto huoneistot
           :let      [huoneistonumero (-> huoneisto :huoneistonumero)
@@ -49,6 +53,15 @@
                (merge {:huoneistonumero (format "%03d" (util/->int (ss/remove-leading-zeros huoneistonumero)))}
                       (when (not-empty huoneistoPorras) {:porras (ss/upper-case huoneistoPorras)})
                       (when (not-empty jakokirjain) {:jakokirjain (ss/lower-case jakokirjain)}))})))))
+
+(defn get-huoneistot-lkm [huoneistot]
+  (count (filter #(= "lis\u00e4ys" (:muutostapa %)) huoneistot)))
+
+(defn get-huoneistot-pintaala [huoneistot]
+  (->> (filter #(= "lis\u00e4ys" (:muutostapa %)) huoneistot)
+       (map :huoneistoala)
+       (map #(util/->double %))
+       (apply +)))
 
 (defn- get-rakennuksen-omistaja [omistaja]
   (when-let [osapuoli (get-osapuoli-data omistaja :rakennuksenomistaja)]
@@ -84,7 +97,12 @@
         julkisivu-map (muu-select-map :muuMateriaali (:muuMateriaali rakenne)
                                       :julkisivumateriaali (:julkisivu rakenne))
         lammitystapa (:lammitystapa lammitys)
-        huoneistot {:huoneisto (get-huoneisto-data huoneistot (:name info))}
+        huoneistot-data (get-huoneisto-data huoneistot (:name info))
+        huoneistot (if (org/pate-org? (:organization application))
+                     {:huoneisto huoneistot-data
+                      :asuntojenPintaala (get-huoneistot-pintaala huoneistot-data)
+                      :asuntojenLkm (get-huoneistot-lkm huoneistot-data)}
+                     {:huoneisto huoneistot-data})
         vaestonsuoja-value (ss/trim (get-in toimenpide [:varusteet :vaestonsuoja]))
         vaestonsuoja (when (ss/numeric? vaestonsuoja-value) (util/->int vaestonsuoja-value))
         rakennuksen-tiedot-basic-info {:kayttotarkoitus (:kayttotarkoitus kaytto)
@@ -231,6 +249,9 @@
   nil)
 
 (defmethod operation-canonical :hankkeen-kuvaus [& _] ;; For prev permit applications
+  nil)
+
+(defmethod operation-canonical :jatkoaika-hankkeen-kuvaus [& _]
   nil)
 
 (defmethod operation-canonical :maisematyo [& _]

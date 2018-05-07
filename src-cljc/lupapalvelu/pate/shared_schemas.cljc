@@ -110,7 +110,9 @@
   the id property of the target value or the value itself."
   (merge PateComponent
          ;; Path is interpreted by the implementation. In Pate the
-         ;; path typically refers to the settings.
+         ;; path typically refers to the settings. Note: if path
+         ;; resolves into map, it is implicitly transformed into
+         ;; vector of map values associated with :MAP-KEY property.
          {:path                              path-type
           ;; In addition to UI, type also affects validation: :select
           ;; only accepts single values. List is read-only.
@@ -134,8 +136,10 @@
           (sc/optional-key :term)
           {;; The path contains sources with corresponding fi, sv and
            ;; en localisations (if not extra-path given). The matching
-           ;; is done by :item-key
-           :path                         path-type
+           ;; is done by :item-key. If term is defined without :path
+           ;; then the target value is assumed to have lang
+           ;; properties.
+           (sc/optional-key :path)       path-type
            ;; Additional path within matched term that contains the
            ;; lang properties.
            (sc/optional-key :extra-path) path-type
@@ -168,8 +172,8 @@
 
 (defschema PateDateDelta
   (merge PateComponent
-         {(sc/optional-key :delta)   positive-integer
-          :unit                      (sc/enum :days :years)}))
+         {(sc/optional-key :delta) positive-integer
+          :unit                    (sc/enum :days :years)}))
 
 (defschema PateReference
   "Displays the referenced value. By default, :path is resolved as a
@@ -252,7 +256,13 @@
 (defschema PateToggle
   (merge (dissoc PateComponent :css)
          {(sc/optional-key :value)  sc/Bool
-          (sc/optional-key :prefix) keyword-or-string}))
+          ;; Checkbox wrapper class prefix (see components/toggle).
+          (sc/optional-key :prefix) keyword-or-string
+          ;; By default the toggle text is determined by the
+          ;; localisation mechanisms. However, in some cases dynamic
+          ;; toggle text might be needed. :text-dict refers to a
+          ;; sibling dict that contains the the toggle text.
+          (sc/optional-key :text-dict) sc/Keyword}))
 
 (def pate-units
   (sc/enum :days :years :ha :m2 :m3 :kpl :section :eur))
@@ -267,7 +277,10 @@
           (sc/optional-key :before) pate-units
           (sc/optional-key :after)  pate-units}))
 
-(def PateDate PateComponent)
+(defschema PateDate
+  (merge PateComponent
+         ;; Timestamp (ms from epoch).
+         {(sc/optional-key :value) sc/Int}))
 
 (defschema PateSelect
   "Very simple selection model. Rendered as dropdown. Each item
@@ -282,33 +295,59 @@
           ;; locale into account. Default order is the items order.
           (sc/optional-key :sort-by)      (sc/enum :value :text)}))
 
+(defschema PateLocText
+  "Localisation term shown as text."
+  (assoc PateCss
+         :loc-text sc/Keyword))
+
 (defschema PateRequired
   {(sc/optional-key :required?) sc/Bool})
 
 (defn- required [m]
   (merge PateRequired m))
 
+(defn schema-types
+  "Schema type schema 'factory' function.
+
+  schema-ref: Reference to the encompassing schema
+              (e.g., #'SchemaTypes)
+
+  fun: (optional) If given, called for every dict schema
+                  (see VerdictSchemaTypes)"
+  ([schema-ref fun]
+   {sc/Keyword
+    (let [fun (or fun identity)]
+           (sc/conditional
+            :reference-list (fun (required {:reference-list PateReferenceList}))
+            :phrase-text    (fun (required {:phrase-text PatePhraseText}))
+            :loc-text       (fun PateLocText)
+            :date-delta     (fun (required {:date-delta PateDateDelta}))
+            :multi-select   (fun (required {:multi-select PateMultiSelect}))
+            :reference      (fun (required {:reference PateReference}))
+            :link           (fun {:link PateLink})
+            :button         (fun {:button PateButton})
+            :placeholder    (fun {:placeholder PatePlaceholder})
+            :keymap         (fun {:keymap KeyMap})
+            :attachments    (fun {:attachments PateAttachments})
+            :application-attachments (fun {:application-attachments PateComponent})
+            :toggle         (fun {:toggle PateToggle})
+            :text           (fun (required {:text PateText}))
+            :date           (fun (required {:date PateDate}))
+            :select         (fun (required {:select PateSelect}))
+            :repeating      (fun {:repeating (sc/recursive schema-ref)
+                                  ;; The value is a key in the repeating dictionary.
+                                  (sc/optional-key :sort-by) sc/Keyword})))})
+  ([schema-ref]
+   (schema-types schema-ref nil)))
+
+;; Keys on the left side of the conditional above.
+(def schema-type-keys [:reference-list :phrase-text :loc-text :date-delta
+                       :multi-select :reference :link :button :placeholder
+                       :keymap :attachments :application-attachments
+                       :toggle :text :date :select :repeating])
+
 (defschema SchemaTypes
-  {sc/Keyword (sc/conditional
-               :reference-list (required {:reference-list PateReferenceList})
-               :phrase-text    (required {:phrase-text PatePhraseText})
-               :loc-text       {:loc-text sc/Keyword} ;; Localisation term shown as text.
-               :date-delta     (required {:date-delta PateDateDelta})
-               :multi-select   (required {:multi-select PateMultiSelect})
-               :reference      (required {:reference PateReference})
-               :link           {:link PateLink}
-               :button         {:button PateButton}
-               :placeholder    {:placeholder PatePlaceholder}
-               :keymap         {:keymap KeyMap}
-               :attachments    {:attachments PateAttachments}
-               :application-attachments {:application-attachments PateComponent}
-               :toggle         {:toggle PateToggle}
-               :text           (required {:text PateText})
-               :date           (required {:date PateDate})
-               :select         (required {:select PateSelect})
-               :repeating      {:repeating (sc/recursive #'SchemaTypes)
-                                ;; The value is a key in the repeating dictionary.
-                                (sc/optional-key :sort-by) sc/Keyword})})
+  (schema-types #'SchemaTypes))
 
 (defschema Dictionary
   "Id to schema mapping."
@@ -390,8 +429,17 @@
 
 (defschema PateSection
   (merge PateLayout
-         {:id   keyword-or-string ;; Also title localization key
+         {:id   sc/Keyword ;; Also title localization key
           :grid PateGrid}))
+
+(defschema PateVerdictTemplateSection
+  (assoc PateSection
+         ;; By default section dicts are included only if the section
+         ;; itself is included. However, sometimes this approach is
+         ;; too restrictive (e.g., for extra reviews section
+         ;; dicts). If :always-included? is true, then the section
+         ;; dicts are never excluded.
+         (sc/optional-key :always-included?) sc/Bool))
 
 (defschema PateVerdictTemplate
   (merge Dictionary
@@ -399,7 +447,7 @@
          {(sc/optional-key :id)       sc/Str
           (sc/optional-key :modified) sc/Int
           (sc/optional-key :name)     sc/Str ;; Non-localized raw string
-          :sections                   [PateSection]}))
+          :sections                   [PateVerdictTemplateSection]}))
 
 (defschema PateSettings
   (merge Dictionary
@@ -408,16 +456,38 @@
                             ;; A way to to show "required star" on the section title.
                             (sc/optional-key :required?) sc/Bool)]}))
 
+(defschema PateVerdictSchemaTypes
+  (schema-types #'PateVerdictSchemaTypes
+                (fn [schema]
+                  (only-one-of [:template-section :template-dict]
+                               (merge schema
+                                      {;; If the section is removed in the template, this
+                                       ;; dict is excluded in the verdict.
+                                       (sc/optional-key :template-section) sc/Keyword
+                                       ;; The template-dict provides the initial value to
+                                       ;; this verdict dict.
+                                       (sc/optional-key :template-dict)    sc/Keyword})))))
+
+(defschema PateVerdictDictionary
+  {:dictionary PateVerdictSchemaTypes})
+
 (defschema PateVerdictSection
-  (merge PateLayout
+  (merge PateSection
          PateCss
-         {:id   keyword-or-string ;; Also title localization key
-          (sc/optional-key :buttons?) sc/Bool ;; Show edit button? (default true)
-          :grid PateGrid}))
+         ;; Show edit button? (default true)
+         {(sc/optional-key :buttons?) sc/Bool
+          ;; The corresponding verdict template section. Needed if the
+          ;; template section is removable. If the template section is
+          ;; removed then every dict specific to this verdict section
+          ;; is also removed. If only parts of the section depend on
+          ;; the template section then the correct mechanism is the
+          ;; top level template-sections (see below).
+          (sc/optional-key :template-section) sc/Keyword}))
 
 (defschema PateVerdict
-  (merge Dictionary
+  (merge PateVerdictDictionary
          PateMeta
-         {(sc/optional-key :id)       sc/Str
+         {:version                    sc/Int
+          (sc/optional-key :id)       sc/Str
           (sc/optional-key :modified) sc/Int
           :sections                   [PateVerdictSection]}))

@@ -10,6 +10,7 @@
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.document.approval :as approval]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -55,8 +56,17 @@
       (> (:created document) (:ts verdict-history-item)))
     false))
 
-(defn approved? [document]
-  (= "approved" (get-in document [:meta :_approved :value])))
+(defn approved-after-verdict? [document application]
+  (if-let [approval (approval/get-approval document)]
+    (let [verdict-state (sm/verdict-given-state application)
+          verdict-history-item (->> (app-state/state-history-entries (:history application))
+                                    (filter #(= (:state %) (name verdict-state)))
+                                    (sort-by :ts)
+                                    last)]
+      (when-not verdict-history-item
+        (error "Application in post-verdict, but doesnt have verdictGiven state in history"))
+      (and (approval/approved? document) (> (:timestamp approval) (:ts verdict-history-item))))
+    false))
 
 (defn user-can-be-set? [user-id application]
   (and (auth/has-auth? application user-id) (domain/no-pending-invites? application user-id)))
@@ -88,7 +98,7 @@
   (and (contains? states/post-verdict-states (keyword state)) (not (created-after-verdict? document application))))
 
 (defn- deny-remove-of-approved-post-verdict-document [document application]
-  (and (created-after-verdict? document application) (approved? document)))
+  (and (created-after-verdict? document application) (approval/approved? document)))
 
 (defn remove-doc-validator [{:keys [document user application]}]
   (cond
@@ -105,7 +115,7 @@
   (when (and document
              application
              (contains? states/post-verdict-states (keyword (:state application)))
-             (approved? document))
+             (approval/approved? document))
     (fail :error.document.approved)))
 
 (defn validate-created-after-verdict
@@ -136,7 +146,7 @@
   "Pre-check for document disabling. If document is added after verdict, it needs to be approved."
   [{:keys [application document]}]
   (when document
-    (when-not (or (not (created-after-verdict? document application)) (approved? document))
+    (when-not (or (not (created-after-verdict? document application)) (approval/approved? document))
       (fail :error.document-not-approved))))
 
 ;;

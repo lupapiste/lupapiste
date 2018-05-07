@@ -22,7 +22,7 @@
                                     path value)}
         (command sipoo :save-verdict-template-draft-value
                  :template-id template-id
-                 :path (flatten [path])
+                 :path (map keyword (flatten [path]))
                  :value value) => ok?))
 
 (defn set-template-draft-values [template-id & args]

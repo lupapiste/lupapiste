@@ -105,6 +105,7 @@ Add and delete verdict
   Verdict count is  3
 
 Correct tab opening elements are visible
+  Scroll to top
   Element should not be visible  //*[@data-test-id='application-open-info-tab']
   Element should be visible  //*[@data-test-id='application-open-parties-tab']
   Element should be visible  //*[@data-test-id='application-open-tasks-tab']

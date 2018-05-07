@@ -26,37 +26,10 @@
                       (reset! state/settings-info
                               {:info  {:modified (:modified settings)
                                        :category category
-                                       :filled? filled}
+                                       :filled? (boolean filled)}
                                :_meta {:updated  settings-updater
                                        :editing? true
-                                       :enabled? (state/auth? :save-verdict-template-settings-value)}})))
-  (service/generics :review
-                    category
-                    (fn [{reviews :reviews}]
-                      (reset! state/reviews reviews)))
-  (service/generics :plan
-                    category
-                    (fn [{plans :plans}]
-                      (reset! state/plans plans))))
-
-(defn- generic-state [generic-type]
-  (case generic-type
-    :review state/reviews
-    :plan   state/plans))
-
-(defn upsert-generic
-  "Updates generic's (review or plan) state according to the
-  response. After adding or updating a review."
-  [generic-type]
-  (let [state* (generic-state generic-type)]
-   (fn [response]
-     (let [generic (generic-type response)]
-       (when (= (:category generic) @state/current-category)
-         (if-let [index (first (keep-indexed #(when (= (:id %2) (:id generic))
-                                                %1)
-                                             @state*))]
-           (swap! state* #(assoc % index generic))
-           (swap! state* #(conj % generic))))))))
+                                       :enabled? (state/auth? :save-verdict-template-settings-value)}}))))
 
 (defn name-edit [initial callback]
   (components/text-edit initial {:callback  callback
@@ -82,93 +55,19 @@
                  [:option {:key value :value value} text])))]))
 
 
-(defn update-details [generic-type gen-id details-key initial value]
-  (let [value (s/trim value)]
-    (when-not (or (= initial value) (s/blank? value))
-      (service/update-generic generic-type
-                              gen-id
-                              (upsert-generic generic-type)
-                              details-key
-                              value))))
-
-(defn name-cell [generic-type {:keys [id name deleted]} key]
-  (let [value (key name)]
-    (if deleted
-      [:span value]
-      (name-edit value (partial update-details generic-type id key value)))))
-
-(defn type-cell [{:keys [id type deleted]}]
-  (if deleted
-    [:span (common/loc (str "pate.review-type." (name type)))]
-    (type-edit type (partial update-details :review id :type type))))
-
-(rum/defcs generic-editor < rum/reactive
-  (rum/local false ::show-deleted)
-  [{show-deleted ::show-deleted} generic-type]
-  (let [items (rum/react (generic-state generic-type))]
-    [:div.pate-settings-editor
-     (when (some :deleted items)
-       (components/toggle show-deleted
-                          {:test-id  (js/sprintf "show-deleted-%ss"
-                                                 (name generic-type))
-                           :text-loc :handler-roles.show-all
-                           :prefix   :checkbox}))
-     (let [filtered (if @show-deleted
-                      items
-                      (remove :deleted items))]
-       (when (seq filtered)
-         [:table.pate-editor-table
-          [:thead
-           [:tr
-            [:th (common/loc "lang.fi")]
-            [:th (common/loc "lang.sv")]
-            [:th (common/loc "lang.en")]
-            (when (= generic-type :review)
-              [:th (common/loc "verdict.katselmuksenLaji")])
-            [:th]]]
-          [:tbody
-           (for [{:keys [id deleted] :as item} filtered]
-             [:tr {:key id}
-              [:td (name-cell generic-type item :fi)]
-              [:td (name-cell generic-type item :sv)]
-              [:td (name-cell generic-type item :en)]
-              (when (= generic-type :review)
-                [:td (type-cell item)])
-              [:td [:button.primary.outline
-                    {:on-click #(service/update-generic generic-type
-                                                        id
-                                                        (upsert-generic generic-type)
-                                                        :deleted
-                                                        (not deleted))}
-                    (common/loc (if deleted :pate-restore :remove))]]])]]))
-     [:button.positive
-      {:on-click #(service/new-generic generic-type
-                                       @state/current-category
-                                       (upsert-generic generic-type))}
-      [:i.lupicon-circle-plus]
-      [:span (common/loc "add")]]]))
-
 ;; -------------------------
 ;; Settings sections
 ;; -------------------------
 
-(defn settings-section-header [{:keys [path schema state] :as options} edit?]
+#_(defn settings-section-header [{:keys [path schema state] :as options}]
   [:div.pate-grid-6.section-header
    [:div.row.row--tight
     [:div.col-4
      [:span.pate-label
-      {:class (common/css-flags :row-text edit?
-                                :required (:required? schema))}
-      (path/loc options)]]
-    (when (and edit? (path/enabled? options))
-      [:div.col-2.col--right
-       [:button.ghost
-        {:on-click #(path/flip-meta options :editor?)}
-        (common/loc (if (path/react-meta options :editor?)
-                      :close
-                      :edit))]])]])
+      {:class (common/css-flags :required (:required? schema))}
+      (path/loc options)]]]])
 
-(rum/defc settings-section-body < rum/reactive
+#_(rum/defc settings-section-body < rum/reactive
   [{:keys [schema] :as options}]
   [:div.section-body
    (if (path/react-meta options :editor?)
@@ -179,11 +78,15 @@
                                              (:grid schema))))])
 
 (defmethod sections/section-header :settings
-  [{schema :schema :as options} _]
-  (settings-section-header options (util/includes-as-kw? [:reviews :plans]
-                                                         (:id schema))))
+  [{:keys [path schema state] :as options} _]
+  [:div.pate-grid-6.section-header
+   [:div.row.row--tight
+    [:div.col-4
+     [:span.pate-label
+      {:class (common/css-flags :required (:required? schema))}
+      (path/loc options)]]]])
 
-(defmethod sections/section-body :settings
+#_(defmethod sections/section-body :settings
   [options _]
   (settings-section-body options))
 

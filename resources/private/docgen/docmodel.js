@@ -98,7 +98,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                            extraParams ))
       .success( function( result ) {
       cb( result.approval );
-      self.approvalHubSend( result.approval, path );
+      if (cmd !== "reject-doc-note") {
+        self.approvalHubSend( result.approval, path );
+      }
       window.Stickyfill.rebuild();
     })
     .call();
@@ -149,16 +151,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   };
 
   self.approvalHubSubscribe = function(fun, listenBroadcasts) {
-    var filter = {eventType: "approval-status-" + self.docId,
+    var filter = {eventType: "approval-status",
+                  docId: self.docId,
                   broadcast: Boolean(listenBroadcasts) };
     self.subscriptions.push(hub.subscribe( filter, fun ));
   };
 
   // Receiver path can be falsey for broadcast messages.
   self.approvalHubSend = function( approval, senderPath, receiverPath ) {
-    hub.send( "approval-status-" + self.docId,
+    hub.send( "approval-status",
               { broadcast: _.isEmpty(senderPath),
                 approval: _.clone(approval),
+                docId: self.docId,
                 path: senderPath,
                 receiver: receiverPath});
   };

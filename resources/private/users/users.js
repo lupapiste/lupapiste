@@ -73,16 +73,17 @@ var users = (function($) {
 
     self.processResults = function(r) {
       var data = r.data;
-      return {aaData:               _.map(data.rows, self.userToRow),
-              iTotalRecords:        data.total,
-              iTotalDisplayRecords: data.display,
-              sEcho:                data.echo};
+      return {data:               _.map(data.rows, self.userToRow),
+              recordsTotal:       data.total,
+              recordsFiltered:    data.display,
+              draw:               Number(data.draw)};
     };
 
-    self.fetch = function(source, data, callback) {
-      var params = _(data)
-        .concat(_.map(self.filters, function(v, k) { return {name: "filter-" + k, value: v()}; }))
-        .reduce(function(m, p) { m[p.name] = p.value; return m; }, {});
+    self.fetch = function(data, callback) {
+      var params = _.reduce(self.filters, function(result, value, key) {
+        result["filter-" + key] = value();
+        return result;
+      }, data);
       ajax
         .datatables("users-for-datatables", {params: params})
         .success(_.flowRight(callback, self.processResults))
@@ -133,7 +134,6 @@ var users = (function($) {
     self.dataTable = self.table$.dataTable({
       bProcessing:      true, // don't hide this, it brakes layout.
       bServerSide:      true,
-      sAjaxSource:      "",
       aoColumnDefs:     [{aTargets: [1,2,3,4], bSortable: false},
                          {aTargets: [2], mRender: toLocalizedOrgAuthz},
                          {aTargets: [3], mRender: toActive},
@@ -141,6 +141,7 @@ var users = (function($) {
       aaSorting:        [[0, "desc"]],
       sDom:             "<t><<r><p><i><l>>", // <'table-filter' f>
       iDisplayLength:   10,
+      pagingType:       "simple",
       oLanguage:        {sLengthMenu:   loc("users.table.lengthMenu"),
                          sProcessing:   "&nbsp;",
                          sSearch:       loc("search") + ":",
@@ -148,8 +149,8 @@ var users = (function($) {
                          oPaginate:     {"sNext": loc("next"), "sPrevious": loc("previous")},
                          sInfo:         loc("users.table.info"),
                          sInfoFiltered: ""},
-      fnServerData: self.fetch,
-      fnCreatedRow: rowCreated
+      ajax:             self.fetch,
+      fnCreatedRow:     rowCreated
     });
 
     _.each(self.filters, function(o) { o.subscribe(_.throttle(self.redraw, 600)); });

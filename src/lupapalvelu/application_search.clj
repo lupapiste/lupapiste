@@ -1,7 +1,18 @@
 (ns lupapalvelu.application-search
-  (:require [taoensso.timbre :as timbre :refer [debug info warn error errorf]]
+  (:require [clojure.set :refer [rename-keys]]
             [clojure.string :as s]
-            [clojure.set :refer [rename-keys]]
+            [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.application-utils :as app-utils]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.find-address :as find-address]
+            [lupapalvelu.geojson :as geo]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :as user]
             [monger.operators :refer :all]
             [monger.query :as query]
             [sade.core :refer :all]
@@ -10,17 +21,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as v]
-            [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.application-utils :as app-utils]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.operations :as operations]
-            [lupapalvelu.user :as user]
-            [lupapalvelu.states :as states]
-            [lupapalvelu.geojson :as geo]
-            [lupapalvelu.organization :as organization]
-            [lupapalvelu.permit :as permit]))
+            [taoensso.timbre :as timbre :refer [debug info warn error errorf]]))
 
 ;;
 ;; Query construction
@@ -28,16 +29,31 @@
 
 (def max-date 253402214400000)
 
+(defn- parse-search-term
+  "Splits the term into actual term and municipality codes if the last
+  term part matches (even partly) any municipality names."
+  [term]
+  (let [parts (ss/split term #"[\s,\\.]+")
+        munis (find-address/municipality-codes (last parts))]
+    {:term           (if (empty? munis)
+                       term
+                       (ss/join " " (butlast parts)))
+     :municipalities munis}))
+
 (defn- make-free-text-query [filter-search]
-  (let [search-keys [:address :verdicts.kuntalupatunnus :_applicantIndex :foreman :_id :documents.data.yritys.yritysnimi.value
-                     :documents.data.henkilo.henkilotiedot.sukunimi.value]
+  (let [search-keys [:_applicantIndex
+                     :_id
+                     :address
+                     :documents.data.henkilo.henkilotiedot.sukunimi.value
+                     :documents.data.yritys.yritysnimi.value
+                     :foreman
+                     :verdicts.kuntalupatunnus]
         fuzzy       (ss/fuzzy-re filter-search)
         or-query    {$or (map #(hash-map % {$regex fuzzy $options "i"}) search-keys)}
         ops         (operations/operation-names filter-search)]
-    (if (seq ops)
-      (update-in or-query [$or] concat [{:primaryOperation.name {$in ops}}
-                                        {:secondaryOperations.name {$in ops}}])
-      or-query)))
+    (cond-> or-query
+      (seq ops) (update-in [$or] concat [{:primaryOperation.name {$in ops}}
+                                         {:secondaryOperations.name {$in ops}}]))))
 
 (defn make-text-query [filter-search]
   {:pre [filter-search]}
@@ -83,73 +99,77 @@
        (not (empty? (:eventType event)))))
 
 (defn make-query [query {:keys [searchText applicationType handlers tags companyTags organizations operations areas modifiedAfter event]} user]
-  {$and
-   (filter seq
-     [query
-      (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
-      (when-let [modified-after (util/->long modifiedAfter)]
-        {:modified {$gt modified-after}})
-      (if (user/applicant? user)
-        (case applicationType
-          "unlimited"          {}
-          "inforequest"        {:state {$in ["answered" "info"]}}
-          "application"        applicant-application-states
-          "construction"       {:state {$in ["verdictGiven" "constructionStarted"]}}
-          "canceled"           {:state "canceled"}
-          "verdict"            {:state {$in states/post-verdict-states}}
-          "foremanApplication" (assoc applicant-application-states :permitSubtype "tyonjohtaja-hakemus")
-          "foremanNotice"      (assoc applicant-application-states :permitSubtype "tyonjohtaja-ilmoitus")
-          {:state {$ne "canceled"}})
-        (case applicationType
-          "unlimited"          {}
-          "inforequest"        {:state {$in ["open" "answered" "info"]} :permitType {$ne permit/ARK}}
-          "application"        authority-application-states
-          "construction"       {:state {$in ["verdictGiven" "constructionStarted"]}}
-          "verdict"            {:state {$in states/post-verdict-states}}
-          "canceled"           {:state "canceled"}
-          "foremanApplication" (assoc authority-application-states :permitSubtype "tyonjohtaja-hakemus")
-          "foremanNotice"      (assoc authority-application-states :permitSubtype "tyonjohtaja-ilmoitus")
-          "readyForArchival"   (archival-query user)
-          "archivingProjects"  {:permitType permit/ARK :state {$nin [:archived :canceled]}}
-          {$and [{:state {$ne "canceled"}
-                  :permitType {$ne permit/ARK}}
-                 {$or [{:state {$ne "draft"}}
-                       {:organization {$nin (->> user :orgAuthz keys (map name))}}]}]}))
-      (when-not (empty? handlers)
-        (if ((set handlers) no-handler)
-          {:handlers {$size 0}}
-          (when-let [handler-ids (seq (remove nil? (map handler-email-to-id handlers)))]
-            {$or [{:auth.id {$in handler-ids}}
-                  {:handlers.userId {$in handler-ids}}]})))
-      (when-not (empty? tags)
-        {:tags {$in tags}})
-      (when-not (empty? companyTags)
-        {:company-notes {$elemMatch {:companyId (get-in user [:company :id]) :tags {$in companyTags}}}})
-      (when-not (empty? organizations)
-        {:organization {$in organizations}})
-      (when (event-search event)
-        (case (first (:eventType event))
-          "warranty-period-end"                 {$and [{:warrantyEnd {"$gte" (or (:start event) 0)
-                                                                     "$lt" (or (:end event) max-date)}}]}
-          "license-period-start"                {$and [{:documents.data.tyoaika-alkaa-ms.value {"$gte" (or (:start event) 0)
-                                                                                              "$lt" (or (:end event) max-date)}}]}
-          "license-period-end"                  {$and [{:documents.data.tyoaika-paattyy-ms.value {"$gte" (or (:start event) 0)
-                                                                                                "$lt" (or (:end event) max-date)}}]}
-          "license-started-not-ready"           {$and [{:documents.data.tyoaika-alkaa-ms.value {"$lt" (now)}},
-                                                       {:state {$ne "closed"}}]}
-          "license-ended-not-ready"             {$and [{:documents.data.tyoaika-paattyy-ms.value {"$lt" (now)}},
-                                                       {:state {$ne "closed"}}]}
-          "announced-to-ready-state-not-ready"  {$and [{:closed {"$lt" (now)}},
-                                                       {:state {$ne "closed"}},
-                                                       {:permitType "YA"}]}))
-      (cond
-        (seq operations) {:primaryOperation.name {$in operations}}
-        (and (user/authority? user) (not= applicationType "unlimited"))
-        ; Hide foreman applications in default search, see LPK-923
-        {:primaryOperation.name {$nin (cond-> ["tyonjohtajan-nimeaminen-v2"]
-                                              (= applicationType "readyForArchival") (conj "aiemmalla-luvalla-hakeminen"))}})
-      (when-not (empty? areas)
-        (app-utils/make-area-query areas user))])})
+
+  (let [{:keys [term municipalities]} (when-not (ss/blank? searchText)
+                                        (parse-search-term (ss/trim searchText)))]
+    {$and
+    (filter seq
+            [query
+             (when-not (ss/blank? term) (make-text-query (ss/trim term)))
+             (when (seq municipalities) {:municipality {$in municipalities}})
+             (when-let [modified-after (util/->long modifiedAfter)]
+               {:modified {$gt modified-after}})
+             (if (user/applicant? user)
+               (case applicationType
+                 "unlimited"          {}
+                 "inforequest"        {:state {$in ["answered" "info"]}}
+                 "application"        applicant-application-states
+                 "construction"       {:state {$in ["verdictGiven" "constructionStarted"]}}
+                 "canceled"           {:state "canceled"}
+                 "verdict"            {:state {$in states/post-verdict-states}}
+                 "foremanApplication" (assoc applicant-application-states :permitSubtype "tyonjohtaja-hakemus")
+                 "foremanNotice"      (assoc applicant-application-states :permitSubtype "tyonjohtaja-ilmoitus")
+                 {:state {$ne "canceled"}})
+               (case applicationType
+                 "unlimited"          {}
+                 "inforequest"        {:state {$in ["open" "answered" "info"]} :permitType {$ne permit/ARK}}
+                 "application"        authority-application-states
+                 "construction"       {:state {$in ["verdictGiven" "constructionStarted"]}}
+                 "verdict"            {:state {$in states/post-verdict-states}}
+                 "canceled"           {:state "canceled"}
+                 "foremanApplication" (assoc authority-application-states :permitSubtype "tyonjohtaja-hakemus")
+                 "foremanNotice"      (assoc authority-application-states :permitSubtype "tyonjohtaja-ilmoitus")
+                 "readyForArchival"   (archival-query user)
+                 "archivingProjects"  {:permitType permit/ARK :state {$nin [:archived :canceled]}}
+                 {$and [{:state {$ne "canceled"}
+                         :permitType {$ne permit/ARK}}
+                        {$or [{:state {$ne "draft"}}
+                              {:organization {$nin (->> user :orgAuthz keys (map name))}}]}]}))
+             (when-not (empty? handlers)
+               (if ((set handlers) no-handler)
+                 {:handlers {$size 0}}
+                 (when-let [handler-ids (seq (remove nil? (map handler-email-to-id handlers)))]
+                   {$or [{:auth.id {$in handler-ids}}
+                         {:handlers.userId {$in handler-ids}}]})))
+             (when-not (empty? tags)
+               {:tags {$in tags}})
+             (when-not (empty? companyTags)
+               {:company-notes {$elemMatch {:companyId (get-in user [:company :id]) :tags {$in companyTags}}}})
+             (when-not (empty? organizations)
+               {:organization {$in organizations}})
+             (when (event-search event)
+               (case (first (:eventType event))
+                 "warranty-period-end"                 {$and [{:warrantyEnd {"$gte" (or (:start event) 0)
+                                                                             "$lt" (or (:end event) max-date)}}]}
+                 "license-period-start"                {$and [{:documents.data.tyoaika-alkaa-ms.value {"$gte" (or (:start event) 0)
+                                                                                                       "$lt" (or (:end event) max-date)}}]}
+                 "license-period-end"                  {$and [{:documents.data.tyoaika-paattyy-ms.value {"$gte" (or (:start event) 0)
+                                                                                                         "$lt" (or (:end event) max-date)}}]}
+                 "license-started-not-ready"           {$and [{:documents.data.tyoaika-alkaa-ms.value {"$lt" (now)}},
+                                                              {:state {$ne "closed"}}]}
+                 "license-ended-not-ready"             {$and [{:documents.data.tyoaika-paattyy-ms.value {"$lt" (now)}},
+                                                              {:state {$ne "closed"}}]}
+                 "announced-to-ready-state-not-ready"  {$and [{:closed {"$lt" (now)}},
+                                                              {:state {$ne "closed"}},
+                                                              {:permitType "YA"}]}))
+             (cond
+               (seq operations) {:primaryOperation.name {$in operations}}
+               (and (user/authority? user) (not= applicationType "unlimited"))
+                                        ; Hide foreman applications in default search, see LPK-923
+               {:primaryOperation.name {$nin (cond-> ["tyonjohtajan-nimeaminen-v2"]
+                                               (= applicationType "readyForArchival") (conj "aiemmalla-luvalla-hakeminen"))}})
+             (when-not (empty? areas)
+               (app-utils/make-area-query areas user))])}))
 
 ;;
 ;; Fields
@@ -222,9 +242,8 @@
   (when (> (count searchText) (env/value :search-text-max-length))
     (fail! :error.search-text-is-too-long))
   (let [user-query  (domain/basic-application-query-for user)
-        user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)
-        query-total (mongo/count :applications query)
+        user-total  (future (if (mongo/select-one :applications user-query) 1 0))
         skip        (or (util/->long (:skip params)) 0)
         limit       (or (util/->long (:limit params)) 10)
         apps        (search query db-fields (make-sort params) skip limit)
@@ -236,9 +255,15 @@
                         #(domain/filter-application-content-for % user)
                         mongo/with-id)
                       apps)]
-    {:userTotalCount user-total
-     :totalCount query-total
-     :applications rows}))
+    {:applications rows
+     ; This is only used in the front-end to find out if the user has any applications at all. Full mongo count
+     ; is expensive, so we rather just check if the user has at least one application.
+     :userTotalCount @user-total}))
+
+(defn query-total-count [user params]
+  (let [user-query  (domain/basic-application-query-for user)
+        query       (make-query user-query params user)]
+    {:totalCount (mongo/count :applications query)}))
 
 ;;
 ;; Public API

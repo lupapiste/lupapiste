@@ -33,6 +33,7 @@ Building owners address is billing address
   Open tab  info
   Open accordions  info
   Execute Javascript  $("input[value='yritys']").click();
+  Wait until  Element should be visible  xpath=//section[@data-doc-type="uusiRakennus"]//select[@name="company-select"]
   Select From List  //section[@data-doc-type="uusiRakennus"]//select[@name="company-select"]  Solita Oy (1060155-5)
   Building owners street address is  \u00c5kerlundinkatu 11
   Building owners zip is  33100
@@ -42,6 +43,7 @@ Applicant address is billing address
   Open tab  parties
   Open accordions  parties
   Execute Javascript  $("input[value='yritys']").click();
+  Wait until  Element should be visible  xpath=//section[@data-doc-type="hakija-r"]//select[@name="company-select"]
   Select From List  //section[@data-doc-type="hakija-r"]//select[@name="company-select"]  Solita Oy (1060155-5)
   Company street address is  hakija-r  \u00c5kerlundinkatu 11
   Company zip is  hakija-r  33100

@@ -1395,7 +1395,7 @@
                                                                                  {"requestedByAuthority" {$not {$type 8}}}]}}}))}
   (update-applications-array :attachments
     (fn [attachment]
-      (if-not (util/boolean? (:requestedByAuthority attachment))
+      (if-not (boolean? (:requestedByAuthority attachment))
         (update attachment :requestedByAuthority boolean)
         attachment))
     {:attachments {$elemMatch {$and [{"requestedByAuthority" {$exists true}}
@@ -3865,7 +3865,81 @@
 (defmigration replace-operation-fix-rakennuspaikka-document
   (map rakennuspaikka-document-fix broken-apps))
 
+(defmigration jatkoaikalupa-state-to-ready
+  {:apply-when (pos? (mongo/count :applications {:primaryOperation.name {$in [:raktyo-aloit-loppuunsaat
+                                                                              :jatkoaika]}
+                                                 :state {$in [:verdictGiven
+                                                              :constructionStarted
+                                                              :closed]}}))}
+  (let [ts (now)]
+    (mongo/update-by-query :applications
+                           {:primaryOperation.name {$in [:raktyo-aloit-loppuunsaat
+                                                         :jatkoaika]}
+                            :state {$in [:verdictGiven
+                                         :constructionStarted
+                                         :closed]}}
+                           {$set  {:state "ready"}
+                            $push {:history {:state "ready"
+                                             :ts ts
+                                             :user usr/migration-user-summary}}})))
 
+(defmigration muutoslupa-state-to-ready
+  {:apply-when (pos? (mongo/count :applications {:primaryOperation.name {$exists true}
+                                                 :permitSubtype "muutoslupa"
+                                                 :state {$in [:verdictGiven
+                                                              :constructionStarted
+                                                              :inUse
+                                                              :closed]}}))}
+  (let [ts (now)]
+    (mongo/update-by-query :applications
+                           {:primaryOperation.name {$exists true}
+                            :permitSubtype "muutoslupa"
+                            :state {$in [:verdictGiven
+                                         :constructionStarted
+                                         :inUse
+                                         :closed]}}
+                           {$set  {:state "ready"}
+                            $push {:history {:state "ready"
+                                             :ts ts
+                                             :user usr/migration-user-summary}}})))
+
+(defmigration add-history-entry-for-extinct-jatkoaika
+  {:apply-when (pos? (mongo/count :applications {:primaryOperation.name {$in [:raktyo-aloit-loppuunsaat
+                                                                              :jatkoaika]}
+                                                 :state "extinct"
+                                                 :history.state {$ne "ready"}}))}
+  (let [ts (now)]
+    (mongo/update-by-query :applications
+                           {:primaryOperation.name {$in [:raktyo-aloit-loppuunsaat
+                                                         :jatkoaika]}
+                            :state "extinct"
+                            :history.state {$ne "ready"}}
+                           {$push {:history {:state "ready"
+                                             :ts ts
+                                             :user usr/migration-user-summary}}})))
+
+(defmigration add-history-entry-for-appealed-muutoslupa
+  {:apply-when (pos? (mongo/count :applications {:primaryOperation.name {$exists true}
+                                                 :permitSubtype "muutoslupa"
+                                                 :state "appealed"
+                                                 :history.state {$ne "ready"}}))}
+  (let [ts (now)]
+    (mongo/update-by-query :applications
+                           {:primaryOperation.name {$exists true}
+                            :permitSubtype "muutoslupa"
+                            :state "appealed"
+                            :history.state {$ne "ready"}}
+                           {$push {:history {:state "ready"
+                                             :ts ts
+                                             :user usr/migration-user-summary}}})))
+
+(defmigration remove-handlers-from-drafts
+  {:apply-when (pos? (mongo/count :applications {:state      "draft"
+                                                 :handlers.0 {$exists true}}))}
+  (mongo/update-by-query :applications
+                         {:state      "draft"
+                          :handlers.0 {$exists true}}
+                         {$set {:handlers []}}))
 
 ;;
 ;; ****** NOTE! ******

@@ -608,3 +608,12 @@
     (-> (canceled-app-context {:user {:id "1"}})
         :permissions)
     => empty?))
+
+(fact "jatkoaika-application?"
+  (jatkoaika-application? {:primaryOperation {:name "raktyo-aloit-loppuunsaat"}}) => true
+  (jatkoaika-application? {:primaryOperation {:name "jatkoaika"}}) => true
+  (jatkoaika-application? {:primaryOperation {:name "ya-jatkoaika"}}) => true
+  (jatkoaika-application? {:primaryOperation {:name "rivitalo-kerrostalo"}}) => false
+  (jatkoaika-application? {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}}) => false
+  (jatkoaika-application? {:primaryOperation {:name ""}}) => false
+  (jatkoaika-application? nil) => false)

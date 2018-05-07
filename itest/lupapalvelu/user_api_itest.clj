@@ -32,24 +32,24 @@
   (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 4))
 
 (facts users-for-datatables
- (fact (datatables admin :users-for-datatables :params {:iDisplayLength 6 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"]})
+ (fact (datatables admin :users-for-datatables :params {:length 6 :start 0 :draw "123" :enabled "true" :organizations ["753-R"]})
    => (contains {:ok true
                  :data (contains {:rows (comp (partial = 6) count)
                                   :total 6
                                   :display 6
-                                  :echo "123"})}))
- (fact (datatables admin :users-for-datatables :params {:iDisplayLength 6 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :filter-search "Suur"})
+                                  :draw "123"})}))
+ (fact (datatables admin :users-for-datatables :params {:length 6 :start 0 :draw "123" :enabled "true" :organizations ["753-R"] :filter-search "Suur"})
    => (contains {:ok true
                  :data (contains {:rows (comp (partial = 1) count)
                                   :total 6
                                   :display 1
-                                  :echo "123"})}))
- (fact (datatables admin :users-for-datatables :params {:iDisplayLength 6 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :filter-search "SoNJa"})
+                                  :draw "123"})}))
+ (fact (datatables admin :users-for-datatables :params {:length 6 :start 0 :draw "123" :enabled "true" :organizations ["753-R"] :filter-search "SoNJa"})
    => (contains {:ok true
                  :data (contains {:rows (comp (partial = 1) count)
                                   :total 6
                                   :display 1
-                                  :echo "123"})})))
+                                  :draw "123"})})))
 
 (facts "User for edit authority"
   (fact (query sonja :user-for-edit-authority :authority-id "777777777777777777000024") =not=> ok?)

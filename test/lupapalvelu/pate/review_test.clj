@@ -13,6 +13,7 @@
 
 (fact "pate review->task, example reviews are valid"
   (->> (pate-verdict->tasks test-pate-verdict [] 123)
+       (filter #(= (get-in % [:schema-info :name]) "task-katselmus"))
        (map (partial tasks/task-doc-validation "task-katselmus"))) => (has every? empty?))
 
 (def b1

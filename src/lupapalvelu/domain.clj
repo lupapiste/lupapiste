@@ -8,7 +8,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.roles :as roles]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.verdict :as verdict]
             [monger.operators :refer :all]
             [sade.core :refer [unauthorized fail?]]
@@ -21,7 +21,7 @@
 ;;
 
 (defn basic-application-query-for [{user-id :id {company-id :id company-role :role} :company :as user}]
-  (let [organizations (user/organization-ids-by-roles user #{:authority :reader :approver :commenter :financialAuthority})]
+  (let [organizations (usr/organization-ids-by-roles user #{:authority :reader :approver :commenter :financialAuthority})]
     (case (keyword (:role user))
       :applicant    (if (nil? company-id)
                       {:auth.id user-id}
@@ -60,10 +60,14 @@
       {})))
 
 (defn- only-authority-sees [user checker items]
-  (filter (fn [m] (or (user/authority? user) (not (checker m)))) items))
+  (filter (fn [m] (or (usr/authority? user) (not (checker m)))) items))
 
 (defn- only-authority-sees-drafts [user verdicts]
   (only-authority-sees user :draft verdicts))
+
+(defn- non-authority-sees-only-published-pate-verdicts [user pate-verdicts]
+  (cond->> pate-verdicts
+    (usr/applicant? user) (filter :published)))
 
 (defn- normalize-neighbors
   "Neighbor user ids (hetu) are visible only to the application
@@ -83,7 +87,7 @@
 
 
 (defn- filter-notice-from-application [application user]
-  (if (user/authority? user)
+  (if (usr/authority? user)
     application
     (dissoc application :urgency :authorityNotice)))
 
@@ -98,9 +102,9 @@
 
 (defn- authorized-to-statement? [user statement]
   (or (:given statement)
-      (user/authority? user)
-      (user/financial-authority? user)
-      (and (user/applicant? user)
+      (usr/authority? user)
+      (usr/financial-authority? user)
+      (and (usr/applicant? user)
            (= (-> statement :person :email ss/canonize-email)
               (-> user :email ss/canonize-email)))))
 
@@ -167,6 +171,7 @@
                                                                (can-read-comment? comment user)))))
         flag-removed-attachment-comments
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
+        (update-in [:pate-verdicts] (partial non-authority-sees-only-published-pate-verdicts user))
         (update-in [:statements] (partial map #(if (authorized-to-statement? user %) % (statement-summary %))))
         (update-in [:attachments] (partial remove (partial statement-attachment-hidden-for-user? application user)))
         (update-in [:attachments] (partial only-authority-sees user (partial relates-to-draft-verdict? application)))
@@ -180,7 +185,7 @@
 (defn with-participants-info
   [reservation]
   (let [ids (flatten (vals (select-keys reservation [:from :to])))]
-    (assoc reservation :participants (map user/get-user-by-id (remove nil? ids)))))
+    (assoc reservation :participants (map usr/get-user-by-id (remove nil? ids)))))
 
 (defn enrich-application-handlers
   ([{org-id :organization :as application}]
@@ -367,8 +372,8 @@
    :type    type
    :created timestamp
    :roles   (if to-user (conj (set roles) (:role to-user)) roles)
-   :to      (user/summary to-user)
-   :user    (user/summary user)})
+   :to      (usr/summary to-user)
+   :user    (usr/summary user)})
 
 ;;
 ;; Neighbors

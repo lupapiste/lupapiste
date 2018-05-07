@@ -21,17 +21,18 @@
    :facts   {:ok            [(sc/pred vector? "The expected OK fact results must be in a vector")]
              :fail          [(sc/pred vector? "The expected FAIL fact results must be in a vector")]}})
 
+(defn- concat-if-some [prev val-result]
+  (if val-result
+    (concat prev val-result)
+    prev))
+
 (defn validate
   "Runs all validators, returning list of concatenated validation results."
   [document]
-  (->>
-    validators
-    deref
-    vals
-    (map :fn)
-    (map (util/fn-> (apply [document])))
-    (reduce concat)
-    (filter (comp not nil?))))
+  (->> (vals @validators)
+       (map :fn)
+       (pmap #(apply % [document]))
+       (reduce concat-if-some)))
 
 (defn- starting-keywords
   "Returns vector of starting keywords of vector until

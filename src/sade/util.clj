@@ -428,8 +428,6 @@
 
 (defn not-empty-or-nil? [x] (not (empty-or-nil? x)))
 
-(defn boolean? [x] (instance? Boolean x))
-
 (defn assoc-when
   "Assocs entries with truthy values into m."
   [m & kvs]
@@ -608,6 +606,7 @@
 (defalias includes-as-kw?    shared/includes-as-kw?)
 (defalias intersection-as-kw shared/intersection-as-kw)
 (defalias difference-as-kw   shared/difference-as-kw)
+(defalias union-as-kw        shared/union-as-kw)
 
 (defn kw-path
   "a b c -> :a.b.c

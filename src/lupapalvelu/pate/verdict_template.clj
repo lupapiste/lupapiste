@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.verdict-template
-  (:require [lupapalvelu.action :as action]
+  (:require [clojure.set :as set]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n]
@@ -46,19 +47,58 @@
            :remove {:removals (concat (or removals []) [path])}
            {})))
 
+(declare settings)
+
+(defn- sync-repeatings
+  "Sync the template repeating (t-rep) according to settings
+  repeating. Only the current language version of (plan/review) is
+  copied."
+  [lang s-rep t-rep]
+  (reduce-kv (fn [acc k v]
+               (assoc-in acc [k :text]
+                         (get v
+                              (keyword lang)
+                              (i18n/localize lang :pate.no-name))))
+             (select-keys t-rep (keys s-rep))
+             s-rep))
+
+(def template-settings-dependencies [:plans :reviews])
+
+(defn verdict-template-settings-dependencies
+  "Reviews and plans information from setting is merged into the
+  corresponding template repeatings. Copying is done when the template
+  dictionary has :reviews or :plans. Returns the updated template."
+  [org-id lang {:keys [category draft] :as template}]
+  (let [{dic :dictionary} (shared/verdict-template-schema category)
+        {s-data :draft}   (settings (org/get-organization org-id
+                                                          {:verdict-templates 1})
+                                    category)]
+    (reduce (fn [acc rep-dict]
+              (let [repeating-data (sync-repeatings lang
+                                          (rep-dict s-data)
+                                          (rep-dict draft))]
+                (if (empty? repeating-data)
+                  (util/dissoc-in acc [:draft rep-dict])
+                  (assoc-in acc [:draft rep-dict] repeating-data))))
+            template
+            (util/intersection-as-kw template-settings-dependencies
+                                     (keys dic)))))
+
 (defn new-verdict-template
   ([org-id timestamp lang category draft name]
-   (let [data {:id       (mongo/create-id)
-               :draft    draft
-               :name     name
-               :category category
-               :modified timestamp}]
+   (let [data (verdict-template-settings-dependencies
+               org-id lang
+               {:id       (mongo/create-id)
+                :draft    draft
+                :name     name
+                :category category
+                :modified timestamp
+                :deleted  false})]
      (mongo/update-by-id :organizations
                          org-id
                          {$push {:verdict-templates.templates
                                  (sc/validate schemas/PateSavedTemplate
-                                              (assoc data
-                                                     :deleted false))}})
+                                              data)}})
      data))
   ([org-id timestamp lang category]
    (new-verdict-template org-id timestamp lang category {}
@@ -73,6 +113,15 @@
          :published (:published published)))
 
 (declare settings-filled? template-filled?)
+
+
+(defn verdict-template-response-data [organization template-id]
+  (let [template     (verdict-template organization
+                                       template-id)]
+    (assoc (verdict-template-summary template)
+           :draft (:draft template)
+           :filled (template-filled? {:org-id   (:id organization)
+                                      :template template}))))
 
 (defn verdict-template-check
   "Returns prechecker for template-id parameters.
@@ -127,28 +176,69 @@
                             timestamp)
                   update)))
 
+(defn verdict-template-update-and-open [{:keys [lang data created] :as command}]
+  (let [{:keys [template-id]}   data
+        organization            (command->organization command)
+        {draft :draft :as data} (verdict-template-response-data organization template-id)
+        {new-draft :draft
+         :as       updated}     (verdict-template-settings-dependencies (:id organization)
+                                                                        lang
+                                                                        data)
+        updates                 (reduce (fn [acc dict]
+                                          (let [new-dict-value (dict new-draft)]
+                                            (if (not= (dict draft) new-dict-value)
+                                              (assoc-in acc
+                                                        [$set
+                                                         (util/kw-path :verdict-templates.templates.$.draft
+                                                                       dict)]
+                                                        new-dict-value)
+                                              acc)))
+                                        nil
+                                        template-settings-dependencies)]
+    (if updates
+      (do
+        (template-update organization template-id updates created)
+        (assoc updated :modified created))
+      data)))
+
 (defn settings [organization category]
   (get-in organization [:verdict-templates :settings (keyword category)]))
 
-(defn- pack-generics [organization gen-key template-data]
-  (->> organization
-       :verdict-templates
-       gen-key
-       (remove :deleted)
-       (filter #(util/includes-as-kw? (gen-key template-data) (:id %)))
-       (map #(select-keys % [:id :name :type]))))
+(defn- pack-dependencies
+  "Packs settings dependency (either :plans or :reviews). Only included
+  items are packed. The selection status is packed as well. The result
+  is a list with (at least) localisation (e.g., :fi) and :selected
+  properties."
+  [settings dep-key template-data]
+  (let [t-data (->> template-data
+                    dep-key
+                    (filter (util/fn-> last :included))
+                    (into {}))]
+    (map (fn [[k v]]
+           (assoc v
+                  :selected (boolean (-> t-data
+                                         k
+                                         :selected))))
+         (select-keys (dep-key settings) (keys t-data)))))
 
 (defn- pack-verdict-dates
   "Since the date calculation is cumulative we always store every delta
-  into kw-delta map. Empty deltas are zeros. For board-verdicts the
-  appeal date (muutoksenhaku) is different."
-  [draft board-verdict?]
-  (cond-> (->> shared/verdict-dates
-               (map (fn [k]
-                      [k (-> draft k schemas/parse-int)]))
-               (into {}))
-    board-verdict? (assoc :muutoksenhaku (-> draft :lautakunta-muutoksenhaku
-                                             schemas/parse-int))))
+  into kw-delta map. Including those that are not even in the current
+  schema. Empty deltas are zeros. For board-verdicts the appeal
+  date (muutoksenhaku) is different."
+  [category draft board-verdict?]
+  (let [{dic :dictionary} (shared/settings-schema category)]
+    (cond-> (->> shared/verdict-dates
+                 (map (fn [k]
+                        [k {:delta (-> draft k schemas/parse-int)
+                            :unit (name (get-in dic [k :date-delta :unit] :days))}]))
+                 (into {}))
+      board-verdict? (assoc :muutoksenhaku {:delta (-> draft
+                                                       :lautakunta-muutoksenhaku
+                                                       schemas/parse-int)
+                                            :unit  (name (get-in dic
+                                                                 [:lautakunta-muutoksenhaku
+                                                                  :date-delta :unit]))}))))
 
 (defn- published-settings
   "The published settings only include lists without schema-ordained
@@ -159,21 +249,18 @@
   (let [draft (:draft (settings organization category))
         data  (into {}
                     (for [[k v] (select-keys draft
-                                             [:verdict-code
-                                              :foremen])]
+                                             [:verdict-code])]
                       [k (loop [v v]
                            (if (map? v)
                              (recur (-> v vals first))
                              v))]))
         board-verdict? (util/=as-kw (:giver template-data) :lautakunta)]
     (merge data
-           {:date-deltas (pack-verdict-dates draft board-verdict?)
-            :plans       (pack-generics organization :plans template-data)
-            :reviews     (pack-generics organization :reviews template-data)}
+           {:date-deltas (pack-verdict-dates category draft board-verdict?)
+            :plans       (pack-dependencies draft :plans template-data)
+            :reviews     (pack-dependencies draft :reviews template-data)}
            (when board-verdict?
              {:boardname (:boardname draft)}))))
-
-(declare generic-list)
 
 (defn save-draft-value
   "Error code on failure (see schemas for details)."
@@ -182,20 +269,12 @@
          :as   template}  (verdict-template organization template-id)
         {:keys [path value op]
          :as   processed} (schemas/validate-and-process-value
-                           (shared/default-verdict-template (keyword category))
+                           (shared/verdict-template-schema category)
                            path
                            value
                            draft
-                           (merge
-                            {:settings (:draft (settings organization
-                                                         category))}
-                            (when-let [ref-gen (some->> path
-                                                        (util/intersection-as-kw [:plans :reviews])
-                                                        first)]
-                              (hash-map ref-gen
-                                        (map :id (generic-list organization
-                                                               category
-                                                               ref-gen))))))]
+                           {:settings (:draft (settings organization
+                                                        category))})]
     (when op ;; Value could be nil
       (let [mongo-path (util/kw-path (cons :verdict-templates.templates.$.draft
                                            path))]
@@ -207,34 +286,66 @@
                         timestamp)))
     processed))
 
-(defn- prune-template-data
-  "Upon publishing the settings generics and template data must by
-  synchronized."
-  [settings gen-key template-data]
-  (update template-data gen-key (fn [ids]
-                                  (->> settings
-                                       gen-key
-                                       (map :id)
-                                       (util/intersection-as-kw ids)))))
+(defn- draft-for-publishing
+  "Extracts template draft data for publishing. Keys with empty values
+  are omitted. However, removed-sections do not affect the data
+  selection, since the verdicts may handle removed-sections
+  differently (e.g., foremen and reviews). Transforms :repeating in
+  template draft from map of maps to sequence of maps."
+  [{:keys [category draft]}]
+  (let [{:keys [dictionary]} (shared/verdict-template-schema category)
+        good? (util/fn-> str ss/not-blank?)]
 
-(defn- transform-conditions
-  "Transform conditions from map of maps to sequence of strings. If
-  conditions section is removed or transformation result is empty,
-  conditions are removed from draft. Returns draft."
-  [{:keys [conditions removed-sections] :as draft}]
-  (let [transformed (some->> conditions
-                                vals
-                                (map :condition)
-                                (remove ss/blank?))]
-    (if (and (-> removed-sections :conditions not)
-             transformed)
-      (assoc draft :conditions transformed)
-      (dissoc draft :conditions))))
+    (reduce (fn [acc dict]
+              (let [value (dict draft)]
+                (if (good? value)
+                  (assoc acc
+                         dict
+                         (if (-> dictionary dict :repeating)
+                           (filter (util/fn->> vals (every? good?))
+                                   (vals value))
+                           value))
+                  acc)))
+            {}
+            (keys dictionary))))
+
+(defn- template-inclusions
+  "List if included top-level dicts. Dict is excluded if it
+  belongs (only) to removed section and the section is not always
+  included. The list is used when resolving the :template-dict
+  references in verdicts."
+  [{:keys [category draft]}]
+  (let [{:keys [dictionary
+                sections]}     (shared/verdict-template-schema category)
+        dict-secs              (schemas/dict-sections sections)
+        always-included        (->> (filter :always-included? sections)
+                                    (map :id)
+                                    set)
+        removed-sections       (set/difference (->> (:removed-sections draft)
+                                                    (map (fn [[k v]]
+                                                           (when v k)))
+                                                    (remove nil?)
+                                                    set)
+                                               always-included)
+
+        ]
+    (->> dict-secs
+         (reduce-kv (fn [acc dict sections]
+                      (cond-> acc
+                        (or (empty? sections)
+                            (not-empty (set/difference sections
+                                                       removed-sections)))
+                        (conj dict)))
+                    (util/difference-as-kw (keys dictionary)
+                                           (keys dict-secs)
+                                           [:removed-sections]))
+         ;; Strings due to smoke tests (values are strings in mongo)
+         (map name))))
 
 (defn publish-verdict-template [organization template-id timestamp]
   (let [{:keys [draft category]
          :as   template} (verdict-template organization template-id)
-        settings         (sc/validate schemas/PatePublishedSettings
+        settings         (sc/validate schemas/PatePublishedTemplateSettings
                                       (published-settings organization
                                                           category
                                                           draft))]
@@ -242,10 +353,9 @@
                      template-id
                      {$set {:verdict-templates.templates.$.published
                             {:published timestamp
-                             :data      (->> draft
-                                             (prune-template-data settings :reviews)
-                                             (prune-template-data settings :plans)
-                                             transform-conditions)
+                             :data      (dissoc (draft-for-publishing template)
+                                                :reviews :plans)
+                             :inclusions (template-inclusions template)
                              :settings  settings}}})))
 
 (defn set-name [organization template-id timestamp name]
@@ -279,22 +389,23 @@
        (ss/join ".")
        keyword))
 
-(defn- settings-schema [category]
-  (get shared/settings-schemas (keyword category)))
-
 (defn save-settings-value [organization category timestamp path value]
-  (let [settings-key    (settings-key category)
-        {:keys [path value]
-         :as   processed} (schemas/validate-and-process-value (settings-schema category)
+  (let [settings-key      (settings-key category)
+        {:keys [path value op]
+         :as   processed} (schemas/validate-and-process-value (shared/settings-schema category)
                                                               path
                                                               value
                                                               (:draft (settings organization
                                                                                 category)))]
-    (when path  ;; Value could be nil.
-      (mongo/update-by-id :organizations
-                          (:id organization)
-                          {$set {(util/kw-path settings-key :draft path) value
-                                 (util/kw-path settings-key :modified)   timestamp}}))
+    (when op  ;; Value could be nil.
+      (let [mongo-path (util/kw-path settings-key :draft path)]
+        (mongo/update-by-id :organizations
+                            (:id organization)
+                            (assoc-in (if (= op :remove)
+                                        {$unset {mongo-path 1}}
+                                        {$set {mongo-path value}})
+                                      [$set (util/kw-path settings-key :modified)]
+                                      timestamp))))
     processed))
 
 (defn- organization-templates [org-id]
@@ -303,7 +414,7 @@
 (defn settings-filled?
   "Settings are filled properly if every requireid field has been filled."
   [{org-id :org-id ready :settings data :data} category]
-  (schemas/required-filled? (settings-schema category)
+  (schemas/required-filled? (shared/settings-schema category)
                             (or data
                                 (:draft (or ready
                                             (settings (organization-templates org-id)
@@ -316,98 +427,12 @@
                      (:category template)
                      (if (some? org-id) (:category (verdict-template (organization-templates org-id) template-id)))
                      (str "r"))]
-      (schemas/required-filled? (shared/default-verdict-template (keyword category))
-                                (or data
-                                    (:draft (or template
-                                                (verdict-template (organization-templates
-                                                                    org-id)
-                                                                  template-id)))))))
-
-;; Generic is a placeholder term that means either review or plan
-;; depending on the context. Namely, the subcollection argument in
-;; functions below is either :reviews or :plans.
-
-(defn new-generic [organization-id category name-key subcollection & extra]
-  (let [data (merge {:id       (mongo/create-id)
-                     :name     {:fi (i18n/localize :fi name-key)
-                                :sv (i18n/localize :sv name-key)
-                                :en (i18n/localize :en name-key)}
-                     :category category
-                     :deleted  false}
-                    (apply hash-map extra))]
-    (mongo/update-by-id :organizations
-                        organization-id
-                        {$push {(util/kw-path :verdict-templates subcollection)
-                                data}})
-    data))
-
-(defn generic-list [{verdict-templates :verdict-templates} category subcollection]
-  (filter #(util/=as-kw category (:category %))
-          (subcollection verdict-templates)))
-
-(defn generic [organization gen-id subcollection]
-  (some->> organization
-           :verdict-templates
-           subcollection
-           (util/find-by-id gen-id)))
-
-(defn generic-update [organization gen-id update subcollection & [timestamp]]
-  (mongo/update :organizations
-                {:_id                         (:id organization)
-                 (util/kw-path :verdict-templates
-                               subcollection) {$elemMatch {:id gen-id}}}
-                (if timestamp
-                  (assoc-in update
-                            [$set (settings-key (:category (generic organization
-                                                                    gen-id
-                                                                    subcollection))
-                                                :modified)]
-                            timestamp)
-                  update)))
-
-(defn set-generic-details [organization timestamp gen-id data subcollection & extra-keys]
-  (let [detail-updates
-        (reduce (fn [acc [k v]]
-                  (let [k      (keyword k)
-                        others (conj extra-keys :deleted)]
-                    (merge acc
-                           (cond
-                             (k #{:fi :sv :en})              {(str "name." (name k)) (ss/trim v)}
-                             (util/includes-as-kw? others k) {k v}))))
-                {}
-                data)]
-    (when (seq detail-updates)
-      (generic-update organization
-                     gen-id
-                     {$set (->> detail-updates
-                                (map (fn [[k v]]
-                                       [(util/kw-path :verdict-templates subcollection :$ k) v]))
-                                (into {}))}
-                     subcollection
-                     timestamp))))
-
-;; Reviews
-
-(defn new-review [organization-id category]
-  (new-generic organization-id category :pate.katselmus :reviews
-               :type :muu-katselmus))
-
-(defn review [organization review-id]
-  (generic organization review-id :reviews))
-
-(defn set-review-details [organization timestamp review-id data]
-  (set-generic-details organization timestamp review-id data :reviews :type))
-
-;; Plans
-
-(defn new-plan [organization-id category]
-  (new-generic organization-id category :pate.plans :plans))
-
-(defn plan [organization review-id]
-  (generic organization review-id :plans))
-
-(defn set-plan-details [organization timestamp review-id data]
-  (set-generic-details organization timestamp review-id data :plans))
+    (schemas/required-filled? (shared/verdict-template-schema category)
+                              (or data
+                                  (:draft (or template
+                                              (verdict-template (organization-templates
+                                                                 org-id)
+                                                                template-id)))))))
 
 ;; Default operation verdict templates
 

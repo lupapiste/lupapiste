@@ -59,7 +59,9 @@
                           (map (fn [company]
                                  (assoc company :admins (->> (get admins (:id company) [])
                                                              (map #(dissoc % :company)))))))))
-    (ok :companies (->> (com/find-companies {:locked {$not {$lt created}}} [:name :y :address1 :zip :po :contactAddress :contactZip :contactPo])
+    (ok :companies (->> (com/find-companies {$or [{:locked {$not {$lt created}}}
+                                                  {:locked 0}]}
+                                            [:name :y :address1 :zip :po :contactAddress :contactZip :contactPo])
                         (map com/company-info)))))
 
 (defcommand company-update
@@ -76,8 +78,8 @@
   (ok :company (com/update-company! company (dissoc updates :tags) caller)))
 
 (defcommand company-lock
-  {:description      "Set/unset company lock timestamp. If timestamp is not positive
-  long, the locked property is removed from the company."
+  {:description "Set/unset company lock timestamp. Zero timestamp is
+  interpreted as unlocked."
    :user-roles       #{:admin}
    :parameters       [company timestamp]
    :input-validators [(partial action/non-blank-parameters [:company])]}
@@ -200,7 +202,7 @@
 (defcommand company-invite
   {:parameters [id company-id]
    :input-validators [(partial action/non-blank-parameters [:id :company-id])]
-   :states (states/all-application-states-but states/terminal-states)
+   :states (states/all-application-states-but [:canceled])
    :user-roles #{:applicant :authority}
    :pre-checks [com/company-not-locked
                 application/validate-authority-in-drafts
@@ -281,5 +283,5 @@
 (defquery authorized-to-apply-submit-restriction-to-other-auths
   {:permissions [{:required []}]
    :pre-checks  [com/authorized-to-apply-submit-restriction-to-other-auths
-                 com/check-invitation-accepted]}
+                 com/check-company-authorized]}
   [_])

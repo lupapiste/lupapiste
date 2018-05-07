@@ -1,7 +1,8 @@
 (ns lupapalvelu.pate.date-test
-  (:require [midje.sweet :refer :all]
+  (:require [clj-time.core :as time]
             [lupapalvelu.pate.date :refer :all]
-            [clj-time.core :as time]))
+            [midje.sweet :refer :all]
+            [sade.util :as util]))
 
 
 (defn work-day
@@ -28,9 +29,17 @@
   (parse-finnish-date "88.77.2017")
   => nil)
 
-(facts "Date unparsing"
+(facts "Finnish date"
   (finnish-date (time/local-date 2017 2 1))
-  => "1.2.2017")
+  => "1.2.2017"
+  (finnish-date (time/date-time 2017 2 1))
+  => "1.2.2017"
+  (finnish-date nil) => nil
+  (finnish-date "") => nil
+  (finnish-date "foobar") => nil
+  (finnish-date (util/to-millis-from-local-date-string "6.4.2018"))
+  => "6.4.2018"
+  (finnish-date "04.05.2018") => "4.5.2018")
 
 (facts "Holidays"
   (holiday "New Year" "1.1.2018" true)
@@ -67,3 +76,10 @@
   (work-day "Regular Monday" "21.8.2017" "21.8.2017")
   (work-day "Saturday" "26.8.2017" "28.8.2017")
   (work-day "Sunday" "27.8.2017" "28.8.2017"))
+
+(defn ts[datestring]
+  (+ (* 1000 3600 12) (util/to-millis-from-local-date-string datestring)))
+
+(facts "Parse and forward"
+  (parse-and-forward (ts "29.3.2018") 3 :days)
+  => (ts "3.4.2018"))

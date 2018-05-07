@@ -8,7 +8,7 @@
 
 (def content-security-policy
   (str "default-src 'self' https://*.lupapiste.fi" (when (env/dev-mode?) " ws://*:*") "; "
-       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://ajax.aspnetcdn.com https://www.googletagmanager.com https://tagmanager.google.com;"
+       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://ajax.aspnetcdn.com https://www.googletagmanager.com https://tagmanager.google.com https://code.jquery.com https://cdn.datatables.net;"
        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
        "img-src 'self' data: https://*.lupapiste.fi https://www.facebook.com;"
        "font-src 'self' data: https://fonts.gstatic.com;"

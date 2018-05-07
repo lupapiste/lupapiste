@@ -11,14 +11,23 @@
 (defn- num-of-results? [n response]
   (and
     (ok? response)
-    (= n (get-in response [:data :totalCount]))
     (= n (count (get-in response [:data :applications])))))
+
+(defn- total-count-is-n? [n response]
+  (and
+    (ok? response)
+    (= n (get-in response [:data :totalCount]))))
 
 (def no-results? (partial num-of-results? 0))
 (def one-result? (partial num-of-results? 1))
+(def zero-total? (partial total-count-is-n? 0))
+(def one-total? (partial total-count-is-n? 1))
 
 (defn- search [query-s]
   (datatables mikko :applications-search :searchText query-s))
+
+(defn- search-total [query-s]
+  (datatables mikko :applications-search-total-count :searchText query-s))
 
 (facts* "Search"
   (apply-remote-minimal)
@@ -48,7 +57,9 @@
 
     (facts "by applicant"
       (fact "no matches" (search "Pena") => no-results?)
-      (fact "one match" (search "Mikko") => id-matches?))
+      (fact "total count shows 0" (search-total "Pena") => zero-total?)
+      (fact "one match" (search "Mikko") => id-matches?)
+      (fact "total count shows 1" (search-total "Mikko") => one-total?))
 
     (facts "by address"
       (fact "no matches" (search "hakukatu") => no-results?)
@@ -74,11 +85,21 @@
 
     (facts "by operation name"
       (fact "no matches" (search "vaihtolavan sijoittaminen") => no-results?)
-      (fact "one match" (search "Muun kuin edell\u00e4 mainitun rakennuksen rakentaminen") => id-matches?))
+      (fact "total count shows 0" (search-total "vaihtolavan sijoittaminen") => zero-total?)
+      (fact "one match" (search "Muun kuin edell\u00e4 mainitun rakennuksen rakentaminen") => id-matches?)
+      (fact "total count shows 1" (search-total "Muun kuin edell\u00e4 mainitun rakennuksen rakentaminen") => one-total?))
 
     (fact "by a very very long search term"
       (search (ss/join (repeat 50 "1234567890"))) => ok?
       (search (ss/join (repeat 51 "1234567890"))) => fail?)
+
+    (facts "With municipality"
+      (fact "Wrong municipality" (search "hakukuja, Vantaa") => no-results?)
+      (fact "Correct municipality" (search "hakukuja, Sip") => id-matches?)
+      (fact "Bad municipality" (search "hakukuja, Sipoot") => no-results?)
+      (fact "Municipality must be the last part" (search "hakukuja, Sipoo 123") => no-results?)
+      (fact "Municipality only" (search "Sipoo") => id-matches?)
+      (fact "Internal punctuation does not matter" (search "  Hakukuja ___123,,,Sip  ") => id-matches?))
 
     (fact "Submitted application is returned by latest-applications"
       (let [resp (query pena :latest-applications)
