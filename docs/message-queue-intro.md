@@ -46,7 +46,7 @@ Session mode defines how messages are acknowledged to the broker. There are for 
 3. DUPS_OK_ACKNOWLEDGE
 4. SESSION_TRANSACTED
 
-Most likely in Lupapiste cases, AUTO_ACKNOWLEDGE is fine. If performance is critical in broker side, DUPS_OK_ACKNOWLEDGE could be used. Short descriptions of each:
+Most likely in Lupapiste cases, AUTO_ACKNOWLEDGE or SESSION_TRANSACTED is selected. If performance is critical in broker side, DUPS_OK_ACKNOWLEDGE could be used. Short descriptions of each:
 
 ### AUTO_ACKNOWLEDGE
 
@@ -56,9 +56,13 @@ More precisly:
 
 >If the receiver uses the MessageListener interface, the message is automatically acknowledged when it successfully returns from the onMessage() method.
 
-If an exception is raised during onMessage, message is automatically rolled back to broker for redelivery.
+~~If an exception is raised during onMessage, message is automatically rolled back to broker for redelivery.~~
 
-Thus implementing client doesn't need any special "acknowledging" code: handling callback function successfully does the trick.
+~~Thus implementing client doesn't need any special "acknowledging" code: handling callback function successfully does the trick.~~
+
+EDIT: After many tests and research, it seems it's NOT ok to throw exception from consumer in search for redeliveries. 
+
+So use AUTO_ACKNOWLEDGE for simple messaging tasks, that don't need "transactional" semantics. If you need to conditionally send messages back to queue, use SESSION_TRANSACTED. 
 
 ### CLIENT_ACKNOWLEDGE
 

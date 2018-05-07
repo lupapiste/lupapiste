@@ -60,7 +60,7 @@
   (def broker-url (or (env/value :jms :broker-url) "vm://0"))
 
   (defn create-connection-factory ^ActiveMQJMSConnectionFactory [^String url connection-options]
-    (let [{:keys [retry-interval retry-multipier max-retry-interval reconnect-attempts consumer-window-size]
+    (let [{:keys [retry-interval retry-multipier max-retry-interval reconnect-attempts]
            :or   {retry-interval (* 2 1000)
                   retry-multipier 2
                   max-retry-interval (* 5 60 1000)          ; 5 mins

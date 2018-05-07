@@ -81,10 +81,7 @@
         (imessages/update-message message-id {$set {:acknowledged (now) :status "done"}} WriteConcern/UNACKNOWLEDGED)
         (catch Exception e      ; this is most likely a slingshot exception from clj-http
           (errorf "Error when sending consumed KuntaGML message to %s: %s" url (.getMessage e))
-          ; Throwing will result in the default session (Session/AUTO_ACKNOWLEDGE) to be acknowledged as failure.
-          ; Message will be returned back to queue and redelivered by broker.
-          ; Broker can be configured to have a "re-delivery" delay for failed messages, otherwise message is re-delivered
-          ; instantly to consumer.
+          ; TODO: You shouldn't throw exceptions from consumer's onMessage function. Use Session/SESSION_TRANSTANCTED to handle acknowledging properly.
           (throw e))))))
 
 (def kuntagml-queue "lupapiste/kuntagml.http")
