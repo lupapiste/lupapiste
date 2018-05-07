@@ -4,6 +4,7 @@
             [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa
                                                                       application-tyonjohtajan-nimeaminen
                                                                       application-tyonjohtajan-nimeaminen-v2]]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.rest.applications-data :as applications-data]
             [lupapalvelu.rest.schemas :refer :all]
             [sade.schema-generators :as ssg]
@@ -13,6 +14,8 @@
 (testable-privates lupapalvelu.rest.applications-data process-applications operation-building-updates)
 
 (facts "Open application data tests"
+  (against-background
+    (org/pate-org? irrelevant) => false)
   (let [rl (select-keys application-rakennuslupa applications-data/required-fields-from-db)]
     (fact "Schema verify OK"
       (process-applications [rl]) =not=> nil?)
