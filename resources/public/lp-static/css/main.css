@@ -13253,6 +13253,10 @@ ul.tabs {
   width: auto;
 }
 
+.autosized.autosized--wider {
+  min-width: 25em;
+}
+
 .autosized-yes-no {
   min-height: 144px;
   height: auto;

@@ -118,6 +118,10 @@
   width: auto;
 }
 
+.autosized.autosized--wider {
+  min-width: 25em;
+}
+
 .autosized-yes-no {
   min-height:$baseline * 6;
   height: auto;
