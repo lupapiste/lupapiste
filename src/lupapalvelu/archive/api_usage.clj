@@ -1,4 +1,4 @@
-(ns lupapalvelu.archive-api-usage
+(ns lupapalvelu.archive.api-usage
   "Functionality for consuming Onkalo API usage log messages and
   inserting them into Mongo"
   (:require [monger.operators :refer :all]
