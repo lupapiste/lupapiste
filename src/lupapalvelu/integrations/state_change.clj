@@ -186,7 +186,7 @@
            matti-json-queue
            (create-state-change-consumer json-consumer-session)))
 
-(defn send-via-jms [state-change-data endpoint-data options]
+(sc/defn ^:always-validate send-via-jms [state-change-data :- StateChangeMessage endpoint-data :- EndpointData options]
   (jms/produce-with-context matti-json-queue (nippy/freeze (assoc endpoint-data :data state-change-data :options options)))
   (debugf "Produced state-change msg (%s) to JMS queue %s" (get-in state-change-data [:toState :name]) matti-json-queue))
 )
