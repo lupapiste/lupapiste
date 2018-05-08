@@ -15,8 +15,8 @@ Automatic fetching of inspections is on by default
   Checkbox wrapper selected  automatic-review-fetch-enabled
 
 Selection for only using the inspection from backend is disabled by default
-  Checkbox wrapper not selected  automatic-review-generation-enabled
+  Checkbox wrapper not selected  only-use-inspection-from-backend
 
 Checkbox for only using the inspection from backend is disabled
   Click label  automatic-review-fetch-enabled
-  Checkbox wrapper disabled  automatic-review-generation-enabled
+  Checkbox wrapper disabled  only-use-inspection-from-backend

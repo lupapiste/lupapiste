@@ -119,7 +119,7 @@
         <h2 class="help-adjacent-title" data-bind="ltext: 'auth-admin.reviews-fetch.title'"></h2>
         <span data-bind="{component: {
                          name: 'help-toggle',
-                         params: {lhtml: 'auth-admin.automatic-review-generation.enabled.help'}
+                         params: {lhtml: 'auth-admin.only-use-inspection-from-backend.help'}
                          }}"></span>
 
         <div data-bind="if: organization.reviewFetchTogglerVisible"
@@ -138,8 +138,8 @@
             <input type="checkbox" id="only-use-inspection-from-backend"
                    data-bind="checked: organization.onlyUseInspectionFromBackend,
                               enable: organization.automaticReviewFetchEnabled" />
-            <label for="automatic-review-generation-enabled" class="checkbox-label"
-                   data-bind="ltext: 'auth-admin.automatic-review-generation.enabled'"></label>
+            <label for="only-use-inspection-from-backend" class="checkbox-label"
+                   data-bind="ltext: 'auth-admin.only-use-inspection-from-backend'"></label>
           </div>
 
         </div>
