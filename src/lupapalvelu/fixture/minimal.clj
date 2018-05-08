@@ -1094,6 +1094,7 @@
                                                                            [:hakija :ote_kauppa_ja_yhdistysrekisterista]
                                                                            [:pelastusviranomaiselle_esitettavat_suunnitelmat :vaestonsuojasuunnitelma]
                                                                            [:suunnitelmat :valaistussuunnitelma]]}
+                       :pate-enabled true
                        :krysp {:R {:url local-krysp :version "2.2.2"
                                    :http (merge
                                            {:auth-type "basic"
