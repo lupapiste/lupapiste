@@ -157,9 +157,17 @@
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  ; JS Pikaday for cljs datepicker (https://github.com/dbushell/Pikaday)
                  [cljs-pikaday "0.1.4"]]
-  :plugins [[lein-cljsbuild "1.1.5"]
+
+  :plugins [[lein-cljsbuild "1.1.7"]
             [lein-shell "0.5.0"]
-            [deraen/lein-sass4clj "0.3.1"]]
+            [deraen/lein-sass4clj "0.3.1"]
+            [lein-pdo "0.1.1"]
+            [lein-midje "3.2.1"]
+            [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
+            [lupapiste/lein-buildid "0.4.2"]
+            [lupapiste/lein-nitpicker "0.5.1"]
+            [lein-figwheel "0.5.15"]]
+
   :clean-targets ^{:protect false} ["resources/public/lp-static/js/rum-app.js"
                                     "resources/public/lp-static/js/rum-app.js.map"
                                     "resources/public/lp-static/js/out"
@@ -178,11 +186,6 @@
                                          [figwheel-sidecar "0.5.15"]
                                          ;; Better Chrome Dev Tools support
                                          [binaryage/devtools "0.9.4"]]
-                        :plugins        [[lein-midje "3.2.1"]
-                                         [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
-                                         [lupapiste/lein-buildid "0.4.2"]
-                                         [lupapiste/lein-nitpicker "0.5.1"]
-                                         [lein-figwheel "0.5.15"]]
                         :resource-paths ["dev-resources"]
                         :source-paths   ["dev-src" "test-utils"]
                         :jvm-opts       ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]
@@ -217,7 +220,8 @@
                                                                          :parallel-build true
                                                                          :pretty-print   false
                                                                          :optimizations  :advanced}}}}
-                        :prep-tasks [["cljsbuild" "once" "rum"]
+                        :prep-tasks [["sass4clj" "once"]
+                                     ["cljsbuild" "once" "rum"]
                                      "javac"
                                      "compile"]}
              :itest    {:test-paths ^:replace ["itest"]}
@@ -228,7 +232,8 @@
              :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
   :figwheel {:server-port 3666
-             :css-dirs    ["resources/public/lp-static/css/main.css"]}
+             :css-dirs    ["resources/public/lp-static/css/main.css"]
+             :repl false}
   :sass {:target-path  "resources/public/lp-static/css/"
          :source-paths ["resources/private/common-html/sass/"]
          :output-style :compressed}
@@ -241,7 +246,14 @@
             "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
             "stest"       ["with-profile" "dev,stest" "midje"]
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," ["midje" ":filter" "-ajanvaraus"]]
-            "sass"        ["do" ["sass4clj" "once"] ["shell" "blessc" "--force" "resources/public/lp-static/css/main.css"]]}
+            "sass"        ["do"
+                           ["sass4clj" "once"]
+                           ["shell" "blessc" "--force" "resources/public/lp-static/css/main.css"]]
+            "front"       ["do"
+                           ["clean"]
+                           ["pdo"
+                            ["sass4clj" "auto"]
+                            ["figwheel"]]]}
   :aot [lupapalvelu.main clj-time.core]
   :main ^:skip-aot lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}
