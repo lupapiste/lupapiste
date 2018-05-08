@@ -11,8 +11,8 @@
             [sade.util :as util]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.attachment :as att]
-            [lupapalvelu.archiving :as archiving]
-            [lupapalvelu.archiving-util :as archiving-util]
+            [lupapalvelu.archive.archiving :as archiving]
+            [lupapalvelu.archive.archiving-util :as archiving-util]
             [lupapalvelu.assignment :as assignment]))
 
 (facts "attachment-not-readOnly"

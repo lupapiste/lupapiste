@@ -1,4 +1,4 @@
-(ns lupapalvelu.archiving
+(ns lupapalvelu.archive.archiving
   (:require [clojure.string :as string]
             [clojure.java.io :as io]
             [taoensso.timbre :refer [info error warn]]
@@ -22,7 +22,7 @@
             [lupapalvelu.attachment.util :as att-util]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.action :as action]
-            [lupapalvelu.archiving-util :refer [metadata-query mark-application-archived-if-done]]
+            [lupapalvelu.archive.archiving-util :refer [metadata-query mark-application-archived-if-done]]
             [lupapalvelu.application-meta-fields :as amf]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [lupapalvelu.foreman :as foreman]
