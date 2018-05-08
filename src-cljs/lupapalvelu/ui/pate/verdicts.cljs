@@ -14,6 +14,8 @@
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
+(enable-console-print!)
+
 (defonce args (atom {}))
 
 (defn- can-edit? []
@@ -66,6 +68,15 @@
                                 :yesFn #(service/delete-verdict app-id
                                                                 verdict-id)}}))
 
+(defn- confirm-and-replace-verdict [app-id verdict-id]
+  (hub/send  "show-dialog"
+             {:ltitle          "areyousure"
+              :size            "medium"
+              :component       "yes-no-dialog"
+              :componentParams {:ltext "pate.replace-verdict"
+                                :yesFn #(service/replace-verdict-verdict app-id
+                                                                         verdict-id)}}))
+
 (rum/defc verdict-list < rum/reactive
   [verdicts app-id]
   [:div
@@ -74,17 +85,32 @@
      (when-not (state/auth? :new-pate-verdict-draft)
        (common/loc-html :p :application.verdictDesc))
      [:table.pate-verdicts-table
+      [:thead
+       [:tr
+        [:th (common/loc :pate.verdict-table.verdict)]
+        [:th (common/loc :pate.verdict-table.verdict-date)]
+        [:th (common/loc :pate.verdict-table.verdict-giver)]
+        [:th (common/loc :pate.verdict-table.last-edit)]
+        [:th ""]]]
       [:tbody
-       (map (fn [{:keys [id published modified] :as verdict}]
+       (map (fn [{:keys [id published modified verdict-date handler] :as verdict}]
+              (println verdict)
               [:tr {:key id}
                [:td [:a {:on-click #(open-verdict id)}
                      (path/loc (if published :pate-verdict :pate-verdict-draft))]]
                [:td (if published
+                      (js/util.finnishDate verdict-date))]
+               [:td handler]
+               [:td (if published
                       (common/loc :pate.published-date (js/util.finnishDate published))
                       (common/loc :pate.last-saved (js/util.finnishDateAndTime modified)))]
-               [:td (when (and (can-edit-verdict? verdict) (not published))
-                      [:i.lupicon-remove.primary
-                       {:on-click #(confirm-and-delete-verdict app-id id)}])]])
+               [:td (if (and (can-edit-verdict? verdict) (not published))
+                      [:a
+                       {:on-click #(confirm-and-delete-verdict app-id id)}
+                       (common/loc :pate.verdict-table.remove-verdict)]
+                      [:a
+                       {:on-click #(confirm-and-replace-verdict app-id id)}
+                       (common/loc :pate.verdict-table.replace-verdict)])]])
             verdicts)]])
    (when (state/auth? :new-pate-verdict-draft)
      (new-verdict))])

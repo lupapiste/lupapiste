@@ -414,7 +414,8 @@
     (:id draft)))
 
 (defn verdict-summary [verdict]
-  (select-keys verdict [:id :published :modified]))
+  (merge (select-keys verdict [:id :published :modified])
+         (select-keys (:data verdict) [:verdict-date :handler])))
 
 (defn mask-verdict-data [{:keys [user application]} verdict]
   (cond

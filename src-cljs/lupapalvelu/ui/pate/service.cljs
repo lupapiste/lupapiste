@@ -190,6 +190,14 @@
                   :id app-id
                   :verdict-id verdict-id))
 
+(defn replace-verdict [app-id verdict-id]
+  (common/command {:command "edit-pate-verdict"
+                   :succes (fn [_] (println "Done"))}
+                  :id app-id
+                  :verdict-id verdict-id
+                  :path ["overrided"]
+                  :value true))
+
 ;; Attachments
 
 (defn delete-file [file-id]
