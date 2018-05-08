@@ -6,6 +6,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
+            [lupapalvelu.application-replace-operation :as replace-operation]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
@@ -3763,11 +3764,6 @@
                          {$unset {:contentType ""
                                   :fileId ""}}))
 
-(defn- get-document-schema-names-for-operation [organization operation]
-  (let [op-info (op/operations (keyword (:name operation)))]
-    (->> (when (not-empty (:org-required op-info)) ((apply juxt (:org-required op-info)) organization))
-         (concat (:required op-info)))))
-
 (defn waste-document-fix [lp-id]
   (let [application (domain/get-application-no-access-checking lp-id)
         schema-version (:schema-version application)
@@ -3780,9 +3776,8 @@
                                                         (empty?)))
         [op-name _] (when application-does-not-contain-waste-plan? ;; get the operation that needs the waste document
                       (->> (cons (:primaryOperation application) (:secondaryOperations application))
-                           (reduce #(assoc %1 (keyword (:name %2)) (get-document-schema-names-for-operation organization %2)) {})
-                           (filter (fn [[_ v]] ((set v) waste-schema-name)))
-                           (first)))
+                           (reduce #(assoc %1 (keyword (:name %2)) (replace-operation/get-document-schema-names-for-operation organization %2)) {})
+                           (util/find-first (fn [[_ v]] ((set v) waste-schema-name)))))
         waste-document (when op-name
                          (->> (schemas/get-schema schema-version waste-schema-name)
                               (application/make-document application op-name (sade.core/now) nil)))]
@@ -3813,7 +3808,7 @@
                                                             (empty?)))
         [op-name doc-name] (when application-does-not-contain-rakennuspaikka? ;; get the operation that needs the rakennuspaikka document
                              (->> (cons (:primaryOperation application) (:secondaryOperations application))
-                                  (reduce #(assoc %1 (keyword (:name %2)) (get-document-schema-names-for-operation organization %2)) {})
+                                  (reduce #(assoc %1 (keyword (:name %2)) (replace-operation/get-document-schema-names-for-operation organization %2)) {})
                                   (filter (fn [[_ v]] (let [doc-set (set v)] (or (doc-set "rakennuspaikka") (doc-set "rakennuspaikka-ilman-ilmoitusta")))))
                                   (get-correct-rakennuspaikka-doc)))
         rakennuspaikka-schema (when op-name (schemas/get-schema schema-version (keyword doc-name)))
@@ -3860,10 +3855,12 @@
    "LP-541-2018-00027" "LP-245-2018-00285"])
 
 (defmigration replace-operation-fix-waste-document
-  (map waste-document-fix broken-apps))
+  (doseq [app-id replace-operation-broken-apps]
+    (waste-document-fix app-id)))
 
 (defmigration replace-operation-fix-rakennuspaikka-document
-  (map rakennuspaikka-document-fix broken-apps))
+  (doseq [app-id replace-operation-broken-apps]
+    (rakennuspaikka-document-fix app-id)))
 
 (defmigration jatkoaikalupa-state-to-ready
   {:apply-when (pos? (mongo/count :applications {:primaryOperation.name {$in [:raktyo-aloit-loppuunsaat

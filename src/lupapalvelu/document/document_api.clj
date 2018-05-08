@@ -113,8 +113,6 @@
                       remove-doc-validator]}
   [{:keys [document] :as command}]
   (do-remove-doc! command document id docId)
-  #_(doc-persistence/remove! command document)
-  #_(assignment/remove-target-from-assignments id docId)
   (ok))
 
 (defn- update-document-assignment-statuses [app-id doc-id doc-status]

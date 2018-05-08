@@ -6,7 +6,7 @@
 
 (testable-privates lupapalvelu.application-replace-operation
                    get-operation-by-key replace-op-in-attachment single-operation-attachment?
-                   get-existing-operation-attachment-types non-empty-attachment? coll-contains-not-type?
+                   get-existing-operation-attachment-types non-empty-attachment? coll-contains-type?
                    new-attachment-duplicates not-needed-templates required-attachments-for-operations
                    replace-operation-in-attachment? get-document-schema-names-for-operation
                    required-document-schema-names-by-op copy-old-document-data)
@@ -86,8 +86,9 @@
            (non-empty-attachment? attachment-4) => false)
 
          (fact "a collection of attachments has the attachment in question of attachments to be deleted"
-           (coll-contains-not-type? [attachment-1 attachment-2 attachment-3] attachment-3) => false
-           (coll-contains-not-type? [attachment-1 attachment-2 attachment-3] attachment-5) => true)
+           (coll-contains-type? [attachment-1 attachment-2 attachment-3] attachment-3) => truthy
+           (coll-contains-type? [attachment-1 attachment-2 attachment-3] attachment-5) => nil?
+           (coll-contains-type? [attachment-1 attachment-2 attachment-3] nil) => nil?)
 
          (fact "empty attachments that are duplicates appear on a list"
            (new-attachment-duplicates [attachment-1 attachment-4 attachment-6] op-1) => ["6"]

@@ -628,8 +628,8 @@
 (defn change-primary-operation [{:keys [application] :as command} id secondaryOperationId]
   (let [old-primary-op                       (:primaryOperation application)
         old-secondary-ops                    (:secondaryOperations application)
-        new-primary-op                       (first (filter #(= secondaryOperationId (:id %)) old-secondary-ops))
-        secondary-ops-without-old-primary-op (remove #{new-primary-op} old-secondary-ops)
+        new-primary-op                       (util/find-first #(= secondaryOperationId (:id %)) old-secondary-ops)
+        secondary-ops-without-old-primary-op (remove #(= (:id new-primary-op) (:id %)) old-secondary-ops)
         new-secondary-ops (if old-primary-op ; production data contains applications with nil in primaryOperation
                             (conj secondary-ops-without-old-primary-op old-primary-op)
                             secondary-ops-without-old-primary-op)]

@@ -11,7 +11,8 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.document.schemas :as schemas]
             [monger.operators :refer :all]
-            [sade.core :refer :all]))
+            [sade.core :refer :all]
+            [sade.util :as util]))
 
 ;;
 ;; Attachments
@@ -76,12 +77,11 @@
 
 (defn- remove-not-needed-attachment-templates [{application :application organization :organization :as command} new-op old-op]
   (let [updated-application       (domain/get-application-no-access-checking (:id application))
-        updated-command           (assoc command :application updated-application)
         attachments               (:attachments updated-application)
         attachments-to-be-removed (concat (new-attachment-duplicates attachments new-op)
                                           (not-needed-templates @organization updated-application old-op))]
     (when (seq attachments-to-be-removed)
-      (action/update-application updated-command {$pull {:attachments {:id {$in attachments-to-be-removed}}}}))))
+      (action/update-application command {$pull {:attachments {:id {$in attachments-to-be-removed}}}}))))
 
 (defn- replace-operation-in-attachment? [new-op-att-types old-op attachment]
   (and (single-operation-attachment? old-op attachment)
@@ -103,7 +103,7 @@
 ;;
 
 
-(defn- get-document-schema-names-for-operation [organization operation]
+(defn get-document-schema-names-for-operation [organization operation]
   (let [op-info (op/operations (keyword (:name operation)))]
     (->> (when (not-empty (:org-required op-info)) ((apply juxt (:org-required op-info)) organization))
          (concat (:required op-info)))))
@@ -125,40 +125,44 @@
       (copy-old-document-data old-document new-document)
       new-document)))
 
-(defn- update-documents [{created :created :as command} organization app-id]
+(defn- update-documents
+  "Because replace-operation uses existing add-operation/change-primary-operation/do-remove-doc! functionalities
+  it is necessary to ensure that the application has the correct documents after replacing operation.
+  This function checks that after replacement, there is no waste document if it isn't needed, and it
+  replaces the location document with one of the correct type and preserves its data. However, it does not delete
+  Paasuunnittelija-document because it is possible that the user has added it even though it isn't needed."
+  [{created :created :as command} organization app-id]
   (let [application                             (domain/get-application-no-access-checking app-id)
-        app-doc-names                           (->> application :documents (map #(-> % :schema-info :name)) (set))
         required-document-names-by-op           (required-document-schema-names-by-op organization application)
         required-document-names                 (apply set/union (vals required-document-names-by-op))
 
-        rakennusjatesuunnitelma                 (or (app-doc-names waste-schemas/basic-construction-waste-plan-name)
-                                                    (app-doc-names waste-schemas/extended-construction-waste-report-name))
+        existing-rakennusjatesuunnitelma        (or (domain/get-document-by-name application waste-schemas/basic-construction-waste-plan-name)
+                                                    (domain/get-document-by-name application waste-schemas/extended-construction-waste-report-name))
         should-contain-rakennusjatesuunnitelma? (or (required-document-names waste-schemas/basic-construction-waste-plan-name)
                                                     (required-document-names waste-schemas/extended-construction-waste-report-name))
-        new-rakennusjatesuunnitelma-document    (when (and (not rakennusjatesuunnitelma)
-                                                           should-contain-rakennusjatesuunnitelma?)
-                                                  (create-document should-contain-rakennusjatesuunnitelma? application created))
 
-        rakennuspaikka-document                 (domain/get-document-by-type application "location") ;; TODO what to do when primary operation does not need "rakennuspaikka" -document but secondary does
-        correct-rakennuspaikka-document?        (required-document-names (:name rakennuspaikka-document))
-        new-rakennuspaikka-document             (when (not correct-rakennuspaikka-document?)
-                                                  (-> (or (required-document-names "rakennuspaikka")
-                                                          (required-document-names "rakennuspaikka-ilman-ilmoitusta"))
-                                                      (create-document application created rakennuspaikka-document)))
+        location-document                       (->> (domain/get-documents-by-type application "location")
+                                                     (remove #(-> % :schema-info :repeating))
+                                                     (first))
+        required-rakennuspaikka                 (or (required-document-names "rakennuspaikka")
+                                                    (required-document-names "rakennuspaikka-ilman-ilmoitusta"))
+        correct-rakennuspaikka-document?        (= required-rakennuspaikka (-> location-document :schema-info :name))
+
+        new-rakennuspaikka-document             (when (and (not correct-rakennuspaikka-document?)
+                                                           required-rakennuspaikka)
+                                                  (create-document required-rakennuspaikka application created location-document))
 
         documents-to-be-removed                 (remove nil?
                                                         [(when (and new-rakennuspaikka-document
-                                                                    (-> rakennuspaikka-document :schema-info :repeating (not)))
-                                                           (:id rakennuspaikka-document))
-                                                         (when (and rakennusjatesuunnitelma
+                                                                    (-> location-document :schema-info :repeating (not)))
+                                                           (:id location-document))
+                                                         (when (and existing-rakennusjatesuunnitelma
                                                                     (not should-contain-rakennusjatesuunnitelma?))
-                                                           (:id rakennusjatesuunnitelma))])
-        documents-to-be-added                   (remove nil? [new-rakennusjatesuunnitelma-document new-rakennuspaikka-document])
-        updated-command                         (assoc command :application application)]
+                                                           (:id existing-rakennusjatesuunnitelma))])]
     (when (seq documents-to-be-removed)
-      (action/update-application updated-command {$pull {:documents {:id {$in documents-to-be-removed}}}}))
-    (when (seq documents-to-be-added)
-      (action/update-application updated-command {$push {:documents {$each documents-to-be-added}}}))))
+      (action/update-application command {$pull {:documents {:id {$in documents-to-be-removed}}}}))
+    (when new-rakennuspaikka-document
+      (action/update-application command {$push {:documents new-rakennuspaikka-document }}))))
 
 ;;
 ;;

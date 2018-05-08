@@ -10,8 +10,7 @@
 (facts "Replacing operations"
   (let [app (create-application pena :operation "kerrostalo-rivitalo" :propertyId tampere-property-id)
         app-id (:id app)
-        op-id (-> app :primaryOperation :id)
-        org (query admin :organization-by-id :organizationId (:organization app))]
+        op-id (-> app :primaryOperation :id)]
 
     (fact "Pena adds operation"
       (command pena :add-operation :id app-id :operation "varasto-tms"))
@@ -32,11 +31,20 @@
 
       (fact "Application has correct attachment templates"
         (map :type (att/get-attachments-by-operation updated-app (:id replaced-op)))
-        => (just [{:type-group "paapiirustus", :type-id "julkisivupiirustus"}
+        => (just [{:type-group "paapiirustus" :type-id "asemapiirros"}
+                  {:type-group "paapiirustus", :type-id "julkisivupiirustus"}
                   {:type-group "paapiirustus", :type-id "leikkauspiirustus"}
                   {:type-group "paapiirustus", :type-id "pohjapiirustus"}
                   {:type-group "suunnitelmat", :type-id "piha_tai_istutussuunnitelma"}]
                   :in-any-order))
+
+      (fact "Asemapiirros has two operations"
+        (->> updated-app
+             :attachments
+             (filter #(-> % :type (= {:type-group "paapiirustus" :type-id "asemapiirros"})))
+             (first)
+             :op
+             (count)) => 2)
 
       (fact "Application has new primaryOperation"
         (-> updated-app :primaryOperation :name) => "asuinrakennus")
@@ -95,7 +103,6 @@
 
         _                 (command pena :replace-operation :id app-id :opId op-id :operation "auto-katos")
         updated-app       (query-application pena app-id)
-        new-op-id         (-> updated-app :primaryOperation :op-id)
         updated-doc-names (->> updated-app :documents (map #(-> % :schema-info :name)) (set))]
 
 
@@ -114,7 +121,6 @@
   (let [app       (create-application pena :operation "tontin-ajoliittyman-muutos" :propertyId tampere-property-id)
         doc-names (->> app :documents (map #(-> % :schema-info :name)) (set))
         app-id    (:id app)
-        op-id     (-> app :primaryOperation :id)
 
         _                 (command pena :add-operation :id app-id :operation "auto-katos")
         updated-app       (query-application pena app-id)
@@ -123,7 +129,6 @@
 
         _                   (command pena :replace-operation :id app-id :opId secondary-op-id :operation "varasto-tms")
         updated-app-2       (query-application pena app-id)
-        new-op-id-2         (->> updated-app-2 :secondaryOperations (first) :id)
         updated-doc-names-2 (->> updated-app-2 :documents (map #(-> % :schema-info :name)) (set))]
 
     (fact "at first no rakennusjatesuunnitelma nor paasuunnittelija"
@@ -145,5 +150,33 @@
       (updated-doc-names-2 "rakennuspaikka-ilman-ilmoitusta") => nil?
       (updated-doc-names-2 "rakennuspaikka") => truthy)
 
-    (fact "other documents are as they should"
-      (updated-doc-names-2 "rakennusjatesuunnitelma") => truthy)))
+    (fact "waste document as it should be"
+      (updated-doc-names-2 "rakennusjatesuunnitelma") => truthy))
+
+  (let [app       (create-application pena :operation "auto-katos" :propertyId tampere-property-id)
+        doc-names (->> app :documents (map #(-> % :schema-info :name)) (set))
+        app-id    (:id app)
+        op-id     (-> app :primaryOperation :id)
+
+        _                 (command pena :add-operation :id app-id :operation "kaivuu")
+        updated-app       (query-application pena app-id)
+        updated-doc-names (->> updated-app :documents (map #(-> % :schema-info :name)) (set))
+
+        _                   (command pena :replace-operation :id app-id :opId op-id :operation "tontin-ajoliittyman-muutos")
+        updated-app-2       (query-application pena app-id)
+        updated-doc-names-2 (->> updated-app-2 :documents (map #(-> % :schema-info :name)) (set))]
+
+    (fact "at first there are correct documents"
+      (doc-names "rakennusjatesuunnitelma") => truthy
+      (doc-names "rakennuspaikka") => truthy
+      (doc-names "rakennuspaikka-ilman-ilmoitusta") => nil?)
+
+    (fact "adding operation that has mini-rakval-schema does not change that"
+      (updated-doc-names "rakennusjatesuunnitelma") => truthy
+      (updated-doc-names "rakennuspaikka") => truthy
+      (updated-doc-names "rakennuspaikka-ilman-ilmoitusta") => nil?)
+
+    (fact "changing the common-rakval-schema operation changes that"
+      (updated-doc-names-2 "rakennusjatesuunnitelma") => nil?
+      (updated-doc-names-2 "rakennuspaikka") => nil?
+      (updated-doc-names-2 "rakennuspaikka-ilman-ilmoitusta") => truthy)))
