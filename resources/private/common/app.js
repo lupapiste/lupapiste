@@ -276,7 +276,7 @@ var LUPAPISTE = LUPAPISTE || {};
       self.calendarsEnabledInAuthModel(lupapisteApp.models.globalAuthModel.ok("calendars-enabled"));
     });
 
-    function RoleSelector(models) {
+    function RoleSelectorModel(models) {
       const self = this;
 
       self.showRoleSelector = ko.pureComputed(function() {
@@ -337,9 +337,8 @@ var LUPAPISTE = LUPAPISTE || {};
         showCalendarMenuOptions: self.showCalendarMenuOptions,
         calendarMenubarVisible: self.calendarMenubarVisible,
         // TODO: sync with side-panel.js sidePanelPages
-        sidePanelPages: ["application","attachment","statement","neighbors","verdict"],
-        // Role selector:
-        roleSelector: new RoleSelector(self.models)
+        sidePanelPages: ["application", "attachment", "statement", "neighbors", "verdict"],
+        roleSelector: new RoleSelectorModel(self.models)
       };
 
       $("#app").applyBindings(lupapisteApp.models.rootVMO);
