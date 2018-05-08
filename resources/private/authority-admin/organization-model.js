@@ -49,7 +49,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.extendedConstructionWasteReportEnabled = ko.observable(false);
   self.validateVerdictGivenDate = ko.observable(true);
   self.automaticReviewFetchEnabled = ko.observable(true);
-  self.automaticReviewGenerationEnabled = ko.observable(true);
+  self.onlyUseInspectionFromBackend = ko.observable(false);
   self.tosFunctions = ko.observableArray();
   self.tosFunctionVisible = ko.observable(false);
   self.archivingProjectTosFunction = ko.observable();
@@ -147,7 +147,7 @@ LUPAPISTE.OrganizationModel = function () {
   });
 
   self.automaticReviewFetchEnabled.subscribe(function(automaticReviewFetchEnabled) {
-    console.log(self.automaticReviewFetchEnabled() + " " + self.automaticReviewGenerationEnabled()); // DEBUG
+    console.log(self.automaticReviewFetchEnabled() + " " + self.onlyUseInspectionFromBackend()); // DEBUG
     if (self.initialized) {
       ajax.command("set-organization-review-fetch-enabled", { enabled: automaticReviewFetchEnabled })
         .success(util.showSavedIndicator)
@@ -156,9 +156,9 @@ LUPAPISTE.OrganizationModel = function () {
     }
   });
 
-  self.automaticReviewGenerationEnabled.subscribe(function(automaticReviewGenerationEnabled) {
+  self.onlyUseInspectionFromBackend.subscribe(function(onlyUseInspectionFromBackend) {
     if (self.initialized) {
-      ajax.command("set-organization-review-generation-enabled", { enabled: automaticReviewGenerationEnabled })
+      ajax.command("set-only-use-inspection-from-backend", { enabled: onlyUseInspectionFromBackend })
         .success(util.showSavedIndicator)
         .error(util.showSavedIndicator)
         .call();

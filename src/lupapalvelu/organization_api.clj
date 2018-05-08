@@ -534,12 +534,12 @@
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:automatic-review-fetch-enabled enabled}})
   (ok))
 
-(defcommand set-organization-review-generation-enabled
+(defcommand set-only-use-inspection-from-backend
   {:parameters [enabled]
    :user-roles #{:authorityAdmin}
    :input-validators  [(partial boolean-parameters [:enabled])]}
   [{user :user}]
-  (org/update-organization (usr/authority-admins-organization-id user) {$set {:automatic-review-generation-enabled enabled}})
+  (org/update-organization (usr/authority-admins-organization-id user) {$set {:only-use-inspection-from-backend enabled}})
   (ok))
 
 (defcommand set-organization-use-attachment-links-integration

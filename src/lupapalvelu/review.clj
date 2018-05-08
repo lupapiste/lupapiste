@@ -298,7 +298,7 @@
                           id
                           (:id att)
                           (.getMessage e)))))
-            (when-not (false? (:automatic-review-generation-enabled organization-info))
+            (when-not (true? (:only-use-inspection-from-backend organization-info))
               (tasks/generate-task-pdfa updated-application added-task (:user command) "fi"))))))
     (cond-> {:ok update-result}
             (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))
