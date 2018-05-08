@@ -1,5 +1,6 @@
 (ns sade.schema-generators
-  (:require [sade.schemas :as ssc]
+  (:require [ring.util.codec :as codec]
+            [sade.schemas :as ssc]
             [sade.validators :as sv]
             [sade.util :refer [fn-> fn->>] :as util]
             [schema.core :as sc]
@@ -208,7 +209,7 @@
 (def http-protocol (gen/elements ["http://" "https://"]))
 (def http-url
   (gen/fmap
-    (fn [[proto ip path]] (s/lower-case (str proto ip "/" (ring.util.codec/url-encode path))))
+    (fn [[proto ip path]] (s/lower-case (str proto ip "/" (codec/url-encode path))))
     (gen/tuple http-protocol ipv4-address gen/string-ascii)))
 
 (register-generator ssc/HttpUrl http-url)
