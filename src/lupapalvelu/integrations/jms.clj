@@ -7,7 +7,7 @@
             [sade.util :as util])
   (:import (javax.jms ExceptionListener Connection Session Queue
                       MessageListener BytesMessage ObjectMessage TextMessage
-                      MessageConsumer MessageProducer JMSException)
+                      MessageConsumer MessageProducer JMSException JMSContext)
            (org.apache.activemq.artemis.jms.client ActiveMQJMSConnectionFactory ActiveMQConnection)
            (org.apache.activemq.artemis.api.jms ActiveMQJMSClient)))
 
@@ -160,6 +160,15 @@
      (create-nippy-producer (producer-session) queue-name))
     ([session queue-name]
      (create-producer session queue-name #(jms/create-message (nippy/freeze %) session))))
+
+  (defn produce-with-context [destination-name data]
+    (jms/send-with-context
+      default-connection-factory
+      (queue destination-name)
+      data
+      (merge (select-keys connection-properties [:username :password])
+             {:session-mode JMSContext/AUTO_ACKNOWLEDGE
+              :ex-listener  exception-listener})))
 
   ;;
   ;; Consumers
