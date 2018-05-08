@@ -4,11 +4,14 @@
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
             [midje.sweet :refer :all]
+            [sade.core :refer :all]
+            [sade.env :as env]
             [sade.schema-generators :as ssg]
             [sade.schema-utils :as ssu]
-            [lupapalvelu.xml.krysp.http :refer :all]
+            [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.test-util :refer [passing-quick-check]])
+            [lupapalvelu.test-util :refer [passing-quick-check]]
+            [lupapalvelu.xml.krysp.http :refer :all])
   (:import (clojure.lang ExceptionInfo)))
 
 (def conf-with-auth-type
@@ -66,3 +69,31 @@
     (create-url :application {:url "http://testi.fi///"}) => "http://testi.fi")
   (fact "correct path is selected"
     (create-url :review {:url "http://testi.fi" :path {:application "testi/" :review "katselmus"}}) => "http://testi.fi/katselmus"))
+
+
+(when (and (env/feature? :embedded-artemis) (env/feature? :jms))
+  (def msgs (atom []))
+  (def app-id "LP-123-1970-99999")
+  (def test-queue-name (str kuntagml-queue "_test" (now)))
+  (def xml-string "<?xml ?>><jee>testi</jee>")
+  (defn handler [data] (swap! msgs conj data))
+  (def consumer (jms/create-nippy-consumer test-queue-name handler))
+  (def test-producer (jms/create-nippy-producer test-queue-name))
+  (with-redefs [lupapalvelu.xml.krysp.http/nippy-producer test-producer]
+    (facts "JMS"
+      (against-background
+        [(lupapalvelu.integrations.messages/save anything) => nil
+         (lupapalvelu.integrations.messages/update-message anything anything) => nil]
+        (fact "send OK"
+          (send-xml
+            {:id app-id :organization "123-TEST"}
+            {:id "fuuser" :username "test"}
+            :application
+            xml-string
+            (ssg/generate org/KryspHttpConf)) => nil
+          (provided (POST anything anything anything) => nil :times 0))
+        (facts "consumer caught message"
+          (fact "one message" (count @msgs) => 1)
+          (fact "data is clojure and xml-string"
+            (:xml (first @msgs)) => xml-string)))))
+  (.close consumer))
