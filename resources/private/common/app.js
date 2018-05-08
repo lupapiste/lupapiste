@@ -20,7 +20,7 @@ var LUPAPISTE = LUPAPISTE || {};
    *                            Thus page visibility toggle responsibility for provided pageIds is in controlling component.
    * @param
    */
-  LUPAPISTE.App = function (params) {
+  LUPAPISTE.App = function(params) {
     const self = this;
 
     self.defaultTitle = document.title;
@@ -51,13 +51,13 @@ var LUPAPISTE = LUPAPISTE || {};
     };
 
     /**
-    * Window unload event handler
-    */
-    self.unload = function () {
+     * Window unload event handler
+     */
+    self.unload = function() {
       trace("window.unload");
     };
 
-    self.openPage = function (path) {
+    self.openPage = function(path) {
       const pageId = path[0];
       const pagePath = path.splice(1, path.length - 1);
 
@@ -89,25 +89,36 @@ var LUPAPISTE = LUPAPISTE || {};
         document.title = self.defaultTitle;
       }
 
-      hub.send("page-load", { pageId: pageId, pagePath: pagePath, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
+      hub.send("page-load", {
+        pageId: pageId,
+        pagePath: pagePath,
+        currentHash: "!/" + self.currentHash,
+        previousHash: "!/" + self.previousHash
+      });
 
       if (self.previousHash !== self.currentHash) {
         const previousPageId = self.previousHash.split("/")[0];
-        hub.send("page-unload", { pageId: previousPageId, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
+        hub.send("page-unload", {
+          pageId: previousPageId,
+          currentHash: "!/" + self.currentHash,
+          previousHash: "!/" + self.previousHash
+        });
       }
     };
 
-    self.hashChanged = function () {
-      hub.send("scrollService::push", {hash: "#!/" + self.currentHash,
-                                       followed: true,
-                                       override: true});
+    self.hashChanged = function() {
+      hub.send("scrollService::push", {
+        hash: "#!/" + self.currentHash,
+        followed: true,
+        override: true
+      });
       self.previousHash = self.currentHash;
 
       self.currentHash = (location.hash || "").substr(3);
 
       const q = self.currentHash.indexOf("?");
       if (q > -1) {
-        self.currentHash = self.currentHash.substring(0,q);
+        self.currentHash = self.currentHash.substring(0, q);
       }
 
       if (self.currentHash === "") {
@@ -124,53 +135,54 @@ var LUPAPISTE = LUPAPISTE || {};
 
       if (!self.allowAnonymous && self.session === undefined) {
         ajax.query("user")
-          .success(function (e) {
-            if (e.user) {
-              self.session = true;
-              hub.send("login", e);
-              self.hashChanged();
-            } else {
-              error("User query did not return user, response: ", e);
+            .success(function(e) {
+              if (e.user) {
+                self.session = true;
+                hub.send("login", e);
+                self.hashChanged();
+              } else {
+                error("User query did not return user, response: ", e);
+                self.session = false;
+                hub.send("logout", e);
+              }
+            })
+            .error(function(e) {
               self.session = false;
               hub.send("logout", e);
-            }
-          })
-          .error(function (e) {
-            self.session = false;
-            hub.send("logout", e);
-          })
-          .call();
+            })
+            .call();
         return;
       }
 
       self.openPage((self.allowAnonymous || self.session) ? path : ["login"]);
     };
 
-    self.connectionCheck = function () {
-      ajax.get("/api/alive").raw(false)
-        .success(function() {
-          hub.send("connection", {status: "online"});
-          setTimeout(self.connectionCheck, 10000);
-        })
-        .error(function(e) {
-          if (e.text === "error.unauthorized") {
-            hub.send("connection", {status: "session-dead"});
-          } else {
-            hub.send("connection", {status: "lockdown", text: e.text});
-          }
-          setTimeout(self.connectionCheck, 10000);
-        })
-        .fail(function() {
-          hub.send("connection", {status: "offline"});
-          setTimeout(self.connectionCheck, 2000);
-        })
-        .call();
+    self.connectionCheck = function() {
+      ajax.get("/api/alive")
+          .raw(false)
+          .success(function() {
+            hub.send("connection", {status: "online"});
+            setTimeout(self.connectionCheck, 10000);
+          })
+          .error(function(e) {
+            if (e.text === "error.unauthorized") {
+              hub.send("connection", {status: "session-dead"});
+            } else {
+              hub.send("connection", {status: "lockdown", text: e.text});
+            }
+            setTimeout(self.connectionCheck, 10000);
+          })
+          .fail(function() {
+            hub.send("connection", {status: "offline"});
+            setTimeout(self.connectionCheck, 2000);
+          })
+          .call();
     };
 
     self.getHashbangUrl = function() {
-      const href = window.location.href;
-      const hash = window.location.hash;
-      const separator = href.indexOf("?") >= 0 ? "&" : "?";
+      let href      = window.location.href,
+          hash      = window.location.hash,
+          separator = href.indexOf("?") >= 0 ? "&" : "?";
       if (hash && hash.length > 0) {
         const withoutHash = href.substring(0, href.indexOf("#"));
         return withoutHash + separator + "redirect-after-login=" + encodeURIComponent(hash.substring(1, hash.length));
@@ -198,9 +210,11 @@ var LUPAPISTE = LUPAPISTE || {};
       }
     }
 
-    hub.subscribe("login", function() { wasLoggedIn = true; });
+    hub.subscribe("login", function() {
+      wasLoggedIn = true;
+    });
 
-    hub.subscribe({eventType: "connection", status: "online"}, function () {
+    hub.subscribe({eventType: "connection", status: "online"}, function() {
       if (offline) {
         offline = false;
         pageutil.hideAjaxWait();
@@ -208,23 +222,23 @@ var LUPAPISTE = LUPAPISTE || {};
       unlock();
     });
 
-    hub.subscribe({eventType: "connection", status: "offline"}, function () {
+    hub.subscribe({eventType: "connection", status: "offline"}, function() {
       if (!offline) {
         offline = true;
         pageutil.showAjaxWait(loc("connection.offline"));
       }
     });
 
-    hub.subscribe({eventType: "connection", status: "session-dead"}, function () {
+    hub.subscribe({eventType: "connection", status: "session-dead"}, function() {
       if (wasLoggedIn) {
         LUPAPISTE.ModalDialog.showDynamicOk(loc("session-dead.title"), loc("session-dead.message"),
-            {title: loc("session-dead.logout"), fn: self.redirectToHashbang});
+          {title: loc("session-dead.logout"), fn: self.redirectToHashbang});
         hub.subscribe("dialog-close", self.redirectToHashbang, true);
       }
       unlock();
     });
 
-    hub.subscribe({eventType: "connection", status: "lockdown"}, function (e) {
+    hub.subscribe({eventType: "connection", status: "lockdown"}, function(e) {
       if (!lockdown && lupapisteApp.models.globalAuthModel) {
         lupapisteApp.models.globalAuthModel.refreshWithCallback({});
       }
@@ -234,7 +248,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
     self.initSubscribtions = function() {
       hub.subscribe({eventType: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
-      hub.subscribe("logout", function () {
+      hub.subscribe("logout", function() {
         window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
       });
     };
@@ -278,7 +292,7 @@ var LUPAPISTE = LUPAPISTE || {};
     /**
      * Complete the App initialization after DOM is loaded.
      */
-    self.domReady = function () {
+    self.domReady = function() {
       self.initSubscribtions();
 
       $(window)
@@ -293,7 +307,9 @@ var LUPAPISTE = LUPAPISTE || {};
         LUPAPISTE.ModalDialog.init();
       }
 
-      $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
+      $(document.documentElement).keyup(function(event) {
+        hub.send("keyup", event);
+      });
 
       function openStartPage() {
         if (self.logoPath) {
@@ -329,12 +345,12 @@ var LUPAPISTE = LUPAPISTE || {};
       $("#app").applyBindings(lupapisteApp.models.rootVMO);
 
       if (LUPAPISTE.Screenmessage) {
-          LUPAPISTE.Screenmessage.refresh();
-          model.screenMessage = LUPAPISTE.Screenmessage;
+        LUPAPISTE.Screenmessage.refresh();
+        model.screenMessage = LUPAPISTE.Screenmessage;
       }
-      $(".brand").applyBindings( model );
-      $(".header-menu").applyBindings( model ).css( "visibility", "visible");
-      $("#sys-notification").applyBindings( model );
+      $(".brand").applyBindings(model);
+      $(".header-menu").applyBindings(model).css("visibility", "visible");
+      $("#sys-notification").applyBindings(model);
       $("footer").applyBindings(model).css("visibility", "visible");
     };
   };
