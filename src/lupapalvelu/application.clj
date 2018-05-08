@@ -630,9 +630,7 @@
         old-secondary-ops                    (:secondaryOperations application)
         new-primary-op                       (util/find-first #(= secondaryOperationId (:id %)) old-secondary-ops)
         secondary-ops-without-old-primary-op (remove #(= (:id new-primary-op) (:id %)) old-secondary-ops)
-        new-secondary-ops (if old-primary-op ; production data contains applications with nil in primaryOperation
-                            (conj secondary-ops-without-old-primary-op old-primary-op)
-                            secondary-ops-without-old-primary-op)]
+        new-secondary-ops                    (conj secondary-ops-without-old-primary-op old-primary-op)]
     (when-not (= (:id old-primary-op) secondaryOperationId)
       (when-not new-primary-op
         (fail! :error.unknown-operation))

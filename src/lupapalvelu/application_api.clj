@@ -504,6 +504,15 @@
     (update-application command {$set {"primaryOperation.description" desc}})
     (update-application command {"secondaryOperations" {$elemMatch {:id op-id}}} {$set {"secondaryOperations.$.description" desc}})))
 
+(defn- there-is-primary-operation? [{application :application}]
+  (when-not (:primaryOperation application)
+    (fail :error.operations-not-found)))
+
+(defn- secondary-operation-exists? [{parameters :data app :application}]
+  (when-let [op-id (:secondaryOperationId parameters)]
+    (when-not (replace-operation/get-operation-by-key app :id op-id)
+      (fail :error.operations-not-found))))
+
 (defcommand change-primary-operation
   {:parameters [id secondaryOperationId]
    :categories #{:documents} ; edited from document header
@@ -512,7 +521,8 @@
    :permissions [{:context  {:application {:state #{:draft}}}
                   :required [:application/edit-draft :application/edit-operation]}
 
-                 {:required [:application/edit-operation]}]}
+                 {:required [:application/edit-operation]}]
+   :pre-checks [secondary-operation-exists?]}
   [{:keys [application] :as command}]
   (app/change-primary-operation command id secondaryOperationId)
   (ok))
@@ -521,6 +531,11 @@
   (when (or (foreman/foreman-app? application)
             (app/designer-app? application))
     (fail :error.replace-operation-not-allowed)))
+
+(defn- operation-exists? [{parameters :data app :application}]
+  (when-let [op-id (:opId parameters)]
+    (when-not (replace-operation/get-operation-by-key app :id op-id)
+      (fail :error.operations-not-found))))
 
 (defcommand replace-operation
   {:parameters       [id opId operation]
@@ -531,7 +546,8 @@
                       {:required [:application/edit-operation]}]
    :input-validators [operation-validator
                       (partial action/non-blank-parameters [:id :opId :operation])]
-   :pre-checks       [replace-operation-allowed-pre-check]}
+   :pre-checks       [replace-operation-allowed-pre-check
+                      operation-exists?]}
   [command]
   (replace-operation/replace-operation command opId operation)
   (ok))
