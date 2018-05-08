@@ -3767,8 +3767,8 @@
 (defn waste-document-fix [lp-id]
   (let [application (domain/get-application-no-access-checking lp-id)
         schema-version (:schema-version application)
-        organization (org/get-organization (:organization application))
-        waste-schema-name (waste-schemas/construction-waste-plan-for-organization organization)
+        organization (when application (org/get-organization (:organization application)))
+        waste-schema-name (when organization (waste-schemas/construction-waste-plan-for-organization organization))
         application-does-not-contain-waste-plan? (when application
                                                    (->> application
                                                         :documents
