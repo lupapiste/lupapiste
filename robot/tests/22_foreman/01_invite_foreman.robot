@@ -156,7 +156,7 @@ Original application is approved and given a verdict
   Open tab  requiredFieldSummary
   Click by test id  test-application-link-permit-lupapistetunnus
   Project application is open
-  Approve application with missing info
+  Approve application
   Open tab  verdict
   Submit empty verdict
 
