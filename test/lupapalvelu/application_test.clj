@@ -28,7 +28,7 @@
 
 (testable-privates lupapalvelu.application-api add-operation-allowed? validate-handler-role validate-handler-role-not-in-use validate-handler-id-in-application validate-handler-in-organization)
 
-(testable-privates lupapalvelu.application count-required-link-permits new-attachment-types-for-operation
+(testable-privates lupapalvelu.application count-required-link-permits
                    attachment-grouping-for-type person-id-masker-for-user enrich-tos-function-name
                    enrich-single-doc-disabled-flag)
 
