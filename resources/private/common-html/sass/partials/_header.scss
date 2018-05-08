@@ -77,7 +77,6 @@ $language-padding: 20px;
   display: block;
   clear: both;
   box-sizing: border-box;
-  overflow: hidden;
 }
 
 .nav-wrapper {
@@ -104,7 +103,8 @@ nav {
   box-sizing: border-box;
   width: 100%;
   .nav-top {
-    @include nav-row( $gray51);
+    @include nav-row($gray51);
+    height: $header-height + 2;
   }
   .brand {
     position: relative;
@@ -123,7 +123,7 @@ nav {
     @include language-select;
   }
   .language-open {
-    @include language-select( $link: white, $hover: $orange, $bg: $language-bg );
+    @include language-select($link: white, $hover: $orange, $bg: $language-bg);
   }
   .header-menu {
     display: inline-block;
@@ -141,6 +141,34 @@ nav {
       }
       a, span {
         line-height: $header-height;
+      }
+    }
+
+    .header-dropdown {
+      position: relative;
+      display: inline-block;
+
+      .dropdown-toggle-button {
+      }
+
+      .dropdown-content {
+        position: absolute;
+        background-color: white;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+      }
+
+      .dropdown-content a {
+        padding: 0 12px 0 12px;
+        text-decoration: none;
+        display: block;
+        &:hover {
+          background-color: rgb(243, 170, 74); // TODO: what variable this color is?
+        }
+        span {
+          color: black;
+        }
       }
     }
   }

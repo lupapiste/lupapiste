@@ -63,33 +63,55 @@
                 <span class="narrow-hide" data-bind="ltext: 'help'"></span>
               </a>
             </div>
+
+            <!--
             <div class="header-box">
               <a href="#!/mypage" data-bind="attr: {'title': loc('mypage.title')}">
                 <span class="lupicon-user"></span>
-                <span class="narrow-hide" id="user-name"
-                      data-bind="text: lupapisteApp.models.currentUser.displayName, attr: {'data-test-role' : lupapisteApp.models.currentUser.role}"></span>
+                <span id="user-name"
+                      class="narrow-hide"
+                      data-bind="
+                        text: lupapisteApp.models.currentUser.displayName,
+                        attr: {'data-test-role' : lupapisteApp.models.currentUser.role}">
+                </span>
               </a>
             </div>
+            -->
+
             <!-- Role switcher -->
-            <div class="header-box" data-bind="visible: $root.roleSelector.showRoleSelector">
-              <a href="/" title="Foffoo">
-                <span data-bind="text: $root.roleSelector.availableRoles"></span>
+            <div class="header-box header-dropdown">
+              <a href="#"
+                 class="dropdown-toggle-button"
+                 data-bind="click: $root.roleSelector.toggle">
+                <span class="narrow-hide"
+                      id="user-name"
+                      data-bind="
+                        text: lupapisteApp.models.currentUser.displayName,
+                        attr: {'data-test-role' : lupapisteApp.models.currentUser.role}">
+                </span>
+                <span data-bind="
+                        css: {'lupicon-chevron-small-down': $root.roleSelector.visible() == false,
+                              'lupicon-chevron-small-up': $root.roleSelector.visible}">
+                </span>
               </a>
-              <!-- FIXME: need better icon -->
-              <!--
-              <a href="/app/fi/authority-admin" data-bind="attr: {'title': loc('authority-admin')}">
-                <span class="lupicon-log-out"></span>
-                <span class="narrow-hide" data-bind="text: 'Admin'"></span>
-              </a>
-              -->
+              <div class="dropdown-content"
+                   data-bind="visible: $root.roleSelector.visible,
+                              foreach: $root.roleSelector.menuItems()">
+                <a href="#" data-bind="click: $root.roleSelector.actionFor(action)">
+                  <span data-bind="css: iconClass"></span>
+                  <span data-bind="text: text"></span>
+                </a>
+              </div>
             </div>
 
+            <!--
             <div id="logout-header-box" class="header-box">
               <a data-bind="attr: {href: '/app/' + $root.currentLanguage + '/logout', 'title': loc('logout')}">
                 <span class="lupicon-log-out"></span>
                 <span class="narrow-hide" data-bind="ltext: 'logout'"></span>
               </a>
             </div>
+            -->
           </div>
         </div>
       </div>
