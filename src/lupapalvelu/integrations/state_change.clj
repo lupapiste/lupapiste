@@ -180,7 +180,7 @@
           (errorf "Message (id: %s) rollback initiated" (:message-id options))
           (jms/rollback session))))))
 
-(def state-change-consumer
+(defonce state-change-consumer
          (jms/create-nippy-consumer
            json-consumer-session
            matti-json-queue
