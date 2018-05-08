@@ -93,6 +93,7 @@
             (ssg/generate org/KryspHttpConf)) => nil
           (provided (POST anything anything anything) => nil :times 0))
         (facts "consumer caught message"
+          (Thread/sleep 100)
           (fact "one message" (count @msgs) => 1)
           (fact "data is clojure and xml-string"
             (:xml (first @msgs)) => xml-string)))))
