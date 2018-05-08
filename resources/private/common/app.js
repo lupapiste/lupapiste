@@ -279,14 +279,65 @@ var LUPAPISTE = LUPAPISTE || {};
     function RoleSelectorModel(models) {
       const self = this;
 
-      self.showRoleSelector = ko.pureComputed(function() {
-        return models.currentUser ? models.currentUser.hasMultipleRoles() : false;
-      });
+      self.visible = ko.observable(false);
+
+      self.toggle = function() {
+        let current = self.visible();
+        self.visible(!current);
+      }
 
       self.availableRoles = ko.pureComputed(function() {
         console.log("availableRoles:", models.currentUser.availableRoles());
         return models.currentUser ? models.currentUser.availableRoles() : [];
       });
+
+      self.menuItems = function() {
+        return _.concat(
+          self
+            .availableRoles()
+            .map(function(role) {
+              return {
+                action: "setRole:" + role[0] + (role[1] ? ":" + role[1] : ""),
+                text: role[0] + (role[1] ? " " + role[1] : ""),
+                iconClass: ""
+              }
+            }),
+          [
+            {
+              action: "ownPage",
+              text: "Omat tiedot",
+              iconClass: "lupicon-user"
+            },
+            {
+              action: "logout",
+              text: "Kirjaudu ulos",
+              iconClass: "lupicon-log-out"
+            }
+          ]);
+      };
+
+      self.action = function(actionName) {
+        self.visible(false);
+        console.debug("action:", actionName);
+        if (actionName === "ownPage") {
+          window.location.hash = "#!/mypage";
+        } else if (actionName === "logout") {
+          window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
+        } else if (_.startsWith(actionName, "setRole:")) {
+          let e    = _.split(actionName, ":"),
+              role = e[1],
+              org  = e[2];
+          // TODO: actually set the role
+          console.log("setRole:", role, org);
+        } else {
+          log.error("unknown action:", actionName);
+        }
+      };
+
+      self.actionFor = function(actionName) {
+        return self.action.bind(self, actionName);
+      };
+
     }
 
     /**
