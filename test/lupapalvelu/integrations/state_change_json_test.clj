@@ -3,6 +3,7 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.integrations.state-change :as mjson]
             [sade.coordinate :as coord]
+            [sade.env :as env]
             [sade.schemas :as ssc]
             [sade.schema-generators :as ssg]))
 
@@ -175,3 +176,26 @@
           (contains? tyonjohtaja :building) => false)
         (fact "does not contain :structure"
           (contains? tyonjohtaja :structure) => false)))))
+
+(facts "JMS or HTTP"
+  (let [command {:application {:id    (ssg/generate ssc/ApplicationId)
+                               :state "submitted"}
+                 :user        {:id (ssg/generate ssc/ObjectIdStr)}}
+        fake-endpoint {:url "http://foo/bar"}
+        example-data (merge (:application command)
+                            {:toState "sent"})
+        message-id (ssg/generate ssc/ObjectIdStr)]
+    (against-background [(lupapalvelu.integrations.messages/create-id) => message-id
+                         (lupapalvelu.integrations.messages/save anything) => nil
+                         (mjson/get-state-change-endpoint-data) => fake-endpoint
+                         (mjson/state-change-data (:application command) "sent") => example-data
+                         (mjson/send-via-jms example-data fake-endpoint anything) => "JMS SUCCESS"
+                         (mjson/send-via-http message-id example-data fake-endpoint) => "HTTP SUCCESS"]
+      (fact "Triggered via JMS"
+        (mjson/trigger-state-change command "sent") => "JMS SUCCESS"
+        (provided
+          (env/feature? :jms) => true))
+      (fact "Triggered via HTTP"
+        (mjson/trigger-state-change command "sent") => "HTTP SUCCESS"
+        (provided
+          (env/feature? :jms) => false)))))
