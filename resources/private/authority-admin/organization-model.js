@@ -147,7 +147,6 @@ LUPAPISTE.OrganizationModel = function () {
   });
 
   self.automaticReviewFetchEnabled.subscribe(function(automaticReviewFetchEnabled) {
-    console.log(self.automaticReviewFetchEnabled() + " " + self.onlyUseInspectionFromBackend()); // DEBUG
     if (self.initialized) {
       ajax.command("set-organization-review-fetch-enabled", { enabled: automaticReviewFetchEnabled })
         .success(util.showSavedIndicator)
