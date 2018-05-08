@@ -506,12 +506,12 @@
 
 (defn- there-is-primary-operation? [{application :application}]
   (when-not (:primaryOperation application)
-    (fail :error.operations-not-found)))
+    (fail :error.unknown-operation)))
 
 (defn- secondary-operation-exists? [{parameters :data app :application}]
   (when-let [op-id (:secondaryOperationId parameters)]
     (when-not (replace-operation/get-operation-by-key app :id op-id)
-      (fail :error.operations-not-found))))
+      (fail :error.unknown-operation))))
 
 (defcommand change-primary-operation
   {:parameters [id secondaryOperationId]
