@@ -231,3 +231,6 @@
   "If given string is blank, returns nil. Else returns string."
   [string]
   (when-not (blank? string) string))
+
+(defn strip-leading-slashes [string]
+  (replace string #"/+$" ""))
