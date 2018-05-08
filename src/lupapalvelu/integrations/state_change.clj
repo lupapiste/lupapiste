@@ -158,7 +158,7 @@
               :body             (clj-http/json-encode data)
               :throw-exceptions true})
   (messages/update-message message-id {$set {:status "done" :acknowledged (now)}} WriteConcern/UNACKNOWLEDGED)
-  (infof "PATE JSON sent to state-change endpoint successfully"))
+  (infof "JSON sent to state-change endpoint successfully"))
 
 (when (env/feature? :jms)
 
@@ -188,7 +188,7 @@
 
 (defn send-via-jms [state-change-data endpoint-data options]
   (jms/produce-with-context matti-json-queue (nippy/freeze (assoc endpoint-data :data state-change-data :options options)))
-  (debugf "Produced state-change msg to JMS queue %s" matti-json-queue))
+  (debugf "Produced state-change msg (%s) to JMS queue %s" (get-in state-change-data [:toState :name]) matti-json-queue))
 )
 
 (defn trigger-state-change [{user :user :as command} new-state]
@@ -208,7 +208,6 @@
                    :data outgoing-data}
                   :action (:action command))]
         (messages/save msg)
-        (infof "PATE state-change payload written to mongo for state '%s', messageId: %s" (name new-state) message-id)
         (if-let [endpoint (get-state-change-endpoint-data)]
           (if jms?
             (send-via-jms outgoing-data endpoint {:user-id (:id user) :message-id message-id :application-id (:id app)})
