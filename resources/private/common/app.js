@@ -58,8 +58,8 @@ var LUPAPISTE = LUPAPISTE || {};
     };
 
     self.openPage = function(path) {
-      const pageId = path[0];
-      const pagePath = path.splice(1, path.length - 1);
+      let pageId = path[0],
+          pagePath = path.splice(1, path.length - 1);
 
       trace("pageId", pageId, "pagePath", pagePath);
 
