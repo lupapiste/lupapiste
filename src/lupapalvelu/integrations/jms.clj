@@ -120,7 +120,7 @@
             (do
               (warnf "Couldn't connect to broker %s, reconnecting in %s seconds" (:broker-url options) (/ sleep-time 1000))
               (Thread/sleep sleep-time)
-              (recur (min (* 2 sleep-time) 60000) (dec try-times))))))))
+              (recur (min (* 2 sleep-time) 15000) (dec try-times))))))))
 
   (defn start! []
     (try
