@@ -1,5 +1,5 @@
 (ns lupapalvelu.xml.krysp.http
-  (:require [taoensso.timbre :refer [infof debug errorf]]
+  (:require [taoensso.timbre :refer [infof debug errorf warn]]
             [clj-http.cookies :as cookies]
             [monger.operators :refer :all]
             [sade.http :as http]
@@ -46,7 +46,7 @@
 
 (sc/defn ^:always-validate create-url [type :- (apply sc/enum org/endpoint-types) http-conf :- org/KryspHttpConf]
   (-> (ss/join "/" [(:url http-conf) (get-in http-conf [:path type])])
-      (ss/replace #"/+$" "")))
+      (ss/strip-trailing-slashes)))
 
 (sc/defn ^:always-validate POST
   "HTTP POST given XML string to endpoint defined in http-conf."
@@ -86,16 +86,20 @@
 
 (def kuntagml-queue "lupapiste/kuntagml.http")
 
-(def kuntagml-transacted-session (-> (jms/get-default-connection)
-                                     (jms/create-transacted-session)
-                                     (jms/register-session :consumer)))
+(def kuntagml-transacted-session (if-let [conn (jms/get-default-connection)]
+                                   (-> conn
+                                       (jms/create-transacted-session)
+                                       (jms/register-session :consumer))
+                                   (warn "No JMS connection available")))
 
-(defonce kuntagml-consumer (jms/create-nippy-consumer
-                             kuntagml-transacted-session
-                             kuntagml-queue
-                             (create-kuntagml-message-handler kuntagml-transacted-session)))
+(defonce kuntagml-consumer
+  (when kuntagml-transacted-session
+    (jms/create-nippy-consumer
+      kuntagml-transacted-session
+      kuntagml-queue
+      (create-kuntagml-message-handler kuntagml-transacted-session))))
 
-(def nippy-producer (jms/create-nippy-producer kuntagml-queue))
+(def nippy-producer (when kuntagml-transacted-session   (jms/create-nippy-producer kuntagml-queue)))
 
 (def opts-schema {:user-id sc/Str :application-id ssc/ApplicationId})
 
@@ -114,7 +118,7 @@
                        :transferType        "http" :format "xml" :created (now)
                        :status              (if jms? "queued" "processing") :initator (select-keys user [:id :username])
                        :application         (select-keys application [:id :organization])}))
-    (if jms?
+    (if (and jms? kuntagml-transacted-session)
       (send-xml-jms message-id type xml http-conf {:user-id (:id user) :application-id (:id application)})
       (POST type xml http-conf))
     (infof "KuntaGML (id: %s, type: %s) for partner %s sent via %s successfully" message-id (name type) (:partner http-conf) (if jms? "JMS" "HTTP"))

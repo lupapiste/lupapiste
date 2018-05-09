@@ -1,7 +1,7 @@
 (ns lupapalvelu.integrations.state-change
-  (:require [taoensso.timbre :refer [infof]]
+  (:require [taoensso.timbre :refer [errorf debugf infof warn]]
             [monger.operators :refer [$set]]
-            [schema.core :as sc]
+            [clojure.set :as set]
             [clj-http.client :as clj-http]
             [sade.core :refer :all]
             [sade.env :as env]
@@ -10,15 +10,19 @@
             [sade.schema-utils :as ssu]
             [sade.strings :as ss]
             [sade.util :as util]
-            [clojure.set :as set]
+            [schema.core :as sc]
+            [taoensso.nippy :as nippy]
             [lupapalvelu.application-schema :as app-schema]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.integrations.messages :as messages]
+            [lupapalvelu.logging :as logging]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.states :as states]))
+            [lupapalvelu.states :as states])
+  (:import (com.mongodb WriteConcern)))
 
 (def displayName {:displayName (zipmap i18n/supported-langs (repeat sc/Str))})
 
@@ -135,14 +139,70 @@
       (and (#{:submitted} (keyword old-state))
            (#{:draft} (keyword new-state)))))
 
-(defn trigger-state-change [command new-state]
+(sc/defschema EndpointData
+  {:url sc/Str
+   :headers {(sc/enum "X-Username" "X-Password" "X-Vault") (sc/maybe sc/Str)}})
+
+(sc/defn ^:always-validate get-state-change-endpoint-data :- (sc/maybe EndpointData) []
+  (when-let [url (env/value :matti :rest :url)]
+    {:url     (ss/strip-trailing-slashes (str url "/" (env/value :matti :rest :path :state-change)))
+     :headers (util/assoc-when-pred
+                {} ss/not-blank?
+                "X-Username" (env/value :matti :rest :username)
+                "X-Password" (env/value :matti :rest :password)
+                "X-Vault"    (env/value :matti :rest :vault))}))
+
+(defn send-via-http [message-id data {:keys [url headers]}]
+  (http/post url
+             {:headers          headers
+              :body             (clj-http/json-encode data)
+              :throw-exceptions true})
+  (messages/update-message message-id {$set {:status "done" :acknowledged (now)}} WriteConcern/UNACKNOWLEDGED)
+  (infof "JSON sent to state-change endpoint successfully"))
+
+(when (env/feature? :jms)
+
+(def matti-json-queue "lupapiste/application.state-change")
+
+(defn create-state-change-consumer [session]
+  (fn [{:keys [url headers options data]}]
+    (logging/with-logging-context {:userId (:user-id options) :applicationId (:application-id options)}
+      (try
+        (send-via-http (:message-id options) data {:url url :headers headers})
+        (jms/commit session)
+        (debugf "state-change message (id: %s) consumed and acknowledged from queue successfully" (:message-id options))
+        (catch Exception e      ; this is most likely a slingshot exception from clj-http
+          (errorf "Failed to send consumed state-change message to %s: %s %s." url (type e) (.getMessage e))
+          (errorf "Message (id: %s) rollback initiated" (:message-id options))
+          (jms/rollback session))))))
+
+(def json-consumer-session (if-let [conn (jms/get-default-connection)]
+                             (-> conn
+                                 (jms/create-transacted-session)
+                                 (jms/register-session :consumer))
+                             (warn "No JMS connection available")))
+
+(when json-consumer-session
+  (defonce state-change-consumer
+           (jms/create-nippy-consumer
+             json-consumer-session
+             matti-json-queue
+             (create-state-change-consumer json-consumer-session))))
+
+(sc/defn ^:always-validate send-via-jms [state-change-data :- StateChangeMessage endpoint-data :- EndpointData options]
+  (jms/produce-with-context matti-json-queue (nippy/freeze (assoc endpoint-data :data state-change-data :options options)))
+  (debugf "Produced state-change msg (%s) to JMS queue %s" (get-in state-change-data [:toState :name]) matti-json-queue))
+)
+
+(defn trigger-state-change [{user :user :as command} new-state]
   (when (valid-states new-state (get-in command [:application :state]))
     (when-let [outgoing-data (state-change-data (:application command) new-state)]
       (let [message-id (messages/create-id)
+            jms? (env/feature? :jms)
             app (:application command)
             msg (util/assoc-when
                   {:id message-id :direction "out"
-                   :status "published" :messageType "state-change"
+                   :status (if jms? "queued" "published") :messageType "state-change"
                    :partner "matti" :format "json" :transferType "http"
                    :created (or (:created command) (now))
                    :application (-> (select-keys app [:id :organization])
@@ -151,13 +211,8 @@
                    :data outgoing-data}
                   :action (:action command))]
         (messages/save msg)
-        (infof "PATE state-change payload written to mongo for state '%s', messageId: %s" (name new-state) message-id)
-        (when-let [url (env/value :matti :rest :url)]         ; TODO send to MQ
-          (http/post (str url "/" (env/value :matti :rest :path :state-change))
-                     {:headers          {"X-Username" (env/value :matti :rest :username)
-                                         "X-Password" (env/value :matti :rest :password)
-                                         "X-Vault"    (env/value :matti :rest :vault)}
-                      :body             (clj-http/json-encode outgoing-data)
-                      :throw-exceptions true})
-          (messages/update-message message-id {$set {:status "done" :acknowledged (now)}})
-          (infof "PATE JSON sent to state-change endpoint successfully"))))))
+        (if-let [endpoint (get-state-change-endpoint-data)]
+          (if (and jms? json-consumer-session)
+            (send-via-jms outgoing-data endpoint {:user-id (:id user) :message-id message-id :application-id (:id app)})
+            (send-via-http message-id outgoing-data endpoint))
+          (warn "No state-change endpoint defined!"))))))
