@@ -46,7 +46,7 @@
 
 (sc/defn ^:always-validate create-url [type :- (apply sc/enum org/endpoint-types) http-conf :- org/KryspHttpConf]
   (-> (ss/join "/" [(:url http-conf) (get-in http-conf [:path type])])
-      (ss/strip-leading-slashes)))
+      (ss/strip-trailing-slashes)))
 
 (sc/defn ^:always-validate POST
   "HTTP POST given XML string to endpoint defined in http-conf."

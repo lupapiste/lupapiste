@@ -232,5 +232,5 @@
   [string]
   (when-not (blank? string) string))
 
-(defn strip-leading-slashes [string]
+(defn strip-trailing-slashes [string]
   (replace string #"/+$" ""))

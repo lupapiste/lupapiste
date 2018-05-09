@@ -145,7 +145,7 @@
 
 (sc/defn ^:always-validate get-state-change-endpoint-data :- (sc/maybe EndpointData) []
   (when-let [url (env/value :matti :rest :url)]
-    {:url     (ss/strip-leading-slashes (str url "/" (env/value :matti :rest :path :state-change)))
+    {:url     (ss/strip-trailing-slashes (str url "/" (env/value :matti :rest :path :state-change)))
      :headers (util/assoc-when-pred
                 {} ss/not-blank?
                 "X-Username" (env/value :matti :rest :username)

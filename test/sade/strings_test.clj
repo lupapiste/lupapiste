@@ -196,11 +196,11 @@
   (unescape-html-scandinavian-characters "&auml;&Auml;&ouml;&Ouml;&aring;&Aring;")
   => "\u00e4\u00c4\u00f6\u00d6\u00e5\u00c5")
 
-(fact "strip-leading-slashes"
-  (strip-leading-slashes nil) => nil
-  (strip-leading-slashes "") => ""
-  (strip-leading-slashes "foo") => "foo"
-  (strip-leading-slashes "/foo") => "/foo"
-  (strip-leading-slashes "/foo/") => "/foo"
-  (strip-leading-slashes "/foo///") => "/foo"
-  (strip-leading-slashes "/foo///fofo///") => "/foo///fofo")
+(fact "strip-trailing-slashes"
+  (strip-trailing-slashes nil) => nil
+  (strip-trailing-slashes "") => ""
+  (strip-trailing-slashes "foo") => "foo"
+  (strip-trailing-slashes "/foo") => "/foo"
+  (strip-trailing-slashes "/foo/") => "/foo"
+  (strip-trailing-slashes "/foo///") => "/foo"
+  (strip-trailing-slashes "/foo///fofo///") => "/foo///fofo")
