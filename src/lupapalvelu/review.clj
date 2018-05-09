@@ -306,10 +306,7 @@
                                     id
                                     (:id att)
                                     (.getMessage e)
-                                    (get-in att [:liite :linkkiliitteeseen])))))
-                  _ (do
-                      (println "TÄSSÄ:")
-                      (println pks))]
+                                    (get-in att [:liite :linkkiliitteeseen])))))]
               (when-not (can-bypass-task-pdfa-generation? organization-info pks)
                 (tasks/generate-task-pdfa updated-application added-task (:user command) "fi")))))))
     (cond-> {:ok update-result}
