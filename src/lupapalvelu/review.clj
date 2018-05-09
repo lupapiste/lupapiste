@@ -305,4 +305,4 @@
                      (true? got-review-attachments-from-backend?))
                   (tasks/generate-task-pdfa updated-application added-task (:user command) "fi")))))))
     (cond-> {:ok update-result}
-      (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))
+            (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))
