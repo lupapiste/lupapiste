@@ -49,6 +49,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.extendedConstructionWasteReportEnabled = ko.observable(false);
   self.validateVerdictGivenDate = ko.observable(true);
   self.automaticReviewFetchEnabled = ko.observable(true);
+  self.onlyUseInspectionFromBackend = ko.observable(false);
   self.tosFunctions = ko.observableArray();
   self.tosFunctionVisible = ko.observable(false);
   self.archivingProjectTosFunction = ko.observable();
@@ -148,6 +149,15 @@ LUPAPISTE.OrganizationModel = function () {
   self.automaticReviewFetchEnabled.subscribe(function(automaticReviewFetchEnabled) {
     if (self.initialized) {
       ajax.command("set-organization-review-fetch-enabled", { enabled: automaticReviewFetchEnabled })
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
+        .call();
+    }
+  });
+
+  self.onlyUseInspectionFromBackend.subscribe(function(onlyUseInspectionFromBackend) {
+    if (self.initialized) {
+      ajax.command("set-only-use-inspection-from-backend", { enabled: onlyUseInspectionFromBackend })
         .success(util.showSavedIndicator)
         .error(util.showSavedIndicator)
         .call();
