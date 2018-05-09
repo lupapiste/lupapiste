@@ -43,7 +43,7 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
             [lupapalvelu.ya :as ya]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.archiving-util :as archiving-util]
+            [lupapalvelu.archive.archiving-util :as archiving-util]
             [lupapalvelu.application-replace-operation :as replace-operation])
   (:import (java.net SocketTimeoutException)))
 

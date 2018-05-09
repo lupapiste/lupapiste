@@ -14,7 +14,7 @@
             [lupapalvelu.application :as a]
             [lupapalvelu.permit :as permit]
             [lupapiste-commons.operations :as operations]
-            [lupapalvelu.archiving-util :as archiving-util]))
+            [lupapalvelu.archive.archiving-util :as archiving-util]))
 
 (defn- target-is-not-archived [target-type {{attachment-id :attachmentId} :data {:keys [metadata processMetadata attachments]} :application}]
   (let [md (case target-type

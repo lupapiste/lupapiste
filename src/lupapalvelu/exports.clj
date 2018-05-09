@@ -10,7 +10,7 @@
             [sade.strings :as ss]
             [sade.util :as util :refer [fn->]]
             [lupapalvelu.application :as application]
-            [lupapalvelu.archiving :as archiving]
+            [lupapalvelu.archive.archiving :as archiving]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
