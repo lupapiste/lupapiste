@@ -20,7 +20,8 @@
 (defn- empty-review-task? [t]
   (let [katselmus-data (-> t :data :katselmus)
         top-keys [:tila :pitoPvm :pitaja]
-        h-keys [:kuvaus :maaraAika :toteaja :toteamisHetki]]
+        h-keys [:kuvaus :maaraAika :toteaja :toteamisHetki]
+        ]
     (and (every? empty? (map #(get-in katselmus-data [% :value]) top-keys))
          (every? empty? (map #(get-in katselmus-data [:huomautukset % :value]) h-keys)))))
 
@@ -88,20 +89,20 @@
   "For a given mongo-task, return a matching task from the XML update"
   [mongo-task update-tasks]
   (or ;; 1. task with matching id, or
-      (task-with-matching-background-id mongo-task update-tasks)
+   (task-with-matching-background-id mongo-task update-tasks)
 
-      ;; 2. task with same name and type WHEN mongo task is empty, or
-      (when (empty-review-task? mongo-task)
-        (task-with-same-name-and-type mongo-task update-tasks))
+   ;; 2. task with same name and type WHEN mongo task is empty, or
+   (when (empty-review-task? mongo-task)
+     (task-with-same-name-and-type mongo-task update-tasks))
 
-      ;; 3. task with same name, type and other data related to holding
-      ;;    the review, given that mongo task does not have background id
-      (when (ss/empty? (background-id mongo-task))
-        (task-with-same-name-type-and-data [#_:tila ;; Temporarily disabled
-                                            :pitoPvm
-                                            [:pitaja compare-pitaja]]
-                                           mongo-task
-                                           update-tasks))))
+   ;; 3. task with same name, type and other data related to holding
+   ;;    the review, given that mongo task does not have background id
+   (when (ss/empty? (background-id mongo-task))
+     (task-with-same-name-type-and-data [#_:tila ;; Temporarily disabled
+                                         :pitoPvm
+                                         [:pitaja compare-pitaja]]
+                                        mongo-task
+                                        update-tasks))))
 
 (defn- merge-review-tasks
   "Returns a vector with two values:
@@ -235,8 +236,8 @@
                                      (if (empty? (get validation-errors idx))
                                        (assoc item :attachments (-> (get reviews idx) :liitetieto)))) review-tasks)
         attachments-by-task-id (apply hash-map
-                                      (remove empty? (mapcat (fn [t]
-                                                               (when (:attachments t) [(:id t) (:attachments t)])) review-tasks)))
+                                 (remove empty? (mapcat (fn [t]
+                                  (when (:attachments t) [(:id t) (:attachments t)])) review-tasks)))
         [unchanged-tasks
          added-and-updated-tasks
          new-faulty-tasks] (merge-review-tasks (map #(dissoc % :attachments) review-tasks)
@@ -281,33 +282,22 @@
         :attachments-by-task-id attachments-by-task-id
         :added-tasks-with-updated-buildings added-tasks-with-updated-buildings)))
 
-(defn can-bypass-task-pdfa-generation?
-  "Task pdfa generation can be bypassed, if
-   1) The user has opted out of it by checking the :only-use-inspection-from-backend parameter in organization to true
-   2) Fetching review documents from backend was successful (i.e. get-poytakirja! calls returned a map with :urlHash parameter)"
-  [organization pks]
-  (let [got-review-attachments-from-backend? (every? #(contains? % :urlHash) pks)]
-    (and (true? (:only-use-inspection-from-backend organization))
-         (true? got-review-attachments-from-backend?))))
-
 (defn save-review-updates [{user :user application :application :as command} updates added-tasks-with-updated-buildings attachments-by-task-id]
   (let [update-result (pos? (update-application command {:modified (:modified application)} updates :return-count? true))
-        updated-application (domain/get-application-no-access-checking (:id application)) ;; TODO: mongo projection
-        organization-info (organization/get-organization (:organization application))]
+        updated-application (domain/get-application-no-access-checking (:id application))] ;; TODO: mongo projection
     (when update-result
       (doseq [{id :id :as added-task} added-tasks-with-updated-buildings]
         (let [attachments (get attachments-by-task-id id)]
           (if-not (empty? attachments)
-            (let [pks (for [att attachments]
-                        (try
-                          (verdict-review-util/get-poytakirja! updated-application user (now) {:type "task" :id id} att)
-                          (catch Exception e
-                            (errorf "Error when getting review attachments: task=%s attachment=%s message=%s url=%s"
-                                    id
-                                    (:id att)
-                                    (.getMessage e)
-                                    (get-in att [:liite :linkkiliitteeseen])))))]
-              (when-not (can-bypass-task-pdfa-generation? organization-info pks)
-                (tasks/generate-task-pdfa updated-application added-task (:user command) "fi")))))))
+            (doseq [att attachments]
+              (try
+                (verdict-review-util/get-poytakirja! updated-application user (now) {:type "task" :id id} att)
+                (catch Exception e
+                  (errorf "Error when getting review attachments: task=%s attachment=%s message=%s"
+                          id
+                          (:id att)
+                          (.getMessage e)))))
+            (tasks/generate-task-pdfa updated-application added-task (:user command) "fi")))))
     (cond-> {:ok update-result}
             (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))
+
