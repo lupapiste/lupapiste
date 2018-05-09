@@ -70,7 +70,7 @@
         compared-keys (keys key->comparator-fn)]
     (every? true? (map (fn [key]
                          ((key->comparator-fn key) (get (katselmus-data a) key)
-                                                   (get (katselmus-data b) key)))
+                          (get (katselmus-data b) key)))
                        compared-keys))))
 
 (defn- task-with-same-name-type-and-data [data-keys mongo-task tasks]
@@ -89,26 +89,26 @@
   "For a given mongo-task, return a matching task from the XML update"
   [mongo-task update-tasks]
   (or ;; 1. task with matching id, or
-   (task-with-matching-background-id mongo-task update-tasks)
+      (task-with-matching-background-id mongo-task update-tasks)
 
-   ;; 2. task with same name and type WHEN mongo task is empty, or
-   (when (empty-review-task? mongo-task)
-     (task-with-same-name-and-type mongo-task update-tasks))
+      ;; 2. task with same name and type WHEN mongo task is empty, or
+      (when (empty-review-task? mongo-task)
+        (task-with-same-name-and-type mongo-task update-tasks))
 
-   ;; 3. task with same name, type and other data related to holding
-   ;;    the review, given that mongo task does not have background id
-   (when (ss/empty? (background-id mongo-task))
-     (task-with-same-name-type-and-data [#_:tila ;; Temporarily disabled
-                                         :pitoPvm
-                                         [:pitaja compare-pitaja]]
-                                        mongo-task
-                                        update-tasks))))
+      ;; 3. task with same name, type and other data related to holding
+      ;;    the review, given that mongo task does not have background id
+      (when (ss/empty? (background-id mongo-task))
+        (task-with-same-name-type-and-data [#_:tila ;; Temporarily disabled
+                                            :pitoPvm
+                                            [:pitaja compare-pitaja]]
+                                           mongo-task
+                                           update-tasks))))
 
 (defn- merge-review-tasks
   "Returns a vector with two values:
-   0: Existing tasks left unchanged,
-   1: Completely new and updated existing review tasks,
-   2: Reviews to be marked faulty"
+  0: Existing tasks left unchanged,
+  1: Completely new and updated existing review tasks,
+  2: Reviews to be marked faulty"
   [tasks-from-update tasks-from-mongo & [overwrite-background-reviews?]]
 
   ;; As a postcondition, check that for every new faulty task there is
@@ -189,9 +189,9 @@
 
 (defn reviews-preprocessed
   "Review preprocessing: 1) Duplicate entry prevention (group-by review type, name, date and external id)
-                         2) Collect all related building and attachment elements together
-                         3) Merge into final results in which there are no duplicates by name or type but still
-                            all building details and attachments are still there"
+  2) Collect all related building and attachment elements together
+  3) Merge into final results in which there are no duplicates by name or type but still
+  all building details and attachments are still there"
   [app-xml]
   (let [historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
                                                                 (< pvm (now))))
@@ -218,8 +218,8 @@
   (letfn [(review-to-task [review] (tasks/katselmus->task meta source {:buildings buildings-summary} review))
           (drop-reviews-with-lupapiste-muuTunnus [rs] (filter (util/fn-> :data :muuTunnusSovellus :value ss/lower-case (not= "lupapiste")) rs))]
     (->> reviews
-         (map review-to-task)
-         drop-reviews-with-lupapiste-muuTunnus)))
+      (map review-to-task)
+      drop-reviews-with-lupapiste-muuTunnus)))
 
 (defn read-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
@@ -236,8 +236,8 @@
                                      (if (empty? (get validation-errors idx))
                                        (assoc item :attachments (-> (get reviews idx) :liitetieto)))) review-tasks)
         attachments-by-task-id (apply hash-map
-                                 (remove empty? (mapcat (fn [t]
-                                  (when (:attachments t) [(:id t) (:attachments t)])) review-tasks)))
+                                      (remove empty? (mapcat (fn [t]
+                                                               (when (:attachments t) [(:id t) (:attachments t)])) review-tasks)))
         [unchanged-tasks
          added-and-updated-tasks
          new-faulty-tasks] (merge-review-tasks (map #(dissoc % :attachments) review-tasks)
@@ -290,15 +290,18 @@
       (doseq [{id :id :as added-task} added-tasks-with-updated-buildings]
         (let [attachments (get attachments-by-task-id id)]
           (if-not (empty? attachments)
-            (doseq [att attachments]
-              (try
-                (verdict-review-util/get-poytakirja! updated-application user (now) {:type "task" :id id} att)
-                (catch Exception e
-                  (errorf "Error when getting review attachments: task=%s attachment=%s message=%s"
-                          id
-                          (:id att)
-                          (.getMessage e)))))
-            (when-not (true? (:only-use-inspection-from-backend organization-info))
-              (tasks/generate-task-pdfa updated-application added-task (:user command) "fi"))))))
+            (let [pks (for [att attachments]
+                        (try
+                          (verdict-review-util/get-poytakirja! updated-application user (now) {:type "task" :id id} att)
+                          (catch Exception e
+                            (errorf "Error when getting review attachments: task=%s attachment=%s message=%s"
+                                    id
+                                    (:id att)
+                                    (.getMessage e)))))
+                  got-reviews-from-backend? (every? #(contains? % :urlHash) pks)]
+              (when-not ;; If :only-use-inspection-from-backend is true AND there's a review from backend, bypass generation of pdfa
+                (and (true? (:only-use-inspection-from-backend organization-info))
+                     (true? got-reviews-from-backend?))
+                  (tasks/generate-task-pdfa updated-application added-task (:user command) "fi")))))))
     (cond-> {:ok update-result}
-            (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))
+      (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))
