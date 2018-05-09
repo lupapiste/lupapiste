@@ -30,7 +30,6 @@ Olli-ya prepares warranty application
   Submit application
   Open tab  requiredFieldSummary
   Click enabled by test id  approve-application-summaryTab
-  Confirm  dynamic-yes-no-confirm-dialog
   Confirm notification dialog  # taustajärjestelmäsiirto ei ole käytettävissä -dialogi
   Open tab  verdict
   Submit empty verdict  verdictGiven  1

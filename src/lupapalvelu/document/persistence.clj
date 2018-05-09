@@ -177,6 +177,7 @@
     (seq (map :id (filter
                     (fn [{versions :versions :as attachment}]
                       (and ((set (att-util/get-operation-ids attachment)) op-id)
+                           (-> attachment :op (count) (< 2))
                            (empty? versions)))
                     attachments)))))
 

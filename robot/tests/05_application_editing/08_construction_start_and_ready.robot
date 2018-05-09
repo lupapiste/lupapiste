@@ -24,7 +24,6 @@ Sonja submits the application, approves it and gives it a verdict
   Submit application
   Open tab  requiredFieldSummary
   Click enabled by test id  approve-application-summaryTab
-  Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  sent
   Open tab  verdict
   Submit empty verdict  verdictGiven  1
