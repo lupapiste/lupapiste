@@ -284,8 +284,8 @@
 
 (defn save-review-updates [{user :user application :application :as command} updates added-tasks-with-updated-buildings attachments-by-task-id]
   (let [update-result (pos? (update-application command {:modified (:modified application)} updates :return-count? true))
-        updated-application (domain/get-application-no-access-checking (:id application))
-        organization-info (organization/get-organization (:organization application))] ;; TODO: mongo projection
+        updated-application (domain/get-application-no-access-checking (:id application)) ;; TODO: mongo projection
+        organization-info (organization/get-organization (:organization application))]
     (when update-result
       (doseq [{id :id :as added-task} added-tasks-with-updated-buildings]
         (let [attachments (get attachments-by-task-id id)]
