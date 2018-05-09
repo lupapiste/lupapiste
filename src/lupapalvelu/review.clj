@@ -70,7 +70,7 @@
         compared-keys (keys key->comparator-fn)]
     (every? true? (map (fn [key]
                          ((key->comparator-fn key) (get (katselmus-data a) key)
-                          (get (katselmus-data b) key)))
+                                                   (get (katselmus-data b) key)))
                        compared-keys))))
 
 (defn- task-with-same-name-type-and-data [data-keys mongo-task tasks]
