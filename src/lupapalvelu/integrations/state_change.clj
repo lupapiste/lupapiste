@@ -164,10 +164,6 @@
 
 (def matti-json-queue "lupapiste/application.state-change")
 
-(def json-consumer-session (-> (jms/get-default-connection)
-                               (jms/create-transacted-session)
-                               (jms/register-session :consumer)))
-
 (defn create-state-change-consumer [session]
   (fn [{:keys [url headers options data]}]
     (logging/with-logging-context {:userId (:user-id options) :applicationId (:application-id options)}
@@ -180,11 +176,18 @@
           (errorf "Message (id: %s) rollback initiated" (:message-id options))
           (jms/rollback session))))))
 
-(defonce state-change-consumer
-         (jms/create-nippy-consumer
-           json-consumer-session
-           matti-json-queue
-           (create-state-change-consumer json-consumer-session)))
+(def json-consumer-session (if-let [conn (jms/get-default-connection)]
+                             (-> conn
+                                 (jms/create-transacted-session)
+                                 (jms/register-session :consumer))
+                             (warn "No JMS connection available")))
+
+(when json-consumer-session
+  (defonce state-change-consumer
+           (jms/create-nippy-consumer
+             json-consumer-session
+             matti-json-queue
+             (create-state-change-consumer json-consumer-session))))
 
 (sc/defn ^:always-validate send-via-jms [state-change-data :- StateChangeMessage endpoint-data :- EndpointData options]
   (jms/produce-with-context matti-json-queue (nippy/freeze (assoc endpoint-data :data state-change-data :options options)))
@@ -209,7 +212,7 @@
                   :action (:action command))]
         (messages/save msg)
         (if-let [endpoint (get-state-change-endpoint-data)]
-          (if jms?
+          (if (and jms? json-consumer-session)
             (send-via-jms outgoing-data endpoint {:user-id (:id user) :message-id message-id :application-id (:id app)})
             (send-via-http message-id outgoing-data endpoint))
           (warn "No state-change endpoint defined!"))))))
