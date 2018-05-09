@@ -106,9 +106,9 @@
 
 (defn- merge-review-tasks
   "Returns a vector with two values:
-  0: Existing tasks left unchanged,
-  1: Completely new and updated existing review tasks,
-  2: Reviews to be marked faulty"
+   0: Existing tasks left unchanged,
+   1: Completely new and updated existing review tasks,
+   2: Reviews to be marked faulty"
   [tasks-from-update tasks-from-mongo & [overwrite-background-reviews?]]
 
   ;; As a postcondition, check that for every new faulty task there is
@@ -189,9 +189,9 @@
 
 (defn reviews-preprocessed
   "Review preprocessing: 1) Duplicate entry prevention (group-by review type, name, date and external id)
-  2) Collect all related building and attachment elements together
-  3) Merge into final results in which there are no duplicates by name or type but still
-  all building details and attachments are still there"
+												 2) Collect all related building and attachment elements together
+												 3) Merge into final results in which there are no duplicates by name or type but still
+												    all building details and attachments are still there"
   [app-xml]
   (let [historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
                                                                 (< pvm (now))))
@@ -218,8 +218,8 @@
   (letfn [(review-to-task [review] (tasks/katselmus->task meta source {:buildings buildings-summary} review))
           (drop-reviews-with-lupapiste-muuTunnus [rs] (filter (util/fn-> :data :muuTunnusSovellus :value ss/lower-case (not= "lupapiste")) rs))]
     (->> reviews
-      (map review-to-task)
-      drop-reviews-with-lupapiste-muuTunnus)))
+         (map review-to-task)
+         drop-reviews-with-lupapiste-muuTunnus)))
 
 (defn read-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
