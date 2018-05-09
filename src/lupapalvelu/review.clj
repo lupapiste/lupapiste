@@ -294,14 +294,15 @@
                         (try
                           (verdict-review-util/get-poytakirja! updated-application user (now) {:type "task" :id id} att)
                           (catch Exception e
-                            (errorf "Error when getting review attachments: task=%s attachment=%s message=%s"
+                            (errorf "Error when getting review attachments: task=%s attachment=%s message=%s url=%s"
                                     id
                                     (:id att)
-                                    (.getMessage e)))))
-                  got-reviews-from-backend? (every? #(contains? % :urlHash) pks)]
+                                    (.getMessage e)
+                                    (get-in att [:liite :linkkiliitteeseen])))))
+                  got-review-attachments-from-backend? (every? #(contains? % :urlHash) pks)]
               (when-not ;; If :only-use-inspection-from-backend is true AND there's a review from backend, bypass generation of pdfa
                 (and (true? (:only-use-inspection-from-backend organization-info))
-                     (true? got-reviews-from-backend?))
+                     (true? got-review-attachments-from-backend?))
                   (tasks/generate-task-pdfa updated-application added-task (:user command) "fi")))))))
     (cond-> {:ok update-result}
       (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))
