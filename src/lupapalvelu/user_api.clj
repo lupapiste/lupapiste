@@ -212,7 +212,7 @@
   (let [caller-email (:email caller)
         user-email   (:email user-data)]
 
-    (if (usr/admin? caller)                                                     ; TODO: Admin is not allowed to update userdata since restruction fromUserUpdate schema. How this should work?
+    (if (usr/admin? caller)                                                                                             ; TODO: Admin is not allowed to update userdata since restruction fromUserUpdate schema. How this should work?
       (when (= user-email caller-email) (fail! :error.unauthorized :desc "admin may not change his/her own data"))
       (when (not= user-email caller-email) (fail! :error.unauthorized :desc "can't edit others data")))
 
@@ -789,16 +789,16 @@
           user-id                (:id user)
           {:keys [attachment-type attachment-id file-name content-type size]} attachment
           attachment             (mongo/download-find {:id attachment-id :metadata.user-id user-id})
-          maybe-attachment-id    (str application-id "." user-id "." attachment-id) ; proposed attachment id (if empty placeholder is not found)
+          maybe-attachment-id    (str application-id "." user-id "." attachment-id)                                     ; proposed attachment id (if empty placeholder is not found)
           updated-application    (mongo/by-id :applications application-id)
-          same-attachments       (allowed-attachments-same-type updated-application attachment-type) ; attachments of same type
-          old-user-attachment-id (some (hash-set maybe-attachment-id) (map :id same-attachments)) ; if id is already present, use it
+          same-attachments       (allowed-attachments-same-type updated-application attachment-type)                    ; attachments of same type
+          old-user-attachment-id (some (hash-set maybe-attachment-id) (map :id same-attachments))                       ; if id is already present, use it
 
           attachment-id          (or old-user-attachment-id
-                                     (-> (remove :latestVersion same-attachments) first :id) ; upload user attachment to empty placeholder
+                                     (-> (remove :latestVersion same-attachments) first :id)                            ; upload user attachment to empty placeholder
                                      maybe-attachment-id)]
       (when (zero? (mongo/count :applications {:_id         application-id
-                                               :attachments {$elemMatch {:id                 attachment-id ; skip upload when user attachment as already been uploaded
+                                               :attachments {$elemMatch {:id                 attachment-id              ; skip upload when user attachment as already been uploaded
                                                                          :latestVersion.type attachment-type}}}))
         (att/upload-and-attach! command
                                 {:attachment-id   attachment-id
