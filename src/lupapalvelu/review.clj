@@ -281,33 +281,23 @@
         :attachments-by-task-id attachments-by-task-id
         :added-tasks-with-updated-buildings added-tasks-with-updated-buildings)))
 
-(defn can-bypass-task-pdfa-generation?
-  "Task pdfa generation can be bypassed, if
-   1) The user has opted out of it by checking the :only-use-inspection-from-backend parameter in organization to true
-   2) Fetching review documents from backend was successful (i.e. get-poytakirja! calls returned a map with :urlHash parameter)"
-  [organization pks]
-  (let [got-review-attachments-from-backend? (every? #(contains? % :urlHash) pks)]
-    (and (true? (:only-use-inspection-from-backend organization))
-         (true? got-review-attachments-from-backend?))))
-
 (defn save-review-updates [{user :user application :application :as command} updates added-tasks-with-updated-buildings attachments-by-task-id]
   (let [update-result (pos? (update-application command {:modified (:modified application)} updates :return-count? true))
         updated-application (domain/get-application-no-access-checking (:id application)) ;; TODO: mongo projection
-        organization-info (organization/get-organization (:organization application))]
+        organization (organization/get-organization (:organization application))]
     (when update-result
       (doseq [{id :id :as added-task} added-tasks-with-updated-buildings]
         (let [attachments (get attachments-by-task-id id)]
           (if-not (empty? attachments)
-            (let [pks (for [att attachments]
-                        (try
-                          (verdict-review-util/get-poytakirja! updated-application user (now) {:type "task" :id id} att)
-                          (catch Exception e
-                            (errorf "Error when getting review attachments: task=%s attachment=%s message=%s url=%s"
-                                    id
-                                    (:id att)
-                                    (.getMessage e)
-                                    (get-in att [:liite :linkkiliitteeseen])))))]
-              (when-not (can-bypass-task-pdfa-generation? organization-info pks)
-                (tasks/generate-task-pdfa updated-application added-task (:user command) "fi")))))))
+            (doseq [att attachments]
+              (try
+                (verdict-review-util/get-poytakirja! updated-application user (now) {:type "task" :id id} att)
+                (catch Exception e
+                  (errorf "Error when getting review attachments: task=%s attachment=%s message=%s"
+                          id
+                          (:id att)
+                          (.getMessage e)))))
+            (when-not (true? (:only-use-inspection-from-backend organization))
+              (tasks/generate-task-pdfa updated-application added-task (:user command) "fi"))))))
     (cond-> {:ok update-result}
             (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))
