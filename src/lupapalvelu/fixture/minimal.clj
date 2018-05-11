@@ -1113,6 +1113,7 @@
                                                 :auto-katos [[:paapiirustus :asemapiirros]
                                                              [:ennakkoluvat_ja_lausunnot :naapurin_kuuleminen]
                                                              [:rakennuspaikan_hallinta :todistus_hallintaoikeudesta]]}
+                       :pate-enabled true
                        :krysp {:R {:url local-krysp :version "2.2.2"
                                    :http (merge
                                            {:auth-type "basic"

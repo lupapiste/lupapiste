@@ -5,7 +5,8 @@
             [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :as fixture]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [sade.shared-util :as util]))
 
 (def jms-test-db (str "krysp_http_itest_jms" (now)))
 
@@ -29,9 +30,9 @@
             (:integrationAvailable resp) => true))
 
         (let [msgs (mongo/select :integration-messages {:application.id application-id})
-              sent-message (first msgs)]
+              sent-message (util/find-first (fn [msg] (= (:messageType msg) "KuntaGML application")) msgs)]
           (facts "integration-messages"
-            (count msgs) => 1
+            (count msgs) => 4                               ; 3x state-change 1x KuntaGML
             (fact "sent message is saved"
               (:messageType sent-message) => "KuntaGML application"
               (:direction sent-message) => "out"
@@ -60,7 +61,7 @@
         resp => ok?
         (:integrationAvailable resp) => true))
 
-    (let [msgs (integration-messages application-id :test-db-name test-db-name)
+    (let [msgs (filter #(ss/contains? (:messageType %) "KuntaGML") (integration-messages application-id :test-db-name test-db-name))
           sent-message (first msgs)
           received-message (second msgs)]
       (facts "integration-messages"
