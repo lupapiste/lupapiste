@@ -43,12 +43,30 @@
 ;; ==============================================================================
 ;;
 
+(defn- get-user-org-names [user]
+  (let [lang (-> user
+                 :language
+                 keyword)
+        org-ids (->> user
+                     :orgAuthz
+                     keys
+                     (map name))]
+    (when (seq org-ids)
+      (->> (mongo/select :organizations {:_id {"$in" org-ids}} [:name])
+           (reduce (fn [acc {:keys [id name]}]
+                     (assoc acc (-> id keyword) (-> name lang)))
+                   {})))))
+
 (defn- get-user [user]
   (if (usr/virtual-user? user)
-    user
+    (-> user
+        (assoc :virtual false))
     (let [full-user (usr/get-user-by-id (:id user))]
-      (cond-> (dissoc full-user :private)
-              (usr/verified-person-id? full-user) (dissoc :personId)))))
+      (-> full-user
+          (dissoc :private)
+          (assoc :orgNames (get-user-org-names full-user))
+          (assoc :virtual true)
+          (cond-> (usr/verified-person-id? full-user) (dissoc :personId))))))
 
 (defquery user
   {:on-success (fn [_ {user :user}]
@@ -57,7 +75,7 @@
    :user-roles roles/all-authenticated-user-roles}
   [{user :user}]
   (if-let [full-user (get-user user)]
-    (ok :user (assoc full-user :virtual (usr/virtual-user? user)))
+    (ok :user full-user)
     (fail :error.user.not.found)))
 
 (defquery users
