@@ -102,22 +102,32 @@ LUPAPISTE.CurrentUser = function() {
   });
 
   /**
-   * A vector of roles available for current user. Each element in vector is a vector
-   * consisting role, and optionally a second element indicating the organization.
+   * A vector of roles available for current user. Each element in vector is an object
+   * with keys "role" and optional "org"
    *
    * Example:
    * <code>
    *   [
-   *     ["authority",      "753-R"],
-   *     ["authority",      "297-R"],
-   *     ["authorityAdmin", "297-R"]
+   *     {
+   *       role: "authority",
+   *       org: "753-R"
+   *     },
+   *     {
+   *       role: "authority",
+   *       org: "297-R"
+   *     },
+   *     {
+   *       role: "authorityAdmin",
+   *       org: "297-R"
+   *     },
+   *     {
+   *       role: "applicant"
+   *     }
    *   ]
    * </code>
    *
    * If the user can't change role the value is [].
    */
-
-  // _.reduce(orgAuthz, (acc, rolez, org) => { _.each(rolez(), role => acc.push([role, org])); return acc; }, [])
 
   self.availableRoles = ko.pureComputed(function() {
     // Currently, multiple roles are available only for authority users that have
@@ -128,7 +138,7 @@ LUPAPISTE.CurrentUser = function() {
       self.orgAuthz(),
       function(acc, rolez, org) {
         _.forEach(ko.unwrap(rolez), function(role) {
-          acc.push([role, org]);
+          acc.push({role: role, org: org});
         });
         return acc;
       },
