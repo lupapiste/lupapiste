@@ -26,7 +26,8 @@ Sonja inits applications
 Foreman fills personal information
   Foreman logs in
   Foreman applies personal information to the foreman application  0
-  Check accordion text  tyonjohtaja-v2  TYÖNJOHTAJAN NIMEÄMINEN  - Teppo Nieminen
+  Set foreman role  KVV-työnjohtaja
+  Check accordion text  tyonjohtaja-v2  TYÖNJOHTAJAN NIMEÄMINEN  - KVV-työnjohtaja Teppo Nieminen
 
 Foreman can not fill applicant information
   # No inputs that are missing a readoly attribute. In other words, all inputs are read only.
@@ -76,6 +77,13 @@ Foreman only read comments on project application
   Open side panel  conversation
   Element should not be visible by test id  application-new-comment-text
   Element should not be visible by test id  application-new-comment-btn
+
+Foreman link text shows foreman description and application state
+# LPK-2097
+  Element should be visible by test id  foreman-link-person-info
+  Element should Contain  xpath=//span[@data-test-id="foreman-link-person-info"]  KVV-työnjohtaja
+  Element should Contain  xpath=//span[@data-test-id="foreman-link-person-info"]  Nieminen Teppo
+  Element should Contain  xpath=//span[@data-test-id="foreman-link-state"]  Hakemus jätetty
 
 Foreman can not invite anyone to the project application
   Open accordions  parties
