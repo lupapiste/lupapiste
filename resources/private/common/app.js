@@ -291,7 +291,7 @@ var LUPAPISTE = LUPAPISTE || {};
         return models.currentUser ? models.currentUser.availableRoles() : [];
       });
 
-      self.menuItems = function() {
+      self.menuItems = ko.pureComputed(function() {
         return _.concat(
           self
             .availableRoles()
@@ -314,7 +314,7 @@ var LUPAPISTE = LUPAPISTE || {};
               iconClass: "lupicon-log-out"
             }
           ]);
-      };
+      });
 
       self.action = function(actionName) {
         self.visible(false);

@@ -1365,7 +1365,7 @@ nav .nav-top {
   display: block;
   clear: both;
   box-sizing: border-box;
-  overflow: hidden;
+  height: 62px;
 }
 
 nav .brand {
@@ -1576,13 +1576,40 @@ nav .header-menu .header-box a, nav .header-menu .header-box span {
   line-height: 60px;
 }
 
+nav .header-menu .header-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+nav .header-menu .header-dropdown .dropdown-content {
+  position: absolute;
+  background-color: white;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  right: 0;
+}
+
+nav .header-menu .header-dropdown .dropdown-content a {
+  padding: 0 12px 0 12px;
+  text-decoration: none;
+  display: block;
+}
+
+nav .header-menu .header-dropdown .dropdown-content a:hover {
+  background-color: #f3aa4a;
+}
+
+nav .header-menu .header-dropdown .dropdown-content a span {
+  color: black;
+}
+
 .nav-bottom {
   width: 100%;
   background-color: #555555;
   display: block;
   clear: both;
   box-sizing: border-box;
-  overflow: hidden;
 }
 
 .nav-bottom .language-menu {
@@ -1895,7 +1922,6 @@ nav .julkipano-brand .nav-bottom ul li a span {
   display: block;
   clear: both;
   box-sizing: border-box;
-  overflow: hidden;
   padding-left: 12px;
   padding-top: 13px;
   padding-bottom: 12px;
