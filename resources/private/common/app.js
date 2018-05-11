@@ -286,56 +286,115 @@ var LUPAPISTE = LUPAPISTE || {};
         self.visible(!current);
       }
 
+      /**
+       * Map of roles that are selectable, that is, roles that user can select in
+       * role selector component. Values do not matter, only the keys are used.
+       */
+
+      self.selectableRole = {
+        "authority": true,
+        "authorityAdmin": true
+      };
+
+      /**
+       * Computes list of roles available in role selector for current user.
+       */
+
       self.availableRoles = ko.pureComputed(function() {
-        console.log("availableRoles:", models.currentUser.availableRoles());
-        return models.currentUser ? models.currentUser.availableRoles() : [];
+        const allRoles = models.currentUser ? models.currentUser.availableRoles() : [];
+        return _(allRoles)
+          .map(function(role) {
+            role.roles = _.filter(role.roles, function(role) {
+              return !!self.selectableRole[role];
+            })
+            return role;
+          })
+          .filter(function(role) {
+            return !_.isEmpty(role.roles);
+          })
+          .sortBy("orgName")
+          .value();
       });
+
+      self.roleIcon = {
+        authority: "lupicon-gear",
+        authorityAdmin: "lupicon-building"
+      };
+
+      self.commonItems = [
+        {
+          type: "sep"
+        },
+        {
+          type: "item",
+          action: "ownPage",
+          text: loc("mypage.title"),
+          iconClass: "lupicon-user"
+        },
+        {
+          type: "item",
+          action: "logout",
+          text: loc("logout"),
+          iconClass: "lupicon-log-out"
+        }
+      ];
+
+      /**
+       * List of menuItems for role selector.
+       */
 
       self.menuItems = ko.pureComputed(function() {
-        return _.concat(
-          self
-            .availableRoles()
-            .map(function(role) {
-              return {
-                action: "setRole:" + role[0] + (role[1] ? ":" + role[1] : ""),
-                text: role[0] + (role[1] ? " " + role[1] : ""),
-                iconClass: ""
-              }
-            }),
-          [
-            {
-              action: "ownPage",
-              text: "Omat tiedot",
-              iconClass: "lupicon-user"
-            },
-            {
-              action: "logout",
-              text: "Kirjaudu ulos",
-              iconClass: "lupicon-log-out"
-            }
-          ]);
+        const menuItemsSeq = _.reduce(
+          self.availableRoles(),
+          function(acc, org) {
+            return acc
+              .concat([
+                {
+                  type: "sep"
+                },
+                {
+                  type: "org",
+                  text: org.orgName
+                }
+              ])
+              .concat(_.map(org.roles, function(role) {
+                return {
+                  type: "item",
+                  text: role, // TODO: localize
+                  iconClass: self.roleIcon[role],
+                  action: "setRole",
+                  role: role,
+                  org: org.org
+                };
+              }));
+          },
+          _([]));
+        return menuItemsSeq
+          .drop(1) // Drop first separator
+          .concat(self.commonItems) // Add my-page and logout items
+          .value();
       });
 
-      self.action = function(actionName) {
+      self.executeAction = function(item) {
         self.visible(false);
-        console.debug("action:", actionName);
-        if (actionName === "ownPage") {
-          window.location.hash = "#!/mypage";
-        } else if (actionName === "logout") {
-          window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
-        } else if (_.startsWith(actionName, "setRole:")) {
-          let e    = _.split(actionName, ":"),
-              role = e[1],
-              org  = e[2];
-          // TODO: actually set the role
-          console.log("setRole:", role, org);
-        } else {
-          log.error("unknown action:", actionName);
+        console.debug("action: item:", item);
+        switch (item.action) {
+          case "setRole":
+            console.log("setRole:", item.role, item.org);
+            break;
+          case "ownPage":
+            window.location.hash = "#!/mypage";
+            break;
+          case "logout":
+            window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
+            break;
+          default:
+            console.error("unknown menu action:", item.action);
         }
       };
 
-      self.actionFor = function(actionName) {
-        return self.action.bind(self, actionName);
+      self.actionFor = function(item) {
+        return self.executeAction.bind(self, item);
       };
 
     }

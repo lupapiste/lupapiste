@@ -1,9 +1,9 @@
 LUPAPISTE.CurrentUser = function() {
   "use strict";
 
-  var self = this;
+  const self = this;
 
-  var defaults = {
+  const defaults = {
     id: "",
     email: "",
     role: "",
@@ -15,6 +15,7 @@ LUPAPISTE.CurrentUser = function() {
     username: "",
     language: "",
     orgAuthz: undefined,
+    orgNames: undefined,
     company: {
       id: undefined,
       role: undefined
@@ -31,10 +32,10 @@ LUPAPISTE.CurrentUser = function() {
     companyApplicationFilters: []
   };
 
-  var fbPixel = null;
+  let fbPixel = null;
   if (LUPAPISTE.config.facebook && LUPAPISTE.config.facebook.url && analytics && analytics.isTrackingEnabled()) {
     fbPixel = function() {
-      var fbUrl = LUPAPISTE.config.facebook.url;
+      const fbUrl = LUPAPISTE.config.facebook.url;
       return "<img height='1' width='1' style='display:none' src='" + fbUrl + "'/>";
     };
   }
@@ -88,10 +89,11 @@ LUPAPISTE.CurrentUser = function() {
   });
 
   function isOutsideAuthority() {
-    var app = lupapisteApp.models.application;
-    return self.role() === "authority"
-      && app && _.includes(hash(), app.id())
-      && !_.get(self.orgAuthz(), app.organization());
+    const app = lupapisteApp.models.application;
+    return self.role() === "authority" &&
+      app &&
+      _.includes(hash(), app.id()) &&
+      !_.get(self.orgAuthz(), app.organization());
   }
 
   self.isAuthorityAdmin = ko.pureComputed(function() {
@@ -107,22 +109,25 @@ LUPAPISTE.CurrentUser = function() {
 
   /**
    * A vector of roles available for current user. Each element in vector is an object
-   * with keys "role" and optional "org"
+   * with keys "role", "org" and "orgName"
    *
    * Example:
    * <code>
    *   [
    *     {
    *       role: "authority",
-   *       org: "753-R"
+   *       org: "753-R",
+   *       orgName: "Sipoon rakennusvalvonta"
    *     },
    *     {
    *       role: "authority",
-   *       org: "297-R"
+   *       org: "297-R",
+   *       orgName: "Kuopio rakennusvalvonta"
    *     },
    *     {
    *       role: "authorityAdmin",
-   *       org: "297-R"
+   *       org: "297-R",
+   *       orgName: "Kuopio rakennusvalvonta"
    *     },
    *     {
    *       role: "applicant"
@@ -138,15 +143,17 @@ LUPAPISTE.CurrentUser = function() {
     // authRolez role for more than one municipality. Later this could
     // be extended to other cases too.
     if (self.role() !== "authority") return [];
-    return _.reduce(
-      self.orgAuthz(),
-      function(acc, rolez, org) {
-        _.forEach(ko.unwrap(rolez), function(role) {
-          acc.push({role: role, org: org});
-        });
-        return acc;
-      },
-      []);
+    const orgAuthz = ko.toJS(self.orgAuthz) || {},
+          orgNames = ko.toJS(self.orgNames) || {};
+    return _.map(
+      orgAuthz,
+      function(roles, org) {
+        return {
+          org: org,
+          roles: roles,
+          orgName: orgNames[org]
+        };
+      });
   });
 
   /**
@@ -166,9 +173,10 @@ LUPAPISTE.CurrentUser = function() {
   });
 
   self.isArchivist = ko.pureComputed(function() {
-    var app = lupapisteApp.models.application;
-    var orgAuths = util.getIn(self.orgAuthz, [ko.unwrap(app.organization)]);
-    return self.role() === "authority" && app &&
+    const app      = lupapisteApp.models.application,
+          orgAuths = util.getIn(self.orgAuthz, [ko.unwrap(app.organization)]);
+    return self.role() === "authority" &&
+      app &&
       _.includes(orgAuths, "archivist");
   });
 
@@ -186,7 +194,7 @@ LUPAPISTE.CurrentUser = function() {
   });
 
   self.displayName = ko.pureComputed(function() {
-    var username = self.username() || "";
+    let username = self.username() || "";
     if (self.firstName() || self.lastName()) {
       username = self.firstName() + " " + self.lastName();
     }
@@ -216,7 +224,7 @@ LUPAPISTE.CurrentUser = function() {
 
   ko.computed(function() {
     if (self.showNotification()) {
-      var fields = getNotificationFields(self.notification);
+      const fields = getNotificationFields(self.notification);
       hub.send("show-dialog", {
         title: fields.title,
         id: "user-notification-dialog",

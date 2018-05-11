@@ -64,20 +64,6 @@
               </a>
             </div>
 
-            <!--
-            <div class="header-box">
-              <a href="#!/mypage" data-bind="attr: {'title': loc('mypage.title')}">
-                <span class="lupicon-user"></span>
-                <span id="user-name"
-                      class="narrow-hide"
-                      data-bind="
-                        text: lupapisteApp.models.currentUser.displayName,
-                        attr: {'data-test-role' : lupapisteApp.models.currentUser.role}">
-                </span>
-              </a>
-            </div>
-            -->
-
             <!-- Role switcher -->
             <div class="header-box header-dropdown">
               <a href="#"
@@ -97,21 +83,21 @@
               <div class="dropdown-content"
                    data-bind="visible: $root.roleSelector.visible,
                               foreach: $root.roleSelector.menuItems">
-                <a href="#" data-bind="click: $root.roleSelector.actionFor(action)">
+                <!-- ko if: type === "item" -->
+                <a href="#" data-bind="click: $root.roleSelector.actionFor($data)">
                   <span data-bind="css: iconClass"></span>
                   <span data-bind="text: text"></span>
                 </a>
+                <!-- /ko -->
+                <!-- ko if: type === "sep" -->
+                <hr/>
+                <!-- /ko -->
+                <!-- ko if: type === "org" -->
+                <span class="organization" data-bind="text: text"></span>
+                <!-- /ko -->
               </div>
             </div>
 
-            <!--
-            <div id="logout-header-box" class="header-box">
-              <a data-bind="attr: {href: '/app/' + $root.currentLanguage + '/logout', 'title': loc('logout')}">
-                <span class="lupicon-log-out"></span>
-                <span class="narrow-hide" data-bind="ltext: 'logout'"></span>
-              </a>
-            </div>
-            -->
           </div>
         </div>
       </div>
