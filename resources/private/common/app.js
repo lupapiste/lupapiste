@@ -317,8 +317,8 @@ var LUPAPISTE = LUPAPISTE || {};
       });
 
       self.roleIcon = {
-        authority: "lupicon-gear",
-        authorityAdmin: "lupicon-building"
+        authority: "lupicon-building",
+        authorityAdmin: "lupicon-gear"
       };
 
       self.commonItems = [
@@ -360,7 +360,7 @@ var LUPAPISTE = LUPAPISTE || {};
               .concat(_.map(org.roles, function(role) {
                 return {
                   type: "item",
-                  text: role, // TODO: localize
+                  text: loc(role),
                   iconClass: self.roleIcon[role],
                   action: "setRole",
                   role: role,
