@@ -12,6 +12,8 @@
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defraw defquery defcommand
                                         update-application notify] :as action]
+            [lupapalvelu.archive.archiving-util :as archiving-util]
+            [lupapalvelu.application-replace-operation :as replace-operation]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.application-utils :as app-utils]
@@ -26,6 +28,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.drawing :as draw]
             [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
@@ -41,10 +44,7 @@
             [lupapalvelu.suti :as suti]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
-            [lupapalvelu.ya :as ya]
-            [lupapalvelu.operations :as operations]
-            [lupapalvelu.archive.archiving-util :as archiving-util]
-            [lupapalvelu.application-replace-operation :as replace-operation])
+            [lupapalvelu.ya :as ya])
   (:import (java.net SocketTimeoutException)))
 
 (defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
@@ -288,7 +288,9 @@
                       (map (fn [e] {:email e, :role "authority"}) emails)))
    :model-fn (fn [{app :application :as command} conf recipient]
                (assoc (notifications/create-app-model command conf recipient)
-                 :applicants (reduce #(str %1 ", " %2) (:_applicantIndex app))))})
+                 :applicants (if-let [applicants (:_applicantIndex app)]
+                               (reduce #(str %1 ", " %2) applicants)
+                               #(i18n/localize % "not-known"))))})
 
 (notifications/defemail :organization-housing-office
   {:pred-fn       (fn [command] (let [application (:application command)
