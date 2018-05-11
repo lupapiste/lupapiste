@@ -13,3 +13,4 @@
       (review/can-bypass-task-pdfa-generation? (assoc organization :only-use-inspection-from-backend false) pks) => false)
     (fact "When :only-use-inspection-from-backend is true but not every element in pks has :urlHash property, it returns false"
       (review/can-bypass-task-pdfa-generation? organization (conj pks {:kikka "kukka"})) => false)))
+
