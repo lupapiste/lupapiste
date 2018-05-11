@@ -30,11 +30,17 @@ LUPAPISTE.ApplicationFiltersService = function() {
 
   self.defaultCompanyFilter = ko.pureComputed(function() {
     return _.find(_savedCompanyFilters(), function(f){
-      return f.isDefaultCompanyFilter();
+      return f.isDefaultFilter();
     });
   });
 
   self.defaultFilter.subscribe(function(val) {
+    if (!self.selected()) {
+      self.selected(val);
+    }
+  });
+
+  self.defaultCompanyFilter.subscribe(function(val) {
     if (!self.selected()) {
       self.selected(val);
     }
