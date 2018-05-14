@@ -207,7 +207,8 @@
       </section>
 
       <section>
-        <h2 data-bind="ltext: 'auth-admin.kopiolaitos-section.title'"></h2>
+        <h2 class="help-adjacent-title" data-bind="ltext: 'auth-admin.kopiolaitos-section.title'"></h2>
+        <span data-bind="component: { name: 'help-toggle', params: {lhtml: 'auth-admin.kopiolaitos.help'}}"></span>
         <div id="kopiolaitos-info" data-bind="with: $root.kopiolaitos">
           <label for="kopiolaitos-email" class="form-label" data-bind="ltext: 'auth-admin.kopiolaitos-email.title'"></label>
           <input id="kopiolaitos-email" class="form-input text really-long" type="text"
