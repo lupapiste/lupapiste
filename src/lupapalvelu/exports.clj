@@ -333,7 +333,7 @@
 
 (defn- dummy-onkalo-log-entry [start-ts end-ts]
   {:organization (rand-nth ["753-R" "091-R" "092-R" "837-R" "297-R"])
-   :timestamp (+ start-ts (rand-int (- end-ts start-ts)))
+   :timestamp (+ start-ts (long (rand (- end-ts start-ts))))
    :filename "foo"
    :file-id "bar"})
 
