@@ -252,7 +252,7 @@
                              {:id link-permit-id :type link-permit-type :operation link-permit-app-op :permitSubtype ""})
 
                            (let [{:keys [primaryOperation permitSubtype state] :as linked-app}
-                                 (when (= (:type ((keyword link-permit-id) link-data)) "application")
+                                 (when (util/=as-kw (:type ((keyword link-permit-id) link-data)) :application)
                                     (link-applications link-permit-id))
 
                                  converted-link-data  {:id link-permit-id
