@@ -408,7 +408,7 @@
                                       assoc
                                       :id  (mongo/create-id)
                                       :modified created))
-        draft           (if override-id
+        draft           (if replacement-id
                           (assoc draft :replacement {:replaces replacement-id})
                           draft)]
     (action/update-application command

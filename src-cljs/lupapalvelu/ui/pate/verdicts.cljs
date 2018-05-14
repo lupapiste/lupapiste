@@ -135,7 +135,7 @@
                         [:a
                          {:on-click #(confirm-and-replace-verdict verdict id)}
                          (common/loc :pate.verdict-table.replace-verdict)])])])
-            verdicts)]]])
+            (sort-by :modified > verdicts))]]])
    (when (state/auth? :new-pate-verdict-draft)
      (new-verdict))])
 
