@@ -9,7 +9,7 @@
             <a data-bind="click: $data.openStartPage" class="logo"></a>
           </div>
           <div id="language-select" data-bind="css: {'language-open': $root.languageMenuVisible,
-                                                 'language-closed': $root.languageMenuVisible() == false}">
+                                                     'language-closed': $root.languageMenuVisible() == false}">
             <a data-test-id="language-link"
                href="#" data-bind="click: $root.toggleLanguageMenu, clickBubble: false">
               <span data-bind="text: $root.currentLanguage"></span>
@@ -65,35 +65,47 @@
             </div>
 
             <!-- Role switcher -->
-            <div class="header-box header-dropdown">
+            <div class="header-box role-selector"
+                 data-bind="
+                        css: {'role-selector-closed': $root.roleSelector.visible() == false,
+                              'role-selector-open':   $root.roleSelector.visible}">
               <a href="#"
-                 class="dropdown-toggle-button"
+                 class="role-selector-dropdown-toggle-button"
                  data-bind="click: $root.roleSelector.toggle">
-                <span class="narrow-hide"
-                      id="user-name"
-                      data-bind="
-                        text: lupapisteApp.models.currentUser.displayName,
-                        attr: {'data-test-role' : lupapisteApp.models.currentUser.role}">
+                <span class="narrow-hide role-selector-user">
+                  <span id="user-name"
+                        class="role-selector-user-name"
+                        data-bind="
+                          text: lupapisteApp.models.currentUser.displayName,
+                          attr: {'data-test-role' : lupapisteApp.models.currentUser.role}">
+                  </span>
+                  <span class="role-selector-user-role">
+                    Role
+                  </span>
                 </span>
                 <span data-bind="
                         css: {'lupicon-chevron-small-down': $root.roleSelector.visible() == false,
                               'lupicon-chevron-small-up': $root.roleSelector.visible}">
                 </span>
               </a>
-              <div class="dropdown-content"
+              <div class="role-selector-dropdown-content"
                    data-bind="visible: $root.roleSelector.visible,
                               foreach: $root.roleSelector.menuItems">
                 <!-- ko if: type === "item" -->
-                <a href="#" data-bind="click: $root.roleSelector.actionFor($data)">
-                  <span data-bind="css: iconClass"></span>
-                  <span data-bind="text: text"></span>
+                <a href="#"
+                   data-bind="click: $root.roleSelector.actionFor($data)"
+                   class="role-selector-dropdown-item role-selector-dropdown-role">
+                  <span data-bind="css: iconClass" class="role-selector-dropdown-role-icon"></span>
+                  <span data-bind="text: text" class="role-selector-dropdown-role-text"></span>
                 </a>
                 <!-- /ko -->
                 <!-- ko if: type === "sep" -->
-                <hr/>
+                <hr class="role-selector-dropdown-item role-selector-dropdown-sep"/>
                 <!-- /ko -->
                 <!-- ko if: type === "org" -->
-                <span class="organization" data-bind="text: text"></span>
+                <span data-bind="text: text"
+                      class="role-selector-dropdown-item role-selector-dropdown-organization">
+                </span>
                 <!-- /ko -->
               </div>
             </div>
