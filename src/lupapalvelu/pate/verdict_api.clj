@@ -73,15 +73,16 @@
 (defcommand new-pate-verdict-draft
   {:description      "Composes new verdict draft from the latest published
   template and its settings. Returns the verdict-id."
-   :feature          :pate
-   :user-roles       #{:authority}
-   :parameters       [id template-id]
-   :input-validators [(partial action/non-blank-parameters [:id])]
-   :pre-checks       [pate-enabled
-                      (template/verdict-template-check :application :published)]
-   :states           states/post-submitted-states}
+   :feature             :pate
+   :user-roles          #{:authority}
+   :parameters          [id template-id]
+   :optional-parameters [replacement-id]
+   :input-validators    [(partial action/non-blank-parameters [:id])]
+   :pre-checks          [pate-enabled
+                          (template/verdict-template-check :application :published)]
+   :states              states/post-submitted-states}
   [command]
-  (ok :verdict-id (verdict/new-verdict-draft template-id command)))
+  (ok :verdict-id (verdict/new-verdict-draft template-id command replacement-id)))
 
 (defquery pate-verdicts
   {:description      "List of verdicts. Item properties:
@@ -189,6 +190,19 @@
    :states          states/post-submitted-states
    :pre-checks      [pate-enabled]}
   [_])
+
+(defcommand replace-pate-verdict
+  {:description       "Replace existing verdict with new one"
+   :feature           :pate
+   :parameters        [id old-verdict-id verdict-id]
+   :user-roles        #{:authority}
+   :input-validators  [(partial action/non-blank-parameters [:id :old-verdict-id :verdict-id])]
+   :pre-checks        [pate-enabled]
+   :states            states/post-verdict-states}
+  [{application :application user :user :as command}]
+  (verdict/replace-verdict user command old-verdict-id verdict-id))
+
+
 
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))

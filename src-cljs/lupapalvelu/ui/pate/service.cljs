@@ -5,6 +5,8 @@
             [lupapalvelu.ui.authorization :as auth]
             [sade.shared-util :as util]))
 
+(enable-console-print!)
+
 (defn fetch-template-list []
   (common/query "verdict-templates"
                 #(reset! state/template-list (:verdict-templates %))))
@@ -154,11 +156,12 @@
                 #(reset! state/verdict-list (:verdicts %))
                 :id app-id))
 
-(defn new-verdict-draft [app-id template-id callback]
+(defn new-verdict-draft [app-id template-id callback replacement-id]
   (common/command {:command "new-pate-verdict-draft"
                    :success callback}
                   :id app-id
-                  :template-id template-id))
+                  :template-id template-id
+                  :replacement-id replacement-id))
 
 (defn open-verdict [app-id verdict-id callback]
   (common/query "pate-verdict"
@@ -190,13 +193,11 @@
                   :id app-id
                   :verdict-id verdict-id))
 
-(defn replace-verdict [app-id verdict-id]
-  (common/command {:command "edit-pate-verdict"
-                   :succes (fn [_] (println "Done"))}
+(defn replace-verdict [app-id old-verdict-id verdict-id]
+  (common/command {:command "replace-pate-verdict"}
                   :id app-id
-                  :verdict-id verdict-id
-                  :path ["overrided"]
-                  :value true))
+                  :old-verdict-id old-verdict-id
+                  :verdict-id verdict-id))
 
 ;; Attachments
 

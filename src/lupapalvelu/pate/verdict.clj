@@ -398,7 +398,7 @@
 (declare enrich-verdict)
 
 (defn new-verdict-draft [template-id {:keys [application organization created]
-                                      :as   command}]
+                                      :as   command} replacement-id]
   (let [template       (template/verdict-template @organization template-id)
         {draft :draft} (-> {:template    template
                             :draft       (default-verdict-draft template)
@@ -407,15 +407,18 @@
                            (update-in [:draft]
                                       assoc
                                       :id  (mongo/create-id)
-                                      :modified created))]
+                                      :modified created))
+        draft           (if override-id
+                          (assoc draft :replacement {:replaces replacement-id})
+                          draft)]
     (action/update-application command
                                {$push {:pate-verdicts
                                        (sc/validate schemas/PateVerdict draft)}})
     (:id draft)))
 
 (defn verdict-summary [verdict]
-  (merge (select-keys verdict [:id :published :modified])
-         (select-keys (:data verdict) [:verdict-date :handler])))
+  (merge (select-keys verdict [:id :published :modified :replacement])
+         (select-keys (:data verdict) [:verdict-date :handler :verdict-section])))
 
 (defn mask-verdict-data [{:keys [user application]} verdict]
   (cond
@@ -950,3 +953,12 @@
        :headers {"Content-Type"        "application/pdf"
                  "Content-Disposition" (format "filename=\"%s\"" filename)}
        :body    pdf-file-stream})))
+
+(defn replace-verdict [user command old-verdict-id verdict-id]
+  (action/update-application command
+                             {:pate-verdicts {$elemMatch {:id old-verdict-id}}}
+                             {$set (merge
+                                     {:pate-verdicts.$.replacement.ts (sade.core/now)}
+                                     {:pate-verdicts.$.replacement.user.username (:username user)}
+                                     {:pate-verdicts.$.replacement.user.id (:id user)}
+                                     {:pate-verdicts.$.replacement.replaced-by verdict-id})}))
