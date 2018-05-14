@@ -71,6 +71,11 @@ Foreman could add attachment to foreman application
   Open tab  attachments
   Element should be visible by test id  add-attachments-label
 
+Foreman application links to project application with correct link text
+  ${appId} =   Get From List  ${applicationIds}  1
+  Element should be visible by test id  test-application-link-permit-lupapistetunnus
+  Element should contain  xpath=//a[@data-test-id="test-application-link-permit-lupapistetunnus"]/span[1]  ${appId}
+
 Foreman only read comments on project application
   Open project application
   Confirm yes no dialog
