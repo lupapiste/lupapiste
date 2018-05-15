@@ -9,7 +9,8 @@
           <i class="lupicon-user-pen"></i>
           <span data-bind="ltext: 'fillInfoButton'"></span>
         </button>
-        <span data-bind="if: showAttachmentsOption" class="form-entry">
+        <span data-bind="if: showAttachmentsOption" class="form-entry"
+              data-test-id="also-fill-attachments-checkbox">
           <input type="checkbox" data-bind="checked: fillAttachments"
                  id="fill-attachments-checkbox" class="form-input checkbox"/>
           <label for="fill-attachments-checkbox" data-bind="ltext: 'application.attachmentsCopyOwn'"

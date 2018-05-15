@@ -27,6 +27,9 @@ Foreman fills personal information
   Foreman logs in
   Foreman applies personal information to the foreman application  0
   Set foreman role  KVV-työnjohtaja
+  Element should be visible by test id  also-fill-attachments-checkbox
+  Element should contain  xpath=//span[@data-test-id='also-fill-attachments-checkbox']/label  Kopioi omat liitteet hakemukselle
+  Checkbox should be selected  xpath=//span[@data-test-id='also-fill-attachments-checkbox']/input
   Check accordion text  tyonjohtaja-v2  TYÖNJOHTAJAN NIMEÄMINEN  - KVV-työnjohtaja Teppo Nieminen
 
 Foreman can not fill applicant information
