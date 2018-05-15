@@ -111,8 +111,7 @@
   [m] (postwalk-map (partial map (fn [[k v]] [k (if (sequential? v) (map-index v) v)])) m))
 
 (defn- do-get-xml [http-fn url opts raw?]
-  ; Set default timeout to 120 s
-  (let [options (merge {:socket-timeout 120000, :conn-timeout 120000, :throw-fail! (not raw?)} opts)
+  (let [options (merge {:socket-timeout 120000, :conn-timeout 30000, :throw-fail! (not raw?)} opts)
         {:keys [status body reason-phrase request-time]} (http-fn url options)]
     (debugf "Received status %s %s in %.3f seconds from url %s" status reason-phrase (/ (double request-time) 1000) url)
     (if-not (s/blank? body)
