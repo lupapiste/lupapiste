@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.pate.verdicts
   (:require [clojure.set :as set]
+            [clojure.string :as ss]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
@@ -13,8 +14,6 @@
             [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]
             [sade.shared-util :as util]))
-
-(enable-console-print!)
 
 (defonce args (atom {}))
 
@@ -92,6 +91,11 @@
   (when-let [replacement-verdict (first (filter #(= (get-in verdict [:replacement :replaces]) (:id %)) verdicts))]
     (common/loc :pate.replacing.verdict (:verdict-section replacement-verdict))))
 
+(defn- sort-verdicts-by-verdict-date [verdicts]
+  (concat
+    (filter #(nil? (:published %)) verdicts)
+    (sort-by :verdict-date > (filter #(not (nil? (:published %))) verdicts))))
+
 (rum/defc verdict-list < rum/reactive
   [verdicts app-id replacement-verdict]
   [:div
@@ -113,12 +117,16 @@
         [:th (common/loc :pate.verdict-table.last-edit)]
         [:th ""]]]
       [:tbody
-       (map (fn [{:keys [id published modified verdict-date handler] :as verdict}]
+       (map (fn [{:keys [id published modified verdict-date handler verdict-type verdict-code category verdict-section] :as verdict}]
               [:tr {:key id}
                [:td [:a {:on-click #(open-verdict id)}
-                     (if published
-                       (str "§" (:verdict-section verdict) " " (path/loc :pate-verdict))
-                       (path/loc :pate-verdict-draft))
+                     (if (= :ya (keyword category))
+                       (if published
+                         (str "§" verdict-section " " (ss/capitalize verdict-type) " - " (ss/capitalize (ss/replace verdict-code #"-" " ")))
+                         (str (path/loc :pate-verdict-draft) " - " (ss/capitalize verdict-type) " - " (ss/capitalize (ss/replace verdict-code #"-" " "))))
+                       (if published
+                         (str "§" verdict-section " " (if verdict-code (ss/capitalize verdict-code) (path/loc :pate-verdict)))
+                         (path/loc :pate-verdict-draft)))
                      (if (some? (get-in verdict [:replacement :replaces]))
                        (replace-verdict verdict verdicts))]]
                [:td (if published
@@ -136,7 +144,7 @@
                         [:a
                          {:on-click #(confirm-and-replace-verdict verdict id)}
                          (common/loc :pate.verdict-table.replace-verdict)])])])
-            (sort-by :modified > verdicts))]]])
+            (sort-verdicts-by-verdict-date verdicts))]]])
    (when (state/auth? :new-pate-verdict-draft)
      (new-verdict))])
 

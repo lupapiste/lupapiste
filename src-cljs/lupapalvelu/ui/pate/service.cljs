@@ -5,8 +5,6 @@
             [lupapalvelu.ui.authorization :as auth]
             [sade.shared-util :as util]))
 
-(enable-console-print!)
-
 (defn fetch-template-list []
   (common/query "verdict-templates"
                 #(reset! state/template-list (:verdict-templates %))))

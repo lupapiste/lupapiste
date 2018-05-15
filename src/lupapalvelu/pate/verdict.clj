@@ -417,8 +417,8 @@
     (:id draft)))
 
 (defn verdict-summary [verdict]
-  (merge (select-keys verdict [:id :published :modified :replacement])
-         (select-keys (:data verdict) [:verdict-date :handler :verdict-section])))
+  (merge (select-keys verdict [:id :published :modified :replacement :category])
+         (select-keys (:data verdict) [:verdict-date :handler :verdict-section :verdict-code :verdict-type])))
 
 (defn mask-verdict-data [{:keys [user application]} verdict]
   (cond
