@@ -10,7 +10,14 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [sade.util :as util]))
 
-(testable-privates lupapalvelu.batchrun fetch-reviews-for-organization fetch-reviews-for-organization-permit-type)
+(testable-privates lupapalvelu.batchrun fetch-reviews-for-organization fetch-reviews-for-organization-permit-type organization-has-krysp-url-function)
+
+(fact "organization-has-krysp-url-function"
+  ((organization-has-krysp-url-function {}) {:permitType "T" :organization "FOO"}) => false
+  ((organization-has-krysp-url-function {"FOO" {:krysp nil}}) {:permitType "T" :organization "FOO"}) => false
+  ((organization-has-krysp-url-function {"FOO" {:krysp {:T {:url ""}}}}) {:permitType "T" :organization "FOO"}) => false
+  ((organization-has-krysp-url-function {"FOO" {:krysp {:T {:url "testi"}}}}) {:permitType "T" :organization "FOO"}) => true
+  ((organization-has-krysp-url-function {"FOO" {:krysp {:T {:url "testi"}}}}) {:permitType "G" :organization "FOO"}) => false)
 
 (facts fetch-reviews-for-organization-permit-type
   (fact "fetch single application"

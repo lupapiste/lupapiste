@@ -1,18 +1,15 @@
 (ns lupapalvelu.batchrun
-  (:require [taoensso.timbre :refer [debug debugf error errorf info]]
+  (:require [taoensso.timbre :refer [debug debugf error errorf info warn]]
             [me.raynes.fs :as fs]
             [monger.operators :refer :all]
             [clojure.set :as set]
             [slingshot.slingshot :refer [try+]]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
-            [monger.core :as monger]
             [monger.query :as monger-query]
-            [monger.credentials :as monger-cred]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.integrations.state-change :as state-change]
             [lupapalvelu.logging :as logging]
@@ -27,19 +24,17 @@
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapiste-commons.threads :as threads]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.dummy-email-server]
             [sade.http :as http]
             [sade.strings :as ss]
-            [lupapiste-commons.threads :as threads]
             [sade.util :refer [fn-> pcond->] :as util]
-            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
-            [monger.collection :as mc]
-            [clojure.data :as cd]
-            [clojure.pprint])
+            [sade.validators :as v])
   (:import [org.xml.sax SAXParseException]))
 
 
@@ -319,27 +314,21 @@
                                    :exception-message (.getMessage t)
                                    :application-id    id
                                    :organization      {:id organization :permit-type permitType}})))))
+(defn- organization-has-krysp-url-function
+  "Takes map of organization id as key and organization data as values.
+  Returns function, that takes application and returns true if application's organization has krysp url set."
+  [organizations-by-id]
+  (fn [{org :organization permitType :permitType}]
+    (ss/not-blank? (get-in organizations-by-id [org :krysp (keyword permitType) :url]))))
 
-(defn fetch-verdicts []
+(defn fetch-verdicts [batchrun-name organizations]
   (let [start-ts (double (now))
-        orgs-with-wfs-url-defined-for-some-scope (organization/get-organizations
-                                                   {$or [{:krysp.R.url {$exists true}}
-                                                         {:krysp.YA.url {$exists true}}
-                                                         {:krysp.P.url {$exists true}}
-                                                         {:krysp.MAL.url {$exists true}}
-                                                         {:krysp.VVVL.url {$exists true}}
-                                                         {:krysp.YI.url {$exists true}}
-                                                         {:krysp.YL.url {$exists true}}
-                                                         {:krysp.KT.url {$exists true}}]}
-                                                   {:krysp 1})
-        orgs-by-id (util/key-by :id orgs-with-wfs-url-defined-for-some-scope)
+        orgs-by-id (util/key-by :id organizations)
         org-ids (keys orgs-by-id)
         apps (mongo/select :applications {:state {$in ["sent"]} :organization {$in org-ids}})
-        org-has-url? (fn [{org :organization permitType :permitType}]
-                       (ss/not-blank? (get-in orgs-by-id [org :krysp (keyword permitType) :url])))
+        org-has-url? (organization-has-krysp-url-function orgs-by-id)
         apps-with-url (filter org-has-url? apps)
-        eraajo-user (user/batchrun-user org-ids)
-        batchrun-name "Automatic verdicts checking"]
+        eraajo-user (user/batchrun-user org-ids)]
     (logging/log-event :info {:run-by batchrun-name
                               :event (format "Starting verdict fetching with %s orgs and %s applications"
                                              (count org-ids)
@@ -349,12 +338,63 @@
                               :event "Finished verdict checking"
                               :took  (format "%.2f minutes" (/ (- (now) start-ts) 1000 60))})))
 
+(defn application-id-args? [args]
+  (every? v/application-id? args))
+
+(defn fetch-verdicts-by-application-ids [ids]
+  (let [start-ts (double (now))
+        apps (mongo/select :applications {:_id {$in ids} :state "sent"})
+        distinct-org-ids (into #{} (map :organization) apps)
+        orgs-by-id (->> (mongo/select :organizations {:_id {$in distinct-org-ids}} [:krysp])
+                        (util/key-by :id))
+        org-has-url-fn? (organization-has-krysp-url-function orgs-by-id)
+        eraajo-user (user/batchrun-user distinct-org-ids)
+        batchrun-name "Verdicts checking by application ids"]
+    (logging/log-event :info {:run-by batchrun-name
+                              :event (format "Starting verdict fetching with %s orgs and %s applications"
+                                             (count distinct-org-ids)
+                                             (count ids))})
+    (transduce (comp (filter org-has-url-fn?)
+                     (map (partial fetch-verdict batchrun-name eraajo-user)))
+               (constantly nil)
+               nil
+               apps)
+    (logging/log-event :info {:run-by batchrun-name
+                              :event "Finished verdict checking"
+                              :took  (format "%.2f minutes" (/ (- (now) start-ts) 1000 60))})))
+
+(defn fetch-verdicts-by-org-ids [ids]
+  (if-let [orgs (seq (organization/get-organizations {:_id {$in ids}} [:krysp]))]
+    (fetch-verdicts "Verdicts checking by organizations" orgs)
+    (warn "No organizations found, exiting.")))
+
+(defn fetch-verdicts-with-args [args]
+  (cond
+    (application-id-args? args) (fetch-verdicts-by-application-ids args)
+    (every? string? args)       (fetch-verdicts-by-org-ids args)
+    :else (warn "Sorry, args don't look like org-ids or application-ids, exiting.")))
+
+(defn fetch-verdicts-default []
+  (let [organizations-with-krysp-url (organization/get-organizations
+                                       {$or [{:krysp.R.url {$exists true}}
+                                             {:krysp.YA.url {$exists true}}
+                                             {:krysp.P.url {$exists true}}
+                                             {:krysp.MAL.url {$exists true}}
+                                             {:krysp.VVVL.url {$exists true}}
+                                             {:krysp.YI.url {$exists true}}
+                                             {:krysp.YL.url {$exists true}}
+                                             {:krysp.KT.url {$exists true}}]}
+                                       {:krysp 1})]
+    (fetch-verdicts "Automatic verdicts checking" organizations-with-krysp-url)))
+
 (defn check-for-verdicts [& args]
   (when-not (system-not-in-lockdown?)
     (logging/log-event :info {:run-by "Automatic verdict checking" :event "Not run - system in lockdown"})
     (fail! :system-in-lockdown))
   (mongo/connect!)
-  (fetch-verdicts))
+  (if (empty? args)
+    (fetch-verdicts-default)
+    (fetch-verdicts-with-args args)))
 
 (defn- get-asianhallinta-ftp-users [organizations]
   (->> (for [org organizations
