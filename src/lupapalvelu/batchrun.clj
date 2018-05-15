@@ -569,7 +569,7 @@
         permit-types  (or (->> applications
                                (map (comp keyword :permitType))
                                distinct not-empty
-                               (remove (comp #{:ARK} keyword)))
+                               (remove #{:ARK}))
                           [:R])
         organizations (->> (map :organization applications) distinct (concat organization-ids) (apply orgs-for-review-fetch))
         eraajo-user   (user/batchrun-user (map :id organizations))
