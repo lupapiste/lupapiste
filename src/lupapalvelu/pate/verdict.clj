@@ -15,6 +15,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.date :as date]
+            [lupapalvelu.pate.legacy :as legacy]
             [lupapalvelu.pate.pdf :as pdf]
             [lupapalvelu.pate.review :as review]
             [lupapalvelu.pate.schemas :as schemas]
@@ -419,6 +420,27 @@
                                         (sc/validate schemas/PateVerdict draft)}})
      (:id draft))))
 
+(defn new-legacy-verdict-draft
+  "Legacy verdicts do not have templates or references. Inclusions
+  contain every schema dict."
+  [{:keys [application organization created]
+    :as   command}]
+  (let [category   (-> application :permitType shared/permit-type->category)
+        verdict-id (mongo/create-id)]
+    (action/update-application command
+                               {$push {:pate-verdicts
+                                       (sc/validate schemas/PateVerdict
+                                                    {:id       verdict-id
+                                                     :modified created
+                                                     :category (name category)
+                                                     :data     {}
+                                                     :template {:inclusions (-> category
+                                                                                legacy/legacy-verdict-schema
+                                                                                :dictionary
+                                                                                dicts->kw-paths)}
+                                                     :legacy?  true})}})
+    verdict-id))
+
 (defn verdict-summary [verdict]
   (merge (select-keys verdict [:id :published :modified :replacement :category])
          (select-keys (:data verdict) [:verdict-date :handler :verdict-section :verdict-code :verdict-type])))
@@ -551,8 +573,10 @@
                                dic-value))))
                   {})))
 
-(defn- verdict-schema [{:keys [category schema-version template]}]
-  (update (shared/verdict-schema category schema-version)
+(defn- verdict-schema [{:keys [category schema-version legacy? template]}]
+  (update (if legacy?
+            (legacy/legacy-verdict-schema category)
+            (shared/verdict-schema category schema-version))
           :dictionary
           #(select-inclusions % (map keyword (:inclusions template)))))
 
@@ -737,7 +761,8 @@
 (defn open-verdict [{:keys [application] :as command}]
   (let [{:keys [data published template]
          :as   verdict} (command->verdict command)]
-    {:verdict    (assoc (select-keys verdict [:id :modified :published])
+    {:verdict    (assoc (select-keys verdict [:id :modified :published
+                                              :schema-version :legacy?])
                         :data (if published
                                 data
                                 (:data (enrich-verdict command

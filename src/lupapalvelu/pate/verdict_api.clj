@@ -84,6 +84,18 @@
   [command]
   (ok :verdict-id (verdict/new-verdict-draft template-id command replacement-id)))
 
+(defcommand new-legacy-verdict-draft
+  {:description "Composes new legacy verdict draft. Returns the
+  verdict-id."
+   :feature          :pate
+   :user-roles       #{:authority}
+   :parameters       [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :pre-checks       [(action/not-pre-check pate-enabled)]
+   :states           states/post-submitted-states}
+  [command]
+  (ok :verdict-id (verdict/new-legacy-verdict-draft command)))
+
 (defquery pate-verdicts
   {:description      "List of verdicts. Item properties:
 
@@ -98,7 +110,6 @@
    :org-authz-roles  roles/reader-org-authz-roles
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :pre-checks       [pate-enabled]
    :states           states/post-submitted-states}
   [{:keys [application]}]
   (ok :verdicts (map verdict/verdict-summary
@@ -111,7 +122,7 @@
    :org-authz-roles  roles/reader-org-authz-roles
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [pate-enabled
+   :pre-checks       [#_pate-enabled
                       (verdict-exists)]
    :states           states/post-submitted-states}
   [command]
@@ -125,7 +136,7 @@
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [pate-enabled
+   :pre-checks       [#_pate-enabled
                       (verdict-exists :editable?)]
    :states           states/post-submitted-states}
   [command]
@@ -140,7 +151,7 @@
    :parameters       [id verdict-id path value]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])
                       (partial action/vector-parameters [:path])]
-   :pre-checks       [pate-enabled
+   :pre-checks       [#_pate-enabled
                       (verdict-exists :editable?)]
    :states           states/post-submitted-states}
   [command]
@@ -156,7 +167,7 @@
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [pate-enabled
+   :pre-checks       [#_pate-enabled
                       (verdict-exists :editable?)
                       verdict-filled]
    ;; As KuntaGML message is generated the application state must be
@@ -173,7 +184,7 @@
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [pate-enabled
+   :pre-checks       [#_pate-enabled
                       (verdict-exists :editable?)
                       verdict-filled]
    :states           states/post-submitted-states}
@@ -187,8 +198,7 @@
    :parameters      [:id]
    :user-roles      #{:applicant :authority}
    :org-authz-roles roles/reader-org-authz-roles
-   :states          states/post-submitted-states
-   :pre-checks      [pate-enabled]}
+   :states          states/post-submitted-states}
   [_])
 
 (defn- get-search-fields [fields app]

@@ -164,6 +164,11 @@
                     :template-id template-id
                     :replacement-id replacement-id)))
 
+(defn new-legacy-verdict-draft [app-id callback]
+  (common/command {:command "new-legacy-verdict-draft"
+                   :success callback}
+                  :id app-id))
+
 (defn open-verdict [app-id verdict-id callback]
   (common/query "pate-verdict"
                 callback

@@ -1,12 +1,13 @@
 (ns lupapalvelu.ui.pate.verdict
   "View of an individual Pate verdict."
   (:require [clojure.set :as set]
+            [lupapalvelu.pate.legacy :as legacy]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
-            [lupapalvelu.ui.pate.layout :as layout]
             [lupapalvelu.ui.pate.components :as pate-components]
+            [lupapalvelu.ui.pate.layout :as layout]
             [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.phrases :as phrases]
             [lupapalvelu.ui.pate.sections :as sections]
@@ -148,8 +149,16 @@
          [:div.col-1.col--right
           (toggle-all options)
           (pate-components/last-saved options)]])]
-     (sections/sections options :verdict)]))
+     (sections/sections options :verdict)
+     (components/debug-atom state/current-verdict "Verdict")]))
 
+
+(defn current-verdict-schema []
+  (let [{:keys [schema-version legacy?]} (:info @state/current-verdict)
+        category (shared/permit-type->category (js/lupapisteApp.models.application.permitType))]
+    (if legacy?
+      (legacy/legacy-verdict-schema category)
+      (shared/verdict-schema category schema-version))))
 
 (rum/defc pate-verdict < rum/reactive
   []
@@ -163,9 +172,7 @@
      [:span (common/loc :back)]]]
    (if (and (rum/react state/current-verdict-id)
             (rum/react state/auth-fn))
-     (let [{dictionary :dictionary :as schema} (shared/verdict-schema
-                                                (shared/permit-type->category (js/lupapisteApp.models.application.permitType))
-                                                (get-in @state/current-verdict [:info :schema-version]))]
+     (let [{dictionary :dictionary :as schema} (current-verdict-schema)]
        (verdict (assoc (state/select-keys state/current-verdict
                                           [:state :info :_meta])
                        :schema (dissoc schema :dictionary)

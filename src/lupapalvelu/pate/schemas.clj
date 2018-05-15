@@ -97,21 +97,33 @@
    (sc/optional-key :replaced-by)   ssc/ObjectIdStr
    (sc/optional-key :replaces)      ssc/ObjectIdStr})
 
-(defschema PateVerdict
+(defschema PateBaseVerdict
   (merge PateCategory
          {;; Verdict is draft until it is published
           (sc/optional-key :published)  ssc/Timestamp
           :modified                     ssc/Timestamp
-          :schema-version               sc/Int
           :data                         sc/Any
-          (sc/optional-key :references) PateVerdictReferences
-          :template                     {:inclusions              [sc/Keyword]
-                                         (sc/optional-key :giver) (sc/enum "viranhaltija"
-                                                                           "lautakunta")}
           (sc/optional-key :archive)    {:verdict-date                    ssc/Timestamp
                                          (sc/optional-key :lainvoimainen) ssc/Timestamp
                                          :verdict-giver                   sc/Str}
           (sc/optional-key :replacement) ReplacementPateVerdict}))
+
+(defschema PateModernVerdict
+  (merge PateBaseVerdict
+         {:schema-version               sc/Int
+          (sc/optional-key :references) PateVerdictReferences
+          :template                     {:inclusions              [sc/Keyword]
+                                         (sc/optional-key :giver) (sc/enum "viranhaltija"
+                                                                           "lautakunta")}}))
+(defschema PateLegacyVerdict
+  (merge PateBaseVerdict
+         {:legacy?  (sc/enum true)
+          :template {:inclusions [sc/Keyword]}}))
+
+(defschema PateVerdict
+  (sc/conditional
+   :legacy?        PateLegacyVerdict
+   :schema-version PateModernVerdict))
 
 ;; Schema utils
 

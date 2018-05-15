@@ -441,13 +441,16 @@
          ;; dicts are never excluded.
          (sc/optional-key :always-included?) sc/Bool))
 
+(def id-modified
+  {(sc/optional-key :id)       sc/Str
+   (sc/optional-key :modified) sc/Int})
+
 (defschema PateVerdictTemplate
   (merge Dictionary
          PateMeta
-         {(sc/optional-key :id)       sc/Str
-          (sc/optional-key :modified) sc/Int
-          (sc/optional-key :name)     sc/Str ;; Non-localized raw string
-          :sections                   [PateVerdictTemplateSection]}))
+         id-modified
+         {(sc/optional-key :name) sc/Str ;; Non-localized raw string
+          :sections               [PateVerdictTemplateSection]}))
 
 (defschema PateSettings
   (merge Dictionary
@@ -487,7 +490,12 @@
 (defschema PateVerdict
   (merge PateVerdictDictionary
          PateMeta
+         id-modified
          {:version                    sc/Int
-          (sc/optional-key :id)       sc/Str
-          (sc/optional-key :modified) sc/Int
           :sections                   [PateVerdictSection]}))
+
+(defschema PateLegacyVerdict
+  (merge id-modified
+         {:legacy?    (sc/enum true)
+          :dictionary SchemaTypes
+          :sections   [PateSection]}))

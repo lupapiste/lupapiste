@@ -58,6 +58,13 @@
                             [:i.lupicon-circle-plus]
                             [:span (common/loc :application.verdict.add)]])]]))))
 
+(rum/defc new-legacy-verdict []
+  (components/icon-button {:icon     :lupicon-circle-plus
+                           :text-loc :application.verdict.add
+                           :class    [:positive]
+                           :on-click #(service/new-legacy-verdict-draft @state/application-id
+                                                                        open-verdict)}))
+
 
 (defn- confirm-and-delete-verdict [app-id verdict-id]
   (hub/send  "show-dialog"
@@ -153,7 +160,9 @@
                     app-id
                     replacement-verdict)])
    (when (state/auth? :new-pate-verdict-draft)
-     (new-verdict))])
+     (new-verdict))
+   (when (state/auth? :new-legacy-verdict-draft)
+     (new-legacy-verdict))])
 
 (rum/defc verdicts < rum/reactive
   []
@@ -170,7 +179,8 @@
     (state/refresh-application-auth-model app-id
                                           #(when (can-edit?)
                                              (service/fetch-verdict-list app-id)
-                                             (service/fetch-application-verdict-templates app-id)))))
+                                             (when (state/auth? :application-verdict-templates)
+                                               (service/fetch-application-verdict-templates app-id))))))
 
 (defn mount-component []
   (when (common/feature? :pate)
