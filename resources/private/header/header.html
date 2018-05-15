@@ -65,14 +65,20 @@
               </a>
             </div>
 
-            <!-- Role switcher -->
-            <div class="header-box role-selector"
-                 data-bind="
-                        css: {'role-selector-closed': $root.roleSelector.visible() == false,
-                              'role-selector-open':   $root.roleSelector.visible}">
-              <a href="#"
-                 class="role-selector-dropdown-toggle-button"
-                 data-bind="click: $root.roleSelector.toggle, clickBubble: false">
+            <!--
+              =============================
+              Role selector:
+              =============================
+            -->
+
+            <div class="header-box">
+              <div class="role-selector"
+                   data-bind="css: {'role-selector-closed': $root.roleSelector.visible() == false,
+                                    'role-selector-open':   $root.roleSelector.visible}">
+                <a href="#"
+                   class="role-selector-dropdown-toggle-button"
+                   data-bind="click: $root.roleSelector.toggle,
+                            clickBubble: false">
                 <span class="narrow-hide role-selector-user">
                   <span id="user-name"
                         class="role-selector-user-name"
@@ -84,34 +90,36 @@
                     Role
                   </span>
                 </span>
-                <span data-bind="
+                  <span data-bind="
                         css: {'lupicon-chevron-small-down': $root.roleSelector.visible() == false,
                               'lupicon-chevron-small-up': $root.roleSelector.visible}">
                 </span>
-              </a>
-              <div class="role-selector-dropdown-content"
-                   data-bind="visible: $root.roleSelector.visible,
-                              foreach: $root.roleSelector.menuItems">
-                <!-- ko if: type === "item" -->
-                <a href="#"
-                   data-bind="click: $root.roleSelector.actionFor($data)"
-                   class="role-selector-dropdown-item role-selector-dropdown-role">
-                  <span data-bind="css: iconClass" class="role-selector-dropdown-role-icon"></span>
-                  <span data-bind="text: text" class="role-selector-dropdown-role-text"></span>
                 </a>
-                <!-- /ko -->
-                <!-- ko if: type === "sep" -->
-                <hr class="role-selector-dropdown-item role-selector-dropdown-sep"/>
-                <!-- /ko -->
-                <!-- ko if: type === "org" -->
-                <span data-bind="text: text"
-                      class="role-selector-dropdown-item role-selector-dropdown-organization">
+                <div class="role-selector-dropdown-content"
+                     data-bind="visible: $root.roleSelector.visible,
+                              foreach: $root.roleSelector.menuItems">
+                  <!-- ko if: type === "item" -->
+                  <a href="#"
+                     data-bind="click: $root.roleSelector.actionFor($data)"
+                     class="role-selector-dropdown-item role-selector-dropdown-role">
+                    <span data-bind="css: iconClass" class="role-selector-dropdown-role-icon"></span>
+                    <span data-bind="text: text" class="role-selector-dropdown-role-text"></span>
+                  </a>
+                  <!-- /ko -->
+                  <!-- ko if: type === "sep" -->
+                  <hr class="role-selector-dropdown-item role-selector-dropdown-sep"/>
+                  <!-- /ko -->
+                  <!-- ko if: type === "org" -->
+                  <span data-bind="text: text"
+                        class="role-selector-dropdown-item role-selector-dropdown-organization">
                 </span>
-                <!-- /ko -->
+                  <!-- /ko -->
+                </div>
+
               </div>
             </div>
-
           </div>
+
         </div>
       </div>
       <div class="nav-bottom">

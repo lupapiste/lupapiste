@@ -292,15 +292,23 @@ $notification-bottom: -60px;
 //
 
 .role-selector {
+  display: inline-block;
+  &:hover {
+    background-color: $language-bg !important;
+  }
+  span {
+    line-height: 20px !important;
+  }
+}
+
+.role-selector-user {
 }
 
 .role-selector-user-name {
-  line-height: 12px;
   display: inline-block;
 }
 
 .role-selector-user-role {
-  line-height: 12px;
   display: inline-block;
 }
 
@@ -310,6 +318,8 @@ $notification-bottom: -60px;
 }
 
 .role-selector-dropdown-toggle-button {
+  @include nav-link;
+  @include header-padding;
 }
 
 .role-selector-dropdown-content {
