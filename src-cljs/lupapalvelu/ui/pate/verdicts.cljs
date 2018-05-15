@@ -84,6 +84,7 @@
               :component       "yes-no-dialog"
               :componentParams {:ltext "pate.replace-verdict"
                                 :yesFn #(do
+                                          (reset! state/verdict-list nil)
                                           (reset! state/verdict-list [verdict])
                                           (reset! state/replacement-verdict verdict-id))}}))
 
