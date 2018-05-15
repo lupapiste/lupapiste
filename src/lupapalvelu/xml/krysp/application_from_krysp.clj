@@ -1,5 +1,5 @@
 (ns lupapalvelu.xml.krysp.application-from-krysp
-  (:require [taoensso.timbre :refer [debugf]]
+  (:require [taoensso.timbre :refer [debugf warn]]
             [clojure.set :refer [rename-keys]]
             [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
@@ -11,14 +11,16 @@
             [sade.xml :as sxml]))
 
 (defn- get-lp-tunnus [permit-type xml-without-ns]
-  (->> (sxml/select1 xml-without-ns (krysp-cr/get-tunnus-xml-path permit-type :application-id))
-       :content
-       first))
+  (or (->> (sxml/select1 xml-without-ns (krysp-cr/get-tunnus-xml-path permit-type :application-id))
+           :content
+           first)
+      (warn "No LP ID found from XML")))
 
 (defn- get-kuntalupatunnus [permit-type xml-without-ns]
-  (->> (sxml/select1 xml-without-ns (krysp-cr/get-tunnus-xml-path permit-type :kuntalupatunnus))
-       :content
-       first))
+  (or (->> (sxml/select1 xml-without-ns (krysp-cr/get-tunnus-xml-path permit-type :kuntalupatunnus))
+           :content
+           first)
+      (warn "No kuntalupatunnus found from XML")))
 
 (defn- group-content-by [content-fn permit-type xml-without-ns]
   (let [xml-without-ns (update xml-without-ns :content (partial remove (comp #{:boundedBy} :tag)))
