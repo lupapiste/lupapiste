@@ -281,9 +281,9 @@ var LUPAPISTE = LUPAPISTE || {};
 
       self.visible = ko.observable(false);
 
-      self.toggle = function() {
-        const current = self.visible();
-        self.visible(!current);
+      self.toggle = function(_, e) {
+        e.preventDefault();
+        self.visible(!self.visible());
       }
 
       /**
@@ -403,6 +403,15 @@ var LUPAPISTE = LUPAPISTE || {};
       $(document).on("click", ".role-selector-dropdown-content", function(e) {
         e.stopPropagation();
       });
+
+      self.currentRole = ko.pureComputed(function() {
+        return models.currentUser.role();
+      });
+
+      self.currentOrg = ko.pureComputed(function() {
+        return "Forssan rakennusvirasto";
+      });
+
     }
 
     /**
