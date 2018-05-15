@@ -444,7 +444,8 @@
 
 (defn- missing-verdict-attachments-query [{:keys [start end organizations]}]
   (merge {:verdicts {$elemMatch {$and [{:timestamp {$gt start
-                                                    $lt end} }
+                                                    $lt end}
+                                        :permitType {$nin ["ARK"]}}
                                        {$or [{:paatokset.poytakirjat {$size 0}}
                                              {:paatokset.poytakirjat.urlHash {$exists false}}]}]}}}
          (when (not-empty organizations)

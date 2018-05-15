@@ -118,6 +118,7 @@
         timestamp-1-week-ago (util/get-timestamp-ago :week 1)
         apps (mongo/snapshot :applications
                              {:state {$in ["open" "submitted"]}
+                              :permitType {$nin ["ARK"]}
                               :statements {$elemMatch {:requested (older-than timestamp-1-week-ago)
                                                        :given nil
                                                        $or [{:reminder-sent {$exists false}}
@@ -151,6 +152,7 @@
         timestamp-1-week-ago (util/get-timestamp-ago :week 1)
         apps (mongo/snapshot :applications
                              {:state      {$nin (map name (clojure.set/union states/post-verdict-states states/terminal-states))}
+                              :permitType {$nin ["ARK"]}
                               :statements {$elemMatch {:given nil
                                                        $and   [{:dueDate {$exists true}}
                                                                {:dueDate (older-than timestamp-now)}]
@@ -203,6 +205,7 @@
   (let [timestamp-1-week-ago (util/get-timestamp-ago :week 1)
         apps (mongo/snapshot :applications
                              {:state {$in ["open" "submitted"]}
+                              :permitType {$nin ["ARK"]}
                               :neighbors.status {$elemMatch {$and [{:state {$in ["email-sent"]}}
                                                                    {:created (older-than timestamp-1-week-ago)}
                                                                    ]}}}
@@ -270,7 +273,7 @@
   []
   (let [apps (mongo/snapshot :applications
                              {:state {$in ["draft" "open"]}
-                              :permitType {$ne "ARK"}
+                              :permitType {$nin ["ARK"]}
                               $and [{:modified (older-than (util/get-timestamp-ago :month 1))}
                                     {:modified (newer-than (util/get-timestamp-ago :month 6))}]
                               $or [{:reminder-sent {$exists false}}
@@ -310,7 +313,9 @@
                                                    {:krysp 1})
         orgs-by-id (util/key-by :id orgs-with-wfs-url-defined-for-some-scope)
         org-ids (keys orgs-by-id)
-        apps (mongo/select :applications {:state {$in ["sent"]} :organization {$in org-ids}})
+        apps (mongo/select :applications {:state {$in ["sent"]}
+                                          :permitType {$nin ["ARK"]}
+                                          :organization {$in org-ids}})
         eraajo-user (user/batchrun-user org-ids)]
     (doall
       (pmap
@@ -561,7 +566,11 @@
   [& {:keys [application-ids organization-ids overwrite-background-reviews?] :as options}]
   (let [applications  (when (seq application-ids)
                         (mongo/select :applications {:_id {$in application-ids}}))
-        permit-types  (-> (map (comp keyword :permitType) applications) distinct not-empty (or [:R]))
+        permit-types  (or (->> applications
+                               (map (comp keyword :permitType))
+                               distinct not-empty
+                               (remove (comp #{:ARK} keyword)))
+                          [:R])
         organizations (->> (map :organization applications) distinct (concat organization-ids) (apply orgs-for-review-fetch))
         eraajo-user   (user/batchrun-user (map :id organizations))
         threadpool    (threads/threadpool (util/->int (env/value :batchrun :review-check-threadpool-size) 8) "review checking worker")
@@ -662,6 +671,7 @@
       (doseq [application (->> (mongo/with-collection "applications"
                                                       (monger-query/find {:organization organization
                                                                           :state {$in states/post-verdict-states}
+                                                                          :permitType {$nin ["ARK"]}
                                                                           :archived.completed nil
                                                                           $or [{:submitted {$gte start-ts $lte end-ts}}
                                                                                {:submitted nil
