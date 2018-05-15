@@ -3,6 +3,7 @@
 Resource        ../../common_resource.robot
 Resource        ../common_keywords/approve_helpers.robot
 Resource        keywords.robot
+Variables      ../06_attachments/variables.py
 Suite Setup     Initialize foreman
 
 *** Keywords ***
@@ -23,13 +24,27 @@ Sonja inits applications
   Sonja creates an application and invites foreman
   Logout
 
-Foreman fills personal information
+Foreman uploads attachment
   Foreman logs in
-  Foreman applies personal information to the foreman application  0
+  Click Element  user-name
+  Wait for Page to Load  Teppo  Nieminen
+  Wait until  Click Label  architect
+  Click enabled by test id  test-add-architect-attachment
+  Select From List  attachmentType  osapuolet.cv
+  Choose File      xpath=//input[@type='file']  ${TXT_TESTFILE_PATH}
+  Click enabled by test id  userinfo-upload-ok
+  Wait Until Page Contains  ${TXT_TESTFILE_NAME}
+  Save User Data
+
+Foreman fills personal information
+  Foreman accepts invitation  0
   Set foreman role  KVV-työnjohtaja
   Element should be visible by test id  also-fill-attachments-checkbox
   Element should contain  xpath=//span[@data-test-id='also-fill-attachments-checkbox']/label  Kopioi omat liitteet hakemukselle
-  Checkbox should be selected  xpath=//span[@data-test-id='also-fill-attachments-checkbox']/input
+  Checkbox should be selected  fill-attachments-checkbox
+  Foreman applies personal information to the foreman application
+  Foreman personal information has been applied
+  Foreman personal attachments have been copied
   Check accordion text  tyonjohtaja-v2  TYÖNJOHTAJAN NIMEÄMINEN  - KVV-työnjohtaja Teppo Nieminen
 
 Foreman can not fill applicant information
@@ -43,7 +58,11 @@ Foreman selects application type and submits the first foreman application
   Submit application
 
 Foreman cannot see related projects
-  Foreman applies personal information to the foreman application  1
+  Foreman accepts invitation  1
+  Foreman disables attachment import checkbox
+  Foreman applies personal information to the foreman application
+  Foreman personal information has been applied
+  Foreman personal attachments have not been copied
   No such test id  'muutHankkeet.1.luvanNumero'
 
 Foreman gets error message when trying to submit foreman notice before link permit has verdict
@@ -219,3 +238,16 @@ Foreman state has reset again on base app
 
 Frontend errors
   There are no frontend errors
+
+*** Keywords ***
+
+Save User Data
+  Click enabled by test id  save-my-userinfo
+  Positive indicator should be visible
+  # Wait for indicator to clear to prevent misclicks
+  Sleep  2s
+
+Wait for Page to Load
+  [Arguments]  ${firstName}  ${lastName}
+  Wait Until  Textfield Value Should Be  firstName  ${firstName}
+  Wait Until  Textfield Value Should Be  lastName   ${lastName}
