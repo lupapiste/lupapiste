@@ -73,14 +73,14 @@
                  (when (:firstLogin user)
                    (mongo/update-by-id :users (:id user) {$unset {:firstLogin true}})))
    :user-roles roles/all-authenticated-user-roles}
-  [{user :user}]
+  [{:keys [user]}]
   (if-let [full-user (get-user user)]
     (ok :user full-user)
     (fail :error.user.not.found)))
 
 (defquery users
   {:user-roles #{:admin}}
-  [{{:keys [role]} :user data :data}]
+  [{:keys [data]}]
   (let [base-query (-> data
                        (set/rename-keys {:userId :id})
                        (select-keys [:id :role :email :username :firstName :lastName :enabled :allowDirectMarketing]))

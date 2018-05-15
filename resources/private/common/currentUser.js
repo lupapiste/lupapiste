@@ -177,7 +177,8 @@ LUPAPISTE.CurrentUser = function() {
   });
 
   // Role in the context of the current application.
-  self.applicationRole = _.cond([[self.isAuthority, _.constant("authority")],
+  self.applicationRole = _.cond([
+    [self.isAuthority, _.constant("authority")],
     [self.isApplicant, _.constant("applicant")],
     [_.stubTrue, self.role]]);
 
