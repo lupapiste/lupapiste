@@ -138,21 +138,22 @@
       (filter #(re-find fuzzy (:text %)) items))))
 
 (defn- scroll-element-if-needed [container elem]
-  (let [scroll-top       (.-scrollTop container)
-        container-top    (.-offsetTop container)
-        container-height (.-offsetHeight container)
-        scroll-bottom    (+ scroll-top container-height)
-        elem-top         (- (.-offsetTop elem) container-top)
-        elem-height      (.-offsetHeight elem)
-        elem-bottom      (+ elem-top elem-height)
-        scroll           (cond
-                           (< elem-top scroll-top)
-                           elem-top
-                           (> elem-bottom scroll-bottom)
-                           (+ (- elem-top container-height)
-                              elem-height))]
-    (when (integer? scroll)
-      (aset container "scrollTop" scroll))))
+  (when container
+    (let [scroll-top      (.-scrollTop container)
+          container-top    (.-offsetTop container)
+          container-height (.-offsetHeight container)
+          scroll-bottom    (+ scroll-top container-height)
+          elem-top         (- (.-offsetTop elem) container-top)
+          elem-height      (.-offsetHeight elem)
+          elem-bottom      (+ elem-top elem-height)
+          scroll           (cond
+                             (< elem-top scroll-top)
+                             elem-top
+                             (> elem-bottom scroll-bottom)
+                             (+ (- elem-top container-height)
+                                elem-height))]
+      (when (integer? scroll)
+        (aset container "scrollTop" scroll)))))
 
 (defn- set-selected  [selected* value callback]
   (when (common/reset-if-needed! selected* value)
@@ -173,14 +174,16 @@
         items-fn            (if (fn? items)
                               items
                               (default-items-fn items))
-        items               (vec (items-fn (rum/react term*)))]
+        items               (vec (cond->> (items-fn (rum/react term*))
+                                   combobox? (mapv #(assoc % :value (:text %)))))]
     (letfn [(close []
               (reset! open?* false)
               (reset! current* 0))
             (select [value]
               (when value
                 (set-selected (or selected* term*) value callback))
-              (close))
+              (when-not combobox?
+                (close)))
             (inc-current [n]
               (when (pos? (count items))
                 (do (swap! current* #(rem (+ (or % 0) n) (count items)))
@@ -211,7 +214,8 @@
                                                                             :value))
                                                            (.preventDefault %))
                                                       ;; Esc
-                                                      27 (close)
+                                                      27 (when-not combobox?
+                                                           (close))
                                                       ;; Up
                                                       38 (inc-current (- (count items) 1))
                                                       ;; Down
@@ -255,8 +259,8 @@
    Initial value can be atom for two-way binding (see the mixin).
    Options [optional]:
      items  either list or function. The function argument is the
-            filtering term. An item is a map with mandatory :text
-            and :value keys and optional :group key.
+            filtering term. An item is a map with a mandatory :text
+            and optional :group key.
      [callback] change callback that is called when after list selection or blur.
      [disabled?] Is component disabled? (false)
      [required?] Is component required? (false)"
@@ -279,8 +283,13 @@
                                             :disabled  disabled?})]
     [:div.pate-autocomplete
      [:div.ac--combobox text-edit]
-     (when (and (rum/react open?*) (seq (items-fn @term*)))
-       [:div.ac__menu menu-items])]))
+     (let [items (items-fn @term*)]
+       (when (and (rum/react open?*)
+                  (seq (filter (fn [{:keys [text group]}]
+                                 (and (s/blank? group)
+                                      (not= (s/trim @term*) text)))
+                               items)))
+         [:div.ac__menu menu-items]))]))
 
 (rum/defcs autocomplete < (initial-value-mixin ::selected)
   rum/reactive

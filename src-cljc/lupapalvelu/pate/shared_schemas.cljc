@@ -275,7 +275,13 @@
           ;; Before and after are localisation keys for the strings to
           ;; be shown before and after the value and editor.
           (sc/optional-key :before) pate-units
-          (sc/optional-key :after)  pate-units}))
+          (sc/optional-key :after)  pate-units
+          ;; Items are localization keys. If any items
+          ;; are given, then the text field is rendered
+          ;; as a combobox.
+          (sc/optional-key :items)  [sc/Keyword]
+          ;; If :lines is given the field is rendered as textarea.
+          (sc/optional-key :lines)  positive-integer}))
 
 (defschema PateDate
   (merge PateComponent

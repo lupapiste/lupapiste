@@ -331,33 +331,50 @@
     component))
 
 (defn pate-attr
-  "Fills attribute map with :id, :key and :class. Also merges extra if
+  "Fills attribute map with :id, :key and :class. Also merges extras if
   given."
-  [{:keys [path] :as options} & [extra]]
+  [{:keys [path] :as options} & extras]
   (let [id (path/id path)]
-    (merge {:key   id
-            :id    id
-            :class (conj (path/css options)
-                         (common/css-flags :warning
-                                           (path/error? options)))}
-           extra)))
+    (apply merge (cons {:key   id
+                        :id    id
+                        :class (conj (path/css options)
+                                     (common/css-flags :warning
+                                                       (path/error? options)))}
+                       extras))))
 
 (rum/defc pate-text < rum/reactive
   ;;{:key-fn (fn [_ {path :path} _ & _] (path/id path))}
   "Update the options model state only on blur. Immediate update does
   not work reliably."
   [{:keys [schema state path] :as options} & [wrap-label?]]
-  (label-wrap-if-needed
-   options
-   {:component    (sandwich schema
-                            (components/text-edit
-                             (path/value path state)
-                             (pate-attr options
-                                        {:callback  (state-change-callback options)
-                                         :disabled  (path/disabled? options)
-                                         :required? (path/required? options)
-                                         :type      (:type schema)})))
-    :wrap-label?  wrap-label?}))
+  (let [attr-fn              (partial pate-attr
+                                      options
+                                      {:callback  (state-change-callback options)
+                                       :disabled  (path/disabled? options)
+                                       :required? (path/required? options)})
+        {:keys [items lines]} schema
+        value                (path/value path state)]
+    (label-wrap-if-needed
+     options
+     {:component (sandwich schema
+                           (cond
+                             items
+                             (components/combobox
+                              value
+                              (attr-fn {:items (map #(hash-map :text (path/loc %))
+                                                    items)}))
+
+                             lines
+                             (components/textarea-edit
+                              value
+                              (attr-fn {:class [:pate-textarea]
+                                        :rows lines}))
+
+                             :else
+                             (components/text-edit
+                              value
+                              (attr-fn {:type (:type schema)}))))
+      :wrap-label? wrap-label?})))
 
 (defn pate-date-delta
   [{:keys [schema] :as options} & [wrap-label?]]

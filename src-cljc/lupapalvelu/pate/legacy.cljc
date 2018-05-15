@@ -20,15 +20,23 @@
                 :anto            {:date      {:i18nkey :verdict.anto}
                                   :required? true}
                 :lainvoimainen   {:date {:i18nkey :verdict.lainvoimainen}}
-                :verdict-text    {:text {:i18nkey :verdict.text}}}
+                :verdict-text    {:text {:i18nkey :verdict.text
+                                         :lines   20}}}
    :section    {:id   :verdict
-                :grid {:columns 5
-                       :rows    [[{:dict :kuntalupatunnus}]
-                                 [{:dict :giver}
+                :grid {:columns 8
+                       :rows    [[{:col 2
+                                   :align :full
+                                   :dict :kuntalupatunnus}]
+                                 [{:col 2
+                                   :align :full
+                                   :dict :giver}
                                   {:dict :section}
-                                  {:dict :verdict-code}]
+                                  {}
+                                  {:col   2
+                                   :align :full
+                                   :dict  :verdict-code}]
                                  [{:dict :anto} {:dict :lainvoimainen}]
-                                 [{:col   4
+                                 [{:col   6
                                    :align :full
                                    :dict  :verdict-text}]]}}})
 
@@ -86,7 +94,10 @@
                                 :loc-text :pate-r.foremen}
                 :foreman-label {:css      :pate-label.required
                                 :loc-text :foreman.role}
-                :foremen       {:repeating {:role   {:text      {:label? false}
+                :foremen       {:repeating {:role   {:text      {:label? false
+                                                                 :items  (mapv #(util/kw-path :pate-r.foremen %)
+                                                                               [:erityis-tj :iv-tj :tj
+                                                                                :vastaava-tj :vv-tj])}
                                                      :required? true}
                                             :remove (remove-button :foremen)}}
                 :add-foreman   (add-button :pate.add-foreman :foremen)}
