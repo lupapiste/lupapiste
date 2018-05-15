@@ -11,7 +11,8 @@
           <div id="language-select" data-bind="css: {'language-open': $root.languageMenuVisible,
                                                      'language-closed': $root.languageMenuVisible() == false}">
             <a data-test-id="language-link"
-               href="#" data-bind="click: $root.toggleLanguageMenu, clickBubble: false">
+               href="#"
+               data-bind="click: $root.toggleLanguageMenu, clickBubble: false">
               <span data-bind="text: $root.currentLanguage"></span>
               <span data-bind="css: {'lupicon-chevron-small-down': $root.languageMenuVisible() == false,
                                      'lupicon-chevron-small-up': $root.languageMenuVisible}"></span>

@@ -57,11 +57,11 @@ $language-padding: 20px;
   float: left;
   a {
     padding: {
-    left: $language-padding;
-    right: $language-padding;
-    top: 0;
-    bottom: 0;
-  }
+      left: $language-padding;
+      right: $language-padding;
+      top: 0;
+      bottom: 0;
+    }
   }
   a, span {
     vertical-align: middle;
@@ -287,7 +287,7 @@ $notification-bottom: -60px;
 //
 // Role-selector:
 //   Sorry for the importants.
-//   This is why BEM is so important
+//   This is why BEM is so important.
 //   Fuck these cascades.
 //
 
