@@ -42,7 +42,7 @@
                                            (org/resolve-krysp-wfs organization permit-type)
                                            (org/get-krysp-wfs {:organization organization :permitType permit-type}))]
     (do
-      (debugf "Start fetching XML, ids=%s search-type=%s raw?=" (ss/join "," ids) search-type raw?)
+      (debugf "Start fetching XML, ids=%s search-type=%s raw?=%s" (ss/join "," ids) search-type raw?)
       (cond->> (permit/fetch-xml-from-krysp permit-type url creds ids search-type raw?)
                (not raw?) scr/strip-xml-namespaces
                (not raw?) (not-empty-content permit-type)))
