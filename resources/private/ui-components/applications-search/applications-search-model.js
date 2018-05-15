@@ -178,4 +178,6 @@ LUPAPISTE.ApplicationsSearchModel = function() {
     hub.send("track-click", {category:"Applications", label:"create", event:"createArchivingReport"});
     pageutil.openPage("create-archiving-report");
   };
+
+  hub.onPageLoad("applications", _.wrap( true, self.dataProvider.fetchSearchResults ) );
 };

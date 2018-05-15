@@ -7,7 +7,7 @@
             [lupapalvelu.action :refer [execute update-application]]
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.archiving-util]
+            [lupapalvelu.archive.archiving-util :as archiving-util]
             [sade.util :as util]))
 
 (testable-privates lupapalvelu.tiedonohjaus-api store-function-code update-application-child-metadata!)
@@ -74,7 +74,7 @@
                                                                                                              :tila            :luonnos
                                                                                                              :kieli           :fi}}]}}) => nil
         (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil
-        (lupapalvelu.archiving-util/mark-application-archived-if-done application 1000 user) => 1)))
+        (archiving-util/mark-application-archived-if-done application 1000 user) => 1)))
 
   (fact "user with insufficient rights cannot update retention metadata"
     (let [application {:id           1
@@ -120,7 +120,7 @@
 
                                                                                                              :kieli           :fi}}]}}) => nil
         (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil
-        (lupapalvelu.archiving-util/mark-application-archived-if-done application 1000 user) => 1)))
+        (archiving-util/mark-application-archived-if-done application 1000 user) => 1)))
 
   (fact "process metadata is updated correctly"
     (let [command {:application {:organization    "753-R"
@@ -219,7 +219,7 @@
                                                                                                   :julkisuusluokka     :salainen
                                                                                                   :kayttajaryhmakuvaus :muokkausoikeus}}]}}) => nil
         (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil
-        (lupapalvelu.archiving-util/mark-application-archived-if-done application 1000 user) => 1)))
+        (archiving-util/mark-application-archived-if-done application 1000 user) => 1)))
 
   (fact "retention and security end dates are not set when they are not required"
     (let [metadata {"julkisuusluokka" "julkinen"
@@ -263,7 +263,7 @@
                                                                                                   :kieli           :fi
                                                                                                   :henkilotiedot   :sisaltaa}}]}}) => nil
         (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil
-        (lupapalvelu.archiving-util/mark-application-archived-if-done application 1000 user) => 1)))
+        (archiving-util/mark-application-archived-if-done application 1000 user) => 1)))
 
   (fact "metadata can be updated to a read-only attachment"
     (let [application {:id           1
@@ -309,7 +309,7 @@
                                                                                                                    :kieli           :fi}
                                                                                             :readOnly true}]}}) => nil
         (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil
-        (lupapalvelu.archiving-util/mark-application-archived-if-done application 1000 user) => 1)))
+        (archiving-util/mark-application-archived-if-done application 1000 user) => 1)))
 
   (fact "a valid function code can be set to application and it is stored in history array"
     (let [fc "10 03 00 01"

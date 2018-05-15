@@ -26,7 +26,7 @@ LUPAPISTE.HandlerRolesModel = function( params ) {
 
   self.nameHeader = function( lang ) {
     return sprintf( "%s (%s)",
-                    loc( "users.table.name"),
+                    loc( "auth-admin.role"),
                     loc( "lang." + lang));
   };
 

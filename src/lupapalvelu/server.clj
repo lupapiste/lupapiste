@@ -20,7 +20,7 @@
             [lupapalvelu.application-options-api]
             [lupapalvelu.application-search-api]
             [lupapalvelu.application-tabs-api]
-            [lupapalvelu.archiving-api]
+            [lupapalvelu.archive.archiving-api]
             [lupapalvelu.asianhallinta-config-api]
             [lupapalvelu.assignment-api]
             [lupapalvelu.attachment-api]

@@ -1,4 +1,4 @@
-(ns lupapalvelu.archiving-util
+(ns lupapalvelu.archive.archiving-util
   (:require [lupapalvelu.action :as action]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.mongo :as mongo]

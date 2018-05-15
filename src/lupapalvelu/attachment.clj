@@ -13,7 +13,7 @@
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.application-bulletin-utils :as bulletin-utils]
             [lupapalvelu.application-utils :as app-utils]
-            [lupapalvelu.archiving-util :as archiving-util]
+            [lupapalvelu.archive.archiving-util :as archiving-util]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment.conversion :as conversion]

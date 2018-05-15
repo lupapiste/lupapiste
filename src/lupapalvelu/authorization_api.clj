@@ -5,6 +5,7 @@
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.core :refer [ok fail fail! unauthorized]]
+            [sade.env :as env]
             [sade.util :as util :refer [=as-kw]]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application notify] :as action]
             [lupapalvelu.application :as application]
@@ -301,6 +302,12 @@
         {$set {:auth.$.unsubscribed unsubscribe?}})
       unauthorized)))
 
+(defn- pate-enabled
+  [{:keys [organization]}]
+  (when (and organization
+             (not (:pate-enabled @organization)))
+    (fail :error.pate-disabled)))
+
 (defcommand unsubscribe-notifications
   {:parameters [:id :username]
    :input-validators [(partial action/non-blank-parameters [:id :username])]
@@ -320,3 +327,10 @@
    :pre-checks [application/validate-authority-in-drafts]}
   [command]
   (manage-unsubscription command false))
+
+(defquery pate-enabled-basic
+  {:description "Pre-checker that fails if Pate is not enabled in the application organization."
+   :feature     :pate
+   :user-roles  #{:applicant :authority}
+   :pre-checks  [pate-enabled]}
+  [_])

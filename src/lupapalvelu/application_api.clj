@@ -12,6 +12,8 @@
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defraw defquery defcommand
                                         update-application notify] :as action]
+            [lupapalvelu.archive.archiving-util :as archiving-util]
+            [lupapalvelu.application-replace-operation :as replace-operation]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.application-utils :as app-utils]
@@ -26,6 +28,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.drawing :as draw]
             [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
@@ -41,9 +44,7 @@
             [lupapalvelu.suti :as suti]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
-            [lupapalvelu.ya :as ya]
-            [lupapalvelu.operations :as operations]
-            [lupapalvelu.archiving-util :as archiving-util])
+            [lupapalvelu.ya :as ya])
   (:import (java.net SocketTimeoutException)))
 
 (defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
@@ -287,7 +288,9 @@
                       (map (fn [e] {:email e, :role "authority"}) emails)))
    :model-fn (fn [{app :application :as command} conf recipient]
                (assoc (notifications/create-app-model command conf recipient)
-                 :applicants (reduce #(str %1 ", " %2) (:_applicantIndex app))))})
+                 :applicants (if-let [applicants (:_applicantIndex app)]
+                               (reduce #(str %1 ", " %2) applicants)
+                               #(i18n/localize % "not-known"))))})
 
 (notifications/defemail :organization-housing-office
   {:pred-fn       (fn [command] (let [application (:application command)
@@ -485,21 +488,8 @@
    :input-validators [operation-validator]
    :pre-checks       [add-operation-allowed?
                       multiple-operations-supported?]}
-  [{{app-state :state
-     tos-function :tosFunction :as application} :application
-    organization :organization
-    created :created :as command}]
-  (let [op (app/make-op operation created)
-        new-docs (app/make-documents nil created @organization op application)
-        attachments (:attachments (domain/get-application-no-access-checking id {:attachments true}))
-        new-attachments (app/make-attachments created op @organization app-state tos-function :existing-attachments-types (map :type attachments))
-        attachment-updates (app/multioperation-attachment-updates op @organization attachments)]
-    (update-application command {$push {:secondaryOperations  op
-                                        :documents   {$each new-docs}
-                                        :attachments {$each new-attachments}}
-                                 $set  {:modified created}})
-    ;; Cannot update existing array and push new items into it same time with one update
-    (when (not-empty attachment-updates) (update-application command attachment-updates))))
+  [command]
+  (app/add-operation command id operation))
 
 (defcommand update-op-description
   {:parameters [id op-id desc]
@@ -516,6 +506,15 @@
     (update-application command {$set {"primaryOperation.description" desc}})
     (update-application command {"secondaryOperations" {$elemMatch {:id op-id}}} {$set {"secondaryOperations.$.description" desc}})))
 
+(defn- there-is-primary-operation? [{application :application}]
+  (when-not (:primaryOperation application)
+    (fail :error.unknown-operation)))
+
+(defn- secondary-operation-exists? [{parameters :data app :application}]
+  (when-let [op-id (:secondaryOperationId parameters)]
+    (when-not (replace-operation/get-operation-by-key app :id op-id)
+      (fail :error.unknown-operation))))
+
 (defcommand change-primary-operation
   {:parameters [id secondaryOperationId]
    :categories #{:documents} ; edited from document header
@@ -524,27 +523,21 @@
    :permissions [{:context  {:application {:state #{:draft}}}
                   :required [:application/edit-draft :application/edit-operation]}
 
-                 {:required [:application/edit-operation]}]}
+                 {:required [:application/edit-operation]}]
+   :pre-checks [secondary-operation-exists?]}
   [{:keys [application] :as command}]
-  (let [old-primary-op (:primaryOperation application)
-        old-secondary-ops (:secondaryOperations application)
-        new-primary-op (first (filter #(= secondaryOperationId (:id %)) old-secondary-ops))
-        secondary-ops-without-old-primary-op (remove #{new-primary-op} old-secondary-ops)
-        new-secondary-ops (if old-primary-op ; production data contains applications with nil in primaryOperation
-                            (conj secondary-ops-without-old-primary-op old-primary-op)
-                            secondary-ops-without-old-primary-op)]
-    (when-not (= (:id old-primary-op) secondaryOperationId)
-      (when-not new-primary-op
-        (fail! :error.unknown-operation))
-      ;; TODO update also :app-links apptype if application is linked to other apps (loose WriteConcern ok?)
-      (update-application command {$set {:primaryOperation    new-primary-op
-                                         :secondaryOperations new-secondary-ops}}))
-    (ok)))
+  (app/change-primary-operation command id secondaryOperationId)
+  (ok))
 
 (defn- replace-operation-allowed-pre-check [{application :application}]
   (when (or (foreman/foreman-app? application)
             (app/designer-app? application))
     (fail :error.replace-operation-not-allowed)))
+
+(defn- operation-exists? [{parameters :data app :application}]
+  (when-let [op-id (:opId parameters)]
+    (when-not (replace-operation/get-operation-by-key app :id op-id)
+      (fail :error.operations-not-found))))
 
 (defcommand replace-operation
   {:parameters       [id opId operation]
@@ -555,10 +548,11 @@
                       {:required [:application/edit-operation]}]
    :input-validators [operation-validator
                       (partial action/non-blank-parameters [:id :opId :operation])]
-   :pre-checks       [replace-operation-allowed-pre-check]
-   :feature          :replace-operation}
+   :pre-checks       [replace-operation-allowed-pre-check
+                      operation-exists?]}
   [command]
-  (app/replace-operation command opId operation))
+  (replace-operation/replace-operation command opId operation)
+  (ok))
 
 (defcommand change-permit-sub-type
   {:parameters       [id permitSubtype]
@@ -639,22 +633,23 @@
       (archiving-util/mark-application-archived-if-done application (:created command) user))))
 
 (defcommand return-to-draft
-  {:description "Returns the application to draft state."
+  {:description      "Returns the application to draft state."
    :parameters       [id text lang]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :permissions      [{:required [:application/change-state]}]
-   :states #{:submitted}
-   :pre-checks [(partial sm/validate-state-transition :draft)]
-   :on-success (notify :application-return-to-draft)}
+   :states           #{:submitted}
+   :pre-checks       [(partial sm/validate-state-transition :draft)]
+   :on-success       (notify :application-return-to-draft)}
   [{{:keys [role] :as user}         :user
     {:keys [state] :as application} :application
     created                         :created
-    :as command}]
+    :as                             command}]
   (->> (util/deep-merge
         (app-state/state-transition-update :draft created application user)
         (when (seq text)
           (comment/comment-mongo-update state text {:type "application"} role false user nil created))
-        {$set {:submitted nil}})
+        {$set {:submitted nil
+               :handlers  []}})
        (update-application command)))
 
 (defcommand change-warranty-start-date

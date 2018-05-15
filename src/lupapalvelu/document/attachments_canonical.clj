@@ -116,7 +116,7 @@
                                   (pred attachment))
                        :let [type-group (get-in attachment [:type :type-group])
                              type-id (get-in attachment [:type :type-id])
-                             attachment-localized-name (i18n/localize "fi" (ss/join "." ["attachmentType" type-group type-id]))
+                             attachment-localized-name (i18n/localize "fi" "attachmentType" (name type-group) (name type-id))
                              attachment-title (if (:contents attachment)
                                                 (str attachment-localized-name ": " (:contents attachment))
                                                 attachment-localized-name)

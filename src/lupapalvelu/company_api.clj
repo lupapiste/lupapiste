@@ -202,7 +202,7 @@
 (defcommand company-invite
   {:parameters [id company-id]
    :input-validators [(partial action/non-blank-parameters [:id :company-id])]
-   :states (states/all-application-states-but states/terminal-states)
+   :states (states/all-application-states-but [:canceled])
    :user-roles #{:applicant :authority}
    :pre-checks [com/company-not-locked
                 application/validate-authority-in-drafts

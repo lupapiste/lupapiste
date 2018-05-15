@@ -1,6 +1,6 @@
 (ns lupapalvelu.onkalo-operations
   (:require [lupapalvelu.action :as action]
-            [lupapalvelu.archiving-util :as archiving-util]
+            [lupapalvelu.archive.archiving-util :as archiving-util]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as usr]
             [monger.operators :refer :all]

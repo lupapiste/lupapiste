@@ -20,7 +20,7 @@ Sonja prepares the application that will later act as link permit
   Sonja logs in
   Create application the fast way  ${appname}  ${propertyid}  kerrostalo-rivitalo
   Submit application
-  Approve application with missing info
+  Approve application
 
   ${linkPermitAppId} =  Get Text  xpath=//span[@data-test-id='application-id']
   Set Suite Variable  ${linkPermitAppId}

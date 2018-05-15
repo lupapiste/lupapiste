@@ -1,18 +1,19 @@
 (ns lupapalvelu.attachment.bind-attachments-api
-  (:require [taoensso.timbre :refer [warn]]
-            [lupapalvelu.action :as action :refer [defcommand defquery]]
+  (:require [lupapalvelu.action :as action :refer [defcommand defquery]]
             [lupapalvelu.application :as app]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.bind :as bind]
+            [lupapalvelu.attachment.ram :as ram]
             [lupapalvelu.job :as job]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
+            [sade.strings :as ss]
             [sade.util :as util]
-            [sade.strings :as ss]))
+            [taoensso.timbre :refer [warn]]))
 
 (defn- validate-attachment-ids [command]
   (->> (get-in command [:data :filedatas])
@@ -77,6 +78,16 @@
   (fn [{data :data :as command}]
     (reduce #(or %1 (check (assoc command :data %2))) nil (:filedatas data))))
 
+(defn- notify-on-ram-attachments [{:keys [application created]}]
+  (fn [filedatas]
+    (let [ram-ids (->> application
+                       :attachments
+                       (filter :ramLink)
+                       (map :id))]
+      (doseq [att-id (util/intersection-as-kw ram-ids
+                                              (map :attachment-id filedatas))]
+        (ram/notify-new-ram-attachment! application att-id created)))))
+
 (defcommand bind-attachments
   {:description         "API to bind files to attachments, returns job that can be polled for status per file."
    :parameters          [id filedatas]
@@ -97,7 +108,8 @@
                          :oirAuthority (states/all-states-but :canceled)}}
   [command]
   (ok :job (bind/make-bind-job command filedatas
-                               :postprocess-fn (assignment/run-assignment-triggers (partial job-response-fn command)))))
+                               :postprocess-fn [(assignment/run-assignment-triggers (partial job-response-fn command))
+                                                (notify-on-ram-attachments command)])))
 
 (defquery bind-attachments-job
   {:parameters [jobId version]

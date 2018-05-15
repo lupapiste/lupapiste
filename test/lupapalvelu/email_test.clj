@@ -1,6 +1,7 @@
 (ns lupapalvelu.email-test
   (:require [lupapalvelu.email :refer :all]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.states :as states]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [clojure.java.io :as io]
@@ -138,3 +139,9 @@
     (doseq [filename excluded-templates]
       (fact {:midje/description (str filename " does NOT exist")}
         (find-resource filename) => (throws IllegalArgumentException)))))
+
+(facts "All states have state-description text for emails"
+  (doseq [lang i18n/supported-langs
+          state states/all-states]
+    (fact {:midje/description (str lang " - " (name state))}
+      (i18n/has-term? lang (str "email.state-description." (name state))) => true)))

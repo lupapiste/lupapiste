@@ -123,12 +123,11 @@ Authority tries to send application to backend
   Click enabled by test id  approve-application-summaryTab
 
 Can not be send before base app
-  Confirm  dynamic-yes-no-confirm-dialog
   Confirm  integration-error-dialog
 
 Approve base app
   Go back to project application
-  Approve application with missing info
+  Approve application
 
 Fetch verdict to base app
   Open tab  verdict
@@ -138,7 +137,6 @@ Approve foreman app
   Open foreman application  1
   Open tab  requiredFieldSummary
   Click enabled by test id  approve-application-summaryTab
-  Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Application state should be  acknowledged
 
 Link foreman approval to base app
@@ -177,7 +175,6 @@ Verdict could be not given in complementNeeded (LPK-2559)
 Re-send and give verdict
   Open tab  requiredFieldSummary
   Click enabled by test id  approve-application-summaryTab
-  Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  sent
   Submit empty verdict  foremanVerdictGiven
   Application state should be  foremanVerdictGiven

@@ -13253,6 +13253,10 @@ ul.tabs {
   width: auto;
 }
 
+.autosized.autosized--wider {
+  min-width: 25em;
+}
+
 .autosized-yes-no {
   min-height: 144px;
   height: auto;
@@ -36339,6 +36343,12 @@ table.default-digitalization-location {
   min-height: 32px;
 }
 
+.register-form .form-entry.register-checkbox label.checkbox-required::after {
+  color: #f39129;
+  content: "*";
+  display: inline;
+}
+
 .register-form .register-error {
   position: relative;
   margin: 6px 0;
@@ -38776,7 +38786,7 @@ div.summary-button-bar {
 .feature:not(.feature--no-border) {
   border: orange dotted medium !important;
   border-radius: 10px;
-  min-height: 44px;
+  min-height: 42px;
 }
 
 .feature:not(.feature--no-border) .legend {

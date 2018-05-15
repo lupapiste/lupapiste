@@ -166,7 +166,7 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
                       _.omitBy( fieldsCache, _.isNil ));
   }
 
-  function fetchSearchResults( clearCache ) {
+  self.fetchSearchResults = function ( clearCache ) {
     if( clearCache ) {
       fieldsCache = {};
     }
@@ -194,9 +194,7 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
         .onError("error.unauthorized", notify.ajaxError)
         .call();
     }
-  }
+  };
 
-  hub.onPageLoad("applications", _.wrap( true, fetchSearchResults ) );
-
-  ko.computed( fetchSearchResults ).extend({deferred: true});
+  ko.computed( self.fetchSearchResults ).extend({deferred: true});
 };

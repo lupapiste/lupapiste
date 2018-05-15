@@ -132,6 +132,7 @@
 
                  ; Message Queue
                  [org.apache.activemq/artemis-jms-client "2.5.0"]
+                 [lupapiste/jms-client "0.2.0"]
                  [com.taoensso/nippy "2.14.0"]
 
                  ;; Lupapiste libraries
@@ -172,7 +173,7 @@
                                          [org.apache.activemq/artemis-jms-server "2.5.0"]
                                          [rhizome "0.2.7"]
                                          [pdfboxing "0.1.13"]
-                                         [com.cemerick/piggieback "0.2.2"]
+                                         [cider/piggieback "0.3.3"]
                                          [figwheel-sidecar "0.5.15"]
                                          ;; Better Chrome Dev Tools support
                                          [binaryage/devtools "0.9.4"]]
@@ -189,7 +190,7 @@
                                          :test-paths            []}
                         :sass           {:output-style :expanded
                                          :source-map   true}
-                        :repl-options   {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]
+                        :repl-options   {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]
                                          :timeout          200000}
                         :cljsbuild      {:builds {:rum {:figwheel {:websocket-host  :js-client-host
                                                                    :on-jsload        lupapalvelu.ui.ui-components/reload-hook

@@ -194,15 +194,19 @@
 (defn fuzzy-re
   "Takes search term and turns it into 'fuzzy' regular expression
   string (not pattern!) that matches any string that contains the
-  substrings in the correct order. The search term is split both for
-  regular whitespace and Unicode no-break space. The original string
-  parts are escaped for (inadvertent) regex syntax.
-  Sample matching: 'ear onk' will match 'year of the monkey' after fuzzying"
+  substrings in the correct order. The search term is split for
+  regular whitespace, Unicode no-break space and punctuation. The
+  original string parts are escaped for (inadvertent) regex syntax.
+  Sample matching: 'ear onk' will match 'year of the monkey' after
+  fuzzying.
+
+  Note: Since the term is typically used in mongo queries, we must
+  keep in mind that regex syntax differs from Clojure (Java) to Mongo"
   [term]
-  (let [whitespace "[\\s\u00a0]+"
+  (let [whitespace "[\\s\u00a0\\p{Punct}]+"
         fuzzy      (->> (split term (re-pattern whitespace))
                         (map #(java.util.regex.Pattern/quote %))
-                        (join (str ".*" whitespace ".*")))]
+                        (join ".+"))]
     (str "^.*" fuzzy ".*$")))
 
 (defprotocol ToPlainString
@@ -227,3 +231,6 @@
   "If given string is blank, returns nil. Else returns string."
   [string]
   (when-not (blank? string) string))
+
+(defn strip-trailing-slashes [string]
+  (replace string #"/+$" ""))
