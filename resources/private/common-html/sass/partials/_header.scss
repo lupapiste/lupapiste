@@ -89,11 +89,11 @@ $language-padding: 20px;
   min-width: $application-min-width;
   margin: 0 auto;
   position: relative;
-    box-sizing: border-box;
-    margin: {
-      left: auto;
-      right: auto;
-    }
+  box-sizing: border-box;
+  margin: {
+    left: auto;
+    right: auto;
+  }
 }
 
 nav {
