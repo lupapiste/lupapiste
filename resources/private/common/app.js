@@ -282,7 +282,7 @@ var LUPAPISTE = LUPAPISTE || {};
       self.visible = ko.observable(false);
 
       self.toggle = function() {
-        let current = self.visible();
+        const current = self.visible();
         self.visible(!current);
       }
 
@@ -397,6 +397,9 @@ var LUPAPISTE = LUPAPISTE || {};
         return self.executeAction.bind(self, item);
       };
 
+      const cancel = self.visible.bind(self, false);
+      hub.subscribe("dialog-close", cancel);
+      $(document).on("click", cancel);
     }
 
     /**
