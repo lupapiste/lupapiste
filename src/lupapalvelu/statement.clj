@@ -299,7 +299,7 @@
 
 (defn possible-statement-statuses [{{permit-type :permitType} :application org :organization}]
   (let [{:keys [version url]} (get-in @org [:krysp (keyword permit-type)])
-        yht-version           (when version (mapping-common/get-yht-version permit-type version))]
+        yht-version           (when (ss/not-blank? version) (mapping-common/get-yht-version permit-type version))]
     ;; Even without url the KRYSP version might exist.
     (if (and (permit/get-metadata permit-type :extra-statement-selection-values)
              (or (util/compare-version >= yht-version "2.1.5")

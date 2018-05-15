@@ -5,7 +5,6 @@
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters supported-localization-parameters parameters-matching-schema] :as action]
-            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.stamps :as stamps]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.i18n :as i18n]
@@ -15,18 +14,16 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [lupapalvelu.waste-ads :as waste-ads]
             [lupapalvelu.wfs :as wfs]
+            [lupapalvelu.xml.validator :as krysp-xml]
             [me.raynes.fs :as fs]
             [monger.operators :refer :all]
             [noir.core :refer [defpage]]
-            [noir.request :as request]
             [noir.response :as resp]
             [sade.core :refer [ok fail fail! now unauthorized]]
-            [sade.env :as env]
             [sade.municipality :as muni]
             [sade.shared-schemas :as sssc]
             [sade.schemas :as ssc]
@@ -697,8 +694,10 @@
   [{user :user}]
   (let [organization-id (usr/authority-admins-organization-id user)]
     (if-let [organization (org/get-organization organization-id)]
-      (let [permit-types (mapv (comp keyword :permitType) (:scope organization))
-            krysp-keys   (conj permit-types :osoitteet)
+      (let [permit-types (->> (:scope organization)
+                              (map (comp keyword :permitType))
+                              (filter #(get krysp-xml/supported-krysp-versions-by-permit-type %)))
+            krysp-keys   (conj (vec permit-types) :osoitteet)
             empty-confs  (zipmap krysp-keys (repeat {}))]
         (ok :krysp (merge empty-confs (:krysp organization))))
       (fail :error.unknown-organization))))
@@ -709,7 +708,7 @@
    :input-validators [(fn [{{permit-type :permitType} :data}]
                         (when-not (or
                                     (= "osoitteet" permit-type)
-                                    (permit/valid-permit-type? permit-type))
+                                    (get krysp-xml/supported-krysp-versions-by-permit-type (keyword permit-type)))
                           (fail :error.missing-parameters :parameters [:permitType])))
                       (partial validate-optional-url :url)
                       (partial action/string-parameters [:url :username :password :permitType :version])]}
