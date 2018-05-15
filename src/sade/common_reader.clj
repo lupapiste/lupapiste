@@ -1,5 +1,5 @@
 (ns sade.common-reader
-  (:require [taoensso.timbre :as timbre :refer [debug warn error]]
+  (:require [taoensso.timbre :as timbre :refer [debug debugf warn error]]
             [clojure.string :as s]
             [clj-time.coerce :as coerce]
             [clj-time.format :as timeformat]
@@ -113,9 +113,12 @@
 (defn- do-get-xml [http-fn url opts raw?]
   ; Set default timeout to 120 s
   (let [options (merge {:socket-timeout 120000, :conn-timeout 120000, :throw-fail! (not raw?)} opts)
-        raw (:body (http-fn url options))]
-    (if-not (s/blank? raw)
-      (if raw? raw (parse raw))
+        {:keys [status body reason-phrase request-time]} (http-fn url options)]
+    (debugf "Received status %s %s in %.3f seconds from url %s" status reason-phrase (/ (double request-time) 1000) url)
+    (if-not (s/blank? body)
+      (do
+        (debugf "Response body starts with: '%s'..." (s/trim-newline (apply str (take 50 body))))
+        (if raw? body (parse body)))
       (do
         (error "Received an empty XML response with GET from url: " url)
         nil))))

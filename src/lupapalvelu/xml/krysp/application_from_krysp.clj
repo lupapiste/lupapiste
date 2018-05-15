@@ -1,12 +1,14 @@
 (ns lupapalvelu.xml.krysp.application-from-krysp
-  (:require [clojure.set :refer [rename-keys]]
+  (:require [taoensso.timbre :refer [debugf]]
+            [clojure.set :refer [rename-keys]]
             [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.common-reader :as krysp-cr]
             [sade.common-reader :as scr]
-            [sade.xml :as sxml]
+            [sade.core :refer [fail!]]
+            [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]
-            [sade.core :refer [fail!]]))
+            [sade.xml :as sxml]))
 
 (defn- get-lp-tunnus [permit-type xml-without-ns]
   (->> (sxml/select1 xml-without-ns (krysp-cr/get-tunnus-xml-path permit-type :application-id))
@@ -36,12 +38,14 @@
     (get-kuntalupatunnus permit-type xml) xml))
 
 (defn- fetch-application-xmls [organization permit-type ids search-type raw?]
-  (if-let [{url :url credentials :credentials} (if (map? organization)
-                                                 (org/resolve-krysp-wfs organization permit-type)
-                                                 (org/get-krysp-wfs {:organization organization :permitType permit-type}))]
-    (cond->> (permit/fetch-xml-from-krysp permit-type url credentials ids search-type raw?)
-      (not raw?) scr/strip-xml-namespaces
-      (not raw?) (not-empty-content permit-type))
+  (if-let [{url :url creds :credentials} (if (map? organization)
+                                           (org/resolve-krysp-wfs organization permit-type)
+                                           (org/get-krysp-wfs {:organization organization :permitType permit-type}))]
+    (do
+      (debugf "Start fetching XML, ids=%s search-type=%s raw?=" (ss/join "," ids) search-type raw?)
+      (cond->> (permit/fetch-xml-from-krysp permit-type url creds ids search-type raw?)
+               (not raw?) scr/strip-xml-namespaces
+               (not raw?) (not-empty-content permit-type)))
     (fail! :error.no-legacy-available)))
 
 (defn get-application-xml-by-application-id [{:keys [id organization permitType] :as application} & [raw?]]
