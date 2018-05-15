@@ -400,6 +400,9 @@ var LUPAPISTE = LUPAPISTE || {};
       const cancel = self.visible.bind(self, false);
       hub.subscribe("dialog-close", cancel);
       $(document).on("click", cancel);
+      $(document).on("click", ".role-selector-dropdown-content", function(e) {
+        e.stopPropagation();
+      });
     }
 
     /**
