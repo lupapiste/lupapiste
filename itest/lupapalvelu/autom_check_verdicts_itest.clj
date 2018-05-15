@@ -58,27 +58,7 @@
         (:state application-verdict-given) => "verdictGiven")
 
       (fact "checking verdicts and sending emails to the authorities related to the applications"
-        (count (batchrun/fetch-verdicts)) => pos?)
-
-      (fact "batchrun check-for-verdicts logs :error on exception"
-        ;; make sure logging functions are called in expected ways
-        (count  (batchrun/fetch-verdicts)) => anything
-        (provided
-          (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
-          (mongo/select :organizations anything anything) => [{:foo 42}]
-          (sade.strings/blank? nil) =throws=> (IllegalArgumentException.)
-          (lupapalvelu.logging/log-event :error anything) => nil))
-
-      (fact "batchrun check-for-verdicts logs failure details"
-        ;; make sure logging functions are called in expected ways
-        (batchrun/fetch-verdicts) => anything
-        (provided
-          (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
-          (mongo/select :organizations anything anything) => [{:foo 42}]
-          (sade.strings/blank? anything) => false
-          (lupapalvelu.logging/log-event :error anything) => nil
-          (lupapalvelu.verdict/do-check-for-verdict anything) => (fail :bar)))
-
+        (batchrun/fetch-verdicts) => nil?)
       (fact "Verifying the sent emails"
         (Thread/sleep 500) ; batchrun includes a parallel operation
         (let [emails (dummy-email-server/messages :reset true)]
@@ -99,4 +79,33 @@
 
         (fact "state history"
           (-> application-sent :history last :state) => "verdictGiven"
-          (-> application-verdict-given :history last :state) => "verdictGiven")))))
+          (-> application-verdict-given :history last :state) => "verdictGiven"))
+
+      (fact "batchrun verdicts not checked, if organization doesn't have url"
+        (batchrun/fetch-verdicts) => nil?
+        (provided
+          (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
+          (mongo/select :organizations anything anything) => [{:id "bar"}]
+          (lupapalvelu.verdict/do-check-for-verdict irrelevant) => irrelevant :times 0
+          (lupapalvelu.logging/log-event :error irrelevant) => irrelevant :times 0
+          (lupapalvelu.logging/log-event :info anything) => nil))
+
+      (fact "batchrun check-for-verdicts logs :error on exception"
+        ;; make sure logging functions are called in expected ways
+        (batchrun/fetch-verdicts) => nil?
+        (provided
+          (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
+          (mongo/select :organizations anything anything) => [{:id "bar" :krysp {:foo {:url "http://test"}}}]
+          (lupapalvelu.verdict/do-check-for-verdict anything) =throws=> (IllegalArgumentException.)
+          (lupapalvelu.logging/log-event :error anything) => nil
+          (lupapalvelu.logging/log-event :info anything) => nil))
+
+      (fact "batchrun check-for-verdicts logs failure details"
+        ;; make sure logging functions are called in expected ways
+        (batchrun/fetch-verdicts) => anything
+        (provided
+          (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
+          (mongo/select :organizations anything anything) => [{:id "bar" :krysp {:foo {:url "http://test"}}}]
+          (lupapalvelu.logging/log-event :error anything) => nil
+          (lupapalvelu.logging/log-event :info irrelevant) => irrelevant
+          (lupapalvelu.verdict/do-check-for-verdict anything) => (fail :bar))))))
