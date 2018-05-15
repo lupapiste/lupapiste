@@ -568,8 +568,9 @@
                         (mongo/select :applications {:_id {$in application-ids}}))
         permit-types  (or (->> applications
                                (map (comp keyword :permitType))
-                               distinct not-empty
-                               (remove #{:ARK}))
+                               distinct
+                               (remove #{:ARK})
+                               not-empty)
                           [:R])
         organizations (->> (map :organization applications) distinct (concat organization-ids) (apply orgs-for-review-fetch))
         eraajo-user   (user/batchrun-user (map :id organizations))
