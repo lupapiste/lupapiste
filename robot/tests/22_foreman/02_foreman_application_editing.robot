@@ -38,13 +38,13 @@ Foreman uploads attachment
 
 Foreman fills personal information
   Foreman accepts invitation  0
-  Set foreman role  KVV-työnjohtaja
   Element should be visible by test id  also-fill-attachments-checkbox
   Element should contain  xpath=//span[@data-test-id='also-fill-attachments-checkbox']/label  Kopioi omat liitteet hakemukselle
   Checkbox should be selected  fill-attachments-checkbox
   Foreman applies personal information to the foreman application
   Foreman personal information has been applied
   Foreman personal attachments have been copied
+  Set foreman role  KVV-työnjohtaja
   Check accordion text  tyonjohtaja-v2  TYÖNJOHTAJAN NIMEÄMINEN  - KVV-työnjohtaja Teppo Nieminen
 
 Foreman can not fill applicant information
@@ -245,7 +245,11 @@ Save User Data
   Click enabled by test id  save-my-userinfo
   Positive indicator should be visible
   # Wait for indicator to clear to prevent misclicks
+<<<<<<< HEAD
   Wait Until  Positive indicator should not be visible
+=======
+  Sleep  2s
+>>>>>>> LPK-373 Add Robot tests for foreman attachment co-import checkbox.
 
 Wait for Page to Load
   [Arguments]  ${firstName}  ${lastName}
