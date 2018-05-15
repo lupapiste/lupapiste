@@ -292,7 +292,8 @@ $notification-bottom: -60px;
 //
 
 .role-selector {
-  display: inline-block;
+  height: 100% !important;
+  color: $orange !important;
   &:hover {
     background-color: $language-bg !important;
   }
@@ -301,7 +302,34 @@ $notification-bottom: -60px;
   }
 }
 
+.role-selector-dropdown-toggle-button {
+  @include nav-link;
+  @include header-padding;
+  display: inline-flex !important;
+  flex-flow: row;
+  align-items: center;
+  text-decoration: none !important;
+  color: $orange !important;
+
+  span {
+    color: $orange !important;
+  }
+
+  &:hover {
+    text-decoration: none !important;
+    span {
+      color: white !important;
+    }
+  }
+}
+
+.role-selector-user-icon {
+  padding-right: 5px;
+}
+
 .role-selector-user {
+  display: flex;
+  flex-flow: column;
 }
 
 .role-selector-user-name {
@@ -309,17 +337,30 @@ $notification-bottom: -60px;
 }
 
 .role-selector-user-role {
+  display: inline-flex;
+  flex-flow: row;
+  font-size: 80%;
+}
+
+.role-selector-user-role-name {
   display: inline-block;
+}
+
+.role-selector-user-role-sep {
+  padding: 0 5px 0 5px;
+}
+
+.role-selector-user-role-org {
+  display: inline-block;
+}
+
+.role-selector-open-indicator {
+  padding-left: 5px;
 }
 
 .role-selector-dropdown {
   position: relative;
   display: inline-block;
-}
-
-.role-selector-dropdown-toggle-button {
-  @include nav-link;
-  @include header-padding;
 }
 
 .role-selector-dropdown-content {
