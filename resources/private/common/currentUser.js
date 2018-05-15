@@ -115,22 +115,14 @@ LUPAPISTE.CurrentUser = function() {
    * <code>
    *   [
    *     {
-   *       role: "authority",
    *       org: "753-R",
+   *       roles: ["authority", "authorityAdmin"],
    *       orgName: "Sipoon rakennusvalvonta"
    *     },
    *     {
-   *       role: "authority",
    *       org: "297-R",
+   *       roles: ["authority"],
    *       orgName: "Kuopio rakennusvalvonta"
-   *     },
-   *     {
-   *       role: "authorityAdmin",
-   *       org: "297-R",
-   *       orgName: "Kuopio rakennusvalvonta"
-   *     },
-   *     {
-   *       role: "applicant"
    *     }
    *   ]
    * </code>
