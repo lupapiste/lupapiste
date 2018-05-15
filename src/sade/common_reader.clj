@@ -3,6 +3,7 @@
             [clojure.string :as s]
             [clj-time.coerce :as coerce]
             [clj-time.format :as timeformat]
+            [lupapalvelu.logging :as logging]
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util :refer [prewalk-map postwalk-map convert-values]]
@@ -112,11 +113,18 @@
 
 (defn- do-get-xml [http-fn url opts raw?]
   (let [options (merge {:socket-timeout 120000, :conn-timeout 30000, :throw-fail! (not raw?)} opts)
-        {:keys [status body reason-phrase request-time]} (http-fn url options)]
-    (debugf "Received status %s %s in %.3f seconds from url %s" status reason-phrase (/ (double request-time) 1000) url)
+        {:keys [status body reason-phrase request-time] :as resp} (http-fn url options)
+        stripped-url (first (ss/split url #"\?"))
+        body-excerpt (s/trim-newline (apply str (take 50 body)))]
+    (debugf "Received status %s %s in %.3f seconds from url %s" status reason-phrase (/ (double request-time) 1000) stripped-url)
     (if-not (s/blank? body)
       (do
-        (debugf "Response body starts with: '%s'..." (s/trim-newline (apply str (take 50 body))))
+        (debugf "Response body starts with: '%s'..." body-excerpt)
+        (logging/log-event :debug {:ns "sade.common-reader"
+                                   :event "Received XML"
+                                   :data (assoc (select-keys resp [:status :reason-phrase :request-time])
+                                           :url stripped-url
+                                           :body-excerpt body-excerpt)})
         (if raw? body (parse body)))
       (do
         (error "Received an empty XML response with GET from url: " url)
