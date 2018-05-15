@@ -329,10 +329,10 @@ $notification-bottom: -60px;
 }
 
 .role-selector-dropdown-role {
-  text-decoration: none;
+  text-decoration: none !important;
 
   &:hover {
-    background-color: rgb(243, 170, 74); // TODO: what variable this color is?
+    background-color: rgb(243, 170, 74) !important; // TODO: what variable this color is?
   }
 }
 
