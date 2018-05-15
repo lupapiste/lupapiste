@@ -319,6 +319,17 @@
 (defn pate-org? [org-id]
   (pos? (mongo/count :organizations {:_id org-id :pate-enabled true})))
 
+(defn krysp-urls-not-set?
+  "Takes organization as parameter.
+  Returns true if organization has 0 non-blank krysp urls set."
+  [{krysp :krysp}]
+  (every? (fn [[_ conf]] (ss/blank? (:url conf))) krysp))
+
+(def some-krysp-url?
+  "Takes organization as parameter.
+  Returns true if some of the krysp configs has non-blank url set, else false."
+  (complement krysp-urls-not-set?))
+
 (defn encode-credentials
   [username password]
   (when-not (ss/blank? username)
