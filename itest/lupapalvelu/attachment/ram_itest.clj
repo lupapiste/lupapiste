@@ -76,6 +76,7 @@
         (upload-file-and-bind pena application-id
                               {:type {:type-group "paapiirustus" :type-id "julkisivupiirustus"}}
                               :attachment-id (:id (latest-attachment))) => truthy
+        (Thread/sleep 100) ; wait for email delivery
         (fact "Email notification about new RAM is sent"
           (let [email (last-email)]
             (:to email) => (contains (email-for-key ronja))
