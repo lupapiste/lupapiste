@@ -245,11 +245,7 @@ Save User Data
   Click enabled by test id  save-my-userinfo
   Positive indicator should be visible
   # Wait for indicator to clear to prevent misclicks
-<<<<<<< HEAD
   Wait Until  Positive indicator should not be visible
-=======
-  Sleep  2s
->>>>>>> LPK-373 Add Robot tests for foreman attachment co-import checkbox.
 
 Wait for Page to Load
   [Arguments]  ${firstName}  ${lastName}
