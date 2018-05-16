@@ -305,12 +305,14 @@
      [callback] change callback
      [clear?] if truthy, clear button is shown when proper (default
               false).
-     [disabled?] Is component disabled? (false)"
+     [disabled?] Is component disabled? (false)
+     [required?] Is component required? (false)"
   [{selected* ::selected
     term*     ::term
     current*  ::current
     open?*    ::open?
-    :as       local-state} _ {:keys [items clear? callback disabled?]
+    :as       local-state} _ {:keys [items clear? callback disabled?
+                                     required?]
                                     :as options}]
   (let [{:keys [text-edit
                 menu-items
@@ -318,22 +320,25 @@
                                            options
                                            {})
 
-        open? (rum/react open?*)]
+        open? (rum/react open?*)
+        selected (rum/react selected*)]
     (when-not open?
       (common/reset-if-needed! term* ""))
     [:div.pate-autocomplete
      [:div.like-btn.ac--selected
       {:on-click (when-not disabled?
                    #(swap! open?* not))
-       :class    (common/css-flags :disabled disabled?)}
-      [:span (:text (util/find-by-key :value
-                                      (rum/react selected*)
+       :class    (common/css-flags :disabled disabled?
+                                   :required (and required?
+                                                  (s/blank? selected)))}
+      [:span (:text (util/find-first #(util/=as-kw (:value %)
+                                                   selected)
                                       (items-fn "")))]
       [:i.primary.ac--chevron
        {:class (common/css-flags :lupicon-chevron-small-down (not open?)
                                  :lupicon-chevron-small-up   open?)}]
       (when (and clear?
-                 (not (s/blank? (rum/react selected*)))
+                 (not (s/blank? selected))
                  (not disabled?))
         [:i.secondary.ac--clear.lupicon-remove
          {:on-click (fn [event]

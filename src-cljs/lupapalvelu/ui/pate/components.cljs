@@ -342,6 +342,14 @@
                                                        (path/error? options)))}
                        extras))))
 
+(defn- sort-by-schema
+  [{sort-key :sort-by} items]
+  (cond->> items
+    sort-key (sort-by sort-key
+                      (if (= sort-key :text)
+                        js/util.localeComparator
+                        identity))))
+
 (rum/defc pate-text < rum/reactive
   ;;{:key-fn (fn [_ {path :path} _ & _] (path/id path))}
   "Update the options model state only on blur. Immediate update does
@@ -361,8 +369,9 @@
                              items
                              (components/combobox
                               value
-                              (attr-fn {:items (map #(hash-map :text (path/loc %))
-                                                    items)}))
+                              (attr-fn {:items (sort-by-schema {:sort-by :text}
+                                                               (map #(hash-map :text (path/loc %))
+                                                                    items))}))
 
                              lines
                              (components/textarea-edit
@@ -405,18 +414,25 @@
 
 (rum/defc pate-select < rum/reactive
   [{:keys [path state schema] :as options} & [wrap-label?]]
-  (label-wrap-if-needed
-   options
-   {:component   (components/dropdown
-                  (path/react path state)
-                  (pate-attr options
-                             {:callback  (state-change-callback options)
-                              :disabled? (path/disabled? options)
-                              :choose?   (-> schema :allow-empty false? not)
-                              :sort-by   (:sort-by schema)
-                              :items     (map (fn [item]
-                                                {:value item
-                                                 :text  (path/loc options item)})
-                                              (:items schema))
-                              :required? (path/required? options)}))
-    :wrap-label? wrap-label?}))
+  (let [attr-fn      (partial pate-attr
+                              options
+                              {:callback  (state-change-callback options)
+                               :disabled? (path/disabled? options)
+                               :items     (->> (:items schema)
+                                               (map (fn [item]
+                                                      {:value item
+                                                       :text  (path/loc options item)}))
+                                               (sort-by-schema schema))
+                               :required? (path/required? options)})
+        value        (path/react path state)
+        allow-empty? (-> schema :allow-empty false? not)]
+    (label-wrap-if-needed
+    options
+    {:component   (if (= (:type schema) :autocomplete)
+                    (components/autocomplete
+                     value
+                     (attr-fn {:clear? allow-empty?}))
+                    (components/dropdown
+                     value
+                     (attr-fn {:choose? allow-empty?})))
+     :wrap-label? wrap-label?})))

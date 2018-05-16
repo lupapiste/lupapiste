@@ -26,11 +26,11 @@
                 :grid {:columns 8
                        :rows    [[{:col 2
                                    :align :full
-                                   :dict :kuntalupatunnus}]
-                                 [{:col 2
+                                   :dict :kuntalupatunnus}
+                                  {:col 2
                                    :align :full
-                                   :dict :giver}
-                                  {:dict :section}
+                                   :dict :giver}]
+                                 [{:dict :section}
                                   {}
                                   {:col   2
                                    :align :full
@@ -163,7 +163,8 @@
   (build-legacy-schema
    (legsub-verdict {:select {:loc-prefix :verdict.status
                              :items      (map (comp keyword str) (range 1 43))
-                             :sort-by    :text}})
+                             :sort-by    :text
+                             :type :autocomplete}})
    (legsub-reviews {:select {:loc-prefix :pate.review-type
                              :label?     false
                              :items      shared/review-types

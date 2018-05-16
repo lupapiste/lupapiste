@@ -295,11 +295,14 @@
   (merge PateComponent
          {:items                          [sc/Keyword]
           ;; If true (default), empty selection (- Choose -) is
-          ;; available.
+          ;; available. For autocomplete, the clear button is shown.
           (sc/optional-key :allow-empty?) sc/Bool
           ;; Value sorting uses natural order, text sorting takes
-          ;; locale into account. Default order is the items order.
-          (sc/optional-key :sort-by)      (sc/enum :value :text)}))
+          ;; locale into account. Default order is the items
+          ;; order.
+          (sc/optional-key :sort-by)      (sc/enum :value :text)
+          ;; How the select is rendered? Select is the default.
+          (sc/optional-key :type)         (sc/enum :select :autocomplete)}))
 
 (defschema PateLocText
   "Localisation term shown as text."

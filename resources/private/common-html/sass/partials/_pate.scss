@@ -522,6 +522,11 @@ div.pate-autocomplete {
       color: $input-select-disabled-icon
     }
   }
+  .ac--selected.required {
+    span, i {
+      border-color: $input-required-border-color;
+    }
+  }
   .ac__menu {
     background-color: white;
     position: absolute;
