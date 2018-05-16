@@ -8,8 +8,6 @@ LUPAPISTE.FillInfoModel = function(params) {
   self.authorization = params.documentAuthModel;
   self.fillAttachments = ko.observable(self.showAttachmentsOption);
 
-  console.log(params);
-
   self.fillUserInfo = function () {
     ajax
       .command("set-current-user-to-document", params)
