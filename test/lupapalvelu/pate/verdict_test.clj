@@ -1399,3 +1399,17 @@
     (accepted-verdict? {:data {:verdict-code "evatty"}}) => nil
     (accepted-verdict? {:data {}}) => nil
     (accepted-verdict? nil) => nil))
+
+(facts "Verdict handling helpers"
+  (fact "Find latest published pate verdict"
+    (latest-published-pate-verdict {:application
+                                    {:pate-verdicts
+                                     [(assoc test-verdict :published 1525336290167)]}})
+    => (assoc test-verdict :published 1525336290167)
+    (latest-published-pate-verdict {:application
+                                    {:pate-verdicts
+                                     [test-verdict
+                                      (assoc test-verdict :published 1525336290167)
+                                      (assoc test-verdict :published 1425330000000)
+                                      (assoc test-verdict :published 1525336290000)]}})
+    => (assoc test-verdict :published 1525336290167)))

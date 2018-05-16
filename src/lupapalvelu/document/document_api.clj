@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error]]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! unauthorized unauthorized! now]]
+            [sade.env :as env]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.application :as application]

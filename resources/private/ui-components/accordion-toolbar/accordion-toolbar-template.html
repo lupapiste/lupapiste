@@ -49,7 +49,30 @@
                         'toolbar-reject-note': hasOperation()},
                         editorCss: {'accordion-reject-note-editor': !hasOperation(),
 'toolbar-reject-note-editor': hasOperation()}}}"></div>
-      </span>      
+      </span>
+
+      <span class="form-approval-status is-status no-border-bottom"
+            data-bind="css: {approved: true,
+                       'own-line': hasOperation},
+                       visible: showEditNote">
+        <div class="like-btn">
+          <i class="lupicon-circle-check approved"></i>
+          <span class="is-details"
+                data-bind="text: editNote"></span>
+        </div>
+      </span>
+
+      <span class="form-approval-status is-status no-border-bottom"
+            data-bind="css: {approved: true,
+                       'own-line': hasOperation},
+                       visible: showSentNote">
+        <div class="like-btn">
+          <i class="lupicon-circle-check approved"></i>
+          <span class="is-details"
+                data-bind="text: sentNote"></span>
+        </div>
+      </span>
+
       <button class="secondary is-left"
               data-bind="attr: {'data-test-id': testId('toggle-identifiers') },
                          visible: hasOperation,
@@ -93,6 +116,29 @@
         <i class="lupicon-check"></i>
         <span data-bind="ltext: 'document.approve'"></span>
       </button>
+
+      <!-- ko if: showToggleEdit() -->
+        <!-- ko if: !editMode() -->
+        <button class="positive is-right"
+                data-bind="click: toggleEdit">
+          <i class="lupicon-pen"></i>
+          <span data-bind="ltext: 'document.edit'"></span>
+        </button>
+        <!-- /ko -->
+        <!-- ko if: editMode() -->
+         <button class="secondary is-right"
+                data-bind="click: closeEdit">
+          <i class="lupicon-remove"></i>
+          <span data-bind="ltext: 'document.edit.close'"></span>
+        </button>
+        <button class="function is-right"
+                data-bind="click: sendEdit">
+          <i class="lupicon-arrow-right"></i>
+          <span data-bind="ltext: 'document.edit.send'"></span>
+        </button>
+        <!-- /ko -->
+      <!-- /ko -->
+
       <!-- ko if: showIdentifierEditors -->
       <div class="identifier-editors container-bubble" data-test-id="identifier-editors" data-bind="event: {keydown: closeEditors}">
        <!-- ko if: isArchiveProject() -->
