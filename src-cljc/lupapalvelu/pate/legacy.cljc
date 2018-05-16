@@ -15,8 +15,8 @@
                 :giver           {:text      {:i18nkey :verdict.name}
                                   :required? true}
                 :verdict-code    (schema-util/required verdict-code-schema)
-                :section         {:text {:i18nkey :verdict.section
-                                         :before  :section}}
+                :verdict-section         {:text {:i18nkey :verdict.section
+                                                 :before  :section}}
                 :anto            {:date      {:i18nkey :verdict.anto}
                                   :required? true}
                 :lainvoimainen   {:date {:i18nkey :verdict.lainvoimainen}}
@@ -30,15 +30,15 @@
                                   {:col 2
                                    :align :full
                                    :dict :giver}]
-                                 [{:dict :section}
+                                 [{:dict :verdict-section}
                                   {}
                                   {:col   2
                                    :align :full
                                    :dict  :verdict-code}]
-                                 [{:dict :anto} {:dict :lainvoimainen}]
                                  [{:col   6
                                    :align :full
-                                   :dict  :verdict-text}]]}}})
+                                   :dict  :verdict-text}]
+                                 [{:dict :anto} {:dict :lainvoimainen}]]}}})
 
 (defn remove-button [dict]
   {:button {:i18nkey :remove

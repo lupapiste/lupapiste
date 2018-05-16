@@ -15,6 +15,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.date :as date]
+            [lupapalvelu.pate.legacy :as legacy]
             [lupapalvelu.pate.markup :as markup]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
@@ -40,13 +41,13 @@
    ;; Keyword corresponds to a key in the data context.
    keyword? sc/Keyword
    :else (shared-schemas/only-one-of [:doc :dict]
-                             ;; Vector is a path to application
-                             ;; document data. The first item is the
-                             ;; document name and rest are path within
-                             ;; the data.
-                             {(sc/optional-key :doc)  [sc/Keyword]
-                              ;; Kw-path into published verdict data.
-                              (sc/optional-key :dict) sc/Keyword})))
+                                     ;; Vector is a path to application
+                                     ;; document data. The first item is the
+                                     ;; document name and rest are path within
+                                     ;; the data.
+                                     {(sc/optional-key :doc)     [sc/Keyword]
+                                      ;; Kw-path into published verdict data.
+                                      (sc/optional-key :dict)    sc/Keyword})))
 
 (defn styles
   "Definition that only allows either individual kw or subset of kws."
@@ -84,6 +85,10 @@
             ;; the source value denotes multiple values.
             (sc/optional-key :loc-many) sc/Keyword
             (sc/optional-key :source)   Source
+            ;; Post-processing function for source value.
+            (sc/optional-key :post-fn) (sc/conditional
+                                        keyword? sc/Keyword
+                                        :else   (sc/pred fn?))
             (sc/optional-key :styles)   (styles row-styles)}
            {})
    ;; Note that the right-hand side can consist of multiple
@@ -477,11 +482,69 @@
 
 (sc/validate PdfLayout ya-pdf-layout)
 
-(def pdf-layouts
-  {:r  r-pdf-layout
-   :p  p-pdf-layout
-   :ya ya-pdf-layout})
+;; --------------------------------
+;; Layouts for legacy verdicts
+;; --------------------------------
 
+(defn repeating-texts-post-fn [text-key]
+  (util/fn->> vals
+              (map (comp ss/trim text-key))
+              (remove ss/blank?)))
+
+(def legacy--application-id [{:loc    :applications.id.longtitle
+                              :source :application-id
+                              :styles [:bold]}])
+
+(def legacy--kuntalupatunnus [{:loc    :verdict.id
+                               :source {:dict :kuntalupatunnus}
+                               :styles [:bold :pad-after]}])
+
+(def legacy--verdict-code [{:loc    :pate-verdict
+                            :source {:dict :verdict-code}
+                            :styles [:bold :border-top]}
+                           {:loc-prefix :verdict.status}])
+
+(def legacy--verdict-text [{:loc    :empty
+                            :source {:dict :verdict-text}
+                            :styles :pad-before}])
+
+(def legacy--foremen [{:loc      :pdf.required-foreman
+                       :loc-many :verdict.vaaditutTyonjohtajat
+                       :source   {:dict :foremen}
+                       :post-fn  (repeating-texts-post-fn :role)
+                       :styles   :pad-before}])
+
+(def legacy--conditions [{:loc      :verdict.muuMaarays
+                          :loc-many :verdict.muutMaaraykset
+                          :source   {:dict :conditions}
+                          :post-fn (repeating-texts-post-fn :name)
+                          :styles   :pad-before}])
+
+
+
+(def r-legacy-layout
+  {:left-width 30
+   :entries (combine-entries legacy--application-id
+                             legacy--kuntalupatunnus
+                             entry--rakennuspaikka
+                             (entry--applicant :pdf.achiever :pdf.achievers)
+                             entry--operation
+                             entry--designers
+                             entry--dimensions
+                             entry--statements
+                             entry--neighbors
+                             entry--attachments
+                             legacy--verdict-code
+                             legacy--verdict-text
+                             legacy--foremen
+                             legacy--conditions)})
+
+(defn pdf-layout [{:keys [category legacy?]}]
+  (case (util/kw-path (when legacy? :legacy) category)
+    :r  r-pdf-layout
+    :p  p-pdf-layout
+    :ya ya-pdf-layout
+    :legacy.r r-legacy-layout))
 
 (defn join-non-blanks
   "Trims and joins."
@@ -534,20 +597,22 @@
   (get-in (domain/get-document-by-name application (name doc-name))
           (cons :data (pathify kw-path))))
 
+(defn- verdict-schema [{:keys [category schema-version legacy?] :as opts}]
+  (if legacy?
+    (legacy/legacy-verdict-schema category)
+    (shared/verdict-schema category schema-version)))
+
 (defn dict-value
   "Dictionary value for the given kw-path. Options can either
   have :verdict key or be verdict itself. The returned values are
-  transformed into friendly formats (e.g., timestamp -> date)"
+  transformed into friendly formats (e.g., timestamp -> date)."
   [options kw-path]
-  (let [{:keys [category schema-version
-                data]}   (get options :verdict options)
-        path             (pathify kw-path)
-        value            (get-in data  path)
-        {schema :schema} (shared/dict-resolve path
-                                              (:dictionary
-                                               (shared/verdict-schema
-                                                category
-                                                schema-version)))]
+  (let [{data :data :as opts} (get options :verdict options)
+        path                  (pathify kw-path)
+        value                 (get-in data path)
+        {schema :schema}      (shared/dict-resolve path
+                                                   (:dictionary
+                                                    (verdict-schema opts)))]
     (cond
       (and (:phrase-text schema) (ss/not-blank? value))
       (list [:div.markup (markup/markup->tags value)])
@@ -659,9 +724,15 @@
        loc-prefix (i18n/localize lang loc-prefix)
        unit (add-unit lang unit))]))
 
+(defn post-process [value post-fn]
+  (cond-> value
+    (and value post-fn) post-fn))
+
 (defn entry-row
-  [left-width {:keys [lang] :as data} [{:keys [loc loc-many source styles]} & cells]]
-  (let [source-value (util/pcond-> (resolve-source data source) string? ss/trim)
+  [left-width {:keys [lang] :as data} [{:keys [loc loc-many source post-fn styles]} & cells]]
+  (let [source-value (post-process (util/pcond-> (resolve-source data source)
+                                                 string? ss/trim)
+                                   post-fn)
         multiple?    (and (sequential? source-value)
                           (> (count source-value) 1))]
     (when (or (nil? source) (not-empty source-value))
@@ -887,11 +958,8 @@
          :link-permits (link-permits options))))
 
 (defn verdict-body [{verdict :verdict :as options}]
-  (->> verdict
-       :category
-       keyword
-       (get pdf-layouts)
-       (content (verdict-properties options))))
+  (content (verdict-properties options)
+           (pdf-layout verdict)))
 
 (defn verdict-header
   [lang application {:keys [category published] :as verdict}]

@@ -21,7 +21,9 @@
                         keyword? sc/Keyword
                         :else    sc/Str))
 (defn only-one-of
-  "Only one of the given keys are allowed in the data."
+  "Only one of the given keys are allowed in the data. Note: do not use
+  in a `PateComponent`, since the wrapping constraint breaks Pate
+  validation. "
   [allowed-keys schema]
   (sc/constrained schema
                   (fn [data]

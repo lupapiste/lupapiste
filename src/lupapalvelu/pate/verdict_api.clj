@@ -184,8 +184,7 @@
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [#_pate-enabled
-                      (verdict-exists :editable?)
+   :pre-checks       [(verdict-exists :editable?)
                       verdict-filled]
    :states           states/post-submitted-states}
   [command]
