@@ -366,6 +366,7 @@
     (warn "No organizations found, exiting.")))
 
 (defn fetch-verdicts-with-args [args]
+  (debug "check-for-verdicts started with args" args)
   (if (application-id-args? args)
     (fetch-verdicts-by-application-ids args)
     (fetch-verdicts-by-org-ids args)))
