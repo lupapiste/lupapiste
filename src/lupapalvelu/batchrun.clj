@@ -369,10 +369,9 @@
     (warn "No organizations found, exiting.")))
 
 (defn fetch-verdicts-with-args [args]
-  (cond
-    (application-id-args? args) (fetch-verdicts-by-application-ids args)
-    (every? string? args)       (fetch-verdicts-by-org-ids args)
-    :else (warn "Sorry, args don't look like org-ids or application-ids, exiting.")))
+  (if (application-id-args? args)
+    (fetch-verdicts-by-application-ids args)
+    (fetch-verdicts-by-org-ids args)))
 
 (defn fetch-verdicts-default []
   (let [organizations-with-krysp-url (organization/get-organizations
