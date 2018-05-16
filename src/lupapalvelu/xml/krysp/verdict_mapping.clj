@@ -15,7 +15,8 @@
 (defmethod permit/verdict-krysp-mapper :R [application verdict lang krysp-version begin-of-link]
   (let [attachments-canonical (att-canonical/get-attachments-as-canonical application begin-of-link (comp #{(:id verdict)} :id :target))
         verdict-canonical (canonical/verdict-canonical application lang verdict)
-        verdict-attachment-canonical (att-canonical/verdict-attachment-canonical lang verdict begin-of-link)]
+        verdict-attachment-canonical (att-canonical/verdict-attachment-canonical lang verdict begin-of-link)
+        kayttotapaus (or (:usage verdict) kayttotapaus)]
 
     {:attachments (mapping-common/attachment-details-from-canonical attachments-canonical)
      :xml (-> (meta-fields/enrich-with-link-permit-data application)

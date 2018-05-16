@@ -53,7 +53,7 @@
 
 (def info-keys #{:name :type :subtype :version
                  :i18name :i18nprefix
-                 :approvable :removable-by :last-removable-by
+                 :approvable :removable-by :last-removable-by :post-verdict-editable
                  :disableable
                  :user-authz-roles
                  :group-help :section-help
@@ -1349,6 +1349,7 @@
 
    {:info {:name "uusiRakennus"
            :approvable true
+           :post-verdict-editable true
            :accordion-fields buildingid-accordion-paths}
     :body (body tunnus
                 rakennuksen-omistajat

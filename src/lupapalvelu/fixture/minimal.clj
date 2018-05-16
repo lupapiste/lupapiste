@@ -1093,7 +1093,27 @@
                                                 :vapaa-ajan-asuinrakennus [[:paapiirustus :pohjapiirustus]
                                                                            [:hakija :ote_kauppa_ja_yhdistysrekisterista]
                                                                            [:pelastusviranomaiselle_esitettavat_suunnitelmat :vaestonsuojasuunnitelma]
-                                                                           [:suunnitelmat :valaistussuunnitelma]]}
+                                                                           [:suunnitelmat :valaistussuunnitelma]]
+                                                :varasto-tms [[:paapiirustus :asemapiirros]
+                                                              [:paapiirustus :julkisivupiirustus]
+                                                              [:paapiirustus :leikkauspiirustus]
+                                                              [:ennakkoluvat_ja_lausunnot :naapurin_kuuleminen]
+                                                              [:paapiirustus :pohjapiirustus]
+                                                              [:rakennuspaikan_hallinta :todistus_hallintaoikeudesta]]
+                                                :asuinrakennus [[:paapiirustus :asemapiirros]
+                                                                [:selvitykset :energiataloudellinen_selvitys]
+                                                                [:selvitykset :energiatodistus]
+                                                                [:paapiirustus :julkisivupiirustus]
+                                                                [:paapiirustus :leikkauspiirustus]
+                                                                [:ennakkoluvat_ja_lausunnot :naapurin_kuuleminen]
+                                                                [:pelastusviranomaiselle_esitettavat_suunnitelmat :paloturvallisuussuunnitelma]
+                                                                [:suunnitelmat :piha_tai_istutussuunnitelma]
+                                                                [:paapiirustus :pohjapiirustus]
+                                                                [:rakennuspaikan_hallinta :todistus_hallintaoikeudesta]]
+                                                :auto-katos [[:paapiirustus :asemapiirros]
+                                                             [:ennakkoluvat_ja_lausunnot :naapurin_kuuleminen]
+                                                             [:rakennuspaikan_hallinta :todistus_hallintaoikeudesta]]}
+                       :pate-enabled true
                        :krysp {:R {:url local-krysp :version "2.2.2"
                                    :http (merge
                                            {:auth-type "basic"

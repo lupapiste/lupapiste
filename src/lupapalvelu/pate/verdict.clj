@@ -962,3 +962,10 @@
                                      {:pate-verdicts.$.replacement.user.username (:username user)}
                                      {:pate-verdicts.$.replacement.user.id (:id user)}
                                      {:pate-verdicts.$.replacement.replaced-by verdict-id})}))
+
+(defn latest-published-pate-verdict
+  [{:keys [application] :as command}]
+  (->> (:pate-verdicts application)
+       (filter #(some? (:published %)))
+       (sort-by :published)
+       (last)))

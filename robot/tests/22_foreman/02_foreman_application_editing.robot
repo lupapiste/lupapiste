@@ -26,7 +26,8 @@ Sonja inits applications
 Foreman fills personal information
   Foreman logs in
   Foreman applies personal information to the foreman application  0
-  Check accordion text  tyonjohtaja-v2  TYÖNJOHTAJAN NIMEÄMINEN  - Teppo Nieminen
+  Set foreman role  KVV-työnjohtaja
+  Check accordion text  tyonjohtaja-v2  TYÖNJOHTAJAN NIMEÄMINEN  - KVV-työnjohtaja Teppo Nieminen
 
 Foreman can not fill applicant information
   # No inputs that are missing a readoly attribute. In other words, all inputs are read only.
@@ -70,12 +71,24 @@ Foreman could add attachment to foreman application
   Open tab  attachments
   Element should be visible by test id  add-attachments-label
 
+Foreman application links to project application with correct link text
+  ${appId} =   Get From List  ${applicationIds}  1
+  Element should be visible by test id  test-application-link-permit-lupapistetunnus
+  Element should contain  xpath=//a[@data-test-id="test-application-link-permit-lupapistetunnus"]/span[1]  ${appId}
+
 Foreman only read comments on project application
   Open project application
   Confirm yes no dialog
   Open side panel  conversation
   Element should not be visible by test id  application-new-comment-text
   Element should not be visible by test id  application-new-comment-btn
+
+Foreman link text shows foreman description and application state
+# LPK-2097
+  Element should be visible by test id  foreman-link-person-info
+  Element should Contain  xpath=//span[@data-test-id="foreman-link-person-info"]  KVV-työnjohtaja
+  Element should Contain  xpath=//span[@data-test-id="foreman-link-person-info"]  Nieminen Teppo
+  Element should Contain  xpath=//span[@data-test-id="foreman-link-state"]  Hakemus jätetty
 
 Foreman can not invite anyone to the project application
   Open accordions  parties
@@ -123,12 +136,11 @@ Authority tries to send application to backend
   Click enabled by test id  approve-application-summaryTab
 
 Can not be send before base app
-  Confirm  dynamic-yes-no-confirm-dialog
   Confirm  integration-error-dialog
 
 Approve base app
   Go back to project application
-  Approve application with missing info
+  Approve application
 
 Fetch verdict to base app
   Open tab  verdict
@@ -138,7 +150,6 @@ Approve foreman app
   Open foreman application  1
   Open tab  requiredFieldSummary
   Click enabled by test id  approve-application-summaryTab
-  Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Application state should be  acknowledged
 
 Link foreman approval to base app
@@ -177,7 +188,6 @@ Verdict could be not given in complementNeeded (LPK-2559)
 Re-send and give verdict
   Open tab  requiredFieldSummary
   Click enabled by test id  approve-application-summaryTab
-  Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  sent
   Submit empty verdict  foremanVerdictGiven
   Application state should be  foremanVerdictGiven

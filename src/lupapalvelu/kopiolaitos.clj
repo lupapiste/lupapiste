@@ -100,6 +100,7 @@
                                     email-addresses)]
 
         (when (-> results-failed-emails count pos?)
+          (warnf "Kopiolaitos email failed with %s messages out of %s. Failed emails: %s" (count results-failed-emails) (count email-addresses) (s/join "," results-failed-emails))
           (fail! :kopiolaitos-email-sending-failed-with-emails :failedEmails (s/join "," results-failed-emails))))
 
       (finally

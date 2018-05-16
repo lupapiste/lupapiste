@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error]]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! unauthorized unauthorized! now]]
+            [sade.env :as env]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.application :as application]
@@ -98,6 +99,10 @@
         (bsite/fetch-and-persist-ktj-tiedot (:application command) document property-id (now))))
     (ok :doc (:id document))))
 
+(defn do-remove-doc! [command document id docId]
+  (doc-persistence/remove! command document)
+  (assignment/remove-target-from-assignments id docId))
+
 (defcommand remove-doc
   {:parameters       [id docId]
    :categories       #{:documents}
@@ -108,8 +113,7 @@
                       doc-disabled-validator
                       remove-doc-validator]}
   [{:keys [document] :as command}]
-  (doc-persistence/remove! command document)
-  (assignment/remove-target-from-assignments id docId)
+  (do-remove-doc! command document id docId)
   (ok))
 
 (defn- update-document-assignment-statuses [app-id doc-id doc-status]

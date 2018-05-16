@@ -6,6 +6,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
+            [lupapalvelu.application-replace-operation :as replace-operation]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
@@ -38,7 +39,11 @@
             [sade.strings :as str]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs fn->>] :as util]
             [sade.validators :as v]
-            [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]])
+            [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]]
+            [lupapalvelu.application :as application]
+            [lupapalvelu.document.waste-schemas :as waste-schemas]
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.organization :as org])
   (:import [org.joda.time DateTime]))
 
 (defn drop-schema-data [document]
@@ -3758,6 +3763,104 @@
                          {$or [{:contentType {$exists true}} {:fileId {$exists true}}]}
                          {$unset {:contentType ""
                                   :fileId ""}}))
+
+(defn waste-document-fix [lp-id]
+  (let [application (domain/get-application-no-access-checking lp-id)
+        schema-version (:schema-version application)
+        organization (when application (org/get-organization (:organization application)))
+        waste-schema-name (when organization (waste-schemas/construction-waste-plan-for-organization organization))
+        application-does-not-contain-waste-plan? (when application
+                                                   (->> application
+                                                        :documents
+                                                        (filter #(-> % :schema-info :name (= waste-schema-name)))
+                                                        (empty?)))
+        [op-name _] (when application-does-not-contain-waste-plan? ;; get the operation that needs the waste document
+                      (->> (cons (:primaryOperation application) (:secondaryOperations application))
+                           (reduce #(assoc %1 (keyword (:name %2)) (replace-operation/get-document-schema-names-for-operation organization %2)) {})
+                           (util/find-first (fn [[_ v]] ((set v) waste-schema-name)))))
+        waste-document (when op-name
+                         (->> (schemas/get-schema schema-version waste-schema-name)
+                              (application/make-document application op-name (sade.core/now) nil)))]
+    (when (and waste-document (not= (:state application) "canceled"))
+      (action/update-application (action/application->command application)
+                                 {$push {:documents waste-document}}))))
+
+(defn get-correct-rakennuspaikka-doc [docs-by-op]
+  (loop [return-op nil
+         return-doc-name nil
+         docs-by-op docs-by-op]
+    (let [[op docs] (first docs-by-op)
+          doc-set (set docs)]
+      (cond
+        (empty? docs-by-op) [return-op return-doc-name]
+        (doc-set "rakennuspaikka") [op "rakennuspaikka"]
+        (doc-set "rakennuspaikka-ilman-ilmoitusta") (recur op "rakennuspaikka-ilman-ilmoitusta" (rest docs-by-op))
+        :else (recur return-op return-doc-name (rest docs-by-op))))))
+
+(defn rakennuspaikka-document-fix [lp-id]
+  (let [application (domain/get-application-no-access-checking lp-id)
+        schema-version (:schema-version application)
+        organization (:organization application)
+        application-does-not-contain-rakennuspaikka? (when application
+                                                       (->> application
+                                                            :documents
+                                                            (filter #(-> % :schema-info :type (keyword) (= :location)))
+                                                            (empty?)))
+        [op-name doc-name] (when application-does-not-contain-rakennuspaikka? ;; get the operation that needs the rakennuspaikka document
+                             (->> (cons (:primaryOperation application) (:secondaryOperations application))
+                                  (reduce #(assoc %1 (keyword (:name %2)) (replace-operation/get-document-schema-names-for-operation organization %2)) {})
+                                  (filter (fn [[_ v]] (let [doc-set (set v)] (or (doc-set "rakennuspaikka") (doc-set "rakennuspaikka-ilman-ilmoitusta")))))
+                                  (get-correct-rakennuspaikka-doc)))
+        rakennuspaikka-schema (when op-name (schemas/get-schema schema-version (keyword doc-name)))
+        rakennuspaikka-document (when rakennuspaikka-schema
+                                  (application/make-document application op-name (sade.core/now) nil rakennuspaikka-schema))]
+    (when (and rakennuspaikka-document (not= (:state application) "canceled"))
+      (action/update-application (action/application->command application)
+                                 {$push {:documents rakennuspaikka-document}}))))
+
+(def replace-operation-broken-apps
+  ["LP-536-2018-00148" "LP-837-2018-00915" "LP-423-2018-00130" "LP-837-2017-03424" "LP-753-2017-00828"
+   "LP-257-2017-01621" "LP-936-2018-00006" "LP-020-2018-00115" "LP-498-2018-00029" "LP-734-2018-00112"
+   "LP-271-2018-00066" "LP-445-2018-00066" "LP-091-2018-01471" "LP-529-2018-00228" "LP-109-2018-00263"
+   "LP-240-2018-00028" "LP-091-2018-00634" "LP-753-2018-90051" "LP-186-2018-00331" "LP-092-2018-90144"
+   "LP-536-2018-00198" "LP-491-2018-00241" "LP-153-2018-00120" "LP-430-2017-00253" "LP-422-2018-00051"
+   "LP-927-2018-00134" "LP-020-2018-00118" "LP-611-2017-00281" "LP-710-2017-01158" "LP-678-2018-00168"
+   "LP-908-2018-00181" "LP-562-2018-00070" "LP-091-2018-02355" "LP-445-2018-00061" "LP-153-2018-00086"
+   "LP-020-2018-00117" "LP-536-2018-00142" "LP-740-2018-00021" "LP-491-2018-00523" "LP-108-2018-00009"
+   "LP-423-2017-00217" "LP-837-2018-00222" "LP-430-2018-00172" "LP-261-2018-00088" "LP-091-2018-02009"
+   "LP-529-2018-00195" "LP-887-2018-00014" "LP-680-2018-00182" "LP-208-2018-00119" "LP-702-2018-00008"
+   "LP-623-2018-00060" "LP-261-2018-00043" "LP-710-2017-01182" "LP-858-2018-00147" "LP-086-2018-00084"
+   "LP-106-2017-01369" "LP-908-2018-00190" "LP-491-2018-00485" "LP-837-2018-00833" "LP-249-2018-00049"
+   "LP-249-2017-00361" "LP-244-2018-00099" "LP-638-2018-00209" "LP-322-2018-00248" "LP-261-2018-00101"
+   "LP-781-2018-00009" "LP-300-2018-00031" "LP-092-2018-01516" "LP-322-2018-00280" "LP-895-2017-00637"
+   "LP-444-2018-00454" "LP-102-2018-00022" "LP-507-2018-00157" "LP-702-2018-00003" "LP-444-2018-00492"
+   "LP-143-2018-90002" "LP-092-2018-01749" "LP-491-2018-00374" "LP-285-2018-00138" "LP-322-2018-00153"
+   "LP-091-2017-06303" "LP-980-2017-00014" "LP-322-2017-00242" "LP-895-2018-00254" "LP-895-2018-00155"
+   "LP-092-2018-90134" "LP-091-2018-01712" "LP-543-2018-00219" "LP-182-2018-00078" "LP-322-2018-00124"
+   "LP-536-2018-00094" "LP-740-2018-00232" "LP-300-2018-00028" "LP-075-2018-00088" "LP-444-2018-00541"
+   "LP-734-2018-00361" "LP-740-2018-00164" "LP-305-2018-00333" "LP-507-2017-00117" "LP-623-2018-00071"
+   "LP-858-2018-00260" "LP-753-2018-90053" "LP-167-2018-00272" "LP-244-2018-00149" "LP-211-2017-00220"
+   "LP-109-2018-00107" "LP-892-2018-00041" "LP-729-2018-00046" "LP-167-2018-00218" "LP-271-2018-00051"
+   "LP-858-2018-00291" "LP-491-2017-02048" "LP-092-2018-00874" "LP-638-2018-00289" "LP-020-2017-00318"
+   "LP-753-2018-90034" "LP-444-2017-02647" "LP-444-2017-01785" "LP-475-2018-00062" "LP-109-2018-00336"
+   "LP-430-2017-00250" "LP-297-2018-00365" "LP-091-2018-00302" "LP-142-2018-90010" "LP-297-2018-00366"
+   "LP-430-2018-00181" "LP-091-2018-01862" "LP-908-2017-00643" "LP-562-2018-00104" "LP-091-2018-02080"
+   "LP-837-2018-00024" "LP-758-2018-00085" "LP-734-2018-00294" "LP-081-2018-00049" "LP-211-2017-00257"
+   "LP-592-2017-00106" "LP-092-2018-01477" "LP-790-2015-00313" "LP-615-2018-00191" "LP-322-2018-00125"
+   "LP-734-2017-01428" "LP-491-2018-00177" "LP-837-2017-03274" "LP-265-2018-00013" "LP-837-2016-01060"
+   "LP-425-2018-00027" "LP-046-2018-00031" "LP-297-2018-00408" "LP-765-2018-90020" "LP-740-2018-00171"
+   "LP-245-2018-00254" "LP-543-2018-00323" "LP-908-2017-00631" "LP-109-2018-00278" "LP-092-2018-01390"
+   "LP-092-2018-90113" "LP-245-2018-00274" "LP-047-2018-00040" "LP-020-2018-00116" "LP-081-2018-00064"
+   "LP-109-2018-00134" "LP-097-2018-00021" "LP-091-2018-01964" "LP-505-2018-00116" "LP-508-2018-00032"
+   "LP-541-2018-00027" "LP-245-2018-00285"])
+
+(defmigration replace-operation-fix-waste-document
+  (doseq [app-id replace-operation-broken-apps]
+    (waste-document-fix app-id)))
+
+(defmigration replace-operation-fix-rakennuspaikka-document
+  (doseq [app-id replace-operation-broken-apps]
+    (rakennuspaikka-document-fix app-id)))
 
 (defmigration jatkoaikalupa-state-to-ready
   {:apply-when (pos? (mongo/count :applications {:primaryOperation.name {$in [:raktyo-aloit-loppuunsaat
