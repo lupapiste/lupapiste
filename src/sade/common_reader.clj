@@ -1,8 +1,9 @@
 (ns sade.common-reader
-  (:require [taoensso.timbre :as timbre :refer [debug warn error]]
+  (:require [taoensso.timbre :as timbre :refer [debug debugf warn error]]
             [clojure.string :as s]
             [clj-time.coerce :as coerce]
             [clj-time.format :as timeformat]
+            [lupapalvelu.logging :as logging]
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util :refer [prewalk-map postwalk-map convert-values]]
@@ -111,11 +112,20 @@
   [m] (postwalk-map (partial map (fn [[k v]] [k (if (sequential? v) (map-index v) v)])) m))
 
 (defn- do-get-xml [http-fn url opts raw?]
-  ; Set default timeout to 120 s
-  (let [options (merge {:socket-timeout 120000, :conn-timeout 120000, :throw-fail! (not raw?)} opts)
-        raw (:body (http-fn url options))]
-    (if-not (s/blank? raw)
-      (if raw? raw (parse raw))
+  (let [options (merge {:socket-timeout 120000, :conn-timeout 30000, :throw-fail! (not raw?)} opts)
+        {:keys [status body reason-phrase request-time] :as resp} (http-fn url options)
+        stripped-url (first (ss/split url #"\?"))
+        body-excerpt (s/trim-newline (apply str (take 50 body)))]
+    (debugf "Received status %s %s in %.3f seconds from url %s" status reason-phrase (/ (double request-time) 1000) stripped-url)
+    (if-not (s/blank? body)
+      (do
+        (debugf "Response body starts with: '%s'..." body-excerpt)
+        (logging/log-event :debug {:ns "sade.common-reader"
+                                   :event "Received XML"
+                                   :data (assoc (select-keys resp [:status :reason-phrase :request-time])
+                                           :url stripped-url
+                                           :body-excerpt body-excerpt)})
+        (if raw? body (parse body)))
       (do
         (error "Received an empty XML response with GET from url: " url)
         nil))))

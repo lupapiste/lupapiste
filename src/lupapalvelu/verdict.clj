@@ -370,6 +370,7 @@
           validation-error)))
     ;; LPK-2459
     (when (or (foreman/foreman-app? application) (app/designer-app? application))
+      (debug "Checking foreman/designer verdict...")
       (fetch-tj-suunnittelija-verdict command))))
 
 (defn- verdict-task?

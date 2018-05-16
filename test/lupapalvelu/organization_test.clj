@@ -226,3 +226,14 @@
   (facts "updates (new is blank)"
     (dissoc-credentials "" {:credentials ["old" "pw"]} "R") => (partial krysp-unset-map "R")
     (dissoc-credentials "" {:credentials ["old" "pw"]} "testi") => (partial krysp-unset-map "testi")))
+
+(facts "krysp-url checkers"
+  (fact "with url"
+    (some-krysp-url? {:krysp {:A {:url "jee"} :B {:url "foo"}}}) => true
+    (krysp-urls-not-set? {:krysp {:A {:url "jee"} :B {:url "foo"}}}) => false)
+  (fact "with other blank"
+    (some-krysp-url? {:krysp {:A {:url "jee"} :B {:url ""}}}) => true
+    (krysp-urls-not-set? {:krysp {:A {:url "jee"} :B {:url ""}}}) => false)
+  (fact "with both blank"
+    (some-krysp-url? {:krysp {:A {:url ""} :B {:url ""}}}) => false
+    (krysp-urls-not-set? {:krysp {:A {:url ""} :B {:url ""}}}) => true))

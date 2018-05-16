@@ -10,7 +10,30 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [sade.util :as util]))
 
-(testable-privates lupapalvelu.batchrun fetch-reviews-for-organization fetch-reviews-for-organization-permit-type)
+(testable-privates lupapalvelu.batchrun fetch-reviews-for-organization fetch-reviews-for-organization-permit-type
+                   organization-has-krysp-url-function get-valid-applications)
+
+(fact "organization-has-krysp-url-function"
+  ((organization-has-krysp-url-function {}) {:permitType "T" :organization "FOO"}) => false
+  ((organization-has-krysp-url-function {"FOO" {:krysp nil}}) {:permitType "T" :organization "FOO"}) => false
+  ((organization-has-krysp-url-function {"FOO" {:krysp {:T {:url ""}}}}) {:permitType "T" :organization "FOO"}) => false
+  ((organization-has-krysp-url-function {"FOO" {:krysp {:T {:url "testi"}}}}) {:permitType "T" :organization "FOO"}) => true
+  ((organization-has-krysp-url-function {"FOO" {:krysp {:T {:url "testi"}}}}) {:permitType "G" :organization "FOO"}) => false)
+
+(fact "get-valid-applications"
+  (get-valid-applications [{:id "FOO" :krysp nil}] {:organization "FOO"}) => (throws AssertionError)
+  (get-valid-applications {:id "FOO" :krysp nil} [{:organization "FOO"}]) => (throws AssertionError)
+  (get-valid-applications [{:id "FOO" :krysp nil}] [{:organization "FOO"}]) => empty?
+  (get-valid-applications [{:id "FOO" :krysp nil}] [{:organization "FAA"}]) => empty?
+  (get-valid-applications [{:id "FOO" :krysp nil}] [{:organization "FOO"}]) => empty?
+  (get-valid-applications [{:id "FOO" :krysp {:T {:url ""}}}] [{:organization "FOO"}]) => empty?
+  (fact "permitType missing"
+    (get-valid-applications [{:id "FOO" :krysp {:T {:url ""}}}] [{:organization "FOO"}]) => empty?)
+  (fact "success"
+    (get-valid-applications [{:id "FOO" :krysp {:T {:url "works"}}}] [{:organization "FOO" :permitType "T"}]) => [{:organization "FOO" :permitType "T"}])
+  (fact "wrong organization doesn't fool the function"
+    (get-valid-applications [{:id "FOO" :krysp {:T {:url nil}}}
+                             {:id "FAA" :krysp {:T {:url "works"}}}] [{:organization "FOO" :permitType "T"}]) => empty?))
 
 (facts fetch-reviews-for-organization-permit-type
   (fact "fetch single application"

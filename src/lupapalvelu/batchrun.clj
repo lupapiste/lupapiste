@@ -1,18 +1,15 @@
 (ns lupapalvelu.batchrun
-  (:require [taoensso.timbre :refer [debug debugf error errorf info]]
+  (:require [taoensso.timbre :refer [debug debugf error errorf info infof warn]]
             [me.raynes.fs :as fs]
             [monger.operators :refer :all]
             [clojure.set :as set]
             [slingshot.slingshot :refer [try+]]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
-            [monger.core :as monger]
             [monger.query :as monger-query]
-            [monger.credentials :as monger-cred]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.integrations.state-change :as state-change]
             [lupapalvelu.logging :as logging]
@@ -27,19 +24,17 @@
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapiste-commons.threads :as threads]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.dummy-email-server]
             [sade.http :as http]
             [sade.strings :as ss]
-            [lupapiste-commons.threads :as threads]
             [sade.util :refer [fn-> pcond->] :as util]
-            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
-            [monger.collection :as mc]
-            [clojure.data :as cd]
-            [clojure.pprint])
+            [sade.validators :as v])
   (:import [org.xml.sax SAXParseException]))
 
 
@@ -297,58 +292,111 @@
 
     (mongo/disconnect!)))
 
-(defn fetch-verdicts []
-  (let [orgs-with-wfs-url-defined-for-some-scope (organization/get-organizations
-                                                   {$or [{:krysp.R.url {$exists true}}
-                                                         {:krysp.YA.url {$exists true}}
-                                                         {:krysp.P.url {$exists true}}
-                                                         {:krysp.MAL.url {$exists true}}
-                                                         {:krysp.VVVL.url {$exists true}}
-                                                         {:krysp.YI.url {$exists true}}
-                                                         {:krysp.YL.url {$exists true}}
-                                                         {:krysp.KT.url {$exists true}}]}
-                                                   {:krysp 1})
-        orgs-by-id (util/key-by :id orgs-with-wfs-url-defined-for-some-scope)
-        org-ids (keys orgs-by-id)
-        apps (mongo/select :applications {:state {$in ["sent"]} :organization {$in org-ids}})
-        eraajo-user (user/batchrun-user org-ids)]
-    (doall
-      (pmap
-        (fn [{:keys [id permitType organization] :as app}]
-          (logging/with-logging-context {:applicationId id, :userId (:id eraajo-user)}
-            (let [url (get-in orgs-by-id [organization :krysp (keyword permitType) :url])]
-              (try
-                (if-not (ss/blank? url)
-                  (let [command (assoc (application->command app) :user eraajo-user :created (now) :action "fetch-verdicts")
-                        result (verdict/do-check-for-verdict command)]
-                    (when (-> result :verdicts count pos?)
-                      ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
-                      (logging/log-event :info {:run-by "Automatic verdicts checking" :event "Found new verdict"})
-                      (notifications/notify! :application-state-change command))
-                    (when (or (nil? result) (fail? result))
-                      (logging/log-event :error {:run-by "Automatic verdicts checking"
-                                                 :event "Failed to check verdict"
-                                                 :failure (if (nil? result) :error.no-app-xml result)
-                                                 :organization {:id organization :permit-type permitType}
-                                                 })))
+(defn fetch-verdict
+  [batchrun-name batchrun-user {:keys [id permitType organization] :as app}]
+  (logging/with-logging-context {:applicationId id, :userId (:id batchrun-user)}
+    (info "Checking verdict...")
+    (try
+      (let [command (assoc (application->command app) :user batchrun-user :created (now) :action "fetch-verdicts")
+            result (verdict/do-check-for-verdict command)]
+        (when (-> result :verdicts count pos?)
+          (infof "Found %s verdicts" (-> result :verdicts count))
+          ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
+          (logging/log-event :info {:run-by batchrun-name :event "Found new verdict"})
+          (notifications/notify! :application-state-change command))
+        (when (or (nil? result) (fail? result))
+          (infof "No verdicts found, result: " (if (nil? result) :error.no-app-xml result))
+          (logging/log-event :error {:run-by       batchrun-name
+                                     :event        "Failed to check verdict"
+                                     :failure      (if (nil? result) :error.no-app-xml result)
+                                     :organization {:id organization :permit-type permitType}
+                                     })))
+      (catch Throwable t
+        (logging/log-event :error {:run-by            batchrun-name
+                                   :event             "Unable to get verdict from backend"
+                                   :exception-message (.getMessage t)
+                                   :application-id    id
+                                   :organization      {:id organization :permit-type permitType}})))))
+(defn- organization-has-krysp-url-function
+  "Takes map of organization id as key and organization data as values.
+  Returns function, that takes application and returns true if application's organization has krysp url set."
+  [organizations-by-id]
+  (fn [{org :organization permitType :permitType}]
+    (ss/not-blank? (get-in organizations-by-id [org :krysp (keyword permitType) :url]))))
 
-                  (logging/log-event :info {:run-by "Automatic verdicts checking"
-                                            :event "No Krysp WFS url defined for organization"
-                                            :organization {:id organization :permit-type permitType}}))
-                (catch Throwable t
-                  (logging/log-event :error {:run-by "Automatic verdicts checking"
-                                             :event "Unable to get verdict from backend"
-                                             :exception-message (.getMessage t)
-                                             :application-id id
-                                             :organization {:id organization :permit-type permitType}}))))))
-          apps))))
+(defn- get-valid-applications
+  "Returns applications, that have krysp.url set in their organizations permitType.
+  Applications need to be filtered, as there might be several permitTypes per organization, but not all have krysp.url set."
+  [organizations applications]
+  {:pre [(sequential? organizations) (sequential? applications)]}
+  (let [orgs-by-id (util/key-by :id organizations)
+        org-has-url? (organization-has-krysp-url-function orgs-by-id)]
+    (filter org-has-url? applications)))
+
+(defn fetch-verdicts [batchrun-name batchrun-user applications]
+  (let [start-ts (double (now))]
+    (logging/log-event :info {:run-by batchrun-name
+                              :event  (format "Starting verdict fetching with %s applications" (count applications))})
+    (doall (pmap (partial fetch-verdict batchrun-name batchrun-user) applications))
+    (logging/log-event :info {:run-by batchrun-name
+                              :event  "Finished verdict checking"
+                              :took   (format "%.2f minutes" (/ (- (now) start-ts) 1000 60))})))
+
+(defn application-id-args? [args]
+  (every? v/application-id? args))
+
+(defn fetch-verdicts-by-application-ids [ids]
+  (infof "Starting fetch-verdicts-by-application-ids with %s ids" (count ids))
+  (let [apps (mongo/select :applications {:_id {$in ids} :state "sent"})
+        distinct-org-ids (into #{} (map :organization) apps)
+        orgs (mongo/select :organizations {:_id {$in distinct-org-ids}} [:krysp])
+        apps-with-urls (get-valid-applications orgs apps)
+        eraajo-user (user/batchrun-user distinct-org-ids)
+        batchrun-name "Verdicts checking by application ids"]
+    (fetch-verdicts batchrun-name eraajo-user apps-with-urls)))
+
+(defn fetch-verdicts-by-org-ids [ids]
+  (infof "Starting fetch-verdicts-by-org-ids with %s ids" (count ids))
+  (if-let [orgs (seq (organization/get-organizations {:_id {$in ids}} [:krysp]))]
+    (let [applications (mongo/select :applications {:state {$in ["sent"]} :organization {$in ids}})
+          apps-with-urls (get-valid-applications orgs applications)
+          batchrun-name "Verdicts checking by organizations"
+          eraajo-user (user/batchrun-user (map :id orgs))]
+      (fetch-verdicts batchrun-name eraajo-user apps-with-urls))
+    (warn "No organizations found, exiting.")))
+
+(defn fetch-verdicts-with-args [args]
+  (debug "check-for-verdicts started with args" args)
+  (if (application-id-args? args)
+    (fetch-verdicts-by-application-ids args)
+    (fetch-verdicts-by-org-ids args)))
+
+(defn fetch-verdicts-default []
+  (let [organizations-with-krysp-url (organization/get-organizations
+                                       {$or [{:krysp.R.url {$exists true}}
+                                             {:krysp.YA.url {$exists true}}
+                                             {:krysp.P.url {$exists true}}
+                                             {:krysp.MAL.url {$exists true}}
+                                             {:krysp.VVVL.url {$exists true}}
+                                             {:krysp.YI.url {$exists true}}
+                                             {:krysp.YL.url {$exists true}}
+                                             {:krysp.KT.url {$exists true}}]}
+                                       {:krysp 1})
+        org-ids (map :id organizations-with-krysp-url)
+        apps (mongo/select :applications {:state {$in ["sent"]} :organization {$in org-ids}})
+        apps-with-urls (get-valid-applications organizations-with-krysp-url apps)
+        eraajo-user (user/batchrun-user org-ids)
+        batchrun-name "Automatic verdicts checking"]
+    (fetch-verdicts batchrun-name eraajo-user apps-with-urls)))
 
 (defn check-for-verdicts [& args]
   (when-not (system-not-in-lockdown?)
     (logging/log-event :info {:run-by "Automatic verdict checking" :event "Not run - system in lockdown"})
     (fail! :system-in-lockdown))
   (mongo/connect!)
-  (fetch-verdicts))
+  (if (empty? args)
+    (fetch-verdicts-default)
+    (fetch-verdicts-with-args args)))
 
 (defn- get-asianhallinta-ftp-users [organizations]
   (->> (for [org organizations

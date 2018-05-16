@@ -81,7 +81,7 @@
           (:state (query-application local-query sonja app-id)) => "sent")
 
         (fact "batchrun creates assignments"
-          (let [batchrun-result (batchrun/fetch-verdicts)
+          (let [_ (batchrun/fetch-verdicts-default)
                 assignments (get-assignments)]
             (fact "one attachment creates one assignment"
                  (count assignments) => 1)
@@ -92,7 +92,7 @@
             (fact "assignment came from the correct trigger"
                  (:trigger (first assignments)) => (:id verdict-assignment-trigger))) => truthy
 
-      (provided (permit/fetch-xml-from-krysp anything anything anything anything anything anything)
+      (provided (permit/fetch-xml-from-krysp "R" anything anything anything anything anything)
                 => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
                         (ss/replace #"LP-186-2014-90009" app-id)
                         (sxml/parse-string "utf-8"))
