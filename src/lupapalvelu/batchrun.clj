@@ -352,17 +352,14 @@
         orgs-by-id (->> (mongo/select :organizations {:_id {$in distinct-org-ids}} [:krysp])
                         (util/key-by :id))
         org-has-url-fn? (organization-has-krysp-url-function orgs-by-id)
+        apps-with-urls (filter org-has-url-fn? apps)
         eraajo-user (user/batchrun-user distinct-org-ids)
         batchrun-name "Verdicts checking by application ids"]
     (logging/log-event :info {:run-by batchrun-name
                               :event (format "Starting verdict fetching with %s orgs and %s applications"
                                              (count distinct-org-ids)
                                              (count ids))})
-    (transduce (comp (filter org-has-url-fn?)
-                     (map (partial fetch-verdict batchrun-name eraajo-user)))
-               (constantly nil)
-               nil
-               apps)
+    (run! (partial fetch-verdict batchrun-name eraajo-user) apps-with-urls)
     (logging/log-event :info {:run-by batchrun-name
                               :event "Finished verdict checking"
                               :took  (format "%.2f minutes" (/ (- (now) start-ts) 1000 60))})))
