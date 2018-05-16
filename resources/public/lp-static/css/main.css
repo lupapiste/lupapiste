@@ -206,9 +206,9 @@ body.admin, body.authority-admin {
 
 .container {
   box-sizing: border-box;
-  padding: 12px 6px 0 6px;
+  padding: 12px 24px 0 24px;
   width: 100%;
-  max-width: 1280px;
+  max-width: 1600px;
   min-width: 640px;
   margin: 24px auto 24px auto;
   position: relative;
@@ -1342,11 +1342,13 @@ h1 .icon {
 
 .nav-box {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1600px;
   min-width: 640px;
   margin: 0 auto;
   position: relative;
   box-sizing: border-box;
+  padding-left: 12px;
+  padding-right: 12px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -2163,7 +2165,7 @@ footer {
 footer .informations {
   padding: 12px;
   width: 100%;
-  max-width: 1280px;
+  max-width: 1600px;
   margin: 0 auto 12px;
 }
 
@@ -8162,7 +8164,7 @@ message-panel {
   margin-right: 6px;
   position: relative;
   min-height: 48px;
-  vertical-align: top;
+  vertical-align: bottom;
 }
 
 .form-entry label {
@@ -8234,7 +8236,6 @@ message-panel {
 }
 
 .form-input, .form-input--inline {
-  height: 22px;
   line-height: 24px;
   margin: 2px 6px 12px 0;
   width: 16.25em;
@@ -15306,7 +15307,7 @@ div.search i {
 }
 
 #indicator .indicator-box {
-  max-width: 1280px;
+  max-width: 1600px;
   min-width: 640px;
   margin: 0 auto;
   padding-left: 6px;
@@ -15375,7 +15376,7 @@ div.search i {
 }
 
 #indicator-icon .indicator-box {
-  max-width: 1280px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 12px;
 }
@@ -29307,10 +29308,6 @@ div.pate-settings-editor table.pate-editor-table tr:hover:nth-child(even) {
   background: #f6f6f6;
 }
 
-div.pate-verdict-page {
-  padding: 2em 2em;
-}
-
 div.pate-spin {
   width: 100%;
   text-align: center;
@@ -38380,7 +38377,7 @@ div.summary-button-bar {
 }
 
 #bulletins .content-center, #local-bulletins .content-center {
-  max-width: 1280px;
+  max-width: 1600px;
   margin: 0 auto;
   position: relative;
   padding: 40px 0;
