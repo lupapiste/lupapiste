@@ -1,5 +1,5 @@
 (ns lupapalvelu.batchrun
-  (:require [taoensso.timbre :refer [debug debugf error errorf info warn]]
+  (:require [taoensso.timbre :refer [debug debugf error errorf info infof warn]]
             [me.raynes.fs :as fs]
             [monger.operators :refer :all]
             [clojure.set :as set]
@@ -295,14 +295,17 @@
 (defn fetch-verdict
   [batchrun-name batchrun-user {:keys [id permitType organization] :as app}]
   (logging/with-logging-context {:applicationId id, :userId (:id batchrun-user)}
+    (info "Checking verdict...")
     (try
       (let [command (assoc (application->command app) :user batchrun-user :created (now) :action "fetch-verdicts")
             result (verdict/do-check-for-verdict command)]
         (when (-> result :verdicts count pos?)
+          (infof "Found %s verdicts" (-> result :verdicts count))
           ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
           (logging/log-event :info {:run-by batchrun-name :event "Found new verdict"})
           (notifications/notify! :application-state-change command))
         (when (or (nil? result) (fail? result))
+          (infof "No verdicts found, result: " (if (nil? result) :error.no-app-xml result))
           (logging/log-event :error {:run-by       batchrun-name
                                      :event        "Failed to check verdict"
                                      :failure      (if (nil? result) :error.no-app-xml result)
@@ -342,6 +345,7 @@
   (every? v/application-id? args))
 
 (defn fetch-verdicts-by-application-ids [ids]
+  (infof "Starting fetch-verdicts-by-application-ids with %s ids" (count ids))
   (let [start-ts (double (now))
         apps (mongo/select :applications {:_id {$in ids} :state "sent"})
         distinct-org-ids (into #{} (map :organization) apps)
@@ -364,6 +368,7 @@
                               :took  (format "%.2f minutes" (/ (- (now) start-ts) 1000 60))})))
 
 (defn fetch-verdicts-by-org-ids [ids]
+  (infof "Starting fetch-verdicts-by-org-ids with %s ids" (count ids))
   (if-let [orgs (seq (organization/get-organizations {:_id {$in ids}} [:krysp]))]
     (fetch-verdicts "Verdicts checking by organizations" orgs)
     (warn "No organizations found, exiting.")))
