@@ -324,50 +324,45 @@
   (fn [{org :organization permitType :permitType}]
     (ss/not-blank? (get-in organizations-by-id [org :krysp (keyword permitType) :url]))))
 
-(defn fetch-verdicts [batchrun-name organizations]
-  (let [start-ts (double (now))
-        orgs-by-id (util/key-by :id organizations)
-        org-ids (keys orgs-by-id)
-        apps (mongo/select :applications {:state {$in ["sent"]} :organization {$in org-ids}})
-        org-has-url? (organization-has-krysp-url-function orgs-by-id)
-        apps-with-url (filter org-has-url? apps)
-        eraajo-user (user/batchrun-user org-ids)]
+(defn- get-valid-applications
+  "Returns applications, that have krysp.url set in their organizations permitType.
+  Applications need to be filtered, as there might be several permitTypes per organization, but not all have krysp.url set."
+  [organizations applications]
+  {:pre [(sequential? organizations) (sequential? applications)]}
+  (let [orgs-by-id (util/key-by :id organizations)
+        org-has-url? (organization-has-krysp-url-function orgs-by-id)]
+    (filter org-has-url? applications)))
+
+(defn fetch-verdicts [batchrun-name batchrun-user applications]
+  (let [start-ts (double (now))]
     (logging/log-event :info {:run-by batchrun-name
-                              :event (format "Starting verdict fetching with %s orgs and %s applications"
-                                             (count org-ids)
-                                             (count apps-with-url))})
-    (doall (pmap (partial fetch-verdict batchrun-name eraajo-user) apps-with-url))
+                              :event  (format "Starting verdict fetching with %s applications" (count applications))})
+    (doall (pmap (partial fetch-verdict batchrun-name batchrun-user) applications))
     (logging/log-event :info {:run-by batchrun-name
-                              :event "Finished verdict checking"
-                              :took  (format "%.2f minutes" (/ (- (now) start-ts) 1000 60))})))
+                              :event  "Finished verdict checking"
+                              :took   (format "%.2f minutes" (/ (- (now) start-ts) 1000 60))})))
 
 (defn application-id-args? [args]
   (every? v/application-id? args))
 
 (defn fetch-verdicts-by-application-ids [ids]
   (infof "Starting fetch-verdicts-by-application-ids with %s ids" (count ids))
-  (let [start-ts (double (now))
-        apps (mongo/select :applications {:_id {$in ids} :state "sent"})
+  (let [apps (mongo/select :applications {:_id {$in ids} :state "sent"})
         distinct-org-ids (into #{} (map :organization) apps)
-        orgs-by-id (->> (mongo/select :organizations {:_id {$in distinct-org-ids}} [:krysp])
-                        (util/key-by :id))
-        org-has-url-fn? (organization-has-krysp-url-function orgs-by-id)
-        apps-with-urls (filter org-has-url-fn? apps)
+        orgs (mongo/select :organizations {:_id {$in distinct-org-ids}} [:krysp])
+        apps-with-urls (get-valid-applications orgs apps)
         eraajo-user (user/batchrun-user distinct-org-ids)
         batchrun-name "Verdicts checking by application ids"]
-    (logging/log-event :info {:run-by batchrun-name
-                              :event (format "Starting verdict fetching with %s orgs and %s applications"
-                                             (count distinct-org-ids)
-                                             (count ids))})
-    (run! (partial fetch-verdict batchrun-name eraajo-user) apps-with-urls)
-    (logging/log-event :info {:run-by batchrun-name
-                              :event "Finished verdict checking"
-                              :took  (format "%.2f minutes" (/ (- (now) start-ts) 1000 60))})))
+    (fetch-verdicts batchrun-name eraajo-user apps-with-urls)))
 
 (defn fetch-verdicts-by-org-ids [ids]
   (infof "Starting fetch-verdicts-by-org-ids with %s ids" (count ids))
   (if-let [orgs (seq (organization/get-organizations {:_id {$in ids}} [:krysp]))]
-    (fetch-verdicts "Verdicts checking by organizations" orgs)
+    (let [applications (mongo/select :applications {:state {$in ["sent"]} :organization {$in ids}})
+          apps-with-urls (get-valid-applications orgs applications)
+          batchrun-name "Verdicts checking by organizations"
+          eraajo-user (user/batchrun-user (map :id orgs))]
+      (fetch-verdicts batchrun-name eraajo-user apps-with-urls))
     (warn "No organizations found, exiting.")))
 
 (defn fetch-verdicts-with-args [args]
@@ -385,8 +380,13 @@
                                              {:krysp.YI.url {$exists true}}
                                              {:krysp.YL.url {$exists true}}
                                              {:krysp.KT.url {$exists true}}]}
-                                       {:krysp 1})]
-    (fetch-verdicts "Automatic verdicts checking" organizations-with-krysp-url)))
+                                       {:krysp 1})
+        org-ids (map :id organizations-with-krysp-url)
+        apps (mongo/select :applications {:state {$in ["sent"]} :organization {$in org-ids}})
+        apps-with-urls (get-valid-applications organizations-with-krysp-url apps)
+        eraajo-user (user/batchrun-user org-ids)
+        batchrun-name "Automatic verdicts checking"]
+    (fetch-verdicts batchrun-name eraajo-user apps-with-urls)))
 
 (defn check-for-verdicts [& args]
   (when-not (system-not-in-lockdown?)
