@@ -167,12 +167,12 @@
         <a data-bind="attr: {'data-test-app-linking-to-us': $data.id, href: '#!/application/' + $data.id()}"
            data-test-id="test-application-app-linking-to-us"
            class="link-permit-item">
-          <!-- ko if: foremanRole -->
+          <!-- ko if: $data.foremanRole -->
           <span data-bind="text: _.capitalize(foremanRole()) + (s.isBlank(foreman()) ? '' : ', ' + foreman())"
                 data-test-id="foreman-link-person-info"></span>,
           <span data-bind="ltext: state" data-test-id="foreman-link-state"></span>
           <!-- /ko -->
-          <!-- ko ifnot: foremanRole -->
+          <!-- ko ifnot: $data.foremanRole -->
           <span data-bind="text: $data.id"></span>
           -
           <span data-bind="ltext: 'operations.' + $data.operation()"></span>
