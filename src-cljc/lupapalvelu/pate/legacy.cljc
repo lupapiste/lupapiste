@@ -12,11 +12,11 @@
 (defn legsub-verdict [verdict-code-schema]
   {:dictionary {:kuntalupatunnus {:text      {:i18nkey :verdict.id}
                                   :required? true}
-                :giver           {:text      {:i18nkey :verdict.name}
+                :handler         {:text      {:i18nkey :verdict.name}
                                   :required? true}
                 :verdict-code    (schema-util/required verdict-code-schema)
-                :verdict-section         {:text {:i18nkey :verdict.section
-                                                 :before  :section}}
+                :verdict-section {:text {:i18nkey :verdict.section
+                                         :before  :section}}
                 :anto            {:date      {:i18nkey :verdict.anto}
                                   :required? true}
                 :lainvoimainen   {:date {:i18nkey :verdict.lainvoimainen}}
@@ -24,12 +24,12 @@
                                          :lines   20}}}
    :section    {:id   :verdict
                 :grid {:columns 8
-                       :rows    [[{:col 2
+                       :rows    [[{:col   2
                                    :align :full
-                                   :dict :kuntalupatunnus}
-                                  {:col 2
+                                   :dict  :kuntalupatunnus}
+                                  {:col   2
                                    :align :full
-                                   :dict :giver}]
+                                   :dict  :handler}]
                                  [{:dict :verdict-section}
                                   {}
                                   {:col   2

@@ -4,6 +4,7 @@
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict :refer :all]
             [lupapalvelu.pate.verdict-template :as template]
@@ -56,7 +57,7 @@
     (insert-section "123-T" 1515151515151 {:data     {}
                                            :template {:giver "test"}})
     => {:data     {:verdict-section "2"}
-        :template {:giver "test"
+        :template {:giver      "test"
                    :inclusions [:verdict-section]}}
 
     (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 2))
@@ -65,17 +66,17 @@
     (insert-section "123-T" 1515151515151 {:data     {:verdict-section ""}
                                            :template {:giver "test"}})
     => {:data     {:verdict-section "1"}
-        :template {:giver "test"
+        :template {:giver      "test"
                    :inclusions [:verdict-section]}}
 
     (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 1))
 
   (fact "Distinct inclusions"
     (insert-section "123-T" 1515151515151 {:data     {:verdict-section ""}
-                                           :template {:giver "test"
+                                           :template {:giver      "test"
                                                       :inclusions [:hello :verdict-section :foo]}})
     => {:data     {:verdict-section "1"}
-        :template {:giver "test"
+        :template {:giver      "test"
                    :inclusions [:hello :verdict-section :foo]}}
 
     (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 1))
@@ -95,6 +96,16 @@
 
     => {:data     {}
         :template {:giver "lautakunta"}}
+
+    (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0))
+
+  (fact "Legacy verdict"
+    (insert-section "123-T" 1515151515151 {:legacy?  true
+                                           :data     {}
+                                           :template {:giver "test"}})
+    => {:legacy?  true
+        :data     {}
+        :template {:giver      "test"}}
 
     (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0)))
 
@@ -232,16 +243,16 @@
 
 (facts "Build schemas"
   (fact "Dict missing"
-    (shared/check-dicts (dissoc (:dictionary test-verdict) :three)
+    (schema-util/check-dicts (dissoc (:dictionary test-verdict) :three)
                         (:sections test-verdict))
     => (throws AssertionError))
   (fact "Dict in repeating missing"
-    (shared/check-dicts (util/dissoc-in (:dictionary test-verdict)
+    (schema-util/check-dicts (util/dissoc-in (:dictionary test-verdict)
                                         [:five :repeating :r-three :repeating :r-sub-two])
                         (:sections test-verdict))
     => (throws AssertionError))
   (fact "Overlapping dicts"
-    (shared/check-overlapping-dicts [{:dictionary {:foo {:toggle {}}
+    (schema-util/check-overlapping-dicts [{:dictionary {:foo {:toggle {}}
                                                    :bar {:text {}}
                                                    :baz {:toggle {}}}}
                                      {:dictionary {:doo {:toggle {}}
@@ -252,14 +263,14 @@
                                                    :baz {:toggle {}}}}])
     => (throws AssertionError))
   (fact "Unique section ids"
-    (shared/check-unique-section-ids (:sections mock-template))
+    (schema-util/check-unique-section-ids (:sections mock-template))
     => nil)
   (fact "Non-unique section ids"
-    (shared/check-unique-section-ids (cons {:id :t-second}
+    (schema-util/check-unique-section-ids (cons {:id :t-second}
                                            (:sections mock-template)))
     => (throws AssertionError))
   (fact "Combine subschemas"
-    (shared/combine-subschemas {:dictionary {:foo {:toggle {}}
+    (schema-util/combine-subschemas {:dictionary {:foo {:toggle {}}
                                              :bar {:text {}}}
                                 :sections   [{:id   :one
                                               :grid {:columns 1

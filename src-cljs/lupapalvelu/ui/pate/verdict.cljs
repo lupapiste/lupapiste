@@ -185,9 +185,10 @@
     (reset-verdict nil)
     (service/fetch-application-phrases app-id)
     (state/refresh-application-auth-model app-id
-                                          #(service/open-verdict app-id
-                                                                 verdict-id
-                                                                 reset-verdict))))
+                                          #(do (service/refresh-attachments)
+                                               (service/open-verdict app-id
+                                                                     verdict-id
+                                                                     reset-verdict)))))
 
 (defonce args (atom {}))
 

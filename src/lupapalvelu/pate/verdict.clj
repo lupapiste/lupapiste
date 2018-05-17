@@ -433,7 +433,7 @@
                                                     {:id       verdict-id
                                                      :modified created
                                                      :category (name category)
-                                                     :data     {}
+                                                     :data     {:handler (general-handler application)}
                                                      :template {:inclusions (-> category
                                                                                 legacy/legacy-verdict-schema
                                                                                 :dictionary
@@ -782,13 +782,15 @@
          (str))))
 
 (defn- insert-section
-  "Section is generated only for non-board verdicts (lautakunta)."
-  [org-id created {:keys [data template] :as verdict}]
+  "Section is generated only for non-board (lautakunta) non-legacy
+  verdicts."
+  [org-id created {:keys [data template legacy?] :as verdict}]
   (let [{section :verdict-section} data
         {giver :giver}             template]
     (cond-> verdict
       (and (ss/blank? section)
-           (util/not=as-kw giver :lautakunta))
+           (util/not=as-kw giver :lautakunta)
+           (not legacy?))
       (->
        (assoc-in [:data :verdict-section]
                  (next-section org-id

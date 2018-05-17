@@ -344,7 +344,7 @@
                           :styles   :pad-before}])
 
 (def legacy--verdict-giver '([{:loc    :verdict.name
-                               :source {:dict :giver}
+                               :source {:dict :handler}
                                :styles :pad-before}]
                              [{:loc    :empty
                                :source :organization
