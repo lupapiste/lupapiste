@@ -111,20 +111,21 @@
   "transform a form with replacing all sequential collections with keyword-indexed maps."
   [m] (postwalk-map (partial map (fn [[k v]] [k (if (sequential? v) (map-index v) v)])) m))
 
-(defn- do-get-xml [http-fn url opts raw?]
+(defn- do-get-xml [http-fn url {debug-log? :debug-event :as opts} raw?]
   (let [options (merge {:socket-timeout 120000, :conn-timeout 30000, :throw-fail! (not raw?)} opts)
         {:keys [status body reason-phrase request-time] :as resp} (http-fn url options)
         stripped-url (first (ss/split url #"\?"))
         body-excerpt (s/trim-newline (apply str (take 50 body)))]
-    (debugf "Received status %s %s in %.3f seconds from url %s" status reason-phrase (/ (double request-time) 1000) stripped-url)
+    (when debug-log? (debugf "Received status %s %s in %.3f seconds from url %s" status reason-phrase (/ (double request-time) 1000) stripped-url))
     (if-not (s/blank? body)
       (do
-        (debugf "Response body starts with: '%s'..." body-excerpt)
-        (logging/log-event :debug {:ns "sade.common-reader"
-                                   :event "Received XML"
-                                   :data (assoc (select-keys resp [:status :reason-phrase :request-time])
-                                           :url stripped-url
-                                           :body-excerpt body-excerpt)})
+        (when debug-log?
+          (debugf "Response body starts with: '%s'..." body-excerpt)
+          (logging/log-event :debug {:ns    "sade.common-reader"
+                                     :event "Received XML"
+                                     :data  (assoc (select-keys resp [:status :reason-phrase :request-time])
+                                              :url stripped-url
+                                              :body-excerpt body-excerpt)}))
         (if raw? body (parse body)))
       (do
         (error "Received an empty XML response with GET from url: " url)

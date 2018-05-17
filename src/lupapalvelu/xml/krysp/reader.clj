@@ -40,7 +40,7 @@
 (defn- application-xml [type-name id-path server credentials ids raw?]
   (let [url (common/wfs-krysp-url-with-service server type-name (common/property-in id-path ids))]
     (trace "Get application: " url)
-    (cr/get-xml url {} credentials raw?)))
+    (cr/get-xml url {:debug-event true} credentials raw?)))
 
 (defn rakval-application-xml [server credentials ids search-type raw?]
   (application-xml common/rakval-case-type (common/get-tunnus-path permit/R search-type)    server credentials ids raw?))
