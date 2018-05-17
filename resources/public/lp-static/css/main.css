@@ -1576,34 +1576,6 @@ nav .header-menu .header-box a, nav .header-menu .header-box span {
   line-height: 60px;
 }
 
-nav .header-menu .header-dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-nav .header-menu .header-dropdown .dropdown-content {
-  position: absolute;
-  background-color: white;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  z-index: 1;
-  right: 0;
-}
-
-nav .header-menu .header-dropdown .dropdown-content a {
-  padding: 0 12px 0 12px;
-  text-decoration: none;
-  display: block;
-}
-
-nav .header-menu .header-dropdown .dropdown-content a:hover {
-  background-color: #f3aa4a;
-}
-
-nav .header-menu .header-dropdown .dropdown-content a span {
-  color: black;
-}
-
 .nav-bottom {
   width: 100%;
   background-color: #555555;
@@ -2136,6 +2108,155 @@ nav .julkipano-brand .nav-bottom ul li a span {
 
 .louhi #logout-header-box, .facta #logout-header-box {
   display: none;
+}
+
+.role-selector-dropdown-toggle-button {
+  padding-left: 12px;
+  padding-right: 12px;
+  display: inline-flex !important;
+  flex-flow: row;
+  align-items: center;
+  height: 100% !important;
+  color: #f7ac2e;
+  text-decoration: none !important;
+}
+
+.role-selector-dropdown-toggle-button a {
+  font-size: 16px;
+  vertical-align: middle;
+  white-space: nowrap;
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.role-selector-dropdown-toggle-button a:link, .role-selector-dropdown-toggle-button a:visited {
+  color: #f7ac2e;
+  text-decoration: none;
+}
+
+.role-selector-dropdown-toggle-button a:link span, .role-selector-dropdown-toggle-button a:visited span {
+  color: #f7ac2e;
+}
+
+.role-selector-dropdown-toggle-button a:hover, .role-selector-dropdown-toggle-button a:active {
+  background-color: inherit;
+}
+
+.role-selector-dropdown-toggle-button a:hover {
+  color: white;
+}
+
+.role-selector-dropdown-toggle-button a:hover span {
+  color: white;
+}
+
+.role-selector-dropdown-toggle-button a:active {
+  color: white;
+}
+
+.role-selector-dropdown-toggle-button a:active span {
+  color: white;
+}
+
+.role-selector-dropdown-toggle-button a span {
+  vertical-align: middle;
+}
+
+.role-selector-dropdown-toggle-button span {
+  line-height: 20px !important;
+}
+
+.role-selector-dropdown-toggle-button:hover {
+  background-color: #555555 !important;
+}
+
+.role-selector-user-icon {
+  padding-right: 5px;
+}
+
+.role-selector-user {
+  display: flex;
+  flex-flow: column;
+}
+
+.role-selector-user-name {
+  display: inline-block;
+}
+
+.role-selector-user-role {
+  display: inline-flex;
+  flex-flow: row;
+  font-size: 80%;
+}
+
+.role-selector-user-role-name {
+  display: inline-block;
+}
+
+.role-selector-user-role-sep {
+  padding: 0 5px 0 5px;
+}
+
+.role-selector-user-role-org {
+  display: inline-block;
+}
+
+.role-selector-open-indicator {
+  padding-left: 5px;
+}
+
+.role-selector-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.role-selector-dropdown-content {
+  position: absolute;
+  background-color: white;
+  min-width: 320px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  right: 0;
+  margin-top: 1px;
+  padding-top: 12px;
+}
+
+.role-selector-dropdown-item {
+  display: block !important;
+  padding: 0 12px 0 12px;
+  line-height: 32px !important;
+  color: black;
+}
+
+.role-selector-dropdown-role {
+  text-decoration: none !important;
+}
+
+.role-selector-dropdown-role:hover {
+  background-color: #f3aa4a !important;
+}
+
+.role-selector-dropdown-role span {
+  color: black !important;
+}
+
+.role-selector-dropdown-role .role-selector-dropdown-role-icon {
+  padding-right: 0.4rem;
+}
+
+.role-selector-dropdown-role.role-selector-dropdown-role-disabled {
+  pointer-events: none;
+  cursor: pointer !important;
+}
+
+.role-selector-dropdown-role.role-selector-dropdown-role-disabled span {
+  color: #8a8a8a !important;
+}
+
+.role-selector-dropdown-organization {
+  color: #8a8a8a;
 }
 
 /* Side bar styles*/
