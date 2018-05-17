@@ -65,6 +65,15 @@ $lupicon-size: 22px;
 // The rest is lupicon style definitions that are copied as is from lupicon style.css
 
 
+.lupicon-user-pen:before {
+  content: "\e931";
+}
+.lupicon-archives-in:before {
+  content: "\e932";
+}
+.lupicon-map:before {
+  content: "\e930";
+}
 .lupicon-grip-diagonal:before {
   content: "\e92c";
 }
