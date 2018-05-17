@@ -69,14 +69,23 @@
           var token = data.token.data,
               company = token.company,
               user = token.user;
-          self
-            .companyName(company.name)
-            .companyY(company.y)
-            .firstName(user.firstName)
-            .lastName(user.lastName)
-            .email(user.email)
-            .loading(false)
-            .loaded(true);
+
+          ajax
+            .query("email-in-use", {email: user.email})
+            .success(function () {
+              pageutil.openPage("invite-company-user", "ok/" + self.token()); // LPK-3759
+            })
+            .fail(function () {
+              self
+                .companyName(company.name)
+                .companyY(company.y)
+                .firstName(user.firstName)
+                .lastName(user.lastName)
+                .email(user.email)
+                .loading(false)
+                .loaded(true);
+            })
+            .call()
         })
         .fail(function() {
           self
