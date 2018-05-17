@@ -286,6 +286,14 @@ var LUPAPISTE = LUPAPISTE || {};
         self.visible(!self.visible());
       }
 
+      self.currentRole = models.currentUser.currentRole;
+      self.currentOrg = models.currentUser.currentOrg;
+
+      self.currentOrgName = ko.pureComputed(function() {
+        const orgNames = models.currentUser.availableOrgs();
+        return orgNames[self.currentOrg()];
+      });
+
       /**
        * Map of roles that are selectable, that is, roles that user can select in
        * role selector component. Values do not matter, only the keys are used.
@@ -301,17 +309,20 @@ var LUPAPISTE = LUPAPISTE || {};
        */
 
       self.availableRoles = ko.pureComputed(function() {
-        const allRoles = models.currentUser ? models.currentUser.availableRoles() : [];
+        const allRoles = models.currentUser.availableRoles();
         return _(allRoles)
+        // Strip roles to include only roles that can be selected in selector
           .map(function(role) {
             role.roles = _.filter(role.roles, function(role) {
               return !!self.selectableRole[role];
-            })
+            });
             return role;
           })
+          // only entries that have selectable roles:
           .filter(function(role) {
             return !_.isEmpty(role.roles);
           })
+          // sort by organization name:
           .sortBy("orgName")
           .value();
       });
@@ -329,13 +340,15 @@ var LUPAPISTE = LUPAPISTE || {};
           type: "item",
           action: "ownPage",
           text: loc("mypage.title"),
-          iconClass: "lupicon-user"
+          iconClass: "lupicon-user",
+          currentlySelected: false
         },
         {
           type: "item",
           action: "logout",
           text: loc("logout"),
-          iconClass: "lupicon-log-out"
+          iconClass: "lupicon-log-out",
+          currentlySelected: false
         }
       ];
 
@@ -344,43 +357,50 @@ var LUPAPISTE = LUPAPISTE || {};
        */
 
       self.menuItems = ko.pureComputed(function() {
-        const menuItemsSeq = _.reduce(
-          self.availableRoles(),
-          function(acc, org) {
-            return acc
-              .concat([
-                {
-                  type: "sep"
+        const currentRole  = self.currentRole(),
+              currentOrg   = self.currentOrg(),
+              menuItemsSeq = _.reduce(
+                self.availableRoles(),
+                function(acc, org) {
+                  return acc
+                    .concat([
+                      {
+                        type: "sep"
+                      },
+                      {
+                        type: "org",
+                        text: org.orgName
+                      }
+                    ])
+                    .concat(_.map(org.roles, function(role) {
+                        return {
+                          type: "item",
+                          text: loc(role),
+                          iconClass: self.roleIcon[role],
+                          action: "setRole",
+                          role: role,
+                          org: org.org,
+                          currentlySelected: (currentRole === role) && (currentOrg === org.org)
+                        };
+                      }));
                 },
-                {
-                  type: "org",
-                  text: org.orgName
-                }
-              ])
-              .concat(_.map(org.roles, function(role) {
-                return {
-                  type: "item",
-                  text: loc(role),
-                  iconClass: self.roleIcon[role],
-                  action: "setRole",
-                  role: role,
-                  org: org.org
-                };
-              }));
-          },
-          _([]));
+                _([]));
         return menuItemsSeq
           .drop(1) // Drop first separator
           .concat(self.commonItems) // Add my-page and logout items
           .value();
       });
 
+      self.setRole = function(role, org) {
+        // FIXME
+        console.log("setRole", role, org);
+      };
+
       self.executeAction = function(item) {
         self.visible(false);
-        console.debug("action: item:", item);
         switch (item.action) {
           case "setRole":
-            console.log("setRole:", item.role, item.org);
+            self.setRole(item.role, item.org);
             break;
           case "ownPage":
             window.location.hash = "#!/mypage";
@@ -402,14 +422,6 @@ var LUPAPISTE = LUPAPISTE || {};
       $(document).on("click", cancel);
       $(document).on("click", ".role-selector-dropdown-content", function(e) {
         e.stopPropagation();
-      });
-
-      self.currentRole = ko.pureComputed(function() {
-        return models.currentUser.role();
-      });
-
-      self.currentOrg = ko.pureComputed(function() {
-        return "Forssan rakennusvirasto";
       });
 
     }

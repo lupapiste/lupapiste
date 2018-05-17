@@ -107,6 +107,16 @@ LUPAPISTE.CurrentUser = function() {
       })
   });
 
+  self.currentRole = ko.pureComputed(function() {
+    // FIXME
+    return "authority";
+  });
+
+  self.currentOrg = ko.pureComputed(function() {
+    // FIXME
+    return "753-R";
+  });
+
   /**
    * A vector of roles available for current user. Each element in vector is an object
    * with keys "role", "org" and "orgName"
@@ -146,6 +156,21 @@ LUPAPISTE.CurrentUser = function() {
           orgName: orgNames[org]
         };
       });
+  });
+
+  /**
+   * A map of organizations available to current user. Keys are organization ID's and
+   * values are human readable organization names.
+   */
+
+  self.availableOrgs = ko.pureComputed(function () {
+    return _.reduce(
+      ko.unwrap(self.orgNames),
+      function(acc, orgName, orgId) {
+        acc[orgId] = ko.unwrap(orgName);
+        return acc;
+      },
+      {});
   });
 
   /**

@@ -72,56 +72,54 @@
             -->
 
             <div class="header-box">
-              <div class="role-selector"
-                   data-bind="css: {'role-selector-closed': $root.roleSelector.visible() == false,
-                                    'role-selector-open':   $root.roleSelector.visible}">
-                <a class="role-selector-dropdown-toggle-button"
-                   data-bind="click: $root.roleSelector.toggle,
-                              clickBubble: false">
 
-                  <span class="lupicon-user role-selector-user-icon"></span>
+              <a class="role-selector-dropdown-toggle-button"
+                 data-bind="click: $root.roleSelector.toggle,
+                            clickBubble: false">
 
-                  <span class="narrow-hide role-selector-user">
-                    <span id="user-name"
-                          class="role-selector-user-name"
-                          data-bind="text: lupapisteApp.models.currentUser.displayName,
-                                     attr: {'data-test-role' : lupapisteApp.models.currentUser.role}">
-                    </span>
-                    <span class="role-selector-user-role">
-                      <span class="role-selector-user-role-name" data-bind="ltext: $root.roleSelector.currentRole"></span>
-                      <span class="role-selector-user-role-sep">-</span>
-                      <span class="role-selector-user-role-org" data-bind="text: $root.roleSelector.currentOrg"></span>
-                    </span>
+                <span class="lupicon-user role-selector-user-icon"></span>
+
+                <span class="narrow-hide role-selector-user">
+                  <span id="user-name"
+                        class="role-selector-user-name"
+                        data-bind="text: lupapisteApp.models.currentUser.displayName,
+                                   attr: {'data-test-role' : lupapisteApp.models.currentUser.role}">
                   </span>
-
-                  <span data-bind="css: {'lupicon-chevron-small-down': $root.roleSelector.visible() == false,
-                                         'lupicon-chevron-small-up': $root.roleSelector.visible}"
-                        class="role-selector-open-indicator">
+                  <span class="role-selector-user-role">
+                    <span class="role-selector-user-role-name" data-bind="ltext: $root.roleSelector.currentRole"></span>
+                    <span class="role-selector-user-role-sep">-</span>
+                    <span class="role-selector-user-role-org" data-bind="text: $root.roleSelector.currentOrgName"></span>
                   </span>
-
-                </a>
-                <div class="role-selector-dropdown-content"
-                     data-bind="visible: $root.roleSelector.visible,
-                                foreach: $root.roleSelector.menuItems">
-                  <!-- ko if: type === "item" -->
-                  <a href="#"
-                     data-bind="click: $root.roleSelector.actionFor($data)"
-                     class="role-selector-dropdown-item role-selector-dropdown-role">
-                    <span data-bind="css: iconClass" class="role-selector-dropdown-role-icon"></span>
-                    <span data-bind="text: text" class="role-selector-dropdown-role-text"></span>
-                  </a>
-                  <!-- /ko -->
-                  <!-- ko if: type === "sep" -->
-                  <hr class="role-selector-dropdown-item role-selector-dropdown-sep"/>
-                  <!-- /ko -->
-                  <!-- ko if: type === "org" -->
-                  <span data-bind="text: text"
-                        class="role-selector-dropdown-item role-selector-dropdown-organization">
                 </span>
-                  <!-- /ko -->
-                </div>
 
+                <span data-bind="css: {'lupicon-chevron-small-down': $root.roleSelector.visible() == false,
+                                       'lupicon-chevron-small-up': $root.roleSelector.visible}"
+                      class="role-selector-open-indicator">
+                </span>
+
+              </a>
+              <div class="role-selector-dropdown-content"
+                   data-bind="visible: $root.roleSelector.visible,
+                              foreach: $root.roleSelector.menuItems">
+                <!-- ko if: type === "item" -->
+                <a href="#"
+                   data-bind="click: $root.roleSelector.actionFor($data),
+                              css: {'role-selector-dropdown-role-disabled': currentlySelected}"
+                   class="role-selector-dropdown-item role-selector-dropdown-role">
+                  <span data-bind="css: iconClass" class="role-selector-dropdown-role-icon"></span>
+                  <span data-bind="text: text" class="role-selector-dropdown-role-text"></span>
+                </a>
+                <!-- /ko -->
+                <!-- ko if: type === "sep" -->
+                <hr class="role-selector-dropdown-item role-selector-dropdown-sep"/>
+                <!-- /ko -->
+                <!-- ko if: type === "org" -->
+                <span data-bind="text: text"
+                      class="role-selector-dropdown-item role-selector-dropdown-organization">
+                </span>
+                <!-- /ko -->
               </div>
+
             </div>
           </div>
 

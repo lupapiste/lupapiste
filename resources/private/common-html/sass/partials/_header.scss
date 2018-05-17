@@ -292,34 +292,26 @@ $notification-bottom: -60px;
 //
 
 .role-selector {
-  height: 100% !important;
-  color: $orange !important;
-  &:hover {
-    background-color: $language-bg !important;
-  }
-  span {
-    line-height: 20px !important;
-  }
 }
 
 .role-selector-dropdown-toggle-button {
   @include nav-link;
   @include header-padding;
+
   display: inline-flex !important;
   flex-flow: row;
   align-items: center;
+
+  height: 100% !important;
+  color: $orange;
   text-decoration: none !important;
-  color: $orange !important;
 
   span {
-    color: $orange !important;
+    line-height: 20px !important;
   }
 
   &:hover {
-    text-decoration: none !important;
-    span {
-      color: white !important;
-    }
+    background-color: $language-bg !important;
   }
 }
 
@@ -377,7 +369,7 @@ $notification-bottom: -60px;
 .role-selector-dropdown-item {
   display: block !important;
   padding: 0 12px 0 12px;
-  line-height: 32px;
+  line-height: 32px !important;
   color: black;
 }
 
@@ -387,17 +379,25 @@ $notification-bottom: -60px;
   &:hover {
     background-color: rgb(243, 170, 74) !important; // TODO: what variable this color is?
   }
+
+  span {
+    color: black !important;
+  }
+
+  .role-selector-dropdown-role-icon {
+    padding-right: 0.4rem;
+  }
+
+  &.role-selector-dropdown-role-disabled {
+    pointer-events: none;
+    cursor: pointer !important;
+
+    span {
+      color: #8a8a8a !important;
+    }
+  }
 }
 
-.role-selector-dropdown-role-icon {
-  padding-right: 0.4rem;
-  color: black !important;
-}
-
-.role-selector-dropdown-role-text {
-  color: black !important;
-}
-
-.role-selector-content-organization {
-  color: #616161;
+.role-selector-dropdown-organization {
+  color: #8a8a8a;
 }
