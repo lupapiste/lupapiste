@@ -196,7 +196,7 @@
   (into {} (for [[k v] org-authz] [k (set (map keyword v))])))
 
 (defn with-org-auth [user]
-  (update-in user [:orgAuthz] coerce-org-authz))
+  (update user :orgAuthz coerce-org-authz))
 
 (def session-summary-keys [:id :username :firstName :lastName :role :email :organizations :company :architect :orgAuthz :language])
 
@@ -206,13 +206,41 @@
              (sc/optional-key :impersonating) sc/Bool
              :expires ssc/Timestamp)))
 
+(comment
+  (def selectable-role? #{})
+
+  (let [user {:orgAuthz     {:753-R         ["authorityz" "approver" "approver"]
+                             :753-YA        ["authorityz" "approver" "approver"]
+                             :998-R-TESTI-2 ["approver" "authority"]}
+              :lastOrgRolez {:org  :753-R
+                             :role "authority"}}]
+    (->> user
+         :orgAuthz
+         (mapcat (fn [[org roles]]
+                   (map (fn [role]
+                          [org role])
+                        roles)))
+         (filter (fn [[org role]]
+                   (selectable-role? role)))
+         (first))))
+
+(defn org-authz-session [user]
+  (when (-> user :orgAuthz seq)
+    (or (-> user :lastOrgRole)
+        ; Just use first org and first selectable role
+        (let [[org roles] (-> user :orgAuthz first)]
+          {:org  org
+           :role role}))))
+
 (defn session-summary
   "Returns common information about the user to be stored in session or nil"
   [user]
-  (some-> user
-          (select-keys session-summary-keys)
-          with-org-auth
-          (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5)))))
+  (when user
+    (-> user
+        (select-keys session-summary-keys)
+        with-org-auth
+        (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5)))
+        (merge (org-authz-session user)))))
 
 (defn oir-authority? [{role :role}]
   (contains? #{:oirAuthority} (keyword role)))
