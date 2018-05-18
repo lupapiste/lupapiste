@@ -102,7 +102,7 @@
     (resp/redirect (str return_success "?data=" data "&iv=" iv))))
 
 (defn respond-fail [{:strs [return_failure]}]
-  (resp/redirect (str return_failure "?error=666&message=oh%20noes")))
+  (resp/redirect (str return_failure "?onnistuu_error=666&onnistuu_message=oh%20noes")))
 
 (defn respond-fake [process]
   (process-page process "fake not done yet"))

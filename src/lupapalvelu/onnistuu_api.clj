@@ -137,9 +137,9 @@
 ; Something went terribly wrong!
 ;
 
-(defpage "/api/sign/fail/:id" {:keys [id error message]}
+(defpage "/api/sign/fail/:id" {:keys [id onnistuu_error onnistuu_message]}
   (with-error-handling
-    (let [process      (p/failed! id error message (now))
+    (let [process      (p/failed! id onnistuu_error onnistuu_message (now))
           lang         (-> process :lang)
           current-user (usr/current-user (request/ring-request))]
       (if (nil? (get-in process [:signer :currentUser]))
