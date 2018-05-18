@@ -840,13 +840,10 @@
                                      (assoc k :amount (count v)))))))}))
 
 (defn pate-verdict->tasks [verdict buildings {ts :created}]
-  (let [review-tasks    (->> (get-in verdict [:data :reviews])
-                             (map (partial review/review->task verdict buildings ts)))
-        plans-tasks     (->> (get-in verdict [:data :plans])
-                             (map #(pate-tasks/plan->task verdict ts %)))
-        condition-tasks (->> (get-in verdict [:data :conditions])
-                             (map #(pate-tasks/condition->task verdict ts %)))]
-    (remove nil? (lazy-cat review-tasks plans-tasks condition-tasks))))
+  (remove nil? (lazy-cat (pate-tasks/reviews->tasks verdict ts buildings)
+                         (pate-tasks/plans->tasks verdict ts)
+                         (pate-tasks/conditions->tasks verdict ts)
+                         (pate-tasks/foremen->tasks verdict ts))))
 
 (defn log-task-errors [tasks]
   (when-let [errs (seq (mapv #(tasks/task-doc-validation (-> % :schema-info :name) %) tasks))]
@@ -923,7 +920,6 @@
                              :pate-verdicts.$.published           created
                              :pate-verdicts.$.archive             (archive-info verdict)}
                             {:buildings buildings}
-                            (when (seq tasks) {:tasks tasks}) ; in re-publish situation, old tasks are nuked and new ones generated
                             (att/attachment-array-updates (:id application)
                                                           #(util/includes-as-kw? (map :id att-items)
                                                                                  (:id %))
@@ -931,6 +927,8 @@
                                                           :locked   true
                                                           :target {:type "verdict"
                                                                    :id   (:id verdict)}))}
+                     (when (seq tasks)
+                       {$push {:tasks {$each tasks}}})
                      (app-state/state-transition-update next-state
                                                         created
                                                         application

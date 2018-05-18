@@ -9,7 +9,8 @@
   (+ (* 1000 3600 12) (util/to-millis-from-local-date-string date)))
 
 (def verdict {:id                 "1a156dd40e40adc8ee064463"
-              :data               {:voimassa                (timestamp "23.11.2023")
+              :data               {:language                "fi"
+                                   :voimassa                (timestamp "23.11.2023")
                                    :appeal                  "muutoksenhakuohje - teksti"
                                    :julkipano               (timestamp "24.11.2017")
                                    :bulletin-op-description "julkipano - teksti"
@@ -49,23 +50,23 @@
                                                                                          :paloluokka             "5"}}
                                    :complexity-text         "hankkeen vaativuus"}
               :references         {:foremen ["erityis-tj" "iv-tj" "vastaava-tj" "vv-tj" "tj"]
-                                   :plans   [{:id   "5a156ddf0e40adc8ee064464"
+                                   :plans   [{:id "5a156ddf0e40adc8ee064464"
                                               :fi "Suunnitelmat"
                                               :sv "Planer"
                                               :en "Plans"}
-                                             {:id   "6a156ddf0e40adc8ee064464"
+                                             {:id "6a156ddf0e40adc8ee064464"
                                               :fi "Suunnitelmat2"
                                               :sv "Planer2"
                                               :en "Plans2"}]
                                    :reviews [{:id   "5a156dd40e40adc8ee064463"
-                                              :fi "Katselmus"
-                                              :sv "Syn"
-                                              :en "Review"
+                                              :fi   "Katselmus"
+                                              :sv   "Syn"
+                                              :en   "Review"
                                               :type "muu-katselmus"}
                                              {:id   "6a156dd40e40adc8ee064463"
-                                              :fi "Katselmus2"
-                                              :sv "Syn2"
-                                              :en "Review2"
+                                              :fi   "Katselmus2"
+                                              :sv   "Syn2"
+                                              :en   "Review2"
                                               :type "paikan-merkitseminen"}]}
               :template           {:giver "viranhaltija"}
               :verdict-attachment {:type           {:type-id    :paatos

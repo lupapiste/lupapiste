@@ -658,6 +658,7 @@
                                    :show? :_meta.editing?}
                                   {:col   2
                                    :show? :_meta.editing?
+                                   :align :full
                                    :dict  :handler}
                                   {:col   3
                                    :hide? :_meta.editing?

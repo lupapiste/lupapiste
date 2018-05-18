@@ -1,15 +1,69 @@
 (ns lupapalvelu.pate.tasks
-  (:require [lupapalvelu.tasks :as tasks]
-            [sade.shared-util :as util]))
+  (:require [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.tasks :as tasks]
+            [lupapalvelu.pate.shared :as shared]
+            [sade.util :as util]))
 
+(defn- new-task [verdict ts schema-name taskname & [taskdata]]
+  (tasks/new-task schema-name
+                  taskname
+                  taskdata
+                  {:created ts}
+                  {:type "verdict"
+                   :id   (:id verdict)}))
 
-(defn plan->task [{{plans :plans} :references :as verdict} ts plan-id]
-  (when-some [pate-plan (util/find-by-id plan-id plans)]
-    (let [source {:type "verdict" :id (:id verdict)}
-          plan-name (get pate-plan (keyword (get-in verdict [:data :language] "fi")))]
-      (tasks/new-task "task-lupamaarays" plan-name nil {:created ts} source))))
+(defn- included? [verdict dict]
+  (get-in verdict [:data (-> (name dict) (str "-included") keyword)]))
 
-(defn condition->task [verdict ts condition]
-  (let [source {:type "verdict" :id (:id verdict)}
-        condition-title (:condition (second condition))]
-    (tasks/new-task "task-lupamaarays" condition-title nil {:created ts} source)))
+(defn reviews->tasks
+  ([{{reviews :reviews} :references
+     data               :data
+     :as                verdict} ts buildings dict]
+   (when (included? verdict dict)
+     (->> reviews
+          (filter #(util/includes-as-kw? (dict data) (:id %)))
+          (map #(new-task verdict ts
+                          "task-katselmus"
+                          (get % (-> data :language keyword))
+                          {:katselmuksenLaji   (shared/review-type-map
+                                                (or (keyword (:type %))
+                                                    :ei-tiedossa))
+                           :vaadittuLupaehtona true
+                           :rakennus           (tasks/rakennus-data-from-buildings
+                                                {} buildings)
+                           ;; data should be empty, as this is just placeholder task
+                           :katselmus          {:tila         nil
+                                                :pitaja       nil
+                                                :pitoPvm      nil
+                                                :lasnaolijat  ""
+                                                :huomautukset {:kuvaus ""}
+                                                :poikkeamat   ""}})))))
+  ([verdict ts buildings] (reviews->tasks verdict ts buildings :reviews)))
+
+(defn plans->tasks
+  ([{{plans :plans} :references
+     data           :data
+     :as verdict} ts dict]
+   (when (included? verdict dict)
+     (->> plans
+          (filter #(util/includes-as-kw? (dict data) (:id %)))
+          (map #(new-task verdict ts
+                          "task-lupamaarays"
+                          (get % (-> data :language keyword)))))))
+  ([verdict ts]
+   (plans->tasks verdict ts :plans)))
+
+(defn conditions->tasks
+  ([{data :data :as verdict} ts dict]
+   (map #(new-task verdict ts "task-lupamaarays" (:condition %))
+        (some-> data dict vals)))
+  ([verdict ts] (conditions->tasks verdict ts :conditions)))
+
+(defn foremen->tasks
+  ([{data :data :as verdict} ts dict]
+   (when (included? verdict dict)
+     (map #(new-task verdict ts
+                     "task-vaadittu-tyonjohtaja"
+                     (i18n/localize (:language data) :pate-r.foremen %))
+          (dict data))))
+  ([verdict ts] (foremen->tasks verdict ts :foremen)))
