@@ -1,7 +1,6 @@
 (ns lupapalvelu.onnistuu.process-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [clojure.walk :as walk]
             [cheshire.core :as json]
             [sade.crypt :as c]
             [lupapalvelu.onnistuu.process :refer :all]))
