@@ -74,7 +74,9 @@
 (fact "Fetch document"
   (let [process-id (:id (init-sign))]
     (fetch-document process-id) => http200?
-    (get-process-status process-id) => "started"))
+    (get-process-status process-id) => "started"
+    (fact "Consequent call retuns also"
+      (fetch-document process-id) => http200?)))
 
 (fact "Fetch document for unknown process"
   (fetch-document "foozaa") => http404?)
