@@ -1,5 +1,5 @@
 (ns lupapalvelu.batchrun
-  (:require [taoensso.timbre :refer [debug debugf error errorf info infof warn]]
+  (:require [taoensso.timbre :refer [debug debugf error errorf info infof warn warnf]]
             [me.raynes.fs :as fs]
             [monger.operators :refer :all]
             [clojure.set :as set]
@@ -11,6 +11,7 @@
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.integrations.state-change :as state-change]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
@@ -295,31 +296,16 @@
 
     (mongo/disconnect!)))
 
+(defn- fetch-verdicts-queue-for-organization [org-id]
+  (str "lupapiste/fetch-verdicts." org-id))
+
 (defn fetch-verdict
   [batchrun-name batchrun-user {:keys [id permitType organization] :as app}]
-  (logging/with-logging-context {:applicationId id, :userId (:id batchrun-user)}
-    (info "Checking verdict...")
-    (try
-      (let [command (assoc (application->command app) :user batchrun-user :created (now) :action "fetch-verdicts")
-            result (verdict/do-check-for-verdict command)]
-        (when (-> result :verdicts count pos?)
-          (infof "Found %s verdicts" (-> result :verdicts count))
-          ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
-          (logging/log-event :info {:run-by batchrun-name :event "Found new verdict"})
-          (notifications/notify! :application-state-change command))
-        (when (or (nil? result) (fail? result))
-          (infof "No verdicts found, result: " (if (nil? result) :error.no-app-xml result))
-          (logging/log-event :error {:run-by       batchrun-name
-                                     :event        "Failed to check verdict"
-                                     :failure      (if (nil? result) :error.no-app-xml result)
-                                     :organization {:id organization :permit-type permitType}
-                                     })))
-      (catch Throwable t
-        (logging/log-event :error {:run-by            batchrun-name
-                                   :event             "Unable to get verdict from backend"
-                                   :exception-message (.getMessage t)
-                                   :application-id    id
-                                   :organization      {:id organization :permit-type permitType}})))))
+  (if (env/feature? :jms)
+    (jms/produce-with-context (fetch-verdicts-queue-for-organization organization)
+                              (pr-str {:id id :database mongo/*db-name*}))
+    (warnf "JMS not enabled, fetch-verdict message for %s was NOT sent" id)))
+
 (defn- organization-has-krysp-url-function
   "Takes map of organization id as key and organization data as values.
   Returns function, that takes application and returns true if application's organization has krysp url set."
