@@ -11,7 +11,6 @@
             [lupapalvelu.roles :as roles]
             [lupapalvelu.server]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as user]
             [schema.core :as sc])
   (:import [org.apache.commons.io.output NullWriter]))
 

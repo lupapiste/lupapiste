@@ -1,6 +1,8 @@
 (ns lupapalvelu.user-api-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [sade.core :refer [ok?]]
+            [lupapalvelu.api-common :refer [execute-command]]
             [lupapalvelu.user-api :refer :all]
             [lupapalvelu.itest-util :refer [expected-failure? unauthorized?]]
             [lupapalvelu.states :as states]))
@@ -58,4 +60,61 @@
         (allowed-state? state {:applicationState state}) => true)))
   (fact "sent"
     (allowed-state? :sent {:applicationState irrelevant}) => true))
+
+(def not-found (partial expected-failure? :error.email-not-found))
+
+(facts "reset-password"
+  (facts "successful"
+    (fact "enabled user"
+      (execute-command "reset-password" {:email "foo@example.com"} {:scheme "http"}) => ok?
+      (provided
+        (lupapalvelu.password-reset/reset-password anything) => nil :times 1
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled true :role "foo"}))
+    (fact "as long as enabled (or not dummy)"
+      (execute-command "reset-password" {:email "foo@example.com"} {:scheme "http"}) => ok?
+      (provided
+        (lupapalvelu.password-reset/reset-password anything) => nil :times 1
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled true})))
+  (facts "unsuccessful"
+    (fact "unknown user"
+      (execute-command "reset-password" {:email "foo@example.com"} {:scheme "http"}) => not-found
+      (provided
+        (lupapalvelu.password-reset/reset-password anything) => nil :times 0
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => nil))
+    (fact "disabled user"
+      (execute-command "reset-password" {:email "foo@example.com"} {:scheme "http"}) => not-found
+      (provided
+        (lupapalvelu.password-reset/reset-password anything) => nil :times 0
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled false :role "foo"}))
+    (fact "dummy user"
+      (execute-command "reset-password" {:email "foo@example.com"} {:scheme "http"}) => not-found
+      (provided
+        (lupapalvelu.password-reset/reset-password anything) => nil :times 0
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled false :role "dummy"}))
+    (fact "dummy user enabled"
+      (execute-command "reset-password" {:email "foo@example.com"} {:scheme "http"}) => not-found
+      (provided
+        (lupapalvelu.password-reset/reset-password anything) => nil :times 0
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled true :role "dummy"}))
+    (fact "dummy user enabled"
+      (execute-command "reset-password" {:email "foo@example.com"} {:scheme "http"}) => not-found
+      (provided
+        (lupapalvelu.password-reset/reset-password anything) => nil :times 0
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled true :role "dummy"})))
+  (facts "admin"
+    (fact "can reset also disabled"
+      (execute-command "admin-reset-password" {:email "foo@example.com"} {:scheme "http" :user {:role "admin"}}) => ok?
+      (provided
+        (lupapalvelu.password-reset/reset-password anything) => nil :times 1
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled false :role "foo"}))
+    (fact "but not dummy"
+      (execute-command "admin-reset-password" {:email "foo@example.com"} {:scheme "http" :user {:role "admin"}}) => not-found
+      (provided
+        (lupapalvelu.password-reset/reset-password anything) => nil :times 0
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled true :role "dummy"}))
+    (fact "nor 'nothing'"
+      (execute-command "admin-reset-password" {:email "foo@example.com"} {:scheme "http" :user {:role "admin"}}) => not-found
+      (provided
+        (lupapalvelu.password-reset/reset-password anything) => nil :times 0
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => nil))))
 
