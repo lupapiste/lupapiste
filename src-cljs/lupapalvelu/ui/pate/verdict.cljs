@@ -22,8 +22,10 @@
 (defn- can-view? []
   (state/auth? :pate-verdicts))
 
-(defn- can-publish? []
-  (state/auth? :publish-pate-verdict))
+(defn- can-publish? [legacy?]
+  (state/auth? (if legacy?
+                 :publish-legacy-verdict
+                 :publish-pate-verdict)))
 
 (defn- can-edit-verdict? [{published :published}]
   (and (can-edit?)
@@ -103,13 +105,14 @@
 (rum/defcs verdict < rum/reactive
   (rum/local false ::wait?)
   [{wait?* ::wait?} {:keys [schema state info _meta] :as options}]
-  (let [published (path/react :published info)
-        yes-fn    (fn []
-                    (reset! wait?* true)
-                    (reset! (rum/cursor-in _meta [:enabled?]) false)
-                    (service/publish-and-reopen-verdict  @state/application-id
-                                                         (path/value :id info)
-                                                         reset-verdict))]
+  (let [{:keys [published legacy? filled? id]
+         :as   info} (rum/react info)
+        yes-fn     (fn []
+                     (reset! wait?* true)
+                     (reset! (rum/cursor-in _meta [:enabled?]) false)
+                     (service/publish-and-reopen-verdict  @state/application-id
+                                                          info
+                                                          reset-verdict))]
     [:div.pate-verdict
      [:div.pate-grid-2
       (when (and (or (path/enabled? options)
@@ -121,8 +124,8 @@
                                    :class    (common/css :primary :pate-left-space)
                                    :icon     :lupicon-circle-section-sign
                                    :wait?    wait?*
-                                   :enabled? (and (path/react :filled? info)
-                                                  (can-publish?))
+                                   :enabled? (and filled?
+                                                  (can-publish? legacy?))
                                    :on-click (fn []
                                                (hub/send "show-dialog"
                                                          {:ltitle          "areyousure"
@@ -132,9 +135,9 @@
                                                                             :yesFn yes-fn}}))})
           (components/link-button {:url      (js/sprintf "/api/raw/preview-pate-verdict?id=%s&verdict-id=%s"
                                                          @state/application-id
-                                                         (path/value :id info))
+                                                         id)
                                    :enabled? (and (path/enabled? options)
-                                                  (path/react :filled? info))
+                                                  filled?)
                                    :disabled published
                                    :text-loc :pdf.preview})]])
       (if published

@@ -17,7 +17,6 @@
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.legacy :as legacy]
             [lupapalvelu.pate.pdf :as pdf]
-            [lupapalvelu.pate.review :as review]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.tasks :as pate-tasks]
@@ -839,12 +838,6 @@
                               (map (fn [[k v]]
                                      (assoc k :amount (count v)))))))}))
 
-(defn pate-verdict->tasks [verdict buildings {ts :created}]
-  (remove nil? (lazy-cat (pate-tasks/reviews->tasks verdict ts buildings)
-                         (pate-tasks/plans->tasks verdict ts)
-                         (pate-tasks/conditions->tasks verdict ts)
-                         (pate-tasks/foremen->tasks verdict ts))))
-
 (defn log-task-errors [tasks]
   (when-let [errs (seq (mapv #(tasks/task-doc-validation (-> % :schema-info :name) %) tasks))]
     (doseq [err errs
@@ -905,7 +898,9 @@
                                                      created))
         next-state             (sm/verdict-given-state application)
         buildings              (->buildings-array application)
-        tasks                  (pate-verdict->tasks verdict buildings command)
+        tasks                  (pate-tasks/pate-verdict->tasks verdict
+                                                               created
+                                                               buildings)
         {att-items :items
          update-fn :update-fn} (attachment-items command verdict)
         verdict                (update verdict :data update-fn)]
@@ -954,8 +949,9 @@
 
     (let [verdict-attachment (pdf/create-verdict-attachment command (assoc verdict :published created))
           verdict            (assoc verdict :verdict-attachment verdict-attachment)]
-      ;; KuntaGML
-      (when (org/krysp-integration? @organization (:permitType application))
+      ;; KuntaGML (only for non-legacy verdicts)
+      (when (and (not (:legacy? verdict))
+                 (org/krysp-integration? @organization (:permitType application)))
         (-> (assoc command :application (domain/get-application-no-access-checking (:id application)))
             (krysp/verdict-as-kuntagml verdict))
         nil))))

@@ -1,12 +1,19 @@
 (ns lupapalvelu.pate.tasks-test
-  (:require [midje.sweet :refer :all]
-            [lupapalvelu.pate.tasks :refer :all]
+  (:require [lupapalvelu.pate.tasks :refer :all]
             [lupapalvelu.pate.verdict-canonical-test :as verdict-test]
-            [lupapalvelu.tasks :as tasks]))
+            [lupapalvelu.tasks :as tasks]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]))
 
 (def test-pate-verdict verdict-test/verdict)
 
 (def ts 1522223223639)
+
+(testable-privates lupapalvelu.pate.tasks
+                   reviews->tasks conditions->tasks
+                   plans->tasks foremen->tasks
+                   legacy-reviews->tasks legacy-conditions->tasks
+                   legacy-foremen->tasks)
 
 (facts "Plans"
   (fact "Create tasks from plans"
@@ -203,3 +210,139 @@
                          :taskname    "Arbetsledare inom vatten och avlopp"
                          :data        {:asiointitunnus {:value ""}
                                        :osapuolena     {:value false}}})])))
+
+(def legacy-verdict {:legacy? true
+                     :id      "legacy-id"
+                     :data    {:conditions {:id1 {:name "First condition"}
+                                            :id2 {:name "Second condition"}}
+                               :foremen {:id3 {:role "Vastaava työnjohtaja"}
+                                         :id4 {:role "Some random foreman"}}}})
+
+(facts "Legacy conditions"
+  (fact "Two conditions"
+    (let [tasks (legacy-conditions->tasks legacy-verdict
+                                          12345)]
+      (fact "Valid tasks"
+        (->> tasks
+             (map (partial tasks/task-doc-validation "task-lupamaarays"))
+             (filter seq))=> empty?)
+
+      tasks => (just [(contains {:schema-info {:name    "task-lupamaarays"
+                                               :type    :task
+                                               :order   20
+                                               :version 1}
+                                :closed      nil
+                                 :created     12345
+                                 :state       :requires_user_action
+                                 :source      {:type "verdict"
+                                               :id   "legacy-id"}
+                                 :assignee    {}
+                                 :duedate     nil
+                                 :taskname    "First condition"
+                                 :data        {:maarays                     {:value ""}
+                                               :kuvaus                      {:value ""}
+                                               :vaaditutErityissuunnitelmat {:value ""}}})
+                      (contains {:schema-info {:name    "task-lupamaarays"
+                                               :type    :task
+                                               :order   20
+                                               :version 1}
+                                 :closed      nil
+                                 :created     12345
+                                 :state       :requires_user_action
+                                 :source      {:type "verdict"
+                                               :id   "legacy-id"}
+                                 :assignee    {}
+                                 :duedate     nil
+                                 :taskname    "Second condition"
+                                 :data        {:maarays                     {:value ""}
+                                               :kuvaus                      {:value ""}
+                                               :vaaditutErityissuunnitelmat {:value ""}}})])))
+  (fact "Only one condition"
+    (legacy-conditions->tasks (assoc-in legacy-verdict
+                                        [:data :conditions] {:foo {:name "Hello world!"}})
+                              12345)
+    => (just [(contains {:schema-info {:name    "task-lupamaarays"
+                                       :type    :task
+                                       :order   20
+                                       :version 1}
+                         :closed      nil
+                         :created     12345
+                         :state       :requires_user_action
+                         :source      {:type "verdict"
+                                       :id   "legacy-id"}
+                         :assignee    {}
+                         :duedate     nil
+                         :taskname    "Hello world!"
+                         :data        {:maarays                     {:value ""}
+                                       :kuvaus                      {:value ""}
+                                       :vaaditutErityissuunnitelmat {:value ""}}})]))
+  (fact "No conditions"
+    (legacy-conditions->tasks (assoc-in legacy-verdict
+                                        [:data :conditions] nil)
+                              12345)
+    => empty?))
+
+(facts "Legacy foremen"
+  (fact "Two foremen"
+    (let [tasks (legacy-foremen->tasks legacy-verdict 12345)]
+      (fact "Valid tasks"
+        (->> tasks
+             (map (partial tasks/task-doc-validation "task-vaadittu-tyonjohtaja"))
+             (filter seq))=> empty?)
+      tasks => (just [(contains {:schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                               :type    :task
+                                               :subtype :foreman
+                                               :order   10
+                                               :version 1}
+                                 :closed      nil
+                                 :created     12345
+                                 :state       :requires_user_action
+                                 :source      {:type "verdict"
+                                               :id   "legacy-id"}
+                                 :assignee    {}
+                                 :duedate     nil
+                                 :taskname    "Vastaava ty\u00f6njohtaja"
+                                 :data        {:asiointitunnus {:value ""}
+                                               :osapuolena     {:value false}}})
+                      (contains {:schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                               :type    :task
+                                               :subtype :foreman
+                                               :order   10
+                                               :version 1}
+                                 :closed      nil
+                                 :created     12345
+                                 :state       :requires_user_action
+                                 :source      {:type "verdict"
+                                               :id   "legacy-id"}
+                                 :assignee    {}
+                                 :duedate     nil
+                                 :taskname    "Some random foreman"
+                                 :data        {:asiointitunnus {:value ""}
+                                               :osapuolena     {:value false}}})])))
+  (fact "Only one foreman"
+    (fact "Two foremen"
+      (let [tasks (legacy-foremen->tasks (assoc-in legacy-verdict
+                                                   [:data :foremen]
+                                                   {:bar {:role "Primus inter pares"}})
+                                         12345)]
+      tasks => (just [(contains {:schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                               :type    :task
+                                               :subtype :foreman
+                                               :order   10
+                                               :version 1}
+                                 :closed      nil
+                                 :created     12345
+                                 :state       :requires_user_action
+                                 :source      {:type "verdict"
+                                               :id   "legacy-id"}
+                                 :assignee    {}
+                                 :duedate     nil
+                                 :taskname    "Primus inter pares"
+                                 :data        {:asiointitunnus {:value ""}
+                                               :osapuolena     {:value false}}})]))))
+
+  (fact "No foremen"
+    (legacy-foremen->tasks (assoc-in legacy-verdict
+                                     [:data :foremen] nil)
+                           12345)
+    => empty?))

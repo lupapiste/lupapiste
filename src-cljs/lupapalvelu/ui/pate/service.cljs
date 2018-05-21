@@ -190,8 +190,10 @@
                   :path path
                   :value value))
 
-(defn publish-and-reopen-verdict [app-id verdict-id callback]
-  (common/command {:command :publish-pate-verdict
+(defn publish-and-reopen-verdict [app-id {verdict-id :id legacy? :legacy?} callback]
+  (common/command {:command (if legacy?
+                              :publish-legacy-verdict
+                              :publish-pate-verdict)
                    :success (fn []
                               (fetch-verdict-list app-id)
                               (open-verdict app-id verdict-id callback)

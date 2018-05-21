@@ -840,9 +840,6 @@
               (command sonja :new-pate-verdict-draft
                        :id app-id :template-id template-id)
               => (err :error.pate-disabled))
-            (fact "Pate verdict tab pseudo query fails"
-              (query sonja :pate-verdict-tab :id app-id)
-              => (err :error.pate-disabled))
             (fact "Enable Pate in Sipoo"
               (toggle-sipoo-pate true)
               (query sonja :pate-verdict-tab :id app-id) => ok?)

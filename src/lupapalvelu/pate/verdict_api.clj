@@ -167,12 +167,27 @@
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [#_pate-enabled
+   :pre-checks       [pate-enabled
                       (verdict-exists :editable?)
                       verdict-filled]
    ;; As KuntaGML message is generated the application state must be
    ;; at least :sent
    :states            (set/difference states/post-sent-states #{:complementNeeded})
+   :notified         true
+   :on-success       (notify :application-state-change)}
+  [command]
+  (ok (verdict/publish-verdict command)))
+
+(defcommand publish-legacy-verdict
+  {:description      "Publishes legacy verdict."
+   :feature          :pate
+   :user-roles       #{:authority}
+   :parameters       [id verdict-id]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :pre-checks       [(action/not-pre-check pate-enabled)
+                      (verdict-exists :editable?)
+                      verdict-filled]
+   :states            states/give-verdict-states
    :notified         true
    :on-success       (notify :application-state-change)}
   [command]
