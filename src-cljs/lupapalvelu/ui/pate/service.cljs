@@ -154,12 +154,15 @@
                 #(reset! state/verdict-list (:verdicts %))
                 :id app-id))
 
-(defn new-verdict-draft [app-id template-id callback replacement-id]
-  (common/command {:command "new-pate-verdict-draft"
-                   :success callback}
-                  :id app-id
-                  :template-id template-id
-                  :replacement-id replacement-id))
+(defn new-verdict-draft
+  ([app-id template-id callback]
+    (new-verdict-draft app-id template-id callback nil))
+  ([app-id template-id callback replacement-id]
+    (common/command {:command "new-pate-verdict-draft"
+                     :success callback}
+                    :id app-id
+                    :template-id template-id
+                    :replacement-id replacement-id)))
 
 (defn open-verdict [app-id verdict-id callback]
   (common/query "pate-verdict"

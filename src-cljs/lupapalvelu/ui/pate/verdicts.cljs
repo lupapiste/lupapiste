@@ -61,7 +61,7 @@
           (layout/vertical [:button.positive
                             {:on-click #(service/new-verdict-draft @state/application-id
                                                                    @template*
-                                                                   (if @state/replacement-verdict replace open-verdict)
+                                                                   open-verdict
                                                                    @state/replacement-verdict)}
                             [:i.lupicon-circle-plus]
                             [:span (common/loc :application.verdict.add)]])]]))))
