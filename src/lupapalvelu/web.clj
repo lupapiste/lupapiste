@@ -486,7 +486,7 @@
 ;;
 
 (defpage [:get "/api/token/:token-id"] {token-id :token-id}
-  (if-let [token (token/get-token token-id :consume false)]
+  (if-let [token (token/get-usable-token token-id :consume false)]
     (resp/status 200 (resp/json (ok :token token)))
     (resp/status 404 (resp/json (fail :error.token-not-found)))))
 

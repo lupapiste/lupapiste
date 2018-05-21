@@ -14,7 +14,7 @@
   (let [token-id (token/make-token :change-email user {:new-email new-email}
                                    :auto-consume false
                                    :ttl ttl/change-email-token-ttl)
-        token (token/get-token token-id)]
+        token (token/get-usable-token token-id)]
     (notifications/notify! (cond
                              (usr/financial-authority? user) :change-email-for-financial-authority
                              (usr/company-user? user) :change-email-for-company-user
@@ -113,7 +113,7 @@
 
     ;; Cleanup tokens
     (when (usr/verified-person-id? user) (vetuma/consume-user stamp))
-    (token/get-token (:id token) :consume true)
+    (token/get-usable-token (:id token) :consume true)
 
     ;; Send notifications
     (notifications/notify! :email-changed {:user user, :data {:new-email new-email}})
@@ -121,6 +121,6 @@
     (ok)))
 
 (defn change-email [tokenId stamp]
-  (if-let [token (token/get-token tokenId)]
+  (if-let [token (token/get-usable-token tokenId)]
     (change-email-with-token token stamp)
     (fail :error.token-not-found)))

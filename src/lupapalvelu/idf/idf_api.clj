@@ -114,7 +114,7 @@
   [_]
   (ok :data
     (let [skeleton {:email "" :phone ""}
-          token (token/get-token tokenId)]
+          token (token/get-usable-token tokenId)]
      (merge skeleton
        (when (= (:token-type token) :activate-linked-account)
          (select-keys (:data token) [:email :phone]))))))
