@@ -206,9 +206,9 @@ body.admin, body.authority-admin {
 
 .container {
   box-sizing: border-box;
-  padding: 12px 24px 0 24px;
+  padding: 12px 60px 0 24px;
   width: 100%;
-  max-width: 1600px;
+  max-width: 1660px;
   min-width: 640px;
   margin: 24px auto 24px auto;
   position: relative;
@@ -1354,7 +1354,7 @@ h1 .icon {
 
 .nav-box {
   width: 100%;
-  max-width: 1600px;
+  max-width: 1660px;
   min-width: 640px;
   margin: 0 auto;
   position: relative;
@@ -1528,7 +1528,7 @@ nav .language-open a, nav .language-open span {
 nav .header-menu {
   display: inline-block;
   position: absolute;
-  right: 0px;
+  right: 20px;
 }
 
 nav .header-menu .header-box {
@@ -2177,7 +2177,7 @@ footer {
 footer .informations {
   padding: 12px;
   width: 100%;
-  max-width: 1600px;
+  max-width: 1660px;
   margin: 0 auto 12px;
 }
 
@@ -15319,7 +15319,7 @@ div.search i {
 }
 
 #indicator .indicator-box {
-  max-width: 1600px;
+  max-width: 1660px;
   min-width: 640px;
   margin: 0 auto;
   padding-left: 6px;
@@ -15388,7 +15388,7 @@ div.search i {
 }
 
 #indicator-icon .indicator-box {
-  max-width: 1600px;
+  max-width: 1660px;
   margin: 0 auto;
   padding: 12px;
 }
@@ -33660,8 +33660,8 @@ span.icon_clear:before {
   position: relative;
   min-height: 280px;
   padding-left: 320px;
-  padding-right: 24%;
-  margin-right: 61px;
+  padding-right: 20%;
+  margin-right: 6px;
 }
 
 .application_summary .preamble .application-map-container, .application_summary .preamble .application_actions {
@@ -34291,11 +34291,7 @@ span.icon_clear:before {
 }
 
 .application-summary-table > div > span {
-  width: 100%;
-}
-
-.application-summary-table > div > p {
-  padding-right: 2em;
+  width: 75%;
 }
 
 @media (max-width: 991px) {
@@ -38389,7 +38385,7 @@ div.summary-button-bar {
 }
 
 #bulletins .content-center, #local-bulletins .content-center {
-  max-width: 1600px;
+  max-width: 1660px;
   margin: 0 auto;
   position: relative;
   padding: 40px 0;
@@ -38580,8 +38576,8 @@ div.summary-button-bar {
   position: relative;
   min-height: 280px;
   padding-left: 320px;
-  padding-right: 24%;
-  margin-right: 61px;
+  padding-right: 20%;
+  margin-right: 6px;
 }
 
 #bulletins .application_summary .bulletin-preamble .application-map-container, #bulletins .application_summary .bulletin-preamble .application_actions, #local-bulletins .application_summary .bulletin-preamble .application-map-container, #local-bulletins .application_summary .bulletin-preamble .application_actions {
