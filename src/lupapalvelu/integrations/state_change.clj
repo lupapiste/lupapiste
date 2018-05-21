@@ -176,11 +176,14 @@
           (errorf "Message (id: %s) rollback initiated" (:message-id options))
           (jms/rollback session))))))
 
-(def json-consumer-session (if-let [conn (jms/get-default-connection)]
-                             (-> conn
-                                 (jms/create-transacted-session)
-                                 (jms/register-session :consumer))
-                             (warn "No JMS connection available")))
+(defn create-jms-session []
+  (if-let [conn (jms/get-default-connection)]
+    (-> conn
+        (jms/create-transacted-session)
+        (jms/register-session :consumer))
+    (warn "No JMS connection available")))
+
+(def json-consumer-session (create-jms-session))
 
 (when json-consumer-session
   (defonce state-change-consumer
