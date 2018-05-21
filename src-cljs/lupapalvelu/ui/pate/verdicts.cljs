@@ -100,6 +100,14 @@
   [verdicts app-id replacement-verdict]
   [:div
    (if replacement-verdict
+     [:div.operation-button-row
+      [:button.secondary
+       {:on-click #(do
+                     (reset! state/replacement-verdict nil)
+                     (service/fetch-verdict-list app-id))}
+       [:i.lupicon-chevron-left]
+       [:span (common/loc :back)]]])
+   (if replacement-verdict
      [:h2 (common/loc :application.tabVerdict.replacement.title)]
      [:h2 (common/loc :application.tabVerdict)])
    (if (empty? verdicts)
