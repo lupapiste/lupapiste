@@ -69,52 +69,62 @@
       (execute-command "reset-password" {:email "foo@example.com"} {:scheme "http"}) => ok?
       (provided
         (lupapalvelu.password-reset/reset-password anything) => nil :times 1
-        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled true :role "foo"}))
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled true :role "foo"}
+        (sade.dns/email-and-domain-valid? "foo@example.com") => true))
     (fact "as long as enabled (or not dummy)"
       (execute-command "reset-password" {:email "foo@example.com"} {:scheme "http"}) => ok?
       (provided
         (lupapalvelu.password-reset/reset-password anything) => nil :times 1
-        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled true})))
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled true}
+        (sade.dns/email-and-domain-valid? "foo@example.com") => true)))
   (facts "unsuccessful"
     (fact "unknown user"
       (execute-command "reset-password" {:email "foo@example.com"} {:scheme "http"}) => not-found
       (provided
         (lupapalvelu.password-reset/reset-password anything) => nil :times 0
-        (lupapalvelu.user/get-user-by-email "foo@example.com") => nil))
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => nil
+        (sade.dns/email-and-domain-valid? "foo@example.com") => true))
     (fact "disabled user"
       (execute-command "reset-password" {:email "foo@example.com"} {:scheme "http"}) => not-found
       (provided
         (lupapalvelu.password-reset/reset-password anything) => nil :times 0
-        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled false :role "foo"}))
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled false :role "foo"}
+        (sade.dns/email-and-domain-valid? "foo@example.com") => true))
     (fact "dummy user"
       (execute-command "reset-password" {:email "foo@example.com"} {:scheme "http"}) => not-found
       (provided
         (lupapalvelu.password-reset/reset-password anything) => nil :times 0
-        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled false :role "dummy"}))
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled false :role "dummy"}
+        (sade.dns/email-and-domain-valid? "foo@example.com") => true))
     (fact "dummy user enabled"
       (execute-command "reset-password" {:email "foo@example.com"} {:scheme "http"}) => not-found
       (provided
         (lupapalvelu.password-reset/reset-password anything) => nil :times 0
-        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled true :role "dummy"}))
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled true :role "dummy"}
+        (sade.dns/email-and-domain-valid? "foo@example.com") => true))
     (fact "dummy user enabled"
       (execute-command "reset-password" {:email "foo@example.com"} {:scheme "http"}) => not-found
       (provided
         (lupapalvelu.password-reset/reset-password anything) => nil :times 0
-        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled true :role "dummy"})))
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled true :role "dummy"}
+        (sade.dns/email-and-domain-valid? "foo@example.com") => true)))
   (facts "admin"
     (fact "can reset also disabled"
       (execute-command "admin-reset-password" {:email "foo@example.com"} {:scheme "http" :user {:role "admin"}}) => ok?
       (provided
         (lupapalvelu.password-reset/reset-password anything) => nil :times 1
-        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled false :role "foo"}))
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled false :role "foo"}
+        (sade.dns/email-and-domain-valid? "foo@example.com") => true))
     (fact "but not dummy"
       (execute-command "admin-reset-password" {:email "foo@example.com"} {:scheme "http" :user {:role "admin"}}) => not-found
       (provided
         (lupapalvelu.password-reset/reset-password anything) => nil :times 0
-        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled true :role "dummy"}))
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => {:enabled true :role "dummy"}
+        (sade.dns/email-and-domain-valid? "foo@example.com") => true))
     (fact "nor 'nothing'"
       (execute-command "admin-reset-password" {:email "foo@example.com"} {:scheme "http" :user {:role "admin"}}) => not-found
       (provided
         (lupapalvelu.password-reset/reset-password anything) => nil :times 0
-        (lupapalvelu.user/get-user-by-email "foo@example.com") => nil))))
+        (lupapalvelu.user/get-user-by-email "foo@example.com") => nil
+        (sade.dns/email-and-domain-valid? "foo@example.com") => true))))
 
