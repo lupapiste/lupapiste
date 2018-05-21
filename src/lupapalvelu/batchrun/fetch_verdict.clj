@@ -1,5 +1,5 @@
 (ns lupapalvelu.batchrun.fetch-verdict
-  (:require [clojure.edn :as edn]
+  (:require [clojure.tools.reader.edn :as edn]
             [schema.core :as sc]
             [taoensso.timbre :refer [error errorf info infof warn]]
             [sade.core :refer :all]
@@ -56,6 +56,8 @@
       (errorf t "Invalid message for fetch-verdict: %s" (.getMessage t))
       nil)))
 
+(when (env/feature? :jms)
+
 (defn handle-fetch-verdict-message [^Session session]
   (fn [msg]
     (mongo/connect!)
@@ -69,14 +71,13 @@
             (jms/rollback session))))
       (jms/commit session)))) ; Invalid message, nothing to be done
 
-(when (env/feature? :jms)
- (def fetch-verdicts-queue "lupapiste/fetch-verdicts.#")
+(def fetch-verdicts-queue "lupapiste/fetch-verdicts.#")
 
- (def fetch-verdicts-transacted-session (-> (jms/get-default-connection)
-                                            (jms/create-transacted-session)
-                                            (jms/register-session :consumer)))
+(def fetch-verdicts-transacted-session (-> (jms/get-default-connection)
+                                           (jms/create-transacted-session)
+                                           (jms/register-session :consumer)))
 
- (defonce fetch-verdicts-consumer
-   (jms/create-consumer fetch-verdicts-transacted-session
-                        fetch-verdicts-queue
-                        (handle-fetch-verdict-message fetch-verdicts-transacted-session))))
+(defonce fetch-verdicts-consumer
+  (jms/create-consumer fetch-verdicts-transacted-session
+                       fetch-verdicts-queue
+                       (handle-fetch-verdict-message fetch-verdicts-transacted-session))))
