@@ -87,8 +87,8 @@
                                           (reset! state/verdict-list [verdict])
                                           (reset! state/replacement-verdict verdict-id))}}))
 
-(defn- replace-verdict [verdict verdicts]
-  (when-let [replacement-verdict (first (filter #(= (get-in verdict [:replacement :replaces]) (:id %)) verdicts))]
+(defn- replace-verdict [verdict]
+  (when-let [replacement-verdict (first (filter #(= (get-in verdict [:replacement :replaces]) (:id %)) @state/verdict-list))]
     (common/loc :pate.replacing.verdict (:verdict-section replacement-verdict))))
 
 (defn- sort-verdicts-by-verdict-date [verdicts]
@@ -96,19 +96,55 @@
     (filter #(nil? (:published %)) verdicts)
     (sort-by :verdict-date > (filter #(not (nil? (:published %))) verdicts))))
 
+(defn- verdict-table [headers verdicts app-id show-actions]
+  [:table.pate-verdicts-table
+   [:thead [:tr (map (fn [header] [:th (common/loc header)]) headers)]]
+   [:tbody (map (fn [{:keys [id title published modified verdict-date handler] :as verdict}]
+                  [:tr {:key id}
+                   [:td [:a {:on-click #(open-verdict id)} title]]
+                   [:td (if published
+                          (js/util.finnishDate verdict-date))]
+                   [:td handler]
+                   [:td (if published
+                          (common/loc :pate.published-date (js/util.finnishDate published))
+                          (common/loc :pate.last-saved (js/util.finnishDateAndTime modified)))]
+                   (if show-actions
+                     [:td]
+                     [:td (if (and (can-edit-verdict? verdict) (not published))
+                            [:a
+                             {:on-click #(confirm-and-delete-verdict app-id id)}
+                             (common/loc :pate.verdict-table.remove-verdict)]
+                            [:a
+                             {:on-click #(confirm-and-replace-verdict verdict id)}
+                             (common/loc :pate.verdict-table.replace-verdict)])])
+                         ])
+                verdicts)]])
+
+(defn- verdict-title [{:keys [category published verdict-section verdict-type verdict-code] :as verdict}]
+  (str
+    (if (= :ya (keyword category))
+      (if published
+        (str "§" verdict-section " " (ss/capitalize verdict-type) " - " (ss/capitalize (ss/replace verdict-code #"-" " ")))
+        (str (path/loc :pate-verdict-draft) " - " (ss/capitalize verdict-type) " - " (ss/capitalize (ss/replace verdict-code #"-" " "))))
+      (if published
+        (str "§" verdict-section " " (if verdict-code (ss/capitalize verdict-code) (path/loc :pate-verdict)))
+        (path/loc :pate-verdict-draft)))
+    (if (some? (get-in verdict [:replacement :replaces]))
+      (replace-verdict verdict))))
+
 (rum/defc verdict-list < rum/reactive
   [verdicts app-id replacement-verdict]
   [:div
    (if replacement-verdict
-     [:div.operation-button-row
-      [:button.secondary
-       {:on-click #(do
-                     (reset! state/replacement-verdict nil)
-                     (service/fetch-verdict-list app-id))}
-       [:i.lupicon-chevron-left]
-       [:span (common/loc :back)]]])
-   (if replacement-verdict
-     [:h2 (common/loc :application.tabVerdict.replacement.title)]
+     [:div
+      [:div.operation-button-row
+       [:button.secondary
+        {:on-click #(do
+                      (reset! state/replacement-verdict nil)
+                      (service/fetch-verdict-list app-id))}
+        [:i.lupicon-chevron-left]
+        [:span (common/loc :back)]]]
+      [:h2 (common/loc :application.tabVerdict.replacement.title)]]
      [:h2 (common/loc :application.tabVerdict)])
    (if (empty? verdicts)
      (when-not (state/auth? :new-pate-verdict-draft)
@@ -116,43 +152,16 @@
      [:div
      (if replacement-verdict
        [:h3.table-title (common/loc :application.tabVerdict.replacement)])
-     [:table.pate-verdicts-table
-      [:thead
-       [:tr
-        [:th (common/loc :pate.verdict-table.verdict)]
-        [:th (common/loc :pate.verdict-table.verdict-date)]
-        [:th (common/loc :pate.verdict-table.verdict-giver)]
-        [:th (common/loc :pate.verdict-table.last-edit)]
-        [:th ""]]]
-      [:tbody
-       (map (fn [{:keys [id published modified verdict-date handler verdict-type verdict-code category verdict-section] :as verdict}]
-              [:tr {:key id}
-               [:td [:a {:on-click #(open-verdict id)}
-                     (if (= :ya (keyword category))
-                       (if published
-                         (str "§" verdict-section " " (ss/capitalize verdict-type) " - " (ss/capitalize (ss/replace verdict-code #"-" " ")))
-                         (str (path/loc :pate-verdict-draft) " - " (ss/capitalize verdict-type) " - " (ss/capitalize (ss/replace verdict-code #"-" " "))))
-                       (if published
-                         (str "§" verdict-section " " (if verdict-code (ss/capitalize verdict-code) (path/loc :pate-verdict)))
-                         (path/loc :pate-verdict-draft)))
-                     (if (some? (get-in verdict [:replacement :replaces]))
-                       (replace-verdict verdict verdicts))]]
-               [:td (if published
-                      (js/util.finnishDate verdict-date))]
-               [:td handler]
-               [:td (if published
-                      (common/loc :pate.published-date (js/util.finnishDate published))
-                      (common/loc :pate.last-saved (js/util.finnishDateAndTime modified)))]
-               (if replacement-verdict
-                 [:td]
-                 [:td (if (and (can-edit-verdict? verdict) (not published))
-                        [:a
-                         {:on-click #(confirm-and-delete-verdict app-id id)}
-                         (common/loc :pate.verdict-table.remove-verdict)]
-                        [:a
-                         {:on-click #(confirm-and-replace-verdict verdict id)}
-                         (common/loc :pate.verdict-table.replace-verdict)])])])
-            (sort-verdicts-by-verdict-date verdicts))]]])
+     (verdict-table [:pate.verdict-table.verdict
+                     :pate.verdict-table.verdict-date
+                     :pate.verdict-table.verdict-giver
+                     :pate.verdict-table.last-edit
+                     ""]
+                    (map
+                      (fn [verdict] (assoc verdict :title (verdict-title verdict)))
+                      (sort-verdicts-by-verdict-date verdicts))
+                    app-id
+                    replacement-verdict)])
    (when (state/auth? :new-pate-verdict-draft)
      (new-verdict))])
 
