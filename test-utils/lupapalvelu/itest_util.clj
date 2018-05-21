@@ -19,6 +19,7 @@
             [sade.util :as util]
             [lupapalvelu.action :refer [*created-timestamp-for-test-actions*]]
             [lupapalvelu.attachment :as att]
+            [lupapalvelu.batchrun :as batchrun]
             [lupapalvelu.cookie :as c]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.document.tools :as tools]
@@ -1016,3 +1017,8 @@
     (fact "assignments query ok"
       resp => ok?)
     (:assignments resp)))
+
+(defn fetch-verdicts []
+  (let [resp (batchrun/fetch-verdicts-default)]
+    (Thread/sleep 10000)
+    resp))

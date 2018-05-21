@@ -45,9 +45,6 @@
     {:id "abba1111111111111111acdc"
      :name {:fi "K\u00e4sittelij\u00e4" :sv "Handl\u00e4ggare" :en "Handler"}} "review-test-trigger"))
 
-(defn wait-for-message-queue []
-  (Thread/sleep 2000))
-
 (mongo/connect!)
 (mongo/with-db db-name
   (fixture/apply-fixture "minimal")
@@ -85,8 +82,7 @@
           (:state (query-application local-query sonja app-id)) => "sent")
 
         (fact "batchrun creates assignments"
-          (let [_ (batchrun/fetch-verdicts-default)
-                _ (wait-for-message-queue)
+          (let [_ (fetch-verdicts)
                 assignments (get-assignments)]
             (fact "one attachment creates one assignment"
                  (count assignments) => 1)
