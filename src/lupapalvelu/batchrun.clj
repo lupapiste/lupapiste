@@ -297,14 +297,11 @@
 
     (mongo/disconnect!)))
 
-(defn- fetch-verdicts-queue-for-organization [org-id]
-  (str "lupapiste/fetch-verdicts." org-id))
-
 (defn fetch-verdict
   [batchrun-name batchrun-user {:keys [id organization] :as app} & [{:keys [jms?] :or {jms? false}}]]
   (if jms?
-    (jms/produce-with-context (fetch-verdicts-queue-for-organization organization)
-                              (pr-str {:id id :database mongo/*db-name*}))
+    (jms/produce-with-context (fetch-verdict/queue-for-organization organization)
+                              (fetch-verdict/fetch-verdict-message id mongo/*db-name*))
     (fetch-verdict/fetch-verdict batchrun-name batchrun-user app)))
 
 (defn- organization-has-krysp-url-function

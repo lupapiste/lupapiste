@@ -3,7 +3,7 @@
             [midje.util :refer [testable-privates]]
             [taoensso.timbre :refer [warnf]]
             [lupapalvelu.batchrun :as batchrun]
-            [lupapalvelu.batchrun.fetch-verdict]
+            [lupapalvelu.batchrun.fetch-verdict-consumer]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.fixture.minimal :as minimal]
