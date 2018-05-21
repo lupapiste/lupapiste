@@ -50,5 +50,7 @@
       token)))
 
 (defn consume-token [id params & {:keys [consume] :or {consume false}}]
-  (when-let [token-data (get-usable-token id :consume consume)]
-    (handle-token token-data params)))
+  (let [[status token] (get-token id :consume consume)]
+    (case status
+      :usable [:usable (handle-token token params)]
+      [status])))

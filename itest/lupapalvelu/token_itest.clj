@@ -41,6 +41,7 @@
 
 (facts
     (mongo/with-db db-name
-      (consume-token (make-token :fofo {} {:foo "foo"}) {:bar "bar"}) => {:works true :foo "foo" :bar "bar"}
-      (consume-token (make-token :no-such-type {} {:foo "bar"}) {}) => nil
-      (consume-token "no-such-token" {}) => nil))
+      (consume-token (make-token :fofo {} {:foo "foo"}) {:bar "bar"})
+        => [:usable {:works true :foo "foo" :bar "bar"}]
+      (consume-token (make-token :no-such-type {} {:foo "bar"}) {}) => [:usable nil]
+      (consume-token "no-such-token" {}) => [:usable nil]))

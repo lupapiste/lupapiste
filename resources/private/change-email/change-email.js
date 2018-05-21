@@ -34,7 +34,13 @@
         vetumaParams.token(token);
         vetumaParams.visible(true);
       })
-      .fail(_.partial(initError, "error.token-not-found"))
+      .fail(function(response) {
+        var err = response.responseJSON.text;
+        initError(err);
+        if (err === "error.token-used") {
+          window.setTimeout(pageutil.openFrontpage, 3000)
+        }
+      })
       .call();
 
     statusModel(pageutil.lastSubPage());
