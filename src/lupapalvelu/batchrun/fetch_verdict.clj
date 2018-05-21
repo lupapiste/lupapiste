@@ -47,10 +47,12 @@
   {:id sc/Str
    :database sc/Str})
 
+(def fetch-verdict-message-validator (sc/validator FetchVerdictMessage))
+
 (defn read-message [msg]
   (try
     (let [message (edn/read-string msg)]
-      (sc/validate FetchVerdictMessage message)
+      (fetch-verdict-message-validator message)
       message)
     (catch Throwable t
       (errorf t "Invalid message for fetch-verdict: %s" (.getMessage t))
