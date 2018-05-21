@@ -1,5 +1,6 @@
 (ns lupapalvelu.batchrun.fetch-verdict
   (:require [clojure.edn :as edn]
+            [schema.core :as sc]
             [taoensso.timbre :refer [error errorf info infof warn]]
             [sade.core :refer :all]
             [sade.env :as env]
@@ -41,17 +42,32 @@
                                    :organization      {:id organization :permit-type permitType}})
         false))))
 
+
+(sc/defschema FetchVerdictMessage
+  {:id sc/Str
+   :database sc/Str})
+
+(defn read-message [msg]
+  (try
+    (let [message (edn/read-string msg)]
+      (sc/validate FetchVerdictMessage message)
+      message)
+    (catch Throwable t
+      (errorf t "Invalid message for fetch-verdict: %s" (.getMessage t))
+      nil)))
+
 (defn handle-fetch-verdict-message [^Session session]
   (fn [msg]
     (mongo/connect!)
-    (let [{:keys [id database]} (edn/read-string msg)]
+    (if-let [{:keys [id database]} (read-message msg)]
       (mongo/with-db database
         (let [application (mongo/select-one :applications {:_id id})
               batchrun-user (user/batchrun-user [(:organization application)])
               batchrun-name "Automatic verdicts checking"]
           (if (fetch-verdict batchrun-name batchrun-user application)
             (jms/commit session)
-            (jms/rollback session)))))))
+            (jms/rollback session))))
+      (jms/commit session)))) ; Invalid message, nothing to be done
 
 (when (env/feature? :jms)
  (def fetch-verdicts-queue "lupapiste/fetch-verdicts.#")
