@@ -10,6 +10,7 @@
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.batchrun.fetch-verdict :as fetch-verdict]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.integrations.state-change :as state-change]
@@ -300,11 +301,11 @@
   (str "lupapiste/fetch-verdicts." org-id))
 
 (defn fetch-verdict
-  [batchrun-name batchrun-user {:keys [id permitType organization] :as app}]
-  (if (env/feature? :jms)
+  [batchrun-name batchrun-user {:keys [id organization] :as app} & [{:keys [jms?] :or {jms? false}}]]
+  (if jms?
     (jms/produce-with-context (fetch-verdicts-queue-for-organization organization)
                               (pr-str {:id id :database mongo/*db-name*}))
-    (warnf "JMS not enabled, fetch-verdict message for %s was NOT sent" id)))
+    (fetch-verdict/fetch-verdict batchrun-name batchrun-user app)))
 
 (defn- organization-has-krysp-url-function
   "Takes map of organization id as key and organization data as values.
@@ -322,11 +323,11 @@
         org-has-url? (organization-has-krysp-url-function orgs-by-id)]
     (filter org-has-url? applications)))
 
-(defn fetch-verdicts [batchrun-name batchrun-user applications]
+(defn fetch-verdicts [batchrun-name batchrun-user applications & [options]]
   (let [start-ts (double (now))]
     (logging/log-event :info {:run-by batchrun-name
                               :event  (format "Starting verdict fetching with %s applications" (count applications))})
-    (doall (pmap (partial fetch-verdict batchrun-name batchrun-user) applications))
+    (doall (pmap #(fetch-verdict batchrun-name batchrun-user % options) applications))
     (logging/log-event :info {:run-by batchrun-name
                               :event  "Finished verdict checking"
                               :took   (format "%.2f minutes" (/ (- (now) start-ts) 1000 60))})))
@@ -362,7 +363,7 @@
     (fetch-verdicts-by-application-ids args)
     (fetch-verdicts-by-org-ids args)))
 
-(defn fetch-verdicts-default []
+(defn fetch-verdicts-default [& [{:keys [jms?] :or {jms? false}}]]
   (let [organizations-with-krysp-url (organization/get-organizations
                                        {$or [{:krysp.R.url {$exists true}}
                                              {:krysp.YA.url {$exists true}}
@@ -380,7 +381,7 @@
         apps-with-urls (get-valid-applications organizations-with-krysp-url apps)
         eraajo-user (user/batchrun-user org-ids)
         batchrun-name "Automatic verdicts checking"]
-    (fetch-verdicts batchrun-name eraajo-user apps-with-urls)))
+    (fetch-verdicts batchrun-name eraajo-user apps-with-urls {:jms? jms?})))
 
 (defn check-for-verdicts [& args]
   (when-not (system-not-in-lockdown?)
@@ -388,7 +389,7 @@
     (fail! :system-in-lockdown))
   (mongo/connect!)
   (if (empty? args)
-    (fetch-verdicts-default)
+    (fetch-verdicts-default {:jms? (env/feature? :jms)})
     (fetch-verdicts-with-args args)))
 
 (defn- get-asianhallinta-ftp-users [organizations]

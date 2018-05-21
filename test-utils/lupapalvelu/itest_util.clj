@@ -1018,7 +1018,8 @@
       resp => ok?)
     (:assignments resp)))
 
-(defn fetch-verdicts []
-  (let [resp (batchrun/fetch-verdicts-default)]
-    (Thread/sleep 10000)
+(defn fetch-verdicts [& [{:keys [jms? wait-ms] :or {jms? false wait-ms 2000}}]]
+  (let [resp (batchrun/fetch-verdicts-default {:jms? jms?})]
+    (when jms?
+      (Thread/sleep wait-ms))
     resp))

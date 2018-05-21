@@ -1,4 +1,4 @@
-(ns lulpapalvelu.batchrun.fetch-verdict
+(ns lupapalvelu.batchrun.fetch-verdict
   (:require [clojure.edn :as edn]
             [taoensso.timbre :refer [error errorf info infof warn]]
             [sade.core :refer :all]

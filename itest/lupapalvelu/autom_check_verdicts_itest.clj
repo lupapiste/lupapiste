@@ -65,7 +65,7 @@
         (:state application-verdict-given) => "verdictGiven")
 
       (fact "checking verdicts and sending emails to the authorities related to the applications"
-        (fetch-verdicts) => nil?)
+        (fetch-verdicts {:jms? true :wait-ms 2000}) => nil?)
       (fact "Verifying the sent emails"
         (Thread/sleep 2000) ; batchrun includes a parallel operation
         (let [emails (dummy-email-server/messages :reset true)]
@@ -89,7 +89,7 @@
           (-> application-verdict-given :history last :state) => "verdictGiven"))
 
       (fact "batchrun verdicts not checked, if organization doesn't have url"
-        (fetch-verdicts) => nil?
+        (fetch-verdicts {:jms? true :wait-ms 2000}) => nil?
         (provided
           (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
           (mongo/select :organizations anything anything) => [{:id "bar"}]
@@ -99,7 +99,7 @@
 
       (fact "batchrun check-for-verdicts logs :error on exception"
         ;; make sure logging functions are called in expected ways
-        (fetch-verdicts) => nil?
+        (fetch-verdicts {:jms? true :wait-ms 2000}) => nil?
         (provided
           (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
           (mongo/select :organizations anything anything) => [{:id "bar" :krysp {:foo {:url "http://test"}}}]
@@ -109,7 +109,7 @@
 
       (fact "batchrun check-for-verdicts logs failure details"
         ;; make sure logging functions are called in expected ways
-        (fetch-verdicts) => anything
+        (fetch-verdicts {:jms? true :wait-ms 2000}) => anything
         (provided
           (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
           (mongo/select :organizations anything anything) => [{:id "bar" :krysp {:foo {:url "http://test"}}}]
