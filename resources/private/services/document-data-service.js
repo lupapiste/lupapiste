@@ -83,7 +83,7 @@ LUPAPISTE.DocumentDataService = function(params) {
 
   self.getUpdateCommand = function(documentId) {
     var doc = self.findDocumentById(documentId);
-    if (doc.schema.info["post-verdict-editable"] && self.authorization.ok("update-post-verdict-doc")) {
+    if (doc && doc.schema.info["post-verdict-editable"] && self.authorization.ok("update-post-verdict-doc")) {
       return "update-post-verdict-doc";
     }
     return doc && doc.updateCommand || "update-doc";
