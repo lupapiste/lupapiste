@@ -16,7 +16,7 @@
 (defn fetch-verdict
   [batchrun-name batchrun-user {:keys [id permitType organization] :as app}]
   (logging/with-logging-context {:applicationId id, :userId (:id batchrun-user)}
-    (info "Checking verdict for" id)
+    (infof "Checking verdict for %s in db %s" id mongo/*db-name*)
     (try
       (let [command (assoc (application->command app) :user batchrun-user :created (now) :action "fetch-verdicts")
             result (verdict/do-check-for-verdict command)]
