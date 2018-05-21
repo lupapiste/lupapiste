@@ -23,7 +23,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.approvalModel = params.approvalModel;
   self.auth = self.docModel.authorizationModel;
   self.isOpen = ko.observable();
-  self.isOpen.subscribe( params.openCallback );
+  var isOpenSubs = self.isOpen.subscribe( params.openCallback );
   self.isOpen( !params.docModelOptions
             || !params.docModelOptions.accordionCollapsed);
   self.disabledStatus = ko.observable(!!self.docModel.docDisabled);
@@ -226,6 +226,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.dispose = function() {
     AccordionState.deregister(self.docModel.docId);
     stickyRefresh.dispose();
+    isOpenSubs.dispose();
     hub.unsubscribe(toggleEditorSubscription);
     baseDispose();
   };
