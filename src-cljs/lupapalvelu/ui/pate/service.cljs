@@ -194,12 +194,6 @@
                   :id app-id
                   :verdict-id verdict-id))
 
-(defn replace-verdict [app-id old-verdict-id verdict-id]
-  (common/command {:command "replace-pate-verdict"}
-                  :id app-id
-                  :old-verdict-id old-verdict-id
-                  :verdict-id verdict-id))
-
 ;; Attachments
 
 (defn delete-file [file-id]

@@ -191,19 +191,6 @@
    :pre-checks      [pate-enabled]}
   [_])
 
-(defcommand replace-pate-verdict
-  {:description       "Replace existing verdict with new one"
-   :feature           :pate
-   :parameters        [id old-verdict-id verdict-id]
-   :user-roles        #{:authority}
-   :input-validators  [(partial action/non-blank-parameters [:id :old-verdict-id :verdict-id])]
-   :pre-checks        [pate-enabled]
-   :states            states/post-verdict-states}
-  [{application :application user :user :as command}]
-  (verdict/replace-verdict user command old-verdict-id verdict-id))
-
-
-
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))
 

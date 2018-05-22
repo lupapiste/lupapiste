@@ -94,7 +94,6 @@
 
 (defschema ReplacementPateVerdict
   {(sc/optional-key :user)          sc/Str
-   (sc/optional-key :ts)            ssc/Timestamp
    (sc/optional-key :replaced-by)   ssc/ObjectIdStr
    (sc/optional-key :replaces)      ssc/ObjectIdStr})
 

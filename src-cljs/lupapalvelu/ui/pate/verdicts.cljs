@@ -29,14 +29,6 @@
                     @state/application-id
                     (get arg :verdict-id arg)))
 
-(defn replace [arg]
-  (service/replace-verdict @state/application-id
-                           @state/replacement-verdict
-                           (get arg :verdict-id arg))
-  (common/open-page :pate-verdict
-                    @state/application-id
-                    (get arg :verdict-id arg)))
-
 (rum/defcs new-verdict < rum/reactive
   (rum/local nil ::template)
   [{template* ::template}]
@@ -96,7 +88,7 @@
     (filter #(nil? (:published %)) verdicts)
     (sort-by :verdict-date > (filter #(not (nil? (:published %))) verdicts))))
 
-(defn- verdict-table [headers verdicts app-id show-actions]
+(defn- verdict-table [headers verdicts app-id hide-actions]
   [:table.pate-verdicts-table
    [:thead [:tr (map (fn [header] [:th (common/loc header)]) headers)]]
    [:tbody (map (fn [{:keys [id title published modified verdict-date handler] :as verdict}]
@@ -108,7 +100,7 @@
                    [:td (if published
                           (common/loc :pate.published-date (js/util.finnishDate published))
                           (common/loc :pate.last-saved (js/util.finnishDateAndTime modified)))]
-                   (if show-actions
+                   (if hide-actions
                      [:td]
                      [:td (if (and (can-edit-verdict? verdict) (not published))
                             [:a
@@ -116,8 +108,7 @@
                              (common/loc :pate.verdict-table.remove-verdict)]
                             [:a
                              {:on-click #(confirm-and-replace-verdict verdict id)}
-                             (common/loc :pate.verdict-table.replace-verdict)])])
-                         ])
+                             (common/loc :pate.verdict-table.replace-verdict)])])])
                 verdicts)]])
 
 (defn- verdict-title [{:keys [category published verdict-section verdict-type verdict-code] :as verdict}]

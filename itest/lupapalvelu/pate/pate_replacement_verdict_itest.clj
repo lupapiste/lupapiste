@@ -40,10 +40,25 @@
                                                             :id app-id
                                                             :template-id template-id
                                                             :replacement-id verdict-id)]
-          (fact "Replace verdict"
-            (command sonja :replace-pate-verdict
+
+          (fact "Fill replacement verdict"
+            (command sonja :edit-pate-verdict :id app-id :verdict-id replacement-verdict-id
+                     :path [:automatic-verdict-dates] :value true) => no-errors?
+            (command sonja :edit-pate-verdict :id app-id :verdict-id replacement-verdict-id
+                     :path [:verdict-date] :value (core/now)) => no-errors?
+            (command sonja :edit-pate-verdict :id app-id :verdict-id replacement-verdict-id
+                     :path [:verdict-code] :value "hyvaksytty") => no-errors?)
+
+          (fact "Only replacement verdict have replacement information before publishing"
+            (let [application (query-application sonja app-id)
+                  old-verdict (first (filter #(= verdict-id (:id %)) (:pate-verdicts application)))
+                  new-verdict (first (filter #(= replacement-verdict-id (:id %)) (:pate-verdicts application)))]
+              (:replacement old-verdict) => nil?
+              (get-in new-verdict [:replacement :replaces]) => verdict-id))
+
+          (fact "Publish replacement verdict"
+            (command sonja :publish-pate-verdict
                      :id app-id
-                     :old-verdict-id verdict-id
                      :verdict-id replacement-verdict-id) => ok?)
 
           (fact "Verdicts have replacement information"
@@ -51,10 +66,4 @@
                   old-verdict (first (filter #(= verdict-id (:id %)) (:pate-verdicts application)))
                   new-verdict (first (filter #(= replacement-verdict-id (:id %)) (:pate-verdicts application)))]
               (get-in old-verdict [:replacement :replaced-by]) => replacement-verdict-id
-              (get-in new-verdict [:replacement :replaces]) => verdict-id))
-
-          (fact "Applicant cant replace verdict"
-            (command pena :replace-pate-verdict
-                     :id app-id
-                     :old-verdict-id verdict-id
-                     :verdict-id replacement-verdict-id) => (partial expected-failure? :error.unauthorized)))))))
+              (get-in new-verdict [:replacement :replaces]) => verdict-id)))))))
