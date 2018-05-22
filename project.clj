@@ -1,7 +1,3 @@
-(require 'cemerick.pomegranate.aether)
-(cemerick.pomegranate.aether/register-wagon-factory!
-  "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
-
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
   :dependencies [[org.clojure/clojure "1.9.0"]
