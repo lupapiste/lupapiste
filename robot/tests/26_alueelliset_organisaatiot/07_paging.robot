@@ -50,6 +50,6 @@ Teppo selects larger paging limits
 
 Teppo briefly visits another tab and the limits remain unchanged
   Click by test id  limit-10
-  Click by test id  search-tab-construction
+  Scroll and click test id  search-tab-construction
   Click by test id  search-tab-all
   Wait until  Element should be visible  //button[@data-test-id="limit-10" and contains(@class, "active")]
