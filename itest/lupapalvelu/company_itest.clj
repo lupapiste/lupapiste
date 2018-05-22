@@ -60,7 +60,14 @@
               (check-invitation-details kaino "solita" (email-for-key teppo) :role "user" :submit false :firstName "Teppo" :lastName "Nieminen"))
 
         (fact "Invitation is accepted"
-              (accept-invitation (email-for-key teppo)))
+              (let [email-address (email-for-key teppo)
+                    invitation (last-email)]
+                (http-token-call (token-from-email email-address invitation))
+
+                (fact "Invitation can only be accepted once"
+                      (let [response (http-token-call (token-from-email email-address invitation) {:ok true})]
+                        (:status response) => 404
+                        (-> response :body json/parse-string) => {"ok" false, "text" "error.token-used"}))))
 
         (fact "User is seen in company query"
               (let [company (query kaino :company :company "solita" :users true)]
