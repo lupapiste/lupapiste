@@ -3,9 +3,12 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="fill-info-template">
-        <button data-bind="ltext: 'fillInfoButton', click: fillUserInfo, visible: authorization.ok('set-current-user-to-document')"
+        <button data-bind="click: fillUserInfo, visible: authorization.ok('set-current-user-to-document')"
                 class="positive margins-s"
-                data-test-id="fill-info-button"></button>
+                data-test-id="fill-info-button">
+          <i class="lupicon-user-pen"></i>
+          <span data-bind="ltext: 'fillInfoButton'"></span>
+        </button>
     </script>
   </section>
 </body>
