@@ -13,12 +13,12 @@
   user-keys)
 
 (mongocheck :users
-            (fn [{pid :personId source :personIdSource state :state :as user}]
+            (fn [{pid :personId source :personIdSource :as user}]
               (cond
                 (and pid (sc/check usr/PersonIdSource source))
                 (format "User %s has invalid person id source" (:username user))
 
-                (and (= "erased" state) pid)
+                (and (usr/erased? user) pid)
                 (format "User %s is erased, but has personId" (:username user))
 
                 (and (usr/applicant? user)
