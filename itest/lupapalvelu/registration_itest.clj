@@ -20,14 +20,6 @@
 (apply-remote-minimal)
 
 ;
-; VETUMA specifics
-;
-
-
-(defn- vetuma-finish [request-opts trid]
-  (vetuma-fake-respose request-opts (default-vetuma-response-data trid)))
-
-;
 ; Other helpers
 ;
 
@@ -50,22 +42,6 @@
   (fact "degree" (:degree new-user) => (:degree new-user-details))
   (fact "notification" (:notification new-user) => {:messageI18nkey "user.notification.firstLogin.message"
                                                     :titleI18nkey "user.notification.firstLogin.title"}))
-
-(defn- new-user-details [stamp]
-  {:stamp stamp
-   :phone "0500"
-   :city "Tammerfors"
-   :zip "12345"
-   :street "Osootes"
-   :password "salasana"
-   :email "jukka@example.com"
-   :rakentajafi false
-   :allowDirectMarketing true
-   :architect true
-   :graduatingYear "1978"
-   :fise "foobar"
-   :fiseKelpoisuus "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"
-   :degree "diplomi-insin\u00f6\u00f6ri"})
 
 ;
 ; *** FACTS ***
@@ -91,7 +67,7 @@
                   person-id (:userid vetuma-data) => string?
                   cmd-opts {:cookies {"anti-csrf-token" {:value "123"}}
                             :headers {"x-anti-forgery-token" "123"}}
-                  details (new-user-details stamp)
+                  details (stamped-new-user-details stamp)
                   resp (register cmd-opts details)
                   user-id (:id resp) => string?
                   email (last-email)
@@ -206,7 +182,7 @@
             person-id (:userid vetuma-data) => string?
             cmd-opts {:cookies {"anti-csrf-token" {:value "123"}}
                       :headers {"x-anti-forgery-token" "123"}}
-            details (assoc (new-user-details stamp) :email "jukka2@example.com")
+            details (assoc (stamped-new-user-details stamp) :email "jukka2@example.com")
             resp (register cmd-opts details)
             user-id (:id resp) => string?
             email (last-email)

@@ -62,6 +62,8 @@
     hub.subscribe({eventType: "dialog-close", id: PW_CHANGED_DIALOG_ID}, pageutil.openFrontpage);
 
     hub.onPageLoad("new-company-user", function(e) {
+      var handleFail = function () { self.loading(false).notFound(true); };
+
       self.reset().token(e.pagePath[0]);
       ajax
         .get("/api/token/" + self.token())
@@ -69,20 +71,26 @@
           var token = data.token.data,
               company = token.company,
               user = token.user;
-          self
-            .companyName(company.name)
-            .companyY(company.y)
-            .firstName(user.firstName)
-            .lastName(user.lastName)
-            .email(user.email)
-            .loading(false)
-            .loaded(true);
+
+          ajax
+            .query("email-in-use", {email: user.email})
+            .success(function () {
+              pageutil.openPage("invite-company-user", "ok/" + self.token()); // LPK-3759
+            })
+            .error(function () {
+              self
+                .companyName(company.name)
+                .companyY(company.y)
+                .firstName(user.firstName)
+                .lastName(user.lastName)
+                .email(user.email)
+                .loading(false)
+                .loaded(true);
+            })
+            .fail(handleFail)
+            .call()
         })
-        .fail(function() {
-          self
-            .loading(false)
-            .notFound(true);
-        })
+        .fail(handleFail)
         .call();
     });
 

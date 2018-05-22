@@ -628,10 +628,16 @@
   ([email email-data]
    {:pre [(ss/not-blank? email)]}
    (fact {:midje/description (str "Read email for " email)}
-     (s/index-of (:to email-data) email) => pos?)
+     (s/index-of (:to email-data) email) => (complement neg?))
    (last (re-find #"http.+/app/fi/welcome#!/.+/([A-Za-z0-9-]+)"
                   (:plain (:body email-data))))))
 
+(defn activation-email->token [email-address email]
+  {:pre [(ss/not-blank? email-address)]}
+  (fact {:midje/description (str "Read email for " email-address)}
+    (s/index-of (:to email) email-address) => (complement neg?))
+  (last (re-find #"http.+/app/security/activate/([A-Za-z0-9-]+)"
+                 (:plain (:body email)))))
 
 (defn login
   ([u p]
