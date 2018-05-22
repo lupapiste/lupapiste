@@ -3,6 +3,7 @@
             [midje.util :refer [testable-privates]]
             [clojure.string :refer [join]]
             [sade.core :refer [unauthorized]]
+            [sade.env :as env]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -328,7 +329,7 @@
         reason-text "Cancellation notice."]
     (fact "integration messages"
       (count generated-messages) => 1
-      (first generated-messages) => (contains {:status "published"
+      (first generated-messages) => (contains {:status (if (env/feature? :jms) "queued" "published")
                                                :partner "matti"
                                                :data (contains {:fromState (contains {:name "draft"})
                                                                 :toState   (contains {:name "submitted"})})}))
