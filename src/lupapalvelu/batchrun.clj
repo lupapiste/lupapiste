@@ -324,7 +324,8 @@
   (let [start-ts (double (now))]
     (logging/log-event :info {:run-by batchrun-name
                               :event  (format "Starting verdict fetching with %s applications" (count applications))})
-    (doall (map #(fetch-verdict batchrun-name batchrun-user % options) applications))
+    (doseq [application applications]
+      (fetch-verdict batchrun-name batchrun-user application options))
     (logging/log-event :info {:run-by batchrun-name
                               :event  "Finished verdict checking"
                               :took   (format "%.2f minutes" (/ (- (now) start-ts) 1000 60))})))
