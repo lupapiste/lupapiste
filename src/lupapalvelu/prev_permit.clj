@@ -61,6 +61,7 @@
       :email (get-in applicant [:henkilo :sahkopostiosoite])
       :koulutusvalinta (get-in applicant [:koulutus])
       :valmistumisvuosi (get-in applicant [:valmistumisvuosi])
+      :kuntaRoolikoodi (get-in applicant [:suunnittelijaRoolikoodi])
       (tools/default-values element))
     (let [postiosoite (or
                         (get-in applicant [:yritys :postiosoite])
@@ -117,7 +118,7 @@
                                            :data        (tools/create-document-data schema
                                                                                     (partial applicant-field-values party))})
         ; document        (assoc-in document [:data :patevyys :koulutusvalinta] (get-in document [:data :patevyys :koulutus]))
-        ; _ (spit (str "PARTY" (rand-int 100) ".edn") party)
+        _ (spit (str "PARTY" (rand-int 100) ".edn") party)
         ; _ (spit (str "SCHEMA" (rand-int 100) ".edn") schema)
         ; _ (spit (str "DATA" (rand-int 100) ".edn") (tools/create-document-data schema (partial applicant-field-values party)))
         _ (spit (str "DOCUMENT" (rand-int 100) ".edn") document)
