@@ -5,6 +5,7 @@ var authorization = (function() {
     var self = this;
 
     self.data = ko.observable(_.isObject(data) ? data : {});
+    self.isInitialized = ko.observable( false );
 
     self.ok = function(command) {
       var authz = self.data()[command];
@@ -19,10 +20,12 @@ var authorization = (function() {
       return ajax.query("allowed-actions", queryParams)
         .success(function(d) {
           self.data(d.actions);
+          self.isInitialized( true );
           if (callback) { callback(); }
         })
         .error(function(e) {
           self.clear();
+          self.isInitialized( false );
           error(e);
         })
         .call();
@@ -53,7 +56,8 @@ var authorization = (function() {
       refresh: self.refresh,
       setData: self.setData,
       getData: self.getData,
-      clone: self.clone
+      clone: self.clone,
+      isInitialized: self.isInitialized
     };
   }
 
