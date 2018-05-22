@@ -88,7 +88,7 @@
                 .loaded(true);
             })
             .fail(handleFail)
-            .call()
+            .call();
         })
         .fail(handleFail)
         .call();
