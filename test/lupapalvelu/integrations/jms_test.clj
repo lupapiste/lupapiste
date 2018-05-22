@@ -8,7 +8,7 @@
 
 (def test-atom (atom nil))
 
-(if-not (and (env/feature? :embedded-artemis) (env/feature? :jms))
+(if-not (env/feature? :jms)
   (warnf "JMS not enabled for unit testing")
   (facts "JMS"
     (fact "Embedded Artemis OK"

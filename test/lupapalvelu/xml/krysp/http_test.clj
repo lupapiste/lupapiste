@@ -71,7 +71,7 @@
     (create-url :review {:url "http://testi.fi" :path {:application "testi/" :review "katselmus"}}) => "http://testi.fi/katselmus"))
 
 
-(when (and (env/feature? :embedded-artemis) (env/feature? :jms))
+(when (env/feature? :jms)
   (def msgs (atom []))
   (def app-id "LP-123-1970-99999")
   (def test-queue-name (str kuntagml-queue "_test" (now)))

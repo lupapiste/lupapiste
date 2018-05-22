@@ -9,7 +9,7 @@
 
 (background (before :facts (reset! mongo-mock [])))
 
-(if-not (and (env/feature? :embedded-artemis) (env/feature? :jms))
+(if-not (env/feature? :jms)
   (warnf "JMS not enabled for unit testing")
 
   (facts "Archive API usage"
