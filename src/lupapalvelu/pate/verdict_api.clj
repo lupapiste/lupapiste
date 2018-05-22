@@ -1,4 +1,7 @@
 (ns lupapalvelu.pate.verdict-api
+  "Pate verdict API supports both 'modern' Pate verdicts with templates
+  and 'legacy' verdicts that are old-school verdicts presented with
+  Pate schemas."
   (:require [clj-time.coerce :as tc]
             [clj-time.core :as t]
             [clojure.set :as set]
@@ -36,9 +39,13 @@
   "Returns pre-checker that fails if the verdict does not exist.
   Additional conditions:
     :editable? fails if the verdict has been published.
-    :published? fails if the verdict has NOT been published"
+    :published? fails if the verdict has NOT been published
+    :legacy? fails if the verdict is a 'modern' Pate verdict
+    :modern? fails if the verdict is a legacy verdict"
   [& conditions]
-  (let [{:keys [editable? published?]} (zipmap conditions (repeat true))]
+  (let [{:keys [editable? published?
+                legacy? modern?]} (zipmap conditions
+                                          (repeat true))]
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
         (let [verdict (util/find-by-id verdict-id
@@ -48,7 +55,11 @@
           (when (and editable? (:published verdict))
             (fail! :error.verdict.not-draft))
           (when (and published? (not (:published verdict)))
-            (fail! :error.verdict.not-published)))))))
+            (fail! :error.verdict.not-published))
+          (when (and legacy? (not (:legacy? verdict)))
+            (fail! :error.verdict.not-legacy))
+          (when (and modern? (:legacy? verdict))
+            (fail! :error.verdict.legacy)))))))
 
 (defn- verdict-filled
   "Precheck that fails if any of the required fields is empty."
@@ -56,6 +67,10 @@
   (when (:verdict-id data)
     (when-not (verdict/verdict-filled? command)
       (fail :pate.required-fields))))
+
+;; ------------------------------------------
+;; Actions common with modern and legacy
+;; ------------------------------------------
 
 (defquery application-verdict-templates
   {:description      "List of id, name, default? maps for suitable
@@ -69,32 +84,6 @@
   [{:keys [application organization]}]
   (ok :templates (template/application-verdict-templates @organization
                                                          application)))
-
-(defcommand new-pate-verdict-draft
-  {:description      "Composes new verdict draft from the latest published
-  template and its settings. Returns the verdict-id."
-   :feature             :pate
-   :user-roles          #{:authority}
-   :parameters          [id template-id]
-   :optional-parameters [replacement-id]
-   :input-validators    [(partial action/non-blank-parameters [:id])]
-   :pre-checks          [pate-enabled
-                          (template/verdict-template-check :application :published)]
-   :states              states/post-submitted-states}
-  [command]
-  (ok :verdict-id (verdict/new-verdict-draft template-id command replacement-id)))
-
-(defcommand new-legacy-verdict-draft
-  {:description "Composes new legacy verdict draft. Returns the
-  verdict-id."
-   :feature          :pate
-   :user-roles       #{:authority}
-   :parameters       [id]
-   :input-validators [(partial action/non-blank-parameters [:id])]
-   :pre-checks       [(action/not-pre-check pate-enabled)]
-   :states           states/post-submitted-states}
-  [command]
-  (ok :verdict-id (verdict/new-legacy-verdict-draft command)))
 
 (defquery pate-verdicts
   {:description      "List of verdicts. Item properties:
@@ -122,26 +111,11 @@
    :org-authz-roles  roles/reader-org-authz-roles
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [#_pate-enabled
-                      (verdict-exists)]
+   :pre-checks       [(verdict-exists)]
    :states           states/post-submitted-states}
   [command]
   (ok (assoc (verdict/open-verdict command)
              :filled (verdict/verdict-filled? command))))
-
-(defcommand delete-pate-verdict
-  {:description      "Deletes verdict. Published verdicts cannot be
-  deleted."
-   :feature          :pate
-   :user-roles       #{:authority}
-   :parameters       [id verdict-id]
-   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [#_pate-enabled
-                      (verdict-exists :editable?)]
-   :states           states/post-submitted-states}
-  [command]
-  (verdict/delete-verdict verdict-id command)
-  (ok))
 
 (defcommand edit-pate-verdict
   {:description      "Updates verdict data. Returns changes and errors
@@ -151,8 +125,7 @@
    :parameters       [id verdict-id path value]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])
                       (partial action/vector-parameters [:path])]
-   :pre-checks       [#_pate-enabled
-                      (verdict-exists :editable?)]
+   :pre-checks       [(verdict-exists :editable?)]
    :states           states/post-submitted-states}
   [command]
   (let [result (verdict/edit-verdict command)]
@@ -160,38 +133,6 @@
       (ok (assoc result
                  :filled (verdict/verdict-filled? command true)))
       (template/error-response result))))
-
-(defcommand publish-pate-verdict
-  {:description      "Publishes verdict."
-   :feature          :pate
-   :user-roles       #{:authority}
-   :parameters       [id verdict-id]
-   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [pate-enabled
-                      (verdict-exists :editable?)
-                      verdict-filled]
-   ;; As KuntaGML message is generated the application state must be
-   ;; at least :sent
-   :states            (set/difference states/post-sent-states #{:complementNeeded})
-   :notified         true
-   :on-success       (notify :application-state-change)}
-  [command]
-  (ok (verdict/publish-verdict command)))
-
-(defcommand publish-legacy-verdict
-  {:description      "Publishes legacy verdict."
-   :feature          :pate
-   :user-roles       #{:authority}
-   :parameters       [id verdict-id]
-   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(action/not-pre-check pate-enabled)
-                      (verdict-exists :editable?)
-                      verdict-filled]
-   :states            states/give-verdict-states
-   :notified         true
-   :on-success       (notify :application-state-change)}
-  [command]
-  (ok (verdict/publish-verdict command)))
 
 (defraw preview-pate-verdict
   {:description      "Generate preview version of the verdict PDF."
@@ -214,6 +155,102 @@
    :org-authz-roles roles/reader-org-authz-roles
    :states          states/post-submitted-states}
   [_])
+
+;; ------------------------------------------
+;; Modern actions
+;; ------------------------------------------
+
+(defcommand new-pate-verdict-draft
+  {:description         "Composes new verdict draft from the latest published
+  template and its settings. Returns the verdict-id."
+   :feature             :pate
+   :user-roles          #{:authority}
+   :parameters          [id template-id]
+   :optional-parameters [replacement-id]
+   :input-validators    [(partial action/non-blank-parameters [:id])]
+   :pre-checks          [pate-enabled
+                         (template/verdict-template-check :application :published)]
+   :states              states/post-submitted-states}
+  [command]
+  (ok :verdict-id (verdict/new-verdict-draft template-id command replacement-id)))
+
+(defcommand delete-pate-verdict
+  {:description      "Deletes verdict. Published verdicts cannot be
+  deleted."
+   :feature          :pate
+   :user-roles       #{:authority}
+   :parameters       [id verdict-id]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :pre-checks       [pate-enabled
+                      (verdict-exists :editable? :modern?)]
+   :states           states/post-submitted-states}
+  [command]
+  (verdict/delete-verdict verdict-id command)
+  (ok))
+
+(defcommand publish-pate-verdict
+  {:description      "Publishes verdict."
+   :feature          :pate
+   :user-roles       #{:authority}
+   :parameters       [id verdict-id]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :pre-checks       [pate-enabled
+                      (verdict-exists :editable? :modern?)
+                      verdict-filled]
+   ;; As KuntaGML message is generated the application state must be
+   ;; at least :sent
+   :states            (set/difference states/post-sent-states #{:complementNeeded})
+   :notified         true
+   :on-success       (notify :application-state-change)}
+  [command]
+  (ok (verdict/publish-verdict command)))
+
+;; ------------------------------------------
+;; Legacy actions
+;; ------------------------------------------
+
+(defcommand new-legacy-verdict-draft
+  {:description "Composes new legacy verdict draft. Returns the
+  verdict-id."
+   :feature          :pate
+   :user-roles       #{:authority}
+   :parameters       [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :pre-checks       [(action/not-pre-check pate-enabled)]
+   :states           states/post-submitted-states}
+  [command]
+  (ok :verdict-id (verdict/new-legacy-verdict-draft command)))
+
+(defcommand delete-legacy-verdict
+  {:description      "Deletes legacy verdict, its tasks and
+  attachments. Rewinds application state if needed."
+   :feature          :pate
+   :user-roles       #{:authority}
+   :parameters       [id verdict-id]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :pre-checks       [(verdict-exists :legacy?)]
+   :states           states/give-verdict-states
+   :notified         true}
+  [command]
+  (ok (verdict/delete-legacy-verdict command)))
+
+(defcommand publish-legacy-verdict
+  {:description      "Publishes legacy verdict."
+   :feature          :pate
+   :user-roles       #{:authority}
+   :parameters       [id verdict-id]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :pre-checks       [(verdict-exists :editable? :legacy?)
+                      verdict-filled]
+   :states            states/give-verdict-states
+   :notified         true
+   :on-success       (notify :application-state-change)}
+  [command]
+  (ok (verdict/publish-verdict command)))
+
+;; ------------------------------------------
+;; Bulletin related actions
+;; ------------------------------------------
 
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))

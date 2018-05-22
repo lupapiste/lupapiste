@@ -967,7 +967,17 @@
                                                       :show? :_meta.editing?}]}
                                             ]}}]]}}})
 
-(def versub-attachments  ;; Attachments and upload
+
+(def versub-attachments
+  {:dictionary
+   {:attachments {:application-attachments {:i18nkey :application.verdict-attachments}}}
+   :section {:id               :attachments
+             :template-section :attachments
+             :grid             {:columns 7
+                                :rows    [[{:col  6
+                                            :dict :attachments}]]}}})
+
+(def versub-upload
   {:dictionary
    {:upload
     {:attachments {:i18nkey    :application.verdict-attachments
@@ -975,21 +985,14 @@
                    :type-group #"paatoksenteko"
                    :default    :paatoksenteko.paatosote
                    :dropzone   "#pate-verdict-page"
-                   :multiple?  true}}
-    :attachments
-    {:application-attachments {:i18nkey :application.verdict-attachments}}}
-   :sections [{:id               :attachments
-               :template-section :attachments
-               :grid             {:columns 7
-                                  :rows    [[{:col  6
-                                              :dict :attachments}]]}}
-              {:id       :upload
-               :hide?    :_meta.published?
-               :css      :pate-section--no-border
-               :buttons? false
-               :grid     {:columns 7
-                          :rows    [[{:col  6
-                                      :dict :upload}]]}}]})
+                   :multiple?  true}}}
+   :section {:id       :upload
+             :hide?    :_meta.published?
+             :css      :pate-section--no-border
+             :buttons? false
+             :grid     {:columns 7
+                        :rows    [[{:col  6
+                                    :dict :upload}]]}}})
 
 (def r-verdict-schema-1 (build-verdict-schema :r 1
                                               (versub-dates :r)
@@ -1005,7 +1008,8 @@
                                               versub-extra-info
                                               versub-deviations
                                               versub-buildings
-                                              versub-attachments))
+                                              versub-attachments
+                                              versub-upload))
 
 (def versub-start-info ;; Lahtokohtatiedot
   (phrase-versub :start-info :pate-start-info :yleinen
@@ -1048,7 +1052,8 @@
                                               versub-next-steps
                                               versub-buyout
                                               versub-fyi
-                                              versub-attachments))
+                                              versub-attachments
+                                              versub-upload))
 
 (def versub-dates-ya
   (-> (versub-dates :ya)
@@ -1094,7 +1099,8 @@
                                                versub-appeal
                                                versub-statements
                                                versub-inform-others
-                                               versub-attachments))
+                                               versub-attachments
+                                               versub-upload))
 
 (defn verdict-schema
   "Nil version returns the latest version."

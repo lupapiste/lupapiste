@@ -150,9 +150,10 @@
                                  [{:dict  :add-condition
                                    :show? :_meta.editing?}]]}}})
 
-(def legsub-attachments (-> shared/versub-attachments
-                            (util/dissoc-in [:sections 0 :template-section])
-                            (util/dissoc-in [:sections 1 :buttons?])))
+;; Only uploading new attachments. This is because the verdicts can be
+;; deleted and we want to avoid inadvertent nuking of attachments.
+(def legsub-attachments (-> shared/versub-upload
+                            (util/dissoc-in [:section :buttons?])))
 
 (defn build-legacy-schema [& subschemas]
   (sc/validate schemas/PateLegacyVerdict

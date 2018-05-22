@@ -6,6 +6,7 @@
             [lupapalvelu.application-meta-fields :as meta]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as att]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.transformations :as transformations]
@@ -13,6 +14,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.inspection-summary :as inspection-summary]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.legacy :as legacy]
@@ -22,9 +24,11 @@
             [lupapalvelu.pate.tasks :as pate-tasks]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.state-machine :as sm]
+            [lupapalvelu.states :as states]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.user :as usr]
+            [lupapalvelu.verdict :as old-verdict]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp]
             [monger.operators :refer :all]
             [ring.util.codec :as codec]
@@ -472,10 +476,57 @@
           :versions
           (util/find-by-id version-id))))
 
-(defn delete-verdict [verdict-id command]
+(defn- verdict-attachment-ids
+  "Ids of attachments, whose target is the given verdict."
+  [{:keys [attachments]} verdict-id]
+  (->> attachments
+       (filter (fn [{target :target}]
+                 (and (util/=as-kw (:type target) :verdict)
+                      (= (:id target) verdict-id))))
+       (map :id)))
+
+(defn delete-verdict [verdict-id {application :application :as command}]
   (action/update-application command
-                             {$pull {:pate-verdicts {:id verdict-id}
-                                     :attachments   {:target.id verdict-id}}}))
+                             {$pull {:pate-verdicts {:id verdict-id}}})
+  (att/delete-attachments! application
+                           (verdict-attachment-ids application verdict-id)))
+
+(defn delete-legacy-verdict [{:keys [application user created] :as command}]
+  ;; Mostly copied from the old verdict_api.clj.
+  (let [{verdict-id :id
+         published  :published
+         :as        verdict}    (command->verdict command)
+        target                  {:type "verdict" :id verdict-id} ; key order seems to be significant!
+        {:keys [sent state
+                pate-verdicts]} application
+        ;; Deleting the only given verdict? Return sent or submitted state.
+        step-back?              (and published
+                                     (= 1 (count (filter :published pate-verdicts)))
+                                     (states/verdict-given-states (keyword state)))
+        task-ids                (old-verdict/deletable-verdict-task-ids application verdict-id)
+        updates                 (merge {$pull {:pate-verdicts {:id verdict-id}
+                                               :comments      {:target target}
+                                               :tasks         {:id {$in task-ids}}}}
+                                       (when step-back?
+                                         (app-state/state-transition-update (if (and sent
+                                                                                     (sm/valid-state? application
+                                                                                                      :sent))
+                                                                              :sent
+                                                                              :submitted)
+                                                                            created
+                                                                            application
+                                                                            user)))]
+      (action/update-application command updates)
+      ;;(bulletins/process-delete-verdict id verdict-id)
+      (att/delete-attachments! application
+                               (->> (old-verdict/task-ids->attachments application task-ids)
+                                    (map :id)
+                                    (concat (verdict-attachment-ids application verdict-id))
+                                    (remove nil?)))
+
+      ;;(appeal-common/delete-by-verdict command verdict-id)
+      (when step-back?
+        (notifications/notify! :application-state-change command))))
 
 (defn- listify
   "Transforms argument into list if it is not sequential. Nil results

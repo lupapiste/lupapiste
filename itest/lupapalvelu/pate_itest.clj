@@ -489,7 +489,7 @@
       => {:pientalo template-id})
 
     (facts "Application verdict templates"
-      (let [{app-id :id} (create-and-submit-application pena
+            (let [{app-id :id} (create-and-submit-application pena
                                                         :operation :pientalo
                                                         :propertyId sipoo-property-id)]
         (fact "Create and delete verdict template"
