@@ -3,6 +3,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.fixture.core :as fixture]
+            [lupapalvelu.itest-util :refer [apply-remote-minimal]]
             [sade.core :refer [now]]
             [midje.sweet :refer :all]))
 
@@ -85,3 +86,23 @@
                                  :password "salainen"} :in-any-order))))
       (fact "User is saved as rest api user"
         (:role (user/get-user-by-email (:email user))) => "rest-api"))))
+
+;;
+;; ==============================================================================
+;; Erase user information
+;; ==============================================================================
+;;
+
+(facts erase-user
+  (apply-remote-minimal)
+  (let [id "777777777777777777000020"; pena
+        obfuscated-username "poistunut_777777777777777777000020@example.com"]
+    (user/erase-user id) => nil
+    (user/get-user-by-id id) => {:id id
+                                 :firstName "Poistunut"
+                                 :lastName "Käyttäjä"
+                                 :role "applicant"
+                                 :email obfuscated-username
+                                 :username obfuscated-username
+                                 :enabled false
+                                 :state "erased"}))

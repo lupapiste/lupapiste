@@ -830,6 +830,34 @@
                      {:_id user-id
                       :role "dummy"}))
 
+
+;;
+;; ==============================================================================
+;; Erase user information
+;; ==============================================================================
+;;
+
+(defn- obfuscated-user [user-id]
+  (let [email (str "poistunut_" user-id "@example.com")]
+    {:firstName "Poistunut"
+     :lastName "Käyttäjä"
+     :email email
+     :username email
+     :enabled false
+     :state "erased"}))
+
+(defn- erasable-key? [k]
+  (and (sc/optional-key? k) (not= (:k k) :state)))
+
+(defn erase-user
+  "Erases/obfuscates user information but retains the user record in database. Returns nil."
+  [user-id]
+  (mongo/update-by-id :users user-id
+    {$set   (obfuscated-user user-id)
+     $unset (into {} (comp (filter (comp erasable-key? key))
+                           (map (fn [[k _]] [(:k k) ""])))
+                     User)}))
+
 ;;
 ;; ==============================================================================
 ;; Strong authentication
