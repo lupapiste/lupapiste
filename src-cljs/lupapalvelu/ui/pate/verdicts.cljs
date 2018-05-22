@@ -134,8 +134,7 @@
                       (reset! state/replacement-verdict nil)
                       (service/fetch-verdict-list app-id))}
         [:i.lupicon-chevron-left]
-        [:span (common/loc :back)]]]
-      [:h2 (common/loc :application.tabVerdict.replacement.title)]]
+        [:span (common/loc :back)]]]]
      [:h2 (common/loc :application.tabVerdict)])
    (if (empty? verdicts)
      (when-not (state/auth? :new-pate-verdict-draft)
