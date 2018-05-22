@@ -32,7 +32,7 @@
         (let [msgs (mongo/select :integration-messages {:application.id application-id})
               sent-message (util/find-first (fn [msg] (= (:messageType msg) "KuntaGML application")) msgs)]
           (facts "integration-messages"
-            (count msgs) => 4                               ; 3x state-change 1x KuntaGML
+            (count msgs) => 3                               ; 2x state-change 1x KuntaGML
             (fact "sent message is saved"
               (:messageType sent-message) => "KuntaGML application"
               (:direction sent-message) => "out"
