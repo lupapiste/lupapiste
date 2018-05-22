@@ -111,6 +111,8 @@ New user gets email
   Open last email
   Wait Until  Page Should Contain  user2@solita.fi
   Page Should Contain  /app/fi/welcome#!/new-company-user/
+  ${invite} =  Get Element Attribute  //a[contains(@href,'new-company-user')]  href
+  Set Suite Variable  ${ullaInvite}  ${invite}
   Click link  xpath=//a[contains(@href,'new-company-user')]
 
 Registration page opens
@@ -126,6 +128,11 @@ Password must be at least 8 characters
   Click enabled by test id  testCompanyUserSubmitPassword
   Wait Until  Page should contain  Salasana asetettu.
   Confirm notification dialog
+
+New user tries to use invitation again and gets directed to login
+  Go To  ${ullaInvite}
+  Wait until  Page should contain  Linkki on jo käytetty
+  Wait until  Element should be visible  login-button
 
 New user logs in
   Go to page  login
