@@ -59,6 +59,9 @@
       :postitoimipaikannimi (get-in applicant [:henkilo :osoite :postitoimipaikannimi])
       :puhelin (get-in applicant [:henkilo :puhelin])
       :email (get-in applicant [:henkilo :sahkopostiosoite])
+      :koulutusvalinta (get-in applicant [:koulutus])
+      :valmistumisvuosi (get-in applicant [:valmistumisvuosi])
+      :kuntaRoolikoodi (get-in applicant [:suunnittelijaRoolikoodi])
       (tools/default-values element))
     (let [postiosoite (or
                         (get-in applicant [:yritys :postiosoite])
