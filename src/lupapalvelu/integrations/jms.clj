@@ -11,7 +11,8 @@
            (org.apache.activemq.artemis.jms.client ActiveMQJMSConnectionFactory ActiveMQConnection)
            (org.apache.activemq.artemis.api.jms ActiveMQJMSClient)))
 
-(when (env/feature? :embedded-artemis)
+; If external broker is not defined, we start a embedded broker inside the JVM for testing.
+(when (and (env/feature? :embedded-artemis) (ss/blank? (env/value :jms :broker-url)))
   ; This works only with :dev profile
   (require 'artemis-server)
   ((ns-resolve 'artemis-server 'start)))
