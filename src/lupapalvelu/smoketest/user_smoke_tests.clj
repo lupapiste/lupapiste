@@ -18,7 +18,11 @@
                 (and pid (sc/check usr/PersonIdSource source))
                 (format "User %s has invalid person id source" (:username user))
 
+                (and (usr/erased? user) pid)
+                (format "User %s is erased, but has personId" (:username user))
+
                 (and (usr/applicant? user)
+                     (not (usr/erased? user))
                      (not (usr/company-user? user))
                      (not (usr/company-admin? user))
                      (not (usr/verified-person-id? user)))
