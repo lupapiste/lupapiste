@@ -116,16 +116,12 @@
                                            :schema-info (:info schema)
                                            :data        (tools/create-document-data schema
                                                                                     (partial applicant-field-values party))})
-<<<<<<< Updated upstream
-        _ (spit (str "DOCUMENT" (rand-int 10) ".edn") document)
-=======
         ; document        (assoc-in document [:data :patevyys :koulutusvalinta] (get-in document [:data :patevyys :koulutus]))
         ; _ (spit (str "PARTY" (rand-int 100) ".edn") party)
         ; _ (spit (str "SCHEMA" (rand-int 100) ".edn") schema)
         ; _ (spit (str "DATA" (rand-int 100) ".edn") (tools/create-document-data schema (partial applicant-field-values party)))
         _ (spit (str "DOCUMENT" (rand-int 100) ".edn") document)
         ; _ (println (tools/create-document-data schema (partial applicant-field-values party)))
->>>>>>> Stashed changes
         unset-type     (if (contains? party :henkilo) :yritys :henkilo)]
     (assoc-in document [:data unset-type] (unset-type default-values))))
 
