@@ -107,6 +107,7 @@
             updates)))
 
 (defn- party->party-doc [party schema-name]
+  "Argumenttina tuleva party -map sisältää koulutustiedot, eivät tule palautusarvoon"
   (let [schema         (schemas/get-schema 1 schema-name)
         default-values (tools/create-document-data schema tools/default-values)
         document       (sanitize-document {}
@@ -115,7 +116,16 @@
                                            :schema-info (:info schema)
                                            :data        (tools/create-document-data schema
                                                                                     (partial applicant-field-values party))})
+<<<<<<< Updated upstream
         _ (spit (str "DOCUMENT" (rand-int 10) ".edn") document)
+=======
+        ; document        (assoc-in document [:data :patevyys :koulutusvalinta] (get-in document [:data :patevyys :koulutus]))
+        ; _ (spit (str "PARTY" (rand-int 100) ".edn") party)
+        ; _ (spit (str "SCHEMA" (rand-int 100) ".edn") schema)
+        ; _ (spit (str "DATA" (rand-int 100) ".edn") (tools/create-document-data schema (partial applicant-field-values party)))
+        _ (spit (str "DOCUMENT" (rand-int 100) ".edn") document)
+        ; _ (println (tools/create-document-data schema (partial applicant-field-values party)))
+>>>>>>> Stashed changes
         unset-type     (if (contains? party :henkilo) :yritys :henkilo)]
     (assoc-in document [:data unset-type] (unset-type default-values))))
 
@@ -304,10 +314,13 @@
       location-info)))
 
 (defn fetch-prev-application! [{{:keys [organizationId kuntalupatunnus authorizeApplicants]} :data :as command}]
-  (let [operation             "aiemmalla-luvalla-hakeminen"
+  (let [organizationId        "092-R"
+        operation             "aiemmalla-luvalla-hakeminen"
         permit-type           (operations/permit-type-of-operation operation)
         dummy-application     {:id "" :permitType permit-type :organization organizationId}
-        xml                   (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
+        ; xml                   (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
+        tiedostonimi          (str kuntalupatunnus ".xml")
+        xml                   (krysp-fetch/get-local-application-xml-by-filename tiedostonimi permit-type)
         app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
         location-info         (get-location-info command app-info)
         organization          (when (:propertyId location-info)

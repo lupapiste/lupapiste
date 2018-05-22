@@ -576,7 +576,7 @@
         scope             (org/resolve-organization-scope municipality permit-type organization)
         organization-id   (:id organization)
         info-request?     (boolean infoRequest)
-        open-inforequest? (and info-request? (:open-inforequest scope))]
+        open-inforequest? true]
 
     (when (ss/blank? organization-id)
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))

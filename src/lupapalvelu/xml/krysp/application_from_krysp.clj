@@ -51,6 +51,9 @@
   (when backend-id
     (fetch-application-xmls organization permitType [backend-id] :kuntalupatunnus raw?)))
 
+(defn get-local-application-xml-by-filename [filename permit-type]
+  (->> (str "./data/" filename) slurp sxml/parse scr/strip-xml-namespaces (not-empty-content permit-type)))
+
 (defmulti get-application-xmls
   "Get application xmls from krysp"
   {:arglists '([organization permit-type search-type ids])}
