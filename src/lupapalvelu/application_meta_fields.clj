@@ -67,12 +67,10 @@
 (defn designers-index-update [application]
   {$set (designers-index application)})
 
-(defn get-applicant-phone [_ app]
-  (let [applicant-auth (first (auth/get-auths-by-role app :writer))]
-    (->> (if (= :company (keyword (:type applicant-auth)))
-           (usr/get-user {:company.id (:id applicant-auth) :company.role "admin"})
-           (usr/get-user-by-id (:id applicant-auth)))
-         :phone)))
+(defn get-inforequest-phone [_ app]
+  (when (:infoRequest app)
+    (when-let [info-requester-id (get-in app [:creator :id])]
+      (:phone (usr/get-user-by-id info-requester-id)))))
 
 (defn get-applicant-companies [_ app]
   (let [companies (auth/get-company-auths app)]
@@ -204,7 +202,7 @@
 
 (def meta-fields (conj indicator-meta-fields
                    {:field :inPostVerdictState :fn in-post-verdict-state?}
-                   {:field :applicantPhone :fn get-applicant-phone}
+                   {:field :applicantPhone :fn get-inforequest-phone}
                    {:field :applicantCompanies :fn get-applicant-companies}
                    {:field :organizationMeta :fn organization-meta}
                    {:field :stateSeq :fn #(sm/application-state-seq %2)}
