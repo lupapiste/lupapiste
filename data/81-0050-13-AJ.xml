@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rakval:Rakennusvalvonta
+  xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.6/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.2.0/rakennusvalvonta.xsd http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+  xmlns:kiito="http://www.paikkatietopalvelu.fi/gml/kiinteistotoimitus"
+  xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+  xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:mkos="http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet"
+  xmlns:wfs="http://www.opengis.net/wfs"
+  xmlns:ymy="http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ppst="http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"
+  xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+  xmlns:ymm="http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat"
+  xmlns:ows="http://www.opengis.net/ows"
+  xmlns:gml="http://www.opengis.net/gml"
+  xmlns:ymv="http://www.paikkatietopalvelu.fi/gml/ymparisto/vesihuoltolaki"
+  xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ymi="http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset">
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi>CGI KRYSP</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Vantaa</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2018-05-14</yht:toimitusPvm>
+    <yht:kuntakoodi>092</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia gml:id="rluvat.97601">
+      <gml:location>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.5503698E7 6693884.0</gml:pos>
+        </gml:Point>
+      </gml:location>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-01-17Z</yht:pvm>
+          <yht:tila>vireillä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-01-17Z</yht:pvm>
+          <yht:tila>uusi lupa, ei käsittelyssä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-01-21Z</yht:pvm>
+          <yht:tila>lupa hyväksytty</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Lupaosasto</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>81-0050-13-AJ</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200013-0050</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-01-17Z</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>16-0034-AJ 81</yht:kuntalupatunnus>
+          <yht:muuTunnustieto>
+            <yht:MuuTunnus>
+              <yht:tunnus>LP-092-2016-00119</yht:tunnus>
+              <yht:sovellus>Lupapiste</yht:sovellus>
+            </yht:MuuTunnus>
+          </yht:muuTunnustieto>
+          <yht:VRKLupatunnus>09200016-0034</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-01-17Z</yht:saapumisPvm>
+          <yht:viittaus>seuraava rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>09-1710-AJ 81</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200009-1710</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-01-17Z</yht:saapumisPvm>
+          <yht:viittaus>edellinen rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>04-2043-A 81</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200004-2043</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-01-17Z</yht:saapumisPvm>
+          <yht:viittaus>edellinen rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:osapuolettieto>
+        <yht:Osapuolet>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+              <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Merja Johanna</yht:etunimi>
+                  <yht:sukunimi>Visuri</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Joutsenpolku 1b</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>01450</yht:postinumero>
+                  <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:henkilotunnus>290174-128R</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian laskun maksaja</yht:kuntaRooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Timo Antero</yht:etunimi>
+                  <yht:sukunimi>Visuri</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Joutsenpolku 1b</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>01450</yht:postinumero>
+                  <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>timo.visuri@nic.fi</yht:sahkopostiosoite>
+                <yht:puhelin>040-7574544</yht:puhelin>
+                <yht:henkilotunnus>090175-0353</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+              <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Timo Antero</yht:etunimi>
+                  <yht:sukunimi>Visuri</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Joutsenpolku 1b</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>01450</yht:postinumero>
+                  <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>timo.visuri@nic.fi</yht:sahkopostiosoite>
+                <yht:puhelin>040-7574544</yht:puhelin>
+                <yht:henkilotunnus>090175-0353</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+        </yht:Osapuolet>
+      </rakval:osapuolettieto>
+      <rakval:rakennuspaikkatieto>
+        <rakval:Rakennuspaikka gml:id="rpaikka.18188">
+          <yht:yksilointitieto>5069010</yht:yksilointitieto>
+          <yht:alkuHetki>2013-01-17T00:00:00Z</yht:alkuHetki>
+          <yht:rakennuspaikanKiinteistotieto>
+            <yht:RakennuspaikanKiinteisto>
+              <yht:kiinteistotieto>
+                <yht:Kiinteisto>
+                  <yht:kylanimi>Korso</yht:kylanimi>
+                  <yht:kiinteistotunnus>09208103460007</yht:kiinteistotunnus>
+                </yht:Kiinteisto>
+              </yht:kiinteistotieto>
+              <yht:kokotilaKytkin>false</yht:kokotilaKytkin>
+            </yht:RakennuspaikanKiinteisto>
+          </yht:rakennuspaikanKiinteistotieto>
+          <yht:sijaintitieto>
+            <yht:Sijainti>
+              <yht:piste>
+                <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                  <gml:pos>2.5503698E7 6693884.0</gml:pos>
+                </gml:Point>
+              </yht:piste>
+            </yht:Sijainti>
+          </yht:sijaintitieto>
+          <yht:rakennusoikeusYhteensa>199</yht:rakennusoikeusYhteensa>
+          <yht:osoite>
+            <yht:kunta>092</yht:kunta>
+            <yht:osoitenimi>
+              <yht:teksti xml:lang="fi">Joutsenpolku</yht:teksti>
+              <yht:teksti xml:lang="sv">Svanstigen</yht:teksti>
+            </yht:osoitenimi>
+            <yht:osoitenumero>1</yht:osoitenumero>
+            <yht:jakokirjain>b</yht:jakokirjain>
+            <yht:postinumero>01450</yht:postinumero>
+            <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+          </yht:osoite>
+        </rakval:Rakennuspaikka>
+      </rakval:rakennuspaikkatieto>
+      <rakval:referenssiPiste>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.5503698E7 6693884.0</gml:pos>
+        </gml:Point>
+      </rakval:referenssiPiste>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>5344A66A42D6421E84874A13248061</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:katselmuksenLaji>loppukatselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:paatostieto>
+        <yht:Paatos>
+          <yht:lupamaaraykset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>loppukatselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>loppukatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:maaraystieto>
+              <yht:Maarays>
+                <yht:sisalto>Muu lupaehto: 
+
+Lupaehdot 81-2043-04-A ja 81-1710-09-AJ mukaan.</yht:sisalto>
+              </yht:Maarays>
+            </yht:maaraystieto>
+          </yht:lupamaaraykset>
+          <yht:paivamaarat>
+            <yht:lainvoimainenPvm>2013-02-06Z</yht:lainvoimainenPvm>
+            <yht:voimassaHetkiPvm>2016-02-18Z</yht:voimassaHetkiPvm>
+            <yht:antoPvm>2013-01-22Z</yht:antoPvm>
+            <yht:viimeinenValitusPvm>2013-02-05Z</yht:viimeinenValitusPvm>
+            <yht:julkipanoPvm>2013-01-22Z</yht:julkipanoPvm>
+          </yht:paivamaarat>
+          <yht:poytakirja>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>Lupaosasto</yht:paatoksentekija>
+            <yht:paatospvm>2013-01-21Z</yht:paatospvm>
+            <yht:pykala>69</yht:pykala>
+            <yht:liite>
+              <yht:kuvaus>Paatosote</yht:kuvaus>
+              <yht:linkkiliitteeseen>http://80.248.164.27/krysp_tiedostot/liitteet/092/arkisto/2013/PAATOSOTE_81-0050-13-AJ_20130121154104234.rtf</yht:linkkiliitteeseen>
+              <yht:muokkausHetki>2013-01-21T15:47:46Z</yht:muokkausHetki>
+              <yht:tyyppi>Paatosote</yht:tyyppi>
+            </yht:liite>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+      <rakval:lisatiedot>
+        <rakval:Lisatiedot>
+          <rakval:salassapitotietoKytkin>false</rakval:salassapitotietoKytkin>
+          <rakval:asioimiskieli>suomi</rakval:asioimiskieli>
+          <rakval:suoramarkkinointikieltoKytkin>false</rakval:suoramarkkinointikieltoKytkin>
+        </rakval:Lisatiedot>
+      </rakval:lisatiedot>
+      <rakval:asianTiedot>
+        <rakval:Asiantiedot>
+          <rakval:vahainenPoikkeaminen></rakval:vahainenPoikkeaminen>
+          <rakval:rakennusvalvontaasianKuvaus>Haetaan rakennuslupaan 81-2043-04-A ja jatkolupaan 81-1710-09-AJ jatkoaikaa 3 vuotta rakennustöiden loppuun saattamiseksi.</rakval:rakennusvalvontaasianKuvaus>
+        </rakval:Asiantiedot>
+      </rakval:asianTiedot>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>

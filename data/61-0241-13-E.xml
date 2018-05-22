@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rakval:Rakennusvalvonta
+  xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.6/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.2.0/rakennusvalvonta.xsd http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+  xmlns:kiito="http://www.paikkatietopalvelu.fi/gml/kiinteistotoimitus"
+  xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+  xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:mkos="http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet"
+  xmlns:wfs="http://www.opengis.net/wfs"
+  xmlns:ymy="http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ppst="http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"
+  xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+  xmlns:ymm="http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat"
+  xmlns:ows="http://www.opengis.net/ows"
+  xmlns:gml="http://www.opengis.net/gml"
+  xmlns:ymv="http://www.paikkatietopalvelu.fi/gml/ymparisto/vesihuoltolaki"
+  xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ymi="http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset">
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi>CGI KRYSP</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Vantaa</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2018-05-14</yht:toimitusPvm>
+    <yht:kuntakoodi>092</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia gml:id="rluvat.121394">
+      <gml:location>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.52E7 6600000.0</gml:pos>
+        </gml:Point>
+      </gml:location>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-03-08Z</yht:pvm>
+          <yht:tila>uusi lupa, ei käsittelyssä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>61-0241-13-E</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200013-0241</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-03-08Z</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:referenssiPiste>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.52E7 6600000.0</gml:pos>
+        </gml:Point>
+      </rakval:referenssiPiste>
+      <rakval:lisatiedot>
+        <rakval:Lisatiedot>
+          <rakval:salassapitotietoKytkin>false</rakval:salassapitotietoKytkin>
+          <rakval:asioimiskieli>suomi</rakval:asioimiskieli>
+          <rakval:suoramarkkinointikieltoKytkin>false</rakval:suoramarkkinointikieltoKytkin>
+        </rakval:Lisatiedot>
+      </rakval:lisatiedot>
+      <rakval:asianTiedot>
+        <rakval:Asiantiedot>
+          <rakval:vahainenPoikkeaminen></rakval:vahainenPoikkeaminen>
+          <rakval:rakennusvalvontaasianKuvaus></rakval:rakennusvalvontaasianKuvaus>
+        </rakval:Asiantiedot>
+      </rakval:asianTiedot>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>

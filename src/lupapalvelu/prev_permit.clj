@@ -59,6 +59,8 @@
       :postitoimipaikannimi (get-in applicant [:henkilo :osoite :postitoimipaikannimi])
       :puhelin (get-in applicant [:henkilo :puhelin])
       :email (get-in applicant [:henkilo :sahkopostiosoite])
+      :koulutusvalinta (get-in applicant [:koulutus])
+      :valmistumisvuosi (get-in applicant [:valmistumisvuosi])
       (tools/default-values element))
     (let [postiosoite (or
                         (get-in applicant [:yritys :postiosoite])
@@ -113,6 +115,7 @@
                                            :schema-info (:info schema)
                                            :data        (tools/create-document-data schema
                                                                                     (partial applicant-field-values party))})
+        _ (spit (str "DOCUMENT" (rand-int 10) ".edn") document)
         unset-type     (if (contains? party :henkilo) :yritys :henkilo)]
     (assoc-in document [:data unset-type] (unset-type default-values))))
 

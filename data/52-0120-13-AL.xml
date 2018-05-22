@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rakval:Rakennusvalvonta
+  xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.6/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.2.0/rakennusvalvonta.xsd http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+  xmlns:kiito="http://www.paikkatietopalvelu.fi/gml/kiinteistotoimitus"
+  xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+  xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:mkos="http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet"
+  xmlns:wfs="http://www.opengis.net/wfs"
+  xmlns:ymy="http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ppst="http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"
+  xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+  xmlns:ymm="http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat"
+  xmlns:ows="http://www.opengis.net/ows"
+  xmlns:gml="http://www.opengis.net/gml"
+  xmlns:ymv="http://www.paikkatietopalvelu.fi/gml/ymparisto/vesihuoltolaki"
+  xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ymi="http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset">
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi>CGI KRYSP</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Vantaa</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2018-05-14</yht:toimitusPvm>
+    <yht:kuntakoodi>092</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia gml:id="rluvat.97652">
+      <gml:location>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.5498173E7 6686972.0</gml:pos>
+        </gml:Point>
+      </gml:location>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-02-07Z</yht:pvm>
+          <yht:tila>vireillä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-02-07Z</yht:pvm>
+          <yht:tila>uusi lupa, ei käsittelyssä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-03-07Z</yht:pvm>
+          <yht:tila>lupa hyväksytty</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Lupaosasto</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>52-0120-13-AL</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200013-0120</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-02-07Z</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>10-0895-A 52</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200010-0895</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-02-07Z</yht:saapumisPvm>
+          <yht:viittaus>edellinen rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:osapuolettieto>
+        <yht:Osapuolet>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+              <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+              <yht:yritys>
+                <yht:nimi>YIT Rakennus Oy</yht:nimi>
+                <yht:liikeJaYhteisotunnus>1565583-5</yht:liikeJaYhteisotunnus>
+                <yht:postiosoitetieto>
+                  <yht:postiosoite>
+                    <yht:osoitenimi>
+                      <yht:teksti>PL 36</yht:teksti>
+                    </yht:osoitenimi>
+                    <yht:postinumero>00621</yht:postinumero>
+                    <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+                  </yht:postiosoite>
+                </yht:postiosoitetieto>
+                <yht:puhelin>020 433 111</yht:puhelin>
+                <yht:sahkopostiosoite>timo.immonen@yit.fi</yht:sahkopostiosoite>
+              </yht:yritys>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian laskun maksaja</yht:kuntaRooliKoodi>
+              <yht:yritys>
+                <yht:nimi>YIT Rakennus Oy</yht:nimi>
+                <yht:liikeJaYhteisotunnus>1565583-5</yht:liikeJaYhteisotunnus>
+                <yht:postiosoitetieto>
+                  <yht:postiosoite>
+                    <yht:osoitenimi>
+                      <yht:teksti>PL 36</yht:teksti>
+                    </yht:osoitenimi>
+                    <yht:postinumero>00621</yht:postinumero>
+                    <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+                  </yht:postiosoite>
+                </yht:postiosoitetieto>
+                <yht:puhelin>0400-502 649</yht:puhelin>
+                <yht:sahkopostiosoite>timo.immonen@yit.fi</yht:sahkopostiosoite>
+              </yht:yritys>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:suunnittelijatieto>
+            <yht:Suunnittelija>
+              <yht:suunnittelijaRoolikoodi>pääsuunnittelija</yht:suunnittelijaRoolikoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Leila</yht:etunimi>
+                  <yht:sukunimi>Tuominen</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Vihertie 44 A</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>01620</yht:postinumero>
+                  <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>leila.tuominen@forma-futura.fi</yht:sahkopostiosoite>
+                <yht:puhelin>0400 813 975</yht:puhelin>
+              </yht:henkilo>
+              <yht:koulutus>rakennusarkkitehti</yht:koulutus>
+            </yht:Suunnittelija>
+          </yht:suunnittelijatieto>
+        </yht:Osapuolet>
+      </rakval:osapuolettieto>
+      <rakval:rakennuspaikkatieto>
+        <rakval:Rakennuspaikka gml:id="rpaikka.19391">
+          <yht:yksilointitieto>5069350</yht:yksilointitieto>
+          <yht:alkuHetki>2013-02-07T00:00:00Z</yht:alkuHetki>
+          <yht:rakennuspaikanKiinteistotieto>
+            <yht:RakennuspaikanKiinteisto>
+              <yht:kiinteistotieto>
+                <yht:Kiinteisto>
+                  <yht:kylanimi>Veromies</yht:kylanimi>
+                  <yht:kiinteistotunnus>09205201250017</yht:kiinteistotunnus>
+                </yht:Kiinteisto>
+              </yht:kiinteistotieto>
+              <yht:kokotilaKytkin>false</yht:kokotilaKytkin>
+            </yht:RakennuspaikanKiinteisto>
+          </yht:rakennuspaikanKiinteistotieto>
+          <yht:sijaintitieto>
+            <yht:Sijainti>
+              <yht:piste>
+                <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                  <gml:pos>2.5498173E7 6686972.0</gml:pos>
+                </gml:Point>
+              </yht:piste>
+            </yht:Sijainti>
+          </yht:sijaintitieto>
+          <yht:rakennusoikeusYhteensa>3295</yht:rakennusoikeusYhteensa>
+          <yht:osoite>
+            <yht:kunta>092</yht:kunta>
+            <yht:osoitenimi>
+              <yht:teksti xml:lang="fi">Perintötie</yht:teksti>
+              <yht:teksti xml:lang="sv">Arvsvägen</yht:teksti>
+            </yht:osoitenimi>
+            <yht:osoitenumero>2</yht:osoitenumero>
+            <yht:jakokirjain>b</yht:jakokirjain>
+            <yht:postinumero>01510</yht:postinumero>
+            <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+          </yht:osoite>
+        </rakval:Rakennuspaikka>
+      </rakval:rakennuspaikkatieto>
+      <rakval:referenssiPiste>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.5498173E7 6686972.0</gml:pos>
+        </gml:Point>
+      </rakval:referenssiPiste>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>2E3C05B4FAD44461B03AAE5E676B90</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:katselmuksenLaji>loppukatselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:paatostieto>
+        <yht:Paatos>
+          <yht:lupamaaraykset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>loppukatselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>loppukatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:maaraystieto>
+              <yht:Maarays>
+                <yht:sisalto>Muu lupaehto: 
+
+Muut lupaehdot kantaluvan 52-895-10-A mukaisesti.</yht:sisalto>
+              </yht:Maarays>
+            </yht:maaraystieto>
+          </yht:lupamaaraykset>
+          <yht:paivamaarat>
+            <yht:lainvoimainenPvm>2013-03-23Z</yht:lainvoimainenPvm>
+            <yht:antoPvm>2013-03-08Z</yht:antoPvm>
+            <yht:viimeinenValitusPvm>2013-03-22Z</yht:viimeinenValitusPvm>
+            <yht:julkipanoPvm>2013-03-08Z</yht:julkipanoPvm>
+          </yht:paivamaarat>
+          <yht:poytakirja>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>Lupaosasto</yht:paatoksentekija>
+            <yht:paatospvm>2013-03-07Z</yht:paatospvm>
+            <yht:pykala>209</yht:pykala>
+            <yht:liite>
+              <yht:kuvaus>Paatosote</yht:kuvaus>
+              <yht:linkkiliitteeseen>http://80.248.164.27/krysp_tiedostot/liitteet/092/arkisto/2013/PAATOSOTE_52-0120-13-AL_20130307104903250.rtf</yht:linkkiliitteeseen>
+              <yht:muokkausHetki>2013-03-07T10:50:53Z</yht:muokkausHetki>
+              <yht:tyyppi>Paatosote</yht:tyyppi>
+            </yht:liite>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+      <rakval:lisatiedot>
+        <rakval:Lisatiedot>
+          <rakval:salassapitotietoKytkin>false</rakval:salassapitotietoKytkin>
+          <rakval:asioimiskieli>suomi</rakval:asioimiskieli>
+          <rakval:suoramarkkinointikieltoKytkin>true</rakval:suoramarkkinointikieltoKytkin>
+          <rakval:rakentamisentiedot>
+            <rakval:paloluokka>P1</rakval:paloluokka>
+          </rakval:rakentamisentiedot>
+        </rakval:Lisatiedot>
+      </rakval:lisatiedot>
+      <rakval:asianTiedot>
+        <rakval:Asiantiedot>
+          <rakval:vahainenPoikkeaminen></rakval:vahainenPoikkeaminen>
+          <rakval:rakennusvalvontaasianKuvaus>Muutoksia rakenteilla olevassa liike- ja toimistorakennuksessa.</rakval:rakennusvalvontaasianKuvaus>
+        </rakval:Asiantiedot>
+      </rakval:asianTiedot>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>

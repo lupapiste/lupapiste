@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rakval:Rakennusvalvonta
+  xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.6/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.2.0/rakennusvalvonta.xsd http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+  xmlns:kiito="http://www.paikkatietopalvelu.fi/gml/kiinteistotoimitus"
+  xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+  xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:mkos="http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet"
+  xmlns:wfs="http://www.opengis.net/wfs"
+  xmlns:ymy="http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ppst="http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"
+  xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+  xmlns:ymm="http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat"
+  xmlns:ows="http://www.opengis.net/ows"
+  xmlns:gml="http://www.opengis.net/gml"
+  xmlns:ymv="http://www.paikkatietopalvelu.fi/gml/ymparisto/vesihuoltolaki"
+  xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ymi="http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset">
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi>CGI KRYSP</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Vantaa</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2018-05-14</yht:toimitusPvm>
+    <yht:kuntakoodi>092</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia gml:id="rluvat.119590">
+      <gml:location>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.52E7 6600000.0</gml:pos>
+        </gml:Point>
+      </gml:location>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-01-02Z</yht:pvm>
+          <yht:tila>lupa hyväksytty</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Kvv-tarkastaja</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>1900-01-01Z</yht:pvm>
+          <yht:tila>ei tiedossa</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Kvv-tarkastaja</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>51-0007-13-TJO</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200013-0007</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-01-02Z</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>09-1254-A 51</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200009-1254</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-01-02Z</yht:saapumisPvm>
+          <yht:viittaus>edellinen rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:osapuolettieto>
+        <yht:Osapuolet>
+          <yht:tyonjohtajatieto>
+            <yht:Tyonjohtaja>
+              <yht:tyonjohtajaRooliKoodi>IV-työnjohtaja</yht:tyonjohtajaRooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Miika</yht:etunimi>
+                  <yht:sukunimi>Koivumäki</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Palokallio 10</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>09430</yht:postinumero>
+                  <yht:postitoimipaikannimi>SAUKKOLA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>miika.koivumaki@sarjametalli.fi</yht:sahkopostiosoite>
+                <yht:puhelin>040-7069622*</yht:puhelin>
+                <yht:henkilotunnus>301283-1753</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:koulutus>LVI-työteknikko</yht:koulutus>
+              <yht:valmistumisvuosi>2008</yht:valmistumisvuosi>
+              <yht:alkamisPvm>2013-01-02Z</yht:alkamisPvm>
+              <yht:paattymisPvm>2013-09-20Z</yht:paattymisPvm>
+              <yht:hakemuksenSaapumisPvm>2013-01-02Z</yht:hakemuksenSaapumisPvm>
+              <yht:vastattavaTyotieto>
+                <yht:VastattavaTyo>
+                  <yht:vastattavaTyo>Ilmanvaihtotyöt</yht:vastattavaTyo>
+                </yht:VastattavaTyo>
+              </yht:vastattavaTyotieto>
+            </yht:Tyonjohtaja>
+          </yht:tyonjohtajatieto>
+        </yht:Osapuolet>
+      </rakval:osapuolettieto>
+      <rakval:rakennuspaikkatieto>
+        <rakval:Rakennuspaikka gml:id="rpaikka.86895">
+          <yht:yksilointitieto>5068729</yht:yksilointitieto>
+          <yht:alkuHetki>2013-01-02T00:00:00Z</yht:alkuHetki>
+          <yht:rakennuspaikanKiinteistotieto>
+            <yht:RakennuspaikanKiinteisto>
+              <yht:kiinteistotieto>
+                <yht:Kiinteisto>
+                  <yht:kylanimi>Pakkala</yht:kylanimi>
+                  <yht:kiinteistotunnus>09205102150002</yht:kiinteistotunnus>
+                </yht:Kiinteisto>
+              </yht:kiinteistotieto>
+              <yht:kokotilaKytkin>false</yht:kokotilaKytkin>
+            </yht:RakennuspaikanKiinteisto>
+          </yht:rakennuspaikanKiinteistotieto>
+          <yht:sijaintitieto>
+            <yht:Sijainti>
+              <yht:piste>
+                <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                  <gml:pos>2.52E7 6600000.0</gml:pos>
+                </gml:Point>
+              </yht:piste>
+            </yht:Sijainti>
+          </yht:sijaintitieto>
+          <yht:osoite>
+            <yht:kunta>092</yht:kunta>
+            <yht:osoitenimi>
+              <yht:teksti xml:lang="fi">Antaksentie</yht:teksti>
+              <yht:teksti xml:lang="sv">Antasvägen</yht:teksti>
+            </yht:osoitenimi>
+            <yht:osoitenumero>5</yht:osoitenumero>
+            <yht:postinumero>01510</yht:postinumero>
+            <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+          </yht:osoite>
+        </rakval:Rakennuspaikka>
+      </rakval:rakennuspaikkatieto>
+      <rakval:referenssiPiste>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.52E7 6600000.0</gml:pos>
+        </gml:Point>
+      </rakval:referenssiPiste>
+      <rakval:paatostieto>
+        <yht:Paatos>
+          <yht:poytakirja>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>LVI-tarkastaja</yht:paatoksentekija>
+            <yht:paatospvm>2013-01-02Z</yht:paatospvm>
+            <yht:pykala>4</yht:pykala>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+      <rakval:lisatiedot>
+        <rakval:Lisatiedot>
+          <rakval:salassapitotietoKytkin>false</rakval:salassapitotietoKytkin>
+          <rakval:asioimiskieli>suomi</rakval:asioimiskieli>
+          <rakval:suoramarkkinointikieltoKytkin>false</rakval:suoramarkkinointikieltoKytkin>
+        </rakval:Lisatiedot>
+      </rakval:lisatiedot>
+      <rakval:asianTiedot>
+        <rakval:Asiantiedot>
+          <rakval:vahainenPoikkeaminen></rakval:vahainenPoikkeaminen>
+          <rakval:rakennusvalvontaasianKuvaus></rakval:rakennusvalvontaasianKuvaus>
+        </rakval:Asiantiedot>
+      </rakval:asianTiedot>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>
