@@ -1938,7 +1938,7 @@
    :organization "753-R",
    :title "It\u00e4inen Hangelbyntie 163",
    :primaryOperation {:id "5280b764420622588b2f04fc",
-                      :name "jatkoaika",
+                      :name "raktyo-aloit-loppuunsaat",
                       :created 1384167268234}
    :secondaryOperations [],
    :infoRequest false,
@@ -1948,14 +1948,19 @@
    :propertyId "75340800010051",
    :documents [{:created 1384167268234,
                 :data {:kuvaus {:modified 1384167309006,
-                                :value "Pari vuotta jatko-aikaa, ett\u00e4 saadaan rakennettua loppuun."}},
+                                :value "Pari vuotta jatko-aikaa, ett\u00e4 saadaan rakennettua loppuun."}
+                       :jatkoaika-paattyy {:modified 1384167309006,
+                                           :value "31.12.2018"},
+                       :rakennustyo-aloitettu {:modified 1384167309006,
+                                               :value "7.6.2010"}},
                 :id "5280b764420622588b2f04fd",
                 :schema-info {:order 1,
                               :version 1,
-                              :name "hankkeen-kuvaus-minimum",
+                              :name "jatkoaika-hankkeen-kuvaus",
+                              :subtype "hankkeen-kuvaus"
                               :approvable true,
                               :op {:id "5280b764420622588b2f04fc",
-                                   :name "jatkoaika",
+                                   :name "raktyo-aloit-loppuunsaat",
                                    :created 1384167268234},
                               :removable true}}
                hakija-henkilo],
