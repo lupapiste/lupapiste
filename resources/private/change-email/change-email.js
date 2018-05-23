@@ -38,7 +38,7 @@
         var err = response.responseJSON.text;
         initError(err);
         if (err === "error.token-used") {
-          window.setTimeout(pageutil.openFrontpage, 3000)
+          window.setTimeout(pageutil.openFrontpage, 3000);
         }
       })
       .call();

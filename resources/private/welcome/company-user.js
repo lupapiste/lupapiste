@@ -65,7 +65,7 @@
         var err = response.responseJSON.text;
         self.loading(false).error(err);
         if (err === "error.token-used") {
-          window.setTimeout(pageutil.openFrontpage, 3000)
+          window.setTimeout(pageutil.openFrontpage, 3000);
         }
       };
 
@@ -131,7 +131,7 @@
           var err = response.responseJSON.text;
           self.result("fail").error(err);
           if (err === "error.token-used") {
-            window.setTimeout(pageutil.openFrontpage, 3000)
+            window.setTimeout(pageutil.openFrontpage, 3000);
           }
         })
         .call();
