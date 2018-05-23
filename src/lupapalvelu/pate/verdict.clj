@@ -998,13 +998,15 @@
     (when-let [replace-verdict-id (get-in verdict [:replacement :replaces])]
       (replace-verdict command replace-verdict-id (:id verdict)))
 
-    (let [verdict-attachment (pdf/create-verdict-attachment command (assoc verdict :published created))
-          verdict            (assoc verdict :verdict-attachment verdict-attachment)]
+    (let [verdict-attachment-id (pdf/create-verdict-attachment command (assoc verdict :published created))]
       ;; KuntaGML (only for non-legacy verdicts)
       (when (and (not (:legacy? verdict))
                  (org/krysp-integration? @organization (:permitType application)))
-        (-> (assoc command :application (domain/get-application-no-access-checking (:id application)))
-            (krysp/verdict-as-kuntagml verdict))
+        (let [application (domain/get-application-no-access-checking (:id application))]
+          (krysp/verdict-as-kuntagml (assoc command :application application)
+                                     (assoc verdict :verdict-attachment
+                                            (util/find-by-id verdict-attachment-id
+                                                             (:attachments application)))))
         nil))))
 
 (defn preview-verdict

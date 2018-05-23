@@ -674,6 +674,16 @@
                    :path [:reviews review-id :included]
                    :value true)
           => ok?)
+        (fact "Review text is read-only"
+          (some-> (command sipoo :save-verdict-template-draft-value
+                           :template-id template-id
+                           :path [:reviews review-id :text]
+                           :value "foo")
+                  :errors
+                  flatten
+                  last
+                  keyword)
+          => :error.read-only)
         (fact "Change review's name"
           (command sipoo :save-verdict-template-settings-value
                    :category :r

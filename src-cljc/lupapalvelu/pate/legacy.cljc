@@ -152,8 +152,14 @@
 
 ;; Only uploading new attachments. This is because the verdicts can be
 ;; deleted and we want to avoid inadvertent nuking of attachments.
-(def legsub-attachments (-> shared/versub-upload
-                            (util/dissoc-in [:section :buttons?])))
+(def legsub-attachments
+  {:dictionary
+   {:attachments {:application-attachments {:i18nkey :application.verdict-attachments}}}
+   :section {:id      :attachments
+             :buttons? false
+             :grid    {:columns 7
+                       :rows    [[{:col  6
+                                   :dict :attachments}]]}}})
 
 (defn build-legacy-schema [& subschemas]
   (sc/validate schemas/PateLegacyVerdict
@@ -172,7 +178,8 @@
                              :sort-by    :text}})
    legsub-foremen
    legsub-conditions
-   legsub-attachments))
+   legsub-attachments
+   shared/versub-upload))
 
 (defn legacy-verdict-schema [category]
   (case (keyword category)

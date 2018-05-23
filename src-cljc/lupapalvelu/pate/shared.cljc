@@ -400,7 +400,7 @@
 (defn settings-dependencies [dict loc-prefix]
   {:dictionary {dict {:repeating {:included {:toggle {:label?    false
                                                       :text-dict :text}}
-                                  :text     {:text {}}
+                                  :text     {:text {:read-only? true}}
                                   :selected {:toggle {:enabled?  :-.included
                                                       :label?  false
                                                       :i18nkey :pate.available-in-verdict}}}

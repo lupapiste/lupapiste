@@ -105,7 +105,12 @@
 
 (defschema PateComponent
   (merge PateBase
-         {(sc/optional-key :label?) sc/Bool})) ;; Show label? Default true
+         {;; Show label? Default true
+          (sc/optional-key :label?)     sc/Bool
+          ;; Read-only components cannot be edited and only rendered
+          ;; in the viewing mode.
+          (sc/optional-key :read-only?) sc/Bool
+          }))
 
 (defschema PateReferenceList
   "Component that builds schema from an external source. Each item is
@@ -485,12 +490,15 @@
 (defschema PateVerdictDictionary
   {:dictionary PateVerdictSchemaTypes})
 
+(def section-buttons
+  ;; Show edit button? (default true)
+  {(sc/optional-key :buttons?) sc/Bool})
+
 (defschema PateVerdictSection
   (merge PateSection
          PateCss
-         ;; Show edit button? (default true)
-         {(sc/optional-key :buttons?) sc/Bool
-          ;; The corresponding verdict template section. Needed if the
+         section-buttons
+         {;; The corresponding verdict template section. Needed if the
           ;; template section is removable. If the template section is
           ;; removed then every dict specific to this verdict section
           ;; is also removed. If only parts of the section depend on
@@ -505,8 +513,12 @@
          {:version                    sc/Int
           :sections                   [PateVerdictSection]}))
 
+(defschema PateLegacySection
+  (merge PateSection
+         section-buttons))
+
 (defschema PateLegacyVerdict
   (merge id-modified
          {:legacy?    (sc/enum true)
           :dictionary SchemaTypes
-          :sections   [PateSection]}))
+          :sections   [PateLegacySection]}))

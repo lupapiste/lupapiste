@@ -341,50 +341,30 @@
                                           :verdict     verdict})
                      (layouts/pdf-layout verdict)))
 
-(defn upload-verdict-pdf [application {:keys [published] :as verdict}]
-  (let [{:keys [body header footer]} (verdict-html application verdict)]
-    (html-pdf/create-and-upload-pdf
-     application
-     "pate-verdict"
-     body
-     {:filename (i18n/localize-and-fill (html/language verdict)
-                                        (if published
-                                          :pdf.filename
-                                          :pdf.draft)
-                                        (:id application)
-                                        (util/to-local-datetime (or published (now))))
-      :header header
-      :footer footer})))
-
-
 (defn create-verdict-attachment
-  "1. Create PDF file for the verdict.
-   2. Create verdict attachment.
-   3. Bind 1 into 2."
+  "Create PDF for the verdict and uploadsit as an attachment. Returns the attachment-id."
   [{:keys [application created] :as command} verdict]
-  (let [{:keys [file-id]}          (upload-verdict-pdf application verdict)
-        _                          (when-not file-id
-                                     (fail! :pate.pdf-verdict-error))
-        {attachment-id :id
-         :as           attachment} (att/create-attachment!
-                                    application
-                                    {:created           created
-                                     :set-app-modified? false
-                                     :attachment-type   {:type-group "paatoksenteko"
-                                                         :type-id    "paatos"}
-                                     :target            {:type "verdict"
-                                                         :id   (:id verdict)}
-                                     :locked            true
-                                     :read-only         true
-                                     :contents          (i18n/localize (html/language verdict)
-                                                                       :pate-verdict)})]
-    (bind/bind-single-attachment! (update-in command
-                                             [:application :attachments]
-                                             #(conj % attachment))
-                                  (mongo/download file-id)
-                                  {:fileId       file-id
-                                   :attachmentId attachment-id}
-                                  nil)))
+  (let [pdf (html-pdf/html->pdf application
+                                "pate-verdict"
+                                (verdict-html application verdict))]
+    (when-not (:ok pdf)
+      (fail! :pate.pdf-verdict-error))
+    (with-open [stream (:pdf-file-stream pdf)]
+      (:id (att/upload-and-attach! command
+                               {:created         created
+                                :attachment-type {:type-group "paatoksenteko"
+                                                  :type-id    "paatos"}
+                                :target          {:type "verdict"
+                                                  :id   (:id verdict)}
+                                :locked          true
+                                :read-only       true
+                                :contents        (i18n/localize (html/language verdict)
+                                                                :pate-verdict)}
+                               {:filename (i18n/localize-and-fill (html/language verdict)
+                                                                  :pdf.filename
+                                                                  (:id application)
+                                                                  (util/to-local-datetime (:published verdict)))
+                                :content stream})))))
 
 (defn create-verdict-preview
   "Creates draft version of the verdict
