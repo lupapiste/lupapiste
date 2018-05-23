@@ -624,7 +624,7 @@
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
         email (ss/canonize-email email)
-        token (token/get-token tokenId)]
+        token (token/get-usable-token tokenId)]
     (when-not (and vetuma-data
                 (= (:token-type token) :activate-linked-account)
                 (= email (get-in token [:data :email])))
@@ -638,7 +638,7 @@
                       :send-email false)]
         (do
           (vetuma/consume-user stamp)
-          (token/get-token tokenId :consume true)
+          (token/get-usable-token tokenId :consume true)
           (ok :id (:id user)))
         (fail :error.create-user))
       (catch IllegalArgumentException e

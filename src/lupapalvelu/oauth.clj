@@ -78,7 +78,7 @@
 (defn access-token-response [client-id client-secret code]
   (when-let [client (usr/get-user {:oauth.client-id client-id
                                    :oauth.client-secret client-secret})]
-    (let [{:keys [token-type user-id data]} (token/get-token code)]
+    (let [{:keys [token-type user-id data]} (token/get-usable-token code)]
       (when (and (= token-type :oauth-code)
                  (= (:client-id data) client-id))
         (let [expires-in (* 10 60 1000)
@@ -90,7 +90,7 @@
 
 (defn user-for-access-token [request]
   (when-let [token-id (http/parse-bearer request)]
-    (when-let [{:keys [token-type user-id data]} (token/get-token token-id)]
+    (when-let [{:keys [token-type user-id data]} (token/get-usable-token token-id)]
       (when (= token-type :oauth-access)
         (when-let [user (usr/get-user-by-id user-id)]
           (assoc user :scopes (map keyword (:scopes data))))))))

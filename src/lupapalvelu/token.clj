@@ -30,14 +30,27 @@
                           :user-id (:id (or user (user/current-user request)))})
     token-id))
 
+(defn- keywordize-token-type [token]
+  (update-in token [:token-type] keyword))
+
 (defn get-token [id & {:keys [consume] :or {consume false}}]
-  (when-let [token (mongo/select-one :token {:_id id
-                                             :used nil
-                                             :expires {$gt (now)}})]
-    (when (or consume (:auto-consume token))
-      (mongo/update-by-id :token id {$set {:used (now)}}))
-    (update-in token [:token-type] keyword)))
+  (if-let [token (mongo/select-one :token {:_id id})]
+    (cond
+      (:used token)              [:used (keywordize-token-type token)]
+      (< (:expires token) (now)) [:expired (keywordize-token-type token)]
+      :else (do
+              (when (or consume (:auto-consume token))
+                (mongo/update-by-id :token id {$set {:used (now)}}))
+              [:usable (keywordize-token-type token)]))
+    [:not-found]))
+
+(defn get-usable-token [id & {:keys [consume] :or {consume false}}]
+  (let [[status token] (get-token id :consume consume)]
+    (when (= status :usable)
+      token)))
 
 (defn consume-token [id params & {:keys [consume] :or {consume false}}]
-  (when-let [token-data (get-token id :consume consume)]
-    (handle-token token-data params)))
+  (let [[status token] (get-token id :consume consume)]
+    (case status
+      :usable [:usable (handle-token token params)]
+      [status])))
