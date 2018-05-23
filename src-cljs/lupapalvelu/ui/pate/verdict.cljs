@@ -164,7 +164,8 @@
    (if (and (rum/react state/current-verdict-id)
             (rum/react state/auth-fn))
      (let [{dictionary :dictionary :as schema} (shared/verdict-schema
-                                                (shared/permit-type->category (js/lupapisteApp.models.application.permitType))
+                                                (shared/application->category {:permitType (js/lupapisteApp.models.application.permitType)
+                                                                               :permitSubtype (js/lupapisteApp.models.application.permitSubtype)})
                                                 (get-in @state/current-verdict [:info :schema-version]))]
        (verdict (assoc (state/select-keys state/current-verdict
                                           [:state :info :_meta])

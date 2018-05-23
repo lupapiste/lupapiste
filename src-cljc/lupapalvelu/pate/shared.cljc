@@ -81,6 +81,8 @@
 (def ya-verdict-dates [:julkipano :anto :muutoksenhaku :lainvoimainen
                        :aloitettava])
 
+(def tj-verdict-dates [:anto :lainvoimainen :muutoksenhaku])
+
 (defn pate-assert [pred & msg]
   (let [div "\n-------------------------------------------------------\n"]
     (assert pred (str div
@@ -343,11 +345,17 @@
                                         setsub-plans
                                         (setsub-reviews ya-review-types)))
 
+(def tj-settings (build-settings-schema "pate-tj"
+                                        (setsub-date-deltas tj-verdict-dates)
+                                        setsub-verdict-code
+                                        setsub-board))
+
 (defn settings-schema [category]
   (case (keyword category)
     :r r-settings
     :p p-settings
-    :ya ya-settings))
+    :ya ya-settings
+    :tj tj-settings))
 
 ;; -----------------------------
 ;; Verdict template subschemas
@@ -643,11 +651,18 @@
                                  temsub-statements
                                  temsub-attachments))
 
+(def tj-verdict-template-schema
+  (build-verdict-template-schema (temsub-verdict tj-verdict-dates)
+                                 temsub-appeal
+                                 temsub-start-info
+                                 temsub-attachments))
+
 (defn verdict-template-schema [category]
   (case (keyword category)
     :r  r-verdict-template-schema
     :p  p-verdict-template-schema
-    :ya ya-verdict-template-schema))
+    :ya ya-verdict-template-schema
+    :tj tj-verdict-template-schema))
 
 ;; -----------------------------
 ;; Verdict subschemas
@@ -1163,6 +1178,10 @@
                                                versub-inform-others
                                                versub-attachments))
 
+;; TODO: FILL ME
+(def tj-verdict-schema-1 (build-verdict-schema :tj 1
+                                               versub-dates))
+
 (defn verdict-schema
   "Nil version returns the latest version."
   ([category version]
@@ -1170,6 +1189,7 @@
                    :r  [r-verdict-schema-1]
                    :p  [p-verdict-schema-1]
                    :ya [ya-verdict-schema-1]
+                   :tj [tj-verdict-schema-1]
                    (pate-assert false "Invalid schema category:" category))]
      (cond
        (nil? version)                     (last schemas)
@@ -1186,9 +1206,28 @@
                         s/lower-case
                         keyword)]
     (cond
-      (#{:r :p :ya} kw)              kw
+      (#{:r} kw)                     [:r :tj]
+      (#{:p :ya} kw)                 kw
       (#{:kt :mm} kw)                :kt
       (#{:yi :yl :ym :vvvl :mal} kw) :ymp)))
+
+
+(defn permit-subtype->category [permit-subtype]
+  (when-let [kw (some-> permit-subtype
+                        s/lower-case
+                        keyword)]
+    (cond
+      (#{:tyonjohtaja-hakemus} kw) :tj)))
+
+(defn application->category [{:keys [permitType permitSubtype]}]
+  (let [by-subtype (permit-subtype->category permitSubtype)
+        kw         (-> permitType s/lower-case keyword)]
+    (if (some? by-subtype)
+      by-subtype
+      (cond
+        (#{:r :p :ya} kw)              kw
+        (#{:kt :mm} kw)                :kt
+        (#{:yi :yl :ym :vvvl :mal} kw) :ymp))))
 
 (defn dict-resolve
   "Path format: [repeating index repeating index ... value-dict].

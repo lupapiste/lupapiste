@@ -15,7 +15,7 @@
 
 (defschema PateCategory
   {:id       ssc/ObjectIdStr
-   :category (sc/enum "r" "p" "ya" "kt" "ymp")})
+   :category (sc/enum "r" "p" "ya" "kt" "ymp" "tj")})
 
 (defschema PateTerm
   {:fi       sc/Str
@@ -69,7 +69,8 @@
   {:templates                  [PateSavedTemplate]
    (sc/optional-key :settings) {(sc/optional-key :r)  PateSavedSettings
                                 (sc/optional-key :p)  PateSavedSettings
-                                (sc/optional-key :ya) PateSavedSettings}})
+                                (sc/optional-key :ya) PateSavedSettings
+                                (sc/optional-key :tj) PateSavedSettings}})
 
 ;; Phrases
 

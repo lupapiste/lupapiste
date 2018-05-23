@@ -78,7 +78,8 @@
    :parameters       [id template-id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :pre-checks       [pate-enabled
-                      (template/verdict-template-check :application :published)]
+                      (template/verdict-template-check :application :published)
+                      ]
    :states           states/post-submitted-states}
   [command]
   (ok :verdict-id (verdict/new-verdict-draft template-id command)))
