@@ -91,7 +91,6 @@
       {$set {:modified now
              :attachments.$.modified now
              :attachments.$.metadata.tila next-state
-             :attachments.$.readOnly (contains? archival-states next-state)
              :attachments.$.latestVersion.onkaloFileId id
              (str "attachments.$.versions." last-version-index ".onkaloFileId") id}})
     (when (= :arkistoitu next-state)

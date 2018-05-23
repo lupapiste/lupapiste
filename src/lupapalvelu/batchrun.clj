@@ -34,7 +34,8 @@
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :refer [fn-> pcond->] :as util]
-            [sade.validators :as v])
+            [sade.validators :as v]
+            [ring.util.codec :as codec])
   (:import [org.xml.sax SAXParseException]))
 
 
@@ -823,3 +824,54 @@
                                    (util/to-millis-from-local-date-string end-timestamp))
                                  (now))
                              (or (vec organizations) [])))
+
+(defn unarchive [& [organization application-id]]
+  (if organization
+    (do
+      (mongo/connect!)
+      (info "Starting unarchiving operation for" organization "applications:" (or application-id "all"))
+      (doseq [application (->> (mongo/with-collection "applications"
+                                                      (monger-query/find (util/assoc-when
+                                                                           {:organization organization
+                                                                            :state        {$nin states/terminal-states}
+                                                                            :permitType   {$ne "ARK"}
+                                                                            :attachments  {$elemMatch {:metadata.tila   :arkistoitu
+                                                                                                       :type.type-group :erityissuunnitelmat}}}
+                                                                           :_id application-id)))
+                               (map mongo/with-id))]
+        (logging/with-logging-context {:applicationId (:id application)}
+          (info "Checking attachments of application" (:id application))
+          (let [results (pmap
+                          (fn [{:keys [latestVersion metadata] :as attachment}]
+                            (if (and latestVersion
+                                     (= (keyword (get-in attachment [:type :type-group])) :erityissuunnitelmat)
+                                     (= (keyword (:tila metadata)) :arkistoitu))
+                              (let [_ (info "Trying to unarchive attachment" (:id attachment) "/" (:filename latestVersion))
+                                    host (env/value :arkisto :host)
+                                    app-id (env/value :arkisto :app-id)
+                                    app-key (env/value :arkisto :app-key)
+                                    encoded-id (codec/url-encode (:id attachment))
+                                    url (str host "/documents/" encoded-id)
+                                    {:keys [status body]} (http/delete url {:basic-auth       [app-id app-key]
+                                                                            :throw-exceptions false
+                                                                            :as               :json
+                                                                            :query-params     {"organization" organization}})
+                                    log-message {:application-id (:id application)
+                                                 :attachment-id  (:id attachment)
+                                                 :type           (:type attachment)
+                                                 :filename       (:filename latestVersion)}]
+                                (if (= 200 status)
+                                  (logging/log-event :info (merge {:run-by "Batch unarchiving run"
+                                                                   :event  "Successfully unarchived attachment"}
+                                                                  log-message))
+                                  (logging/log-event :error (merge {:run-by       "Batch unarchiving run"
+                                                                    :event        "Attachment unarchiving failed"
+                                                                    :onkalo-error body}
+                                                                   log-message)))
+                                (= 200 status))
+                              true))
+                          (:attachments application))]
+            (if (every? true? results)
+              (info "Attachments successfully unarchived for application" (:id application))
+              (error "Some attachments were not successfully unarchived for application" (:id application)))))))
+    (println "Organization must be provided.")))

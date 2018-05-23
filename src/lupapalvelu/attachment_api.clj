@@ -224,6 +224,7 @@
                 att/foreman-must-be-uploader
                 att/edit-allowed-by-target
                 att/attachment-editable-by-application-state
+                att/attachment-not-archived
                 (action/some-pre-check usr/precheck-user-is-archivist
                                        att/attachment-not-readOnly)
                 att/attachment-matches-application
@@ -765,6 +766,7 @@
                 att/attachment-editable-by-application-state
                 (action/some-pre-check usr/precheck-user-is-archivist
                                        att/attachment-not-readOnly)
+                att/attachment-not-archived
                 att/edit-allowed-by-target
                 (action/some-pre-check att/allowed-only-for-authority-when-application-sent
                                        (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))
