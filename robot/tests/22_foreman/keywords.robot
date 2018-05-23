@@ -82,6 +82,10 @@ Foreman accepts invitation and fills info
   Wait until  Scroll and click test id  fill-info-button
   Wait for jQuery
 
+Set foreman role
+  [Arguments]  ${role}
+  Wait until  Select From List by test id  kuntaRoolikoodi  ${role}
+
 Foreman sets role and difficulty to foreman application
   [Arguments]  ${index}  ${role}  ${difficulty}
   Open foreman app from list  ${index}

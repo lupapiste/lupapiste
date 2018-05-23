@@ -72,6 +72,7 @@
            :email                                 ssc/Email
            :username                              ssc/Username
            :enabled                               sc/Bool
+           (sc/optional-key :state)               (sc/enum "erased")
            (sc/optional-key :private)             {(sc/optional-key :password) sc/Str
                                                    (sc/optional-key :apikey) sc/Str}
            (sc/optional-key :orgAuthz)            OrgAuthz
@@ -266,6 +267,11 @@
 
 (defn onkalo-user? [{role :role}]
   (= :onkalo-api (keyword role)))
+
+(defn user-in-state? [expected-state {:keys [state]}]
+  (true? (and state (= (name state) expected-state))))
+
+(def erased? (partial user-in-state? "erased"))
 
 (defn organization-ids
   "Returns user's organizations as a set of strings"

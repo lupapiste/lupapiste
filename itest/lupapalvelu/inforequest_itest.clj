@@ -1,9 +1,6 @@
 (ns lupapalvelu.inforequest-itest
   (:require [midje.sweet  :refer :all]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.operations :as operations]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.itest-util :refer :all]))
 
 (apply-remote-minimal)
 (last-email)
@@ -21,7 +18,9 @@
         application => (in-state? "info")
         (:opened application) => truthy
         (count (:comments application)) => 1
-        (-> (:comments application) first :text) => "hello"))
+        (-> (:comments application) first :text) => "hello"
+        (fact "Pena's phone"
+          (:applicantPhone application) => "0102030405")))
 
     (fact "Veikko can not assign inforequest to himself"
       (command veikko :upsert-application-handler :id id :userId veikko-id :roleId sipoo-general-handler-id) => not-accessible?)

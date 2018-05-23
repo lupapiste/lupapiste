@@ -23,7 +23,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.approvalModel = params.approvalModel;
   self.auth = self.docModel.authorizationModel;
   self.isOpen = ko.observable();
-  self.isOpen.subscribe( params.openCallback );
+  var isOpenSubs = self.isOpen.subscribe( params.openCallback );
   self.isOpen( !params.docModelOptions
             || !params.docModelOptions.accordionCollapsed);
   self.disabledStatus = ko.observable(!!self.docModel.docDisabled);
@@ -126,6 +126,8 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.isRejected = hasRole && self.approvalModel.isRejected;
   self.isSummaryRejected = hasRole && self.approvalModel.isSummaryRejected;
   self.details = self.approvalModel.details;
+  self.editNote = ko.observable(self.docModel.editNote());
+  self.sentNote = ko.observable(self.docModel.sentNote());
 
   self.approveTestId = self.docModel.approvalTestId( [], APPROVE );
   self.rejectTestId = self.docModel.approvalTestId( [], REJECT );
@@ -142,6 +144,8 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.reject  = _.partial( self.approvalModel.changeStatus, false );
   self.approve = _.partial( self.approvalModel.changeStatus, true );
 
+  self.showEditNote = ko.observable(self.docModel.isPostVerdictEdited());
+  self.showSentNote = ko.observable(self.docModel.isPostVerdictSent());
 
   self.canBeDisabled = self.disposedPureComputed(function () {
     return self.auth.ok("set-doc-status");
@@ -202,6 +206,40 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     }
   });
 
+  self.showToggleEdit = function () {
+    return self.docModel.schema.info["post-verdict-editable"] &&
+           self.docModel.authorizationModel.ok("update-post-verdict-doc");
+  };
+
+  self.editMode = function () {
+    return self.docModel.docPostVerdictEdit;
+  };
+
+  self.toggleEdit = function () {
+    self.docModel.docPostVerdictEdit = true;
+    self.docModel.redraw();
+  };
+
+  self.sendEdit = function () {
+    ajax.command("send-doc-updates", {id: self.docModel.appId, docId: self.docModel.docId})
+      .success(function() {
+        self.docModel.docPostVerdictEdit = false;
+        self.showSentNote(self.docModel.isPostVerdictSent());
+        self.sentNote(self.docModel.sentNote());
+        self.docModel.redraw();
+      })
+      .error(function(e) {
+        notify.ajaxError(e);
+      })
+      .call();
+  };
+
+  self.closeEdit = function () {
+    self.docModel.docPostVerdictEdit = false;
+    self.showEditNote(self.docModel.isPostVerdictEdited());
+    self.editNote(self.docModel.editNote());
+    self.docModel.redraw();
+  };
 
 
   /*************
@@ -226,6 +264,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.dispose = function() {
     AccordionState.deregister(self.docModel.docId);
     stickyRefresh.dispose();
+    isOpenSubs.dispose();
     hub.unsubscribe(toggleEditorSubscription);
     baseDispose();
   };

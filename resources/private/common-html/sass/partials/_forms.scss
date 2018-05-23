@@ -174,7 +174,7 @@ message-panel {
   margin-right: $marginS;
   position: relative;
   min-height: 48px;
-  vertical-align: top;
+  vertical-align: bottom;
   label {
     display: inline-block;
   }
@@ -242,7 +242,7 @@ message-panel {
 }
 
 .form-input {
-  height: 22px;
+  //height: 22px;
   line-height: $baseline;
   margin: 2px $marginS $marginM 0;
   width: $cols3;

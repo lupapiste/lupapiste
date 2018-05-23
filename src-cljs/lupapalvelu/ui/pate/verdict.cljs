@@ -153,6 +153,7 @@
 
 (rum/defc pate-verdict < rum/reactive
   []
+  [:div.container
   [:div.pate-verdict-page {:id "pate-verdict-page"}
    (lupapalvelu.ui.attachment.components/dropzone)
    [:div.operation-button-row
@@ -170,7 +171,7 @@
                        :schema (dissoc schema :dictionary)
                        :dictionary dictionary
                        :references state/references)))
-     [:div.pate-spin [:i.lupicon-circle-section-sign]])])
+     [:div.pate-spin [:i.lupicon-circle-section-sign]])]])
 
 (defn bootstrap-verdict []
   (let [[app-id verdict-id] (js/pageutil.getPagePath)]

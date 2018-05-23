@@ -378,6 +378,7 @@
           (opt :group-help)                  (sc/maybe sc/Str) ;; TODO: remove nils?
           (opt :section-help)                (sc/maybe sc/Str) ;; TODO: remove nils?
           (opt :approvable)                  sc/Bool    ;;
+          (opt :post-verdict-editable)       sc/Bool    ;; Editable by authority after PATE verdict is given
           (opt :repeating)                   sc/Bool    ;;
           (opt :removable-by)                (sc/enum :authority :all :none)
           (opt :disableable)                 sc/Bool    ;;

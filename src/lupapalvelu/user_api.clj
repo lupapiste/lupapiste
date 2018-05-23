@@ -479,12 +479,12 @@
    :notified      true}
   [_]
   (let [user (usr/get-user-by-email email) ]
-    (if (and user (not (usr/dummy? user)))
+    (if (and user (not (usr/dummy? user)) (:enabled user))
       (do
         (pw-reset/reset-password user)
         (ok))
       (do
-        (warnf "password reset request: unknown email: email=%s" email)
+        (warnf "password reset request: unknown or disabled email: email=%s" email)
         (fail :error.email-not-found)))))
 
 (defcommand admin-reset-password

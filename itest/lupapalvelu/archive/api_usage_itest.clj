@@ -1,4 +1,4 @@
-(ns lupapalvelu.archive.api-usage-test
+(ns lupapalvelu.archive.api-usage-itest
   (:require [midje.sweet :refer :all]
             [taoensso.timbre :refer [warnf]]
             [sade.env :as env]
@@ -9,7 +9,7 @@
 
 (background (before :facts (reset! mongo-mock [])))
 
-(if-not (and (env/feature? :embedded-artemis) (env/feature? :jms))
+(if-not (env/feature? :jms)
   (warnf "JMS not enabled for unit testing")
 
   (facts "Archive API usage"
@@ -21,7 +21,7 @@
 
         (fact "consumed message is inserted into collection"
               (onkalo-mock {:organization "753-R" :timestamp 12345})
-              (Thread/sleep 100)
+              (Thread/sleep 500)
               (->> @mongo-mock count) => 1
               (->> @mongo-mock first :timestamp) => 12345)
 
@@ -29,11 +29,11 @@
               (onkalo-mock {:organization "753-R" :timestamp 12345})
               (onkalo-mock {:organization "753-R" :timestamp 12346})
               (onkalo-mock {:organization "753-R" :timestamp 12347})
-              (Thread/sleep 100)
+              (Thread/sleep 500)
               (->> @mongo-mock count) => 3
               (->> @mongo-mock last :timestamp) => 12347)
 
         (fact "messages that do not match schema are dropped"
               (onkalo-mock {:does :not :match :schema})
-              (Thread/sleep 100)
+              (Thread/sleep 500)
               (->> @mongo-mock count) => 0)))))

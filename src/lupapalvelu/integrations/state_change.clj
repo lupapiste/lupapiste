@@ -176,11 +176,14 @@
           (errorf "Message (id: %s) rollback initiated" (:message-id options))
           (jms/rollback session))))))
 
-(def json-consumer-session (if-let [conn (jms/get-default-connection)]
-                             (-> conn
-                                 (jms/create-transacted-session)
-                                 (jms/register-session :consumer))
-                             (warn "No JMS connection available")))
+(defn create-jms-session []
+  (if-let [conn (jms/get-default-connection)]
+    (-> conn
+        (jms/create-transacted-session)
+        (jms/register-session :consumer))
+    (warn "No JMS connection available")))
+
+(def json-consumer-session (create-jms-session))
 
 (when json-consumer-session
   (defonce state-change-consumer
@@ -191,7 +194,10 @@
 
 (sc/defn ^:always-validate send-via-jms [state-change-data :- StateChangeMessage endpoint-data :- EndpointData options]
   (jms/produce-with-context matti-json-queue (nippy/freeze (assoc endpoint-data :data state-change-data :options options)))
-  (debugf "Produced state-change msg (%s) to JMS queue %s" (get-in state-change-data [:toState :name]) matti-json-queue))
+  (debugf "Produced state-change (%s) msg (id: %s to JMS queue %s"
+          (get-in state-change-data [:toState :name])
+          (:message-id options)
+          matti-json-queue))
 )
 
 (defn trigger-state-change [{user :user :as command} new-state]

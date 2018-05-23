@@ -15,8 +15,9 @@ LUPAPISTE.DocumentIdentifierModel = function(params) {
   self.identifier = self.identifierObject &&
                     ko.observable(self.identifierObject.value()).extend({rateLimit: {timeout: 500, method: "notifyWhenChangesStop"}});
 
+  var subscription = null;
   if (ko.isObservable(self.identifier)) {
-    self.identifier.subscribe(function(value) {
+    subscription = self.identifier.subscribe(function(value) {
       hub.send("accordionService::saveIdentifier", {docId: self.documentId, key: self.identifierObject.key, value: value, indicator: self.indicator});
     });
   }
@@ -34,6 +35,7 @@ LUPAPISTE.DocumentIdentifierModel = function(params) {
 
   self.dispose = function() {
     // save on dispose as subscription is not triggered if component is killed quicker than timeout
+    if (subscription) { subscription.dispose(); }
     hub.send("accordionService::saveIdentifier", {docId: self.documentId, key: self.identifierObject.key, value: self.identifier()});
   };
 

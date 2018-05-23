@@ -13,12 +13,13 @@ LUPAPISTE.BuildingIdentifierModel = function(params) {
   self.identifier = ko.observable(self.service.getBuildingId(self.documentId)).extend({rateLimit: {timeout: 500, method: "notifyWhenChangesStop"}});
   self.indicator = ko.observable();
 
-  self.identifier.subscribe( function(buildingId) {
+  var subscription = self.identifier.subscribe( function(buildingId) {
     hub.send("accordionService::saveBuildingId", {docId: self.documentId, value: buildingId, indicator: self.indicator});
   });
 
 
   self.dispose = function() {
+    subscription.dispose();
     hub.send("accordionService::saveBuildingId", {docId: self.documentId, value: self.identifier(), indicator: self.indicator});
   };
 

@@ -82,8 +82,11 @@
           (fact "Foreman application contains link to application"
                 (:id foreman-link-permit-data) => application-id)
 
-          (fact "Original application contains link to foreman application"
-                (:id link-from-foreman) => foreman-application-id)
+          (fact "Original application contains summary of foreman application"
+                (:id link-from-foreman) => foreman-application-id
+                (:state link-from-foreman) => "open"
+                (:foreman link-from-foreman) => ""
+                (:foremanRole link-from-foreman) => "ei tiedossa")
 
           (fact "All linked Foreman applications are returned in query"
                 (let [applications (:applications foreman-applications)]

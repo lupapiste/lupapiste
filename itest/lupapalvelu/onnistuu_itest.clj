@@ -169,6 +169,7 @@
         _ (fetch-document process-id) => http200?
         store (atom {})
         params {:cookie-store (->cookie-store store)
+                :query-params {:onnistuu_error 60 :onnistuu_message "fail"}
                 :throw-exceptions false}
         response   (http-get (str (server-address) "/api/sign/fail/" process-id) params)]
     response => http200?

@@ -949,3 +949,10 @@
        :headers {"Content-Type"        "application/pdf"
                  "Content-Disposition" (format "filename=\"%s\"" filename)}
        :body    pdf-file-stream})))
+
+(defn latest-published-pate-verdict
+  [{:keys [application] :as command}]
+  (->> (:pate-verdicts application)
+       (filter #(some? (:published %)))
+       (sort-by :published)
+       (last)))

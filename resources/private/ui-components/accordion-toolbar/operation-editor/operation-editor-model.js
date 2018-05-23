@@ -13,7 +13,7 @@ LUPAPISTE.OperationEditorModel = function(params) {
   self.description = ko.observable(self.operation.description()).extend({rateLimit: {timeout: 500, method: "notifyWhenChangesStop"}});
   self.enabled = self.operation && auth.ok("update-op-description");
 
-  self.description.subscribe( function(desc) {
+  var subscription = self.description.subscribe( function(desc) {
     hub.send("accordionService::saveOperationDescription", {appId: self.docModel.appId,
                                                             operationId: self.operation.id(),
                                                             description: desc,
@@ -39,6 +39,7 @@ LUPAPISTE.OperationEditorModel = function(params) {
   };
 
   self.dispose = function() {
+    subscription.dispose();
     // save operation description state on dispose, if timeout hasn't triggered observable
     if (auth.ok("update-op-description")) {
       hub.send("accordionService::saveOperationDescription", {appId: self.docModel.appId,
