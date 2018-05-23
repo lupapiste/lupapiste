@@ -367,6 +367,31 @@
   (fact "illegal mime"
     (upload-user-attachment pena "osapuolet.tutkintotodistus" false  "dev-resources/krysp/verdict-r.xml") => (partial expected-failure? :error.file-upload.illegal-file-type)))
 
+;;;; Erase user data
+
+(facts "Admin erases user data"
+  (fact "erase sven's data"
+    (let [{{:keys [id email]} :user} (query admin :user-by-email :email "sven@example.com") => ok?
+          obfuscated-username (str "poistunut_" id "@example.com")]
+      (command admin :erase-user :email email) => ok?
+      (query admin :user-by-email :email email) => {:ok true, :user nil}
+      (query admin :user-by-email :email obfuscated-username)
+      => {:ok true
+          :user {:id id
+                 :firstName "Poistunut"
+                 :lastName "Käyttäjä"
+                 :role "applicant"
+                 :email obfuscated-username
+                 :username obfuscated-username
+                 :enabled false
+                 :state "erased"}}))
+
+  (fact "cannot erase already erased user"
+    (command admin :erase-user :email "sven@example.com") => {:ok false, :text "not-found"})
+
+  (fact "cannot erase nonexistent user"
+    (command admin :erase-user :email "fubar@example.com") => {:ok false, :text "not-found"}))
+
 ;;
 ;; ==============================================================================
 ;; Admin impersonates an authority
