@@ -57,7 +57,7 @@
       :katu (get-in applicant [:henkilo :osoite :osoitenimi :teksti])
       :postinumero (get-in applicant [:henkilo :osoite :postinumero])
       :postitoimipaikannimi (get-in applicant [:henkilo :osoite :postitoimipaikannimi])
-      :puhelin (get-in applicant [:henkilo :puhelin])
+      :puhelin (re-find #"[0-9- ]+" (get-in applicant [:henkilo :puhelin])) ;; Strip illegal characters, only accept dash, numbers and whitespace.
       :email (get-in applicant [:henkilo :sahkopostiosoite])
       :koulutusvalinta (get-in applicant [:koulutus])
       :valmistumisvuosi (get-in applicant [:valmistumisvuosi])
@@ -264,6 +264,7 @@
                                 (assoc :opened (:created command)))
 
         ;; attaches the new application, and its id to path [:data :id], into the command
+        _ (spit "APPLICATION.edn" created-application)
         command (util/deep-merge command (action/application->command created-application))]
   (logging/with-logging-context {:applicationId (:id created-application)}
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
