@@ -837,7 +837,20 @@
 ;; ==============================================================================
 ;;
 
-(defn- obfuscated-user [user-id]
+(def ^:private erasure-strategy
+  (into {}
+        (map (fn [[k _]]
+               (cond
+                 ;; Retain id and role, anonymize other compulsory fields:
+                 (contains? #{:id :role} k) [k :retain]
+                 (not (sc/optional-key? k)) [k :anonymize]
+
+                 ;; Anonymize state, remove other optional fields:
+                 (= (:k k) :state)          [(:k k) :anonymize]
+                 :else [(:k k) :remove])))
+        User))
+
+(defn- anonymized-user [user-id]
   (let [email (str "poistunut_" user-id "@example.com")]
     {:firstName "Poistunut"
      :lastName "Käyttäjä"
@@ -846,17 +859,15 @@
      :enabled false
      :state "erased"}))
 
-(defn- erasable-key? [k]
-  (and (sc/optional-key? k) (not= (:k k) :state)))
+(def ^:private erasure-unsetter
+  (into {} (for [[k v] erasure-strategy :when (= v :remove)] [k ""])))
 
 (defn erase-user
-  "Erases/obfuscates user information but retains the user record in database. Returns nil."
+  "Erases/anonymizes user information but retains the user record in database. Returns nil."
   [user-id]
   (mongo/update-by-id :users user-id
-    {$set   (obfuscated-user user-id)
-     $unset (into {} (comp (filter (comp erasable-key? key))
-                           (map (fn [[k _]] [(:k k) ""])))
-                     User)}))
+    {$set   (anonymized-user user-id)
+     $unset erasure-unsetter}))
 
 ;;
 ;; ==============================================================================
