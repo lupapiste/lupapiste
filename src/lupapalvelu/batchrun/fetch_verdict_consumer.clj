@@ -27,9 +27,10 @@
 (when (env/feature? :jms)
 
 (defn handle-fetch-verdict-message
-  "Returns a function for handling fetch verdict messages. Calls commit-fn if
-  fetching succeeds, but also if something fails such that there's nothing to retry.
-  Calls rollback-fn fetching fails in a way that warrants a retry."
+  "Returns a function for handling fetch verdict messages. The returned function
+  calls commit-fn if fetching succeeds, but also if something fails and  there's
+  nothing to retry, and alternatively calls rollback-fn fetching fails in a way
+  that warrants a retry."
   [commit-fn rollback-fn]
   (fn [msg]
     (if-let [{:keys [id database]} (read-message msg)]
