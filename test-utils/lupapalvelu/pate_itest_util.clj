@@ -3,6 +3,10 @@
             [midje.sweet :refer :all]
             [sade.util :as util]))
 
+(defn err [error]
+  (partial expected-failure? error))
+
+(def timestamp util/to-millis-from-local-date-string)
 
 (defn no-errors?
   "Checks PATE api response and ensures request didn't contain errors"
@@ -12,6 +16,11 @@
 (defn invalid-value? [{:keys [errors]}]
   (util/=as-kw (-> errors first last) :error.invalid-value))
 
+(defn check-file [file-id exists?]
+  (fact {:midje/description (str "Check that file "
+                                 (if exists? "exists" "does not exist"))}
+    (raw sonja :view-attachment :attachment-id file-id)
+    => (contains {:status (if exists? 200 404)})))
 
 (defn init-verdict-template [as-user category]
   (let [{id :id :as template} (command as-user :new-verdict-template :category category)]

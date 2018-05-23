@@ -36,7 +36,7 @@ LUPAPISTE.AttachmentsService = function() {
     // not necessarily been initialized.
     return lupapisteApp.models.application.id()
         || pageutil.hashApplicationId();
-  }
+  };
   self.isArchivingProject = lupapisteApp.models.application.isArchivingProject;
   self.applicationModel = lupapisteApp.models.application;
 

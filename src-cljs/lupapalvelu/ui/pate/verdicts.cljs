@@ -24,6 +24,12 @@
   (and (can-edit?)
        (not published)))
 
+(defn- can-delete-verdict? [{:keys [published legacy?]}]
+  (if legacy?
+    (state/auth? :delete-legacy-verdict)
+    (and (not published)
+         (state/auth? :delete-pate-verdict))))
+
 (defn open-verdict [arg]
   (common/open-page :pate-verdict
                     @state/application-id
@@ -66,14 +72,15 @@
                                                                         open-verdict)}))
 
 
-(defn- confirm-and-delete-verdict [app-id verdict-id]
+(defn- confirm-and-delete-verdict [app-id {:keys [legacy? id published] :as verdict}]
   (hub/send  "show-dialog"
              {:ltitle          "areyousure"
               :size            "medium"
               :component       "yes-no-dialog"
-              :componentParams {:ltext "pate.delete-verdict-draft"
-                                :yesFn #(service/delete-verdict app-id
-                                                                verdict-id)}}))
+              :componentParams {:ltext (if (and legacy? published)
+                                         :verdict.confirmdelete
+                                         "pate.delete-verdict-draft")
+                                :yesFn #(service/delete-verdict app-id verdict)}}))
 
 (defn- confirm-and-replace-verdict [verdict verdict-id]
   (hub/send  "show-dialog"

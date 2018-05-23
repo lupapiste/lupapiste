@@ -91,6 +91,7 @@
                        id:        Verdict id
                        published: timestamp (can be nil)
                        modified:  timestamp
+                       legacy?:   (optional) true for legacy verdicts.
 
                       If the user is applicant, only published
                       verdicts are returned."

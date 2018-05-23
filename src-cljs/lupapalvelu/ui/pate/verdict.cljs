@@ -152,8 +152,7 @@
          [:div.col-1.col--right
           (toggle-all options)
           (pate-components/last-saved options)]])]
-     (sections/sections options :verdict)
-     (components/debug-atom state/current-verdict "Verdict")]))
+     (sections/sections options :verdict)]))
 
 
 (defn current-verdict-schema []

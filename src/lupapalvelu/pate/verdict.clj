@@ -445,7 +445,7 @@
     verdict-id))
 
 (defn verdict-summary [verdict]
-  (merge (select-keys verdict [:id :published :modified :replacement :category])
+  (merge (select-keys verdict [:id :published :modified :replacement :category :legacy?])
          (select-keys (:data verdict) [:verdict-date :handler :verdict-section :verdict-code :verdict-type])))
 
 (defn mask-verdict-data [{:keys [user application]} verdict]

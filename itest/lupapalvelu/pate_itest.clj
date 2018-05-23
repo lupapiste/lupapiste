@@ -16,9 +16,6 @@
 
 (apply-remote-minimal)
 
-(defn err [error]
-  (partial expected-failure? error))
-
 (defn mangle-keys [m fun]
   (reduce-kv (fn [acc k v]
                (assoc acc (fun k) v))
@@ -28,14 +25,12 @@
 (defn prefix-keys [m prefix]
   (mangle-keys m (util/fn->> name (str (name prefix)) keyword)))
 
-(def timestamp util/to-millis-from-local-date-string)
-
 (defn toggle-sipoo-pate [flag]
   (fact {:midje/description (str "Sipoo Pate: " flag)}
     (command admin :set-organization-boolean-path
              :organizationId "753-R"
              :path "pate-enabled"
-             :value flag) => ok?))
+             :value flag)=> ok?))
 
 (defn check-kuntagml [{:keys [organization permitType id]} verdict-date]
   (let [organization (organization-from-minimal-by-id organization)
@@ -524,7 +519,8 @@
                                                attachments)]
     (fact {:midje/description (str "New attachment: " contents)}
       attachment-id => truthy)
-    attachment-id))
+    {:attachment-id attachment-id
+     :file-id       file-id}))
 
 (defn add-verdict-attachment
   "Adds attachment to the verdict. Contents is mainly for logging. Returns attachment id."
@@ -631,21 +627,6 @@
       (-> buildings second :nationalId) => "1234567881"
       (-> buildings second :location) => [406216.0 6686856.0]
       (-> buildings second :location-wgs84) => (coord/convert "EPSG:3067" "WGS84" 5 [406216.0 6686856.0]))))
-
-(defn add-attachment-to-verdict-draft [verdict app-id]
-  (facts "Add attachment to verdict draft"
-         (let [verdict-id (:id verdict)
-               attachment-id (add-verdict-attachment app-id verdict-id "Hello world!")]
-           (fact "Delete verdict draft"
-                 (command sonja :delete-pate-verdict :id app-id
-                          :verdict-id verdict-id) => ok?)
-           (let [{:keys [pate-verdicts attachments]} (query-application sonja app-id)]
-             (fact "Verdict draft is no longer in the application"
-                   pate-verdicts =not=> (contains {:id verdict-id}))
-             (fact "Verdict draft attachment is no longer in the application"
-                   attachments =not=> (contains {:id attachment-id}))
-             (fact "There are still other attachments"
-                   (count attachments) => pos?)))))
 
 (defn add-repeating-setting
   "Returns the id of the new item."
@@ -965,7 +946,7 @@
                       foremen => (just ["vastaava-tj" "iv-tj" "erityis-tj"] :in-any-order))
                     (fact "Reviews"
                       reviews =>  (just [{:id   (find-review-id references "Helsinki")
-                                          :fi "Helsinki" :sv "Stockholm" :en "London"
+                                          :fi   "Helsinki" :sv "Stockholm" :en "London"
                                           :type "rakennekatselmus"}
                                          {:id   (find-review-id references "K3") :fi "K3" :sv "S3" :en "R3"
                                           :type "pohjakatselmus"}] :in-any-order))
@@ -1317,7 +1298,9 @@
                                             [["muutoksenhaku"] (timestamp "22.1.2018")]
                                             [["voimassa"] (timestamp "28.1.2021")]])))
                         (facts "Add attachment to verdict draft"
-                          (let [attachment-id (add-verdict-attachment app-id verdict-id "Paatosote")]
+                          (let [{:keys [attachment-id]} (add-verdict-attachment app-id
+                                                                                verdict-id
+                                                                                "Paatosote")]
                             (fact "Attachment can be deleted"
                               (command sonja :delete-attachment :id app-id
                                        :attachmentId attachment-id)=> ok?)))
@@ -1327,11 +1310,11 @@
                         (fact "Add required verdict date"
                           (edit-verdict "verdict-date" verdict-date) => no-errors?)
                         (facts "Add attachment to verdict draft again. Add regular attachment to the application, too. Add pseudo verdict attachment"
-                          (let [attachment-id (add-verdict-attachment app-id verdict-id "Otepaatos")
-                                regular-id    (add-attachment app-id "Lupa lausua"
-                                                              "ennakkoluvat_ja_lausunnot" "suunnittelutarveratkaisu")
-                                pseudo-id     (add-attachment app-id "sotaaP"
-                                                              "paatoksenteko" "paatos")]
+                          (let [{:keys [attachment-id]}     (add-verdict-attachment app-id verdict-id "Otepaatos")
+                                {regular-id :attachment-id} (add-attachment app-id "Lupa lausua"
+                                                                            "ennakkoluvat_ja_lausunnot" "suunnittelutarveratkaisu")
+                                {pseudo-id :attachment-id}  (add-attachment app-id "sotaaP"
+                                                                            "paatoksenteko" "paatos")]
                             (fact "Regular, pseudo and bogus-ids as application attachments"
                               (edit-verdict "attachments" [regular-id "bogus-id" pseudo-id])
                               => no-errors?)
@@ -1423,10 +1406,23 @@
                         (check-post-verdict-building-data (query-application sonja app-id)
                                                           doc-id operation-id)))))
                 (fact "Verdict draft to be deleted"
-                  (let  [{verdict-id :verdict-id} (command sonja :new-pate-verdict-draft
-                                                           :id app-id
-                                                           :template-id template-id)
-                         {verdict :verdict}       (query sonja :pate-verdict
-                                                         :id app-id
-                                                         :verdict-id verdict-id)]
-                    (add-attachment-to-verdict-draft verdict app-id)))))))))))
+                  (let [{verdict-id :verdict-id} (command sonja :new-pate-verdict-draft
+                                                          :id app-id
+                                                          :template-id template-id)
+                        {verdict :verdict}       (query sonja :pate-verdict
+                                                        :id app-id
+                                                        :verdict-id verdict-id)
+                        {:keys [attachment-id
+                                file-id]}        (add-verdict-attachment app-id
+                                                                         verdict-id
+                                                                         "Hello world!")]
+                    (check-file file-id true)
+                    (fact "Modern verdict cannot be deleted with legacy command"
+                      (command sonja :delete-legacy-verdict :id app-id
+                               :verdict-id verdict-id) => fail?)
+                    (fact "Deleting verdict deletes its attachment"
+                      (command sonja :delete-pate-verdict :id app-id
+                               :verdict-id verdict-id) => ok?
+                      (util/find-by-id attachment-id (:attachments (query-application sonja app-id)))
+                      => nil?
+                      (check-file file-id false))))))))))))
