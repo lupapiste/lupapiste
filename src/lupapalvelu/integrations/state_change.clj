@@ -194,7 +194,10 @@
 
 (sc/defn ^:always-validate send-via-jms [state-change-data :- StateChangeMessage endpoint-data :- EndpointData options]
   (jms/produce-with-context matti-json-queue (nippy/freeze (assoc endpoint-data :data state-change-data :options options)))
-  (debugf "Produced state-change msg (%s) to JMS queue %s" (get-in state-change-data [:toState :name]) matti-json-queue))
+  (debugf "Produced state-change (%s) msg (id: %s to JMS queue %s"
+          (get-in state-change-data [:toState :name])
+          (:message-id options)
+          matti-json-queue))
 )
 
 (defn trigger-state-change [{user :user :as command} new-state]
