@@ -853,7 +853,7 @@
 (defn- anonymized-user [user-id]
   (let [email (str "poistunut_" user-id "@example.com")]
     {:firstName "Poistunut"
-     :lastName "Käyttäjä"
+     :lastName "K\u00e4ytt\u00e4j\u00e4"
      :email email
      :username email
      :enabled false

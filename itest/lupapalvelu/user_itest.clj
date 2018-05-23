@@ -100,7 +100,7 @@
     (user/erase-user id) => nil
     (user/get-user-by-id id) => {:id id
                                  :firstName "Poistunut"
-                                 :lastName "Käyttäjä"
+                                 :lastName "K\u00e4ytt\u00e4j\u00e4"
                                  :role "applicant"
                                  :email obfuscated-username
                                  :username obfuscated-username
