@@ -47,6 +47,15 @@
                .command("retry-rakentajafi", {email: email})
                .success(function() { callback(true); })
                .call();
+           }},
+          {name: "erase",
+           button: "secondary",
+           showFor: _.constant(true),
+           operation: function (email, callback) {
+             ajax
+               .command("erase-user", {email: email})
+               .success(function () { callback(true); })
+               .call();
            }}]
   };
 
