@@ -6,8 +6,8 @@
 (def test-handler (handle-fetch-verdict-message (constantly :commit) (constantly :rollback)))
 
 (facts "handle-check-verdict-message"
-       (fact "invalid message"
-             (test-handler "commits on invalid message") => :commit)
+       (fact "commits on invalid message"
+             (test-handler "invalid message") => :commit)
        (fact "commits nonexistent application"
              (test-handler (pr-str {:id "nonexistent application id"})) => :commit
              (provided
@@ -15,6 +15,6 @@
        (fact "rolls back if fetch fails"
              (test-handler (pr-str {:id "ID"})) => :rollback
              (provided
-              (lupapalvelu.mongo/select-one :applications {:_id "ID"}) => {:id "ID" :organization "organization"}
+              (lupapalvelu.mongo/select-one :applications {:_id "ID" :state "sent"}) => {:id "ID" :organization "organization"}
               (lupapalvelu.user/batchrun-user anything) => ...user...
               (fetch-verdict/fetch-verdict anything anything anything) => false)))

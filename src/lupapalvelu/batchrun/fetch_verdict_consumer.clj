@@ -21,16 +21,21 @@
       (fetch-verdict-message-validator message)
       message)
     (catch Throwable t
-      (errorf t "Invalid message for fetch-verdict: %s" (.getMessage t))
+      (errorf "Invalid message '%s' for fetch-verdict: %s" msg (.getMessage t))
       nil)))
 
 (when (env/feature? :jms)
 
-(defn handle-fetch-verdict-message [commit-fn rollback-fn]
+(defn handle-fetch-verdict-message
+  "Returns a function for handling fetch verdict messages. Calls commit-fn if
+  fetching succeeds, but also if something fails such that there's nothing to retry.
+  Calls rollback-fn fetching fails in a way that warrants a retry."
+  [commit-fn rollback-fn]
   (fn [msg]
     (if-let [{:keys [id database]} (read-message msg)]
       (mongo/with-db (or database mongo/*db-name*)
-        (if-let [application (mongo/select-one :applications {:_id id})]
+        (if-let [application (mongo/select-one :applications {:_id   id
+                                                              :state "sent"})]
           (let [batchrun-user (user/batchrun-user [(:organization application)])
                 batchrun-name "Automatic verdicts checking"]
             (if (fetch-verdict/fetch-verdict batchrun-name batchrun-user application)
