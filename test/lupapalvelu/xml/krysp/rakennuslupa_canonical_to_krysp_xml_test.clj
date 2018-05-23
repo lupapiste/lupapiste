@@ -400,3 +400,14 @@
       (fact "suunnittelijaRoolikoodi" (xml/get-text suunnittelija [:suunnittelijaRoolikoodi]) => "muu")
       (fact "muuSuunnittelijaRooli"   (xml/get-text suunnittelija [:muuSuunnittelijaRooli])   => "ei listassa -rooli")
       (fact "VRKrooliKoodi"           (xml/get-text suunnittelija [:VRKrooliKoodi])           => "erityissuunnittelija"))))
+
+(def rakval-jatkolupa-canonical (application-to-canonical jatkolupa-application "fi"))
+
+(facts "rakval jatkolupa"
+
+  (facts "2.2.2"
+    (let [xml_s (-> rakval-jatkolupa-canonical (rakennuslupa-element-to-xml "2.2.2") indent-str)
+          app-info (-> xml_s xml/parse cr/strip-xml-namespaces)]
+
+      (validator/validate xml_s (:permitType jatkolupa-application) "2.2.2")
+      (fact "asiankuvaus" (xml/get-text app-info [:rakennusvalvontaasianKuvaus]) => "Pari vuotta jatko-aikaa, ett\u00e4 saadaan rakennettua loppuun."))))
