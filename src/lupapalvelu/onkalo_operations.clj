@@ -29,7 +29,9 @@
   (let [application (domain/get-application-no-access-checking application-id)
         attachment (util/find-by-id attachment-id (:attachments application))
         attachment-state (-> attachment :metadata :tila (keyword))
-        read-only (= target-state :arkistoitu)
+        read-only (when (:readOnly attachment)
+                    (or (= target-state :arkistoitu) ; Keep current readOnly status when re-archiving
+                        (#{:paatoksenteko :katselmukset_ja_tarkastukset} (-> attachment :type :type-group keyword)))) ; Remove read-only from others, but keep for verdicts & tasks
         modified (sade.core/now)]
     (cond
       (not application) (resp/status 400 (str "Application " application-id " not found"))

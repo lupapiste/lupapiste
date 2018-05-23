@@ -1048,11 +1048,18 @@
   (let [attachment (get-attachment-info application attachmentId)
         readonly-after-sent? (op/get-primary-operation-metadata application :attachments-readonly-after-sent)]
     (when (or (attachment-is-readOnly? attachment)
+              (= :arkistoitu (-> attachment :metadata :tila keyword))
               (and readonly-after-sent?
                    (not (states/pre-sent-application-states (-> application :state keyword)))
                    (not (auth/application-authority? application user))))
       (fail :error.unauthorized
             :desc "Attachment is read only."))))
+
+(defn attachment-not-archived [{{:keys [attachmentId]} :data application :application}]
+  (when (and attachmentId
+             (= (-> (get-attachment-info application attachmentId) :metadata :tila keyword) :arkistoitu))
+    (fail :error.unauthorized
+          :desc "Attachment is archived.")))
 
 (defn attachment-matches-application
   ([{{:keys [attachmentId]} :data :as command}]
