@@ -220,7 +220,8 @@
        (.close conn))
      (doseq [^MessageProducer conn (:producers @state)]
        (.close conn))
-     (.close ^Connection (get-default-connection))
+     (when-let [conn (get-default-connection)]
+       (.close ^Connection conn))
 
      (when close-embedded?
        (when-let [artemis (ns-resolve 'artemis-server 'embedded-broker)]
