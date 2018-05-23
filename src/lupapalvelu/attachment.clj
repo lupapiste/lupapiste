@@ -1054,6 +1054,12 @@
       (fail :error.unauthorized
             :desc "Attachment is read only."))))
 
+(defn attachment-not-archived [{{:keys [attachmentId]} :data application :application}]
+  (when (and attachmentId
+             (= (-> (get-attachment-info application attachmentId) :metadata :tila keyword) :arkistoitu))
+    (fail :error.unauthorized
+          :desc "Attachment is archived.")))
+
 (defn attachment-matches-application
   ([{{:keys [attachmentId]} :data :as command}]
    (attachment-matches-application command attachmentId))
