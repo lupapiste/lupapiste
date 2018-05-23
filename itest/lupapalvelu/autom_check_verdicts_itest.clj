@@ -88,8 +88,11 @@
           (-> application-sent :history last :state) => "verdictGiven"
           (-> application-verdict-given :history last :state) => "verdictGiven"))
 
+
+      ;; The following tests do not go through message queue
+
       (fact "batchrun verdicts not checked, if organization doesn't have url"
-        (fetch-verdicts {:jms? true :wait-ms 2000}) => nil?
+        (fetch-verdicts) => nil?
         (provided
           (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
           (mongo/select :organizations anything anything) => [{:id "bar"}]
@@ -99,7 +102,7 @@
 
       (fact "batchrun check-for-verdicts logs :error on exception"
         ;; make sure logging functions are called in expected ways
-        (fetch-verdicts {:jms? true :wait-ms 2000}) => nil?
+        (fetch-verdicts) => nil?
         (provided
           (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
           (mongo/select :organizations anything anything) => [{:id "bar" :krysp {:foo {:url "http://test"}}}]
@@ -109,7 +112,7 @@
 
       (fact "batchrun check-for-verdicts logs failure details"
         ;; make sure logging functions are called in expected ways
-        (fetch-verdicts {:jms? true :wait-ms 2000}) => anything
+        (fetch-verdicts) => anything
         (provided
           (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
           (mongo/select :organizations anything anything) => [{:id "bar" :krysp {:foo {:url "http://test"}}}]
