@@ -24,8 +24,6 @@
       (errorf "Invalid message '%s' for fetch-verdict: %s" msg (.getMessage t))
       nil)))
 
-(when (env/feature? :jms)
-
 (defn handle-fetch-verdict-message
   "Returns a function for handling fetch verdict messages. The returned function
   calls commit-fn if fetching succeeds, but also if something fails and  there's
@@ -45,6 +43,8 @@
           (do (errorf "Could not find application for fetching verdict: %s" id)
               (commit-fn))))
       (commit-fn)))) ; Invalid message, nothing to be done
+
+(when (env/feature? :jms)
 
 (def fetch-verdicts-queue "lupapiste/fetch-verdicts.#")
 
