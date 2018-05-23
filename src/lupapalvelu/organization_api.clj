@@ -169,8 +169,8 @@
 
 (defn- bulletin-scope-settings-validator
   [{{:keys [notificationEmail descriptionsFromBackendSystem]} :data}]
-  (when (and notificationEmail (not (v/valid-email? notificationEmail))
-             (fail! :error.email)))
+  (when (and notificationEmail (not (v/valid-email? notificationEmail)))
+    (fail! :error.email))
   (when (and descriptionsFromBackendSystem (not (boolean? descriptionsFromBackendSystem)))
     (fail! :error.invalid-value)))
 

@@ -167,7 +167,6 @@
   {:description "Creates system user for embedded Lupapiste view in Facta. Admin only."
    :parameters [municipality-name organization-ids]
    :input-validators [(partial action/string-parameters [:municipality-name])
-                      (partial action/email-validator)
                       (partial action/vector-parameter-of :organization-ids string?)]
    :user-roles #{:admin}}
   [_]

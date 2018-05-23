@@ -420,7 +420,7 @@
     (when (not-empty invalid-paths) {:description "Invalid rows definition" :schema name :errors invalid-paths})))
 
 (defn validate-value-reference [key doc-schema {:keys [path] :as schema}]
-  (when (and (key schema) (->> (build-absolute-path (butlast path) (get-in schema [key :path]))
+  (when (and (get schema key) (->> (build-absolute-path (butlast path) (get-in schema [key :path]))
                                (get-in-schema doc-schema)
                                nil?))
     {:description (str "Invalid " (name key) " path") :schema (:name schema) :path path :errors (get-in schema [key :path])}))

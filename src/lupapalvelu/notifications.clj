@@ -41,7 +41,7 @@
       (str (sanit firstName) " " (sanit lastName) " <" (sanit email) ">"))))
 
 (defn- send-mail-to-recipient! [recipient subject msg]
-  {:pre [(map? recipient) (:email recipient)]}
+  {:pre [(map? recipient) (string? (:email recipient))]}
   (let [to (->to recipient)]
     (if (env/value :email :dummy)
      (email/send-email-message to subject msg)

@@ -612,11 +612,12 @@
     (some? (select1 xml [:Rakennus :sijaintitieto :Sijainti :piste :Point])) :building
     (some? (select1 xml [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :alue])) :area))
 
-(defn resolve-coordinates [xml kuntalupatunnus]
+(defn resolve-coordinates
   "Primarily uses rakennuspaikka coordinates,
    if not found then takes coordinates from first building if exists,
    if still not found then checks if location is area like and calculates interior point
    finally returns nil and location is resolved later with kiinteistotunnus and kuntalupatunnus"
+  [xml kuntalupatunnus]
   (let [coordinate-type (resolve-coordinate-type xml)
         Rakennuspaikka  (cr/all-of xml [:rakennuspaikkatieto :Rakennuspaikka])]
     (case coordinate-type

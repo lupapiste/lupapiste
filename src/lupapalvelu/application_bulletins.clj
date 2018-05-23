@@ -171,6 +171,8 @@
 (defn get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))
 
+; FIXME: the `:- ApplicationBulletin` is syntactically in wrong place here, and does not actually validate anything
+; it seems hell lot of tests break if we turn the validation on: not feasible to fix atm.
 (sc/defn ^:always-validate create-bulletin [application created & [updates]] :- ApplicationBulletin
   (let [app-snapshot (create-bulletin-snapshot application)
        app-snapshot (if updates

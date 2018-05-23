@@ -59,9 +59,8 @@
 
 (defschema Role (apply sc/enum all-roles))
 (defschema OrgId (sc/pred keyword? "Organization ID"))
-(defschema Authz (sc/either (sc/pred string? "Authz access right")
-                            (sc/pred keyword? "Authz access right")))
-(defschema OrgAuthz {OrgId (sc/either [Authz] #{Authz})})
+(defschema Authz (sc/cond-pre sc/Str sc/Keyword))
+(defschema OrgAuthz {OrgId (sc/cond-pre [Authz] #{Authz})})
 (defschema PersonIdSource (sc/enum "identification-service" "user"))
 
 (defschema User

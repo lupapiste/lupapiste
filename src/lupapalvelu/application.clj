@@ -816,9 +816,6 @@
     (when-let [{url :url credentials :credentials} (org/get-krysp-wfs {:_id organization} permit-type)]
       (building-reader/building-xml url credentials property-id))))
 
-(defn buildings-for-documents [xml]
-  (->> (building-reader/->buildings xml)
-       (map #(-> {:data %}))))
 
 (defn update-buildings-array! [xml application all-buildings]
   (let [doc-buildings (building/building-ids application)
@@ -845,7 +842,7 @@
 (defn fetch-buildings [{:keys [application] :as command} propertyId all-buildings]
   (let [building-xml              (fetch-building-xml (:organization application) "R" propertyId)
         old-building-docs         (domain/get-documents-by-name application "archiving-project")
-        buildings-and-structures  (buildings-for-documents building-xml)
+        buildings-and-structures  (building-reader/buildings-for-documents building-xml)
         document-datas            (schema-datas nil buildings-and-structures)
         structure-descriptions    (map :description buildings-and-structures)
         building-docs             (map (partial document-data->op-document application) document-datas)
@@ -855,7 +852,7 @@
         command                   (util/deep-merge command (action/application->command application))]
   (when (some? (:id primary-operation))
     (do
-      (mapv #(doc-persistence/remove! command %) old-building-docs)
+      (run! #(doc-persistence/remove! command %) old-building-docs)
       (action/update-application command {$set  {:primaryOperation    primary-operation
                                                  :secondaryOperations secondary-ops}
                                           $push {:documents {$each building-docs}}})
@@ -866,7 +863,7 @@
         primary-op-id (get-in application [:primaryOperation :id])
         secondary-building-docs (filter #(not (= (-> % :schema-info :op :id) primary-op-id)) building-docs)
         secondary-buildings (filter #(not (= (:operationId %) primary-op-id)) (:buildings application))]
-    (mapv #(doc-persistence/remove! command  %) secondary-building-docs)
+    (run! #(doc-persistence/remove! command  %) secondary-building-docs)
     (action/update-application command {$pull {:buildings {:buildingId {$in (map :buildingId secondary-buildings)}}}})))
 
 (defn jatkoaika-application? [application]
