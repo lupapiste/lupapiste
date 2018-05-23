@@ -62,7 +62,7 @@
    {:user-roles #{:trusted-salesforce}}
    [{{start-ts :startTimestampMillis
       end-ts   :endTimestampMillis} :data user :user}]
-    (ok :documents
+    (ok :transactions
         (exports/archive-api-usage-to-salesforce (when start-ts (Long/parseLong start-ts 10))
                                                  (when end-ts (Long/parseLong end-ts 10))))))
 

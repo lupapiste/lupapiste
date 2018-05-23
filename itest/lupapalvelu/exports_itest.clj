@@ -151,10 +151,10 @@
                               {:basic-auth       ["salesforce-etl" "salesforce-etl"]
                                :follow-redirects false
                                :throw-exceptions false})
-            data (get-in resp [:body :documents])]
+            data (get-in resp [:body :transactions])]
         (fact "correct credentials"
           (:status resp) => 200)
 
         (fact "correct keys"
           (when (count data)
-            (-> data first keys) => (contains #{:id :date :quantity} :gaps-ok)))))))
+            (-> data first keys) => (contains #{:organization :lastDateOfTransactionMonth :quantity} :gaps-ok)))))))
