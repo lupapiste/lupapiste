@@ -102,8 +102,8 @@
                                                 :content-type    sc/Str
                                                 :size            sc/Num
                                                 :created         ssc/Timestamp}]
-   (sc/optional-key :company)                 {:id sc/Str
-                                               :role (sc/enum "admin" "user")
+   (sc/optional-key :company)                 {:id     sc/Str
+                                               :role   (sc/enum "admin" "user")
                                                :submit sc/Bool}
    (sc/optional-key :partnerApplications)     {(sc/optional-key :rakentajafi) {:id      sc/Str
                                                                                :created ssc/Timestamp
@@ -647,17 +647,17 @@
    role, throws exception."
   [caller user-data & {:keys [send-email] :or {send-email true}}]
   (validate-create-new-user! caller user-data)
-  (let [user-entry   (create-new-user-entity user-data)
-        old-user     (get-user-by-email (:email user-entry))
-        new-user     (if old-user
-                       (assoc user-entry :id (:id old-user))
-                       (assoc user-entry :id (mongo/create-id)))
-        email        (:email new-user)
+  (let [user-entry (create-new-user-entity user-data)
+        old-user   (get-user-by-email (:email user-entry))
+        new-user   (if old-user
+                     (assoc user-entry :id (:id old-user))
+                     (assoc user-entry :id (mongo/create-id)))
+        email      (:email new-user)
         {old-id :id old-role :role} old-user
-        new-user     (if (applicant? user-data)
-                       (assoc new-user :notification {:titleI18nkey   "user.notification.firstLogin.title"
-                                                      :messageI18nkey "user.notification.firstLogin.message"})
-                       new-user)]
+        new-user   (if (applicant? user-data)
+                     (assoc new-user :notification {:titleI18nkey   "user.notification.firstLogin.title"
+                                                    :messageI18nkey "user.notification.firstLogin.message"})
+                     new-user)]
     (try
       (condp = old-role
         nil (do
