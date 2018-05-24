@@ -725,8 +725,7 @@
           (str "org-authz-roles depends on application, can't be used outside application context - " action-name))
 
   (let [action-keyword (keyword action-name)
-        {:keys [user-roles user-authz-roles org-authz-roles]} meta-data]
-
+        {:keys [user-roles]} meta-data]
     (tracef "registering %s: '%s' (%s:%s)" (name action-type) action-name ns-str line)
     (swap! actions assoc
            action-keyword
