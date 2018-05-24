@@ -228,7 +228,8 @@
                    "triggers-target-service.js"
                    "trigger-service.js"
                    "navi-sidebar-service.js"
-                   "batch-service.js"]}
+                   "batch-service.js"
+                   "organizations-users-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
