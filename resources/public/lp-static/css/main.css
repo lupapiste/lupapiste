@@ -29347,7 +29347,7 @@ div.pate-spin > i:before {
 }
 
 table.pate-verdicts-table {
-  width: initial;
+  width: 100%;
 }
 
 table.pate-verdicts-table tr:hover {
@@ -36155,18 +36155,13 @@ div.organization-link-cell {
 body.admin .nav-box,
 body.authority-admin .nav-box {
   max-width: none;
-  padding-left: 48px;
-  padding-right: 48px;
+  padding-left: 24px;
+  padding-right: 24px;
 }
 
 body.admin .nav-box .brand > a,
 body.authority-admin .nav-box .brand > a {
   margin-left: 0;
-}
-
-body.admin .header-menu,
-body.authority-admin .header-menu {
-  padding-right: 48px;
 }
 
 .navi-sidebar {

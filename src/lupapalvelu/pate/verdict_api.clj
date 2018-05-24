@@ -73,15 +73,16 @@
 (defcommand new-pate-verdict-draft
   {:description      "Composes new verdict draft from the latest published
   template and its settings. Returns the verdict-id."
-   :feature          :pate
-   :user-roles       #{:authority}
-   :parameters       [id template-id]
-   :input-validators [(partial action/non-blank-parameters [:id])]
-   :pre-checks       [pate-enabled
-                      (template/verdict-template-check :application :published)]
-   :states           states/post-submitted-states}
+   :feature             :pate
+   :user-roles          #{:authority}
+   :parameters          [id template-id]
+   :optional-parameters [replacement-id]
+   :input-validators    [(partial action/non-blank-parameters [:id])]
+   :pre-checks          [pate-enabled
+                          (template/verdict-template-check :application :published)]
+   :states              states/post-submitted-states}
   [command]
-  (ok :verdict-id (verdict/new-verdict-draft template-id command)))
+  (ok :verdict-id (verdict/new-verdict-draft template-id command replacement-id)))
 
 (defquery pate-verdicts
   {:description      "List of verdicts. Item properties:

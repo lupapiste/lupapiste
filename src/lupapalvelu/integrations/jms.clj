@@ -223,7 +223,7 @@
      (when-let [conn (get-default-connection)]
        (.close ^Connection conn))
 
-     (when close-embedded?
+     (when (and close-embedded? (find-ns 'artemis-server))
        (when-let [artemis (ns-resolve 'artemis-server 'embedded-broker)]
          (info "Stopping Artemis...")
          (.stop artemis)))))

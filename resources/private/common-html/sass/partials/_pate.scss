@@ -343,7 +343,7 @@ div.pate-spin {
 }
 
 table.pate-verdicts-table {
-  width: initial;
+  width: 100%;
   @include no-row-hover;
   tr {
     border: none;

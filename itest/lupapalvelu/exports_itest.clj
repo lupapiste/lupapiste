@@ -151,10 +151,14 @@
                               {:basic-auth       ["salesforce-etl" "salesforce-etl"]
                                :follow-redirects false
                                :throw-exceptions false})
-            data (get-in resp [:body :documents])]
+            transactions (get-in resp [:body :transactions])
+            most-recent-download-ts (get-in resp [:body :mostRecentTransactionTimestampMillis])]
         (fact "correct credentials"
           (:status resp) => 200)
 
         (fact "correct keys"
-          (when (count data)
-            (-> data first keys) => (contains #{:id :date :quantity} :gaps-ok)))))))
+          (when (count transactions)
+            (-> transactions first keys) => (contains #{:organization :lastDateOfTransactionMonth :quantity} :gaps-ok)))
+
+        (fact "has most recent download timestamp"
+              most-recent-download-ts => number?)))))

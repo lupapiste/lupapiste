@@ -91,12 +91,13 @@
                       (resp/status 500 "Unknown server error")))
                   `(resp/status 200 {}))))))))
 
-(defmacro defendpoint [path & content]
+(defmacro defendpoint
   "Defines a plain JSON endpoint which can be accessed with basic authentication or autologin.
 
    If the metadata map given as second argument contains the key :oauth-scope, then the user will be looked up
    (only) by comparing the token given in Authorization header (Bearer token) to issued OAuth access tokens.
    The scopes requested at authorization time must include the one defined in endpoint metadata."
+  [path & content]
   `(defendpoint-for usr/rest-user? ~path true ~@content))
 
 

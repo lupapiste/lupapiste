@@ -196,32 +196,23 @@
 
   ;; TODO: Testaa "Liiteri"
 
-  (fact "Helsinki"
-   (let [response (plan-urls-by-point-proxy {:params {:x "395628" :y "6677704" :municipality "091"}})
-         body     (json/decode (:body response) true)]
-     (first body) => {:id "8755"
-                      :kuntanro "91"
-                      :kaavanro "8755"
-                      :vahvistett_pvm "19.12.1985"
-                      :linkki "http://img.sito.fi/kaavamaaraykset/91/8755.pdf"
-                      :type "sito"}))
 
-  #_(fact "Mikkeli"
+  (fact "Mikkeli"
     (let [response (plan-urls-by-point-proxy {:params {:x "533257.514" :y "6828489.823" :municipality "491"}})
           body (json/decode (:body response) true)]
 
-      (first body) => {:id "1436"
-                       :kaavanro "12891"
-                       :kaavalaji "RKM"
-                       :kasitt_pvm "3/31/1989 12:00:00 AM"
-                       :linkki "http://194.111.49.141/asemakaavapdf/12891.pdf"
+      (first body) => {:id "606"
+                       :kaavalaji "RK"
+                       :kaavanro "12021"
+                       :kasitt_pvm "6/1/1984 12:00:00 AM"
+                       :linkki "http://194.111.49.141/asemakaavapdf/12021.pdf"
                        :type "bentley"}
 
-      (second body) => {:id "1440"
-                        :kaavanro "12021"
+      (second body) => {:id "610"
                         :kaavalaji "RK"
-                        :kasitt_pvm "6/1/1984 12:00:00 AM"
-                        :linkki "http://194.111.49.141/asemakaavapdf/12021.pdf"
+                        :kaavanro "12001"
+                        :kasitt_pvm "5/31/1967 12:00:00 AM"
+                        :linkki "http://194.111.49.141/asemakaavapdf/12001.pdf"
                         :type "bentley"})))
 
 (facts "general-plan-urls-by-point-proxy"

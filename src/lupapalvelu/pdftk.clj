@@ -10,7 +10,7 @@
 (defn create-pdftk-file [in file-name]
   (handle-result (shell/sh "pdftk" "-" "output" file-name :in in)))
 
-(defn rotate-pdf [in file-name rotation]
+(defn rotate-pdf [in file-name ^long rotation]
   (let [rot (case rotation -90 "left", 90 "right", 180 "down")]
     (handle-result (shell/sh "pdftk" "-" "cat" (str "1-end" rot) "output" file-name :in in))))
 

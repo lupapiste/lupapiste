@@ -50,7 +50,7 @@
   (defn verdict-xml [typeName & [search-key search-val]]
     (let [verdicts-by-type (filter (comp #{typeName} :type-name) @dummy-verdicts)]
       (-> (or
-            (when (and search-val search-key)) (util/find-by-key search-key search-val verdicts-by-type)
+            (when (and search-val search-key) (util/find-by-key search-key search-val verdicts-by-type))
             (first verdicts-by-type))
           :template-file)))
 

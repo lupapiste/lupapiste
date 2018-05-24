@@ -248,3 +248,7 @@
   Return buildings summary for the given file."
   [fname]
   (-> fname slurp (parse-string "utf-8") cr/strip-xml-namespaces ->buildings-summary))
+
+(defn buildings-for-documents [xml]
+  (->> (->buildings xml)
+       (map (fn [b] {:data b}))))

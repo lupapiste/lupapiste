@@ -131,7 +131,7 @@
                  [org.geotools/gt-epsg-wkt "18.1"]
 
                  ; Message Queue
-                 [org.apache.activemq/artemis-jms-client "2.5.0"]
+                 [org.apache.activemq/artemis-jms-client "2.6.0"]
                  [lupapiste/jms-client "0.2.0"]
                  [com.taoensso/nippy "2.14.0"]
 
@@ -170,7 +170,7 @@
   :profiles {:dev      {:dependencies   [[midje "1.9.1"]
                                          [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                          [com.raspasov/clj-ssh "0.5.12"]
-                                         [org.apache.activemq/artemis-jms-server "2.5.0"]
+                                         [org.apache.activemq/artemis-jms-server "2.6.0"]
                                          [rhizome "0.2.7"]
                                          [pdfboxing "0.1.13"]
                                          [cider/piggieback "0.3.3"]

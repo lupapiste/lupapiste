@@ -531,7 +531,7 @@
     (try
       (f command status)
       (catch Throwable e
-        (error "post fn fail after command " (:name command) ": " e)))))
+        (error "post fn fail after command " (:action command) ": " e)))))
 
 (defn- enrich-default-permissions [command]
   (->> (set/union (permissions/get-global-permissions command)
