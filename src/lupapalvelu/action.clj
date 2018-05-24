@@ -541,7 +541,10 @@
        (assoc command :permissions)))
 
 (defn- enrich-action-contexts [command]
-  (reduce (fn [cmd ctx-fn] (ctx-fn cmd)) command (:contexts (meta-data command))))
+  (reduce (fn [command ctx-fn]
+            (ctx-fn command))
+          command
+          (-> command meta-data :contexts)))
 
 (defn- run [command validators execute?]
   (try+
