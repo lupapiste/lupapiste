@@ -583,6 +583,9 @@
     (when street
       (str street " " number))))
 
+(defn rakennuspaikka-property-id [rakennuspaikka-element]
+  (-> rakennuspaikka-element :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus))
+
 (defn- resolve-location-by-property-id [property-id kuntalupatunnus]
   (warn "Falling back to resolve location for kuntalupatunnus" kuntalupatunnus "by property id" property-id)
   (if-let [location (-> (find-address/search-property-id "fi" property-id)
@@ -667,8 +670,9 @@
             suunnittelijat (map cr/all-of (select asia [:osapuolettieto :Osapuolet :suunnittelijatieto :Suunnittelija]))
             [hakijat muut-osapuolet] ((juxt filter remove) #(= "hakija" (:VRKrooliKoodi %)) osapuolet)
             kiinteistotunnus (if (and (seq coord-array-Rakennuspaikka) (#{:building :area} coordinates-type))
-                               (resolve-property-id-by-point coord-array-Rakennuspaikka)
-                               (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus))
+                               (or (resolve-property-id-by-point coord-array-Rakennuspaikka)
+                                   (rakennuspaikka-property-id Rakennuspaikka))
+                               (rakennuspaikka-property-id Rakennuspaikka))
             municipality (or (prop/municipality-by-property-id kiinteistotunnus) kuntakoodi)]
 
         (-> (merge
