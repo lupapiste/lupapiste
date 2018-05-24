@@ -24,6 +24,7 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp]
             [monger.operators :refer :all]
             [ring.util.codec :as codec]
@@ -397,24 +398,30 @@
 
 (declare enrich-verdict)
 
-(defn new-verdict-draft [template-id {:keys [application organization created]
-                                      :as   command}]
-  (let [template       (template/verdict-template @organization template-id)
-        {draft :draft} (-> {:template    template
-                            :draft       (default-verdict-draft template)
-                            :application application}
-                           initialize-verdict-draft
-                           (update-in [:draft]
-                                      assoc
-                                      :id  (mongo/create-id)
-                                      :modified created))]
-    (action/update-application command
-                               {$push {:pate-verdicts
-                                       (sc/validate schemas/PateVerdict draft)}})
-    (:id draft)))
+(defn new-verdict-draft
+  ([template-id command]
+    (new-verdict-draft template-id command nil))
+  ([template-id {:keys [application organization created] :as command} replacement-id]
+   (let [template (template/verdict-template @organization template-id)
+         {draft :draft} (-> {:template    template
+                             :draft       (default-verdict-draft template)
+                             :application application}
+                            initialize-verdict-draft
+                            (update-in [:draft]
+                                       assoc
+                                       :id (mongo/create-id)
+                                       :modified created))
+         draft (if replacement-id
+                 (assoc draft :replacement {:replaces replacement-id})
+                 draft)]
+     (action/update-application command
+                                {$push {:pate-verdicts
+                                        (sc/validate schemas/PateVerdict draft)}})
+     (:id draft))))
 
 (defn verdict-summary [verdict]
-  (select-keys verdict [:id :published :modified]))
+  (merge (select-keys verdict [:id :published :modified :replacement :category])
+         (select-keys (:data verdict) [:verdict-date :handler :verdict-section :verdict-code :verdict-type])))
 
 (defn mask-verdict-data [{:keys [user application]} verdict]
   (cond
@@ -847,6 +854,12 @@
        (app/get-link-permit-apps)
        (first)))
 
+(defn replace-verdict [command old-verdict-id verdict-id]
+  (action/update-application command
+                             {:pate-verdicts {$elemMatch {:id old-verdict-id}}}
+                             {$set {:pate-verdicts.$.replacement {:user (usr/summary (:user command))
+                                                                  :replaced-by verdict-id}}}))
+
 (defn publish-verdict
   "Publishing verdict does the following:
    1. Finalize and publish verdict
@@ -910,6 +923,9 @@
         (:id application)
         (get-in verdict [:data :handler])
         (get-in verdict [:data :voimassa])))
+
+    (when-let [replace-verdict-id (get-in verdict [:replacement :replaces])]
+      (replace-verdict command replace-verdict-id (:id verdict)))
 
     (let [verdict-attachment (pdf/create-verdict-attachment command (assoc verdict :published created))
           verdict            (assoc verdict :verdict-attachment verdict-attachment)]

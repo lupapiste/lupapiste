@@ -92,6 +92,11 @@
                                              {:type review-type})]
           (sc/optional-key :plans)   [PateVerdictReq]}))
 
+(defschema ReplacementPateVerdict
+  {(sc/optional-key :user)          sc/Str
+   (sc/optional-key :replaced-by)   ssc/ObjectIdStr
+   (sc/optional-key :replaces)      ssc/ObjectIdStr})
+
 (defschema PateVerdict
   (merge PateCategory
          {;; Verdict is draft until it is published
@@ -105,7 +110,8 @@
                                                                            "lautakunta")}
           (sc/optional-key :archive)    {:verdict-date                    ssc/Timestamp
                                          (sc/optional-key :lainvoimainen) ssc/Timestamp
-                                         :verdict-giver                   sc/Str}}))
+                                         :verdict-giver                   sc/Str}
+          (sc/optional-key :replacement) ReplacementPateVerdict}))
 
 ;; Schema utils
 

@@ -29347,7 +29347,7 @@ div.pate-spin > i:before {
 }
 
 table.pate-verdicts-table {
-  width: initial;
+  width: 100%;
 }
 
 table.pate-verdicts-table tr:hover {
