@@ -9,7 +9,6 @@
             [sade.strings :as ss]
             [sade.coordinate :as coordinate]
             [sade.core :refer [now def- fail]]
-            [sade.xml :as sxml]
             [lupapalvelu.drawing :as drawing]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.property :as prop]
@@ -502,6 +501,13 @@
 
 ;; Coordinates
 
+(defn select1-non-zero-point
+  "Select first element of matching selector, which doesn't have '0.0' as gml:Point/gml:pos value."
+  [xml selector]
+  (->> (select xml selector)
+       (remove #(some #{"0.0"} (-> (get-text % [:Point :pos]) (ss/split #"\s+"))))
+       first))
+
 (defn- resolve-point-coordinates [point-xml-with-ns point-str]
   (try
     (when-let [source-projection (common/->source-projection point-xml-with-ns [:Point])]
@@ -512,7 +518,7 @@
 
 (defn- resolve-building-coordinates [xml]
   (try
-    (let [building-location-xml (select1 xml [:Rakennus :sijaintitieto :Sijainti])
+    (let [building-location-xml (select1-non-zero-point xml [:Rakennus :sijaintitieto :Sijainti])
           building-coordinates-str (->> (cr/all-of building-location-xml) :piste :Point :pos)
           building-coordinates (ss/split building-coordinates-str #"\s+")
           source-projection (common/->source-projection building-location-xml [:Point])]
@@ -612,7 +618,7 @@
 (defn resolve-coordinate-type [xml]
   (cond
     (some? (select1 xml [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste])) :point
-    (some? (select1 xml [:Rakennus :sijaintitieto :Sijainti :piste :Point])) :building
+    (some? (select1-non-zero-point xml [:Rakennus :sijaintitieto :Sijainti :piste :Point])) :building
     (some? (select1 xml [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :alue])) :area))
 
 (defn resolve-coordinates
