@@ -656,11 +656,11 @@
       )
 
     (fact "Should resolve coordinates"
-      (resolve-coordinates point-xml "14-0241-R 3") => [393033.614 6707228.994]
-      (resolve-coordinates building-xml  "895-2015-002") => [192413.401 6745769.046]
-      (resolve-coordinates area-xml "895-2015-001") => [192416.901187 6745788.046445]
-      (resolve-coordinates invalid-xml "895-2015-001") => nil
-      (resolve-coordinates inv-area-xml "895-2015-001") => nil)))
+      (resolve-coordinates point-xml) => [393033.614 6707228.994]
+      (resolve-coordinates building-xml ) => [192413.401 6745769.046]
+      (resolve-coordinates area-xml) => [192416.901187 6745788.046445]
+      (resolve-coordinates invalid-xml) => nil
+      (resolve-coordinates inv-area-xml) => nil)))
 
 
 (facts* "Tests for TJ/suunnittelijan verdicts parsing"

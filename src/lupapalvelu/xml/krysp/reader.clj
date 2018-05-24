@@ -502,13 +502,13 @@
 
 ;; Coordinates
 
-(defn- resolve-point-coordinates [point-xml-with-ns point-str kuntalupatunnus]
+(defn- resolve-point-coordinates [point-xml-with-ns point-str]
   (try
     (when-let [source-projection (common/->source-projection point-xml-with-ns [:Point])]
       (let [coords (ss/split point-str #" ")]
         (when-not (contains? coordinate/known-bad-coordinates coords)
           (coordinate/convert source-projection common/to-projection 3 coords))))
-    (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus))))
+    (catch Exception e (error e "Coordinate conversion failed for point-str" point-str))))
 
 (defn- resolve-building-coordinates [xml]
   (try
@@ -612,18 +612,18 @@
     (some? (select1 xml [:Rakennus :sijaintitieto :Sijainti :piste :Point])) :building
     (some? (select1 xml [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :alue])) :area))
 
-(defn resolve-coordinates [xml kuntalupatunnus]
+(defn resolve-coordinates
   "Primarily uses rakennuspaikka coordinates,
    if not found then takes coordinates from first building if exists,
    if still not found then checks if location is area like and calculates interior point
    finally returns nil and location is resolved later with kiinteistotunnus and kuntalupatunnus"
+  [xml]
   (let [coordinate-type (resolve-coordinate-type xml)
         Rakennuspaikka  (cr/all-of xml [:rakennuspaikkatieto :Rakennuspaikka])]
     (case coordinate-type
       :point    (resolve-point-coordinates
                   (select1 xml [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste])
-                  (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos)
-                  kuntalupatunnus)
+                  (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos))
       :building (resolve-building-coordinates xml)
       :area     (resolve-area-coordinates xml)
       nil)))
@@ -662,7 +662,7 @@
             osoite-Rakennuspaikka (build-address osoite-xml asioimiskieli-code)
 
             coordinates-type (resolve-coordinate-type asia)
-            [x y :as coord-array-Rakennuspaikka] (resolve-coordinates asia kuntalupatunnus)
+            [x y :as coord-array-Rakennuspaikka] (resolve-coordinates asia)
             osapuolet (map cr/all-of (select asia [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli]))
             suunnittelijat (map cr/all-of (select asia [:osapuolettieto :Osapuolet :suunnittelijatieto :Suunnittelija]))
             [hakijat muut-osapuolet] ((juxt filter remove) #(= "hakija" (:VRKrooliKoodi %)) osapuolet)
