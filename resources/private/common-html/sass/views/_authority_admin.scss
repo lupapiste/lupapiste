@@ -257,16 +257,11 @@ div.organization-link-cell {
 body.admin .nav-box,
 body.authority-admin .nav-box {
   max-width: none;
-  padding-left: 2 * $marginL;
-  padding-right: 2 * $marginL;
+  padding-left: $marginL;
+  padding-right: $marginL;
   .brand > a {
     margin-left: 0;
   }
-}
-
-body.admin .header-menu,
-body.authority-admin .header-menu {
-  padding-right: 48px;
 }
 
 // Note on breakpoints: IE does not support display: initial.
