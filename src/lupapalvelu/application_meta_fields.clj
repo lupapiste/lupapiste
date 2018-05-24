@@ -219,6 +219,11 @@
   "Enriches application with all meta fields. Causes database lookups."
   (partial enrich-with-meta-fields meta-fields))
 
+(defn- substitute-foreman? [foreman-doc]
+  (let [substitute (get-in foreman-doc [:data :sijaistus])]
+    (not (and (empty? (get-in substitute [:sijaistettavaHloEtunimi :value]))
+              (empty? (get-in substitute [:sijaistettavaHloSukunimi :value]))))))
+
 (defn enrich-with-link-permit-data [{application-id :id :as application}]
   (if-let [links (seq (when application-id (mongo/select :app-links {:link {$in [application-id]}})))]
 
@@ -261,7 +266,8 @@
                                (assoc converted-link-data
                                  :state       state
                                  :foreman     (foreman-name-from-doc foreman-doc)
-                                 :foremanRole (foreman-role-from-doc foreman-doc))
+                                 :foremanRole (foreman-role-from-doc foreman-doc)
+                                 :isSubstituteForeman (substitute-foreman? foreman-doc))
                                converted-link-data)))))]
 
       (assoc application
