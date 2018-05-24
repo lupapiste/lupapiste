@@ -749,3 +749,15 @@
     (provided (lupapalvelu.permissions/get-permissions-by-role :organization :authorityAdmin) => #{:organization/admin}))
   )
 
+(facts "input-validators-fail test"
+  (against-background
+    (get-actions) => {:success {:input-validators [(constantly nil)
+                                                   (constantly nil)
+                                                   (constantly nil)]}
+                      :failing {:input-validators [(constantly nil)
+                                                   (constantly {:oh "no"})
+                                                   (constantly {:not "this"})]}})
+  (fact
+    (input-validators-fail {:action :success}) => nil)
+  (fact
+    (input-validators-fail {:action :failing}) => {:oh "no"}))

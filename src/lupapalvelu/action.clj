@@ -406,9 +406,9 @@
     (fail :error.missing-parameters :parameters (vec missing))))
 
 (defn input-validators-fail [command]
-  (when-let [validators (:input-validators (meta-data command))]
-    (when (seq validators)
-      (reduce #(or %1 (%2 command)) nil validators))))
+  (some (fn [validator]
+          (validator command))
+        (-> command meta-data :input-validators)))
 
 (defn invalid-state-in-application [{{role :role} :user :as command} {state :state}]
   (when-let [valid-states (util/pcond-> (:states (meta-data command))
