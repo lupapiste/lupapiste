@@ -259,11 +259,14 @@
                                            (cons ::styles path)))
                                  (get-in source-value
                                          [::styles ::cell])))
-        value (or text (get-in source-value path source-value))]
-    [:div.cell {:class class}
-     (cond->> value
-       loc-prefix (i18n/localize lang loc-prefix)
-       unit (add-unit lang unit))]))
+        value (or text (->> (get-in source-value path source-value)
+                            ss/->plain-string
+                            ss/blank-as-nil))]
+    (when value
+      [:div.cell {:class class}
+       (cond->> value
+         loc-prefix (i18n/localize lang loc-prefix)
+         unit (add-unit lang unit))])))
 
 (defn post-process [value post-fn]
   (cond-> value
@@ -277,31 +280,40 @@
         multiple?    (and (sequential? source-value)
                           (> (count source-value) 1))]
     (when (or (nil? source) (not-empty source-value))
-      (let [section-styles [:page-break :border-top :border-bottom]
-            row-styles     (resolve-class row-styles styles
-                                          (get-in source-value [::styles :row]))]
-        [:div.section
-         {:class (util/intersection-as-kw section-styles row-styles)}
-         [:div.row
-          {:class (util/difference-as-kw row-styles section-styles)}
-          [:div.cell
-           {:class (resolve-class [:bold] styles (when left-width
-                                                   (str "cell--" left-width)))}
-           (i18n/localize lang (if multiple? (or loc-many loc) loc))]
-          (if (or (> (count cells) 1) multiple?)
+      (let [section-styles  [:page-break :border-top :border-bottom]
+            row-styles      (resolve-class row-styles styles
+                                           (get-in source-value [::styles :row]))
+            multiple-cells? (or (> (count cells) 1) multiple?)
+            cell-values     (if multiple-cells?
+                              (remove nil?
+                                      (for [v    (if (sequential? source-value)
+                                                   source-value
+                                                   (vector source-value))
+                                            :let [value (map (partial resolve-cell data v)
+                                                             (if (empty? cells) [{}] cells))]]
+                                        (when-not (every? nil? value)
+                                          [:div.row
+                                           {:class (get-in v [::styles :row])}
+                                           value])))
+                              (resolve-cell data
+                                            (util/pcond-> source-value
+                                                          sequential? first)
+                                            (first cells)))]
+
+        (when-not (util/empty-or-nil? cell-values)
+          [:div.section
+           {:class (util/intersection-as-kw section-styles row-styles)}
+           [:div.row
+            {:class (util/difference-as-kw row-styles section-styles)}
             [:div.cell
-             [:div.section
-              (for [v (if (sequential? source-value)
-                        source-value
-                        (vector source-value))]
-                [:div.row
-                 {:class (get-in v [::styles :row])}
-                 (map (partial resolve-cell data v)
-                      (if (empty? cells) [{}] cells))])]]
-            (resolve-cell data
-                          (util/pcond-> source-value
-                                        sequential? first)
-                          (first cells)))]]))))
+             {:class (resolve-class [:bold] styles (when left-width
+                                                     (str "cell--" left-width)))}
+             (i18n/localize lang (if multiple? (or loc-many loc) loc))]
+            (if multiple-cells?
+              [:div.cell
+               [:div.section
+                cell-values]]
+              cell-values)]])))))
 
 (defn content
   [data {:keys [left-width entries]}]

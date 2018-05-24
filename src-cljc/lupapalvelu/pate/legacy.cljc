@@ -7,8 +7,6 @@
             [sade.shared-util :as util]
             [schema.core :as sc]))
 
-;; Todo: select combobox, autocomplete: verdict-code, foremen
-
 (defn legsub-verdict [verdict-code-schema]
   {:dictionary {:kuntalupatunnus {:text      {:i18nkey :verdict.id}
                                   :required? true}
@@ -23,22 +21,26 @@
                 :verdict-text    {:text {:i18nkey :verdict.text
                                          :lines   20}}}
    :section    {:id   :verdict
-                :grid {:columns 8
+                :grid {:columns 12
                        :rows    [[{:col   2
                                    :align :full
                                    :dict  :kuntalupatunnus}
-                                  {:col   2
+                                  {}
+                                  {:col   4
                                    :align :full
                                    :dict  :handler}]
                                  [{:dict :verdict-section}
-                                  {}
-                                  {:col   2
+                                  {:col 2}
+                                  {:col   4
                                    :align :full
                                    :dict  :verdict-code}]
-                                 [{:col   6
+                                 [{:col   10
                                    :align :full
                                    :dict  :verdict-text}]
-                                 [{:dict :anto} {:dict :lainvoimainen}]]}}})
+                                 [{:col 2
+                                   :dict :anto}
+                                  {:col 2
+                                   :dict :lainvoimainen}]]}}})
 
 (defn remove-button [dict]
   {:button {:i18nkey :remove

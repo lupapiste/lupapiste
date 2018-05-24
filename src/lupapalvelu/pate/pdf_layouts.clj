@@ -124,8 +124,7 @@
 
 (def entry--neighbors (entry--simple :neighbors [:bold :pad-before]))
 
-(def entry--attachments [{:loc      :pdf.attachment
-                          :loc-many :verdict.attachments
+(def entry--attachments [{:loc      :verdict.attachments
                           :source   :attachments
                           :styles   [:bold :pad-before]}
                          {:path   :text

@@ -288,49 +288,49 @@
            :property-id (property-id application)
            :applicants (->> (applicants options)
                             (map #(format "%s\n%s"
-                                        (:name %) (:address %)))
-                          (interpose "\n"))
-         :operations (assoc-in (operations options)
-                               [0 ::styles :text] :bold)
-         :complexity (complexity options)
-         :designers (designers options)
-         :primary (primary-operation-data application)
-         :paloluokka (->> buildings
-                          (map :paloluokka)
-                          (remove ss/blank?)
-                          distinct
-                          (ss/join " / "))
-         :parking (->>  buildings
-                        (map (partial building-parking lang))
-                        (interpose {:text    "" :amount ""
-                                    ::styles {:row :pad-before}})
-                        flatten)
-         :attachments (verdict-attachments options)
-         :reviews (references options :reviews)
-         :review-info (review-info options)
-         :plans   (references options :plans)
-         :conditions (conditions options)
-         :statements (statements options)
-         :collateral (collateral options)
-         :organization (html/organization-name lang application)
-         :muutoksenhaku (loc-fill-non-blank lang
-                                            :pdf.not-later-than
+                                          (:name %) (:address %)))
+                            (interpose "\n"))
+           :operations (assoc-in (operations options)
+                                 [0 ::styles :text] :bold)
+           :complexity (complexity options)
+           :designers (designers options)
+           :primary (primary-operation-data application)
+           :paloluokka (->> buildings
+                            (map :paloluokka)
+                            (remove ss/blank?)
+                            distinct
+                            (ss/join " / "))
+           :parking (->>  buildings
+                          (map (partial building-parking lang))
+                          (interpose {:text    "" :amount ""
+                                      ::styles {:row :pad-before}})
+                          flatten)
+           :attachments (verdict-attachments options)
+           :reviews (references options :reviews)
+           :review-info (review-info options)
+           :plans   (references options :plans)
+           :conditions (conditions options)
+           :statements (statements options)
+           :collateral (collateral options)
+           :organization (html/organization-name lang application)
+           :muutoksenhaku (loc-fill-non-blank lang
+                                              :pdf.not-later-than
+                                              (html/dict-value options
+                                                               :muutoksenhaku))
+           :voimassaolo (loc-fill-non-blank lang
+                                            :pdf.voimassa.text
                                             (html/dict-value options
-                                                             :muutoksenhaku))
-         :voimassaolo (loc-fill-non-blank lang
-                                          :pdf.voimassa.text
-                                          (html/dict-value options
-                                                           :aloitettava)
-                                          (html/dict-value options
-                                                           :voimassa))
-         :voimassaolo-ya (loc-fill-non-blank lang
-                                          :pdf.voimassaolo-ya
-                                          (html/dict-value options
-                                                           :start-date)
-                                          (html/dict-value options
-                                                           :end-date))
-         :handler (handler options)
-         :link-permits (link-permits options))))
+                                                             :aloitettava)
+                                            (html/dict-value options
+                                                             :voimassa))
+           :voimassaolo-ya (loc-fill-non-blank lang
+                                               :pdf.voimassaolo-ya
+                                               (html/dict-value options
+                                                                :start-date)
+                                               (html/dict-value options
+                                                                :end-date))
+           :handler (handler options)
+           :link-permits (link-permits options))))
 
 (defn verdict-html
   [application verdict]
@@ -342,7 +342,8 @@
                      (layouts/pdf-layout verdict)))
 
 (defn create-verdict-attachment
-  "Create PDF for the verdict and uploadsit as an attachment. Returns the attachment-id."
+  "Creates PDF for the verdict and uploads it as an attachment. Returns
+  the attachment-id."
   [{:keys [application created] :as command} verdict]
   (let [pdf (html-pdf/html->pdf application
                                 "pate-verdict"
