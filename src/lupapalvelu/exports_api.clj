@@ -1,7 +1,7 @@
 (ns lupapalvelu.exports-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [monger.operators :refer :all]
-            [sade.core :refer [ok]]
+            [sade.core :refer [ok now]]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
@@ -62,7 +62,8 @@
    {:user-roles #{:trusted-salesforce}}
    [{{start-ts :startTimestampMillis
       end-ts   :endTimestampMillis} :data user :user}]
-    (ok :transactions
+    (ok :mostRecentTransactionTimestampMillis (or end-ts (now)) ; This will be the timestamp of the most recent download
+        :transactions
         (exports/archive-api-usage-to-salesforce (when start-ts (Long/parseLong start-ts 10))
                                                  (when end-ts (Long/parseLong end-ts 10))))))
 
