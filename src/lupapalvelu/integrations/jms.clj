@@ -12,7 +12,7 @@
            (org.apache.activemq.artemis.api.jms ActiveMQJMSClient)))
 
 ; If external broker is not defined, we start a embedded broker inside the JVM for testing.
-(when (and (env/dev-mode?) (ss/blank? (env/value :jms :broker-url)) (find-ns 'artemis-server))
+(when (and (env/dev-mode?) (ss/blank? (env/value :jms :broker-url)))
   ; This works only with :dev profile
   (require 'artemis-server)
   ((ns-resolve 'artemis-server 'start)))
