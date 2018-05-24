@@ -20,7 +20,8 @@
             [sade.validators :as v]
             [schema.core :refer [defschema] :as sc]
             [swiss.arrows :refer [-<> some-<>> -<>>]]
-            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf]]))
+            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf]]
+            [schema-tools.core :as st]))
 
 ;;
 ;; User schema
@@ -43,19 +44,25 @@
 (def Id (ssc/min-length-string 1))                                                                                      ; Variation of user ids in different environments is too diverse for a simple customized schema.
 
 (def all-roles
-  "vector of role strings that can be used in User's :role field"
-  ["applicant"
-   "authority"
-   "oirAuthority"
-   "authorityAdmin"
-   "admin"
-   "dummy"
-   "rest-api"
-   "trusted-etl"
-   "trusted-salesforce"
-   "docstore-api"
-   "financialAuthority"
-   "onkalo-api"])
+  "set of role strings that can be used in User's :role field"
+  #{"applicant"
+    "authority"
+    "oirAuthority"
+    "admin"
+    "dummy"
+    "rest-api"
+    "trusted-etl"
+    "trusted-salesforce"
+    "docstore-api"
+    "financialAuthority"
+    "onkalo-api"})
+
+(def new-user-roles
+  "set of role strings that can be used in creating user via `create-new-user`"
+  #{"applicant"
+    "authority"
+    "dummy"
+    "financialAuthority"})
 
 (defschema Role (apply sc/enum all-roles))
 (defschema OrgId (sc/pred keyword? "Organization ID"))
@@ -117,6 +124,15 @@
                                                :scopes        [(sc/enum "read" "pay")]
                                                :display-name  (i18n/lenient-localization-schema sc/Str)
                                                :callback-url  ssc/HttpUrl}})
+
+(defschema NewUser
+  "NewUser is like `User`, but without `:id` and only `:email` and `:role` are
+  required, and `:role` is one of `new-user-roles`"
+  (-> User
+      (st/dissoc :id)
+      (st/optional-keys)
+      (st/required-keys [:email])
+      (st/assoc :role (apply sc/enum new-user-roles))))
 
 (defschema RegisterUser
   {:email                            ssc/Email
@@ -608,13 +624,7 @@
                           (name (first (keys org-authz))))
         admin?          (= caller-role :admin)
         authorityAdmin? (= caller-role :authorityAdmin)]
-
-    (when (and org-authz (not (every? coll? (vals org-authz))))
-      (fail! :error.invalid-role :desc "new user has unsupported organization roles"))
-
-    (when-not (#{:authority :authorityAdmin :applicant :dummy :financialAuthority} user-role)
-      (fail! :error.invalid-role :desc "new user has unsupported role" :user-role user-role))
-
+    
     (when (and (= user-role :applicant) caller)
       (fail! :error.unauthorized :desc "applicants are born via registration"))
 
