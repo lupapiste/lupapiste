@@ -14,7 +14,7 @@
                    reviews->tasks legacy-reviews->tasks)
 
 (defn filter-review-tasks [tasks]
-  (filter #(= (get-in % [:schema-info :name]) "task-katselmus")
+  (filter #(= (get-in % [:schema-info :subtype]) :review)
           tasks))
 
 (fact "pate reviews->tasks, example reviews are valid"
@@ -74,6 +74,44 @@
                        :data        (contains {:katselmuksenLaji
                                                {:value    "rakennuksen paikan merkitseminen"
                                                 :modified 123}})})]))
+
+(facts "YA reviews"
+  (let [ya-verdict (-> test-pate-verdict
+                       (assoc :category "ya")
+                       (assoc-in [:references :reviews 0 :type] "valvonta")
+                       (assoc-in [:references :reviews 1 :type] "aloituskatselmus"))
+        tasks      (filter-review-tasks (pate-tasks/pate-verdict->tasks ya-verdict
+                                                                        123 []))]
+    (fact "Generated YA tasks are valid"
+      (count tasks) => 2
+      (map (partial tasks/task-doc-validation "task-katselmus-ya") tasks)
+      => (has every? empty?))
+
+    (fact "Tasks"
+      tasks => (just [(contains {:taskname    "Katselmus"
+                                 :schema-info (contains {:type    :task
+                                                         :subtype :review
+                                                         :name    "task-katselmus-ya"
+                                                         :order   1
+                                                         :version 1})
+                                 :source      {:id   (:id ya-verdict)
+                                               :type "verdict"}
+                                 :state       :requires_user_action
+                                 :data        (contains {:katselmuksenLaji
+                                                         {:value    "Muu valvontakäynti"
+                                                          :modified 123}})})
+                      (contains {:taskname    "Katselmus2"
+                                 :schema-info (contains {:type    :task
+                                                         :subtype :review
+                                                         :name    "task-katselmus-ya"
+                                                         :order   1
+                                                         :version 1})
+                                 :source      {:id   (:id ya-verdict)
+                                               :type "verdict"}
+                                 :state       :requires_user_action
+                                 :data        (contains {:katselmuksenLaji
+                                                         {:value    "Aloituskatselmus"
+                                                          :modified 123}})})] ))))
 
 (def legacy-verdict {:id       "legacy-id"
                      :legacy?  true

@@ -18,21 +18,20 @@
       ((or rt :ei-tiedossa) shared/review-type-map)
       (rt shared/ya-review-type-map))))
 
-(defn- new-review-task [verdict ts review-name review-type buildings]
-  (new-task verdict ts
-            "task-katselmus"
-            review-name
-            {:katselmuksenLaji   (resolve-review-type verdict review-type)
-             :vaadittuLupaehtona true
-             :rakennus           (tasks/rakennus-data-from-buildings
-                                  {} buildings)
-             ;; data should be empty, as this is just placeholder task
-             :katselmus          {:tila         nil
-                                  :pitaja       nil
-                                  :pitoPvm      nil
-                                  :lasnaolijat  ""
-                                  :huomautukset {:kuvaus ""}
-                                  :poikkeamat   ""}}))
+(defn- new-review-task [{:keys [category] :as verdict}
+                        ts review-name review-type buildings]
+  (let [ya? (util/=as-kw category :ya)]
+    (new-task verdict ts
+              (if ya?
+                "task-katselmus-ya"
+                "task-katselmus")
+              review-name
+              (merge {:katselmuksenLaji   (resolve-review-type verdict
+                                                               review-type)
+                      :vaadittuLupaehtona true}
+                     (when-not ya?
+                       {:rakennus (tasks/rakennus-data-from-buildings
+                                   {} buildings)})))))
 
 (defn- included? [verdict dict]
   (get-in verdict [:data (-> (name dict) (str "-included") keyword)]))
