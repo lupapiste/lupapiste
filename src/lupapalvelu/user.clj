@@ -102,7 +102,9 @@
                                                 :content-type    sc/Str
                                                 :size            sc/Num
                                                 :created         ssc/Timestamp}]
-   (sc/optional-key :company)                 {:id sc/Str :role (sc/enum "admin" "user") :submit sc/Bool}
+   (sc/optional-key :company)                 {:id sc/Str
+                                               :role (sc/enum "admin" "user")
+                                               :submit sc/Bool}
    (sc/optional-key :partnerApplications)     {(sc/optional-key :rakentajafi) {:id      sc/Str
                                                                                :created ssc/Timestamp
                                                                                :origin  sc/Bool}}
@@ -222,32 +224,6 @@
              (sc/optional-key :impersonating) sc/Bool
              :expires ssc/Timestamp)))
 
-(comment
-  (def selectable-role? #{})
-
-  (let [user {:orgAuthz     {:753-R         ["authorityz" "approver" "approver"]
-                             :753-YA        ["authorityz" "approver" "approver"]
-                             :998-R-TESTI-2 ["approver" "authority"]}
-              :lastOrgRolez {:org  :753-R
-                             :role "authority"}}]
-    (->> user
-         :orgAuthz
-         (mapcat (fn [[org roles]]
-                   (map (fn [role]
-                          [org role])
-                        roles)))
-         (filter (fn [[org role]]
-                   (selectable-role? role)))
-         (first))))
-
-(defn org-authz-session [user]
-  (when (-> user :orgAuthz seq)
-    (or (-> user :lastOrgRole)
-        ; Just use first org and first selectable role
-        (let [[org roles] (-> user :orgAuthz first)]
-          {:org  org
-           :role role}))))
-
 (defn session-summary
   "Returns common information about the user to be stored in session or nil"
   [user]
@@ -255,8 +231,7 @@
     (-> user
         (select-keys session-summary-keys)
         with-org-auth
-        (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5)))
-        (merge (org-authz-session user)))))
+        (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5))))))
 
 (defn oir-authority? [{role :role}]
   (contains? #{:oirAuthority} (keyword role)))
@@ -268,8 +243,8 @@
     impersonating
     (oir-authority? user)))
 
-(defn authority? [{role :role}]
-  (= :authority (keyword role)))
+(defn authority? [user]
+  (-> user :role (= "authority")))
 
 (defn verified-person-id? [{pid :personId source :personIdSource :as user}]
   (and (ss/not-blank? pid) (util/=as-kw :identification-service source)))
@@ -650,25 +625,21 @@
       (fail! :error.organization-not-found))
 
     (when (and (:apikey user-data) (not admin?))
-      (fail! :error.unauthorized :desc "only admin can create create users with apikey"))
-
-    ;; TODO validate against schema!
-    )
+      (fail! :error.unauthorized :desc "only admin can create create users with apikey")))
 
   true)
 
 (defn- create-new-user-entity [{:keys [enabled password] :as user-data}]
   (let [email (ss/canonize-email (:email user-data))]
-    (-<> user-data
-         (select-keys [:email :username :role :firstName :lastName :personId :personIdSource
-                       :phone :city :street :zip :enabled :orgAuthz :language
-                       :allowDirectMarketing :architect :company
-                       :graduatingYear :degree :fise :fiseKelpoisuus])
-         (merge {:firstName "" :lastName "" :username email} <>)
-         (assoc
-           :email email
-                  :enabled (= "true" (str enabled))
-                  :private (if password {:password (security/get-hash password)} {})))))
+    (-> user-data
+        (select-keys [:email :username :role :firstName :lastName :personId :personIdSource
+                      :phone :city :street :zip :enabled :orgAuthz :language
+                      :allowDirectMarketing :architect :company
+                      :graduatingYear :degree :fise :fiseKelpoisuus])
+        (->> (merge {:firstName "" :lastName "" :username email}))
+        (assoc :email email
+               :enabled (= "true" (str enabled))
+               :private (if password {:password (security/get-hash password)} {})))))
 
 (defn create-new-user
   "Insert new user to database, returns new user data without private information. If user
@@ -683,10 +654,9 @@
                        (assoc user-entry :id (mongo/create-id)))
         email        (:email new-user)
         {old-id :id old-role :role} old-user
-        notification {:titleI18nkey   "user.notification.firstLogin.title"
-                      :messageI18nkey "user.notification.firstLogin.message"}
         new-user     (if (applicant? user-data)
-                       (assoc new-user :notification notification)
+                       (assoc new-user :notification {:titleI18nkey   "user.notification.firstLogin.title"
+                                                      :messageI18nkey "user.notification.firstLogin.message"})
                        new-user)]
     (try
       (condp = old-role
@@ -697,7 +667,8 @@
                   (info "rewriting over dummy user:" old-id (dissoc new-user :private :id))
                   (mongo/update-by-id :users old-id (dissoc new-user :id)))
         ; LUPA-1146
-        "applicant" (if (and (= (:personId old-user) (:personId new-user)) (not (:enabled old-user)))
+        "applicant" (if (and (= (:personId old-user) (:personId new-user))
+                             (not (:enabled old-user)))
                       (do
                         (info "rewriting over inactive applicant user:" old-id (dissoc new-user :private :id))
                         (mongo/update-by-id :users old-id (dissoc new-user :id)))
