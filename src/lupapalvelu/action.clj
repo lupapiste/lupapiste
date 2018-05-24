@@ -335,7 +335,7 @@
   (into {} (for [[k v] (get-actions)]
              [k (-> v
                     (dissoc :handler :pre-checks :input-validators :on-success
-                            :contexts :permissions)                             ; FIXME serialize permissions
+                            :contexts :permissions)                                                                     ; FIXME serialize permissions
                     (assoc :name k))])))
 
 ;;
@@ -733,13 +733,13 @@
            (merge
              {:user-authz-roles (cond
                                   (nil? user-roles) roles/all-authz-roles
-                                  (= #{:authority} user-roles) #{}              ;; By default, authority gets authorization fron organization role
+                                  (= #{:authority} user-roles) #{}                                                      ;; By default, authority gets authorization fron organization role
                                   :else (roles/default-user-authz action-type))
               :org-authz-roles  (cond
                                   (nil? user-roles) roles/all-org-authz-roles
                                   (some user-roles [:authority :oirAuthority]) roles/default-org-authz-roles
                                   (user-roles :anonymous) roles/all-org-authz-roles)
-              :permissions      [{:required []}]}                               ; no permissions required by default
+              :permissions      [{:required []}]}                                                                       ; no permissions required by default
              meta-data
              {:type       action-type
               :ns         ns-str
