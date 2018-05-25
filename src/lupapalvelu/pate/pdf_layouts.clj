@@ -353,6 +353,13 @@
                      [{:loc    :pdf.lainvoimainen
                        :source {:dict :lainvoimainen}}]))
 
+(def entry--dates-tj '([{:loc    :pdf.anto
+                       :source {:dict :anto}}]
+                      [{:loc    :pdf.lainvoimainen
+                        :source {:dict :lainvoimainen}}]
+                      [{:loc    :pdf.muutoksenhaku
+                        :source {:dict :muutoksenhaku}}]))
+
 
 
 (def r-legacy-layout
@@ -374,9 +381,22 @@
                 legacy--verdict-giver
                 legacy--dates))
 
+(def tj-pdf-layout
+  (build-layout entry--application-id
+                entry--rakennuspaikka
+                entry--link-permits
+                entry--attachments
+                ;; TJ
+                ;; Vastattavat työt
+                entry--verdict
+                (entry--verdict-giver :applications.authority)
+                entry--dates-tj
+                entry--appeal))
+
 (defn pdf-layout [{:keys [category legacy?]}]
   (case (util/kw-path (when legacy? :legacy) category)
     :r  r-pdf-layout
     :p  p-pdf-layout
     :ya ya-pdf-layout
+    :tj tj-pdf-layout
     :legacy.r r-legacy-layout))
