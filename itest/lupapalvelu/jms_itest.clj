@@ -18,15 +18,25 @@
                      (fn [data]; 'with-db' is called in jms.clj MessageListener
                        (mongo/insert
                          :testi
-                         {:id (mongo/create-id) :data data})))]
-      (fact "Produce to normal db and custom db"
+                         {:id (mongo/create-id) :data data})))
+          normal-producer (jms/create-producer test-queue)]
+      (fact "Produce with context"
         (jms/produce-with-context test-queue "default db") => nil
         (mongo/with-db test-db
           (jms/produce-with-context test-queue "with db")) => nil)
+      (fact "Produce with normal producer"
+        (normal-producer "normal producer default db") => nil
+        (mongo/with-db test-db
+          (normal-producer "normal producer with-db")) => nil)
       (Thread/sleep 100)
       (fact "From normal DB"
-        (mongo/select :testi) => (just (contains {:data "default db"})))
+        (mongo/select :testi) => (just (contains {:data "default db"})
+                                       (contains {:data "normal producer default db"})
+                                       :in-any-order))
       (fact "From test-db DB"
         (mongo/with-db test-db
-          (mongo/select :testi) => (just (contains {:data "with db"}))))
+          (mongo/select :testi) => (just (contains {:data "with db"})
+                                         (contains {:data "normal producer with-db"})
+                                         :in-any-order)))
+      (.close normal-producer)
       (.close consumer))))
