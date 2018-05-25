@@ -29366,6 +29366,10 @@ table.pate-verdicts-table tr {
   border: none;
 }
 
+table.pate-verdicts-table td.replaced {
+  padding-left: 4em;
+}
+
 div.pate-verdict div.pate-section div.section-header {
   background-color: initial;
   border: none;

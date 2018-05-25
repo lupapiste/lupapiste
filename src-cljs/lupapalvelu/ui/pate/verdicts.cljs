@@ -87,24 +87,18 @@
                                           (reset! state/verdict-list [verdict])
                                           (reset! state/replacement-verdict verdict-id))}}))
 
-(defn- replace-verdict [verdict]
-  (when-let [replacement-verdict (first (filter #(= (get-in verdict [:replacement :replaces]) (:id %)) @state/verdict-list))]
-    (common/loc :pate.replacing.verdict (:verdict-section replacement-verdict))))
-
-(defn- sort-verdicts-by-verdict-date [verdicts]
-  (concat
-    (filter #(nil? (:published %)) verdicts)
-    (sort-by :verdict-date > (filter #(not (nil? (:published %))) verdicts))))
-
 (defn- verdict-table [headers verdicts app-id hide-actions]
   [:table.pate-verdicts-table
    [:thead [:tr (map (fn [header] [:th (common/loc header)]) headers)]]
-   [:tbody (map (fn [{:keys [id title published modified verdict-date handler] :as verdict}]
+   [:tbody (map (fn [{:keys [id title published modified
+                             verdict-date giver replaced?]
+                      :as   verdict}]
                   [:tr {:key id}
-                   [:td [:a {:on-click #(open-verdict id)} title]]
+                   [:td {:class (common/css-flags :replaced replaced?)}
+                    [:a {:on-click #(open-verdict id)} title]]
                    [:td (if published
                           (js/util.finnishDate verdict-date))]
-                   [:td handler]
+                   [:td giver]
                    [:td (if published
                           (common/loc :pate.published-date (js/util.finnishDate published))
                           (common/loc :pate.last-saved (js/util.finnishDateAndTime modified)))]
@@ -119,21 +113,9 @@
                                            :pate.verdict-table.remove-draft))])
                       (when (can-replace? id)
                         [:a
-                        {:on-click #(confirm-and-replace-verdict verdict id)}
+                         {:on-click #(confirm-and-replace-verdict verdict id)}
                         (common/loc :pate.verdict-table.replace-verdict)])])])
                 verdicts)]])
-
-(defn- verdict-title [{:keys [category published verdict-section verdict-type verdict-code] :as verdict}]
-  (str
-    (if (= :ya (keyword category))
-      (if published
-        (str "§" verdict-section " " (ss/capitalize verdict-type) " - " (ss/capitalize (ss/replace verdict-code #"-" " ")))
-        (str (path/loc :pate-verdict-draft) " - " (ss/capitalize verdict-type) " - " (ss/capitalize (ss/replace verdict-code #"-" " "))))
-      (if published
-        (str "§" verdict-section " " (if verdict-code (ss/capitalize verdict-code) (path/loc :pate-verdict)))
-        (path/loc :pate-verdict-draft)))
-    (if (some? (get-in verdict [:replacement :replaces]))
-      (replace-verdict verdict))))
 
 (rum/defc verdict-list < rum/reactive
   [verdicts app-id replacement-verdict]
@@ -159,9 +141,7 @@
                      :pate.verdict-table.verdict-giver
                      :pate.verdict-table.last-edit
                      ""]
-                    (map
-                      (fn [verdict] (assoc verdict :title (verdict-title verdict)))
-                      (sort-verdicts-by-verdict-date verdicts))
+                    verdicts
                     app-id
                     replacement-verdict)])
    (when (state/auth? :new-pate-verdict-draft)
