@@ -5,8 +5,8 @@
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
-            [lupapalvelu.ui.pate.layout :as layout]
             [lupapalvelu.ui.pate.components :as pate-components]
+            [lupapalvelu.ui.pate.layout :as layout]
             [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.phrases :as phrases]
             [lupapalvelu.ui.pate.sections :as sections]
@@ -17,23 +17,12 @@
 
 (defonce args (atom {}))
 
-(defn- can-edit? []
-  (state/auth? :edit-pate-verdict))
+(defn- can-delete? [verdict-id]
+  (or (state/verdict-auth? verdict-id :delete-legacy-verdict)
+      (state/verdict-auth? verdict-id :delete-pate-verdict)))
 
-(defn- can-edit-verdict? [{published :published}]
-  (and (can-edit?)
-       (not published)))
-
-(defn- can-delete-verdict? [{:keys [published legacy?]}]
-  (if legacy?
-    (state/auth? :delete-legacy-verdict)
-    (and (not published)
-         (state/auth? :delete-pate-verdict))))
-
-(defn- can-replace-verdict? [{:keys [published legacy?]}]
-  (and published
-       (not legacy?)
-       (state/auth? :new-pate-verdict-draft)))
+(defn- can-replace? [verdict-id]
+  (state/verdict-auth? verdict-id :replace-pate-verdict))
 
 (defn open-verdict [arg]
   (common/open-page :pate-verdict
@@ -122,13 +111,13 @@
                    (if hide-actions
                      [:td]
                      [:td
-                      (when (can-delete-verdict? verdict)
+                      (when (can-delete? id)
                             [:a
                              {:on-click #(confirm-and-delete-verdict app-id id)}
                              (common/loc (if published
                                            :pate.verdict-table.remove-verdict
                                            :pate.verdict-table.remove-draft))])
-                      (when (can-replace-verdict? verdict)
+                      (when (can-replace? id)
                         [:a
                         {:on-click #(confirm-and-replace-verdict verdict id)}
                         (common/loc :pate.verdict-table.replace-verdict)])])])
@@ -192,8 +181,9 @@
     (reset! state/template-list [])
     (reset! state/verdict-list nil)
     (reset! state/replacement-verdict nil)
+    (state/refresh-verdict-auths app-id)
     (state/refresh-application-auth-model app-id
-                                          #(when (can-edit?)
+                                          #(when (state/auth? :pate-verdicts)
                                              (service/fetch-verdict-list app-id)
                                              (when (state/auth? :application-verdict-templates)
                                                (service/fetch-application-verdict-templates app-id))))))

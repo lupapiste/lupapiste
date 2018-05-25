@@ -61,14 +61,15 @@
           (when (and modern? (:legacy? verdict))
             (fail! :error.verdict.legacy)))))))
 
-(defn- replacement-draft-check
-  "Fails for replacement draft, if the target verdict is a) already
-  replaced, b) already being replaced (by another draft), c) not
-  published, d) legacy verdict, d) missing."
-  [{:keys [application data]}]
-  (when-let [replacement-id (:replacement-id data)]
-    (when-not (verdict/can-verdict-be-replaced? application replacement-id)
-      (fail :error.verdict-cannot-be-replaced))))
+(defn- replacement-check
+  "Fails if the target verdict is a) already replaced, b) already being
+  replaced (by another draft), c) not published, d) legacy verdict, d)
+  missing."
+  [verdict-key]
+  (fn [{:keys [application data]}]
+    (when-let [verdict-id (verdict-key data)]
+      (when-not (verdict/can-verdict-be-replaced? application verdict-id)
+        (fail :error.verdict-cannot-be-replaced)))))
 
 (defn- verdict-filled
   "Precheck that fails if any of the required fields is empty."
@@ -76,6 +77,14 @@
   (when (:verdict-id data)
     (when-not (verdict/verdict-filled? command)
       (fail :pate.required-fields))))
+
+(defmethod action/allowed-actions-for-category :pate-verdicts
+  [command]
+  (action/allowed-actions-for-collection :pate-verdicts
+                                         (fn [application verdict]
+                                           {:id         (:id application)
+                                            :verdict-id (:id verdict)})
+                                         command))
 
 ;; ------------------------------------------
 ;; Actions common with modern and legacy
@@ -124,6 +133,7 @@
    :user-roles       #{:authority :applicant}
    :org-authz-roles  roles/reader-org-authz-roles
    :parameters       [id verdict-id]
+   :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(verdict-exists)]
    :states           states/post-submitted-states}
@@ -137,6 +147,7 @@
    :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id path value]
+   :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])
                       (partial action/vector-parameters [:path])]
    :pre-checks       [(verdict-exists :editable?)]
@@ -153,6 +164,7 @@
    :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
+   :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(verdict-exists :editable?)
                       verdict-filled]
@@ -174,6 +186,19 @@
 ;; Modern actions
 ;; ------------------------------------------
 
+(defquery replace-pate-verdict
+  {:description      "Pseudo-query for checking whether a verdict can be
+  replaced."
+   :feature          :pate
+   :user-roles       #{:authority}
+   :parameters       [:id :verdict-id]
+   :categories       #{:pate-verdicts}
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :pre-checks       [pate-enabled
+                      (replacement-check :verdict-id)]
+   :states           states/post-submitted-states}
+  [_])
+
 (defcommand new-pate-verdict-draft
   {:description         "Composes new verdict draft from the latest published
   template and its settings. Returns the verdict-id."
@@ -184,7 +209,7 @@
    :input-validators    [(partial action/non-blank-parameters [:id])]
    :pre-checks          [pate-enabled
                          (template/verdict-template-check :application :published)
-                         replacement-draft-check]
+                         (replacement-check :replacement-id)]
    :states              states/post-submitted-states}
   [command]
   (ok :verdict-id (verdict/new-verdict-draft template-id command replacement-id)))
@@ -195,6 +220,7 @@
    :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
+   :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
                       (verdict-exists :editable? :modern?)]
@@ -208,6 +234,7 @@
    :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
+   :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
                       (verdict-exists :editable? :modern?)
@@ -242,6 +269,7 @@
    :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
+   :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(verdict-exists :legacy?)]
    :states           states/give-verdict-states
@@ -254,6 +282,7 @@
    :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
+   :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(verdict-exists :editable? :legacy?)
                       verdict-filled]
@@ -290,6 +319,7 @@
    :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
+   :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
                       (verdict-exists :editable?)]

@@ -16,21 +16,6 @@
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
-(defn- can-edit? []
-  (state/auth? :edit-pate-verdict))
-
-(defn- can-view? []
-  (state/auth? :pate-verdicts))
-
-(defn- can-publish? [legacy?]
-  (state/auth? (if legacy?
-                 :publish-legacy-verdict
-                 :publish-pate-verdict)))
-
-(defn- can-edit-verdict? [{published :published}]
-  (and (can-edit?)
-       (not published)))
-
 (defn updater
   ([{:keys [state path] :as options} value]
    (service/edit-verdict @state/application-id
@@ -52,7 +37,8 @@
                         (update :inclusions #(set (map keyword %))))
              :_meta {:updated             updater
                      :highlight-required? (-> verdict :published not)
-                     :enabled?            (can-edit-verdict? verdict)
+                     :enabled?            (state/verdict-auth? (:id verdict)
+                                                               :edit-pate-verdict)
                      :published?          (:published verdict)
                      :upload.filedata     (fn [_ filedata & kvs]
                                             (apply assoc filedata
@@ -124,8 +110,8 @@
                                    :class    (common/css :primary :pate-left-space)
                                    :icon     :lupicon-circle-section-sign
                                    :wait?    wait?*
-                                   :enabled? (and filled?
-                                                  (can-publish? legacy?))
+                                   :enabled? (and (path/enabled? options)
+                                                  filled?)
                                    :on-click (fn []
                                                (hub/send "show-dialog"
                                                          {:ltitle          "areyousure"
@@ -138,7 +124,6 @@
                                                          id)
                                    :enabled? (and (path/enabled? options)
                                                   filled?)
-                                   :disabled published
                                    :text-loc :pdf.preview})]])
       (if published
         [:div.row
@@ -173,7 +158,8 @@
      [:i.lupicon-chevron-left]
      [:span (common/loc :back)]]]
    (if (and (rum/react state/current-verdict-id)
-            (rum/react state/auth-fn))
+            (rum/react state/auth-fn)
+            (rum/react state/allowed-verdict-actions))
      (let [{dictionary :dictionary :as schema} (current-verdict-schema)]
        (verdict (assoc (state/select-keys state/current-verdict
                                           [:state :info :_meta])
@@ -186,11 +172,13 @@
   (let [[app-id verdict-id] (js/pageutil.getPagePath)]
     (reset-verdict nil)
     (service/fetch-application-phrases app-id)
-    (state/refresh-application-auth-model app-id
-                                          #(do (service/refresh-attachments)
-                                               (service/open-verdict app-id
-                                                                     verdict-id
-                                                                     reset-verdict)))))
+    (state/refresh-verdict-auths app-id
+                                 #(state/refresh-application-auth-model app-id
+                                                                        (fn []
+                                                                          (service/refresh-attachments)
+                                                                          (service/open-verdict app-id
+                                                                                                verdict-id
+                                                                                                reset-verdict))))))
 
 (defonce args (atom {}))
 
