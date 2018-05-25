@@ -654,7 +654,6 @@
 (def tj-verdict-template-schema
   (build-verdict-template-schema (temsub-verdict tj-verdict-dates)
                                  temsub-appeal
-                                 temsub-start-info
                                  temsub-attachments))
 
 (defn verdict-template-schema [category]
@@ -716,8 +715,8 @@
 
 (defn versub-dates
   "Verdict handler title could be specific to a category."
-  [category]
-  {:dictionary (assoc (->> verdict-dates
+  [category dates]
+  {:dictionary (assoc (->> dates
                            (map (fn [kw]
                                   [kw (required {:date {:disabled?
                                                         :automatic-verdict-dates}})]))
@@ -768,7 +767,7 @@
                                                        {:disabled? :automatic-verdict-dates
                                                         :id        id
                                                         :dict      kw}))
-                                                   verdict-dates)}]}}})
+                                                   dates)}]}}})
 
 (def versub-operation
   {:dictionary {:operation {:text {:loc-prefix :pate.operation}}
@@ -1074,7 +1073,7 @@
                                       :dict :upload}]]}}]})
 
 (def r-verdict-schema-1 (build-verdict-schema :r 1
-                                              (versub-dates :r)
+                                              (versub-dates :r verdict-dates)
                                               (versub-verdict true)
                                               versub-bulletin
                                               versub-operation
@@ -1114,7 +1113,7 @@
 
 
 (def p-verdict-schema-1 (build-verdict-schema :p 1
-                                              (versub-dates :p)
+                                              (versub-dates :p verdict-dates)
                                               (versub-verdict true)
                                               versub-bulletin
                                               versub-operation
@@ -1133,7 +1132,7 @@
                                               versub-attachments))
 
 (def versub-dates-ya
-  (-> (versub-dates :ya)
+  (-> (versub-dates :ya verdict-dates)
       (assoc-in [:dictionary :start-date]
                 {:date      {:i18nkey :tyoaika.tyoaika-alkaa-ms}
                  :required? true})
@@ -1166,6 +1165,25 @@
       (update-in [:section :grid :rows 0]
                  #(cons {:dict :verdict-type} %))))
 
+(def versub-verdict-tj
+  (-> (versub-verdict false)
+      (assoc-in [:dictionary :verdict-section :required?]
+                false)
+      (assoc-in [:section :grid :rows 0]
+                [{:col        2
+                  :loc-prefix :pate-verdict.giver
+                  :hide?      :_meta.editing?
+                  :show?      :*ref.boardname
+                  :dict       :boardname}
+                 {:col        1
+                  :show?      [:OR :*ref.boardname :verdict-section]
+                  :loc-prefix :pate-verdict.section
+                  :dict       :verdict-section}
+                 {:show? [:AND :_meta.editing? :?.boardname]}
+                 {:col   2
+                  :align :full
+                  :dict  :verdict-code}])))
+
 (def ya-verdict-schema-1 (build-verdict-schema :ya 1
                                                versub-dates-ya
                                                versub-verdict-ya
@@ -1180,7 +1198,11 @@
 
 ;; TODO: FILL ME
 (def tj-verdict-schema-1 (build-verdict-schema :tj 1
-                                               versub-dates))
+                                               (versub-dates :tj tj-verdict-dates)
+                                               versub-verdict-tj
+                                               versub-operation
+                                               versub-appeal
+                                               versub-attachments))
 
 (defn verdict-schema
   "Nil version returns the latest version."
