@@ -8191,6 +8191,10 @@ message-panel {
   margin-right: 36px;
 }
 
+.form-entry-vcenter {
+  line-height: 40px;
+}
+
 .form-full-width {
   width: 60%;
 }
