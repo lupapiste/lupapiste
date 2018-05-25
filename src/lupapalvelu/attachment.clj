@@ -802,8 +802,11 @@
                                                      (auth/application-authority? application user))))
         linked-version     (set-attachment-version! application user attachment options)
         {:keys [fileId originalFileId]} linked-version]
-    (storage/link-files-to-application (:id session) (:id application) (cond-> [originalFileId]
-                                                                               (not= fileId originalFileId) (conj fileId)))
+    (storage/link-files-to-application (:id session)
+                                       (:id application)
+                                       (cond-> []
+                                               (not (:original-file-already-linked? attachment-options)) (conj originalFileId)
+                                               (not= fileId originalFileId) (conj fileId)))
     (preview/preview-image! (:id application) (:fileId options) (:filename options) (:contentType options))
     (cleanup-temp-file (:result conversion-data))
     linked-version))

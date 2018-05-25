@@ -585,6 +585,7 @@
            attachment-options (util/assoc-when {:comment-text nil
                                                 :required false
                                                 :original-file-id originalFileId
+                                                :original-file-already-linked? true
                                                 :attachment-id attachmentId
                                                 :attachment-type (:type attachment)
                                                 :created (:created latest-version)
