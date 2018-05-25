@@ -61,6 +61,15 @@
           (when (and modern? (:legacy? verdict))
             (fail! :error.verdict.legacy)))))))
 
+(defn- replacement-draft-check
+  "Fails for replacement draft, if the target verdict is a) already
+  replaced, b) already being replaced (by another draft), c) not
+  published, d) legacy verdict, d) missing."
+  [{:keys [application data]}]
+  (when-let [replacement-id (:replacement-id data)]
+    (when-not (verdict/can-verdict-be-replaced? application replacement-id)
+      (fail :error.verdict-cannot-be-replaced))))
+
 (defn- verdict-filled
   "Precheck that fails if any of the required fields is empty."
   [{data :data :as command}]
@@ -92,6 +101,10 @@
                        published: timestamp (can be nil)
                        modified:  timestamp
                        legacy?:   (optional) true for legacy verdicts.
+
+                       TODO: title: Friendly title for the verdict. The
+                       format depends on the verdict state and
+                       category.
 
                       If the user is applicant, only published
                       verdicts are returned."
@@ -170,7 +183,8 @@
    :optional-parameters [replacement-id]
    :input-validators    [(partial action/non-blank-parameters [:id])]
    :pre-checks          [pate-enabled
-                         (template/verdict-template-check :application :published)]
+                         (template/verdict-template-check :application :published)
+                         replacement-draft-check]
    :states              states/post-submitted-states}
   [command]
   (ok :verdict-id (verdict/new-verdict-draft template-id command replacement-id)))

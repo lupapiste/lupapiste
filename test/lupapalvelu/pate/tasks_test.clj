@@ -320,11 +320,10 @@
                                  :data        {:asiointitunnus {:value ""}
                                                :osapuolena     {:value false}}})])))
   (fact "Only one foreman"
-    (fact "Two foremen"
-      (let [tasks (legacy-foremen->tasks (assoc-in legacy-verdict
-                                                   [:data :foremen]
-                                                   {:bar {:role "Primus inter pares"}})
-                                         12345)]
+    (let [tasks (legacy-foremen->tasks (assoc-in legacy-verdict
+                                                 [:data :foremen]
+                                                 {:bar {:role "Primus inter pares"}})
+                                       12345)]
       tasks => (just [(contains {:schema-info {:name    "task-vaadittu-tyonjohtaja"
                                                :type    :task
                                                :subtype :foreman
@@ -339,7 +338,7 @@
                                  :duedate     nil
                                  :taskname    "Primus inter pares"
                                  :data        {:asiointitunnus {:value ""}
-                                               :osapuolena     {:value false}}})]))))
+                                               :osapuolena     {:value false}}})])))
 
   (fact "No foremen"
     (legacy-foremen->tasks (assoc-in legacy-verdict

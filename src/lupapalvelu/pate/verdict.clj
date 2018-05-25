@@ -922,6 +922,19 @@
        (app/get-link-permit-apps)
        (first)))
 
+(defn can-verdict-be-replaced?
+  "Modern verdict can be replaced if its published and not already
+  replaced (or being replaced)."
+  [{:keys [pate-verdicts]} verdict-id]
+  (when-let [{:keys [published legacy?
+                     replacement]} (util/find-by-id verdict-id pate-verdicts)]
+    (and published
+         (not legacy?)
+         (not (some-> replacement :replaced-by))
+         (not (util/find-first #(= (get-in % [:replacement :replaces])
+                                   verdict-id)
+                               pate-verdicts)))))
+
 (defn replace-verdict [command old-verdict-id verdict-id]
   (action/update-application command
                              {:pate-verdicts {$elemMatch {:id old-verdict-id}}}

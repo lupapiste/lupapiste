@@ -105,16 +105,17 @@
           :data                         sc/Any
           (sc/optional-key :archive)    {:verdict-date                    ssc/Timestamp
                                          (sc/optional-key :lainvoimainen) ssc/Timestamp
-                                         :verdict-giver                   sc/Str}
-          (sc/optional-key :replacement) ReplacementPateVerdict}))
+                                         :verdict-giver                   sc/Str}}))
 
 (defschema PateModernVerdict
   (merge PateBaseVerdict
-         {:schema-version               sc/Int
-          (sc/optional-key :references) PateVerdictReferences
-          :template                     {:inclusions              [sc/Keyword]
-                                         (sc/optional-key :giver) (sc/enum "viranhaltija"
-                                                                           "lautakunta")}}))
+         {:schema-version                sc/Int
+          (sc/optional-key :references)  PateVerdictReferences
+          :template                      {:inclusions              [sc/Keyword]
+                                          (sc/optional-key :giver) (sc/enum "viranhaltija"
+                                                                            "lautakunta")}
+          (sc/optional-key :replacement) ReplacementPateVerdict}))
+
 (defschema PateLegacyVerdict
   (merge PateBaseVerdict
          {:legacy?  (sc/enum true)
