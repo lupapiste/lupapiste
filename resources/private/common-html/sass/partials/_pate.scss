@@ -467,6 +467,10 @@ div.pate-autocomplete {
   border-collapse: initial;
   .ac--combobox {
     display: table;
+    width: 100%;
+    input {
+      width: 100%;
+    }
   }
   .ac--selected {
     min-height: 40px;
@@ -516,6 +520,11 @@ div.pate-autocomplete {
     }
     i {
       color: $input-select-disabled-icon
+    }
+  }
+  .ac--selected.required {
+    span, i {
+      border-color: $input-required-border-color;
     }
   }
   .ac__menu {
@@ -687,6 +696,9 @@ div.pate-autocomplete {
   td.batch--type {
     min-width: 15em;
   }
+  td.batch--contents {
+    min-width: 15em;
+  }
   td.batch--error {
     color: $negative;
     min-width: 20em;
@@ -827,4 +839,8 @@ input.date-delta {
 
 body.pate-error-page {
   padding: 2em 2em;
+}
+
+textarea.grid-style-input.pate-textarea {
+  height: initial;
 }

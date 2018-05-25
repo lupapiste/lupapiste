@@ -19,7 +19,7 @@
     (command sonja :approve-application :id app-id :lang "fi") => ok?)
 
   (facts "Publish and replace verdict"
-    (let [template-id (-> pate-fixture/verdic-templates-setting :templates first :id)
+    (let [template-id              (-> pate-fixture/verdic-templates-setting :templates first :id)
           {verdict-id :verdict-id} (command sonja :new-pate-verdict-draft
                                             :id app-id
                                             :template-id template-id)]
@@ -33,9 +33,26 @@
       (fact "Verdict code"
         (command sonja :edit-pate-verdict :id app-id :verdict-id verdict-id
                  :path [:verdict-code] :value "hyvaksytty") => no-errors?)
+
+      (fact "Draft cannot be replaced"
+        (command sonja :new-pate-verdict-draft :id app-id
+                 :template-id template-id
+                 :replacement-id verdict-id)=> fail?)
+
       (command sonja :publish-pate-verdict :id app-id :verdict-id verdict-id) => no-errors?
 
-      (fact "Create replacement verdict"
+      (facts "Replacement verdict"
+        (fact "First replacement draft"
+          (let [{vid1 :verdict-id :as res} (command sonja :new-pate-verdict-draft :id app-id
+                                            :template-id template-id
+                                            :replacement-id verdict-id) => ok?]
+            (fact "Only one replacement draft at the time"
+              (command sonja :new-pate-verdict-draft :id app-id
+                 :template-id template-id
+                 :replacement-id verdict-id) => fail?)
+            (fact "Delete the only replacement draft"
+              (command sonja :delete-pate-verdict :id app-id
+                       :verdict-id vid1) => ok?)))
         (let [{replacement-verdict-id :verdict-id} (command sonja :new-pate-verdict-draft
                                                             :id app-id
                                                             :template-id template-id

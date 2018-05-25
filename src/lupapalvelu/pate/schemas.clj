@@ -97,21 +97,34 @@
    (sc/optional-key :replaced-by)   ssc/ObjectIdStr
    (sc/optional-key :replaces)      ssc/ObjectIdStr})
 
-(defschema PateVerdict
+(defschema PateBaseVerdict
   (merge PateCategory
          {;; Verdict is draft until it is published
           (sc/optional-key :published)  ssc/Timestamp
           :modified                     ssc/Timestamp
-          :schema-version               sc/Int
           :data                         sc/Any
-          (sc/optional-key :references) PateVerdictReferences
-          :template                     {:inclusions              [sc/Keyword]
-                                         (sc/optional-key :giver) (sc/enum "viranhaltija"
-                                                                           "lautakunta")}
           (sc/optional-key :archive)    {:verdict-date                    ssc/Timestamp
                                          (sc/optional-key :lainvoimainen) ssc/Timestamp
-                                         :verdict-giver                   sc/Str}
+                                         :verdict-giver                   sc/Str}}))
+
+(defschema PateModernVerdict
+  (merge PateBaseVerdict
+         {:schema-version                sc/Int
+          (sc/optional-key :references)  PateVerdictReferences
+          :template                      {:inclusions              [sc/Keyword]
+                                          (sc/optional-key :giver) (sc/enum "viranhaltija"
+                                                                            "lautakunta")}
           (sc/optional-key :replacement) ReplacementPateVerdict}))
+
+(defschema PateLegacyVerdict
+  (merge PateBaseVerdict
+         {:legacy?  (sc/enum true)
+          :template {:inclusions [sc/Keyword]}}))
+
+(defschema PateVerdict
+  (sc/conditional
+   :legacy?        PateLegacyVerdict
+   :schema-version PateModernVerdict))
 
 ;; Schema utils
 
@@ -246,7 +259,7 @@
 
 (defn- resolve-dict-value
   [data]
-  (let [{:keys [docgen reference-list date-delta multi-select
+  (let [{:keys [reference-list date-delta multi-select
                 phrase-text keymap button application-attachments
                 toggle text date select]} data
         wrap                              (fn [type schema
@@ -254,8 +267,6 @@
                                                       :schema schema
                                                       :data   data})]
     (cond
-      docgen                  (wrap :docgen (doc-schemas/get-schema
-                                             {:name (get docgen :name docgen)}) docgen)
       date-delta              (wrap :date-delta shared-schemas/PateDateDelta date-delta)
       reference-list          (wrap :reference-list shared-schemas/PateReferenceList reference-list)
       multi-select            (wrap :multi-select shared-schemas/PateMultiSelect multi-select)
@@ -275,10 +286,13 @@
   dictionary value. Returns error if not valid, nil otherwise."
   [dict-value value & [path references]]
   (if dict-value
-    (validate-resolution (assoc (resolve-dict-value dict-value)
-                                :value value
-                                :path path
-                                :references references))
+    (let [resolution (resolve-dict-value dict-value)]
+      (if (some-> resolution :data :read-only?)
+        :error.read-only
+        (validate-resolution (assoc resolution
+                                    :value value
+                                    :path path
+                                    :references references))))
     :error.invalid-value-path))
 
 (defn- canonize-path [path]

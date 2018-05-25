@@ -169,7 +169,8 @@
            class="link-permit-item">
           <!-- ko if: $data.foremanRole -->
           <span data-bind="text: _.capitalize(foremanRole()) + (s.isBlank(foreman()) ? '' : ', ' + foreman())"
-                data-test-id="foreman-link-person-info"></span>,
+                data-test-id="foreman-link-person-info">
+          </span><span data-bind="text: $data.isSubstituteForeman() ? ' ' + loc('tyonjohtaja.substitute') + ',' : ','"></span>
           <span data-bind="ltext: state" data-test-id="foreman-link-state"></span>
           <!-- /ko -->
           <!-- ko ifnot: $data.foremanRole -->

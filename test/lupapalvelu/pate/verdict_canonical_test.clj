@@ -1,91 +1,123 @@
 (ns lupapalvelu.pate.verdict-canonical-test
-  (:require [lupapalvelu.pate.verdict-canonical :refer :all]
-            [lupapalvelu.document.attachments-canonical :refer [verdict-attachment-canonical]]
+  (:require [lupapalvelu.document.attachments-canonical :refer [verdict-attachment-canonical]]
+            [lupapalvelu.pate.schemas :refer [PateVerdict]]
+            [lupapalvelu.pate.verdict-canonical :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [schema.core :as sc]))
 
 (defn timestamp [date]
   (+ (* 1000 3600 12) (util/to-millis-from-local-date-string date)))
 
-(def verdict {:id                 "1a156dd40e40adc8ee064463"
-              :data               {:voimassa                (timestamp "23.11.2023")
-                                   :appeal                  "muutoksenhakuohje - teksti"
-                                   :julkipano               (timestamp "24.11.2017")
-                                   :bulletin-op-description "julkipano - teksti"
-                                   :purpose                 "k\u00e4ytt\u00f6tarkoitus"
-                                   :verdict-text            "p\u00e4\u00e4t\u00f6s - teksti"
-                                   :anto                    (timestamp "20.11.2017")
-                                   :complexity              "small"
-                                   :plans                   ["5a156ddf0e40adc8ee064464"
-                                                             "6a156ddf0e40adc8ee064464"]
-                                   :aloitettava             (timestamp "23.11.2022")
-                                   :valitus                 (timestamp "27.12.2017")
-                                   :foremen                 ["erityis-tj"
-                                                             "iv-tj"
-                                                             "vastaava-tj"
-                                                             "vv-tj"]
-                                   :verdict-code            "myonnetty"
-                                   :collateral              "vakuus - teksti"
-                                   :conditions              {:id1 {:condition "muut lupaehdot - teksti"}
-                                                             :id2 {:condition "toinen teksti"}}
-                                   :rights                  "rakennusoikeus"
-                                   :plans-included          true
-                                   :reviews                 ["5a156dd40e40adc8ee064463"
-                                                             "6a156dd40e40adc8ee064463"]
-                                   :foremen-included        true
-                                   :neighbors               ""
-                                   :lainvoimainen           (timestamp "27.11.2017")
-                                   :reviews-included        true
-                                   :statements              ""
-                                   :verdict-date            (timestamp "23.11.2017")
-                                   :automatic-verdict-dates true
-                                   :handler                 "Pate Paattaja"
-                                   :verdict-section         "99"
-                                   :buildings               {"5a1561250e40adc8ee064449" {:rakennetut-autopaikat  "1"
-                                                                                         :kiinteiston-autopaikat "2"
-                                                                                         :autopaikat-yhteensa    "3"
-                                                                                         :vss-luokka             "4"
-                                                                                         :paloluokka             "5"}}
-                                   :complexity-text         "hankkeen vaativuus"}
-              :references         {:foremen ["erityis-tj" "iv-tj" "vastaava-tj" "vv-tj" "tj"]
-                                   :plans   [{:id   "5a156ddf0e40adc8ee064464"
-                                              :fi "Suunnitelmat"
-                                              :sv "Planer"
-                                              :en "Plans"}
-                                             {:id   "6a156ddf0e40adc8ee064464"
-                                              :fi "Suunnitelmat2"
-                                              :sv "Planer2"
-                                              :en "Plans2"}]
-                                   :reviews [{:id   "5a156dd40e40adc8ee064463"
-                                              :fi "Katselmus"
-                                              :sv "Syn"
-                                              :en "Review"
-                                              :type "muu-katselmus"}
-                                             {:id   "6a156dd40e40adc8ee064463"
-                                              :fi "Katselmus2"
-                                              :sv "Syn2"
-                                              :en "Review2"
-                                              :type "paikan-merkitseminen"}]}
-              :template           {:giver "viranhaltija"}
-              :verdict-attachment {:type           {:type-id    :paatos
-                                                    :type-group :paatoksenteko}
-                                   :created        1521628178984
-                                   :size           22959
-                                   :filename       "LP-753-2018-90012 P\u00e4\u00e4t\u00f6s 21.03.2018 12:29.pdf"
-                                   :originalFileId "5ab234139997d70535b952b2"
-                                   :id             "5ab234139997d70535b952b5"
-                                   :autoConversion true
-                                   :contentType    "application/pdf"
-                                   :archivable     true
-                                   :version        {:major 0 :minor 1}
-                                   :stamped        false
-                                   :user           {:id        "777777777777777777000023"
-                                                    :username  "sonja"
-                                                    :firstName "Sonja"
-                                                    :lastName  "Sibbo"
-                                                    :role      "authority"}
-                                   :fileId         "5ab234149997d70535b952b6"}})
+(def verdict {:id                     "1a156dd40e40adc8ee064463"
+              :schema-version         1
+              :category               "r"
+              :modified               123456
+              :data                   {:language                "fi"
+                                       :voimassa                (timestamp "23.11.2023")
+                                       :appeal                  "muutoksenhakuohje - teksti"
+                                       :julkipano               (timestamp "24.11.2017")
+                                       :bulletin-op-description "julkipano - teksti"
+                                       :purpose                 "k\u00e4ytt\u00f6tarkoitus"
+                                       :verdict-text            "p\u00e4\u00e4t\u00f6s - teksti"
+                                       :anto                    (timestamp "20.11.2017")
+                                       :complexity              "small"
+                                       :plans                   ["5a156ddf0e40adc8ee064464"
+                                                                 "6a156ddf0e40adc8ee064464"]
+                                       :aloitettava             (timestamp "23.11.2022")
+                                       :valitus                 (timestamp "27.12.2017")
+                                       :foremen                 ["erityis-tj"
+                                                                 "iv-tj"
+                                                                 "vastaava-tj"
+                                                                 "vv-tj"]
+                                       :verdict-code            "myonnetty"
+                                       :collateral              "vakuus - teksti"
+                                       :conditions              {:id1 {:condition "muut lupaehdot - teksti"}
+                                                                 :id2 {:condition "toinen teksti"}}
+                                       :rights                  "rakennusoikeus"
+                                       :plans-included          true
+                                       :reviews                 ["5a156dd40e40adc8ee064463"
+                                                                 "6a156dd40e40adc8ee064463"]
+                                       :foremen-included        true
+                                       :neighbors               ""
+                                       :lainvoimainen           (timestamp "27.11.2017")
+                                       :reviews-included        true
+                                       :statements              ""
+                                       :verdict-date            (timestamp "23.11.2017")
+                                       :automatic-verdict-dates true
+                                       :handler                 "Pate Paattaja"
+                                       :verdict-section         "99"
+                                       :buildings               {"5a1561250e40adc8ee064449" {:rakennetut-autopaikat  "1"
+                                                                                             :kiinteiston-autopaikat "2"
+                                                                                             :autopaikat-yhteensa    "3"
+                                                                                             :vss-luokka             "4"
+                                                                                             :paloluokka             "5"}}
+                                       :complexity-text         "hankkeen vaativuus"}
+              :references             {:foremen      ["erityis-tj" "iv-tj" "vastaava-tj" "vv-tj" "tj"]
+                                       :plans        [{:id "5a156ddf0e40adc8ee064464"
+                                                       :fi "Suunnitelmat"
+                                                       :sv "Planer"
+                                                       :en "Plans"}
+                                                      {:id "6a156ddf0e40adc8ee064464"
+                                                       :fi "Suunnitelmat2"
+                                                       :sv "Planer2"
+                                                       :en "Plans2"}]
+                                       :reviews      [{:id   "5a156dd40e40adc8ee064463"
+                                                       :fi   "Katselmus"
+                                                       :sv   "Syn"
+                                                       :en   "Review"
+                                                       :type "muu-katselmus"}
+                                                      {:id   "6a156dd40e40adc8ee064463"
+                                                       :fi   "Katselmus2"
+                                                       :sv   "Syn2"
+                                                       :en   "Review2"
+                                                       :type "paikan-merkitseminen"}]
+                                       :date-deltas  {:julkipano     {:delta 1 :unit "days"}
+                                                      :anto          {:delta 2 :unit "days"}
+                                                      :muutoksenhaku {:delta 3 :unit "days"}
+                                                      :lainvoimainen {:delta 4 :unit "days"}
+                                                      :aloitettava   {:delta 1 :unit "years"}
+                                                      :voimassa      {:delta 2 :unit "years"}}
+                                       :verdict-code [ "pysytti-evattyna",
+                                                      "myonnetty",
+                                                      "konversio",
+                                                      "ilmoitus-tiedoksi"
+                                                      "ei-tutkittu-3"
+                                                      "annettu-lausunto"]}
+              :template               {:giver      "viranhaltija"
+                                       :inclusions [:language :voimassa :appeal :julkipano :bulletin-op-description
+                                                    :purpose :verdict-text :anto :complexity :plans :aloitettava
+                                                    :valitus :foremen :verdict-code :collateral :conditions.condition
+                                                    :rights :plans-included :reviews :foremen-included :neighbors
+                                                    :lainvoimainen :reviews-included :statements :verdict-date
+                                                    :automatic-verdict-dates :handler :verdict-section
+                                                    :buildings.rakennetut-autopaikat :buildings.kiinteiston-autopaikat
+                                                    :buildings.autopaikat-yhteensa :buildings.vss-luokka
+                                                    :buildings.paloluokka]}})
+
+(sc/validate PateVerdict verdict)
+
+(def verdict-attachment {:type            {:type-id    :paatos
+                                           :type-group :paatoksenteko}
+                         :created        1521628178984
+                         :size           22959
+                         :filename       "LP-753-2018-90012 P\u00e4\u00e4t\u00f6s 21.03.2018 12:29.pdf"
+                         :originalFileId "5ab234139997d70535b952b2"
+                         :id             "5ab234139997d70535b952b5"
+                         :autoConversion true
+                         :contentType    "application/pdf"
+                         :archivable     true
+                         :version        {:major 0 :minor 1}
+                         :stamped        false
+                         :user           {:id        "777777777777777777000023"
+                                          :username  "sonja"
+                                          :firstName "Sonja"
+                                          :lastName  "Sibbo"
+                                          :role      "authority"}
+                         :fileId         "5ab234149997d70535b952b6"})
+
+(def verdict-with-attachment (assoc verdict :verdict-attachment verdict-attachment))
 
 (def p-verdict {:data     {:voimassa              (timestamp "25.2.2020")
                            :appeal                ""
@@ -344,7 +376,9 @@
 (facts "Canonical for verdict attachment"
 
   (fact verdict-attachment-canonical
-    (verdict-attachment-canonical "fi" verdict "http://localhost:8000/api/raw/")
+    (verdict-attachment-canonical "fi"
+                                  verdict-with-attachment
+                                  "http://localhost:8000/api/raw/")
     => {:kuvaus "P\u00e4\u00e4t\u00f6s"
         :linkkiliitteeseen "http://localhost:8000/api/raw/latest-attachment-version?attachment-id=5ab234139997d70535b952b5"
         :muokkausHetki "2018-03-21T10:29:38"

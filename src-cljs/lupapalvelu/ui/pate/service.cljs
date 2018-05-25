@@ -164,18 +164,27 @@
                     :template-id template-id
                     :replacement-id replacement-id)))
 
+(defn new-legacy-verdict-draft [app-id callback]
+  (common/command {:command "new-legacy-verdict-draft"
+                   :success callback}
+                  :id app-id))
+
 (defn open-verdict [app-id verdict-id callback]
   (common/query "pate-verdict"
                 callback
                 :id app-id
                 :verdict-id verdict-id))
 
-(defn delete-verdict [app-id verdict-id]
-  (common/command {:command "delete-pate-verdict"
+(defn delete-verdict [app-id {:keys [id published legacy?]}]
+  (common/command {:command (if legacy?
+                              :delete-legacy-verdict
+                              :delete-pate-verdict)
                    :success #(do (fetch-verdict-list app-id)
-                                 (js/lupapisteApp.services.attachmentsService.queryAll))}
+                                 (if published
+                                   (js/repository.load app-id)
+                                   (js/lupapisteApp.services.attachmentsService.queryAll)))}
                   :id app-id
-                  :verdict-id verdict-id))
+                  :verdict-id id))
 
 (defn edit-verdict [app-id verdict-id path value callback]
   (common/command {:command "edit-pate-verdict"
@@ -185,8 +194,10 @@
                   :path path
                   :value value))
 
-(defn publish-and-reopen-verdict [app-id verdict-id callback]
-  (common/command {:command :publish-pate-verdict
+(defn publish-and-reopen-verdict [app-id {verdict-id :id legacy? :legacy?} callback]
+  (common/command {:command (if legacy?
+                              :publish-legacy-verdict
+                              :publish-pate-verdict)
                    :success (fn []
                               (fetch-verdict-list app-id)
                               (open-verdict app-id verdict-id callback)
