@@ -117,6 +117,8 @@
                                           :role      "authority"}
                          :fileId         "5ab234149997d70535b952b6"})
 
+(def verdict-with-attachment (assoc verdict :verdict-attachment verdict-attachment))
+
 (def p-verdict {:data     {:voimassa              (timestamp "25.2.2020")
                            :appeal                ""
                            :julkipano             (timestamp "22.2.2018")
@@ -375,8 +377,7 @@
 
   (fact verdict-attachment-canonical
     (verdict-attachment-canonical "fi"
-                                  (assoc verdict
-                                         :verdict-attachment verdict-attachment)
+                                  verdict-with-attachment
                                   "http://localhost:8000/api/raw/")
     => {:kuvaus "P\u00e4\u00e4t\u00f6s"
         :linkkiliitteeseen "http://localhost:8000/api/raw/latest-attachment-version?attachment-id=5ab234139997d70535b952b5"
