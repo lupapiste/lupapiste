@@ -2,7 +2,7 @@
   "Schema instantiations for Pate schemas."
   (:require [clojure.set :as set]
             [clojure.string :as s]
-            [clojure.walk :as walk]
+            [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.shared-schemas :as schemas]
             [sade.shared-util :as util]
             [schema.core :as sc]))
@@ -81,12 +81,6 @@
 (def ya-verdict-dates [:julkipano :anto :muutoksenhaku :lainvoimainen
                        :aloitettava])
 
-(defn pate-assert [pred & msg]
-  (let [div "\n-------------------------------------------------------\n"]
-    (assert pred (str div
-                      (s/join " " msg)
-                      div))))
-
 (def review-types (keys review-type-map))
 
 (def ya-review-types (keys ya-review-type-map))
@@ -137,68 +131,6 @@
                                       :items      [:shekki :panttaussitoumus]
                                       :sort-by    :text}})
 
-(defn required [m]
-  (assoc m :required? true))
-
-(defn subschema-sections [{:keys [section sections]}]
-  (if section
-    [section]
-    (or sections [])))
-
-(defn check-dicts [dictionary form]
-  (walk/prewalk (fn [x]
-                  (let [dict      (:dict x)
-                        repeating (:repeating x)]
-                    (cond
-                     repeating
-                     (do
-                       (check-dicts (-> dictionary
-                                        repeating
-                                        :repeating)
-                                    (dissoc x :repeating))
-                       nil)
-
-                     dict
-                     (do (pate-assert (dict dictionary)
-                                      "Missing dict:" dict)
-                         x)
-
-                     :else x)))
-                form))
-
-(defn check-overlapping-dicts [subschemas]
-  (->> subschemas
-       (map (comp set keys :dictionary))
-       (reduce (fn [acc key-set]
-                 (let [overlapping (set/intersection acc key-set)]
-                   (pate-assert (empty? overlapping)
-                                "Overlapping dicts:" overlapping)
-                   (set/union acc key-set)))
-               #{})))
-
-(defn check-unique-section-ids [sections]
-  (doseq [[k v] (group-by :id sections)]
-    (pate-assert (= (count v) 1) "Duplicate section id:" k)))
-
-(defn combine-subschemas
-  "Combines given subschemas into one schema. Throws if dictionary keys
-  overlap or sections refer to a :dict that does not exist."
-  [& subschemas]
-  (check-overlapping-dicts subschemas)
-
-  (let [schema (reduce (fn [acc {:keys [dictionary] :as subschema}]
-                         (-> acc
-                             (update :dictionary #(merge % dictionary))
-                             (update :sections
-                                     #(concat % (subschema-sections subschema)))))
-                       {:dictionary {} :sections []}
-                       subschemas)]
-    (check-dicts (:dictionary schema)
-                 (:sections schema))
-    (check-unique-section-ids (:sections schema))
-    schema))
-
-
 ;; -----------------------------
 ;; Settings subschemas
 ;; -----------------------------
@@ -207,18 +139,18 @@
   "Combines subschemas and validates the result."
   [title & subschemas]
   (sc/validate schemas/PateSettings
-               (assoc (apply combine-subschemas subschemas)
+               (assoc (apply schema-util/combine-subschemas subschemas)
                       :title title)))
 
 (defn setsub-date-deltas
   "Dates is vector of date dict keys."
   [dates]
-  (let [date-dicts {:julkipano     (required {:date-delta {:unit :days}})
-                    :anto          (required {:date-delta {:unit :days}})
-                    :muutoksenhaku (required {:date-delta {:unit :days}})
-                    :lainvoimainen (required {:date-delta {:unit :days}})
-                    :aloitettava   (required {:date-delta {:unit :years}})
-                    :voimassa      (required {:date-delta {:unit :years}})}]
+  (let [date-dicts {:julkipano     (schema-util/required {:date-delta {:unit :days}})
+                    :anto          (schema-util/required {:date-delta {:unit :days}})
+                    :muutoksenhaku (schema-util/required {:date-delta {:unit :days}})
+                    :lainvoimainen (schema-util/required {:date-delta {:unit :days}})
+                    :aloitettava   (schema-util/required {:date-delta {:unit :years}})
+                    :voimassa      (schema-util/required {:date-delta {:unit :years}})}]
     {:dictionary (merge {:verdict-dates {:loc-text :pate-verdict-dates-settings}
                          :plus          {:loc-text :plus}}
                         (select-keys date-dicts dates))
@@ -230,7 +162,7 @@
 
 (def setsub-verdict-code
   {:dictionary {:verdict-code
-                (required {:multi-select {:label? false
+                (schema-util/required {:multi-select {:label? false
                                           :items  (keys verdict-code-map)}})}
    :section    {:id         :verdict
                 :required?  true
@@ -240,8 +172,8 @@
                              :rows       [[{:dict :verdict-code}]]}}})
 
 (def setsub-board ;; Lautakunta
-  {:dictionary {:lautakunta-muutoksenhaku (required {:date-delta {:unit :days}})
-                :boardname                (required {:text {}})}
+  {:dictionary {:lautakunta-muutoksenhaku (schema-util/required {:date-delta {:unit :days}})
+                :boardname                (schema-util/required {:text {}})}
    :section {:id         :board
              :loc-prefix :pate-settings.boardname-title
              :grid       {:columns 4
@@ -262,9 +194,9 @@
                            :loc-text :pate-verdict.language.en}}})
 
 (defn settings-repeating [{:keys [dict loc-prefix add-dict add-loc remove-dict]}]
-  {:dictionary {dict     {:repeating {:fi         (required {:text {:label? false}})
-                                      :sv         (required {:text {:label? false}})
-                                      :en         (required {:text {:label? false}})
+  {:dictionary {dict     {:repeating {:fi         (schema-util/required {:text {:label? false}})
+                                      :sv         (schema-util/required {:text {:label? false}})
+                                      :en         (schema-util/required {:text {:label? false}})
                                       remove-dict {:button {:i18nkey :remove
                                                             :label?  false
                                                             :icon    :lupicon-remove
@@ -312,9 +244,9 @@
       (assoc-in [:dictionary :title-type] {:css      [:pate-label.required]
                                            :loc-text :pate.review-type})
       (assoc-in [:dictionary :reviews :repeating :type]
-                (required {:select {:label?     false
-                                    :loc-prefix :pate.review-type
-                                    :items      review-types
+                (schema-util/required {:select {:label?     false
+                                                :loc-prefix :pate.review-type
+                                                :items      review-types
                            :sort-by    :text}}))
       (update-in [:section :grid :rows 0 :row] #(conj % {:dict :title-type}))
       (update-in [:section :grid :rows 1 :row 0 :grid :rows 0 :row]
@@ -354,10 +286,10 @@
 ;; -----------------------------
 
 (defn build-verdict-template-schema
-  "In addition to combine-subschemas, the dictionary is prefilled with
-  settings-link dicts. If a subschema has a :removable? flag, then the
-  section is added to :removed-sections. The resulting schema is
-  validated."
+  "In addition to `schema-util/combine-subschemas`, the dictionary is
+  prefilled with settings-link dicts. If a subschema has a :removable?
+  flag, then the section is added to :removed-sections. The resulting
+  schema is validated."
   [& subschemas]
   (->> subschemas
        (cons {:dictionary
@@ -372,11 +304,11 @@
                                   (cond-> acc
                                     (:removable? subschema)
                                     (concat (map (comp keyword :id)
-                                                 (subschema-sections subschema)))))
+                                                 (schema-util/subschema-sections subschema)))))
                                 []
                                 subschemas)
                         (repeat false))}}})
-       (apply combine-subschemas)
+       (apply schema-util/combine-subschemas)
        (sc/validate schemas/PateVerdictTemplate)))
 
 
@@ -397,7 +329,7 @@
                                                   :sort?           false
                                                   :i18nkey         :pate-verdict-dates
                                                   :item-loc-prefix :pate-verdict}}
-                :giver            (required verdict-giver-select)
+                :giver            (schema-util/required verdict-giver-select)
                 :verdict-code     {:reference-list {:path       :settings.verdict-code
                                                     :type       :select
                                                     :loc-prefix :pate-r.verdict-code}}
@@ -468,7 +400,7 @@
 (defn settings-dependencies [dict loc-prefix]
   {:dictionary {dict {:repeating {:included {:toggle {:label?    false
                                                       :text-dict :text}}
-                                  :text     {:text {}}
+                                  :text     {:text {:read-only? true}}
                                   :selected {:toggle {:enabled?  :-.included
                                                       :label?  false
                                                       :i18nkey :pate.available-in-verdict}}}
@@ -658,7 +590,7 @@
   result."
   [category version & subschemas]
   (let [{comb-dic :dictionary
-         :as     combined} (apply combine-subschemas subschemas)
+         :as     combined} (apply schema-util/combine-subschemas subschemas)
         temdic             (:dictionary (verdict-template-schema category))
         removable          (some-> temdic :removed-sections :keymap keys set)
         temdicts           (-> temdic keys set)
@@ -673,8 +605,8 @@
                                                 (remove nil?)
                                                 set)
                                            temdicts)]
-    (pate-assert (empty? sec-diff) "Bad template-sections:" sec-diff)
-    (pate-assert (empty? dict-diff) "Bad template-dicts:" dict-diff)
+    (schema-util/pate-assert (empty? sec-diff) "Bad template-sections:" sec-diff)
+    (schema-util/pate-assert (empty? dict-diff) "Bad template-dicts:" dict-diff)
     (sc/validate schemas/PateVerdict (assoc combined :version version))))
 
 (defn phrase-versub
@@ -704,14 +636,14 @@
   [category]
   {:dictionary (assoc (->> verdict-dates
                            (map (fn [kw]
-                                  [kw (required {:date {:disabled?
+                                  [kw (schema-util/required {:date {:disabled?
                                                         :automatic-verdict-dates}})]))
                            (into {}))
-                      :language                (required (assoc language-select
+                      :language                (schema-util/required (assoc language-select
                                                                 :template-dict :language))
-                      :verdict-date            (required {:date {}})
+                      :verdict-date            (schema-util/required {:date {}})
                       :automatic-verdict-dates {:toggle {}}
-                      :handler               (required {:text {:loc-prefix
+                      :handler               (schema-util/required {:text {:loc-prefix
                                                                (case category
                                                                  :p :pate.prepper
                                                                  :pate-verdict.handler)}})
@@ -726,6 +658,7 @@
                                    :show? :_meta.editing?}
                                   {:col   2
                                    :show? :_meta.editing?
+                                   :align :full
                                    :dict  :handler}
                                   {:col   3
                                    :hide? :_meta.editing?
@@ -770,14 +703,14 @@
   collateral? is true."
   [collateral?]
   (let [verdict {:dictionary (merge {:boardname        {:reference {:path :*ref.boardname}}
-                                     :verdict-section  (required {:text {:before :section}})
-                                     :verdict-code     (required {:reference-list {:path       :verdict-code
+                                     :verdict-section  (schema-util/required {:text {:before :section}})
+                                     :verdict-code     (schema-util/required {:reference-list {:path       :verdict-code
                                                                                    :type       :select
                                                                                    :loc-prefix :pate-r.verdict-code}
                                                                   :template-dict  :verdict-code})
-                                     :verdict-text     (required {:phrase-text   {:category :paatosteksti}
+                                     :verdict-text     (schema-util/required {:phrase-text   {:category :paatosteksti}
                                                                   :template-dict :paatosteksti})
-                                     :verdict-text-ref (required {:reference {:path :verdict-text}})}
+                                     :verdict-text-ref (schema-util/required {:reference {:path :verdict-text}})}
                                     (when collateral? {:collateral      {:text {:after :eur}}
                                                        :collateral-flag {:toggle {:loc-prefix :pate-collateral.flag}}
                                                        :collateral-date {:date {}}
@@ -1034,7 +967,17 @@
                                                       :show? :_meta.editing?}]}
                                             ]}}]]}}})
 
-(def versub-attachments  ;; Attachments and upload
+
+(def versub-attachments
+  {:dictionary
+   {:attachments {:application-attachments {:i18nkey :application.verdict-attachments}}}
+   :section {:id               :attachments
+             :template-section :attachments
+             :grid             {:columns 7
+                                :rows    [[{:col  6
+                                            :dict :attachments}]]}}})
+
+(def versub-upload
   {:dictionary
    {:upload
     {:attachments {:i18nkey    :application.verdict-attachments
@@ -1042,21 +985,14 @@
                    :type-group #"paatoksenteko"
                    :default    :paatoksenteko.paatosote
                    :dropzone   "#pate-verdict-page"
-                   :multiple?  true}}
-    :attachments
-    {:application-attachments {:i18nkey :application.verdict-attachments}}}
-   :sections [{:id               :attachments
-               :template-section :attachments
-               :grid             {:columns 7
-                                  :rows    [[{:col  6
-                                              :dict :attachments}]]}}
-              {:id       :upload
-               :hide?    :_meta.published?
-               :css      :pate-section--no-border
-               :buttons? false
-               :grid     {:columns 7
-                          :rows    [[{:col  6
-                                      :dict :upload}]]}}]})
+                   :multiple?  true}}}
+   :section {:id       :upload
+             :hide?    :_meta.published?
+             :css      :pate-section--no-border
+             :buttons? false
+             :grid     {:columns 7
+                        :rows    [[{:col  6
+                                    :dict :upload}]]}}})
 
 (def r-verdict-schema-1 (build-verdict-schema :r 1
                                               (versub-dates :r)
@@ -1072,7 +1008,8 @@
                                               versub-extra-info
                                               versub-deviations
                                               versub-buildings
-                                              versub-attachments))
+                                              versub-attachments
+                                              versub-upload))
 
 (def versub-start-info ;; Lahtokohtatiedot
   (phrase-versub :start-info :pate-start-info :yleinen
@@ -1115,7 +1052,8 @@
                                               versub-next-steps
                                               versub-buyout
                                               versub-fyi
-                                              versub-attachments))
+                                              versub-attachments
+                                              versub-upload))
 
 (def versub-dates-ya
   (-> (versub-dates :ya)
@@ -1161,7 +1099,8 @@
                                                versub-appeal
                                                versub-statements
                                                versub-inform-others
-                                               versub-attachments))
+                                               versub-attachments
+                                               versub-upload))
 
 (defn verdict-schema
   "Nil version returns the latest version."
@@ -1170,16 +1109,14 @@
                    :r  [r-verdict-schema-1]
                    :p  [p-verdict-schema-1]
                    :ya [ya-verdict-schema-1]
-                   (pate-assert false "Invalid schema category:" category))]
+                   (schema-util/pate-assert false "Invalid schema category:" category))]
      (cond
        (nil? version)                     (last schemas)
        (and (pos? version)
             (<= version (count schemas))) (nth schemas (dec version))
-       :else                              (pate-assert false "Invalid schema version:" version))))
+       :else                              (schema-util/pate-assert false "Invalid schema version:" version))))
   ([category]
    (verdict-schema category nil)))
-
-;; Other utils
 
 (defn permit-type->category [permit-type]
   (when-let [kw (some-> permit-type

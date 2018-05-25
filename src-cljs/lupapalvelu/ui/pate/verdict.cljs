@@ -1,12 +1,13 @@
 (ns lupapalvelu.ui.pate.verdict
   "View of an individual Pate verdict."
   (:require [clojure.set :as set]
+            [lupapalvelu.pate.legacy :as legacy]
             [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
-            [lupapalvelu.ui.pate.layout :as layout]
             [lupapalvelu.ui.pate.components :as pate-components]
+            [lupapalvelu.ui.pate.layout :as layout]
             [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.phrases :as phrases]
             [lupapalvelu.ui.pate.sections :as sections]
@@ -21,8 +22,10 @@
 (defn- can-view? []
   (state/auth? :pate-verdicts))
 
-(defn- can-publish? []
-  (state/auth? :publish-pate-verdict))
+(defn- can-publish? [legacy?]
+  (state/auth? (if legacy?
+                 :publish-legacy-verdict
+                 :publish-pate-verdict)))
 
 (defn- can-edit-verdict? [{published :published}]
   (and (can-edit?)
@@ -102,13 +105,14 @@
 (rum/defcs verdict < rum/reactive
   (rum/local false ::wait?)
   [{wait?* ::wait?} {:keys [schema state info _meta] :as options}]
-  (let [published (path/react :published info)
-        yes-fn    (fn []
-                    (reset! wait?* true)
-                    (reset! (rum/cursor-in _meta [:enabled?]) false)
-                    (service/publish-and-reopen-verdict  @state/application-id
-                                                         (path/value :id info)
-                                                         reset-verdict))]
+  (let [{:keys [published legacy? filled? id]
+         :as   info} (rum/react info)
+        yes-fn     (fn []
+                     (reset! wait?* true)
+                     (reset! (rum/cursor-in _meta [:enabled?]) false)
+                     (service/publish-and-reopen-verdict  @state/application-id
+                                                          info
+                                                          reset-verdict))]
     [:div.pate-verdict
      [:div.pate-grid-2
       (when (and (or (path/enabled? options)
@@ -120,8 +124,8 @@
                                    :class    (common/css :primary :pate-left-space)
                                    :icon     :lupicon-circle-section-sign
                                    :wait?    wait?*
-                                   :enabled? (and (path/react :filled? info)
-                                                  (can-publish?))
+                                   :enabled? (and filled?
+                                                  (can-publish? legacy?))
                                    :on-click (fn []
                                                (hub/send "show-dialog"
                                                          {:ltitle          "areyousure"
@@ -131,9 +135,9 @@
                                                                             :yesFn yes-fn}}))})
           (components/link-button {:url      (js/sprintf "/api/raw/preview-pate-verdict?id=%s&verdict-id=%s"
                                                          @state/application-id
-                                                         (path/value :id info))
+                                                         id)
                                    :enabled? (and (path/enabled? options)
-                                                  (path/react :filled? info))
+                                                  filled?)
                                    :disabled published
                                    :text-loc :pdf.preview})]])
       (if published
@@ -151,6 +155,13 @@
      (sections/sections options :verdict)]))
 
 
+(defn current-verdict-schema []
+  (let [{:keys [schema-version legacy?]} (:info @state/current-verdict)
+        category (shared/permit-type->category (js/lupapisteApp.models.application.permitType))]
+    (if legacy?
+      (legacy/legacy-verdict-schema category)
+      (shared/verdict-schema category schema-version))))
+
 (rum/defc pate-verdict < rum/reactive
   []
   [:div.container
@@ -163,9 +174,7 @@
      [:span (common/loc :back)]]]
    (if (and (rum/react state/current-verdict-id)
             (rum/react state/auth-fn))
-     (let [{dictionary :dictionary :as schema} (shared/verdict-schema
-                                                (shared/permit-type->category (js/lupapisteApp.models.application.permitType))
-                                                (get-in @state/current-verdict [:info :schema-version]))]
+     (let [{dictionary :dictionary :as schema} (current-verdict-schema)]
        (verdict (assoc (state/select-keys state/current-verdict
                                           [:state :info :_meta])
                        :schema (dissoc schema :dictionary)
@@ -178,9 +187,10 @@
     (reset-verdict nil)
     (service/fetch-application-phrases app-id)
     (state/refresh-application-auth-model app-id
-                                          #(service/open-verdict app-id
-                                                                 verdict-id
-                                                                 reset-verdict))))
+                                          #(do (service/refresh-attachments)
+                                               (service/open-verdict app-id
+                                                                     verdict-id
+                                                                     reset-verdict)))))
 
 (defonce args (atom {}))
 

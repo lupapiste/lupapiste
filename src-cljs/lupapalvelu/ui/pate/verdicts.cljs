@@ -24,6 +24,17 @@
   (and (can-edit?)
        (not published)))
 
+(defn- can-delete-verdict? [{:keys [published legacy?]}]
+  (if legacy?
+    (state/auth? :delete-legacy-verdict)
+    (and (not published)
+         (state/auth? :delete-pate-verdict))))
+
+(defn- can-replace-verdict? [{:keys [published legacy?]}]
+  (and published
+       (not legacy?)
+       (state/auth? :new-pate-verdict-draft)))
+
 (defn open-verdict [arg]
   (common/open-page :pate-verdict
                     @state/application-id
@@ -58,15 +69,23 @@
                             [:i.lupicon-circle-plus]
                             [:span (common/loc :application.verdict.add)]])]]))))
 
+(rum/defc new-legacy-verdict []
+  (components/icon-button {:icon     :lupicon-circle-plus
+                           :text-loc :application.verdict.add
+                           :class    [:positive]
+                           :on-click #(service/new-legacy-verdict-draft @state/application-id
+                                                                        open-verdict)}))
 
-(defn- confirm-and-delete-verdict [app-id verdict-id]
+
+(defn- confirm-and-delete-verdict [app-id {:keys [legacy? id published] :as verdict}]
   (hub/send  "show-dialog"
              {:ltitle          "areyousure"
               :size            "medium"
               :component       "yes-no-dialog"
-              :componentParams {:ltext "pate.delete-verdict-draft"
-                                :yesFn #(service/delete-verdict app-id
-                                                                verdict-id)}}))
+              :componentParams {:ltext (if (and legacy? published)
+                                         :verdict.confirmdelete
+                                         "pate.delete-verdict-draft")
+                                :yesFn #(service/delete-verdict app-id verdict)}}))
 
 (defn- confirm-and-replace-verdict [verdict verdict-id]
   (hub/send  "show-dialog"
@@ -102,13 +121,17 @@
                           (common/loc :pate.last-saved (js/util.finnishDateAndTime modified)))]
                    (if hide-actions
                      [:td]
-                     [:td (if (and (can-edit-verdict? verdict) (not published))
+                     [:td
+                      (when (can-delete-verdict? verdict)
                             [:a
                              {:on-click #(confirm-and-delete-verdict app-id id)}
-                             (common/loc :pate.verdict-table.remove-verdict)]
-                            [:a
-                             {:on-click #(confirm-and-replace-verdict verdict id)}
-                             (common/loc :pate.verdict-table.replace-verdict)])])])
+                             (common/loc (if published
+                                           :pate.verdict-table.remove-verdict
+                                           :pate.verdict-table.remove-draft))])
+                      (when (can-replace-verdict? verdict)
+                        [:a
+                        {:on-click #(confirm-and-replace-verdict verdict id)}
+                        (common/loc :pate.verdict-table.replace-verdict)])])])
                 verdicts)]])
 
 (defn- verdict-title [{:keys [category published verdict-section verdict-type verdict-code] :as verdict}]
@@ -153,7 +176,9 @@
                     app-id
                     replacement-verdict)])
    (when (state/auth? :new-pate-verdict-draft)
-     (new-verdict))])
+     (new-verdict))
+   (when (state/auth? :new-legacy-verdict-draft)
+     (new-legacy-verdict))])
 
 (rum/defc verdicts < rum/reactive
   []
@@ -170,7 +195,8 @@
     (state/refresh-application-auth-model app-id
                                           #(when (can-edit?)
                                              (service/fetch-verdict-list app-id)
-                                             (service/fetch-application-verdict-templates app-id)))))
+                                             (when (state/auth? :application-verdict-templates)
+                                               (service/fetch-application-verdict-templates app-id))))))
 
 (defn mount-component []
   (when (common/feature? :pate)

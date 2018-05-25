@@ -115,7 +115,7 @@
                              :contents
                              (map #(path/loc :attachments.contents %))
                              sort
-                             (map #(hash-map :text % :value %)))
+                             (map #(hash-map :text %)))
             default (if (<= (count items) 1)
                       (or (-> items first :text)
                           (type-loc type))

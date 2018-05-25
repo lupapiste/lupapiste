@@ -103,8 +103,8 @@
     (facts "Reviews have been created"                      ;
       (let [{:keys [tasks]} (query-application pena app-id)
             reviews         (filter #(= "task-katselmus" (get-in % [:schema-info :name])) tasks)
-            aloituskokous   (first reviews)
-            loppukatselmus  (second reviews)]
+            aloituskokous   (util/find-by-key :taskname "Aloituskokous" reviews)
+            loppukatselmus  (util/find-by-key :taskname "Loppukatselmus" reviews)]
         (fact "two" (count reviews) => 2)
         (facts "aloituskokous"
           (fact "katselmuksenLaji" (get-in aloituskokous [:data :katselmuksenLaji :value]) => "aloituskokous")
@@ -133,7 +133,7 @@
         #_(fact "can't delete because vaadittuLupaehtona"   ; TODO check this with dosent
             (command sonja :delete-task :id app-id :taskId (:id aloituskokous)) => (partial expected-failure? :error.task-is-required))))
     (facts "Plans have been created"
-      (let [plans (->> (query-application pena app-id)
+      (let [plans     (->> (query-application pena app-id)
                            :tasks
                            (filter #(= "task-lupamaarays" (get-in % [:schema-info :name]))))
             find-plan #(util/find-by-key :taskname % plans)
