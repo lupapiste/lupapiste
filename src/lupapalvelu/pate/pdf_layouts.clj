@@ -360,7 +360,13 @@
                       [{:loc    :pdf.muutoksenhaku
                         :source {:dict :muutoksenhaku}}]))
 
-
+(def entry--tj   (list [{:loc    :pdf.tj
+                         :source {:doc [:tyonjohtaja-v2 :henkilotiedot.etunimi]}
+                         :styles [:bold :border-top]}]
+                       [{:loc    :empty
+                         :source {:doc [:tyonjohtaja-v2 :patevyys-tyonjohtaja.koulutusvalinta]}}]
+                       [{:loc    :empty
+                         :source {:doc [:tyonjohtaja-v2 :yhteystiedot.puhelin]}}]))
 
 (def r-legacy-layout
   (build-layout legacy--application-id
@@ -386,7 +392,7 @@
                 entry--rakennuspaikka
                 entry--link-permits
                 entry--attachments
-                ;; TJ
+                entry--tj
                 ;; Vastattavat työt
                 entry--verdict
                 (entry--verdict-giver :applications.authority)
