@@ -157,7 +157,8 @@
 
 (defn current-verdict-schema []
   (let [{:keys [schema-version legacy?]} (:info @state/current-verdict)
-        category (shared/permit-type->category (js/lupapisteApp.models.application.permitType))]
+        category (shared/application->category {:permitType (js/lupapisteApp.models.application.permitType)
+                                                :permitSubtype (js/lupapisteApp.models.application.permitSubtype)})]
     (if legacy?
       (legacy/legacy-verdict-schema category)
       (shared/verdict-schema category schema-version))))

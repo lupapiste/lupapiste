@@ -81,6 +81,8 @@
 (def ya-verdict-dates [:julkipano :anto :muutoksenhaku :lainvoimainen
                        :aloitettava])
 
+(def tj-verdict-dates [:anto :lainvoimainen :muutoksenhaku])
+
 (def review-types (keys review-type-map))
 
 (def ya-review-types (keys ya-review-type-map))
@@ -275,11 +277,17 @@
                                         setsub-plans
                                         (setsub-reviews ya-review-types)))
 
+(def tj-settings (build-settings-schema "pate-tj"
+                                        (setsub-date-deltas tj-verdict-dates)
+                                        setsub-verdict-code
+                                        setsub-board))
+
 (defn settings-schema [category]
   (case (keyword category)
     :r r-settings
     :p p-settings
-    :ya ya-settings))
+    :ya ya-settings
+    :tj tj-settings))
 
 ;; -----------------------------
 ;; Verdict template subschemas
@@ -575,11 +583,17 @@
                                  temsub-statements
                                  temsub-attachments))
 
+(def tj-verdict-template-schema
+  (build-verdict-template-schema (temsub-verdict tj-verdict-dates)
+                                 temsub-appeal
+                                 temsub-attachments))
+
 (defn verdict-template-schema [category]
   (case (keyword category)
     :r  r-verdict-template-schema
     :p  p-verdict-template-schema
-    :ya ya-verdict-template-schema))
+    :ya ya-verdict-template-schema
+    :tj tj-verdict-template-schema))
 
 ;; -----------------------------
 ;; Verdict subschemas
@@ -633,8 +647,8 @@
 
 (defn versub-dates
   "Verdict handler title could be specific to a category."
-  [category]
-  {:dictionary (assoc (->> verdict-dates
+  [category dates]
+  {:dictionary (assoc (->> dates
                            (map (fn [kw]
                                   [kw (schema-util/required {:date {:disabled?
                                                         :automatic-verdict-dates}})]))
@@ -686,7 +700,7 @@
                                                        {:disabled? :automatic-verdict-dates
                                                         :id        id
                                                         :dict      kw}))
-                                                   verdict-dates)}]}}})
+                                                   dates)}]}}})
 
 (def versub-operation
   {:dictionary {:operation {:text {:loc-prefix :pate.operation}}
@@ -995,7 +1009,7 @@
                                     :dict :upload}]]}}})
 
 (def r-verdict-schema-1 (build-verdict-schema :r 1
-                                              (versub-dates :r)
+                                              (versub-dates :r verdict-dates)
                                               (versub-verdict true)
                                               versub-bulletin
                                               versub-operation
@@ -1036,7 +1050,7 @@
 
 
 (def p-verdict-schema-1 (build-verdict-schema :p 1
-                                              (versub-dates :p)
+                                              (versub-dates :p verdict-dates)
                                               (versub-verdict true)
                                               versub-bulletin
                                               versub-operation
@@ -1056,7 +1070,7 @@
                                               versub-upload))
 
 (def versub-dates-ya
-  (-> (versub-dates :ya)
+  (-> (versub-dates :ya verdict-dates)
       (assoc-in [:dictionary :start-date]
                 {:date      {:i18nkey :tyoaika.tyoaika-alkaa-ms}
                  :required? true})
@@ -1089,6 +1103,25 @@
       (update-in [:section :grid :rows 0]
                  #(cons {:dict :verdict-type} %))))
 
+(def versub-verdict-tj
+  (-> (versub-verdict false)
+      (assoc-in [:dictionary :verdict-section :required?]
+                false)
+      (assoc-in [:section :grid :rows 0]
+                [{:col        2
+                  :loc-prefix :pate-verdict.giver
+                  :hide?      :_meta.editing?
+                  :show?      :*ref.boardname
+                  :dict       :boardname}
+                 {:col        1
+                  :show?      [:OR :*ref.boardname :verdict-section]
+                  :loc-prefix :pate-verdict.section
+                  :dict       :verdict-section}
+                 {:show? [:AND :_meta.editing? :?.boardname]}
+                 {:col   2
+                  :align :full
+                  :dict  :verdict-code}])))
+
 (def ya-verdict-schema-1 (build-verdict-schema :ya 1
                                                versub-dates-ya
                                                versub-verdict-ya
@@ -1102,6 +1135,14 @@
                                                versub-attachments
                                                versub-upload))
 
+;; TODO: FILL ME
+(def tj-verdict-schema-1 (build-verdict-schema :tj 1
+                                               (versub-dates :tj tj-verdict-dates)
+                                               versub-verdict-tj
+                                               versub-operation
+                                               versub-appeal
+                                               versub-attachments))
+
 (defn verdict-schema
   "Nil version returns the latest version."
   ([category version]
@@ -1109,6 +1150,7 @@
                    :r  [r-verdict-schema-1]
                    :p  [p-verdict-schema-1]
                    :ya [ya-verdict-schema-1]
+                   :tj [tj-verdict-schema-1]
                    (schema-util/pate-assert false "Invalid schema category:" category))]
      (cond
        (nil? version)                     (last schemas)
@@ -1123,9 +1165,28 @@
                         s/lower-case
                         keyword)]
     (cond
-      (#{:r :p :ya} kw)              kw
+      (#{:r} kw)                     [:r :tj]
+      (#{:p :ya} kw)                 kw
       (#{:kt :mm} kw)                :kt
       (#{:yi :yl :ym :vvvl :mal} kw) :ymp)))
+
+
+(defn permit-subtype->category [permit-subtype]
+  (when-let [kw (some-> permit-subtype
+                        s/lower-case
+                        keyword)]
+    (cond
+      (#{:tyonjohtaja-hakemus} kw) :tj)))
+
+(defn application->category [{:keys [permitType permitSubtype]}]
+  (let [by-subtype (permit-subtype->category permitSubtype)
+        kw         (-> permitType s/lower-case keyword)]
+    (if (some? by-subtype)
+      by-subtype
+      (cond
+        (#{:r :p :ya} kw)              kw
+        (#{:kt :mm} kw)                :kt
+        (#{:yi :yl :ym :vvvl :mal} kw) :ymp))))
 
 (defn dict-resolve
   "Path format: [repeating index repeating index ... value-dict].
