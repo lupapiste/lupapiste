@@ -222,3 +222,7 @@
 
 (defschema AttachmentId
   (min-length-string 24))
+
+(defdynamicschema NonEmptyVec [elem]
+  (sc/constrained [elem] (min-length-constraint 1)
+                  (str "Non empty " (sc/explain [elem]))))
