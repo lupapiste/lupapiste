@@ -66,7 +66,8 @@
                 :add-item    {:button {:add :dynamic}}
                 :attachments {:application-attachments {}}
                 :toggle      {:toggle {}}
-                :select      {:select {:items [:one :two :three]}}}
+                :select      {:select {:items [:one :two :three]}}
+                :readonly    {:text {:read-only? true}}}
    :name       "test"
    :sections   [{:id   :one
                  :grid {:columns 4
@@ -275,7 +276,9 @@
     (validate-path-value [:text] nil) => :error.invalid-value
     (validate-path-value [:text] true) => :error.invalid-value
     (validate-path-value [:text] "") => nil
-    (validate-path-value [:text] "hello") => nil))
+    (validate-path-value [:text] "hello") => nil)
+  (fact "Readonly"
+    (validate-path-value [:readonly] "hi") => :error.read-only))
 
 (defn validate-and-process-value [path value old-data & [references]]
   (schemas/validate-and-process-value test-template

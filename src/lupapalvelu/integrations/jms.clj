@@ -78,16 +78,18 @@
   (def connection-properties (merge (env/value :jms) {:broker-url broker-url}))
 
   (defn create-connection-factory ^ActiveMQJMSConnectionFactory [{^String url :broker-url :as connection-options}]
-    (let [{:keys [retry-interval retry-multipier max-retry-interval reconnect-attempts]
+    (let [{:keys [retry-interval retry-multipier max-retry-interval reconnect-attempts consumer-window-size]
            :or   {retry-interval (* 2 1000)
                   retry-multipier 2
                   max-retry-interval (* 5 60 1000)          ; 5 mins
+                  consumer-window-size 0
                   reconnect-attempts -1}} connection-options]
       (doto (ActiveMQJMSConnectionFactory. url)
         (.setRetryInterval (util/->long retry-interval))
         (.setRetryIntervalMultiplier (util/->double retry-multipier))
         (.setMaxRetryInterval (util/->long max-retry-interval))
-        (.setReconnectAttempts (util/->int reconnect-attempts)))))
+        (.setReconnectAttempts (util/->int reconnect-attempts))
+        (.setConsumerWindowSize (util/->int consumer-window-size)))))
 
   (def default-connection-factory (create-connection-factory connection-properties))
 

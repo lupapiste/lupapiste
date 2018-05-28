@@ -1,6 +1,4 @@
 (require 'cemerick.pomegranate.aether)
-(cemerick.pomegranate.aether/register-wagon-factory!
-  "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
 
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
@@ -180,14 +178,14 @@
                                          [rhizome "0.2.7"]
                                          [pdfboxing "0.1.13"]
                                          [cider/piggieback "0.3.3"]
-                                         [figwheel-sidecar "0.5.15"]
+                                         [figwheel-sidecar "0.5.16"]
                                          ;; Better Chrome Dev Tools support
                                          [binaryage/devtools "0.9.4"]]
                         :plugins        [[lein-midje "3.2.1"]
                                          [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
                                          [lupapiste/lein-buildid "0.4.2"]
                                          [lupapiste/lein-nitpicker "0.5.1"]
-                                         [lein-figwheel "0.5.15"]]
+                                         [lein-figwheel "0.5.16"]]
                         :resource-paths ["dev-resources"]
                         :source-paths   ["dev-src" "test-utils"]
                         :jvm-opts       ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]
@@ -240,8 +238,7 @@
   :jvm-opts ["-Dfile.encoding=UTF-8"]
   :nitpicker {:exts     ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug" #"lp-static/js/"]}
-  :repositories [["boundless" {:url "https://repo.boundlessgeo.com/main/"}]
-                 ["osgeo" {:url "http://download.osgeo.org/webdav/geotools"}]]
+  :repositories [["osgeo" {:url "https://download.osgeo.org/webdav/geotools"}]]
   :aliases {"integration" ["with-profile" "dev,itest" ["midje" ":filter" "-ajanvaraus"]]
             "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
             "stest"       ["with-profile" "dev,stest" "midje"]

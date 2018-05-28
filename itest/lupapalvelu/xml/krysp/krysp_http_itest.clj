@@ -23,7 +23,6 @@
             application (query-application local-query pena application-id)]
         (generate-documents application pena true)
         (local-command pena :submit-application :id application-id) => ok?
-
         (let [resp (local-command veikko :approve-application :id application-id :lang "fi")]
           (fact "Veikko moves to backing system via HTTP"
             resp => ok?

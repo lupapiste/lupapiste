@@ -152,7 +152,7 @@
                                :follow-redirects false
                                :throw-exceptions false})
             transactions (get-in resp [:body :transactions])
-            most-recent-download-ts (get-in resp [:body :mostRecentTransactionTimestampMillis])]
+            most-recent-download-ts (get-in resp [:body :lastRunTimestampMillis])]
         (fact "correct credentials"
           (:status resp) => 200)
 

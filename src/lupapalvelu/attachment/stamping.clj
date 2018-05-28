@@ -116,6 +116,7 @@
     (->> (update-stamp-to-attachment! stamp file-info context)
          (hash-map :status :done :fileId)
          (job/update job-id assoc (:attachment-id file-info)))
+    (debug "Stamping complete" (select-keys file-info [:attachment-id :contentType :fileId :filename :stamped-original-file-id]))
     (catch Throwable t
       (errorf t "failed to stamp attachment: application=%s, file=%s" application-id (:fileId file-info))
       (job/update job-id assoc (:attachment-id file-info) {:status :error :fileId (:fileId file-info)}))))
@@ -141,4 +142,5 @@
         job (-> (zipmap (map :attachment-id file-infos) (map #(assoc % :status :pending) file-infos))
                 (job/start stamp-job-status))]
     (future* (stamp-attachments! file-infos (assoc context :job-id (:id job))))
+    (debug "Returning stamp job:" job)
     job))

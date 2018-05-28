@@ -838,6 +838,7 @@
   nil)
 
 (defn allowed-actions-for-collection
+  "The collection-key must be the same as the category key."
   [collection-key command-builder {:keys [application] :as command}]
   (let [coll (get application collection-key)]
     (->> (map (partial command-builder application) coll)

@@ -8191,6 +8191,10 @@ message-panel {
   margin-right: 36px;
 }
 
+.form-entry-vcenter {
+  line-height: 40px;
+}
+
 .form-full-width {
   width: 60%;
 }
@@ -29362,6 +29366,10 @@ table.pate-verdicts-table tr {
   border: none;
 }
 
+table.pate-verdicts-table td.replaced {
+  padding-left: 4em;
+}
+
 div.pate-verdict div.pate-section div.section-header {
   background-color: initial;
   border: none;
@@ -29492,6 +29500,11 @@ div.pate-autocomplete {
 
 div.pate-autocomplete .ac--combobox {
   display: table;
+  width: 100%;
+}
+
+div.pate-autocomplete .ac--combobox input {
+  width: 100%;
 }
 
 div.pate-autocomplete .ac--selected {
@@ -29544,6 +29557,10 @@ div.pate-autocomplete .ac--selected.disabled span, div.pate-autocomplete .ac--se
 
 div.pate-autocomplete .ac--selected.disabled i {
   color: #bbbbbb;
+}
+
+div.pate-autocomplete .ac--selected.required span, div.pate-autocomplete .ac--selected.required i {
+  border-color: #f39129;
 }
 
 div.pate-autocomplete .ac__menu {
@@ -29760,6 +29777,10 @@ div.pate-autocomplete .ac__menu ul.ac__items li.ac--grouped {
 }
 
 .pate-batch-table td.batch--type {
+  min-width: 15em;
+}
+
+.pate-batch-table td.batch--contents {
   min-width: 15em;
 }
 
@@ -30105,6 +30126,10 @@ input.date-delta {
 
 body.pate-error-page {
   padding: 2em 2em;
+}
+
+textarea.grid-style-input.pate-textarea {
+  height: initial;
 }
 
 .order-grid-1 {

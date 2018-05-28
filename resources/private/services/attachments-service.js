@@ -31,7 +31,12 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.authModel = lupapisteApp.models.applicationAuthModel;
   self.processing = lupapisteApp.models.application.processing;
-  self.applicationId = lupapisteApp.models.application.id;
+  self.applicationId = function() {
+    // For some views (e.g., pate-verdict) the application model has
+    // not necessarily been initialized.
+    return lupapisteApp.models.application.id()
+        || pageutil.hashApplicationId();
+  };
   self.isArchivingProject = lupapisteApp.models.application.isArchivingProject;
   self.applicationModel = lupapisteApp.models.application;
 

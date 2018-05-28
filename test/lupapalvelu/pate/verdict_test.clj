@@ -4,6 +4,7 @@
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict :refer :all]
             [lupapalvelu.pate.verdict-template :as template]
@@ -17,7 +18,9 @@
 (testable-privates lupapalvelu.pate.verdict
                    next-section insert-section
                    general-handler application-deviations
-                   archive-info application-operation)
+                   archive-info application-operation
+                   title-fn verdict-select-string
+                   verdict-section-string verdict-summary)
 
 (testable-privates lupapalvelu.pate.verdict-template
                    template-inclusions)
@@ -56,7 +59,7 @@
     (insert-section "123-T" 1515151515151 {:data     {}
                                            :template {:giver "test"}})
     => {:data     {:verdict-section "2"}
-        :template {:giver "test"
+        :template {:giver      "test"
                    :inclusions [:verdict-section]}}
 
     (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 2))
@@ -65,17 +68,17 @@
     (insert-section "123-T" 1515151515151 {:data     {:verdict-section ""}
                                            :template {:giver "test"}})
     => {:data     {:verdict-section "1"}
-        :template {:giver "test"
+        :template {:giver      "test"
                    :inclusions [:verdict-section]}}
 
     (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 1))
 
   (fact "Distinct inclusions"
     (insert-section "123-T" 1515151515151 {:data     {:verdict-section ""}
-                                           :template {:giver "test"
+                                           :template {:giver      "test"
                                                       :inclusions [:hello :verdict-section :foo]}})
     => {:data     {:verdict-section "1"}
-        :template {:giver "test"
+        :template {:giver      "test"
                    :inclusions [:hello :verdict-section :foo]}}
 
     (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 1))
@@ -95,6 +98,16 @@
 
     => {:data     {}
         :template {:giver "lautakunta"}}
+
+    (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0))
+
+  (fact "Legacy verdict"
+    (insert-section "123-T" 1515151515151 {:legacy?  true
+                                           :data     {}
+                                           :template {:giver "test"}})
+    => {:legacy?  true
+        :data     {}
+        :template {:giver      "test"}}
 
     (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0)))
 
@@ -232,16 +245,16 @@
 
 (facts "Build schemas"
   (fact "Dict missing"
-    (shared/check-dicts (dissoc (:dictionary test-verdict) :three)
+    (schema-util/check-dicts (dissoc (:dictionary test-verdict) :three)
                         (:sections test-verdict))
     => (throws AssertionError))
   (fact "Dict in repeating missing"
-    (shared/check-dicts (util/dissoc-in (:dictionary test-verdict)
+    (schema-util/check-dicts (util/dissoc-in (:dictionary test-verdict)
                                         [:five :repeating :r-three :repeating :r-sub-two])
                         (:sections test-verdict))
     => (throws AssertionError))
   (fact "Overlapping dicts"
-    (shared/check-overlapping-dicts [{:dictionary {:foo {:toggle {}}
+    (schema-util/check-overlapping-dicts [{:dictionary {:foo {:toggle {}}
                                                    :bar {:text {}}
                                                    :baz {:toggle {}}}}
                                      {:dictionary {:doo {:toggle {}}
@@ -252,14 +265,14 @@
                                                    :baz {:toggle {}}}}])
     => (throws AssertionError))
   (fact "Unique section ids"
-    (shared/check-unique-section-ids (:sections mock-template))
+    (schema-util/check-unique-section-ids (:sections mock-template))
     => nil)
   (fact "Non-unique section ids"
-    (shared/check-unique-section-ids (cons {:id :t-second}
+    (schema-util/check-unique-section-ids (cons {:id :t-second}
                                            (:sections mock-template)))
     => (throws AssertionError))
   (fact "Combine subschemas"
-    (shared/combine-subschemas {:dictionary {:foo {:toggle {}}
+    (schema-util/combine-subschemas {:dictionary {:foo {:toggle {}}
                                              :bar {:text {}}}
                                 :sections   [{:id   :one
                                               :grid {:columns 1
@@ -1413,3 +1426,226 @@
                                       (assoc test-verdict :published 1425330000000)
                                       (assoc test-verdict :published 1525336290000)]}})
     => (assoc test-verdict :published 1525336290167)))
+
+(fact "title-fn"
+  (let [fun (partial format "(%s)")]
+    (title-fn " hello " fun) => "(hello)"
+    (title-fn " " fun) => ""
+    (title-fn nil fun) => ""))
+
+(facts "verdict-select-string"
+  (fact "legacy verdict-code"
+    (verdict-select-string "fi"
+                         {:legacy? true
+                          :category "r"
+                          :data {:verdict-code "8"}
+                          :template {:inclusions ["verdict-code"]}}
+                         :verdict-code)
+    => "Ty\u00f6h\u00f6n liittyy ehto")
+  (fact "modern verdict-code"
+    (verdict-select-string "en"
+                           {:category "r"
+                            :data {:verdict-code "hallintopakko"}
+                            :template {:inclusions ["verdict-code"]}}
+                           :verdict-code)
+    => "Administrative enforcement/penalty proceedings discontinued.")
+  (fact "verdict-type"
+    (verdict-select-string "fi"
+                           {:category "ya"
+                            :data {:verdict-type "katulupa"}
+                            :template {:inclusions ["verdict-type"]}}
+                           :verdict-type)
+    => "Katulupa"))
+
+(fact "verdict-section-string"
+  (verdict-section-string {:data {:verdict-section " 22 "}}) => "\u00a722"
+  (verdict-section-string {:data {:verdict-section ""}}) => "")
+
+
+(facts "Verdict summary"
+  (let [section-strings {"v1" "\u00a71" "v2" "\u00a72"}
+        verdict         {:id         "v1"
+                         :category   "r"
+                         :data       {:verdict-code    "ehdollinen"
+                                      :handler         "Foo Bar"
+                                      :verdict-section "1"
+                                      :verdict-date    876543}
+                         :modified   12345
+                         :template   {:inclusions ["verdict-code"
+                                                   "handler"
+                                                   "verdict-date"
+                                                   "verdict-section"]
+                                      :giver      "viranhaltija"}
+                         :references {:boardname "Broad board abroad"}}]
+    (fact "Draft"
+      (verdict-summary "fi" section-strings verdict)
+      => {:id           "v1"
+          :modified     12345
+          :giver        "Foo Bar"
+          :verdict-date 876543
+          :replaces     nil
+          :title        "Luonnos"})
+    (fact "Board draft"
+      (verdict-summary "fi" section-strings
+                       (assoc-in verdict [:template :giver] "lautakunta"))
+      => {:id           "v1"
+          :modified     12345
+          :giver        "Broad board abroad"
+          :verdict-date 876543
+          :replaces     nil
+          :title        "Luonnos"})
+    (fact "Replacement draft"
+      (verdict-summary "fi" section-strings
+                       (assoc-in verdict [:replacement :replaces] "v2"))
+      => {:id           "v1"
+          :modified     12345
+          :giver        "Foo Bar"
+          :verdict-date 876543
+          :replaces     "v2"
+          :title        "Luonnos (korvaa p\u00e4\u00e4t\u00f6ksen \u00a72)"})
+    (fact "Published"
+      (verdict-summary "fi" section-strings
+                       (assoc verdict :published 121212))
+      => {:id           "v1"
+          :modified     12345
+          :published    121212
+          :giver        "Foo Bar"
+          :verdict-date 876543
+          :replaces     nil
+          :title        "\u00a71 Ehdollinen"})
+    (fact "Published, no section"
+      (verdict-summary "fi" {}
+                       (-> verdict
+                           (assoc :published 121212)
+                           (assoc-in [:data :verdict-section] nil)))
+      => {:id           "v1"
+          :modified     12345
+          :published    121212
+          :giver        "Foo Bar"
+          :verdict-date 876543
+          :replaces     nil
+          :title        "Ehdollinen"})
+    (fact "Published replacement"
+      (verdict-summary "fi" section-strings
+                       (-> verdict
+                           (assoc :published 121212)
+                           (assoc-in [:replacement :replaces] "v2")))
+      => {:id           "v1"
+          :modified     12345
+          :published    121212
+          :giver        "Foo Bar"
+          :verdict-date 876543
+          :replaces     "v2"
+          :title        "\u00a71 Ehdollinen (korvaa p\u00e4\u00e4t\u00f6ksen \u00a72)"})
+    (fact "Published replacement, no section"
+      (verdict-summary "fi" (dissoc section-strings "v2")
+                       (-> verdict
+                           (assoc :published 121212)
+                           (assoc-in [:replacement :replaces] "v2")))
+      => {:id           "v1"
+          :modified     12345
+          :published    121212
+          :giver        "Foo Bar"
+          :verdict-date 876543
+          :replaces     "v2"
+          :title        "\u00a71 Ehdollinen (korvaava p\u00e4\u00e4t\u00f6s)"})
+    (fact "Legacy draft"
+      (verdict-summary "fi" section-strings
+                       (assoc verdict :legacy? true))
+      => {:id           "v1"
+          :legacy?      true
+          :modified     12345
+          :giver        "Foo Bar"
+          :verdict-date 876543
+          :replaces     nil
+          :title        "Luonnos"})
+    (fact "Legacy published"
+      (verdict-summary "fi" section-strings
+                       (-> verdict
+                           (assoc :legacy? true
+                                  :published 676767)
+                           (assoc-in [:data :verdict-code] "41")))
+      => {:id           "v1"
+          :legacy?      true
+          :modified     12345
+          :published    676767
+          :giver        "Foo Bar"
+          :verdict-date 876543
+          :replaces     nil
+          :title        "\u00a71 Ilmoitus merkitty tiedoksi"})
+    (facts "YA verdict-type"
+      (let [verdict (-> verdict
+                        (assoc :category "ya")
+                        (assoc-in [:data :verdict-code] "annettu-lausunto")
+                        (assoc-in [:data :verdict-type] "sijoituslupa")
+                        (update-in [:template :inclusions] conj "verdict-type"))]
+        (fact "Draft"
+          (verdict-summary "fi" section-strings verdict)
+          => {:id           "v1"
+              :modified     12345
+              :giver        "Foo Bar"
+              :verdict-date 876543
+              :replaces     nil
+              :title        "Luonnos"})
+        (fact "Published"
+          (verdict-summary "fi" section-strings
+                           (assoc verdict :published 656565))
+          => {:id           "v1"
+              :modified     12345
+              :published    656565
+              :giver        "Foo Bar"
+              :verdict-date 876543
+              :replaces     nil
+              :title        "\u00a71 Sijoituslupa - Annettu lausunto"})
+        (fact "Published replacement"
+          (verdict-summary "fi" section-strings
+                           (assoc verdict
+                                  :published 656565
+                                  :replacement {:replaces "v2"}))
+          => {:id           "v1"
+              :modified     12345
+              :published    656565
+              :giver        "Foo Bar"
+              :verdict-date 876543
+              :replaces     "v2"
+              :title        "\u00a71 Sijoituslupa - Annettu lausunto (korvaa p\u00e4\u00e4t\u00f6ksen \u00a72)"})))))
+
+(defn make-verdict [& kvs]
+  (let [{:keys [id code section modified published replaces]} (apply hash-map kvs)]
+    {:id          id
+     :category     "r"
+     :data        {:verdict-code    code
+                   :handler         "Foo Bar"
+                   :verdict-section section
+                   :verdict-date    876543}
+     :modified    (or published modified 1)
+     :published   published
+     :replacement (when replaces {:replaces replaces})
+     :template    {:inclusions ["verdict-code"
+                                "handler"
+                                "verdict-date"
+                                "verdict-section"]
+                   :giver      "viranhaltija"}
+     :references  {:boardname "Broad board abroad"}}))
+
+(facts "verdict-list"
+  (let [v1 (make-verdict :id "v1" :code "ei-tutkittu-1" :section "11" :published 10)
+        v2 (make-verdict :id "v2" :code "ei-lausuntoa" :section "" :published 20 :replaces "v1")
+        v3 (make-verdict :id "v3" :code "asiakirjat palautettu" :section "33" :modified 30 :replaces "v2")
+        v4 (make-verdict :id "v4" :code "ei-puollettu" :section "44" :published 25)]
+    (verdict-list {:lang        "fi"
+                   :application {:pate-verdicts [v1 v2 v3 v4]}})
+    => (just [(contains {:id       "v3"
+                         :modified 30
+                         :title    "Luonnos (korvaava p\u00e4\u00e4t\u00f6s)"})
+              (contains {:id        "v2"
+                         :modified  20
+                         :replaced? true
+                         :title     "Ei lausuntoa (korvaa p\u00e4\u00e4t\u00f6ksen \u00a711)"})
+              (contains {:id        "v1"
+                         :modified  10
+                         :replaced? true
+                         :title     "\u00a711 Ei tutkittu"})
+              (contains {:id       "v4"
+                         :modified 25
+                         :title    "\u00a744 Ei puollettu"})])))
