@@ -31,6 +31,15 @@
 (def building-fields
   (->> schemas/rakennuksen-tiedot (map (comp keyword :name)) (concat [:rakennuksenOmistajat :valtakunnallinenNumero])))
 
+(defn db-format->permit-id
+  "Viitelupien tunnukset on Factassa tallennettu 'tietokantaformaatissa', josta ne on tunnuksella
+  hakemista varten muunnettava yleiseen formaattiin.
+  Esimerkki: 12-0477-A 63 -> 63-0447-12-A"
+  [id]
+  (let [parts (zipmap '(:vuosi :no :tyyppi :kauposa) (ss/split id #"[- ]"))]
+    (ss/join "-" ((juxt :kauposa :no :vuosi :tyyppi) parts))))
+
+
 (defn- get-applicant-email [applicant]
   (-> (or
         (get-in applicant [:henkilo :sahkopostiosoite])
@@ -117,12 +126,6 @@
                                            :schema-info (:info schema)
                                            :data        (tools/create-document-data schema
                                                                                     (partial applicant-field-values party))})
-        ; document        (assoc-in document [:data :patevyys :koulutusvalinta] (get-in document [:data :patevyys :koulutus]))
-        _ (spit (str "PARTY" (rand-int 100) ".edn") party)
-        ; _ (spit (str "SCHEMA" (rand-int 100) ".edn") schema)
-        ; _ (spit (str "DATA" (rand-int 100) ".edn") (tools/create-document-data schema (partial applicant-field-values party)))
-        _ (spit (str "DOCUMENT" (rand-int 100) ".edn") document)
-        ; _ (println (tools/create-document-data schema (partial applicant-field-values party)))
         unset-type     (if (contains? party :henkilo) :yritys :henkilo)]
     (assoc-in document [:data unset-type] (unset-type default-values))))
 
@@ -247,10 +250,12 @@
                   {:operation operation :infoRequest false :messages []}
                   location-info)
         created-application (application/do-create-application command manual-schema-datas)
+        _ (spit "CREATED-APPLICATION.edn" (pr-str created-application)) ;; DEBUG
         new-parties (remove empty?
                             (concat (map suunnittelija->party-document (:suunnittelijat app-info))
                                     (map osapuoli->party-document (:muutOsapuolet app-info))))
 
+        ; _ (spit "XML.edn" (pr-str xml)) ;; DEBUG
         structure-descriptions (map :description buildings-and-structures)
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
@@ -264,7 +269,6 @@
                                 (assoc :opened (:created command)))
 
         ;; attaches the new application, and its id to path [:data :id], into the command
-        _ (spit "APPLICATION.edn" created-application)
         command (util/deep-merge command (action/application->command created-application))]
   (logging/with-logging-context {:applicationId (:id created-application)}
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
