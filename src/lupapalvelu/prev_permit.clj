@@ -117,7 +117,6 @@
             updates)))
 
 (defn- party->party-doc [party schema-name]
-  "Argumenttina tuleva party -map sisältää koulutustiedot, eivät tule palautusarvoon"
   (let [schema         (schemas/get-schema 1 schema-name)
         default-values (tools/create-document-data schema tools/default-values)
         document       (sanitize-document {}
