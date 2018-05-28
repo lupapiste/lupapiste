@@ -4,7 +4,8 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.attachment :refer [get-attachment-info]]
             [lupapalvelu.attachment.util :refer [attachment-state]]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [taoensso.timbre :as timbre]))
 
 (apply-remote-minimal)
 
@@ -56,6 +57,7 @@
 
     ; Poll for 10 seconds
     (when-not (= "done" (:status job))
+      (timbre/info "Polling for stamp job id" (:id job) "version" (:version job) "application" application-id "attachment" (:id attachment))
       (poll-job sonja :stamp-attachments-job (:id job) (:version job) 50) => ok?)
 
     (let [attachment (get-attachment-by-id sonja application-id (:id attachment))
