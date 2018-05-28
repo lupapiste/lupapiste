@@ -450,17 +450,17 @@
   (util/pcond-> (-> s ss/->plain-string ss/trim)
                 ss/not-blank? fun))
 
-(defn- verdict-code-string [lang {:keys [data] :as verdict}]
-  (title-fn (:verdict-code data)
-            (fn [code]
+(defn- verdict-select-string [lang {:keys [data] :as verdict} dict]
+  (title-fn (dict data)
+            (fn [value]
               (when-let [{:keys [reference-list
                                  select]} (some-> (verdict-schema verdict)
                                                   :dictionary
-                                                  :verdict-code)]
+                                                  dict)]
                 (i18n/localize lang
                                (:loc-prefix (or reference-list
                                                 select))
-                               code)))))
+                               value)))))
 
 (defn- verdict-section-string [{data :data}]
   (title-fn (:verdict-section data) #(str "\u00a7" %)))
@@ -471,9 +471,13 @@
                                 published legacy? schema-version]
                          :as   verdict}]
   (let [replaces (:replaces replacement)
-        rep-string (title-fn replaces #(i18n/localize-and-fill lang
-                                                               :pate.replaces-verdict
-                                                               (get section-strings %)))]
+        rep-string (title-fn replaces (fn [vid]
+                                        (let [section (get section-strings vid)]
+                                          (if (ss/blank? section)
+                                            (i18n/localize lang :pate.replacement-verdict)
+                                            (i18n/localize-and-fill lang
+                                                                    :pate.replaces-verdict
+                                                                    section)))))]
     (assoc (select-keys verdict [:id :published :modified :legacy?])
           :giver (if (util/=as-kw (:giver template) :lautakunta)
                    (:boardname references)
@@ -482,7 +486,9 @@
           :verdict-date (:verdict-date data)
           :title (->> (if published
                         [(get section-strings id)
-                         (verdict-code-string lang verdict)
+                         (util/pcond-> (verdict-select-string lang verdict :verdict-type)
+                          ss/not-blank? (str " -"))
+                         (verdict-select-string lang verdict :verdict-code)
                          rep-string]
                         [(i18n/localize lang :pate-verdict-draft)
                          rep-string])
