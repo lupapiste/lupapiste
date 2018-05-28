@@ -272,10 +272,27 @@
 
 (defn link-permits
   "Since link-permits resolutive is quite database intensive operation
-  it is only done for YA category."
+  it is only done for YA and TJ category."
   [{:keys [verdict application]}]
-  (when (util/=as-kw :ya (:category verdict))
+  (when (or (util/=as-kw :ya (:category verdict))
+            (util/=as-kw :tj (:category verdict)))
     (:linkPermitData (app-meta/enrich-with-link-permit-data application))))
+
+(defn tj-vastattavat-tyot [application lang]
+  (let [doc (domain/get-document-by-name application :tyonjohtaja-v2)
+        vastattavat-data (lupapalvelu.document.tools/unwrapped (get-in doc [:data :vastattavatTyotehtavat]))
+        vastattavat-loc-keys (reduce (fn [m {:keys [name i18nkey]}]
+                                       (assoc m (keyword name) i18nkey))
+                                     {}
+                                     (get-in lupapalvelu.document.schemas/vastattavat-tyotehtavat-tyonjohtaja-v2 [0 :body]))]
+    (->> vastattavat-data
+         (reduce-kv (fn [result key val]
+                      (cond
+                        (and (= :muuMika (keyword key))
+                             (not (ss/blank? val))) (conj result val)
+                        (true? val) (conj result (i18n/localize lang (get vastattavat-loc-keys key)))
+                        :else result))
+                    []))))
 
 (defn verdict-properties
   "Adds all kinds of different properties to the options. It is then up
@@ -330,7 +347,8 @@
                                                (html/dict-value options
                                                                 :end-date))
            :handler (handler options)
-           :link-permits (link-permits options))))
+           :link-permits (link-permits options)
+           :tj-vastattavat-tyot (tj-vastattavat-tyot application lang))))
 
 (defn verdict-html
   [application verdict]

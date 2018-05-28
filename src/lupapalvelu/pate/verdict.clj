@@ -400,11 +400,12 @@
       (init--dict-by-application :address :address)
       init--permit-period))
 
-;; TODO: FILL ME
 (defmethod initialize-verdict-draft :tj
   [initmap]
   (-> initmap
-      (init--dict-by-application :handler general-handler)))
+      (init--dict-by-application :handler general-handler)
+      (init--dict-by-application :operation application-operation)
+      (init--dict-by-application :address :address)))
 
 (declare enrich-verdict)
 

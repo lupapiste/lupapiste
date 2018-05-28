@@ -1135,7 +1135,6 @@
                                                versub-attachments
                                                versub-upload))
 
-;; TODO: FILL ME
 (def tj-verdict-schema-1 (build-verdict-schema :tj 1
                                                (versub-dates :tj tj-verdict-dates)
                                                versub-verdict-tj

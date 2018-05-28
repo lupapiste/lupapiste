@@ -360,13 +360,25 @@
                       [{:loc    :pdf.muutoksenhaku
                         :source {:dict :muutoksenhaku}}]))
 
-(def entry--tj   (list [{:loc    :pdf.tj
-                         :source {:doc [:tyonjohtaja-v2 :henkilotiedot.etunimi]}
-                         :styles [:bold :border-top]}]
-                       [{:loc    :empty
-                         :source {:doc [:tyonjohtaja-v2 :patevyys-tyonjohtaja.koulutusvalinta]}}]
-                       [{:loc    :empty
-                         :source {:doc [:tyonjohtaja-v2 :yhteystiedot.puhelin]}}]))
+(def entry--tj (list [{:loc    :pdf.tj
+                       :source {:doc [:tyonjohtaja-v2 :kuntaRoolikoodi]}
+                       :styles [:bold :border-top]}]
+                     [{:loc      :empty
+                      :source   {:doc [:tyonjohtaja-v2 :henkilotiedot]}}
+                      {:path   :etunimi
+                       :styles [:nowrap :right]}
+                      {:path   :sukunimi
+                       :styles :nowrap}
+                      {:text  ""
+                       :width 100}]
+                     [{:loc    :empty
+                       :source {:doc [:tyonjohtaja-v2 :patevyys-tyonjohtaja.koulutusvalinta]}}]
+                     [{:loc    :empty
+                       :source {:doc [:tyonjohtaja-v2 :yhteystiedot.puhelin]}}]))
+
+(def entry--tj-vastattavat-tyot [{:loc    :pdf.tj.vastattavat
+                                  :source :tj-vastattavat-tyot
+                                  :styles :pad-before}])
 
 (def r-legacy-layout
   (build-layout legacy--application-id
@@ -390,10 +402,10 @@
 (def tj-pdf-layout
   (build-layout entry--application-id
                 entry--rakennuspaikka
+                entry--tj
                 entry--link-permits
                 entry--attachments
-                entry--tj
-                ;; Vastattavat työt
+                entry--tj-vastattavat-tyot
                 entry--verdict
                 (entry--verdict-giver :applications.authority)
                 entry--dates-tj
