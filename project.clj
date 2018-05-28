@@ -78,6 +78,9 @@
                  ; Joda time wrapper
                  [clj-time "0.14.2"]
 
+                 ; Country code manipulation
+                 [iso-country-codes "1.0"]
+
                  ; String case manipulation
                  [camel-snake-kebab "0.4.0"]
 
