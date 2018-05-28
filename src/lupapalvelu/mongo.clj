@@ -444,6 +444,7 @@
   (ensure-index :users {:private.apikey 1} {:unique true :sparse true})
   (ensure-index :users {:oauth.client-id 1} {:unique true :sparse true})
   (ensure-index :users {:company.id 1} {:sparse true})
+  (ensure-index :users {:role 1})
   (ensure-index :applications {:municipality 1})
   (ensure-index :applications {:submitted 1})
   (ensure-index :applications {:modified -1})
