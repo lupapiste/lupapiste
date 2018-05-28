@@ -444,9 +444,90 @@
                                                      :legacy?  true})}})
     verdict-id))
 
-(defn verdict-summary [verdict]
-  (merge (select-keys verdict [:id :published :modified :replacement :category :legacy?])
-         (select-keys (:data verdict) [:verdict-date :handler :verdict-section :verdict-code :verdict-type])))
+(declare verdict-schema)
+
+(defn- title-fn [s fun]
+  (util/pcond-> (-> s ss/->plain-string ss/trim)
+                ss/not-blank? fun))
+
+(defn- verdict-select-string [lang {:keys [data] :as verdict} dict]
+  (title-fn (dict data)
+            (fn [value]
+              (when-let [{:keys [reference-list
+                                 select]} (some-> (verdict-schema verdict)
+                                                  :dictionary
+                                                  dict)]
+                (i18n/localize lang
+                               (:loc-prefix (or reference-list
+                                                select))
+                               value)))))
+
+(defn- verdict-section-string [{data :data}]
+  (title-fn (:verdict-section data) #(str "\u00a7" %)))
+
+(defn- verdict-summary [lang section-strings
+                        {:keys [id data template replacement
+                                references
+                                published legacy? schema-version]
+                         :as   verdict}]
+  (let [replaces (:replaces replacement)
+        rep-string (title-fn replaces (fn [vid]
+                                        (let [section (get section-strings vid)]
+                                          (if (ss/blank? section)
+                                            (i18n/localize lang :pate.replacement-verdict)
+                                            (i18n/localize-and-fill lang
+                                                                    :pate.replaces-verdict
+                                                                    section)))))]
+    (assoc (select-keys verdict [:id :published :modified :legacy?])
+          :giver (if (util/=as-kw (:giver template) :lautakunta)
+                   (:boardname references)
+                   (:handler data))
+          :replaces replaces
+          :verdict-date (:verdict-date data)
+          :title (->> (if published
+                        [(get section-strings id)
+                         (util/pcond-> (verdict-select-string lang verdict :verdict-type)
+                          ss/not-blank? (str " -"))
+                         (verdict-select-string lang verdict :verdict-code)
+                         rep-string]
+                        [(i18n/localize lang :pate-verdict-draft)
+                         rep-string])
+                      (remove ss/blank?)
+                      (ss/join " ")))))
+
+(defn verdict-list [{:keys [lang application]}]
+  (let [verdicts        (:pate-verdicts application)
+        section-strings (reduce (fn [acc v]
+                                  (assoc acc (:id v) (verdict-section-string v)))
+                                {}
+                                verdicts)
+        summaries       (reduce (fn [acc v]
+                                  (assoc acc
+                                         (:id v)
+                                         (verdict-summary lang
+                                                          section-strings
+                                                          v)))
+                                {}
+                                verdicts)
+        replaced        (->> (vals summaries)
+                             (map :replaces)
+                             (remove nil?)
+                             set)]
+    (loop [[x & xs] (->> (vals summaries)
+                         (sort-by :modified)
+                         reverse)
+           result   []]
+      (cond
+        (nil? x) result
+        (contains? replaced (:id x)) (recur xs result)
+        :else (recur xs (concat result
+                                (loop [{:keys [replaces] :as v} x
+                                       sub []]
+                                  (if replaces
+                                    (recur (assoc (get summaries replaces)
+                                                  :replaced? true)
+                                           (conj sub (dissoc v :replaces)))
+                                    (conj sub (dissoc v :replaces))))))))))
 
 (defn mask-verdict-data [{:keys [user application]} verdict]
   (cond

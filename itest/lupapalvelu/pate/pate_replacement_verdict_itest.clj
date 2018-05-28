@@ -38,11 +38,17 @@
         (command sonja :new-pate-verdict-draft :id app-id
                  :template-id template-id
                  :replacement-id verdict-id)=> fail?)
+      (fact "Pseudo query also fails"
+        (query sonja :replace-pate-verdict :id app-id
+               :verdict-id verdict-id) => fail?)
 
       (command sonja :publish-pate-verdict :id app-id :verdict-id verdict-id) => no-errors?
 
       (facts "Replacement verdict"
         (fact "First replacement draft"
+          (fact "Pseudo query succeeds"
+            (query sonja :replace-pate-verdict :id app-id
+                   :verdict-id verdict-id) => ok?)
           (let [{vid1 :verdict-id :as res} (command sonja :new-pate-verdict-draft :id app-id
                                             :template-id template-id
                                             :replacement-id verdict-id) => ok?]

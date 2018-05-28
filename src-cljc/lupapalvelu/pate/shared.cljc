@@ -705,8 +705,8 @@
   (let [verdict {:dictionary (merge {:boardname        {:reference {:path :*ref.boardname}}
                                      :verdict-section  (schema-util/required {:text {:before :section}})
                                      :verdict-code     (schema-util/required {:reference-list {:path       :verdict-code
-                                                                                   :type       :select
-                                                                                   :loc-prefix :pate-r.verdict-code}
+                                                                                               :type       :select
+                                                                                               :loc-prefix :pate-r.verdict-code}
                                                                   :template-dict  :verdict-code})
                                      :verdict-text     (schema-util/required {:phrase-text   {:category :paatosteksti}
                                                                   :template-dict :paatosteksti})

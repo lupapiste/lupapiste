@@ -149,6 +149,8 @@
                 #(reset! state/template-list (:templates %))
                 :id app-id))
 
+;; Verdicts
+
 (defn fetch-verdict-list [app-id]
   (common/query "pate-verdicts"
                 #(reset! state/verdict-list (:verdicts %))
