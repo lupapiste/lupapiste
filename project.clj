@@ -1,6 +1,4 @@
 (require 'cemerick.pomegranate.aether)
-(cemerick.pomegranate.aether/register-wagon-factory!
-  "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
 
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
@@ -234,8 +232,7 @@
   :jvm-opts ["-Dfile.encoding=UTF-8"]
   :nitpicker {:exts     ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug" #"lp-static/js/"]}
-  :repositories [["boundless" {:url "https://repo.boundlessgeo.com/main/"}]
-                 ["osgeo" {:url "http://download.osgeo.org/webdav/geotools"}]]
+  :repositories [["osgeo" {:url "https://download.osgeo.org/webdav/geotools"}]]
   :aliases {"integration" ["with-profile" "dev,itest" ["midje" ":filter" "-ajanvaraus"]]
             "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
             "stest"       ["with-profile" "dev,stest" "midje"]
