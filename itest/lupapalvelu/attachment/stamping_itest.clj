@@ -7,9 +7,8 @@
             [sade.util :as util]
             [taoensso.timbre :as timbre]))
 
-(apply-remote-minimal)
-
 (facts "Stamping"
+  (apply-remote-minimal)
   (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
         application-id (:id application)
         attachment (first (:attachments application))
@@ -55,6 +54,9 @@
     (fact "Job id is returned" (:id job) => truthy)
     (fact "FileId is returned" file-id => truthy)
 
+    (timbre/info "Sleeping for 3 seconds before polling for stamp job")
+    (Thread/sleep 3000)
+
     ; Poll for 10 seconds
     (when-not (= "done" (:status job))
       (timbre/info "Polling for stamp job id" (:id job) "version" (:version job) "application" application-id "attachment" (:id attachment))
@@ -99,6 +101,7 @@
               (get-in attachment [:latestVersion :stamped]) => true)))))))
 
 (facts* "Stamped attachment can't be deleted LPK-3335"
+  (apply-remote-minimal)
   (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
         application-id (:id application)
         attachment (first (:attachments application))
@@ -175,6 +178,7 @@
       (fact "New fileid is in response" (get-in new-attachment [:latestVersion :fileId]) =not=> file-id))))
 
 (facts "Stamping copies all signings"
+  (apply-remote-minimal)
   (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
         application (query-application pena application-id)
         attachment-id (:id (first (:attachments application)))
@@ -229,6 +233,7 @@
                                                               :version {:major 1 :minor 1}})])))))
 
 (facts "Stamping does not change approval"
+  (apply-remote-minimal)
   (let [application    (create-and-submit-application pena :propertyId sipoo-property-id)
         application-id (:id application)
         att-template   (first (:attachments application))
@@ -270,6 +275,7 @@
       (count stamps) => 2)))
 
 (facts "editing stamp templates"
+  (apply-remote-minimal)
   (let [add-result (command sipoo :upsert-stamp-template
                             :name "zero stamp" :page "first" :background 0
                             :qrCode false :position {:x 0 :y 0}
@@ -325,6 +331,7 @@
               (:rows edited-stamp) => [[{:type "custom-text" :text "Hello World"}]])))))))
 
 (facts "remove stamp"
+  (apply-remote-minimal)
   (let [stamps (:stamps (query sipoo :stamp-templates))
         stamp-id (:id (last stamps))]
 
