@@ -11,7 +11,7 @@
 
 (defn- update-archival-status-change [application attachment-id tila read-only modified deletion-explanation]
   (let [mongo-base-updates {:attachments.$.metadata.tila tila
-                            :attachments.$.readOnly      read-only
+                            :attachments.$.readOnly      (if read-only true false)
                             :attachments.$.modified      modified}
         mongo-updates (if (= tila :valmis) (assoc mongo-base-updates :archived.completed nil) mongo-base-updates)
         update-result (action/update-application (action/application->command application)
