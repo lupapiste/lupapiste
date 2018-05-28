@@ -279,7 +279,7 @@
     (:linkPermitData (app-meta/enrich-with-link-permit-data application))))
 
 (defn tj-vastattavat-tyot [application lang]
-  (let [doc (domain/get-document-by-name application :tyonjohtaja-v2)
+  (let [doc (domain/get-document-by-name application "tyonjohtaja-v2")
         vastattavat-data (lupapalvelu.document.tools/unwrapped (get-in doc [:data :vastattavatTyotehtavat]))
         vastattavat-loc-keys (reduce (fn [m {:keys [name i18nkey]}]
                                        (assoc m (keyword name) i18nkey))
