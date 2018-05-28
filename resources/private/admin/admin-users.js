@@ -135,6 +135,7 @@
 
   function RestApiUsers() {
     var self = this;
+    var backend = "-backend";
 
     self.organizationCode = ko.observable();
     self.phase = ko.observable(0);
@@ -143,12 +144,16 @@
     self.username = ko.pureComputed(function() {
       return util.lowerCase(self.firstName()) + "-backend";
     });
+
     self.userDetailsOk = ko.computed(function() {
+      if (self.firstName() && (self.firstName().length + backend.length) < 21) {
         var firstNameOk = self.firstName();
-        var lastNameOk = self.lastName();
-        var organizationCodeOk = self.organizationCode();
-        var usernameOk = self.username();
-        return organizationCodeOk && usernameOk && firstNameOk && lastNameOk;
+      }
+//var firstNameOk = self.firstName();
+      var lastNameOk = self.lastName();
+      var organizationCodeOk = self.organizationCode();
+      var usernameOk = self.username();
+      return organizationCodeOk && usernameOk && firstNameOk && lastNameOk;
     });
 
     self.searching = ko.observable();
