@@ -18,6 +18,9 @@
 (def UUIDStr
   (sc/pred (partial matches? uuid-pattern) "UUID hex string"))
 
+(def FileId
+  (sc/cond-pre UUIDStr ObjectIdStr))
+
 (defn in-lower-case? [^String s]
   (if s
     (= s (.toLowerCase s))
@@ -29,3 +32,6 @@
 (defschema Email
            "A simple schema for email"
   (sc/constrained sc/Str (every-pred v/valid-email? in-lower-case? (max-length-constraint 254)) "Email"))
+
+(defschema StorageSystem
+  (sc/enum :mongodb :s3))

@@ -42,10 +42,11 @@
    (sc/optional-key :pate-verdict) sc/Any})
 
 (sc/defschema CommentFile
-  {:fileId      (sc/either ssc/ObjectIdStr sssc/UUIDStr)
-   :filename    sc/Str
-   :size        sc/Int
-   :contentType sc/Str})
+  {:fileId                          sssc/FileId
+   :filename                        sc/Str
+   :size                            sc/Int
+   :contentType                     sc/Str
+   (sc/optional-key :storageSystem) sssc/StorageSystem})
 
 (def comment-file-checker (sc/checker CommentFile))
 

@@ -16,11 +16,11 @@
             [sade.shared-schemas :as sssc]))
 
 (sc/defschema NewVersion
-  {(sc/required-key :fileId)           sssc/UUIDStr
+  {(sc/required-key :fileId)           sssc/FileId
    (sc/required-key :attachmentId)     sc/Str})
 
 (sc/defschema NewAttachment
-  {(sc/required-key :fileId)           sssc/UUIDStr
+  {(sc/required-key :fileId)           sssc/FileId
    (sc/required-key :type)             att/Type
    (sc/required-key :group)            (sc/maybe {:groupType  (apply sc/enum att-tags/attachment-groups)
                                                   (sc/optional-key :operations) [{(sc/optional-key :id)   ssc/ObjectIdStr

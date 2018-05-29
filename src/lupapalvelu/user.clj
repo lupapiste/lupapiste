@@ -15,6 +15,7 @@
             [sade.core :refer [ok fail fail! now]]
             [sade.env :as env]
             [sade.schemas :as ssc]
+            [sade.shared-schemas :as sssc]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as v]
@@ -95,7 +96,7 @@
                                                     :content-type  sc/Str
                                                     :size  sc/Num
                                                     :created ssc/Timestamp
-                                                    :storageSystem (sc/enum :mongodb :s3)}]
+                                                    :storageSystem sssc/StorageSystem}]
            (sc/optional-key :company)             {:id sc/Str :role (sc/enum "admin" "user") :submit sc/Bool}
            (sc/optional-key :partnerApplications) {(sc/optional-key :rakentajafi) {:id sc/Str
                                                                                    :created ssc/Timestamp

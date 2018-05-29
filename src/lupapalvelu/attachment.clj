@@ -116,10 +116,10 @@
 (defschema Version
   "Attachment version"
   {:version                              VersionNumber
-   :fileId                               (sc/maybe sssc/UUIDStr)  ;; fileId in GridFS, nil if the file has been deleted when archived
-   :originalFileId                       (sc/maybe sssc/UUIDStr)  ;; fileId of the unrotated/unconverted file
+   :fileId                               (sc/maybe sssc/FileId)  ;; fileId in storage, nil if the file has been deleted when archived
+   :originalFileId                       (sc/maybe sssc/FileId)  ;; fileId of the unrotated/unconverted file
    (sc/optional-key :onkaloFileId)       AttachmentId                ;; id in Onkalo, if archived. Should equal attachment id.
-   :storageSystem                        (sc/enum :mongodb :s3)
+   :storageSystem                        sssc/StorageSystem
    :created                              ssc/Timestamp
    ;; Timestamp for the latest "non-versioning" operation (e.g.,
    ;; rotation, pdf/a conversion). Thus, modified can be present only

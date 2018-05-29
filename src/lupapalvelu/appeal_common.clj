@@ -1,15 +1,15 @@
 (ns lupapalvelu.appeal-common
   (:require [monger.operators :refer :all]
             [sade.core :refer :all]
-            [sade.schemas :as ssc]
             [schema.core :refer [defschema] :as sc]
             [lupapalvelu.action :as action]
             [lupapalvelu.attachment.appeal :as att-appeal]
-            [lupapalvelu.attachment :as att]))
+            [lupapalvelu.attachment :as att]
+            [sade.shared-schemas :as sssc]))
 
 (defschema FrontendAppealFile
   "File presentation expected by the frontend from appeals query."
-  {:fileId      ssc/ObjectIdStr
+  {:fileId      sssc/FileId
    :filename    sc/Str
    :contentType sc/Str
    :size        sc/Num})
