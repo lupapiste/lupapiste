@@ -441,5 +441,5 @@
                                                                                 :muuMika                                {:value ""},
                                                                                 :sisapuolinenKvvTyo                     {:value true, :modified 1527251434831}}}}]}
                            "fi")
-  => ["Maanrakennustyöt" "Ulkopuolinen KVV-työ" "Sisäpuolinen KVV-työ"])
+  => ["Maanrakennusty\u00f6t" "Ulkopuolinen KVV-ty\u00f6" "Sis\u00e4puolinen KVV-ty\u00f6"])
 

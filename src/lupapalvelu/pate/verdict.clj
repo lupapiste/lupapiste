@@ -435,7 +435,7 @@
   contain every schema dict."
   [{:keys [application organization created]
     :as   command}]
-  (let [category   (-> application :permitType shared/permit-type->category)
+  (let [category   (shared/application->category application)
         verdict-id (mongo/create-id)]
     (action/update-application command
                                {$push {:pate-verdicts
@@ -778,7 +778,7 @@
           app-buildings))
 
 (defn command->category [{app :application}]
-  (shared/permit-type->category (:permitType app)))
+  (shared/application->category app))
 
 (defn statements
   "List of maps with given (timestamp), text (string) and

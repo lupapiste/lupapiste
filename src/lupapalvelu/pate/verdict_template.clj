@@ -5,7 +5,6 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.operations :as ops]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.schemas :as schemas]
@@ -29,7 +28,7 @@
   (set (flatten (map (comp shared/permit-type->category :permitType) scope))))
 
 (defn operation->category [operation]
-  (shared/permit-type->category (ops/permit-type-of-operation operation)))
+  (shared/operation->category operation))
 
 (defn error-response [{:keys [failure errors]}]
   (if failure

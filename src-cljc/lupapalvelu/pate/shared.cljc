@@ -2,6 +2,7 @@
   "Schema instantiations for Pate schemas."
   (:require [clojure.set :as set]
             [clojure.string :as s]
+            [lupapalvelu.operations :as ops]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.shared-schemas :as schemas]
             [sade.shared-util :as util]
@@ -1177,6 +1178,13 @@
     (cond
       (#{:tyonjohtaja-hakemus} kw) :tj)))
 
+(defn category-by-operation [operation]
+  (when-let [kw (some-> operation
+                        s/lower-case
+                        keyword)]
+    (cond
+      (#{:tyonjohtajan-nimeaminen-v2} kw) :tj)))
+
 (defn application->category [{:keys [permitType permitSubtype]}]
   (let [by-subtype (permit-subtype->category permitSubtype)
         kw         (-> permitType s/lower-case keyword)]
@@ -1186,6 +1194,20 @@
         (#{:r :p :ya} kw)              kw
         (#{:kt :mm} kw)                :kt
         (#{:yi :yl :ym :vvvl :mal} kw) :ymp))))
+
+(defn operation->category [operation]
+  (let [by-opeation (category-by-operation operation)
+        kw          (-> (ops/permit-type-of-operation operation)
+                        s/lower-case
+                        keyword)]
+    (if (some? by-opeation)
+      by-opeation
+      (cond
+        (#{:r :p :ya} kw)              kw
+        (#{:kt :mm} kw)                :kt
+        (#{:yi :yl :ym :vvvl :mal} kw) :ymp))))
+
+
 
 (defn dict-resolve
   "Path format: [repeating index repeating index ... value-dict].

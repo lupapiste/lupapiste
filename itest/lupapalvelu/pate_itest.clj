@@ -139,7 +139,7 @@
 
 (fact "Sipoo categories"
   (:categories (query sipoo :verdict-template-categories))
-  => (contains ["r" "p" "ymp" "kt"] :in-any-order))
+  => (contains ["r" "p" "ymp" "kt" "tj"] :in-any-order))
 
 (defn add-condition [add-cmd fill-cmd condition]
   (let [changes      (:changes (add-cmd))

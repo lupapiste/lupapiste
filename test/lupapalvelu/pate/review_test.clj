@@ -98,7 +98,7 @@
                                                :type "verdict"}
                                  :state       :requires_user_action
                                  :data        (contains {:katselmuksenLaji
-                                                         {:value    "Muu valvontakäynti"
+                                                         {:value    "Muu valvontak\u00e4ynti"
                                                           :modified 123}})})
                       (contains {:taskname    "Katselmus2"
                                  :schema-info (contains {:type    :task
