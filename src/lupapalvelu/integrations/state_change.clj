@@ -162,7 +162,7 @@
 
 (when (env/feature? :jms)
 
-(def matti-json-queue "lupapiste/application.state-change")
+(def matti-json-queue "lupapiste.application.state-change")
 
 (defn create-state-change-consumer [session]
   (fn [{:keys [url headers options data]}]

@@ -84,7 +84,7 @@
             (errorf "Error when sending consumed KuntaGML message to %s: %s. Message rollback initiated." url (.getMessage e))
             (jms/rollback session)))))))
 
-(def kuntagml-queue "lupapiste/kuntagml.http")
+(def kuntagml-queue "lupapiste.kuntagml.http")
 
 (def kuntagml-transacted-session (if-let [conn (jms/get-default-connection)]
                                    (-> conn
