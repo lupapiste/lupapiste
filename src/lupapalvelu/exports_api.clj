@@ -1,7 +1,7 @@
 (ns lupapalvelu.exports-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [monger.operators :refer :all]
-            [sade.core :refer [ok now]]
+            [sade.core :refer [ok fail now]]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
@@ -65,9 +65,10 @@
     (let [now-ts (now)
           start-ts (or (when start-ts (Long/parseLong start-ts 10)) now-ts)
           end-ts (or (when end-ts (Long/parseLong end-ts 10)) now-ts)]
-      (when (> start-ts end-ts)
-        (timbre/errorf "startTimestampMillis > endTimestampMillis: %d > %d" start-ts end-ts))
-      (ok (exports/archive-api-usage-to-salesforce start-ts end-ts)))))
+      (if (> start-ts end-ts)
+        (do (timbre/errorf "startTimestampMillis > endTimestampMillis: %d > %d" start-ts end-ts)
+            (fail :error.invalid-timestamps))
+        (ok (exports/archive-api-usage-to-salesforce start-ts end-ts))))))
 
 
 (defexport export-organizations
