@@ -39,7 +39,6 @@
   (let [parts (zipmap '(:vuosi :no :tyyppi :kauposa) (ss/split id #"[- ]"))]
     (ss/join "-" ((juxt :kauposa :no :vuosi :tyyppi) parts))))
 
-
 (defn- get-applicant-email [applicant]
   (-> (or
         (get-in applicant [:henkilo :sahkopostiosoite])
@@ -147,6 +146,9 @@
   (when-let [schema-name (suunnittelijaRoolikoodi->doc-schema (:suunnittelijaRoolikoodi party))]
     (party->party-doc party schema-name)))
 
+(defn tyonjohtaja->tj-document [party]
+  (party->party-doc party "tyonjohtaja-v2"))
+
 (defn- invite-applicants [{:keys [lang user created application] :as command} applicants authorize-applicants]
 
   (let [applicants-with-no-info (remove get-applicant-type applicants)
@@ -249,12 +251,11 @@
                   {:operation operation :infoRequest false :messages []}
                   location-info)
         created-application (application/do-create-application command manual-schema-datas)
-        _ (spit "CREATED-APPLICATION.edn" (pr-str created-application)) ;; DEBUG
         new-parties (remove empty?
                             (concat (map suunnittelija->party-document (:suunnittelijat app-info))
-                                    (map osapuoli->party-document (:muutOsapuolet app-info))))
+                                    (map osapuoli->party-document (:muutOsapuolet app-info))
+                                    (map tyonjohtaja->tj-document (:tyonjohtajat app-info))))
 
-        ; _ (spit "XML.edn" (pr-str xml)) ;; DEBUG
         structure-descriptions (map :description buildings-and-structures)
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
