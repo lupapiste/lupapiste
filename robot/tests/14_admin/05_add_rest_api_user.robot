@@ -27,8 +27,8 @@ ${SUCCESS} =                         Rajapintatunnus paperilupia varten luotu on
 
 Verify Users Page Loaded
   SolitaAdmin logs in
-  Go to page  users
-  Wait until  Element should be visible       ${LANDING_PAGE_USERS}
+  Go to page     users
+  Wait until     Element should be visible    ${LANDING_PAGE_USERS}
 
 Verify New REST API User Can Be Added
   Wait until     Element should be visible    ${USER_NAME_INPUT_FIELD}
@@ -70,9 +70,3 @@ New REST API user name stored to database
   [Tags]  Test4
   Click element                               ${ADD_BUTTON}
   Page should contain                         ${SUCCESS}
-
-
-
-
-
-
