@@ -12,7 +12,7 @@
             [lupapalvelu.user-enums :as user-enums]
             [monger.operators :refer :all]
             [monger.query :as query]
-            [sade.core :refer [ok fail fail! now]]
+            [sade.core :refer [def- ok fail fail! now]]
             [sade.env :as env]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
@@ -837,7 +837,7 @@
 ;; ==============================================================================
 ;;
 
-(def ^:private erasure-strategy
+(def- erasure-strategy
   (into {}
         (map (fn [[k _]]
                (cond
@@ -859,7 +859,7 @@
      :enabled false
      :state "erased"}))
 
-(def ^:private erasure-unsetter
+(def- erasure-unsetter
   (into {} (for [[k v] erasure-strategy :when (= v :remove)] [k ""])))
 
 (defn erase-user
