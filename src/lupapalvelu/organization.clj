@@ -283,7 +283,7 @@
   [:name :scope :allowedAutologinIPs :krysp
    :pate-enabled :permanent-archive-enabled :permanent-archive-in-use-since
    :earliest-allowed-archiving-date :digitizer-tools-enabled :calendars-enabled
-   :docstore-info :3d-map
+   :docstore-info :3d-map :default-digitalization-location
    :kopiolaitos-email :kopiolaitos-orderer-address :kopiolaitos-orderer-email :kopiolaitos-orderer-phone
    :app-required-fields-filling-obligatory ])
 
