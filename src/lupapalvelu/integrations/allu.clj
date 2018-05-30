@@ -55,16 +55,30 @@
       :henkilo (get data tag)
       :yritys  (:yhteyshenkilo (get data tag)))))
 
+(defn- drawing->GeoJSON-2008 [{:keys [geometry geometry-wgs84] :as drawing}]
+  {:type "Feature"
+   :geometry geometry-wgs84
+   :properties (dissoc drawing :geometry :geometry-wgs84)}) ; TODO: dissoc even more (?)
+
+(def- WGS84-URN "urn:ogc:def:crs:OGC:1.3:CRS84")
+
+(defn- drawings->GeoJSON-2008 [drawings]
+  {:type "FeatureCollection"
+   :features (mapv drawing->GeoJSON-2008 drawings)
+   :crs {:type "name"
+         :properties {:name WGS84-URN}}})
+
 (defn- application-postal-address [app]
   {:streetAddress {:streetName (:address app)}})
 
 (defn- convert-value-flattened-app
-  [{:keys [id primaryOperation propertyId], [customer-doc work-description payee-doc] :documents
+  [{:keys [id primaryOperation propertyId drawings]
+    [customer-doc work-description payee-doc] :documents
     :as app}]
   {:clientApplicationKind "FIXME"
    :customerWithContacts  {:customer (doc->customer customer-doc)
                            :contacts [(person->contact (customer-contact customer-doc))]}
-   :geometry              {:geometryOperations {}}
+   :geometry              {:geometryOperations (drawings->GeoJSON-2008 drawings)}
    :identificationNumber  id
    :invoicingCustomer     (doc->customer payee-doc)
    :name            (:name primaryOperation)
