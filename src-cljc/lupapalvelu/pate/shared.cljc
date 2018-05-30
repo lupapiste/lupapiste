@@ -1196,12 +1196,12 @@
         (#{:yi :yl :ym :vvvl :mal} kw) :ymp))))
 
 (defn operation->category [operation]
-  (let [by-opeation (category-by-operation operation)
-        kw          (-> (ops/permit-type-of-operation operation)
-                        s/lower-case
-                        keyword)]
-    (if (some? by-opeation)
-      by-opeation
+  (let [by-operation (category-by-operation operation)
+        kw           (-> (ops/permit-type-of-operation operation)
+                         s/lower-case
+                         keyword)]
+    (if (some? by-operation)
+      by-operation
       (cond
         (#{:r :p :ya} kw)              kw
         (#{:kt :mm} kw)                :kt
