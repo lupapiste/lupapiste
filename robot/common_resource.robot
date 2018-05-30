@@ -883,8 +883,6 @@ Add attachment
   Run Keyword If  '${kind}' == 'inforequest'  Wait Until Page Contains  ${description}
 
 Return to application
-  # The button might be behind a save indicator, so wait for it to clear
-  Sleep  2s
   Wait Until  Scroll and click test id  back-to-application-from-attachment
 
 Delete attachment
@@ -1591,8 +1589,7 @@ Scroll and click input
 
 Scroll and click test id
   [Arguments]  ${id}
-  Sleep  1s
-  Wait until  Page should contain element  xpath=//*[@data-test-id="${id}"]
+  Element should be visible by test id  ${id}
   Scroll to  [data-test-id="${id}"]
   Click by test id  ${id}
 

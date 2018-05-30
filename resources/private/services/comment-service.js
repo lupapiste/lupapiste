@@ -7,7 +7,7 @@ LUPAPISTE.CommentService = function() {
   self.queryComments = function() {
     var authorization = lupapisteApp.models.applicationAuthModel;
     var id = lupapisteApp.models.application.id();
-    if (authorization.ok("comments")) {
+    if (id && authorization.ok("comments")) {
       ajax.query("comments", {id: id})
         .success(function (res) {
           self.comments(res.comments);

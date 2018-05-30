@@ -190,7 +190,9 @@
                          (mjson/get-state-change-endpoint-data) => fake-endpoint
                          (mjson/state-change-data (:application command) "sent") => example-data
                          (mjson/send-via-jms example-data fake-endpoint anything) => "JMS SUCCESS"
-                         (mjson/send-via-http message-id example-data fake-endpoint) => "HTTP SUCCESS"]
+                         (mjson/send-via-http message-id example-data fake-endpoint) => "HTTP SUCCESS"
+                         (mjson/create-jms-session) => "truthy"
+                         (lupapalvelu.integrations.jms/create-nippy-consumer anything anything anything) => nil]
       (fact "Triggered via JMS"
         (mjson/trigger-state-change command "sent") => "JMS SUCCESS"
         (provided

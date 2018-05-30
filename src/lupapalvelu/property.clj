@@ -11,8 +11,9 @@
   (->> (wfs/get-property-location-info-by-property-id property-id)
        (wfs/location-feature-to-property-info)))
 
-(defn location-data-by-property-id-from-wfs [property-id]
+(defn location-data-by-property-id-from-wfs
   "Queries KTJKii WFS for property location information."
+  [property-id]
   (if (env/feature? :disable-ktj-on-create)
     (infof "ktj-client is disabled - not getting municipality information for %s" property-id)
     (or

@@ -1,7 +1,9 @@
 (ns lupapalvelu.autom-check-verdicts-itest
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [taoensso.timbre :refer [warnf]]
             [lupapalvelu.batchrun :as batchrun]
+            [lupapalvelu.batchrun.fetch-verdict-consumer]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.fixture.minimal :as minimal]
@@ -11,8 +13,13 @@
             [lupapalvelu.verdict-api]
             [lupapalvelu.xml.krysp.application-from-krysp :as app-from-krysp]
             [sade.core :refer [now fail]]
+            [sade.env :as env]
             [sade.dummy-email-server :as dummy-email-server]))
 
+(if-not (and (env/feature? :embedded-artemis) (env/feature? :jms))
+(warnf "JMS not enabled for unit testing")
+
+(do
 (defonce db-name (str "test_autom-check-verdicts-itest_" (now)))
 
 (mongo/connect!)
@@ -58,7 +65,7 @@
         (:state application-verdict-given) => "verdictGiven")
 
       (fact "checking verdicts and sending emails to the authorities related to the applications"
-        (batchrun/fetch-verdicts-default) => nil?)
+        (fetch-verdicts {:jms? true :wait-ms 2000}) => nil?)
       (fact "Verifying the sent emails"
         (Thread/sleep 500) ; batchrun includes a parallel operation
         (let [emails (dummy-email-server/messages :reset true)]
@@ -81,8 +88,11 @@
           (-> application-sent :history last :state) => "verdictGiven"
           (-> application-verdict-given :history last :state) => "verdictGiven"))
 
+
+      ;; The following tests do not go through message queue
+
       (fact "batchrun verdicts not checked, if organization doesn't have url"
-        (batchrun/fetch-verdicts-default) => nil?
+        (fetch-verdicts) => nil?
         (provided
           (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
           (mongo/select :organizations anything anything) => [{:id "bar"}]
@@ -92,7 +102,7 @@
 
       (fact "batchrun check-for-verdicts logs :error on exception"
         ;; make sure logging functions are called in expected ways
-        (batchrun/fetch-verdicts-default) => nil?
+        (fetch-verdicts) => nil?
         (provided
           (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
           (mongo/select :organizations anything anything) => [{:id "bar" :krysp {:foo {:url "http://test"}}}]
@@ -102,10 +112,12 @@
 
       (fact "batchrun check-for-verdicts logs failure details"
         ;; make sure logging functions are called in expected ways
-        (batchrun/fetch-verdicts-default) => anything
+        (fetch-verdicts) => anything
         (provided
           (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
           (mongo/select :organizations anything anything) => [{:id "bar" :krysp {:foo {:url "http://test"}}}]
           (lupapalvelu.logging/log-event :error anything) => nil
           (lupapalvelu.logging/log-event :info irrelevant) => irrelevant
           (lupapalvelu.verdict/do-check-for-verdict anything) => (fail :bar))))))
+)
+)

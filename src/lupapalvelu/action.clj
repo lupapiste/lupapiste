@@ -531,7 +531,7 @@
     (try
       (f command status)
       (catch Throwable e
-        (error "post fn fail after command " (:name command) ": " e)))))
+        (error "post fn fail after command " (:action command) ": " e)))))
 
 (defn- enrich-default-permissions [command]
   (->> (set/union (permissions/get-global-permissions command)
@@ -838,6 +838,7 @@
   nil)
 
 (defn allowed-actions-for-collection
+  "The collection-key must be the same as the category key."
   [collection-key command-builder {:keys [application] :as command}]
   (let [coll (get application collection-key)]
     (->> (map (partial command-builder application) coll)

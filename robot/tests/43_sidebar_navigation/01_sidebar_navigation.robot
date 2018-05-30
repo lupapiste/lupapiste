@@ -51,7 +51,6 @@ Navigate to every admin page
 Open Sipoo organization
   Navigate to  organizations
   Fill test id  organization-search-term  753-R
-  Click by test id  organization-search
   Click by test id  edit-organization-753-R
 
 Toolbar is not visible

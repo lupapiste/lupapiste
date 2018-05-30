@@ -365,6 +365,7 @@ LUPAPISTE.OrganizationModel = function () {
     self.validateVerdictGivenDate(organization["validate-verdict-given-date"] === true);
 
     self.automaticReviewFetchEnabled(organization["automatic-review-fetch-enabled"] === true);
+    self.onlyUseInspectionFromBackend(organization["only-use-inspection-from-backend"] || false);
 
     self.permanentArchiveEnabled(organization["permanent-archive-enabled"] || false);
     self.permanentArchiveInUseSince(new Date(organization["permanent-archive-in-use-since"] || 0));

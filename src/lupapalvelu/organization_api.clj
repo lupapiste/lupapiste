@@ -169,8 +169,8 @@
 
 (defn- bulletin-scope-settings-validator
   [{{:keys [notificationEmail descriptionsFromBackendSystem]} :data}]
-  (when (and notificationEmail (not (v/valid-email? notificationEmail))
-             (fail! :error.email)))
+  (when (and notificationEmail (not (v/valid-email? notificationEmail)))
+    (fail! :error.email))
   (when (and descriptionsFromBackendSystem (not (boolean? descriptionsFromBackendSystem)))
     (fail! :error.invalid-value)))
 
@@ -347,7 +347,7 @@
 (defquery organizations
   {:user-roles #{:admin}}
   [_]
-  (ok :organizations (org/get-organizations)))
+  (ok :organizations (org/get-organizations {} org/admin-projection)))
 
 (defquery allowed-autologin-ips-for-organization
   {:parameters [org-id]
@@ -371,7 +371,7 @@
    :input-validators [(partial non-blank-parameters [:organizationId])]
    :user-roles #{:admin}}
   [_]
-  (ok :data (org/get-organization organizationId)))
+  (ok :data (org/get-organization organizationId org/admin-projection)))
 
 (defquery permit-types
   {:user-roles #{:admin}}
@@ -1021,10 +1021,7 @@
    :optional-parameters [org lang]
    :input-validators [org/valid-feed-format org/valid-org i18n/valid-language]
    :user-roles #{:anonymous}}
-  ((memo/ttl waste-ads/waste-ads :ttl/threshold 900000)             ; 15 min
-    (ss/upper-case org)
-    (-> fmt ss/lower-case keyword)
-    (-> (or lang :fi) ss/lower-case keyword)))
+  (resp/status 404 "Not Found"))              ;; LPK-3787 New waste-ads coming
 
 (defcommand section-toggle-enabled
   {:description      "Enable/disable section requirement for fetched

@@ -106,9 +106,6 @@
     (when-let [{url :url credentials :credentials} (org/get-building-wfs {:_id organization} permit-type)]
       (building-reader/building-xml url credentials property-id))))
 
-(defn buildings-for-documents [xml]
-  (->> (building-reader/->buildings xml)
-       (map #(-> {:data %}))))
 
 (defn add-other-building-docs [created-application document-datas structure-descriptions]
   (let [;; make secondaryOperations for buildings other than the first one in case there are many
@@ -180,7 +177,7 @@
                                                  (get-location-info command app-info))
         building-xml      (if app-info xml (application/fetch-building-xml organizationId permit-type propertyId))
         bldgs-and-structs (or (when app-info (building-reader/->buildings-and-structures xml))
-                              (application/buildings-for-documents building-xml))]
+                              (building-reader/buildings-for-documents building-xml))]
     (cond
       (and (empty? app-info)
            (not createAnyway))              (fail :error.no-previous-permit-found-from-backend :permitNotFound true)

@@ -167,32 +167,36 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
   }
 
   self.fetchSearchResults = function ( clearCache ) {
-    if( clearCache ) {
-      fieldsCache = {};
-    }
-    // Create dependency to the observable
-    var fields = searchFields();
-    var currentSearchType = latestSearchType;
-    if(cacheMiss()) {
-      ajax.datatables("applications-search", fields)
-      .success(function( res ) {
-        if( currentSearchType === latestSearchType ) {
-          fieldsCache = _.cloneDeep(fields);
-          self.onSuccess( res );
-        }
-      })
-      .onError("error.unauthorized", notify.ajaxError)
-      .pending(self.pending)
-      .complete( function() {
-        self.initialized( true );
-      })
-      .call();
-      ajax.datatables("applications-search-total-count", fields)
+    if( lupapisteApp.models.currentUser.loaded()
+     && lupapisteApp.models.globalAuthModel.isInitialized()
+     && lupapisteApp.services.organizationsUsersService.isInitialized()) {
+      if( clearCache ) {
+        fieldsCache = {};
+      }
+      // Create dependency to the observable
+      var fields = searchFields();
+      var currentSearchType = latestSearchType;
+      if(cacheMiss()) {
+        ajax.datatables("applications-search", fields)
+        .success(function( res ) {
+          if( currentSearchType === latestSearchType ) {
+            fieldsCache = _.cloneDeep(fields);
+            self.onSuccess( res );
+          }
+        })
+        .onError("error.unauthorized", notify.ajaxError)
+        .pending(self.pending)
+        .complete( function() {
+          self.initialized( true );
+        })
+        .call();
+        ajax.datatables("applications-search-total-count", fields)
         .success(function( res ) {
           self.totalCount(res.data.totalCount);
         })
         .onError("error.unauthorized", notify.ajaxError)
         .call();
+      }
     }
   };
 

@@ -3,6 +3,7 @@
 Resource        ../../common_resource.robot
 Resource        ../common_keywords/approve_helpers.robot
 Resource        keywords.robot
+Variables      ../06_attachments/variables.py
 Suite Setup     Initialize foreman
 
 *** Keywords ***
@@ -23,10 +24,28 @@ Sonja inits applications
   Sonja creates an application and invites foreman
   Logout
 
-Foreman fills personal information
+Foreman uploads attachment
   Foreman logs in
-  Foreman applies personal information to the foreman application  0
-  Check accordion text  tyonjohtaja-v2  TYÖNJOHTAJAN NIMEÄMINEN  - Teppo Nieminen
+  Click Element  user-name
+  Wait for Page to Load  Teppo  Nieminen
+  Wait until  Click Label  architect
+  Click enabled by test id  test-add-architect-attachment
+  Select From List  attachmentType  osapuolet.cv
+  Choose File      xpath=//input[@type='file']  ${TXT_TESTFILE_PATH}
+  Click enabled by test id  userinfo-upload-ok
+  Wait Until Page Contains  ${TXT_TESTFILE_NAME}
+  Save User Data
+
+Foreman fills personal information
+  Foreman accepts invitation  0
+  Element should be visible by test id  also-fill-attachments-checkbox
+  Element should contain  xpath=//span[@data-test-id='also-fill-attachments-checkbox']/label  Kopioi omat liitteet hakemukselle
+  Checkbox should be selected  fill-attachments-checkbox
+  Foreman applies personal information to the foreman application
+  Foreman personal information has been applied
+  Foreman personal attachments have been copied
+  Set foreman role  KVV-työnjohtaja
+  Check accordion text  tyonjohtaja-v2  TYÖNJOHTAJAN NIMEÄMINEN  - KVV-työnjohtaja Teppo Nieminen
 
 Foreman can not fill applicant information
   # No inputs that are missing a readoly attribute. In other words, all inputs are read only.
@@ -39,7 +58,11 @@ Foreman selects application type and submits the first foreman application
   Submit application
 
 Foreman cannot see related projects
-  Foreman applies personal information to the foreman application  1
+  Foreman accepts invitation  1
+  Foreman disables attachment import checkbox
+  Foreman applies personal information to the foreman application
+  Foreman personal information has been applied
+  Foreman personal attachments have not been copied
   No such test id  'muutHankkeet.1.luvanNumero'
 
 Foreman gets error message when trying to submit foreman notice before link permit has verdict
@@ -70,12 +93,24 @@ Foreman could add attachment to foreman application
   Open tab  attachments
   Element should be visible by test id  add-attachments-label
 
+Foreman application links to project application with correct link text
+  ${appId} =   Get From List  ${applicationIds}  1
+  Element should be visible by test id  test-application-link-permit-lupapistetunnus
+  Element should contain  xpath=//a[@data-test-id="test-application-link-permit-lupapistetunnus"]/span[1]  ${appId}
+
 Foreman only read comments on project application
   Open project application
   Confirm yes no dialog
   Open side panel  conversation
   Element should not be visible by test id  application-new-comment-text
   Element should not be visible by test id  application-new-comment-btn
+
+Foreman link text shows foreman description and application state
+# LPK-2097
+  Element should be visible by test id  foreman-link-person-info
+  Element should Contain  xpath=//span[@data-test-id="foreman-link-person-info"]  KVV-työnjohtaja
+  Element should Contain  xpath=//span[@data-test-id="foreman-link-person-info"]  Nieminen Teppo
+  Element should Contain  xpath=//span[@data-test-id="foreman-link-state"]  Hakemus jätetty
 
 Foreman can not invite anyone to the project application
   Open accordions  parties
@@ -203,3 +238,16 @@ Foreman state has reset again on base app
 
 Frontend errors
   There are no frontend errors
+
+*** Keywords ***
+
+Save User Data
+  Click enabled by test id  save-my-userinfo
+  Positive indicator should be visible
+  # Wait for indicator to clear to prevent misclicks
+  Wait Until  Positive indicator should not be visible
+
+Wait for Page to Load
+  [Arguments]  ${firstName}  ${lastName}
+  Wait Until  Textfield Value Should Be  firstName  ${firstName}
+  Wait Until  Textfield Value Should Be  lastName   ${lastName}

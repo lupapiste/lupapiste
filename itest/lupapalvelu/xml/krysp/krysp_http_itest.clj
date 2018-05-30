@@ -23,7 +23,6 @@
             application (query-application local-query pena application-id)]
         (generate-documents application pena true)
         (local-command pena :submit-application :id application-id) => ok?
-
         (let [resp (local-command veikko :approve-application :id application-id :lang "fi")]
           (fact "Veikko moves to backing system via HTTP"
             resp => ok?
@@ -32,7 +31,7 @@
         (let [msgs (mongo/select :integration-messages {:application.id application-id})
               sent-message (util/find-first (fn [msg] (= (:messageType msg) "KuntaGML application")) msgs)]
           (facts "integration-messages"
-            (count msgs) => 4                               ; 3x state-change 1x KuntaGML
+            (count msgs) => 3                               ; 2x state-change 1x KuntaGML
             (fact "sent message is saved"
               (:messageType sent-message) => "KuntaGML application"
               (:direction sent-message) => "out"

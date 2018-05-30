@@ -6,6 +6,8 @@ Suite Teardown  Logout
 Default Tags    company
 Resource        ../../common_resource.robot
 Resource        company_resource.robot
+Resource        ../common_keywords/ident_helpers.robot
+Resource        ../02_register/keywords.robot
 
 *** Test Cases ***
 
@@ -103,29 +105,14 @@ Duff3 user gets invite email again
   Wait until  Element should be visible  xpath=//section[@id='invite-company-user']//p[@data-test-id='invite-company-user-success']
 
 Add new user
-  Kaino logs in
-  Open company user listing
-  Click enabled by test id  company-add-user
-  Wait until  Element should be visible  dialog-company-new-user
-  Input text by test id  company-new-user-email  USER2@solita.fi
-  Click enabled by test id  company-search-email
-  Test id disabled  company-new-user-email
-  Test id disabled  company-user-send-invite
-  Input text by test id  company-new-user-firstname  Ulla
-  Test id disabled  company-user-send-invite
-  Input text by test id  company-new-user-lastname  Ser
-  Test id enabled  company-user-send-invite
-  Click label  company-new-user-admin
-  Click label  company-new-user-submit
-  Click enabled by test id  company-user-send-invite
-  Wait until  Element text should be  testCompanyAddUserDone  Käyttäjä kutsuttu.
-  Click enabled by test id  company-new-user-invited-close-dialog
-  Check invitation  0  user2@solita.fi  Ser  Ulla  Ylläpitäjä  Ei
+  Invite unregistered person  user2@solita.fi  Ulla  Ser
 
 New user gets email
   Open last email
   Wait Until  Page Should Contain  user2@solita.fi
   Page Should Contain  /app/fi/welcome#!/new-company-user/
+  ${invite} =  Get Element Attribute  //a[contains(@href,'new-company-user')]  href
+  Set Suite Variable  ${ullaInvite}  ${invite}
   Click link  xpath=//a[contains(@href,'new-company-user')]
 
 Registration page opens
@@ -141,6 +128,11 @@ Password must be at least 8 characters
   Click enabled by test id  testCompanyUserSubmitPassword
   Wait Until  Page should contain  Salasana asetettu.
   Confirm notification dialog
+
+New user tries to use invitation again and gets directed to login
+  Go To  ${ullaInvite}
+  Wait until  Page should contain  Linkki on jo käytetty
+  Wait until  Element should be visible  login-button
 
 New user logs in
   Go to page  login
@@ -207,5 +199,47 @@ Kaino logs in and removes Ulla's admin rights
   Check company user  1  ulla.ser@solita.fi  Ser  Ulla  Käyttäjä  Kyllä
   Logout
 
+Kaino invites Teemu, a new user
+  Invite unregistered person  user3@solita.fi  Teemu  Testaaja
+  Open last email
+  ${invite} =  Get Element Attribute  xpath=//a[contains(@href,'new-company-user')]  href
+  Set Suite Variable  ${invitationPage}  ${invite}
+
+Instead of reading his email, Teemu registers via front page
+  Fill registration  Rambokuja 7  33800  sipoo  +358554433221  user3@solita.fi  vetuma69
+  Activate account  user3@solita.fi
+  Logout
+
+Teemu reads his email and clicks the invitation link
+  Go to  ${invitationPage}
+
+Teemu is linked as an existing user even though he registered after the invite was sent (LPK-3759)
+  Wait Until  Page Should Contain  Tilisi on liitetty onnistuneesti yrityksen tiliin.
+  Logout
+
 No frontend errors
   There are no frontend errors
+
+*** Keywords ***
+
+Invite unregistered person
+  [Arguments]  ${email}  ${firstName}  ${lastName}
+  Kaino logs in
+  Open company user listing
+  Click enabled by test id  company-add-user
+  Wait until  Element should be visible  dialog-company-new-user
+  Input text by test id  company-new-user-email  ${email}
+  Click enabled by test id  company-search-email
+  Test id disabled  company-new-user-email
+  Test id disabled  company-user-send-invite
+  Input text by test id  company-new-user-firstname  ${firstName}
+  Test id disabled  company-user-send-invite
+  Input text by test id  company-new-user-lastname  ${lastName}
+  Test id enabled  company-user-send-invite
+  Click label  company-new-user-admin
+  Click label  company-new-user-submit
+  Click enabled by test id  company-user-send-invite
+  Wait until  Element text should be  testCompanyAddUserDone  Käyttäjä kutsuttu.
+  Click enabled by test id  company-new-user-invited-close-dialog
+  Check invitation  0  ${email}  ${lastName}  ${firstName}  Ylläpitäjä  Ei
+  Logout

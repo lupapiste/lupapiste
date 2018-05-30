@@ -109,7 +109,8 @@
           </div>
 
           <h2>Hakemustyypit</h2>
-          <div data-bind="with: organization"><div data-bind="foreach: $data.scope">
+          <div data-bind="with: organization">
+            <div data-bind="foreach: $data.scope">
             <h3><span data-bind="text: loc(['municipality', $data.municipality()])"></span>: <span data-bind="ltext: $data.permitType"></span></h3>
             <table data-test-id="organization-table">
               <thead>
@@ -144,19 +145,20 @@
               </tbody>
             </table>
 
-          </div></div>
+          </div>
+        </div>
 
           <button data-bind="click: newScope" class="btn positive">Lis&auml;&auml; lupatyyppi</button>
 
           <button data-bind="visible: !openInfoRequests(), click: convertOpenInforequests" class="btn positive">Muuta avoimet neuvontapyynn&ouml;t tavallisiksi</button>
 
 
-          <div>
+          <div data-bind="if: organization">
             <h2>Pate k&auml;yt&ouml;ss&auml;?</h2>
             <div>
               <div>
                 <label data-bind="text: loc('yes') + '/' + loc('no') " for="pate-enabled"></label>
-                <input data-bind="checked: pateEnabled" id="pate-enabled" type="checkbox"/>
+                <input data-bind="checked: organization()['pate-enabled']" id="pate-enabled" type="checkbox"/>
               </div>
               <button data-bind="ltext: 'save',
                                  click: savePateEnabled" class="btn positive"

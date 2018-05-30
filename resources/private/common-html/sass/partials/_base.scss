@@ -17,12 +17,13 @@ $marginL: $baseline;
 $marginM: $baseline/2;
 $marginS: $baseline/4;
 
-$application-max-width: 1280px;
+$application-max-width: 1660px;
 $application-min-width:  640px;
 
 $footer-min-padding: 320px;
 $footer-max-padding: 420px;
 
+$side-panel-width: 60px;
 
 @mixin width-wrapper {
   margin:0 auto;
@@ -61,7 +62,7 @@ body {
 }
 .container {
   box-sizing: border-box;
-  padding: $marginM $marginS 0 $marginS;
+  padding: $marginM $side-panel-width 0 $marginL;
   width: 100%;
   max-width: $application-max-width;
   min-width: $application-min-width;

@@ -60,7 +60,14 @@
               (check-invitation-details kaino "solita" (email-for-key teppo) :role "user" :submit false :firstName "Teppo" :lastName "Nieminen"))
 
         (fact "Invitation is accepted"
-              (accept-invitation (email-for-key teppo)))
+              (let [email-address (email-for-key teppo)
+                    invitation (last-email)]
+                (http-token-call (token-from-email email-address invitation))
+
+                (fact "Invitation can only be accepted once"
+                      (let [response (http-token-call (token-from-email email-address invitation) {:ok true})]
+                        (:status response) => 404
+                        (-> response :body json/parse-string) => {"ok" false, "text" "error.token-used"}))))
 
         (fact "User is seen in company query"
               (let [company (query kaino :company :company "solita" :users true)]
@@ -717,3 +724,41 @@
         (fact "Kaino sees that Teppo's userId is not in document anymore"
           (get-in designer-doc [:data :userId :value]) => ss/blank?)))
     ))
+
+(defn interim-registration [activate]
+  (facts "Non-user is invited to company, registers and THEN uses token (LPK-3759)"
+         (apply-remote-minimal)
+
+         (let [new-user-email (:email vetuma/new-user-details)]
+           (fact "Invite is sent"
+                 (command kaino :company-add-user :firstName "Jukka" :lastName "Palmu" :email new-user-email :admin true :submit true) => ok?)
+
+           (fact "User registers"
+                 (let [params (vetuma/default-vetuma-params (->cookie-store (atom {})))
+                       trid (vetuma/vetuma-init params vetuma/default-token-query)]
+                   (vetuma/vetuma-finish params trid)
+                   (let [vetuma-data (decode-body (http-get (str (server-address) "/api/vetuma/user") params))
+                         cmd-opts {:cookies {"anti-csrf-token" {:value "123"}}
+                                   :headers {"x-anti-forgery-token" "123"}}
+                         details (vetuma/stamped-new-user-details (:stamp vetuma-data))]
+                     (vetuma/register cmd-opts details)
+
+                     (let [[activation invitation & _] (reverse (sent-emails))]
+                       (when activate
+                         (let [token (activation-email->token new-user-email activation)]
+                           (http-get (str (server-address) "/app/security/activate/" token)
+                                     {:follow-redirects false}) => #(redirects-to "/app/fi/applicant" %)))
+
+                       (fact "User accepts invitation, new-company-user token is treated as invite-company-user token"
+                             (http-token-call (token-from-email new-user-email invitation)))))))
+
+           (fact "User is seen in company query"
+                 (let [company (query kaino :company :company "solita" :users true)]
+                   (count (:invitations company)) => 0
+                   (count (:users company)) => 2))
+
+           (fact "User details"
+                 (check-user-details new-user-email :company {:role "admin" :submit true})))))
+
+(interim-registration true)
+(interim-registration false)

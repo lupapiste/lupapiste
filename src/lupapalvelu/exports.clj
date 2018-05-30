@@ -314,9 +314,9 @@
 
 (sc/defschema SalesforceExportArchiveApiUsageEntry
   "Schema for archive API usage entry, exported to Salesforce"
-  {:id       org/OrgId
-   :date     (ssc/date-string "YYYY-MM-dd")
-   :quantity ssc/Nat})
+  {:organization                   org/OrgId
+   :lastDateOfTransactionMonth     (ssc/date-string "YYYY-MM-dd")
+   :quantity                       ssc/Nat})
 
 (sc/defn ^:always-validate
   onkalo-log-entries->salesforce-export-entries :- [SalesforceExportArchiveApiUsageEntry]
@@ -324,11 +324,13 @@
   [log-entries :- [ArchiveApiUsageLogEntry]]
   (->> log-entries
        (map (fn-> (select-keys [:organization :timestamp])
-                  (update :timestamp timestamp->end-of-month-date-string)
-                  (rename-keys {:organization :id :timestamp :date})))
-       (group-by (juxt :id :date))
+                  (update :timestamp timestamp->end-of-month-date-string)))
+       (group-by (juxt :organization :timestamp))
        (util/map-values count)
-       (map (fn [[[org-id date] count]] {:id org-id :date date :quantity count}))))
+       (map (fn [[[org-id date] count]]
+              {:organization               org-id
+               :lastDateOfTransactionMonth date
+               :quantity                   count}))))
 
 
 (defn- dummy-onkalo-log-entry [start-ts end-ts]

@@ -811,8 +811,8 @@
             {:alue {:Polygon {:exterior {:LinearRing (get-pos (.getCoordinates geometry))}}}})]
     (parse-krysp-geometry drawing polygon-parser)))
 
-(defn- drawing-type? [t drawing]
-  (.startsWith (:geometry drawing) t))
+(defn- drawing-type? [t {:keys [^String geometry]}]
+  (.startsWith geometry t))
 
 (defn drawings-as-krysp [drawings]
    (remove nil?

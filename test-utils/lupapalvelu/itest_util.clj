@@ -19,6 +19,7 @@
             [sade.util :as util]
             [lupapalvelu.action :refer [*created-timestamp-for-test-actions*]]
             [lupapalvelu.attachment :as att]
+            [lupapalvelu.batchrun :as batchrun]
             [lupapalvelu.cookie :as c]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.document.tools :as tools]
@@ -628,10 +629,16 @@
   ([email email-data]
    {:pre [(ss/not-blank? email)]}
    (fact {:midje/description (str "Read email for " email)}
-     (s/index-of (:to email-data) email) => pos?)
+     (s/index-of (:to email-data) email) => (complement neg?))
    (last (re-find #"http.+/app/fi/welcome#!/.+/([A-Za-z0-9-]+)"
                   (:plain (:body email-data))))))
 
+(defn activation-email->token [email-address email]
+  {:pre [(ss/not-blank? email-address)]}
+  (fact {:midje/description (str "Read email for " email-address)}
+    (s/index-of (:to email) email-address) => (complement neg?))
+  (last (re-find #"http.+/app/security/activate/([A-Za-z0-9-]+)"
+                 (:plain (:body email)))))
 
 (defn login
   ([u p]
@@ -1016,3 +1023,9 @@
     (fact "assignments query ok"
       resp => ok?)
     (:assignments resp)))
+
+(defn fetch-verdicts [& [{:keys [jms? wait-ms] :or {jms? false wait-ms 2000}}]]
+  (let [resp (batchrun/fetch-verdicts-default {:jms? jms?})]
+    (when jms?
+      (Thread/sleep wait-ms))
+    resp))

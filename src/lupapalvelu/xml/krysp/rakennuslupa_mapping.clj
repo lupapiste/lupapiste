@@ -413,10 +413,9 @@
         attachments (filter target-pred  (:attachments application))
         poytakirja  (some #(when (katselmus-pk? (:type %)) %) attachments)
         attachments-wo-pk (filter #(not= (:id %) (:id poytakirja)) attachments)
-        canonical-attachments (when {:type "task" :id (:id review)}
-                                (attachments-canon/get-attachments-as-canonical
-                                  {:attachments attachments-wo-pk :title (:title application)}
-                                  begin-of-link (every-pred target-pred attachments-canon/no-statements-no-verdicts)))
+        canonical-attachments (attachments-canon/get-attachments-as-canonical
+                                {:attachments attachments-wo-pk :title (:title application)}
+                                begin-of-link (every-pred target-pred attachments-canon/no-statements-no-verdicts))
         canonical-pk-liite (first (attachments-canon/get-attachments-as-canonical
                                     {:attachments [poytakirja] :title (:title application)}
                                     begin-of-link (every-pred target-pred attachments-canon/no-statements-no-verdicts)))

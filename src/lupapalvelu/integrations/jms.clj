@@ -11,7 +11,8 @@
            (org.apache.activemq.artemis.jms.client ActiveMQJMSConnectionFactory ActiveMQConnection)
            (org.apache.activemq.artemis.api.jms ActiveMQJMSClient)))
 
-(when (env/feature? :embedded-artemis)
+; If external broker is not defined, we start a embedded broker inside the JVM for testing.
+(when (and (env/dev-mode?) (ss/blank? (env/value :jms :broker-url)))
   ; This works only with :dev profile
   (require 'artemis-server)
   ((ns-resolve 'artemis-server 'start)))
@@ -77,16 +78,18 @@
   (def connection-properties (merge (env/value :jms) {:broker-url broker-url}))
 
   (defn create-connection-factory ^ActiveMQJMSConnectionFactory [{^String url :broker-url :as connection-options}]
-    (let [{:keys [retry-interval retry-multipier max-retry-interval reconnect-attempts]
+    (let [{:keys [retry-interval retry-multipier max-retry-interval reconnect-attempts consumer-window-size]
            :or   {retry-interval (* 2 1000)
                   retry-multipier 2
                   max-retry-interval (* 5 60 1000)          ; 5 mins
+                  consumer-window-size 0
                   reconnect-attempts -1}} connection-options]
       (doto (ActiveMQJMSConnectionFactory. url)
         (.setRetryInterval (util/->long retry-interval))
         (.setRetryIntervalMultiplier (util/->double retry-multipier))
         (.setMaxRetryInterval (util/->long max-retry-interval))
-        (.setReconnectAttempts (util/->int reconnect-attempts)))))
+        (.setReconnectAttempts (util/->int reconnect-attempts))
+        (.setConsumerWindowSize (util/->int consumer-window-size)))))
 
   (def default-connection-factory (create-connection-factory connection-properties))
 
@@ -219,9 +222,10 @@
        (.close conn))
      (doseq [^MessageProducer conn (:producers @state)]
        (.close conn))
-     (.close ^Connection (get-default-connection))
+     (when-let [conn (get-default-connection)]
+       (.close ^Connection conn))
 
-     (when close-embedded?
+     (when (and close-embedded? (find-ns 'artemis-server))
        (when-let [artemis (ns-resolve 'artemis-server 'embedded-broker)]
          (info "Stopping Artemis...")
          (.stop artemis)))))

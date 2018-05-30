@@ -21,7 +21,9 @@
                         keyword? sc/Keyword
                         :else    sc/Str))
 (defn only-one-of
-  "Only one of the given keys are allowed in the data."
+  "Only one of the given keys are allowed in the data. Note: do not use
+  in a `PateComponent`, since the wrapping constraint breaks Pate
+  validation. "
   [allowed-keys schema]
   (sc/constrained schema
                   (fn [data]
@@ -103,7 +105,12 @@
 
 (defschema PateComponent
   (merge PateBase
-         {(sc/optional-key :label?) sc/Bool})) ;; Show label? Default true
+         {;; Show label? Default true
+          (sc/optional-key :label?)     sc/Bool
+          ;; Read-only components cannot be edited and only rendered
+          ;; in the viewing mode.
+          (sc/optional-key :read-only?) sc/Bool
+          }))
 
 (defschema PateReferenceList
   "Component that builds schema from an external source. Each item is
@@ -275,7 +282,13 @@
           ;; Before and after are localisation keys for the strings to
           ;; be shown before and after the value and editor.
           (sc/optional-key :before) pate-units
-          (sc/optional-key :after)  pate-units}))
+          (sc/optional-key :after)  pate-units
+          ;; Items are localization keys. If any items
+          ;; are given, then the text field is rendered
+          ;; as a combobox.
+          (sc/optional-key :items)  [sc/Keyword]
+          ;; If :lines is given the field is rendered as textarea.
+          (sc/optional-key :lines)  positive-integer}))
 
 (defschema PateDate
   (merge PateComponent
@@ -289,11 +302,14 @@
   (merge PateComponent
          {:items                          [sc/Keyword]
           ;; If true (default), empty selection (- Choose -) is
-          ;; available.
+          ;; available. For autocomplete, the clear button is shown.
           (sc/optional-key :allow-empty?) sc/Bool
           ;; Value sorting uses natural order, text sorting takes
-          ;; locale into account. Default order is the items order.
-          (sc/optional-key :sort-by)      (sc/enum :value :text)}))
+          ;; locale into account. Default order is the items
+          ;; order.
+          (sc/optional-key :sort-by)      (sc/enum :value :text)
+          ;; How the select is rendered? Select is the default.
+          (sc/optional-key :type)         (sc/enum :select :autocomplete)}))
 
 (defschema PateLocText
   "Localisation term shown as text."
@@ -441,13 +457,16 @@
          ;; dicts are never excluded.
          (sc/optional-key :always-included?) sc/Bool))
 
+(def id-modified
+  {(sc/optional-key :id)       sc/Str
+   (sc/optional-key :modified) sc/Int})
+
 (defschema PateVerdictTemplate
   (merge Dictionary
          PateMeta
-         {(sc/optional-key :id)       sc/Str
-          (sc/optional-key :modified) sc/Int
-          (sc/optional-key :name)     sc/Str ;; Non-localized raw string
-          :sections                   [PateVerdictTemplateSection]}))
+         id-modified
+         {(sc/optional-key :name) sc/Str ;; Non-localized raw string
+          :sections               [PateVerdictTemplateSection]}))
 
 (defschema PateSettings
   (merge Dictionary
@@ -471,12 +490,15 @@
 (defschema PateVerdictDictionary
   {:dictionary PateVerdictSchemaTypes})
 
+(def section-buttons
+  ;; Show edit button? (default true)
+  {(sc/optional-key :buttons?) sc/Bool})
+
 (defschema PateVerdictSection
   (merge PateSection
          PateCss
-         ;; Show edit button? (default true)
-         {(sc/optional-key :buttons?) sc/Bool
-          ;; The corresponding verdict template section. Needed if the
+         section-buttons
+         {;; The corresponding verdict template section. Needed if the
           ;; template section is removable. If the template section is
           ;; removed then every dict specific to this verdict section
           ;; is also removed. If only parts of the section depend on
@@ -487,7 +509,16 @@
 (defschema PateVerdict
   (merge PateVerdictDictionary
          PateMeta
+         id-modified
          {:version                    sc/Int
-          (sc/optional-key :id)       sc/Str
-          (sc/optional-key :modified) sc/Int
           :sections                   [PateVerdictSection]}))
+
+(defschema PateLegacySection
+  (merge PateSection
+         section-buttons))
+
+(defschema PateLegacyVerdict
+  (merge id-modified
+         {:legacy?    (sc/enum true)
+          :dictionary SchemaTypes
+          :sections   [PateLegacySection]}))

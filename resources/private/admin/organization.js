@@ -12,7 +12,6 @@
     self.indicator = ko.observable(false).extend({notify: "always"});
     self.pending = ko.observable();
     self.earliestArchivingDate = ko.observable();
-    self.pateEnabled = ko.observable(false);
     self.backendSystems = ko.observableArray();
     self.availableBackendSystems = ko.observableArray();
 
@@ -91,7 +90,7 @@
     }
 
     self.savePateEnabled = function() {
-      saveBooleanValue("pate-enabled", self.pateEnabled());
+      saveBooleanValue("pate-enabled", self.organization()["pate-enabled"]());
     };
 
     function updateSsoKeys() {

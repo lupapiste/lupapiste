@@ -406,10 +406,11 @@
    :version version
    :fileId fileId})
 
-(defn- signature-updates [version-model user ts copied-signatures]
+(defn- signature-updates
   "Returns mongo updates for setting signatures to an attachment. If the copied-signatures are provided, just copies
    them to point to the given version. Otherwise a new signature is generated.
    Does NOT handle possible duplicates, i.e. the same version can be signed multiple times by the same user."
+  [version-model user ts copied-signatures]
   (cond
     (and (sequential? copied-signatures) (seq copied-signatures))
     {$push {:attachments.$.signatures {$each (map (fn [sig]

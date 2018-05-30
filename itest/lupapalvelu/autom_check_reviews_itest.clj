@@ -74,7 +74,7 @@
           (local-command sonja :approve-application :id application-id-verdict-given-1 :lang "fi") => ok?
           (local-command sonja :approve-application :id application-id-verdict-given-2 :lang "fi") => ok?
           (count  (:tasks (query-application local-query sonja application-id-verdict-given-1))) => 0
-          (batchrun/fetch-verdicts-default) => nil?
+          (fetch-verdicts) => nil?
           (count  (:tasks (query-application local-query sonja application-id-verdict-given-1))) =not=> 0
 
           (give-local-verdict sonja application-id-verdict-given-1 :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
@@ -177,7 +177,7 @@
         (local-command sonja :approve-application :id application-id-verdict-given-1 :lang "fi") => ok?
         (local-command sonja :approve-application :id application-id-verdict-given-2 :lang "fi") => ok?
         (count  (:tasks (query-application local-query sonja application-id-verdict-given-1))) => 0
-        (batchrun/fetch-verdicts-default) => nil?
+        (fetch-verdicts) => nil?
         (count  (:tasks (query-application local-query sonja application-id-verdict-given-1))) =not=> 0
 
         (give-local-verdict sonja application-id-verdict-given-1 :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?

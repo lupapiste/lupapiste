@@ -206,9 +206,9 @@ body.admin, body.authority-admin {
 
 .container {
   box-sizing: border-box;
-  padding: 12px 6px 0 6px;
+  padding: 12px 60px 0 24px;
   width: 100%;
-  max-width: 1280px;
+  max-width: 1660px;
   min-width: 640px;
   margin: 24px auto 24px auto;
   position: relative;
@@ -814,6 +814,18 @@ h1 .icon {
   cursor: default;
 }
 
+.lupicon-user-pen:before {
+  content: "\e931";
+}
+
+.lupicon-archives-in:before {
+  content: "\e932";
+}
+
+.lupicon-map:before {
+  content: "\e930";
+}
+
 .lupicon-grip-diagonal:before {
   content: "\e92c";
 }
@@ -1342,11 +1354,13 @@ h1 .icon {
 
 .nav-box {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1660px;
   min-width: 640px;
   margin: 0 auto;
   position: relative;
   box-sizing: border-box;
+  padding-left: 12px;
+  padding-right: 12px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -1514,7 +1528,7 @@ nav .language-open a, nav .language-open span {
 nav .header-menu {
   display: inline-block;
   position: absolute;
-  right: 0px;
+  right: 20px;
 }
 
 nav .header-menu .header-box {
@@ -2163,7 +2177,7 @@ footer {
 footer .informations {
   padding: 12px;
   width: 100%;
-  max-width: 1280px;
+  max-width: 1660px;
   margin: 0 auto 12px;
 }
 
@@ -8162,7 +8176,7 @@ message-panel {
   margin-right: 6px;
   position: relative;
   min-height: 48px;
-  vertical-align: top;
+  vertical-align: bottom;
 }
 
 .form-entry label {
@@ -8175,6 +8189,10 @@ message-panel {
 
 .form-entry .form-input, .form-entry .form-input--inline {
   margin-right: 36px;
+}
+
+.form-entry-vcenter {
+  line-height: 40px;
 }
 
 .form-full-width {
@@ -8234,7 +8252,6 @@ message-panel {
 }
 
 .form-input, .form-input--inline {
-  height: 22px;
   line-height: 24px;
   margin: 2px 6px 12px 0;
   width: 16.25em;
@@ -15306,7 +15323,7 @@ div.search i {
 }
 
 #indicator .indicator-box {
-  max-width: 1280px;
+  max-width: 1660px;
   min-width: 640px;
   margin: 0 auto;
   padding-left: 6px;
@@ -15375,7 +15392,7 @@ div.search i {
 }
 
 #indicator-icon .indicator-box {
-  max-width: 1280px;
+  max-width: 1660px;
   margin: 0 auto;
   padding: 12px;
 }
@@ -29307,10 +29324,6 @@ div.pate-settings-editor table.pate-editor-table tr:hover:nth-child(even) {
   background: #f6f6f6;
 }
 
-div.pate-verdict-page {
-  padding: 2em 2em;
-}
-
 div.pate-spin {
   width: 100%;
   text-align: center;
@@ -29338,7 +29351,7 @@ div.pate-spin > i:before {
 }
 
 table.pate-verdicts-table {
-  width: initial;
+  width: 100%;
 }
 
 table.pate-verdicts-table tr:hover {
@@ -29351,6 +29364,10 @@ table.pate-verdicts-table tr:hover:nth-child(even) {
 
 table.pate-verdicts-table tr {
   border: none;
+}
+
+table.pate-verdicts-table td.replaced {
+  padding-left: 4em;
 }
 
 div.pate-verdict div.pate-section div.section-header {
@@ -29483,6 +29500,11 @@ div.pate-autocomplete {
 
 div.pate-autocomplete .ac--combobox {
   display: table;
+  width: 100%;
+}
+
+div.pate-autocomplete .ac--combobox input {
+  width: 100%;
 }
 
 div.pate-autocomplete .ac--selected {
@@ -29535,6 +29557,10 @@ div.pate-autocomplete .ac--selected.disabled span, div.pate-autocomplete .ac--se
 
 div.pate-autocomplete .ac--selected.disabled i {
   color: #bbbbbb;
+}
+
+div.pate-autocomplete .ac--selected.required span, div.pate-autocomplete .ac--selected.required i {
+  border-color: #f39129;
 }
 
 div.pate-autocomplete .ac__menu {
@@ -29751,6 +29777,10 @@ div.pate-autocomplete .ac__menu ul.ac__items li.ac--grouped {
 }
 
 .pate-batch-table td.batch--type {
+  min-width: 15em;
+}
+
+.pate-batch-table td.batch--contents {
   min-width: 15em;
 }
 
@@ -30096,6 +30126,10 @@ input.date-delta {
 
 body.pate-error-page {
   padding: 2em 2em;
+}
+
+textarea.grid-style-input.pate-textarea {
+  height: initial;
 }
 
 .order-grid-1 {
@@ -33651,8 +33685,8 @@ span.icon_clear:before {
   position: relative;
   min-height: 280px;
   padding-left: 320px;
-  padding-right: 24%;
-  margin-right: 61px;
+  padding-right: 20%;
+  margin-right: 6px;
 }
 
 .application_summary .preamble .application-map-container, .application_summary .preamble .application_actions {
@@ -34282,11 +34316,7 @@ span.icon_clear:before {
 }
 
 .application-summary-table > div > span {
-  width: 100%;
-}
-
-.application-summary-table > div > p {
-  padding-right: 2em;
+  width: 75%;
 }
 
 @media (max-width: 991px) {
@@ -35800,7 +35830,7 @@ td.comment-text {
   width: 22.5em;
 }
 
-form.organizations-search input.textinput, form.xml-download input.textinput {
+div.organizations-search input.textinput, form.xml-download input.textinput {
   display: inline-block;
   width: 20em;
   vertical-align: middle;
@@ -36150,18 +36180,13 @@ div.organization-link-cell {
 body.admin .nav-box,
 body.authority-admin .nav-box {
   max-width: none;
-  padding-left: 48px;
-  padding-right: 48px;
+  padding-left: 24px;
+  padding-right: 24px;
 }
 
 body.admin .nav-box .brand > a,
 body.authority-admin .nav-box .brand > a {
   margin-left: 0;
-}
-
-body.admin .header-menu,
-body.authority-admin .header-menu {
-  padding-right: 48px;
 }
 
 .navi-sidebar {
@@ -38380,7 +38405,7 @@ div.summary-button-bar {
 }
 
 #bulletins .content-center, #local-bulletins .content-center {
-  max-width: 1280px;
+  max-width: 1660px;
   margin: 0 auto;
   position: relative;
   padding: 40px 0;
@@ -38571,8 +38596,8 @@ div.summary-button-bar {
   position: relative;
   min-height: 280px;
   padding-left: 320px;
-  padding-right: 24%;
-  margin-right: 61px;
+  padding-right: 20%;
+  margin-right: 6px;
 }
 
 #bulletins .application_summary .bulletin-preamble .application-map-container, #bulletins .application_summary .bulletin-preamble .application_actions, #local-bulletins .application_summary .bulletin-preamble .application-map-container, #local-bulletins .application_summary .bulletin-preamble .application_actions {

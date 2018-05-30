@@ -1,7 +1,8 @@
 (ns lupapalvelu.archive.api-usage
   "Functionality for consuming Onkalo API usage log messages and
   inserting them into Mongo"
-  (:require [monger.operators :refer :all]
+  (:require [clojure.tools.reader.edn :as edn]
+            [monger.operators :refer :all]
             [schema.core :as sc]
             [taoensso.timbre :refer [errorf]]
             [sade.core :refer [now]]
@@ -17,9 +18,16 @@
 (sc/defschema ArchiveApiUsageLogEntry
   "Schema for API usage log entries, produced by Onkalo"
   {:organization             org/OrgId
+   :fileId                   sc/Str
+   :apiUser                  sc/Str
+   :externalId               sc/Str
    :timestamp                ssc/Nat   ; Timestamp of download, change to :downloaded
    (sc/optional-key :logged) ssc/Nat   ; Timestamp of logging, added when sent to Mongo
-   sc/Keyword                sc/Any})  ; Rest of the data TBD
+   :metadata {(sc/optional-key :henkilotiedot)       sc/Str
+              (sc/optional-key :julkisuusluokka)     sc/Str
+              (sc/optional-key :myyntipalvelu)       sc/Bool
+              (sc/optional-key :nakyvyys)            sc/Str
+              (sc/optional-key :security-period-end) sc/Str}})
 
 (def archive-api-usage-collection :archive-api-usage)
 
@@ -27,21 +35,33 @@
   [entry :- ArchiveApiUsageLogEntry
    log-timestamp :- ssc/Nat]
   (try (mongo/insert archive-api-usage-collection
-                     (assoc entry :logged log-timestamp))
+                     (assoc entry
+                            :_id (mongo/create-id)
+                            :logged log-timestamp))
        true
        (catch Throwable e
          (errorf "Could not insert archive API usage log entry to mongo: %s" (.getMessage e))
          false)))
 
+(def api-usage-message-validator (sc/validator ArchiveApiUsageLogEntry))
+
+(defn read-message [msg]
+  (try
+    (let [message (edn/read-string msg)]
+      (api-usage-message-validator message)
+      message)
+    (catch Throwable t
+      (errorf "Invalid message '%s' for api usage: %s" msg (.getMessage t))
+      nil)))
+
 (when (env/feature? :jms)
-(defn- message-handler [^Session session]
-  (fn [payload]
-    (if-let [schema-error (sc/check ArchiveApiUsageLogEntry payload)]
-      (do (errorf "Archive API usage log entry does not match schema: %s" schema-error)
-          (jms/commit session))
-      (if (log-archive-api-usage! payload (now))
-        (jms/commit session)
-        (jms/rollback session)))))
+(defn- message-handler [commit-fn rollback-fn]
+  (fn [msg]
+    (if-let [api-usage-entry (read-message msg)]
+      (if (log-archive-api-usage! api-usage-entry (now))
+        (commit-fn)
+        (rollback-fn))
+      (commit-fn))))
 
 (def archive-api-usage-queue "onkalo.api-usage")
 
@@ -49,8 +69,9 @@
                                               (jms/create-transacted-session)
                                               (jms/register-session :consumer)))
 
-(defonce api-usage-consumer (jms/create-nippy-consumer
+(defonce api-usage-consumer (jms/create-consumer
                               archive-api-usage-transacted-session
                               archive-api-usage-queue
-                              (message-handler archive-api-usage-transacted-session)))
+                              (message-handler #(jms/commit archive-api-usage-transacted-session)
+                                               #(jms/rollback archive-api-usage-transacted-session))))
 )

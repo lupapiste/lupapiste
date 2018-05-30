@@ -12,6 +12,7 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [lupapalvelu.integrations.jms :as jms]
+            [lupapalvelu.integrations.jms-consumers]
             [lupapalvelu.actions-api]
             [lupapalvelu.admin-api]
             [lupapalvelu.appeal-api]

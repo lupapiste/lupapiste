@@ -59,14 +59,32 @@ Sonja invites foreman to application
   ${foremanAppId} =  Get Text  xpath=//section[@id='application']//span[@data-test-id='application-id']
   Append To List  ${foremanApps}  ${foremanAppId}
 
-Foreman applies personal information to the foreman application
+Foreman accepts invitation
   [Arguments]  ${index}
   Open foreman app from list  ${index}
   Wait until  Confirm yes no dialog
   Open tab  parties
   Wait until  Page should contain  Hyväksynyt valtuutuksen
+
+Foreman disables attachment import checkbox
+  Unselect checkbox  fill-attachments-checkbox
+
+Foreman applies personal information to the foreman application
   Wait until  Click by test id  fill-info-button
+
+Foreman personal information has been applied
   Wait until  Textfield value should be  xpath=//section[@data-doc-type='tyonjohtaja-v2']//input[@data-docgen-path='henkilotiedot.etunimi']  Teppo
+
+Foreman personal attachments have been copied
+  Open tab  attachments
+  Wait Until  Element should be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME}')
+  Open tab  parties
+
+Foreman personal attachments have not been copied
+  Open tab  attachments
+  Sleep  2s
+  Element should not be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME}')
+  Open tab  parties
 
 Submit foreman base app
   [Arguments]  ${index}
@@ -81,6 +99,10 @@ Foreman accepts invitation and fills info
   Wait for jQuery
   Wait until  Scroll and click test id  fill-info-button
   Wait for jQuery
+
+Set foreman role
+  [Arguments]  ${role}
+  Wait until  Select From List by test id  kuntaRoolikoodi  ${role}
 
 Foreman sets role and difficulty to foreman application
   [Arguments]  ${index}  ${role}  ${difficulty}

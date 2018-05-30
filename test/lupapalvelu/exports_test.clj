@@ -137,20 +137,20 @@
   (fact "single entry results in single entry"
     (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R"
                                                              :timestamp (to-long 2018 5 3)}])
-    => [{:id "753-R" :date "2018-05-31" :quantity 1}])
+    => [{:organization "753-R" :lastDateOfTransactionMonth "2018-05-31" :quantity 1}])
   (fact "quantity shows the number of entries for given organization in given month"
     (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R" :timestamp (to-long 2018 5 3)}
                                                             {:organization "753-R" :timestamp (to-long 2018 5 3)}])
-    => [{:id "753-R" :date "2018-05-31" :quantity 2}])
+    => [{:organization "753-R" :lastDateOfTransactionMonth "2018-05-31" :quantity 2}])
   (fact "each organization has own entries"
     (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R" :timestamp (to-long 2018 5 3)}
                                                             {:organization "091-R" :timestamp (to-long 2018 5 3)}])
-    => (contains [{:id "753-R" :date "2018-05-31" :quantity 1} {:id "091-R" :date "2018-05-31" :quantity 1}]
+    => (contains [{:organization "753-R" :lastDateOfTransactionMonth "2018-05-31" :quantity 1} {:organization "091-R" :lastDateOfTransactionMonth "2018-05-31" :quantity 1}]
                  :in-any-order))
   (fact "each month has own entries"
     (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R" :timestamp (to-long 2018 5 3)}
                                                             {:organization "753-R" :timestamp (to-long 2018 6 3)}])
-    => (contains [{:id "753-R" :date "2018-05-31" :quantity 1} {:id "753-R" :date "2018-06-30" :quantity 1}]
+    => (contains [{:organization "753-R" :lastDateOfTransactionMonth "2018-05-31" :quantity 1} {:organization "753-R" :lastDateOfTransactionMonth "2018-06-30" :quantity 1}]
                  :in-any-order))
   (fact "throws on invalid input data"
         (exports/onkalo-log-entries->salesforce-export-entries [{:not-organization "753-R" :timestamp (to-long 2018 5 3)}

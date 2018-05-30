@@ -10,9 +10,9 @@
             <p data-bind="lhtml: 'new-company-user.loading'"></p>
           </div>
 
-          <div data-bind="visible: notFound">
+          <div data-bind="visible: error">
             <h3 data-bind="lhtml: 'new-company-user.not-found.title'"></h3>
-            <p data-bind="lhtml: 'error.token-not-found'"></p>
+            <p data-bind="lhtml: error"></p>
           </div>
 
           <div data-bind="visible: loaded" class="form-group">
@@ -73,7 +73,10 @@
     </div>
 
     <div data-bind="visible: fail">
-      <p data-bind="ltext: 'invite-company-user.fail'"></p>
+      <p>
+        <span data-bind="ltext: 'invite-company-user.fail'"></span>
+        <span data-bind="ltext: error"></span>
+      </p>
     </div>
   </section>
 
@@ -90,7 +93,10 @@
     </div>
 
     <div data-bind="visible: fail">
-      <p data-bind="ltext: 'accept-company-invitation.fail'"></p>
+      <p>
+        <span data-bind="ltext: 'accept-company-invitation.fail'"></span>
+        <span data-bind="ltext: error"></span>
+      </p>
     </div>
   </section>
 </body>
