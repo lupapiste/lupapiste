@@ -278,6 +278,14 @@
       (update org :krysp #(into {} (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]) %)))
       org)))
 
+(def admin-projection
+  [:name :scope :allowedAutologinIPs :krysp
+   :pate-enabled :permanent-archive-enabled :permanent-archive-in-use-since
+   :earliest-allowed-archiving-date :digitizer-tools-enabled :calendars-enabled
+   :docstore-info :3d-map
+   :kopiolaitos-email :kopiolaitos-orderer-address :kopiolaitos-orderer-email :kopiolaitos-orderer-phone
+   :app-required-fields-filling-obligatory ])
+
 (defn get-organizations
   ([]
     (get-organizations {}))
