@@ -10,11 +10,11 @@
 ;;;; Cleaning up :value indirections
 
 (defn- flatten-values [app]
-  (letfn [(flatten-node [node]
+  (letfn [(node-value [node]
             (if (and (map? node) (contains? node :value))
               (:value node)
               node))]
-    (postwalk flatten-node app)))
+    (postwalk node-value app)))
 
 ;;;; Conversion details
 
@@ -23,6 +23,11 @@
 
 (defn- fullname [{:keys [etunimi sukunimi]}]
   (str etunimi " " sukunimi))
+
+(defn- customer-name [customer-type customer]
+  (case customer-type
+    :henkilo (fullname (:henkilotiedot customer))
+    :yritys  (:yritysnimi customer)))
 
 (defn- address-country [address]
   (country-translate :alpha-3 :alpha-2 (:maa address)))
@@ -33,32 +38,22 @@
    :streetAddress {:streetName katu}})
 
 (defn- doc->customer [{{tag :_selected :as data} :data}]
-  (let [tag (keyword tag)]
-    (case tag
-      :henkilo (let [customer (get data tag)
-                     address (:osoite customer)]
-                 {:type (convert-customer-type tag)
-                  :name (fullname (:henkilotiedot customer))
-                  :country (address-country address)
-                  :postalAddress (convert-address address)})
-
-      :yritys (let [customer (get data tag)
-                    address (:osoite customer)]
-                {:type (convert-customer-type tag)
-                 :name (:yritysnimi customer)
-                 :country (address-country address)
-                 :postalAddress (convert-address address)}))))
+  (let [tag (keyword tag)
+        customer (get data tag)
+        address (:osoite customer)]
+    {:type          (convert-customer-type tag)
+     :name          (customer-name tag customer)
+     :country       (address-country address)
+     :postalAddress (convert-address address)}))
 
 (defn- person->contact [{:keys [henkilotiedot], {:keys [puhelin email]} :yhteystiedot}]
   {:name (fullname henkilotiedot), :phone puhelin, :email email})
 
-(defn- doc->customer-with-contacts [{{tag :_selected :as data} :data :as doc}]
+(defn- customer-contact [{{tag :_selected :as data} :data :as doc}]
   (let [tag (keyword tag)]
     (case tag
-      :henkilo {:customer (doc->customer doc)
-                :contacts [(person->contact (get data tag))]}
-      :yritys {:customer (doc->customer doc)
-               :contacts [(person->contact (:yhteyshenkilo (get data tag)))]})))
+      :henkilo (get data tag)
+      :yritys  (:yhteyshenkilo (get data tag)))))
 
 (defn- application-postal-address [app]
   {:streetAddress {:streetName (:address app)}})
@@ -67,7 +62,8 @@
   [{:keys [id primaryOperation propertyId], [customer-doc work-description payee-doc] :documents
     :as app}]
   {:clientApplicationKind "FIXME"
-   :customerWithContacts  (doc->customer-with-contacts customer-doc)
+   :customerWithContacts  {:customer (doc->customer customer-doc)
+                           :contacts [(person->contact (customer-contact customer-doc))]}
    :geometry              {:geometryOperations {}}
    :identificationNumber  id
    :invoicingCustomer     (doc->customer payee-doc)
