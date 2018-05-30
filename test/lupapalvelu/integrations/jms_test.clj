@@ -30,7 +30,7 @@
           prod => fn?
           (fact "successful send"
             (prod "test1") => nil
-            (Thread/sleep 50)                               ; non-deterministic wait for message delivery
+            (Thread/sleep 100)                               ; non-deterministic wait for message delivery
             @test-atom => "test1")
           (fact "wrong type -> exception"
             (prod {:foo 1}) => (throws IllegalArgumentException))))
