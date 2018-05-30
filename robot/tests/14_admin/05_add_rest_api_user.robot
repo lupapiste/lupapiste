@@ -4,9 +4,6 @@ Documentation   Admin adds REST API user
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
-# Run:
-# local-chrome-standalone.bat tests\14_admin\05_add_rest_api_user.robot
-
 *** Variables ***
 
 ${LANDING_PAGE_USERS} =              xpath=//section[@id='users']

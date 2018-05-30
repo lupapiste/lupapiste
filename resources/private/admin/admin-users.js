@@ -146,9 +146,7 @@
     });
 
     self.userDetailsOk = ko.computed(function() {
-      if (self.firstName() && (self.firstName().length + backend.length) < 21) {
-        var firstNameOk = self.firstName();
-      }
+      var firstNameOk = (self.firstName() && (self.firstName().length + backend.length) < 21);
       var lastNameOk = self.lastName();
       var organizationCodeOk = self.organizationCode();
       var usernameOk = self.username();
