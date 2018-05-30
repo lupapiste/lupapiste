@@ -28,7 +28,6 @@ Admin shows all organizations
 
 Admin searchs just 753-R
   Fill test id  organization-search-term  753-R
-  Scroll and click test id  organization-search
   Test id text is  organization-result-count  1 organisaatio.
 
 Admin edits organization with id 753-R
