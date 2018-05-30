@@ -30,7 +30,7 @@
 (defn now ^Long [] (System/currentTimeMillis))
 
 (defmacro def- [item value]
-  `(def ^{:private true} ~item ~value))
+  `(def ~(with-meta item (assoc (meta item) :private true)) ~value))
 
 (defn error-and-fail! [error-msg fail-key]
   (error error-msg)
