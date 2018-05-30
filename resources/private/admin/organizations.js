@@ -52,18 +52,33 @@
   function OrganizationsModel() {
     var self = this;
 
-    var all = [];
+    self.searchTerm = ko.observable();
+    var filterFn = function( term, org ) {
+      var termLower = _.toLower(term);
+      return _.trim( termLower ) ? isSearchMatch( org, termLower) : false;
+    };
     self.organizations = ko.observableArray([]);
+    self.selectedOrganizations = ko.pureComputed(function() {
+      var searchInput = _.trim(self.searchTerm());
+      if (_.isEmpty(searchInput)) {
+        // empty string, 'showAll'
+        return _.sortBy(self.organizations(), function(o) {
+          return o.name[loc.getCurrentLanguage()];
+        });
+      } else {
+        return _(self.organizations())
+                .filter(_.partial(filterFn, searchInput))
+                .sortBy(function(o) { return o.name[loc.getCurrentLanguage()]; })
+                .value();
+      }
+    });
     self.pending = ko.observable();
     self.newOrganization = ko.observable();
-    self.searchTerm = ko.observable();
     self.searchFocus = ko.observable(false);
-    self.search = function() {
-      self.organizations( _.filter( all,
-                                    function( org ) {
-                                      var term = _.toLower(self.searchTerm());
-                                      return _.trim( term ) && isSearchMatch( org, term);
-                                    }));
+
+
+    self.showAll = function() {
+      self.searchTerm("");
     };
 
     self.load = function() {
@@ -72,31 +87,25 @@
         .query("organizations")
         .pending(self.pending)
         .success(function(d) {
-          all = _.sortBy(d.organizations, function(o) { return o.name[loc.getCurrentLanguage()]; });
-          // Refresh the old results. For example, when returning from
-          // organization view.
-          if( self.searchTerm()) {
-            self.search();
-          } else {
-            if( _.size( self.organizations())) {
-              self.showAll();
-            }
-          }
+          self.organizations(d.organizations);
         })
         .call();
     };
-    self.countText = function() {
-      var count = _.size( self.organizations());
-      return _.trim( self.searchTerm()) || _.some( self.organizations())
-        ? sprintf( "%d organisaatio%s.",
-                   count,
-                   count !== 1 ? "ta" : "")
-      : "";
-    };
-    self.showAll = function() {
-      self.searchTerm("");
-      self.organizations( all );
-    };
+    self.countText = ko.pureComputed(function() {
+      var orgs = self.selectedOrganizations();
+      var count = _.size( orgs );
+      var searchInput = self.searchTerm();
+      if (_.isUndefined(searchInput)) {
+        // don't show count, when nothing has been typed (initial view)
+        return "";
+      } else {
+        return _.trim( self.searchTerm()) || _.some(orgs)
+          ? sprintf( "%d organisaatio%s.",
+                     count,
+                     count !== 1 ? "ta" : "")
+        : "";
+      }
+    });
 
     function redirectAfterCreate() {
       var id = util.getIn(self.newOrganization, ["orgId"]);
