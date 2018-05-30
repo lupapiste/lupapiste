@@ -4,7 +4,9 @@
             [clj-time.coerce :as tc]
             [clj-time.core :as t]
             [schema.core :as sc]
+            [monger.operators :refer :all]
             [sade.core :refer [now]]
+            [sade.env :as env]
             [sade.excel-reader :as xls]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
@@ -13,7 +15,9 @@
             [lupapalvelu.archive.archiving :as archiving]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.fixture.minimal :refer [dummy-onkalo-log-entry]]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]))
@@ -318,34 +322,56 @@
    :lastDateOfTransactionMonth     (ssc/date-string "YYYY-MM-dd")
    :quantity                       ssc/Nat})
 
-(sc/defn ^:always-validate
-  onkalo-log-entries->salesforce-export-entries :- [SalesforceExportArchiveApiUsageEntry]
-  "Maps onkalo log entries into data consumed by the salesforce integration."
-  [log-entries :- [ArchiveApiUsageLogEntry]]
+(sc/defschema SalesforceExportArchiveApiUsageResponse
+  {:lastRunTimestampMillis ssc/Nat
+   :transactions [SalesforceExportArchiveApiUsageEntry]})
+
+(defn- most-recent-mongo-insert-timestamp [log-entries start-ts]
+  (inc (if (seq log-entries)
+         (->> log-entries (map :logged) (apply max))
+         start-ts)))
+
+(defn- archive-api-transactions-sorted-by-month-and-organization [log-entries]
   (->> log-entries
        (map (fn-> (select-keys [:organization :timestamp])
                   (update :timestamp timestamp->end-of-month-date-string)))
        (group-by (juxt :organization :timestamp))
        (util/map-values count)
-       (map (fn [[[org-id date] count]]
+       (map (fn [[[org-id last-date-of-month] quantity-of-transactions-in-given-month]]
               {:organization               org-id
-               :lastDateOfTransactionMonth date
-               :quantity                   count}))))
+               :lastDateOfTransactionMonth last-date-of-month
+               :quantity                   quantity-of-transactions-in-given-month}))))
 
+(sc/defn ^:always-validate
+  onkalo-log-entries->salesforce-export-entries :- SalesforceExportArchiveApiUsageResponse
+  "Maps onkalo log entries into data consumed by the salesforce integration.
+   lastRuntimestampMillis is either the timestamp of most recent insert to mongo, or, if
+   there are no log-entries, start-ts, so that the next batchrun will use the same starting
+   timestamp as the current one."
+  [log-entries :- [ArchiveApiUsageLogEntry]
+   start-ts :- ssc/Nat]
+  {:lastRunTimestampMillis (most-recent-mongo-insert-timestamp log-entries start-ts)
+   :transactions (archive-api-transactions-sorted-by-month-and-organization log-entries)})
 
-(defn- dummy-onkalo-log-entry [start-ts end-ts]
-  {:organization (rand-nth ["753-R" "091-R" "092-R" "837-R" "297-R"])
-   :timestamp (+ start-ts (long (rand (- end-ts start-ts))))
-   :filename "foo"
-   :file-id "bar"})
-
-(defn get-onkalo-api-logs!
-  "A dummy implementation for actually fetching Onkalo logs from Mongo"
+(defn mock-onkalo-api-logs
+  "A mock implementation for actually fetching Onkalo logs from Mongo"
   [start-ts end-ts]
   (let [number-of-entries (rand-int 50)]
     (repeatedly number-of-entries #(dummy-onkalo-log-entry start-ts end-ts))))
 
+(defn onkalo-api-logs-from-mongo
+  [start-ts end-ts]
+  (mongo/snapshot :archive-api-usage
+                  {:logged {$gte start-ts
+                            $lte end-ts}}
+                  [:organization :logged :timestamp]))
+
+(def get-onkalo-api-logs! (if (env/feature? :mock-api-usage)
+                            mock-onkalo-api-logs
+                            onkalo-api-logs-from-mongo))
+
 (defn archive-api-usage-to-salesforce
   [start-ts end-ts]
-  (-> (get-onkalo-api-logs! (or start-ts (now)) (or end-ts (now)))
-      onkalo-log-entries->salesforce-export-entries))
+  {:pre [(number? start-ts) (number? end-ts) (<= start-ts end-ts)]}
+  (-> (get-onkalo-api-logs! start-ts end-ts)
+      (onkalo-log-entries->salesforce-export-entries start-ts)))
