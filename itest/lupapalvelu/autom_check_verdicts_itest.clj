@@ -94,7 +94,7 @@
       (fact "batchrun verdicts not checked, if organization doesn't have url"
         (fetch-verdicts) => nil?
         (provided
-          (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
+          (mongo/select-ordered :applications anything anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
           (mongo/select :organizations anything anything) => [{:id "bar"}]
           (lupapalvelu.verdict/do-check-for-verdict irrelevant) => irrelevant :times 0
           (lupapalvelu.logging/log-event :error irrelevant) => irrelevant :times 0
@@ -104,7 +104,7 @@
         ;; make sure logging functions are called in expected ways
         (fetch-verdicts) => nil?
         (provided
-          (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
+          (mongo/select-ordered :applications anything anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
           (mongo/select :organizations anything anything) => [{:id "bar" :krysp {:foo {:url "http://test"}}}]
           (lupapalvelu.verdict/do-check-for-verdict anything) =throws=> (IllegalArgumentException.)
           (lupapalvelu.logging/log-event :error anything) => nil
@@ -114,7 +114,7 @@
         ;; make sure logging functions are called in expected ways
         (fetch-verdicts) => anything
         (provided
-          (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
+          (mongo/select-ordered :applications anything anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
           (mongo/select :organizations anything anything) => [{:id "bar" :krysp {:foo {:url "http://test"}}}]
           (lupapalvelu.logging/log-event :error anything) => nil
           (lupapalvelu.logging/log-event :info irrelevant) => irrelevant
