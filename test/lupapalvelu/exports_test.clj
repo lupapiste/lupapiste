@@ -133,26 +133,38 @@
 
 (facts onkalo-log-entries->salesforce-export-entries
   (fact "no log entries results in no export entries"
-    (exports/onkalo-log-entries->salesforce-export-entries []) => [])
+        (exports/onkalo-log-entries->salesforce-export-entries [] 1234)
+    => {:lastRunTimestampMillis 1235
+        :transactions []})
   (fact "single entry results in single entry"
     (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R"
-                                                             :timestamp (to-long 2018 5 3)}])
-    => [{:organization "753-R" :lastDateOfTransactionMonth "2018-05-31" :quantity 1}])
+                                                             :timestamp (to-long 2018 5 3)
+                                                             :logged (to-long 2018 5 3)}]
+                                                           1234)
+    => {:lastRunTimestampMillis (inc (to-long 2018 5 3))
+        :transactions [{:organization "753-R" :lastDateOfTransactionMonth "2018-05-31" :quantity 1}]})
   (fact "quantity shows the number of entries for given organization in given month"
-    (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R" :timestamp (to-long 2018 5 3)}
-                                                            {:organization "753-R" :timestamp (to-long 2018 5 3)}])
-    => [{:organization "753-R" :lastDateOfTransactionMonth "2018-05-31" :quantity 2}])
+    (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R" :timestamp (to-long 2018 5 3) :logged (to-long 2018 5 3)}
+                                                            {:organization "753-R" :timestamp (to-long 2018 5 3) :logged (to-long 2018 5 4)}]
+                                                           1234)
+    => {:lastRunTimestampMillis (inc (to-long 2018 5 4))
+        :transactions [{:organization "753-R" :lastDateOfTransactionMonth "2018-05-31" :quantity 2}]})
   (fact "each organization has own entries"
-    (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R" :timestamp (to-long 2018 5 3)}
-                                                            {:organization "091-R" :timestamp (to-long 2018 5 3)}])
+    (-> (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R" :timestamp (to-long 2018 5 3) :logged (to-long 2018 5 3)}
+                                                                {:organization "091-R" :timestamp (to-long 2018 5 3) :logged (to-long 2018 5 3)}]
+                                                               1234)
+        :transactions)
     => (contains [{:organization "753-R" :lastDateOfTransactionMonth "2018-05-31" :quantity 1} {:organization "091-R" :lastDateOfTransactionMonth "2018-05-31" :quantity 1}]
                  :in-any-order))
   (fact "each month has own entries"
-    (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R" :timestamp (to-long 2018 5 3)}
-                                                            {:organization "753-R" :timestamp (to-long 2018 6 3)}])
+    (-> (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R" :timestamp (to-long 2018 5 3) :logged (to-long 2018 5 3)}
+                                                                {:organization "753-R" :timestamp (to-long 2018 6 3) :logged (to-long 2018 6 3)}]
+                                                               1234)
+        :transactions)
     => (contains [{:organization "753-R" :lastDateOfTransactionMonth "2018-05-31" :quantity 1} {:organization "753-R" :lastDateOfTransactionMonth "2018-06-30" :quantity 1}]
                  :in-any-order))
   (fact "throws on invalid input data"
-        (exports/onkalo-log-entries->salesforce-export-entries [{:not-organization "753-R" :timestamp (to-long 2018 5 3)}
-                                                                {:organization "753-R" :timestamp (to-long 2018 6 3)}])
+    (exports/onkalo-log-entries->salesforce-export-entries [{:not-organization "753-R" :timestamp (to-long 2018 5 3) :logged (to-long 2018 5 3)}
+                                                            {:organization "753-R" :timestamp (to-long 2018 6 3) :logged (to-long 2018 6 3)}]
+                                                               1234)
         => (throws #"does not match schema")))

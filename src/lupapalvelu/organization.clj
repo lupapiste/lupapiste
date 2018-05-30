@@ -254,7 +254,8 @@
    (sc/optional-key :pate-enabled)                 sc/Bool
    (sc/optional-key :multiple-operations-supported) sc/Bool
    (sc/optional-key :local-bulletins-page-settings) LocalBulletinsPageSettings
-   (sc/optional-key :default-digitalization-location) {:x sc/Str :y sc/Str}})
+   (sc/optional-key :default-digitalization-location) {:x sc/Str :y sc/Str}
+   (sc/optional-key :remove-handlers-from-reverted-draft) sc/Bool})
 
 
 (sc/defschema SimpleOrg
@@ -277,6 +278,14 @@
     (if (:krysp org)
       (update org :krysp #(into {} (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]) %)))
       org)))
+
+(def admin-projection
+  [:name :scope :allowedAutologinIPs :krysp
+   :pate-enabled :permanent-archive-enabled :permanent-archive-in-use-since
+   :earliest-allowed-archiving-date :digitizer-tools-enabled :calendars-enabled
+   :docstore-info :3d-map :default-digitalization-location
+   :kopiolaitos-email :kopiolaitos-orderer-address :kopiolaitos-orderer-email :kopiolaitos-orderer-phone
+   :app-required-fields-filling-obligatory ])
 
 (defn get-organizations
   ([]

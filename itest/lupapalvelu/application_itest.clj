@@ -907,6 +907,23 @@
         (-> application :comments last :text) => "comment-text")
       (fact "Application's submission date is nil"
         (-> application :submitted) => nil?)
+      (fact "Application still has handler"
+        (:handlers application) => (just [(contains {:userId ronja-id})])))))
+
+(fact "Remove handlers from reverted draft flag"
+  (let [application-id (create-app-id teppo :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
+    (command teppo :submit-application :id application-id)
+    (fact "Set Ronja as the handler"
+      (command sonja :upsert-application-handler
+               :id application-id
+               :roleId "abba1111111111111111acdc"
+               :userId ronja-id) => ok?
+      (-> (query-application sonja application-id) :handlers first :userId) => ronja-id)
+    (fact "Set the remove handlers from reverted draft flag"
+      (command sipoo :set-organization-remove-handlers-from-reverted-draft
+               :enabled true) => ok?)
+    (return-to-draft sonja application-id)
+    (let [application (query-application teppo application-id)]
       (fact "Application has no handlers"
         (:handlers application) => empty?))))
 

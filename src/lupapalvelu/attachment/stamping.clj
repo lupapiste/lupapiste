@@ -111,7 +111,7 @@
 
 (defn- stamp-attachment! [stamp file-info context job-id application-id]
   (try
-    (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :stamped-original-file-id]))
+    (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :stamped-original-file-id :job-id]))
     (job/update job-id assoc (:attachment-id file-info) {:status :working :fileId (:fileId file-info)})
     (->> (update-stamp-to-attachment! stamp file-info context)
          (hash-map :status :done :fileId)
@@ -123,12 +123,14 @@
 
 (defn- stamp-attachments!
   [file-infos {:keys [job-id application info-fields] :as context}]
+  (debug "stamp-attachments! invoked")
   (let [stamp-without-buildings (make-stamp-without-buildings context info-fields)
         operation-specific-stamps (->> (map :operation-ids file-infos)
                                        (remove empty?)
                                        distinct
                                        (make-operation-specific-stamps context info-fields))]
     (doseq [{op-ids :operation-ids :as file-info} file-infos]
+      (debug "stamp-attachments! - file-infos seq, processing attachment:" (:attachment-id file-info))
       (-> (if (and (seq op-ids) (seq (:buildings info-fields)))
             (operation-specific-stamps op-ids)
             stamp-without-buildings)

@@ -54,9 +54,6 @@
     (fact "Job id is returned" (:id job) => truthy)
     (fact "FileId is returned" file-id => truthy)
 
-    (timbre/info "Sleeping for 3 seconds before polling for stamp job")
-    (Thread/sleep 3000)
-
     ; Poll for 10 seconds
     (when-not (= "done" (:status job))
       (timbre/info "Polling for stamp job id" (:id job) "version" (:version job) "application" application-id "attachment" (:id attachment))

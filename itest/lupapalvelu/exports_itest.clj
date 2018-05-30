@@ -137,7 +137,9 @@
 
 (when (env/feature? :api-usage-export)
   (facts "Archive API usage Salesforce export"
-    (let [endpoint (str (server-address) "/data-api/json/export-archive-api-usage")]
+    (let [endpoint (str (server-address)
+                        "/data-api/json/export-archive-api-usage?startTimestampMillis=0&"
+                        "endTimestampMillis=" (now))]
       (doseq [tester [{:role "trusted-etl"
                        :auth ["solita-etl" "solita-etl"]}
                       {:role "applicant"
@@ -157,8 +159,9 @@
           (:status resp) => 200)
 
         (fact "correct keys"
-          (when (count transactions)
-            (-> transactions first keys) => (contains #{:organization :lastDateOfTransactionMonth :quantity} :gaps-ok)))
+          (-> transactions first keys) => (contains #{:organization :lastDateOfTransactionMonth :quantity} :gaps-ok))
 
+        (fact "correct quantity"
+              (->> transactions (map :quantity) (reduce +)) => 3) ; From minimal fixture
         (fact "has most recent download timestamp"
               most-recent-download-ts => number?)))))

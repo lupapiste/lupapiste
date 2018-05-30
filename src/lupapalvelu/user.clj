@@ -12,7 +12,7 @@
             [lupapalvelu.user-enums :as user-enums]
             [monger.operators :refer :all]
             [monger.query :as query]
-            [sade.core :refer [ok fail fail! now]]
+            [sade.core :refer [def- ok fail fail! now]]
             [sade.env :as env]
             [sade.schemas :as ssc]
             [sade.shared-schemas :as sssc]
@@ -831,6 +831,45 @@
   (mongo/remove-many :users
                      {:_id user-id
                       :role "dummy"}))
+
+
+;;
+;; ==============================================================================
+;; Erase user information
+;; ==============================================================================
+;;
+
+(def- erasure-strategy
+  (into {}
+        (map (fn [[k _]]
+               (cond
+                 ;; Retain id and role, anonymize other compulsory fields:
+                 (contains? #{:id :role} k) [k :retain]
+                 (not (sc/optional-key? k)) [k :anonymize]
+
+                 ;; Anonymize state, remove other optional fields:
+                 (= (:k k) :state)          [(:k k) :anonymize]
+                 :else [(:k k) :remove])))
+        User))
+
+(defn- anonymized-user [user-id]
+  (let [email (str "poistunut_" user-id "@example.com")]
+    {:firstName "Poistunut"
+     :lastName "K\u00e4ytt\u00e4j\u00e4"
+     :email email
+     :username email
+     :enabled false
+     :state "erased"}))
+
+(def- erasure-unsetter
+  (into {} (for [[k v] erasure-strategy :when (= v :remove)] [k ""])))
+
+(defn erase-user
+  "Erases/anonymizes user information but retains the user record in database. Returns nil."
+  [user-id]
+  (mongo/update-by-id :users user-id
+    {$set   (anonymized-user user-id)
+     $unset erasure-unsetter}))
 
 ;;
 ;; ==============================================================================

@@ -46,7 +46,7 @@
 
 (when (env/feature? :jms)
 
-(def fetch-verdicts-queue "lupapiste/fetch-verdicts.#")
+(def fetch-verdicts-queue "lupapiste.fetch-verdicts.#")
 
 (def fetch-verdicts-transacted-session (-> (jms/get-default-connection)
                                            (jms/create-transacted-session)

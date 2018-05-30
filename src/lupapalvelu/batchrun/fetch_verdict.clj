@@ -36,7 +36,7 @@
         false))))
 
 (defn queue-for-organization [org-id]
-  (str "lupapiste/fetch-verdicts." org-id))
+  (str "lupapiste.fetch-verdicts." org-id))
 
 (defn fetch-verdict-message [app-id database-name]
   (pr-str {:id app-id :database database-name}))

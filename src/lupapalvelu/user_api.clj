@@ -524,6 +524,23 @@
      (fail :not-found))))
 
 ;;
+;; erase user data:
+;;
+
+(defcommand erase-user
+  {:description "Erase/anonymize user data but retain the record in database."
+   :parameters  [email]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator]
+   :user-roles #{:admin}}
+  [_]
+  (if-let [user (usr/get-user-by-email (ss/canonize-email email))]
+    (do
+      (usr/erase-user (:id user))
+      (ok))
+    (fail :not-found)))
+
+;;
 ;; ==============================================================================
 ;; Login:
 ;; ==============================================================================
