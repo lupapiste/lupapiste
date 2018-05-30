@@ -1,27 +1,38 @@
 (ns lupapalvelu.integrations.allu
-  (:require [schema.core :as sc]
+  (:require [clojure.walk :refer [postwalk]]
+            [schema.core :as sc]
             [iso-country-codes.core :refer [country-translate]]
             [sade.core :refer [def-]]
             [lupapalvelu.integrations.allu-schemas :refer [PlacementContract]]))
 
 ;;; FIXME: Avoid producing nil-valued fields.
-;;; TODO: Abstract the :value selections away.
+
+;;;; Cleaning up :value indirections
+
+(defn- flatten-values [app]
+  (letfn [(flatten-node [node]
+            (if (and (map? node) (contains? node :value))
+              (:value node)
+              node))]
+    (postwalk flatten-node app)))
+
+;;;; Conversion details
 
 (def- convert-customer-type
   {:henkilo "PERSON", :yritys "COMPANY"})
 
 (defn- fullname [{:keys [etunimi sukunimi]}]
-  (str (:value etunimi) " " (:value sukunimi)))
+  (str etunimi " " sukunimi))
 
 (defn- address-country [address]
-  (country-translate :alpha-3 :alpha-2 (-> address :maa :value)))
+  (country-translate :alpha-3 :alpha-2 (:maa address)))
 
 (defn- convert-address [{:keys [postitoimipaikannimi postinumero katu]}]
-  {:city          (:value postitoimipaikannimi)
-   :postalCode    (:value postinumero)
-   :streetAddress {:streetName (:value katu)}})
+  {:city          postitoimipaikannimi
+   :postalCode    postinumero
+   :streetAddress {:streetName katu}})
 
-(defn- doc->customer [{{{tag :value} :_selected :as data} :data}]
+(defn- doc->customer [{{tag :_selected :as data} :data}]
   (let [tag (keyword tag)]
     (case tag
       :henkilo (let [customer (get data tag)
@@ -34,14 +45,14 @@
       :yritys (let [customer (get data tag)
                     address (:osoite customer)]
                 {:type (convert-customer-type tag)
-                 :name (-> customer :yritysnimi :value)
+                 :name (:yritysnimi customer)
                  :country (address-country address)
                  :postalAddress (convert-address address)}))))
 
 (defn- person->contact [{:keys [henkilotiedot], {:keys [puhelin email]} :yhteystiedot}]
-  {:name (fullname henkilotiedot), :phone (:value puhelin), :email (:value email)})
+  {:name (fullname henkilotiedot), :phone puhelin, :email email})
 
-(defn- doc->customer-with-contacts [{{{tag :value} :_selected :as data} :data :as doc}]
+(defn- doc->customer-with-contacts [{{tag :_selected :as data} :data :as doc}]
   (let [tag (keyword tag)]
     (case tag
       :henkilo {:customer (doc->customer doc)
@@ -52,7 +63,7 @@
 (defn- application-postal-address [app]
   {:streetAddress {:streetName (:address app)}})
 
-(sc/defn application->allu-placement-contract :- PlacementContract
+(defn- convert-value-flattened-app
   [{:keys [id primaryOperation propertyId], [customer-doc work-description payee-doc] :documents
     :as app}]
   {:clientApplicationKind "FIXME"
@@ -64,4 +75,9 @@
    :pendingOnClient true
    :postalAddress   (application-postal-address app)
    :propertyIdentificationNumber propertyId
-   :workDescription (-> work-description :data :kayttotarkoitus :value)})
+   :workDescription (-> work-description :data :kayttotarkoitus)})
+
+;;;; Putting it all together
+
+(sc/defn application->allu-placement-contract :- PlacementContract [app]
+  (-> app flatten-values convert-value-flattened-app))
