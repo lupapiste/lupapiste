@@ -374,9 +374,11 @@
                                              {:krysp.KT.url {$exists true}}]}
                                        {:krysp 1})
         org-ids (map :id organizations-with-krysp-url)
-        apps (mongo/select :applications {:state {$in ["sent"]}
-                                          :permitType {$nin ["ARK"]}
-                                          :organization {$in org-ids}})
+        apps (mongo/select-ordered :applications
+                                   {:state {$in ["sent"]}
+                                    :permitType {$nin ["ARK"]}
+                                    :organization {$in org-ids}}
+                                   {:modified -1})
         apps-with-urls (get-valid-applications organizations-with-krysp-url apps)
         eraajo-user (user/batchrun-user org-ids)
         batchrun-name "Automatic verdicts checking"]
