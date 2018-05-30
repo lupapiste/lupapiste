@@ -43,6 +43,15 @@
       </section>
 
       <section>
+        <h2 data-bind="ltext: 'auth-admin.draft-revertion.title'"></h2>
+        <toggle params="value: organization.removeHandlersFromRevertedDraft,
+                        ltext: 'auth-admin.remove-handlers-from-reverted-draft',
+                        prefix: 'blockbox',
+                        enable: lupapisteApp.models.globalAuthModel.ok('set-organization-remove-handlers-from-reverted-draft'),
+                        testId: 'remove-handlers-from-reverted-draft'"></toggle>
+      </section>
+
+      <section>
         <h2 data-bind="ltext: 'auth-admin.organization-name'"></h2>
         <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
         <div data-bind="component: 'organization-name-editor'"></div>

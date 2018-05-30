@@ -515,6 +515,14 @@
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:multiple-operations-supported enabled}})
   (ok))
 
+(defcommand set-organization-remove-handlers-from-reverted-draft
+  {:parameters [enabled]
+   :user-roles #{:authorityAdmin}
+   :input-validators  [(partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (org/update-organization (usr/authority-admins-organization-id user) {$set {:remove-handlers-from-reverted-draft enabled}})
+  (ok))
+
 (defcommand set-organization-validate-verdict-given-date
   {:parameters [enabled]
    :user-roles #{:authorityAdmin}

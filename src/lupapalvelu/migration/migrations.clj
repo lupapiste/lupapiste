@@ -3930,14 +3930,6 @@
                                              :ts ts
                                              :user usr/migration-user-summary}}})))
 
-(defmigration remove-handlers-from-drafts
-  {:apply-when (pos? (mongo/count :applications {:state      "draft"
-                                                 :handlers.0 {$exists true}}))}
-  (mongo/update-by-query :applications
-                         {:state      "draft"
-                          :handlers.0 {$exists true}}
-                         {$set {:handlers []}}))
-
 (defmigration mark-user-erased
   {:apply-when (pos? (mongo/count :users {:username "poistunut_574d50deedf02d7f9622f984@example.com" :state {$ne "erased"}}))}
   (mongo/update-by-query :users {:username "poistunut_574d50deedf02d7f9622f984@example.com"} {$set {:state "erased"}}))

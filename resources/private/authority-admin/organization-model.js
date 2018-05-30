@@ -66,6 +66,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.handlerRoles = ko.observableArray();
   self.assignmentTriggers = ko.observableArray();
   self.multipleOperationsSupported = ko.observable(false);
+  self.removeHandlersFromRevertedDraft = ko.observable( false );
 
   self.sectionOperations = ko.observableArray();
 
@@ -133,6 +134,17 @@ LUPAPISTE.OrganizationModel = function () {
         .success(util.showSavedIndicator)
         .error(util.showSavedIndicator)
         .call();
+    }
+  });
+
+  ko.computed(function() {
+    var removeHandlers = self.removeHandlersFromRevertedDraft();
+    if (self.initialized) {
+      ajax.command("set-organization-remove-handlers-from-reverted-draft",
+                   {enabled: removeHandlers})
+      .success(util.showSavedIndicator)
+      .error(util.showSavedIndicator)
+      .call();
     }
   });
 
@@ -347,6 +359,8 @@ LUPAPISTE.OrganizationModel = function () {
     self.extendedConstructionWasteReportEnabled(organization["extended-construction-waste-report-enabled"] || false);
 
     self.multipleOperationsSupported(organization["multiple-operations-supported"] || false);
+
+    self.removeHandlersFromRevertedDraft( organization["remove-handlers-from-reverted-draft"] || false );
 
     self.validateVerdictGivenDate(organization["validate-verdict-given-date"] === true);
 
