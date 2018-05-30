@@ -690,13 +690,12 @@
             [hakijat muut-osapuolet] ((juxt filter remove) #(= "hakija" (:VRKrooliKoodi %)) (get-osapuolet asia))
             kiinteistotunnus (if (and (seq coord-array-Rakennuspaikka) (#{:building :area} (resolve-coordinate-type asia)))
                                (resolve-property-id-by-point coord-array-Rakennuspaikka)
-                               (get-kiinteistotunnus asia))
-            municipality (or (prop/municipality-by-property-id kiinteistotunnus) (get-kuntakoodi xml))]
+                               (get-kiinteistotunnus asia))]
 
         (-> (merge
               {:id                          (->lp-tunnus asia)
                :kuntalupatunnus             (->kuntalupatunnus asia)
-               :municipality                municipality
+               :municipality                (or (prop/municipality-by-property-id kiinteistotunnus) (get-kuntakoodi xml))
                :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
                :vahainenPoikkeaminen        (:vahainenPoikkeaminen asianTiedot)
                :hakijat                     hakijat
