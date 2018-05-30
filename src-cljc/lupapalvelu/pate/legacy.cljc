@@ -183,7 +183,40 @@
    legsub-attachments
    shared/versub-upload))
 
+(def ya-legacy-verdict
+  (build-legacy-schema
+   (-> (legsub-verdict {:select {:loc-prefix :verdict.status
+                                 ;; Myonnetty, hyvaksytty, evatty,
+                                 ;; peruutettu
+                                 :items      [:1 :2 :21 :37]
+                                 :sort-by    :text
+                                 :type       :select}})
+       (assoc-in [:dictionary :contract] {:toggle {:i18nkey :verdict.create.agreement}})
+       (update-in [:section :grid :rows 3]
+                  concat [{:col  4
+                           :show?   :_meta.editing?
+                           :dict :contract}]))
+   (legsub-reviews {:select {:loc-prefix :pate.review-type
+                             :label?     false
+                             :items      shared/ya-review-types
+                             :sort-by    :text}})
+   legsub-conditions
+   legsub-attachments
+   shared/versub-upload))
+
+(def p-legacy-verdict
+  (build-legacy-schema
+   (legsub-verdict {:select {:loc-prefix :verdict.status
+                             :items      (map (comp keyword str) (range 1 43))
+                             :sort-by    :text
+                             :type :autocomplete}})
+   legsub-conditions
+   legsub-attachments
+   shared/versub-upload))
+
 (defn legacy-verdict-schema [category]
   (case (keyword category)
-    :r r-legacy-verdict
+    :r  r-legacy-verdict
+    :ya ya-legacy-verdict
+    :p  p-legacy-verdict
     (schema-util/pate-assert false "Unsupported legacy category:" category)))
