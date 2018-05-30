@@ -628,15 +628,45 @@
       :area     (resolve-area-coordinates xml)
       nil)))
 
+(defn get-asiat [xml]
+  (-> xml
+      cr/strip-xml-namespaces
+      (enlive/select common/case-elem-selector)))
+
+(defn get-kuntakoodi [xml]
+  (-> xml
+      cr/strip-xml-namespaces
+      (select1 [:toimituksenTiedot :kuntakoodi])
+      cr/all-of))
+
+(defn get-asioimiskieli-code [asia]
+  (case (cr/all-of asia [:lisatiedot :Lisatiedot :asioimiskieli])
+    "ruotsi" "sv"
+    "fi"))
+
+(defn get-osapuolet [asia]
+  (map cr/all-of (select asia [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli])))
+
+(defn get-suunnittelijat [asia]
+  (map cr/all-of (select asia [:osapuolettieto :Osapuolet :suunnittelijatieto :Suunnittelija])))
+
+(defn get-tyonjohtajat [asia]
+  (map cr/all-of (select asia [:osapuolettieto :Osapuolet :tyonjohtajatieto :Tyonjohtaja])))
+
+(defn get-kiinteistotunnus [asia]
+  (-> (cr/all-of asia [:rakennuspaikkatieto :Rakennuspaikka])
+      :rakennuspaikanKiinteistotieto
+      :RakennuspaikanKiinteisto
+      :kiinteistotieto
+      :Kiinteisto
+      :kiinteistotunnus))
+
 ;;
 ;; Information parsed from verdict xml message for application creation
 ;;
 (defn get-app-info-from-message [xml kuntalupatunnus]
-  (let [xml-no-ns (cr/strip-xml-namespaces xml)
-        kuntakoodi (-> (select1 xml-no-ns [:toimituksenTiedot :kuntakoodi]) cr/all-of)
-        asiat (enlive/select xml-no-ns common/case-elem-selector)
-        ;; Take first asia with given kuntalupatunnus. There should be only one. If there are many throw error.
-        asiat-with-kuntalupatunnus (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) asiat)]
+  (let [;; Take first asia with given kuntalupatunnus. There should be only one. If there are many throw error.
+        asiat-with-kuntalupatunnus (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) (get-asiat xml))]
     (when (pos? (count asiat-with-kuntalupatunnus))
       ;; There should be only one RakennusvalvontaAsia element in the message, even though Krysp makes multiple elements possible.
       ;; Log an error if there were many. Use the first one anyway.
@@ -644,11 +674,6 @@
         (error "Creating application from previous permit. More than one RakennusvalvontaAsia element were received in the xml message with kuntalupatunnus " kuntalupatunnus "."))
 
       (let [asia (first asiat-with-kuntalupatunnus)
-            asioimiskieli (cr/all-of asia [:lisatiedot :Lisatiedot :asioimiskieli])
-            asioimiskieli-code (case asioimiskieli
-                                 "suomi"  "fi"
-                                 "ruotsi" "sv"
-                                 "fi")
             asianTiedot (cr/all-of asia [:asianTiedot :Asiantiedot])
 
             ;;
@@ -659,18 +684,14 @@
             Rakennuspaikka (cr/all-of asia [:rakennuspaikkatieto :Rakennuspaikka])
 
             osoite-xml     (select asia [:rakennuspaikkatieto :Rakennuspaikka :osoite])
-            osoite-Rakennuspaikka (build-address osoite-xml asioimiskieli-code)
+            osoite-Rakennuspaikka (build-address osoite-xml (get-asioimiskieli-code asia))
 
-            coordinates-type (resolve-coordinate-type asia)
             [x y :as coord-array-Rakennuspaikka] (resolve-coordinates asia kuntalupatunnus)
-            osapuolet (map cr/all-of (select asia [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli]))
-            suunnittelijat (map cr/all-of (select asia [:osapuolettieto :Osapuolet :suunnittelijatieto :Suunnittelija]))
-            tyonjohtajat (map cr/all-of (select asia [:osapuolettieto :Osapuolet :tyonjohtajatieto :Tyonjohtaja]))
-            [hakijat muut-osapuolet] ((juxt filter remove) #(= "hakija" (:VRKrooliKoodi %)) osapuolet)
-            kiinteistotunnus (if (and (seq coord-array-Rakennuspaikka) (#{:building :area} coordinates-type))
+            [hakijat muut-osapuolet] ((juxt filter remove) #(= "hakija" (:VRKrooliKoodi %)) (get-osapuolet asia))
+            kiinteistotunnus (if (and (seq coord-array-Rakennuspaikka) (#{:building :area} (resolve-coordinate-type asia)))
                                (resolve-property-id-by-point coord-array-Rakennuspaikka)
-                               (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus))
-            municipality (or (prop/municipality-by-property-id kiinteistotunnus) kuntakoodi)]
+                               (get-kiinteistotunnus asia))
+            municipality (or (prop/municipality-by-property-id kiinteistotunnus) (get-kuntakoodi xml))]
 
         (-> (merge
               {:id                          (->lp-tunnus asia)
@@ -680,8 +701,8 @@
                :vahainenPoikkeaminen        (:vahainenPoikkeaminen asianTiedot)
                :hakijat                     hakijat
                :muutOsapuolet               muut-osapuolet
-               :suunnittelijat              suunnittelijat
-               :tyonjohtajat                tyonjohtajat}
+               :suunnittelijat              (get-suunnittelijat asia)
+               :tyonjohtajat                (get-tyonjohtajat asia)}
 
               (cond
                 (and (seq coord-array-Rakennuspaikka) (not-any? ss/blank? [osoite-Rakennuspaikka kiinteistotunnus]))
