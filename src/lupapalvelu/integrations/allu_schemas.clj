@@ -3,7 +3,8 @@
             [sade.schemas :refer [NonBlankStr NonEmptyVec
                                   Email Zipcode Tel Hetu FinnishY FinnishOVTid
                                   Kiinteistotunnus ApplicationId]]
-            [sade.validators :refer [matches?]]))
+            [sade.validators :refer [matches?]]
+            [lupapalvelu.integrations.geojson-2008-schemas :refer [GeoJSON-2008]]))
 
 ;; TODO: Only accept the ones that are actually assigned.
 (defschema ISO-3166-alpha-2
@@ -51,10 +52,6 @@
    (optional-key :registryKey)   RegistryKey
    :type CustomerType})
 
-;; TODO: GeoJSON, details pending specification
-(defschema GeometryOperations
-  {:geometryOperations {}})
-
 ;; TODO: :startTime and :endTime should be RFC-3339 but on the other hand we don't use them anyway.
 (defschema PlacementContract
   {:clientApplicationKind            ClientApplicationKind
@@ -62,7 +59,7 @@
    :customerWithContacts             {:contacts (NonEmptyVec Contact)
                                       :customer Customer}
    (optional-key :endTime) NonBlankStr
-   :geometry               GeometryOperations
+   :geometry               {:geometryOperations GeoJSON-2008}
    :identificationNumber             ApplicationId
    (optional-key :invoicingCustomer) Customer
    (optional-key :name)            NonBlankStr
