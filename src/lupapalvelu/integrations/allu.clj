@@ -5,6 +5,7 @@
             [iso-country-codes.core :refer [country-translate]]
             [sade.core :refer [def-]]
             [sade.http :as http]
+            [lupapalvelu.document.tools :refer [doc-subtype]]
             [lupapalvelu.integrations.allu-schemas :refer [PlacementContract]]))
 
 ;;; FIXME: Avoid producing nil-valued fields.
@@ -84,20 +85,21 @@
 
 ;; TODO: OVT, laskuviite jne.
 (defn- convert-value-flattened-app
-  [{:keys [id primaryOperation propertyId drawings]
-    [customer-doc work-description payee-doc] :documents ; FIXME: find these by schema-info subtype
-    :as app}]
-  {:clientApplicationKind "FIXME"
-   :customerWithContacts  {:customer (doc->customer customer-doc)
-                           :contacts [(person->contact (customer-contact customer-doc))]}
-   :geometry              {:geometryOperations (application-geometry app)}
-   :identificationNumber  id
-   :invoicingCustomer     (doc->customer payee-doc)
-   :name            (:name primaryOperation) ; TODO: i18n?
-   :pendingOnClient true
-   :postalAddress   (application-postal-address app)
-   :propertyIdentificationNumber propertyId
-   :workDescription (-> work-description :data :kayttotarkoitus)})
+  [{:keys [id primaryOperation propertyId drawings documents] :as app}]
+  (let [customer-doc     (first (filter #(= (doc-subtype %) :hakija) documents))
+        work-description (first (filter #(= (doc-subtype %) :hankkeen-kuvaus) documents))
+        payee-doc        (first (filter #(= (doc-subtype %) :maksaja) documents))]
+    {:clientApplicationKind "FIXME"
+     :customerWithContacts  {:customer (doc->customer customer-doc)
+                             :contacts [(person->contact (customer-contact customer-doc))]}
+     :geometry              {:geometryOperations (application-geometry app)}
+     :identificationNumber  id
+     :invoicingCustomer     (doc->customer payee-doc)
+     :name            (:name primaryOperation) ; TODO: i18n?
+     :pendingOnClient true
+     :postalAddress   (application-postal-address app)
+     :propertyIdentificationNumber propertyId
+     :workDescription (-> work-description :data :kayttotarkoitus)}))
 
 ;;;; Putting it all together
 
