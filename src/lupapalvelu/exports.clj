@@ -361,10 +361,10 @@
 
 (defn onkalo-api-logs-from-mongo
   [start-ts end-ts]
-  (mongo/snapshot :archive-api-usage
-                  {:logged {$gte start-ts
-                            $lte end-ts}}
-                  [:organization :logged :timestamp]))
+  (mongo/select :archive-api-usage
+                {:logged {$gte start-ts
+                          $lte end-ts}}
+                [:organization :logged :timestamp]))
 
 (def get-onkalo-api-logs! (if (env/feature? :mock-api-usage)
                             mock-onkalo-api-logs
