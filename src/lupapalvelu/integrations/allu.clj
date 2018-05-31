@@ -5,6 +5,7 @@
             [iso-country-codes.core :refer [country-translate]]
             [sade.core :refer [def-]]
             [sade.http :as http]
+            [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.document.tools :refer [doc-subtype]]
             [lupapalvelu.integrations.allu-schemas :refer [PlacementContract]]))
 
@@ -79,9 +80,10 @@
                :coordinates location-wgs84})]
     (assoc obj :crs {:type "name", :properties {:name WGS84-URN}})))
 
-;; TODO: city, postal code
-(defn- application-postal-address [app]
-  {:streetAddress {:streetName (:address app)}})
+;; TODO: postal code
+(defn- application-postal-address [{:keys [municipality address]}]
+  {:city (localize "fi" :municipality municipality) ; FIXME: hardcoded "fi"
+   :streetAddress {:streetName address}})
 
 ;; TODO: OVT, laskuviite jne.
 (defn- convert-value-flattened-app
