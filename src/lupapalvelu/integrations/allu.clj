@@ -23,6 +23,11 @@
 (def- convert-customer-type
   {:henkilo "PERSON", :yritys "COMPANY"})
 
+(defn- customer-registry-key [customer-type customer]
+  (case customer-type
+    :henkilo (-> customer :henkilotiedot :hetu)
+    :yritys  (:liikeJaYhteisoTunnus customer)))
+
 (defn- fullname [{:keys [etunimi sukunimi]}]
   (str etunimi " " sukunimi))
 
@@ -44,6 +49,7 @@
         customer (get data tag)
         address (:osoite customer)]
     {:type          (convert-customer-type tag)
+     :registryKey   (customer-registry-key tag customer)
      :name          (customer-name tag customer)
      :country       (address-country address)
      :postalAddress (convert-address address)}))
@@ -76,7 +82,6 @@
 (defn- application-postal-address [app]
   {:streetAddress {:streetName (:address app)}})
 
-;; TODO: RegistryKey
 ;; TODO: OVT, laskuviite jne.
 (defn- convert-value-flattened-app
   [{:keys [id primaryOperation propertyId drawings]
