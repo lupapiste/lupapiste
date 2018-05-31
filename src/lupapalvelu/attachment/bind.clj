@@ -41,8 +41,8 @@
         config-by-group (get type-config (keyword typeGroup))]
     (util/contains-value? config-by-group (keyword typeId))))
 
-(defn bind-single-attachment! [{:keys [application user created session]} unlinked-file {:keys [fileId type attachmentId contents] :as filedata} exclude-ids]
-  (let [conversion-data       (att/conversion (:id session) application (assoc unlinked-file :content ((:content unlinked-file))))
+(defn bind-single-attachment! [{:keys [application user created]} unlinked-file {:keys [fileId type attachmentId contents] :as filedata} exclude-ids]
+  (let [conversion-data       (att/conversion (:id user) application (assoc unlinked-file :content ((:content unlinked-file))))
         is-authority          (usr/user-is-authority-in-organization? user (:organization application))
         automatic-ok-enabled  (org/get-organization-auto-ok (:organization application))
         placeholder-id        (or attachmentId
@@ -70,17 +70,17 @@
                           (:file conversion-data))
         linked-version (att/set-attachment-version! application user attachment version-options)
         {:keys [fileId originalFileId]} linked-version]
-    (storage/link-files-to-application (:id session) (:id application) (cond-> [originalFileId]
+    (storage/link-files-to-application (:id user) (:id application) (cond-> [originalFileId]
                                                                                (not= fileId originalFileId) (conj fileId)))
     (preview/preview-image! (:id application) (:fileId version-options) (:filename version-options) (:contentType version-options))
     (att/cleanup-temp-file (:result conversion-data))
     (assoc linked-version :type (or (:type linked-version) (:type attachment)))))
 
-(defn- bind-attachments! [command file-infos job-id]
+(defn- bind-attachments! [{:keys [user] :as command} file-infos job-id]
   (reduce
     (fn [results {:keys [fileId type] :as filedata}]
       (job/update job-id assoc fileId {:status :working :fileId fileId})
-      (if-let [unlinked-file (storage/download-session-file (get-in command [:session :id]) fileId)]
+      (if-let [unlinked-file (storage/download-unlinked-file (:id user) fileId)]
         (let [result (bind-single-attachment! command unlinked-file filedata (map :attachment-id results))]
           (job/update job-id assoc fileId {:status :done :fileId fileId})
           (conj results {:original-file-id fileId

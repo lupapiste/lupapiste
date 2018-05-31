@@ -444,8 +444,8 @@
    :input-validators [(partial action/non-blank-parameters [:fileId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles roles/all-authz-roles}
-  [{{:keys [fileId]} :data session :session}]
-  (att/output-file fileId (:id session)))
+  [{{:keys [fileId]} :data session :session user :user}]
+  (att/output-file fileId (or (:id user) (:id session))))
 
 (defraw "download-attachment"
   {:parameters       [:attachment-id]  ; Note that this is actually file id

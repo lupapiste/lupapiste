@@ -90,12 +90,12 @@
 
       grouping (first (filter #(= grouping (:groupType %)) groups)))))
 
-(defn- download-and-save-files [application attachments session-id]
+(defn- download-and-save-files [application attachments user-id]
   (pmap
     (fn [{:keys [filename uri localizedType contents drawingNumber operation]}]
       (let [attachment-type (lat/localisation->attachment-type :R localizedType)]
         (when-let [is (muuntaja/download-file uri)]
-          (let [file-data (save-file {:filename filename :content is} :sessionId session-id :linked false)]
+          (let [file-data (save-file {:filename filename :content is} :uploader-user-id user-id :linked false)]
             (.close is)
             (merge
               file-data
@@ -114,17 +114,17 @@
        (env/feature? :unzip-attachments)
        (is-zip-file? (first files))))
 
-(defn save-files [application files session-id]
+(defn save-files [application files user-id]
   (if (unzip? files)
     (let [{:keys [attachments error]} (-> files first :tempfile muuntaja/unzip-attachment-collection)]
       (if (or (not-empty error) (empty? attachments))
         {:ok false
          :error (or error "error.unzipping-error")}
         {:ok true
-         :files (download-and-save-files application attachments session-id)}))
+         :files (download-and-save-files application attachments user-id)}))
     {:ok true
      :files (pmap
-              #(save-file % :sessionId session-id :linked false)
+              #(save-file % :uploader-user-id user-id :linked false)
               (map #(rename-keys % {:tempfile :content}) files))}))
 
 (defn mark-duplicates [application result]

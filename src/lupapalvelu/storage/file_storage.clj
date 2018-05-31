@@ -17,16 +17,17 @@
 (def unlinked-bucket s3/unlinked-bucket)
 (def bulletin-bucket "bulletin-files")
 
-(defn bucket-name [{:keys [application user-id sessionId]}]
+(defn bucket-name [{:keys [application user-id uploader-user-id sessionId]}]
   (cond
     application application-bucket
     user-id user-bucket
+    uploader-user-id unlinked-bucket
     sessionId unlinked-bucket))
 
 (defn s3-id [metadata-or-id file-id & [preview?]]
   (if (map? metadata-or-id)
-    (let [{:keys [application user-id sessionId]} metadata-or-id]
-      (str (or application user-id sessionId) "/" file-id (when preview? "-preview")))
+    (let [{:keys [application user-id uploader-user-id sessionId]} metadata-or-id]
+      (str (or application user-id uploader-user-id sessionId) "/" file-id (when preview? "-preview")))
     (str metadata-or-id "/" file-id (when preview? "-preview"))))
 
 (defn upload [file-id filename content-type content metadata]
@@ -110,11 +111,16 @@
       (s3/download application-bucket (s3-id application-id file-id :preview) application-id)
       (mongo/download-find {:_id (str file-id "-preview")}))))
 
-(defn ^{:perfmon-exclude true} download-session-file
-  [session-id file-id]
+(defn ^{:perfmon-exclude true} download-unlinked-file
+  [user-or-session-id file-id]
   (if (env/feature? :s3)
-    (s3/download unlinked-bucket (s3-id session-id file-id))
-    (mongo/download-find {:_id file-id :metadata.sessionId session-id})))
+    (s3/download unlinked-bucket (s3-id user-or-session-id file-id))
+    (mongo/download-find {$and [{:_id file-id}
+                                {:metadata.application {$exists false}}
+                                {$or [{:metadata.linked false}
+                                      {:metadata.linked {$exists false}}]}
+                                {$or [{:metadata.sessionId user-or-session-id}
+                                      {:metadata.uploader-user-id user-or-session-id}]}]})))
 
 (defn ^{:perfmon-exclude true} download-process-file
   [process-id]
@@ -130,29 +136,46 @@
 
 ;; LINK
 
-(defn link-files-to-application [session-id app-id file-ids]
+(defn link-files-to-application [user-or-session-id app-id file-ids]
   {:pre [(seq file-ids) (not-any? ss/blank? (conj file-ids app-id))]}
   (if (env/feature? :s3)
     (doseq [file-id file-ids]
-      (s3/move-file-object unlinked-bucket application-bucket (s3-id session-id file-id) (s3-id app-id file-id)))
-    (mongo/update-by-query :fs.files {:_id {$in file-ids}} {$set {:metadata.application app-id
-                                                                  :metadata.linked true}})))
+      (s3/move-file-object unlinked-bucket
+                           application-bucket
+                           (s3-id user-or-session-id file-id)
+                           (s3-id app-id file-id)))
+    (mongo/update-by-query :fs.files
+                           {$and [{:_id {$in file-ids}}
+                                  {:metadata.application {$exists false}}
+                                  {$or [{:metadata.linked false}
+                                        {:metadata.linked {$exists false}}]}
+                                  {$or [{:metadata.sessionId user-or-session-id}
+                                        {:metadata.uploader-user-id user-or-session-id}]}]}
+                           {$set {:metadata.application app-id
+                                  :metadata.linked true}})))
 
 (defn link-files-to-bulletin [session-id bulletin-id file-ids]
   {:pre [(seq file-ids) (not-any? ss/blank? (conj file-ids bulletin-id))]}
   (if (env/feature? :s3)
     (doseq [file-id file-ids]
       (s3/move-file-object unlinked-bucket bulletin-bucket (s3-id session-id file-id) (s3-id bulletin-id file-id)))
-    (mongo/update-by-query :fs.files {:_id {$in file-ids}} {$set {:metadata.bulletinId bulletin-id
-                                                                  :metadata.linked true}})))
+    (mongo/update-by-query :fs.files
+                           {:_id {$in file-ids}
+                            :metadata.sessionId session-id}
+                           {$set {:metadata.bulletinId bulletin-id
+                                  :metadata.linked true}})))
 
 ;; EXISTS
 
-(defn session-files-exist? [session-id file-ids]
-  {:pre [(sequential? file-ids) (not-any? ss/blank? (conj file-ids session-id))]}
+(defn unlinked-files-exist? [user-or-session-id file-ids]
+  {:pre [(sequential? file-ids) (not-any? ss/blank? (conj file-ids user-or-session-id))]}
   (->> (if (env/feature? :s3)
-         (map #(s3/object-exists? unlinked-bucket (s3-id session-id %)) file-ids)
-         (map #(mongo/any? :fs.files {:_id % :metadata.sessionId session-id}) file-ids))
+         (map #(s3/object-exists? unlinked-bucket (s3-id user-or-session-id %)) file-ids)
+         (map #(mongo/any? :fs.files
+                           {:_id %
+                            $or [{:metadata.sessionId user-or-session-id}
+                                 {:metadata.uploader-user-id user-or-session-id}]})
+              file-ids))
        (every? true?)))
 
 (defn application-file-exists? [application-id file-id]
@@ -170,14 +193,15 @@
       (do (mongo/delete-file-by-id file-id)
           (mongo/delete-file-by-id (str file-id "-preview"))))))
 
-(defn delete-session-file
+(defn delete-unlinked-file
   "Deletes a file uploaded to temporary storage with session id.
    Guarantees that the file is not linked to anything at the time of deletion."
-  [session-id file-id]
+  [user-or-session-id file-id]
   (if (env/feature? :s3)
-    (s3/delete unlinked-bucket (s3-id session-id file-id))
+    (s3/delete unlinked-bucket (s3-id user-or-session-id file-id))
     (mongo/delete-file {:_id file-id
-                        :metadata.sessionId session-id
+                        $or [{:metadata.sessionId user-or-session-id}
+                             {:metadata.uploader-user-id user-or-session-id}]
                         :metadata.application {$exists false}
                         :metadata.bulletinId {$exists false}
                         :linked false})))

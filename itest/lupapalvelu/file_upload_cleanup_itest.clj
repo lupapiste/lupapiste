@@ -31,9 +31,9 @@
                            (#'fs/date-two-hours-ago) => (Date/from (.plusSeconds (Instant/now) 3600))]
         (fact "unlinked upload is removed"
           (let [file-id (upload-file file false)]
-            (fs/download-session-file session-id file-id) => util/not-empty-or-nil?
+            (fs/download-unlinked-file session-id file-id) => util/not-empty-or-nil?
             (fs/delete-old-unlinked-files)
-            (fs/download-session-file session-id file-id) => empty?))
+            (fs/download-unlinked-file session-id file-id) => empty?))
 
         (fact "linked upload is not removed"
           (let [file-id (upload-file file app-id)
@@ -47,9 +47,9 @@
     (facts "files uploaded under 2 hours ago"
       (fact "unliked upload is not removed"
         (let [file-id (upload-file file false)]
-          (fs/download-session-file session-id file-id) => util/not-empty-or-nil?
+          (fs/download-unlinked-file session-id file-id) => util/not-empty-or-nil?
           (fs/delete-old-unlinked-files)
-          (fs/download-session-file session-id file-id) => util/not-empty-or-nil?
+          (fs/download-unlinked-file session-id file-id) => util/not-empty-or-nil?
           (fs/delete-from-any-system app-id file-id)))
       (fact "linked upload is not removed"
         (let [file-id (upload-file file app-id)

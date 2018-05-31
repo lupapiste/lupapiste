@@ -158,7 +158,7 @@
 
 (defn- referenced-file-can-be-attached
   [{{files :files} :data}]
-  (when-not (storage/session-files-exist? (vetuma/session-id) (map :fileId files))
+  (when-not (storage/unlinked-files-exist? (vetuma/session-id) (map :fileId files))
     (fail :error.invalid-files-attached-to-comment)))
 
 (def delivery-address-fields #{:firstName :lastName :street :zip :city})

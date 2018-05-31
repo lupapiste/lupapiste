@@ -762,8 +762,8 @@
    (output-attachment (attachment-fn file-id) download?)))
 
 (defn output-file
-  [file-id session-id]
-  (if-let [attachment-file (storage/download-session-file session-id file-id)]
+  [file-id user-or-session-id]
+  (if-let [attachment-file (storage/download-unlinked-file user-or-session-id file-id)]
     (update (attachment-200-response attachment-file (ss/encode-filename (:filename attachment-file)))
             :headers
             http/no-cache-headers)
@@ -777,18 +777,18 @@
   "Does archivability conversion, if required, for given file.
    If file was converted, uploads converted file to mongo.
    Returns map with conversion result and :file if conversion was made."
-  [session-id application filedata]
+  [user-id application filedata]
   (let [conversion-result  (conversion/archivability-conversion application filedata)
         converted-filedata (when (:autoConversion conversion-result)
                              ; upload and return new fileId for converted file
                              (file-upload/save-file (select-keys conversion-result [:content :filename])
                                                     {:linked false
-                                                     :sessionId session-id}))]
+                                                     :uploader-user-id user-id}))]
     {:result conversion-result
      :file converted-filedata}))
 
 (defn- attach!
-  [{:keys [application user session]} {attachment-id :attachment-id :as attachment-options} original-filedata conversion-data]
+  [{:keys [application user]} {attachment-id :attachment-id :as attachment-options} original-filedata conversion-data]
   (let [options            (merge attachment-options
                                   original-filedata
                                   (:result conversion-data)
@@ -802,7 +802,7 @@
                                                      (auth/application-authority? application user))))
         linked-version     (set-attachment-version! application user attachment options)
         {:keys [fileId originalFileId]} linked-version]
-    (storage/link-files-to-application (:id session)
+    (storage/link-files-to-application (:id user)
                                        (:id application)
                                        (cond-> []
                                                (not (:original-file-already-linked? attachment-options)) (conj originalFileId)
@@ -827,15 +827,15 @@
    4) Creates preview image in separate thread
    5) Links file as new version to attachment. If conversion was made, converted file is used (originalFileId points to original file)
    Returns attached version."
-  [{:keys [application session] :as command} attachment-options file-options]
-  (let [session-id        (or (:id session) (vetuma/session-id) "system-process")
+  [{:keys [application user session] :as command} attachment-options file-options]
+  (let [user-id           (or (:id user) (:id session) (vetuma/session-id) "system-process")
         content           (reusable-content (:content file-options))
         original-filedata (file-upload/save-file (assoc file-options :content content) {:linked false
-                                                                                        :sessionId session-id})
+                                                                                        :uploader-user-id user-id})
         _                 (when (instance? ByteArrayInputStream content)
                             (.reset content))
-        conversion-data   (conversion session-id application (assoc original-filedata :content content))]
-    (attach! (assoc-in command [:session :id] session-id) attachment-options original-filedata conversion-data)))
+        conversion-data   (conversion user-id application (assoc original-filedata :content content))]
+    (attach! (assoc-in command [:user :id] user-id) attachment-options original-filedata conversion-data)))
 
 (defn- append-stream [zip file-name in]
   (when in

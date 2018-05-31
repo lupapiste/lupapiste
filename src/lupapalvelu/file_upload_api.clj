@@ -39,8 +39,8 @@
                       file-upload/file-size-legal]
    :pre-checks       [disallow-impersonation]
    :states           states/all-states}
-  [{:keys [application]}]
-  (let [{:keys [ok error] :as result} (file-upload/save-files application files (vetuma/session-id))]
+  [{:keys [application user]}]
+  (let [{:keys [ok error] :as result} (file-upload/save-files application files (:id user))]
     (when-not ok
       (errorf "upload failed, error: %s" error))
     (->> result
@@ -52,8 +52,10 @@
   {:parameters [attachmentId]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:anonymous}}
-  (if (storage/session-files-exist? (vetuma/session-id) [attachmentId])
-    (do
-      (storage/delete-session-file (vetuma/session-id) attachmentId)
-      (ok :attachmentId attachmentId))
-    (fail :error.file-upload.not-found)))
+  [{:keys [user]}]
+  (let [uid (or (:id user) (vetuma/session-id))]
+    (if (storage/unlinked-files-exist? uid [attachmentId])
+      (do
+        (storage/delete-unlinked-file uid attachmentId)
+        (ok :attachmentId attachmentId))
+      (fail :error.file-upload.not-found))))
