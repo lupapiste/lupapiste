@@ -64,11 +64,13 @@
 
 (def- WGS84-URN "urn:ogc:def:crs:OGC:1.3:CRS84")
 
-(defn- drawings->GeoJSON-2008 [drawings]
-  {:type "FeatureCollection"
-   :features (mapv drawing->GeoJSON-2008 drawings)
-   :crs {:type "name"
-         :properties {:name WGS84-URN}}})
+(defn- application-geometry [{:keys [drawings location-wgs84]}]
+  (let [obj (if (seq drawings)
+              {:type "FeatureCollection"
+               :features (mapv drawing->GeoJSON-2008 drawings)}
+              {:type "Point"
+               :coordinates location-wgs84})]
+    (assoc obj :crs {:type "name", :properties {:name WGS84-URN}})))
 
 ;; TODO: city, postal code
 (defn- application-postal-address [app]
@@ -76,7 +78,6 @@
 
 ;; TODO: RegistryKey
 ;; TODO: OVT, laskuviite jne.
-;; TODO: use location-wgs84 as a GeoJSON Point if drawings is empty
 (defn- convert-value-flattened-app
   [{:keys [id primaryOperation propertyId drawings]
     [customer-doc work-description payee-doc] :documents ; FIXME: find these by schema-info subtype
@@ -84,7 +85,7 @@
   {:clientApplicationKind "FIXME"
    :customerWithContacts  {:customer (doc->customer customer-doc)
                            :contacts [(person->contact (customer-contact customer-doc))]}
-   :geometry              {:geometryOperations (drawings->GeoJSON-2008 drawings)}
+   :geometry              {:geometryOperations (application-geometry app)}
    :identificationNumber  id
    :invoicingCustomer     (doc->customer payee-doc)
    :name            (:name primaryOperation) ; TODO: i18n?
