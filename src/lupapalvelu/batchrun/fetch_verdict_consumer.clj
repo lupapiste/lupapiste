@@ -5,6 +5,7 @@
             [sade.env :as env]
             [lupapalvelu.batchrun.fetch-verdict :as fetch-verdict]
             [lupapalvelu.integrations.jms :as jms]
+            [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user])
   (:import (javax.jms Session)))
@@ -37,9 +38,10 @@
                                                               :state "sent"})]
           (let [batchrun-user (user/batchrun-user [(:organization application)])
                 batchrun-name "Automatic verdicts checking"]
-            (if (fetch-verdict/fetch-verdict batchrun-name batchrun-user application)
-              (commit-fn)
-              (rollback-fn)))
+            (logging/with-logging-context {:applicationId id, :userId (:id batchrun-user)}
+              (if (fetch-verdict/fetch-verdict batchrun-name batchrun-user application)
+                (commit-fn)
+                (rollback-fn))))
           (do (errorf "Could not find application for fetching verdict: %s" id)
               (commit-fn))))
       (commit-fn)))) ; Invalid message, nothing to be done
@@ -52,8 +54,16 @@
                                            (jms/create-transacted-session)
                                            (jms/register-session :consumer)))
 
+(defn commit-fetch-verdict [^Session session]
+  (info "Commiting fetch-verdict message")
+  (jms/commit session))
+
+(defn rollback-fetch-verdict [^Session session]
+  (warn "Rollbacking fetch-verdict message")
+  (jms/rollback session))
+
 (defonce fetch-verdicts-consumer
   (jms/create-consumer fetch-verdicts-transacted-session
                        fetch-verdicts-queue
-                       (handle-fetch-verdict-message #(jms/commit fetch-verdicts-transacted-session)
-                                                     #(jms/rollback fetch-verdicts-transacted-session)))))
+                       (handle-fetch-verdict-message (partial commit-fetch-verdict fetch-verdicts-transacted-session)
+                                                     (partial rollback-fetch-verdict fetch-verdicts-transacted-session)))))
