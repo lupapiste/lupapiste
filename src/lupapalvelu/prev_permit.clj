@@ -127,7 +127,6 @@
         unset-type     (if (contains? party :henkilo) :yritys :henkilo)]
     (assoc-in document [:data unset-type] (unset-type default-values))))
 
-
 (defn- suunnittelijaRoolikoodi->doc-schema [koodi]
   (cond
     (= koodi "p\u00e4\u00e4suunnittelija") "paasuunnittelija"
@@ -320,7 +319,6 @@
         operation             "aiemmalla-luvalla-hakeminen"
         permit-type           (operations/permit-type-of-operation operation)
         dummy-application     {:id "" :permitType permit-type :organization organizationId}
-        ; xml                   (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
         tiedostonimi          (str kuntalupatunnus ".xml")
         xml                   (krysp-fetch/get-local-application-xml-by-filename tiedostonimi permit-type)
         app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)

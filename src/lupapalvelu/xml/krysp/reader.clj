@@ -629,9 +629,7 @@
       nil)))
 
 (defn get-asiat [xml]
-  (-> xml
-      cr/strip-xml-namespaces
-      (enlive/select common/case-elem-selector)))
+  (-> xml cr/strip-xml-namespaces (enlive/select common/case-elem-selector)))
 
 (defn get-kuntakoodi [xml]
   (-> xml
