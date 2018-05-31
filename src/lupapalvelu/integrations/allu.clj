@@ -1,8 +1,10 @@
 (ns lupapalvelu.integrations.allu
   (:require [clojure.walk :refer [postwalk]]
             [schema.core :as sc]
+            [cheshire.core :as json]
             [iso-country-codes.core :refer [country-translate]]
             [sade.core :refer [def-]]
+            [sade.http :as http]
             [lupapalvelu.integrations.allu-schemas :refer [PlacementContract]]))
 
 ;;; FIXME: Avoid producing nil-valued fields.
@@ -95,3 +97,11 @@
 
 (sc/defn application->allu-placement-contract :- PlacementContract [app]
   (-> app flatten-values convert-value-flattened-app))
+
+;; TODO: Use property files to configure allu-api-* instead.
+(defn create-placement-contract! [allu-api-url allu-api-jwt]
+  (fn [app]
+    (http/post (str allu-api-url "placementcontracts")
+               {:headers {:authorization (str "Bearer " allu-api-jwt)}
+                :content-type :json
+                :body (json/encode (application->allu-placement-contract app))})))
