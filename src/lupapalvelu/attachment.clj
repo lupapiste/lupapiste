@@ -230,8 +230,11 @@
 
 (defn link-files-to-application [app-id fileIds]
   {:pre [(string? app-id)]}
-  (mongo/update-by-query :fs.files {:_id {$in fileIds}} {$set {:metadata.application app-id
-                                                               :metadata.linked true}}))
+  (mongo/update-by-query :fs.files
+                         {:_id {$in fileIds}
+                          :metadata.linked false}
+                         {$set {:metadata.application app-id
+                                :metadata.linked true}}))
 
 (defn- by-file-ids [file-ids {versions :versions :as attachment}]
   (some (comp (set file-ids) :fileId) versions))
