@@ -149,7 +149,7 @@
 ;; EXISTS
 
 (defn session-files-exist? [session-id file-ids]
-  {:pre [(seq file-ids) (not-any? ss/blank? (conj file-ids session-id))]}
+  {:pre [(sequential? file-ids) (not-any? ss/blank? (conj file-ids session-id))]}
   (->> (if (env/feature? :s3)
          (map #(s3/object-exists? unlinked-bucket (s3-id session-id %)) file-ids)
          (map #(mongo/any? :fs.files {:_id % :metadata.sessionId session-id}) file-ids))
