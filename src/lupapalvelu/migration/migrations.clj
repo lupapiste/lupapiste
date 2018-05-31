@@ -3944,7 +3944,7 @@
                              {"attachments.readOnly" {$type "null"}}))
 
 (defn add-storage-system-if-needed [file-data]
-  (if (:storageSystem file-data)
+  (if (or (:storageSystem file-data) (empty? file-data))
     file-data
     (assoc file-data :storageSystem :mongodb)))
 
@@ -3971,7 +3971,7 @@
                                                                                              :attachments.latestVersion.storageSystem {$exists false}}}})]
     (let [updated-versions (map #(update % :attachments (fn [attachments]
                                                           (map (fn [{:keys [latestVersion] :as att}]
-                                                                 (if-not (:storageSystem latestVersion)
+                                                                 (if (and (seq latestVersion) (not (:storageSystem latestVersion)))
                                                                    (assoc-in att [:latestVersion :storageSystem] :mongodb)
                                                                    att))
                                                                attachments)))
