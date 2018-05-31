@@ -65,18 +65,29 @@
   (get-in @allowed-verdict-actions
           [(keyword verdict-id) (keyword action) :ok]))
 
+(defn- update-allowed-if-needed [verdict-id new-actions]
+  (let [ok-keys-fn #(->> %
+                         (map (fn [[k v]]
+                                (when (:ok v) k)))
+                         (remove nil?)
+                         set)
+        olds (ok-keys-fn (verdict-id @allowed-verdict-actions))
+        news (ok-keys-fn new-actions)]
+    (when (not= olds news)
+      (swap! allowed-verdict-actions
+             assoc
+             verdict-id new-actions))))
+
 (defn refresh-verdict-auths
   ([app-id {:keys [callback verdict-id]}]
    ;; Not in service due to circular reqs.
    (let [verdict-id (when-not (s/blank? verdict-id) (keyword verdict-id))
          query-fn   (partial common/query :allowed-actions-for-category
                              (fn [{actions :actionsById}]
-                               (swap! allowed-verdict-actions
-                                      (fn [allowed-actions]
-                                        (if verdict-id
-                                          (assoc allowed-actions
-                                                 verdict-id (verdict-id actions))
-                                          actions)))
+                               (if verdict-id
+                                 (update-allowed-if-needed verdict-id (verdict-id actions))
+                                 (reset! allowed-verdict-actions actions))
+
                                (when (and verdict-id (= verdict-id @current-verdict-id))
                                  (common/reset-if-needed! (rum/cursor-in current-verdict
                                                                          [:_meta :enabled?])

@@ -60,7 +60,7 @@
                      :upload.include?     (fn [_ {target :target :as att}]
                                             (= (:id target) (:id verdict)))}}))
   (reset! state/references references)
-  (reset! state/verdict-wait? false))
+  (common/reset-if-needed! state/verdict-wait? false))
 
 (rum/defc verdict-section-header < rum/reactive
   [{:keys [schema] :as options}]
@@ -103,8 +103,8 @@
 
 (rum/defc verdict < rum/reactive
   [{:keys [schema state info _meta] :as options}]
-  (let [{:keys [published legacy? filled? id]
-         :as   info} (rum/react info)
+  (let [{:keys [published legacy? id]
+         :as   info} @info
         yes-fn     (fn []
                      (reset! state/verdict-wait? true)
                      (reset! (rum/cursor-in _meta [:enabled?]) false)
@@ -113,7 +113,7 @@
                                                           reset-verdict))]
     [:div.pate-verdict
      [:div.pate-grid-2
-      (when (can-edit?)
+      (when-not published
         [:div.row
          [:div.col-2.col--right
           (components/icon-button {:text-loc :verdict.submit
@@ -146,8 +146,8 @@
           (toggle-all options)
           (pate-components/last-saved options)]])]
      (sections/sections options :verdict)
-     (components/debug-atom state/current-verdict)
-     (components/debug-atom state/allowed-verdict-actions)]))
+     #_(components/debug-atom state/current-verdict)
+     #_(components/debug-atom state/allowed-verdict-actions)]))
 
 
 (defn current-verdict-schema []

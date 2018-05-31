@@ -1166,3 +1166,13 @@
                              {})
                       path)
       :else                   (recur (butlast path)))))
+
+(defn ya-verdict-type
+  "YA verdicts come in different types. The initial value is extracted
+  from the primary operation name."
+  [{primary-op :primaryOperation}]
+  (let [regex (->> ya-verdict-types
+                   (map name)
+                   (s/join "|")
+                   re-pattern)]
+    (re-find regex (:name primary-op))))
