@@ -56,4 +56,4 @@
     (do
       (storage/delete-session-file (vetuma/session-id) attachmentId)
       (ok :attachmentId attachmentId))
-    (fail :error.file-upload.removing-file-failed)))
+    (fail :error.file-upload.not-found)))
