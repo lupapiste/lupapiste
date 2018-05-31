@@ -68,12 +68,16 @@
    :crs {:type "name"
          :properties {:name WGS84-URN}}})
 
+;; TODO: city, postal code
 (defn- application-postal-address [app]
   {:streetAddress {:streetName (:address app)}})
 
+;; TODO: RegistryKey
+;; TODO: OVT, laskuviite jne.
+;; TODO: use location-wgs84 as a GeoJSON Point if drawings is empty
 (defn- convert-value-flattened-app
   [{:keys [id primaryOperation propertyId drawings]
-    [customer-doc work-description payee-doc] :documents
+    [customer-doc work-description payee-doc] :documents ; FIXME: find these by schema-info subtype
     :as app}]
   {:clientApplicationKind "FIXME"
    :customerWithContacts  {:customer (doc->customer customer-doc)
@@ -81,7 +85,7 @@
    :geometry              {:geometryOperations (drawings->GeoJSON-2008 drawings)}
    :identificationNumber  id
    :invoicingCustomer     (doc->customer payee-doc)
-   :name            (:name primaryOperation)
+   :name            (:name primaryOperation) ; TODO: i18n?
    :pendingOnClient true
    :postalAddress   (application-postal-address app)
    :propertyIdentificationNumber propertyId
