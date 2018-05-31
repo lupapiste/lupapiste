@@ -232,7 +232,9 @@
   {:pre [(string? app-id)]}
   (mongo/update-by-query :fs.files
                          {:_id {$in fileIds}
-                          :metadata.linked false}
+                          $or [{:metadata.linked false}
+                               {:metadata.linked {$exists false}}]
+                          :metadata.application {$exists false}}
                          {$set {:metadata.application app-id
                                 :metadata.linked true}}))
 
