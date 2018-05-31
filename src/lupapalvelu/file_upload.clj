@@ -127,17 +127,6 @@
               #(save-file % :sessionId session-id :linked false)
               (map #(rename-keys % {:tempfile :content}) files))}))
 
-(defn- two-hours-ago []
-  ; Matches vetuma session TTL
-  (util/get-timestamp-ago :hour 2))
-
-(defn cleanup-uploaded-files []
-  (when-not @mongo/connection
-    (mongo/connect!))
-  (mongo/delete-file {$and [{:metadata.linked {$exists true}}
-                            {:metadata.linked false}
-                            {:metadata.uploaded {$lt (two-hours-ago)}}]}))
-
 (defn mark-duplicates [application result]
   (let [existing-files (mapv (fn [attachment] (first (str/split (get-in attachment [:latestVersion :filename]) #"\."))) (:attachments application))
         find-duplicates-fn (fn [file]

@@ -20,7 +20,7 @@
                "fix-prev-permit-applicants" 'lupapalvelu.prev-permit/fix-prev-permit-applicants
                "pdfa-convert-review-pdfs"   'lupapalvelu.batchrun/pdfa-convert-review-pdfs
                "pdf-to-pdfa-conversion"     'lupapalvelu.batchrun/pdf-to-pdfa-conversion
-               "cleanup-uploaded-files"     'lupapalvelu.file-upload/cleanup-uploaded-files
+               "cleanup-uploaded-files"     'lupapalvelu.storage.file-storage/delete-old-unlinked-files
                "unarchive"                  'lupapalvelu.batchrun/unarchive})
 
 (defn launch! [service args]

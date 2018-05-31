@@ -8,17 +8,17 @@
             [lupapiste-commons.threads :as threads]
             [sade.env :as env]
             [lupapalvelu.logging :as logging]
-            [lupapalvelu.storage.s3 :as s3])
+            [lupapalvelu.storage.file-storage :as storage])
   (:import [java.io InputStream]))
 
 (defonce preview-generation-pool (threads/threadpool 2 "preview-generation-worker"))
 
-(defn- download-and-generate! [download-fn application-id file-id filename content-type preview-file-id preview-filename]
+(defn- download-and-generate! [storage-system application-id file-id filename content-type preview-file-id preview-filename]
   (if-let [preview-content (util/timing
                              (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
                              ;; It's possible at least in tests to delete the file before preview
                              ;; generation runs.
-                             (when-let [content-fn (:content (download-fn file-id))]
+                             (when-let [content-fn (:content (storage/download-from-system application-id file-id storage-system))]
                                (with-open [content (content-fn)]
                                  (ext-preview/create-preview content
                                                              content-type
@@ -30,28 +30,6 @@
                                :application application-id)
         (.close ^InputStream preview-content))
     (warnf "Preview image of %s file '%s' (id=%s) was not generated" content-type filename file-id)))
-
-(defn- mongo-preview! [db-name application-id file-id filename content-type preview-file-id preview-filename]
-  (mongo/with-db (or db-name mongo/default-db-name)
-    (when (seq (mongo/file-metadata {:id file-id}))
-      (download-and-generate! mongo/download
-                              application-id
-                              file-id
-                              filename
-                              content-type
-                              preview-file-id
-                              preview-filename))))
-
-(defn- s3-preview! [application-id file-id filename content-type preview-file-id preview-filename]
-  (if (s3/object-exists? application-id file-id)
-    (download-and-generate! (partial s3/download application-id)
-                            application-id
-                            file-id
-                            filename
-                            content-type
-                            preview-file-id
-                            preview-filename)
-    (throw (Exception. (str "Attachment file " file-id " for application " application-id " not found in S3")))))
 
 (defn preview-image!
   "Creates a preview image in a separate thread pool."
@@ -65,9 +43,16 @@
       (logging/with-logging-context
         {:applicationId application-id}
         (try
-          (if (env/feature? :s3)
-            (s3-preview! application-id file-id filename content-type preview-file-id preview-filename)
-            (mongo-preview! db-name application-id file-id filename content-type preview-file-id preview-filename))
+          (mongo/with-db (or db-name mongo/default-db-name)
+            (if (storage/application-file-exists? application-id file-id)
+              (download-and-generate! (if (env/feature? :s3) :s3 :mongodb)
+                                      application-id
+                                      file-id
+                                      filename
+                                      content-type
+                                      preview-file-id
+                                      preview-filename)
+              (throw (Exception. (str "Attachment file " file-id " for application " application-id " not found in storage")))))
           (catch Throwable t
             (error t "Preview generation failed")))))))
 

@@ -12,12 +12,12 @@
             [lupapalvelu.mongo :as mongo])
   (:import [java.io InputStream ByteArrayOutputStream File FileInputStream ByteArrayInputStream]
            [com.amazonaws.services.s3.model PutObjectRequest CreateBucketRequest CannedAccessControlList
-                                            SetBucketVersioningConfigurationRequest BucketVersioningConfiguration
-                                            ObjectMetadata AmazonS3Exception]
+                                            ObjectMetadata AmazonS3Exception Bucket S3ObjectSummary S3VersionSummary]
            [com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration]
            [com.amazonaws.auth AWSStaticCredentialsProvider BasicAWSCredentials]
            [com.amazonaws.services.s3 AmazonS3ClientBuilder AmazonS3]
-           [com.amazonaws Protocol ClientConfiguration]))
+           [com.amazonaws Protocol ClientConfiguration]
+           [java.util Date]))
 
 (defn- create-client [access-key secret-key endpoint]
   (let [credentials (BasicAWSCredentials. access-key secret-key)
@@ -40,6 +40,8 @@
                    (env/value :s3 :secret-key)
                    (env/value :s3 :endpoint))))
 
+(def unlinked-bucket "unlinked-files")
+
 (defn- ^String bucket-name [bucket]
   (str "lp-"
        env/target-env
@@ -47,7 +49,7 @@
        (when (str/starts-with mongo/*db-name* "test")
          "test-")
        (or (ss/lower-case (str/blank-as-nil bucket))
-           "unlinked-files")))
+           unlinked-bucket)))
 
 (defn- create-bucket-if-not-exists [bucket]
   (when-not (.doesBucketExist s3-client bucket)
@@ -138,40 +140,41 @@
   "Moves object within the storage system from one bucket to another by copying the object
    and then deleting it from the source bucket.
    Source bucket for the two-arity version is the default temp file buvket."
-  ([to-bucket file-id]
-   (move-file-object nil to-bucket file-id))
-  ([from-bucket to-bucket file-id]
-   {:pre [(string? to-bucket) (string? file-id)]}
-   (let [from-bucket (bucket-name from-bucket)
-         target-bucket (bucket-name to-bucket)]
-     (try
-       (create-bucket-if-not-exists target-bucket)
-       (.copyObject s3-client from-bucket file-id target-bucket file-id)
-       (.deleteObject s3-client from-bucket file-id)
-       (timbre/debug "Object" file-id "moved from" from-bucket "to" target-bucket)
-       (catch AmazonS3Exception ex
-         (timbre/error ex "Could not move" file-id "from" from-bucket "to" target-bucket))))))
+  [from-bucket to-bucket old-id new-id]
+  {:pre [(every? string? [to-bucket old-id new-id])]}
+  (let [from-bucket (bucket-name from-bucket)
+        target-bucket (bucket-name to-bucket)]
+    (try
+      (create-bucket-if-not-exists target-bucket)
+      (.copyObject s3-client from-bucket old-id target-bucket new-id)
+      (.deleteObject s3-client from-bucket old-id)
+      (timbre/debug "Object" old-id "moved from" from-bucket "to" target-bucket "as" new-id)
+      (catch AmazonS3Exception ex
+        (timbre/error ex "Could not move" old-id "from" from-bucket "to" target-bucket "as" new-id)))))
 
-(defn download [application-id file-id]
+(defn download [bucket file-id & [application-id]]
   {:pre [(string? file-id)]}
   (try
-    (let [object (.getObject s3-client (bucket-name application-id) ^String file-id)
+    (let [object (.getObject s3-client (bucket-name bucket) ^String file-id)
           metadata (.getObjectMetadata object)
           user-metadata (->> (.getUserMetadata metadata)
                              (into {})
                              (map (fn [[k v]]
                                     [(keyword k) (codec/url-decode v)]))
                              (into {}))]
-      {:content     (fn [] (.getObjectContent object))
-       :contentType (.getContentType metadata)
-       :size        (.getContentLength metadata)
-       :filename    (:filename user-metadata)
-       :fileId      file-id
-       :metadata    (-> (dissoc user-metadata :filename)
-                        (update :uploaded util/->int))
-       :application application-id})
+      (util/assoc-when
+        {:content     (fn [] (.getObjectContent object))
+         :contentType (.getContentType metadata)
+         :size        (.getContentLength metadata)
+         :filename    (:filename user-metadata)
+         :fileId      file-id
+         :metadata    (-> (dissoc user-metadata :filename)
+                          (update :uploaded util/->int))}
+        :application application-id))
     (catch AmazonS3Exception ex
-      (timbre/error ex "Error occurred when trying to retrieve" file-id "from S3 bucket" (bucket-name application-id)))))
+      (if (= 404 (.getStatusCode ex))
+        (timbre/warn "Tried to retrieve non-existing" file-id "from S3 bucket" (bucket-name bucket) ":" (.getMessage ex))
+        (timbre/error ex "Error occurred when trying to retrieve" file-id "from S3 bucket" (bucket-name bucket))))))
 
 (defn object-exists? [bucket id]
   (.doesObjectExist s3-client (bucket-name bucket) id))
@@ -179,3 +182,9 @@
 (defn delete [bucket id]
   (.deleteObject s3-client (bucket-name bucket) id)
   (timbre/debug "Object" id "deleted from" (bucket-name bucket)))
+
+(defn delete-unlinked-files [^Date older-than]
+  (doseq [^S3ObjectSummary object (-> (.listObjects s3-client ^String (bucket-name unlinked-bucket))
+                                      (.getObjectSummaries))]
+    (when (.before (.getLastModified object) older-than)
+      (.deleteObject s3-client (bucket-name unlinked-bucket) (.getKey object)))))
