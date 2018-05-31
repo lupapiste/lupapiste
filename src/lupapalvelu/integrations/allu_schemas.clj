@@ -1,14 +1,15 @@
 (ns lupapalvelu.integrations.allu-schemas
   (:require [schema.core :as sc :refer [defschema enum optional-key cond-pre Int Bool]]
+            [iso-country-codes.countries :as countries]
             [sade.schemas :refer [NonBlankStr NonEmptyVec
                                   Email Zipcode Tel Hetu FinnishY FinnishOVTid
                                   Kiinteistotunnus ApplicationId]]
             [sade.validators :refer [matches?]]
             [lupapalvelu.integrations.geojson-2008-schemas :refer [GeoJSON-2008]]))
 
-;; TODO: Only accept the ones that are actually assigned.
 (defschema ISO-3166-alpha-2
-  (sc/pred (partial matches? #"[A-Z]{2}") "ISO-3166 alpha-2 country code"))
+  (sc/pred (into #{} (map :alpha-2) countries/countries)
+           "ISO-3166 alpha-2 country code"))
 
 ;; TODO: Improve this based on the standard.
 (defschema JHS-106
