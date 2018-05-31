@@ -404,11 +404,30 @@
                 legacy--verdict-giver
                 legacy--dates))
 
+(def kt-legacy-layout
+  (build-layout legacy--application-id
+                legacy--kuntalupatunnus
+                entry--rakennuspaikka
+                (entry--applicant :applicant :pdf.applicants)
+                entry--operation
+                entry--statements
+                entry--neighbors
+                entry--attachments
+                (butlast legacy--verdict-code)
+                legacy--verdict-text
+                legacy--conditions
+                legacy--verdict-giver
+                legacy--dates))
+
+(def ymp-legacy-layout kt-legacy-layout)
+
 (defn pdf-layout [{:keys [category legacy?]}]
   (case (util/kw-path (when legacy? :legacy) category)
-    :r         r-pdf-layout
-    :p         p-pdf-layout
-    :ya        ya-pdf-layout
-    :legacy.r  r-legacy-layout
-    :legacy.ya ya-legacy-layout
-    :legacy.p  p-legacy-layout))
+    :r          r-pdf-layout
+    :p          p-pdf-layout
+    :ya         ya-pdf-layout
+    :legacy.r   r-legacy-layout
+    :legacy.ya  ya-legacy-layout
+    :legacy.p   p-legacy-layout
+    :legacy.kt  kt-legacy-layout
+    :legacy.ymp ymp-legacy-layout))

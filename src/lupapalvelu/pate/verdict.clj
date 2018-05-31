@@ -456,17 +456,20 @@
   (util/pcond-> (-> s ss/->plain-string ss/trim)
                 ss/not-blank? fun))
 
-(defn- verdict-select-string [lang {:keys [data] :as verdict} dict]
+(defn- verdict-string [lang {:keys [data] :as verdict} dict]
   (title-fn (dict data)
             (fn [value]
               (when-let [{:keys [reference-list
-                                 select]} (some-> (verdict-schema verdict)
-                                                  :dictionary
-                                                  dict)]
-                (i18n/localize lang
-                               (:loc-prefix (or reference-list
-                                                select))
-                               value)))))
+                                 select
+                                 text]} (some-> (verdict-schema verdict)
+                                                :dictionary
+                                                dict)]
+                (if text
+                  value
+                  (i18n/localize lang
+                                 (:loc-prefix (or reference-list
+                                                  select))
+                                 value))))))
 
 (defn- verdict-section-string [{data :data}]
   (title-fn (:verdict-section data) #(str "\u00a7" %)))
@@ -492,9 +495,9 @@
           :verdict-date (:verdict-date data)
           :title (->> (if published
                         [(get section-strings id)
-                         (util/pcond-> (verdict-select-string lang verdict :verdict-type)
+                         (util/pcond-> (verdict-string lang verdict :verdict-type)
                           ss/not-blank? (str " -"))
-                         (verdict-select-string lang verdict :verdict-code)
+                         (verdict-string lang verdict :verdict-code)
                          rep-string]
                         [(i18n/localize lang :pate-verdict-draft)
                          rep-string])
