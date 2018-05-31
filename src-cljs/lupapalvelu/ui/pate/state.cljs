@@ -1,6 +1,7 @@
 (ns lupapalvelu.ui.pate.state
   (:refer-clojure :exclude [select-keys])
-  (:require [lupapalvelu.ui.common :as common]
+  (:require [clojure.string :as s]
+            [lupapalvelu.ui.common :as common]
             [rum.core :as rum]))
 
 (defonce state* (atom {}))
@@ -25,6 +26,8 @@
 (def verdict-list            (state-cursor :verdict-list))
 (def replacement-verdict     (state-cursor :replacement-verdict))
 (def allowed-verdict-actions (state-cursor :allowed-verdict-actions))
+;; Wait state for verdict publishing. True when waiting.
+(def verdict-wait?           (state-cursor :verdict-wait?))
 
 ;; ok function of the currently active authModel.
 (defonce auth-fn (atom nil))
@@ -58,18 +61,32 @@
 ;; actions. Since the actions are only used for ClojureScript we can
 ;; bypass the JavaScript auth models.
 
-(defn refresh-verdict-auths
-  ([app-id callback]
-   ;; Not in service due to circular reqs.
-   (common/query :allowed-actions-for-category
-                 (fn [response]
-                   (reset! allowed-verdict-actions (:actionsById response))
-                   (when callback
-                     (callback)))
-                 :id app-id
-                 :category :pate-verdicts))
-  ([app-id] (refresh-verdict-auths app-id nil)))
-
 (defn verdict-auth? [verdict-id action]
   (get-in @allowed-verdict-actions
           [(keyword verdict-id) (keyword action) :ok]))
+
+(defn refresh-verdict-auths
+  ([app-id {:keys [callback verdict-id]}]
+   ;; Not in service due to circular reqs.
+   (let [verdict-id (when-not (s/blank? verdict-id) (keyword verdict-id))
+         query-fn   (partial common/query :allowed-actions-for-category
+                             (fn [{actions :actionsById}]
+                               (swap! allowed-verdict-actions
+                                      (fn [allowed-actions]
+                                        (if verdict-id
+                                          (assoc allowed-actions
+                                                 verdict-id (verdict-id actions))
+                                          actions)))
+                               (when (and verdict-id (= verdict-id @current-verdict-id))
+                                 (common/reset-if-needed! (rum/cursor-in current-verdict
+                                                                         [:_meta :enabled?])
+                                                          (verdict-auth? verdict-id
+                                                                         :edit-pate-verdict)))
+                               (when callback
+                                 (callback)))
+                             :id app-id
+                             :category :pate-verdicts)]
+     (if verdict-id
+       (query-fn :verdict-id verdict-id)
+       (query-fn))))
+  ([app-id] (refresh-verdict-auths app-id nil)))

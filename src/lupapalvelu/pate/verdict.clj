@@ -913,7 +913,8 @@
   (let [{:keys [data published template]
          :as   verdict} (command->verdict command)]
     {:verdict    (assoc (select-keys verdict [:id :modified :published
-                                              :schema-version :legacy?])
+                                              :category :schema-version
+                                              :legacy?])
                         :data (if published
                                 data
                                 (:data (enrich-verdict command
