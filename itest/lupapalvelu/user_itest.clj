@@ -3,7 +3,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.fixture.core :as fixture]
-            [lupapalvelu.itest-util :refer [apply-remote-minimal]]
+            [lupapalvelu.itest-util :refer [apply-remote-minimal pena upload-user-attachment]]
             [sade.core :refer [now]]
             [midje.sweet :refer :all]))
 
@@ -95,8 +95,15 @@
 
 (facts erase-user
   (apply-remote-minimal)
+  (upload-user-attachment pena "osapuolet.cv" true)
+  (upload-user-attachment pena "osapuolet.tutkintotodistus" true)
+
   (let [id "777777777777777777000020"; pena
-        obfuscated-username "poistunut_777777777777777777000020@example.com"]
+        obfuscated-username "poistunut_777777777777777777000020@example.com"
+        attachments (:attachments (user/get-user-by-id id {:attachments 1}))]
+    (doseq [{:keys [attachment-id]} attachments]
+      (mongo/file-metadata {:id attachment-id}) => boolean)
+
     (user/erase-user id) => nil
     (user/get-user-by-id id) => {:id id
                                  :firstName "Poistunut"
@@ -105,4 +112,6 @@
                                  :email obfuscated-username
                                  :username obfuscated-username
                                  :enabled false
-                                 :state "erased"}))
+                                 :state "erased"}
+    (doseq [{:keys [attachment-id]} attachments]
+      (mongo/file-metadata {:id attachment-id}) => nil?)))

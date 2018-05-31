@@ -395,8 +395,9 @@
                 query)]
     query))
 
-(defn find-user [query]
-  (mongo/select-one :users (user-query query)))
+(defn find-user
+  ([query]            (mongo/select-one :users (user-query query)))
+  ([query projection] (mongo/select-one :users (user-query query) projection)))
 
 (defn find-users
   ([query]
@@ -495,8 +496,9 @@
 ;; ==============================================================================
 ;;
 
-(defn get-user [q]
-  (non-private (find-user q)))
+(defn get-user
+  ([q] (non-private (find-user q)))
+  ([q projection] (non-private (find-user q projection))))
 
 (defn get-users
   ([q]
@@ -504,9 +506,11 @@
   ([q order-by]
    (map non-private (find-users q order-by))))
 
-(defn get-user-by-id [id]
-  {:pre [id]}
-  (get-user {:id id}))
+(defn get-user-by-id
+  ([id] {:pre [id]}
+   (get-user {:id id}))
+  ([id projection] {:pre [id]}
+   (get-user {:id id} projection)))
 
 (defn get-user-by-id!
   "Get user or throw fail!"
@@ -867,6 +871,11 @@
 (defn erase-user
   "Erases/anonymizes user information but retains the user record in database. Returns nil."
   [user-id]
+  ;; Remove attachment files:
+  (doseq [{:keys [attachment-id]} (:attachments (get-user-by-id user-id {:attachments 1}))]
+    (mongo/delete-file {:id attachment-id, :metadata.user-id user-id}))
+
+  ;; Erase user record:
   (mongo/update-by-id :users user-id
     {$set   (anonymized-user user-id)
      $unset erasure-unsetter}))
