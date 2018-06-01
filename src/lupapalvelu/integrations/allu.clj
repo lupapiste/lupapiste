@@ -46,16 +46,23 @@
    :postalCode    postinumero
    :streetAddress {:streetName katu}})
 
-;; TODO: invoicingOperator, ovt
-(defn- doc->customer [{{tag :_selected :as data} :data}]
+(defn- company-invoicing
+  [{{:keys [verkkolaskuTunnus ovtTunnus valittajaTunnus]} :verkkolaskutustieto}]
+  {:invoicingOperator valittajaTunnus
+   :ovt (if (seq ovtTunnus) ovtTunnus verkkolaskuTunnus)}) ; TODO: Why do we even have both fields?
+
+(defn- doc->customer [payee? {{tag :_selected :as data} :data}]
   (let [tag (keyword tag)
         customer (get data tag)
-        address (:osoite customer)]
-    {:type          (convert-customer-type tag)
-     :registryKey   (customer-registry-key tag customer)
-     :name          (customer-name tag customer)
-     :country       (address-country address)
-     :postalAddress (convert-address address)}))
+        address (:osoite customer)
+        allu-customer {:type          (convert-customer-type tag)
+                       :registryKey   (customer-registry-key tag customer)
+                       :name          (customer-name tag customer)
+                       :country       (address-country address)
+                       :postalAddress (convert-address address)}]
+    (if (and payee? (= tag :yritys))
+      (merge allu-customer (company-invoicing customer))
+      allu-customer)))
 
 (defn- person->contact [{:keys [henkilotiedot], {:keys [puhelin email]} :yhteystiedot}]
   {:name (fullname henkilotiedot), :phone puhelin, :email email})
@@ -86,18 +93,19 @@
   {:city (localize "fi" :municipality municipality) ; FIXME: hardcoded "fi"
    :streetAddress {:streetName address}})
 
-;; TODO: clientApplicationKind, customerReference
+;; TODO: clientApplicationKind
 (defn- convert-value-flattened-app
   [{:keys [id primaryOperation propertyId drawings documents] :as app}]
   (let [customer-doc     (first (filter #(= (doc-subtype %) :hakija) documents))
         work-description (first (filter #(= (doc-subtype %) :hankkeen-kuvaus) documents))
         payee-doc        (first (filter #(= (doc-subtype %) :maksaja) documents))]
     {:clientApplicationKind "FIXME"
-     :customerWithContacts  {:customer (doc->customer customer-doc)
+     :customerReference     (-> payee-doc :data :laskuviite)
+     :customerWithContacts  {:customer (doc->customer false customer-doc)
                              :contacts [(person->contact (customer-contact customer-doc))]}
      :geometry              {:geometryOperations (application-geometry app)}
      :identificationNumber  id
-     :invoicingCustomer     (doc->customer payee-doc)
+     :invoicingCustomer     (doc->customer true payee-doc)
      :name            (:name primaryOperation) ; TODO: i18n?
      :pendingOnClient true
      :postalAddress   (application-postal-address app)
