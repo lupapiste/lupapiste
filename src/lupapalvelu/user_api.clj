@@ -160,9 +160,7 @@
     (ok :operation "invited")))
 
 (defcommand create-user
-  {:parameters       [:email role]
-   :input-validators [(partial action/non-blank-parameters [:email])
-                      action/email-validator]
+  {:input-validators [usr/NewUser]
    :notified         true
    :permissions      [{:required [:users/create]}]}
   [{user-data :data caller :user}]
