@@ -12,6 +12,7 @@
 ;; Getting user and users:
 ;; ==============================================================================
 ;;
+
 (apply-remote-minimal)
 
 (def invite-authority-email-subject "Lupapiste: Tervetuloa Lupapisteen viranomaisk\u00e4ytt\u00e4j\u00e4ksi!")
