@@ -294,7 +294,8 @@
 
 (def unauthorized? (partial expected-failure? (:text unauthorized)))
 (def not-accessible? (partial expected-failure? (:text not-accessible)))
-
+(def missing-parameters? (partial expected-failure? :error.missing-parameters))
+(def organization-not-found? (partial expected-failure? :error.organization-not-found))
 
 (facts "unauthorized?"
   (fact "with map"
