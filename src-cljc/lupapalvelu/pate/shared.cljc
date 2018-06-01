@@ -1102,7 +1102,7 @@
                                                versub-statements
                                                versub-inform-others
                                                versub-attachments
-                                               (versub-upload)))
+                                               (versub-upload {:type-group #"muut" :default :muut.paatosote})))
 
 (defn verdict-schema
   "Nil version returns the latest version."

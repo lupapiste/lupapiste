@@ -202,7 +202,7 @@
                              :sort-by    :text}})
    legsub-conditions
    legsub-attachments
-   (shared/versub-upload)))
+   (shared/versub-upload {:type-group #"muut" :default :muut.paatosote})))
 
 (def p-legacy-verdict
   (build-legacy-schema
