@@ -51,12 +51,13 @@
     (if (usr/authority? user)
       (do
         (notify-new-authority user caller (or (:organization user-data) (usr/authority-admins-organization-id caller)))
-        (ok :id (:id user) :user user))
+        (ok :id (:id user)
+            :user user))
       (let [token (token/make-token :password-reset caller {:email (:email user)} :ttl ttl/create-user-token-ttl)]
         (ok :id (:id user)
-          :user user
-          :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
-          :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token))))))
+            :user user
+            :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
+            :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token))))))
 
 (defn authority-by-email
   "Gets, creates or promotes authority. Returns user or nil if the
