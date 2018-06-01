@@ -71,8 +71,6 @@
      (get-in data [:kayttotarkoitus :value]) ;; YA
      "")))
 
-
-
 (defn dicts->kw-paths
   [dictionary]
   (->> dictionary

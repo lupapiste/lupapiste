@@ -19,7 +19,7 @@
                    next-section insert-section
                    general-handler application-deviations
                    archive-info application-operation
-                   title-fn verdict-select-string
+                   title-fn verdict-string
                    verdict-section-string verdict-summary)
 
 (testable-privates lupapalvelu.pate.verdict-template
@@ -1433,9 +1433,9 @@
     (title-fn " " fun) => ""
     (title-fn nil fun) => ""))
 
-(facts "verdict-select-string"
+(facts "verdict-string"
   (fact "legacy verdict-code"
-    (verdict-select-string "fi"
+    (verdict-string "fi"
                          {:legacy? true
                           :category "r"
                           :data {:verdict-code "8"}
@@ -1443,14 +1443,14 @@
                          :verdict-code)
     => "Ty\u00f6h\u00f6n liittyy ehto")
   (fact "modern verdict-code"
-    (verdict-select-string "en"
+    (verdict-string "en"
                            {:category "r"
                             :data {:verdict-code "hallintopakko"}
                             :template {:inclusions ["verdict-code"]}}
                            :verdict-code)
     => "Administrative enforcement/penalty proceedings discontinued.")
   (fact "verdict-type"
-    (verdict-select-string "fi"
+    (verdict-string "fi"
                            {:category "ya"
                             :data {:verdict-type "katulupa"}
                             :template {:inclusions ["verdict-type"]}}
