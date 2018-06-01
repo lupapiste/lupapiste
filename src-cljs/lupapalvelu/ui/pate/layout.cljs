@@ -87,7 +87,8 @@
   (let [cell-type    (schema-type options)
         schema-value (cell-type schema)
         options      (path/schema-options options schema-value)]
-    (if (and (path/react-meta options :editing?)
+    (if (and (or (path/react-meta options :editing?)
+                 (:always-editing? schema-value))
              (not (:read-only? schema-value)))
       ((case cell-type
          :date-delta     pate-components/pate-date-delta

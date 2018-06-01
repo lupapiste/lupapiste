@@ -16,6 +16,18 @@
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
+(defn can? [action]
+
+  (and (not (rum/react state/verdict-wait?))
+       (state/verdict-auth? (rum/react state/current-verdict-id)
+                            action)))
+(def can-edit? (partial can? :edit-pate-verdict))
+(def can-preview? (partial can? :preview-pate-verdict))
+
+(defn can-publish? []
+  (or (can? :publish-pate-verdict)
+      (can? :publish-legacy-verdict)))
+
 (defn updater
   ([{:keys [state path] :as options} value]
    (service/edit-verdict @state/application-id
@@ -47,14 +59,15 @@
                                                    kvs))
                      :upload.include?     (fn [_ {target :target :as att}]
                                             (= (:id target) (:id verdict)))}}))
-  (reset! state/references references))
+  (reset! state/references references)
+  (common/reset-if-needed! state/verdict-wait? false))
 
 (rum/defc verdict-section-header < rum/reactive
   [{:keys [schema] :as options}]
   [:div.pate-grid-1.section-header
    {:class (path/css options)}
    (when (and (not (-> schema :buttons? false?))
-              (path/enabled? options))
+              (can-edit?))
      [:div.row.row--tight
       [:div.col-1.col--right
        [:div.verdict-buttons
@@ -70,7 +83,7 @@
 
 (rum/defc toggle-all < rum/reactive
   [{:keys [schema _meta] :as options}]
-  (when (path/enabled? options)
+  (when (can-edit?)
     (let [all-sections  (map :id (:sections schema))
           meta-map (rum/react _meta)
           open-sections (filter #(get meta-map (util/kw-path % :editing?))
@@ -88,30 +101,26 @@
                      :pate.close-all
                      :pate.open-all))])))
 
-(rum/defcs verdict < rum/reactive
-  (rum/local false ::wait?)
-  [{wait?* ::wait?} {:keys [schema state info _meta] :as options}]
-  (let [{:keys [published legacy? filled? id]
-         :as   info} (rum/react info)
+(rum/defc verdict < rum/reactive
+  [{:keys [schema state info _meta] :as options}]
+  (let [{:keys [published legacy? id]
+         :as   info} @info
         yes-fn     (fn []
-                     (reset! wait?* true)
+                     (reset! state/verdict-wait? true)
                      (reset! (rum/cursor-in _meta [:enabled?]) false)
                      (service/publish-and-reopen-verdict  @state/application-id
                                                           info
                                                           reset-verdict))]
     [:div.pate-verdict
      [:div.pate-grid-2
-      (when (and (or (path/enabled? options)
-                     (rum/react wait?*))
-                 (not published))
+      (when-not published
         [:div.row
          [:div.col-2.col--right
           (components/icon-button {:text-loc :verdict.submit
                                    :class    (common/css :primary :pate-left-space)
                                    :icon     :lupicon-circle-section-sign
-                                   :wait?    wait?*
-                                   :enabled? (and (path/enabled? options)
-                                                  filled?)
+                                   :wait?    state/verdict-wait?
+                                   :enabled? (can-publish?)
                                    :on-click (fn []
                                                (hub/send "show-dialog"
                                                          {:ltitle          "areyousure"
@@ -122,8 +131,7 @@
           (components/link-button {:url      (js/sprintf "/api/raw/preview-pate-verdict?id=%s&verdict-id=%s"
                                                          @state/application-id
                                                          id)
-                                   :enabled? (and (path/enabled? options)
-                                                  filled?)
+                                   :enabled? (can-preview?)
                                    :text-loc :pdf.preview})]])
       (if published
         [:div.row
@@ -137,12 +145,13 @@
          [:div.col-1.col--right
           (toggle-all options)
           (pate-components/last-saved options)]])]
-     (sections/sections options :verdict)]))
+     (sections/sections options :verdict)
+     #_(components/debug-atom state/current-verdict)
+     #_(components/debug-atom state/allowed-verdict-actions)]))
 
 
 (defn current-verdict-schema []
-  (let [{:keys [schema-version legacy?]} (:info @state/current-verdict)
-        category (shared/permit-type->category (js/lupapisteApp.models.application.permitType))]
+  (let [{:keys [schema-version legacy? category]} (:info @state/current-verdict)]
     (if legacy?
       (legacy/legacy-verdict-schema category)
       (shared/verdict-schema category schema-version))))
@@ -173,12 +182,14 @@
     (reset-verdict nil)
     (service/fetch-application-phrases app-id)
     (state/refresh-verdict-auths app-id
-                                 #(state/refresh-application-auth-model app-id
-                                                                        (fn []
-                                                                          (service/refresh-attachments)
-                                                                          (service/open-verdict app-id
-                                                                                                verdict-id
-                                                                                                reset-verdict))))))
+                                 {:callback #(state/refresh-application-auth-model
+                                              app-id
+                                              (fn []
+                                                (service/refresh-attachments)
+                                                (service/open-verdict app-id
+                                                                      verdict-id
+                                                                      reset-verdict)))
+                                  :verdict-id verdict-id})))
 
 (defonce args (atom {}))
 

@@ -86,11 +86,14 @@
 
 (defmethod action/allowed-actions-for-category :pate-verdicts
   [command]
-  (action/allowed-actions-for-collection :pate-verdicts
-                                         (fn [application verdict]
-                                           {:id         (:id application)
-                                            :verdict-id (:id verdict)})
-                                         command))
+  (if-let [verdict-id (get-in command [:data :verdict-id])]
+    {verdict-id (action/allowed-category-actions-for-command :pate-verdicts
+                                                             command)}
+    (action/allowed-actions-for-collection :pate-verdicts
+                                           (fn [application verdict]
+                                             {:id         (:id application)
+                                              :verdict-id (:id verdict)})
+                                           command)))
 
 ;; ------------------------------------------
 ;; Actions common with modern and legacy

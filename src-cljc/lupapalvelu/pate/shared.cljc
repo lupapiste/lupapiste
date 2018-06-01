@@ -977,22 +977,24 @@
                                 :rows    [[{:col  6
                                             :dict :attachments}]]}}})
 
-(def versub-upload
-  {:dictionary
-   {:upload
-    {:attachments {:i18nkey    :application.verdict-attachments
-                   :label?     false
-                   :type-group #"paatoksenteko"
-                   :default    :paatoksenteko.paatosote
-                   :dropzone   "#pate-verdict-page"
-                   :multiple?  true}}}
-   :section {:id       :upload
-             :hide?    :_meta.published?
-             :css      :pate-section--no-border
-             :buttons? false
-             :grid     {:columns 7
-                        :rows    [[{:col  6
-                                    :dict :upload}]]}}})
+(defn versub-upload
+  ([{:keys [type-group default]}]
+   {:dictionary
+    {:upload
+     {:attachments {:i18nkey    :application.verdict-attachments
+                    :label?     false
+                    :type-group (or type-group #"paatoksenteko")
+                    :default    (or default :paatoksenteko.paatosote)
+                    :dropzone   "#pate-verdict-page"
+                    :multiple?  true}}}
+    :section {:id       :upload
+              :hide?    :_meta.published?
+              :css      :pate-section--no-border
+              :buttons? false
+              :grid     {:columns 7
+                         :rows    [[{:col  6
+                                     :dict :upload}]]}}})
+  ([] (versub-upload {})))
 
 (def r-verdict-schema-1 (build-verdict-schema :r 1
                                               (versub-dates :r)
@@ -1009,7 +1011,7 @@
                                               versub-deviations
                                               versub-buildings
                                               versub-attachments
-                                              versub-upload))
+                                              (versub-upload)))
 
 (def versub-start-info ;; Lahtokohtatiedot
   (phrase-versub :start-info :pate-start-info :yleinen
@@ -1053,7 +1055,7 @@
                                               versub-buyout
                                               versub-fyi
                                               versub-attachments
-                                              versub-upload))
+                                              (versub-upload)))
 
 (def versub-dates-ya
   (-> (versub-dates :ya)
@@ -1100,7 +1102,7 @@
                                                versub-statements
                                                versub-inform-others
                                                versub-attachments
-                                               versub-upload))
+                                               (versub-upload)))
 
 (defn verdict-schema
   "Nil version returns the latest version."
@@ -1164,3 +1166,13 @@
                              {})
                       path)
       :else                   (recur (butlast path)))))
+
+(defn ya-verdict-type
+  "YA verdicts come in different types. The initial value is extracted
+  from the primary operation name."
+  [{primary-op :primaryOperation}]
+  (let [regex (->> ya-verdict-types
+                   (map name)
+                   (s/join "|")
+                   re-pattern)]
+    (re-find regex (:name primary-op))))

@@ -71,15 +71,7 @@
      (get-in data [:kayttotarkoitus :value]) ;; YA
      "")))
 
-(defn verdict-type
-  "YA verdicts come in different types. The initial value is extracted
-  from the primary operation name."
-  [{primary-op :primaryOperation}]
-  (let [regex (->> shared/ya-verdict-types
-                   (map name)
-                   (ss/join "|")
-                   re-pattern)]
-    (re-find regex (:name primary-op))))
+
 
 (defn dicts->kw-paths
   [dictionary]
@@ -390,7 +382,7 @@
   (-> initmap
       (init--dict-by-application :handler general-handler)
       init--verdict-dates
-      (init--dict-by-application :verdict-type verdict-type)
+      (init--dict-by-application :verdict-type shared/ya-verdict-type)
       (init--requirements-references :plans)
       (init--requirements-references :reviews)
       init--upload
@@ -456,17 +448,20 @@
   (util/pcond-> (-> s ss/->plain-string ss/trim)
                 ss/not-blank? fun))
 
-(defn- verdict-select-string [lang {:keys [data] :as verdict} dict]
+(defn- verdict-string [lang {:keys [data] :as verdict} dict]
   (title-fn (dict data)
             (fn [value]
               (when-let [{:keys [reference-list
-                                 select]} (some-> (verdict-schema verdict)
-                                                  :dictionary
-                                                  dict)]
-                (i18n/localize lang
-                               (:loc-prefix (or reference-list
-                                                select))
-                               value)))))
+                                 select
+                                 text]} (some-> (verdict-schema verdict)
+                                                :dictionary
+                                                dict)]
+                (if text
+                  value
+                  (i18n/localize lang
+                                 (:loc-prefix (or reference-list
+                                                  select))
+                                 value))))))
 
 (defn- verdict-section-string [{data :data}]
   (title-fn (:verdict-section data) #(str "\u00a7" %)))
@@ -492,9 +487,9 @@
           :verdict-date (:verdict-date data)
           :title (->> (if published
                         [(get section-strings id)
-                         (util/pcond-> (verdict-select-string lang verdict :verdict-type)
+                         (util/pcond-> (verdict-string lang verdict :verdict-type)
                           ss/not-blank? (str " -"))
-                         (verdict-select-string lang verdict :verdict-code)
+                         (verdict-string lang verdict :verdict-code)
                          rep-string]
                         [(i18n/localize lang :pate-verdict-draft)
                          rep-string])
@@ -910,7 +905,8 @@
   (let [{:keys [data published template]
          :as   verdict} (command->verdict command)]
     {:verdict    (assoc (select-keys verdict [:id :modified :published
-                                              :schema-version :legacy?])
+                                              :category :schema-version
+                                              :legacy?])
                         :data (if published
                                 data
                                 (:data (enrich-verdict command

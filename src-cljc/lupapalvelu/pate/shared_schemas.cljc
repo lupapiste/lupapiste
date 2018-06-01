@@ -106,11 +106,13 @@
 (defschema PateComponent
   (merge PateBase
          {;; Show label? Default true
-          (sc/optional-key :label?)     sc/Bool
+          (sc/optional-key :label?)          sc/Bool
           ;; Read-only components cannot be edited and only rendered
-          ;; in the viewing mode.
-          (sc/optional-key :read-only?) sc/Bool
-          }))
+          ;; in the viewing mode. Overrides :always-editing?
+          (sc/optional-key :read-only?)      sc/Bool
+          ;; If true, the component is always rendered as the edit
+          ;; component regardless of the container mode.
+          (sc/optional-key :always-editing?) sc/Bool}))
 
 (defschema PateReferenceList
   "Component that builds schema from an external source. Each item is
