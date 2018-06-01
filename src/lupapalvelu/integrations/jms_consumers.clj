@@ -7,5 +7,5 @@
 
 (defn init! []
   (when (env/feature? :jms)
-    (let [organization-ids (->> (get-organizations {} [:_id]) (map :id))]
+    (let [organization-ids (->> (get-organizations {} [:_id]) (mapv :id))]
       (fetch-verdict-consumer/create-fetch-verdict-consumers! organization-ids))))
