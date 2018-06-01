@@ -69,7 +69,8 @@
       :email (get-in applicant [:henkilo :sahkopostiosoite])
       :koulutusvalinta (get-in applicant [:koulutus])
       :valmistumisvuosi (get-in applicant [:valmistumisvuosi])
-      :kuntaRoolikoodi (get-in applicant [:suunnittelijaRoolikoodi])
+      :kuntaRoolikoodi (or (get-in applicant [:suunnittelijaRoolikoodi])
+                           (get-in applicant [:tyonjohtajaRooliKoodi]))
       (tools/default-values element))
     (let [postiosoite (or
                         (get-in applicant [:yritys :postiosoite])
@@ -254,7 +255,6 @@
                             (concat (map suunnittelija->party-document (:suunnittelijat app-info))
                                     (map osapuoli->party-document (:muutOsapuolet app-info))
                                     (map tyonjohtaja->tj-document (:tyonjohtajat app-info))))
-
         structure-descriptions (map :description buildings-and-structures)
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
