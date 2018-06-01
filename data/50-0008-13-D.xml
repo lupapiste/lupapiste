@@ -1,0 +1,554 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rakval:Rakennusvalvonta
+  xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.6/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.2.0/rakennusvalvonta.xsd http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+  xmlns:kiito="http://www.paikkatietopalvelu.fi/gml/kiinteistotoimitus"
+  xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+  xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:mkos="http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet"
+  xmlns:wfs="http://www.opengis.net/wfs"
+  xmlns:ymy="http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ppst="http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"
+  xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+  xmlns:ymm="http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat"
+  xmlns:ows="http://www.opengis.net/ows"
+  xmlns:gml="http://www.opengis.net/gml"
+  xmlns:ymv="http://www.paikkatietopalvelu.fi/gml/ymparisto/vesihuoltolaki"
+  xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ymi="http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset">
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi>CGI KRYSP</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Vantaa</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2018-05-14</yht:toimitusPvm>
+    <yht:kuntakoodi>092</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia gml:id="rluvat.99045">
+      <gml:location>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.5498418E7 6684312.0</gml:pos>
+        </gml:Point>
+      </gml:location>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-01-03Z</yht:pvm>
+          <yht:tila>vireillä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-01-03Z</yht:pvm>
+          <yht:tila>uusi lupa, ei käsittelyssä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-01-23Z</yht:pvm>
+          <yht:tila>lupa hyväksytty</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Lupaosasto</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-06-10Z</yht:pvm>
+          <yht:tila>lopullinen loppukatselmus tehty</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Kaj Hurme</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>50-0008-13-D</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200013-0008</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-01-03Z</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>13-0294-TJO 50</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200013-0294</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-01-03Z</yht:saapumisPvm>
+          <yht:viittaus>seuraava rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>13-0270-TJO 50</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200013-0270</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-01-03Z</yht:saapumisPvm>
+          <yht:viittaus>seuraava rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:osapuolettieto>
+        <yht:Osapuolet>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+              <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+              <yht:yritys>
+                <yht:nimi>Kiinteistö Oy Vantaan Valimotien Kiinteistöt</yht:nimi>
+                <yht:liikeJaYhteisotunnus>0684694-7</yht:liikeJaYhteisotunnus>
+                <yht:postiosoitetieto>
+                  <yht:postiosoite>
+                    <yht:osoitenimi>
+                      <yht:teksti>PL 930</yht:teksti>
+                    </yht:osoitenimi>
+                    <yht:postinumero>00101</yht:postinumero>
+                    <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+                  </yht:postiosoite>
+                </yht:postiosoitetieto>
+                <yht:puhelin>0500-402487</yht:puhelin>
+                <yht:sahkopostiosoite>timo.laakso@newsec.fi</yht:sahkopostiosoite>
+              </yht:yritys>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian laskun maksaja</yht:kuntaRooliKoodi>
+              <yht:yritys>
+                <yht:nimi>Kiinteistö Oy Vantaan Valimotien Kiinteistöt</yht:nimi>
+                <yht:liikeJaYhteisotunnus>0684694-7</yht:liikeJaYhteisotunnus>
+                <yht:postiosoitetieto>
+                  <yht:postiosoite>
+                    <yht:osoitenimi>
+                      <yht:teksti>PL 930</yht:teksti>
+                    </yht:osoitenimi>
+                    <yht:postinumero>00101</yht:postinumero>
+                    <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+                  </yht:postiosoite>
+                </yht:postiosoitetieto>
+                <yht:puhelin>0500-402487</yht:puhelin>
+                <yht:sahkopostiosoite>timo.laakso@newsec.fi</yht:sahkopostiosoite>
+              </yht:yritys>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:suunnittelijatieto>
+            <yht:Suunnittelija>
+              <yht:suunnittelijaRoolikoodi>rakennussuunnittelija</yht:suunnittelijaRoolikoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Pekka</yht:etunimi>
+                  <yht:sukunimi>Hytönen</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Hiihtomäentie 39</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>00800</yht:postinumero>
+                  <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>rotko.hytonen@arkkitehdit.inet.fi</yht:sahkopostiosoite>
+                <yht:puhelin>040 821 9992</yht:puhelin>
+              </yht:henkilo>
+              <yht:koulutus>arkkitehti</yht:koulutus>
+            </yht:Suunnittelija>
+          </yht:suunnittelijatieto>
+          <yht:suunnittelijatieto>
+            <yht:Suunnittelija>
+              <yht:suunnittelijaRoolikoodi>pääsuunnittelija</yht:suunnittelijaRoolikoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Pekka</yht:etunimi>
+                  <yht:sukunimi>Hytönen</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Hiihtomäentie 39</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>00800</yht:postinumero>
+                  <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>rotko.hytonen@arkkitehdit.inet.fi</yht:sahkopostiosoite>
+                <yht:puhelin>040 821 9992</yht:puhelin>
+              </yht:henkilo>
+              <yht:koulutus>arkkitehti</yht:koulutus>
+            </yht:Suunnittelija>
+          </yht:suunnittelijatieto>
+          <yht:suunnittelijatieto>
+            <yht:Suunnittelija>
+              <yht:suunnittelijaRoolikoodi>IV-suunnittelija</yht:suunnittelijaRoolikoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Jarmo</yht:etunimi>
+                  <yht:sukunimi>Piirainen</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Malminkaari 23B</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>00700</yht:postinumero>
+                  <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>jarmo.piirainen@viisicon.fi</yht:sahkopostiosoite>
+                <yht:puhelin>0400819820</yht:puhelin>
+                <yht:henkilotunnus>260562-179K</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:koulutus>LVI-insinööri</yht:koulutus>
+              <yht:valmistumisvuosi>1988</yht:valmistumisvuosi>
+            </yht:Suunnittelija>
+          </yht:suunnittelijatieto>
+          <yht:tyonjohtajatieto>
+            <yht:Tyonjohtaja>
+              <yht:tyonjohtajaRooliKoodi>IV-työnjohtaja</yht:tyonjohtajaRooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Timo</yht:etunimi>
+                  <yht:sukunimi>Mäkäräinen</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Aliverstaankuja 3C9</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>04500</yht:postinumero>
+                  <yht:postitoimipaikannimi>KELLOKOSKI</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>timo.makarainen@consti.fi</yht:sahkopostiosoite>
+                <yht:puhelin>0404552371</yht:puhelin>
+                <yht:henkilotunnus>020564-213P</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:koulutus>LVI-työteknikko</yht:koulutus>
+              <yht:valmistumisvuosi>2009</yht:valmistumisvuosi>
+              <yht:alkamisPvm>2013-02-25Z</yht:alkamisPvm>
+              <yht:paattymisPvm>2013-05-22Z</yht:paattymisPvm>
+              <yht:hakemuksenSaapumisPvm>2013-02-25Z</yht:hakemuksenSaapumisPvm>
+            </yht:Tyonjohtaja>
+          </yht:tyonjohtajatieto>
+          <yht:tyonjohtajatieto>
+            <yht:Tyonjohtaja>
+              <yht:tyonjohtajaRooliKoodi>vastaava työnjohtaja</yht:tyonjohtajaRooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Suvi</yht:etunimi>
+                  <yht:sukunimi>Lepola</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Hopeatie 2</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>00440</yht:postinumero>
+                  <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>suvi.lepola@consti.fi</yht:sahkopostiosoite>
+                <yht:puhelin>0504301147</yht:puhelin>
+                <yht:henkilotunnus>270788-084F</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:koulutus>rakennusinsinööri</yht:koulutus>
+              <yht:valmistumisvuosi>2011</yht:valmistumisvuosi>
+              <yht:alkamisPvm>2013-03-01Z</yht:alkamisPvm>
+              <yht:paattymisPvm>2013-06-10Z</yht:paattymisPvm>
+              <yht:hakemuksenSaapumisPvm>2013-03-01Z</yht:hakemuksenSaapumisPvm>
+              <yht:tyonjohtajaHakemusKytkin>true</yht:tyonjohtajaHakemusKytkin>
+            </yht:Tyonjohtaja>
+          </yht:tyonjohtajatieto>
+        </yht:Osapuolet>
+      </rakval:osapuolettieto>
+      <rakval:rakennuspaikkatieto>
+        <rakval:Rakennuspaikka gml:id="rpaikka.19345">
+          <yht:yksilointitieto>5068747</yht:yksilointitieto>
+          <yht:alkuHetki>2013-01-03T00:00:00Z</yht:alkuHetki>
+          <yht:rakennuspaikanKiinteistotieto>
+            <yht:RakennuspaikanKiinteisto>
+              <yht:kiinteistotieto>
+                <yht:Kiinteisto>
+                  <yht:kylanimi>Tammisto</yht:kylanimi>
+                  <yht:kiinteistotunnus>09205000040017</yht:kiinteistotunnus>
+                </yht:Kiinteisto>
+              </yht:kiinteistotieto>
+              <yht:kokotilaKytkin>true</yht:kokotilaKytkin>
+              <yht:hallintaperuste>oma</yht:hallintaperuste>
+            </yht:RakennuspaikanKiinteisto>
+          </yht:rakennuspaikanKiinteistotieto>
+          <yht:sijaintitieto>
+            <yht:Sijainti>
+              <yht:piste>
+                <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                  <gml:pos>2.5498418E7 6684312.0</gml:pos>
+                </gml:Point>
+              </yht:piste>
+            </yht:Sijainti>
+          </yht:sijaintitieto>
+          <yht:kaavanaste>asema</yht:kaavanaste>
+          <yht:rakennusoikeusYhteensa>30900</yht:rakennusoikeusYhteensa>
+          <yht:osoite>
+            <yht:kunta>092</yht:kunta>
+            <yht:osoitenimi>
+              <yht:teksti xml:lang="fi">Tammiston kauppatie</yht:teksti>
+              <yht:teksti xml:lang="sv">Rosendals handelsväg</yht:teksti>
+            </yht:osoitenimi>
+            <yht:osoitenumero>7</yht:osoitenumero>
+            <yht:postinumero>01510</yht:postinumero>
+            <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+          </yht:osoite>
+          <yht:kaavatilanne>asemakaava</yht:kaavatilanne>
+        </rakval:Rakennuspaikka>
+      </rakval:rakennuspaikkatieto>
+      <rakval:referenssiPiste>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.5498418E7 6684312.0</gml:pos>
+        </gml:Point>
+      </rakval:referenssiPiste>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>875F77C5D93846C782D0331CB6DB18</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-05-23Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Käyttö- ja huolto-ohje</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>BF0277DACE1B4E49A8CE22E7C3AD19</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-06-10Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Tarkastusasiakirja</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>978E27D99C0847E8827F81EB6F053E</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-05-15Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Sähkön varmennustarkastus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>956B8E6C5E424EAAA0A49F2651BAD1</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2011-05-23Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>Osastointimuutos (RAM) hyväksytettävä rakennusvalvonnassa.</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Ositt.loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>DFF72639B22242B8993D32F598D8A8</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-05-07Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Sähköurakoitsijan tarkastus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>195105F0647D497C9F700AFC42C987</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-06-10Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+          <rakval:katselmuksenLaji>loppukatselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>C7441157D891401D8EF2D8D1613714</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-05-22Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:pitaja>Jorma Sulander</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>ivmptk: 10.4.2013&#xd;
+tarkastusasiakirja ok</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Ilmanvaihtokatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>47742D08FA744C7B88696D5C820AA4</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-05-23Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+          <rakval:katselmuksenLaji>rakennekatselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>rakennekatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>620F4AD18FC34B94A63AEC5C83ACD1</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-03-08Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Aloitusilmoitus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:paatostieto>
+        <yht:Paatos>
+          <yht:lupamaaraykset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>loppukatselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>loppukatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>muu katselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Ilmanvaihtokatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>rakennekatselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>rakennekatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>muu katselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Aloitusilmoitus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:maaraystieto>
+              <yht:Maarays>
+                <yht:sisalto>Muu lupaehto: 
+
+Ennen rakennustyön aloittamista on tehtävä aloitusilmoitus rakennusvalvonnan tarkastusinsinöörille.&#xd;
+&#xd;
+Rakentamisesta on pidettävä tarkastusasiakirjaa, jonka yhteenvedon kopio arkistoidaan rakennusvalvonnan lupa-asiakirjojen yhteyteen.&#xd;
+&#xd;
+Rakennukselle on laadittava käyttö- ja huolto-ohje.&#xd;
+&#xd;
+Toteutuneen rakentamisen mukaiset pääpiirustukset ja erityissuunnitelmat on toimitettava sähköisessä muodossa rakennusvalvontaan ennen loppukatselmusta.</yht:sisalto>
+              </yht:Maarays>
+            </yht:maaraystieto>
+            <yht:vaadittuErityissuunnitelmatieto>
+              <yht:vaadittuErityissuunnitelma>Loppupiirustukset</yht:vaadittuErityissuunnitelma>
+            </yht:vaadittuErityissuunnitelmatieto>
+            <yht:vaadittuErityissuunnitelmatieto>
+              <yht:vaadittuErityissuunnitelma>Rakennesuunnitelmat</yht:vaadittuErityissuunnitelma>
+            </yht:vaadittuErityissuunnitelmatieto>
+            <yht:vaadittuErityissuunnitelmatieto>
+              <yht:vaadittuErityissuunnitelma>Ilmanvaihtosuunnitelmat</yht:vaadittuErityissuunnitelma>
+            </yht:vaadittuErityissuunnitelmatieto>
+            <yht:vaadittuTyonjohtajatieto>
+              <yht:VaadittuTyonjohtaja>
+                <yht:tyonjohtajaRooliKoodi>IV-työnjohtaja</yht:tyonjohtajaRooliKoodi>
+              </yht:VaadittuTyonjohtaja>
+            </yht:vaadittuTyonjohtajatieto>
+            <yht:vaadittuTyonjohtajatieto>
+              <yht:VaadittuTyonjohtaja>
+                <yht:tyonjohtajaRooliKoodi>vastaava työnjohtaja</yht:tyonjohtajaRooliKoodi>
+              </yht:VaadittuTyonjohtaja>
+            </yht:vaadittuTyonjohtajatieto>
+          </yht:lupamaaraykset>
+          <yht:paivamaarat>
+            <yht:aloitettavaPvm>2016-02-08Z</yht:aloitettavaPvm>
+            <yht:lainvoimainenPvm>2013-02-08Z</yht:lainvoimainenPvm>
+            <yht:voimassaHetkiPvm>2018-02-08Z</yht:voimassaHetkiPvm>
+            <yht:antoPvm>2013-01-24Z</yht:antoPvm>
+            <yht:viimeinenValitusPvm>2013-02-07Z</yht:viimeinenValitusPvm>
+            <yht:julkipanoPvm>2013-01-24Z</yht:julkipanoPvm>
+          </yht:paivamaarat>
+          <yht:poytakirja>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>Lupaosasto</yht:paatoksentekija>
+            <yht:paatospvm>2013-01-23Z</yht:paatospvm>
+            <yht:pykala>73</yht:pykala>
+            <yht:liite>
+              <yht:kuvaus>Paatosote</yht:kuvaus>
+              <yht:linkkiliitteeseen>http://80.248.164.27/krysp_tiedostot/liitteet/092/arkisto/2013/PAATOSOTE_50-0008-13-D_20130123091342687.rtf</yht:linkkiliitteeseen>
+              <yht:muokkausHetki>2013-01-23T09:16:45Z</yht:muokkausHetki>
+              <yht:tyyppi>Paatosote</yht:tyyppi>
+            </yht:liite>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+      <rakval:lisatiedot>
+        <rakval:Lisatiedot>
+          <rakval:salassapitotietoKytkin>false</rakval:salassapitotietoKytkin>
+          <rakval:asioimiskieli>suomi</rakval:asioimiskieli>
+          <rakval:suoramarkkinointikieltoKytkin>false</rakval:suoramarkkinointikieltoKytkin>
+          <rakval:rakentamisentiedot>
+            <rakval:paloluokka>P1</rakval:paloluokka>
+          </rakval:rakentamisentiedot>
+        </rakval:Lisatiedot>
+      </rakval:lisatiedot>
+      <rakval:asianTiedot>
+        <rakval:Asiantiedot>
+          <rakval:vahainenPoikkeaminen></rakval:vahainenPoikkeaminen>
+          <rakval:rakennusvalvontaasianKuvaus>Käyttötarkoituksen muutos liike- ja toimistorakennuksessa.</rakval:rakennusvalvontaasianKuvaus>
+        </rakval:Asiantiedot>
+      </rakval:asianTiedot>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>

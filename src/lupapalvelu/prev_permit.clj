@@ -31,6 +31,14 @@
 (def building-fields
   (->> schemas/rakennuksen-tiedot (map (comp keyword :name)) (concat [:rakennuksenOmistajat :valtakunnallinenNumero])))
 
+(defn db-format->permit-id
+  "Viitelupien tunnukset on Factassa tallennettu 'tietokantaformaatissa', josta ne on tunnuksella
+  hakemista varten muunnettava yleiseen formaattiin.
+  Esimerkki: 12-0477-A 63 -> 63-0447-12-A"
+  [id]
+  (let [parts (zipmap '(:vuosi :no :tyyppi :kauposa) (ss/split id #"[- ]"))]
+    (ss/join "-" ((juxt :kauposa :no :vuosi :tyyppi) parts))))
+
 (defn- get-applicant-email [applicant]
   (-> (or
         (get-in applicant [:henkilo :sahkopostiosoite])
@@ -59,14 +67,15 @@
       :postitoimipaikannimi (get-in applicant [:henkilo :osoite :postitoimipaikannimi])
       :puhelin (some->> (get-in applicant [:henkilo :puhelin])
                         (re-find #"[0-9- ]+")) ;; Strip illegal characters: only accept dash, numbers and whitespace.
+      :kuntaRoolikoodi (or (get-in applicant [:suunnittelijaRoolikoodi])
+                           (get-in applicant [:tyonjohtajaRooliKoodi]))
       :email (get-in applicant [:henkilo :sahkopostiosoite])
       :koulutusvalinta (get-in applicant [:koulutus])
       :valmistumisvuosi (get-in applicant [:valmistumisvuosi])
       :kuntaRoolikoodi (get-in applicant [:suunnittelijaRoolikoodi])
       (tools/default-values element))
-    (let [postiosoite (or
-                        (get-in applicant [:yritys :postiosoite])
-                        (get-in applicant [:yritys :postiosoitetieto :postiosoite]))]
+    (let [postiosoite (or (get-in applicant [:yritys :postiosoite])
+                          (get-in applicant [:yritys :postiosoitetieto :postiosoite]))]
       (case (keyword name)
         :_selected "yritys"
         :companyId nil
@@ -120,7 +129,6 @@
         unset-type     (if (contains? party :henkilo) :yritys :henkilo)]
     (assoc-in document [:data unset-type] (unset-type default-values))))
 
-
 (defn- suunnittelijaRoolikoodi->doc-schema [koodi]
   (cond
     (= koodi "p\u00e4\u00e4suunnittelija") "paasuunnittelija"
@@ -138,6 +146,9 @@
 (defn suunnittelija->party-document [party]
   (when-let [schema-name (suunnittelijaRoolikoodi->doc-schema (:suunnittelijaRoolikoodi party))]
     (party->party-doc party schema-name)))
+
+(defn tyonjohtaja->tj-document [party]
+  (party->party-doc party "tyonjohtaja-v2"))
 
 (defn- invite-applicants [{:keys [lang user created application] :as command} applicants authorize-applicants]
 
@@ -243,8 +254,8 @@
         created-application (application/do-create-application command manual-schema-datas)
         new-parties (remove empty?
                             (concat (map suunnittelija->party-document (:suunnittelijat app-info))
-                                    (map osapuoli->party-document (:muutOsapuolet app-info))))
-
+                                    (map osapuoli->party-document (:muutOsapuolet app-info))
+                                    (map tyonjohtaja->tj-document (:tyonjohtajat app-info))))
         structure-descriptions (map :description buildings-and-structures)
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
@@ -331,7 +342,6 @@
                                           (if no-proper-applicants?
                                             (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
                                             (ok :id id))))))
-
 
 (def fix-prev-permit-counter (atom 0))
 

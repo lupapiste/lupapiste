@@ -540,7 +540,7 @@
                    {:name "patevyys-tyonjohtaja" :type :group :body patevyys-tyonjohtaja}
                    sijaisuus-tyonjohtaja))
 
-(def kuntaroolikoodi-tyonjohtaja-v2 [{:name "kuntaRoolikoodi"
+(def kuntaroolikoodi-tyonjohtaja-v2 [{:name "kuntaRoolikoodi" ;; kuntaRoolikoodi
                                       :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label"
                                       :type :select
                                       :emit [:filterByCode]

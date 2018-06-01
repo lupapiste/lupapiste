@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rakval:Rakennusvalvonta
+  xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.6/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.2.0/rakennusvalvonta.xsd http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+  xmlns:kiito="http://www.paikkatietopalvelu.fi/gml/kiinteistotoimitus"
+  xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+  xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:mkos="http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet"
+  xmlns:wfs="http://www.opengis.net/wfs"
+  xmlns:ymy="http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ppst="http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"
+  xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+  xmlns:ymm="http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat"
+  xmlns:ows="http://www.opengis.net/ows"
+  xmlns:gml="http://www.opengis.net/gml"
+  xmlns:ymv="http://www.paikkatietopalvelu.fi/gml/ymparisto/vesihuoltolaki"
+  xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ymi="http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset">
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi>CGI KRYSP</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Vantaa</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2018-05-14</yht:toimitusPvm>
+    <yht:kuntakoodi>092</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia gml:id="rluvat.99097">
+      <gml:location>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.5508024E7 6692335.0</gml:pos>
+        </gml:Point>
+      </gml:location>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-05-13Z</yht:pvm>
+          <yht:tila>vireillä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-05-13Z</yht:pvm>
+          <yht:tila>uusi lupa, ei käsittelyssä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-06-11Z</yht:pvm>
+          <yht:tila>luvalla ei loppukatselmusehtoa, lupa valmis</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Lupaosasto</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-06-11Z</yht:pvm>
+          <yht:tila>lupa hyväksytty</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Lupaosasto</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>86-0497-13-MAI</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200013-0497</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-05-13Z</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:osapuolettieto>
+        <yht:Osapuolet>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+              <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Leena</yht:etunimi>
+                  <yht:sukunimi>Voutilainen</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Klaavuntie 6 D 32</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>00910</yht:postinumero>
+                  <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>leenav@saunalhti.fi</yht:sahkopostiosoite>
+                <yht:puhelin>040 5804022</yht:puhelin>
+                <yht:henkilotunnus>101160-086K</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian laskun maksaja</yht:kuntaRooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Leena</yht:etunimi>
+                  <yht:sukunimi>Voutilainen</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Klaavuntie 6 D 32</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>00910</yht:postinumero>
+                  <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>leenav@saunalhti.fi</yht:sahkopostiosoite>
+                <yht:puhelin>040 5804022</yht:puhelin>
+                <yht:henkilotunnus>101160-086K</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonnan asiamies</yht:kuntaRooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Kari</yht:etunimi>
+                  <yht:sukunimi>Meriluoto</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Taulatie 2 A</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>01670</yht:postinumero>
+                  <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>kari.meriluoto@elisanet.fi</yht:sahkopostiosoite>
+                <yht:puhelin>044 2835575</yht:puhelin>
+              </yht:henkilo>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:suunnittelijatieto>
+            <yht:Suunnittelija>
+              <yht:suunnittelijaRoolikoodi>pääsuunnittelija</yht:suunnittelijaRoolikoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Kari Juhani</yht:etunimi>
+                  <yht:sukunimi>Meriluoto</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Taulatie 2 A</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>01670</yht:postinumero>
+                  <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>kari.meriluoto@elisanet.fi</yht:sahkopostiosoite>
+                <yht:puhelin>0442835575</yht:puhelin>
+                <yht:henkilotunnus>300346-099U</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:koulutus>rakennusmestari</yht:koulutus>
+            </yht:Suunnittelija>
+          </yht:suunnittelijatieto>
+        </yht:Osapuolet>
+      </rakval:osapuolettieto>
+      <rakval:rakennuspaikkatieto>
+        <rakval:Rakennuspaikka gml:id="rpaikka.20120">
+          <yht:yksilointitieto>5070974</yht:yksilointitieto>
+          <yht:alkuHetki>2013-05-13T00:00:00Z</yht:alkuHetki>
+          <yht:rakennuspaikanKiinteistotieto>
+            <yht:RakennuspaikanKiinteisto>
+              <yht:kiinteistotieto>
+                <yht:Kiinteisto>
+                  <yht:kylanimi>Alikerava</yht:kylanimi>
+                  <yht:kiinteistotunnus>09240100060407</yht:kiinteistotunnus>
+                  <yht:maaraAlaTunnus>M0501</yht:maaraAlaTunnus>
+                </yht:Kiinteisto>
+              </yht:kiinteistotieto>
+              <yht:kokotilaKytkin>false</yht:kokotilaKytkin>
+              <yht:hallintaperuste>oma</yht:hallintaperuste>
+            </yht:RakennuspaikanKiinteisto>
+          </yht:rakennuspaikanKiinteistotieto>
+          <yht:sijaintitieto>
+            <yht:Sijainti>
+              <yht:piste>
+                <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                  <gml:pos>2.5508024E7 6692335.0</gml:pos>
+                </gml:Point>
+              </yht:piste>
+            </yht:Sijainti>
+          </yht:sijaintitieto>
+          <yht:kaavanaste>asema</yht:kaavanaste>
+          <yht:rakennusoikeusYhteensa>346</yht:rakennusoikeusYhteensa>
+          <yht:osoite>
+            <yht:kunta>092</yht:kunta>
+            <yht:osoitenimi>
+              <yht:teksti xml:lang="fi">Lukkirinne</yht:teksti>
+              <yht:teksti xml:lang="sv">Spindelbrinken</yht:teksti>
+            </yht:osoitenimi>
+            <yht:osoitenumero>7</yht:osoitenumero>
+            <yht:jakokirjain>a</yht:jakokirjain>
+            <yht:postinumero>01490</yht:postinumero>
+            <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+          </yht:osoite>
+          <yht:kaavatilanne>asemakaava</yht:kaavatilanne>
+        </rakval:Rakennuspaikka>
+      </rakval:rakennuspaikkatieto>
+      <rakval:referenssiPiste>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.5508024E7 6692335.0</gml:pos>
+        </gml:Point>
+      </rakval:referenssiPiste>
+      <rakval:paatostieto>
+        <yht:Paatos>
+          <yht:paivamaarat>
+            <yht:aloitettavaPvm>2016-06-27Z</yht:aloitettavaPvm>
+            <yht:lainvoimainenPvm>2013-06-27Z</yht:lainvoimainenPvm>
+            <yht:voimassaHetkiPvm>2016-06-27Z</yht:voimassaHetkiPvm>
+            <yht:antoPvm>2013-06-12Z</yht:antoPvm>
+            <yht:viimeinenValitusPvm>2013-06-26Z</yht:viimeinenValitusPvm>
+            <yht:julkipanoPvm>2013-06-12Z</yht:julkipanoPvm>
+          </yht:paivamaarat>
+          <yht:poytakirja>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>Lupaosasto</yht:paatoksentekija>
+            <yht:paatospvm>2013-06-11Z</yht:paatospvm>
+            <yht:pykala>591</yht:pykala>
+            <yht:liite>
+              <yht:kuvaus>Paatosote</yht:kuvaus>
+              <yht:linkkiliitteeseen>http://80.248.164.27/krysp_tiedostot/liitteet/092/arkisto/2013/PAATOSOTE_86-0497-13-MAI_20130611131618906.rtf</yht:linkkiliitteeseen>
+              <yht:muokkausHetki>2013-06-11T13:17:13Z</yht:muokkausHetki>
+              <yht:tyyppi>Paatosote</yht:tyyppi>
+            </yht:liite>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+      <rakval:lisatiedot>
+        <rakval:Lisatiedot>
+          <rakval:salassapitotietoKytkin>false</rakval:salassapitotietoKytkin>
+          <rakval:asioimiskieli>suomi</rakval:asioimiskieli>
+          <rakval:suoramarkkinointikieltoKytkin>false</rakval:suoramarkkinointikieltoKytkin>
+        </rakval:Lisatiedot>
+      </rakval:lisatiedot>
+      <rakval:asianTiedot>
+        <rakval:Asiantiedot>
+          <rakval:vahainenPoikkeaminen></rakval:vahainenPoikkeaminen>
+          <rakval:rakennusvalvontaasianKuvaus>Puiden kaatoa ja tontin raivausta tulevan asuinrakennuksen  kohdalta.</rakval:rakennusvalvontaasianKuvaus>
+        </rakval:Asiantiedot>
+      </rakval:asianTiedot>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>
