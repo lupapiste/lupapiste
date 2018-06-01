@@ -64,7 +64,7 @@
 (defn get-organization-permissions [{{org-authz :orgAuthz} :user {org-id :organization} :application}]
   (->> (if org-id
          (get org-authz (keyword org-id))
-         (mapcat val org-authz))
+         (mapcat val org-authz))                                                                                        ; FIXME should figure out org from session
        (map (partial get-permissions-by-role :organization))
        (reduce into #{})))
 
