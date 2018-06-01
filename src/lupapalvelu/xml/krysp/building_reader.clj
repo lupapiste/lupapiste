@@ -181,7 +181,7 @@
                      :postinumero                   (get-text rakennus :osoite :postinumero)
                      :postitoimipaikannimi          (get-text rakennus :osoite :postitoimipaikannimi)}
             :kaytto {:kayttotarkoitus               (get-text rakennus :kayttotarkoitus)
-                     :rakentajaTyyppi               (get-text rakennus :rakentajaTyyppi)}
+                     :rakentajaTyyppi               (get-text rakennus :rakentajatyyppi)}
             :luokitus {:energialuokka               (get-text rakennus :energialuokka)
                        :paloluokka                  (get-text rakennus :paloluokka)}
             :mitat {:kellarinpinta-ala              (get-non-zero-integer-text rakennus :kellarinpinta-ala)
