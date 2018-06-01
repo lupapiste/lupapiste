@@ -761,3 +761,47 @@
     (input-validators-fail {:action :success}) => nil)
   (fact
     (input-validators-fail {:action :failing}) => {:oh "no"}))
+
+;;
+;; Test that input-validator can be a function or schema.
+;;
+
+; Test command that has two validators, first is a function that
+; returns what the command has under ::validator-response, second
+; uses schema `InputValidatorTestSchema` as validator. On success
+; command returns `:data` of command.
+
+(sc/defschema InputValidatorTestSchema {:answer sc/Int})
+
+(defcommand "input-validator-test-command"
+  {:input-validators [(fn [command] (-> command ::validator-response))
+                      InputValidatorTestSchema]
+   :user-roles       #{:anonymous}}
+  [command]
+  (-> command :data))
+
+(facts "input-validator can be a function or schema"
+  (fact "validator returns nil, data matches schema => command is successful"
+    (run {:action              :input-validator-test-command
+          :data                {:answer 42}
+          ::validator-response nil}
+         [input-validators-fail]
+         true)
+    => {:answer 42})
+
+  (fact "fn validator returns non-nil => command is fails"
+    (run {:action              :input-validator-test-command
+          :data                {:answer 42}
+          ::validator-response ::validator-fail}
+         [input-validators-fail]
+         true)
+    => ::validator-fail)
+
+  (fact "schema validation fails => command is fails"
+    (run {:action              :input-validator-test-command
+          :data                {:answer "foo"}
+          ::validator-response nil}
+         [input-validators-fail]
+         true)
+    => {:ok   false
+        :text "input does not match schema InputValidatorTestSchema"}))

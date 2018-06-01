@@ -663,7 +663,7 @@
    ; but has :data when pre-check is called during action execution.
    (sc/optional-key :pre-checks)          [(sc/cond-pre util/IFn sc/Symbol)]
    ; Input validators take one parameter, the command. Application is not yet available.
-   (sc/optional-key :input-validators)    [(sc/cond-pre util/Fn sc/Symbol)]
+   (sc/optional-key :input-validators)    [(sc/cond-pre util/Fn sc/Symbol (sc/pred map? "Schema"))]
    ; Application state keywords
    (sc/optional-key :states)              (sc/if map?
                                             {(apply sc/enum roles/all-user-roles) (subset-of states/all-states)}
@@ -682,6 +682,17 @@
    ; Feature flag name. Action is run only if the feature flag is true.
    ; If you have feature.some-feature properties file, use :feature :some-feature in action meta data
    (sc/optional-key :feature)             sc/Keyword})
+
+(defn normalize-validator [validator]
+  (if-not (map? validator)
+    validator
+    (let [checker       (sc/checker validator)
+          error-message (str "input does not match schema " (or (-> validator meta :name)
+                                                                (-> validator pr-str)))]
+      (fn [command]
+        (when-let [schema-errors (-> command :data checker)]
+          (error error-message (pr-str schema-errors))
+          (fail error-message))))))
 
 (defn register-action [action-type action-name meta-data line ns-str handler]
   {:pre [(keyword? action-type)
@@ -725,6 +736,7 @@
           (str "org-authz-roles depends on application, can't be used outside application context - " action-name))
 
   (let [action-keyword (keyword action-name)
+        meta-data (update meta-data :input-validators (partial mapv normalize-validator))
         {:keys [user-roles]} meta-data]
     (tracef "registering %s: '%s' (%s:%s)" (name action-type) action-name ns-str line)
     (swap! actions assoc
