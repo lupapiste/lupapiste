@@ -1,11 +1,11 @@
 (ns lupapalvelu.xml.krysp.krysp-http-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [sade.core :refer [now]]
-            [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :as fixture]
+            [sade.core :refer [now]]
             [sade.env :as env]
+            [sade.strings :as ss]
             [sade.shared-util :as util]))
 
 (def jms-test-db (str "krysp_http_itest_jms" (now)))
@@ -14,7 +14,7 @@
   (mongo/connect!)
   (mongo/with-db jms-test-db
     (fixture/apply-fixture "minimal")
-    (against-background [(sade.http/post "http://localhost:8000/dev/krysp/receiver/hakemus-path" anything) => nil]
+    (against-background [(sade.http/post (str (env/server-address) "/dev/krysp/receiver/hakemus-path") anything) => nil]
       (facts "Sending KuntaGML via JMS and HTTP"            ; Tampere is configured to use HTTP krysp in minimal
       (let [{application-id :id} (create-local-app pena
                                                    :x 329072
