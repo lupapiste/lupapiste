@@ -46,8 +46,6 @@
 
 (when (env/feature? :jms)
 
-(def fetch-verdicts-queue "lupapiste.fetch-verdicts.#")
-
 (defn create-transacted-session []
   (-> (jms/get-default-connection)
       (jms/create-transacted-session)
@@ -61,16 +59,16 @@
   (warn "Rollbacking fetch-verdict message")
   (jms/rollback session))
 
-(defn create-fetch-verdict-consumer []
+(defn create-fetch-verdict-consumer [organization-id]
   "Creates a consumer for fetch-verdict messages with an exclusive
   transacted session."
   (let [session (create-transacted-session)]
     (jms/create-consumer session
-                         fetch-verdicts-queue
+                         (fetch-verdict/queue-for-organization organization-id)
                          (handle-fetch-verdict-message (partial commit-fetch-verdict session)
                                                        (partial rollback-fetch-verdict session)))))
-(defonce fetch-verdict-consumers
-  (let [n-consumers (or (env/value :fetch-verdicts :consumers) 1)]
-    (info (str "Creating " n-consumers " fetch-verdict consumer(s)"))
-    (vec (repeatedly n-consumers create-fetch-verdict-consumer))))
+(defn create-fetch-verdict-consumers! [organization-ids]
+  (info (str "Creating  fetch-verdict consumer(s) for " (count organization-ids) " organizations."))
+  (doseq [org-id organization-ids]
+    (create-fetch-verdict-consumer org-id)))
 )

@@ -2,7 +2,7 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [taoensso.timbre :refer [warnf]]
-            [lupapalvelu.batchrun.fetch-verdict-consumer]
+            [lupapalvelu.batchrun.fetch-verdict-consumer :refer [create-fetch-verdict-consumers!]]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.fixture.minimal :as minimal]
@@ -32,6 +32,8 @@
     (dorun (map (partial mongo/insert :organizations) organizations))))
 
 (dummy-email-server/messages :reset true) ; Inbox zero
+
+(create-fetch-verdict-consumers! ["753-R"])
 
 (facts "Automatic checking for verdicts"
   (mongo/with-db db-name

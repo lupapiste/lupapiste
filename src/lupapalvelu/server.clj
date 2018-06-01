@@ -12,7 +12,7 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [lupapalvelu.integrations.jms :as jms]
-            [lupapalvelu.integrations.jms-consumers]
+            [lupapalvelu.integrations.jms-consumers :as jms-consumers]
             [lupapalvelu.actions-api]
             [lupapalvelu.admin-api]
             [lupapalvelu.appeal-api]
@@ -169,7 +169,9 @@
 
   (server/add-middleware headers/sanitize-header-values)
   (server/add-middleware control/lockdown-middleware)
-  (server/add-middleware web/cookie-monster))
+  (server/add-middleware web/cookie-monster)
+
+  (jms-consumers/init!))
 
 (defn read-session-key []
   {:post [(or (nil? %) (= (count %) 16))]}
