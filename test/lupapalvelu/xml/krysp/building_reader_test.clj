@@ -89,7 +89,9 @@
             (get-in owner2 [:henkilo :osoite :postinumero]) => "06500"
             (get-in owner2 [:henkilo :osoite :postitoimipaikannimi]) => "PORVOO"
             (get-in owner2 [:henkilo :henkilotiedot :turvakieltoKytkin]) => nil))
-        (fact "rakentajatyyppi" (get-in building1 [:kaytto :rakentajaTyyppi]) => "liiketaloudellinen")))
+        (fact "rakentajatyyppi" (get-in building1 [:kaytto :rakentajaTyyppi]) => "liiketaloudellinen")
+        (fact "energiatehokkuusluku" (get-in building1 [:luokitus :energiatehokkuusluku]) => truthy)
+        (fact "energiatehokkuusluvunYksikko" (get-in building1 [:luokitus :energiatehokkuusluvunYksikko]) => truthy)))
 
       (facts "building2"
         (let [building2 (dissoc (->rakennuksen-tiedot xml building2-id) :kiinttun)

@@ -47,6 +47,8 @@
               <maakaasuKytkin>false</maakaasuKytkin>
               <kaapeliKytkin>false</kaapeliKytkin>
             </verkostoliittymat>
+            <energiatehokkuusluku>123</energiatehokkuusluku>
+            <energiatehokkuusluvunYksikko>kWh/m2</energiatehokkuusluvunYksikko>
             <paloluokka>P3</paloluokka>
             <lammitystapa>suora sähkö</lammitystapa>
             <lammonlahde>

@@ -183,6 +183,8 @@
             :kaytto {:kayttotarkoitus               (get-text rakennus :kayttotarkoitus)
                      :rakentajaTyyppi               (get-text rakennus :rakentajatyyppi)}
             :luokitus {:energialuokka               (get-text rakennus :energialuokka)
+                       :energiatehokkuusluku        (get-text rakennus :energiatehokkuusluku)
+                       :energiatehokkuusluvunYksikko (get-text rakennus :energiatehokkuusluvunYksikko)
                        :paloluokka                  (get-text rakennus :paloluokka)}
             :mitat {:kellarinpinta-ala              (get-non-zero-integer-text rakennus :kellarinpinta-ala)
                     :kerrosala                      (get-non-zero-integer-text rakennus :kerrosala)
