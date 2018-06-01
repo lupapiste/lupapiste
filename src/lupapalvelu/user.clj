@@ -1,12 +1,13 @@
 (ns lupapalvelu.user
-  (:require [camel-snake-kebab.core :as csk]
+  (:require [taoensso.timbre :refer [debug debugf info infof warn warnf error]]
+            [camel-snake-kebab.core :as csk]
             [clj-time.coerce :refer [to-date]]
             [clj-time.core :as time]
             [clojure.set :as set]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.permissions :refer [defcontext] :as permissions]
+            [lupapalvelu.permissions :refer [defcontext]]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.security :as security]
             [lupapalvelu.user-enums :as user-enums]
@@ -17,11 +18,11 @@
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.validators :as v]
+            [sade.validators]
             [schema.core :refer [defschema] :as sc]
-            [swiss.arrows :refer [-<> some-<>> -<>>]]
-            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf]]
-            [schema-tools.core :as st]))
+            [schema-tools.core :as st]
+            [plumbing.core :refer [defnk fnk]]
+            [swiss.arrows :refer [-<> some-<>> -<>>]]))
 
 ;;
 ;; User schema
@@ -56,13 +57,6 @@
     "docstore-api"
     "financialAuthority"
     "onkalo-api"})
-
-(def new-user-roles
-  "set of role strings that can be used in creating user via `create-new-user`"
-  #{"applicant"
-    "authority"
-    "dummy"
-    "financialAuthority"})
 
 (defschema Role (apply sc/enum all-roles))
 (defschema OrgId (sc/pred keyword? "Organization ID"))
@@ -127,14 +121,33 @@
                                                :display-name  (i18n/lenient-localization-schema sc/Str)
                                                :callback-url  ssc/HttpUrl}})
 
+(def new-user-roles
+  "set of role strings that can be used in creating user via `create-new-user`"
+  #{"applicant"
+    "authority"
+    "dummy"
+    "financialAuthority"})
+
+(def new-user-keys
+  [:email
+   :username :firstName :lastName
+   :personId :personIdSource
+   :phone :city :street :zip
+   :language
+   :role :orgAuthz :company
+   :architect
+   :enabled
+   :allowDirectMarketing
+   :graduatingYear :degree :fise :fiseKelpoisuus])
+
 (defschema NewUser
-  "NewUser is like `User`, but without `:id` and only `:email` and `:role` are
-  required, and `:role` is one of `new-user-roles`"
+  "NewUser is like `User`, but limited to `new-user-keys`, `:role` is one of `new-user-roles`
+   and only `:email` and `:role` are required"
   (-> User
-      (st/dissoc :id)
+      (st/select-keys new-user-keys)
+      (st/assoc :role (apply sc/enum new-user-roles))
       (st/optional-keys)
-      (st/required-keys [:email])
-      (st/assoc :role (apply sc/enum new-user-roles))))
+      (st/required-keys [:email :role])))
 
 (defschema RegisterUser
   {:email                            ssc/Email
@@ -243,11 +256,29 @@
     impersonating
     (oir-authority? user)))
 
-(defn authority? [user]
-  (-> user :role (= "authority")))
+(defn- user-in-roles? [roles user]
+  (-> user :role keyword roles))
 
-(defn verified-person-id? [{pid :personId source :personIdSource :as user}]
+(def authority? (partial user-in-roles? #{:authority}))
+(def applicant? (partial user-in-roles? #{:applicant}))
+(def rest-user? (partial user-in-roles? #{:rest-api}))
+(def admin? (partial user-in-roles? #{:admin}))
+(def dummy? (partial user-in-roles? #{:dummy}))
+(def docstore-user? (partial user-in-roles? #{:onkalo-api :docstore-api}))
+(def financial-authority? (partial user-in-roles? #{:financialAuthority}))
+(def onkalo-user? (partial user-in-roles? #{:onkalo-api}))
+
+(defn- user-in-company-roles? [roles user]
+  (-> user :company :role keyword roles))
+
+(def company-user? (partial user-in-company-roles? #{:user}))
+(def company-admin? (partial user-in-company-roles? #{:admin}))
+
+(defn verified-person-id? [{pid :personId source :personIdSource}]
   (and (ss/not-blank? pid) (util/=as-kw :identification-service source)))
+
+(defn same-user? [{id1 :id} {id2 :id}]
+  (= id1 id2))
 
 (defn validate-authority
   "Validator: current user must be an authority. To be used in commands'
@@ -256,39 +287,6 @@
   (if (authority? (:user command))
     nil
     (fail :error.unauthorized :desc "user is not an authority")))
-
-(defn applicant? [{role :role}]
-  (= :applicant (keyword role)))
-
-(defn rest-user? [{role :role}]
-  (= :rest-api (keyword role)))
-
-(defn docstore-user? [{role :role}]
-  (#{:onkalo-api :docstore-api} (keyword role)))
-
-(defn admin? [{role :role}]
-  (= :admin (keyword role)))
-
-(defn authority-admin? [{role :role}]
-  (= :authorityAdmin (keyword role)))
-
-(defn dummy? [{role :role}]
-  (= :dummy (keyword role)))
-
-(defn same-user? [{id1 :id} {id2 :id}]
-  (= id1 id2))
-
-(defn company-user? [user]
-  (= (-> user :company :role) "user"))
-
-(defn company-admin? [user]
-  (= (-> user :company :role) "admin"))
-
-(defn financial-authority? [{role :role}]
-  (= :financialAuthority (keyword role)))
-
-(defn onkalo-user? [{role :role}]
-  (= :onkalo-api (keyword role)))
 
 (defn organization-ids
   "Returns user's organizations as a set of strings"
@@ -437,13 +435,19 @@
 ;; jQuery data-tables support:
 ;;
 
+; FIXME:
+(defn authority-admin? [caller]
+  (throw (ex-info "fixme" {})))
+
 (defn- users-for-datatables-base-query [caller params]
   (let [caller-organizations (organization-ids caller)
         organizations        (:organizations params)
         organizations        (if (admin? caller) organizations (filter caller-organizations (or organizations caller-organizations)))
         role                 (:filter-role params)
         role                 (if (admin? caller) role :authority)
-        enabled              (if (or (admin? caller) (authority-admin? caller)) (:filter-enabled params) true)]
+        enabled              (if (or (admin? caller)
+                                     (authority-admin? caller))
+                               (:filter-enabled params) true)]
     (merge {}
            (when (seq organizations) {:organizations organizations})
            (when role {:role role})
@@ -585,61 +589,89 @@
 ;; ==============================================================================
 ;;
 
+(defn- auth-admin-orgs [orgAuthz]
+  (->> orgAuthz
+       (keep (fn [[org org-roles]]
+               (when (some (partial = "authorityAdmin") org-roles)
+                 org)))
+       (set)))
+
+(def create-new-user-rules
+  [{:desc  "user data matches User schema"
+    :error :error.missing-parameters
+    :fail? (fnk [user-data]
+             (when-let [schema-errors (sc/check NewUser user-data)]
+               (error "new user does not match NewUser schema" schema-errors)
+               true))}
+
+   {:desc  "applicant can not create users"
+    :error :error.unauthorized
+    :fail? (fnk [[:caller {role nil}]]
+             (= role "applicant"))}
+
+   {:desc  "applicants are born via registration"
+    :error :error.unauthorized
+    :fail? (fnk [caller [:user-data role]]
+             (and (= role "applicant") caller))}
+
+   {:desc  "applicants may not have an organizations"
+    :error :error.unauthorized
+    :fail? (fnk [[:user-data role {orgAuthz nil}]]
+             (and (= role "applicant") (seq orgAuthz)))}
+
+   {:desc  "authorityAdmin can create users into his/her own organizations only"
+    :error :error.unauthorized
+    :fail? (fnk [caller user-data]
+             (and (-> caller :role (not= "admin"))
+                  (not (every? (-> caller :orgAuthz auth-admin-orgs)
+                               (-> user-data :orgAuthz keys)))))}
+
+   {:desc  "new authority must have at least one organization role"
+    :error :error.missing-parameters
+    :fail? (fnk [[:user-data role {orgAuthz nil}]]
+             (and (-> role (= "authority"))
+                  (-> orgAuthz seq nil?)))}
+
+   {:desc  "dummy user may not have an organization roles"
+    :error :error.unauthorized
+    :fail? (fnk [[:user-data role {orgAuthz nil}]]
+             (and (= role "dummy")
+                  (seq orgAuthz)))}
+
+   ; In principle, `the "authorityAdmin can create users into his/her own organizations only" test
+   ; should cover this. Only way this test traps errors is that the organization was deleted, but
+   ; some authority still has the roles for deleted organization in her :authOrgz.
+   {:desc  "all organizations must be known"
+    :error :error.organization-not-found
+    :fail? (fnk [[:user-data {orgAuthz nil}] known-organizations?]
+             (not (known-organizations? (keys orgAuthz))))}
+
+   {:desc  "only admin can create create users with apikey"
+    :error :error.unauthorized
+    :fail? (fnk [[:caller role] {apikey nil}]
+             (and apikey (not (= role "admin"))))}])
+
+(defn- new-user-error [data]
+  (some (fn [{:keys [fail?] :as rule}]
+          (when (fail? data)
+            rule))
+        create-new-user-rules))
+
 (defn- validate-create-new-user! [caller user-data]
-  (when-let [missing (util/missing-keys user-data [:email :role])]
-    (fail! :error.missing-parameters :parameters missing))
-  (when (ss/blank? (:email user-data))
-    (fail! :error.email))
+  (when-let [e (new-user-error {:caller caller
+                                :user-data user-data
+                                :known-organizations? org/known-organizations?})]
+    (fail! (-> e :error) :desc (-> e :desc))))
 
-  (let [password        (:password user-data)
-        user-role       (keyword (:role user-data))
-        caller-role     (keyword (:role caller))
-        org-authz       (:orgAuthz user-data)
-        organization-id (when (map? org-authz)
-                          (name (first (keys org-authz))))
-        admin?          (= caller-role :admin)
-        authorityAdmin? (= caller-role :authorityAdmin)]
-    
-    (when (and (= user-role :applicant) caller)
-      (fail! :error.unauthorized :desc "applicants are born via registration"))
-
-    (when (and (= user-role :authorityAdmin) (not admin?))
-      (fail! :error.unauthorized :desc "only admin can create authorityAdmin users"))
-
-    (when (and (= user-role :authority) (not authorityAdmin?))
-      (fail! :error.unauthorized :desc "only authorityAdmin can create authority users" :user-role user-role :caller-role caller-role))
-
-    (when (and (= user-role :authorityAdmin) (not organization-id))
-      (fail! :error.missing-parameters :desc "new authorityAdmin user must have organization" :parameters [:organization]))
-
-    (when (and (= user-role :authority) (and organization-id (not ((organization-ids caller) organization-id))))
-      (fail! :error.unauthorized :desc "authorityAdmin can create users into his/her own organization only, or statement givers without any organization at all"))
-
-    (when (and (= user-role :dummy) organization-id)
-      (fail! :error.unauthorized :desc "dummy user may not have an organization" :missing :organization))
-
-    (when (and password (not (security/valid-password? password)))
-      (fail! :error.password.minlengt :desc "password specified, but it's not valid"))
-
-    (when (and organization-id (not (org/get-organization organization-id)))
-      (fail! :error.organization-not-found))
-
-    (when (and (:apikey user-data) (not admin?))
-      (fail! :error.unauthorized :desc "only admin can create create users with apikey")))
-
-  true)
-
-(defn- create-new-user-entity [{:keys [enabled password] :as user-data}]
-  (let [email (ss/canonize-email (:email user-data))]
-    (-> user-data
-        (select-keys [:email :username :role :firstName :lastName :personId :personIdSource
-                      :phone :city :street :zip :enabled :orgAuthz :language
-                      :allowDirectMarketing :architect :company
-                      :graduatingYear :degree :fise :fiseKelpoisuus])
-        (->> (merge {:firstName "" :lastName "" :username email}))
-        (assoc :email email
-               :enabled (= "true" (str enabled))
-               :private (if password {:password (security/get-hash password)} {})))))
+(defn- create-new-user-entity [{:keys [user-data password]}]
+  (-> user-data
+      (select-keys new-user-keys)
+      (update user-data ss/canonize-email)
+      (->> (merge {:firstName "" :lastName ""}))
+      (assoc :enabled (-> user-data :enabled str (= "true"))
+             :private (if password
+                        {:password (security/get-hash password)}
+                        {}))))
 
 (defn create-new-user
   "Insert new user to database, returns new user data without private information. If user
