@@ -1179,8 +1179,8 @@
 
         _getSingleFileInputFiles: function (fileInput) {
             fileInput = $(fileInput);
-            var entries = fileInput.prop('webkitEntries') ||
-                    fileInput.prop('entries'),
+          // https://stackoverflow.com/questions/49918319/jquery-file-upload-cannot-upload-file-in-safari-11
+            var entries = [], // entries = fileInput.prop('webkitEntries') ||fileInput.prop('entries'),
                 files,
                 value;
             if (entries && entries.length) {
