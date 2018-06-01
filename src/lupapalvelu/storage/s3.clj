@@ -167,7 +167,7 @@
          :contentType (.getContentType metadata)
          :size        (.getContentLength metadata)
          :filename    (:filename user-metadata)
-         :fileId      file-id
+         :fileId      (last (str/split file-id #"/"))
          :metadata    (-> (dissoc user-metadata :filename)
                           (update :uploaded util/->int))}
         :application application-id))
