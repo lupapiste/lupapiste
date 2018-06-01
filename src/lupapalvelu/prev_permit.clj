@@ -67,12 +67,11 @@
       :postitoimipaikannimi (get-in applicant [:henkilo :osoite :postitoimipaikannimi])
       :puhelin (some->> (get-in applicant [:henkilo :puhelin])
                         (re-find #"[0-9- ]+")) ;; Strip illegal characters: only accept dash, numbers and whitespace.
-      :kuntaRoolikoodi (or (get-in applicant [:suunnittelijaRoolikoodi])
-                           (get-in applicant [:tyonjohtajaRooliKoodi]))
       :email (get-in applicant [:henkilo :sahkopostiosoite])
       :koulutusvalinta (get-in applicant [:koulutus])
       :valmistumisvuosi (get-in applicant [:valmistumisvuosi])
-      :kuntaRoolikoodi (get-in applicant [:suunnittelijaRoolikoodi])
+      :kuntaRoolikoodi (or (get-in applicant [:suunnittelijaRoolikoodi])
+                           (get-in applicant [:tyonjohtajaRooliKoodi]))
       (tools/default-values element))
     (let [postiosoite (or (get-in applicant [:yritys :postiosoite])
                           (get-in applicant [:yritys :postiosoitetieto :postiosoite]))]
