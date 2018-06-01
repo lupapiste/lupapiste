@@ -1,4 +1,4 @@
-{:qlobal       {:admin #{:users/admin-query
+{:global       {:admin #{:users/admin-query
                          :users/update
                          :users/create
                          :users/create-financial-handler}
