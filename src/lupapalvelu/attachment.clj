@@ -435,8 +435,7 @@
            :cannot-delete))))
 
 (defn delete-attachment-file-and-preview! [application file-id]
-  (storage/delete application file-id)
-  (storage/delete application (str file-id "-preview")))
+  (storage/delete application file-id))
 
 (defn delete-archived-attachments-files-from-mongo! [application {:keys [metadata latestVersion versions id]}]
   {:pre [(= :arkistoitu (keyword (:tila metadata)))
