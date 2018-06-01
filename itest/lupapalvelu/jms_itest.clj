@@ -38,5 +38,4 @@
           (mongo/select :testi) => (just (contains {:data "with db"})
                                          (contains {:data "normal producer with-db"})
                                          :in-any-order)))
-      (.close normal-producer)
       (.close consumer))))
