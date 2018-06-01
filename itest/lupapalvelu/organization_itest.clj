@@ -1396,3 +1396,14 @@
              :org-id "564-YMP"
              :backend-systems {})
     => (partial expected-failure? :error.empty-map-parameters)))
+
+(facts "known-organizations? tests"
+  (facts
+    (local-org-api/known-organizations? []) => truthy
+    (local-org-api/known-organizations? nil) => truthy)
+  (fact
+    (local-org-api/known-organizations? ["297-R" "433-R" "069-R"])
+    => truthy)
+  (fact
+    (local-org-api/known-organizations? ["297-R" "433-R" "zap"])
+    => falsey))

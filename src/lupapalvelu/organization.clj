@@ -289,6 +289,12 @@
         (map remove-sensitive-data)
         (map with-scope-defaults))))
 
+(defn known-organizations? [orgs]
+  (or (-> orgs seq nil?)
+      (let [found-orgs (get-organizations {:_id {"$in" orgs}} {:_id true})]
+        (= (count orgs)
+           (count found-orgs)))))
+
 (defn get-autologin-ips-for-organization [org-id]
   (-> (mongo/by-id :organizations org-id [:allowedAutologinIPs])
       :allowedAutologinIPs))
@@ -304,6 +310,9 @@
    (->> (mongo/by-id :organizations id projection)
         remove-sensitive-data
         with-scope-defaults)))
+
+(defn known-organization? [id]
+  (some? (get-organization id {:_id true})))
 
 (defn update-organization [id changes]
   {:pre [(not (ss/blank? id))]}
