@@ -130,7 +130,7 @@
 
                  ; Message Queue
                  [org.apache.activemq/artemis-jms-client "2.6.0"]
-                 [lupapiste/jms-client "0.2.0"]
+                 [lupapiste/jms-client "0.2.1"]
                  [com.taoensso/nippy "2.14.0"]
 
                  ;; Lupapiste libraries

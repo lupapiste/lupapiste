@@ -27,16 +27,18 @@
           (fact "Veikko moves to backing system via HTTP"
             resp => ok?
             (:integrationAvailable resp) => true))
+        (Thread/sleep 50)
 
-        (let [msgs (mongo/select :integration-messages {:application.id application-id})
+        (let [msgs (->> (mongo/select :integration-messages {:application.id application-id})
+                        (remove #(= "KuntaGML hakemus-path" (:messageType %)))) ; remove messages logged by /dev/krysp dummy endpoint
               sent-message (util/find-first (fn [msg] (= (:messageType msg) "KuntaGML application")) msgs)]
           (facts "integration-messages"
             (count msgs) => 3                               ; 2x state-change 1x KuntaGML
-            (fact "sent message is saved"
+            (fact "message is delivered via queue"
               (:messageType sent-message) => "KuntaGML application"
               (:direction sent-message) => "out"
-              (fact "to queue"
-                (:status sent-message) => "queued"))))))))
+              (fact "is processed by consumer"
+                (:status sent-message) => "done"))))))))
 
 
 (apply-remote-minimal)
