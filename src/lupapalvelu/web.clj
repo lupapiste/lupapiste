@@ -694,7 +694,7 @@
       (content-type-response {:uri file})))
 
   (defjson "/dev/fileinfo/:application/:id" {:keys [application id]}
-    (let [data (storage/download-from-system application id (if (env/feature? :s3) :s3 :mongodb))]
+    (when-let [data (storage/download-from-system application id (if (env/feature? :s3) :s3 :mongodb))]
       (with-open [is ((:content data))]
         ; Make sure input stream is closed even if it's not used.
         (dissoc data :content))))
