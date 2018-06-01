@@ -50,9 +50,10 @@
 
 (def fetch-verdicts-queue "lupapiste.fetch-verdicts.#")
 
-(def fetch-verdicts-transacted-session (-> (jms/get-default-connection)
-                                           (jms/create-transacted-session)
-                                           (jms/register-session :consumer)))
+(defn create-transacted-session []
+  (-> (jms/get-default-connection)
+      (jms/create-transacted-session)
+      (jms/register-session :consumer)))
 
 (defn commit-fetch-verdict [^Session session]
   (info "Commiting fetch-verdict message")
@@ -62,8 +63,16 @@
   (warn "Rollbacking fetch-verdict message")
   (jms/rollback session))
 
-(defonce fetch-verdicts-consumer
-  (jms/create-consumer fetch-verdicts-transacted-session
-                       fetch-verdicts-queue
-                       (handle-fetch-verdict-message (partial commit-fetch-verdict fetch-verdicts-transacted-session)
-                                                     (partial rollback-fetch-verdict fetch-verdicts-transacted-session)))))
+(defn create-fetch-verdict-consumer []
+  "Creates a consumer for fetch-verdict messages with an exclusive
+  transacted session."
+  (let [session (create-transacted-session)]
+    (jms/create-consumer session
+                         fetch-verdicts-queue
+                         (handle-fetch-verdict-message (partial commit-fetch-verdict session)
+                                                       (partial rollback-fetch-verdict session)))))
+(defonce fetch-verdict-consumers
+  (let [n-consumers (or (env/value :fetch-verdicts :consumers) 1)]
+    (info (str "Creating " n-consumers " fetch-verdict consumer(s)"))
+    (vec (repeatedly n-consumers create-fetch-verdict-consumer))))
+)
