@@ -46,6 +46,7 @@
    :postalCode    postinumero
    :streetAddress {:streetName katu}})
 
+;; TODO: invoicingOperator, ovt
 (defn- doc->customer [{{tag :_selected :as data} :data}]
   (let [tag (keyword tag)
         customer (get data tag)
@@ -85,7 +86,7 @@
   {:city (localize "fi" :municipality municipality) ; FIXME: hardcoded "fi"
    :streetAddress {:streetName address}})
 
-;; TODO: OVT, laskuviite jne.
+;; TODO: clientApplicationKind, customerReference
 (defn- convert-value-flattened-app
   [{:keys [id primaryOperation propertyId drawings documents] :as app}]
   (let [customer-doc     (first (filter #(= (doc-subtype %) :hakija) documents))
