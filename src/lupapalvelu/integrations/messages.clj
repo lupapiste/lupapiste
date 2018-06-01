@@ -4,7 +4,8 @@
             [sade.schemas :as ssc]
             [monger.operators :refer [$set]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.states :as states])
+            [lupapalvelu.states :as states]
+            [sade.shared-schemas :as sssc])
   (:import (com.mongodb WriteConcern)))
 
 (def create-id mongo/create-id)
@@ -12,28 +13,28 @@
 (def partners #{"ely" "mylly" "matti" "internal"})
 
 (sc/defschema IntegrationMessage
-  {:id                            ssc/ObjectIdStr
-   :direction                     (sc/enum "in" "out")
-   :messageType                   sc/Str
-   (sc/optional-key :transferType) (sc/enum "http" "sftp" "jms")
-   (sc/optional-key :partner)     (apply sc/enum partners)
-   :format                        (sc/enum "xml" "json" "clojure" "bytes")
-   :created                       ssc/Timestamp
-   :status                        (sc/enum "done" "published" "processing" "processed" "received" "queued" "consumed")
+  {:id                                   ssc/ObjectIdStr
+   :direction                            (sc/enum "in" "out")
+   :messageType                          sc/Str
+   (sc/optional-key :transferType)       (sc/enum "http" "sftp" "jms")
+   (sc/optional-key :partner)            (apply sc/enum partners)
+   :format                               (sc/enum "xml" "json" "clojure" "bytes")
+   :created                              ssc/Timestamp
+   :status                               (sc/enum "done" "published" "processing" "processed" "received" "queued" "consumed")
    (sc/optional-key :external-reference) sc/Str
-   (sc/optional-key :output-dir)  sc/Str
-   (sc/optional-key :application) {:id           ssc/ApplicationId
-                                   (sc/optional-key :organization) sc/Str
-                                   (sc/optional-key :state)        (apply sc/enum (map name states/all-states))}
-   (sc/optional-key :target)      {:id   ssc/ObjectIdStr
-                                   :type sc/Str}
-   (sc/optional-key :initator)    {:id       sc/Str
-                                   :username sc/Str}
-   (sc/optional-key :action)            (sc/maybe sc/Str)
-   (sc/optional-key :attached-files)    [ssc/ObjectIdStr]
-   (sc/optional-key :attachmentsCount)  sc/Int
-   (sc/optional-key :acknowledged)      ssc/Timestamp
-   (sc/optional-key :data)              (sc/cond-pre sc/Str {sc/Keyword sc/Any})})
+   (sc/optional-key :output-dir)         sc/Str
+   (sc/optional-key :application)        {:id                             ssc/ApplicationId
+                                          (sc/optional-key :organization) sc/Str
+                                          (sc/optional-key :state)        (apply sc/enum (map name states/all-states))}
+   (sc/optional-key :target)             {:id   ssc/ObjectIdStr
+                                          :type sc/Str}
+   (sc/optional-key :initator)           {:id       sc/Str
+                                          :username sc/Str}
+   (sc/optional-key :action)             (sc/maybe sc/Str)
+   (sc/optional-key :attached-files)     [sssc/FileId]
+   (sc/optional-key :attachmentsCount)   sc/Int
+   (sc/optional-key :acknowledged)       ssc/Timestamp
+   (sc/optional-key :data)               (sc/cond-pre sc/Str {sc/Keyword sc/Any})})
 
 (sc/defn ^:always-validate save
   ([message :- IntegrationMessage]
