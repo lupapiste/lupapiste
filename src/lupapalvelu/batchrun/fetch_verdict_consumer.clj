@@ -11,8 +11,7 @@
   (:import (javax.jms Session)))
 
 (sc/defschema FetchVerdictMessage
-  {:id sc/Str
-   (sc/optional-key :database) sc/Str})
+  {:id sc/Str})
 
 (def fetch-verdict-message-validator (sc/validator FetchVerdictMessage))
 
@@ -32,18 +31,17 @@
   that warrants a retry."
   [commit-fn rollback-fn]
   (fn [msg]
-    (if-let [{:keys [id database]} (read-message msg)]
-      (mongo/with-db (or database mongo/*db-name*)
-        (if-let [application (mongo/select-one :applications {:_id   id
-                                                              :state "sent"})]
-          (let [batchrun-user (user/batchrun-user [(:organization application)])
-                batchrun-name "Automatic verdicts checking"]
-            (logging/with-logging-context {:applicationId id, :userId (:id batchrun-user)}
-              (if (fetch-verdict/fetch-verdict batchrun-name batchrun-user application)
-                (commit-fn)
-                (rollback-fn))))
-          (do (errorf "Could not find application for fetching verdict: %s" id)
-              (commit-fn))))
+    (if-let [{:keys [id]} (read-message msg)]
+      (if-let [application (mongo/select-one :applications {:_id   id
+                                                            :state "sent"})]
+        (let [batchrun-user (user/batchrun-user [(:organization application)])
+              batchrun-name "Automatic verdicts checking"]
+          (logging/with-logging-context {:applicationId id, :userId (:id batchrun-user)}
+            (if (fetch-verdict/fetch-verdict batchrun-name batchrun-user application)
+              (commit-fn)
+              (rollback-fn))))
+        (do (errorf "Could not find application for fetching verdict: %s" id)
+            (commit-fn)))
       (commit-fn)))) ; Invalid message, nothing to be done
 
 (when (env/feature? :jms)
