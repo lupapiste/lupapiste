@@ -107,7 +107,7 @@
                      [:td
                       (when (can-delete? id)
                             [:a
-                             {:on-click #(confirm-and-delete-verdict app-id id)}
+                             {:on-click #(confirm-and-delete-verdict app-id verdict)}
                              (common/loc (if published
                                            :pate.verdict-table.remove-verdict
                                            :pate.verdict-table.remove-draft))])
