@@ -322,9 +322,6 @@ input.form-input.inline {
   {
     border-bottom: none;
   }
-  table {
-    width: auto;
-  }
   .form-group {
     margin:$marginS;
   }
@@ -539,10 +536,6 @@ input.form-input.inline {
   .huoneistot-table, .muutHankkeet-table {
     td, th {
       padding: $marginS;
-    }
-
-    td {
-      text-align: center;
     }
     tr:hover{
       background-color: white;

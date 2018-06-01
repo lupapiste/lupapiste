@@ -8330,10 +8330,6 @@ input.form-input.inline, input.inline.form-input--inline {
   border-bottom: none;
 }
 
-.form-group table, .form-choice table, .form-table table {
-  width: auto;
-}
-
 .form-group .form-group, .form-choice .form-group, .form-table .form-group {
   margin: 6px;
 }
@@ -8564,10 +8560,6 @@ input.form-input.inline, input.inline.form-input--inline {
 
 .docgen-content .huoneistot-table td, .docgen-content .huoneistot-table th, .docgen-content .muutHankkeet-table td, .docgen-content .muutHankkeet-table th {
   padding: 6px;
-}
-
-.docgen-content .huoneistot-table td, .docgen-content .muutHankkeet-table td {
-  text-align: center;
 }
 
 .docgen-content .huoneistot-table tr:hover, .docgen-content .muutHankkeet-table tr:hover {
