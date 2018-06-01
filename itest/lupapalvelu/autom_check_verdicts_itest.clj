@@ -2,7 +2,6 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [taoensso.timbre :refer [warnf]]
-            [lupapalvelu.batchrun :as batchrun]
             [lupapalvelu.batchrun.fetch-verdict-consumer]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.fixture.core :as fixture]
@@ -11,12 +10,11 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.verdict-api]
-            [lupapalvelu.xml.krysp.application-from-krysp :as app-from-krysp]
             [sade.core :refer [now fail]]
             [sade.env :as env]
             [sade.dummy-email-server :as dummy-email-server]))
 
-(if-not (and (env/feature? :embedded-artemis) (env/feature? :jms))
+(if-not (env/feature? :jms)
 (warnf "JMS not enabled for unit testing")
 
 (do
