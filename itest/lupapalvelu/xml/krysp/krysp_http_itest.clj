@@ -14,7 +14,8 @@
   (mongo/connect!)
   (mongo/with-db jms-test-db
     (fixture/apply-fixture "minimal")
-    (facts "Sending KuntaGML via JMS and HTTP"            ; Tampere is configured to use HTTP krysp in minimal
+    (against-background [(sade.http/post "http://localhost:8000/dev/krysp/receiver/hakemus-path" anything) => nil]
+      (facts "Sending KuntaGML via JMS and HTTP"            ; Tampere is configured to use HTTP krysp in minimal
       (let [{application-id :id} (create-local-app pena
                                                    :x 329072
                                                    :y 6823200
@@ -38,7 +39,7 @@
               (:messageType sent-message) => "KuntaGML application"
               (:direction sent-message) => "out"
               (fact "is processed by consumer"
-                (:status sent-message) => "done"))))))))
+                (:status sent-message) => "done")))))))))
 
 
 (apply-remote-minimal)
