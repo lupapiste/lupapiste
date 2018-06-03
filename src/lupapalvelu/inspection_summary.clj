@@ -10,12 +10,14 @@
             [lupapalvelu.pdf.html-template :as pdf-html]
             [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
-            [sade.core :refer [now unauthorized fail]]
+            [sade.core :refer [now unauthorized fail ok]]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
             [schema.core :as sc :refer [defschema]]
-            [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]))
+            [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]
+            [clj-uuid :as uuid]
+            [lupapalvelu.storage.file-storage :as storage]))
 
 (defschema InspectionSummaryTargets
   {:target-name                     sc/Str   ;Tarkastuskohde
@@ -259,16 +261,19 @@
   (->> (delete-summary-attachment-updates summary-id)
        (mongo/update-by-id :applications (:id application))))
 
-(defn toggle-summary-locking [{{app-id :id summaries :inspection-summaries :as application} :application lang :lang :as command} summary-id locked?]
+(defn toggle-summary-locking [{{app-id :id summaries :inspection-summaries :as application} :application :keys [lang user] :as command} summary-id locked?]
   (mongo/update-by-query :applications
                          {:_id app-id :inspection-summaries {$elemMatch {:id summary-id}}}
                          {$set {:inspection-summaries.$.locked locked?}})
   (if locked?
-    (let [file-id  (mongo/create-id)
+    (let [file-id  (str (uuid/v1))
+          filename (str (:id application) "_inspection-summary_" summary-id \_ (now) ".pdf")
           filedata {:fileId file-id
                     :type   (summary-attachment-type-for-application application)
                     :group  nil
                     :source {:type "inspection-summary" :id summary-id}}]
-      (->> (util/future* (pdf-html/create-inspection-summary-pdf application lang summary-id :file-id file-id))
+      (->> (util/future*
+             (with-open [is (pdf-html/create-inspection-summary-pdf application lang summary-id)]
+               (ok :filedata (storage/upload file-id filename "application/pdf" is {:uploader-user-id (:id user)}))))
            (att-bind/make-bind-job command [filedata] :preprocess-ref)))
     (delete-summary-attachment application summary-id)))

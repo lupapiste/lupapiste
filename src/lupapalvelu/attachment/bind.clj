@@ -89,7 +89,7 @@
                          :type (or type (:type result))
                          :status :done}))
         (do
-          (warnf "no file with file-id %s in mongo" fileId)
+          (warnf "no file with file-id %s in storage" fileId)
           (job/update job-id assoc fileId {:status :error :fileId fileId})
           (conj results {:fileId fileId :type type :status :error}))))
     []
