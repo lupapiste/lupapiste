@@ -186,7 +186,8 @@
                                               :emailPreferred emailPreferred})
         comment (bulletins/create-comment bulletin-id bulletin-version-id comment contact-info files created)]
     (mongo/insert :application-bulletin-comments comment)
-    (storage/link-files-to-bulletin (vetuma/session-id) bulletin-id (map :fileId files))
+    (when (seq files)
+      (storage/link-files-to-bulletin (vetuma/session-id) bulletin-id (map :fileId files)))
     (ok)))
 
 (defcommand move-to-proclaimed
