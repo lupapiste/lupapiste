@@ -153,13 +153,14 @@
                                     (nil? csv-data) {:ok false :text "error.illegal-premises-excel-file"}
                                     (empty? premises-data) {:ok false :text "error.illegal-premises-excel-data"}
                                     :else {:ok false})]
-    (let [old-ifc-fileId (-> application :ifc-data :fileId)]
-      (action/update-application command {$set {:ifc-data {:fileId   (:fileId save-response)
-                                                           :filename (:filename save-response)
-                                                           :modified created
-                                                           :user     (usr/summary user)}}})
-      (when old-ifc-fileId
-        (storage/delete-from-any-system application old-ifc-fileId)))
+    (when file-updated?
+      (let [old-ifc-fileId (-> application :ifc-data :fileId)]
+        (action/update-application command {$set {:ifc-data {:fileId   (:fileId save-response)
+                                                             :filename (:filename save-response)
+                                                             :modified created
+                                                             :user     (usr/summary user)}}})
+        (when old-ifc-fileId
+          (storage/delete-from-any-system (:id application) old-ifc-fileId))))
     (->> return-map
          (resp/json)
          (resp/status 200))))
