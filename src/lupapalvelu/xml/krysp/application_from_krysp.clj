@@ -58,9 +58,14 @@
     (fetch-application-xmls organization permitType [backend-id] :kuntalupatunnus raw?)))
 
 (defn get-local-application-xml-by-filename
-  "For local testing"
+  "For local testing of Krysp import"
   [filename permit-type]
-  (->> (str "./src/lupapalvelu/conversion/test-data/" filename) slurp sxml/parse scr/strip-xml-namespaces (not-empty-content permit-type)))
+  (->> filename
+       (str "./src/lupapalvelu/conversion/test-data/")
+       slurp
+       sxml/parse
+       scr/strip-xml-namespaces
+       (not-empty-content permit-type)))
 
 (defmulti get-application-xmls
   "Get application xmls from krysp"
