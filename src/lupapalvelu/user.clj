@@ -28,7 +28,6 @@
 ;; User schema
 ;;
 
-
 (defschema SearchFilter
   {:id     sc/Str
    :title  sc/Str
@@ -316,8 +315,12 @@
        set))
 
 (defn authority-admins-organization-id [user]
-  ; FIXME: user can have multiple orgz
-  (first (organization-ids-by-roles user #{:authorityAdmin})))
+  ; TODO: user can have multiple orgz
+  (let [[org & more] (organization-ids-by-roles user #{:authorityAdmin})]
+    (when (seq more)
+      (error "user is authorityAdmin in multiple organizations, somebody needs to implement this")
+      (throw (ex-info "user is authorityAdmin in multiple organizations, somebody needs to implement this" {:user user})))
+    org))
 
 (defn authority-admins-organization
   "Organization for the authority admin user."
@@ -435,9 +438,14 @@
 ;; jQuery data-tables support:
 ;;
 
-; FIXME: user can have multiple orgz
+; TODO: user can have multiple orgz
 (defn authority-admin? [caller]
-  (throw (ex-info "fixme" {})))
+  (let [orgs (organization-ids-by-roles caller #{:authorityAdmin})]
+    (case (count orgs)
+      0 false
+      1 true
+      (do (error "user is authorityAdmin in multiple organizations, somebody needs to implement this")
+          (throw (ex-info "user is authorityAdmin in multiple organizations, somebody needs to implement this" {:user caller}))))))
 
 (defn- users-for-datatables-base-query [caller params]
   (let [caller-organizations (organization-ids caller)
