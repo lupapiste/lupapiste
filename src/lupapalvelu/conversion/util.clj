@@ -1,5 +1,6 @@
 (ns lupapalvelu.conversion.util
-  (:require [sade.strings :as ss]))
+  (:require [sade.core :refer :all]
+            [sade.strings :as ss]))
 
 (defn db-format->permit-id
   "Viitelupien tunnukset on Factassa tallennettu 'tietokantaformaatissa', josta ne on tunnuksella

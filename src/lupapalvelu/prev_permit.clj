@@ -333,6 +333,36 @@
                                             (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
                                             (ok :id id))))))
 
+(defn fetch-prev-local-application! [{{:keys [organizationId kuntalupatunnus authorizeApplicants]} :data :as command}]
+  (let [organizationId        "092-R"
+        operation             "aiemmalla-luvalla-hakeminen"
+        permit-type           (operations/permit-type-of-operation operation)
+        dummy-application     {:id "" :permitType permit-type :organization organizationId}
+        tiedostonimi          (str kuntalupatunnus ".xml")
+        xml                   (krysp-fetch/get-local-application-xml-by-filename tiedostonimi permit-type)
+        app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
+        location-info         (get-location-info command app-info)
+        organization          (when (:propertyId location-info)
+                                (organization/resolve-organization (prop/municipality-by-property-id (:propertyId location-info)) permit-type))
+        validation-result     (permit/validate-verdict-xml permit-type xml organization)
+        organizations-match?  (= organizationId (:id organization))
+        no-proper-applicants? (not-any? get-applicant-type (:hakijat app-info))]
+    (cond
+      (empty? app-info)                 (fail :error.no-previous-permit-found-from-backend)
+      (not location-info)               (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
+      (not (:propertyId location-info)) (fail :error.previous-permit-no-propertyid)
+      (not organizations-match?)        (fail :error.previous-permit-found-from-backend-is-of-different-organization)
+      validation-result                 validation-result
+      :else                             (let [{id :id} (do-create-application-from-previous-permit command
+                                                                                                   operation
+                                                                                                   xml
+                                                                                                   app-info
+                                                                                                   location-info
+                                                                                                   authorizeApplicants)]
+                                          (if no-proper-applicants?
+                                            (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
+                                            (ok :id id))))))
+
 (def fix-prev-permit-counter (atom 0))
 
 (defn fix-prev-permit-addresses []
