@@ -12,6 +12,7 @@
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.batchrun.fetch-verdict :as fetch-verdict]
+            [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.integrations.jms :as jms]
@@ -963,3 +964,29 @@
                    (string? lang))
             (stamping/regenerated-stamped-attachment command timestamp application files lang stamp)
             (error "Invalid log data, can't fix stamp:" logdata)))))))
+
+
+(defn generate-missing-neighbor-docs [& args]
+  (mongo/connect!)
+  (let [ts 1527800400000]
+    ;(sade.util/to-millis-from-local-datetime-string "2018-06-01T00:00")
+    ;=> 1527800400000
+    (doseq [app (mongo/select :applications
+                              {:modified {$gte ts}
+                               :neighbors.status.created {$gte ts}}
+                              [:neighbors :attachments])
+            neighbor (->> (:neighbors app)
+                          (filter (fn [n] (some #(> (:created %) ts) (:status n)))))
+            neighbor-attachment (->> (:attachments app)
+                                      (filter (fn [a] (= (get-in a [:source :id]) (:id neighbor)))))
+            :let [version (:latestVersion neighbor-attachment)
+                  neighbor-status (->> (:status neighbor)
+                                       (util/find-first (fn [status] (ss/contains? (:state status) "response-given-"))))]]
+      (logging/with-logging-context {:applicationId (:id app)}
+        (when (nil? (mongo/download (:fileId version)))
+          (let [version (child-to-attachment/create-attachment-from-children
+                          (:vetuma neighbor-status)
+                          (domain/get-application-no-access-checking (:id app))
+                          :neighbors (:id neighbor)
+                          "fi")]
+            (info "Created neighbor fileId" (:fileId version) "to attachment" (:id version))))))))
