@@ -1228,17 +1228,28 @@
                       reviews (vec (review/reviews-preprocessed app-xml))
                       buildings-summary (building-reader/->buildings-summary app-xml)
                       source {:type "background"}
+                      app-task (->> (:tasks app)
+                                    (filter #(= (:id %) (:id target)))
+                                    first)
                       review-tasks (review/reviews->tasks {:state :sent :created (now)} source buildings-summary reviews)
                       review-tasks (keep-indexed (fn [idx item]
                                                    (assoc item :attachments (-> (get reviews idx) :liitetieto))) review-tasks)
-                      attachments (-> (filter #(= (:id %) (:id target)) review-tasks)
+                      attachments (-> (filter (fn [{:keys [data]}]
+                                                (= (get-in app-task [:data :muuTunnus :value])
+                                                   (get-in data [:muuTunnus :value])))
+                                              review-tasks)
                                       first
                                       :attachments)
-                      {:keys [linkkiliitteeseen]} (->> attachments
-                                                       (filter (fn [{:keys [linkkiliitteeseen]}]
+                      all-atts (->> (map :attachments review-tasks)
+                                    flatten
+                                    (remove nil?))
+                      {:keys [linkkiliitteeseen]} (->> (or (seq attachments)
+                                                           all-atts)
+                                                       (filter (fn [{{:keys [linkkiliitteeseen]} :liite}]
                                                                  (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
                                                                     (:id att))))
-                                                       first)]
+                                                       first
+                                                       :liite)]
                   (if (ss/blank? linkkiliitteeseen)
                     (error "Could not find an HTTP link from reviews:" reviews)
                     (fetch-and-upload-file linkkiliitteeseen version app)))
