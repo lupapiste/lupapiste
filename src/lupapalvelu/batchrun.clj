@@ -978,12 +978,22 @@
             neighbor (->> (:neighbors app)
                           (filter (fn [n] (some #(> (:created %) ts) (:status n)))))
             neighbor-attachment (->> (:attachments app)
-                                      (filter (fn [a] (= (get-in a [:source :id]) (:id neighbor)))))
+                                     (filter (fn [a] (= (get-in a [:source :id]) (:id neighbor))))
+                                     (filter :latestVersion))
             :let [version (:latestVersion neighbor-attachment)
+                  att-id (:id neighbor-attachment)
                   neighbor-status (->> (:status neighbor)
                                        (util/find-first (fn [status] (ss/contains? (:state status) "response-given-"))))]]
       (logging/with-logging-context {:applicationId (:id app)}
         (when (nil? (mongo/download (:fileId version)))
+          (info "No file, clearing old version from attachment:" att-id ", version fileId:" (:fileId version))
+          (mongo/update-by-query :applications
+                                 {:_id (:id app)
+                                  :attachments {$elemMatch {:id att-id
+                                                            :source.id (:id neighbor)}}}
+                                 {$unset {:attachments.$.latestVersion true}
+                                  $set {:attachments.$.auth []
+                                        :attachments.$.versions []}})
           (let [version (child-to-attachment/create-attachment-from-children
                           (:vetuma neighbor-status)
                           (domain/get-application-no-access-checking (:id app))
