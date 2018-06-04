@@ -30,27 +30,27 @@
   ; It's not nice to test the number of users, but... well, this is relly easy:
   (fact (-> (query admin :users :role "admin") :users count) => 1)
   (fact (-> (query admin :users :organization "753-R") :users count) => 6)
-  (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 4))
+  (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 5))
 
-(facts users-for-datatables
- (fact (datatables admin :users-for-datatables :params {:length 6 :start 0 :draw "123" :enabled "true" :organizations ["753-R"]})
-   => (contains {:ok true
-                 :data (contains {:rows (comp (partial = 6) count)
-                                  :total 6
-                                  :display 6
-                                  :draw "123"})}))
- (fact (datatables admin :users-for-datatables :params {:length 6 :start 0 :draw "123" :enabled "true" :organizations ["753-R"] :filter-search "Suur"})
-   => (contains {:ok true
-                 :data (contains {:rows (comp (partial = 1) count)
-                                  :total 6
-                                  :display 1
-                                  :draw "123"})}))
- (fact (datatables admin :users-for-datatables :params {:length 6 :start 0 :draw "123" :enabled "true" :organizations ["753-R"] :filter-search "SoNJa"})
-   => (contains {:ok true
-                 :data (contains {:rows (comp (partial = 1) count)
-                                  :total 6
-                                  :display 1
-                                  :draw "123"})})))
+(facts "users-for-datatables"
+  (fact (datatables admin :users-for-datatables :params {:length 6 :start 0 :draw "123" :enabled "true" :organizations ["753-R"]})
+    => (contains {:ok   true
+                  :data (contains {:rows    (comp (partial = 6) count)
+                                   :total   6
+                                   :display 6
+                                   :draw    "123"})}))
+  (fact (datatables admin :users-for-datatables :params {:length 6 :start 0 :draw "123" :enabled "true" :organizations ["753-R"] :filter-search "Suur"})
+    => (contains {:ok   true
+                  :data (contains {:rows    (comp (partial = 1) count)
+                                   :total   6
+                                   :display 1
+                                   :draw    "123"})}))
+  (fact (datatables admin :users-for-datatables :params {:length 6 :start 0 :draw "123" :enabled "true" :organizations ["753-R"] :filter-search "SoNJa"})
+    => (contains {:ok   true
+                  :data (contains {:rows    (comp (partial = 1) count)
+                                   :total   6
+                                   :display 1
+                                   :draw    "123"})})))
 
 (facts "User for edit authority"
   (fact (query sonja :user-for-edit-authority :authority-id "777777777777777777000024") =not=> ok?)
@@ -77,19 +77,39 @@
 ;; ==============================================================================
 ;;
 
-(facts create-user
+(facts "create-user"
   (apply-remote-minimal)
-  (fact (command pena :create-user :email "x" :role "dummy" :password "foobarbozbiz") => fail?)
-  (fact (command admin :create-user :email "x@example.com" :role "authorityAdmin" :enabled true
-          :organization "753-R" :password "foobarbozbiz") => ok?)
+  (fact
+    (command pena :create-user
+             :email "x@example.com"
+             :role "dummy"
+             :password "foobarbozbiz")
+    => fail?)
+  (fact
+    (command admin :create-user
+             :email "x@example.com"
+             :role "authorityAdmin"
+             :enabled true
+             :organization "753-R"
+             :password "foobarbozbiz")
+    => ok?)
   ; Check that user was created
-  (fact (-> (query admin :users :email "x@example.com") :users first) => (contains {:role "authorityAdmin" :email "x@example.com" :enabled true :orgAuthz {:753-R ["authorityAdmin"]}}))
+  (fact
+    (-> (query admin :users :email "x@example.com") :users first)
+    => (contains {:role     "authority"
+                  :email    "x@example.com"
+                  :enabled  true
+                  :orgAuthz {:753-R ["authorityAdmin"]}}))
 
   ; Inbox zero
   (last-email)
 
   (fact "authority without organization, i.e., a statement giver, can be created"
-    (command sipoo :create-user :email "foo@example.com" :role "authority" :enabled true) => ok?)
+    (command sipoo :create-user
+             :email "foo@example.com"
+             :role "authority"
+             :enabled true)
+    => ok?)
   (fact "newly created authority receives mail"
     (let [email (last-email)]
       (:to email) => "foo@example.com"
@@ -183,26 +203,84 @@
   (fact "Filter overwritten"
       (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :defaultFilter :id) => "barfoo"))
 
-(facts update-user-organization
+(facts "update-user-organization"
   (apply-remote-minimal)
 
-  (fact (command naantali :create-user :email "foo@example.com" :role "authority" :enabled "true" :organization "529-R") => ok?)
+  (fact
+    (command naantali :create-user
+             :email "foo@example.com"
+             :role "authority"
+             :enabled "true"
+             :organization "529-R")
+    => ok?)
 
-  (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R"])
-  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :roles ["authority"]) => ok?)
+  (fact
+    (->> (query admin :user-by-email :email "foo@example.com")
+         :user
+         :orgAuthz
+         keys)
+    => [:529-R])
 
-  (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => (just ["529-R" "753-R"] :in-any-order))
-  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :roles ["authority"]) => ok?)
+  (fact
+    (command sipoo :update-user-organization
+             :email "foo@example.com"
+             :firstName "bar"
+             :lastName "har"
+             :roles ["authority"])
+    => ok?)
 
-  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :roles []) => (contains {:ok false, :parameters ["roles"], :text "error.vector-parameters-with-items-missing-required-keys"}))
+  (fact
+    (->> (query admin :user-by-email :email "foo@example.com")
+         :user
+         :orgAuthz
+         keys
+         set)
+    => #{:529-R :753-R})
 
-  (fact (command sipoo :update-user-organization :email (email-for-key teppo) :firstName "Teppo" :lastName "Example" :roles ["authority"]) => fail?)
+  (fact
+    (command sipoo :update-user-organization
+             :email "foo@example.com"
+             :firstName "bar"
+             :lastName "har"
+             :roles ["authority"])
+    => ok?)
 
-  (fact (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :roles ["authority"]) => (contains {:ok false :parameters ["lastName"], :text "error.missing-parameters"}))
+  (fact
+    (command sipoo :update-user-organization
+             :email "foo@example.com"
+             :firstName "bar"
+             :lastName "har"
+             :roles [])
+    => (contains {:ok         false,
+                  :parameters ["roles"]
+                  :text       "error.vector-parameters-with-items-missing-required-keys"}))
+
+  (fact
+    (command sipoo :update-user-organization
+             :email (email-for-key teppo)
+             :firstName "Teppo"
+             :lastName "Example"
+             :roles ["authority"])
+    => fail?)
+
+  (fact
+    (command sipoo :update-user-organization
+             :email "tonja.sibbo@sipoo.fi"
+             :firstName "bar"
+             :roles ["authority"])
+    => (contains {:ok         false
+                  :parameters ["lastName"]
+                  :text       "error.missing-parameters"}))
 
   (fact "invite new user Tonja to Sipoo"
 
-    (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :lastName "har" :operation "add"  :roles ["authority"]) => ok?
+    (command sipoo :update-user-organization
+             :email "tonja.sibbo@sipoo.fi"
+             :firstName "bar"
+             :lastName "har"
+             :operation "add"
+             :roles ["authority"])
+    => ok?
 
     (let [email (last-email)]
       (:to email) => (contains "tonja.sibbo@sipoo.fi")
@@ -244,32 +322,26 @@
 
 (fact "changing user info"
   (apply-remote-minimal)
-  (fact (query teppo :user) => (every-checker ok? (contains
-                                                    {:user
-                                                     (just
-                                                       {:city "Tampere"
-                                                        :allowDirectMarketing true
-                                                        :email "teppo@example.com"
-                                                        :enabled true
-                                                        :language "fi"
-                                                        :firstName "Teppo"
-                                                        :id "5073c0a1c2e6c470aef589a5"
-                                                        :lastName "Nieminen"
-                                                        :phone "0505503171"
-                                                        :role "applicant"
-                                                        :street "Mutakatu 7"
-                                                        :username "teppo@example.com"
-                                                        :virtual false
-                                                        :personIdSource "identification-service"
-                                                        :zip "33560"})})))
   (fact
-    (let [data {:firstName "Seppo"
-                :lastName "Sieninen"
-                :street "Sutakatu 7"
-                :city "Sampere"
-                :zip "33200"
-                :phone "0505503171"
-                :architect true
+    (query teppo :user) => (contains {:ok   true,
+                                      :user (contains {:role                 "applicant"
+                                                       :email                "teppo@example.com"
+                                                       :username             "teppo@example.com"
+                                                       :firstName            "Teppo"
+                                                       :lastName             "Nieminen"
+                                                       :street               "Mutakatu 7"
+                                                       :city                 "Tampere"
+                                                       :zip                  "33560"
+                                                       :phone                "0505503171"
+                                                       :allowDirectMarketing true})}))
+  (fact
+    (let [data {:firstName            "Seppo"
+                :lastName             "Sieninen"
+                :street               "Sutakatu 7"
+                :city                 "Sampere"
+                :zip                  "33200"
+                :phone                "0505503171"
+                :architect            true
                 :allowDirectMarketing true
                 :degree "kirvesmies"
                 :graduatingYear "2000"
