@@ -4,6 +4,7 @@
             [cheshire.core :as json]
             [iso-country-codes.core :refer [country-translate]]
             [sade.core :refer [def-]]
+            [sade.env :as env]
             [sade.http :as http]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.document.tools :refer [doc-subtype]]
@@ -12,9 +13,13 @@
 
 ;;; FIXME: Avoid producing nil-valued fields.
 
-(def- lang
+;;;; Constants
+
+(def ^:private lang
   "The language to use when localizing output to ALLU"
   "fi")
+
+(def- WGS84-URN "urn:ogc:def:crs:OGC:1.3:CRS84")
 
 ;;;; Cleaning up :value indirections
 
@@ -99,8 +104,6 @@
    :geometry geometry-wgs84
    :properties (dissoc drawing :geometry :geometry-wgs84)}) ; TODO: dissoc even more (?)
 
-(def- WGS84-URN "urn:ogc:def:crs:OGC:1.3:CRS84")
-
 (defn- application-geometry [{:keys [drawings location-wgs84]}]
   (let [obj (if (seq drawings)
               {:type "FeatureCollection"
@@ -135,10 +138,8 @@
 (sc/defn application->allu-placement-contract :- PlacementContract [app]
   (-> app flatten-values convert-value-flattened-app))
 
-;; TODO: Use property files to configure allu-api-* instead.
-(defn create-placement-contract! [allu-api-url allu-api-jwt]
-  (fn [app]
-    (http/post (str allu-api-url "placementcontracts")
-               {:headers {:authorization (str "Bearer " allu-api-jwt)}
-                :content-type :json
-                :body (json/encode (application->allu-placement-contract app))})))
+(defn create-placement-contract! [app]
+  (http/post (str (env/value :allu :url) "/placementcontracts")
+             {:headers {:authorization (str "Bearer " (env/value :allu :jwt))}
+              :content-type :json
+              :body (json/encode (application->allu-placement-contract app))}))
