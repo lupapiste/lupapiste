@@ -10,8 +10,10 @@
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.batchrun.fetch-verdict :as fetch-verdict]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.integrations.state-change :as state-change]
             [lupapalvelu.logging :as logging]
@@ -862,3 +864,65 @@
               (info "Attachments successfully unarchived for application" (:id application))
               (error "Some attachments were not successfully unarchived for application" (:id application)))))))
     (println "Organization must be provided.")))
+
+(defn print-info [id att version message]
+  (let [type (get-in att [:type :type-id])
+        content (:contentType version)]
+    (println id "-" (:id att) "-" (:fileId version) ", msg:" message "," content"," type)))
+
+(defn analyze-missing [& args]
+  (mongo/connect!)
+  (info "Starting analyze-missing job")
+  (let [ts 1527800400000]
+    (doseq [app (mongo/select :applications
+                              {:modified                          {$gte ts}
+                               :attachments.latestVersion.created {$gte ts}}
+                              [:attachments])
+            {version :latestVersion :as att} (->> (:attachments app)
+                                                  (filter :latestVersion))
+            :let [file (mongo/download (:fileId version))
+                  different-original? (not= (:fileId version) (:originalFileId version))]]
+      (when-not file
+        (if different-original?
+          (if (mongo/download (:originalFileId version))
+            (print-info (:id app) att version "fileId missing but originalFileIdFound")
+            (print-info (:id app) att version "fileId AND originalFileId missing"))
+          (print-info (:id app) att version "fileId missing"))))))
+
+(defn convert-and-link-missing [& args]
+  (mongo/connect!)
+  (info "Starting convert-and-link-missing job")
+  ;(sade.util/to-millis-from-local-datetime-string "2018-06-01T00:00")
+  ;=> 1527800400000
+  (let [ts 1527800400000]
+    (doseq [app (mongo/select :applications
+                              {:modified                          {$gte ts}
+                               :attachments.latestVersion.created {$gte ts}}
+                              [:attachments :organization])
+            {version :latestVersion :as att} (->> (:attachments app)
+                                                  (filter :latestVersion))
+            :let [file (mongo/download (:fileId version))]]
+      (logging/with-logging-context {:applicationId (:id app)}
+        (if file
+          (attachment/link-files-to-application (:id app) [(:fileId file)])
+          ;; file missing, generate new if it was from conversion
+          (if-let [original (mongo/download (:originalFileId version))]
+            (if (:autoConversion version)
+              (let [conversion (conversion/archivability-conversion
+                                 app
+                                 (assoc (select-keys original [:filename :contentType])
+                                   :content ((:content original))))]
+                (if (:autoConversion conversion)
+                  (do
+                    (file-upload/save-file (merge (select-keys conversion [:content :filename]) {:fileId (:fileId version)})
+                                           {:application (:id app) :linked true})
+                    (debugf "fileId %s converted, uploaded and linked successfully" (:fileId version)))
+                  (warnf "file %s not converted (%s): %s" (:fileId version) (get-in att [:type :type-id]) (pr-str conversion))))
+              (info "file missing, originalFileId found, but no autoConversion flag. FileId: " (:fileId version)
+                    " originalFileId: " (:originalFileId version)
+                    " type: " (get-in att [:type :type-id])))
+            (warnf "File not found, attachment: %s, originalFileId: %s, type: %s"
+                   (:id att)
+                   (:originalFileId version)
+                   (get-in att [:type :type-id]))))))))
+
