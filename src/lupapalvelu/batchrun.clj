@@ -1031,3 +1031,14 @@
         user-fn (fn [_ task-attachment]
                   (get-in task-attachment [:latestVersion :user]))]
     (fix-attachment-childrens apps :tasks tasks-filter-fn user-fn)))
+
+(defn statement-children-fix [& args]
+  (mongo/connect!)
+  (let [graylog-commands (graylog-request "give-statement")
+        statement-ids (set (map (comp :statementId :data) graylog-commands))
+        apps (mongo/select :applications {:_id {$in (map (comp :id :data) graylog-commands)}} [:attachments :statements])
+        statements-fn (fn [statement] (and (= "given" (:state statement))
+                                           (contains? statement-ids (:id statement))))
+        user-fn (fn [_ statement-attachment]
+                  (get-in statement-attachment [:latestVersion :user]))]
+    (fix-attachment-childrens apps :statements statements-fn user-fn)))
