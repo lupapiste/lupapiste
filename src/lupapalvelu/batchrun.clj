@@ -997,7 +997,7 @@
 (defn generate-missing-neighbor-docs [& args]
   (mongo/connect!)
   (let [ts 1527800400000
-        graylog-commands [{:data {:applicationId "LP-186-2018-90002" :neighborId "5b14f8a2afd92e4817e59427"}}] #_(graylog-request "neighbor-response")
+        graylog-commands (graylog-request "neighbor-response")
         neighbor-ids (set (map (comp :neighborId :data) graylog-commands))
         apps (mongo/select :applications
                            {:_id {$in (map (comp :applicationId :data) graylog-commands)}}
