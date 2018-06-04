@@ -245,8 +245,7 @@
         created-application (application/do-create-application command manual-schema-datas)
         new-parties (remove empty?
                             (concat (map suunnittelija->party-document (:suunnittelijat app-info))
-                                    (map osapuoli->party-document (:muutOsapuolet app-info))
-                                    (map tyonjohtaja->tj-document (:tyonjohtajat app-info))))
+                                    (map osapuoli->party-document (:muutOsapuolet app-info))))
         structure-descriptions (map :description buildings-and-structures)
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
