@@ -23,22 +23,17 @@
 
 ;;;; Cleaning up :value indirections
 
-(defn- flatten-values [app]
-  (letfn [(node-value [node]
-            (if (and (map? node) (contains? node :value))
-              (:value node)
-              node))]
-    (postwalk node-value app)))
+(def- flatten-values (partial postwalk (some-fn :value identity)))
 
 ;;;; Conversion details
 
-(defn- application-kind [{{operation :name} :primaryOperation}]
-  (let [operation (keyword operation)
+(defn- application-kind [app]
+  (let [operation (-> app :primaryOperation :name keyword)
         kind (str (name (doccc/ya-operation-type-to-schema-name-key operation)) " / "
                   (doccc/ya-operation-type-to-usage-description operation))]
-    (if-let [additional (doccc/ya-operation-type-to-additional-usage-description operation)]
-      (str kind " / " additional)
-      kind)))
+    (or (some->> (doccc/ya-operation-type-to-additional-usage-description operation)
+                 (str kind " / "))
+        kind)))
 
 (def- convert-customer-type
   {:henkilo "PERSON", :yritys "COMPANY"})
