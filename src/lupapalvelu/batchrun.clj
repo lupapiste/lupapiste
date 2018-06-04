@@ -940,7 +940,7 @@
       (json/parse-string true)))
 
 (defn graylog-request [action-to-check]
-  (->> (http/get (str "http://log.evolta.fi:9000/api/search/universal/absolute?query=action%3A"
+  (->> (http/get (str (env/value :graylog :host) "/api/search/universal/absolute?query=action%3A"
                       action-to-check
                       "%20AND%20(source%3Aapp3%20OR%20source%3Aapp4)&from=2018-05-31T21%3A00%3A00.000Z&to=2018-06-3T22%3A00%3A00.000Z&limit=4000")
                  {:basic-auth [(env/value :graylog :user) (env/value :graylog :password)]
