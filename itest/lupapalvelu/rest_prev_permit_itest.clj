@@ -20,4 +20,3 @@
       (fact "applicants are authorized"
         (->> (query-application raktark-jarvenpaa id) :documents (map :schema-info))
             => (has some (contains {:name "hakija-r"}))))))
-
