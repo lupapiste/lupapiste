@@ -175,9 +175,9 @@
                                        (remove empty?)
                                        distinct
                                        (make-operation-specific-stamps context info-fields))]
-    (doseq [{:keys [latestVersion] :as attachment} attachments]
-      (if (and (:stamped latestVersion)
-               (nil? (mongo/download (:fileId latestVersion))))
+    (doseq [{:keys [latestVersion] :as attachment} attachments
+            :when (:stamped latestVersion)]
+      (if (nil? (mongo/download (:fileId latestVersion)))
         (let [source (-> attachment
                          :versions
                          reverse
