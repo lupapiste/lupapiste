@@ -876,7 +876,7 @@
                                :attachments.latestVersion.created {$gte ts}}
                               [:attachments :organization])
             {version :latestVersion :as att} (->> (:attachments app)
-                                                  (filter #(-> % :latestVersion :autoConversion)))
+                                                  (filter :latestVersion))
             :let [file (mongo/download (:fileId version))]]
       (logging/with-logging-context {:applicationId (:id app)}
         (if file
