@@ -24,10 +24,9 @@
                "unarchive"                  'lupapalvelu.batchrun/unarchive
                "convert-and-link-missing"   'lupapalvelu.batchrun/convert-and-link-missing
                "analyze-missing"            'lupapalvelu.batchrun/analyze-missing
-               "replay-missing-stamping-ops" 'lupapalvelu.batchrun/replay-missing-stamping-ops
-               "replay-missing-user-attachments" 'lupapalvelu.batchrun/replay-missing-user-attachments
                "replay-attachment-children" 'lupapalvelu.batchrun/replay-attachment-children
-               "replay-missing-stamping-ops" 'lupapalvelu.batchrun/replay-missing-stamping-ops})
+               "replay-missing-stamping-ops" 'lupapalvelu.batchrun/replay-missing-stamping-ops
+               "replay-missing-user-attachments" 'lupapalvelu.batchrun/replay-missing-user-attachments})
 
 (defn launch! [service args]
   (debugf "Loading namespace '%s'...\n" (namespace service))
