@@ -1157,6 +1157,7 @@
                                   :size content-length}
                                  {:application (:id application)
                                   :linked true})
+          (infof "fileId %s converted, uploaded and linked successfully" originalFileId)
           (when-not (= fileId originalFileId)
             (let [conversion (conversion/archivability-conversion application
                                                                   {:filename    filename
@@ -1190,6 +1191,7 @@
                                                                  (filter :target))
             :let [file (mongo/download (:fileId version))]]
       (logging/with-logging-context {:applicationId (:id app)}
+        (info "Checking attachment id" (:id att))
         (when-not file
           (let [app-xml (or (get @app-xml-cache (:id app))
                             (-> (swap! app-xml-cache assoc (:id app) (krysp-fetch/get-application-xml-by-application-id app))
@@ -1197,7 +1199,8 @@
                 organization (org/get-organization (:organization app))
                 xml-verdicts (verdict/get-verdicts-from-xml app organization app-xml)]
             (cond
-              (= (:type target) "verdict")
+              (and (= (:type target) "verdict")
+                   (:urlHash target))
               (let [app-verdict (first (filter #(= (:id %) (:id target)) (:verdicts app)))]
                 (info "Fetching file for verdict" (:id target))
                 (if-let [xml-verdict (verdict/matching-verdict app-verdict xml-verdicts)]
@@ -1220,7 +1223,8 @@
                       (fetch-and-upload-file linkkiliitteeseen version app)))
                   (error "Could not find the matching XML verdict for" (:id target))))
 
-              (= (:type target) "task")
+              (and (= (:type target) "task")
+                   (:urlHash target))
               (let [_ (info "Fetching file for task" (:id target))
                     reviews (vec (review/reviews-preprocessed app-xml))
                     buildings-summary (building-reader/->buildings-summary app-xml)
@@ -1231,12 +1235,27 @@
                     attachments (-> (filter #(= (:id %) (:id target)) review-tasks)
                                     first
                                     :attachments)
-                    correct-attachment (->> attachments
-                                            (filter (fn [{:keys [linkkiliitteeseen]}]
-                                                      (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
-                                                         (:id att))))
-                                            first)]
-                (fetch-and-upload-file (:linkkiliitteeseen correct-attachment) version app))
+                    {:keys [linkkiliitteeseen]} (->> attachments
+                                                     (filter (fn [{:keys [linkkiliitteeseen]}]
+                                                               (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
+                                                                  (:id att))))
+                                                     first)]
+                (if (ss/blank? linkkiliitteeseen)
+                  (error "Could not find an HTTP link from reviews:" reviews)
+                  (fetch-and-upload-file linkkiliitteeseen version app)))
 
-              :else
-              (error "Cannot handle attachment with target" target))))))))
+              (= (:type target) "task")
+              (let [_ (info "Generating PDF for task" (:id target))
+                    tasks-filter-fn (fn [task] (and (= "task-katselmus" (get-in task [:schema-info :name]))
+                                                    (= "sent" (:state task))
+                                                    (= (:id target) (:id task))))
+                    user-fn (fn [_ task-attachment]
+                              (get-in task-attachment [:latestVersion :user]))]
+                (fix-attachment-childrens [app] :tasks tasks-filter-fn user-fn))
+
+
+              target
+              (error "Cannot handle attachment with target:" target)
+
+              (nil? target)
+              (error "Attachment does not have a target:" att))))))))
