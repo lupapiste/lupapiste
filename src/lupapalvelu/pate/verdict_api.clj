@@ -41,11 +41,14 @@
     :editable? fails if the verdict has been published.
     :published? fails if the verdict has NOT been published
     :legacy? fails if the verdict is a 'modern' Pate verdict
-    :modern? fails if the verdict is a legacy verdict"
+    :modern? fails if the verdict is a legacy verdict
+    :contract? fails if the verdict is not a contract
+    :verdict? fails for contracts"
   [& conditions]
   (let [{:keys [editable? published?
-                legacy? modern?]} (zipmap conditions
-                                          (repeat true))]
+                legacy? modern?
+                contract? verdict?]} (zipmap conditions
+                                             (repeat true))]
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
         (let [verdict (util/find-by-id verdict-id
@@ -64,13 +67,21 @@
                           :error.verdict.not-legacy
 
                           (and modern? (:legacy? verdict))
-                          :error.verdict.legacy)
+                          :error.verdict.legacy
+
+                          (and contract? (util/not=as-kw (:category verdict)
+                                                         :contract))
+                          :error.verdict.not-contract
+
+                          (and verdict? (util/=as-kw (:category verdict)
+                                                     :contract))
+                          :error.verdict.contract)
                         identity fail))))))
 
 (defn- replacement-check
   "Fails if the target verdict is a) already replaced, b) already being
   replaced (by another draft), c) not published, d) legacy verdict, d)
-  missing."
+  missing, e) contract."
   [verdict-key]
   (fn [{:keys [application data]}]
     (when-let [verdict-id (verdict-key data)]
@@ -83,6 +94,12 @@
   (when (:verdict-id data)
     (when-not (verdict/verdict-filled? command)
       (fail :pate.required-fields))))
+
+(defn- contractual-application
+  "Precheck that fails if the application category IS NOT :contract."
+  [command]
+  (when-not (= (verdict/command->category command) :contract)
+    (fail :error.verdict.not-contract)))
 
 (defmethod action/allowed-actions-for-category :pate-verdicts
   [command]
@@ -129,7 +146,8 @@
                        category.
 
                       If the user is applicant, only published
-                      verdicts are returned."
+                      verdicts are returned. Note that verdicts can be
+                      contracts."
    :feature          :pate
    :user-roles       #{:authority :applicant}
    :org-authz-roles  roles/reader-org-authz-roles
@@ -191,6 +209,17 @@
    :parameters      [:id]
    :user-roles      #{:applicant :authority}
    :org-authz-roles roles/reader-org-authz-roles
+   :states          states/post-submitted-states}
+  [_])
+
+(defquery pate-contract-tab {:description "Pseudo-query that fails if
+  the Pate contracts tab should not be shown on the UI. Note that
+  pate-contract-tab always implies pate-verdict-tab, too."
+   :feature         :pate
+   :parameters      [:id]
+   :user-roles      #{:applicant :authority}
+   :org-authz-roles roles/reader-org-authz-roles
+   :pre-checks      [contractual-application]
    :states          states/post-submitted-states}
   [_])
 
@@ -334,7 +363,7 @@
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
-                      (verdict-exists :editable?)]
+                      (verdict-exists :editable? :verdict?)]
    :states           states/post-submitted-states}
   [{application :application created :created}]
   (let [today-long (tc/to-long (t/today-at-midnight))

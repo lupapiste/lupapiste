@@ -1026,9 +1026,11 @@
   replaced (or being replaced)."
   [{:keys [pate-verdicts]} verdict-id]
   (when-let [{:keys [published legacy?
-                     replacement]} (util/find-by-id verdict-id pate-verdicts)]
+                     replacement category]} (util/find-by-id verdict-id
+                                                             pate-verdicts)]
     (and published
          (not legacy?)
+         (util/not=as-kw category :contract)
          (not (some-> replacement :replaced-by))
          (not (util/find-first #(= (get-in % [:replacement :replaces])
                                    verdict-id)

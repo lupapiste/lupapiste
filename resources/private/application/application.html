@@ -131,7 +131,7 @@
                                              feature: 'pate'"
                                   href="#" data-target="pate-verdict" data-test-id="pate-verdict-tab"
                                   class="link-btn">
-                                <span data-bind="ltext: 'application.tabVerdict'"></span>
+                                <span data-bind="ltext: 'application.tabVerdict' + $root.application.verdictPostfix()"></span>
                               </a>
                             </li>
 
@@ -419,7 +419,13 @@
                     <!-- ko if: selectedTabName() === 'pate-verdict' && lupapisteApp.models.rootVMO.currentPage() === 'application' -->
                     <div id="application-pate-verdict-tab"
                          class="tab-content feature--no-border" data-bind="feature: 'pate'">
+                      <!-- ko if: $root.authorization.ok( 'pate-contract-tab') -->
+                      <cljs-pate_verdicts params="contracts: true"></cljs-pate_verdicts>
+                      <!-- /ko -->
+                      <!-- ko ifnot: $root.authorization.ok( 'pate-contract-tab') -->
                       <cljs-pate_verdicts></cljs-pate_verdicts>
+                      <!-- /ko -->
+
                     </div>
                     <!-- /ko -->
 

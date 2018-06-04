@@ -992,10 +992,10 @@
                                             :dict :attachments}]]}}})
 
 (defn versub-upload
-  ([{:keys [type-group default]}]
+  ([{:keys [type-group default title]}]
    {:dictionary
     {:upload
-     {:attachments {:i18nkey    :application.verdict-attachments
+     {:attachments {:i18nkey    (or title :application.verdict-attachments)
                     :label?     false
                     :type-group (or type-group #"paatoksenteko")
                     :default    (or default :paatoksenteko.paatosote)
@@ -1161,18 +1161,24 @@
   ([category]
    (verdict-schema category nil)))
 
-;; TODO: There should be only one public function application->category
-;;       which should resolve category by subtype, operation, permitType and so on..
-
-(defn permit-type->category [permit-type]
+(defn permit-type->categories
+  "Categories (keywords) applicable to the given permit type. First
+  category is the more typical (e.g., :ya vs. :contract)."
+  [permit-type]
   (when-let [kw (some-> permit-type
                         s/lower-case
                         keyword)]
     (cond
-      (#{:r} kw)                     [:r :tj]
-      (#{:p :ya} kw)                 kw
-      (#{:kt :mm} kw)                :kt
-      (#{:yi :yl :ym :vvvl :mal} kw) :ymp)))
+      (#{:r :p} kw)                  [kw]
+      (#{:ya} kw)                    [:ya :contract]
+      (#{:kt :mm} kw)                [:kt]
+      (#{:yi :yl :ym :vvvl :mal} kw) [:ymp])))
+
+(defn application->category [{:keys [permitType permitSubtype]}]
+  (let [[x & _] (permit-type->categories permitType)]
+    (if (and (= x :ya) (util/=as-kw permitSubtype :sijoitussopimus))
+      :contract
+      x)))
 
 
 (defn permit-subtype->category [permit-subtype]

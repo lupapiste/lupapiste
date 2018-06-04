@@ -123,15 +123,21 @@
                                  [{:dict  :add-foreman
                                    :show? :_meta.editing?}]]}}})
 
-(def legsub-conditions
+(defn legsub-conditions [& [contract?]]
   {:dictionary {:conditions-title {:css      :pate-label
-                                   :loc-text :verdict.muutMaaraykset}
+                                   :loc-text (if contract?
+                                               :pate.contract.conditions
+                                               :verdict.muutMaaraykset)}
                 :condition-label  {:css      :pate-label.required
-                                   :loc-text :pate-condition}
+                                   :loc-text (if contract?
+                                               :pate.contract.condition
+                                               :pate-condition)}
                 :conditions       {:repeating {:name   {:text      {:label? false}
                                                         :required? true}
                                                :remove (remove-button :conditions)}}
-                :add-condition    (add-button :pate-conditions.add :conditions)}
+                :add-condition    (add-button (if contract?
+                                                :pate.contract.add-condition
+                                                :pate-conditions.add) :conditions)}
    :section    {:id   :conditions
                 :grid {:columns 5
                        :rows    [[{:col  5
@@ -179,28 +185,26 @@
                              :items      shared/review-types
                              :sort-by    :text}})
    legsub-foremen
-   legsub-conditions
+   (legsub-conditions)
    legsub-attachments
    (shared/versub-upload)))
 
+(def legsub-reviews-ya
+  (legsub-reviews {:select {:loc-prefix :pate.review-type
+                            :label?     false
+                            :items      shared/ya-review-types
+                            :sort-by    :text}}))
+
 (def ya-legacy-verdict
   (build-legacy-schema
-   (-> (legsub-verdict {:select {:loc-prefix :verdict.status
-                                 ;; Myonnetty, hyvaksytty, evatty,
-                                 ;; peruutettu
-                                 :items      [:1 :2 :21 :37]
-                                 :sort-by    :text
-                                 :type       :select}})
-       (assoc-in [:dictionary :contract] {:toggle {:i18nkey :verdict.create.agreement}})
-       (update-in [:section :grid :rows 3]
-                  concat [{:col  4
-                           :show?   :_meta.editing?
-                           :dict :contract}]))
-   (legsub-reviews {:select {:loc-prefix :pate.review-type
-                             :label?     false
-                             :items      shared/ya-review-types
-                             :sort-by    :text}})
-   legsub-conditions
+   (legsub-verdict {:select {:loc-prefix :verdict.status
+                             ;; Myonnetty, hyvaksytty, evatty,
+                             ;; peruutettu
+                             :items      [:1 :2 :21 :37]
+                             :sort-by    :text
+                             :type       :select}})
+   legsub-reviews-ya
+   (legsub-conditions)
    legsub-attachments
    (shared/versub-upload {:type-group #"muut" :default :muut.paatosote})))
 
@@ -210,7 +214,7 @@
                              :items      (map (comp keyword str) (range 1 43))
                              :sort-by    :text
                              :type :autocomplete}})
-   legsub-conditions
+   (legsub-conditions)
    legsub-attachments
    (shared/versub-upload)))
 
@@ -218,24 +222,80 @@
   (build-legacy-schema
    (legsub-verdict {:text {:loc-prefix :verdict.status
                            :items      [:verdict.status.43 :verdict.status.44]}})
-   legsub-conditions
+   (legsub-conditions)
    legsub-attachments
    (shared/versub-upload {:type-group #".*" :default :muut.paatosote})))
 
 (def ymp-legacy-verdict
   (build-legacy-schema
    (legsub-verdict {:text {:i18nkey :verdict.status}})
-   legsub-conditions
+   (legsub-conditions)
    legsub-attachments
    (shared/versub-upload {:type-group #".*" :default :muut.paatosote})))
 
 
+(def legsub-contract
+  {:dictionary {:kuntalupatunnus {:text      {:i18nkey :verdict.id}
+                                  :required? true}
+                :handler         {:text      {:i18nkey :verdict.name.sijoitussopimus}
+                                  :required? true}
+                :contract-date   {:date      {:i18nkey :verdict.contract.date}
+                                  :required? true}
+                :contract-text   {:text {:i18nkey :verdict.contract.text
+                                         :lines   20}}}
+   :section    {:id   :verdict
+                :grid {:columns 12
+                       :rows    [[{:col   2
+                                   :align :full
+                                   :dict  :kuntalupatunnus}
+                                  {}
+                                  ]
+                                 [{:col  2
+                                   :dict :contract-date}
+                                  {}
+                                  {:col   4
+                                   :align :full
+                                   :dict  :handler}]
+                                 [{:col   10
+                                   :align :full
+                                   :dict  :contract-text}]]}}})
+
+(def legsub-signatures
+  {:dictionary {:signatures {:repeating {:name       {:text {:read-only? true}}
+                                         :user-id    {:text {:read-only? true}}
+                                         :company-id {:text {:read-only? true}}
+                                         :date       {:date {:read-only? true}}}
+                             :sort-by   :date}}
+   :section    {:id       :signatures
+                :buttons? false
+                :i18nkey  :verdict.signatures
+                :show?    :signatures
+                :grid     {:columns 8
+                           :rows    [[{:col  7
+                                       :grid {:columns   7
+                                              :repeating :signatures
+                                              :rows      [[{:col  5
+                                                            :dict :name}
+                                                           {:col  2
+                                                            :dict :date}]]}}]]}}})
+
+(def contract-legacy-verdict
+  (build-legacy-schema
+   legsub-contract
+   legsub-reviews-ya
+   (legsub-conditions true)
+   (shared/versub-upload {:type-group #".*"
+                          :default :muut.paatosote
+                          :title :verdict.contract.attachments})
+   legsub-signatures))
+
 
 (defn legacy-verdict-schema [category]
   (case (keyword category)
-    :r  r-legacy-verdict
-    :ya ya-legacy-verdict
-    :p  p-legacy-verdict
-    :kt kt-legacy-verdict
-    :ymp ymp-legacy-verdict
+    :r        r-legacy-verdict
+    :ya       ya-legacy-verdict
+    :p        p-legacy-verdict
+    :kt       kt-legacy-verdict
+    :ymp      ymp-legacy-verdict
+    :contract contract-legacy-verdict
     (schema-util/pate-assert false "Unsupported legacy category:" category)))

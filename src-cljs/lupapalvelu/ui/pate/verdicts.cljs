@@ -17,6 +17,22 @@
 
 (defonce args (atom {}))
 
+(defn loc-key [k]
+  ;; Each value is [verdict-key contract-key]
+  (let [v (k {:title                [:application.tabVerdict :application.tabVerdict.sijoitussopimus]
+              :th-verdict           [:pate.verdict-table.verdict :pate.verdict-table.contract]
+              :th-date              [:pate.verdict-table.verdict-date :verdict.contract.date]
+              :th-giver             [:pate.verdict-table.verdict-giver :verdict.name.sijoitussopimus]
+              :add                  [:application.verdict.add :pate.contract.add]
+              :description          [:application.verdictDesc :pate.contract.description
+                                     :help.YA.verdictDesc.sijoitussopimus]
+              :confirm-delete       [:verdict.confirmdelete :pate.contract.confirm-delete]
+              :confirm-delete-draft [:pate.delete-verdict-draft
+                                     :pate.contract.confirm-delete-draft]})]
+    (if (:contracts? @args)
+      (last v)
+      (first v))))
+
 (defn- can-delete? [verdict-id]
   (or (state/verdict-auth? verdict-id :delete-legacy-verdict)
       (state/verdict-auth? verdict-id :delete-pate-verdict)))
@@ -56,11 +72,11 @@
                                                                    open-verdict
                                                                    @state/replacement-verdict)}
                             [:i.lupicon-circle-plus]
-                            [:span (common/loc :application.verdict.add)]])]]))))
+                            [:span (common/loc (loc-key :add))]])]]))))
 
 (rum/defc new-legacy-verdict []
   (components/icon-button {:icon     :lupicon-circle-plus
-                           :text-loc :application.verdict.add
+                           :text-loc (loc-key :add)
                            :class    [:positive]
                            :on-click #(service/new-legacy-verdict-draft @state/application-id
                                                                         open-verdict)}))
@@ -72,8 +88,8 @@
               :size            "medium"
               :component       "yes-no-dialog"
               :componentParams {:ltext (if (and legacy? published)
-                                         :verdict.confirmdelete
-                                         "pate.delete-verdict-draft")
+                                         (loc-key :confirm-delete)
+                                         (loc-key :confirm-delete-draft))
                                 :yesFn #(service/delete-verdict app-id verdict)}}))
 
 (defn- confirm-and-replace-verdict [verdict verdict-id]
@@ -129,18 +145,18 @@
                       (service/fetch-verdict-list app-id))}
         [:i.lupicon-chevron-left]
         [:span (common/loc :back)]]]]
-     [:h2 (common/loc :application.tabVerdict)])
+     [:h2 (common/loc (loc-key :title))])
    (if (empty? verdicts)
      (when-not (state/auth? :new-pate-verdict-draft)
-       (common/loc-html :p :application.verdictDesc))
+       (common/loc-html :p (loc-key :description)))
      [:div
      (if replacement-verdict
        [:h3.table-title (common/loc :application.tabVerdict.replacement)])
-     (verdict-table [:pate.verdict-table.verdict
-                     :pate.verdict-table.verdict-date
-                     :pate.verdict-table.verdict-giver
-                     :pate.verdict-table.last-edit
-                     ""]
+      (verdict-table [(loc-key :th-verdict)
+                      (loc-key :th-date)
+                      (loc-key :th-giver)
+                      :pate.verdict-table.last-edit
+                      ""]
                     verdicts
                     app-id
                     replacement-verdict)])
@@ -173,9 +189,10 @@
     (rum/mount (verdicts)
                (.getElementById js/document (:dom-id @args)))))
 
-(defn ^:export start [domId _]
+(defn ^:export start [domId params]
   (when (common/feature? :pate)
     (swap! args assoc
+           :contracts? (common/oget params :contracts)
            :dom-id (name domId))
     (bootstrap-verdicts)
     (mount-component)))

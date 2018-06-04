@@ -26,7 +26,10 @@
                      user-organizations)))
 
 (defn organization-categories [{scope :scope}]
-  (set (flatten (map (comp shared/permit-type->category :permitType) scope))))
+  (->> scope
+       (map (comp shared/permit-type->categories :permitType))
+       flatten
+       set))
 
 (defn operation->category [operation]
   (let [by-operation (shared/category-by-operation operation)
@@ -468,8 +471,9 @@
 
 (defn application-verdict-templates [{:keys [operation-verdict-templates
                                              verdict-templates]}
-                                     {:keys [primaryOperation] :as application}]
-  (let [app-category (shared/application->category application)
+                                     {:keys [primaryOperation]
+                                      :as   application}]
+  (let [app-category  (shared/application->category application)
         app-operation (-> primaryOperation :name keyword)]
     (->> verdict-templates
          :templates

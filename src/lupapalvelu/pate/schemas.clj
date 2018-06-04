@@ -15,7 +15,7 @@
 
 (defschema PateCategory
   {:id       ssc/ObjectIdStr
-   :category (sc/enum "r" "p" "ya" "kt" "ymp" "tj")})
+   :category (sc/enum "r" "p" "ya" "kt" "ymp" "tj" "contract")})
 
 (defschema PateTerm
   {:fi       sc/Str
