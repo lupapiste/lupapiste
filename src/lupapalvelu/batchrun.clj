@@ -41,8 +41,11 @@
             [sade.validators :as v]
             [ring.util.codec :as codec]
             [cheshire.custom :as json]
-            [lupapalvelu.attachment.stamping :as stamping])
-  (:import [org.xml.sax SAXParseException]))
+            [lupapalvelu.attachment.stamping :as stamping]
+            [lupapalvelu.attachment :as att]
+            [clojure.java.io :as io])
+  (:import [org.xml.sax SAXParseException]
+           [java.io ByteArrayOutputStream ByteArrayInputStream]))
 
 
 (defn- older-than [timestamp] {$lt timestamp})
@@ -963,3 +966,57 @@
                    (string? lang))
             (stamping/regenerated-stamped-attachment command timestamp application files lang stamp)
             (error "Invalid log data, can't fix stamp:" logdata)))))))
+
+(defn replay-missing-user-attachments [& args]
+  (mongo/connect!)
+  (info "Starting replay-missing-user-attachments job")
+  (doseq [{:keys [user data] :as logdata} (graylog-request "copy-user-attachments-to-application")]
+
+    (logging/with-logging-context {:applicationId (:id data)}
+      (doseq [attachment (:attachments (mongo/by-id :users (:id user) {:attachments true}))]
+        (let [application-id (:id data)
+              application (mongo/by-id :applications application-id)
+              user-id (:id user)
+              {:keys [attachment-type attachment-id file-name content-type size]} attachment
+              user-att-file (mongo/download-find {:id attachment-id :metadata.user-id user-id})
+              maybe-attachment-id (str application-id "." user-id "." attachment-id)
+              same-attachments (->> (att/get-attachments-by-type application attachment-type)
+                                    (filter (fn [att]
+                                              (and (seq (:latestVersion att))
+                                                   (= (get-in att [:latestVersion :user :id]) user-id)
+                                                   (nil? (mongo/download (get-in att [:latestVersion :fileId])))))))
+              target-attachment (or (first (filter #(= maybe-attachment-id (:id %)) same-attachments))
+                                    (first same-attachments))
+              {:keys [fileId originalFileId stamped]} (:latestVersion target-attachment)]
+          (cond
+            (nil? fileId)
+            (warn "No suitable target attachment found in application for user" user-id "attachment" attachment-id)
+
+            stamped
+            (error "Target attachment for user" user-id "attachment" attachment-id "is attachment id" (:id target-attachment)
+                   "but it is stamped. Skipping.")
+
+            :else
+            (let [bos (ByteArrayOutputStream.)]
+              (info "Processing user" user-id "attachment" attachment-id)
+              (with-open [content ((:content user-att-file))]
+                (io/copy content bos))
+              (with-open [bis (ByteArrayInputStream. (.toByteArray bos))]
+                (when-not (= fileId originalFileId)
+                  (let [conversion (conversion/archivability-conversion application
+                                                                        {:filename    file-name
+                                                                         :contentType content-type
+                                                                         :content     bis})]
+                    (if (:autoConversion conversion)
+                      (do
+                        (file-upload/save-file (merge (select-keys conversion [:content :filename]) {:fileId fileId})
+                                               {:application application-id :linked true})
+                        (infof "fileId %s converted, uploaded and linked successfully" fileId))
+                      (warnf "file %s not converted (%s): %s" fileId (get-in target-attachment [:type :type-id]) (pr-str conversion)))))
+                (.reset bis)
+                (file-upload/save-file {:content  bis
+                                        :filename file-name
+                                        :fileId   originalFileId}
+                                       {:application application-id
+                                        :linked      true})
+                (infof "fileId %s uploaded and linked successfully" originalFileId)))))))))
