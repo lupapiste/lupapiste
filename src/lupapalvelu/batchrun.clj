@@ -885,7 +885,8 @@
           (if-let [original   (mongo/download (:originalFileId version))]
             (let [conversion (conversion/archivability-conversion
                                app
-                               (select-keys original [:filename :contentType :content]))]
+                               (assoc (select-keys original [:filename :contentType])
+                                 :content ((:content original))))]
               (if (:autoConversion conversion)
                 (do
                   (file-upload/save-file (merge (select-keys conversion [:content :filename]) {:fileId (:fileId file)})
