@@ -26,7 +26,8 @@
                "analyze-missing"            'lupapalvelu.batchrun/analyze-missing
                "replay-attachment-children" 'lupapalvelu.batchrun/replay-attachment-children
                "replay-missing-stamping-ops" 'lupapalvelu.batchrun/replay-missing-stamping-ops
-               "replay-missing-user-attachments" 'lupapalvelu.batchrun/replay-missing-user-attachments})
+               "replay-missing-user-attachments" 'lupapalvelu.batchrun/replay-missing-user-attachments
+               "fetch-missing-backend-attachments" 'lupapalvelu.batchrun/fetch-missing-backend-attachments})
 
 (defn launch! [service args]
   (debugf "Loading namespace '%s'...\n" (namespace service))
