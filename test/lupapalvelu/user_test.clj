@@ -4,11 +4,10 @@
             [monger.operators :refer :all]
             [sade.core :refer [fail?]]
             [lupapalvelu.generators.user]
-            [lupapalvelu.itest-util :refer [expected-failure? 
-                                            unauthorized? 
-                                            missing-parameters? 
-                                            organization-not-found? 
-                                            invalid-role?]]
+            [lupapalvelu.itest-util :refer [expected-failure?
+                                            unauthorized?
+                                            missing-parameters?
+                                            organization-not-found?]]
             [lupapalvelu.test-util :refer [catch-all passing-quick-check]]
             [lupapalvelu.user :refer :all]
             [lupapalvelu.mongo :as mongo]
@@ -114,8 +113,8 @@
                   (every? valid? (:orgAuthz user)))))
 
 (fact :qc organization-ids-by-roles-spec
-  (quick-check 100 organization-ids-by-roles-prop :max-size 50)
-  => passing-quick-check)
+          (quick-check 100 organization-ids-by-roles-prop :max-size 50)
+          => passing-quick-check)
 
 (def user-and-organization-id-generator
   (gen/let [org-ids (gen/vector-distinct (ssg/generator OrgId)
@@ -136,8 +135,8 @@
                          (contains? users-roles-in-organization :approver))))))
 
 (fact :qc user-is-authority-in-organization?-spec
-  (quick-check 100 user-is-authority-in-organization-prop :max-size 50)
-  => passing-quick-check)
+          (quick-check 100 user-is-authority-in-organization-prop :max-size 50)
+          => passing-quick-check)
 
 (facts municipality-name->system-user-email
   (fact "srting with caps"
@@ -182,272 +181,35 @@
 
 ;;
 ;; ==============================================================================
-;; validate-create-new-user!
-;; ==============================================================================
-;;
-
-(testable-privates lupapalvelu.user new-user-error validate-create-new-user!)
-
-(facts "new-user-error-test"
-
-  (fact "new user must match schema"
-    (new-user-error {:caller    nil
-                     :user-data {}})
-    => (contains {:desc  "user data matches User schema"
-                  :error :error.missing-parameters}))
-
-  (fact "applicants are born via registration"
-    (new-user-error {:caller    {}
-                     :user-data {:email "a@b.c"
-                                 :role  "applicant"}})
-    => (contains {:desc  "applicants are born via registration"
-                  :error :error.unauthorized}))
-
-  (fact "applicants may not have an organizations"
-    (new-user-error {:caller    nil
-                     :user-data {:email    "a@b.c"
-                                 :role     "applicant"
-                                 :orgAuthz {:some-org ["some-role"]}}})
-    => (contains {:desc  "applicants may not have an organizations"
-                  :error :error.unauthorized}))
-
-  (fact "authorityAdmin can create users into his/her own organizations only"
-    (new-user-error {:caller    {:role     "authority"
-                                 :orgAuthz {:foo ["authority"]}}
-                     :user-data {:email    "a@b.c"
-                                 :role     "authority"
-                                 :orgAuthz {:foo ["authority"]}}})
-    => (contains {:desc  "authorityAdmin can create users into his/her own organizations only"
-                  :error :error.unauthorized}))
-
-  (fact "new authority must have at least one organization role"
-    (new-user-error {:caller    {:role     "authority"
-                                 :orgAuthz {:foo ["authority"]}}
-                     :user-data {:email    "a@b.c"
-                                 :role     "authority"
-                                 :orgAuthz {}}})
-    => (contains {:desc  "new authority must have at least one organization role"
-                  :error :error.missing-parameters}))
-
-  (fact "new authority must have at least one organization role"
-    (new-user-error {:caller    {:role     "authority"
-                                 :orgAuthz {:foo ["authority"]}}
-                     :user-data {:email    "a@b.c"
-                                 :role     "authority"
-                                 :orgAuthz {}}})
-    => (contains {:desc  "new authority must have at least one organization role"
-                  :error :error.missing-parameters}))
-
-  (fact "dummy user may not have an organization roles"
-    (new-user-error {:caller    {:role     "authority"
-                                 :orgAuthz {:foo ["authorityAdmin"]}}
-                     :user-data {:email    "a@b.c"
-                                 :role     "dummy"
-                                 :orgAuthz {:foo ["bar"]}}})
-    => (contains {:error :error.unauthorized
-                  :desc  "dummy user may not have an organization roles"}))
-
-  (facts "all organizations must be known"
-    (fact
-      (new-user-error {:caller               {:role     "authority"
-                                              :orgAuthz {:foo ["authorityAdmin"]}}
-                       :user-data            {:email    "a@b.c"
-                                              :role     "authority"
-                                              :orgAuthz {:foo ["authority"]}}
-                       :known-organizations? (constantly false)})
-      => (contains {:desc  "all organizations must be known"
-                    :error :error.organization-not-found}))
-    (fact
-      (new-user-error {:caller               {:role     "authority"
-                                              :orgAuthz {:foo ["authorityAdmin"]}}
-                       :user-data            {:email    "a@b.c"
-                                              :role     "authority"
-                                              :orgAuthz {:foo ["authority"]}}
-                       :known-organizations? (constantly true)})
-      => nil))
-
-  (facts "only users in admin role can create users with apikeys"
-    (fact
-      (new-user-error {:caller               {:role     "authority"}
-                       :user-data            {:email    "a@b.c"
-                                              :role     "dummy"}
-                       :known-organizations? (constantly true)
-                       :apikey "xxx"})
-      => (contains {:desc  "only admin can create create users with apikey"
-                    :error :error.unauthorized}))
-    (fact
-      (new-user-error {:caller               {:role     "admin"}
-                       :user-data            {:email    "a@b.c"
-                                              :role     "dummy"}
-                       :known-organizations? (constantly true)
-                       :apikey "xxx"})
-      => nil))
-
-  ;; Happy cases:
-
-  (fact
-    (new-user-error {:caller    {:role     "authority"
-                                 :orgAuthz {:foo ["authorityAdmin"]}}
-                     :user-data {:email    "a@b.c"
-                                 :role     "dummy"
-                                 :orgAuthz {}}
-                     :known-organizations? (constantly true)})
-    => nil)
-
-  (fact
-    (new-user-error {:caller    {:role     "authority"
-                                 :orgAuthz {:foo ["r1" "authorityAdmin" "r2"]
-                                            :bar ["r1" "authorityAdmin" "r2"]}}
-                     :user-data {:email    "a@b.c"
-                                 :role     "authority"
-                                 :orgAuthz {:foo ["r1"]
-                                            :bar ["r2"]}}
-                     :known-organizations? (constantly true)})
-    => nil))
-
-(facts "validate-create-new-user!"
-  (fact (validate-create-new-user! nil nil) => missing-parameters?)
-  (fact (validate-create-new-user! nil {}) => missing-parameters?)
-
-  (fact "applicant can't create users"
-    (validate-create-new-user! {:role "applicant"}
-                               {:role  "dummy"
-                                :email "x@x.x"})
-    => unauthorized?)
-
-  (fact (validate-create-new-user! {:role "admin"} {:role "x" :email "x@x.x"}) => missing-parameters?)
-  (fact (validate-create-new-user! {:role "applicant"} {:role "authority" :email "x@x.x"}) => unauthorized?)
-  (fact (validate-create-new-user! {:role "admin"} {:role "authority" :email "x@x.x"}) => missing-parameters?)
-  (fact (validate-create-new-user! {:role "applicant"} {:role "authority" :email "x@x.x"}) => unauthorized?)
-
-  (facts "authority can create new authority, provided that she has authorityAdmin permission to target org"
-    (fact "caller has authority admin, validation succeeds"
-      (validate-create-new-user! {:role     "authority"
-                                  :orgAuthz {:org-1 ["authorityAdmin"]
-                                             :org-2 ["authorityAdmin"]}}
-                                 {:role     "authority"
-                                  :email    "x@x.x"
-                                  :orgAuthz {:org-1 ["authority"]
-                                             :org-2 ["authority"]}})
-      => nil
-      (provided
-        (org/known-organizations? [:org-1 :org-2]) => true))
-    (fact "caller does not have authorityAdmin to org-2 validation fails"
-      (validate-create-new-user! {:role     "authority"
-                                  :orgAuthz {:org-1 ["authorityAdmin"]
-                                             :org-2 ["authority"]}}
-                                 {:role     "authority"
-                                  :email    "x@x.x"
-                                  :orgAuthz {:org-1 ["authority"]
-                                             :org-2 ["authority"]}})
-      => unauthorized?)
-    (fact "can't create users to org that is unknown"
-      (validate-create-new-user! {:role     "authority"
-                                  :orgAuthz {:org-1 ["authorityAdmin"]
-                                             :org-2 ["authorityAdmin"]}}
-                                 {:role     "authority"
-                                  :email    "x@x.x"
-                                  :orgAuthz {:org-1 ["authority"]
-                                             :org-2 ["authority"]}})
-      => organization-not-found?
-      (provided
-        (org/known-organizations? [:org-1 :org-2]) => false)))
-
-  (facts "admin tests"
-    (fact "admin can create user to known organization"
-      (validate-create-new-user! {:role "admin"}
-                                 {:role "authority"
-                                  :email "x@x.x"
-                                  :orgAuthz {:org ["authority"]}})
-      => nil
-      (provided
-        (org/known-organizations? [:org]) => true))
-    (fact "admin can't create user to unknown organization"
-      (validate-create-new-user! {:role "admin"}
-                                 {:role "authority"
-                                  :email "x@x.x"
-                                  :orgAuthz {:org ["authority"]}})
-      => organization-not-found?
-      (provided
-        (org/known-organizations? [:org]) => false)))
-
-
-  (fact "dummy users can't have orgs" 
-    (validate-create-new-user! {:role "authority" 
-                                :orgAuthz {:org ["authorityAdmin"]}} 
-                               {:role "dummy"
-                                :email "x@x.x"
-                                :orgAuthz {:org ["authority"]}}) 
-    => unauthorized?)
-
-  (fact "not even admin can create another admin"
-    (validate-create-new-user! {:role "admin"} 
-                               {:role "admin" 
-                                :email "x@x.x"})
-    => missing-parameters?)
-
-
-  #_(fact "invalid passwords are rejected"
-    (validate-create-new-user! {:role "admin"}
-                               {:password "z"
-                                :role "dummy"
-                                :email "x"})
-    => (partial expected-failure? :error.password.minlength)
-    (provided (security/valid-password? "z") => false))
-
-  #_(against-background
-    [(mongo/by-id :organizations "o" anything) => {:id "o"}
-     (mongo/by-id :organizations "other" anything) => nil
-     (mongo/by-id :organizations "q" anything) => {:id "q"}
-     (mongo/by-id :organizations "x" anything) => {:id "x"}
-     (org/known-organizations? #{}) => false]
-
-
-
-
-    
-
-    
-
-
-
-
-
-    (fact "valid passwords are ok"
-      (validate-create-new-user! {:role "admin"} {:password "z" :role "dummy" :email "x"}) => truthy
-      (provided (security/valid-password? "z") => true))))
-
-;;
-;; ==============================================================================
 ;; create-new-user-entity
 ;; ==============================================================================
 ;;
 
 (testable-privates lupapalvelu.user create-new-user-entity)
 
-#_(facts "create-new-user-entity"
+(facts "create-new-user-entity"
 
   (facts "emails are converted to lowercase"
     (fact (create-new-user-entity {:email "foo"}) => (contains {:email "foo"}))
     (fact (create-new-user-entity {:email "Foo@Bar.COM"}) => (contains {:email "foo@bar.com"})))
 
   (facts "default values"
-    (fact (create-new-user-entity {:email "Foo"}) => (contains {:email     "foo"
-                                                                :username  "foo"
-                                                                :firstName ""
-                                                                :lastName  ""
-                                                                :enabled   false}))
+    (fact (create-new-user-entity {:email "Foo@Foo.Foo"}) => (contains {:email     "foo@foo.foo"
+                                                                        :username  "foo@foo.foo"
+                                                                        :firstName ""
+                                                                        :lastName  ""
+                                                                        :enabled   false}))
     (fact (create-new-user-entity {:email "Foo" :username "bar"}) => (contains {:email     "foo"
                                                                                 :username  "bar"
                                                                                 :firstName ""
                                                                                 :lastName  ""
                                                                                 :enabled   false})))
 
-
-
   (fact "password (if provided) is put under :private"
-    (fact (create-new-user-entity {:email "email"}) => (contains {:private {}}))
-    (fact (create-new-user-entity {:email "email" :password "foo"}) => (contains {:private {:password "bar"}})
+    (fact (create-new-user-entity {:email "email"})
+      => (contains {:private {}}))
+    (fact (create-new-user-entity {:email "email" :password "foo"})
+      => (contains {:private {:password "bar"}})
       (provided (security/get-hash "foo") => "bar")))
 
   (fact "does not contain extra fields"
@@ -460,42 +222,263 @@
 
 ;;
 ;; ==============================================================================
+;; validate-create-new-user!
+;; ==============================================================================
+;;
+
+(testable-privates lupapalvelu.user new-user-error validate-create-new-user!)
+
+(facts "new-user-error-test"
+
+  (fact "new user must match schema"
+    (-> {:caller    nil
+         :user-data (create-new-user-entity {})}
+        (new-user-error))
+    => (contains {:desc  "user data matches User schema"
+                  :error :error.missing-parameters}))
+
+  (fact "applicants are born via registration"
+    (new-user-error {:caller    {}
+                     :user-data (create-new-user-entity {:email "a@b.c"
+                                                         :role  "applicant"})})
+    => (contains {:desc  "applicants are born via registration"
+                  :error :error.unauthorized}))
+
+  (fact "applicants may not have an organizations"
+    (new-user-error {:caller    nil
+                     :user-data (create-new-user-entity {:email    "a@b.c"
+                                                         :role     "applicant"
+                                                         :orgAuthz {:some-org ["some-role"]}})})
+    => (contains {:desc  "applicants may not have an organizations"
+                  :error :error.unauthorized}))
+
+  (fact "authorityAdmin can create users into his/her own organizations only"
+    (new-user-error {:caller    {:role     "authority"
+                                 :orgAuthz {:foo ["authority"]}}
+                     :user-data (create-new-user-entity {:email    "a@b.c"
+                                                         :role     "authority"
+                                                         :orgAuthz {:foo ["authority"]}})})
+    => (contains {:desc  "authorityAdmin can create users into his/her own organizations only"
+                  :error :error.unauthorized}))
+
+  (fact "dummy user may not have an organization roles"
+    (new-user-error {:caller    {:role     "authority"
+                                 :orgAuthz {:foo ["authorityAdmin"]}}
+                     :user-data (create-new-user-entity {:email    "a@b.c"
+                                                         :role     "dummy"
+                                                         :orgAuthz {:foo ["bar"]}})})
+    => (contains {:error :error.unauthorized
+                  :desc  "dummy user may not have an organization roles"}))
+
+  (facts "all organizations must be known"
+    (fact
+      (new-user-error {:caller               {:role     "authority"
+                                              :orgAuthz {:foo ["authorityAdmin"]}}
+                       :user-data            (create-new-user-entity {:email    "a@b.c"
+                                                                      :role     "authority"
+                                                                      :orgAuthz {:foo ["authority"]}})
+                       :known-organizations? (constantly false)})
+      => (contains {:desc  "all organizations must be known"
+                    :error :error.organization-not-found}))
+    (fact
+      (new-user-error {:caller               {:role     "authority"
+                                              :orgAuthz {:foo ["authorityAdmin"]}}
+                       :user-data            (create-new-user-entity {:email    "a@b.c"
+                                                                      :role     "authority"
+                                                                      :orgAuthz {:foo ["authority"]}})
+                       :known-organizations? (constantly true)})
+      => nil))
+
+  (facts "only users in admin role can create users with apikeys"
+    (fact
+      (new-user-error {:caller               {:role "authority"}
+                       :user-data            (create-new-user-entity {:email "a@b.c"
+                                                                      :role  "dummy"})
+                       :known-organizations? (constantly true)
+                       :apikey               "xxx"})
+      => (contains {:desc  "only admin can create create users with apikey"
+                    :error :error.unauthorized}))
+    (fact
+      (new-user-error {:caller               {:role "admin"}
+                       :user-data            (create-new-user-entity {:email "a@b.c"
+                                                                      :role  "dummy"})
+                       :known-organizations? (constantly true)
+                       :apikey               "xxx"})
+      => nil))
+
+  ;; Happy cases:
+
+  (fact
+    (new-user-error {:caller               {:role     "authority"
+                                            :orgAuthz {:foo ["authorityAdmin"]}}
+                     :user-data            (create-new-user-entity {:email    "a@b.c"
+                                                                    :role     "dummy"
+                                                                    :orgAuthz {}})
+                     :known-organizations? (constantly true)})
+    => nil)
+
+  (fact
+    (new-user-error {:caller               {:role     "authority"
+                                            :orgAuthz {:foo ["r1" "authorityAdmin" "r2"]
+                                                       :bar ["r1" "authorityAdmin" "r2"]}}
+                     :user-data            (create-new-user-entity {:email    "a@b.c"
+                                                                    :role     "authority"
+                                                                    :orgAuthz {:foo ["r1"]
+                                                                               :bar ["r2"]}})
+                     :known-organizations? (constantly true)})
+    => nil))
+
+(facts "validate-create-new-user!"
+  (fact (validate-create-new-user! nil (create-new-user-entity nil)) => missing-parameters?)
+  (fact (validate-create-new-user! nil (create-new-user-entity {})) => missing-parameters?)
+
+  (fact "applicant can't create users"
+    (validate-create-new-user! {:role "applicant"}
+                               (create-new-user-entity {:role  "dummy"
+                                                        :email "x@x.x"}))
+    => unauthorized?)
+
+  (fact
+    (validate-create-new-user! {:role "admin"}
+                               (create-new-user-entity {:role "x"
+                                                        :email "x@x.x"}))
+    => missing-parameters?)
+  (fact
+    (validate-create-new-user! {:role "applicant"}
+                               (create-new-user-entity {:role "authority"
+                                                        :email "x@x.x"}))
+    => unauthorized?)
+  (fact
+    (validate-create-new-user! {:role "applicant"}
+                               (create-new-user-entity {:role "authority"
+                                                        :email "x@x.x"}))
+    => unauthorized?)
+
+  (facts "authority can create new authority, provided that she has authorityAdmin permission to target org"
+    (fact "caller has authority admin, validation succeeds"
+      (validate-create-new-user! {:role     "authority"
+                                  :orgAuthz {:org-1 ["authorityAdmin"]
+                                             :org-2 ["authorityAdmin"]}}
+                                 (create-new-user-entity {:role     "authority"
+                                                          :email    "x@x.x"
+                                                          :orgAuthz {:org-1 ["authority"]
+                                                                     :org-2 ["authority"]}}))
+      => nil
+      (provided
+        (org/known-organizations? [:org-1 :org-2]) => true))
+    (fact "caller does not have authorityAdmin to org-2 validation fails"
+      (validate-create-new-user! {:role     "authority"
+                                  :orgAuthz {:org-1 ["authorityAdmin"]
+                                             :org-2 ["authority"]}}
+                                 (create-new-user-entity {:role     "authority"
+                                                          :email    "x@x.x"
+                                                          :orgAuthz {:org-1 ["authority"]
+                                                                     :org-2 ["authority"]}}))
+      => unauthorized?)
+    (fact "can't create users to org that is unknown"
+      (validate-create-new-user! {:role     "authority"
+                                  :orgAuthz {:org-1 ["authorityAdmin"]
+                                             :org-2 ["authorityAdmin"]}}
+                                 (create-new-user-entity {:role     "authority"
+                                                          :email    "x@x.x"
+                                                          :orgAuthz {:org-1 ["authority"]
+                                                                     :org-2 ["authority"]}}))
+      => organization-not-found?
+      (provided
+        (org/known-organizations? [:org-1 :org-2]) => false)))
+
+  (facts "admin tests"
+    (fact "admin can create user to known organization"
+      (validate-create-new-user! {:role "admin"}
+                                 (create-new-user-entity {:role     "authority"
+                                                          :email    "x@x.x"
+                                                          :orgAuthz {:org ["authority"]}}))
+      => nil
+      (provided
+        (org/known-organizations? [:org]) => true))
+    (fact "admin can't create user to unknown organization"
+      (validate-create-new-user! {:role "admin"}
+                                 (create-new-user-entity {:role     "authority"
+                                                          :email    "x@x.x"
+                                                          :orgAuthz {:org ["authority"]}}))
+      => organization-not-found?
+      (provided
+        (org/known-organizations? [:org]) => false)))
+
+
+  (fact "dummy users can't have orgs"
+    (validate-create-new-user! {:role     "authority"
+                                :orgAuthz {:org ["authorityAdmin"]}}
+                               (create-new-user-entity {:role     "dummy"
+                                                        :email    "x@x.x"
+                                                        :orgAuthz {:org ["authority"]}}))
+    => unauthorized?)
+
+  (fact "not even admin can create another admin"
+    (validate-create-new-user! {:role "admin"}
+                               (create-new-user-entity {:role  "admin"
+                                                        :email "x@x.x"}))
+    => missing-parameters?)
+
+  (fact "admin can create authority"
+    (validate-create-new-user! {:role "admin"}
+                               (create-new-user-entity {:role "authority"
+                                                        :email "x@x.x"}))
+    => nil)
+
+  ; TODO: figure out where invalid password should be checked
+  #_(fact "invalid passwords are rejected"
+      (validate-create-new-user! {:role "admin"}
+                                 {:password "z"
+                                  :role     "dummy"
+                                  :email    "x@x.x"})
+      => (partial expected-failure? :error.password.minlength)
+      (provided (security/valid-password? "z") => false)))
+
+;;
+;; ==============================================================================
 ;; Creating users:
 ;; ==============================================================================
 ;;
 
-#_(facts "create-new-user"
+(facts "create-new-user"
 
-  (fact "register new applicant user, user did not exists before"
-    (create-new-user nil {:email "email" :role "applicant"}) => ..result..
+  ; FIXME: this fails with "applicants are born via registration"
+  #_(fact "register new applicant user, user did not exists before"
+    (create-new-user nil {:email "x@x.x" :role "applicant"}) => ..result..
     (provided
-      (get-user-by-email "email") =streams=> [nil ..result..]
+      (get-user-by-email "x@x.x") =streams=> [nil ..result..]
       (mongo/create-id) => ..id..
-      (mongo/insert :users (contains {:email "email" :id ..id..})) => nil
+      (mongo/insert :users (contains {:email "x@x.x" :id ..id..})) => nil
       (mongo/update-by-id :users anything anything) => anything :times 0))
 
-  (fact "create new applicant user, user exists before as dummy user"
-    (create-new-user nil {:email "email" :role "applicant"}) => ..result..
+  ; FIXME: this fails with "applicants are born via registration"
+  #_(fact "create new applicant user, user exists before as dummy user"
+    (create-new-user nil {:email "x@x.x" :role "applicant"}) => ..result..
     (provided
-      (get-user-by-email "email") =streams=> [{:id ..old-id.. :role "dummy"} ..result..]
+      (get-user-by-email "x@x.x") =streams=> [{:id ..old-id.. :role "dummy"} ..result..]
       (mongo/insert :users anything) => anything :times 0
-      (mongo/update-by-id :users ..old-id.. (contains {:email "email"})) => nil))
+      (mongo/update-by-id :users ..old-id.. (contains {:email "x@x.x"})) => nil))
 
   (fact "create new authorityAdmin user, user exists before as dummy user"
-    (create-new-user {:role "admin"} {:email "email" :orgAuthz {:x ["authorityAdmin"]} :role "authorityAdmin"}) => ..result..
+    (create-new-user {:role "admin"}
+                     {:email "x@x.x"
+                      :orgAuthz {:x ["authorityAdmin"]}
+                      :role "authorityAdmin"})
+    => ..result..
     (provided
-      (get-user-by-email "email") =streams=> [{:id ..old-id.. :role "dummy"} ..result..]
-      (mongo/by-id :organizations "x" anything) => {:id "x"}
+      (get-user-by-email "x@x.x") =streams=> [{:id ..old-id.. :role "dummy"} ..result..]
+      (org/known-organizations? [:x]) => true
       (mongo/insert :users anything) => anything :times 0
-      (mongo/update-by-id :users ..old-id.. (contains {:email "email"})) => nil))
+      (mongo/update-by-id :users ..old-id.. (contains {:email "x@x.x"})) => nil))
 
   (fact "create new authorityAdmin user, user exists before, but role is not 'dummy'"
-    (create-new-user {:role "admin"} {:email "email" :orgAuthz {:x ["authorityAdmin"]} :role "authorityAdmin"}) => (partial expected-failure? :error.duplicate-email)
+    (create-new-user {:role "admin"} {:email "x@x.x" :orgAuthz {:x ["authorityAdmin"]} :role "authorityAdmin"}) => (partial expected-failure? :error.duplicate-email)
     (provided
-      (get-user-by-email "email") => {:id ..old-id.. :role "authorityAdmin"} :times 1
-      (mongo/by-id :organizations "x" anything) => {:id "x"}
+      (get-user-by-email "x@x.x") => {:id ..old-id.. :role "authorityAdmin"} :times 1
+      (org/known-organizations? [:x]) => true
       (mongo/insert :users anything) => anything :times 0
-      (mongo/update-by-id :users ..old-id.. (contains {:email "email"})) => anything :times 0)))
+      (mongo/update-by-id :users ..old-id.. (contains {:email "x@x.x"})) => anything :times 0)))
 
 ;;
 ;; ==============================================================================
@@ -505,7 +488,7 @@
 
 (testable-privates lupapalvelu.user user-query)
 
-#_(facts user-query
+(facts user-query
   (user-query "hello") => (throws AssertionError)
   (user-query nil) => (throws AssertionError)
   (user-query {}) => {}
@@ -521,11 +504,10 @@
 
 (testable-privates lupapalvelu.user users-for-datatables-base-query)
 
-#_(facts users-for-datatables-base-query
+(facts users-for-datatables-base-query
   (fact "admin" (users-for-datatables-base-query {:role :admin} {}) => {})
   (fact "admin" (users-for-datatables-base-query {:role :admin} {:organizations ["a" "b"]}) => {:organizations ["a" "b"]})
   (fact "admin" (users-for-datatables-base-query {:role :admin} {:organizations ["a" "b"]}) => {:organizations ["a" "b"]})
-`
   (fact (users-for-datatables-base-query {:orgAuthz {:a "some-role", :b "some-role"}} {:organizations ["a"]}) => (contains {:organizations ["a"]}))
   (fact (users-for-datatables-base-query {:orgAuthz {:a "some-role", :b "some-role"}} {:organizations ["b"]}) => (contains {:organizations ["b"]}))
   (fact (users-for-datatables-base-query {:orgAuthz {:a "some-role", :b "some-role"}} {:organizations ["a" "b"]}) => (contains {:organizations ["a" "b"]}))
@@ -573,11 +555,11 @@
 (facts with-user-by-email
   (fact
     (with-user-by-email "email" user) => (contains {:id "123" :email "email"})
-    (provided (get-user-by-email "email") => {:id "123" :email "email"}))
+                                      (provided (get-user-by-email "email") => {:id "123" :email "email"}))
 
   (fact
     (with-user-by-email ..email..) => (throws clojure.lang.ExceptionInfo #"error\.user-not-found")
-    (provided (get-user-by-email ..email..) => nil)))
+                                   (provided (get-user-by-email ..email..) => nil)))
 
 ;;
 ;; ==============================================================================
@@ -614,7 +596,7 @@
   (email-recipient? {:id 2}) => true
   (provided
     (find-user {:id 2}) => {:id 2 :dummy true})
-  (email-recipient? {:id 3}) => true                                                                                    ; no password set
+  (email-recipient? {:id 3}) => true ; no password set
   (provided
     (find-user {:id 3}) => {:id 3 :dummy false})
   (email-recipient? {:id 4}) => true
@@ -623,7 +605,7 @@
   (email-recipient? {:id 5}) => true
   (provided
     (find-user {:id 5}) => {:id 5 :dummy false :enabled true, :private {:password "foo"}})
-  (email-recipient? {:id 6}) => false                                                                                   ; has been enabled (has password), but now disabled
+  (email-recipient? {:id 6}) => false ; has been enabled (has password), but now disabled
   (provided
     (find-user {:id 6}) => {:id 6 :dummy false :enabled false, :private {:password "foo"}})
   (email-recipient? {:id 7}) => true
