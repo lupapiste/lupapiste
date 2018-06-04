@@ -1138,8 +1138,8 @@
   (tasks-children-fix)
   (statement-children-fix))
 
-(defn- fetch-and-upload-file [url {:keys [filename originalFileid fileId contentType]} application]
-  {:pre [(not-any? ss/blank? [url fileId])]}
+(defn- fetch-and-upload-file [url {:keys [filename originalFileId fileId contentType]} application]
+  {:pre [(not-any? ss/blank? [url fileId originalFileId])]}
   (let [java-url (.toString (URL. (URL. "http://") url))
         resp (http/get (.toString java-url) :as :stream :throw-exceptions false :conn-timeout (* 10 1000))
         content-length (util/->int (get-in resp [:headers "content-length"] 0))]
@@ -1153,11 +1153,11 @@
           (io/copy in temp-file)
           (file-upload/save-file {:content temp-file
                                   :filename filename
-                                  :fileId originalFileid
+                                  :fileId originalFileId
                                   :size content-length}
                                  {:application (:id application)
                                   :linked true})
-          (when-not (= fileId originalFileid)
+          (when-not (= fileId originalFileId)
             (let [conversion (conversion/archivability-conversion application
                                                                   {:filename    filename
                                                                    :contentType contentType
