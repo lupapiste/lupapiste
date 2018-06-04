@@ -82,6 +82,14 @@
       :henkilo (get data tag)
       :yritys  (:yhteyshenkilo (get data tag)))))
 
+(defn- convert-applicant [applicant-doc]
+  {:customer (doc->customer false applicant-doc)
+   :contacts [(person->contact (customer-contact applicant-doc))]})
+
+(defn- convert-payee [payee-doc]
+  (merge (person->contact (customer-contact payee-doc))
+         (doc->customer true payee-doc)))
+
 (defn- drawing->GeoJSON-2008 [{:keys [geometry geometry-wgs84] :as drawing}]
   {:type "Feature"
    :geometry geometry-wgs84
@@ -104,20 +112,19 @@
 
 (defn- convert-value-flattened-app
   [{:keys [id propertyId drawings documents] :as app}]
-  (let [customer-doc     (first (filter #(= (doc-subtype %) :hakija) documents))
+  (let [applicant-doc    (first (filter #(= (doc-subtype %) :hakija) documents))
         work-description (first (filter #(= (doc-subtype %) :hankkeen-kuvaus) documents))
         payee-doc        (first (filter #(= (doc-subtype %) :maksaja) documents))]
     {:clientApplicationKind (application-kind app)
      :customerReference     (-> payee-doc :data :laskuviite)
-     :customerWithContacts  {:customer (doc->customer false customer-doc)
-                             :contacts [(person->contact (customer-contact customer-doc))]}
+     :customerWithContacts  (convert-applicant applicant-doc)
      :geometry              {:geometryOperations (application-geometry app)}
      :identificationNumber  id
-     :invoicingCustomer     (doc->customer true payee-doc) ; TODO: contacts
-     :pendingOnClient true
-     :postalAddress   (application-postal-address app)
+     :invoicingCustomer     (convert-payee payee-doc)
+     :pendingOnClient       true
+     :postalAddress         (application-postal-address app)
      :propertyIdentificationNumber propertyId
-     :workDescription (-> work-description :data :kayttotarkoitus)}))
+     :workDescription              (-> work-description :data :kayttotarkoitus)}))
 
 ;;;; Putting it all together
 
