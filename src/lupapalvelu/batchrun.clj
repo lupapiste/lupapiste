@@ -1154,7 +1154,7 @@
           (file-upload/save-file {:content temp-file
                                   :filename filename
                                   :fileId originalFileid
-                                  :size (content-length)}
+                                  :size content-length}
                                  {:application (:id application)
                                   :linked true})
           (when-not (= fileId originalFileid)
