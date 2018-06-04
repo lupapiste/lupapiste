@@ -1193,57 +1193,70 @@
       (logging/with-logging-context {:applicationId (:id app)}
         (info "Checking attachment id" (:id att))
         (when-not file
-          (let [app-xml (or (get @app-xml-cache (:id app))
-                            (-> (swap! app-xml-cache assoc (:id app) (krysp-fetch/get-application-xml-by-application-id app))
-                                (get (:id app))))
-                organization (org/get-organization (:organization app))
-                xml-verdicts (verdict/get-verdicts-from-xml app organization app-xml)]
+          (if (:urlHash target)
+            (let [app-xml (or (get @app-xml-cache (:id app))
+                              (-> (swap! app-xml-cache assoc (:id app) (krysp-fetch/get-application-xml-by-application-id app))
+                                  (get (:id app))))
+                  organization (org/get-organization (:organization app))
+                  xml-verdicts (verdict/get-verdicts-from-xml app organization app-xml)]
+              (cond
+                (= (:type target) "verdict")
+                (let [app-verdict (first (filter #(= (:id %) (:id target)) (:verdicts app)))]
+                  (info "Fetching file for verdict" (:id target))
+                  (if-let [xml-verdict (verdict/matching-verdict app-verdict xml-verdicts)]
+                    (let [{:keys [linkkiliitteeseen]} (->> xml-verdict
+                                                           :paatokset
+                                                           first
+                                                           :poytakirjat
+                                                           (map (fn [pk]
+                                                                  (->> [(or (:liite pk) (:Liite pk))]
+                                                                       flatten
+                                                                       (filter #(-> % :linkkiliitteeseen ss/blank? false?)))))
+                                                           flatten
+                                                           (remove nil?)
+                                                           (filter (fn [{:keys [linkkiliitteeseen]}]
+                                                                     (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
+                                                                        (:id att))))
+                                                           first)]
+                      (if (ss/blank? linkkiliitteeseen)
+                        (error "Could not find an HTTP link from verdict:" xml-verdict)
+                        (fetch-and-upload-file linkkiliitteeseen version app)))
+                    (error "Could not find the matching XML verdict for" (:id target))))
+
+                (= (:type target) "task")
+                (let [_ (info "Fetching file for task" (:id target))
+                      reviews (vec (review/reviews-preprocessed app-xml))
+                      buildings-summary (building-reader/->buildings-summary app-xml)
+                      source {:type "background"}
+                      review-tasks (review/reviews->tasks {:state :sent :created (now)} source buildings-summary reviews)
+                      review-tasks (keep-indexed (fn [idx item]
+                                                   (assoc item :attachments (-> (get reviews idx) :liitetieto))) review-tasks)
+                      attachments (-> (filter #(= (:id %) (:id target)) review-tasks)
+                                      first
+                                      :attachments)
+                      {:keys [linkkiliitteeseen]} (->> attachments
+                                                       (filter (fn [{:keys [linkkiliitteeseen]}]
+                                                                 (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
+                                                                    (:id att))))
+                                                       first)]
+                  (if (ss/blank? linkkiliitteeseen)
+                    (error "Could not find an HTTP link from reviews:" reviews)
+                    (fetch-and-upload-file linkkiliitteeseen version app)))
+
+                (= (:type target) "task")
+                (let [_ (info "Generating PDF for task" (:id target))
+                      tasks-filter-fn (fn [task] (and (= "task-katselmus" (get-in task [:schema-info :name]))
+                                                      (= "sent" (:state task))
+                                                      (= (:id target) (:id task))))
+                      user-fn (fn [_ task-attachment]
+                                (get-in task-attachment [:latestVersion :user]))]
+                  (fix-attachment-childrens [app] :tasks tasks-filter-fn user-fn))
+
+
+                :else
+                (error "Cannot handle attachment with target:" target)))
+
             (cond
-              (and (= (:type target) "verdict")
-                   (:urlHash target))
-              (let [app-verdict (first (filter #(= (:id %) (:id target)) (:verdicts app)))]
-                (info "Fetching file for verdict" (:id target))
-                (if-let [xml-verdict (verdict/matching-verdict app-verdict xml-verdicts)]
-                  (let [{:keys [linkkiliitteeseen]} (->> xml-verdict
-                                                         :paatokset
-                                                         first
-                                                         :poytakirjat
-                                                         (map (fn [pk]
-                                                                (->> [(or (:liite pk) (:Liite pk))]
-                                                                     flatten
-                                                                     (filter #(-> % :linkkiliitteeseen ss/blank? false?)))))
-                                                         flatten
-                                                         (remove nil?)
-                                                         (filter (fn [{:keys [linkkiliitteeseen]}]
-                                                                   (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
-                                                                      (:id att))))
-                                                         first)]
-                    (if (ss/blank? linkkiliitteeseen)
-                      (error "Could not find an HTTP link from verdict:" xml-verdict)
-                      (fetch-and-upload-file linkkiliitteeseen version app)))
-                  (error "Could not find the matching XML verdict for" (:id target))))
-
-              (and (= (:type target) "task")
-                   (:urlHash target))
-              (let [_ (info "Fetching file for task" (:id target))
-                    reviews (vec (review/reviews-preprocessed app-xml))
-                    buildings-summary (building-reader/->buildings-summary app-xml)
-                    source {:type "background"}
-                    review-tasks (review/reviews->tasks {:state :sent :created (now)} source buildings-summary reviews)
-                    review-tasks (keep-indexed (fn [idx item]
-                                                 (assoc item :attachments (-> (get reviews idx) :liitetieto))) review-tasks)
-                    attachments (-> (filter #(= (:id %) (:id target)) review-tasks)
-                                    first
-                                    :attachments)
-                    {:keys [linkkiliitteeseen]} (->> attachments
-                                                     (filter (fn [{:keys [linkkiliitteeseen]}]
-                                                               (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
-                                                                  (:id att))))
-                                                     first)]
-                (if (ss/blank? linkkiliitteeseen)
-                  (error "Could not find an HTTP link from reviews:" reviews)
-                  (fetch-and-upload-file linkkiliitteeseen version app)))
-
               (= (:type target) "task")
               (let [_ (info "Generating PDF for task" (:id target))
                     tasks-filter-fn (fn [task] (and (= "task-katselmus" (get-in task [:schema-info :name]))
@@ -1253,9 +1266,17 @@
                               (get-in task-attachment [:latestVersion :user]))]
                 (fix-attachment-childrens [app] :tasks tasks-filter-fn user-fn))
 
+              (= (:type target) "verdict")
+              (let [_ (info "Generating PDF for verdict" (:id target))
+                    verdict-filter-fn (fn [verdict]
+                                        (= (:id target) (:id verdict)))
+                    user-fn (fn [_ verdict-attachment]
+                              (get-in verdict-attachment [:latestVersion :user]))
+                    lang (if (or (ss/starts-with (:filename version) "Beslut")
+                                 (ss/starts-with (:filename version) "Avtal"))
+                           "sv"
+                           "fi")]
+                (fix-attachment-childrens [app] :verdicts verdict-filter-fn user-fn {(:id app) lang}))
 
-              target
-              (error "Cannot handle attachment with target:" target)
-
-              (nil? target)
+              :else
               (error "Attachment does not have a target:" att))))))))
