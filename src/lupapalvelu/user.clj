@@ -666,7 +666,7 @@
 (defn- create-new-user-entity [{:keys [user-data password]}]
   (-> user-data
       (select-keys new-user-keys)
-      (update user-data ss/canonize-email)
+      (update :email ss/canonize-email)
       (->> (merge {:firstName "" :lastName ""}))
       (assoc :enabled (-> user-data :enabled str (= "true"))
              :private (if password
