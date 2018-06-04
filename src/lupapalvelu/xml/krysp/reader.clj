@@ -676,6 +676,7 @@
             [x y :as coord-array-Rakennuspaikka] (resolve-coordinates asia)
             osapuolet (map cr/all-of (select asia [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli]))
             suunnittelijat (map cr/all-of (select asia [:osapuolettieto :Osapuolet :suunnittelijatieto :Suunnittelija]))
+            tyonjohtajat (map cr/all-of (select asia [:osapuolettieto :Osapuolet :tyonjohtajatieto :Tyonjohtaja]))
             [hakijat muut-osapuolet] ((juxt filter remove) #(= "hakija" (:VRKrooliKoodi %)) osapuolet)
             kiinteistotunnus (if (and (seq coord-array-Rakennuspaikka) (#{:building :area} coordinates-type))
                                (or (resolve-property-id-by-point coord-array-Rakennuspaikka)
@@ -691,7 +692,8 @@
                :vahainenPoikkeaminen        (:vahainenPoikkeaminen asianTiedot)
                :hakijat                     hakijat
                :muutOsapuolet               muut-osapuolet
-               :suunnittelijat              suunnittelijat}
+               :suunnittelijat              suunnittelijat
+               :tyonjohtajat                tyonjohtajat}
 
               (cond
                 (and (seq coord-array-Rakennuspaikka) (not-any? ss/blank? [osoite-Rakennuspaikka kiinteistotunnus]))
