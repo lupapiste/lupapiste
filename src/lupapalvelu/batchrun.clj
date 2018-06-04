@@ -882,18 +882,22 @@
         (if file
           (attachment/link-files-to-application (:id app) [(:fileId file)])
           ;; file missing, generate new
-          (if-let [original   (mongo/download (:originalFileId version))]
-            (let [conversion (conversion/archivability-conversion
-                               app
-                               (assoc (select-keys original [:filename :contentType])
-                                 :content ((:content original))))]
-              (if (:autoConversion conversion)
-                (do
-                  (file-upload/save-file (merge (select-keys conversion [:content :filename]) {:fileId (:fileId version)})
-                                         {:application (:id app) :linked true})
-                  (debug "File %s converted, uploaded and linked successfully" (:fileId file)))
-                (warn "file %s not converted (%s): %s" (:fileId version) (get-in att [:type :type-id]) (pr-str conversion))))
-            (error "No original fileId found, attachment: %s, originalFileId: %s, type: %s"
+          (if-let [original (mongo/download (:originalFileId version))]
+            (if (:autoConversion version)
+              (let [conversion (conversion/archivability-conversion
+                                 app
+                                 (assoc (select-keys original [:filename :contentType])
+                                   :content ((:content original))))]
+                (if (:autoConversion conversion)
+                  (do
+                    (file-upload/save-file (merge (select-keys conversion [:content :filename]) {:fileId (:fileId version)})
+                                           {:application (:id app) :linked true})
+                    (debugf "File %s converted, uploaded and linked successfully" (:fileId file)))
+                  (warnf "file %s not converted (%s): %s" (:fileId version) (get-in att [:type :type-id]) (pr-str conversion))))
+              (info "file missing, originalFileId found, but no autoConversion flag. FileId: " (:fileId version)
+                    " originalFileId: " (:originalFileId version)
+                    " type: " (get-in att [:type :type-id])))
+            (errorf "No original fileId found, attachment: %s, originalFileId: %s, type: %s"
                    (:id att)
                    (:originalFileId version)
                    (get-in att [:type :type-id]))))))))
