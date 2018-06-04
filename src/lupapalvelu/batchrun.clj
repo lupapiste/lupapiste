@@ -29,6 +29,7 @@
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.verdict-review-util :as vru]
             [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
@@ -46,9 +47,13 @@
             [lupapalvelu.attachment :as att]
             [clojure.java.io :as io]
             [sade.files :as files]
-            [lupapalvelu.pdftk :as pdftk])
+            [lupapalvelu.pdftk :as pdftk]
+            [lupapalvelu.organization :as org]
+            [pandect.core :as pandect]
+            [lupapalvelu.xml.krysp.building-reader :as building-reader])
   (:import [org.xml.sax SAXParseException]
-           [java.io ByteArrayOutputStream ByteArrayInputStream]))
+           [java.io ByteArrayOutputStream ByteArrayInputStream]
+           [java.net URL]))
 
 
 (defn- older-than [timestamp] {$lt timestamp})
@@ -1132,3 +1137,99 @@
   (publish-verdicts-fix)
   (tasks-children-fix)
   (statement-children-fix))
+
+(defn- fetch-and-upload-file [url {:keys [filename originalFileid fileId contentType]} application]
+  {:pre [(not-any? ss/blank? [url fileId])]}
+  (let [java-url (.toString (URL. (URL. "http://") url))
+        resp (http/get (.toString java-url) :as :stream :throw-exceptions false :conn-timeout (* 10 1000))
+        content-length (util/->int (get-in resp [:headers "content-length"] 0))]
+    (when (= content-length 0)
+      (errorf "attachment link %s in poytakirja refers to an empty file" (.toString java-url)))
+    (files/with-temp-file temp-file
+      (if (= 200 (:status resp))
+        (with-open [in (:body resp)]
+          ;; Copy content to a temp file to keep the content close at hand
+          ;; during upload and conversion processing.
+          (io/copy in temp-file)
+          (file-upload/save-file {:content temp-file
+                                  :filename filename
+                                  :fileId originalFileid
+                                  :size (content-length)}
+                                 {:application (:id application)
+                                  :linked true})
+          (when-not (= fileId originalFileid)
+            (let [conversion (conversion/archivability-conversion application
+                                                                  {:filename    filename
+                                                                   :contentType contentType
+                                                                   :content     temp-file})]
+              (if (:autoConversion conversion)
+                (do
+                  (file-upload/save-file (merge (select-keys conversion [:content :filename]) {:fileId fileId})
+                                         {:application (:id application) :linked true})
+                  (infof "fileId %s converted, uploaded and linked successfully" fileId))
+                (warnf "file %s not converted: %s" fileId (pr-str conversion))))))
+        (error (str (:status resp) " - unable to download " url ": " resp))))))
+
+(defn fetch-missing-backend-attachments [& args]
+  (mongo/connect!)
+  (let [ts 1527800400000
+        app-xml-cache (atom {})]
+    (doseq [app (mongo/select :applications
+                              {:modified                          {$gte ts}
+                               :attachments {$elemMatch {:latestVersion.created {$gte ts
+                                                                                 $lt 1528063200000}
+                                                         :type.type-id {$in (concat ["paatos" "paatosote" "muu"] vru/task-attachment-types)}
+                                                         :target.id {$exists true}}}}
+                              [:state :municipality
+                               :address :permitType
+                               :permitSubtype :organization
+                               :primaryOperation :verdicts
+                               :attachments])
+            {version :latestVersion target :target :as att} (->> (:attachments app)
+                                                                 (filter :latestVersion)
+                                                                 (filter :target))
+            :let [file (mongo/download (:fileId version))]]
+      (logging/with-logging-context {:applicationId (:id app)}
+        (when-not file
+          (let [app-xml (or (get @app-xml-cache (:id app))
+                            (-> (swap! app-xml-cache assoc (:id app) (krysp-fetch/get-application-xml-by-application-id app))
+                                (get (:id app))))
+                organization (org/get-organization (:organization app))
+                xml-verdicts (verdict/get-verdicts-from-xml app organization app-xml)]
+            (cond
+              (= (:type target) "verdict")
+              (let [app-verdict (first (filter #(= (:id %) (:id target)) (:verdicts app)))]
+                (info "Fetching file for verdict" (:id target))
+                (if-let [xml-verdict (verdict/matching-verdict app-verdict xml-verdicts)]
+                  (let [pk (first (:paatokset xml-verdict))
+                        attachments (->> [(or (:liite pk) (:Liite pk))]
+                                         flatten
+                                         (filter #(-> % :linkkiliitteeseen ss/blank? false?)))
+                        correct-attachment (->> attachments
+                                                (filter (fn [{:keys [linkkiliitteeseen]}]
+                                                          (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
+                                                             (:id att))))
+                                                first)]
+                    (fetch-and-upload-file (:linkkiliitteeseen correct-attachment) version app))
+                  (error "Could not find the matching XML verdict for" (:id target))))
+
+              (= (:type target) "task")
+              (let [_ (info "Fetching file for task" (:id target))
+                    reviews (vec (review/reviews-preprocessed app-xml))
+                    buildings-summary (building-reader/->buildings-summary app-xml)
+                    source {:type "background"}
+                    review-tasks (review/reviews->tasks {:state :sent :created (now)} source buildings-summary reviews)
+                    review-tasks (keep-indexed (fn [idx item]
+                                                 (assoc item :attachments (-> (get reviews idx) :liitetieto))) review-tasks)
+                    attachments (-> (filter #(= (:id %) (:id target)) review-tasks)
+                                    first
+                                    :attachments)
+                    correct-attachment (->> attachments
+                                            (filter (fn [{:keys [linkkiliitteeseen]}]
+                                                      (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
+                                                         (:id att))))
+                                            first)]
+                (fetch-and-upload-file (:linkkiliitteeseen correct-attachment) version app))
+
+              :else
+              (error "Cannot handle attachment with target" target))))))))

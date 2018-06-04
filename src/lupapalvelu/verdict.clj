@@ -462,10 +462,10 @@
                 (missing-verdict-attachments-query options)
                 [:organization :permitType]))
 
-(defn- get-verdicts-from-xml [application organization xml]
+(defn get-verdicts-from-xml [application organization xml]
   (krysp-reader/->verdicts xml (:permitType application) permit/read-verdict-xml organization))
 
-(defn- matching-verdict
+(defn matching-verdict
   "Return a verdict with a matching kuntalupatunnus from verdicts"
   [verdict verdicts]
   (util/find-first #(= (:kuntalupatunnus %)
