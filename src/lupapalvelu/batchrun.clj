@@ -893,4 +893,8 @@
                                          {:application (:id app) :linked true})
                   (debug "File %s converted, uploaded and linked successfully" (:fileId file)))
                 (warn "file %s not converted: %s" (:fileId file) (pr-str conversion))))
-            (error "No original fileId found, attachment: %s, originalFileId: %s" (:id att) (:originalFileId version))))))))
+            (error "No original fileId found, attachment: %s, originalFileId: %s, type: %s"
+                   (:id att)
+                   (:originalFileId version)
+                   (get-in att [:type :id]))))))))
+
