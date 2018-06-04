@@ -1186,7 +1186,8 @@
                                :primaryOperation :verdicts
                                :attachments])
             {version :latestVersion target :target :as att} (->> (:attachments app)
-                                                                 (filter :latestVersion))
+                                                                 (filter :latestVersion)
+                                                                 (filter :target))
             :let [file (mongo/download (:fileId version))]]
       (logging/with-logging-context {:applicationId (:id app)}
         (when-not file
