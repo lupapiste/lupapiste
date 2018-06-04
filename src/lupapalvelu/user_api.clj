@@ -33,6 +33,7 @@
             [sade.util :refer [future*]]
             [sade.util :as util]
             [schema.core :as sc]
+            [schema-tools.core :as st]
             [slingshot.slingshot :refer [throw+ try+]]
             [swiss.arrows :refer :all]
             [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]))
@@ -152,15 +153,54 @@
 ;;
 
 (defn- create-authority-user-with-organization [caller new-organization email firstName lastName roles]
-  (let [org-authz {new-organization (into #{} roles)}
+  (let [org-authz {(keyword new-organization) (into #{} roles)}
         user-data {:email email :orgAuthz org-authz :role :authority :enabled true :firstName firstName :lastName lastName}
         new-user  (usr/create-new-user caller user-data :send-email false)]
     (infof "invitation for new authority user: email=%s, organization=%s" email new-organization)
     (uu/notify-new-authority new-user caller new-organization)
     (ok :operation "invited")))
 
+
+; TODO: Refactor commands so that the user-data is passed separately from
+; additional parameters, like password. Currently the user-data is manipulated
+; down-stream so that password and organization are removed from final persisted
+; user-data.
+(sc/defschema CreateUser
+  (-> usr/User
+      ; Limit the keys that can be given here:
+      (st/select-keys [:email
+                       :username :firstName :lastName
+                       :role :orgAuthz :company
+                       :personId :personIdSource
+                       :phone :city :street :zip
+                       :language
+                       :architect
+                       :enabled
+                       :allowDirectMarketing
+                       :graduatingYear :degree :fise :fiseKelpoisuus])
+      ; Password can be passed in here, but it's removed in down-stream:
+      (st/assoc :password (sc/pred
+                            (fn [password]
+                              (or (nil? password)
+                                  (and (security/valid-password? password)
+                                       (< (count password) 256))))
+                            'valid-password?))
+      ; Organization is passed in here, but removed and handled in down-stream:
+      (st/assoc :organization sc/Str)
+      ; Limit the roles that can be created here:
+      (st/assoc :role (apply sc/enum #{"applicant"
+                                       "authority"
+                                       "authorityAdmin" ; FIXME: The authorityAdmin role is handled down-stream in transition period
+                                       "dummy"
+                                       "financialAuthority"}))
+      ; enabled comes in as string (coercion shomewhere?)
+      (st/assoc :enabled (sc/enum "true" "false" true false))
+      ; All keys are optional, except :email and :role
+      (st/optional-keys)
+      (st/required-keys [:email :role])))
+
 (defcommand create-user
-  {:input-validators [usr/NewUser]
+  {:input-validators [CreateUser]
    :notified         true
    :permissions      [{:required [:users/create]}]}
   [{user-data :data caller :user}]
@@ -390,9 +430,8 @@
         email           (ss/canonize-email email)
         result          (usr/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})]
     (if (ok? result)
-      (do
-        (uu/notify-authority-added email organization-id)
-        (ok :operation "add"))
+      (do (uu/notify-authority-added email organization-id)
+          (ok :operation "add"))
       (if-not (usr/get-user-by-email email)
         (create-authority-user-with-organization caller organization-id email firstName lastName actual-roles)
         (fail :error.user-not-found)))))

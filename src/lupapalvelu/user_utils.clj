@@ -8,7 +8,7 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as usr]
-            [sade.core :refer [ok]]
+            [sade.core :refer [ok fail!]]
             [sade.env :as env]
             [sade.strings :as ss]
             [taoensso.timbre :as timbre :refer [infof]]))
@@ -42,18 +42,21 @@
 (defn create-and-notify-user
   "Since create-user command is typically called by authority admin to
   create authorities, there are some peculiar details."
-  [caller user-data]
-  (let [updated-user-data (if (:organization user-data)
-                            (assoc user-data :orgAuthz {(:organization user-data) [(:role user-data)]})
-                            user-data)
-        user (usr/create-new-user caller updated-user-data :send-email false)]
+  [caller {:as user-data :keys [organization role]}]
+  (let [user-data (if organization
+                    (assoc user-data :orgAuthz {(keyword organization) [role]})
+                    user-data)
+        ; TODO: drop this when callers are updated
+        user-data (if (= role "authorityAdmin")
+                    (assoc user-data :role "authority")
+                    user-data)
+        user (usr/create-new-user caller user-data :send-email false)]
     (infof "Added a new user: role=%s, email=%s, orgAuthz=%s" (:role user) (:email user) (:orgAuthz user))
     (if (usr/authority? user)
-      (do
-        ; FIXME: user can have multiple orgz
-        (notify-new-authority user caller (or (:organization user-data) (usr/authority-admins-organization-id caller)))
-        (ok :id (:id user)
-            :user user))
+      ; FIXME: user can have multiple orgz
+      (do (notify-new-authority user caller (or (:organization user-data) (usr/authority-admins-organization-id caller)))
+          (ok :id (:id user)
+              :user user))
       (let [token (token/make-token :password-reset caller {:email (:email user)} :ttl ttl/create-user-token-ttl)]
         (ok :id (:id user)
             :user user

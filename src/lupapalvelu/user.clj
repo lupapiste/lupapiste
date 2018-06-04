@@ -120,33 +120,18 @@
                                                :display-name  (i18n/lenient-localization-schema sc/Str)
                                                :callback-url  ssc/HttpUrl}})
 
-(def new-user-roles
-  "set of role strings that can be used in creating user via `create-new-user`"
-  #{"applicant"
-    "authority"
-    "dummy"
-    "financialAuthority"})
+;; NewUser, shape of new users:
+;; * new user does not have :id
+;; * role "admin" is not allowed
+;; * role "authorityAdmin" is allowed (transitional period)
 
-(def new-user-keys
-  [:email
-   :username :firstName :lastName
-   :personId :personIdSource
-   :phone :city :street :zip
-   :language
-   :role :orgAuthz :company
-   :architect
-   :enabled
-   :allowDirectMarketing
-   :graduatingYear :degree :fise :fiseKelpoisuus])
+(defschema NewUser (-> User
+                       (st/dissoc :id)
+                       (st/assoc :role (apply sc/enum (-> all-roles
+                                                          (disj "admin")
+                                                          (conj "authorityAdmin"))))))
 
-(defschema NewUser
-  "NewUser is like `User`, but limited to `new-user-keys`, `:role` is one of `new-user-roles`
-   and only `:email` and `:role` are required"
-  (-> User
-      (st/select-keys new-user-keys)
-      (st/assoc :role (apply sc/enum new-user-roles))
-      (st/optional-keys)
-      (st/required-keys [:email :role])))
+(def user-keys (->> User keys (map sc/explicit-schema-key) set))
 
 (defschema RegisterUser
   {:email                            ssc/Email
@@ -609,7 +594,8 @@
     :error :error.missing-parameters
     :fail? (fnk [user-data]
              (when-let [schema-errors (sc/check NewUser user-data)]
-               (error "new user does not match NewUser schema" schema-errors)
+               ; Help problem tracing by adding a stack trace to logs
+               (error (ex-info "stack trace" {}) "new user does not match NewUser schema" schema-errors)
                true))}
 
    {:desc  "applicant can not create users"
@@ -634,12 +620,6 @@
                   (not (every? (-> caller :orgAuthz auth-admin-orgs)
                                (-> user-data :orgAuthz keys)))))}
 
-   {:desc  "new authority must have at least one organization role"
-    :error :error.missing-parameters
-    :fail? (fnk [[:user-data role {orgAuthz nil}]]
-             (and (-> role (= "authority"))
-                  (-> orgAuthz seq nil?)))}
-
    {:desc  "dummy user may not have an organization roles"
     :error :error.unauthorized
     :fail? (fnk [[:user-data role {orgAuthz nil}]]
@@ -647,7 +627,7 @@
                   (seq orgAuthz)))}
 
    ; In principle, `the "authorityAdmin can create users into his/her own organizations only" test
-   ; should cover this. Only way this test traps errors is that the organization was deleted, but
+   ; should cover this. The only way this test traps errors is that the organization was deleted, but
    ; some authority still has the roles for deleted organization in her :authOrgz.
    {:desc  "all organizations must be known"
     :error :error.organization-not-found
@@ -656,8 +636,8 @@
 
    {:desc  "only admin can create create users with apikey"
     :error :error.unauthorized
-    :fail? (fnk [[:caller role] {apikey nil}]
-             (and apikey (not (= role "admin"))))}])
+    :fail? (fnk [{caller nil} {apikey nil}]
+             (and apikey (-> caller :role (not= "admin"))))}])
 
 (defn- new-user-error [data]
   (some (fn [{:keys [fail?] :as rule}]
@@ -671,27 +651,38 @@
                                 :known-organizations? org/known-organizations?})]
     (fail! (-> e :error) :desc (-> e :desc))))
 
-(defn- create-new-user-entity [{:keys [user-data password]}]
-  (-> user-data
-      (select-keys new-user-keys)
-      (update :email ss/canonize-email)
-      (->> (merge {:firstName "" :lastName ""}))
-      (assoc :enabled (-> user-data :enabled str (= "true"))
-             :private (if password
-                        {:password (security/get-hash password)}
-                        {}))))
+(defn- create-new-user-entity [{:as user-data :keys [password]}]
+  (let [email (-> user-data :email ss/canonize-email)]
+    (-> user-data
+        (select-keys user-keys)
+        (assoc :email email)
+        (->> (merge {:firstName "" :lastName "" :username email}))
+        (update :role (fn [role] (if (keyword? role) (name role) role)))
+        (assoc :enabled (-> user-data :enabled str (= "true"))
+               :private (if password
+                          {:password (security/get-hash password)}
+                          {})))))
 
 (defn create-new-user
   "Insert new user to database, returns new user data without private information. If user
    exists and has role \"dummy\", overwrites users information. If users exists with any other
    role, throws exception."
   [caller user-data & {:keys [send-email] :or {send-email true}}]
-  (validate-create-new-user! caller user-data)
-  (let [user-entry (create-new-user-entity user-data)
-        old-user   (get-user-by-email (:email user-entry))
+  (let [; Oh fuck this, sometimes orgAuthz is a set of keywords, sometimes
+        ; vector of strings, probably there are some other variations also.
+        ; This normalizes callers orgAuthz for this case
+        caller     (when caller
+                     (update caller :orgAuthz (fn [org-authz]
+                                                (->> org-authz
+                                                     (map (fn [[k v]]
+                                                            [k (mapv name v)]))
+                                                     (into {})))))
+        user-data  (create-new-user-entity user-data)
+        _          (validate-create-new-user! caller user-data)
+        old-user   (get-user-by-email (:email user-data))
         new-user   (if old-user
-                     (assoc user-entry :id (:id old-user))
-                     (assoc user-entry :id (mongo/create-id)))
+                     (assoc user-data :id (:id old-user))
+                     (assoc user-data :id (mongo/create-id)))
         email      (:email new-user)
         {old-id :id old-role :role} old-user
         new-user   (if (applicant? user-data)
