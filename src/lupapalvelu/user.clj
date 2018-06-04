@@ -316,7 +316,7 @@
        set))
 
 (defn authority-admins-organization-id [user]
-  ; FIXME:
+  ; FIXME: user can have multiple orgz
   (first (organization-ids-by-roles user #{:authorityAdmin})))
 
 (defn authority-admins-organization
@@ -435,7 +435,7 @@
 ;; jQuery data-tables support:
 ;;
 
-; FIXME:
+; FIXME: user can have multiple orgz
 (defn authority-admin? [caller]
   (throw (ex-info "fixme" {})))
 

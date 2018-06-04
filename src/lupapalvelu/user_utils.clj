@@ -42,14 +42,15 @@
 (defn create-and-notify-user
   "Since create-user command is typically called by authority admin to
   create authorities, there are some peculiar details."
- [caller user-data]
- (let [updated-user-data (if (:organization user-data)
-                           (assoc user-data :orgAuthz {(:organization user-data) [(:role user-data)]})
-                           user-data)
+  [caller user-data]
+  (let [updated-user-data (if (:organization user-data)
+                            (assoc user-data :orgAuthz {(:organization user-data) [(:role user-data)]})
+                            user-data)
         user (usr/create-new-user caller updated-user-data :send-email false)]
     (infof "Added a new user: role=%s, email=%s, orgAuthz=%s" (:role user) (:email user) (:orgAuthz user))
     (if (usr/authority? user)
       (do
+        ; FIXME: user can have multiple orgz
         (notify-new-authority user caller (or (:organization user-data) (usr/authority-admins-organization-id caller)))
         (ok :id (:id user)
             :user user))
