@@ -1004,4 +1004,14 @@
                   (->> (:status neighbor)
                        (util/find-first (fn [status] (ss/contains? (:state status) "response-given-")))
                        :vetuma))]
-    (fix-attachment-childrens apps :neighbors target-filter-fn user-fn)))
+    (fix-attachment-childrens apps :neighbors neighbor-filter-fn user-fn)))
+
+(def fix-publish-verdicts ["LP-092-2018-03007" "LP-927-2018-00353" "LP-927-2018-00354" "LP-245-2018-00588" "LP-153-2018-00293" "LP-245-2018-00591" "LP-153-2018-00328" "LP-092-2018-02914" "LP-092-2018-02834" "LP-235-2018-00155" "LP-092-2018-02817" "LP-445-2018-00137" "LP-092-2018-03079" "LP-837-2017-02796" "LP-186-2018-00625" "LP-092-2018-02759" "LP-977-2018-01774" "LP-153-2018-00331" "LP-445-2018-00138" "LP-543-2018-00617" "LP-092-2018-02568" "LP-092-2018-02285" "LP-638-2018-00561" "LP-092-2018-03181" "LP-153-2018-00284" "LP-092-2018-03119" "LP-092-2018-02671" "LP-543-2018-00541" "LP-977-2018-01957" "LP-604-2018-00151" "LP-092-2018-02487" "LP-092-2018-03104" "LP-092-2018-01760"])
+
+(defn publish-verdicts-fix [& args]
+  (mongo/connect!)
+  (let [apps (mongo/select :applications {:_id {$in fix-publish-verdicts}} [:attachments :verdicts])
+        verdict-filter-fn (partial remove :draft)
+        user-fn (fn [_ verdict-attachment]
+                  (get-in verdict-attachment [:latestVersion :user]))]
+    (fix-attachment-childrens apps :verdicts verdict-filter-fn user-fn {"LP-445-2018-00137" "sv"})))
