@@ -966,7 +966,7 @@
             (error "Invalid log data, can't fix stamp:" logdata)))))))
 
 
-(defn fix-attachment-childrens [apps target-key target-filter-pred user-fn]
+(defn fix-attachment-childrens [apps target-key target-filter-pred user-fn & [lang-mapping]]
   (doseq [app apps
           target (->> (get app target-key)
                       (filter target-filter-pred))
@@ -989,7 +989,7 @@
                         (user-fn target target-attachment)
                         (domain/get-application-no-access-checking (:id app))
                         target-key (:id target)
-                        "fi")]
+                        (get lang-mapping (:id app) "fi"))]
           (info "Created child" target-key "fileId" (:fileId version) "to attachment" att-id))))))
 
 (defn generate-missing-neighbor-docs [& args]
