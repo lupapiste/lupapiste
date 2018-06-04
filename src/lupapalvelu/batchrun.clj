@@ -43,7 +43,9 @@
             [cheshire.custom :as json]
             [lupapalvelu.attachment.stamping :as stamping]
             [lupapalvelu.attachment :as att]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [sade.files :as files]
+            [lupapalvelu.pdftk :as pdftk])
   (:import [org.xml.sax SAXParseException]
            [java.io ByteArrayOutputStream ByteArrayInputStream]))
 
@@ -948,6 +950,7 @@
                   :as :json})
        :body
        :messages
+       (filter #(ss/starts-with (get-in % [:message :message]) "INFO"))
        (map parse-message-field)))
 
 (defn replay-missing-stamping-ops [& args]
@@ -1020,3 +1023,28 @@
                                        {:application application-id
                                         :linked      true})
                 (infof "fileId %s uploaded and linked successfully" originalFileId)))))))))
+
+(defn replay-missing-rotates [& args]
+  (mongo/connect!)
+  (info "Starting replay-missing-rotates job")
+  (doseq [{:keys [data] :as logdata} (graylog-request "rotate-pdf")]
+    (logging/with-logging-context {:applicationId (:id data)}
+      (let [{:keys [id attachmentId rotation]} data
+            application (mongo/by-id :applications id)
+            attachment (att/get-attachment-info application attachmentId)
+            {:keys [fileId filename]} (last (:versions attachment))]
+        (if-let [dl (mongo/download fileId)]
+          (files/with-temp-file temp-pdf
+            (info "Rotating file" fileId "from attachment" attachmentId "by" rotation)
+            (with-open [content ((:content dl))]
+              (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)
+              (info "Deleting existing file" fileId)
+              (mongo/delete-file-by-id fileId)
+              (file-upload/save-file {:content  temp-pdf
+                                      :filename filename
+                                      :fileId   fileId
+                                      :size (.length temp-pdf)}
+                                     {:application id
+                                      :linked      true})
+              (info "Rotated file" fileId "uploaded")))
+          (error "No unrotated file found with file id" fileId))))))
