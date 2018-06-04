@@ -61,7 +61,6 @@
   "For local testing of Krysp import"
   [filename permit-type]
   (->> filename
-       (str "./src/lupapalvelu/conversion/test-data/")
        slurp
        sxml/parse
        scr/strip-xml-namespaces

@@ -294,7 +294,7 @@
     (-> x util/->double pos?)
     (-> y util/->double pos?)))
 
-(defn- get-location-info [{data :data :as command} app-info]
+(defn get-location-info [{data :data :as command} app-info]
   (when app-info
     (let [rakennuspaikka-exists? (and (:rakennuspaikka app-info)
                                       (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))
@@ -334,16 +334,15 @@
                                             (ok :id id))))))
 
 (defn fetch-prev-local-application! [{{:keys [organizationId kuntalupatunnus authorizeApplicants]} :data :as command}]
-  (let [organizationId        "092-R"
+  (let [organizationId        "092-R" ;; Vantaa, bypass the selection from form
         operation             "aiemmalla-luvalla-hakeminen"
         permit-type           (operations/permit-type-of-operation operation)
         dummy-application     {:id "" :permitType permit-type :organization organizationId}
-        tiedostonimi          (str kuntalupatunnus ".xml")
-        xml                   (krysp-fetch/get-local-application-xml-by-filename tiedostonimi permit-type)
+        filename              (str "./src/lupapalvelu/conversion/test-data/" kuntalupatunnus ".xml")
+        xml                   (krysp-fetch/get-local-application-xml-by-filename filename permit-type)
         app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
         location-info         (get-location-info command app-info)
-        organization          (when (:propertyId location-info)
-                                (organization/resolve-organization (prop/municipality-by-property-id (:propertyId location-info)) permit-type))
+        organization          (apply organization/resolve-organization (ss/split organizationId #"-"))
         validation-result     (permit/validate-verdict-xml permit-type xml organization)
         organizations-match?  (= organizationId (:id organization))
         no-proper-applicants? (not-any? get-applicant-type (:hakijat app-info))]

@@ -7,7 +7,8 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.action :refer [defcommand defraw]]
             [lupapalvelu.prev-permit :as prev-permit]
-            [lupapalvelu.user :as user]))
+            [lupapalvelu.user :as user]
+            [lupapalvelu.conversion.util :as util]))
 
 (defraw get-lp-id-from-previous-permit
   {:parameters [kuntalupatunnus authorizeApplicants]
@@ -49,5 +50,6 @@
                               :include-canceled-apps? false)]
     ;;Found an application of same organization that has a verdict with the given kuntalupatunnus -> Open it.
     (ok :id (:id app-with-verdict))
-    #_(prev-permit/fetch-prev-application! command)
-    (prev-permit/fetch-prev-local-application! command)))
+    (prev-permit/fetch-prev-application! command)
+    ;; (prev-permit/fetch-prev-local-application! command)
+    ))
