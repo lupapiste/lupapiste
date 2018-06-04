@@ -889,10 +889,10 @@
                                  :content ((:content original))))]
               (if (:autoConversion conversion)
                 (do
-                  (file-upload/save-file (merge (select-keys conversion [:content :filename]) {:fileId (:fileId file)})
+                  (file-upload/save-file (merge (select-keys conversion [:content :filename]) {:fileId (:fileId version)})
                                          {:application (:id app) :linked true})
                   (debug "File %s converted, uploaded and linked successfully" (:fileId file)))
-                (warn "file %s not converted: %s" (:fileId file) (pr-str conversion))))
+                (warn "file %s not converted: %s" (:fileId version) (pr-str conversion))))
             (error "No original fileId found, attachment: %s, originalFileId: %s, type: %s"
                    (:id att)
                    (:originalFileId version)
