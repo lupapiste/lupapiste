@@ -12,6 +12,10 @@
 
 ;;; FIXME: Avoid producing nil-valued fields.
 
+(def- lang
+  "The language to use when localizing output to ALLU"
+  "fi")
+
 ;;;; Cleaning up :value indirections
 
 (defn- flatten-values [app]
@@ -105,9 +109,9 @@
                :coordinates location-wgs84})]
     (assoc obj :crs {:type "name", :properties {:name WGS84-URN}})))
 
-;; TODO: postal code
 (defn- application-postal-address [{:keys [municipality address]}]
-  {:city (localize "fi" :municipality municipality) ; FIXME: hardcoded "fi"
+  ;; We don't have the postal code within easy reach so it is omitted here.
+  {:city (localize lang :municipality municipality)
    :streetAddress {:streetName address}})
 
 (defn- convert-value-flattened-app
