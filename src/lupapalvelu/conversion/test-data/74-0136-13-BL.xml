@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rakval:Rakennusvalvonta
+  xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.6/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.2.0/rakennusvalvonta.xsd http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+  xmlns:kiito="http://www.paikkatietopalvelu.fi/gml/kiinteistotoimitus"
+  xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+  xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:mkos="http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet"
+  xmlns:wfs="http://www.opengis.net/wfs"
+  xmlns:ymy="http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ppst="http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"
+  xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+  xmlns:ymm="http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat"
+  xmlns:ows="http://www.opengis.net/ows"
+  xmlns:gml="http://www.opengis.net/gml"
+  xmlns:ymv="http://www.paikkatietopalvelu.fi/gml/ymparisto/vesihuoltolaki"
+  xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ymi="http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset">
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi>CGI KRYSP</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Vantaa</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2018-05-14</yht:toimitusPvm>
+    <yht:kuntakoodi>092</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia gml:id="rluvat.99130">
+      <gml:location>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.550341E7 6689383.0</gml:pos>
+        </gml:Point>
+      </gml:location>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-02-12Z</yht:pvm>
+          <yht:tila>vireillä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-02-12Z</yht:pvm>
+          <yht:tila>uusi lupa, ei käsittelyssä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-04-03Z</yht:pvm>
+          <yht:tila>lupa hyväksytty</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Lupaosasto</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>74-0136-13-BL</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200013-0136</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-02-12Z</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>12-0181-BL 74</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200012-0181</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-02-12Z</yht:saapumisPvm>
+          <yht:viittaus>edellinen rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>11-1275-C 74</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200011-1275</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-02-12Z</yht:saapumisPvm>
+          <yht:viittaus>edellinen rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>11-1274-C 74</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200011-1274</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-02-12Z</yht:saapumisPvm>
+          <yht:viittaus>edellinen rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>11-0600-B 74</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200011-0600</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-02-12Z</yht:saapumisPvm>
+          <yht:viittaus>edellinen rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:osapuolettieto>
+        <yht:Osapuolet>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+              <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+              <yht:yritys>
+                <yht:nimi>VTK Kiinteistöt Oy</yht:nimi>
+                <yht:liikeJaYhteisotunnus>0517745-4</yht:liikeJaYhteisotunnus>
+                <yht:postiosoitetieto>
+                  <yht:postiosoite>
+                    <yht:osoitenimi>
+                      <yht:teksti>Elannontie 3</yht:teksti>
+                    </yht:osoitenimi>
+                    <yht:postinumero>01510</yht:postinumero>
+                    <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                  </yht:postiosoite>
+                </yht:postiosoitetieto>
+                <yht:puhelin>040-8656498</yht:puhelin>
+                <yht:sahkopostiosoite>kai.kelimaki@vtkoy.fi</yht:sahkopostiosoite>
+              </yht:yritys>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian laskun maksaja</yht:kuntaRooliKoodi>
+              <yht:yritys>
+                <yht:nimi>VTK Kiinteistöt Oy</yht:nimi>
+                <yht:liikeJaYhteisotunnus>0517745-4</yht:liikeJaYhteisotunnus>
+                <yht:postiosoitetieto>
+                  <yht:postiosoite>
+                    <yht:osoitenimi>
+                      <yht:teksti>Elannontie 3</yht:teksti>
+                    </yht:osoitenimi>
+                    <yht:postinumero>01510</yht:postinumero>
+                    <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                  </yht:postiosoite>
+                </yht:postiosoitetieto>
+                <yht:puhelin>020 47001</yht:puhelin>
+                <yht:sahkopostiosoite>markku.niemi@vtkoy.fi</yht:sahkopostiosoite>
+              </yht:yritys>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:suunnittelijatieto>
+            <yht:Suunnittelija>
+              <yht:suunnittelijaRoolikoodi>KVV-suunnittelija</yht:suunnittelijaRoolikoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Jussi</yht:etunimi>
+                  <yht:sukunimi>Hietanen</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Ins.tsto Niemi &amp; Co Oy</yht:teksti>
+                  </yht:osoitenimi>
+                </yht:osoite>
+                <yht:puhelin>09-4535610</yht:puhelin>
+                <yht:henkilotunnus>080155-0271</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:koulutus>LVI-insinööri</yht:koulutus>
+              <yht:valmistumisvuosi>1981</yht:valmistumisvuosi>
+            </yht:Suunnittelija>
+          </yht:suunnittelijatieto>
+          <yht:suunnittelijatieto>
+            <yht:Suunnittelija>
+              <yht:suunnittelijaRoolikoodi>IV-suunnittelija</yht:suunnittelijaRoolikoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Jussi</yht:etunimi>
+                  <yht:sukunimi>Hietanen</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Ins.tsto Niemi &amp; Co Oy</yht:teksti>
+                  </yht:osoitenimi>
+                </yht:osoite>
+                <yht:puhelin>09-4535610</yht:puhelin>
+                <yht:henkilotunnus>080155-0271</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:koulutus>LVI-insinööri</yht:koulutus>
+              <yht:valmistumisvuosi>1981</yht:valmistumisvuosi>
+            </yht:Suunnittelija>
+          </yht:suunnittelijatieto>
+          <yht:suunnittelijatieto>
+            <yht:Suunnittelija>
+              <yht:suunnittelijaRoolikoodi>rakennussuunnittelija</yht:suunnittelijaRoolikoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Teppo</yht:etunimi>
+                  <yht:sukunimi>Pietarinen</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Veturikuja 7</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>01300</yht:postinumero>
+                  <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>teppo.pietarinen@pr-arkkitehdit.fi</yht:sahkopostiosoite>
+                <yht:puhelin>040 551 2778</yht:puhelin>
+              </yht:henkilo>
+              <yht:koulutus>arkkitehti</yht:koulutus>
+              <yht:valmistumisvuosi>1983</yht:valmistumisvuosi>
+            </yht:Suunnittelija>
+          </yht:suunnittelijatieto>
+          <yht:suunnittelijatieto>
+            <yht:Suunnittelija>
+              <yht:suunnittelijaRoolikoodi>pääsuunnittelija</yht:suunnittelijaRoolikoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Teppo</yht:etunimi>
+                  <yht:sukunimi>Pietarinen</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Veturikuja 7</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>01300</yht:postinumero>
+                  <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>teppo.pietarinen@pr-arkkitehdit.fi</yht:sahkopostiosoite>
+                <yht:puhelin>040 551 2778</yht:puhelin>
+              </yht:henkilo>
+              <yht:koulutus>arkkitehti</yht:koulutus>
+              <yht:valmistumisvuosi>1983</yht:valmistumisvuosi>
+            </yht:Suunnittelija>
+          </yht:suunnittelijatieto>
+        </yht:Osapuolet>
+      </rakval:osapuolettieto>
+      <rakval:rakennuspaikkatieto>
+        <rakval:Rakennuspaikka gml:id="rpaikka.21216">
+          <yht:yksilointitieto>5069410</yht:yksilointitieto>
+          <yht:alkuHetki>2013-02-12T00:00:00Z</yht:alkuHetki>
+          <yht:rakennuspaikanKiinteistotieto>
+            <yht:RakennuspaikanKiinteisto>
+              <yht:kiinteistotieto>
+                <yht:Kiinteisto>
+                  <yht:kylanimi>Havukoski</yht:kylanimi>
+                  <yht:kiinteistotunnus>09207405020001</yht:kiinteistotunnus>
+                </yht:Kiinteisto>
+              </yht:kiinteistotieto>
+              <yht:kokotilaKytkin>true</yht:kokotilaKytkin>
+              <yht:hallintaperuste>oma</yht:hallintaperuste>
+            </yht:RakennuspaikanKiinteisto>
+          </yht:rakennuspaikanKiinteistotieto>
+          <yht:sijaintitieto>
+            <yht:Sijainti>
+              <yht:piste>
+                <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                  <gml:pos>2.550341E7 6689383.0</gml:pos>
+                </gml:Point>
+              </yht:piste>
+            </yht:Sijainti>
+          </yht:sijaintitieto>
+          <yht:kaavanaste>asema</yht:kaavanaste>
+          <yht:rakennusoikeusYhteensa>60186</yht:rakennusoikeusYhteensa>
+          <yht:osoite>
+            <yht:kunta>092</yht:kunta>
+            <yht:osoitenimi>
+              <yht:teksti xml:lang="fi">Halmekuja</yht:teksti>
+              <yht:teksti xml:lang="sv">Svedåkersgränden</yht:teksti>
+            </yht:osoitenimi>
+            <yht:osoitenumero>2</yht:osoitenumero>
+            <yht:postinumero>01360</yht:postinumero>
+            <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+          </yht:osoite>
+          <yht:kaavatilanne>asemakaava</yht:kaavatilanne>
+        </rakval:Rakennuspaikka>
+      </rakval:rakennuspaikkatieto>
+      <rakval:referenssiPiste>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.550341E7 6689383.0</gml:pos>
+        </gml:Point>
+      </rakval:referenssiPiste>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>88F1128D462440D1B1A596803211C1</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Ilmanvaihtokatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>5315BF0C51CC4217B55804C18D48E4</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Vesi- ja viemärikatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>05B853E812894931B8B3F01391779B</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:katselmuksenLaji>loppukatselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:paatostieto>
+        <yht:Paatos>
+          <yht:lupamaaraykset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>loppukatselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>loppukatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:maaraystieto>
+              <yht:Maarays>
+                <yht:sisalto>Muu lupaehto: 
+
+Muut lupaehdot kantaluvan 74-600-11-B, lupien 74-1275-11-C ja 74-181-12-BL  mukaisesti.</yht:sisalto>
+              </yht:Maarays>
+            </yht:maaraystieto>
+          </yht:lupamaaraykset>
+          <yht:paivamaarat>
+            <yht:lainvoimainenPvm>2013-04-19Z</yht:lainvoimainenPvm>
+            <yht:antoPvm>2013-04-04Z</yht:antoPvm>
+            <yht:viimeinenValitusPvm>2013-04-18Z</yht:viimeinenValitusPvm>
+            <yht:julkipanoPvm>2013-04-04Z</yht:julkipanoPvm>
+          </yht:paivamaarat>
+          <yht:poytakirja>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>Lupaosasto</yht:paatoksentekija>
+            <yht:paatospvm>2013-04-03Z</yht:paatospvm>
+            <yht:pykala>303</yht:pykala>
+            <yht:liite>
+              <yht:kuvaus>Paatosote</yht:kuvaus>
+              <yht:linkkiliitteeseen>http://80.248.164.27/krysp_tiedostot/liitteet/092/arkisto/2013/PAATOSOTE_74-0136-13-BL_20130403145027546.rtf</yht:linkkiliitteeseen>
+              <yht:muokkausHetki>2013-04-03T15:09:42Z</yht:muokkausHetki>
+              <yht:tyyppi>Paatosote</yht:tyyppi>
+            </yht:liite>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+      <rakval:lisatiedot>
+        <rakval:Lisatiedot>
+          <rakval:salassapitotietoKytkin>false</rakval:salassapitotietoKytkin>
+          <rakval:asioimiskieli>suomi</rakval:asioimiskieli>
+          <rakval:suoramarkkinointikieltoKytkin>true</rakval:suoramarkkinointikieltoKytkin>
+        </rakval:Lisatiedot>
+      </rakval:lisatiedot>
+      <rakval:asianTiedot>
+        <rakval:Asiantiedot>
+          <rakval:vahainenPoikkeaminen></rakval:vahainenPoikkeaminen>
+          <rakval:rakennusvalvontaasianKuvaus>Kierrätyskeskuksessa palo-osastoinnin rajan muutos ja tilamuutoksia sekä mainostorni.</rakval:rakennusvalvontaasianKuvaus>
+        </rakval:Asiantiedot>
+      </rakval:asianTiedot>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>

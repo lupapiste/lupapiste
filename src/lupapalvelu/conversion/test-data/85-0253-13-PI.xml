@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rakval:Rakennusvalvonta
+  xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.6/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.2.0/rakennusvalvonta.xsd http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+  xmlns:kiito="http://www.paikkatietopalvelu.fi/gml/kiinteistotoimitus"
+  xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+  xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:mkos="http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet"
+  xmlns:wfs="http://www.opengis.net/wfs"
+  xmlns:ymy="http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ppst="http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"
+  xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+  xmlns:ymm="http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat"
+  xmlns:ows="http://www.opengis.net/ows"
+  xmlns:gml="http://www.opengis.net/gml"
+  xmlns:ymv="http://www.paikkatietopalvelu.fi/gml/ymparisto/vesihuoltolaki"
+  xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ymi="http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset">
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi>CGI KRYSP</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Vantaa</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2018-05-14</yht:toimitusPvm>
+    <yht:kuntakoodi>092</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia gml:id="rluvat.99298">
+      <gml:location>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.5506285E7 6692072.0</gml:pos>
+        </gml:Point>
+      </gml:location>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-03-13Z</yht:pvm>
+          <yht:tila>vireillä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-03-13Z</yht:pvm>
+          <yht:tila>uusi lupa, ei käsittelyssä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-03-15Z</yht:pvm>
+          <yht:tila>luvalla ei loppukatselmusehtoa, lupa valmis</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Lupaosasto</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-03-15Z</yht:pvm>
+          <yht:tila>lupa hyväksytty</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Lupaosasto</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>85-0253-13-PI</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200013-0253</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-03-13Z</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:osapuolettieto>
+        <yht:Osapuolet>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+              <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Riia-Maria</yht:etunimi>
+                  <yht:sukunimi>Immonen</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Lumikkotie 4 B</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>01450</yht:postinumero>
+                  <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:henkilotunnus>150472-1400</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian laskun maksaja</yht:kuntaRooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Jukka</yht:etunimi>
+                  <yht:sukunimi>Kostamovaara</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Lumikkotie 4 B</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>01450</yht:postinumero>
+                  <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>jukka.kostamovaara@kolumbus.fi</yht:sahkopostiosoite>
+                <yht:puhelin>040 8600372</yht:puhelin>
+                <yht:henkilotunnus>030769-173Y</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+              <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Jukka</yht:etunimi>
+                  <yht:sukunimi>Kostamovaara</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Lumikkotie 4 B</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>01450</yht:postinumero>
+                  <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>jukka.kostamovaara@kolumbus.fi</yht:sahkopostiosoite>
+                <yht:puhelin>040 8600372</yht:puhelin>
+                <yht:henkilotunnus>030769-173Y</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+        </yht:Osapuolet>
+      </rakval:osapuolettieto>
+      <rakval:rakennuspaikkatieto>
+        <rakval:Rakennuspaikka gml:id="rpaikka.19424">
+          <yht:yksilointitieto>5069893</yht:yksilointitieto>
+          <yht:alkuHetki>2013-03-13T00:00:00Z</yht:alkuHetki>
+          <yht:rakennuspaikanKiinteistotieto>
+            <yht:RakennuspaikanKiinteisto>
+              <yht:kiinteistotieto>
+                <yht:Kiinteisto>
+                  <yht:kylanimi>Jokivarsi</yht:kylanimi>
+                  <yht:kiinteistotunnus>09208500400005</yht:kiinteistotunnus>
+                </yht:Kiinteisto>
+              </yht:kiinteistotieto>
+              <yht:kokotilaKytkin>true</yht:kokotilaKytkin>
+              <yht:hallintaperuste>oma</yht:hallintaperuste>
+            </yht:RakennuspaikanKiinteisto>
+          </yht:rakennuspaikanKiinteistotieto>
+          <yht:sijaintitieto>
+            <yht:Sijainti>
+              <yht:piste>
+                <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                  <gml:pos>2.5506285E7 6692072.0</gml:pos>
+                </gml:Point>
+              </yht:piste>
+            </yht:Sijainti>
+          </yht:sijaintitieto>
+          <yht:kaavanaste>asema</yht:kaavanaste>
+          <yht:rakennusoikeusYhteensa>145</yht:rakennusoikeusYhteensa>
+          <yht:osoite>
+            <yht:kunta>092</yht:kunta>
+            <yht:osoitenimi>
+              <yht:teksti xml:lang="fi">Sarvijaakontie</yht:teksti>
+              <yht:teksti xml:lang="sv">Hornbaggsvägen</yht:teksti>
+            </yht:osoitenimi>
+            <yht:osoitenumero>8</yht:osoitenumero>
+            <yht:jakokirjain>b</yht:jakokirjain>
+            <yht:postinumero>01480</yht:postinumero>
+            <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+          </yht:osoite>
+          <yht:kaavatilanne>asemakaava</yht:kaavatilanne>
+        </rakval:Rakennuspaikka>
+      </rakval:rakennuspaikkatieto>
+      <rakval:referenssiPiste>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.5506285E7 6692072.0</gml:pos>
+        </gml:Point>
+      </rakval:referenssiPiste>
+      <rakval:toimenpidetieto>
+        <rakval:Toimenpide>
+          <rakval:purkaminen>
+            <rakval:kuvaus>Purkaminen</rakval:kuvaus>
+            <rakval:purkamisenSyy>purettu uudisrakentamisen vuoksi</rakval:purkamisenSyy>
+            <rakval:poistumaPvm>2013-09-25Z</rakval:poistumaPvm>
+          </rakval:purkaminen>
+          <rakval:rakennelmatieto>
+            <rakval:Rakennelma gml:id="rakennelma.1656">
+              <yht:yksilointitieto>5045736</yht:yksilointitieto>
+              <yht:alkuHetki>2013-03-13T00:00:00Z</yht:alkuHetki>
+              <rakval:sijaintitieto>
+                <rakval:Sijainti>
+                  <yht:piste>
+                    <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                      <gml:pos>2.5506275E7 6692078.0</gml:pos>
+                    </gml:Point>
+                  </yht:piste>
+                </rakval:Sijainti>
+              </rakval:sijaintitieto>
+              <rakval:kuvaus>
+                <rakval:kuvaus>Varasto</rakval:kuvaus>
+              </rakval:kuvaus>
+              <rakval:tunnus>
+                <rakval:kunnanSisainenPysyvaRakennusnumero>50546</rakval:kunnanSisainenPysyvaRakennusnumero>
+                <rakval:jarjestysnumero>0</rakval:jarjestysnumero>
+                <rakval:kiinttun>09208500400005</rakval:kiinttun>
+                <rakval:rakennusnro>001</rakval:rakennusnro>
+                <rakval:aanestysalue></rakval:aanestysalue>
+              </rakval:tunnus>
+              <rakval:kayttotarkoitus>Varasto</rakval:kayttotarkoitus>
+            </rakval:Rakennelma>
+          </rakval:rakennelmatieto>
+        </rakval:Toimenpide>
+      </rakval:toimenpidetieto>
+      <rakval:paatostieto>
+        <yht:Paatos>
+          <yht:poytakirja>
+            <yht:paatos>Purkaminen voidaan suorittaa tämän ilmoituksen perusteella.</yht:paatos>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>Lupaosasto</yht:paatoksentekija>
+            <yht:paatospvm>2013-03-15Z</yht:paatospvm>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+      <rakval:lisatiedot>
+        <rakval:Lisatiedot>
+          <rakval:salassapitotietoKytkin>false</rakval:salassapitotietoKytkin>
+          <rakval:asioimiskieli>suomi</rakval:asioimiskieli>
+          <rakval:suoramarkkinointikieltoKytkin>true</rakval:suoramarkkinointikieltoKytkin>
+        </rakval:Lisatiedot>
+      </rakval:lisatiedot>
+      <rakval:asianTiedot>
+        <rakval:Asiantiedot>
+          <rakval:vahainenPoikkeaminen></rakval:vahainenPoikkeaminen>
+          <rakval:rakennusvalvontaasianKuvaus>Puretaan vanha talousrakennus uudisrakentamisen johdosta</rakval:rakennusvalvontaasianKuvaus>
+        </rakval:Asiantiedot>
+      </rakval:asianTiedot>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>

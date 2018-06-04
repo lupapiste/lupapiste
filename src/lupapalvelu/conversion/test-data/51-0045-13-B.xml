@@ -1,0 +1,2529 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rakval:Rakennusvalvonta
+  xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.6/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.2.0/rakennusvalvonta.xsd http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+  xmlns:kiito="http://www.paikkatietopalvelu.fi/gml/kiinteistotoimitus"
+  xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+  xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:mkos="http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet"
+  xmlns:wfs="http://www.opengis.net/wfs"
+  xmlns:ymy="http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ppst="http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"
+  xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+  xmlns:ymm="http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat"
+  xmlns:ows="http://www.opengis.net/ows"
+  xmlns:gml="http://www.opengis.net/gml"
+  xmlns:ymv="http://www.paikkatietopalvelu.fi/gml/ymparisto/vesihuoltolaki"
+  xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ymi="http://www.paikkatietopalvelu.fi/gml/ymparisto/ilmoitukset">
+  <rakval:toimituksenTiedot>
+    <yht:aineistonnimi>CGI KRYSP</yht:aineistonnimi>
+    <yht:aineistotoimittaja>Vantaa</yht:aineistotoimittaja>
+    <yht:tila>valmis</yht:tila>
+    <yht:toimitusPvm>2018-05-14</yht:toimitusPvm>
+    <yht:kuntakoodi>092</yht:kuntakoodi>
+    <yht:kielitieto>Suomi</yht:kielitieto>
+  </rakval:toimituksenTiedot>
+  <rakval:rakennusvalvontaAsiatieto>
+    <rakval:RakennusvalvontaAsia gml:id="rluvat.98915">
+      <gml:location>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.5498235E7 6685502.0</gml:pos>
+        </gml:Point>
+      </gml:location>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-01-17Z</yht:pvm>
+          <yht:tila>vireillä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-01-17Z</yht:pvm>
+          <yht:tila>uusi lupa, ei käsittelyssä</yht:tila>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-04-22Z</yht:pvm>
+          <yht:tila>rakennustyöt aloitettu</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Kaj Hurme</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2013-03-25Z</yht:pvm>
+          <yht:tila>lupa hyväksytty</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Lupaosasto</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>2015-08-03Z</yht:pvm>
+          <yht:tila>lopullinen loppukatselmus tehty</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Riitta Tamminen</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:kasittelynTilatieto>
+        <yht:Tilamuutos>
+          <yht:pvm>1900-01-01Z</yht:pvm>
+          <yht:tila>ei tiedossa</yht:tila>
+          <yht:kasittelija>
+            <yht:henkilo>
+              <yht:nimi>
+                <yht:sukunimi>Kaj Hurme</yht:sukunimi>
+              </yht:nimi>
+            </yht:henkilo>
+          </yht:kasittelija>
+        </yht:Tilamuutos>
+      </rakval:kasittelynTilatieto>
+      <rakval:luvanTunnisteTiedot>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>51-0045-13-B</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200013-0045</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-01-17Z</yht:saapumisPvm>
+        </yht:LupaTunnus>
+      </rakval:luvanTunnisteTiedot>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>13-0965-BL 51</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200013-0965</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-01-17Z</yht:saapumisPvm>
+          <yht:viittaus>seuraava rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>13-0637-TJO 51</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200013-0637</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-01-17Z</yht:saapumisPvm>
+          <yht:viittaus>seuraava rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>13-0636-TJO 51</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200013-0636</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-01-17Z</yht:saapumisPvm>
+          <yht:viittaus>seuraava rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>13-0517-TJO 51</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200013-0517</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-01-17Z</yht:saapumisPvm>
+          <yht:viittaus>seuraava rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>13-0493-TJO 51</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200013-0493</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-01-17Z</yht:saapumisPvm>
+          <yht:viittaus>seuraava rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:viitelupatieto>
+        <yht:LupaTunnus>
+          <yht:kuntalupatunnus>13-0004-LKR 51</yht:kuntalupatunnus>
+          <yht:VRKLupatunnus>09200013-0004</yht:VRKLupatunnus>
+          <yht:saapumisPvm>2013-01-17Z</yht:saapumisPvm>
+          <yht:viittaus>edellinen rakennusvalvonta-asia</yht:viittaus>
+        </yht:LupaTunnus>
+      </rakval:viitelupatieto>
+      <rakval:osapuolettieto>
+        <yht:Osapuolet>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonnan asiamies</yht:kuntaRooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Pasi</yht:etunimi>
+                  <yht:sukunimi>Raevaara</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Hakalantie 11 B</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>04200</yht:postinumero>
+                  <yht:postitoimipaikannimi>KERAVA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>ark.raevaara@kolumbus.fi</yht:sahkopostiosoite>
+                <yht:puhelin>09-2423807</yht:puhelin>
+              </yht:henkilo>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian laskun maksaja</yht:kuntaRooliKoodi>
+              <yht:yritys>
+                <yht:nimi>Kiinteistö Oy Arinatie 6</yht:nimi>
+                <yht:liikeJaYhteisotunnus>1457768-7</yht:liikeJaYhteisotunnus>
+                <yht:postiosoitetieto>
+                  <yht:postiosoite>
+                    <yht:osoitenimi>
+                      <yht:teksti>Henry Fordin katu 5 H 10</yht:teksti>
+                    </yht:osoitenimi>
+                    <yht:postinumero>00150</yht:postinumero>
+                    <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+                  </yht:postiosoite>
+                </yht:postiosoitetieto>
+                <yht:puhelin>040-4552069</yht:puhelin>
+                <yht:sahkopostiosoite>pekka.silvennoinen@juhola.com</yht:sahkopostiosoite>
+              </yht:yritys>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:osapuolitieto>
+            <yht:Osapuoli>
+              <yht:kuntaRooliKoodi>Rakennusvalvonta-asian hakija</yht:kuntaRooliKoodi>
+              <yht:VRKrooliKoodi>hakija</yht:VRKrooliKoodi>
+              <yht:yritys>
+                <yht:nimi>Kiinteistö Oy Arinatie 6</yht:nimi>
+                <yht:liikeJaYhteisotunnus>1457768-7</yht:liikeJaYhteisotunnus>
+                <yht:postiosoitetieto>
+                  <yht:postiosoite>
+                    <yht:osoitenimi>
+                      <yht:teksti>Henry Fordin katu 5 H 10</yht:teksti>
+                    </yht:osoitenimi>
+                    <yht:postinumero>00150</yht:postinumero>
+                    <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+                  </yht:postiosoite>
+                </yht:postiosoitetieto>
+                <yht:puhelin>040-4552069</yht:puhelin>
+                <yht:sahkopostiosoite>pekka.silvennoinen@juhola.com</yht:sahkopostiosoite>
+              </yht:yritys>
+              <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+            </yht:Osapuoli>
+          </yht:osapuolitieto>
+          <yht:suunnittelijatieto>
+            <yht:Suunnittelija>
+              <yht:suunnittelijaRoolikoodi>KVV-suunnittelija</yht:suunnittelijaRoolikoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Aleksi Arto Olavi</yht:etunimi>
+                  <yht:sukunimi>Isoaho</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Kilterinaukio 1 B 34</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>01600</yht:postinumero>
+                  <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>aleksi.isoaho@vahvacon.fi</yht:sahkopostiosoite>
+                <yht:puhelin>050 363 4018</yht:puhelin>
+              </yht:henkilo>
+              <yht:koulutus>LVI-insinööri</yht:koulutus>
+              <yht:valmistumisvuosi>2006</yht:valmistumisvuosi>
+            </yht:Suunnittelija>
+          </yht:suunnittelijatieto>
+          <yht:suunnittelijatieto>
+            <yht:Suunnittelija>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Sami</yht:etunimi>
+                  <yht:sukunimi>Karvinen</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Ilmalanportti 2</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>00240</yht:postinumero>
+                  <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>sami.karvinen@sweco.fi</yht:sahkopostiosoite>
+                <yht:puhelin>050 581 6278</yht:puhelin>
+                <yht:henkilotunnus>070278-135L</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:koulutus>diplomi-insinööri</yht:koulutus>
+              <yht:valmistumisvuosi>2005</yht:valmistumisvuosi>
+            </yht:Suunnittelija>
+          </yht:suunnittelijatieto>
+          <yht:suunnittelijatieto>
+            <yht:Suunnittelija>
+              <yht:suunnittelijaRoolikoodi>IV-suunnittelija</yht:suunnittelijaRoolikoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Aki</yht:etunimi>
+                  <yht:sukunimi>Mikkelson</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti></yht:teksti>
+                  </yht:osoitenimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>aki.mikkelson@vahvacon.fi</yht:sahkopostiosoite>
+                <yht:puhelin>044-3663016</yht:puhelin>
+                <yht:henkilotunnus>260582-147P</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:koulutus>LVI-insinööri</yht:koulutus>
+              <yht:valmistumisvuosi>2004</yht:valmistumisvuosi>
+            </yht:Suunnittelija>
+          </yht:suunnittelijatieto>
+          <yht:suunnittelijatieto>
+            <yht:Suunnittelija>
+              <yht:suunnittelijaRoolikoodi>rakennussuunnittelija</yht:suunnittelijaRoolikoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Pasi</yht:etunimi>
+                  <yht:sukunimi>Raevaara</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Hakalantie 11 b</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>04200</yht:postinumero>
+                  <yht:postitoimipaikannimi>KERAVA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>ark.raevaara@kolumbus.fi</yht:sahkopostiosoite>
+                <yht:puhelin>0400 461599</yht:puhelin>
+              </yht:henkilo>
+              <yht:koulutus>arkkitehti</yht:koulutus>
+              <yht:valmistumisvuosi>1976</yht:valmistumisvuosi>
+            </yht:Suunnittelija>
+          </yht:suunnittelijatieto>
+          <yht:suunnittelijatieto>
+            <yht:Suunnittelija>
+              <yht:suunnittelijaRoolikoodi>pääsuunnittelija</yht:suunnittelijaRoolikoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Pasi</yht:etunimi>
+                  <yht:sukunimi>Raevaara</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Hakalantie 11 b</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>04200</yht:postinumero>
+                  <yht:postitoimipaikannimi>KERAVA</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>ark.raevaara@kolumbus.fi</yht:sahkopostiosoite>
+                <yht:puhelin>0400 461599</yht:puhelin>
+              </yht:henkilo>
+              <yht:koulutus>arkkitehti</yht:koulutus>
+              <yht:valmistumisvuosi>1976</yht:valmistumisvuosi>
+            </yht:Suunnittelija>
+          </yht:suunnittelijatieto>
+          <yht:tyonjohtajatieto>
+            <yht:Tyonjohtaja>
+              <yht:tyonjohtajaRooliKoodi>vastaava työnjohtaja</yht:tyonjohtajaRooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Pekka</yht:etunimi>
+                  <yht:sukunimi>Peltonen</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Kaanaankatu 9A7</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>00560</yht:postinumero>
+                  <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>pekka.h.peltonen@sweco.fi</yht:sahkopostiosoite>
+                <yht:puhelin>0406765156</yht:puhelin>
+                <yht:henkilotunnus>220961-193D</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:koulutus>rakennusmestari</yht:koulutus>
+              <yht:valmistumisvuosi>1982</yht:valmistumisvuosi>
+              <yht:alkamisPvm>2013-04-03Z</yht:alkamisPvm>
+              <yht:paattymisPvm>2013-11-06Z</yht:paattymisPvm>
+              <yht:hakemuksenSaapumisPvm>2013-04-03Z</yht:hakemuksenSaapumisPvm>
+              <yht:tyonjohtajaHakemusKytkin>true</yht:tyonjohtajaHakemusKytkin>
+            </yht:Tyonjohtaja>
+          </yht:tyonjohtajatieto>
+          <yht:tyonjohtajatieto>
+            <yht:Tyonjohtaja>
+              <yht:tyonjohtajaRooliKoodi>KVV-työnjohtaja</yht:tyonjohtajaRooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Tomi</yht:etunimi>
+                  <yht:sukunimi>Paavola</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Ilveskaari 29</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>01900</yht:postinumero>
+                  <yht:postitoimipaikannimi>NURMIJÄRVI</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>tomi.paavola@lvi-paavola.com</yht:sahkopostiosoite>
+                <yht:puhelin>050-5903996</yht:puhelin>
+                <yht:henkilotunnus>180574-117H</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:koulutus>LVI-insinööri</yht:koulutus>
+              <yht:valmistumisvuosi>1998</yht:valmistumisvuosi>
+              <yht:alkamisPvm>2013-04-24Z</yht:alkamisPvm>
+              <yht:paattymisPvm>2013-11-04Z</yht:paattymisPvm>
+              <yht:hakemuksenSaapumisPvm>2013-04-24Z</yht:hakemuksenSaapumisPvm>
+            </yht:Tyonjohtaja>
+          </yht:tyonjohtajatieto>
+          <yht:tyonjohtajatieto>
+            <yht:Tyonjohtaja>
+              <yht:tyonjohtajaRooliKoodi>IV-työnjohtaja</yht:tyonjohtajaRooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Tomi</yht:etunimi>
+                  <yht:sukunimi>Paavola</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Ilveskaari 29</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>01900</yht:postinumero>
+                  <yht:postitoimipaikannimi>NURMIJÄRVI</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>tomi.paavola@lvi-paavola.com</yht:sahkopostiosoite>
+                <yht:puhelin>050-5903996</yht:puhelin>
+                <yht:henkilotunnus>180574-117H</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:koulutus>LVI-insinööri</yht:koulutus>
+              <yht:valmistumisvuosi>1998</yht:valmistumisvuosi>
+              <yht:alkamisPvm>2013-04-24Z</yht:alkamisPvm>
+              <yht:paattymisPvm>2013-11-04Z</yht:paattymisPvm>
+              <yht:hakemuksenSaapumisPvm>2013-04-24Z</yht:hakemuksenSaapumisPvm>
+            </yht:Tyonjohtaja>
+          </yht:tyonjohtajatieto>
+          <yht:tyonjohtajatieto>
+            <yht:Tyonjohtaja>
+              <yht:tyonjohtajaRooliKoodi>KVV-työnjohtaja</yht:tyonjohtajaRooliKoodi>
+              <yht:henkilo>
+                <yht:nimi>
+                  <yht:etunimi>Ari-Pekka Petteri</yht:etunimi>
+                  <yht:sukunimi>Autio</yht:sukunimi>
+                </yht:nimi>
+                <yht:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti>Akkutie 16</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:postinumero>00770</yht:postinumero>
+                  <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+                </yht:osoite>
+                <yht:sahkopostiosoite>ari.autio@consrak.fi</yht:sahkopostiosoite>
+                <yht:puhelin>0504412000</yht:puhelin>
+                <yht:henkilotunnus>200963-013U</yht:henkilotunnus>
+              </yht:henkilo>
+              <yht:koulutus>rakennusmestari</yht:koulutus>
+              <yht:valmistumisvuosi>1989</yht:valmistumisvuosi>
+              <yht:alkamisPvm>2013-04-05Z</yht:alkamisPvm>
+              <yht:paattymisPvm>2013-11-04Z</yht:paattymisPvm>
+              <yht:hakemuksenSaapumisPvm>2013-04-05Z</yht:hakemuksenSaapumisPvm>
+            </yht:Tyonjohtaja>
+          </yht:tyonjohtajatieto>
+        </yht:Osapuolet>
+      </rakval:osapuolettieto>
+      <rakval:rakennuspaikkatieto>
+        <rakval:Rakennuspaikka gml:id="rpaikka.18771">
+          <yht:yksilointitieto>5069004</yht:yksilointitieto>
+          <yht:alkuHetki>2013-01-17T00:00:00Z</yht:alkuHetki>
+          <yht:rakennuspaikanKiinteistotieto>
+            <yht:RakennuspaikanKiinteisto>
+              <yht:kiinteistotieto>
+                <yht:Kiinteisto>
+                  <yht:kylanimi>Pakkala</yht:kylanimi>
+                  <yht:kiinteistotunnus>09205101530002</yht:kiinteistotunnus>
+                </yht:Kiinteisto>
+              </yht:kiinteistotieto>
+              <yht:kokotilaKytkin>true</yht:kokotilaKytkin>
+              <yht:hallintaperuste>oma</yht:hallintaperuste>
+            </yht:RakennuspaikanKiinteisto>
+          </yht:rakennuspaikanKiinteistotieto>
+          <yht:sijaintitieto>
+            <yht:Sijainti>
+              <yht:piste>
+                <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                  <gml:pos>2.5498235E7 6685502.0</gml:pos>
+                </gml:Point>
+              </yht:piste>
+            </yht:Sijainti>
+          </yht:sijaintitieto>
+          <yht:kaavanaste>asema</yht:kaavanaste>
+          <yht:kerrosala>1208</yht:kerrosala>
+          <yht:rakennusoikeusYhteensa>11693</yht:rakennusoikeusYhteensa>
+          <yht:osoite>
+            <yht:kunta>092</yht:kunta>
+            <yht:osoitenimi>
+              <yht:teksti xml:lang="fi">Hagelstamintie</yht:teksti>
+              <yht:teksti xml:lang="sv">Hagelstamvägen</yht:teksti>
+            </yht:osoitenimi>
+            <yht:osoitenumero>28</yht:osoitenumero>
+            <yht:postinumero>01520</yht:postinumero>
+            <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+          </yht:osoite>
+          <yht:kaavatilanne>asemakaava</yht:kaavatilanne>
+        </rakval:Rakennuspaikka>
+      </rakval:rakennuspaikkatieto>
+      <rakval:referenssiPiste>
+        <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+          <gml:pos>2.5498235E7 6685502.0</gml:pos>
+        </gml:Point>
+      </rakval:referenssiPiste>
+      <rakval:toimenpidetieto>
+        <rakval:Toimenpide>
+          <rakval:laajennus>
+            <rakval:laajennuksentiedot>
+              <rakval:tilavuus>8458</rakval:tilavuus>
+              <rakval:kerrosala>1208</rakval:kerrosala>
+              <rakval:rakennusoikeudellinenKerrosala>1208</rakval:rakennusoikeudellinenKerrosala>
+              <rakval:kokonaisala>1208</rakval:kokonaisala>
+            </rakval:laajennuksentiedot>
+            <rakval:kuvaus>Laajennus</rakval:kuvaus>
+            <rakval:perusparannusKytkin>false</rakval:perusparannusKytkin>
+            <rakval:aloitusPvm>2013-04-22Z</rakval:aloitusPvm>
+            <rakval:valmistumisPvm>2013-07-01Z</rakval:valmistumisPvm>
+          </rakval:laajennus>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>5788A6C831C349A8BBFA10A82EFAEE</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-11-04Z</rakval:pitoPvm>
+              <rakval:osittainen>lopullinen</rakval:osittainen>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Käyttö- ja huolto-ohje</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>711EEBBF79DA497B9A9FFC98990703</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-10-30Z</rakval:pitoPvm>
+              <rakval:osittainen>lopullinen</rakval:osittainen>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Sähköurakoitsijan tarkastus</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>CAF3CD0EE00C4BC1A4B1B11EF0CFE7</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-08-15Z</rakval:pitoPvm>
+              <rakval:osittainen>osittainen</rakval:osittainen>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Sähköurakoitsijan tarkastus</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>1C88FFA4EFF749D0A7778E6001EFB4</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-11-04Z</rakval:pitoPvm>
+              <rakval:osittainen>osittainen</rakval:osittainen>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Tarkastusasiakirja</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>70C546175B754F63B6E4CE1E6C8469</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2015-08-03Z</rakval:pitoPvm>
+              <rakval:osittainen>lopullinen</rakval:osittainen>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Tarkastusasiakirja</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>3CE3E021224740EA97C4AE86299BB1</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-11-01Z</rakval:pitoPvm>
+              <rakval:osittainen>lopullinen</rakval:osittainen>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Erityinen palotarkastus</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>FEF182E6544A4AB2802485FFB44B4A</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-08-28Z</rakval:pitoPvm>
+              <rakval:osittainen>osittainen</rakval:osittainen>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Erityinen palotarkastus</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>9ED5D81CE2B3448E9FF7156C366229</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-08-12Z</rakval:pitoPvm>
+              <rakval:osittainen>osittainen</rakval:osittainen>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:huomautukset>
+                <rakval:huomautus>
+                  <rakval:kuvaus>Tilat: 181 ja 187 10-13/A-B</rakval:kuvaus>
+                </rakval:huomautus>
+              </rakval:huomautukset>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Sähkön varmennustarkastus</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>FC2D1BC7DDA74629A80056C4CB2685</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-09-20Z</rakval:pitoPvm>
+              <rakval:osittainen>osittainen</rakval:osittainen>
+              <rakval:pitaja>Jouko Lamminen</rakval:pitaja>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:huomautukset>
+                <rakval:huomautus>
+                  <rakval:kuvaus>KATSELMUKSEN KOHDE:&#xd;
+Tilat 182-184, jotka hyväksyttiin käyttöön.&#xd;
+&#xd;
+ASIAKIRJOJA&#xd;
+Sähköurakoitsijan tarkastus 18.9.2013&#xd;
+Osittainen kvv-katselmus 20.9.2013&#xd;
+Osittainen iv -katselmus 20.9.2013&#xd;
+&#xd;
+MUITA SEIKKOJA&#xd;
+Ko. tilojen osalla palotarkastus ei ole tarpeellinen tässä vaiheessa.&#xd;
+</rakval:kuvaus>
+                </rakval:huomautus>
+              </rakval:huomautukset>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Ositt.loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>D5429A86F66E4717BA524E7EC852C2</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-08-15Z</rakval:pitoPvm>
+              <rakval:osittainen>osittainen</rakval:osittainen>
+              <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:huomautukset>
+                <rakval:huomautus>
+                  <rakval:kuvaus>Tilat 181 ja 187</rakval:kuvaus>
+                </rakval:huomautus>
+              </rakval:huomautukset>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Ositt.loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+              <rakval:lasnaolijat>Tilojen 181 ja 187 käyttöönotto</rakval:lasnaolijat>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>true</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>DC4044726E9C439596FEC881498D78</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-07-01Z</rakval:pitoPvm>
+              <rakval:osittainen>osittainen</rakval:osittainen>
+              <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:huomautukset>
+                <rakval:huomautus>
+                  <rakval:kuvaus>Pakkasvarasto</rakval:kuvaus>
+                </rakval:huomautus>
+              </rakval:huomautukset>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Ositt.loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+              <rakval:lasnaolijat>Pakkasvaraston käyttöönotto</rakval:lasnaolijat>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>3DD9F96E837D4142B5F0763225D97F</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-11-04Z</rakval:pitoPvm>
+              <rakval:osittainen>lopullinen</rakval:osittainen>
+              <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Ositt.loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>75D726A4EF804A8695BD8C70FB20E4</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2012-08-30Z</rakval:pitoPvm>
+              <rakval:osittainen>osittainen</rakval:osittainen>
+              <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Ositt.loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+              <rakval:lasnaolijat>Toimistotilojen käyttöönotto alueella A-B/1-6, kerrokset 1 ja 2.</rakval:lasnaolijat>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>6616E44B5EB8408B90B5FF20137DE2</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2015-04-24Z</rakval:pitoPvm>
+              <rakval:osittainen>osittainen</rakval:osittainen>
+              <rakval:pitaja>Riitta Tamminen</rakval:pitaja>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:huomautukset>
+                <rakval:huomautus>
+                  <rakval:kuvaus>Paikalla Mattila (valtakirjalla) Tero Riikonen.&#xd;
+Ilmoitus osittaiseen ja loppukatselmukseen on.&#xd;
+&#xd;
+10 4.2018 mennessä.&#xd;
+- tarkastusasiakirja yhteenvetolomake&#xd;
+- vesijohdon ja jätevesiviemärin siirto vesuhuollon suunnitteluun (selvitys 11.5.15)&#xd;
+- ARK, RAK ja LVI-kuvat arkistoon pdf:nä (pääsuunnittelija hoitaa)&#xd;
+- katuloppukatselmus&#xd;
+&#xd;
+51-965-13-BL hoidettava myös loppuun</rakval:kuvaus>
+                </rakval:huomautus>
+              </rakval:huomautukset>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Ositt.loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>72FD0DFACC5D49C5A9BAEC9C78EA6B</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-08-23Z</rakval:pitoPvm>
+              <rakval:osittainen>osittainen</rakval:osittainen>
+              <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:huomautukset>
+                <rakval:huomautus>
+                  <rakval:kuvaus>Ennen toimistotilan A-B/1-8 käyttöönottoa on seuraavat asiat hoidettava: sähköurakoitsijan allekirjoitus tarkastusraporttiinsa,pelastusviranomaisen tarkastus,poistumistien salpaus korjattava,poistumistiemerkintä asennettava oikeaan paikkaan,ilmastointikonehuoneen ovi asennettava,porrashuoneen kaiteet saatettava F2:n mukaiseksi ja rasitesopimukset tehtävä.</rakval:kuvaus>
+                </rakval:huomautus>
+              </rakval:huomautukset>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Kalustuskatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>D86B8EC9B34B42548063B5A64D95A0</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2015-08-03Z</rakval:pitoPvm>
+              <rakval:osittainen>lopullinen</rakval:osittainen>
+              <rakval:pitaja>Riitta Tamminen</rakval:pitaja>
+              <rakval:katselmuksenLaji>loppukatselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>A1FCD4BF60BC4EDCB2A587E7F97716</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-11-04Z</rakval:pitoPvm>
+              <rakval:osittainen>lopullinen</rakval:osittainen>
+              <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+              <rakval:katselmuksenLaji>rakennekatselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>rakennekatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>007EAA93AE884FC795FED519029426</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-07-01Z</rakval:pitoPvm>
+              <rakval:osittainen>osittainen</rakval:osittainen>
+              <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+              <rakval:katselmuksenLaji>rakennekatselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:huomautukset>
+                <rakval:huomautus>
+                  <rakval:kuvaus>Runkorakenteet. Pakkasvaraston muutokselle haettava RAM-lupa.</rakval:kuvaus>
+                </rakval:huomautus>
+              </rakval:huomautukset>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>rakennekatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>8CA6A7EBAF3D46E08FDA284BD76C63</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-11-04Z</rakval:pitoPvm>
+              <rakval:osittainen>lopullinen</rakval:osittainen>
+              <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Perustuskatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>FD2E8442916F4FCF88FF55DDE25DE4</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-05-29Z</rakval:pitoPvm>
+              <rakval:osittainen>lopullinen</rakval:osittainen>
+              <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+              <rakval:katselmuksenLaji>pohjakatselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>pohjakatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>5626A0E37BB34226924862EDF39E13</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-07-11Z</rakval:pitoPvm>
+              <rakval:osittainen>lopullinen</rakval:osittainen>
+              <rakval:pitaja>Ari Roivainen</rakval:pitaja>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Sijaintikatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>C24D82AA0A454CA0802E8843E03C09</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-04-22Z</rakval:pitoPvm>
+              <rakval:osittainen>lopullinen</rakval:osittainen>
+              <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+              <rakval:katselmuksenLaji>aloituskokous</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>aloituskokous</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:katselmuksenRakennustieto>
+                <rakval:KatselmuksenRakennus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+                  <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:KatselmuksenRakennus>
+              </rakval:katselmuksenRakennustieto>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:tunnus>EE451F136A0F40C18D08500CE29E9E</yht:tunnus>
+                  <yht:sovellus>Facta</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>2013-04-17Z</rakval:pitoPvm>
+              <rakval:osittainen>pidetty</rakval:osittainen>
+              <rakval:pitaja>Ari Roivainen</rakval:pitaja>
+              <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:huomautukset>
+                <rakval:huomautus>
+                  <rakval:kuvaus>Laajennuksen paikan merkintää ei katsottu tarpeelliseksi suorittaa.&#xd;
+17.4.2013 MIO/Ari Roivainen</rakval:kuvaus>
+                </rakval:huomautus>
+              </rakval:huomautukset>
+              <rakval:tarkastuksenTaiKatselmuksenNimi>Paikan merkitseminen</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>
+          <rakval:rakennustieto>
+            <rakval:Rakennus gml:id="rakennus.21046">
+              <yht:yksilointitieto>5045510</yht:yksilointitieto>
+              <yht:alkuHetki>2013-01-17T00:00:00Z</yht:alkuHetki>
+              <rakval:sijaintitieto>
+                <rakval:Sijainti>
+                  <yht:piste>
+                    <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                      <gml:pos>2.5498223E7 6685525.0</gml:pos>
+                    </gml:Point>
+                  </yht:piste>
+                </rakval:Sijainti>
+              </rakval:sijaintitieto>
+              <rakval:rakennuksenTiedot>
+                <rakval:rakennustunnus>
+                  <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+                  <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+                  <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                  <rakval:kiinttun>09205101530002</rakval:kiinttun>
+                  <rakval:rakennusnro>001</rakval:rakennusnro>
+                  <rakval:aanestysalue>303</rakval:aanestysalue>
+                  <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+                </rakval:rakennustunnus>
+                <rakval:kayttotarkoitus>699 muut teollisuuden tuotantorakennukset</rakval:kayttotarkoitus>
+                <rakval:tilavuus>54143</rakval:tilavuus>
+                <rakval:kokonaisala>9204</rakval:kokonaisala>
+                <rakval:osoite>
+                  <yht:kunta>092</yht:kunta>
+                  <yht:osoitenimi>
+                    <yht:teksti xml:lang="fi">Hagelstamintie</yht:teksti>
+                    <yht:teksti xml:lang="sv">Hagelstamvägen</yht:teksti>
+                  </yht:osoitenimi>
+                  <yht:osoitenumero>28</yht:osoitenumero>
+                  <yht:postinumero>01520</yht:postinumero>
+                  <yht:postitoimipaikannimi>VANTAA</yht:postitoimipaikannimi>
+                </rakval:osoite>
+                <rakval:kerrosluku>2</rakval:kerrosluku>
+                <rakval:kerrosala>8658</rakval:kerrosala>
+                <rakval:rakennusoikeudellinenKerrosala>8658</rakval:rakennusoikeudellinenKerrosala>
+                <rakval:rakentamistapa>elementti</rakval:rakentamistapa>
+                <rakval:kantavaRakennusaine>
+                  <rakval:rakennusaine>betoni</rakval:rakennusaine>
+                </rakval:kantavaRakennusaine>
+                <rakval:julkisivu>
+                  <rakval:julkisivumateriaali>betoni</rakval:julkisivumateriaali>
+                </rakval:julkisivu>
+                <rakval:verkostoliittymat>
+                  <rakval:viemariKytkin>false</rakval:viemariKytkin>
+                  <rakval:vesijohtoKytkin>false</rakval:vesijohtoKytkin>
+                  <rakval:sahkoKytkin>false</rakval:sahkoKytkin>
+                  <rakval:maakaasuKytkin>false</rakval:maakaasuKytkin>
+                  <rakval:kaapeliKytkin>false</rakval:kaapeliKytkin>
+                </rakval:verkostoliittymat>
+                <rakval:paloluokka>P1</rakval:paloluokka>
+                <rakval:lammitystapa>vesikeskus</rakval:lammitystapa>
+                <rakval:lammonlahde>
+                  <rakval:polttoaine>kevyt polttoöljy</rakval:polttoaine>
+                </rakval:lammonlahde>
+                <rakval:varusteet>
+                  <rakval:sahkoKytkin>false</rakval:sahkoKytkin>
+                  <rakval:kaasuKytkin>false</rakval:kaasuKytkin>
+                  <rakval:viemariKytkin>false</rakval:viemariKytkin>
+                  <rakval:vesijohtoKytkin>false</rakval:vesijohtoKytkin>
+                  <rakval:lamminvesiKytkin>false</rakval:lamminvesiKytkin>
+                  <rakval:aurinkopaneeliKytkin>false</rakval:aurinkopaneeliKytkin>
+                  <rakval:hissiKytkin>false</rakval:hissiKytkin>
+                  <rakval:koneellinenilmastointiKytkin>false</rakval:koneellinenilmastointiKytkin>
+                  <rakval:vaestonsuoja>150</rakval:vaestonsuoja>
+                </rakval:varusteet>
+              </rakval:rakennuksenTiedot>
+              <rakval:omistajatieto>
+                <rakval:Omistaja>
+                  <yht:kuntaRooliKoodi>Rakennuksen omistaja</yht:kuntaRooliKoodi>
+                  <yht:VRKrooliKoodi>rakennuksen omistaja</yht:VRKrooliKoodi>
+                  <yht:yritys>
+                    <yht:nimi>Kiinteistö Oy Arinatie 6 / Kiinteistöman.J.Juhola Oy</yht:nimi>
+                    <yht:liikeJaYhteisotunnus>1457768-7</yht:liikeJaYhteisotunnus>
+                    <yht:postiosoitetieto>
+                      <yht:postiosoite>
+                        <yht:osoitenimi>
+                          <yht:teksti>Henry Fordin katu 5 H 10</yht:teksti>
+                        </yht:osoitenimi>
+                        <yht:postinumero>00150</yht:postinumero>
+                        <yht:postitoimipaikannimi>HELSINKI</yht:postitoimipaikannimi>
+                      </yht:postiosoite>
+                    </yht:postiosoitetieto>
+                  </yht:yritys>
+                  <yht:suoramarkkinointikieltoKytkin>true</yht:suoramarkkinointikieltoKytkin>
+                  <rakval:omistajalaji>
+                    <rakval:omistajalaji>kiinteistö oy</rakval:omistajalaji>
+                  </rakval:omistajalaji>
+                </rakval:Omistaja>
+              </rakval:omistajatieto>
+            </rakval:Rakennus>
+          </rakval:rakennustieto>
+        </rakval:Toimenpide>
+      </rakval:toimenpidetieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>C7B32F32ED0B4BC08B28FFDA9FF5F5</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-06-19Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:pitaja>Jorma Sulander</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>seuraava lvi-seurantakatselmus to 29.8.2013 klo 9.00&#xd;
+pohjaviemäreiden kannakointi: min 500mm välein ks. RYL ( kantava alapohja ilman ryömintätilaa )</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>LVI / seurantakatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>CA626350FED34A26BD0E250346BE07</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-08-29Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:pitaja>Jorma Sulander</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>LVI / seurantakatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>CE3C815F8EA04525BE791C90AD25DF</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-08-22Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:pitaja>Jorma Sulander</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>osa 1, 1-2krs. iv-käyttöönottokatselmus ( toimisto tilat )&#xd;
+- osa tiloista kesken, H158 ja H159&#xd;
+- vaihtopiirustukset toimitettava&#xd;
+- ivmptk: 21.8.2013</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>IV / käyttöönottokatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>513FD193229E4781A469AC5FEABD73</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-08-15Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:pitaja>Janne Korhonen</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>- Taukohuoneen 187 käyttöönotto</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>IV / käyttöönottokatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>2EC2A3586188469C9DBF331FBDB65B</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-10-11Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:pitaja>Jorma Sulander</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>tilojen 133, 134, 135, 157, 158, 159, 225 ja 226 iv-käyttöönottokatselmus&#xd;
+- ivmptk: 10.10-13</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>IV / käyttöönottokatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>69E496C8C4154BC29B0C7BBA2FC850</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-09-20Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:pitaja>Jorma Sulander</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>1krs. osa 2 huoneiden 182 ja 184 iv-käyttöönottokatselmus&#xd;
+- ivmptk: 13.8.2013</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>IV / käyttöönottokatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>9ED5D81CE2B3448E9FF7156C366229</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-08-12Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>Tilat: 181 ja 187 10-13/A-B</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Sähkön varmennustarkastus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>EA3DC31CD5F544B99A88B325E0340D</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-10-14Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Sähkön varmennustarkastus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>FC2D1BC7DDA74629A80056C4CB2685</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-09-20Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:pitaja>Jouko Lamminen</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>KATSELMUKSEN KOHDE:&#xd;
+Tilat 182-184, jotka hyväksyttiin käyttöön.&#xd;
+&#xd;
+ASIAKIRJOJA&#xd;
+Sähköurakoitsijan tarkastus 18.9.2013&#xd;
+Osittainen kvv-katselmus 20.9.2013&#xd;
+Osittainen iv -katselmus 20.9.2013&#xd;
+&#xd;
+MUITA SEIKKOJA&#xd;
+Ko. tilojen osalla palotarkastus ei ole tarpeellinen tässä vaiheessa.&#xd;
+</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Ositt.loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>D5429A86F66E4717BA524E7EC852C2</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-08-15Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>Tilat 181 ja 187</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Ositt.loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+          <rakval:lasnaolijat>Tilojen 181 ja 187 käyttöönotto</rakval:lasnaolijat>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>true</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>DC4044726E9C439596FEC881498D78</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-07-01Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>Pakkasvarasto</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Ositt.loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+          <rakval:lasnaolijat>Pakkasvaraston käyttöönotto</rakval:lasnaolijat>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>3DD9F96E837D4142B5F0763225D97F</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-11-04Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Ositt.loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>75D726A4EF804A8695BD8C70FB20E4</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2012-08-30Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Ositt.loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+          <rakval:lasnaolijat>Toimistotilojen käyttöönotto alueella A-B/1-6, kerrokset 1 ja 2.</rakval:lasnaolijat>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>6616E44B5EB8408B90B5FF20137DE2</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2015-04-24Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:pitaja>Riitta Tamminen</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>Paikalla Mattila (valtakirjalla) Tero Riikonen.&#xd;
+Ilmoitus osittaiseen ja loppukatselmukseen on.&#xd;
+&#xd;
+10 4.2018 mennessä.&#xd;
+- tarkastusasiakirja yhteenvetolomake&#xd;
+- vesijohdon ja jätevesiviemärin siirto vesuhuollon suunnitteluun (selvitys 11.5.15)&#xd;
+- ARK, RAK ja LVI-kuvat arkistoon pdf:nä (pääsuunnittelija hoitaa)&#xd;
+- katuloppukatselmus&#xd;
+&#xd;
+51-965-13-BL hoidettava myös loppuun</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Ositt.loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>CA41BFB73DA94E5EBFE9A5668B0BDD</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-10-18Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:pitaja>Jouko Lamminen</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>18.10.2013 Laiteparven kerrosala, palokestovaatimus jne selvitettävä ensitilassa /Jouko Lamminen</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Ositt.loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>5788A6C831C349A8BBFA10A82EFAEE</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-11-04Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Käyttö- ja huolto-ohje</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>711EEBBF79DA497B9A9FFC98990703</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-10-30Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Sähköurakoitsijan tarkastus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>CAF3CD0EE00C4BC1A4B1B11EF0CFE7</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-08-15Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Sähköurakoitsijan tarkastus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>1C88FFA4EFF749D0A7778E6001EFB4</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-11-04Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Tarkastusasiakirja</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>70C546175B754F63B6E4CE1E6C8469</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2015-08-03Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Tarkastusasiakirja</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>07C320148CB744A2A22A11C4EFEB48</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-08-22Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:pitaja>Jorma Sulander</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>osa 1, 1-2krs. kvv-käyttöönottokatselmus ( toimisto tilat )&#xd;
+- osa tiloista kesken, H158 ja H159&#xd;
+- pesualtaisiin vuodonilmaisu&#xd;
+- vaihtopiirustukset toimitettava</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>KVV / käyttöönottokatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>A05DA5BECD6C4825871C051461CBCE</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-08-15Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:pitaja>Janne Korhonen</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>- Taukohuoneen 187 käyttöönotto&#xd;
+- Vesi- ja viemärikuvat päivitettävä ennen lopputarkastusta</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>KVV / käyttöönottokatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>A196273004484921BC010D5CBC2AB0</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-10-11Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:pitaja>Jorma Sulander</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>tilojen 133, 134, 135, 157, 158, 159, 225 ja 226 kvv- käyttöönottokatselmus&#xd;
+- laatikonpesulinjan vesisyöttö tekemättä, liitos varustettava sulku- ja yksisuuntaventiileillä ja imusuojalla.</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>KVV / käyttöönottokatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>8FA2E6365C70412D8217CA9D85CBE2</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-09-20Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:pitaja>Jorma Sulander</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>1krs. osa 2 huoneiden 182 ja 184 kvv-käyttöönottokatselmus</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>KVV / käyttöönottokatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>3CE3E021224740EA97C4AE86299BB1</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-11-01Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Erityinen palotarkastus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>FEF182E6544A4AB2802485FFB44B4A</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-08-28Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Erityinen palotarkastus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>D05514D56BA74DA99C133B5AFA123C</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-05-15Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:pitaja>Jorma Sulander</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>seuraava lvi-seurantakatselmus 19.6.2013 klo 9.00</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>LVI / aloittamiskokous</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>72FD0DFACC5D49C5A9BAEC9C78EA6B</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-08-23Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>false</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>Ennen toimistotilan A-B/1-8 käyttöönottoa on seuraavat asiat hoidettava: sähköurakoitsijan allekirjoitus tarkastusraporttiinsa,pelastusviranomaisen tarkastus,poistumistien salpaus korjattava,poistumistiemerkintä asennettava oikeaan paikkaan,ilmastointikonehuoneen ovi asennettava,porrashuoneen kaiteet saatettava F2:n mukaiseksi ja rasitesopimukset tehtävä.</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Kalustuskatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>D86B8EC9B34B42548063B5A64D95A0</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2015-08-03Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:pitaja>Riitta Tamminen</rakval:pitaja>
+          <rakval:katselmuksenLaji>loppukatselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>loppukatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>BF268088E3D04B66957D31527DA14D</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-11-04Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:pitaja>Jorma Sulander</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>- vaihtopiirustukset toimitettava&#xd;
+- tarkastusasiakirja ok&#xd;
+- ivmptk: 31.10-13</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Ilmanvaihtokatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>FF93C2B2131147D2A0FC23E02B283E</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-11-04Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:pitaja>Jorma Sulander</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>- vaihtopiirustukset toimitettava
+- tarkastusasiakirja ok</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Vesi- ja viemärikatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>A1FCD4BF60BC4EDCB2A587E7F97716</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-11-04Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+          <rakval:katselmuksenLaji>rakennekatselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>rakennekatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>osittainen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>007EAA93AE884FC795FED519029426</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-07-01Z</rakval:pitoPvm>
+          <rakval:osittainen>osittainen</rakval:osittainen>
+          <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+          <rakval:katselmuksenLaji>rakennekatselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>Runkorakenteet. Pakkasvaraston muutokselle haettava RAM-lupa.</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>rakennekatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>8CA6A7EBAF3D46E08FDA284BD76C63</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-11-04Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Perustuskatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>FD2E8442916F4FCF88FF55DDE25DE4</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-05-29Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+          <rakval:katselmuksenLaji>pohjakatselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>pohjakatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>5626A0E37BB34226924862EDF39E13</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-07-11Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:pitaja>Ari Roivainen</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Sijaintikatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>C24D82AA0A454CA0802E8843E03C09</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-04-22Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:pitaja>Kaj Hurme</rakval:pitaja>
+          <rakval:katselmuksenLaji>aloituskokous</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>aloituskokous</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
+          <rakval:katselmuksenRakennustieto>
+            <rakval:KatselmuksenRakennus>
+              <rakval:valtakunnallinenNumero>101915061L</rakval:valtakunnallinenNumero>
+              <rakval:kunnanSisainenPysyvaRakennusnumero>3315</rakval:kunnanSisainenPysyvaRakennusnumero>
+              <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+              <rakval:kiinttun>09205101530002</rakval:kiinttun>
+              <rakval:rakennusnro>001</rakval:rakennusnro>
+              <rakval:aanestysalue>303</rakval:aanestysalue>
+              <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+              <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+              <rakval:rakennuksenSelite>Leipomon lajennus</rakval:rakennuksenSelite>
+            </rakval:KatselmuksenRakennus>
+          </rakval:katselmuksenRakennustieto>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>EE451F136A0F40C18D08500CE29E9E</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2013-04-17Z</rakval:pitoPvm>
+          <rakval:osittainen>pidetty</rakval:osittainen>
+          <rakval:pitaja>Ari Roivainen</rakval:pitaja>
+          <rakval:katselmuksenLaji>muu katselmus</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>Laajennuksen paikan merkintää ei katsottu tarpeelliseksi suorittaa.&#xd;
+17.4.2013 MIO/Ari Roivainen</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>Paikan merkitseminen</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:paatostieto>
+        <yht:Paatos>
+          <yht:lupamaaraykset>
+            <yht:autopaikkojaVahintaan>87</yht:autopaikkojaVahintaan>
+            <yht:autopaikkojaRakennettu>97</yht:autopaikkojaRakennettu>
+            <yht:autopaikkojaKiinteistolla>97</yht:autopaikkojaKiinteistolla>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>rakennekatselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>rakennekatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>pohjakatselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>pohjakatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>aloituskokous</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>aloituskokous</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>muu katselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Vesi- ja viemärikatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>muu katselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Sijaintikatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>muu katselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Ilmanvaihtokatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>loppukatselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>loppukatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>muu katselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Perustuskatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:vaaditutKatselmukset>
+              <yht:Katselmus>
+                <yht:katselmuksenLaji>muu katselmus</yht:katselmuksenLaji>
+                <yht:tarkastuksenTaiKatselmuksenNimi>Paikan merkitseminen</yht:tarkastuksenTaiKatselmuksenNimi>
+              </yht:Katselmus>
+            </yht:vaaditutKatselmukset>
+            <yht:maaraystieto>
+              <yht:Maarays>
+                <yht:sisalto>Muu lupaehto: 
+
+Ennen rakennustyön aloittamista on järjestettävä aloituskokous. Kokouksesta sovitaan rakennusvalvonnan tarkastusinsinöörin kanssa. Aloituskokoukseen on otettava mukaan päätösote, pääpiirustukset ja kuntatekniikan lausunto.&#xd;
+&#xd;
+Rakentamisesta on pidettävä tarkastusasiakirjaa, jonka yhteenvedon kopio arkistoidaan rakennusvalvonnan lupa-asiakirjojen yhteyteen.&#xd;
+&#xd;
+Rakennuksen perustustyön valmistuttua rakentamista ei saa jatkaa ennen kuin sijainti- ja perustuskatselmus on toimitettu. Mikäli korkeusasemassa tai muussa sijainnissa on poikettu rakennusluvan mukaisesta sijainnista, ei rakennustyötä saa jatkaa ennen kuin rakennusvalvontaviranomainen on hyväksynyt muutoksen.&#xd;
+&#xd;
+Ennen rakennustöiden aloittamista tulee ottaa yhteyttä kuntatekniikan keskuksen kadunpitoon ja sopia työmaaliikenteen järjestämisestä ja yleisten alueiden kunnon tarkastamisesta.&#xd;
+&#xd;
+Rakennukselle on laadittava käyttö- ja huolto-ohje.&#xd;
+&#xd;
+Ennen rakennuksen käyttöönottoa on perustettava tarvittavat rasitteet.&#xd;
+&#xd;
+Toteutuneen rakentamisen mukaiset pääpiirustukset ja erityissuunnitelmat on toimitettava sähköisessä muodossa rakennusvalvontaan ennen loppukatselmusta.&#xd;
+&#xd;
+Noudatettava kunnallistekniikan lausuntoa 51-4-13-LKR 18.1.2013. Huomioitavaa mm. että rakennettu yleinen vesijohto 100 V ja jätevesiviemäri 250 b jäävät suunnitellun rakennuksen alle.&#xd;
+&#xd;
+Alkusammutuskalusto tulee toteuttaa Suomen Pelastusalan Keskusjärjestön (SPEK) ohjeiden mukaan.&#xd;
+(SPEK opastaa 5: Alkusammutuskalusto opas, www.spek.fi)&#xd;
+&#xd;
+Automaattisen paloilmoitinjärjestelmän toteutuspöytäkirja on esiteltävä ja hyväksytettävä pelastusviranomaisella ennen asennustöiden aloittamista.&#xd;
+&#xd;
+Rakennuksen poistumisreittien merkitseminen on toteutettava SM:n asetuksen 805/2005 mukaisesti. Erityissuunnitelma on esiteltävä ja hyväksytettävä pelastusviranomaisella ennen asennustöiden aloittamista.&#xd;
+(Sisäasiainministeriön asetus rakennusten poistumisreittien merkitsemisestä ja valaisemisesta, www.finlex.fi) &#xd;
+&#xd;
+Rakennuksen savunpoisto on suunniteltava ja toteutettava Suomen rakentamismääräyskokoelman mukaisesti. Erityissuunnitelma on laadittava pelastuslaitoksen ohjeen mukaisesti sekä esiteltävä ja hyväksytettävä pelastusviranomaisella ennen varsinaisten rakennustöiden aloittamista.&#xd;
+(www.ku-pelastus.fi) &#xd;
+&#xd;
+Pelastusviranomaiselta on pyydettävä erityinen palotarkastus ennen rakennusvalvontaviranomaisen suorittamaa rakennuksen käyttöön hyväksyvää loppukatselmusta.&#xd;
+</yht:sisalto>
+              </yht:Maarays>
+            </yht:maaraystieto>
+            <yht:vaadittuErityissuunnitelmatieto>
+              <yht:vaadittuErityissuunnitelma>Loppupiirustukset</yht:vaadittuErityissuunnitelma>
+            </yht:vaadittuErityissuunnitelmatieto>
+            <yht:vaadittuErityissuunnitelmatieto>
+              <yht:vaadittuErityissuunnitelma>Vesi- ja viemärisuunnitelmat</yht:vaadittuErityissuunnitelma>
+            </yht:vaadittuErityissuunnitelmatieto>
+            <yht:vaadittuErityissuunnitelmatieto>
+              <yht:vaadittuErityissuunnitelma>Loppupiirustukset</yht:vaadittuErityissuunnitelma>
+            </yht:vaadittuErityissuunnitelmatieto>
+            <yht:vaadittuErityissuunnitelmatieto>
+              <yht:vaadittuErityissuunnitelma>Ilmanvaihtosuunnitelmat</yht:vaadittuErityissuunnitelma>
+            </yht:vaadittuErityissuunnitelmatieto>
+            <yht:vaadittuErityissuunnitelmatieto>
+              <yht:vaadittuErityissuunnitelma>Piha- ja istutussuunnitelma</yht:vaadittuErityissuunnitelma>
+            </yht:vaadittuErityissuunnitelmatieto>
+            <yht:vaadittuErityissuunnitelmatieto>
+              <yht:vaadittuErityissuunnitelma>Loppupiirustukset</yht:vaadittuErityissuunnitelma>
+            </yht:vaadittuErityissuunnitelmatieto>
+            <yht:vaadittuErityissuunnitelmatieto>
+              <yht:vaadittuErityissuunnitelma>Rakennesuunnitelmat</yht:vaadittuErityissuunnitelma>
+            </yht:vaadittuErityissuunnitelmatieto>
+            <yht:vaadittuErityissuunnitelmatieto>
+              <yht:vaadittuErityissuunnitelma>Loppupiirustukset</yht:vaadittuErityissuunnitelma>
+            </yht:vaadittuErityissuunnitelmatieto>
+            <yht:vaadittuTyonjohtajatieto>
+              <yht:VaadittuTyonjohtaja>
+                <yht:tyonjohtajaRooliKoodi>IV-työnjohtaja</yht:tyonjohtajaRooliKoodi>
+              </yht:VaadittuTyonjohtaja>
+            </yht:vaadittuTyonjohtajatieto>
+            <yht:vaadittuTyonjohtajatieto>
+              <yht:VaadittuTyonjohtaja>
+                <yht:tyonjohtajaRooliKoodi>KVV-työnjohtaja</yht:tyonjohtajaRooliKoodi>
+              </yht:VaadittuTyonjohtaja>
+            </yht:vaadittuTyonjohtajatieto>
+            <yht:vaadittuTyonjohtajatieto>
+              <yht:VaadittuTyonjohtaja>
+                <yht:tyonjohtajaRooliKoodi>vastaava työnjohtaja</yht:tyonjohtajaRooliKoodi>
+              </yht:VaadittuTyonjohtaja>
+            </yht:vaadittuTyonjohtajatieto>
+          </yht:lupamaaraykset>
+          <yht:paivamaarat>
+            <yht:aloitettavaPvm>2016-04-10Z</yht:aloitettavaPvm>
+            <yht:lainvoimainenPvm>2013-04-10Z</yht:lainvoimainenPvm>
+            <yht:voimassaHetkiPvm>2018-04-10Z</yht:voimassaHetkiPvm>
+            <yht:antoPvm>2013-03-26Z</yht:antoPvm>
+            <yht:viimeinenValitusPvm>2013-04-09Z</yht:viimeinenValitusPvm>
+            <yht:julkipanoPvm>2013-03-26Z</yht:julkipanoPvm>
+          </yht:paivamaarat>
+          <yht:poytakirja>
+            <yht:paatoskoodi>myönnetty</yht:paatoskoodi>
+            <yht:paatoksentekija>Lupaosasto</yht:paatoksentekija>
+            <yht:paatospvm>2013-03-25Z</yht:paatospvm>
+            <yht:pykala>272</yht:pykala>
+            <yht:liite>
+              <yht:kuvaus>Paatosote</yht:kuvaus>
+              <yht:linkkiliitteeseen>http://80.248.164.27/krysp_tiedostot/liitteet/092/arkisto/2013/PAATOSOTE_51-0045-13-B_20130325144056328.rtf</yht:linkkiliitteeseen>
+              <yht:muokkausHetki>2013-03-25T14:45:49Z</yht:muokkausHetki>
+              <yht:tyyppi>Paatosote</yht:tyyppi>
+            </yht:liite>
+          </yht:poytakirja>
+        </yht:Paatos>
+      </rakval:paatostieto>
+      <rakval:lisatiedot>
+        <rakval:Lisatiedot>
+          <rakval:salassapitotietoKytkin>false</rakval:salassapitotietoKytkin>
+          <rakval:asioimiskieli>suomi</rakval:asioimiskieli>
+          <rakval:suoramarkkinointikieltoKytkin>true</rakval:suoramarkkinointikieltoKytkin>
+          <rakval:rakentamisentiedot>
+            <rakval:paloluokka>P1</rakval:paloluokka>
+            <rakval:tilavuus>8458</rakval:tilavuus>
+          </rakval:rakentamisentiedot>
+        </rakval:Lisatiedot>
+      </rakval:lisatiedot>
+      <rakval:asianTiedot>
+        <rakval:Asiantiedot>
+          <rakval:vahainenPoikkeaminen></rakval:vahainenPoikkeaminen>
+          <rakval:rakennusvalvontaasianKuvaus>Teollisuusrakennuksen laajennus ja vanhan osan muutos.</rakval:rakennusvalvontaasianKuvaus>
+        </rakval:Asiantiedot>
+      </rakval:asianTiedot>
+    </rakval:RakennusvalvontaAsia>
+  </rakval:rakennusvalvontaAsiatieto>
+</rakval:Rakennusvalvonta>
