@@ -1015,3 +1015,15 @@
         user-fn (fn [_ verdict-attachment]
                   (get-in verdict-attachment [:latestVersion :user]))]
     (fix-attachment-childrens apps :verdicts verdict-filter-fn user-fn language-map)))
+
+(defn tasks-children-fix [& args]
+  (mongo/connect!)
+  (let [graylog-commands (graylog-request "review-done")
+        task-ids (set (map (comp :taskId :data) graylog-commands))
+        apps (mongo/select :applications {:_id {$in (map (comp :id :data) graylog-commands)}} [:attachments :tasks])
+        tasks-filter-fn (fn [task] (and (= "task-katselmus" (get-in task [:schema-info :name]))
+                                        (= "sent" (:state task))
+                                        (contains? task-ids (:id task))))
+        user-fn (fn [_ task-attachment]
+                  (get-in task-attachment [:latestVersion :user]))]
+    (fix-attachment-childrens apps :tasks tasks-filter-fn user-fn)))
