@@ -239,7 +239,7 @@
                                   :required? true}
                 :handler         {:text      {:i18nkey :verdict.name.sijoitussopimus}
                                   :required? true}
-                :contract-date   {:date      {:i18nkey :verdict.contract.date}
+                :verdict-date    {:date      {:i18nkey :verdict.contract.date}
                                   :required? true}
                 :contract-text   {:text {:i18nkey :verdict.contract.text
                                          :lines   20}}}
@@ -251,7 +251,7 @@
                                   {}
                                   ]
                                  [{:col  2
-                                   :dict :contract-date}
+                                   :dict :verdict-date}
                                   {}
                                   {:col   4
                                    :align :full
@@ -284,6 +284,7 @@
    legsub-contract
    legsub-reviews-ya
    (legsub-conditions true)
+   legsub-attachments
    (shared/versub-upload {:type-group #".*"
                           :default :muut.paatosote
                           :title :verdict.contract.attachments})

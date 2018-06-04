@@ -473,7 +473,7 @@
 
 (defn- verdict-summary [lang section-strings
                         {:keys [id data template replacement
-                                references
+                                references category
                                 published legacy? schema-version]
                          :as   verdict}]
   (let [replaces (:replaces replacement)
@@ -490,19 +490,29 @@
                    (:handler data))
           :replaces replaces
           :verdict-date (:verdict-date data)
-          :title (->> (if published
+          :title (->> (cond
+                        (util/=as-kw category :contract)
+                        [(i18n/localize lang :pate.verdict-table.contract)]
+
+                        published
                         [(get section-strings id)
                          (util/pcond-> (verdict-string lang verdict :verdict-type)
                           ss/not-blank? (str " -"))
                          (verdict-string lang verdict :verdict-code)
                          rep-string]
+
+                        :else
                         [(i18n/localize lang :pate-verdict-draft)
                          rep-string])
                       (remove ss/blank?)
                       (ss/join " ")))))
 
-(defn verdict-list [{:keys [lang application]}]
-  (let [verdicts        (:pate-verdicts application)
+(defn verdict-list
+  [{:keys [lang application]}]
+  (let [category (shared/application->category application)
+        ;; There could be both contracts and verdicts.
+        verdicts        (filter #(util/=as-kw category (:category %))
+                                (:pate-verdicts application))
         section-strings (reduce (fn [acc v]
                                   (assoc acc (:id v) (verdict-section-string v)))
                                 {}
@@ -564,12 +574,15 @@
           (util/find-by-id version-id))))
 
 (defn- verdict-attachment-ids
-  "Ids of attachments, whose target is the given verdict."
+  "Ids of attachments, whose either target or source is the given
+  verdict."
   [{:keys [attachments]} verdict-id]
   (->> attachments
-       (filter (fn [{target :target}]
-                 (and (util/=as-kw (:type target) :verdict)
-                      (= (:id target) verdict-id))))
+       (filter (fn [{:keys [target source]}]
+                 (or (and (util/=as-kw (:type target) :verdict)
+                          (= (:id target) verdict-id))
+                     (and (util/=as-kw (:type source) :verdict)
+                          (= (:id source) verdict-id)))))
        (map :id)))
 
 (defn delete-verdict [verdict-id {application :application :as command}]
@@ -1023,7 +1036,7 @@
 
 (defn can-verdict-be-replaced?
   "Modern verdict can be replaced if its published and not already
-  replaced (or being replaced)."
+  replaced (or being replaced). Contracts cannot be replaced."
   [{:keys [pate-verdicts]} verdict-id]
   (when-let [{:keys [published legacy?
                      replacement category]} (util/find-by-id verdict-id
@@ -1122,7 +1135,10 @@
     (when-let [replace-verdict-id (get-in verdict [:replacement :replaces])]
       (replace-verdict command replace-verdict-id (:id verdict)))
 
-    (let [verdict-attachment-id (pdf/create-verdict-attachment command (assoc verdict :published created))]
+    (let [application (domain/get-application-no-access-checking (:id application))
+          verdict-attachment-id (pdf/create-verdict-attachment (assoc command
+                                                                      :application application)
+                                                               (assoc verdict :published created))]
       ;; KuntaGML (only for non-legacy verdicts)
       (when (and (not (:legacy? verdict))
                  (org/krysp-integration? @organization (:permitType application)))

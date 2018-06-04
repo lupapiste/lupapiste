@@ -881,3 +881,6 @@
 "pate.contract.add" "fi" "Laadi sopimus"
 "pate.contract.confirm-delete" "fi" "Haluatko varmasti poistaa sopimuksen ja siihen liittyvät liitteet, lupaehdot ja määräykset Lupapisteestä?"
 "pate.contract.confirm-delete-draft" "fi" "Haluatko varmasti poistaa sopimusluonnoksen ja sen liitteet?"
+"pdf.contract.case" "fi" "Asia"
+"pdf.contract.cases" "fi" "Asiat"
+"pdf.contract.filename" "fi" "{0} Sopimus {1}.pdf"

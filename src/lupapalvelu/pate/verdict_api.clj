@@ -12,6 +12,7 @@
             [lupapalvelu.pate.verdict :as verdict]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.roles :as roles]
+            [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
@@ -57,6 +58,10 @@
                           (not verdict)
                           :error.verdict-not-found
 
+                          (util/not=as-kw (shared/application->category application)
+                                          (:category verdict))
+                          :error.invalid-category
+
                           (and editable? (:published verdict))
                           :error.verdict.not-draft
 
@@ -100,6 +105,14 @@
   [command]
   (when-not (= (verdict/command->category command) :contract)
     (fail :error.verdict.not-contract)))
+
+(defn- state-in
+  "Precheck that fails if the application state is not included in the
+  given states."
+  [states]
+  (fn [{application :application}]
+    (when-not (util/includes-as-kw? states (:state application))
+      (fail :error.command-illegal-state))))
 
 (defmethod action/allowed-actions-for-category :pate-verdicts
   [command]
@@ -223,6 +236,12 @@
    :states          states/post-submitted-states}
   [_])
 
+#_(defcommand sign-pate-contract
+
+  {:description "Adds the user as signatory to a published Pate
+  contract if the password matches."
+   })
+
 ;; ------------------------------------------
 ;; Modern actions
 ;; ------------------------------------------
@@ -309,11 +328,13 @@
   attachments. Rewinds application state if needed."
    :feature          :pate
    :user-roles       #{:authority}
-   :parameters       [id verdict-id]
+   :parameters       [:id :verdict-id]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-exists :legacy?)]
-   :states           states/give-verdict-states
+   :pre-checks       [(verdict-exists :legacy?)
+                      (action/some-pre-check (verdict-exists :legacy? :editable?)
+                                             (state-in states/give-verdict-states))]
+   :states           states/post-submitted-states
    :notified         true}
   [command]
   (ok (verdict/delete-legacy-verdict command)))

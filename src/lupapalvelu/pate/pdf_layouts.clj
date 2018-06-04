@@ -458,14 +458,62 @@
 
 (def ymp-legacy-layout kt-legacy-layout)
 
+;; ----------------------------------
+;; Legacy contracts
+;; ----------------------------------
+
+(def legacy--contract-text [{:loc    :empty
+                            :source {:dict :contract-text}
+                            :styles :pad-before}])
+
+(def entry--case [{:loc       :pdf.contract.case
+                   :loc-many :pdf.contract.cases
+                   :source   :operations
+                   :styles   :bold}
+                  {:path :text}])
+
+(def legacy--contract-conditions
+  [{:loc      :pate.contract.condition
+    :loc-many :pate.contract.conditions
+    :source   {:dict :conditions}
+    :post-fn (repeating-texts-post-fn :name)
+    :styles   :pad-before}])
+
+(def legacy--contract-giver
+  '([{:loc    :verdict.name.sijoitussopimus
+      :source {:dict :handler}
+      :styles :pad-before}]
+    [{:loc    :empty
+      :source :organization
+      :styles :pad-after}]))
+
+(def legacy--contract-date
+  '([{:loc    :verdict.contract.date
+      :source {:dict :verdict-date}}]))
+
+
+(def contract-legacy-layout
+  (build-layout legacy--application-id
+                legacy--kuntalupatunnus
+                entry--rakennuspaikka
+                (entry--applicant :applicant :pdf.applicants)
+                entry--case
+                entry--attachments
+                legacy--contract-text
+                legacy--reviews
+                legacy--contract-conditions
+                legacy--contract-giver
+                legacy--contract-date))
+
 (defn pdf-layout [{:keys [category legacy?]}]
   (case (util/kw-path (when legacy? :legacy) category)
-    :r          r-pdf-layout
-    :p          p-pdf-layout
-    :ya         ya-pdf-layout
-    :tj         tj-pdf-layout
-    :legacy.r   r-legacy-layout
-    :legacy.ya  ya-legacy-layout
-    :legacy.p   p-legacy-layout
-    :legacy.kt  kt-legacy-layout
-    :legacy.ymp ymp-legacy-layout))
+    :r               r-pdf-layout
+    :p               p-pdf-layout
+    :ya              ya-pdf-layout
+    :tj              tj-pdf-layout
+    :legacy.r        r-legacy-layout
+    :legacy.ya       ya-legacy-layout
+    :legacy.p        p-legacy-layout
+    :legacy.kt       kt-legacy-layout
+    :legacy.ymp      ymp-legacy-layout
+    :legacy.contract contract-legacy-layout))
