@@ -39,7 +39,9 @@
             [sade.strings :as ss]
             [sade.util :refer [fn-> pcond->] :as util]
             [sade.validators :as v]
-            [ring.util.codec :as codec])
+            [ring.util.codec :as codec]
+            [cheshire.custom :as json]
+            [lupapalvelu.attachment.stamping :as stamping])
   (:import [org.xml.sax SAXParseException]))
 
 
@@ -926,3 +928,38 @@
                    (:originalFileId version)
                    (get-in att [:type :type-id]))))))))
 
+(defn- parse-message-field [{:keys [message]}]
+  (-> message
+      :message
+      (ss/split #"\w+ - \{")
+      last
+      ((fn [s] (str "{" s)))
+      (json/parse-string true)))
+
+(defn graylog-request [action-to-check]
+  (->> (http/get (str "http://log.evolta.fi:9000/api/search/universal/absolute?query=action%3A"
+                      action-to-check
+                      "%20AND%20(source%3Aapp3%20OR%20source%3Aapp4)&from=2018-05-31T21%3A00%3A00.000Z&to=2018-06-3T22%3A00%3A00.000Z&limit=4000")
+                 {:basic-auth [(env/value :graylog :user) (env/value :graylog :password)]
+                  :coerce :always
+                  :as :json})
+       :body
+       :messages
+       (map parse-message-field)))
+
+(defn replay-missing-stamping-ops [& args]
+  (mongo/connect!)
+  (info "Starting replay-missing-stamping-ops job")
+  (doseq [{:keys [action user data created] :as logdata} (graylog-request "stamp-attachments")]
+    (logging/with-logging-context {:applicationId (:id data)}
+      (when (= action "stamp-attachments")
+        (let [{:keys [id files stamp timestamp lang]} data
+              command {:user user
+                       :created created}
+              application (mongo/by-id :applications id)]
+          (if (and (string? id)
+                   (seq files)
+                   (map? stamp)
+                   (string? lang))
+            (stamping/regenerated-stamped-attachment command timestamp application files lang stamp)
+            (error "Invalid log data, can't fix stamp:" logdata)))))))
