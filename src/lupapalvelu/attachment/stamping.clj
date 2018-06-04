@@ -10,7 +10,11 @@
             [lupapalvelu.i18n :as i18n]
             [sade.files :as files]
             [sade.util :refer [future* fn-> fn->>] :as util]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [lupapalvelu.building :as building]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.attachment.conversion :as conversion]
+            [lupapalvelu.file-upload :as file-upload]))
 
 (defn status [job-id version timeout]
   (job/status job-id (util/->long version) (util/->long timeout)))
@@ -144,3 +148,61 @@
     (future* (stamp-attachments! file-infos (assoc context :job-id (:id job))))
     (debug "Returning stamp job:" job)
     job))
+
+(defn regenerated-stamped-attachment [command timestamp application attachment-ids lang stamp]
+  (info "Fixing stamping for application" (:id application))
+  (let [parsed-timestamp (cond
+                           (number? timestamp) (long timestamp)
+                           (ss/blank? timestamp) (:created command)
+                           :else (util/->long timestamp))
+        stamp-timestamp (if (zero? parsed-timestamp) (:created command) parsed-timestamp)
+        attachments (att/get-attachments-infos application attachment-ids)
+        file-infos (map ->file-info attachments)
+        info-fields {:fields (:rows stamp) :buildings (building/building-ids application)}
+        context {:application   application
+                 :user          (:user command)
+                 :lang          lang
+                 :qr-code       (:qrCode stamp)
+                 :stamp-created stamp-timestamp
+                 :created       (:created command)
+                 :x-margin      (util/->long (get-in stamp [:position :x]))
+                 :y-margin      (util/->long (get-in stamp [:position :y]))
+                 :page          (keyword (:page stamp))
+                 :transparency  (util/->long (or (:background stamp) 0))
+                 :info-fields   info-fields}
+        stamp-without-buildings (make-stamp-without-buildings context (:info-fields context))
+        operation-specific-stamps (->> (map :operation-ids file-infos)
+                                       (remove empty?)
+                                       distinct
+                                       (make-operation-specific-stamps context info-fields))]
+    (doseq [{:keys [latestVersion] :as attachment} attachments
+            :when (:stamped latestVersion)]
+      (if (nil? (mongo/download (:fileId latestVersion)))
+        (let [source (-> attachment
+                         :versions
+                         reverse
+                         second)
+              {:keys [contentType fileId filename]} source
+              op-ids (set (att-util/get-operation-ids attachment))
+              stamp (if (and (seq op-ids) (seq (:buildings info-fields)))
+                      (operation-specific-stamps op-ids)
+                      stamp-without-buildings)
+              options (select-keys context [:x-margin :y-margin :transparency :page])]
+          (info "Fixing attachment id" (:id attachment))
+          (files/with-temp-file file
+            (try
+              (with-open [out (io/output-stream file)]
+                (stamper/stamp stamp fileId out options))
+              (info "Uploading stamped replacement version for original file id" (:originalFileId latestVersion))
+              (mongo/upload (:originalFileId latestVersion) filename contentType file {:linked true :application (:id application)})
+
+              (let [converted (conversion/archivability-conversion
+                                application
+                                {:filename filename
+                                 :contentType contentType
+                                 :content file})]
+                (info "Uploading stamped replacement version for file id" (:fileId latestVersion))
+                (mongo/upload (:fileId latestVersion) filename contentType (:content converted) {:linked true :application (:id application)}))
+              (catch Throwable t
+                (error t "Could not fix attachment" attachment)))))
+        (info "File id" (:fileId latestVersion) "found, skipping attachment id" (:id attachment))))))
