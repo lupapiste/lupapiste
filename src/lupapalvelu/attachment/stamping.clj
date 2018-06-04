@@ -175,20 +175,35 @@
                                        (remove empty?)
                                        distinct
                                        (make-operation-specific-stamps context info-fields))]
-    (doseq [{:keys [latestVersion] :as attachment} attachments
+    (doseq [{:keys [latestVersion type] :as attachment} attachments
             :when (:stamped latestVersion)]
-      (if (nil? (mongo/download (:fileId latestVersion)))
-        (let [source (-> attachment
+      (if (or (nil? (mongo/download (:fileId latestVersion)))
+              (= (:type-id type) "paatos"))
+        (let [pick-fn (if (= (:type-id type) "paatos")
+                        first
+                        second)
+              source (-> attachment
                          :versions
                          reverse
-                         second)
-              {:keys [contentType fileId filename]} source
+                         (pick-fn))
+              {:keys [contentType fileId originalFileId filename]} source
               op-ids (set (att-util/get-operation-ids attachment))
               stamp (if (and (seq op-ids) (seq (:buildings info-fields)))
                       (operation-specific-stamps op-ids)
                       stamp-without-buildings)
               options (select-keys context [:x-margin :y-margin :transparency :page])]
           (info "Fixing attachment id" (:id attachment))
+          (when (and (nil? (mongo/download fileId))
+                     (mongo/download originalFileId))
+            (let [conversion (conversion/archivability-conversion application
+                                                                  {:filename    filename
+                                                                   :contentType contentType
+                                                                   :content     ((:content (mongo/download originalFileId)))})]
+              (when (:autoConversion conversion)
+                (do
+                  (file-upload/save-file (merge (select-keys conversion [:content :filename]) {:fileId fileId})
+                                         {:application (:id application) :linked true})
+                  (infof "fileId %s from previous version converted, uploaded and linked successfully" fileId)))))
           (files/with-temp-file file
             (try
               (with-open [out (io/output-stream file)]

@@ -959,21 +959,62 @@
        (filter #(ss/starts-with (get-in % [:message :message]) "INFO"))
        (map parse-message-field)))
 
+(def stamp-errors #{"5ae87d2259412f3ccc40f35f"
+                    "25200785706e783c1a15bf0d2642a3696ee072f7"
+                    "5acb5807e7f6046c1079fa83"
+                    "5947ae49edf02d7febc26103"
+                    "29a7eaa32a0190a900646fbb36d7c014681a9ec1"
+                    "f97d7d56757296d70274f4e1119a2d47d338a738"
+                    "54e5a4d853378d16ed9c616942a96cb82bbd39b4"
+                    "a9e842133bb7391f2b2f159496a5ac0a76629eaf"
+                    "94cc9eaa582a9f4b2f8a0b84b51288c1bf174884"
+                    "6d9037431ed40209d0d3271f48b6e82c214acdb1"
+                    "5b0be30b59412f477ea2b40f"
+                    "5947a87aedf02d7febc25a7d"
+                    "5ae87d2259412f3ccc40f35c"
+                    "00547e630065e3048625ea54634ed380d4dabd09"
+                    "f596e6307b838e835466d5f3e37e5942ea5111b4"
+                    "5b06fef2e7f6043f476f4a8f"
+                    "5b10d46ce7f6047b9fd19076"
+                    "936920cb07407a45b8d85764d9f4f1d6cf947eb1"
+                    "5947ac2eedf02d7febc25e5d"
+                    "d7e439d5a4d24b323c5aa34c18cb98f9282cf0ca"
+                    "a20b317ab7c7491abdd0d40afc9061a05e795f80"
+                    "c98d320791e6111647260608fd5a8ecc6f5afb13"
+                    "5ae87d2259412f3ccc40f361"
+                    "f110bec39a07f6dc5fa4ccf7401c5cb511814fad"
+                    "5947adb8edf02d7febc26046"
+                    "5947adf2edf02d7febc26085"
+                    "41efbd852d3a690528a948747248b17fc360bdc1"
+                    "d347966a06db2ef5663ce0c62292247ed4160b0c"
+                    "4514af989fb708227b8baf26af9ed47d1dd5659b"
+                    "1ea40dab0241baed38880bf9e3de7c3ff56fc8a4"
+                    "5947ad57edf02d7febc25fcd"
+                    "5b10ef4ce7f6047b9fd1e7c4"
+                    "de5f77f1d5d135e2cc7b386f8308634f79ccc1cf"
+                    "86ad5b8e99321e5cd7184f893dd681eb99d8b3dd"
+                    "5b10ea1459412f40c12ae6ef"
+                    "5b110a0de7f6047b9fd21da4"
+                    "5b0e6e1de7f6046b13f33c74"
+                    "c7d5a85be3e44fd1205116e980861d0bb5e38e24"})
+
 (defn replay-missing-stamping-ops [& args]
   (mongo/connect!)
   (info "Starting replay-missing-stamping-ops job")
   (doseq [{:keys [action user data created] :as logdata} (graylog-request "stamp-attachments")]
     (logging/with-logging-context {:applicationId (:id data)}
-      (when (= action "stamp-attachments")
+      (when (and (= action "stamp-attachments")
+                 (some #(contains? stamp-errors %) (:files data)))
         (let [{:keys [id files stamp timestamp lang]} data
               command {:user user
                        :created created}
-              application (mongo/by-id :applications id)]
+              application (mongo/by-id :applications id)
+              filtered-files (filter #(contains? stamp-errors %) files)]
           (if (and (string? id)
-                   (seq files)
+                   (seq filtered-files)
                    (map? stamp)
                    (string? lang))
-            (stamping/regenerated-stamped-attachment command timestamp application files lang stamp)
+            (stamping/regenerated-stamped-attachment command timestamp application filtered-files lang stamp)
             (error "Invalid log data, can't fix stamp:" logdata)))))))
 
 (defn replay-missing-user-attachments [& args]
