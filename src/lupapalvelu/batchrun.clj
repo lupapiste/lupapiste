@@ -966,37 +966,42 @@
             (error "Invalid log data, can't fix stamp:" logdata)))))))
 
 
+(defn fix-attachment-childrens [apps target-key target-filter-pred user-fn]
+  (doseq [app apps
+          target (->> (get app target-key)
+                      (filter target-filter-pred))
+          target-attachment (->> (:attachments app)
+                                 (filter (fn [a] (= (get-in a [:source :id]) (:id target))))
+                                 (filter :latestVersion))
+          :let [version (:latestVersion target-attachment)
+                att-id (:id target-attachment)]]
+    (logging/with-logging-context {:applicationId (:id app)}
+      (when (nil? (mongo/download (:fileId version)))
+        (info "No file, clearing old version from attachment:" att-id ", version fileId:" (:fileId version))
+        (mongo/update-by-query :applications
+                               {:_id (:id app)
+                                :attachments {$elemMatch {:id att-id
+                                                          :source.id (:id target)}}}
+                               {$unset {:attachments.$.latestVersion true}
+                                $set {:attachments.$.auth []
+                                      :attachments.$.versions []}})
+        (let [version (child-to-attachment/create-attachment-from-children
+                        (user-fn target)
+                        (domain/get-application-no-access-checking (:id app))
+                        target-key (:id target)
+                        "fi")]
+          (info "Created child" target-key "fileId" (:fileId version) "to attachment" att-id))))))
+
 (defn generate-missing-neighbor-docs [& args]
   (mongo/connect!)
-  (let [ts 1527800400000]
-    ;(sade.util/to-millis-from-local-datetime-string "2018-06-01T00:00")
-    ;=> 1527800400000
-    (doseq [app (mongo/select :applications
-                              {:modified {$gte ts}
-                               :neighbors.status.created {$gte ts}}
-                              [:neighbors :attachments])
-            neighbor (->> (:neighbors app)
-                          (filter (fn [n] (some #(> (:created %) ts) (:status n)))))
-            neighbor-attachment (->> (:attachments app)
-                                     (filter (fn [a] (= (get-in a [:source :id]) (:id neighbor))))
-                                     (filter :latestVersion))
-            :let [version (:latestVersion neighbor-attachment)
-                  att-id (:id neighbor-attachment)
-                  neighbor-status (->> (:status neighbor)
-                                       (util/find-first (fn [status] (ss/contains? (:state status) "response-given-"))))]]
-      (logging/with-logging-context {:applicationId (:id app)}
-        (when (nil? (mongo/download (:fileId version)))
-          (info "No file, clearing old version from attachment:" att-id ", version fileId:" (:fileId version))
-          (mongo/update-by-query :applications
-                                 {:_id (:id app)
-                                  :attachments {$elemMatch {:id att-id
-                                                            :source.id (:id neighbor)}}}
-                                 {$unset {:attachments.$.latestVersion true}
-                                  $set {:attachments.$.auth []
-                                        :attachments.$.versions []}})
-          (let [version (child-to-attachment/create-attachment-from-children
-                          (:vetuma neighbor-status)
-                          (domain/get-application-no-access-checking (:id app))
-                          :neighbors (:id neighbor)
-                          "fi")]
-            (info "Created neighbor fileId" (:fileId version) "to attachment" (:id version))))))))
+  (let [ts 1527800400000
+        apps (mongo/select :applications
+                           {:modified {$gte ts}
+                            :neighbors.status.created {$gte ts}}
+                           [:neighbors :attachments])
+        target-filter-fn (fn [n] (some #(> (:created %) ts) (:status n)))
+        user-fn (fn [neighbor]
+                  (->> (:status neighbor)
+                       (util/find-first (fn [status] (ss/contains? (:state status) "response-given-")))
+                       :vetuma))]
+    (fix-attachment-childrens apps :neighbors target-filter-fn user-fn)))
