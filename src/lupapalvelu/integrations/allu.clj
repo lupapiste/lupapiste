@@ -105,7 +105,7 @@
                              :contacts [(person->contact (customer-contact customer-doc))]}
      :geometry              {:geometryOperations (application-geometry app)}
      :identificationNumber  id
-     :invoicingCustomer     (doc->customer true payee-doc)
+     :invoicingCustomer     (doc->customer true payee-doc) ; TODO: contacts
      :name            (:name primaryOperation) ; TODO: i18n?
      :pendingOnClient true
      :postalAddress   (application-postal-address app)
