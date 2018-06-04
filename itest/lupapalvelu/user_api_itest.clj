@@ -56,20 +56,20 @@
   (fact (query sonja :user-for-edit-authority :authority-id "777777777777777777000024") =not=> ok?)
   (fact (query jarvenpaa :user-for-edit-authority :authority-id "777777777777777777000024") =not=> ok?)
   (fact (query sipoo :user-for-edit-authority :authority-id "777777777777777777000024")
-    => {:ok true
-        :data {:email "ronja.sibbo@sipoo.fi"
-               :username "ronja"
+    => {:ok   true
+        :data {:email     "ronja.sibbo@sipoo.fi"
+               :username  "ronja"
                :firstName "Ronja"
-               :lastName "Sibbo"
-               :orgAuthz {:753-R ["authority"]}}}))
+               :lastName  "Sibbo"
+               :orgAuthz  {:753-R ["authority"]}}}))
 
 (facts "Check passwords"
-       (fact "Good password"
-             (command pena :check-password :password "pena") => ok?)
-       (fact "Bad password"
-             (command pena :check-password :password "bad") => {:ok false :text "error.password"})
-       (fact "Empty password"
-             (command pena :check-password :password "") => fail?))
+  (fact "Good password"
+    (command pena :check-password :password "pena") => ok?)
+  (fact "Bad password"
+    (command pena :check-password :password "bad") => {:ok false :text "error.password"})
+  (fact "Empty password"
+    (command pena :check-password :password "") => fail?))
 
 ;;
 ;; ==============================================================================
@@ -170,38 +170,38 @@
   (apply-remote-minimal)
 
   (fact "Default search returns minimal query since there is no saved default filter"
-        (:search (query sonja :applications-search-default)) => {:applicationType "application"
-                                                                 :skip 0
-                                                                 :limit 100
-                                                                 :sort {:asc false
-                                                                        :field "modified"}}
-        (:search (query pena :applications-search-default)) => {:applicationType "all"
-                                                                :skip 0
-                                                                :limit 100
-                                                                :sort {:asc false
-                                                                       :field "modified"}})
+    (:search (query sonja :applications-search-default)) => {:applicationType "application"
+                                                             :skip            0
+                                                             :limit           100
+                                                             :sort            {:asc   false
+                                                                               :field "modified"}}
+    (:search (query pena :applications-search-default)) => {:applicationType "all"
+                                                            :skip            0
+                                                            :limit           100
+                                                            :sort            {:asc   false
+                                                                              :field "modified"}})
 
   (fact (command sonja :update-default-application-filter :filterId "foobar" :filterType "application") => ok?)
 
   (fact (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :defaultFilter :id) => "foobar")
 
   (fact "Default search returns query"
-        (:search (query sonja :applications-search-default)) => {:applicationType "application"
-                                                                 :skip 0
-                                                                 :limit 100
-                                                                 :sort {:asc false
-                                                                        :field "modified"}
-                                                                 :handlers []
-                                                                 :tags []
-                                                                 :operations []
-                                                                 :organizations []
-                                                                 :areas []})
+    (:search (query sonja :applications-search-default)) => {:applicationType "application"
+                                                             :skip            0
+                                                             :limit           100
+                                                             :sort            {:asc   false
+                                                                               :field "modified"}
+                                                             :handlers        []
+                                                             :tags            []
+                                                             :operations      []
+                                                             :organizations   []
+                                                             :areas           []})
 
   (fact "Overwrite default filter"
     (command sonja :update-default-application-filter :filterId "barfoo" :filterType "application") => ok?)
 
   (fact "Filter overwritten"
-      (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :defaultFilter :id) => "barfoo"))
+    (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :defaultFilter :id) => "barfoo"))
 
 (facts "update-user-organization"
   (apply-remote-minimal)
@@ -289,7 +289,7 @@
 
   (fact "add existing authority to new organization"
 
-    (command naantali :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :lastName "har" :operation "add"  :roles ["authority"]) => ok?
+    (command naantali :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :lastName "har" :operation "add" :roles ["authority"]) => ok?
     (let [email (last-email)]
       (:to email) => (contains "tonja.sibbo@sipoo.fi")
       (:subject email) => invite-authority-email-subject
@@ -343,12 +343,12 @@
                 :phone                "0505503171"
                 :architect            true
                 :allowDirectMarketing true
-                :degree "kirvesmies"
-                :graduatingYear "2000"
-                :fise "f"
-                :fiseKelpoisuus "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"
-                :companyName "cn"
-                :companyId "1060155-5"}]
+                :degree               "kirvesmies"
+                :graduatingYear       "2000"
+                :fise                 "f"
+                :fiseKelpoisuus       "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"
+                :companyName          "cn"
+                :companyId            "1060155-5"}]
       (apply command teppo :update-user (flatten (seq data))) => ok?
       (query teppo :user) => (contains {:user (contains data)}))))
 
@@ -368,9 +368,9 @@
 
     (fact "Sipoo can give authz to Pekka Borga but can not edit info"
       (let [pekka {:firstName "Pekka"
-                   :lastName "Borga"
-                   :email "pekka.borga@porvoo.fi"
-                   :roles ["commenter"]}]
+                   :lastName  "Borga"
+                   :email     "pekka.borga@porvoo.fi"
+                   :roles     ["commenter"]}]
         (command sipoo :update-user-organization pekka) => ok?
         (command sipoo :update-auth-info (-> pekka
                                              (dissoc :roles)
@@ -385,7 +385,6 @@
 ;; historical tests, dragons be here...
 ;;
 
-
 (facts* "uploading user attachment"
   (apply-remote-minimal)
 
@@ -394,7 +393,7 @@
   ;
 
   (fact "Initially pena does not have attachments?"
-        (:attachments (query pena "user-attachments")) => nil?)
+    (:attachments (query pena "user-attachments")) => nil?)
 
   ;
   ; Pena uploads a tutkintotodistus:
@@ -411,10 +410,10 @@
 
     ; Now Pena has attachment
     (get (:attachments (query pena "user-attachments")) 0)
-    => (contains {:attachment-id attachment-id
+    => (contains {:attachment-id   attachment-id
                   :attachment-type {:type-group "osapuolet"
-                                    :type-id "tutkintotodistus"}
-                  :file-name filename})
+                                    :type-id    "tutkintotodistus"}
+                  :file-name       filename})
 
     ; Attachment is in GridFS
 
@@ -438,86 +437,87 @@
   (fact "illegal attachment type"
     (upload-user-attachment pena "foo" false) => (partial expected-failure? :error.illegal-attachment-type))
   (fact "illegal mime"
-    (upload-user-attachment pena "osapuolet.tutkintotodistus" false  "dev-resources/krysp/verdict-r.xml") => (partial expected-failure? :error.file-upload.illegal-file-type)))
+    (upload-user-attachment pena "osapuolet.tutkintotodistus" false "dev-resources/krysp/verdict-r.xml") => (partial expected-failure? :error.file-upload.illegal-file-type)))
 
 ;;
 ;; ==============================================================================
 ;; Admin impersonates an authority
 ;; ==============================================================================
 ;;
+
 (facts* "impersonating"
- (let [store        (atom {})
-       params       {:cookie-store (->cookie-store store)
-                     :follow-redirects false
-                     :throw-exceptions false}
-       login        (http-post
-                      (str (server-address) "/api/login")
-                      (assoc params :form-params {:username "admin" :password "admin"})) => http200?
-       csrf-token   (get-anti-csrf store) => truthy
-       params       (assoc params :headers {"x-anti-forgery-token" csrf-token})
-       sipoo-rakval (-> "sipoo" find-user-from-minimal :orgAuthz keys first name)
-       impersonate  (fn [password]
-                      (-> (http-post
-                            (str (server-address) "/api/command/impersonate-authority")
-                            (assoc params
-                              :form-params (merge {:organizationId sipoo-rakval :role "approver"} (when password {:password password}))
-                              :content-type :json))
-                        decode-response :body))
-       role         (fn [] (-> (http-get (str (server-address) "/api/query/user") params) decode-response :body :user :role))
-       actions      (fn [] (-> (http-get (str (server-address) "/api/query/allowed-actions") params) decode-response :body :actions))]
+  (let [store        (atom {})
+        params       {:cookie-store (->cookie-store store)
+                      :follow-redirects false
+                      :throw-exceptions false}
+        login        (http-post
+                       (str (server-address) "/api/login")
+                       (assoc params :form-params {:username "admin" :password "admin"})) => http200?
+        csrf-token   (get-anti-csrf store) => truthy
+        params       (assoc params :headers {"x-anti-forgery-token" csrf-token})
+        sipoo-rakval (-> "sipoo" find-user-from-minimal :orgAuthz keys first name)
+        impersonate  (fn [password]
+                       (-> (http-post
+                             (str (server-address) "/api/command/impersonate-authority")
+                             (assoc params
+                               :form-params (merge {:organizationId sipoo-rakval :role "approver"} (when password {:password password}))
+                               :content-type :json))
+                           decode-response :body))
+        role         (fn [] (-> (http-get (str (server-address) "/api/query/user") params) decode-response :body :user :role))
+        actions      (fn [] (-> (http-get (str (server-address) "/api/query/allowed-actions") params) decode-response :body :actions))]
 
-   (fact "impersonation action is available"
-     (:impersonate-authority (actions)) => ok?)
+    (fact "impersonation action is available"
+      (:impersonate-authority (actions)) => ok?)
 
-   (fact "admin can not query property owners"
-     (-> (http-get (str (server-address) "/api/query/owners?propertyId=0") params) decode-response :body) => unauthorized?)
+    (fact "admin can not query property owners"
+      (-> (http-get (str (server-address) "/api/query/owners?propertyId=0") params) decode-response :body) => unauthorized?)
 
-   (fact "fails without password"
-     (impersonate nil) => fail?)
+    (fact "fails without password"
+      (impersonate nil) => fail?)
 
-   (fact "fails with wrong password"
-     (impersonate "nil") => fail?)
+    (fact "fails with wrong password"
+      (impersonate "nil") => fail?)
 
-   (fact "role remains admin"
-     (role) => "admin")
+    (fact "role remains admin"
+      (role) => "admin")
 
-   (let [application (create-and-submit-application pena :propertyId sipoo-property-id) => truthy
-         application-id (:id application)
-         query-as-admin (http-get (str (server-address) "/api/query/application?id=" application-id) params) => http200?]
+    (let [application (create-and-submit-application pena :propertyId sipoo-property-id) => truthy
+          application-id (:id application)
+          query-as-admin (http-get (str (server-address) "/api/query/application?id=" application-id) params) => http200?]
 
-     (fact "sonja sees the application"
-       (query-application sonja application-id) => truthy)
+      (fact "sonja sees the application"
+        (query-application sonja application-id) => truthy)
 
-     (fact "but admin doesn't"
-       (-> query-as-admin decode-response :body) => not-accessible?)
+      (fact "but admin doesn't"
+        (-> query-as-admin decode-response :body) => not-accessible?)
 
-     (fact "succeeds with correct password"
-       (impersonate "admin") => ok?)
+      (fact "succeeds with correct password"
+        (impersonate "admin") => ok?)
 
-     (fact "but not again (as we're now impersonating)"
-       (impersonate "admin") => fail?)
+      (fact "but not again (as we're now impersonating)"
+        (impersonate "admin") => fail?)
 
-     (fact "instead, application is visible"
-       (let [query-as-imposter (http-get (str (server-address) "/api/query/application?id=" application-id) params) => http200?
-             body (-> query-as-imposter decode-response :body) => ok?
-             application (:application body)]
-         (:id application) => application-id)))
+      (fact "instead, application is visible"
+        (let [query-as-imposter (http-get (str (server-address) "/api/query/application?id=" application-id) params) => http200?
+              body (-> query-as-imposter decode-response :body) => ok?
+              application (:application body)]
+          (:id application) => application-id)))
 
-   (fact "role has changed to authority"
-     (role) => "authority")
+    (fact "role has changed to authority"
+      (role) => "authority")
 
-   (fact "every available action is a query or raw, i.e. not a command
+    (fact "every available action is a query or raw, i.e. not a command
           (or any other mutating action type we might have in the future)"
-     (let [action-names (keys (filter (fn [[name ok]] (ok? ok)) (actions)))]
-       ; Make sure we have required all the actions
-       (require 'lupapalvelu.server)
-       (map #(:type (% @lupapalvelu.action/actions)) action-names) => (partial every? #{:query :raw})))
+      (let [action-names (keys (filter (fn [[name ok]] (ok? ok)) (actions)))]
+        ; Make sure we have required all the actions
+        (require 'lupapalvelu.server)
+        (map #(:type (% @lupapalvelu.action/actions)) action-names) => (partial every? #{:query :raw})))
 
-   (fact "still can not query property owners"
-     (let [req (-> params
-                   (assoc-in [:headers "content-type"] "application/json;charset=utf-8")
-                   (assoc :body (json/encode {:propertyIds ["12312312341234"]})))]
-       (-> (http-post (str (server-address) "/api/datatables/owners") req) decode-response :body)) => unauthorized?)))
+    (fact "still can not query property owners"
+      (let [req (-> params
+                    (assoc-in [:headers "content-type"] "application/json;charset=utf-8")
+                    (assoc :body (json/encode {:propertyIds ["12312312341234"]})))]
+        (-> (http-post (str (server-address) "/api/datatables/owners") req) decode-response :body)) => unauthorized?)))
 
 (facts* "reset password email"
   (last-email) ; Inbox zero
