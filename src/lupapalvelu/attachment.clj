@@ -233,8 +233,7 @@
   (mongo/update-by-query :fs.files
                          {:_id {$in fileIds}
                           $or [{:metadata.linked false}
-                               {:metadata.linked {$exists false}}]
-                          :metadata.application {$exists false}}
+                               {:metadata.linked {$exists false}}]}
                          {$set {:metadata.application app-id
                                 :metadata.linked true}}))
 
