@@ -10,8 +10,10 @@
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.batchrun.fetch-verdict :as fetch-verdict]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.integrations.state-change :as state-change]
             [lupapalvelu.logging :as logging]
@@ -862,3 +864,32 @@
               (info "Attachments successfully unarchived for application" (:id application))
               (error "Some attachments were not successfully unarchived for application" (:id application)))))))
     (println "Organization must be provided.")))
+
+(defn convert-and-link-missing [& args]
+  (mongo/connect!)
+  (info "Starting convert-and-link-missing job")
+  ;(sade.util/to-millis-from-local-datetime-string "2018-06-01T00:00")
+  ;=> 1527800400000
+  (let [ts 1527800400000]
+    (doseq [app (mongo/select :applications
+                              {:modified                          {$gte ts}
+                               :attachments.latestVersion.created {$gte ts}}
+                              [:attachments :organization])
+            {version :latestVersion :as att} (->> (:attachments app)
+                                                  (filter #(-> % :latestVersion :autoConversion)))
+            :let [file (mongo/download (:fileId version))]]
+      (logging/with-logging-context {:applicationId (:id app)}
+        (if file
+          (attachment/link-files-to-application (:id app) [(:fileId file)])
+          ;; file missing, generate new
+          (if-let [original   (mongo/download (:originalFileId version))]
+            (let [conversion (conversion/archivability-conversion
+                               app
+                               (select-keys original [:filename :contentType :content]))]
+              (if (:autoConversion conversion)
+                (do
+                  (file-upload/save-file (merge (select-keys conversion [:content :filename]) {:fileId (:fileId file)})
+                                         {:application (:id app) :linked true})
+                  (debug "File %s converted, uploaded and linked successfully" (:fileId file)))
+                (warn "file %s not converted: %s" (:fileId file) (pr-str conversion))))
+            (error "No original fileId found, attachment: %s, originalFileId: %s" (:id att) (:originalFileId version))))))))
