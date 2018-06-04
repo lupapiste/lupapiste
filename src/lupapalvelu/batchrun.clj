@@ -966,7 +966,9 @@
             (error "Invalid log data, can't fix stamp:" logdata)))))))
 
 
-(defn fix-attachment-childrens [apps target-key target-filter-pred user-fn & [lang-mapping]]
+(defn fix-attachment-childrens
+  "Generate new attachments for targets, which were initially created by create-attachment-from-children and later removed"
+  [apps target-key target-filter-pred user-fn & [lang-mapping]]
   (doseq [app apps
           target (->> (get app target-key)
                       (filter target-filter-pred))
@@ -977,7 +979,7 @@
                 att-id (:id target-attachment)]]
     (logging/with-logging-context {:applicationId (:id app)}
       (when (nil? (mongo/download (:fileId version)))
-        (info "No file, clearing old version from attachment:" att-id ", version fileId:" (:fileId version))
+        (info "No file for " target-key ", clearing old version from attachment:" att-id ", version fileId:" (:fileId version))
         (mongo/update-by-query :applications
                                {:_id (:id app)
                                 :attachments {$elemMatch {:id att-id
@@ -995,11 +997,13 @@
 (defn generate-missing-neighbor-docs [& args]
   (mongo/connect!)
   (let [ts 1527800400000
+        graylog-commands [{:data {:applicationId "LP-186-2018-90002" :neighborId "5b14f8a2afd92e4817e59427"}}] #_(graylog-request "neighbor-response")
+        neighbor-ids (set (map (comp :neighborId :data) graylog-commands))
         apps (mongo/select :applications
-                           {:modified {$gte ts}
-                            :neighbors.status.created {$gte ts}}
+                           {:_id {$in (map (comp :applicationId :data) graylog-commands)}}
                            [:neighbors :attachments])
-        neighbor-filter-fn (fn [n] (some #(> (:created %) ts) (:status n)))
+        neighbor-filter-fn (fn [n] (and (some #(> (:created %) ts) (:status n))
+                                        (contains? neighbor-ids (:id n))))
         user-fn (fn [neighbor _]
                   (->> (:status neighbor)
                        (util/find-first (fn [status] (ss/contains? (:state status) "response-given-")))
