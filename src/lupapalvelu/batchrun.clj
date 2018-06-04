@@ -982,7 +982,8 @@
               maybe-attachment-id (str application-id "." user-id "." attachment-id)
               same-attachments (->> (att/get-attachments-by-type application attachment-type)
                                     (filter (fn [att]
-                                              (nil? (mongo/download (get-in att [:latestVersion :fileId]))))))
+                                              (and (= (get-in att [:latestVersion :user :id]) user-id)
+                                                   (nil? (mongo/download (get-in att [:latestVersion :fileId])))))))
               target-attachment (or (first (filter #(= maybe-attachment-id (:id %)) same-attachments))
                                     (-> (remove :latestVersion same-attachments) first))
               {:keys [fileId originalFileId stamped]} (:latestVersion target-attachment)]
