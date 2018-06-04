@@ -33,11 +33,6 @@
   "Henkil\u00f6- tai Y-tunnus"
   (cond-pre Hetu FinnishY))
 
-;; TODO: Pending specification
-(defschema ClientApplicationKind
-  "Hakemuksen tyyppi"
-  NonBlankStr)
-
 (defschema PostalAddress
   "Postiosoite.
 
@@ -107,7 +102,7 @@
   propertyIdentificationNumber: varattavan alueen kiinteist\u00f6tunnus
   startTime: alueen k\u00e4yt\u00f6n alkuaika (ei k\u00e4yt\u00f6ss\u00e4 Lupapisteess\u00e4)
   workDescription: hankkeen (pidempi) kuvaus"
-  {:clientApplicationKind            ClientApplicationKind
+  {:clientApplicationKind            NonBlankStr
    (optional-key :customerReference) NonBlankStr
    :customerWithContacts             {:contacts (NonEmptyVec Contact)
                                       :customer Customer}
