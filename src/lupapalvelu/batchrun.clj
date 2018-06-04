@@ -1201,16 +1201,23 @@
               (let [app-verdict (first (filter #(= (:id %) (:id target)) (:verdicts app)))]
                 (info "Fetching file for verdict" (:id target))
                 (if-let [xml-verdict (verdict/matching-verdict app-verdict xml-verdicts)]
-                  (let [pk (first (:paatokset xml-verdict))
-                        attachments (->> [(or (:liite pk) (:Liite pk))]
-                                         flatten
-                                         (filter #(-> % :linkkiliitteeseen ss/blank? false?)))
-                        correct-attachment (->> attachments
-                                                (filter (fn [{:keys [linkkiliitteeseen]}]
-                                                          (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
-                                                             (:id att))))
-                                                first)]
-                    (fetch-and-upload-file (:linkkiliitteeseen correct-attachment) version app))
+                  (let [{:keys [linkkiliitteeseen]} (->> xml-verdict
+                                                         :paatokset
+                                                         first
+                                                         :poytakirjat
+                                                         (map (fn [pk]
+                                                                (->> [(or (:liite pk) (:Liite pk))]
+                                                                     flatten
+                                                                     (filter #(-> % :linkkiliitteeseen ss/blank? false?)))))
+                                                         flatten
+                                                         (remove nil?)
+                                                         (filter (fn [{:keys [linkkiliitteeseen]}]
+                                                                   (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
+                                                                      (:id att))))
+                                                         first)]
+                    (if (ss/blank? linkkiliitteeseen)
+                      (error "Could not find an HTTP link from verdict:" xml-verdict)
+                      (fetch-and-upload-file linkkiliitteeseen version app)))
                   (error "Could not find the matching XML verdict for" (:id target))))
 
               (= (:type target) "task")
