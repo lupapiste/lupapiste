@@ -24,7 +24,7 @@
                "unarchive"                  'lupapalvelu.batchrun/unarchive
                "convert-and-link-missing"   'lupapalvelu.batchrun/convert-and-link-missing
                "analyze-missing"            'lupapalvelu.batchrun/analyze-missing
-               "generate-missing-neighbor-docs" 'lupapalvelu.batchrun/generate-missing-neighbor-docs
+               "replay-attachment-children" 'lupapalvelu.batchrun/replay-attachment-children
                "replay-missing-stamping-ops" 'lupapalvelu.batchrun/replay-missing-stamping-ops})
 
 (defn launch! [service args]

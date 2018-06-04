@@ -1042,3 +1042,9 @@
         user-fn (fn [_ statement-attachment]
                   (get-in statement-attachment [:latestVersion :user]))]
     (fix-attachment-childrens apps :statements statements-fn user-fn)))
+
+(defn replay-attachment-children [& args]
+  (generate-missing-neighbor-docs)
+  (publish-verdicts-fix)
+  (tasks-children-fix)
+  (statement-children-fix))
