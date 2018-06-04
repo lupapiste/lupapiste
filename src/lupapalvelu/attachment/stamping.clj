@@ -190,16 +190,19 @@
               options (select-keys context [:x-margin :y-margin :transparency :page])]
           (info "Fixing attachment id" (:id attachment))
           (files/with-temp-file file
-            (with-open [out (io/output-stream file)]
-              (stamper/stamp stamp fileId out options))
-            (info "Uploading stamped replacement version for original file id" (:originalFileId latestVersion))
-            (mongo/upload (:originalFileId latestVersion) filename contentType file {:linked true :application (:id application)})
+            (try
+              (with-open [out (io/output-stream file)]
+                (stamper/stamp stamp fileId out options))
+              (info "Uploading stamped replacement version for original file id" (:originalFileId latestVersion))
+              (mongo/upload (:originalFileId latestVersion) filename contentType file {:linked true :application (:id application)})
 
-            (let [converted (conversion/archivability-conversion
-                              application
-                              {:filename filename
-                               :contentType contentType
-                               :content file})]
-              (info "Uploading stamped replacement version for file id" (:fileId latestVersion))
-              (mongo/upload (:fileId latestVersion) filename contentType (:content converted) {:linked true :application (:id application)}))))
+              (let [converted (conversion/archivability-conversion
+                                application
+                                {:filename filename
+                                 :contentType contentType
+                                 :content file})]
+                (info "Uploading stamped replacement version for file id" (:fileId latestVersion))
+                (mongo/upload (:fileId latestVersion) filename contentType (:content converted) {:linked true :application (:id application)}))
+              (catch Throwable t
+                (error t "Could not fix attachment" attachment)))))
         (info "File id" (:fileId latestVersion) "found, skipping attachment id" (:id attachment))))))
