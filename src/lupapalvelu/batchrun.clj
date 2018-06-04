@@ -982,23 +982,23 @@
               maybe-attachment-id (str application-id "." user-id "." attachment-id)
               same-attachments (->> (att/get-attachments-by-type application attachment-type)
                                     (filter (fn [att]
-                                              (and (= (get-in att [:latestVersion :user :id]) user-id)
+                                              (and (seq (:latestVersion att))
+                                                   (= (get-in att [:latestVersion :user :id]) user-id)
                                                    (nil? (mongo/download (get-in att [:latestVersion :fileId])))))))
               target-attachment (or (first (filter #(= maybe-attachment-id (:id %)) same-attachments))
-                                    (-> (remove :latestVersion same-attachments) first))
+                                    (first same-attachments))
               {:keys [fileId originalFileId stamped]} (:latestVersion target-attachment)]
           (cond
             (nil? fileId)
-            (error "No suitable target attachment found in application for user" user-id "attachment" (:id attachment)
-                   "Log data:" (pr-str logdata))
+            (warn "No suitable target attachment found in application for user" user-id "attachment" attachment-id)
 
             stamped
-            (error "Target attachment for user" user-id "attachment" (:id attachment) "is attachment id" (:id target-attachment)
+            (error "Target attachment for user" user-id "attachment" attachment-id "is attachment id" (:id target-attachment)
                    "but it is stamped. Skipping.")
 
             :else
             (let [bos (ByteArrayOutputStream.)]
-              (info "Processing user" user-id "attachment" (:id attachment))
+              (info "Processing user" user-id "attachment" attachment-id)
               (with-open [content ((:content user-att-file))]
                 (io/copy content bos))
               (with-open [bis (ByteArrayInputStream. (.toByteArray bos))]
