@@ -197,14 +197,16 @@
                 (stamper/stamp stamp fileId out options))
               (info "Uploading stamped replacement version for original file id" (:originalFileId latestVersion))
               (mongo/upload (:originalFileId latestVersion) filename contentType file {:linked true :application (:id application)})
-
-              (let [converted (conversion/archivability-conversion
-                                application
-                                {:filename filename
-                                 :contentType contentType
-                                 :content file})]
-                (info "Uploading stamped replacement version for file id" (:fileId latestVersion))
-                (mongo/upload (:fileId latestVersion) filename contentType (:content converted) {:linked true :application (:id application)}))
+              (when-not (= (:fileId latestVersion) (:originalFileId latestVersion))
+                (let [converted (conversion/archivability-conversion
+                                  application
+                                  {:filename filename
+                                   :contentType contentType
+                                   :content file})]
+                  (if (:autoConversion converted)
+                    (do (info "Uploading stamped replacement version for file id" (:fileId latestVersion))
+                        (mongo/upload (:fileId latestVersion) filename contentType (:content converted) {:linked true :application (:id application)}))
+                    (error "Could not convert file id" (:fileId latestVersion) "to PDF/A"))))
               (catch Throwable t
                 (error t "Could not fix attachment" attachment)))))
         (info "File id" (:fileId latestVersion) "found, skipping attachment id" (:id attachment))))))
