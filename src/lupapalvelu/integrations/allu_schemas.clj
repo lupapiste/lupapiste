@@ -17,12 +17,12 @@
 
   apartmentNumber: huoneiston numero
   divisionLetter: jakokirjainosa (soluasunnot tms.)
-  entranceLetter: kirjainosa (yleensä porras)
+  entranceLetter: kirjainosa (yleens\u00e4 porras)
   premiseNumber: osoitenumero
   streetName: tien/kadun nimi
 
-  Lupapisteessä katuosoite on pelkkä merkkijono. ALLUssa se voidaan vain laittaa suoraan
-  streetName-kenttään ja muut kentät jättää pois."
+  Lupapisteess\u00e4 katuosoite on pelkk\u00e4 merkkijono. ALLUssa se voidaan vain laittaa suoraan
+  streetName-kentt\u00e4\u00e4n ja muut kent\u00e4t j\u00e4tt\u00e4\u00e4 pois."
   {(optional-key :apartmentNumber) NonBlankStr
    (optional-key :divisionLetter)  NonBlankStr
    (optional-key :entranceLetter)  NonBlankStr
@@ -30,7 +30,7 @@
    (optional-key :streetName)      NonBlankStr})
 
 (defschema RegistryKey
-  "Henkilö- tai Y-tunnus"
+  "Henkil\u00f6- tai Y-tunnus"
   (cond-pre Hetu FinnishY))
 
 ;; TODO: Pending specification
@@ -51,9 +51,9 @@
 (defschema Contact
   "Yhteystieto.
 
-  email: sähköpostiosoite
-  id: Allun sisäinen id, voi jättää huomiotta, tulee poistumaan
-  name: henkilön tai yrityksen nimi
+  email: s\u00e4hk\u00f6postiosoite
+  id: Allun sis\u00e4inen id, voi j\u00e4tt\u00e4\u00e4 huomiotta, tulee poistumaan
+  name: henkil\u00f6n tai yrityksen nimi
   phone: puhelinnumero
   postalAddress: postiosoite"
   {(optional-key :email) Email
@@ -63,22 +63,22 @@
    (optional-key :postalAddress) PostalAddress})
 
 (defschema CustomerType
-  "Hakijan/maksajan tyyppi (hankilö/yritys/yhsitys/muu)."
+  "Hakijan/maksajan tyyppi (hankil\u00f6/yritys/yhsitys/muu)."
   (enum "PERSON" "COMPANY" "ASSOCIATION" "OTHER"))
 
 (defschema Customer
   "Hakijan/maksajan yleiset tiedot.
 
   country: kotimaa
-  email: sähköpostiosoite
-  id: Allun sisäinen id, voi jättää huomiotta, tulee poistumaan
+  email: s\u00e4hk\u00f6postiosoite
+  id: Allun sis\u00e4inen id, voi j\u00e4tt\u00e4\u00e4 huomiotta, tulee poistumaan
   invoicingOperator: laskutusoperaattori (pankkitunnus (OKOYFIHH, NDEAFIHH ...) tms.)
-  name: henkilön tai yrityksen nimi
+  name: henkil\u00f6n tai yrityksen nimi
   ovt: (yrityksen) OVT-tunnus
   phone: puhelinnumero
   postalAddress: postiosoite
-  registryKey: henkilö- tai Y-tunnus
-  type: Onko kyseessä henkilö, yritys, yhdistys vai jokin muu."
+  registryKey: henkil\u00f6- tai Y-tunnus
+  type: Onko kyseess\u00e4 henkil\u00f6, yritys, yhdistys vai jokin muu."
   {:country              ISO-3166-alpha-2
    (optional-key :email) Email
    (optional-key :id)    Int
@@ -97,15 +97,15 @@
   clientApplicationKind: Hakemuksen laji
   customerReference: viitenumero laskuun
   customerWithContacts: hakijan yleiset ja yhteystiedot
-  endTime: alueen käytön loppuaika (ei käytössä Lupapisteessä)
-  geometry: käytettävän alueen geometriat
+  endTime: alueen k\u00e4yt\u00f6n loppuaika (ei k\u00e4yt\u00f6ss\u00e4 Lupapisteess\u00e4)
+  geometry: k\u00e4ytett\u00e4v\u00e4n alueen geometriat
   identificationNumber: (Lupapisteen) hakemustunnus
   invoicingCustomer: maksajan tiedot
   name: hakemuksen nimi / lyhyt kuvaus
-  pendingOnClient: tehdäänkö Lupapisteessä vielä muutoksia
+  pendingOnClient: tehd\u00e4\u00e4nk\u00f6 Lupapisteess\u00e4 viel\u00e4 muutoksia
   postalAddress: varattavan alueen postiosoite
-  propertyIdentificationNumber: varattavan alueen kiinteistötunnus
-  startTime: alueen käytön alkuaika (ei käytössä Lupapisteessä)
+  propertyIdentificationNumber: varattavan alueen kiinteist\u00f6tunnus
+  startTime: alueen k\u00e4yt\u00f6n alkuaika (ei k\u00e4yt\u00f6ss\u00e4 Lupapisteess\u00e4)
   workDescription: hankkeen (pidempi) kuvaus"
   {:clientApplicationKind            ClientApplicationKind
    (optional-key :customerReference) NonBlankStr

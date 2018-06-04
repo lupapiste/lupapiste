@@ -7,6 +7,7 @@
             [sade.http :as http]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.document.tools :refer [doc-subtype]]
+            [lupapalvelu.document.canonical-common :as doccc]
             [lupapalvelu.integrations.allu-schemas :refer [PlacementContract]]))
 
 ;;; FIXME: Avoid producing nil-valued fields.
@@ -21,6 +22,14 @@
     (postwalk node-value app)))
 
 ;;;; Conversion details
+
+(defn- application-kind [{{operation :name} :primaryOperation}]
+  (let [operation (keyword operation)
+        kind (str (name (doccc/ya-operation-type-to-schema-name-key operation)) " / "
+                  (doccc/ya-operation-type-to-usage-description operation))]
+    (if-let [additional (doccc/ya-operation-type-to-additional-usage-description operation)]
+      (str kind " / " additional)
+      kind)))
 
 (def- convert-customer-type
   {:henkilo "PERSON", :yritys "COMPANY"})
@@ -93,20 +102,18 @@
   {:city (localize "fi" :municipality municipality) ; FIXME: hardcoded "fi"
    :streetAddress {:streetName address}})
 
-;; TODO: clientApplicationKind
 (defn- convert-value-flattened-app
-  [{:keys [id primaryOperation propertyId drawings documents] :as app}]
+  [{:keys [id propertyId drawings documents] :as app}]
   (let [customer-doc     (first (filter #(= (doc-subtype %) :hakija) documents))
         work-description (first (filter #(= (doc-subtype %) :hankkeen-kuvaus) documents))
         payee-doc        (first (filter #(= (doc-subtype %) :maksaja) documents))]
-    {:clientApplicationKind "FIXME"
+    {:clientApplicationKind (application-kind app)
      :customerReference     (-> payee-doc :data :laskuviite)
      :customerWithContacts  {:customer (doc->customer false customer-doc)
                              :contacts [(person->contact (customer-contact customer-doc))]}
      :geometry              {:geometryOperations (application-geometry app)}
      :identificationNumber  id
      :invoicingCustomer     (doc->customer true payee-doc) ; TODO: contacts
-     :name            (:name primaryOperation) ; TODO: i18n?
      :pendingOnClient true
      :postalAddress   (application-postal-address app)
      :propertyIdentificationNumber propertyId
