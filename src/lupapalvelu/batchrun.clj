@@ -12,6 +12,7 @@
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.batchrun.fetch-verdict :as fetch-verdict]
+            [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.integrations.jms :as jms]
@@ -1048,3 +1049,86 @@
                                       :linked      true})
               (info "Rotated file" fileId "uploaded")))
           (error "No unrotated file found with file id" fileId))))))
+
+(defn fix-attachment-childrens
+  "Generate new attachments for targets, which were initially created by create-attachment-from-children and later removed"
+  [apps target-key target-filter-pred user-fn & [lang-mapping]]
+  (doseq [app apps
+          target (->> (get app target-key)
+                      (filter target-filter-pred))
+          target-attachment (->> (:attachments app)
+                                 (filter (fn [a] (= (get-in a [:source :id]) (:id target))))
+                                 (filter :latestVersion))
+          :let [version (:latestVersion target-attachment)
+                att-id (:id target-attachment)]]
+    (logging/with-logging-context {:applicationId (:id app)}
+      (when (nil? (mongo/download (:fileId version)))
+        (info "No file for " target-key ", clearing old version from attachment:" att-id ", version fileId:" (:fileId version))
+        (mongo/update-by-query :applications
+                               {:_id (:id app)
+                                :attachments {$elemMatch {:id att-id
+                                                          :source.id (:id target)}}}
+                               {$unset {:attachments.$.latestVersion true}
+                                $set {:attachments.$.auth []
+                                      :attachments.$.versions []}})
+        (let [version (child-to-attachment/create-attachment-from-children
+                        (user-fn target target-attachment)
+                        (domain/get-application-no-access-checking (:id app))
+                        target-key (:id target)
+                        (get lang-mapping (:id app) "fi"))]
+          (info "Created child" target-key "fileId" (:fileId version) "to attachment" att-id))))))
+
+(defn generate-missing-neighbor-docs [& args]
+  (mongo/connect!)
+  (let [ts 1527800400000
+        graylog-commands (graylog-request "neighbor-response")
+        neighbor-ids (set (map (comp :neighborId :data) graylog-commands))
+        apps (mongo/select :applications
+                           {:_id {$in (map (comp :applicationId :data) graylog-commands)}}
+                           [:neighbors :attachments])
+        neighbor-filter-fn (fn [n] (and (some #(> (:created %) ts) (:status n))
+                                        (contains? neighbor-ids (:id n))))
+        user-fn (fn [neighbor _]
+                  (->> (:status neighbor)
+                       (util/find-first (fn [status] (ss/contains? (:state status) "response-given-")))
+                       :vetuma))]
+    (fix-attachment-childrens apps :neighbors neighbor-filter-fn user-fn)))
+
+(defn publish-verdicts-fix [& args]
+  (mongo/connect!)
+  (let [graylog-apps (graylog-request "publish-verdict")
+        language-map (into {} (map (fn [log] [(get-in log [:data :id]) (get-in log [:data :lang])])) graylog-apps)
+        apps (mongo/select :applications {:_id {$in (map (comp :id :data) graylog-apps)}} [:attachments :verdicts])
+        verdict-filter-fn (partial remove :draft)
+        user-fn (fn [_ verdict-attachment]
+                  (get-in verdict-attachment [:latestVersion :user]))]
+    (fix-attachment-childrens apps :verdicts verdict-filter-fn user-fn language-map)))
+
+(defn tasks-children-fix [& args]
+  (mongo/connect!)
+  (let [graylog-commands (graylog-request "review-done")
+        task-ids (set (map (comp :taskId :data) graylog-commands))
+        apps (mongo/select :applications {:_id {$in (map (comp :id :data) graylog-commands)}} [:attachments :tasks])
+        tasks-filter-fn (fn [task] (and (= "task-katselmus" (get-in task [:schema-info :name]))
+                                        (= "sent" (:state task))
+                                        (contains? task-ids (:id task))))
+        user-fn (fn [_ task-attachment]
+                  (get-in task-attachment [:latestVersion :user]))]
+    (fix-attachment-childrens apps :tasks tasks-filter-fn user-fn)))
+
+(defn statement-children-fix [& args]
+  (mongo/connect!)
+  (let [graylog-commands (graylog-request "give-statement")
+        statement-ids (set (map (comp :statementId :data) graylog-commands))
+        apps (mongo/select :applications {:_id {$in (map (comp :id :data) graylog-commands)}} [:attachments :statements])
+        statements-fn (fn [statement] (and (= "given" (:state statement))
+                                           (contains? statement-ids (:id statement))))
+        user-fn (fn [_ statement-attachment]
+                  (get-in statement-attachment [:latestVersion :user]))]
+    (fix-attachment-childrens apps :statements statements-fn user-fn)))
+
+(defn replay-attachment-children [& args]
+  (generate-missing-neighbor-docs)
+  (publish-verdicts-fix)
+  (tasks-children-fix)
+  (statement-children-fix))
