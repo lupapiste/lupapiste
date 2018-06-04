@@ -986,7 +986,7 @@
                                 $set {:attachments.$.auth []
                                       :attachments.$.versions []}})
         (let [version (child-to-attachment/create-attachment-from-children
-                        (user-fn target)
+                        (user-fn target target-attachment)
                         (domain/get-application-no-access-checking (:id app))
                         target-key (:id target)
                         "fi")]
@@ -999,8 +999,8 @@
                            {:modified {$gte ts}
                             :neighbors.status.created {$gte ts}}
                            [:neighbors :attachments])
-        target-filter-fn (fn [n] (some #(> (:created %) ts) (:status n)))
-        user-fn (fn [neighbor]
+        neighbor-filter-fn (fn [n] (some #(> (:created %) ts) (:status n)))
+        user-fn (fn [neighbor _]
                   (->> (:status neighbor)
                        (util/find-first (fn [status] (ss/contains? (:state status) "response-given-")))
                        :vetuma))]
