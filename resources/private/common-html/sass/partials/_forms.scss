@@ -329,7 +329,7 @@ input.form-input.inline {
     display: block;
   }
   .form-input.checkbox, .form-input.radio {
-    margin: 0 $marginS 0 0;
+    margin: $marginL $marginS 0 0;
     display: inline-block;
   }
   .form-label-checkbox{
@@ -478,11 +478,15 @@ input.form-input.inline {
           width: $cols1;
         }
       }
+      .form-input.checkbox {
+        margin-top: 0;
+      }      
     }
   }
   .form-entry {
     min-width: 300px;
     min-height: 64px;
+    margin-bottom: $marginM;
 
     &.long {
       min-width: 480px;

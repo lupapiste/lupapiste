@@ -8339,7 +8339,7 @@ input.form-input.inline, input.inline.form-input--inline {
 }
 
 .form-group .form-input.checkbox, .form-group .checkbox.form-input--inline, .form-group .form-input.radio, .form-group .radio.form-input--inline, .form-choice .form-input.checkbox, .form-choice .checkbox.form-input--inline, .form-choice .form-input.radio, .form-choice .radio.form-input--inline, .form-table .form-input.checkbox, .form-table .checkbox.form-input--inline, .form-table .form-input.radio, .form-table .radio.form-input--inline {
-  margin: 0 6px 0 0;
+  margin: 24px 6px 0 0;
   display: inline-block;
 }
 
@@ -8499,9 +8499,14 @@ input.form-input.inline, input.inline.form-input--inline {
   width: 3.75em;
 }
 
+.docgen-content .form-choice .form-entry .form-input.checkbox, .docgen-content .form-choice .form-entry .checkbox.form-input--inline {
+  margin-top: 0;
+}
+
 .docgen-content .form-entry {
   min-width: 300px;
   min-height: 64px;
+  margin-bottom: 12px;
 }
 
 .docgen-content .form-entry.long {
