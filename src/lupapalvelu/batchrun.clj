@@ -889,10 +889,10 @@
   (let [ts 1527638400000]
     (doseq [app (mongo/select :applications
                               {:modified    {$gte ts}
-                               :attachments {$elemMatch {$or [:latestVersion.created {$gte ts
-                                                                                      $lt 1528063200000}
-                                                              :latestVersion.modified {$gte ts
-                                                                                       $lt 1528063200000}]
+                               :attachments {$elemMatch {$or [{:latestVersion.created {$gte ts
+                                                                                       $lt 1528063200000}}
+                                                              {:latestVersion.modified {$gte ts
+                                                                                        $lt 1528063200000}}]
                                                          :latestVersion.onkaloFileId {$exists false}}}}
                               [:attachments])
             {version :latestVersion :as att} (->> (:attachments app)
@@ -914,10 +914,10 @@
   (let [ts 1527638400000]
     (doseq [app (mongo/select :applications
                               {:modified                          {$gte ts}
-                               $or [:attachments.latestVersion.created {$gte ts
-                                                                        $lt 1528063200000}
-                                    :attachments.latestVersion.modified {$gte ts
-                                                                         $lt 1528063200000}]}
+                               $or [{:attachments.latestVersion.created {$gte ts
+                                                                         $lt 1528063200000}}
+                                    {:attachments.latestVersion.modified {$gte ts
+                                                                          $lt 1528063200000}}]}
                               [:attachments :organization])
             {version :latestVersion :as att} (->> (:attachments app)
                                                   (filter :latestVersion))
