@@ -85,7 +85,6 @@
    (optional-key :registryKey)   RegistryKey
    :type CustomerType})
 
-;; TODO: :startTime and :endTime should be RFC-3339 but on the other hand we don't use them anyway.
 (defschema PlacementContract
   "Sijoitushakemuksen/sopimuksen tiedot.
 
@@ -106,13 +105,13 @@
    (optional-key :customerReference) NonBlankStr
    :customerWithContacts             {:contacts (NonEmptyVec Contact)
                                       :customer Customer}
-   (optional-key :endTime) NonBlankStr
-   :geometry               {:geometryOperations GeoJSON-2008}
+   :endTime                          NonBlankStr ; TODO: RFC-3339
+   :geometry                         {:geometryOperations GeoJSON-2008}
    :identificationNumber             ApplicationId
    (optional-key :invoicingCustomer) Customer
-   (optional-key :name)            NonBlankStr
-   (optional-key :pendingOnClient) Bool
-   (optional-key :postalAddress)   PostalAddress
+   :name                             NonBlankStr
+   (optional-key :pendingOnClient)   Bool
+   (optional-key :postalAddress)     PostalAddress
    (optional-key :propertyIdentificationNumber) Kiinteistotunnus
-   (optional-key :startTime)       NonBlankStr
-   (optional-key :workDescription) NonBlankStr})
+   :startTime                        NonBlankStr ; TODO: RFC-3339
+   (optional-key :workDescription)   NonBlankStr})

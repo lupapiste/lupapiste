@@ -2,6 +2,8 @@
   (:require [clojure.walk :refer [postwalk]]
             [schema.core :as sc]
             [cheshire.core :as json]
+            [clj-time.core :as t]
+            [clj-time.format :as tf]
             [iso-country-codes.core :refer [country-translate]]
             [sade.util :refer [assoc-when]]
             [sade.core :refer [def-]]
@@ -108,19 +110,27 @@
   {:city (localize lang :municipality municipality)
    :streetAddress {:streetName address}})
 
+(def- format-date-time (partial tf/unparse (tf/formatters :date-time-no-ms)))
+
 (defn- convert-value-flattened-app
   [{:keys [id propertyId documents] :as app}]
   (let [applicant-doc    (first (filter #(= (doc-subtype %) :hakija) documents))
         work-description (first (filter #(= (doc-subtype %) :hankkeen-kuvaus) documents))
         payee-doc        (first (filter #(= (doc-subtype %) :maksaja) documents))
-        res              {:clientApplicationKind (application-kind app)
+        kind             (application-kind app)
+        start            (t/now)
+        end              (t/plus start (t/years 1))
+        res              {:clientApplicationKind kind
                           :customerWithContacts  (convert-applicant applicant-doc)
+                          :endTime               (format-date-time end)
                           :geometry              {:geometryOperations (application-geometry app)}
                           :identificationNumber  id
                           :invoicingCustomer     (convert-payee payee-doc)
+                          :name                  (str id " " kind)
                           :pendingOnClient       true
                           :postalAddress         (application-postal-address app)
                           :propertyIdentificationNumber propertyId
+                          :startTime       (format-date-time start)
                           :workDescription (-> work-description :data :kayttotarkoitus)}]
     (assoc-when res :customerReference (not-empty (-> payee-doc :data :laskuviite)))))
 
