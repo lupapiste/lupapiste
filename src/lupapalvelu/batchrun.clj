@@ -1071,7 +1071,14 @@
                 (info "Rotating file" fileId "from attachment" attachmentId "by" rotation
                       ", target file id is" (:fileId target-version))
                 (with-open [content ((:content dl))]
-                  (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation))
+                  (if (not= (:contentType dl) "application/pdf")
+                    (-> (conversion/archivability-conversion application
+                                                             {:filename    filename
+                                                              :contentType (:contentType dl)
+                                                              :content     content})
+                        :content
+                        (pdftk/rotate-pdf (.getAbsolutePath temp-pdf) rotation))
+                    (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)))
                 (when (= fileId (:fileId target-version))
                   (info "Deleting existing file" fileId)
                   (mongo/delete-file-by-id fileId))
