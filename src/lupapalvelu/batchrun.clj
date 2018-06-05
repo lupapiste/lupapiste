@@ -888,16 +888,12 @@
   (info "Starting analyze-missing job")
   (let [ts 1527638400000]
     (doseq [app (mongo/select :applications
-                              {:modified    {$gte ts}
-                               :attachments {$elemMatch {$or [{:latestVersion.created {$gte ts
-                                                                                       $lt 1528063200000}}
-                                                              {:latestVersion.modified {$gte ts
-                                                                                        $lt 1528063200000}}]
-                                                         :latestVersion.onkaloFileId {$exists false}}}}
+                              {:modified    {$gte ts}}
                               [:attachments]
                               {:_id 1})
             {version :latestVersion :as att} (->> (:attachments app)
-                                                  (filter :latestVersion))
+                                                  (filter  :latestVersion)
+                                                  (remove #(get-in % [:latestVersion :onkaloFileId])))
             :let [file (mongo/download (:fileId version))
                   different-original? (not= (:fileId version) (:originalFileId version))]]
       (when-not file
