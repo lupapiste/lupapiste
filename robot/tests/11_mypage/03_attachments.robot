@@ -16,7 +16,7 @@ Mikko uploads CV
   Select From List  attachmentType  osapuolet.cv
   Choose File      xpath=//input[@type='file']  ${TXT_TESTFILE_PATH}
   Click enabled by test id  userinfo-upload-ok
-  Wait Until Page Contains  ${TXT_TESTFILE_NAME}
+  Wait Until  Element should contain  xpath=//section[@id='mypage']//div[@data-test-id='filename']  ${TXT_TESTFILE_NAME}
 
 Mikko uploads attachment with invalid mime
   [Tags]  firefox
@@ -112,8 +112,7 @@ Mikko can add his attachments in post verdict state
 Save User Data
   Click enabled by test id  save-my-userinfo
   Positive indicator should be visible
-  # Wait for indicator to clear to prevent misclicks
-  Sleep  2s
+  Positive indicator should not be visible
 
 Wait for Page to Load
   [Arguments]  ${firstName}  ${lastName}
