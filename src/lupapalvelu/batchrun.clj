@@ -1232,14 +1232,15 @@
 
 (defn fetch-missing-backend-attachments [& [start-ts]]
   (mongo/connect!)
-  (let [ts (or (c/to-long start-ts) 1527724800000)
+  (let [ts (or (c/to-long start-ts) 1527552000000)
         app-xml-cache (atom {})]
+    (info "Starting from timestamp" ts)
     (doseq [app (mongo/select :applications
-                              {:modified                          {$gte ts}
+                              {:modified    {$gte ts}
                                :attachments {$elemMatch {:latestVersion.created {$gte ts
-                                                                                 $lt 1528063200000}
-                                                         :type.type-id {$in (concat ["paatos" "paatosote" "muu"] vru/task-attachment-types)}
-                                                         :target.id {$exists true}}}}
+                                                                                 $lt  1528063200000}
+                                                         :type.type-id          {$in (concat ["paatos" "paatosote" "muu"] vru/task-attachment-types)}
+                                                         :target.id             {$exists true}}}}
                               [:state :municipality
                                :address :permitType
                                :permitSubtype :organization
