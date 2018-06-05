@@ -179,13 +179,10 @@
             :when (:stamped latestVersion)]
       (if (or (nil? (mongo/download (:fileId latestVersion)))
               (= (:type-id type) "paatos"))
-        (let [pick-fn (if (= (:type-id type) "paatos")
-                        first
-                        second)
-              source (-> attachment
+        (let [source (-> attachment
                          :versions
                          reverse
-                         (pick-fn))
+                         second)
               {:keys [contentType fileId originalFileId filename]} source
               op-ids (set (att-util/get-operation-ids attachment))
               stamp (if (and (seq op-ids) (seq (:buildings info-fields)))

@@ -888,8 +888,10 @@
   (info "Starting analyze-missing job")
   (let [ts 1527800400000]
     (doseq [app (mongo/select :applications
-                              {:modified                          {$gte ts}
-                               :attachments.latestVersion.created {$gte ts}}
+                              {:modified    {$gte ts}
+                               :attachments {$elemMatch {:latestVersion.created {$gte ts
+                                                                                 $lt 1528063200000}
+                                                         :latestVersion.onkaloFileId {$exists false}}}}
                               [:attachments])
             {version :latestVersion :as att} (->> (:attachments app)
                                                   (filter :latestVersion))
@@ -959,44 +961,8 @@
        (filter #(ss/starts-with (get-in % [:message :message]) "INFO"))
        (map parse-message-field)))
 
-(def stamp-errors #{"5ae87d2259412f3ccc40f35f"
-                    "25200785706e783c1a15bf0d2642a3696ee072f7"
-                    "5acb5807e7f6046c1079fa83"
-                    "5947ae49edf02d7febc26103"
-                    "29a7eaa32a0190a900646fbb36d7c014681a9ec1"
-                    "f97d7d56757296d70274f4e1119a2d47d338a738"
-                    "54e5a4d853378d16ed9c616942a96cb82bbd39b4"
-                    "a9e842133bb7391f2b2f159496a5ac0a76629eaf"
-                    "94cc9eaa582a9f4b2f8a0b84b51288c1bf174884"
-                    "6d9037431ed40209d0d3271f48b6e82c214acdb1"
-                    "5b0be30b59412f477ea2b40f"
-                    "5947a87aedf02d7febc25a7d"
-                    "5ae87d2259412f3ccc40f35c"
-                    "00547e630065e3048625ea54634ed380d4dabd09"
-                    "f596e6307b838e835466d5f3e37e5942ea5111b4"
-                    "5b06fef2e7f6043f476f4a8f"
-                    "5b10d46ce7f6047b9fd19076"
-                    "936920cb07407a45b8d85764d9f4f1d6cf947eb1"
-                    "5947ac2eedf02d7febc25e5d"
-                    "d7e439d5a4d24b323c5aa34c18cb98f9282cf0ca"
-                    "a20b317ab7c7491abdd0d40afc9061a05e795f80"
-                    "c98d320791e6111647260608fd5a8ecc6f5afb13"
-                    "5ae87d2259412f3ccc40f361"
-                    "f110bec39a07f6dc5fa4ccf7401c5cb511814fad"
-                    "5947adb8edf02d7febc26046"
-                    "5947adf2edf02d7febc26085"
-                    "41efbd852d3a690528a948747248b17fc360bdc1"
-                    "d347966a06db2ef5663ce0c62292247ed4160b0c"
-                    "4514af989fb708227b8baf26af9ed47d1dd5659b"
-                    "1ea40dab0241baed38880bf9e3de7c3ff56fc8a4"
-                    "5947ad57edf02d7febc25fcd"
-                    "5b10ef4ce7f6047b9fd1e7c4"
-                    "de5f77f1d5d135e2cc7b386f8308634f79ccc1cf"
-                    "86ad5b8e99321e5cd7184f893dd681eb99d8b3dd"
-                    "5b10ea1459412f40c12ae6ef"
-                    "5b110a0de7f6047b9fd21da4"
-                    "5b0e6e1de7f6046b13f33c74"
-                    "c7d5a85be3e44fd1205116e980861d0bb5e38e24"})
+(def stamp-errors #{"5b10d46ce7f6047b9fd19076"
+                    "5b06fef2e7f6043f476f4a8f"})
 
 (defn replay-missing-stamping-ops [& args]
   (mongo/connect!)
@@ -1078,22 +1044,43 @@
     (logging/with-logging-context {:applicationId (:id data)}
       (let [{:keys [id attachmentId rotation]} data
             application (mongo/by-id :applications id)
-            attachment (att/get-attachment-info application attachmentId)
-            {:keys [fileId filename]} (last (:versions attachment))]
+            {:keys [versions] :as attachment} (att/get-attachment-info application attachmentId)
+            source-version (->> (reverse versions)
+                                (filter #(mongo/download (:fileId %)))
+                                first)
+            target-version (or (->> (reverse versions)
+                                    (take-while #(not= (:fileId source-version) (:fileId %)))
+                                    last)
+                               source-version)
+            {:keys [fileId filename contentType]} source-version]
         (if-let [dl (mongo/download fileId)]
           (files/with-temp-file temp-pdf
-            (info "Rotating file" fileId "from attachment" attachmentId "by" rotation)
+            (info "Rotating file" fileId "from attachment" attachmentId "by" rotation
+                  ", target file id is" (:fileId target-version))
             (with-open [content ((:content dl))]
-              (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)
+              (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation))
+            (when (= fileId (:fileId target-version))
               (info "Deleting existing file" fileId)
-              (mongo/delete-file-by-id fileId)
-              (file-upload/save-file {:content  temp-pdf
-                                      :filename filename
-                                      :fileId   fileId
-                                      :size (.length temp-pdf)}
-                                     {:application id
-                                      :linked      true})
-              (info "Rotated file" fileId "uploaded")))
+              (mongo/delete-file-by-id fileId))
+            (file-upload/save-file {:content  temp-pdf
+                                    :filename filename
+                                    :fileId   (:originalFileId target-version)
+                                    :size     (.length temp-pdf)}
+                                   {:application id
+                                    :linked      true})
+            (when-not (= (:fileId target-version) (:originalFileId target-version))
+              (let [conversion (conversion/archivability-conversion application
+                                                                    {:filename    filename
+                                                                     :contentType contentType
+                                                                     :content     temp-pdf})]
+                (if (:autoConversion conversion)
+                  (do
+                    (file-upload/save-file (merge (select-keys conversion [:content :filename])
+                                                  {:fileId fileId})
+                                           {:application (:id application) :linked true})
+                    (infof "fileId %s converted, uploaded and linked successfully" fileId))
+                  (warnf "file %s not converted: %s" fileId (pr-str conversion)))))
+            (info "Rotated file" (:fileId target-version) "uploaded"))
           (error "No unrotated file found with file id" fileId))))))
 
 (defn fix-attachment-childrens
