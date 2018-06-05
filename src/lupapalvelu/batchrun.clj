@@ -1203,9 +1203,9 @@
                 (warnf "file %s not converted: %s" fileId (pr-str conversion))))))
         (error (str (:status resp) " - unable to download " url ": " resp))))))
 
-(defn fetch-missing-backend-attachments [& args]
+(defn fetch-missing-backend-attachments [& [start-ts]]
   (mongo/connect!)
-  (let [ts 1527724800000
+  (let [ts (or (c/to-long start-ts) 1527724800000)
         app-xml-cache (atom {})]
     (doseq [app (mongo/select :applications
                               {:modified                          {$gte ts}
