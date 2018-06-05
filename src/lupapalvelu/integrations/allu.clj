@@ -36,21 +36,8 @@
                  (str kind " / "))
         kind)))
 
-(def- convert-customer-type
-  {:henkilo "PERSON", :yritys "COMPANY"})
-
-(defn- customer-registry-key [customer-type customer]
-  (case customer-type
-    :henkilo (-> customer :henkilotiedot :hetu)
-    :yritys  (:liikeJaYhteisoTunnus customer)))
-
 (defn- fullname [{:keys [etunimi sukunimi]}]
   (str etunimi " " sukunimi))
-
-(defn- customer-name [customer-type customer]
-  (case customer-type
-    :henkilo (fullname (:henkilotiedot customer))
-    :yritys  (:yritysnimi customer)))
 
 (defn- address-country [address]
   (country-translate :alpha-3 :alpha-2 (:maa address)))
@@ -60,32 +47,40 @@
    :postalCode    postinumero
    :streetAddress {:streetName katu}})
 
-(defn- company-invoicing
-  [{{:keys [verkkolaskuTunnus ovtTunnus valittajaTunnus]} :verkkolaskutustieto}]
-  {:invoicingOperator valittajaTunnus
-   :ovt (if (seq ovtTunnus) ovtTunnus verkkolaskuTunnus)}) ; TODO: Why do we even have both fields?
+(defmulti ^:private doc->customer (fn [payee? doc] (-> doc :data :_selected)))
 
-(defn- doc->customer [payee? {{tag :_selected :as data} :data}]
-  (let [tag (keyword tag)
-        customer (get data tag)
-        address (:osoite customer)
-        allu-customer {:type          (convert-customer-type tag)
-                       :registryKey   (customer-registry-key tag customer)
-                       :name          (customer-name tag customer)
-                       :country       (address-country address)
-                       :postalAddress (convert-address address)}]
-    (if (and payee? (= tag :yritys))
-      (merge allu-customer (company-invoicing customer))
-      allu-customer)))
+(defmethod doc->customer "henkilo" [_ {{person :henkilo} :data}]
+  (let [{:keys [osoite], {:keys [hetu]} :henkilotiedot} person]
+    {:type          "PERSON"
+     :registryKey   hetu
+     :name          (fullname person)
+     :country       (address-country osoite)
+     :postalAddress (convert-address osoite)}))
+
+(defmethod doc->customer "yritys" [payee? {{company :yritys} :data}]
+  (let [{:keys [osoite liikeJaYhteisoTunnus yritysnimi]
+         {:keys [verkkolaskuTunnus ovtTunnus valittajaTunnus]} :verkkolaskutustieto} company
+        customer {:type          "COMPANY"
+                  :registryKey   liikeJaYhteisoTunnus
+                  :name          yritysnimi
+                  :country       (address-country osoite)
+                  :postalAddress (convert-address osoite)}]
+    (if payee?
+      (assoc customer :invoicingOperator valittajaTunnus
+                      ;; TODO: Why do we even have both ovtTunnus and verkkolaskuTunnus?
+                      :ovt (if (seq ovtTunnus) ovtTunnus verkkolaskuTunnus))
+      customer)))
 
 (defn- person->contact [{:keys [henkilotiedot], {:keys [puhelin email]} :yhteystiedot}]
   {:name (fullname henkilotiedot), :phone puhelin, :email email})
 
-(defn- customer-contact [{{tag :_selected :as data} :data :as doc}]
-  (let [tag (keyword tag)]
-    (case tag
-      :henkilo (get data tag)
-      :yritys  (:yhteyshenkilo (get data tag)))))
+(defmulti ^:private customer-contact (comp :_selected :data))
+
+(defmethod customer-contact "henkilo" [{{person :henkilo} :data}]
+  person)
+
+(defmethod customer-contact "yritys" [{{company :yritys} :data}]
+  (:yhteyshenkilo company))
 
 (defn- convert-applicant [applicant-doc]
   {:customer (doc->customer false applicant-doc)
@@ -114,7 +109,7 @@
    :streetAddress {:streetName address}})
 
 (defn- convert-value-flattened-app
-  [{:keys [id propertyId drawings documents] :as app}]
+  [{:keys [id propertyId documents] :as app}]
   (let [applicant-doc    (first (filter #(= (doc-subtype %) :hakija) documents))
         work-description (first (filter #(= (doc-subtype %) :hankkeen-kuvaus) documents))
         payee-doc        (first (filter #(= (doc-subtype %) :maksaja) documents))
@@ -131,7 +126,7 @@
 
 ;;;; Putting it all together
 
-(sc/defn application->allu-placement-contract :- PlacementContract [app]
+(sc/defn ^:private application->allu-placement-contract :- PlacementContract [app]
   (-> app flatten-values convert-value-flattened-app))
 
 (defn create-placement-contract! [app]
