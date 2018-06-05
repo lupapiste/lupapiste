@@ -1213,7 +1213,7 @@
                                :address :permitType
                                :permitSubtype :organization
                                :primaryOperation :verdicts
-                               :attachments])
+                               :attachments :tasks])
             {version :latestVersion target :target :as att} (->> (:attachments app)
                                                                  (filter :latestVersion)
                                                                  (filter :target))
@@ -1271,11 +1271,9 @@
                       all-atts (->> (map :attachments review-tasks)
                                     flatten
                                     (remove nil?))
-                      {:keys [linkkiliitteeseen]} (->> (or (seq attachments)
-                                                           all-atts)
+                      {:keys [linkkiliitteeseen]} (->> attachments
                                                        (filter (fn [{{:keys [linkkiliitteeseen]} :liite}]
-                                                                 (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
-                                                                    (:id att))))
+                                                                 (not (ss/blank? linkkiliitteeseen))))
                                                        first
                                                        :liite)]
                   (if (ss/blank? linkkiliitteeseen)
