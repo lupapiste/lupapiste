@@ -177,46 +177,57 @@
                                        (make-operation-specific-stamps context info-fields))]
     (doseq [{:keys [latestVersion type] :as attachment} attachments
             :when (:stamped latestVersion)]
-      (if (or (nil? (mongo/download (:fileId latestVersion)))
-              (= (:type-id type) "paatos"))
-        (let [source (-> attachment
-                         :versions
-                         reverse
-                         second)
-              {:keys [contentType fileId originalFileId filename]} source
-              op-ids (set (att-util/get-operation-ids attachment))
-              stamp (if (and (seq op-ids) (seq (:buildings info-fields)))
-                      (operation-specific-stamps op-ids)
-                      stamp-without-buildings)
-              options (select-keys context [:x-margin :y-margin :transparency :page])]
-          (info "Fixing attachment id" (:id attachment))
-          (when (and (nil? (mongo/download fileId))
-                     (mongo/download originalFileId))
-            (let [conversion (conversion/archivability-conversion application
-                                                                  {:filename    filename
-                                                                   :contentType contentType
-                                                                   :content     ((:content (mongo/download originalFileId)))})]
-              (when (:autoConversion conversion)
-                (do
-                  (file-upload/save-file (merge (select-keys conversion [:content :filename]) {:fileId fileId})
-                                         {:application (:id application) :linked true})
-                  (infof "fileId %s from previous version converted, uploaded and linked successfully" fileId)))))
-          (files/with-temp-file file
-            (try
-              (with-open [out (io/output-stream file)]
-                (stamper/stamp stamp fileId out options))
-              (info "Uploading stamped replacement version for original file id" (:originalFileId latestVersion))
-              (mongo/upload (:originalFileId latestVersion) filename contentType file {:linked true :application (:id application)})
-              (when-not (= (:fileId latestVersion) (:originalFileId latestVersion))
-                (let [converted (conversion/archivability-conversion
-                                  application
-                                  {:filename filename
-                                   :contentType contentType
-                                   :content file})]
+      (let [source (-> attachment
+                       :versions
+                       reverse
+                       second)
+            {:keys [contentType fileId originalFileId filename]} source
+            op-ids (set (att-util/get-operation-ids attachment))
+            stamp (if (and (seq op-ids) (seq (:buildings info-fields)))
+                    (operation-specific-stamps op-ids)
+                    stamp-without-buildings)
+            options (select-keys context [:x-margin :y-margin :transparency :page])]
+        (info "Fixing attachment id" (:id attachment))
+        (when (and (nil? (mongo/download fileId))
+                   (mongo/download originalFileId))
+          (let [conversion (conversion/archivability-conversion application
+                                                                {:filename    filename
+                                                                 :contentType contentType
+                                                                 :content     ((:content (mongo/download originalFileId)))})]
+            (when (:autoConversion conversion)
+              (do
+                (file-upload/save-file (merge (select-keys conversion [:content :filename]) {:fileId fileId})
+                                       {:application (:id application) :linked true})
+                (infof "fileId %s from previous version converted, uploaded and linked successfully" fileId)))))
+        (files/with-temp-file file
+          (try
+            (if (mongo/download (:fileId latestVersion))
+              (do
+                (with-open [out (io/output-stream file)]
+                  (stamper/stamp stamp (:fileId latestVersion) out options))
+                (let [converted (conversion/archivability-conversion application
+                                                                     {:filename    filename
+                                                                      :contentType contentType
+                                                                      :content     file})]
                   (if (:autoConversion converted)
                     (do (info "Uploading stamped replacement version for file id" (:fileId latestVersion))
+                        (mongo/delete-file-by-id (:fileId latestVersion))
                         (mongo/upload (:fileId latestVersion) filename contentType (:content converted) {:linked true :application (:id application)}))
                     (error "Could not convert file id" (:fileId latestVersion) "to PDF/A"))))
-              (catch Throwable t
-                (error t "Could not fix attachment" attachment)))))
-        (info "File id" (:fileId latestVersion) "found, skipping attachment id" (:id attachment))))))
+              (do
+                (with-open [out (io/output-stream file)]
+                  (stamper/stamp stamp fileId out options))
+                (info "Uploading stamped replacement version for original file id" (:originalFileId latestVersion))
+                (mongo/upload (:originalFileId latestVersion) filename contentType file {:linked true :application (:id application)})
+                (when-not (= (:fileId latestVersion) (:originalFileId latestVersion))
+                  (let [converted (conversion/archivability-conversion
+                                    application
+                                    {:filename    filename
+                                     :contentType contentType
+                                     :content     file})]
+                    (if (:autoConversion converted)
+                      (do (info "Uploading stamped replacement version for file id" (:fileId latestVersion))
+                          (mongo/upload (:fileId latestVersion) filename contentType (:content converted) {:linked true :application (:id application)}))
+                      (error "Could not convert file id" (:fileId latestVersion) "to PDF/A"))))))
+            (catch Throwable t
+              (error t "Could not fix attachment" attachment))))))))
