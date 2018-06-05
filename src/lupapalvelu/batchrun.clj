@@ -1205,11 +1205,11 @@
 
 (defn fetch-missing-backend-attachments [& args]
   (mongo/connect!)
-  (let [ts 1527800400000
+  (let [ts 1527724800000
         app-xml-cache (atom {})]
     (doseq [app (mongo/select :applications
                               {:modified                          {$gte ts}
-                               :attachments {$elemMatch {:latestVersion.created {$gte 1527724800000
+                               :attachments {$elemMatch {:latestVersion.created {$gte ts
                                                                                  $lt 1528063200000}
                                                          :type.type-id {$in (concat ["paatos" "paatosote" "muu"] vru/task-attachment-types)}
                                                          :target.id {$exists true}}}}
