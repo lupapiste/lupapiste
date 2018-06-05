@@ -894,7 +894,8 @@
                                                               {:latestVersion.modified {$gte ts
                                                                                         $lt 1528063200000}}]
                                                          :latestVersion.onkaloFileId {$exists false}}}}
-                              [:attachments])
+                              [:attachments]
+                              {:_id 1})
             {version :latestVersion :as att} (->> (:attachments app)
                                                   (filter :latestVersion))
             :let [file (mongo/download (:fileId version))
@@ -918,7 +919,8 @@
                                                                          $lt 1528063200000}}
                                     {:attachments.latestVersion.modified {$gte ts
                                                                           $lt 1528063200000}}]}
-                              [:attachments :organization])
+                              [:attachments :organization]
+                              {:_id 1})
             {version :latestVersion :as att} (->> (:attachments app)
                                                   (filter :latestVersion))
             :let [file (mongo/download (:fileId version))]]
@@ -1242,7 +1244,8 @@
                                :address :permitType
                                :permitSubtype :organization
                                :primaryOperation :verdicts
-                               :attachments :tasks])
+                               :attachments :tasks]
+                              {:_id 1})
             {version :latestVersion target :target :as att} (->> (:attachments app)
                                                                  (filter :latestVersion)
                                                                  (filter :target))
