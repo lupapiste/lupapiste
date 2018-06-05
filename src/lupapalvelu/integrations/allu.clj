@@ -22,7 +22,7 @@
   "The language to use when localizing output to ALLU"
   "fi")
 
-(def- WGS84-URN "urn:ogc:def:crs:OGC:1.3:CRS84")
+(def- WGS84-URN "EPSG:4326")
 
 ;;;; Cleaning up :value indirections
 
@@ -92,15 +92,10 @@
   (let [{:keys [email phone]} (person->contact (customer-contact payee-doc))]
     (assoc (doc->customer true payee-doc) :phone phone :email email)))
 
-(defn- drawing->GeoJSON-2008 [{:keys [geometry-wgs84] :as drawing}]
-  {:type "Feature"
-   :geometry geometry-wgs84
-   :properties (dissoc drawing :geometry :geometry-wgs84)}) ; TODO: dissoc even more (?)
-
 (defn- application-geometry [{:keys [drawings location-wgs84]}]
   (let [obj (if (seq drawings)
-              {:type "FeatureCollection"
-               :features (mapv drawing->GeoJSON-2008 drawings)}
+              {:type "GeometryCollection"
+               :geometries (mapv :geometry-wgs84 drawings)}
               {:type "Point"
                :coordinates location-wgs84})]
     (assoc obj :crs {:type "name", :properties {:name WGS84-URN}})))
@@ -123,7 +118,7 @@
         res              {:clientApplicationKind kind
                           :customerWithContacts  (convert-applicant applicant-doc)
                           :endTime               (format-date-time end)
-                          :geometry              {:geometryOperations (application-geometry app)}
+                          :geometry              (application-geometry app)
                           :identificationNumber  id
                           :invoicingCustomer     (convert-payee payee-doc)
                           :name                  (str id " " kind)

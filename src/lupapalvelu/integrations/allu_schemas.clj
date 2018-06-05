@@ -106,7 +106,7 @@
    :customerWithContacts             {:contacts (NonEmptyVec Contact)
                                       :customer Customer}
    :endTime                          NonBlankStr ; TODO: RFC-3339
-   :geometry                         {:geometryOperations GeoJSON-2008}
+   :geometry                         GeoJSON-2008
    :identificationNumber             ApplicationId
    (optional-key :invoicingCustomer) Customer
    :name                             NonBlankStr
