@@ -261,23 +261,32 @@
                                    :dict  :contract-text}]]}}})
 
 (def legsub-signatures
-  {:dictionary {:signatures {:repeating {:name       {:text {:read-only? true}}
-                                         :user-id    {:text {:read-only? true}}
-                                         :company-id {:text {:read-only? true}}
-                                         :date       {:date {:read-only? true}}}
-                             :sort-by   :date}}
+  {:dictionary {:signatures-title {:css      :pate-label
+                                   :loc-text :verdict.signatures}
+                :signatures       {:repeating {:name       {:text {:label?     false
+                                                                   :read-only? true}}
+                                               :user-id    {:text {:read-only? true}}
+                                               :company-id {:text {:read-only? true}}
+                                               :date       {:date {:label?     false
+                                                                   :read-only? true}}}
+                                   :sort-by   :date}}
    :section    {:id       :signatures
                 :buttons? false
-                :i18nkey  :verdict.signatures
                 :show?    :signatures
                 :grid     {:columns 8
-                           :rows    [[{:col  7
-                                       :grid {:columns   7
-                                              :repeating :signatures
-                                              :rows      [[{:col  5
-                                                            :dict :name}
-                                                           {:col  2
-                                                            :dict :date}]]}}]]}}})
+                           :rows    [[{:col  8
+                                       :dict :signatures-title}]
+                                     {:css :row--extra-tight
+                                      :row [{:col  7
+                                             :grid {:columns   16
+                                                    :repeating :signatures
+                                                    :rows      [{:css :row--extra-tight
+                                                                 :row [{}
+                                                                       {:col  4
+                                                                        :dict :name}
+                                                                       {:col  2
+                                                                        :align :right
+                                                                        :dict :date}]}]}}]}]}}})
 
 (def contract-legacy-verdict
   (build-legacy-schema

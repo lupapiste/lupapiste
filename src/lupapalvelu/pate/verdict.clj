@@ -485,14 +485,14 @@
                                             (i18n/localize-and-fill lang
                                                                     :pate.replaces-verdict
                                                                     section)))))]
-    (assoc (select-keys verdict [:id :published :modified :legacy?])
+    (assoc (select-keys verdict [:id :published :modified :legacy? :category])
           :giver (if (util/=as-kw (:giver template) :lautakunta)
                    (:boardname references)
                    (:handler data))
           :replaces replaces
           :verdict-date (:verdict-date data)
           :title (->> (cond
-                        (util/=as-kw category :contract)
+                        (and (util/=as-kw category :contract) published)
                         [(i18n/localize lang :pate.verdict-table.contract)]
 
                         published

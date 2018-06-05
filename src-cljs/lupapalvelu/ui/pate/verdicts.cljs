@@ -107,7 +107,8 @@
   [:table.pate-verdicts-table
    [:thead [:tr (map (fn [header] [:th (common/loc header)]) headers)]]
    [:tbody (map (fn [{:keys [id title published modified
-                             verdict-date giver replaced?]
+                             verdict-date giver replaced?
+                             category]
                       :as   verdict}]
                   [:tr {:key id}
                    [:td {:class (common/css-flags :replaced replaced?)}
@@ -124,8 +125,15 @@
                       (when (can-delete? id)
                             [:a
                              {:on-click #(confirm-and-delete-verdict app-id verdict)}
-                             (common/loc (if published
+                             (common/loc (cond
+                                           (and published
+                                                (util/=as-kw :contract category))
+                                           :pate.contract.delete
+
+                                           published
                                            :pate.verdict-table.remove-verdict
+
+                                           :else
                                            :pate.verdict-table.remove-draft))])
                       (when (can-replace? id)
                         [:a

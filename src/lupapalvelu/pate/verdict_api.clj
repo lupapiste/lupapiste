@@ -129,6 +129,8 @@
   (when-let [password (:password data)]
     (when-not (usr/get-user-with-password (:username user)
                                           password)
+      ;; Two-second delay to discourage brute forcing.
+      (Thread/sleep 2000)
       (fail :error.password))))
 
 (defmethod action/allowed-actions-for-category :pate-verdicts
@@ -376,7 +378,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(verdict-exists :editable? :legacy?)
                       verdict-filled]
-   :states            states/give-verdict-states
+   :states            states/post-submitted-states
    :notified         true
    :on-success       (notify :application-state-change)}
   [command]

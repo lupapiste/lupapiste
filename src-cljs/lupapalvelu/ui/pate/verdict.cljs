@@ -142,7 +142,9 @@
        [:div.row
         [:div.col-2.col--right
          [:span.verdict-published
-          (common/loc :pate.verdict-published
+          (common/loc (if contract?
+                        :pate.contract.published
+                        :pate.verdict-published)
                       (js/util.finnishDate published))]]]
        [:div.row.row--tight
         [:div.col-1
