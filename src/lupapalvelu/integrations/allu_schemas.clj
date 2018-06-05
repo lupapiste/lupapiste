@@ -1,10 +1,17 @@
 (ns lupapalvelu.integrations.allu-schemas
   (:require [schema.core :as sc :refer [defschema enum optional-key cond-pre Int Bool]]
+            [clj-time.format :as tf]
             [iso-country-codes.countries :as countries]
             [sade.schemas :refer [NonBlankStr NonEmptyVec
                                   Email Zipcode Tel Hetu FinnishY FinnishOVTid
                                   Kiinteistotunnus ApplicationId]]
             [lupapalvelu.integrations.geojson-2008-schemas :refer [GeoJSON-2008]]))
+
+(defschema DateTimeNoMs
+  "ISO-8601/RFC-3339 aikaleima sekuntien tarkkuudella"
+  (sc/pred (fn [s] (try (tf/parse (tf/formatters :date-time-no-ms) s)
+                        (catch Exception _ false)))
+           "ISO-8601/RFC-3339 date time without milliseconds"))
 
 (defschema ISO-3166-alpha-2
   "Kaksikirjaiminen maakoodi (esim. 'FI')"
@@ -58,7 +65,7 @@
    (optional-key :postalAddress) PostalAddress})
 
 (defschema CustomerType
-  "Hakijan/maksajan tyyppi (hankil\u00f6/yritys/yhsitys/muu)."
+  "Hakijan/maksajan tyyppi (henkil\u00f6/yritys/yhdistys/muu)."
   (enum "PERSON" "COMPANY" "ASSOCIATION" "OTHER"))
 
 (defschema Customer
@@ -105,7 +112,7 @@
    (optional-key :customerReference) NonBlankStr
    :customerWithContacts             {:contacts (NonEmptyVec Contact)
                                       :customer Customer}
-   :endTime                          NonBlankStr ; TODO: RFC-3339
+   :endTime                          DateTimeNoMs
    :geometry                         GeoJSON-2008
    :identificationNumber             ApplicationId
    (optional-key :invoicingCustomer) Customer
@@ -113,5 +120,5 @@
    (optional-key :pendingOnClient)   Bool
    (optional-key :postalAddress)     PostalAddress
    (optional-key :propertyIdentificationNumber) Kiinteistotunnus
-   :startTime                        NonBlankStr ; TODO: RFC-3339
+   :startTime                        DateTimeNoMs
    (optional-key :workDescription)   NonBlankStr})
