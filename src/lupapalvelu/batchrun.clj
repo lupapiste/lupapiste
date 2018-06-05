@@ -886,11 +886,13 @@
 (defn analyze-missing [& args]
   (mongo/connect!)
   (info "Starting analyze-missing job")
-  (let [ts 1527800400000]
+  (let [ts 1527638400000]
     (doseq [app (mongo/select :applications
                               {:modified    {$gte ts}
-                               :attachments {$elemMatch {:latestVersion.created {$gte ts
-                                                                                 $lt 1528063200000}
+                               :attachments {$elemMatch {$or [:latestVersion.created {$gte ts
+                                                                                      $lt 1528063200000}
+                                                              :latestVersion.modified {$gte ts
+                                                                                       $lt 1528063200000}]
                                                          :latestVersion.onkaloFileId {$exists false}}}}
                               [:attachments])
             {version :latestVersion :as att} (->> (:attachments app)
@@ -907,12 +909,15 @@
 (defn convert-and-link-missing [& args]
   (mongo/connect!)
   (info "Starting convert-and-link-missing job")
-  ;(sade.util/to-millis-from-local-datetime-string "2018-06-01T00:00")
-  ;=> 1527800400000
-  (let [ts 1527800400000]
+  ;(sade.util/to-millis-from-local-datetime-string "2018-05-30T00:00")
+  ;=> 1527638400000
+  (let [ts 1527638400000]
     (doseq [app (mongo/select :applications
                               {:modified                          {$gte ts}
-                               :attachments.latestVersion.created {$gte ts}}
+                               $or [:attachments.latestVersion.created {$gte ts
+                                                                        $lt 1528063200000}
+                                    :attachments.latestVersion.modified {$gte ts
+                                                                         $lt 1528063200000}]}
                               [:attachments :organization])
             {version :latestVersion :as att} (->> (:attachments app)
                                                   (filter :latestVersion))
@@ -1047,15 +1052,21 @@
         (let [{:keys [id attachmentId rotation]} data
               application (mongo/by-id :applications id)
               {:keys [versions] :as attachment} (att/get-attachment-info application attachmentId)
-              source-version (->> (reverse versions)
-                                  (filter #(mongo/download (:fileId %)))
-                                  first)
-              target-version (->> (reverse versions)
-                                  (take-while #(not= (:fileId source-version) (:fileId %)))
-                                  last)
-              {:keys [fileId filename contentType]} source-version]
+              source-version (or (->> (reverse versions)
+                                      (filter #(mongo/download (:fileId %)))
+                                      first)
+                                 (->> (reverse versions)
+                                      (filter #(mongo/download (:originalFileId %)))
+                                      first))
+              {:keys [fileId filename contentType originalFileId]} source-version
+              target-version (or (->> (reverse versions)
+                                      (take-while #(not= fileId (:fileId %)))
+                                      last)
+                                 (when-not (mongo/download fileId)
+                                   source-version))]
           (if target-version
-            (if-let [dl (mongo/download fileId)]
+            (if-let [dl (or (mongo/download fileId)
+                            (mongo/download originalFileId))]
               (files/with-temp-file temp-pdf
                 (info "Rotating file" fileId "from attachment" attachmentId "by" rotation
                       ", target file id is" (:fileId target-version))
@@ -1082,7 +1093,14 @@
                                                       {:fileId (:fileId target-version)})
                                                {:application (:id application) :linked true})
                         (infof "fileId %s converted, uploaded and linked successfully" fileId))
-                      (warnf "file %s not converted: %s" fileId (pr-str conversion)))))
+                      (do
+                        (file-upload/save-file {:content  temp-pdf
+                                                :filename filename
+                                                :fileId   (:fileId target-version)
+                                                :size     (.length temp-pdf)}
+                                               {:application id
+                                                :linked      true})
+                        (infof "fileId %s uploaded and linked successfully" fileId)))))
                 (info "Rotated file" (:fileId target-version) "uploaded"))
               (error "No unrotated file found with file id" fileId))
             (info "Latest version has a file, so this should be already fine.")))))))
