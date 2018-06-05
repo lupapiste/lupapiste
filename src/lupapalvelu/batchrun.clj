@@ -888,8 +888,10 @@
   (info "Starting analyze-missing job")
   (let [ts 1527800400000]
     (doseq [app (mongo/select :applications
-                              {:modified                          {$gte ts}
-                               :attachments.latestVersion.created {$gte ts}}
+                              {:modified    {$gte ts}
+                               :attachments {$elemMatch {:latestVersion.created {$gte ts
+                                                                                 $lt 1528063200000}
+                                                         :latestVersion.onkaloFileId {$exists false}}}}
                               [:attachments])
             {version :latestVersion :as att} (->> (:attachments app)
                                                   (filter :latestVersion))
@@ -959,21 +961,26 @@
        (filter #(ss/starts-with (get-in % [:message :message]) "INFO"))
        (map parse-message-field)))
 
+(def stamp-errors #{"5b10d46ce7f6047b9fd19076"
+                    "5b06fef2e7f6043f476f4a8f"})
+
 (defn replay-missing-stamping-ops [& args]
   (mongo/connect!)
   (info "Starting replay-missing-stamping-ops job")
   (doseq [{:keys [action user data created] :as logdata} (graylog-request "stamp-attachments")]
     (logging/with-logging-context {:applicationId (:id data)}
-      (when (= action "stamp-attachments")
+      (when (and (= action "stamp-attachments")
+                 (some #(contains? stamp-errors %) (:files data)))
         (let [{:keys [id files stamp timestamp lang]} data
               command {:user user
                        :created created}
-              application (mongo/by-id :applications id)]
+              application (mongo/by-id :applications id)
+              filtered-files (filter #(contains? stamp-errors %) files)]
           (if (and (string? id)
-                   (seq files)
+                   (seq filtered-files)
                    (map? stamp)
                    (string? lang))
-            (stamping/regenerated-stamped-attachment command timestamp application files lang stamp)
+            (stamping/regenerated-stamped-attachment command timestamp application filtered-files lang stamp)
             (error "Invalid log data, can't fix stamp:" logdata)))))))
 
 (defn replay-missing-user-attachments [& args]
@@ -1037,22 +1044,43 @@
     (logging/with-logging-context {:applicationId (:id data)}
       (let [{:keys [id attachmentId rotation]} data
             application (mongo/by-id :applications id)
-            attachment (att/get-attachment-info application attachmentId)
-            {:keys [fileId filename]} (last (:versions attachment))]
+            {:keys [versions] :as attachment} (att/get-attachment-info application attachmentId)
+            source-version (->> (reverse versions)
+                                (filter #(mongo/download (:fileId %)))
+                                first)
+            target-version (or (->> (reverse versions)
+                                    (take-while #(not= (:fileId source-version) (:fileId %)))
+                                    last)
+                               source-version)
+            {:keys [fileId filename contentType]} source-version]
         (if-let [dl (mongo/download fileId)]
           (files/with-temp-file temp-pdf
-            (info "Rotating file" fileId "from attachment" attachmentId "by" rotation)
+            (info "Rotating file" fileId "from attachment" attachmentId "by" rotation
+                  ", target file id is" (:fileId target-version))
             (with-open [content ((:content dl))]
-              (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)
+              (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation))
+            (when (= fileId (:fileId target-version))
               (info "Deleting existing file" fileId)
-              (mongo/delete-file-by-id fileId)
-              (file-upload/save-file {:content  temp-pdf
-                                      :filename filename
-                                      :fileId   fileId
-                                      :size (.length temp-pdf)}
-                                     {:application id
-                                      :linked      true})
-              (info "Rotated file" fileId "uploaded")))
+              (mongo/delete-file-by-id fileId))
+            (file-upload/save-file {:content  temp-pdf
+                                    :filename filename
+                                    :fileId   (:originalFileId target-version)
+                                    :size     (.length temp-pdf)}
+                                   {:application id
+                                    :linked      true})
+            (when-not (= (:fileId target-version) (:originalFileId target-version))
+              (let [conversion (conversion/archivability-conversion application
+                                                                    {:filename    filename
+                                                                     :contentType contentType
+                                                                     :content     temp-pdf})]
+                (if (:autoConversion conversion)
+                  (do
+                    (file-upload/save-file (merge (select-keys conversion [:content :filename])
+                                                  {:fileId (:fileId target-version)})
+                                           {:application (:id application) :linked true})
+                    (infof "fileId %s converted, uploaded and linked successfully" fileId))
+                  (warnf "file %s not converted: %s" fileId (pr-str conversion)))))
+            (info "Rotated file" (:fileId target-version) "uploaded"))
           (error "No unrotated file found with file id" fileId))))))
 
 (defn fix-attachment-childrens
@@ -1138,8 +1166,8 @@
   (tasks-children-fix)
   (statement-children-fix))
 
-(defn- fetch-and-upload-file [url {:keys [filename originalFileid fileId contentType]} application]
-  {:pre [(not-any? ss/blank? [url fileId])]}
+(defn- fetch-and-upload-file [url {:keys [filename originalFileId fileId contentType]} application]
+  {:pre [(not-any? ss/blank? [url fileId originalFileId])]}
   (let [java-url (.toString (URL. (URL. "http://") url))
         resp (http/get (.toString java-url) :as :stream :throw-exceptions false :conn-timeout (* 10 1000))
         content-length (util/->int (get-in resp [:headers "content-length"] 0))]
@@ -1153,11 +1181,12 @@
           (io/copy in temp-file)
           (file-upload/save-file {:content temp-file
                                   :filename filename
-                                  :fileId originalFileid
-                                  :size (content-length)}
+                                  :fileId originalFileId
+                                  :size content-length}
                                  {:application (:id application)
                                   :linked true})
-          (when-not (= fileId originalFileid)
+          (infof "fileId %s converted, uploaded and linked successfully" originalFileId)
+          (when-not (= fileId originalFileId)
             (let [conversion (conversion/archivability-conversion application
                                                                   {:filename    filename
                                                                    :contentType contentType
@@ -1190,53 +1219,103 @@
                                                                  (filter :target))
             :let [file (mongo/download (:fileId version))]]
       (logging/with-logging-context {:applicationId (:id app)}
+        (info "Checking attachment id" (:id att))
         (when-not file
-          (let [app-xml (or (get @app-xml-cache (:id app))
-                            (-> (swap! app-xml-cache assoc (:id app) (krysp-fetch/get-application-xml-by-application-id app))
-                                (get (:id app))))
-                organization (org/get-organization (:organization app))
-                xml-verdicts (verdict/get-verdicts-from-xml app organization app-xml)]
-            (cond
-              (= (:type target) "verdict")
-              (let [app-verdict (first (filter #(= (:id %) (:id target)) (:verdicts app)))]
-                (info "Fetching file for verdict" (:id target))
-                (if-let [xml-verdict (verdict/matching-verdict app-verdict xml-verdicts)]
-                  (let [{:keys [linkkiliitteeseen]} (->> xml-verdict
-                                                         :paatokset
-                                                         first
-                                                         :poytakirjat
-                                                         (map (fn [pk]
-                                                                (->> [(or (:liite pk) (:Liite pk))]
-                                                                     flatten
-                                                                     (filter #(-> % :linkkiliitteeseen ss/blank? false?)))))
-                                                         flatten
-                                                         (remove nil?)
-                                                         (filter (fn [{:keys [linkkiliitteeseen]}]
-                                                                   (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
-                                                                      (:id att))))
-                                                         first)]
-                    (if (ss/blank? linkkiliitteeseen)
-                      (error "Could not find an HTTP link from verdict:" xml-verdict)
-                      (fetch-and-upload-file linkkiliitteeseen version app)))
-                  (error "Could not find the matching XML verdict for" (:id target))))
+          (if (:urlHash target)
+            (let [app-xml (or (get @app-xml-cache (:id app))
+                              (-> (swap! app-xml-cache assoc (:id app) (krysp-fetch/get-application-xml-by-application-id app))
+                                  (get (:id app))))
+                  organization (org/get-organization (:organization app))
+                  xml-verdicts (verdict/get-verdicts-from-xml app organization app-xml)]
+              (cond
+                (= (:type target) "verdict")
+                (let [app-verdict (first (filter #(= (:id %) (:id target)) (:verdicts app)))]
+                  (info "Fetching file for verdict" (:id target))
+                  (if-let [xml-verdict (verdict/matching-verdict app-verdict xml-verdicts)]
+                    (let [{:keys [linkkiliitteeseen]} (->> xml-verdict
+                                                           :paatokset
+                                                           first
+                                                           :poytakirjat
+                                                           (map (fn [pk]
+                                                                  (->> [(or (:liite pk) (:Liite pk))]
+                                                                       flatten
+                                                                       (filter #(-> % :linkkiliitteeseen ss/blank? false?)))))
+                                                           flatten
+                                                           (remove nil?)
+                                                           (filter (fn [{:keys [linkkiliitteeseen]}]
+                                                                     (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
+                                                                        (:id att))))
+                                                           first)]
+                      (if (ss/blank? linkkiliitteeseen)
+                        (error "Could not find an HTTP link from verdict:" xml-verdict)
+                        (fetch-and-upload-file linkkiliitteeseen version app)))
+                    (error "Could not find the matching XML verdict for" (:id target))))
 
+                (= (:type target) "task")
+                (let [_ (info "Fetching file for task" (:id target))
+                      reviews (vec (review/reviews-preprocessed app-xml))
+                      buildings-summary (building-reader/->buildings-summary app-xml)
+                      source {:type "background"}
+                      app-task (->> (:tasks app)
+                                    (filter #(= (:id %) (:id target)))
+                                    first)
+                      review-tasks (review/reviews->tasks {:state :sent :created (now)} source buildings-summary reviews)
+                      review-tasks (keep-indexed (fn [idx item]
+                                                   (assoc item :attachments (-> (get reviews idx) :liitetieto))) review-tasks)
+                      attachments (-> (filter (fn [{:keys [data]}]
+                                                (= (get-in app-task [:data :muuTunnus :value])
+                                                   (get-in data [:muuTunnus :value])))
+                                              review-tasks)
+                                      first
+                                      :attachments)
+                      all-atts (->> (map :attachments review-tasks)
+                                    flatten
+                                    (remove nil?))
+                      {:keys [linkkiliitteeseen]} (->> (or (seq attachments)
+                                                           all-atts)
+                                                       (filter (fn [{{:keys [linkkiliitteeseen]} :liite}]
+                                                                 (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
+                                                                    (:id att))))
+                                                       first
+                                                       :liite)]
+                  (if (ss/blank? linkkiliitteeseen)
+                    (error "Could not find an HTTP link from reviews:" reviews)
+                    (fetch-and-upload-file linkkiliitteeseen version app)))
+
+                (= (:type target) "task")
+                (let [_ (info "Generating PDF for task" (:id target))
+                      tasks-filter-fn (fn [task] (and (= "task-katselmus" (get-in task [:schema-info :name]))
+                                                      (= "sent" (:state task))
+                                                      (= (:id target) (:id task))))
+                      user-fn (fn [_ task-attachment]
+                                (get-in task-attachment [:latestVersion :user]))]
+                  (fix-attachment-childrens [app] :tasks tasks-filter-fn user-fn))
+
+
+                :else
+                (error "Cannot handle attachment with target:" target)))
+
+            (cond
               (= (:type target) "task")
-              (let [_ (info "Fetching file for task" (:id target))
-                    reviews (vec (review/reviews-preprocessed app-xml))
-                    buildings-summary (building-reader/->buildings-summary app-xml)
-                    source {:type "background"}
-                    review-tasks (review/reviews->tasks {:state :sent :created (now)} source buildings-summary reviews)
-                    review-tasks (keep-indexed (fn [idx item]
-                                                 (assoc item :attachments (-> (get reviews idx) :liitetieto))) review-tasks)
-                    attachments (-> (filter #(= (:id %) (:id target)) review-tasks)
-                                    first
-                                    :attachments)
-                    correct-attachment (->> attachments
-                                            (filter (fn [{:keys [linkkiliitteeseen]}]
-                                                      (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
-                                                         (:id att))))
-                                            first)]
-                (fetch-and-upload-file (:linkkiliitteeseen correct-attachment) version app))
+              (let [_ (info "Generating PDF for task" (:id target))
+                    tasks-filter-fn (fn [task] (and (= "task-katselmus" (get-in task [:schema-info :name]))
+                                                    (= "sent" (:state task))
+                                                    (= (:id target) (:id task))))
+                    user-fn (fn [_ task-attachment]
+                              (get-in task-attachment [:latestVersion :user]))]
+                (fix-attachment-childrens [app] :tasks tasks-filter-fn user-fn))
+
+              (= (:type target) "verdict")
+              (let [_ (info "Generating PDF for verdict" (:id target))
+                    verdict-filter-fn (fn [verdict]
+                                        (= (:id target) (:id verdict)))
+                    user-fn (fn [_ verdict-attachment]
+                              (get-in verdict-attachment [:latestVersion :user]))
+                    lang (if (or (ss/starts-with (:filename version) "Beslut")
+                                 (ss/starts-with (:filename version) "Avtal"))
+                           "sv"
+                           "fi")]
+                (fix-attachment-childrens [app] :verdicts verdict-filter-fn user-fn {(:id app) lang}))
 
               :else
-              (error "Cannot handle attachment with target" target))))))))
+              (error "Attachment does not have a target:" att))))))))
