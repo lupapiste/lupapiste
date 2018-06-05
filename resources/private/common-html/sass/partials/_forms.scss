@@ -428,7 +428,7 @@ input.form-input.inline {
 .form-string-unit {
   display: table-cell;
   vertical-align: middle;
-  padding-left: 2px;
+  padding-bottom: 5px;
 }
 
 .form-input.tiny {
@@ -472,7 +472,7 @@ input.form-input.inline {
         vertical-align: text-top;
       }
       .form-input-and-unit {
-        display: inline-block;
+        //display: inline-block;
         margin-right: $marginM;
         input {
           width: $cols1;

@@ -8442,7 +8442,7 @@ input.form-input.inline, input.inline.form-input--inline {
 .form-string-unit {
   display: table-cell;
   vertical-align: middle;
-  padding-left: 2px;
+  padding-bottom: 5px;
 }
 
 .form-input.tiny, .tiny.form-input--inline {
@@ -8491,7 +8491,6 @@ input.form-input.inline, input.inline.form-input--inline {
 }
 
 .docgen-content .form-choice .form-entry .form-input-and-unit {
-  display: inline-block;
   margin-right: 12px;
 }
 
