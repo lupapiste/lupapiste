@@ -16,7 +16,7 @@
 
 ;;;; Constants
 
-(def ^:private lang
+(def- lang
   "The language to use when localizing output to ALLU"
   "fi")
 
