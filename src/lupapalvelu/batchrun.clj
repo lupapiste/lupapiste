@@ -1230,17 +1230,21 @@
                 (warnf "file %s not converted: %s" fileId (pr-str conversion))))))
         (error (str (:status resp) " - unable to download " url ": " resp))))))
 
-(defn fetch-missing-backend-attachments [& [start-ts]]
+(defn fetch-missing-backend-attachments [& application-ids]
   (mongo/connect!)
-  (let [ts (or (c/to-long start-ts) 1527552000000)
-        app-xml-cache (atom {})]
+  (let [ts 1527552000000
+        app-xml-cache (atom {})
+        query (if (seq application-ids)
+                {:_id {$in application-ids}}
+                {:modified    {$gte ts}
+                 :attachments {$elemMatch {:latestVersion.created {$gte ts
+                                                                   $lt  1528063200000}
+                                           :type.type-id          {$in (concat ["paatos" "paatosote" "muu"] vru/task-attachment-types)}
+                                           :target.id             {$exists true}}}})]
     (info "Starting from timestamp" ts)
+    (info "Running for application ids:" (or (seq application-ids) "all"))
     (doseq [app (mongo/select :applications
-                              {:modified    {$gte ts}
-                               :attachments {$elemMatch {:latestVersion.created {$gte ts
-                                                                                 $lt  1528063200000}
-                                                         :type.type-id          {$in (concat ["paatos" "paatosote" "muu"] vru/task-attachment-types)}
-                                                         :target.id             {$exists true}}}}
+                              query
                               [:state :municipality
                                :address :permitType
                                :permitSubtype :organization
