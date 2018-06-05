@@ -295,6 +295,14 @@
                         (true? val) (conj result (i18n/localize lang (get vastattavat-loc-keys key)))
                         :else result))
                     []))))
+(defn signatures
+  "Signatures as a timestamp ordered list"
+  [{:keys [verdict]}]
+  (when (util/=as-kw :contract (:category verdict))
+    (->> verdict :data :signatures
+         vals
+         (sort-by :date)
+         (map #(update % :date date/finnish-date)))))
 
 (defn verdict-properties
   "Adds all kinds of different properties to the options. It is then up
@@ -350,7 +358,9 @@
                                                                 :end-date))
            :handler (handler options)
            :link-permits (link-permits options)
-           :tj-vastattavat-tyot (tj-vastattavat-tyot application lang))))
+           :tj-vastattavat-tyot (tj-vastattavat-tyot application lang)
+           :signatures (signatures options))))
+
 
 (defn verdict-html
   [application verdict]
@@ -382,7 +392,7 @@
                                                           (reduce-kv (fn [acc k v]
                                                                        (assoc acc k (name v)))
                                                                      {}))
-                                    :source          {:type "verdict"
+                                    :source          {:type "verdicts"
                                                       :id   (:id verdict)}
                                     :locked          true
                                     :read-only       true
@@ -397,6 +407,32 @@
                                                                       (:id application)
                                                                       (util/to-local-datetime (:published verdict)))
                                     :content  stream})))))
+
+(defn create-verdict-attachment-version
+  "Creates a verdict attachments as a new version to previously created
+  verdict attachment. Used when a contract is signed."
+  [{:keys [application created] :as command} verdict]
+  (let [pdf                 (html-pdf/html->pdf application
+                                                "pate-verdict"
+                                                (verdict-html application verdict))
+        contract?           (util/=as-kw (:category verdict) :contract)
+        {attachment-id :id} (util/find-first (fn [{source :source}]
+                                               (and (util/=as-kw (:type source) :verdicts)
+                                                    (= (:id source) (:id verdict))))
+                                             (:attachments application))]
+    (when-not (:ok pdf)
+      (fail! :pate.pdf-verdict-error))
+    (with-open [stream (:pdf-file-stream pdf)]
+      (att/upload-and-attach! command
+                              {:created       created
+                               :attachment-id attachment-id}
+                              {:filename (i18n/localize-and-fill (html/language verdict)
+                                                                 (if contract?
+                                                                   :pdf.contract.filename
+                                                                   :pdf.filename)
+                                                                 (:id application)
+                                                                 (util/to-local-datetime created))
+                               :content  stream}))))
 
 (defn create-verdict-preview
   "Creates draft version of the verdict

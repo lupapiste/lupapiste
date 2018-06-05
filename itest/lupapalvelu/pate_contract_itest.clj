@@ -24,9 +24,11 @@
      (fact "New verdict draft"
        (let [{:keys [verdict-id]} (command sonja :new-legacy-verdict-draft
                                            :id app-id)]
-         (fact "Verdict category is ya"
-           (:verdict (open-verdict app-id verdict-id))
-           => (contains {:category "ya"}))
+         (let [{:keys [verdict]} (open-verdict app-id verdict-id)]
+           (fact "Verdict category is ya"
+             (:category verdict) => "ya")
+           (fact "Verdict giver is the handler"
+             (:data verdict) => (contains {:handler "Sonja Sibbo"})))
          (fact "There is one verdict"
            (count (:verdicts (query sonja :pate-verdicts :id app-id)))
            => 1)
@@ -52,6 +54,7 @@
          (fact "Fill contract"
            (fill-verdict app-id verdict-id
                          :kuntalupatunnus "123456"
+                         :handler "Random Authority"
                          :verdict-date (timestamp "4.6.2018")
                          :contract-text "This is a binding contract.")
            (fact "Add condition"
@@ -84,7 +87,7 @@
                               :in-any-order))
              (fact "Verdict attachment"
                (let [attachment (last attachments)]
-                 attachment => (contains {:source           source
+                 attachment => (contains {:source           (update source :type str "s")
                                           :applicationState "agreementPrepared"
                                           :contents         "Sopimus"
                                           :type             {:type-group "muut"
@@ -93,4 +96,79 @@
                    (-> attachment
                        :latestVersion
                        :filename)
-                   => (re-pattern (str app-id " Sopimus .+.pdf")))))))))))
+                   => (re-pattern (str app-id " Sopimus .+.pdf")))))))
+         (fact "The published contract has one signature"
+           (let [{:keys [verdict]} (open-verdict app-id verdict-id)]
+             (-> verdict :data :signatures vals)
+             => (just [(contains {:name "Random Authority"
+                                  :date (-> verdict :data :verdict-date)})])))
+
+         (fact "Sonja signs the contract: bad password"
+           (command sonja :sign-pate-contract :id app-id
+                    :verdict-id verdict-id
+                    :password "bad") => (err :error.password))
+
+         (fact "Sonja signs the contract: correct password"
+           (command sonja :sign-pate-contract :id app-id
+                    :verdict-id verdict-id
+                    :password "sonja") => ok?)
+
+         (let [{:keys [attachments state]} (query-application sonja app-id)
+               attachment                  (last attachments)]
+           (fact "Application state is agreementSigned"
+             state => "agreementSigned")
+           (fact "There are two verdict attachment versions"
+             ;; Attachment application state is still
+             ;; agreementPrepared, since it does not change
+             ;; automatically by version.
+             attachment => (contains {:applicationState "agreementPrepared"
+                                      :source           {:type "verdicts"
+                                                         :id   verdict-id}})
+
+             (count (:versions attachment)) => 2))
+         (fact "The contract has two signatures"
+           (let [{:keys [verdict]} (open-verdict app-id verdict-id)]
+             (-> verdict :data :signatures vals)
+             => (just [{:name "Random Authority"
+                        :date (-> verdict :data :verdict-date)}
+                       {:name    "Sonja Sibbo"
+                        :user-id sonja-id
+                        :date    (:modified verdict)}]
+                      :in-any-order)))
+         (fact "Sonja cannot resign"
+           (command sonja :sign-pate-contract :id app-id
+                    :verdict-id verdict-id
+                    :password "sonja")
+           => (err :error.already-signed))
+         (invite-company-and-accept-invitation sonja app-id "esimerkki" erkki)
+
+         (fact "Erkki adds Pena to company"
+           (command erkki :company-invite-user
+                    :email "pena@example.com"
+                    :admin false
+                    :firstName "Pena"
+                    :lastName "Panaani"
+                    :submit false) => ok?)
+         (http-token-call (token-from-email "pena@example.com"))
+         (fact "Pena can now sign the contract"
+           (command pena :sign-pate-contract :id app-id
+                    :verdict-id verdict-id
+                    :password "pena") => ok?)
+         (fact "Erkki can no longer sign"
+           (command erkki :sign-pate-contract :id app-id
+                    :verdict-id verdict-id
+                    :password "esimerkki")
+           => (err :error.already-signed))
+         (fact "There are now three signatures"
+           (let [{:keys [verdict]} (open-verdict app-id verdict-id)]
+             (-> verdict :data :signatures vals)
+             => (just [{:name "Random Authority"
+                        :date (-> verdict :data :verdict-date)}
+                       (just {:name    "Sonja Sibbo"
+                              :user-id sonja-id
+                              :date pos?})
+                       {:name "Pena Panaani, Esimerkki Oy"
+                        :user-id pena-id
+                        :company-id "esimerkki"
+                        :date (:modified verdict)}]
+                      :in-any-order)))))))

@@ -114,6 +114,23 @@
     (when-not (util/includes-as-kw? states (:state application))
       (fail :error.command-illegal-state))))
 
+(defn- can-sign
+  "Precheck that fails if the user cannot sign the
+  contract. User/company can sign only once."
+  [{:keys [application] :as command}]
+  (when (and application
+             (not (verdict/user-can-sign? command)))
+    (fail :error.already-signed)))
+
+(defn- password-matches
+  "Precheck that fails if the given password does not match for the
+  current user."
+  [{:keys [user data]}]
+  (when-let [password (:password data)]
+    (when-not (usr/get-user-with-password (:username user)
+                                          password)
+      (fail :error.password))))
+
 (defmethod action/allowed-actions-for-category :pate-verdicts
   [command]
   (if-let [verdict-id (get-in command [:data :verdict-id])]
@@ -236,11 +253,22 @@
    :states          states/post-submitted-states}
   [_])
 
-#_(defcommand sign-pate-contract
-
-  {:description "Adds the user as signatory to a published Pate
+(defcommand sign-pate-contract
+  {:description      "Adds the user as signatory to a published Pate
   contract if the password matches."
-   })
+   :feature          :pate
+   :categories       #{:pate-verdicts}
+   :parameters       [:id :verdict-id :password]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id :password])]
+   :pre-checks       [(verdict-exists :published? :contract?)
+                      can-sign
+                      password-matches]
+   :states           states/post-verdict-states
+   :user-roles       #{:applicant :authority}
+   :user-authz-roles roles/writer-roles-with-foreman}
+  [command]
+  (verdict/sign-contract command)
+  (ok))
 
 ;; ------------------------------------------
 ;; Modern actions

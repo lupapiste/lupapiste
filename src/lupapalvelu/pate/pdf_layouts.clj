@@ -491,6 +491,13 @@
   '([{:loc    :verdict.contract.date
       :source {:dict :verdict-date}}]))
 
+(def legacy--contract-signatures
+  '([{:loc      :pdf.signature
+      :loc-many :verdict.signatures
+      :source   :signatures
+      :styles   [:bold :pad-before]}
+     {:path :name}
+     {:path :date}]))
 
 (def contract-legacy-layout
   (build-layout legacy--application-id
@@ -503,7 +510,8 @@
                 legacy--reviews
                 legacy--contract-conditions
                 legacy--contract-giver
-                legacy--contract-date))
+                legacy--contract-date
+                legacy--contract-signatures))
 
 (defn pdf-layout [{:keys [category legacy?]}]
   (case (util/kw-path (when legacy? :legacy) category)

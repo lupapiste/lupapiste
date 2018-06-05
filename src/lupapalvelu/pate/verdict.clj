@@ -8,6 +8,7 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.company :as com]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.transformations :as transformations]
             [lupapalvelu.domain :as domain]
@@ -581,7 +582,7 @@
        (filter (fn [{:keys [target source]}]
                  (or (and (util/=as-kw (:type target) :verdict)
                           (= (:id target) verdict-id))
-                     (and (util/=as-kw (:type source) :verdict)
+                     (and (util/=as-kw (:type source) :verdicts)
                           (= (:id source) verdict-id)))))
        (map :id)))
 
@@ -900,21 +901,29 @@
   "Augments verdict data, but MUST NOT update mongo (this is called from
   query actions, too).  If final? is truthy then the enrichment is
   part of publishing."
-  ([{:keys [application]} {:keys [data template] :as verdict} final?]
-   (let [inc-set  (->> template
-                       :inclusions
-                       (map keyword)
-                       set)
-         addons (merge
-                 (when (util/intersection-as-kw inc-set
-                                                buildings-inclusion-keys)
-                   {:buildings (merge-buildings (buildings application)
-                                                (:buildings data))})
-                 ;; Neighbors added if in the template
-                 (when (:neighbors inc-set)
-                   {:neighbor-states (neighbor-states application)})
-                 (when (:statements inc-set)
-                   {:statements (statements application final?)}))]
+  ([{:keys [application]} {:keys [data template category published]
+                           :as   verdict} final?]
+   (let [inc-set (->> template
+                      :inclusions
+                      (map keyword)
+                      set)
+         addons  (merge
+                  (when (seq (util/intersection-as-kw inc-set
+                                                      buildings-inclusion-keys))
+                    {:buildings (merge-buildings (buildings application)
+                                                 (:buildings data))})
+                  (when (:neighbors inc-set)
+                    {:neighbor-states (neighbor-states application)})
+                  (when (:statements inc-set)
+                    {:statements (statements application final?)})
+                  (when (and (util/=as-kw :contract category)
+                             final?
+                             (not published))
+                    ;; Verdict giver (handler) is the initial, implicit signer
+                    {:signatures
+                     {(keyword (mongo/create-id))
+                      {:name (:handler data)
+                       :date (:verdict-date data)}}}))]
      (assoc verdict :data (merge data addons))))
   ([command verdict]
    (enrich-verdict command verdict false)))
@@ -1186,3 +1195,56 @@
        (filter #(some? (:published %)))
        (sort-by :published)
        (last)))
+
+(defn user-can-sign? [{:keys [application user] :as command}]
+  (let [sigs  (some-> (command->verdict command)
+                      :data :signatures vals)
+        {com-id :id} (auth/auth-via-company application user)]
+    (not (util/find-first (fn [{:keys [user-id company-id]}]
+                            (or (= user-id (:id user))
+                                (and com-id
+                                     (= com-id company-id))))
+                          sigs))))
+
+(defn- add-signature
+  "Returns verdict with the user's signature added."
+  [{:keys [application user created]} verdict]
+  (let [person            (ss/trim (format "%s %s"
+                                           (:firstName user)
+                                           (:lastName user)))
+        {company-id :id} (auth/auth-via-company application
+                                                 user)]
+    (assoc-in verdict [:data :signatures (keyword (mongo/create-id))]
+              (cond-> {:user-id (:id user)
+                       :date created
+                       :name person}
+                company-id (assoc
+                            :company-id company-id
+                            ;; Get the up-to-date company name just in case
+                            :name (->> (com/find-company-by-id company-id)
+                                       :name
+                                       (format "%s, %s" person)))))))
+
+(defn sign-contract
+  "Sign the contract
+   - Update verdict data
+   - Generate new contract attachment version."
+  [{:keys [user created application] :as command}]
+  (let [verdict (add-signature command
+                               (command->verdict command))]
+
+    (verdict-update command
+                    (util/deep-merge
+                     {$set {:pate-verdicts.$.data (:data verdict)}}
+                     (when (util/not=as-kw (:state application)
+                                           :agreementSigned)
+                       (app-state/state-transition-update :agreementSigned
+                                                          created
+                                                          application
+                                                          user))))
+
+    (pdf/create-verdict-attachment-version
+     (assoc command
+            :application
+            (domain/get-application-no-access-checking (:id application)))
+     verdict)))

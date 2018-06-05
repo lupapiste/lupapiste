@@ -884,3 +884,7 @@
 "pdf.contract.case" "fi" "Asia"
 "pdf.contract.cases" "fi" "Asiat"
 "pdf.contract.filename" "fi" "{0} Sopimus {1}.pdf"
+"pdf.signature" "fi" "Allekirjoitus"
+"pate.contract.publish" "fi" "Julkaise sopimus"
+"pate.contract.published" "fi" "Sopimus julkaistu {0}"
+"pate.contract.confirm-publish" "fi" "Haluatko varmasti julkaista sopimuksen? Toimintoa ei voi perua. Hakemuksen osapuolet saavat sopimuksesta sähköposti-ilmoituksen."
