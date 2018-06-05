@@ -1300,7 +1300,7 @@
             (cond
               (= (:type target) "task")
               (let [_ (info "Generating PDF for task" (:id target))
-                    tasks-filter-fn (fn [task] (and (= "task-katselmus" (get-in task [:schema-info :name]))
+                    tasks-filter-fn (fn [task] (and (#{"task-katselmus" "task-katselmus-backend"} (get-in task [:schema-info :name]))
                                                     (= "sent" (:state task))
                                                     (= (:id target) (:id task))
                                                     (not= (:organization app) "297-R")))
