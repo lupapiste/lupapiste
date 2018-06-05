@@ -1037,51 +1037,55 @@
                                         :linked      true})
                 (infof "fileId %s uploaded and linked successfully" originalFileId)))))))))
 
-(defn replay-missing-rotates [& args]
+(defn replay-missing-rotates [& application-ids]
   (mongo/connect!)
   (info "Starting replay-missing-rotates job")
   (doseq [{:keys [data] :as logdata} (graylog-request "rotate-pdf")]
     (logging/with-logging-context {:applicationId (:id data)}
-      (let [{:keys [id attachmentId rotation]} data
-            application (mongo/by-id :applications id)
-            {:keys [versions] :as attachment} (att/get-attachment-info application attachmentId)
-            source-version (->> (reverse versions)
-                                (filter #(mongo/download (:fileId %)))
-                                first)
-            target-version (or (->> (reverse versions)
-                                    (take-while #(not= (:fileId source-version) (:fileId %)))
-                                    last)
-                               source-version)
-            {:keys [fileId filename contentType]} source-version]
-        (if-let [dl (mongo/download fileId)]
-          (files/with-temp-file temp-pdf
-            (info "Rotating file" fileId "from attachment" attachmentId "by" rotation
-                  ", target file id is" (:fileId target-version))
-            (with-open [content ((:content dl))]
-              (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation))
-            (when (= fileId (:fileId target-version))
-              (info "Deleting existing file" fileId)
-              (mongo/delete-file-by-id fileId))
-            (file-upload/save-file {:content  temp-pdf
-                                    :filename filename
-                                    :fileId   (:originalFileId target-version)
-                                    :size     (.length temp-pdf)}
-                                   {:application id
-                                    :linked      true})
-            (when-not (= (:fileId target-version) (:originalFileId target-version))
-              (let [conversion (conversion/archivability-conversion application
-                                                                    {:filename    filename
-                                                                     :contentType contentType
-                                                                     :content     temp-pdf})]
-                (if (:autoConversion conversion)
-                  (do
-                    (file-upload/save-file (merge (select-keys conversion [:content :filename])
-                                                  {:fileId (:fileId target-version)})
-                                           {:application (:id application) :linked true})
-                    (infof "fileId %s converted, uploaded and linked successfully" fileId))
-                  (warnf "file %s not converted: %s" fileId (pr-str conversion)))))
-            (info "Rotated file" (:fileId target-version) "uploaded"))
-          (error "No unrotated file found with file id" fileId))))))
+      (when (or (nil? application-ids)
+                (some (= (:id data) %) application-ids))
+        (let [{:keys [id attachmentId rotation]} data
+              application (mongo/by-id :applications id)
+              {:keys [versions] :as attachment} (att/get-attachment-info application attachmentId)
+              source-version (->> (reverse versions)
+                                  (filter #(mongo/download (:fileId %)))
+                                  first)
+              target-version (->> (reverse versions)
+                                  (take-while #(not= (:fileId source-version) (:fileId %)))
+                                  last)
+              {:keys [fileId filename contentType]} source-version]
+          (if target-version
+            (if-let [dl (mongo/download fileId)]
+              (files/with-temp-file temp-pdf
+                (info "Rotating file" fileId "from attachment" attachmentId "by" rotation
+                      ", target file id is" (:fileId target-version))
+                (with-open [content ((:content dl))]
+                  (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation))
+                (when (= fileId (:fileId target-version))
+                  (info "Deleting existing file" fileId)
+                  (mongo/delete-file-by-id fileId))
+                (when-not (mongo/download (:originalFileId target-version))
+                  (file-upload/save-file {:content  temp-pdf
+                                          :filename filename
+                                          :fileId   (:originalFileId target-version)
+                                          :size     (.length temp-pdf)}
+                                         {:application id
+                                          :linked      true}))
+                (when-not (= (:fileId target-version) (:originalFileId target-version))
+                  (let [conversion (conversion/archivability-conversion application
+                                                                        {:filename    filename
+                                                                         :contentType contentType
+                                                                         :content     temp-pdf})]
+                    (if (:autoConversion conversion)
+                      (do
+                        (file-upload/save-file (merge (select-keys conversion [:content :filename])
+                                                      {:fileId (:fileId target-version)})
+                                               {:application (:id application) :linked true})
+                        (infof "fileId %s converted, uploaded and linked successfully" fileId))
+                      (warnf "file %s not converted: %s" fileId (pr-str conversion)))))
+                (info "Rotated file" (:fileId target-version) "uploaded"))
+              (error "No unrotated file found with file id" fileId))
+            (info "Latest version has a file, so this should be already fine.")))))))
 
 (defn fix-attachment-childrens
   "Generate new attachments for targets, which were initially created by create-attachment-from-children and later removed"
