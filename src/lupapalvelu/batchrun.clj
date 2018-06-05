@@ -1076,7 +1076,7 @@
                 (if (:autoConversion conversion)
                   (do
                     (file-upload/save-file (merge (select-keys conversion [:content :filename])
-                                                  {:fileId fileId})
+                                                  {:fileId (:fileId target-version)})
                                            {:application (:id application) :linked true})
                     (infof "fileId %s converted, uploaded and linked successfully" fileId))
                   (warnf "file %s not converted: %s" fileId (pr-str conversion)))))
