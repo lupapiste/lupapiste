@@ -1043,7 +1043,7 @@
   (doseq [{:keys [data] :as logdata} (graylog-request "rotate-pdf")]
     (logging/with-logging-context {:applicationId (:id data)}
       (when (or (nil? application-ids)
-                (some (= (:id data) %) application-ids))
+                (some #(= (:id data) %) application-ids))
         (let [{:keys [id attachmentId rotation]} data
               application (mongo/by-id :applications id)
               {:keys [versions] :as attachment} (att/get-attachment-info application attachmentId)
@@ -1209,7 +1209,7 @@
         app-xml-cache (atom {})]
     (doseq [app (mongo/select :applications
                               {:modified                          {$gte ts}
-                               :attachments {$elemMatch {:latestVersion.created {$gte ts
+                               :attachments {$elemMatch {:latestVersion.created {$gte 1527724800000
                                                                                  $lt 1528063200000}
                                                          :type.type-id {$in (concat ["paatos" "paatosote" "muu"] vru/task-attachment-types)}
                                                          :target.id {$exists true}}}}
@@ -1302,7 +1302,8 @@
               (let [_ (info "Generating PDF for task" (:id target))
                     tasks-filter-fn (fn [task] (and (= "task-katselmus" (get-in task [:schema-info :name]))
                                                     (= "sent" (:state task))
-                                                    (= (:id target) (:id task))))
+                                                    (= (:id target) (:id task))
+                                                    (not= (:organization app) "297-R")))
                     user-fn (fn [_ task-attachment]
                               (get-in task-attachment [:latestVersion :user]))]
                 (fix-attachment-childrens [app] :tasks tasks-filter-fn user-fn))
