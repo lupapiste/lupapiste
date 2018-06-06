@@ -1160,6 +1160,9 @@
   ([category]
    (verdict-schema category nil)))
 
+;; TODO: There should be only one public function application->category
+;;       which should resolve category by subtype, operation, permitType and so on..
+
 (defn permit-type->category [permit-type]
   (when-let [kw (some-> permit-type
                         s/lower-case

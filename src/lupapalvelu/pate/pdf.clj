@@ -8,8 +8,10 @@
             [lupapalvelu.application-meta-fields :as app-meta]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.bind :as bind]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
@@ -271,7 +273,7 @@
        (ss/join " ")))
 
 (defn link-permits
-  "Since link-permits resolutive is quite database intensive operation
+  "Since link-permits resolution is quite database intensive operation
   it is only done for YA and TJ category."
   [{:keys [verdict application]}]
   (when (or (util/=as-kw :ya (:category verdict))
@@ -279,12 +281,12 @@
     (:linkPermitData (app-meta/enrich-with-link-permit-data application))))
 
 (defn tj-vastattavat-tyot [application lang]
-  (let [doc (domain/get-document-by-name application "tyonjohtaja-v2")
-        vastattavat-data (lupapalvelu.document.tools/unwrapped (get-in doc [:data :vastattavatTyotehtavat]))
+  (let [doc (foreman/get-foreman-document application)
+        vastattavat-data (tools/unwrapped (get-in doc [:data :vastattavatTyotehtavat]))
         vastattavat-loc-keys (reduce (fn [m {:keys [name i18nkey]}]
                                        (assoc m (keyword name) i18nkey))
                                      {}
-                                     (get-in lupapalvelu.document.schemas/vastattavat-tyotehtavat-tyonjohtaja-v2 [0 :body]))]
+                                     (get-in schemas/vastattavat-tyotehtavat-tyonjohtaja-v2 [0 :body]))]
     (->> vastattavat-data
          (reduce-kv (fn [result key val]
                       (cond
