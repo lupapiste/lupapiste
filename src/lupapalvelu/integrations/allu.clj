@@ -1,6 +1,7 @@
 (ns lupapalvelu.integrations.allu
   (:require [clojure.string :as s]
             [clojure.walk :refer [postwalk]]
+            [mount.core :refer [defstate]]
             [schema.core :as sc]
             [cheshire.core :as json]
             [clj-time.core :as t]
@@ -17,7 +18,7 @@
 
 ;;; FIXME: Avoid producing nil-valued fields.
 
-;;;; Constants
+;;;; # Constants
 
 (def- lang
   "The language to use when localizing output to ALLU"
@@ -25,11 +26,11 @@
 
 (def- WGS84-URN "EPSG:4326")
 
-;;;; Cleaning up :value indirections
+;;;; # Cleaning up :value indirections
 
 (def- flatten-values (partial postwalk (some-fn :value identity)))
 
-;;;; Conversion details
+;;;; # Application conversion
 
 (defn- application-kind [app]
   (let [operation (-> app :primaryOperation :name keyword)
@@ -134,6 +135,8 @@
 (sc/defn ^:private application->allu-placement-contract :- PlacementContract [app]
   (-> app flatten-values convert-value-flattened-app))
 
+;;;; # Should you use this?
+
 (defn- allu-organization? [org]
   (if (env/dev-mode?)
     (s/ends-with? org "-YA")
@@ -145,12 +148,24 @@
   (and (allu-organization? organization)
        (contains? allu-permit-subtypes permitSubtype)))
 
-;; TODO: Error handling
-(defn create-placement-contract!
-  "Create placement contract in ALLU. Returns ALLU id for the contract."
-  [app]
-  (let [endpoint (str (env/value :allu :url) "/placementcontracts")
-        request {:headers {:authorization (str "Bearer " (env/value :allu :jwt))}
-                 :content-type :json
-                 :body (json/encode (application->allu-placement-contract app))}]
-    (:body (http/post endpoint request))))
+;;;; # Effectful operations
+
+(defprotocol ALLUPlacementContracts
+  (create-contract! [self application]
+    "Create placement contract in ALLU. Returns ALLU id for the contract."))
+
+(deftype RemoteALLU []
+  ALLUPlacementContracts
+  (create-contract! [_ app]
+    ;; TODO: Error handling
+    (let [endpoint (str (env/value :allu :url) "/placementcontracts")
+          request {:headers {:authorization (str "Bearer " (env/value :allu :jwt))}
+                   :content-type :json
+                   :body (json/encode (application->allu-placement-contract app))}]
+      (:body (http/post endpoint request)))))
+
+(defstate allu-instance
+          :start (->RemoteALLU))
+
+(defn create-placement-contract! [app]
+  (create-contract! allu-instance app))

@@ -11,6 +11,9 @@
                  [org.clojure/core.memoize "0.5.9"]
                  [org.clojure/core.async "0.4.474"]
 
+                 ; State management
+                 [mount "0.1.12"]
+
                  ; Web frameworks
                  [ring "1.6.2" :exclusions [commons-fileupload org.clojure/tools.reader]]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
