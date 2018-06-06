@@ -1257,7 +1257,7 @@
           (if (:urlHash target)
             (let [app-xml (or (get @app-xml-cache (:id app))
                               (-> (swap! app-xml-cache assoc (:id app)
-                                         (or (krysp-fetch/get-application-xml-by-application-id (:id app))
+                                         (or (krysp-fetch/get-application-xml-by-application-id app)
                                              (krysp-fetch/get-application-xml-by-backend-id app (some :kuntalupatunnus (:verdicts app)))))
                                   (get (:id app))))
                   organization (org/get-organization (:organization app))
