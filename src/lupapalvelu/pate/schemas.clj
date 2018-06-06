@@ -93,20 +93,30 @@
                                              {:type review-type})]
           (sc/optional-key :plans)   [PateVerdictReq]}))
 
+(defschema UserRef
+  "We have to define our own summary, since requiring the
+  lupapalvelu.user namespace would create a cyclical dependency."
+  {:id        ssc/ObjectIdStr
+   :username  ssc/Username})
+
 (defschema ReplacementPateVerdict
-  {(sc/optional-key :user)          sc/Str
-   (sc/optional-key :replaced-by)   ssc/ObjectIdStr
-   (sc/optional-key :replaces)      ssc/ObjectIdStr})
+  (sc/conditional
+   :replaces    {(sc/optional-key :replaces)      ssc/ObjectIdStr}
+   :replaced-by {;; The publisher of the replacement verdict.
+                 (sc/optional-key :user)          UserRef
+                 (sc/optional-key :replaced-by)   ssc/ObjectIdStr}))
 
 (defschema PateBaseVerdict
   (merge PateCategory
          {;; Verdict is draft until it is published
-          (sc/optional-key :published)  ssc/Timestamp
-          :modified                     ssc/Timestamp
-          :data                         sc/Any
-          (sc/optional-key :archive)    {:verdict-date                    ssc/Timestamp
-                                         (sc/optional-key :lainvoimainen) ssc/Timestamp
-                                         :verdict-giver                   sc/Str}}))
+          (sc/optional-key :published) ssc/Timestamp
+          :modified                    ssc/Timestamp
+          :data                        sc/Any
+          (sc/optional-key :archive)   {:verdict-date                    ssc/Timestamp
+                                        (sc/optional-key :lainvoimainen) ssc/Timestamp
+                                        :verdict-giver                   sc/Str}
+          ;; Either the drafter or publisher
+          (sc/optional-key :user)      UserRef}))
 
 (defschema PateModernVerdict
   (merge PateBaseVerdict
@@ -130,7 +140,7 @@
 ;; Schema utils
 
 (defn parse-int
-  "Empty strings are considered as zeros."
+  "Empty strings are considered zeros."
   [x]
   (let [n (-> x str ss/trim)]
     (cond

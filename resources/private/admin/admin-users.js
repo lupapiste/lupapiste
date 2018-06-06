@@ -47,6 +47,15 @@
                .command("retry-rakentajafi", {email: email})
                .success(function() { callback(true); })
                .call();
+           }},
+          {name: "erase",
+           button: "secondary",
+           showFor: _.constant(true),
+           operation: function (email, callback) {
+             ajax
+               .command("erase-user", {email: email})
+               .success(function () { callback(true); })
+               .call();
            }}]
   };
 
@@ -135,6 +144,7 @@
 
   function RestApiUsers() {
     var self = this;
+    var backend = "-backend";
 
     self.organizationCode = ko.observable();
     self.phase = ko.observable(0);
@@ -143,12 +153,13 @@
     self.username = ko.pureComputed(function() {
       return util.lowerCase(self.firstName()) + "-backend";
     });
+
     self.userDetailsOk = ko.computed(function() {
-        var firstNameOk = self.firstName();
-        var lastNameOk = self.lastName();
-        var organizationCodeOk = self.organizationCode();
-        var usernameOk = self.username();
-        return organizationCodeOk && usernameOk && firstNameOk && lastNameOk;
+      var firstNameOk = (self.firstName() && (self.firstName().length + backend.length) < 21);
+      var lastNameOk = self.lastName();
+      var organizationCodeOk = self.organizationCode();
+      var usernameOk = self.username();
+      return organizationCodeOk && usernameOk && firstNameOk && lastNameOk;
     });
 
     self.searching = ko.observable();

@@ -12,6 +12,7 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.authorization :as auth]
             [lupapiste-commons.attachment-types :as att-types]
+            [monger.operators :refer :all]
             [sade.schemas :as ssc]
             [sade.strings :as ss]))
 
@@ -78,7 +79,10 @@
   (reduce
     (fn [results {:keys [fileId type] :as filedata}]
       (job/update job-id assoc fileId {:status :working :fileId fileId})
-      (if-let [mongo-file (mongo/download fileId)]
+      (if-let [mongo-file (mongo/download-find {:_id fileId
+                                                $or [{:metadata.linked false}
+                                                     {:metadata.linked {$exists false}}]
+                                                :metadata.application {$exists false}})]
         (let [result (bind-single-attachment! command mongo-file filedata (map :attachment-id results))]
           (job/update job-id assoc fileId {:status :done :fileId fileId})
           (conj results {:original-file-id fileId

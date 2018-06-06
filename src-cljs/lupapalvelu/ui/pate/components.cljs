@@ -355,13 +355,13 @@
   "Update the options model state only on blur. Immediate update does
   not work reliably."
   [{:keys [schema state path] :as options} & [wrap-label?]]
-  (let [attr-fn              (partial pate-attr
-                                      options
-                                      {:callback  (state-change-callback options)
-                                       :disabled  (path/disabled? options)
-                                       :required? (path/required? options)})
+  (let [attr-fn               (partial pate-attr
+                                       options
+                                       {:callback  (state-change-callback options)
+                                        :required? (path/required? options)})
+        disabled?             (path/disabled? options)
         {:keys [items lines]} schema
-        value                (path/value path state)]
+        value                 (path/value path state)]
     (label-wrap-if-needed
      options
      {:component (sandwich schema
@@ -369,20 +369,23 @@
                              items
                              (components/combobox
                               value
-                              (attr-fn {:items (sort-by-schema {:sort-by :text}
-                                                               (map #(hash-map :text (path/loc %))
-                                                                    items))}))
+                              (attr-fn {:items     (sort-by-schema {:sort-by :text}
+                                                                   (map #(hash-map :text (path/loc %))
+                                                                        items))
+                                        :disabled? disabled?}))
 
                              lines
                              (components/textarea-edit
                               value
-                              (attr-fn {:class [:pate-textarea]
-                                        :rows lines}))
+                              (attr-fn {:class    [:pate-textarea]
+                                        :rows     lines
+                                        :disabled disabled?}))
 
                              :else
                              (components/text-edit
                               value
-                              (attr-fn {:type (:type schema)}))))
+                              (attr-fn {:type     (:type schema)
+                                        :disabled disabled?}))))
       :wrap-label? wrap-label?})))
 
 (defn pate-date-delta

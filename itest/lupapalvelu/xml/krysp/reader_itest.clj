@@ -98,7 +98,7 @@
                              :energiatehokkuusluku ""
                              :energiatehokkuusluvunYksikko "kWh/m2"}
                   :kaytto {:kayttotarkoitus "039 muut asuinkerrostalot"
-                           :rakentajaTyyppi nil}
+                           :rakentajaTyyppi "muu"}
                   :mitat {:kerrosluku "5"
                           :kerrosala "1785"
                           :rakennusoikeudellinenKerrosala ""

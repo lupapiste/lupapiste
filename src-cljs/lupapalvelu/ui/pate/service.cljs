@@ -149,6 +149,8 @@
                 #(reset! state/template-list (:templates %))
                 :id app-id))
 
+;; Verdicts
+
 (defn fetch-verdict-list [app-id]
   (common/query "pate-verdicts"
                 #(reset! state/verdict-list (:verdicts %))
@@ -188,7 +190,10 @@
 
 (defn edit-verdict [app-id verdict-id path value callback]
   (common/command {:command "edit-pate-verdict"
-                   :success callback}
+                   :success (fn [response]
+                              (state/refresh-verdict-auths app-id
+                                                           {:verdict-id verdict-id})
+                              (callback response))}
                   :id app-id
                   :verdict-id verdict-id
                   :path path
@@ -199,6 +204,8 @@
                               :publish-legacy-verdict
                               :publish-pate-verdict)
                    :success (fn []
+                              (state/refresh-verdict-auths app-id
+                                                           {:verdict-id verdict-id})
                               (fetch-verdict-list app-id)
                               (open-verdict app-id verdict-id callback)
                               (js/repository.load app-id))}

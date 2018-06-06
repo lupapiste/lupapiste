@@ -21,7 +21,14 @@
                "pdfa-convert-review-pdfs"   'lupapalvelu.batchrun/pdfa-convert-review-pdfs
                "pdf-to-pdfa-conversion"     'lupapalvelu.batchrun/pdf-to-pdfa-conversion
                "cleanup-uploaded-files"     'lupapalvelu.file-upload/cleanup-uploaded-files
-               "unarchive"                  'lupapalvelu.batchrun/unarchive})
+               "unarchive"                  'lupapalvelu.batchrun/unarchive
+               "convert-and-link-missing"   'lupapalvelu.batchrun/convert-and-link-missing
+               "analyze-missing"            'lupapalvelu.batchrun/analyze-missing
+               "replay-attachment-children" 'lupapalvelu.batchrun/replay-attachment-children
+               "replay-missing-stamping-ops" 'lupapalvelu.batchrun/replay-missing-stamping-ops
+               "replay-missing-user-attachments" 'lupapalvelu.batchrun/replay-missing-user-attachments
+               "fetch-missing-backend-attachments" 'lupapalvelu.batchrun/fetch-missing-backend-attachments
+               "replay-missing-rotates" 'lupapalvelu.batchrun/replay-missing-rotates})
 
 (defn launch! [service args]
   (debugf "Loading namespace '%s'...\n" (namespace service))

@@ -3,6 +3,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error warnf]]
             [clojure.set :refer [rename-keys]]
             [net.cgrand.enlive-html :as enlive]
+            [sade.env :as env]
             [sade.xml :refer :all]
             [sade.util :refer [fn-> fn->>] :as util]
             [sade.common-reader :as cr]
@@ -37,9 +38,10 @@
        </wfs:GetFeature>")}))
 
 (defn- application-xml [type-name id-path server credentials ids raw?]
-  (let [url (common/wfs-krysp-url-with-service server type-name (common/property-in id-path ids))]
+  (let [url (common/wfs-krysp-url-with-service server type-name (common/property-in id-path ids))
+        xml-timeout (or (env/value :kuntagml :conn-timeout) 15000)]
     (trace "Get application: " url)
-    (cr/get-xml url {:debug-event true} credentials raw?)))
+    (cr/get-xml url {:debug-event true :conn-timeout xml-timeout} credentials raw?)))
 
 (defn rakval-application-xml [server credentials ids search-type raw?]
   (application-xml common/rakval-case-type (common/get-tunnus-path permit/R search-type)    server credentials ids raw?))

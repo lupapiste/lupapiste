@@ -1,11 +1,11 @@
 (ns lupapalvelu.xml.krysp.krysp-http-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [sade.core :refer [now]]
-            [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :as fixture]
+            [sade.core :refer [now]]
             [sade.env :as env]
+            [sade.strings :as ss]
             [sade.shared-util :as util]))
 
 (def jms-test-db (str "krysp_http_itest_jms" (now)))
@@ -14,7 +14,8 @@
   (mongo/connect!)
   (mongo/with-db jms-test-db
     (fixture/apply-fixture "minimal")
-    (facts "Sending KuntaGML via JMS and HTTP"            ; Tampere is configured to use HTTP krysp in minimal
+    (against-background [(sade.http/post (str (env/server-address) "/dev/krysp/receiver/hakemus-path") anything) => nil]
+      (facts "Sending KuntaGML via JMS and HTTP"            ; Tampere is configured to use HTTP krysp in minimal
       (let [{application-id :id} (create-local-app pena
                                                    :x 329072
                                                    :y 6823200
@@ -23,21 +24,22 @@
             application (query-application local-query pena application-id)]
         (generate-documents application pena true)
         (local-command pena :submit-application :id application-id) => ok?
-
         (let [resp (local-command veikko :approve-application :id application-id :lang "fi")]
           (fact "Veikko moves to backing system via HTTP"
             resp => ok?
             (:integrationAvailable resp) => true))
+        (Thread/sleep 50)
 
-        (let [msgs (mongo/select :integration-messages {:application.id application-id})
+        (let [msgs (->> (mongo/select :integration-messages {:application.id application-id})
+                        (remove #(= "KuntaGML hakemus-path" (:messageType %)))) ; remove messages logged by /dev/krysp dummy endpoint
               sent-message (util/find-first (fn [msg] (= (:messageType msg) "KuntaGML application")) msgs)]
           (facts "integration-messages"
             (count msgs) => 3                               ; 2x state-change 1x KuntaGML
-            (fact "sent message is saved"
+            (fact "message is delivered via queue"
               (:messageType sent-message) => "KuntaGML application"
               (:direction sent-message) => "out"
-              (fact "to queue"
-                (:status sent-message) => "queued"))))))))
+              (fact "is processed by consumer"
+                (:status sent-message) => "done")))))))))
 
 
 (apply-remote-minimal)

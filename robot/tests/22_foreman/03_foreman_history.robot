@@ -15,6 +15,7 @@ Sonja creates applications
   Sonja logs in  False
   Create project application  submitted
 
+Create 5x foreman invites
   Repeat Keyword  5  Sonja invites foreman and goes back to application
 
 Foreman sets his information to several applications

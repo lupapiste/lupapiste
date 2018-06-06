@@ -3,10 +3,9 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.mongo :as mongo]
             [sade.strings :as ss]))
 
-
+(apply-remote-minimal)
 (fact* "Merging building information from KRYSP does not overwrite muutostyolaji or energiatehokkuusluvunYksikko"
   (let [application-id (create-app-id pena :propertyId sipoo-property-id :operation "kayttotark-muutos")
         app (query-application pena application-id)

@@ -2,10 +2,11 @@
   (:require [taoensso.timbre :refer [error errorf info infof tracef warnf fatal]]
             [taoensso.nippy :as nippy]
             [lupapiste-jms.client :as jms]
+            [lupapalvelu.mongo :as mongo]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util])
-  (:import (javax.jms ExceptionListener Connection Session Queue
+  (:import (javax.jms ExceptionListener Connection Session Queue Message
                       MessageListener BytesMessage ObjectMessage TextMessage
                       MessageConsumer MessageProducer JMSException JMSContext)
            (org.apache.activemq.artemis.jms.client ActiveMQJMSConnectionFactory ActiveMQConnection)
@@ -18,6 +19,8 @@
   ((ns-resolve 'artemis-server 'start)))
 
 (when (env/feature? :jms)
+
+  (def jms-test-db-property "LP_test_db_name")
 
   (defonce state (atom {:producers         []
                         :consumers         []
@@ -39,11 +42,16 @@
           (tracef "Delivery count of message: %d" delivery-count)
           (when (< 1 delivery-count)
             (warnf "Message delivered already %d times" delivery-count)))
-        (condp instance? m
-          BytesMessage  (cb (jms/byte-message-as-array m))
-          ObjectMessage (cb (.getObject ^ObjectMessage m))
-          TextMessage   (cb (.getText ^TextMessage m))
-          (error "Unknown JMS message type:" (type m))))))
+        (let [test-db-name (.getStringProperty m jms-test-db-property)
+              db-name (if (and (env/dev-mode?) (ss/not-blank? test-db-name))
+                        test-db-name
+                        mongo/*db-name*)]
+          (mongo/with-db db-name
+            (condp instance? m
+              BytesMessage (cb (jms/byte-message-as-array m))
+              ObjectMessage (cb (.getObject ^ObjectMessage m))
+              TextMessage (cb (.getText ^TextMessage m))
+              (error "Unknown JMS message type:" (type m))))))))
 
   (def exception-listener
     (reify ExceptionListener
@@ -66,6 +74,12 @@
   (defn commit [^Session sess] (.commit sess))
   (defn rollback [^Session sess] (.rollback sess))
 
+  (defn create-jms-message [data session-or-context]
+    (let [^Message message (jms/create-message data session-or-context)]
+      (when (env/dev-mode?)
+        (.setStringProperty message jms-test-db-property mongo/*db-name*))
+      message))
+
   ;;
   ;; Connection
   ;;
@@ -78,16 +92,18 @@
   (def connection-properties (merge (env/value :jms) {:broker-url broker-url}))
 
   (defn create-connection-factory ^ActiveMQJMSConnectionFactory [{^String url :broker-url :as connection-options}]
-    (let [{:keys [retry-interval retry-multipier max-retry-interval reconnect-attempts]
+    (let [{:keys [retry-interval retry-multipier max-retry-interval reconnect-attempts consumer-window-size]
            :or   {retry-interval (* 2 1000)
                   retry-multipier 2
                   max-retry-interval (* 5 60 1000)          ; 5 mins
+                  consumer-window-size 0
                   reconnect-attempts -1}} connection-options]
       (doto (ActiveMQJMSConnectionFactory. url)
         (.setRetryInterval (util/->long retry-interval))
         (.setRetryIntervalMultiplier (util/->double retry-multipier))
         (.setMaxRetryInterval (util/->long max-retry-interval))
-        (.setReconnectAttempts (util/->int reconnect-attempts)))))
+        (.setReconnectAttempts (util/->int reconnect-attempts))
+        (.setConsumerWindowSize (util/->int consumer-window-size)))))
 
   (def default-connection-factory (create-connection-factory connection-properties))
 
@@ -149,7 +165,7 @@
     If no message-fn is given, message type is inferred from data with jms/MessageCreator protocol.
     Producer is internally registered and closed on shutdown."
     ([queue-name]
-     (create-producer (producer-session) queue-name #(jms/create-message % (producer-session))))
+     (create-producer (producer-session) queue-name #(create-jms-message % (producer-session))))
     ([session queue-name message-fn]
      (-> (jms/create-producer session (queue queue-name))
          (register-producer)
@@ -160,7 +176,7 @@
     ([queue-name]
      (create-nippy-producer (producer-session) queue-name))
     ([session queue-name]
-     (create-producer session queue-name #(jms/create-message (nippy/freeze %) session))))
+     (create-producer session queue-name #(create-jms-message (nippy/freeze %) session))))
 
   (defn produce-with-context [destination-name data]
     (jms/send-with-context
@@ -169,6 +185,7 @@
       data
       (merge (select-keys connection-properties [:username :password])
              {:session-mode JMSContext/AUTO_ACKNOWLEDGE
+              :message-fn   create-jms-message
               :ex-listener  exception-listener})))
 
   ;;

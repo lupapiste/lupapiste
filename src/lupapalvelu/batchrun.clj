@@ -1,5 +1,5 @@
 (ns lupapalvelu.batchrun
-  (:require [taoensso.timbre :refer [debug debugf error errorf info infof warn]]
+  (:require [taoensso.timbre :refer [debug debugf error errorf info infof warn warnf]]
             [me.raynes.fs :as fs]
             [monger.operators :refer :all]
             [clojure.set :as set]
@@ -10,7 +10,12 @@
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment.conversion :as conversion]
+            [lupapalvelu.batchrun.fetch-verdict :as fetch-verdict]
+            [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.file-upload :as file-upload]
+            [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.integrations.state-change :as state-change]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
@@ -24,6 +29,7 @@
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.verdict-review-util :as vru]
             [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
@@ -35,8 +41,19 @@
             [sade.strings :as ss]
             [sade.util :refer [fn-> pcond->] :as util]
             [sade.validators :as v]
-            [ring.util.codec :as codec])
-  (:import [org.xml.sax SAXParseException]))
+            [ring.util.codec :as codec]
+            [cheshire.custom :as json]
+            [lupapalvelu.attachment.stamping :as stamping]
+            [lupapalvelu.attachment :as att]
+            [clojure.java.io :as io]
+            [sade.files :as files]
+            [lupapalvelu.pdftk :as pdftk]
+            [lupapalvelu.organization :as org]
+            [pandect.core :as pandect]
+            [lupapalvelu.xml.krysp.building-reader :as building-reader])
+  (:import [org.xml.sax SAXParseException]
+           [java.io ByteArrayOutputStream ByteArrayInputStream]
+           [java.net URL]))
 
 
 (defn- older-than [timestamp] {$lt timestamp})
@@ -297,30 +314,12 @@
     (mongo/disconnect!)))
 
 (defn fetch-verdict
-  [batchrun-name batchrun-user {:keys [id permitType organization] :as app}]
-  (logging/with-logging-context {:applicationId id, :userId (:id batchrun-user)}
-    (info "Checking verdict...")
-    (try
-      (let [command (assoc (application->command app) :user batchrun-user :created (now) :action "fetch-verdicts")
-            result (verdict/do-check-for-verdict command)]
-        (when (-> result :verdicts count pos?)
-          (infof "Found %s verdicts" (-> result :verdicts count))
-          ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
-          (logging/log-event :info {:run-by batchrun-name :event "Found new verdict"})
-          (notifications/notify! :application-state-change command))
-        (when (or (nil? result) (fail? result))
-          (infof "No verdicts found, result: " (if (nil? result) :error.no-app-xml result))
-          (logging/log-event :error {:run-by       batchrun-name
-                                     :event        "Failed to check verdict"
-                                     :failure      (if (nil? result) :error.no-app-xml result)
-                                     :organization {:id organization :permit-type permitType}
-                                     })))
-      (catch Throwable t
-        (logging/log-event :error {:run-by            batchrun-name
-                                   :event             "Unable to get verdict from backend"
-                                   :exception-message (.getMessage t)
-                                   :application-id    id
-                                   :organization      {:id organization :permit-type permitType}})))))
+  [batchrun-name batchrun-user {:keys [id organization] :as app} & [{:keys [jms?] :or {jms? false}}]]
+  (if jms?
+    (jms/produce-with-context (fetch-verdict/queue-for-organization organization)
+                              (fetch-verdict/fetch-verdict-message id))
+    (fetch-verdict/fetch-verdict batchrun-name batchrun-user app)))
+
 (defn- organization-has-krysp-url-function
   "Takes map of organization id as key and organization data as values.
   Returns function, that takes application and returns true if application's organization has krysp url set."
@@ -337,11 +336,12 @@
         org-has-url? (organization-has-krysp-url-function orgs-by-id)]
     (filter org-has-url? applications)))
 
-(defn fetch-verdicts [batchrun-name batchrun-user applications]
+(defn fetch-verdicts [batchrun-name batchrun-user applications & [options]]
   (let [start-ts (double (now))]
     (logging/log-event :info {:run-by batchrun-name
                               :event  (format "Starting verdict fetching with %s applications" (count applications))})
-    (doall (pmap (partial fetch-verdict batchrun-name batchrun-user) applications))
+    (doseq [application applications]
+      (fetch-verdict batchrun-name batchrun-user application options))
     (logging/log-event :info {:run-by batchrun-name
                               :event  "Finished verdict checking"
                               :took   (format "%.2f minutes" (/ (- (now) start-ts) 1000 60))})))
@@ -377,7 +377,7 @@
     (fetch-verdicts-by-application-ids args)
     (fetch-verdicts-by-org-ids args)))
 
-(defn fetch-verdicts-default []
+(defn fetch-verdicts-default [& [{:keys [jms?] :or {jms? false}}]]
   (let [organizations-with-krysp-url (organization/get-organizations
                                        {$or [{:krysp.R.url {$exists true}}
                                              {:krysp.YA.url {$exists true}}
@@ -389,13 +389,15 @@
                                              {:krysp.KT.url {$exists true}}]}
                                        {:krysp 1})
         org-ids (map :id organizations-with-krysp-url)
-        apps (mongo/select :applications {:state {$in ["sent"]}
-                                          :permitType {$nin ["ARK"]}
-                                          :organization {$in org-ids}})
+        apps (mongo/select-ordered :applications
+                                   {:state {$in ["sent"]}
+                                    :permitType {$nin ["ARK"]}
+                                    :organization {$in org-ids}}
+                                   {:modified -1})
         apps-with-urls (get-valid-applications organizations-with-krysp-url apps)
         eraajo-user (user/batchrun-user org-ids)
         batchrun-name "Automatic verdicts checking"]
-    (fetch-verdicts batchrun-name eraajo-user apps-with-urls)))
+    (fetch-verdicts batchrun-name eraajo-user apps-with-urls {:jms? jms?})))
 
 (defn check-for-verdicts [& args]
   (when-not (system-not-in-lockdown?)
@@ -403,7 +405,7 @@
     (fail! :system-in-lockdown))
   (mongo/connect!)
   (if (empty? args)
-    (fetch-verdicts-default)
+    (fetch-verdicts-default {:jms? (env/feature? :jms)})
     (fetch-verdicts-with-args args)))
 
 (defn- get-asianhallinta-ftp-users [organizations]
@@ -875,3 +877,445 @@
               (info "Attachments successfully unarchived for application" (:id application))
               (error "Some attachments were not successfully unarchived for application" (:id application)))))))
     (println "Organization must be provided.")))
+
+(defn print-info [id att version message]
+  (let [type (get-in att [:type :type-id])
+        content (:contentType version)]
+    (println id "-" (:id att) "-" (:fileId version) ", msg:" message "," content"," type)))
+
+(defn analyze-missing [& args]
+  (mongo/connect!)
+  (info "Starting analyze-missing job")
+  (let [ts 1527800400000]
+    (doseq [app (mongo/select :applications
+                              {:modified    {$gte ts}
+                               :attachments {$elemMatch {:latestVersion.created {$gte ts
+                                                                                 $lt 1528063200000}
+                                                         :latestVersion.onkaloFileId {$exists false}}}}
+                              [:attachments])
+            {version :latestVersion :as att} (->> (:attachments app)
+                                                  (filter :latestVersion))
+            :let [file (mongo/download (:fileId version))
+                  different-original? (not= (:fileId version) (:originalFileId version))]]
+      (when-not file
+        (if different-original?
+          (if (mongo/download (:originalFileId version))
+            (print-info (:id app) att version "fileId missing but originalFileIdFound")
+            (print-info (:id app) att version "fileId AND originalFileId missing"))
+          (print-info (:id app) att version "fileId missing"))))))
+
+(defn convert-and-link-missing [& args]
+  (mongo/connect!)
+  (info "Starting convert-and-link-missing job")
+  ;(sade.util/to-millis-from-local-datetime-string "2018-06-01T00:00")
+  ;=> 1527800400000
+  (let [ts 1527800400000]
+    (doseq [app (mongo/select :applications
+                              {:modified                          {$gte ts}
+                               :attachments.latestVersion.created {$gte ts}}
+                              [:attachments :organization])
+            {version :latestVersion :as att} (->> (:attachments app)
+                                                  (filter :latestVersion))
+            :let [file (mongo/download (:fileId version))]]
+      (logging/with-logging-context {:applicationId (:id app)}
+        (if file
+          (attachment/link-files-to-application (:id app) [(:fileId file)])
+          ;; file missing, generate new if it was from conversion
+          (if-let [original (mongo/download (:originalFileId version))]
+            (if (:autoConversion version)
+              (let [conversion (conversion/archivability-conversion
+                                 app
+                                 (assoc (select-keys original [:filename :contentType])
+                                   :content ((:content original))))]
+                (if (:autoConversion conversion)
+                  (do
+                    (file-upload/save-file (merge (select-keys conversion [:content :filename]) {:fileId (:fileId version)})
+                                           {:application (:id app) :linked true})
+                    (debugf "fileId %s converted, uploaded and linked successfully" (:fileId version)))
+                  (warnf "file %s not converted (%s): %s" (:fileId version) (get-in att [:type :type-id]) (pr-str conversion))))
+              (info "file missing, originalFileId found, but no autoConversion flag. FileId: " (:fileId version)
+                    " originalFileId: " (:originalFileId version)
+                    " type: " (get-in att [:type :type-id])))
+            (warnf "File not found, attachment: %s, originalFileId: %s, type: %s"
+                   (:id att)
+                   (:originalFileId version)
+                   (get-in att [:type :type-id]))))))))
+
+(defn- parse-message-field [{:keys [message]}]
+  (-> message
+      :message
+      (ss/split #"\w+ - \{")
+      last
+      ((fn [s] (str "{" s)))
+      (json/parse-string true)))
+
+(defn graylog-request [action-to-check]
+  (->> (http/get (str (env/value :graylog :host) "/api/search/universal/absolute?query=action%3A"
+                      action-to-check
+                      "%20AND%20(source%3Aapp3%20OR%20source%3Aapp4)&from=2018-05-31T21%3A00%3A00.000Z&to=2018-06-3T22%3A00%3A00.000Z&limit=4000")
+                 {:basic-auth [(env/value :graylog :user) (env/value :graylog :password)]
+                  :coerce :always
+                  :as :json})
+       :body
+       :messages
+       (filter #(ss/starts-with (get-in % [:message :message]) "INFO"))
+       (map parse-message-field)))
+
+(def stamp-errors #{"5b10d46ce7f6047b9fd19076"
+                    "5b06fef2e7f6043f476f4a8f"})
+
+(defn replay-missing-stamping-ops [& args]
+  (mongo/connect!)
+  (info "Starting replay-missing-stamping-ops job")
+  (doseq [{:keys [action user data created] :as logdata} (graylog-request "stamp-attachments")]
+    (logging/with-logging-context {:applicationId (:id data)}
+      (when (and (= action "stamp-attachments")
+                 (some #(contains? stamp-errors %) (:files data)))
+        (let [{:keys [id files stamp timestamp lang]} data
+              command {:user user
+                       :created created}
+              application (mongo/by-id :applications id)
+              filtered-files (filter #(contains? stamp-errors %) files)]
+          (if (and (string? id)
+                   (seq filtered-files)
+                   (map? stamp)
+                   (string? lang))
+            (stamping/regenerated-stamped-attachment command timestamp application filtered-files lang stamp)
+            (error "Invalid log data, can't fix stamp:" logdata)))))))
+
+(defn replay-missing-user-attachments [& args]
+  (mongo/connect!)
+  (info "Starting replay-missing-user-attachments job")
+  (doseq [{:keys [user data] :as logdata} (graylog-request "copy-user-attachments-to-application")]
+
+    (logging/with-logging-context {:applicationId (:id data)}
+      (doseq [attachment (:attachments (mongo/by-id :users (:id user) {:attachments true}))]
+        (let [application-id (:id data)
+              application (mongo/by-id :applications application-id)
+              user-id (:id user)
+              {:keys [attachment-type attachment-id file-name content-type size]} attachment
+              user-att-file (mongo/download-find {:id attachment-id :metadata.user-id user-id})
+              maybe-attachment-id (str application-id "." user-id "." attachment-id)
+              same-attachments (->> (att/get-attachments-by-type application attachment-type)
+                                    (filter (fn [att]
+                                              (and (seq (:latestVersion att))
+                                                   (= (get-in att [:latestVersion :user :id]) user-id)
+                                                   (nil? (mongo/download (get-in att [:latestVersion :fileId])))))))
+              target-attachment (or (first (filter #(= maybe-attachment-id (:id %)) same-attachments))
+                                    (first same-attachments))
+              {:keys [fileId originalFileId stamped]} (:latestVersion target-attachment)]
+          (cond
+            (nil? fileId)
+            (warn "No suitable target attachment found in application for user" user-id "attachment" attachment-id)
+
+            stamped
+            (error "Target attachment for user" user-id "attachment" attachment-id "is attachment id" (:id target-attachment)
+                   "but it is stamped. Skipping.")
+
+            :else
+            (let [bos (ByteArrayOutputStream.)]
+              (info "Processing user" user-id "attachment" attachment-id)
+              (with-open [content ((:content user-att-file))]
+                (io/copy content bos))
+              (with-open [bis (ByteArrayInputStream. (.toByteArray bos))]
+                (when-not (= fileId originalFileId)
+                  (let [conversion (conversion/archivability-conversion application
+                                                                        {:filename    file-name
+                                                                         :contentType content-type
+                                                                         :content     bis})]
+                    (if (:autoConversion conversion)
+                      (do
+                        (file-upload/save-file (merge (select-keys conversion [:content :filename]) {:fileId fileId})
+                                               {:application application-id :linked true})
+                        (infof "fileId %s converted, uploaded and linked successfully" fileId))
+                      (warnf "file %s not converted (%s): %s" fileId (get-in target-attachment [:type :type-id]) (pr-str conversion)))))
+                (.reset bis)
+                (file-upload/save-file {:content  bis
+                                        :filename file-name
+                                        :fileId   originalFileId}
+                                       {:application application-id
+                                        :linked      true})
+                (infof "fileId %s uploaded and linked successfully" originalFileId)))))))))
+
+(defn replay-missing-rotates [& args]
+  (mongo/connect!)
+  (info "Starting replay-missing-rotates job")
+  (doseq [{:keys [data] :as logdata} (graylog-request "rotate-pdf")]
+    (logging/with-logging-context {:applicationId (:id data)}
+      (let [{:keys [id attachmentId rotation]} data
+            application (mongo/by-id :applications id)
+            {:keys [versions] :as attachment} (att/get-attachment-info application attachmentId)
+            source-version (->> (reverse versions)
+                                (filter #(mongo/download (:fileId %)))
+                                first)
+            target-version (or (->> (reverse versions)
+                                    (take-while #(not= (:fileId source-version) (:fileId %)))
+                                    last)
+                               source-version)
+            {:keys [fileId filename contentType]} source-version]
+        (if-let [dl (mongo/download fileId)]
+          (files/with-temp-file temp-pdf
+            (info "Rotating file" fileId "from attachment" attachmentId "by" rotation
+                  ", target file id is" (:fileId target-version))
+            (with-open [content ((:content dl))]
+              (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation))
+            (when (= fileId (:fileId target-version))
+              (info "Deleting existing file" fileId)
+              (mongo/delete-file-by-id fileId))
+            (file-upload/save-file {:content  temp-pdf
+                                    :filename filename
+                                    :fileId   (:originalFileId target-version)
+                                    :size     (.length temp-pdf)}
+                                   {:application id
+                                    :linked      true})
+            (when-not (= (:fileId target-version) (:originalFileId target-version))
+              (let [conversion (conversion/archivability-conversion application
+                                                                    {:filename    filename
+                                                                     :contentType contentType
+                                                                     :content     temp-pdf})]
+                (if (:autoConversion conversion)
+                  (do
+                    (file-upload/save-file (merge (select-keys conversion [:content :filename])
+                                                  {:fileId (:fileId target-version)})
+                                           {:application (:id application) :linked true})
+                    (infof "fileId %s converted, uploaded and linked successfully" fileId))
+                  (warnf "file %s not converted: %s" fileId (pr-str conversion)))))
+            (info "Rotated file" (:fileId target-version) "uploaded"))
+          (error "No unrotated file found with file id" fileId))))))
+
+(defn fix-attachment-childrens
+  "Generate new attachments for targets, which were initially created by create-attachment-from-children and later removed"
+  [apps target-key target-filter-pred user-fn & [lang-mapping]]
+  (doseq [app apps
+          target (->> (get app target-key)
+                      (filter target-filter-pred))
+          target-attachment (->> (:attachments app)
+                                 (filter (fn [a] (= (get-in a [:source :id]) (:id target))))
+                                 (filter :latestVersion))
+          :let [version (:latestVersion target-attachment)
+                att-id (:id target-attachment)]]
+    (logging/with-logging-context {:applicationId (:id app)}
+      (when (nil? (mongo/download (:fileId version)))
+        (info "No file for " target-key ", clearing old version from attachment:" att-id ", version fileId:" (:fileId version))
+        (mongo/update-by-query :applications
+                               {:_id (:id app)
+                                :attachments {$elemMatch {:id att-id
+                                                          :source.id (:id target)}}}
+                               {$unset {:attachments.$.latestVersion true}
+                                $set {:attachments.$.auth []
+                                      :attachments.$.versions []}})
+        (let [version (child-to-attachment/create-attachment-from-children
+                        (user-fn target target-attachment)
+                        (domain/get-application-no-access-checking (:id app))
+                        target-key (:id target)
+                        (get lang-mapping (:id app) "fi"))]
+          (info "Created child" target-key "fileId" (:fileId version) "to attachment" att-id))))))
+
+(defn generate-missing-neighbor-docs [& args]
+  (mongo/connect!)
+  (let [ts 1527800400000
+        graylog-commands (graylog-request "neighbor-response")
+        neighbor-ids (set (map (comp :neighborId :data) graylog-commands))
+        apps (mongo/select :applications
+                           {:_id {$in (map (comp :applicationId :data) graylog-commands)}}
+                           [:neighbors :attachments])
+        neighbor-filter-fn (fn [n] (and (some #(> (:created %) ts) (:status n))
+                                        (contains? neighbor-ids (:id n))))
+        user-fn (fn [neighbor _]
+                  (->> (:status neighbor)
+                       (util/find-first (fn [status] (ss/contains? (:state status) "response-given-")))
+                       :vetuma))]
+    (fix-attachment-childrens apps :neighbors neighbor-filter-fn user-fn)))
+
+(defn publish-verdicts-fix [& args]
+  (mongo/connect!)
+  (let [graylog-apps (graylog-request "publish-verdict")
+        language-map (into {} (map (fn [log] [(get-in log [:data :id]) (get-in log [:data :lang])])) graylog-apps)
+        apps (mongo/select :applications {:_id {$in (map (comp :id :data) graylog-apps)}} [:attachments :verdicts])
+        verdict-filter-fn (partial remove :draft)
+        user-fn (fn [_ verdict-attachment]
+                  (get-in verdict-attachment [:latestVersion :user]))]
+    (fix-attachment-childrens apps :verdicts verdict-filter-fn user-fn language-map)))
+
+(defn tasks-children-fix [& args]
+  (mongo/connect!)
+  (let [graylog-commands (graylog-request "review-done")
+        task-ids (set (map (comp :taskId :data) graylog-commands))
+        apps (mongo/select :applications {:_id {$in (map (comp :id :data) graylog-commands)}} [:attachments :tasks])
+        tasks-filter-fn (fn [task] (and (= "task-katselmus" (get-in task [:schema-info :name]))
+                                        (= "sent" (:state task))
+                                        (contains? task-ids (:id task))))
+        user-fn (fn [_ task-attachment]
+                  (get-in task-attachment [:latestVersion :user]))]
+    (fix-attachment-childrens apps :tasks tasks-filter-fn user-fn)))
+
+(defn statement-children-fix [& args]
+  (mongo/connect!)
+  (let [graylog-commands (graylog-request "give-statement")
+        statement-ids (set (map (comp :statementId :data) graylog-commands))
+        apps (mongo/select :applications {:_id {$in (map (comp :id :data) graylog-commands)}} [:attachments :statements])
+        statements-fn (fn [statement] (and (= "given" (:state statement))
+                                           (contains? statement-ids (:id statement))))
+        user-fn (fn [_ statement-attachment]
+                  (get-in statement-attachment [:latestVersion :user]))]
+    (fix-attachment-childrens apps :statements statements-fn user-fn)))
+
+(defn replay-attachment-children [& args]
+  (generate-missing-neighbor-docs)
+  (publish-verdicts-fix)
+  (tasks-children-fix)
+  (statement-children-fix))
+
+(defn- fetch-and-upload-file [url {:keys [filename originalFileId fileId contentType]} application]
+  {:pre [(not-any? ss/blank? [url fileId originalFileId])]}
+  (let [java-url (.toString (URL. (URL. "http://") url))
+        resp (http/get (.toString java-url) :as :stream :throw-exceptions false :conn-timeout (* 10 1000))
+        content-length (util/->int (get-in resp [:headers "content-length"] 0))]
+    (when (= content-length 0)
+      (errorf "attachment link %s in poytakirja refers to an empty file" (.toString java-url)))
+    (files/with-temp-file temp-file
+      (if (= 200 (:status resp))
+        (with-open [in (:body resp)]
+          ;; Copy content to a temp file to keep the content close at hand
+          ;; during upload and conversion processing.
+          (io/copy in temp-file)
+          (file-upload/save-file {:content temp-file
+                                  :filename filename
+                                  :fileId originalFileId
+                                  :size content-length}
+                                 {:application (:id application)
+                                  :linked true})
+          (infof "fileId %s converted, uploaded and linked successfully" originalFileId)
+          (when-not (= fileId originalFileId)
+            (let [conversion (conversion/archivability-conversion application
+                                                                  {:filename    filename
+                                                                   :contentType contentType
+                                                                   :content     temp-file})]
+              (if (:autoConversion conversion)
+                (do
+                  (file-upload/save-file (merge (select-keys conversion [:content :filename]) {:fileId fileId})
+                                         {:application (:id application) :linked true})
+                  (infof "fileId %s converted, uploaded and linked successfully" fileId))
+                (warnf "file %s not converted: %s" fileId (pr-str conversion))))))
+        (error (str (:status resp) " - unable to download " url ": " resp))))))
+
+(defn fetch-missing-backend-attachments [& args]
+  (mongo/connect!)
+  (let [ts 1527800400000
+        app-xml-cache (atom {})]
+    (doseq [app (mongo/select :applications
+                              {:modified                          {$gte ts}
+                               :attachments {$elemMatch {:latestVersion.created {$gte ts
+                                                                                 $lt 1528063200000}
+                                                         :type.type-id {$in (concat ["paatos" "paatosote" "muu"] vru/task-attachment-types)}
+                                                         :target.id {$exists true}}}}
+                              [:state :municipality
+                               :address :permitType
+                               :permitSubtype :organization
+                               :primaryOperation :verdicts
+                               :attachments])
+            {version :latestVersion target :target :as att} (->> (:attachments app)
+                                                                 (filter :latestVersion)
+                                                                 (filter :target))
+            :let [file (mongo/download (:fileId version))]]
+      (logging/with-logging-context {:applicationId (:id app)}
+        (info "Checking attachment id" (:id att))
+        (when-not file
+          (if (:urlHash target)
+            (let [app-xml (or (get @app-xml-cache (:id app))
+                              (-> (swap! app-xml-cache assoc (:id app) (krysp-fetch/get-application-xml-by-application-id app))
+                                  (get (:id app))))
+                  organization (org/get-organization (:organization app))
+                  xml-verdicts (verdict/get-verdicts-from-xml app organization app-xml)]
+              (cond
+                (= (:type target) "verdict")
+                (let [app-verdict (first (filter #(= (:id %) (:id target)) (:verdicts app)))]
+                  (info "Fetching file for verdict" (:id target))
+                  (if-let [xml-verdict (verdict/matching-verdict app-verdict xml-verdicts)]
+                    (let [{:keys [linkkiliitteeseen]} (->> xml-verdict
+                                                           :paatokset
+                                                           first
+                                                           :poytakirjat
+                                                           (map (fn [pk]
+                                                                  (->> [(or (:liite pk) (:Liite pk))]
+                                                                       flatten
+                                                                       (filter #(-> % :linkkiliitteeseen ss/blank? false?)))))
+                                                           flatten
+                                                           (remove nil?)
+                                                           (filter (fn [{:keys [linkkiliitteeseen]}]
+                                                                     (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
+                                                                        (:id att))))
+                                                           first)]
+                      (if (ss/blank? linkkiliitteeseen)
+                        (error "Could not find an HTTP link from verdict:" xml-verdict)
+                        (fetch-and-upload-file linkkiliitteeseen version app)))
+                    (error "Could not find the matching XML verdict for" (:id target))))
+
+                (= (:type target) "task")
+                (let [_ (info "Fetching file for task" (:id target))
+                      reviews (vec (review/reviews-preprocessed app-xml))
+                      buildings-summary (building-reader/->buildings-summary app-xml)
+                      source {:type "background"}
+                      app-task (->> (:tasks app)
+                                    (filter #(= (:id %) (:id target)))
+                                    first)
+                      review-tasks (review/reviews->tasks {:state :sent :created (now)} source buildings-summary reviews)
+                      review-tasks (keep-indexed (fn [idx item]
+                                                   (assoc item :attachments (-> (get reviews idx) :liitetieto))) review-tasks)
+                      attachments (-> (filter (fn [{:keys [data]}]
+                                                (= (get-in app-task [:data :muuTunnus :value])
+                                                   (get-in data [:muuTunnus :value])))
+                                              review-tasks)
+                                      first
+                                      :attachments)
+                      all-atts (->> (map :attachments review-tasks)
+                                    flatten
+                                    (remove nil?))
+                      {:keys [linkkiliitteeseen]} (->> (or (seq attachments)
+                                                           all-atts)
+                                                       (filter (fn [{{:keys [linkkiliitteeseen]} :liite}]
+                                                                 (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
+                                                                    (:id att))))
+                                                       first
+                                                       :liite)]
+                  (if (ss/blank? linkkiliitteeseen)
+                    (error "Could not find an HTTP link from reviews:" reviews)
+                    (fetch-and-upload-file linkkiliitteeseen version app)))
+
+                (= (:type target) "task")
+                (let [_ (info "Generating PDF for task" (:id target))
+                      tasks-filter-fn (fn [task] (and (= "task-katselmus" (get-in task [:schema-info :name]))
+                                                      (= "sent" (:state task))
+                                                      (= (:id target) (:id task))))
+                      user-fn (fn [_ task-attachment]
+                                (get-in task-attachment [:latestVersion :user]))]
+                  (fix-attachment-childrens [app] :tasks tasks-filter-fn user-fn))
+
+
+                :else
+                (error "Cannot handle attachment with target:" target)))
+
+            (cond
+              (= (:type target) "task")
+              (let [_ (info "Generating PDF for task" (:id target))
+                    tasks-filter-fn (fn [task] (and (= "task-katselmus" (get-in task [:schema-info :name]))
+                                                    (= "sent" (:state task))
+                                                    (= (:id target) (:id task))))
+                    user-fn (fn [_ task-attachment]
+                              (get-in task-attachment [:latestVersion :user]))]
+                (fix-attachment-childrens [app] :tasks tasks-filter-fn user-fn))
+
+              (= (:type target) "verdict")
+              (let [_ (info "Generating PDF for verdict" (:id target))
+                    verdict-filter-fn (fn [verdict]
+                                        (= (:id target) (:id verdict)))
+                    user-fn (fn [_ verdict-attachment]
+                              (get-in verdict-attachment [:latestVersion :user]))
+                    lang (if (or (ss/starts-with (:filename version) "Beslut")
+                                 (ss/starts-with (:filename version) "Avtal"))
+                           "sv"
+                           "fi")]
+                (fix-attachment-childrens [app] :verdicts verdict-filter-fn user-fn {(:id app) lang}))
+
+              :else
+              (error "Attachment does not have a target:" att))))))))

@@ -720,8 +720,8 @@
   (let [verdict {:dictionary (merge {:boardname        {:reference {:path :*ref.boardname}}
                                      :verdict-section  (schema-util/required {:text {:before :section}})
                                      :verdict-code     (schema-util/required {:reference-list {:path       :verdict-code
-                                                                                   :type       :select
-                                                                                   :loc-prefix :pate-r.verdict-code}
+                                                                                               :type       :select
+                                                                                               :loc-prefix :pate-r.verdict-code}
                                                                   :template-dict  :verdict-code})
                                      :verdict-text     (schema-util/required {:phrase-text   {:category :paatosteksti}
                                                                   :template-dict :paatosteksti})
@@ -992,22 +992,24 @@
                                 :rows    [[{:col  6
                                             :dict :attachments}]]}}})
 
-(def versub-upload
-  {:dictionary
-   {:upload
-    {:attachments {:i18nkey    :application.verdict-attachments
-                   :label?     false
-                   :type-group #"paatoksenteko"
-                   :default    :paatoksenteko.paatosote
-                   :dropzone   "#pate-verdict-page"
-                   :multiple?  true}}}
-   :section {:id       :upload
-             :hide?    :_meta.published?
-             :css      :pate-section--no-border
-             :buttons? false
-             :grid     {:columns 7
-                        :rows    [[{:col  6
-                                    :dict :upload}]]}}})
+(defn versub-upload
+  ([{:keys [type-group default]}]
+   {:dictionary
+    {:upload
+     {:attachments {:i18nkey    :application.verdict-attachments
+                    :label?     false
+                    :type-group (or type-group #"paatoksenteko")
+                    :default    (or default :paatoksenteko.paatosote)
+                    :dropzone   "#pate-verdict-page"
+                    :multiple?  true}}}
+    :section {:id       :upload
+              :hide?    :_meta.published?
+              :css      :pate-section--no-border
+              :buttons? false
+              :grid     {:columns 7
+                         :rows    [[{:col  6
+                                     :dict :upload}]]}}})
+  ([] (versub-upload {})))
 
 (def r-verdict-schema-1 (build-verdict-schema :r 1
                                               (versub-dates :r verdict-dates)
@@ -1024,7 +1026,7 @@
                                               versub-deviations
                                               versub-buildings
                                               versub-attachments
-                                              versub-upload))
+                                              (versub-upload)))
 
 (def versub-start-info ;; Lahtokohtatiedot
   (phrase-versub :start-info :pate-start-info :yleinen
@@ -1068,7 +1070,7 @@
                                               versub-buyout
                                               versub-fyi
                                               versub-attachments
-                                              versub-upload))
+                                              (versub-upload)))
 
 (def versub-dates-ya
   (-> (versub-dates :ya verdict-dates)
@@ -1134,7 +1136,7 @@
                                                versub-statements
                                                versub-inform-others
                                                versub-attachments
-                                               versub-upload))
+                                               (versub-upload {:type-group #"muut" :default :muut.paatosote})))
 
 (def tj-verdict-schema-1 (build-verdict-schema :tj 1
                                                (versub-dates :tj tj-verdict-dates)
@@ -1249,3 +1251,13 @@
                              {})
                       path)
       :else                   (recur (butlast path)))))
+
+(defn ya-verdict-type
+  "YA verdicts come in different types. The initial value is extracted
+  from the primary operation name."
+  [{primary-op :primaryOperation}]
+  (let [regex (->> ya-verdict-types
+                   (map name)
+                   (s/join "|")
+                   re-pattern)]
+    (re-find regex (:name primary-op))))

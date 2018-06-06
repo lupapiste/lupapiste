@@ -325,25 +325,35 @@
   (org/get-organization-name organization lang))
 
 (defn verdict-header
-  [lang application {:keys [category published] :as verdict}]
+  [lang application {:keys [category published legacy?] :as verdict}]
   [:div.header
    [:div.section.header
-    [:div.row.pad-after
-     [:div.cell.cell--40
-      (organization-name lang application)
-      (when-let [boardname (some-> verdict :references :boardname)]
-        [:div boardname])]
-     [:div.cell.cell--20.center
-      [:div (if published
-              (i18n/localize lang (case (keyword category)
-                                    :p :pdf.poikkeamispaatos
-                                    :attachmentType.paatoksenteko.paatos))
-              [:span.preview (i18n/localize lang :pdf.preview)])]]
-     [:div.cell.cell--40.right
-      [:div.permit (case (keyword category)
-                     :ya (i18n/localize lang :pate.verdict-type
-                                        (dict-value verdict :verdict-type))
-                     (i18n/localize lang :pdf category :permit))]]]
+    (let [category-kw    (util/kw-path (when legacy? :legacy) category)
+          legacy-kt-ymp? (contains? #{:legacy.kt :legacy.ymp}
+                                    category-kw)]
+      [:div.row.pad-after
+       [:div.cell.cell--40
+        (organization-name lang application)
+        (when-let [boardname (some-> verdict :references :boardname)]
+          [:div boardname])]
+       [:div.cell.cell--20.center
+        [:div (cond
+                (not published)
+                [:span.preview (i18n/localize lang :pdf.preview)]
+
+                (not legacy-kt-ymp?)
+                (i18n/localize lang (case category-kw
+                                      :p :pdf.poikkeamispaatos
+                                      :attachmentType.paatoksenteko.paatos)))]]
+       [:div.cell.cell--40.right
+        [:div.permit (if legacy-kt-ymp?
+                       (i18n/localize lang :attachmentType.paatoksenteko.paatos)
+                       (case category-kw
+                        :ya        (i18n/localize lang :pate.verdict-type
+                                                  (dict-value verdict :verdict-type))
+                        :legacy.ya (i18n/localize lang :pate.verdict-type
+                                                  (shared/ya-verdict-type application))
+                        (i18n/localize lang :pdf category :permit)))]]])
     [:div.row
      [:div.cell.cell--40
       (add-unit lang :section (dict-value verdict :verdict-section))]
