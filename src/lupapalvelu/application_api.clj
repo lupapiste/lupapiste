@@ -29,6 +29,7 @@
             [lupapalvelu.drawing :as draw]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.integrations.allu :as allu]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
@@ -345,7 +346,10 @@
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
-      (app/submit command))))
+      (do
+        (when (allu/allu-application? application)
+          (allu/create-placement-contract! application)) ; TODO: Save the returned contract id
+        (app/submit command)))))
 
 (defcommand refresh-ktj
   {:parameters [:id]

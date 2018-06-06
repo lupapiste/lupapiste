@@ -1,5 +1,6 @@
 (ns lupapalvelu.integrations.allu
-  (:require [clojure.walk :refer [postwalk]]
+  (:require [clojure.string :as s]
+            [clojure.walk :refer [postwalk]]
             [schema.core :as sc]
             [cheshire.core :as json]
             [clj-time.core :as t]
@@ -129,13 +130,27 @@
                           :workDescription (-> work-description :data :kayttotarkoitus)}]
     (assoc-when res :customerReference (not-empty (-> payee-doc :data :laskuviite)))))
 
-;;;; Putting it all together
-
+;; Putting it all together
 (sc/defn ^:private application->allu-placement-contract :- PlacementContract [app]
   (-> app flatten-values convert-value-flattened-app))
 
-(defn create-placement-contract! [app]
-  (http/post (str (env/value :allu :url) "/placementcontracts")
-             {:headers {:authorization (str "Bearer " (env/value :allu :jwt))}
-              :content-type :json
-              :body (json/encode (application->allu-placement-contract app))}))
+(defn- allu-organization? [org]
+  (if (env/dev-mode?)
+    (s/ends-with? org "-YA")
+    (= org "091-YA")))
+
+(def- allu-permit-subtypes #{"sijoituslupa" "sijoitussopimus"})
+
+(defn allu-application? [{:keys [permitSubtype organization]}]
+  (and (allu-organization? organization)
+       (contains? allu-permit-subtypes permitSubtype)))
+
+;; TODO: Error handling
+(defn create-placement-contract!
+  "Create placement contract in ALLU. Returns ALLU id for the contract."
+  [app]
+  (let [endpoint (str (env/value :allu :url) "/placementcontracts")
+        request {:headers {:authorization (str "Bearer " (env/value :allu :jwt))}
+                 :content-type :json
+                 :body (json/encode (application->allu-placement-contract app))}]
+    (:body (http/post endpoint request))))
