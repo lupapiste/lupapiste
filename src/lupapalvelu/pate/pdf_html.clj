@@ -259,9 +259,8 @@
                                            (cons ::styles path)))
                                  (get-in source-value
                                          [::styles ::cell])))
-        value (or text (->> (get-in source-value path source-value)
-                            ss/->plain-string
-                            ss/blank-as-nil))]
+        value (or text (util/pcond-> (get-in source-value path source-value)
+                                     string? ss/blank-as-nil))]
     (when value
       [:div.cell {:class class}
        (cond->> value
