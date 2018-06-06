@@ -888,7 +888,9 @@
   (info "Starting analyze-missing job")
   (let [ts 1527638400000]
     (doseq [app (mongo/select :applications
-                              {:modified    {$gte ts}}
+                              {$or [{:modified {$gte ts}}
+                                    {:verdicts.timestamp {$gte ts}}
+                                    {:tasks.created {$gte ts}}]}
                               [:attachments]
                               {:_id 1})
             {version :latestVersion :as att} (->> (:attachments app)
@@ -952,10 +954,10 @@
       ((fn [s] (str "{" s)))
       (json/parse-string true)))
 
-(defn graylog-request [action-to-check]
+(defn graylog-request [action-to-check & [offset]]
   (->> (http/get (str (env/value :graylog :host) "/api/search/universal/absolute?query=action%3A"
                       action-to-check
-                      "%20AND%20(source%3Aapp3%20OR%20source%3Aapp4)&from=2018-05-31T21%3A00%3A00.000Z&to=2018-06-3T22%3A00%3A00.000Z&limit=4000")
+                      "%20AND%20(source%3Aapp3%20OR%20source%3Aapp4)&from=2018-05-31T21%3A00%3A00.000Z&to=2018-06-3T22%3A00%3A00.000Z&limit=1000&offset=" (or offset 0))
                  {:basic-auth [(env/value :graylog :user) (env/value :graylog :password)]
                   :coerce :always
                   :as :json})
@@ -1232,11 +1234,10 @@
         app-xml-cache (atom {})
         query (if (seq application-ids)
                 {:_id {$in application-ids}}
-                {:modified    {$gte ts}
-                 :attachments {$elemMatch {:latestVersion.created {$gte ts
-                                                                   $lt  1528063200000}
-                                           :type.type-id          {$in (concat ["paatos" "paatosote" "muu"] vru/task-attachment-types)}
-                                           :target.id             {$exists true}}}})]
+                {$or          [{:verdicts.timestamp {$gte ts}}
+                               {:tasks.created {$gte ts}}]
+                 :attachments {$elemMatch {:type.type-id {$in (concat ["paatos" "paatosote" "muu"] vru/task-attachment-types)}
+                                           :target.id    {$exists true}}}})]
     (info "Starting from timestamp" ts)
     (info "Running for application ids:" (or (seq application-ids) "all"))
     (doseq [app (mongo/select :applications
