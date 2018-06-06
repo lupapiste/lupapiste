@@ -188,23 +188,28 @@
                           :create-application
                           :document-states
                           :authorized-to-apply-submit-restriction-to-other-auths}
-
-        user {:id "user123" :role :applicant}
-        application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
-    (doseq [command (foreach-action {:web {} :user user :application application :data {} :organization (delay {:statementGivers [{:id "user123"}]})})
-            :let [action (keyword (:action command))
+        user {:id "user123"
+              :role :applicant}
+        application {:organization "999-R"
+                     :auth [{:id "user123"
+                             :role "statementGiver"}]}
+        command-sceleton {:web {}
+                          :user user
+                          :application application
+                          :data {}
+                          :organization (delay {:statementGivers [{:id "user123"}]})}]
+    (doseq [command (->> (foreach-action command-sceleton)
+                         (map enrich-default-permissions)
+                         (map enrich-action-contexts))
+            :let [action (:action command)
                   result (or (user-is-not-allowed-to-access? command application)
-                             (-> command
-                                 enrich-default-permissions
-                                 enrich-action-contexts
-                                 access-denied-by-insufficient-permissions))]]
+                             (access-denied-by-insufficient-permissions command))]]
       (fact {:midje/description (name action)}
         (fact "has user" (:user command) => user)
         (fact "has upplication" (:application command) => application)
-        (if (allowed-actions action)
-          result => nil?
-          result => unauthorized?)))))
-
+        (fact result => (if (allowed-actions action)
+                          nil?
+                          unauthorized?))))))
 
 (facts "Actions with id and state 'draft' are not allowed for authority"
        (let [allowed-actions #{:invite-guest :delete-guest-application
