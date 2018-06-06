@@ -639,15 +639,18 @@
       :area     (resolve-area-coordinates xml)
       nil)))
 
+(defn get-asiat-with-kuntalupatunnus [xml-no-ns kuntalupatunnus]
+  (let [asiat (enlive/select xml-no-ns common/case-elem-selector)]
+    (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) asiat)))
+
 ;;
 ;; Information parsed from verdict xml message for application creation
 ;;
 (defn get-app-info-from-message [xml kuntalupatunnus]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
         kuntakoodi (-> (select1 xml-no-ns [:toimituksenTiedot :kuntakoodi]) cr/all-of)
-        asiat (enlive/select xml-no-ns common/case-elem-selector)
         ;; Take first asia with given kuntalupatunnus. There should be only one. If there are many throw error.
-        asiat-with-kuntalupatunnus (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) asiat)]
+        asiat-with-kuntalupatunnus (get-asiat-with-kuntalupatunnus xml-no-ns kuntalupatunnus)]
     (when (pos? (count asiat-with-kuntalupatunnus))
       ;; There should be only one RakennusvalvontaAsia element in the message, even though Krysp makes multiple elements possible.
       ;; Log an error if there were many. Use the first one anyway.

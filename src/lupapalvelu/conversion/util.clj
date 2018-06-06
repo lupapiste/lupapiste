@@ -1,8 +1,12 @@
 (ns lupapalvelu.conversion.util
-  (:require [sade.core :refer :all]
+  (:require [net.cgrand.enlive-html :as enlive]
+            [sade.core :refer :all]
+            [sade.common-reader :as cr]
             [sade.strings :as ss]
+            [sade.xml :refer :all]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.prev-permit :as prev-permit]
+            [lupapalvelu.xml.krysp.common-reader :as common]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.organization :as organization]
@@ -20,7 +24,8 @@
         operation             "aiemmalla-luvalla-hakeminen"
         permit-type           (operations/permit-type-of-operation operation)
         dummy-application     {:id "" :permitType permit-type :organization organizationId}
-        filename              (str "./src/lupapalvelu/conversion/test-data/" kuntalupatunnus ".xml")
+        path                  "./src/lupapalvelu/conversion/test-data/"
+        filename              (str path kuntalupatunnus ".xml")
         xml                   (krysp-fetch/get-local-application-xml-by-filename filename permit-type)
         app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
         location-info         (prev-permit/get-location-info command app-info)
@@ -44,6 +49,7 @@
                                             (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
                                             (ok :id id))))))
 
+
 (defn db-format->permit-id
   "Viitelupien tunnukset on Factassa tallennettu 'tietokantaformaatissa', josta ne on tunnuksella
   hakemista varten muunnettava yleiseen formaattiin.
@@ -51,3 +57,34 @@
   [id]
   (let [parts (zipmap '(:vuosi :no :tyyppi :kauposa) (ss/split id #"[- ]"))]
     (ss/join "-" ((juxt :kauposa :no :vuosi :tyyppi) parts))))
+
+;; For testing, remove
+(def ^:private data
+  (krysp-fetch/get-local-application-xml-by-filename "./src/lupapalvelu/conversion/test-data/12-0027-13-A.xml" "R"))
+
+(def ^:private tjo
+  (krysp-fetch/get-local-application-xml-by-filename "./src/lupapalvelu/conversion/test-data/17-0010-13-TJO.xml" "R"))
+
+(defn get-kuntalupatunnus [xml]
+  (cr/all-of (select1 xml [:rakennusvalvontaAsiatieto :luvanTunnisteTiedot :kuntalupatunnus])))
+
+(defn get-viitelupatunnukset
+  "Takes a parsed XML document, returns a list of viitelupatunnus -ids (in 'permit-id'-format) found therein."
+  [xml]
+  (->> (select xml [:rakennusvalvontaAsiatieto :viitelupatieto])
+       (map (comp db-format->permit-id #(get-in % [:LupaTunnus :kuntalupatunnus]) cr/all-of))))
+
+(defn is-foreman-application? [xml]
+  (let [permit-type (-> xml get-kuntalupatunnus (ss/split #"-") last)]
+    (= "TJO" permit-type)))
+
+(defn get-tyonjohtajat [xml]
+  (when (is-foreman-application? xml)
+    (as-> xml x
+        (krysp-reader/get-asiat-with-kuntalupatunnus x (get-kuntalupatunnus xml))
+        (first x)
+        (select x [:osapuolettieto :Osapuolet :tyonjohtajatieto :Tyonjohtaja])
+        (map cr/all-of x))))
+
+(defn xml->tj-documents [xml]
+  (map prev-permit/tyonjohtaja->tj-document (get-tyonjohtajat xml)))
