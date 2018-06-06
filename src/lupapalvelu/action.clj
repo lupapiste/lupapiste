@@ -489,10 +489,9 @@
 (defn user-is-allowed-to-access?
   [{user :user :as command} application]
   (let [meta-data (meta-data command)]
-    (or
-      (user-authz? meta-data application user)
-      (organization-authz? meta-data application user)
-      (company-authz? meta-data application user))))
+    (or (user-authz? meta-data application user)
+        (organization-authz? meta-data application user)
+        (company-authz? meta-data application user))))
 
 (defn- user-is-not-allowed-to-access?
   "Current user must have correct role in application.auth, work in
