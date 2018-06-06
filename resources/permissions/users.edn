@@ -2,7 +2,6 @@
                          :users/update
                          :users/create
                          :users/create-financial-handler}
-                :applicant #{:users/update}
                 :authority #{:users/update}
                 :financialAuthority #{:users/update}}
  :organization {:authorityAdmin #{:users/admin-query
