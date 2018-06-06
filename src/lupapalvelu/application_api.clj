@@ -347,7 +347,7 @@
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
       (do
-        (when (allu/allu-application? application)
+        (when (and (env/feature? :allu) (allu/allu-application? application))
           (allu/create-placement-contract! application)) ; TODO: Save the returned contract id
         (app/submit command)))))
 
