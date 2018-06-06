@@ -443,7 +443,7 @@
 
 (facts "create-new-user"
 
-  ; FIXME: this fails with "applicants are born via registration"
+  ; FIXME: this fails with "applicants are born via registration", which is correct response, me thinks
   #_(fact "register new applicant user, user did not exists before"
     (create-new-user nil {:email "x@x.x" :role "applicant"}) => ..result..
     (provided
@@ -452,7 +452,7 @@
       (mongo/insert :users (contains {:email "x@x.x" :id ..id..})) => nil
       (mongo/update-by-id :users anything anything) => anything :times 0))
 
-  ; FIXME: this fails with "applicants are born via registration"
+  ; FIXME: this fails with "applicants are born via registration", which is correct response, me thinks
   #_(fact "create new applicant user, user exists before as dummy user"
     (create-new-user nil {:email "x@x.x" :role "applicant"}) => ..result..
     (provided

@@ -670,7 +670,7 @@
   (let [; Oh fuck this, sometimes orgAuthz is a set of keywords, sometimes
         ; vector of strings, probably there are some other variations also.
         ; This normalizes callers orgAuthz for this case
-        caller     (when caller
+        caller    (when caller
                      (update caller :orgAuthz (fn [org-authz]
                                                 (->> org-authz
                                                      (map (fn [[k v]]
@@ -683,9 +683,9 @@
         new-user  (if old-user
                      (assoc user-data :id (:id old-user))
                      (assoc user-data :id (mongo/create-id)))
-        email      (:email new-user)
+        email     (:email new-user)
         {old-id :id old-role :role} old-user
-        new-user   (if (applicant? user-data)
+        new-user  (if (applicant? user-data)
                      (assoc new-user :notification {:titleI18nkey   "user.notification.firstLogin.title"
                                                     :messageI18nkey "user.notification.firstLogin.message"})
                      new-user)]
