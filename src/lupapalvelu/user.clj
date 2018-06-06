@@ -647,7 +647,8 @@
   (when-let [e (new-user-error {:caller caller
                                 :user-data user-data
                                 :known-organizations? org/known-organizations?})]
-    (fail! (-> e :error) :desc (-> e :desc))))
+    (fail! (-> e :error) :desc (-> e :desc)))
+  user-data)
 
 (defn- create-new-user-entity [{:as user-data :keys [password]}]
   (let [email (-> user-data :email ss/canonize-email)]
@@ -675,10 +676,11 @@
                                                      (map (fn [[k v]]
                                                             [k (mapv name v)]))
                                                      (into {})))))
-        user-data  (create-new-user-entity user-data)
-        _          (validate-create-new-user! caller user-data)
-        old-user   (get-user-by-email (:email user-data))
-        new-user   (if old-user
+        user-data (->> user-data
+                       (create-new-user-entity)
+                       (validate-create-new-user! caller))
+        old-user  (get-user-by-email (:email user-data))
+        new-user  (if old-user
                      (assoc user-data :id (:id old-user))
                      (assoc user-data :id (mongo/create-id)))
         email      (:email new-user)

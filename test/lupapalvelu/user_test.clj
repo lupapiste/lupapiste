@@ -363,7 +363,7 @@
                                                           :email    "x@x.x"
                                                           :orgAuthz {:org-1 ["authority"]
                                                                      :org-2 ["authority"]}}))
-      => nil
+      => (contains {:email "x@x.x"})
       (provided
         (org/known-organizations? [:org-1 :org-2]) => true))
     (fact "caller does not have authorityAdmin to org-2 validation fails"
@@ -393,7 +393,7 @@
                                  (create-new-user-entity {:role     "authority"
                                                           :email    "x@x.x"
                                                           :orgAuthz {:org ["authority"]}}))
-      => nil
+      => (contains {:email "x@x.x"})
       (provided
         (org/known-organizations? [:org]) => true))
     (fact "admin can't create user to unknown organization"
@@ -424,7 +424,7 @@
     (validate-create-new-user! {:role "admin"}
                                (create-new-user-entity {:role "authority"
                                                         :email "x@x.x"}))
-    => nil)
+    => (contains {:email "x@x.x"}))
 
   ; TODO: figure out where invalid password should be checked
   #_(fact "invalid passwords are rejected"
