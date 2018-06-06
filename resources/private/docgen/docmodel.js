@@ -318,7 +318,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       $(input).removeClass("source-value-changed");
     } else if (sourceValue !== undefined && sourceValue !== value){
       $(input).addClass("source-value-changed");
-      input.title = _.escapeHTML(loc("sourceValue") + ": " + (localizedSourceValue ? localizedSourceValue : sourceValue));
+      if (!_.endsWith(input.name, "hetu")) {
+        input.title = _.escapeHTML(loc("sourceValue") + ": " + (localizedSourceValue ? localizedSourceValue : sourceValue));
+      }
     }
   }
 
