@@ -624,7 +624,7 @@
              (and (= role "dummy")
                   (seq orgAuthz)))}
 
-   ; In principle, `the "authorityAdmin can create users into his/her own organizations only" test
+   ; In principle, the "authorityAdmin can create users into his/her own organizations only" test
    ; should cover this. The only way this test traps errors is that the organization was deleted, but
    ; some authority still has the roles for deleted organization in her :authOrgz.
    {:desc  "all organizations must be known"
@@ -667,7 +667,7 @@
    exists and has role \"dummy\", overwrites users information. If users exists with any other
    role, throws exception."
   [caller user-data & {:keys [send-email] :or {send-email true}}]
-  (let [; Oh fuck this, sometimes orgAuthz is a set of keywords, sometimes
+  (let [; Oh damn, sometimes orgAuthz is a set of keywords, sometimes
         ; vector of strings, probably there are some other variations also.
         ; This normalizes callers orgAuthz for this case
         caller    (when caller
