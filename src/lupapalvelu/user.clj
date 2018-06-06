@@ -303,7 +303,6 @@
   ; TODO: user can have multiple orgz
   (let [[org & more] (organization-ids-by-roles user #{:authorityAdmin})]
     (when (seq more)
-      (error "user is authorityAdmin in multiple organizations, somebody needs to implement this")
       (throw (ex-info "user is authorityAdmin in multiple organizations, somebody needs to implement this" {:user user})))
     org))
 
@@ -429,8 +428,7 @@
     (case (count orgs)
       0 false
       1 true
-      (do (error "user is authorityAdmin in multiple organizations, somebody needs to implement this")
-          (throw (ex-info "user is authorityAdmin in multiple organizations, somebody needs to implement this" {:user caller}))))))
+      (throw (ex-info "user is authorityAdmin in multiple organizations, somebody needs to implement this" {:user caller})))))
 
 (defn- users-for-datatables-base-query [caller params]
   (let [caller-organizations (organization-ids caller)
