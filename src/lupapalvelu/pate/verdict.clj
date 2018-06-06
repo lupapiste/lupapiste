@@ -506,7 +506,11 @@
                         [(i18n/localize lang :pate-verdict-draft)
                          rep-string])
                       (remove ss/blank?)
-                      (ss/join " ")))))
+                      (ss/join " "))
+          :signatures (some->> data :signatures vals
+                               (map #(select-keys % [:name :date]))
+                               (sort-by :date)
+                               seq))))
 
 (defn verdict-list
   [{:keys [lang application]}]

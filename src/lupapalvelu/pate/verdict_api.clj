@@ -166,6 +166,7 @@
                        id:        Verdict id
                        published: (optional) timestamp
                        modified:  timestamp
+                       category:  Verdict category
                        legacy?:   (optional) true for legacy verdicts.
                        giver:     Either verdict handler or boardname.
                        verdict-date: (optional) timestamp
@@ -176,6 +177,11 @@
                        title: Friendly title for the verdict. The
                        format depends on the verdict state and
                        category.
+
+                       signatures: (optional) list of maps:
+                           name: signer
+                           date timestamp. The list is ordered by
+                           dates.
 
                       If the user is applicant, only published
                       verdicts are returned. Note that verdicts can be
@@ -244,9 +250,10 @@
    :states          states/post-submitted-states}
   [_])
 
-(defquery pate-contract-tab {:description "Pseudo-query that fails if
-  the Pate contracts tab should not be shown on the UI. Note that
-  pate-contract-tab always implies pate-verdict-tab, too."
+(defquery pate-contract-tab
+  {:description     "Pseudo-query that fails if the Pate contracts tab
+  should not be shown on the UI. Note that pate-contract-tab always
+  implies pate-verdict-tab, too."
    :feature         :pate
    :parameters      [:id]
    :user-roles      #{:applicant :authority}
