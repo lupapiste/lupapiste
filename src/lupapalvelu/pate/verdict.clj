@@ -389,6 +389,13 @@
       (init--dict-by-application :address :address)
       init--permit-period))
 
+(defmethod initialize-verdict-draft :tj
+  [initmap]
+  (-> initmap
+      (init--dict-by-application :handler general-handler)
+      (init--dict-by-application :operation application-operation)
+      (init--dict-by-application :address :address)))
+
 (declare enrich-verdict)
 
 (defn user-ref [{user :user}]
@@ -423,7 +430,7 @@
   contain every schema dict."
   [{:keys [application organization created]
     :as   command}]
-  (let [category   (-> application :permitType shared/permit-type->category)
+  (let [category   (shared/application->category application)
         verdict-id (mongo/create-id)]
     (action/update-application command
                                {$push {:pate-verdicts
@@ -862,7 +869,7 @@
           app-buildings))
 
 (defn command->category [{app :application}]
-  (shared/permit-type->category (:permitType app)))
+  (shared/application->category app))
 
 (defn statements
   "List of maps with given (timestamp), text (string) and

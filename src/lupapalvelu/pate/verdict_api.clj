@@ -111,7 +111,6 @@
   [{:keys [application organization]}]
   (ok :templates (template/application-verdict-templates @organization
                                                          application)))
-
 (defquery pate-verdicts
   {:description      "List of verdicts. Item properties:
 

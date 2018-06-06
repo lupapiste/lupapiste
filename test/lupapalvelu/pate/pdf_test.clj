@@ -426,3 +426,20 @@
                                                        :aaa {:condition "Probably first."}}}}})
     => [[:div.markup '(([:p {} "Probably first." [:br]])
                        ([:p {} "Should be last." [:br]]))]]))
+
+(fact "tj-vastattavat-tyot"
+  (pdf/tj-vastattavat-tyot {:documents [{:schema-info {:name "tyonjohtaja-v2"}
+                                         :data        {:vastattavatTyotehtavat {:rakennuksenPurkaminen                  {:value false},
+                                                                                :ivLaitoksenKorjausJaMuutostyo          {:value false},
+                                                                                :uudisrakennustyoIlmanMaanrakennustoita {:value false},
+                                                                                :maanrakennustyot                       {:value true},
+                                                                                :uudisrakennustyoMaanrakennustoineen    {:value false},
+                                                                                :ulkopuolinenKvvTyo                     {:value true, :modified 1527251435900},
+                                                                                :rakennuksenMuutosJaKorjaustyo          {:value false},
+                                                                                :linjasaneeraus                         {:value false},
+                                                                                :ivLaitoksenAsennustyo                  {:value false},
+                                                                                :muuMika                                {:value ""},
+                                                                                :sisapuolinenKvvTyo                     {:value true, :modified 1527251434831}}}}]}
+                           "fi")
+  => ["Maanrakennusty\u00f6t" "Ulkopuolinen KVV-ty\u00f6" "Sis\u00e4puolinen KVV-ty\u00f6"])
+

@@ -5,7 +5,6 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.operations :as ops]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.schemas :as schemas]
@@ -26,10 +25,10 @@
                      user-organizations)))
 
 (defn organization-categories [{scope :scope}]
-  (set (map (comp shared/permit-type->category :permitType) scope)))
+  (set (flatten (map (comp shared/permit-type->category :permitType) scope))))
 
 (defn operation->category [operation]
-  (shared/permit-type->category (ops/permit-type-of-operation operation)))
+  (shared/operation->category operation))
 
 (defn error-response [{:keys [failure errors]}]
   (if failure
@@ -158,8 +157,8 @@
               (fail! :error.verdict-template-name-missing))
             (when (and application
                        (util/not=as-kw (:category template)
-                                       (-> command :application :permitType
-                                           shared/permit-type->category)))
+                                       (-> command :application
+                                           shared/application->category)))
               (fail! :error.invalid-category))
             (when (and filled (or (not (template-filled? {:template template}))
                                   (not (settings-filled? {:org-id (:id organization)}
@@ -459,8 +458,8 @@
 
 (defn application-verdict-templates [{:keys [operation-verdict-templates
                                              verdict-templates]}
-                                     {:keys [permitType primaryOperation]}]
-  (let [app-category  (shared/permit-type->category permitType)
+                                     {:keys [primaryOperation] :as application}]
+  (let [app-category (shared/application->category application)
         app-operation (-> primaryOperation :name keyword)]
     (->> verdict-templates
          :templates
