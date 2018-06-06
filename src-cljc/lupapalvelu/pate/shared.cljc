@@ -1169,16 +1169,11 @@
                         s/lower-case
                         keyword)]
     (cond
-      (#{:r :p} kw)                  [kw]
+      (= kw :r)                      [:r :tj]
+      (= :p kw)                      [:p]
       (#{:ya} kw)                    [:ya :contract]
       (#{:kt :mm} kw)                [:kt]
       (#{:yi :yl :ym :vvvl :mal} kw) [:ymp])))
-
-(defn application->category [{:keys [permitType permitSubtype]}]
-  (let [[x & _] (permit-type->categories permitType)]
-    (if (and (= x :ya) (util/=as-kw permitSubtype :sijoitussopimus))
-      :contract
-      x)))
 
 
 (defn permit-subtype->category [permit-subtype]
@@ -1186,7 +1181,8 @@
                         s/lower-case
                         keyword)]
     (cond
-      (#{:tyonjohtaja-hakemus} kw) :tj)))
+      (= kw :tyonjohtaja-hakemus) :tj
+      (= kw :sijoitussopimus)     :contract)))
 
 (defn category-by-operation [operation]
   (when-let [kw (some-> operation
@@ -1196,14 +1192,8 @@
       (#{:tyonjohtajan-nimeaminen-v2} kw) :tj)))
 
 (defn application->category [{:keys [permitType permitSubtype]}]
-  (let [by-subtype (permit-subtype->category permitSubtype)
-        kw         (-> permitType s/lower-case keyword)]
-    (if (some? by-subtype)
-      by-subtype
-      (cond
-        (#{:r :p :ya} kw)              kw
-        (#{:kt :mm} kw)                :kt
-        (#{:yi :yl :ym :vvvl :mal} kw) :ymp))))
+  (or (permit-subtype->category permitSubtype)
+      (first (permit-type->categories permitType))))
 
 (defn dict-resolve
   "Path format: [repeating index repeating index ... value-dict].

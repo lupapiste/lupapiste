@@ -95,7 +95,7 @@
                                                                  :subtype "foreman"})
                                          :source      {:type "verdict" :id verdict-id}})]))
             (fact "Attachment has been created"
-              attachments => (just [(contains {:source           {:type "verdict" :id verdict-id}
+              attachments => (just [(contains {:source           {:type "verdicts" :id verdict-id}
                                                :type             {:type-id    "paatos"
                                                                   :type-group "paatoksenteko"}
                                                :applicationState "verdictGiven"})]))

@@ -485,32 +485,35 @@
                                             (i18n/localize-and-fill lang
                                                                     :pate.replaces-verdict
                                                                     section)))))]
-    (assoc (select-keys verdict [:id :published :modified :legacy? :category])
-          :giver (if (util/=as-kw (:giver template) :lautakunta)
-                   (:boardname references)
-                   (:handler data))
-          :replaces replaces
-          :verdict-date (:verdict-date data)
-          :title (->> (cond
-                        (and (util/=as-kw category :contract) published)
-                        [(i18n/localize lang :pate.verdict-table.contract)]
+    (-<>> (select-keys verdict [:id :published :modified :legacy? :category])
+          (assoc <>
+                 :giver (if (util/=as-kw (:giver template) :lautakunta)
+                          (:boardname references)
+                          (:handler data))
+                 :replaces replaces
+                 :verdict-date (:verdict-date data)
+                 :title (->> (cond
+                               (and (util/=as-kw category :contract) published)
+                               [(i18n/localize lang :pate.verdict-table.contract)]
 
-                        published
-                        [(get section-strings id)
-                         (util/pcond-> (verdict-string lang verdict :verdict-type)
-                          ss/not-blank? (str " -"))
-                         (verdict-string lang verdict :verdict-code)
-                         rep-string]
+                               published
+                               [(get section-strings id)
+                                (util/pcond-> (verdict-string lang verdict :verdict-type)
+                                              ss/not-blank? (str " -"))
+                                (verdict-string lang verdict :verdict-code)
+                                rep-string]
 
-                        :else
-                        [(i18n/localize lang :pate-verdict-draft)
-                         rep-string])
-                      (remove ss/blank?)
-                      (ss/join " "))
-          :signatures (some->> data :signatures vals
-                               (map #(select-keys % [:name :date]))
-                               (sort-by :date)
-                               seq))))
+                               :else
+                               [(i18n/localize lang :pate-verdict-draft)
+                                rep-string])
+                             (remove ss/blank?)
+                             (ss/join " "))
+                 :signatures (some->> data :signatures vals
+                                      (map #(select-keys % [:name :date]))
+                                      (sort-by :date)
+                                      seq))
+          (remove (comp nil? second))
+          (into {}))))
 
 (defn verdict-list
   [{:keys [lang application]}]

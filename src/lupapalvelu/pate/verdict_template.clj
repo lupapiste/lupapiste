@@ -32,16 +32,11 @@
        set))
 
 (defn operation->category [operation]
-  (let [by-operation (shared/category-by-operation operation)
-        kw           (-> (ops/permit-type-of-operation operation)
-                         ss/lower-case
-                         keyword)]
-    (if (some? by-operation)
-      by-operation
-      (cond
-        (#{:r :p :ya} kw)              kw
-        (#{:kt :mm} kw)                :kt
-        (#{:yi :yl :ym :vvvl :mal} kw) :ymp))))
+  (or (shared/category-by-operation operation)
+      (-> operation
+          ops/permit-type-of-operation
+          shared/permit-type->categories
+          first)))
 
 (defn error-response [{:keys [failure errors]}]
   (if failure
