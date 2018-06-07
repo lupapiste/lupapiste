@@ -322,12 +322,7 @@
                      :dum                       {:date {}}
                      :removed-sections          {:keymap {:one   false
                                                           :two   false
-                                                          :three false}}
-                     :link-to-settings          {:link {:text-loc :pate.settings-link
-                                                        :click    :open-settings}}
-                     :link-to-settings-no-label {:link {:text-loc :pate.settings-link
-                                                        :label?   false
-                                                        :click    :open-settings}}}
+                                                          :three false}}}
         :sections   [{:id   :one
                       :grid {:columns 1
                              :rows    [[{:dict :foo}]]}}
