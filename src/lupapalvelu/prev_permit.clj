@@ -301,7 +301,7 @@
                                    rakennuspaikka-exists?                          (:rakennuspaikka app-info)
                                    (enough-location-info-from-parameters? command) (select-keys data [:x :y :address :propertyId]))]
       (when-not rakennuspaikka-exists?
-        (info "Prev permit application creation, rakennuspaikkatieto information incomplete:\n " (:rakennuspaikka app-info) "\n"))
+        (info "Prev permit application creation, rakennuspaikkatieto information incomplete:" (:rakennuspaikka app-info)))
       location-info)))
 
 (defn fetch-prev-application! [{{:keys [organizationId kuntalupatunnus authorizeApplicants]} :data :as command}]
