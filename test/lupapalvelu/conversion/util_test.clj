@@ -37,6 +37,11 @@
   (util/is-foreman-application? verdict-tjo) => true)
 
 (fact "Conversion of permit ids from 'database-format' works as expected"
-  (util/db-format->permit-id "12-0089-D 17") => "17-0089-12-D"
-  (util/db-format->permit-id "10-0088-A 98") => "98-0088-10-A"
-  (util/db-format->permit-id "16-0549-DJ 75") => "75-0549-16-DJ")
+  (facts "ids in 'database-format' are converted into 'ui-format'"
+    (util/normalize-permit-id "12-0089-D 17") => "17-0089-12-D"
+    (util/normalize-permit-id "10-0088-A 98") => "98-0088-10-A"
+    (util/normalize-permit-id "16-0549-DJ 75") => "75-0549-16-DJ")
+  (facts "ids already in 'ui-format' are not altered"
+    (util/normalize-permit-id "17-0089-12-D") => "17-0089-12-D"
+    (util/normalize-permit-id "98-0088-10-A") => "98-0088-10-A"
+    (util/normalize-permit-id "75-0549-16-DJ") => "75-0549-16-DJ"))
