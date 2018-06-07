@@ -223,7 +223,7 @@
                         <!-- /ko -->
 
                         <div class="operation-info">
-                            <!-- ko if: !$root.authorization.ok('link-permit-required') -->
+                            <!-- ko if: !$root.authorization.ok('link-permit-required') && permitType() -->
                             <div class="margins-m no-top" data-bind="if: $root.authorization.ok('add-operation')">
                               <div class="help-box">
                                 <p data-bind="lhtml: 'help.' + permitType() + '.AddOperations'"></p>
