@@ -368,6 +368,9 @@
   ([collection query]
     (mc/count (get-db) collection (remove-null-chars query))))
 
+(defn aggregate [collection stages]
+  (mc/aggregate (get-db) (name collection) stages :cursor {}))
+
 (defn ^{:perfmon-exclude true} get-next-sequence-value [sequence-name]
   (:count (update-one-and-return :sequences {:_id (name sequence-name)} {$inc {:count 1}} :upsert true)))
 
