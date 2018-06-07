@@ -847,3 +847,32 @@ body.pate-error-page {
 textarea.grid-style-input.pate-textarea {
   height: initial;
 }
+
+span.text-and-button > input {
+  line-height: $btn-height;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+tr.verdict-signatures {
+  div.tabby {
+    margin-left: 1em;
+    //max-width: 30em;
+    div.tabby__cell {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+    .cell--right {
+      text-align: right;
+    }
+  }
+  label {
+    display: block;
+  }
+  .text-and-button > input {
+    min-width: 16em;
+  }
+  button.cancel-signing {
+    margin-top: 1.5em;
+  }
+}

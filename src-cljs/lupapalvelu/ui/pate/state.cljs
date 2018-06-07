@@ -65,6 +65,10 @@
   (get-in @allowed-verdict-actions
           [(keyword verdict-id) (keyword action) :ok]))
 
+(defn react-verdict-auth? [verdict-id action]
+  (rum/react (rum/cursor-in allowed-verdict-actions
+                            [(keyword verdict-id) (keyword action) :ok])))
+
 (defn- update-allowed-if-needed [verdict-id new-actions]
   (let [ok-keys-fn #(->> %
                          (map (fn [[k v]]

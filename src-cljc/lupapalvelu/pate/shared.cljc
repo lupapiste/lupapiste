@@ -992,10 +992,10 @@
                                             :dict :attachments}]]}}})
 
 (defn versub-upload
-  ([{:keys [type-group default]}]
+  ([{:keys [type-group default title]}]
    {:dictionary
     {:upload
-     {:attachments {:i18nkey    :application.verdict-attachments
+     {:attachments {:i18nkey    (or title :application.verdict-attachments)
                     :label?     false
                     :type-group (or type-group #"paatoksenteko")
                     :default    (or default :paatoksenteko.paatosote)
@@ -1161,43 +1161,36 @@
   ([category]
    (verdict-schema category nil)))
 
-;; TODO: There should be only one public function application->category
-;;       which should resolve category by subtype, operation, permitType and so on..
+(defn- lowkeyword [s]
+  (some-> s name s/lower-case keyword))
 
-(defn permit-type->category [permit-type]
-  (when-let [kw (some-> permit-type
-                        s/lower-case
-                        keyword)]
+(defn permit-type->categories
+  "Categories (keywords) applicable to the given permit type. First
+  category is the more typical (e.g., :ya vs. :contract)."
+  [permit-type]
+  (when-let [kw (lowkeyword permit-type)]
     (cond
-      (#{:r} kw)                     [:r :tj]
-      (#{:p :ya} kw)                 kw
-      (#{:kt :mm} kw)                :kt
-      (#{:yi :yl :ym :vvvl :mal} kw) :ymp)))
+      (= kw :r)                      [:r :tj]
+      (= :p kw)                      [:p]
+      (#{:ya} kw)                    [:ya :contract]
+      (#{:kt :mm} kw)                [:kt]
+      (#{:yi :yl :ym :vvvl :mal} kw) [:ymp])))
 
 
 (defn permit-subtype->category [permit-subtype]
-  (when-let [kw (some-> permit-subtype
-                        s/lower-case
-                        keyword)]
+  (when-let [kw (lowkeyword permit-subtype)]
     (cond
-      (#{:tyonjohtaja-hakemus} kw) :tj)))
+      (= kw :tyonjohtaja-hakemus) :tj
+      (= kw :sijoitussopimus)     :contract)))
 
 (defn category-by-operation [operation]
-  (when-let [kw (some-> operation
-                        s/lower-case
-                        keyword)]
+  (when-let [kw (lowkeyword operation)]
     (cond
       (#{:tyonjohtajan-nimeaminen-v2} kw) :tj)))
 
 (defn application->category [{:keys [permitType permitSubtype]}]
-  (let [by-subtype (permit-subtype->category permitSubtype)
-        kw         (-> permitType s/lower-case keyword)]
-    (if (some? by-subtype)
-      by-subtype
-      (cond
-        (#{:r :p :ya} kw)              kw
-        (#{:kt :mm} kw)                :kt
-        (#{:yi :yl :ym :vvvl :mal} kw) :ymp))))
+  (or (permit-subtype->category permitSubtype)
+      (first (permit-type->categories permitType))))
 
 (defn dict-resolve
   "Path format: [repeating index repeating index ... value-dict].

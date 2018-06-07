@@ -12,6 +12,7 @@
             [lupapalvelu.pate.verdict :as verdict]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.roles :as roles]
+            [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
@@ -41,11 +42,14 @@
     :editable? fails if the verdict has been published.
     :published? fails if the verdict has NOT been published
     :legacy? fails if the verdict is a 'modern' Pate verdict
-    :modern? fails if the verdict is a legacy verdict"
+    :modern? fails if the verdict is a legacy verdict
+    :contract? fails if the verdict is not a contract
+    :verdict? fails for contracts"
   [& conditions]
   (let [{:keys [editable? published?
-                legacy? modern?]} (zipmap conditions
-                                          (repeat true))]
+                legacy? modern?
+                contract? verdict?]} (zipmap conditions
+                                             (repeat true))]
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
         (let [verdict (util/find-by-id verdict-id
@@ -53,6 +57,10 @@
           (util/pcond-> (cond
                           (not verdict)
                           :error.verdict-not-found
+
+                          (util/not=as-kw (shared/application->category application)
+                                          (:category verdict))
+                          :error.invalid-category
 
                           (and editable? (:published verdict))
                           :error.verdict.not-draft
@@ -64,13 +72,21 @@
                           :error.verdict.not-legacy
 
                           (and modern? (:legacy? verdict))
-                          :error.verdict.legacy)
+                          :error.verdict.legacy
+
+                          (and contract? (util/not=as-kw (:category verdict)
+                                                         :contract))
+                          :error.verdict.not-contract
+
+                          (and verdict? (util/=as-kw (:category verdict)
+                                                     :contract))
+                          :error.verdict.contract)
                         identity fail))))))
 
 (defn- replacement-check
   "Fails if the target verdict is a) already replaced, b) already being
   replaced (by another draft), c) not published, d) legacy verdict, d)
-  missing."
+  missing, e) contract."
   [verdict-key]
   (fn [{:keys [application data]}]
     (when-let [verdict-id (verdict-key data)]
@@ -83,6 +99,39 @@
   (when (:verdict-id data)
     (when-not (verdict/verdict-filled? command)
       (fail :pate.required-fields))))
+
+(defn- contractual-application
+  "Precheck that fails if the application category IS NOT :contract."
+  [command]
+  (when-not (= (verdict/command->category command) :contract)
+    (fail :error.verdict.not-contract)))
+
+(defn- state-in
+  "Precheck that fails if the application state is not included in the
+  given states."
+  [states]
+  (fn [{application :application}]
+    (when-not (util/includes-as-kw? states (:state application))
+      (fail :error.command-illegal-state))))
+
+(defn- can-sign
+  "Precheck that fails if the user cannot sign the
+  contract. User/company can sign only once."
+  [{:keys [application] :as command}]
+  (when (and application
+             (not (verdict/user-can-sign? command)))
+    (fail :error.already-signed)))
+
+(defn- password-matches
+  "Precheck that fails if the given password does not match for the
+  current user."
+  [{:keys [user data]}]
+  (when-let [password (:password data)]
+    (when-not (usr/get-user-with-password (:username user)
+                                          password)
+      ;; Two-second delay to discourage brute forcing.
+      (Thread/sleep 2000)
+      (fail :error.password))))
 
 (defmethod action/allowed-actions-for-category :pate-verdicts
   [command]
@@ -117,6 +166,7 @@
                        id:        Verdict id
                        published: (optional) timestamp
                        modified:  timestamp
+                       category:  Verdict category
                        legacy?:   (optional) true for legacy verdicts.
                        giver:     Either verdict handler or boardname.
                        verdict-date: (optional) timestamp
@@ -128,8 +178,14 @@
                        format depends on the verdict state and
                        category.
 
+                       signatures: (optional) list of maps:
+                           name: signer
+                           date timestamp. The list is ordered by
+                           dates.
+
                       If the user is applicant, only published
-                      verdicts are returned."
+                      verdicts are returned. Note that verdicts can be
+                      contracts."
    :feature          :pate
    :user-roles       #{:authority :applicant}
    :org-authz-roles  roles/reader-org-authz-roles
@@ -193,6 +249,35 @@
    :org-authz-roles roles/reader-org-authz-roles
    :states          states/post-submitted-states}
   [_])
+
+(defquery pate-contract-tab
+  {:description     "Pseudo-query that fails if the Pate contracts tab
+  should not be shown on the UI. Note that pate-contract-tab always
+  implies pate-verdict-tab, too."
+   :feature         :pate
+   :parameters      [:id]
+   :user-roles      #{:applicant :authority}
+   :org-authz-roles roles/reader-org-authz-roles
+   :pre-checks      [contractual-application]
+   :states          states/post-submitted-states}
+  [_])
+
+(defcommand sign-pate-contract
+  {:description      "Adds the user as signatory to a published Pate
+  contract if the password matches."
+   :feature          :pate
+   :categories       #{:pate-verdicts}
+   :parameters       [:id :verdict-id :password]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id :password])]
+   :pre-checks       [(verdict-exists :published? :contract?)
+                      can-sign
+                      password-matches]
+   :states           states/post-verdict-states
+   :user-roles       #{:applicant :authority}
+   :user-authz-roles roles/writer-roles-with-foreman}
+  [command]
+  (verdict/sign-contract command)
+  (ok))
 
 ;; ------------------------------------------
 ;; Modern actions
@@ -280,11 +365,13 @@
   attachments. Rewinds application state if needed."
    :feature          :pate
    :user-roles       #{:authority}
-   :parameters       [id verdict-id]
+   :parameters       [:id :verdict-id]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-exists :legacy?)]
-   :states           states/give-verdict-states
+   :pre-checks       [(verdict-exists :legacy?)
+                      (action/some-pre-check (verdict-exists :legacy? :editable?)
+                                             (state-in states/give-verdict-states))]
+   :states           states/post-submitted-states
    :notified         true}
   [command]
   (ok (verdict/delete-legacy-verdict command)))
@@ -298,7 +385,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(verdict-exists :editable? :legacy?)
                       verdict-filled]
-   :states            states/give-verdict-states
+   :states            states/post-submitted-states
    :notified         true
    :on-success       (notify :application-state-change)}
   [command]
@@ -334,7 +421,7 @@
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
-                      (verdict-exists :editable?)]
+                      (verdict-exists :editable? :verdict?)]
    :states           states/post-submitted-states}
   [{application :application created :created}]
   (let [today-long (tc/to-long (t/today-at-midnight))

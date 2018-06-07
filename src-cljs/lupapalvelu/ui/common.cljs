@@ -6,7 +6,8 @@
             [clojure.string :as str]
             [goog.events :as googe]
             [goog.object :as googo]
-            [rum.core :as rum]))
+            [rum.core :as rum]
+            [sade.shared-util :as util]))
 
 (defn get-current-language []
   (.getCurrentLanguage js/loc))
@@ -83,9 +84,13 @@
   (boolean (js/features.enabled (name feature))))
 
 (defn css
-  "Convenience function for :class definitions."
+  "Convenience function for :class definitions. Supports keywords,
+  strings, vectors and kw-paths."
   [& classes]
-  (->> classes flatten (remove nil?) (map name)))
+  (->> classes flatten (remove nil?)
+       (map util/split-kw-path)
+       (apply concat)
+       (map name)))
 
 (defn css-flags
   "List of keys with truthy values.

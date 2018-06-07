@@ -30128,6 +30128,37 @@ textarea.grid-style-input.pate-textarea {
   height: initial;
 }
 
+span.text-and-button > input {
+  line-height: 40px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+tr.verdict-signatures div.tabby {
+  margin-left: 1em;
+}
+
+tr.verdict-signatures div.tabby div.tabby__cell {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+tr.verdict-signatures div.tabby .cell--right {
+  text-align: right;
+}
+
+tr.verdict-signatures label {
+  display: block;
+}
+
+tr.verdict-signatures .text-and-button > input {
+  min-width: 16em;
+}
+
+tr.verdict-signatures button.cancel-signing {
+  margin-top: 1.5em;
+}
+
 .order-grid-1 {
   width: 100%;
   color: #333333;

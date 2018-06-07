@@ -604,3 +604,23 @@
   (schemas/parse-int false) => nil
   (schemas/parse-int true) => nil
   (schemas/parse-int :yeah) => nil)
+
+(fact "application->category"
+  (shared/application->category {:permitType "R"}) => :r
+  (shared/application->category {:permitType "R"
+                                 :permitSubtype "foobar"})=> :r
+  (shared/application->category {:permitType "R"
+                                 :permitSubtype "tyonjohtaja-hakemus"})
+  => :tj
+  (shared/application->category {:permitType "YA"
+                                 :permitSubtype "tyonjohtaja-hakemus"})
+  => :tj
+  (shared/application->category {:permitType "YA"}) => :ya
+  (shared/application->category {:permitType "YA"
+                                 :permitSubtype "foobar"})=> :ya
+  (shared/application->category {:permitType "YA"
+                                 :permitSubtype "sijoitussopimus"})
+  => :contract
+  (shared/application->category {:permitType "R"
+                                 :permitSubtype "sijoitussopimus"})
+  => :contract)

@@ -17,10 +17,9 @@
             [sade.shared-util :as util]))
 
 (defn can? [action]
-
   (and (not (rum/react state/verdict-wait?))
-       (state/verdict-auth? (rum/react state/current-verdict-id)
-                            action)))
+       (state/react-verdict-auth? (rum/react state/current-verdict-id)
+                                  action)))
 (def can-edit? (partial can? :edit-pate-verdict))
 (def can-preview? (partial can? :preview-pate-verdict))
 
@@ -101,53 +100,64 @@
                      :pate.close-all
                      :pate.open-all))])))
 
-(rum/defc verdict < rum/reactive
+(rum/defc verdict-toolbar < rum/reactive
   [{:keys [schema state info _meta] :as options}]
-  (let [{:keys [published legacy? id]
+  (let [{:keys [published legacy? id category]
          :as   info} @info
+        contract? (util/=as-kw category :contract)
         yes-fn     (fn []
                      (reset! state/verdict-wait? true)
                      (reset! (rum/cursor-in _meta [:enabled?]) false)
                      (service/publish-and-reopen-verdict  @state/application-id
                                                           info
                                                           reset-verdict))]
-    [:div.pate-verdict
-     [:div.pate-grid-2
-      (when-not published
-        [:div.row
-         [:div.col-2.col--right
-          (components/icon-button {:text-loc :verdict.submit
-                                   :class    (common/css :primary :pate-left-space)
-                                   :icon     :lupicon-circle-section-sign
-                                   :wait?    state/verdict-wait?
-                                   :enabled? (can-publish?)
-                                   :on-click (fn []
-                                               (hub/send "show-dialog"
-                                                         {:ltitle          "areyousure"
-                                                          :size            "medium"
-                                                          :component       "yes-no-dialog"
-                                                          :componentParams {:ltext "verdict.confirmpublish"
-                                                                            :yesFn yes-fn}}))})
-          (components/link-button {:url      (js/sprintf "/api/raw/preview-pate-verdict?id=%s&verdict-id=%s"
-                                                         @state/application-id
-                                                         id)
-                                   :enabled? (can-preview?)
-                                   :text-loc :pdf.preview})]])
-      (if published
-        [:div.row
-         [:div.col-2.col--right
-          [:span.verdict-published
-           (common/loc :pate.verdict-published
-                       (js/util.finnishDate published))]]]
-        [:div.row.row--tight
-         [:div.col-1
-          (pate-components/required-fields-note options)]
-         [:div.col-1.col--right
-          (toggle-all options)
-          (pate-components/last-saved options)]])]
-     (sections/sections options :verdict)
-     #_(components/debug-atom state/current-verdict)
-     #_(components/debug-atom state/allowed-verdict-actions)]))
+    [:div.pate-grid-2
+     (when-not published
+       [:div.row
+        [:div.col-2.col--right
+         (components/icon-button {:text-loc (if contract?
+                                              :pate.contract.publish
+                                              :verdict.submit)
+                                  :class    (common/css :primary :pate-left-space)
+                                  :icon     (if contract?
+                                              :lupicon-circle-pen
+                                              :lupicon-circle-section-sign)
+                                  :wait?    state/verdict-wait?
+                                  :enabled? (can-publish?)
+                                  :on-click (fn []
+                                              (hub/send "show-dialog"
+                                                        {:ltitle          "areyousure"
+                                                         :size            "medium"
+                                                         :component       "yes-no-dialog"
+                                                         :componentParams {:ltext (if contract?
+                                                                                    "pate.contract.confirm-publish"
+                                                                                    "verdict.confirmpublish")
+                                                                           :yesFn yes-fn}}))})
+         (components/link-button {:url      (js/sprintf "/api/raw/preview-pate-verdict?id=%s&verdict-id=%s"
+                                                        @state/application-id
+                                                        id)
+                                  :enabled? (can-preview?)
+                                  :text-loc :pdf.preview})]])
+     (if published
+       [:div.row
+        [:div.col-2.col--right
+         [:span.verdict-published
+          (common/loc (if contract?
+                        :pate.contract.published
+                        :pate.verdict-published)
+                      (js/util.finnishDate published))]]]
+       [:div.row.row--tight
+        [:div.col-1
+         (pate-components/required-fields-note options)]
+        [:div.col-1.col--right
+         (toggle-all options)
+         (pate-components/last-saved options)]])]))
+
+(rum/defc verdict < rum/reactive
+  [options]
+  [:div.pate-verdict
+   (verdict-toolbar options)
+   (sections/sections options :verdict)])
 
 
 (defn current-verdict-schema []
@@ -169,8 +179,7 @@
      [:i.lupicon-chevron-left]
      [:span (common/loc :back)]]]
    (if (and (rum/react state/current-verdict-id)
-            (rum/react state/auth-fn)
-            (rum/react state/allowed-verdict-actions))
+            (rum/react state/auth-fn))
      (let [{dictionary :dictionary :as schema} (current-verdict-schema)]
        (verdict (assoc (state/select-keys state/current-verdict
                                           [:state :info :_meta])

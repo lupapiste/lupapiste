@@ -26,19 +26,17 @@
                      user-organizations)))
 
 (defn organization-categories [{scope :scope}]
-  (set (flatten (map (comp shared/permit-type->category :permitType) scope))))
+  (->> scope
+       (map (comp shared/permit-type->categories :permitType))
+       flatten
+       set))
 
 (defn operation->category [operation]
-  (let [by-operation (shared/category-by-operation operation)
-        kw           (-> (ops/permit-type-of-operation operation)
-                         ss/lower-case
-                         keyword)]
-    (if (some? by-operation)
-      by-operation
-      (cond
-        (#{:r :p :ya} kw)              kw
-        (#{:kt :mm} kw)                :kt
-        (#{:yi :yl :ym :vvvl :mal} kw) :ymp))))
+  (or (shared/category-by-operation operation)
+      (-> operation
+          ops/permit-type-of-operation
+          shared/permit-type->categories
+          first)))
 
 (defn error-response [{:keys [failure errors]}]
   (if failure
@@ -468,8 +466,9 @@
 
 (defn application-verdict-templates [{:keys [operation-verdict-templates
                                              verdict-templates]}
-                                     {:keys [primaryOperation] :as application}]
-  (let [app-category (shared/application->category application)
+                                     {:keys [primaryOperation]
+                                      :as   application}]
+  (let [app-category  (shared/application->category application)
         app-operation (-> primaryOperation :name keyword)]
     (->> verdict-templates
          :templates

@@ -259,11 +259,11 @@
                                            (cons ::styles path)))
                                  (get-in source-value
                                          [::styles ::cell])))
-        value (or text (->> (get-in source-value path source-value)
-                            ss/->plain-string
-                            ss/blank-as-nil))]
+        value (or text (util/pcond-> (get-in source-value path source-value)
+                                     string? ss/blank-as-nil))]
     (when value
-      [:div.cell {:class class}
+      [:div.cell (cond-> {}
+                   (seq class) (assoc :class class))
        (cond->> value
          loc-prefix (i18n/localize lang loc-prefix)
          unit (add-unit lang unit))])))
@@ -330,7 +330,10 @@
    [:div.section.header
     (let [category-kw    (util/kw-path (when legacy? :legacy) category)
           legacy-kt-ymp? (contains? #{:legacy.kt :legacy.ymp}
-                                    category-kw)]
+                                    category-kw)
+          contract?      (util/=as-kw category :contract)
+          loc-fn         (fn [& kws]
+                           (apply i18n/localize lang (flatten kws)))]
       [:div.row.pad-after
        [:div.cell.cell--40
         (organization-name lang application)
@@ -341,19 +344,20 @@
                 (not published)
                 [:span.preview (i18n/localize lang :pdf.preview)]
 
-                (not legacy-kt-ymp?)
+                (and (not contract?) (not legacy-kt-ymp?))
                 (i18n/localize lang (case category-kw
                                       :p :pdf.poikkeamispaatos
                                       :attachmentType.paatoksenteko.paatos)))]]
        [:div.cell.cell--40.right
-        [:div.permit (if legacy-kt-ymp?
-                       (i18n/localize lang :attachmentType.paatoksenteko.paatos)
-                       (case category-kw
-                        :ya        (i18n/localize lang :pate.verdict-type
-                                                  (dict-value verdict :verdict-type))
-                        :legacy.ya (i18n/localize lang :pate.verdict-type
-                                                  (shared/ya-verdict-type application))
-                        (i18n/localize lang :pdf category :permit)))]]])
+        [:div.permit (loc-fn (cond
+                               legacy-kt-ymp? :attachmentType.paatoksenteko.paatos
+                               contract?      :pate.verdict-table.contract
+                               :else          (case category-kw
+                                                :ya        [:pate.verdict-type
+                                                            (dict-value verdict :verdict-type)]
+                                                :legacy.ya [:pate.verdict-type
+                                                            (shared/ya-verdict-type application)]
+                                                [:pdf category :permit])))]]])
     [:div.row
      [:div.cell.cell--40
       (add-unit lang :section (dict-value verdict :verdict-section))]

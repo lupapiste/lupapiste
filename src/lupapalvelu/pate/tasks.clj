@@ -20,7 +20,7 @@
 
 (defn- new-review-task [{:keys [category] :as verdict}
                         ts review-name review-type buildings]
-  (let [ya? (util/=as-kw category :ya)]
+  (let [ya? (util/includes-as-kw? [:ya :contract] category)]
     (new-task verdict ts
               (if ya?
                 "task-katselmus-ya"
