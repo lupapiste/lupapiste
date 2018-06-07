@@ -262,7 +262,8 @@
         value (or text (util/pcond-> (get-in source-value path source-value)
                                      string? ss/blank-as-nil))]
     (when value
-      [:div.cell {:class class}
+      [:div.cell (cond-> {}
+                   (seq class) (assoc :class class))
        (cond->> value
          loc-prefix (i18n/localize lang loc-prefix)
          unit (add-unit lang unit))])))

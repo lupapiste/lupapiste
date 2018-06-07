@@ -1161,13 +1161,14 @@
   ([category]
    (verdict-schema category nil)))
 
+(defn- lowkeyword [s]
+  (some-> s name s/lower-case keyword))
+
 (defn permit-type->categories
   "Categories (keywords) applicable to the given permit type. First
   category is the more typical (e.g., :ya vs. :contract)."
   [permit-type]
-  (when-let [kw (some-> permit-type
-                        s/lower-case
-                        keyword)]
+  (when-let [kw (lowkeyword permit-type)]
     (cond
       (= kw :r)                      [:r :tj]
       (= :p kw)                      [:p]
@@ -1177,17 +1178,13 @@
 
 
 (defn permit-subtype->category [permit-subtype]
-  (when-let [kw (some-> permit-subtype
-                        s/lower-case
-                        keyword)]
+  (when-let [kw (lowkeyword permit-subtype)]
     (cond
       (= kw :tyonjohtaja-hakemus) :tj
       (= kw :sijoitussopimus)     :contract)))
 
 (defn category-by-operation [operation]
-  (when-let [kw (some-> operation
-                        s/lower-case
-                        keyword)]
+  (when-let [kw (lowkeyword operation)]
     (cond
       (#{:tyonjohtajan-nimeaminen-v2} kw) :tj)))
 
