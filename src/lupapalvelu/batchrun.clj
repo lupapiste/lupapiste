@@ -886,7 +886,7 @@
 (defn analyze-missing [& args]
   (mongo/connect!)
   (info "Starting analyze-missing job")
-  (let [ts 1527638400000]
+  (let [ts 1522540800000]
     (doseq [app (mongo/select :applications
                               {$or [{:modified {$gte ts}}
                                     {:verdicts.timestamp {$gte ts}}
