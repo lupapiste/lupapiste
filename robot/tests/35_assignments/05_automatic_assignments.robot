@@ -75,6 +75,7 @@ Assignments are assigned to Sonja
   Open assignments search
   Open search tab  all
   Scroll and click test id  toggle-advanced-filters
+  Wait until  Element should be visible by test id  recipient-filter-component
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
   Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  1
   Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[1]/td[@data-test-col-name='description']  Aita ja asema
@@ -119,6 +120,7 @@ Sonja has two assignments
   Open assignments search
   Open search tab  all
   Scroll and click test id  toggle-advanced-filters
+  Wait until  Element should be visible by test id  recipient-filter-component
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
   Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  2
   Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[1]/td[@data-test-col-name='description']  Aita ja asema
@@ -178,6 +180,7 @@ Sonja changes handler
 Sonja has no open assignments
   Open assignments search
   Scroll and click test id  toggle-advanced-filters
+  Wait until  Element should be visible by test id  recipient-filter-component
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
   Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  0
   Logout
@@ -187,6 +190,7 @@ Ronja has one assignment
   Open assignments search
   Open search tab  all
   Scroll and click test id  toggle-advanced-filters
+  Wait until  Element should be visible by test id  recipient-filter-component
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
   Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  1
   Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[1]/td[@data-test-col-name='description']  Aita ja asema

@@ -548,7 +548,7 @@ Clear autocomplete selections by test id
 
 Autocomplete selection is
   [Arguments]  ${container}  ${value}
-  Wait Until  Element should contain  xpath=//${container}//span[contains(@class, "autocomplete-selection")]/span[contains(@class, 'caption')]  ${value}
+  Element should contain  xpath=//${container}//span[contains(@class, "autocomplete-selection")]/span[contains(@class, 'caption')]  ${value}
 
 Autocomplete selection by test id is
   [Arguments]  ${tid}  ${value}
