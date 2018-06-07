@@ -53,7 +53,7 @@ LUPAPISTE.NaviSidebarService = function() {
                       feature: "ajanvaraus"},
                      {icon: "lupicon-circle-section-sign",
                       page: "pate-verdict-templates",
-                      loc: "pate.verdict-templates",
+                      loc: "pate.templates",
                       showIf: authOk( "pate-enabled")},
                      {icon: "lupicon-megaphone",
                       page: "organization-bulletins",

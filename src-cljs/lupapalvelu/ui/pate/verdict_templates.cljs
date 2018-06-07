@@ -11,7 +11,8 @@
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.settings :as settings]
             [lupapalvelu.ui.pate.state :as state]
-            [rum.core :as rum]))
+            [rum.core :as rum]
+            [sade.shared-util :as util]))
 
 (defn updater
   ([{:keys [state info path] :as options} value]
@@ -162,11 +163,15 @@
 (rum/defcs verdict-template-list < rum/reactive
   (rum/local false ::show-deleted)
   [{show-deleted ::show-deleted}]
-  (let [templates (filter #(= (rum/react state/current-category)
+  (let [contract? (util/=as-kw (rum/react state/current-category)
+                               :contract)
+        templates (filter #(= (rum/react state/current-category)
                               (:category %))
                           (rum/react state/template-list))]
     [:div.pate-template-list
-     [:h2 (common/loc "pate.verdict-templates")]
+     [:h2 (common/loc (if contract?
+                        :pate.contract-templates
+                        :pate.verdict-templates))]
      (category-select)
      (when (some :deleted templates)
        (components/toggle show-deleted
@@ -208,7 +213,9 @@
      [:button.positive
       {:on-click #(service/new-template @state/current-category new-template)}
       [:i.lupicon-circle-plus]
-      [:span (common/loc :pate.add-verdict-template)]]]))
+      [:span (common/loc (if contract?
+                           :pate.add-contract-template
+                           :pate.add-verdict-template))]]]))
 
 (rum/defc verdict-templates < rum/reactive
   []
