@@ -7,7 +7,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.action :refer [defcommand defraw]]
             [lupapalvelu.prev-permit :as prev-permit]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.conversion.util :as util]))
 
 (defraw get-lp-id-from-previous-permit
@@ -15,7 +15,7 @@
    :input-validators [(partial action/non-blank-parameters [:kuntalupatunnus])]
    :user-roles #{:rest-api}}
   [{:keys [user] :as command}]
-  (let [organizations (user/organization-ids-by-roles user #{:authority})
+  (let [organizations (usr/organization-ids-by-roles user #{:authority})
         _             (assert (= 1 (count organizations)))
         command       (update-in command [:data] merge {:organizationId (first organizations)})
         existing-app  (domain/get-application-as {:verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}} user :include-canceled-apps? false)]
@@ -37,7 +37,7 @@
                           (action/property-id-parameters [:propertyId] command)))]
    :pre-checks [(fn [{:keys [user data]}]
                   (when-let [organization-id (:organizationId data)]
-                    (when-not (user/user-is-authority-in-organization? user organization-id)
+                    (when-not (usr/user-is-authority-in-organization? user organization-id)
                       unauthorized)))]}
   [{:keys [user] :as command}]
   ;; Prevent creating many applications based on the same kuntalupatunnus:
