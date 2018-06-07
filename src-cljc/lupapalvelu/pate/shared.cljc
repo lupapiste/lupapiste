@@ -93,17 +93,6 @@
                            :path   path}
                           extra)})
 
-(defn  multi-section [id link-ref]
-  {:loc-prefix (str "pate-" (name id))
-   :id         id
-   :grid       {:columns 1
-                :rows    [[{:align      :full
-                            :loc-prefix (str "pate-settings." (name id))
-                            :hide?      link-ref
-                            :dict       :link-to-settings-no-label}
-                           {:show? link-ref
-                            :dict  id }]]}})
-
 (defn text-section [id]
   {:loc-prefix (str "pate-" (name id))
    :id         id
@@ -117,7 +106,7 @@
                        (when (seq acc)
                          {:dict :plus
                           :css [:date-delta-plus]})
-                       {:col 2 :dict kw :id (name kw)}))
+                       {:col 2 :dict kw}))
                [])
        (remove nil?)))
 
@@ -147,43 +136,46 @@
 (defn setsub-date-deltas
   "Dates is vector of date dict keys."
   [dates]
-  (let [date-dicts {:julkipano     (schema-util/required {:date-delta {:unit :days}})
-                    :anto          (schema-util/required {:date-delta {:unit :days}})
-                    :muutoksenhaku (schema-util/required {:date-delta {:unit :days}})
-                    :lainvoimainen (schema-util/required {:date-delta {:unit :days}})
-                    :aloitettava   (schema-util/required {:date-delta {:unit :years}})
-                    :voimassa      (schema-util/required {:date-delta {:unit :years}})}]
+  (let [date-dicts (reduce-kv (fn [acc k v]
+                                (assoc acc k (schema-util/required
+                                              {:date-delta {:unit    v
+                                                            :i18nkey (util/kw-path :pate-verdict k)}})))
+                              {}
+                              {:julkipano     :days
+                               :anto          :days
+                               :muutoksenhaku :days
+                               :lainvoimainen :days
+                               :aloitettava   :years
+                               :voimassa      :years})]
     {:dictionary (merge {:verdict-dates {:loc-text :pate-verdict-dates-settings}
                          :plus          {:loc-text :plus}}
                         (select-keys date-dicts dates))
      :section    {:id         :verdict-dates
                   :loc-prefix :pate-verdict-dates-settings
-                  :grid       {:columns    17
-                               :loc-prefix :pate-verdict
-                               :rows       [(date-delta-row dates)]}}}))
+                  :grid       {:columns 17
+                               :rows    [(date-delta-row dates)]}}}))
 
 (def setsub-verdict-code
   {:dictionary {:verdict-code
                 (schema-util/required {:multi-select {:label? false
-                                          :items  (keys verdict-code-map)}})}
+                                                      :items  (keys verdict-code-map)
+                                                      :loc-prefix :pate-r.verdict-code}})}
    :section    {:id         :verdict
                 :required?  true
                 :loc-prefix :pate-settings.verdict
                 :grid       {:columns    1
-                             :loc-prefix :pate-r.verdict-code
                              :rows       [[{:dict :verdict-code}]]}}})
 
 (def setsub-board ;; Lautakunta
-  {:dictionary {:lautakunta-muutoksenhaku (schema-util/required {:date-delta {:unit :days}})
-                :boardname                (schema-util/required {:text {}})}
+  {:dictionary {:lautakunta-muutoksenhaku (schema-util/required {:date-delta {:unit :days
+                                                                              :loc-prefix :pate-verdict.muutoksenhaku}})
+                :boardname                (schema-util/required {:text {:loc-prefix :pate-settings.boardname}})}
    :section {:id         :board
              :loc-prefix :pate-settings.boardname-title
              :grid       {:columns 4
-                          :rows    [[{:loc-prefix :pate-verdict.muutoksenhaku
-                                      :dict       :lautakunta-muutoksenhaku}]
+                          :rows    [[{:dict       :lautakunta-muutoksenhaku}]
                                     [{:col        1
                                       :align      :full
-                                      :loc-prefix :pate-settings.boardname
                                       :dict       :boardname}]]}}})
 
 ;; Must be included if reviews or plans is included.
@@ -293,20 +285,19 @@
 ;; Verdict template subschemas
 ;; -----------------------------
 
+(defn- settings-link [& kvs]
+  {:link (merge {:text-loc :pate.settings-link
+                 :click    :open-settings}
+                (apply hash-map kvs))})
+
 (defn build-verdict-template-schema
-  "In addition to `schema-util/combine-subschemas`, the dictionary is
-  prefilled with settings-link dicts. If a subschema has a :removable?
-  flag, then the section is added to :removed-sections. The resulting
-  schema is validated."
+  "Some addtions to `schema-util/combine-subschemas`: If a subschema has
+  a :removable?  flag, then the section is added
+  to :removed-sections. The resulting schema is validated."
   [& subschemas]
   (->> subschemas
        (cons {:dictionary
-              {:link-to-settings          {:link {:text-loc :pate.settings-link
-                                                  :click    :open-settings}}
-               :link-to-settings-no-label {:link {:text-loc :pate.settings-link
-                                                  :label?   false
-                                                  :click    :open-settings}}
-               :removed-sections
+              {:removed-sections
                {:keymap
                 (zipmap (reduce (fn [acc subschema]
                                   (cond-> acc
@@ -332,16 +323,18 @@
    (text-subschema dict loc-ext true)))
 
 (defn temsub-verdict [dates]
-  {:dictionary {:language         language-select
-                :verdict-dates    {:multi-select {:items           dates
-                                                  :sort?           false
-                                                  :i18nkey         :pate-verdict-dates
-                                                  :item-loc-prefix :pate-verdict}}
-                :giver            (schema-util/required verdict-giver-select)
-                :verdict-code     {:reference-list {:path       :settings.verdict-code
-                                                    :type       :select
-                                                    :loc-prefix :pate-r.verdict-code}}
-                :paatosteksti     {:phrase-text {:category :paatosteksti}}}
+  {:dictionary {:language          language-select
+                :verdict-dates     {:multi-select {:items           dates
+                                                   :sort?           false
+                                                   :i18nkey         :pate-verdict-dates
+                                                   :item-loc-prefix :pate-verdict}}
+                :giver             (schema-util/required verdict-giver-select)
+                :verdict-code      {:reference-list {:path       :settings.verdict-code
+                                                     :type       :select
+                                                     :loc-prefix :pate-r.verdict-code}}
+                :verdict-code-link (settings-link :loc-prefix :pate-r.verdict-code)
+                :paatosteksti      {:phrase-text {:loc-prefix :pate-verdict
+                                                  :category   :paatosteksti}}}
    :section    {:id         :verdict
                 :loc-prefix :pate-verdict-template.verdict-info
                 :grid       {:columns 12
@@ -351,17 +344,15 @@
                                          :dict :verdict-dates}]
                                        [{:col  3
                                          :dict :giver}
-                                        {:align      :full
-                                         :col        3
-                                         :loc-prefix :pate-r.verdict-code
-                                         :hide?      :*ref.settings.verdict-code
-                                         :dict       :link-to-settings}
+                                        {:align :full
+                                         :col   3
+                                         :hide? :*ref.settings.verdict-code
+                                         :dict  :verdict-code-link}
                                         {:align :full
                                          :col   3
                                          :show? :*ref.settings.verdict-code
                                          :dict  :verdict-code}]
                                        [{:col  12
-                                         :loc-prefix :pate-verdict
                                          :dict :paatosteksti}]]}}})
 
 (def temsub-bulletin
@@ -406,31 +397,33 @@
                 :removable? true})))
 
 (defn settings-dependencies [dict loc-prefix]
-  {:dictionary {dict {:repeating {:included {:toggle {:label?    false
-                                                      :text-dict :text}}
-                                  :text     {:text {:read-only? true}}
-                                  :selected {:toggle {:enabled?  :-.included
-                                                      :label?  false
-                                                      :i18nkey :pate.available-in-verdict}}}
-                      :sort-by :text}}
-   :section    {:id         dict
-                :loc-prefix loc-prefix
-                :grid       {:columns 5
-                             :rows    [{:hide? dict
-                                        :css   :row--extra-tight
-                                        :row   [{:col  4
-                                                 :dict :link-to-settings-no-label}]}
-                                       {:css :row--extra-tight
-                                        :row [{:col   4
-                                               :show? dict
-                                               :grid  {:columns   4
-                                                       :repeating dict
-                                                       :rows      [{:css :row--extra-tight
-                                                                    :row [{:col  2
-                                                                           :dict :included}
-                                                                          {:col  2
-                                                                           :dict :selected}]}]}}]}]}}
-   :removable? true})
+  (let [link-dict (-> (name dict) (str  "-link") keyword)]
+    {:dictionary {dict {:repeating {:included {:toggle {:label?    false
+                                                       :text-dict :text}}
+                                   :text     {:text {:read-only? true}}
+                                   :selected {:toggle {:enabled?  :-.included
+                                                       :label?  false
+                                                       :i18nkey :pate.available-in-verdict}}}
+                       :sort-by :text}
+                  link-dict (settings-link :label? false)}
+    :section    {:id         dict
+                 :loc-prefix loc-prefix
+                 :grid       {:columns 5
+                              :rows    [{:hide? dict
+                                         :css   :row--extra-tight
+                                         :row   [{:col  4
+                                                  :dict link-dict}]}
+                                        {:css :row--extra-tight
+                                         :row [{:col   4
+                                                :show? dict
+                                                :grid  {:columns   4
+                                                        :repeating dict
+                                                        :rows      [{:css :row--extra-tight
+                                                                     :row [{:col  2
+                                                                            :dict :included}
+                                                                           {:col  2
+                                                                            :dict :selected}]}]}}]}]}}
+    :removable? true}))
 
 (def temsub-reviews
   (settings-dependencies :reviews :pate-reviews))
@@ -498,32 +491,31 @@
 (def temsub-statements (text-subschema :statements :pate-statements.text))
 
 (def temsub-buildings
-  {:dictionary    {:autopaikat {:toggle {}}
-                   :vss-luokka {:toggle {}}
-                   :paloluokka {:toggle {}}}
+  {:dictionary (reduce (fn [acc k]
+                         (assoc acc k {:toggle {:i18nkey (util/kw-path
+                                                          :pate-buildings.info k)}}))
+                       {}
+                       [:autopaikat :vss-luokka :paloluokka])
    :section
    {:id         :buildings
     :loc-prefix :pate-buildings
     :grid       {:columns 1
-                 :rows    [[{:loc-prefix :pate-buildings.info
-                             :list       {:title   "pate-buildings.info"
-                                          :labels? false
-                                          :items   (mapv (fn [check]
-                                                           {:dict check
-                                                            :id   check
-                                                            :css  [:pate-condition-box]})
-                                                         [:autopaikat :vss-luokka :paloluokka])}}]]}}
+                 :rows    [[{:list {:title   "pate-buildings.info"
+                                    :labels? false
+                                    :items   (mapv (fn [check]
+                                                     {:dict check
+                                                      :css  [:pate-condition-box]})
+                                                   [:autopaikat :vss-luokka :paloluokka])}}]]}}
    :removable? true})
 
 (def temsub-attachments
-  {:dictionary    {:upload {:toggle {}}}
+  {:dictionary    {:upload {:toggle {:i18nkey :pate.attachments.upload}}}
    :section       {:id         :attachments
                    :loc-prefix :application.verdict-attachments
                    :grid       {:columns 1
-                                :rows    [[{:loc-prefix :pate.attachments
+                                :rows    [[{
                                             :list       {:labels? false
-                                                         :items   [{:id   :upload
-                                                                    :dict :upload}]}}]]}}
+                                                         :items   [{:dict :upload}]}}]]}}
    :removable? true})
 
 
@@ -650,17 +642,18 @@
   [category dates]
   {:dictionary (assoc (->> dates
                            (map (fn [kw]
-                                  [kw (schema-util/required {:date {:disabled?
-                                                        :automatic-verdict-dates}})]))
+                                  [kw (schema-util/required
+                                       {:date {:disabled? :automatic-verdict-dates
+                                               :i18nkey   (util/kw-path :pate-verdict kw)}})]))
                            (into {}))
                       :language                (schema-util/required (assoc language-select
-                                                                :template-dict :language))
+                                                                            :template-dict :language))
                       :verdict-date            (schema-util/required {:date {}})
                       :automatic-verdict-dates {:toggle {}}
                       :handler               (schema-util/required {:text {:loc-prefix
-                                                               (case category
-                                                                 :p :pate.prepper
-                                                                 :pate-verdict.handler)}})
+                                                                           (case category
+                                                                             :p :pate.prepper
+                                                                             :pate-verdict.handler)}})
                       :handler-title         {:text {:loc-prefix :pate-verdict.handler.title}}
                       :application-id        app-id-placeholder)
    :section    {:id   :pate-dates
@@ -694,11 +687,9 @@
                                    :dict  :automatic-verdict-dates}]
                                  {:id         "deltas"
                                   :css        [:pate-date]
-                                  :loc-prefix :pate-verdict
                                   :row        (map (fn [kw]
                                                      (let [id (name kw)]
                                                        {:disabled? :automatic-verdict-dates
-                                                        :id        id
                                                         :dict      kw}))
                                                    dates)}]}}})
 
@@ -716,35 +707,36 @@
   "Collateral part (toggle, amount, type, date) included only when
   collateral? is true."
   [collateral?]
-  (let [verdict {:dictionary (merge {:boardname        {:reference {:path :*ref.boardname}}
-                                     :verdict-section  (schema-util/required {:text {:before :section}})
+  (let [verdict {:dictionary (merge {:boardname        {:reference {:loc-prefix :pate-verdict.giver
+                                                                    :path       :*ref.boardname}}
+                                     :verdict-section  (schema-util/required {:text {:loc-prefix :pate-verdict.section
+                                                                                     :before :section}})
                                      :verdict-code     (schema-util/required {:reference-list {:path       :verdict-code
                                                                                                :type       :select
                                                                                                :loc-prefix :pate-r.verdict-code}
-                                                                  :template-dict  :verdict-code})
+                                                                              :template-dict  :verdict-code})
                                      :verdict-text     (schema-util/required {:phrase-text   {:category :paatosteksti}
-                                                                  :template-dict :paatosteksti})
+                                                                              :template-dict :paatosteksti})
                                      :verdict-text-ref (schema-util/required {:reference {:path :verdict-text}})}
-                                    (when collateral? {:collateral      {:text {:after :eur}}
+                                    (when collateral? {:collateral      {:text {:loc-prefix :pate.collateral
+                                                                                :after :eur}}
                                                        :collateral-flag {:toggle {:loc-prefix :pate-collateral.flag}}
-                                                       :collateral-date {:date {}}
+                                                       :collateral-date {:date {:loc-prefix :pate.collateral-date}}
                                                        :collateral-type collateral-type-select}))
                  :section    {:id   :pate-verdict
                               :grid {:columns 7
-                                     :rows    [[{:col        2
-                                                 :loc-prefix :pate-verdict.giver
-                                                 :hide?      :_meta.editing?
-                                                 :dict       :boardname}
+                                     :rows    [[{:col   2
+                                                 :hide? :_meta.editing?
+                                                 :dict  :boardname}
                                                 {:col        1
                                                  :show?      [:OR :*ref.boardname :verdict-section]
-                                                 :loc-prefix :pate-verdict.section
                                                  :dict       :verdict-section}
                                                 {:show? [:AND :_meta.editing? :?.boardname]}
                                                 {:col   2
                                                  :align :full
                                                  :dict  :verdict-code}]
                                                [{:col   5
-                                                 :id    "paatosteksti"
+                                                 ;;:id    "paatosteksti"
                                                  :show? :_meta.editing?
                                                  :dict  :verdict-text}
                                                 {:col   5
@@ -761,10 +753,8 @@
                               {:show?      [:AND :?.collateral :collateral-flag]
                                :loc-prefix :pate
                                :row        [{:col  2
-                                             :id   :collateral-date
                                              :dict :collateral-date}
                                             {:col  2
-                                             :id   :collateral
                                              :dict :collateral}
                                             {:col  2
                                              :dict :collateral-type}]}]))))
@@ -898,12 +888,14 @@
 (def versub-complexity ;; Vaativuus, rakennusoikeus, kaava
   {:dictionary {:complexity      (assoc complexity-select
                                         :template-dict    :complexity)
-                :complexity-text {:phrase-text      {:label?   false
-                                                     :category :vaativuus}
-                                  :template-dict    :complexity-text}
-                :rights          {:phrase-text      {:category :rakennusoikeus}
+                :complexity-text {:phrase-text   {:label?   false
+                                                  :category :vaativuus}
+                                  :template-dict :complexity-text}
+                :rights          {:phrase-text      {:category   :rakennusoikeus
+                                                     :loc-prefix :pate-rights}
                                   :template-section :rights}
-                :purpose         {:phrase-text      {:category :kaava}
+                :purpose         {:phrase-text      {:category   :kaava
+                                                     :loc-prefix :phrase.category.kaava}
                                   :template-section :purpose}}
    :section
    {:id         :complexity
@@ -918,13 +910,11 @@
                                      :id   "text"
                                      :dict :complexity-text}]}
                            {:show? :?.rights
-                            :row   [{:col        6
-                                     :loc-prefix :pate-rights
-                                     :dict       :rights}]}
+                            :row   [{:col  6
+                                     :dict :rights}]}
                            {:show? :?.purpose
-                            :row   [{:col        6
-                                     :loc-prefix :phrase.category.kaava
-                                     :dict       :purpose}]}]}}})
+                            :row   [{:col  6
+                                     :dict :purpose}]}]}}})
 
 (def versub-extra-info
   (phrase-versub :extra-info :pate-extra-info :yleinen
@@ -943,14 +933,17 @@
 (def versub-buildings
   {:dictionary
    {:buildings
-    {:repeating        {:building-name          {:placeholder {:label? false
-                                                               :type   :building}}
-                        :rakennetut-autopaikat  {:text {}}
-                        :kiinteiston-autopaikat {:text {}}
-                        :autopaikat-yhteensa    {:text {}}
-                        :vss-luokka             {:text {}}
-                        :paloluokka             {:text {}}
-                        :show-building          required-in-verdict}
+    {:repeating        (reduce (fn [acc k]
+                                 (assoc acc k {:text {:i18nkey (util/kw-path :pate-buildings.info
+                                                                             k)}}))
+                               {:building-name          {:placeholder {:label? false
+                                                                :type   :building}}
+                                :show-building          required-in-verdict}
+                               [:rakennetut-autopaikat
+                                :kiinteiston-autopaikat
+                                :autopaikat-yhteensa
+                                :vss-luokka
+                                :paloluokka])
      :sort-by          :order
      :template-section :buildings}}
    :section
@@ -959,7 +952,6 @@
     :grid  {:columns 7
             :rows    [[{:col  7
                         :grid {:columns    6
-                               :loc-prefix :pate-buildings.info
                                :repeating  :buildings
                                :rows       [{:css   [:row--tight]
                                              :show? [:OR :_meta.editing? :+.show-building]
@@ -969,8 +961,7 @@
                                              :css   [:row--indent]
                                              :row   [{:col  5
                                                       :list {:css   :list--sparse
-                                                             :items (map #(hash-map :id %
-                                                                                    :dict %
+                                                             :items (map #(hash-map :dict %
                                                                                     :enabled? :-.show-building)
                                                                          [:rakennetut-autopaikat
                                                                           :kiinteiston-autopaikat
@@ -1111,13 +1102,11 @@
                 false)
       (assoc-in [:section :grid :rows 0]
                 [{:col        2
-                  :loc-prefix :pate-verdict.giver
                   :hide?      :_meta.editing?
                   :show?      :*ref.boardname
                   :dict       :boardname}
                  {:col        1
                   :show?      [:OR :*ref.boardname :verdict-section]
-                  :loc-prefix :pate-verdict.section
                   :dict       :verdict-section}
                  {:show? [:AND :_meta.editing? :?.boardname]}
                  {:col   2

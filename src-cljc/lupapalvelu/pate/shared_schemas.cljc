@@ -372,7 +372,7 @@
   {:dictionary SchemaTypes})
 
 (defschema PateLayout
-  (merge PateBase PateVisible))
+  (merge PateEnabled PateCss PateVisible))
 
 (defschema PateMeta
   "Dynamic management. No UI counterpart. Not part of the saved data."
@@ -446,7 +446,8 @@
                        (sc/optional-key :repeating) sc/Keyword)}))
 
 (defschema PateSection
-  (merge PateLayout
+  (merge PateBase
+         PateVisible
          {:id   sc/Keyword ;; Also title localization key
           :grid PateGrid}))
 
