@@ -905,18 +905,20 @@
             (print-info (:id app) att version "fileId AND originalFileId missing"))
           (print-info (:id app) att version "fileId missing"))))))
 
-(defn convert-and-link-missing [& args]
+(defn convert-and-link-missing [& application-ids]
   (mongo/connect!)
   (info "Starting convert-and-link-missing job")
   ;(sade.util/to-millis-from-local-datetime-string "2018-05-30T00:00")
   ;=> 1527638400000
-  (let [ts 1527638400000]
+  (let [ts 1527638400000
+        query (if (seq application-ids)
+                {:_id {$in application-ids}}
+                {$or [{:attachments.latestVersion.created {$gte ts
+                                                           $lt 1528063200000}}
+                      {:attachments.latestVersion.modified {$gte ts
+                                                            $lt 1528063200000}}]})]
     (doseq [app (mongo/select :applications
-                              {:modified                          {$gte ts}
-                               $or [{:attachments.latestVersion.created {$gte ts
-                                                                         $lt 1528063200000}}
-                                    {:attachments.latestVersion.modified {$gte ts
-                                                                          $lt 1528063200000}}]}
+                              query
                               [:attachments :organization]
                               {:_id 1})
             {version :latestVersion :as att} (->> (:attachments app)
