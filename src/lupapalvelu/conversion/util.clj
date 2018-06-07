@@ -58,13 +58,6 @@
   (let [parts (zipmap '(:vuosi :no :tyyppi :kauposa) (ss/split id #"[- ]"))]
     (ss/join "-" ((juxt :kauposa :no :vuosi :tyyppi) parts))))
 
-;; For testing, remove
-(def ^:private data
-  (krysp-fetch/get-local-application-xml-by-filename "./src/lupapalvelu/conversion/test-data/12-0027-13-A.xml" "R"))
-
-(def ^:private tjo
-  (krysp-fetch/get-local-application-xml-by-filename "./src/lupapalvelu/conversion/test-data/17-0010-13-TJO.xml" "R"))
-
 (defn get-kuntalupatunnus [xml]
   (cr/all-of (select1 xml [:rakennusvalvontaAsiatieto :luvanTunnisteTiedot :kuntalupatunnus])))
 
