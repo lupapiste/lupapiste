@@ -1,4 +1,4 @@
-(ns lupapalvelu.pate-legacy-contract-itest
+(ns lupapalvelu.pate-contract-itest
   (:require [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.pate-itest-util :refer :all]
             [lupapalvelu.pate-legacy-itest-util :refer :all]
