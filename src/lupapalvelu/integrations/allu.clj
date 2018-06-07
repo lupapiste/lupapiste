@@ -8,7 +8,7 @@
             [clj-time.format :as tf]
             [iso-country-codes.core :refer [country-translate]]
             [sade.util :refer [assoc-when]]
-            [sade.core :refer [def-]]
+            [sade.core :refer [def- fail!]]
             [sade.env :as env]
             [sade.http :as http]
             [lupapalvelu.i18n :refer [localize]]
@@ -152,18 +152,25 @@
 
 (defprotocol ALLUPlacementContracts
   (create-contract! [self application]
-    ;; TODO: Exception specification
-    "Create placement contract in ALLU. Returns ALLU id for the contract."))
+    "Create placement contract in ALLU. Returns ALLU id for the contract.
+
+    Can `sade.core/fail!` with
+    * :error.allu.malformed-application - Application is malformed according to ALLU.
+    * :error.allu.http :status _ :body _ - An HTTP error. Probably due to a bug or connection issues."))
 
 (deftype RemoteALLU []
   ALLUPlacementContracts
   (create-contract! [_ app]
-    ;; TODO: Error handling
     (let [endpoint (str (env/value :allu :url) "/placementcontracts")
           request {:headers {:authorization (str "Bearer " (env/value :allu :jwt))}
                    :content-type :json
-                   :body (json/encode (application->allu-placement-contract app))}]
-      (:body (http/post endpoint request)))))
+                   :body (json/encode (application->allu-placement-contract app))}
+          {:keys [status body]} (http/post endpoint request)]
+      ;; TODO: Propagate error descriptions from ALLU etc. when they provide documentation for those.
+      (case status
+        (200 201) body
+        400       (fail! :error.allu.malformed-application)
+        (fail! :error.allu.http :status status :body body)))))
 
 (defstate allu-instance
   :start (->RemoteALLU))
