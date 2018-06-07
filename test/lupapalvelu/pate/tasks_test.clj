@@ -225,7 +225,7 @@
       (fact "Valid tasks"
         (->> tasks
              (map (partial tasks/task-doc-validation "task-lupamaarays"))
-             (filter seq))=> empty?)
+             (filter seq)) => empty?)
 
       tasks => (just [(contains {:schema-info {:name    "task-lupamaarays"
                                                :type    :task

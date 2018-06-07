@@ -49,6 +49,7 @@ temp
 # OSX
 .DS_Store
 
+
 # Test files
 robot/local-ie8-test.bat
 robot/pabot*
@@ -71,6 +72,7 @@ user.properties
 /docs/developerguide.html
 node_modules
 /.ctags
+src/lupapalvelu/conversion/test-data
 
 resources/public/lp-static/css/*.css.map
 resources/public/lp-static/js/*
