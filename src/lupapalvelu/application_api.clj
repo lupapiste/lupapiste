@@ -348,7 +348,10 @@
       (fail :error.cannot-submit-application :errors errors)
       (do
         (when (and (env/feature? :allu) (allu/allu-application? application))
-          (allu/create-placement-contract! application)) ; TODO: Save the returned contract id
+          ;; TODO: Save the returned contract id
+          ;; TODO: Send errors to authority instead of applicant?
+          ;; TODO: Resending in case ALLU is having problems?
+          (allu/create-placement-contract! application))
         (app/submit command)))))
 
 (defcommand refresh-ktj

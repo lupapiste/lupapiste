@@ -152,6 +152,7 @@
 
 (defprotocol ALLUPlacementContracts
   (create-contract! [self application]
+    ;; TODO: Exception specification
     "Create placement contract in ALLU. Returns ALLU id for the contract."))
 
 (deftype RemoteALLU []
@@ -165,7 +166,7 @@
       (:body (http/post endpoint request)))))
 
 (defstate allu-instance
-          :start (->RemoteALLU))
+  :start (->RemoteALLU))
 
 (defn create-placement-contract! [app]
   (create-contract! allu-instance app))
