@@ -663,12 +663,12 @@ Input building identifier
 
 
 Document status is disabled
-  [Arguments]  ${docType}  ${xpathIdx}
+  [Arguments]  ${docType}  ${xpathIdx}=1
   Wait until  Element should be visible  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
   Wait until  Element text should be  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//button[@data-test-id='toggle-document-status']/span  Palauta aktiiviseksi
 
 Document status is enabled
-  [Arguments]  ${docType}  ${xpathIdx}
+  [Arguments]  ${docType}  ${xpathIdx}=1
   Wait until  Element should not be visible  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
   Wait until  Element text should be  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//button[@data-test-id='toggle-document-status']/span  Merkitse poistuneeksi
 
