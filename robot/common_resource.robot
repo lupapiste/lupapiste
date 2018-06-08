@@ -10,7 +10,7 @@ Library        DebugLibrary
 *** Variables ***
 
 ${SERVER}                       http://localhost:8000
-${WAIT_DELAY}                   12
+${WAIT_DELAY}                   10
 ${BROWSER}                      firefox
 ${DEFAULT_SPEED}                0
 ${OP_TREE_SPEED}                0.1
