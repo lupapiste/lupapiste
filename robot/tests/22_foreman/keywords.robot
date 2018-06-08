@@ -39,7 +39,7 @@ Open foreman app from list
   Click element  //div[contains(@class,"nav-top")]//div[contains(@class,"header-box")]//a[@title="Hankkeet"]
   Wait until  Element should be visible  //table[@id="applications-list"]//td[@data-test-col-name="operation"]
   Click element  //table[@id="applications-list"]//tr[@data-id="${foremanAppId}"]//td[@data-test-col-name="operation"]
-  Wait until  jQuery should match X times  span[data-test-primary-operation-id=tyonjohtajan-nimeaminen-v2]:visible  1
+  Wait until  Element should be visible  xpath=//section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
 
 Open foreman accordions
   Open accordions  parties
@@ -51,7 +51,7 @@ Sonja invites foreman to application
   Open tab  parties
   Open foreman accordions
   Wait until  Click by test id  invite-foreman-button
-  Sleep  1s
+  Wait until  Element should be visible  invite-foreman-email
   Wait until  Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
   Wait until  Click by test id  application-invite-foreman-close-dialog
@@ -109,7 +109,6 @@ Foreman sets role and difficulty to foreman application
   Open foreman app from list  ${index}
   Test id visible  confirm-no
   Deny yes no dialog
-  Sleep  1s
   Open tab  parties
   Foreman accepts invitation and fills info
   Wait until  Select From List by test id  kuntaRoolikoodi  ${role}
