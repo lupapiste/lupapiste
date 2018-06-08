@@ -194,7 +194,16 @@
 
 (facts "plan-urls-by-point-proxy"
 
-  ;; TODO: Testaa "Liiteri"
+  (fact "Liiteri Vantaa"
+    (let [response (plan-urls-by-point-proxy {:params {:x "391489.5625" :y "6685643.5" :municipality "liiteri"}})
+          body (json/decode (:body response) true)]
+      (count body) => 1
+      (first body) => {:id "000810"
+                       :kaavanro "000810"
+                       :kunta "Vantaa"
+                       :kuntanro "92"
+                       :linkki "http://kartta.vantaa.fi/kaavamaaraykset/000810km.pdf"
+                       :type "liiteri-ak"}))
 
 
   (fact "Mikkeli"
