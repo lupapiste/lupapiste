@@ -7,18 +7,15 @@ Resource       ../../common_resource.robot
 *** Test Cases ***
 
 Mikko goes to own page
-  [Tags]  firefox
   Mikko logs in
   Click Element  user-name
   Wait for Page to Load  Mikko  Intonen
   Title Should Be  Lupapiste
 
 There is no company info
-  [Tags]  firefox
   Element should not be visible  //div[@data-test-id='mypage-company-accordion']
 
 Mikko changes his name and experience
-  [Tags]  firefox
   Fill test id  firstName  Mika
   Fill test id  lastName  Intola
   Scroll to  div#pw-form
@@ -34,7 +31,6 @@ Mikko changes his name and experience
   User should be logged in  Mika Intola
 
 Name and experience should have changed in Swedish page too
-  [Tags]  firefox
   Language To  SV
   Wait for Page to Load  Mika  Intola
   User should be logged in  Mika Intola
@@ -45,7 +41,6 @@ Name and experience should have changed in Swedish page too
   Wait until  List Selection Should Be  architect-fiseKelpoisuus-select  sedvanlig huvudplanering (nybyggnad)
 
 Mika changes the name and experience back
-  [Tags]  firefox
   Change Textfield Value  firstName  Mika  Mikko
   Change Textfield Value  lastName  Intola  Intonen
   Select From List  architect-degree-select  Timmerman
@@ -58,7 +53,6 @@ Mika changes the name and experience back
   Positive indicator should be visible
 
 Name and experience should have changed in Finnish page too
-  [Tags]  firefox
   Language To  FI
   Checkbox Should Be Selected  allowDirectMarketing
   Wait until  List Selection Should Be  architect-degree-select  Kirvesmies
