@@ -18,6 +18,7 @@ class CustomSeleniumLibrary(SeleniumLibrary):
             if browser.lower() == "headlesschrome":
                 options.add_argument("--headless")
                 options.add_argument("--disable-gpu")
+                options.add_argument("--window-size=1400,1200")
             prefs = {'safebrowsing.enabled': True,
                      'credentials_enable_service': False,
                      'profile.password_manager_enabled': False}
