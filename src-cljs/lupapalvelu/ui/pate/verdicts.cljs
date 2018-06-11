@@ -30,7 +30,7 @@
               :confirm-delete-draft [:pate.delete-verdict-draft
                                      :pate.contract.confirm-delete-draft]
               :no-templates         [:pate.no-verdict-templates :pate.no-contract-templates]
-              :template             [:pate.verdict-template :pate.contract.template]})]
+              :template             [:pate-verdict-template :pate.contract.template]})]
     (if (:contracts? @args)
       (last v)
       (first v))))
@@ -201,13 +201,15 @@
 
                                             :else
                                             :pate.verdict-table.remove-draft)
-                                :icon :lupicon-remove
-                                :class (common/css :secondary)
+                                :icon     :lupicon-remove
+                                :class    (common/css :secondary)
                                 :on-click #(confirm-and-delete-verdict app-id verdict)}))
                             (when (can-replace? id)
-                              [:a
-                               {:on-click #(confirm-and-replace-verdict verdict id)}
-                               (common/loc :pate.verdict-table.replace-verdict)])])]
+                              (components/icon-button
+                               {:text-loc :pate.verdict-table.replace-verdict
+                                :icon     :lupicon-refresh-section-sign
+                                :class    (common/css :secondary)
+                                :on-click #(confirm-and-replace-verdict verdict id)}))])]
                         (when (seq signatures)
                           (rum/with-key (verdict-signatures-row app-id id signatures)
                             (str id "-signatures")))))

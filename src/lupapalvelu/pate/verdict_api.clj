@@ -335,10 +335,14 @@
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
                       (verdict-exists :editable? :modern?)
-                      verdict-filled]
-   ;; As KuntaGML message is generated the application state must be
-   ;; at least :sent
-   :states            (set/difference states/post-sent-states #{:complementNeeded})
+                      verdict-filled
+                      (action/some-pre-check
+                       (action/and-pre-check (verdict-exists :contract?)
+                                             (state-in states/post-submitted-states))
+                       ;; As KuntaGML message is generated the
+                       ;; application state must be at least :sent
+                       (state-in (set/difference states/post-sent-states
+                                                 #{:complementNeeded})))]
    :notified         true
    :on-success       (notify :application-state-change)}
   [command]

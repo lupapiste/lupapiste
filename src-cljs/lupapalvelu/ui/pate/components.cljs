@@ -415,6 +415,14 @@
                             :disabled (path/disabled? options)}))
     :wrap-label? wrap-label?}))
 
+(defn pate-select-item-text [options item]
+  (path/loc (if-let [item-loc (get-in options [:schema :item-loc-prefix])]
+              (assoc-in options
+                        [:schema :loc-prefix]
+                        item-loc)
+              options)
+            item))
+
 (rum/defc pate-select < rum/reactive
   [{:keys [path state schema] :as options} & [wrap-label?]]
   (let [attr-fn      (partial pate-attr
@@ -424,13 +432,8 @@
                                :items     (->> (:items schema)
                                                (map (fn [item]
                                                       {:value item
-                                                       :text  (path/loc
-                                                               (if-let [item-loc (:item-loc-prefix schema)]
-                                                                 (assoc-in options
-                                                                           [:schema :loc-prefix]
-                                                                           item-loc)
-                                                                 options)
-                                                               item)}))
+                                                       :text (pate-select-item-text options
+                                                                                    item)}))
                                                (sort-by-schema schema))
                                :required? (path/required? options)})
         value        (path/react path state)

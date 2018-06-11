@@ -903,4 +903,4 @@
 "pate.contract.language" "fi" "Sopimuksen kieli"
 "pate.contract.template.include" "fi" "Mukana sopimuksessa"
 "pate.contract.template.include-always" "fi" "Aina sopimuksessa"
-"pate.no-contract-templates" "fi" "Ei sopimuspohjia. Sopimuksen laatiminen vaatii aina päätöspohjan."
+"pate.no-contract-templates" "fi" "Ei sopimuspohjia. Sopimuksen laatiminen vaatii aina sopimuspohjan."

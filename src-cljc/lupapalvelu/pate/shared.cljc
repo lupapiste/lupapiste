@@ -1175,26 +1175,25 @@
                                                versub-attachments))
 
 (def versub-contract
-  {:dictionary {:language        (assoc contract-language
-                                        :template-dict :language
-                                        :required?     true)
-                :kuntalupatunnus {:text      {:i18nkey :verdict.id}
-                                  :required? true}
-                :handler         {:text      {:i18nkey :verdict.name.sijoitussopimus}
-                                  :required? true}
-                :verdict-date    {:date      {:i18nkey :verdict.contract.date}
-                                  :required? true}
-                :contract-text   {:phrase-text   {:i18nkey  :verdict.contract.text
-                                                  :category :sopimus}
-                                  :required?     true
-                                  :template-dict :contract-text}}
+  {:dictionary {:language       (assoc contract-language
+                                       :template-dict :language
+                                       :required?     true)
+                :application-id app-id-placeholder
+                :handler        {:text      {:i18nkey :verdict.name.sijoitussopimus}
+                                 :required? true}
+                :verdict-date   {:date      {:i18nkey :verdict.contract.date}
+                                 :required? true}
+                :contract-text  {:phrase-text   {:i18nkey  :verdict.contract.text
+                                                 :category :sopimus}
+                                 :required?     true
+                                 :template-dict :contract-text}}
    :section    {:id   :verdict
                 :grid {:columns 12
                        :rows    [[{:col  2
                                    :dict :language}]
                                  [{:col   2
                                    :align :full
-                                   :dict  :kuntalupatunnus}
+                                   :dict  :application-id}
                                   {}
                                   ]
                                  [{:col  2

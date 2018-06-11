@@ -120,8 +120,8 @@
                                               :verdict.submit)
                                   :class    (common/css :primary :pate-left-space)
                                   :icon     (if contract?
-                                              :lupicon-circle-pen
-                                              :lupicon-circle-section-sign)
+                                              :lupicon-undersign
+                                              :lupicon-document-section-sign)
                                   :wait?    state/verdict-wait?
                                   :enabled? (can-publish?)
                                   :on-click (fn []

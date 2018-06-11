@@ -968,13 +968,15 @@
 (defn- insert-section
   "Section is generated only for non-board (lautakunta) non-legacy
   verdicts."
-  [org-id created {:keys [data template legacy?] :as verdict}]
+  [org-id created {:keys [data template legacy?
+                          category] :as verdict}]
   (let [{section :verdict-section} data
         {giver :giver}             template]
     (cond-> verdict
       (and (ss/blank? section)
            (util/not=as-kw giver :lautakunta)
-           (not legacy?))
+           (not legacy?)
+           (util/not=as-kw category :contract))
       (->
        (assoc-in [:data :verdict-section]
                  (next-section org-id
@@ -1163,6 +1165,7 @@
                                                                (assoc verdict :published created))]
       ;; KuntaGML (only for non-legacy verdicts)
       (when (and (not (:legacy? verdict))
+                 (util/not=as-kw (:category verdict) :contract)
                  (org/krysp-integration? @organization (:permitType application)))
         (let [application (domain/get-application-no-access-checking (:id application))]
           (krysp/verdict-as-kuntagml (assoc command :application application)
