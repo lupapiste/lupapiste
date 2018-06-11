@@ -1,13 +1,98 @@
 (ns lupapalvelu.conversion.kuntagml-converter
-  (:require [sade.core :refer :all]
-            [sade.strings :as ss]
+  (:require [taoensso.timbre :refer [info infof warn]]
+            [sade.core :refer :all]
+            [lupapalvelu.action :as action]
+            [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.conversion.util :as conversion-util]
             [lupapalvelu.prev-permit :as prev-permit]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.organization :as organization]
-            [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]))
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.xml.krysp.building-reader :as building-reader]
+            [lupapalvelu.application :as application]
+            [sade.util :as util]
+            [lupapalvelu.logging :as logging]
+            [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.review :as review]
+            [lupapalvelu.user :as usr]))
+
+
+(defn convert-application-from-xml [command operation xml app-info location-info authorize-applicants]
+  ;;
+  ;; Data to be decided from xml:
+  ;;   - building-site
+  ;;   - operations and their respective document schemas
+  ;;     - Some can be deduced from XML: uusi/laajennos/uudelleenrakentaminen/purkaminen/muuMuutosTyo/kaupunkikuvatoimenpide
+  ;;     - Some types need to be selected by the permit-id type (TJO,VAK..)
+  ;;     - which is primary?
+  ;;   - buildings and structures
+  ;;   - parties
+  ;;      - hakijat, maksajat, asiamiehet, tyonjohtajat (vain TJO), suunnittelijat
+  ;;   - statements
+  ;;   - verdicts
+  ;;   - reviews
+  ;;   - app-links to :app-links collection (viitelupatieto)
+  ;;   - :history array for the application (kasittelynTilatieto / tilamuutos) (get-sorted-tilamuutos-entries)
+  ;;
+  ;;  Other things to note:
+  ;;    - linked permitIDs might be in funny order, check that it's normalised (util/normalize-permit-id)
+  ;;    - we need to generate LP id for conversion cases (do not use do-create-application)
+  ;;
+  ;;  Types that need special handling: VAK (not own thing, but adds data to linked application)
+  ;;
+  (let [{:keys [hakijat]} app-info
+        buildings-and-structures (building-reader/->buildings-and-structures xml)
+        document-datas (prev-permit/schema-datas app-info buildings-and-structures)
+        manual-schema-datas {"aiemman-luvan-toimenpide" (first document-datas)}
+        command (update-in command [:data] merge
+                           {:operation operation :infoRequest false :messages []}
+                           location-info)
+        created-application (application/do-create-application command manual-schema-datas)
+        new-parties (remove empty?
+                            (concat (map prev-permit/suunnittelija->party-document (:suunnittelijat app-info))
+                                    (map prev-permit/osapuoli->party-document (:muutOsapuolet app-info))))
+        structure-descriptions (map :description buildings-and-structures)
+        created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
+
+        ;; make secondaryOperations for buildings other than the first one in case there are many
+        other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas))
+        secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
+
+        created-application (-> created-application
+                                (update-in [:documents] concat other-building-docs new-parties)
+                                (update-in [:secondaryOperations] concat secondary-ops)
+                                (assoc :opened (:created command)))
+
+        ;; attaches the new application, and its id to path [:data :id], into the command
+        command (util/deep-merge command (action/application->command created-application))]
+    (logging/with-logging-context {:applicationId (:id created-application)}
+      ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
+      (application/insert-application created-application)
+      (infof "Inserted prev-permit app: org=%s kuntalupatunnus=%s authorizeApplicants=%s"
+             (:organization created-application)
+             (get-in command [:data :kuntalupatunnus])
+             authorize-applicants)
+      ;; Get verdicts for the application
+      (when-let [updates (verdict/find-verdicts-from-xml command xml)]
+        (action/update-application command updates))
+
+      (prev-permit/invite-applicants command hakijat authorize-applicants)
+      (infof "Processed applicants, processable applicants count was: %s" (count (filter prev-permit/get-applicant-type hakijat)))
+
+      (let [updated-application (mongo/by-id :applications (:id created-application))
+            {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml usr/batchrun-user-data (now) updated-application xml)
+            review-command (assoc (action/application->command updated-application (:user command)) :action "prev-permit-review-udpates")
+            update-result (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id)]
+        (if (:ok update-result)
+          (info "Saved review updates")
+          (infof "Reviews were not saved: %s" (:desc update-result))))
+
+
+      (let [fetched-application (mongo/by-id :applications (:id created-application))]
+        (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
+        fetched-application))))
 
 
 (defn fetch-prev-local-application!
@@ -26,22 +111,21 @@
         xml                   (krysp-fetch/get-local-application-xml-by-filename filename permit-type)
         app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
         location-info         (prev-permit/get-location-info command app-info)
-        organization          (apply organization/resolve-organization (ss/split organizationId #"-"))
+        organization          (org/get-organization organizationId)
         validation-result     (permit/validate-verdict-xml permit-type xml organization)
-        organizations-match?  (= organizationId (:id organization))
         no-proper-applicants? (not-any? prev-permit/get-applicant-type (:hakijat app-info))]
+    (when validation-result
+      (warn "Has invalid verdict: " (:text validation-result)))
     (cond
-      (empty? app-info)                 (fail :error.no-previous-permit-found-from-backend)
-      (not location-info)               (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
-      (not (:propertyId location-info)) (fail :error.previous-permit-no-propertyid)
-      (not organizations-match?)        (fail :error.previous-permit-found-from-backend-is-of-different-organization)
-      validation-result                 validation-result
-      :else                             (let [{id :id} (prev-permit/do-create-application-from-previous-permit command
-                                                                                                               operation
-                                                                                                               xml
-                                                                                                               app-info
-                                                                                                               location-info
-                                                                                                               authorizeApplicants)]
+      (empty? app-info)                 (error-and-fail! "No app-info available" :error.no-previous-permit-found-from-backend)
+      (not location-info)               (error-and-fail! "No location info" :error.more-prev-app-info-needed)
+      (not (:propertyId location-info)) (error-and-fail! "No property-id" :error.previous-permit-no-propertyid)
+      :else                             (let [{id :id} (convert-application-from-xml command
+                                                                                     operation
+                                                                                     xml
+                                                                                     app-info
+                                                                                     location-info
+                                                                                     authorizeApplicants)]
                                           (if no-proper-applicants?
                                             (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
                                             (ok :id id))))))
