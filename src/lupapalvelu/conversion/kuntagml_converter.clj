@@ -20,10 +20,9 @@
   [{{:keys [organizationId kuntalupatunnus authorizeApplicants]} :data :as command}]
   (let [organizationId        "092-R" ;; Vantaa, bypass the selection from form
         operation             "aiemmalla-luvalla-hakeminen"
-        permit-type           (operations/permit-type-of-operation operation)
-        dummy-application     {:id "" :permitType permit-type :organization organizationId}
         path                  "./src/lupapalvelu/conversion/test-data/"
         filename              (str path kuntalupatunnus ".xml")
+        permit-type           "R"
         xml                   (krysp-fetch/get-local-application-xml-by-filename filename permit-type)
         app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
         location-info         (prev-permit/get-location-info command app-info)
