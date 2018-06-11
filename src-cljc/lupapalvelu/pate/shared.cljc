@@ -274,12 +274,17 @@
                                         setsub-verdict-code
                                         setsub-board))
 
+(def contract-settings (build-settings-schema "pate-contract"
+                                              setsub-lang-titles
+                                              (setsub-reviews ya-review-types)))
+
 (defn settings-schema [category]
   (case (keyword category)
     :r r-settings
     :p p-settings
     :ya ya-settings
-    :tj tj-settings))
+    :tj tj-settings
+    :contract contract-settings))
 
 ;; -----------------------------
 ;; Verdict template subschemas
@@ -441,6 +446,7 @@
                                                                            :remove  :conditions}}}}
                    :add-condition {:button {:icon    :lupicon-circle-plus
                                             :i18nkey :pate-conditions.add
+                                            :label? false
                                             :css     :positive
                                             :add     :conditions}}}
    :section       {:id         :conditions
@@ -580,12 +586,47 @@
                                  temsub-appeal
                                  temsub-attachments))
 
+(def contract-language
+  {:select {:loc-prefix :pate.contract.language
+            :item-loc-prefix :pate-verdict.language
+            :items      supported-languages}})
+
+(def temsub-contract
+  {:dictionary {:language      contract-language
+                :contract-text {:phrase-text {:i18nkey  :verdict.contract.text
+                                              :category :sopimus}}}
+   :section    {:id         :contract
+                :loc-prefix :pate.contract.template.info
+                :grid       {:columns 2
+                             :rows    [[{:dict :language}]
+                                       [{:col  2
+                                         :dict :contract-text}]]}}})
+
+(def temsub-contract-conditions ;; Sopimusehdot
+  (-> temsub-conditions
+      (assoc-in [:dictionary :conditions :repeating :condition :phrase-text :i18nkey]
+                :pate.contract.condition)
+      (assoc-in [:dictionary :add-condition :button :i18nkey]
+                :pate.contract.add-condition)
+      (assoc-in [:section :loc-prefix] :pate.contract.conditions)))
+
+(def temsub-contract-attachments
+  (assoc-in (text-subschema :attachments :pate.contract.attachments-text)
+            [:section :loc-prefix] :verdict.contract.attachments))
+
+(def contract-template-schema
+  (build-verdict-template-schema temsub-contract
+                                 temsub-reviews
+                                 temsub-contract-conditions
+                                 temsub-contract-attachments))
+
 (defn verdict-template-schema [category]
   (case (keyword category)
-    :r  r-verdict-template-schema
-    :p  p-verdict-template-schema
-    :ya ya-verdict-template-schema
-    :tj tj-verdict-template-schema))
+    :r        r-verdict-template-schema
+    :p        p-verdict-template-schema
+    :ya       ya-verdict-template-schema
+    :tj       tj-verdict-template-schema
+    :contract contract-template-schema))
 
 ;; -----------------------------
 ;; Verdict subschemas
@@ -1096,6 +1137,19 @@
       (update-in [:section :grid :rows 0]
                  #(cons {:dict :verdict-type} %))))
 
+(def ya-verdict-schema-1 (build-verdict-schema :ya 1
+                                               versub-dates-ya
+                                               versub-verdict-ya
+                                               versub-bulletin
+                                               versub-operation
+                                               versub-requirements-ya
+                                               versub-conditions
+                                               versub-appeal
+                                               versub-statements
+                                               versub-inform-others
+                                               versub-attachments
+                                               (versub-upload {:type-group #"muut" :default :muut.paatosote})))
+
 (def versub-verdict-tj
   (-> (versub-verdict false)
       (assoc-in [:dictionary :verdict-section :required?]
@@ -1113,19 +1167,6 @@
                   :align :full
                   :dict  :verdict-code}])))
 
-(def ya-verdict-schema-1 (build-verdict-schema :ya 1
-                                               versub-dates-ya
-                                               versub-verdict-ya
-                                               versub-bulletin
-                                               versub-operation
-                                               versub-requirements-ya
-                                               versub-conditions
-                                               versub-appeal
-                                               versub-statements
-                                               versub-inform-others
-                                               versub-attachments
-                                               (versub-upload {:type-group #"muut" :default :muut.paatosote})))
-
 (def tj-verdict-schema-1 (build-verdict-schema :tj 1
                                                (versub-dates :tj tj-verdict-dates)
                                                versub-verdict-tj
@@ -1133,14 +1174,103 @@
                                                versub-appeal
                                                versub-attachments))
 
+(def versub-contract
+  {:dictionary {:language        (assoc contract-language
+                                        :template-dict :language
+                                        :required?     true)
+                :kuntalupatunnus {:text      {:i18nkey :verdict.id}
+                                  :required? true}
+                :handler         {:text      {:i18nkey :verdict.name.sijoitussopimus}
+                                  :required? true}
+                :verdict-date    {:date      {:i18nkey :verdict.contract.date}
+                                  :required? true}
+                :contract-text   {:phrase-text   {:i18nkey  :verdict.contract.text
+                                                  :category :sopimus}
+                                  :required?     true
+                                  :template-dict :contract-text}}
+   :section    {:id   :verdict
+                :grid {:columns 12
+                       :rows    [[{:col  2
+                                   :dict :language}]
+                                 [{:col   2
+                                   :align :full
+                                   :dict  :kuntalupatunnus}
+                                  {}
+                                  ]
+                                 [{:col  2
+                                   :dict :verdict-date}
+                                  {}
+                                  {:col   4
+                                   :align :full
+                                   :dict  :handler}]
+                                 [{:col   10
+                                   :align :full
+                                   :dict  :contract-text}]]}}})
+
+(def versub-signatures
+  {:dictionary {:signatures-title {:css      :pate-label
+                                   :loc-text :verdict.signatures}
+                :signatures       {:repeating {:name       {:text {:label?     false
+                                                                   :read-only? true}}
+                                               :user-id    {:text {:read-only? true}}
+                                               :company-id {:text {:read-only? true}}
+                                               :date       {:date {:label?     false
+                                                                   :read-only? true}}}
+                                   :sort-by   :date}}
+   :section    {:id       :signatures
+                :buttons? false
+                :show?    :signatures
+                :grid     {:columns 8
+                           :rows    [[{:col  8
+                                       :dict :signatures-title}]
+                                     {:css :row--extra-tight
+                                      :row [{:col  7
+                                             :grid {:columns   16
+                                                    :repeating :signatures
+                                                    :rows      [{:css :row--extra-tight
+                                                                 :row [{}
+                                                                       {:col  4
+                                                                        :dict :name}
+                                                                       {:col  2
+                                                                        :align :right
+                                                                        :dict :date}]}]}}]}]}}})
+(def versub-contract-conditions
+  (-> temsub-contract-conditions
+      (assoc-in [:dictionary :conditions :template-dict]
+                :conditions)))
+
+(def versub-contract-attachments
+  (-> versub-attachments
+       (assoc-in [:dictionary :attachments :application-attachments :read-only?]
+                 true)
+       (assoc-in [:dictionary :attachments :application-attachments :i18nkey]
+                 :verdict.contract.attachments)
+       (assoc-in [:section :buttons?] false)))
+
+(def versub-contract-upload
+  (assoc-in (versub-upload {:type-group #".*"
+                            :default    :muut.paatosote
+                            :title      :verdict.contract.attachments})
+            [:dictionary :upload :template-section]
+            :attachments))
+
+(def contract-schema-1 (build-verdict-schema :contract 1
+                                           versub-contract
+                                           (versub-requirements :reviews)
+                                           versub-contract-conditions
+                                           versub-contract-attachments
+                                           versub-contract-upload))
+
+
 (defn verdict-schema
   "Nil version returns the latest version."
   ([category version]
    (let [schemas (case (keyword category)
-                   :r  [r-verdict-schema-1]
-                   :p  [p-verdict-schema-1]
-                   :ya [ya-verdict-schema-1]
-                   :tj [tj-verdict-schema-1]
+                   :r        [r-verdict-schema-1]
+                   :p        [p-verdict-schema-1]
+                   :ya       [ya-verdict-schema-1]
+                   :tj       [tj-verdict-schema-1]
+                   :contract [contract-schema-1]
                    (schema-util/pate-assert false "Invalid schema category:" category))]
      (cond
        (nil? version)                     (last schemas)

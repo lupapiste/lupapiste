@@ -99,7 +99,6 @@
 (defmethod loc :map
   [{:keys [i18nkey loc-path schema] :as arg} & extra]
   (loc (concat [(or i18nkey
-                    (some-> schema :body first :i18nkey)
                     (:i18nkey schema)
                     (:loc-prefix schema)
                     (:dict schema)

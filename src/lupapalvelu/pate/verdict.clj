@@ -397,6 +397,12 @@
       (init--dict-by-application :operation application-operation)
       (init--dict-by-application :address :address)))
 
+(defmethod initialize-verdict-draft :contract
+  [initmap]
+  (-> initmap
+      (init--dict-by-application :handler general-handler)
+      (init--requirements-references :reviews)))
+
 (declare enrich-verdict)
 
 (defn user-ref [{user :user}]

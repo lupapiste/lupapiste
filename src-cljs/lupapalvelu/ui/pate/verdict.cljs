@@ -185,7 +185,7 @@
                        :schema (dissoc schema :dictionary)
                        :dictionary dictionary
                        :references state/references)))
-     [:div.pate-spin [:i.lupicon-circle-section-sign]])]])
+     [:div.pate-spin [:i.lupicon-refresh]])]])
 
 (defn bootstrap-verdict []
   (let [[app-id verdict-id] (js/pageutil.getPagePath)]

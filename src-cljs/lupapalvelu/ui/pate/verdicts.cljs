@@ -28,7 +28,9 @@
                                      :help.YA.verdictDesc.sijoitussopimus]
               :confirm-delete       [:verdict.confirmdelete :pate.contract.confirm-delete]
               :confirm-delete-draft [:pate.delete-verdict-draft
-                                     :pate.contract.confirm-delete-draft]})]
+                                     :pate.contract.confirm-delete-draft]
+              :no-templates         [:pate.no-verdict-templates :pate.no-contract-templates]
+              :template             [:pate.verdict-template :pate.contract.template]})]
     (if (:contracts? @args)
       (last v)
       (first v))))
@@ -54,7 +56,7 @@
   (let [templates (rum/react state/template-list)]
 
     (if (empty? templates)
-      [:div.pate-note (path/loc :pate.no-verdict-templates)]
+      [:div.pate-note (path/loc (loc-key :no-templates))]
       (let [items (map #(set/rename-keys % {:id :value :name :text})
                        templates)
             selected (rum/react template*)]
@@ -64,7 +66,7 @@
                                                (first items)))))
         [:div.pate-grid-6
          [:div.row
-          (layout/vertical {:label :pate-verdict-template
+          (layout/vertical {:label (loc-key :template)
                             :align :full}
                            (components/dropdown template*
                                                 {:items   items

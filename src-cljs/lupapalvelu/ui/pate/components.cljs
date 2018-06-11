@@ -424,7 +424,13 @@
                                :items     (->> (:items schema)
                                                (map (fn [item]
                                                       {:value item
-                                                       :text  (path/loc options item)}))
+                                                       :text  (path/loc
+                                                               (if-let [item-loc (:item-loc-prefix schema)]
+                                                                 (assoc-in options
+                                                                           [:schema :loc-prefix]
+                                                                           item-loc)
+                                                                 options)
+                                                               item)}))
                                                (sort-by-schema schema))
                                :required? (path/required? options)})
         value        (path/react path state)
