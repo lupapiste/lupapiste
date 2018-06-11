@@ -1,25 +1,25 @@
 (ns lupapalvelu.conversion.kuntagml-converter
   (:require [taoensso.timbre :refer [info infof warn]]
             [sade.core :refer :all]
+            [sade.util :as util]
             [lupapalvelu.action :as action]
+            [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.conversion.util :as conversion-util]
-            [lupapalvelu.prev-permit :as prev-permit]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.organization :as org]
-            [lupapalvelu.xml.krysp.building-reader :as building-reader]
-            [lupapalvelu.application :as application]
-            [sade.util :as util]
             [lupapalvelu.logging :as logging]
-            [lupapalvelu.verdict :as verdict]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.prev-permit :as prev-permit]
             [lupapalvelu.review :as review]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.xml.krysp.building-reader :as building-reader]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
 
 
-(defn convert-application-from-xml [command operation xml app-info location-info authorize-applicants]
+(defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
   ;; Data to be decided from xml:
   ;;   - building-site
@@ -43,13 +43,30 @@
   ;;  Types that need special handling: VAK (not own thing, but adds data to linked application)
   ;;
   (let [{:keys [hakijat]} app-info
+        municipality "092"
         buildings-and-structures (building-reader/->buildings-and-structures xml)
         document-datas (prev-permit/schema-datas app-info buildings-and-structures)
         manual-schema-datas {"aiemman-luvan-toimenpide" (first document-datas)}
         command (update-in command [:data] merge
                            {:operation operation :infoRequest false :messages []}
                            location-info)
-        created-application (application/do-create-application command manual-schema-datas)
+        ;; TODO: should we check scope, that new-applications-enabled is true?
+        id (app/make-application-id municipality)
+        created-application (app/make-application id
+                                                  "aiemmalla-luvalla-hakeminen"
+                                                  (:x location-info)
+                                                  (:y location-info)
+                                                  (:address location-info)
+                                                  (:propertyId location-info)
+                                                  nil           ;propertyIdSource
+                                                  municipality
+                                                  organization
+                                                  false ; info-request?
+                                                  false         ; open-inforequest?
+                                                  []            ; messages
+                                                  (:user command)
+                                                  (:created command)
+                                                  manual-schema-datas)
         new-parties (remove empty?
                             (concat (map prev-permit/suunnittelija->party-document (:suunnittelijat app-info))
                                     (map prev-permit/osapuoli->party-document (:muutOsapuolet app-info))))
@@ -69,7 +86,7 @@
         command (util/deep-merge command (action/application->command created-application))]
     (logging/with-logging-context {:applicationId (:id created-application)}
       ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
-      (application/insert-application created-application)
+      (app/insert-application created-application)
       (infof "Inserted prev-permit app: org=%s kuntalupatunnus=%s authorizeApplicants=%s"
              (:organization created-application)
              (get-in command [:data :kuntalupatunnus])
@@ -128,6 +145,7 @@
       (not (:propertyId location-info)) (error-and-fail! "No property-id" :error.previous-permit-no-propertyid)
       :else                             (let [{id :id} (convert-application-from-xml command
                                                                                      operation
+                                                                                     organization
                                                                                      xml
                                                                                      app-info
                                                                                      location-info
