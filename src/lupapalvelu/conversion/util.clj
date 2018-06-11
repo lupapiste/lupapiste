@@ -6,6 +6,9 @@
             [lupapalvelu.prev-permit :as prev-permit]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]))
 
+(defn destructure-normalized-permit-id [id]
+  (when (string? id)
+    (zipmap '(:kauposa :no :vuosi :tyyppi) (ss/split id #"[-]"))))
 
 (defn normalize-permit-id
   "Viitelupien tunnukset on Factassa tallennettu 'tietokantaformaatissa', josta ne on tunnuksella
