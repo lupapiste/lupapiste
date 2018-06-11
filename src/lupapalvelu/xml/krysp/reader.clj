@@ -361,10 +361,13 @@
 
 (defmethod application-state :default [xml-without-ns] (simple-application-state xml-without-ns))
 
-(defn standard-application-state [xml-without-ns]
+(defn get-sorted-tilamuutos-entries [xml-without-ns]
   (->> (select xml-without-ns [:kasittelynTilatieto :Tilamuutos])
        (map (fn-> cr/all-of (cr/convert-keys-to-timestamps [:pvm])))
-       (sort state-comparator)
+       (sort state-comparator)))
+
+(defn standard-application-state [xml-without-ns]
+  (->> (get-sorted-tilamuutos-entries xml-without-ns)
        last
        :tila
        ss/lower-case))
