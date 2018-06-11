@@ -7,7 +7,7 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.prev-permit :as pp]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
-            [lupapalvelu.application :as application]
+            [lupapalvelu.application :as app]
             [lupapalvelu.action :as action]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.mongo :as mongo]
@@ -21,7 +21,6 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.building :as building]
             [lupapalvelu.i18n :as i18n]
             [monger.operators :refer :all]))
 
@@ -65,8 +64,26 @@
     (when-not organization-id
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
 
-    (let [id (make-application-id municipality)]
-      (application/make-application id
+    (let [id (make-application-id municipality)
+          application-info (util/assoc-when-pred
+                             {:id id
+                              :organization organization
+                              :operation-name operation
+                              :location (app/->location x y)
+                              :propertyId propertyId
+                              :address address
+                              :infoRequest false
+                              :openInfoRequest false}
+                             ss/not-blank?
+                             :propertyIdSource propertyIdSource
+                             :municipality municipality)]
+      (app/make-application application-info
+                            messages
+                            user
+                            created
+                            manual-schema-datas)
+      ;   [id operation-name x y address property-id property-id-source municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
+      #_(app/make-application id
                                     operation
                                     x
                                     y
@@ -81,18 +98,6 @@
                                     user
                                     created
                                     manual-schema-datas))))
-
-(defn- schema-datas [{:keys [rakennusvalvontaasianKuvaus]} buildings]
-  (map
-    (fn [{:keys [data]}]
-      (remove empty? (conj [[[:valtakunnallinenNumero] (:valtakunnallinenNumero data)]
-                            [[:kaytto :kayttotarkoitus] (get-in data [:kaytto :kayttotarkoitus])]]
-                           (when-not (or (ss/blank? (:rakennusnro data))
-                                         (= "000" (:rakennusnro data)))
-                             [[:tunnus] (:rakennusnro data)])
-                           (when-not (ss/blank? rakennusvalvontaasianKuvaus)
-                             [[:kuvaus] rakennusvalvontaasianKuvaus]))))
-    buildings))
 
 (defn document-data->op-document [{:keys [schema-version] :as application} data]
   (let [op (app/make-op :archiving-project (now))
@@ -109,7 +114,7 @@
 
 (defn add-other-building-docs [created-application document-datas structure-descriptions]
   (let [;; make secondaryOperations for buildings other than the first one in case there are many
-        other-building-docs (map (partial application/document-data->op-document created-application) (rest document-datas))
+        other-building-docs (map (partial app/document-data->op-document created-application) (rest document-datas))
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
 
         created-application (update-in created-application [:documents] concat other-building-docs)
@@ -119,7 +124,7 @@
 (defn create-archiving-project-application!
   [command operation buildings-and-structures app-info location-info permit-type building-xml backend-id refreshBuildings]
   (let [{:keys [hakijat]} app-info
-        document-datas (application/schema-datas app-info buildings-and-structures)
+        document-datas (app/schema-datas app-info buildings-and-structures)
         manual-schema-datas {"archiving-project" (first document-datas)}
         command (update-in command [:data] merge
                            {:operation operation :infoRequest false :messages []}
@@ -138,7 +143,7 @@
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
-    (application/insert-application created-application)
+    (app/insert-application created-application)
 
     (let [updates (or (verdict/find-verdicts-from-xml command building-xml false)
                       (verdict/backend-id-mongo-updates {} [backend-id]))]
@@ -148,7 +153,7 @@
 
     (let [fetched-application (mongo/by-id :applications (:id created-application))]
       (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
-      (application/update-buildings-array! building-xml fetched-application refreshBuildings)
+      (app/update-buildings-array! building-xml fetched-application refreshBuildings)
       fetched-application)))
 
 (defn get-location-info [{data :data :as command} app-info]
@@ -166,7 +171,7 @@
 
 (defn fetch-or-create-archiving-project!
   [{{:keys [lang organizationId kuntalupatunnus createAnyway createWithoutBuildings createWithDefaultLocation refreshBuildings]} :data :as command}]
-  (let [operation         :archiving-project
+  (let [operation         "archiving-project"
         permit-type       "R"                                ; No support for other permit types currently
         dummy-application {:id "" :permitType permit-type :organization organizationId}
         xml               (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
@@ -175,7 +180,7 @@
         {:keys [propertyId] :as location-info} (if createWithDefaultLocation
                                                  (default-location organization lang)
                                                  (get-location-info command app-info))
-        building-xml      (if app-info xml (application/fetch-building-xml organizationId permit-type propertyId))
+        building-xml      (if app-info xml (app/fetch-building-xml organizationId permit-type propertyId))
         bldgs-and-structs (or (when app-info (building-reader/->buildings-and-structures xml))
                               (building-reader/buildings-for-documents building-xml))]
     (cond

@@ -6,7 +6,9 @@
             [lupapalvelu.mock.organization :as mock-org]
             [lupapalvelu.mock.user :as mock-usr]
             [lupapalvelu.user :as usr]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [sade.schemas :as ssc]
+            [sade.schema-generators :as ssg]))
 
 (fact "digging-permit-can-be-created?"
   (digging-permit-can-be-created? {:permitType "not YA"}) => false
@@ -31,17 +33,19 @@
 (facts "new-digging-permit"
   (against-background (env/feature? :disable-ktj-on-create) => true)
   (mock-org/with-all-mocked-orgs
-    (with-redefs [app/make-application-id (constantly "LP-123")
+    (with-redefs [app/make-application-id (constantly "LP-123-2018-00001")
                   usr/get-user-by-id mock-usr/users-by-id]
-      (let [invalid-source-application (app/do-create-application {:data {:operation "kerrostalo-rivitalo"
-                                                                          :x 0 :y 0
-                                                                          :address "Latokuja 1"
+      (let [invalid-source-application (app/do-create-application {:data {:operation  "kerrostalo-rivitalo"
+                                                                          :x          (ssg/generate ssc/LocationX)
+                                                                          :y          (ssg/generate ssc/LocationY)
+                                                                          :address    "Latokuja 1"
                                                                           :propertyId "75342600060211"
-                                                                          :messages []}
-                                                                   :user mock-usr/pena
+                                                                          :messages   []}
+                                                                   :user    mock-usr/pena
                                                                    :created 12345})
             source-application (-> (app/do-create-application {:data {:operation "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen"
-                                                                      :x 0 :y 0
+                                                                      :x          (ssg/generate ssc/LocationX)
+                                                                      :y          (ssg/generate ssc/LocationY)
                                                                       :address "Latokuja 1"
                                                                       :propertyId "75342600060211"
                                                                       :messages []}

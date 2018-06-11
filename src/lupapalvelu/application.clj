@@ -5,10 +5,11 @@
             [clojure.set :refer [difference]]
             [clojure.walk :refer [keywordize-keys]]
             [monger.operators :refer :all]
+            [schema.core :as sc]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-state :as app-state]
-            [lupapalvelu.application-utils :refer [location->object]]
+            [lupapalvelu.application-utils :as app-utils :refer [location->object]]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
@@ -35,12 +36,12 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
+            [sade.coordinate :as coord]
             [sade.core :refer :all]
             [sade.env :as env]
+            [sade.schemas :as ssc]
             [sade.util :as util :refer [merge-in]]
-            [sade.coordinate :as coord]
-            [sade.strings :as ss]
-            [lupapalvelu.application-utils :as app-utils]))
+            [sade.strings :as ss]))
 
 (defcontext canceled-app-context [{{user-id :id} :user application :application}]
   (let [last-history-entry (app-state/last-history-item application)]
@@ -538,29 +539,47 @@
 (defn tos-function [organization operation-name]
   (get-in organization [:operations-tos-functions (keyword operation-name)]))
 
-(defn make-application
-  [id operation-name x y address property-id property-id-source municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
-  {:pre [id operation-name address property-id (not (nil? info-request?)) (not (nil? open-inforequest?)) user created]}
+(sc/defschema MakeApplicationSchema
+  {:id                                 ssc/ApplicationId
+   :organization                       org/Organization
+   :propertyId                         sc/Str
+   :municipality                       sc/Str
+   :address                            sc/Str
+   :location                           [(sc/one ssc/LocationX "X coordinate")
+                                        (sc/one ssc/LocationY "Y coordinate")]
+   :infoRequest                        sc/Bool
+   :openInfoRequest                    sc/Bool
+   :operation-name                     (apply sc/enum (map name (keys op/operations)))
+   (sc/optional-key :propertyIdSource) sc/Str})
+
+(sc/defn ^:always-validate make-application
+  [{:keys [id operation-name
+           infoRequest organization] :as application-info} :- MakeApplicationSchema
+   messages
+   user
+   created
+   manual-schema-datas]
+  {:pre [user created]}
   (let [application (merge domain/application-skeleton
-                           (permit-type-and-operation-map operation-name created)
-                           (location-map (->location x y))
-                           {:address             address
-                            :auth                (application-auth user operation-name)
-                            :comments            (application-comments user messages open-inforequest? created)
-                            :created             created
-                            :creator             (usr/summary user)
-                            :id                  id
-                            :infoRequest         info-request?
-                            :municipality        municipality
-                            :openInfoRequest     open-inforequest?
-                            :organization        (:id organization)
-                            :propertyId          property-id
-                            :schema-version      (schemas/get-latest-schema-version)
-                            :state               (application-state user (:id organization) info-request? operation-name)
-                            :title               address
-                            :tosFunction         (tos-function organization operation-name)}
-                           (when-not (#{:location-service nil} (keyword property-id-source))
-                             {:propertyIdSource property-id-source}))]
+                           (dissoc application-info :propertyIdSource)
+                           (permit-type-and-operation-map (:operation-name application-info) created)
+                           (location-map (:location application-info))
+                           {:auth            (application-auth user operation-name)
+                            :comments        (application-comments user messages (:openInfoRequest application-info) created)
+                            :created         created
+                            :creator         (usr/summary user)
+                            :id              id
+                            :infoRequest     infoRequest
+                            :municipality    (:municipality application-info)
+                            :openInfoRequest (:openInfoRequest application-info)
+                            :organization    (:id organization)
+                            :propertyId      (:propertyId application-info)
+                            :schema-version  (schemas/get-latest-schema-version)
+                            :state           (application-state user (:id organization) infoRequest operation-name)
+                            :title           (:address application-info)
+                            :tosFunction     (tos-function (:organization application-info) operation-name)}
+                           (when-not (#{:location-service nil} (keyword (:propertyIdSource application-info)))
+                             {:propertyIdSource (:propertyIdSource application-info)}))]
     (-> application
         (merge-in application-timestamp-map)
         (merge-in application-history-map user)
@@ -586,8 +605,26 @@
       (when-not (:new-application-enabled scope)
         (fail! :error.new-applications-disabled)))
 
-    (let [id (make-application-id municipality)]
-      (make-application id
+    (let [id (make-application-id municipality)
+          application-info (util/assoc-when-pred
+                             {:id id
+                              :organization organization
+                              :operation-name operation
+                              :location (->location x y)
+                              :propertyId propertyId
+                              :address address
+                              :infoRequest info-request?
+                              :openInfoRequest open-inforequest?}
+                             ss/not-blank?
+                             :propertyIdSource propertyIdSource
+                             :municipality municipality)]
+      (make-application application-info
+                          messages
+                          user
+                          created
+                          manual-schema-datas)
+      ;   [id operation-name x y address property-id property-id-source municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
+      #_(make-application id
                         operation
                         x
                         y

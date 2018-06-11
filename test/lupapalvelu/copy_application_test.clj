@@ -1,6 +1,5 @@
 (ns lupapalvelu.copy-application-test
   (:require [clojure.data :refer [diff]]
-            [clojure.walk :as walk]
             [lupapalvelu.application :as app]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
@@ -9,7 +8,6 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.waste-schemas :as waste-schemas]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.test-util :refer [walk-dissoc-keys]]
             [lupapalvelu.user :as usr]
@@ -17,6 +15,7 @@
             [midje.util :refer [testable-privates]]
             [sade.coordinate :as coord]
             [sade.env :as env]
+            [sade.schemas :as ssc]
             [sade.schema-generators :as ssg]
             [sade.util :as util]))
 
@@ -88,9 +87,28 @@
                           "asemapiirros"]
                          ["paapiirustus"
                           "pohjapiirustus"]]}}
-         raw-new-app (app/make-application "LP-123" "kerrostalo-rivitalo" 0 0
-                                           "address" "01234567891234" nil municipality
-                                           organization false false ["message1" "message2"] source-user
+         app-info {:id              (ssg/generate ssc/ApplicationId)
+                   :organization    {:id    "753-R"
+                                     :name  {:fi "Testi" :sv "Testi"}
+                                     :scope [{:permitType   "R" :inforequest-enabled false :new-application-enabled false
+                                              :municipality "753"}]
+                                     :operations-attachments
+                                            {:kerrostalo-rivitalo
+                                             [["paapiirustus"
+                                               "asemapiirros"]
+                                              ["paapiirustus"
+                                               "pohjapiirustus"]]}}
+                   :operation-name  "kerrostalo-rivitalo"
+                   :location        (app/->location (ssg/generate ssc/LocationX)
+                                                    (ssg/generate ssc/LocationY))
+                   :propertyId      "01234567891234"
+                   :address         "address"
+                   :infoRequest     false
+                   :openInfoRequest false
+                   :municipality    municipality}
+         raw-new-app (app/make-application app-info
+                                           ["message1" "message2"]
+                                           source-user
                                            source-created nil)
          source-app (-> raw-new-app
                         (assoc :attachments (attachment/make-attachments 999 :draft
