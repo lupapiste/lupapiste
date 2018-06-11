@@ -94,6 +94,10 @@
         (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
         fetched-application))))
 
+(def supported-import-types #{:TJO :A :B :C :D :E :P :Z :AJ :AL :MAI :BJ :PI :BL :DJ :CL :PJ})
+(defn- validate-permit-type! [type]
+  (when-not (contains? supported-import-types (keyword type))
+    (error-and-fail! (str "Unsupported import type " type) :error.unsupported-permit-type)))
 
 (defn fetch-prev-local-application!
   "A variation of lupapalvelu.prev-permit/fetch-prev-local-application! that exists for conversion
@@ -104,6 +108,7 @@
   prev-permit/fetch-prev-application!"
   [{{:keys [organizationId kuntalupatunnus authorizeApplicants]} :data :as command}]
   (let [organizationId        "092-R" ;; Vantaa, bypass the selection from form
+        destructured-permit-id (conversion-util/destructure-normalized-permit-id kuntalupatunnus)
         operation             "aiemmalla-luvalla-hakeminen"
         path                  "./src/lupapalvelu/conversion/test-data/"
         filename              (str path kuntalupatunnus ".xml")
@@ -114,6 +119,7 @@
         organization          (org/get-organization organizationId)
         validation-result     (permit/validate-verdict-xml permit-type xml organization)
         no-proper-applicants? (not-any? prev-permit/get-applicant-type (:hakijat app-info))]
+    (validate-permit-type! (:tyyppi destructured-permit-id))
     (when validation-result
       (warn "Has invalid verdict: " (:text validation-result)))
     (cond
