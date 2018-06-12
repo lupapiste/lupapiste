@@ -414,7 +414,7 @@
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
         schema-name (get-in schema [:info :name])]
     {:id          (mongo/create-id)
-     :schema-info (:info schema) ; TODO: no need for storing doc schema into mongo (LPK-3107)
+     :schema-info (select-keys (:info schema) [:name :version :type :subtype])
      :created     created
      :data        (util/deep-merge
                    (tools/create-document-data schema tools/default-values)
