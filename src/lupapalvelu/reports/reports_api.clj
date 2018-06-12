@@ -9,6 +9,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as usr]
             [lupapalvelu.reports.applications :as app-reports]
+            [lupapalvelu.reports.store-billing :as store-billing]
             [lupapalvelu.reports.excel :as excel]
             [lupapalvelu.company :as com]))
 
@@ -133,3 +134,16 @@
                                  ".xlsx")]
     (excel-response resulting-file-name
                     (app-reports/digitized-attachments user startTs endTs lang))))
+
+(defraw store-billing-report
+  {:description "Excel report of documents sold in Lupapiste kauppa"
+   :parameters [startTs endTs]
+   :input-validators [(partial action/numeric-parameters [:startTs :endTs])]
+   :user-roles #{:authorityAdmin}}
+  [{user :user {lang :lang} :data}]
+  (let [resulting-file-name (str (i18n/localize lang "billing.excel.filename")
+                                 "_"
+                                 (util/to-xml-date (now))
+                                 ".xlsx")]
+    (excel-response resulting-file-name
+                    (store-billing/billing-entries user startTs endTs lang))))
