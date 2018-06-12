@@ -58,8 +58,6 @@
                   :location        (app/->location (:x location-info) (:y location-info))
                   :propertyId      (:propertyId location-info)
                   :address         (:address location-info)
-                  :infoRequest     false
-                  :openInfoRequest false
                   :municipality    municipality}
         created-application (app/make-application app-info
                                                   []            ; messages

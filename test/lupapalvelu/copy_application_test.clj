@@ -103,8 +103,6 @@
                                                     (ssg/generate ssc/LocationY))
                    :propertyId      "01234567891234"
                    :address         "address"
-                   :infoRequest     false
-                   :openInfoRequest false
                    :municipality    municipality}
          raw-new-app (app/make-application app-info
                                            ["message1" "message2"]
@@ -124,13 +122,13 @@
                [new old _] (diff new-app source-app)]
 
            (fact "the application is copied almost verbatim"
-                 (let [[only-new only-old _] (diff (dissoc-ids-and-timestamps new-app)
-                                                   (dissoc-ids-and-timestamps source-app))]
+             (let [[only-new only-old _] (diff (dissoc-ids-and-timestamps new-app)
+                                               (dissoc-ids-and-timestamps source-app))]
                    (keys only-new) ; gives the same result as (keys only-old)
                    => (just [:auth :attachments :comments :history] :in-any-order))
-                 (keys new)        ; gives the same result as (keys old)
-                 => (just [:auth :attachments :comments :created :documents :history :id :modified :primaryOperation]
-                          :in-any-order))
+             (keys new)        ; gives the same result as (keys old)
+             => (just [:auth :attachments :comments :created :documents :history :id :modified :primaryOperation]
+                      :in-any-order))
 
            (fact "the operation info of attachments in copied application points to the new copied operations"
                  (->> new-app :attachments (map :op)) => (pointing-to-operations-of new-app))

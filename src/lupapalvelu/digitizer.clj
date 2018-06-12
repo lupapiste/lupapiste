@@ -71,9 +71,7 @@
                               :operation-name operation
                               :location (app/->location x y)
                               :propertyId propertyId
-                              :address address
-                              :infoRequest false
-                              :openInfoRequest false}
+                              :address address}
                              ss/not-blank?
                              :propertyIdSource propertyIdSource
                              :municipality municipality)]
@@ -81,23 +79,7 @@
                             messages
                             user
                             created
-                            manual-schema-datas)
-      ;   [id operation-name x y address property-id property-id-source municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
-      #_(app/make-application id
-                                    operation
-                                    x
-                                    y
-                                    address
-                                    propertyId
-                                    propertyIdSource
-                                    municipality
-                                    organization
-                                    false
-                                    false
-                                    messages
-                                    user
-                                    created
-                                    manual-schema-datas))))
+                            manual-schema-datas))))
 
 (defn document-data->op-document [{:keys [schema-version] :as application} data]
   (let [op (app/make-op :archiving-project (now))

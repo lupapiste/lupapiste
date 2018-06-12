@@ -545,11 +545,11 @@
    :propertyId                         sc/Str
    :municipality                       sc/Str
    :address                            sc/Str
+   :operation-name                     (apply sc/enum (map name (keys op/operations)))
    :location                           [(sc/one ssc/LocationX "X coordinate")
                                         (sc/one ssc/LocationY "Y coordinate")]
-   :infoRequest                        sc/Bool
-   :openInfoRequest                    sc/Bool
-   :operation-name                     (apply sc/enum (map name (keys op/operations)))
+   (sc/optional-key :infoRequest)      sc/Bool
+   (sc/optional-key :openInfoRequest)  sc/Bool
    (sc/optional-key :propertyIdSource) sc/Str})
 
 (sc/defn ^:always-validate make-application
@@ -569,9 +569,9 @@
                             :created         created
                             :creator         (usr/summary user)
                             :id              id
-                            :infoRequest     infoRequest
+                            :infoRequest     (or infoRequest false)
+                            :openInfoRequest (get application-info :openInfoRequest false)
                             :municipality    (:municipality application-info)
-                            :openInfoRequest (:openInfoRequest application-info)
                             :organization    (:id organization)
                             :propertyId      (:propertyId application-info)
                             :schema-version  (schemas/get-latest-schema-version)
@@ -619,22 +619,6 @@
                              :propertyIdSource propertyIdSource
                              :municipality municipality)]
       (make-application application-info
-                          messages
-                          user
-                          created
-                          manual-schema-datas)
-      ;   [id operation-name x y address property-id property-id-source municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
-      #_(make-application id
-                        operation
-                        x
-                        y
-                        address
-                        propertyId
-                        propertyIdSource
-                        municipality
-                        organization
-                        info-request?
-                        open-inforequest?
                         messages
                         user
                         created

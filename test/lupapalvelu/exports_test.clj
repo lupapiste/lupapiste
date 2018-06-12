@@ -42,9 +42,7 @@
                     :location        (app/->location (ssg/generate ssc/LocationX)
                                                      (ssg/generate ssc/LocationY))
                     :propertyId      "01234567891234"
-                    :address         "address"
-                    :infoRequest     false
-                    :openInfoRequest false}
+                    :address         "address"}
                    ss/not-blank?
                    :propertyIdSource "location-service"
                    :municipality "753")
