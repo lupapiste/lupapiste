@@ -438,8 +438,7 @@
                                           :kuvaus { :value "Aidan rakentaminen rajalle"}}
                                    :id "aidan-rakentaminen"
                                    :created 5
-                                   :schema-info {:removable true
-                                                 :op {:id  "kaupunkikuva-id"
+                                   :schema-info {:op {:id  "kaupunkikuva-id"
                                                       :name "aita"}
                                                  :name "kaupunkikuvatoimenpide-ei-tunnusta"
                                                  :version 1}})
@@ -447,8 +446,7 @@
 (def- puun-kaataminen {:created 6
                                 :data { :kuvaus {:value "Puun kaataminen"}}
                                 :id "puun kaataminen"
-                                :schema-info {:removable true
-                                              :op {:id "5177ad63da060e8cd8348e32"
+                                :schema-info {:op {:id "5177ad63da060e8cd8348e32"
                                                    :name "puun-kaataminen"
                                                    :created  1366797667137}
                                               :name "maisematyo"
@@ -1961,8 +1959,7 @@
                               :approvable true,
                               :op {:id "5280b764420622588b2f04fc",
                                    :name "raktyo-aloit-loppuunsaat",
-                                   :created 1384167268234},
-                              :removable true}}
+                                   :created 1384167268234}}}
                hakija-henkilo],
    :_software_version "1.0.5",
    :modified 1384167309006,
@@ -2150,7 +2147,6 @@
                   :schema-info {:approvable true,
                                 :subtype "hakija",
                                 :name "hakija-r",
-                                :removable true,
                                 :after-update "applicant-index-update",
                                 :repeating true,
                                 :version 1,
@@ -2174,14 +2170,12 @@
                                 :approvable true,
                                 :op {:id "537df18fbc454ac7ac9036c5",
                                      :name "aloitusoikeus",
-                                     :created 1400762767119},
-                                :removable false}
+                                     :created 1400762767119}}
                   :data {:kuvaus {:modified 1400762776200, :value "Tarttis aloitta asp rakentaminen."}}}
                  {:id "537df18fbc454ac7ac9036c8",
                   :created 1400762767119,
                   :schema-info {:approvable true,
                                 :name "maksaja",
-                                :removable true,
                                 :repeating true,
                                 :version 1,
                                 :type "party",

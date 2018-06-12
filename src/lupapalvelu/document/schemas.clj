@@ -992,7 +992,7 @@
                                     {:name "kerrosala" :type :string :size :s :unit :m2 :subtype :number :min -9999999 :max 9999999}
                                     {:name "rakennusoikeudellinenKerrosala" :type :string :size :s :unit :m2 :subtype :number :min -9999999 :max 9999999}
                                     {:name "kokonaisala" :type :string :size :s :unit :m2 :subtype :number :min -9999999 :max 9999999}
-                                    {:name "huoneistoala" :type :group :repeating true :removable true
+                                    {:name "huoneistoala" :type :group :repeating true
                                      :body [{:name "pintaAla" :type :string :size :s :unit :m2 :subtype :number :min -9999999 :max 9999999}
                                             {:name "kayttotarkoitusKoodi" :type :select :sortBy :displayname
                                              :body [{:name "asuntotilaa(ei vapaa-ajan asunnoista)"}
@@ -1118,7 +1118,6 @@
 (def kt-kiinteistonmuodostus {:name "kiinteistonmuodostus"
                               :type :group
                               :approvable true
-                              :removable true
                               :body [{:name "kiinteistonmuodostusTyyppi"
                                       :type :select
                                       :layout :full-width
@@ -1138,7 +1137,6 @@
                         :type :group
                         :group-help "help.rasitetoimitus"
                         :approvable true
-                        :removable true
                         :body [{:name "kayttooikeuslaji"
                                 :type :select
                                 :layout :full-width

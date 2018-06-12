@@ -314,7 +314,6 @@
    (opt :approvable)           sc/Bool      ;; Approvable by authority
    (opt :repeating)            sc/Bool      ;; Array of groups
    (opt :repeating-init-empty) sc/Bool      ;; Init repeating group as empty array (default false)
-   (opt :removable)            sc/Bool      ;;
    (opt :copybutton)           sc/Bool      ;;
    (opt :exclude-from-pdf)     sc/Bool      ;;
    (opt :validator)            sc/Keyword   ;; Specific validator key for element (see model/validate-element)

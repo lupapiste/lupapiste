@@ -12,8 +12,7 @@
    :schema-info {:name "yl-hankkeen-kuvaus"
                  :op {:id "abba1" :name "yl-uusi-toiminta" :created 1392811538915}
                  :order 1
-                 :version 1
-                 :removable true}
+                 :version 1}
    :data {:kuvaus {:value "Hankkeen kuvauskentan sisalto" :modified 1392811539061}
           :peruste {:value "Hankkeen peruste" :modified 1392811539061}}})
 

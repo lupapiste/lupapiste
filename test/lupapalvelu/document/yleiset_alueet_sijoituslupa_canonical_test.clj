@@ -22,7 +22,6 @@
    :schema-info {:order 65
                  :version 1
                  :repeating false
-                 :removable false
                  :name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                  :op operation}
    :data {:kayttotarkoitus {:value "Hankkeen kuvaus."}}})
@@ -315,7 +314,6 @@
                  maksaja
                  {:id "535905834206f413319be7f8"
                   :schema-info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
-                                :removable false
                                 :repeating false
                                 :version 1
                                 :type "group"
@@ -328,7 +326,6 @@
                          :tyoaika-paattyy-ms {:modified 1398343045698 :value 1398988800000}}
                   :id "535905834206f413319be7f9"
                   :schema-info {:name "tyoaika"
-                                :removable false
                                 :repeating false
                                 :version 1
                                 :type "group"
