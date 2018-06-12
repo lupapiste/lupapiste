@@ -122,7 +122,7 @@
   prev-permit/fetch-prev-application!"
   [{{:keys [organizationId kuntalupatunnus authorizeApplicants]} :data :as command}]
   (let [organizationId        "092-R" ;; Vantaa, bypass the selection from form
-        destructured-permit-id (conversion-util/destructure-normalized-permit-id kuntalupatunnus)
+        destructured-permit-id (conversion-util/destructure-permit-id kuntalupatunnus)
         operation             "aiemmalla-luvalla-hakeminen"
         path                  "./src/lupapalvelu/conversion/test-data/"
         filename              (str path kuntalupatunnus ".xml")
