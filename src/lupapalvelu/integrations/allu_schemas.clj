@@ -7,7 +7,7 @@
                                   ApplicationId]]
             [sade.municipality :refer [municipality-codes]]
             [lupapalvelu.document.canonical-common :as doccc]
-            [lupapalvelu.integrations.geojson-2008-schemas :as geo :refer [Geometry GeoJSON-2008]]))
+            [lupapalvelu.integrations.geojson-2008-schemas :as geo :refer [SingleGeometry GeoJSON-2008]]))
 
 ;;;; # Generalia
 
@@ -31,14 +31,13 @@
 
 (defschema FeaturelessGeoJSON-2008
   (sc/conditional
-    geo/point?             geo/Point
-    geo/multi-point?       geo/MultiPoint
-    geo/line-string?       geo/LineString
-    geo/multi-line-string? geo/MultiLineString
-    geo/polygon?           geo/Polygon
-    geo/multi-polygon?     geo/MultiPolygon
-
-    geo/geometry-collection? geo/GeometryCollection
+    geo/point? (geo/with-crs geo/Point)
+    geo/multi-point? (geo/with-crs geo/MultiPoint)
+    geo/line-string? (geo/with-crs geo/LineString)
+    geo/multi-line-string? (geo/with-crs geo/MultiLineString)
+    geo/polygon? (geo/with-crs geo/Polygon)
+    geo/multi-polygon? (geo/with-crs geo/MultiPolygon)
+    geo/geometry-collection? (geo/with-crs geo/GeometryCollection)
     'FeaturelessGeoJSONObject))
 
 ;;;; # Lupapiste applications
@@ -167,7 +166,7 @@
                       (sc/one ValidDescriptionDoc "description")
                       (sc/one ValidPayeeDoc "payee")]
    :location-wgs84   [(sc/one sc/Num "longitude") (sc/one sc/Num "latitude")]
-   :drawings         [{:geometry-wgs84 Geometry}]})
+   :drawings         [{:geometry-wgs84 SingleGeometry}]})
 
 ;;;; # ALLU Placement Contracts
 
