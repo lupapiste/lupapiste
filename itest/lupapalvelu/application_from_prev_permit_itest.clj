@@ -6,7 +6,6 @@
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.organization :as organization]
             [lupapalvelu.prev-permit-api :refer :all]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]

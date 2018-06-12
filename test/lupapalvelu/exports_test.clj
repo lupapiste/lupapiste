@@ -9,7 +9,11 @@
             [lupapalvelu.operations :as ops]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.permit :as permit]
-            [lupapiste-commons.usage-types :as usages]))
+            [lupapiste-commons.usage-types :as usages]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [sade.schema-generators :as ssg]
+            [sade.schemas :as ssc]))
 
 (testable-privates lupapalvelu.exports resolve-price-class)
 
@@ -28,7 +32,21 @@
       (get permit-type-price-codes permit-type) => number?)))
 
 (fact "Uusi kerrostalo-rivitalo"
-  (let [application (app/make-application "LP-123" "kerrostalo-rivitalo" 0 0 "address" "01234567891234" "location-service" "753" {:id "753-R"} false false [] {} 123 nil)
+  (let [app-info (util/assoc-when-pred
+                   {:id              (ssg/generate ssc/ApplicationId)
+                    :organization    {:id "753-R"
+                                      :name {:fi "Testi" :sv "Testi"}
+                                      :scope [{:permitType "R" :inforequest-enabled false :new-application-enabled false
+                                               :municipality "753"}]}
+                    :operation-name  "kerrostalo-rivitalo"
+                    :location        (app/->location (ssg/generate ssc/LocationX)
+                                                     (ssg/generate ssc/LocationY))
+                    :propertyId      "01234567891234"
+                    :address         "address"}
+                   ss/not-blank?
+                   :propertyIdSource "location-service"
+                   :municipality "753")
+        application (app/make-application app-info [] {} 123 nil)
         uusi-rakennus (domain/get-document-by-name application "uusiRakennus")]
 
     (fact "Default value '021 rivitalot' = B"
