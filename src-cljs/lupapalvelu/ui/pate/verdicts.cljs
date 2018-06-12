@@ -28,7 +28,9 @@
                                      :help.YA.verdictDesc.sijoitussopimus]
               :confirm-delete       [:verdict.confirmdelete :pate.contract.confirm-delete]
               :confirm-delete-draft [:pate.delete-verdict-draft
-                                     :pate.contract.confirm-delete-draft]})]
+                                     :pate.contract.confirm-delete-draft]
+              :no-templates         [:pate.no-verdict-templates :pate.no-contract-templates]
+              :template             [:pate-verdict-template :pate.contract.template]})]
     (if (:contracts? @args)
       (last v)
       (first v))))
@@ -54,7 +56,7 @@
   (let [templates (rum/react state/template-list)]
 
     (if (empty? templates)
-      [:div.pate-note (path/loc :pate.no-verdict-templates)]
+      [:div.pate-note (path/loc (loc-key :no-templates))]
       (let [items (map #(set/rename-keys % {:id :value :name :text})
                        templates)
             selected (rum/react template*)]
@@ -64,7 +66,7 @@
                                                (first items)))))
         [:div.pate-grid-6
          [:div.row
-          (layout/vertical {:label :pate-verdict-template
+          (layout/vertical {:label (loc-key :template)
                             :align :full}
                            (components/dropdown template*
                                                 {:items   items
@@ -199,13 +201,15 @@
 
                                             :else
                                             :pate.verdict-table.remove-draft)
-                                :icon :lupicon-remove
-                                :class (common/css :secondary)
+                                :icon     :lupicon-remove
+                                :class    (common/css :secondary)
                                 :on-click #(confirm-and-delete-verdict app-id verdict)}))
                             (when (can-replace? id)
-                              [:a
-                               {:on-click #(confirm-and-replace-verdict verdict id)}
-                               (common/loc :pate.verdict-table.replace-verdict)])])]
+                              (components/icon-button
+                               {:text-loc :pate.verdict-table.replace-verdict
+                                :icon     :lupicon-refresh-section-sign
+                                :class    (common/css :secondary)
+                                :on-click #(confirm-and-replace-verdict verdict id)}))])]
                         (when (seq signatures)
                           (rum/with-key (verdict-signatures-row app-id id signatures)
                             (str id "-signatures")))))
