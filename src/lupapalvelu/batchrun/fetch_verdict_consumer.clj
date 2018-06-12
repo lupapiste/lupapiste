@@ -59,16 +59,17 @@
   (warn "Rollbacking fetch-verdict message")
   (jms/rollback session))
 
-(defn create-fetch-verdict-consumer [organization-id]
+(defn create-fetch-verdict-consumer
   "Creates a consumer for fetch-verdict messages with an exclusive
   transacted session."
+  [organization-id]
   (let [session (create-transacted-session)]
     (jms/create-consumer session
                          (fetch-verdict/queue-for-organization organization-id)
                          (handle-fetch-verdict-message (partial commit-fetch-verdict session)
                                                        (partial rollback-fetch-verdict session)))))
 (defn create-fetch-verdict-consumers! [organization-ids]
-  (info (str "Creating  fetch-verdict consumer(s) for " (count organization-ids) " organizations."))
+  (info (str "Creating fetch-verdict consumer(s) for " (count organization-ids) " organizations."))
   (doseq [org-id organization-ids]
     (create-fetch-verdict-consumer org-id)))
 )
