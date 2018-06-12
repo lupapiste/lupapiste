@@ -21,7 +21,7 @@
 
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
-  ;; Data to be decided from xml:
+  ;; Data to be deduced from xml:
   ;;   - building-site
   ;;   - operations and their respective document schemas
   ;;     - Some can be deduced from XML: uusi/laajennos/uudelleenrakentaminen/purkaminen/muuMuutosTyo/kaupunkikuvatoimenpide
@@ -111,12 +111,12 @@
         fetched-application))))
 
 (def supported-import-types #{:TJO :A :B :C :D :E :P :Z :AJ :AL :MAI :BJ :PI :BL :DJ :CL :PJ})
-(defn- validate-permit-type! [type]
+(defn- validate-permit-type [type]
   (when-not (contains? supported-import-types (keyword type))
     (error-and-fail! (str "Unsupported import type " type) :error.unsupported-permit-type)))
 
 (defn fetch-prev-local-application!
-  "A variation of lupapalvelu.prev-permit/fetch-prev-local-application! that exists for conversion
+  "A variation of `lupapalvelu.prev-permit/fetch-prev-local-application!` that exists for conversion
   and testing purposes. Creates an application from Krysp message in a local file. To use a local Krysp
   file:
   1) The local MongoDB has to contain the location info for the municipality in question (here Vantaa)
@@ -135,7 +135,7 @@
         organization          (org/get-organization organizationId)
         validation-result     (permit/validate-verdict-xml permit-type xml organization)
         no-proper-applicants? (not-any? prev-permit/get-applicant-type (:hakijat app-info))]
-    (validate-permit-type! (:tyyppi destructured-permit-id))
+    (validate-permit-type (:tyyppi destructured-permit-id))
     (when validation-result
       (warn "Has invalid verdict: " (:text validation-result)))
     (cond

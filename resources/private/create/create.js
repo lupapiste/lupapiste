@@ -378,7 +378,6 @@
             .pending(self.pending)
             .success(function(data) {
               self.clear();
-              console.log(data);
               pageutil.openApplicationPage({id: data.id});
             })
             .error(function(d) {

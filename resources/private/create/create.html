@@ -165,7 +165,6 @@
 
           <span data-bind="ltext: 'newRequest.newApplicationWithPrevPermit'"></span>
         </button>
-        <!-- ko if: features.enabled('conversion-debug') -->
         <button data-bind="click: convertApplication,
                            css: {waiting: pending},
                            feature: 'conversion-debug'"
@@ -176,7 +175,6 @@
 
           <span data-bind="text: 'Konvertoi'"></span>
         </button>
-        <!-- /ko -->
       </form>
     </div>
 
