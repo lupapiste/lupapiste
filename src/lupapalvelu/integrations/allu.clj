@@ -14,9 +14,7 @@
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.document.tools :refer [doc-subtype]]
             [lupapalvelu.document.canonical-common :as doccc]
-            [lupapalvelu.integrations.allu-schemas :refer [PlacementContract]]))
-
-;;; FIXME: Avoid producing nil-valued fields.
+            [lupapalvelu.integrations.allu-schemas :refer [ValidPlacementApplication PlacementContract]]))
 
 ;;;; # Constants
 
@@ -51,18 +49,17 @@
    :postalCode    postinumero
    :streetAddress {:streetName katu}})
 
-(defmulti ^:private doc->customer (fn [payee? doc] (-> doc :data :_selected)))
+(defmulti ^:private doc->customer (fn [_payee doc] (-> doc :data :_selected)))
 
-(defmethod doc->customer "henkilo" [_ {{person :henkilo} :data}]
-  (let [{:keys [osoite], {:keys [hetu]} :henkilotiedot} person]
-    {:type          "PERSON"
-     :registryKey   hetu
-     :name          (fullname person)
-     :country       (address-country osoite)
-     :postalAddress (convert-address osoite)}))
+(defmethod doc->customer "henkilo" [_ {{{:keys [osoite], {:keys [hetu] :as person} :henkilotiedot} :henkilo} :data}]
+  {:type          "PERSON"
+   :registryKey   hetu
+   :name          (fullname person)
+   :country       (address-country osoite)
+   :postalAddress (convert-address osoite)})
 
 (defmethod doc->customer "yritys" [payee? {{company :yritys} :data}]
-  (let [{:keys [osoite liikeJaYhteisoTunnus yritysnimi]
+  (let [{:keys                                                 [osoite liikeJaYhteisoTunnus yritysnimi]
          {:keys [verkkolaskuTunnus ovtTunnus valittajaTunnus]} :verkkolaskutustieto} company
         customer {:type          "COMPANY"
                   :registryKey   liikeJaYhteisoTunnus
@@ -96,57 +93,60 @@
 
 (defn- application-geometry [{:keys [drawings location-wgs84]}]
   (let [obj (if (seq drawings)
-              {:type "GeometryCollection"
+              {:type       "GeometryCollection"
                :geometries (mapv :geometry-wgs84 drawings)}
-              {:type "Point"
+              {:type        "Point"
                :coordinates location-wgs84})]
     (assoc obj :crs {:type "name", :properties {:name WGS84-URN}})))
 
 (defn- application-postal-address [{:keys [municipality address]}]
   ;; We don't have the postal code within easy reach so it is omitted here.
-  {:city (localize lang :municipality municipality)
+  {:city          (localize lang :municipality municipality)
    :streetAddress {:streetName address}})
 
 (def- format-date-time (partial tf/unparse (tf/formatters :date-time-no-ms)))
 
 (defn- convert-value-flattened-app
   [{:keys [id propertyId documents] :as app}]
-  (let [applicant-doc    (first (filter #(= (doc-subtype %) :hakija) documents))
+  (let [applicant-doc (first (filter #(= (doc-subtype %) :hakija) documents))
         work-description (first (filter #(= (doc-subtype %) :hankkeen-kuvaus) documents))
-        payee-doc        (first (filter #(= (doc-subtype %) :maksaja) documents))
-        kind             (application-kind app)
-        start            (t/now)
-        end              (t/plus start (t/years 1))
-        res              {:clientApplicationKind kind
-                          :customerWithContacts  (convert-applicant applicant-doc)
-                          :endTime               (format-date-time end)
-                          :geometry              (application-geometry app)
-                          :identificationNumber  id
-                          :invoicingCustomer     (convert-payee payee-doc)
-                          :name                  (str id " " kind)
-                          :pendingOnClient       true
-                          :postalAddress         (application-postal-address app)
-                          :propertyIdentificationNumber propertyId
-                          :startTime       (format-date-time start)
-                          :workDescription (-> work-description :data :kayttotarkoitus)}]
+        payee-doc (first (filter #(= (doc-subtype %) :maksaja) documents))
+        kind (application-kind app)
+        start (t/now)
+        end (t/plus start (t/years 1))
+        res {:clientApplicationKind        kind
+             :customerWithContacts         (convert-applicant applicant-doc)
+             :endTime                      (format-date-time end)
+             :geometry                     (application-geometry app)
+             :identificationNumber         id
+             :invoicingCustomer            (convert-payee payee-doc)
+             :name                         (str id " " kind)
+             :pendingOnClient              true
+             :postalAddress                (application-postal-address app)
+             :propertyIdentificationNumber propertyId
+             :startTime                    (format-date-time start)
+             :workDescription              (-> work-description :data :kayttotarkoitus)}]
     (assoc-when res :customerReference (not-empty (-> payee-doc :data :laskuviite)))))
 
 ;; Putting it all together
-(sc/defn ^:private application->allu-placement-contract :- PlacementContract [app]
+(sc/defn ^{:private true, :always-validate true} application->allu-placement-contract
+  :- PlacementContract [app :- ValidPlacementApplication]
   (-> app flatten-values convert-value-flattened-app))
 
 ;;;; # Should you use this?
 
-(defn- allu-organization? [org]
-  (if (env/dev-mode?)
+(defn- allu-organization? [dev-mode? org]
+  (if dev-mode?
     (s/ends-with? org "-YA")
     (= org "091-YA")))
 
 (def- allu-permit-subtypes #{"sijoituslupa" "sijoitussopimus"})
 
-(defn allu-application? [{:keys [permitSubtype organization]}]
-  (and (allu-organization? organization)
-       (contains? allu-permit-subtypes permitSubtype)))
+(defn allu-application?
+  ([app] (allu-application? (env/dev-mode?) app))
+  ([dev-mode? {:keys [permitSubtype organization]}]
+   (and (allu-organization? dev-mode? organization)
+        (contains? allu-permit-subtypes permitSubtype))))
 
 ;;;; # Effectful operations
 
@@ -162,14 +162,14 @@
   ALLUPlacementContracts
   (create-contract! [_ app]
     (let [endpoint (str (env/value :allu :url) "/placementcontracts")
-          request {:headers {:authorization (str "Bearer " (env/value :allu :jwt))}
+          request {:headers      {:authorization (str "Bearer " (env/value :allu :jwt))}
                    :content-type :json
-                   :body (json/encode (application->allu-placement-contract app))}
+                   :body         (json/encode (application->allu-placement-contract app))}
           {:keys [status body]} (http/post endpoint request)]
       ;; TODO: Propagate error descriptions from ALLU etc. when they provide documentation for those.
       (case status
         (200 201) body
-        400       (fail! :error.allu.malformed-application)
+        400 (fail! :error.allu.malformed-application)
         (fail! :error.allu.http :status status :body body)))))
 
 (defstate allu-instance

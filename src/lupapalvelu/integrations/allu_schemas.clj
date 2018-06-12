@@ -2,10 +2,14 @@
   (:require [schema.core :as sc :refer [defschema enum optional-key cond-pre Int Bool]]
             [clj-time.format :as tf]
             [iso-country-codes.countries :as countries]
-            [sade.schemas :refer [NonBlankStr NonEmptyVec
-                                  Email Zipcode Tel Hetu FinnishY FinnishOVTid
-                                  Kiinteistotunnus ApplicationId]]
-            [lupapalvelu.integrations.geojson-2008-schemas :refer [GeoJSON-2008]]))
+            [com.gfredericks.test.chuck.generators :refer [string-from-regex]]
+            [sade.schemas :refer [NonBlankStr Email Zipcode Tel Hetu FinnishY FinnishOVTid Kiinteistotunnus
+                                  ApplicationId]]
+            [sade.municipality :refer [municipality-codes]]
+            [lupapalvelu.document.canonical-common :as doccc]
+            [lupapalvelu.integrations.geojson-2008-schemas :as geo :refer [Geometry GeoJSON-2008]]))
+
+;;;; # Generalia
 
 (defschema DateTimeNoMs
   "ISO-8601/RFC-3339 aikaleima sekuntien tarkkuudella"
@@ -15,8 +19,157 @@
 
 (defschema ISO-3166-alpha-2
   "Kaksikirjaiminen maakoodi (esim. 'FI')"
-  (sc/pred (into #{} (map :alpha-2) countries/countries)
-           "ISO-3166 alpha-2 country code"))
+  (apply sc/enum (map :alpha-2 countries/countries)))
+
+(defschema ISO-3166-alpha-3
+  "Kolmikirjaiminen maakoodi (esim. 'FIN')"
+  (apply sc/enum (map :alpha-3 countries/countries)))
+
+(defschema MunicipalityCode
+  "Kolminumeroinen kuntatunnus"
+  (apply sc/enum municipality-codes))
+
+(defschema FeaturelessGeoJSON-2008
+  (sc/conditional
+    geo/point?             geo/Point
+    geo/multi-point?       geo/MultiPoint
+    geo/line-string?       geo/LineString
+    geo/multi-line-string? geo/MultiLineString
+    geo/polygon?           geo/Polygon
+    geo/multi-polygon?     geo/MultiPolygon
+
+    geo/geometry-collection? geo/GeometryCollection
+    'FeaturelessGeoJSONObject))
+
+;;;; # Lupapiste applications
+
+;;;; ## Merely Having the Right Types
+
+(defschema TypedAddress
+  {:katu                 {:value sc/Str}
+   :postinumero          {:value sc/Str}
+   :postitoimipaikannimi {:value sc/Str}
+   :maa                  {:value sc/Str}})
+
+(defschema TypedContactInfo
+  {:puhelin {:value sc/Str}
+   :email   {:value sc/Str}})
+
+(defschema TypedPersonDoc
+  {:henkilotiedot {:etunimi  {:value sc/Str}
+                   :sukunimi {:value sc/Str}
+                   :hetu     {:value sc/Str}}
+   :osoite        TypedAddress
+   :yhteystiedot  TypedContactInfo})
+
+(defschema TypedCompanyDoc
+  {:yritysnimi           {:value sc/Str}
+   :liikeJaYhteisoTunnus {:value sc/Str}
+   :osoite               TypedAddress
+   :yhteyshenkilo        {:henkilotiedot {:etunimi  {:value sc/Str}
+                                          :sukunimi {:value sc/Str}}
+                          :yhteystiedot  TypedContactInfo}})
+
+(defschema TypedCustomerDoc
+  {:schema-info {:subtype (sc/enum :hakija :maksaja)}
+   :data        {:_selected {:value (sc/enum "henkilo" "yritys")}
+                 :henkilo   TypedPersonDoc
+                 :yritys    TypedCompanyDoc}})
+
+(defschema TypedApplicantDoc
+  (assoc-in TypedCustomerDoc [:schema-info :subtype] (sc/eq :hakija)))
+
+(defschema TypedPaymentInfo
+  {:verkkolaskuTunnus {:value sc/Str}
+   :ovtTunnus         {:value sc/Str}
+   :valittajaTunnus   {:value sc/Str}})
+
+(defschema TypedPayeeDoc
+  (-> TypedCustomerDoc
+      (assoc-in [:schema-info :subtype] (sc/eq :maksaja))
+      (assoc-in [:data :laskuviite] {:value sc/Str})
+      (assoc-in [:data :yritys :verkkolaskutustieto] TypedPaymentInfo)))
+
+(defschema TypedDescriptionDoc
+  {:schema-info {:subtype (sc/eq :hankkeen-kuvaus)}
+   :data        {:kayttotarkoitus {:value sc/Str}}})
+
+(defschema TypedPlacementApplication
+  {:id               sc/Str
+   :propertyId       sc/Str
+   :municipality     sc/Str
+   :address          sc/Str
+   :primaryOperation {:name (apply sc/enum (keys doccc/ya-operation-type-to-schema-name-key))}
+   :documents        [(sc/one TypedApplicantDoc "applicant")
+                      (sc/one TypedDescriptionDoc "description")
+                      (sc/one TypedPayeeDoc "payee")]
+   :location-wgs84   [(sc/one sc/Num "longitude") (sc/one sc/Num "latitude")]
+   :drawings         [{:geometry-wgs84 GeoJSON-2008}]})
+
+;;;; ## Valid for Submitting
+
+(defschema ValidAddress
+  {:katu                 {:value NonBlankStr}
+   :postinumero          {:value Zipcode}
+   :postitoimipaikannimi {:value NonBlankStr}
+   :maa                  {:value ISO-3166-alpha-3}})
+
+(defschema ValidContactInfo
+  {:puhelin {:value Tel}
+   :email   {:value Email}})
+
+(defschema ValidPersonDoc
+  {:henkilotiedot {:etunimi  {:value NonBlankStr}
+                   :sukunimi {:value NonBlankStr}
+                   :hetu     {:value Hetu}}
+   :osoite        ValidAddress
+   :yhteystiedot  ValidContactInfo})
+
+(defschema ValidCompanyDoc
+  {:yritysnimi           {:value NonBlankStr}
+   :liikeJaYhteisoTunnus FinnishY
+   :osoite               ValidAddress
+   :yhteyshenkilo        {:henkilotiedot {:etunimi  {:value NonBlankStr}
+                                          :sukunimi {:value NonBlankStr}}
+                          :yhteystiedot  ValidContactInfo}})
+
+(defschema ValidCustomerDoc
+  {:schema-info {:subtype (sc/enum :hakija :maksaja)}
+   :data        {:_selected {:value (sc/enum "henkilo" "yritys")}
+                 :henkilo   ValidPersonDoc
+                 :yritys    ValidCompanyDoc}})
+
+(defschema ValidApplicantDoc
+  (assoc-in ValidCustomerDoc [:schema-info :subtype] (sc/eq :hakija)))
+
+(defschema ValidPaymentInfo
+  {:verkkolaskuTunnus {:value NonBlankStr}
+   :ovtTunnus         {:value FinnishOVTid}
+   :valittajaTunnus   {:value NonBlankStr}})
+
+(defschema ValidPayeeDoc
+  (-> ValidCustomerDoc
+      (assoc-in [:schema-info :subtype] (sc/eq :maksaja))
+      (assoc-in [:data :laskuviite] {:value sc/Str})
+      (assoc-in [:data :yritys :verkkolaskutustieto] ValidPaymentInfo)))
+
+(def ValidDescriptionDoc
+  {:schema-info {:subtype (sc/eq :hankkeen-kuvaus)}
+   :data        {:kayttotarkoitus {:value NonBlankStr}}})
+
+(defschema ValidPlacementApplication
+  {:id               ApplicationId
+   :propertyId       Kiinteistotunnus
+   :municipality     MunicipalityCode
+   :address          NonBlankStr
+   :primaryOperation {:name (apply sc/enum (keys doccc/ya-operation-type-to-schema-name-key))}
+   :documents        [(sc/one ValidApplicantDoc "applicant")
+                      (sc/one ValidDescriptionDoc "description")
+                      (sc/one ValidPayeeDoc "payee")]
+   :location-wgs84   [(sc/one sc/Num "longitude") (sc/one sc/Num "latitude")]
+   :drawings         [{:geometry-wgs84 Geometry}]})
+
+;;;; # ALLU Placement Contracts
 
 ;; TODO: Improve this based on the standard.
 (defschema JHS-106
@@ -58,10 +211,10 @@
   name: henkil\u00f6n tai yrityksen nimi
   phone: puhelinnumero
   postalAddress: postiosoite"
-  {(optional-key :email) Email
-   (optional-key :id)    Int
-   :name                 NonBlankStr
-   (optional-key :phone) Tel
+  {(optional-key :email)         Email
+   (optional-key :id)            Int
+   :name                         NonBlankStr
+   (optional-key :phone)         Tel
    (optional-key :postalAddress) PostalAddress})
 
 (defschema CustomerType
@@ -81,16 +234,16 @@
   postalAddress: postiosoite
   registryKey: henkil\u00f6- tai Y-tunnus
   type: Onko kyseess\u00e4 henkil\u00f6, yritys, yhdistys vai jokin muu."
-  {:country              ISO-3166-alpha-2
-   (optional-key :email) Email
-   (optional-key :id)    Int
-   (optional-key :invoicingOperator) NonBlankStr ; TODO: Is there some format for this?
-   :name                 NonBlankStr
-   (optional-key :ovt)   FinnishOVTid
-   (optional-key :phone) Tel
-   (optional-key :postalAddress) PostalAddress
-   (optional-key :registryKey)   RegistryKey
-   :type CustomerType})
+  {:country                          ISO-3166-alpha-2
+   (optional-key :email)             Email
+   (optional-key :id)                Int
+   (optional-key :invoicingOperator) NonBlankStr            ; TODO: Is there some format for this?
+   :name                             NonBlankStr
+   (optional-key :ovt)               FinnishOVTid
+   (optional-key :phone)             Tel
+   (optional-key :postalAddress)     PostalAddress
+   (optional-key :registryKey)       RegistryKey
+   :type                             CustomerType})
 
 (defschema PlacementContract
   "Sijoitushakemuksen/sopimuksen tiedot.
@@ -108,17 +261,17 @@
   propertyIdentificationNumber: varattavan alueen kiinteist\u00f6tunnus
   startTime: alueen k\u00e4yt\u00f6n alkuaika (ei k\u00e4yt\u00f6ss\u00e4 Lupapisteess\u00e4)
   workDescription: hankkeen (pidempi) kuvaus"
-  {:clientApplicationKind            NonBlankStr
-   (optional-key :customerReference) NonBlankStr
-   :customerWithContacts             {:contacts (NonEmptyVec Contact)
-                                      :customer Customer}
-   :endTime                          DateTimeNoMs
-   :geometry                         GeoJSON-2008
-   :identificationNumber             ApplicationId
-   (optional-key :invoicingCustomer) Customer
-   :name                             NonBlankStr
-   (optional-key :pendingOnClient)   Bool
-   (optional-key :postalAddress)     PostalAddress
+  {:clientApplicationKind                       NonBlankStr
+   (optional-key :customerReference)            NonBlankStr
+   :customerWithContacts                        {:contacts [(sc/one Contact "primary contact") Contact]
+                                                 :customer Customer}
+   :endTime                                     DateTimeNoMs
+   :geometry                                    FeaturelessGeoJSON-2008
+   :identificationNumber                        ApplicationId
+   (optional-key :invoicingCustomer)            Customer
+   :name                                        NonBlankStr
+   (optional-key :pendingOnClient)              Bool
+   (optional-key :postalAddress)                PostalAddress
    (optional-key :propertyIdentificationNumber) Kiinteistotunnus
-   :startTime                        DateTimeNoMs
-   (optional-key :workDescription)   NonBlankStr})
+   :startTime                                   DateTimeNoMs
+   (optional-key :workDescription)              NonBlankStr})

@@ -1,7 +1,11 @@
 (ns lupapalvelu.integrations.geojson-2008-schemas
-  (:require [schema.core :refer [defschema Num Str
-                                 eq conditional maybe constrained pred optional-key]]))
+  (:require [schema.core :refer [defschema Num Str Keyword Any eq conditional maybe constrained one optional-key]]
+            [clojure.test.check.generators :as gen]
 
+            [sade.core :refer [def-]]
+            [sade.schema-generators :as ssg]))
+
+;;; FIXME: only allow :crs at top level
 ;;; TODO: DRY out the `(and (map? v) (= (:type v) ...`:s
 
 (defn named-crs? [v]
@@ -29,14 +33,18 @@
    :coordinates Coordinates
    (optional-key :crs) CRS})
 
-(defschema Position (constrained [Num] #(>= (count %) 2)))
+(defschema Position [(one Num "first") (one Num "second") Num])
 
-(defschema LineStringCoordinates (constrained [Position] #(>= (count %) 2)))
+(defschema LineStringCoordinates [(one Position "first") (one Position "second") Position])
+
+(defschema ^:private LinearMaybeRingCoordinates
+  [(one Position "coord1") (one Position "coord2") (one Position "coord3") (one Position "coord4") Position])
 
 (defschema LinearRingCoordinates
-  (constrained [Position] (fn [coords]
-                            (and (>= (count coords) 4)
-                                 (= (first coords) (peek coords))))))
+  (constrained LinearMaybeRingCoordinates #(= (first %) (peek %))))
+
+(ssg/register-generator LinearRingCoordinates (gen/fmap (fn [[coord :as coords]] (conj (pop coords) coord))
+                                                        (ssg/generator LinearMaybeRingCoordinates)))
 
 (def point? (partial GeoJSON-object? "Point"))
 (defschema Point (make-Geometry "Point" Position))
@@ -76,7 +84,7 @@
 (defschema Feature
   {:type (eq "Feature")
    :geometry Geometry
-   :properties (maybe (pred map?))
+   :properties (maybe {Keyword Any})
    (optional-key :crs) CRS})
 
 (def feature-collection? (partial GeoJSON-object? "FeatureCollection"))
