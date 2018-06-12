@@ -31,7 +31,6 @@
   reference-list components)"
   (:require [clojure.set :as set]
             [clojure.string :as s]
-            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.shared-schemas :as schemas]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]

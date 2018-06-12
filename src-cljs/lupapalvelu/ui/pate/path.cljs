@@ -2,7 +2,7 @@
   "Various utilities for component state, path, schema and _meta
   handling."
   (:require [clojure.string :as s]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.ui.common :as common]
             [rum.core :as rum]
             [sade.shared-util :as util]))
@@ -54,8 +54,8 @@
   path, [dict] otherwise."
   [{{dict :dict} :schema dictionary :dictionary path :path :as options}]
   (let [{dict-schema :schema
-         dict-path   :path :as res} (shared/dict-resolve (concat path [dict])
-                                                         dictionary)]
+         dict-path   :path :as res} (schema-util/dict-resolve (concat path [dict])
+                                                              dictionary)]
     (assoc (schema-options options dict-schema )
            :path (extend path dict dict-path))))
 

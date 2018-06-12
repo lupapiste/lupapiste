@@ -1,6 +1,7 @@
 (ns lupapalvelu.ui.pate.verdict-templates
   (:require [clojure.set :as set]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.settings-schemas :as settings-schemas]
+            [lupapalvelu.pate.verdict-template-schemas :as template-schemas]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.pate.components :as pate-components]
@@ -234,9 +235,9 @@
        (with-back-button
          (verdict-template
           (merge
-           {:schema     (dissoc (shared/verdict-template-schema @state/current-category)
+           {:schema     (dissoc (template-schemas/verdict-template-schema @state/current-category)
                                 :dictionary)
-            :dictionary (:dictionary (shared/verdict-template-schema @state/current-category))
+            :dictionary (:dictionary (template-schemas/verdict-template-schema @state/current-category))
             :references state/references}
            (state/select-keys state/current-template [:state :info :_meta]))))
 
@@ -244,7 +245,7 @@
        [:div (verdict-template-list) (phrases/phrases-table)]
 
        ::settings
-       (when-let [full-schema (shared/settings-schema @state/current-category)]
+       (when-let [full-schema (settings-schemas/settings-schema @state/current-category)]
          (with-back-button
            (settings/verdict-template-settings
             (merge

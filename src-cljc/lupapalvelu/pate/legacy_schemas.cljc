@@ -1,9 +1,10 @@
-(ns lupapalvelu.pate.legacy
+(ns lupapalvelu.pate.legacy-schemas
   "Schema instantiations for Pate legacy schemas. The legacy schemas
   should be compatible (enough) with the old verdicts."
-  (:require [lupapalvelu.pate.schema-util :as schema-util]
-            [lupapalvelu.pate.shared :as shared]
+  (:require [lupapalvelu.pate.schema-helper :as helper]
+            [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.shared-schemas :as schemas]
+            [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [sade.shared-util :as util]
             [schema.core :as sc]))
 
@@ -182,17 +183,17 @@
                              :type :autocomplete}})
    (legsub-reviews {:select {:loc-prefix :pate.review-type
                              :label?     false
-                             :items      shared/review-types
+                             :items      helper/review-types
                              :sort-by    :text}})
    legsub-foremen
    (legsub-conditions)
    legsub-attachments
-   (shared/versub-upload)))
+   (verdict-schemas/versub-upload)))
 
 (def legsub-reviews-ya
   (legsub-reviews {:select {:loc-prefix :pate.review-type
                             :label?     false
-                            :items      shared/ya-review-types
+                            :items      helper/ya-review-types
                             :sort-by    :text}}))
 
 (def ya-legacy-verdict
@@ -206,7 +207,7 @@
    legsub-reviews-ya
    (legsub-conditions)
    legsub-attachments
-   (shared/versub-upload {:type-group #"muut" :default :muut.paatosote})))
+   (verdict-schemas/versub-upload {:type-group #"muut" :default :muut.paatosote})))
 
 (def p-legacy-verdict
   (build-legacy-schema
@@ -216,7 +217,7 @@
                              :type :autocomplete}})
    (legsub-conditions)
    legsub-attachments
-   (shared/versub-upload)))
+   (verdict-schemas/versub-upload)))
 
 (def kt-legacy-verdict
   (build-legacy-schema
@@ -224,14 +225,14 @@
                            :items      [:verdict.status.43 :verdict.status.44]}})
    (legsub-conditions)
    legsub-attachments
-   (shared/versub-upload {:type-group #".*" :default :muut.paatosote})))
+   (verdict-schemas/versub-upload {:type-group #".*" :default :muut.paatosote})))
 
 (def ymp-legacy-verdict
   (build-legacy-schema
    (legsub-verdict {:text {:i18nkey :verdict.status}})
    (legsub-conditions)
    legsub-attachments
-   (shared/versub-upload {:type-group #".*" :default :muut.paatosote})))
+   (verdict-schemas/versub-upload {:type-group #".*" :default :muut.paatosote})))
 
 
 (def legsub-contract
@@ -294,9 +295,9 @@
    legsub-reviews-ya
    (legsub-conditions true)
    legsub-attachments
-   (shared/versub-upload {:type-group #".*"
-                          :default :muut.paatosote
-                          :title :verdict.contract.attachments})
+   (verdict-schemas/versub-upload {:type-group #".*"
+                                   :default :muut.paatosote
+                                   :title :verdict.contract.attachments})
    legsub-signatures))
 
 

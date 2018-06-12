@@ -2,12 +2,14 @@
   (:require [clj-time.coerce :as time-coerce]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pate.date :as date]
-            [lupapalvelu.pate.schemas :as schemas]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.pate.schema-util :as schema-util]
+            [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict :refer :all]
+            [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [lupapalvelu.pate.verdict-template :as template]
+            [lupapalvelu.pate.verdict-template-schemas :as template-schemas]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.shared-schemas :refer [object-id-pattern]]
@@ -122,7 +124,7 @@
         ts #(+ (* 1000 3600 12) (util/to-millis-from-local-date-string %))]
     (fact "All dates included in the verdict"
       (update-automatic-verdict-dates {:references   refs
-                                       :template     {:inclusions shared/verdict-dates}
+                                       :template     {:inclusions helper/verdict-dates}
                                        :verdict-data {:automatic-verdict-dates true
                                                       :verdict-date            (ts "6.4.2018") ;; Friday
                                                       }})
@@ -134,7 +136,7 @@
           :voimassa      (ts "23.4.2021")})
     (fact "Calculation skips public holiday (Easter)"
       (update-automatic-verdict-dates {:references   refs
-                                       :template     {:inclusions shared/verdict-dates}
+                                       :template     {:inclusions helper/verdict-dates}
                                        :verdict-data {:automatic-verdict-dates true
                                                       :verdict-date            (ts "26.3.2018")}})
       => {:julkipano     (ts "27.3.2018")
@@ -153,23 +155,23 @@
           :voimassa      (ts "9.4.2021")})
     (fact "No automatic calculation flag"
       (update-automatic-verdict-dates {:references   refs
-                                       :template     {:inclusions shared/verdict-dates}
+                                       :template     {:inclusions helper/verdict-dates}
                                        :verdict-data {:automatic-verdict-dates false
                                                       :verdict-date            (ts "26.3.2018")}})
       => nil
       (update-automatic-verdict-dates {:references   refs
-                                       :template     {:inclusions shared/verdict-dates}
+                                       :template     {:inclusions helper/verdict-dates}
                                        :verdict-data {:verdict-date            (ts "26.3.2018")}})
       => nil)
     (fact "Verdict date is not set"
       (update-automatic-verdict-dates {:references   refs
-                                       :template     {:inclusions shared/verdict-dates}
+                                       :template     {:inclusions helper/verdict-dates}
                                        :verdict-data {:automatic-verdict-dates true
                                                       :verdict-date ""}})
       => nil
       (fact "Verdict date is not set"
         (update-automatic-verdict-dates {:references   refs
-                                         :template     {:inclusions shared/verdict-dates}
+                                         :template     {:inclusions helper/verdict-dates}
                                          :verdict-data {:automatic-verdict-dates true}})
         => nil))))
 
@@ -297,7 +299,7 @@
                       :grid {:columns 1
                              :rows    [[{:dict :baz}]]}}]})
   (fact "Build verdict template schema"
-    (shared/build-verdict-template-schema
+    (template-schemas/build-verdict-template-schema
      {:dictionary {:foo {:toggle {}}
                    :bar {:text {}}}
       :sections   [{:id   :one
@@ -339,29 +341,29 @@
 (facts "Verdict validation"
   (facts "Schema creation"
     (fact "OK"
-      (shared/build-verdict-schema :r 1 test-verdict)
+      (verdict-schemas/build-verdict-schema :r 1 test-verdict)
       => (contains {:version 1})
-      (provided (shared/verdict-template-schema :r)
+      (provided (template-schemas/verdict-template-schema :r)
                 =>     (sc/validate shared-schemas/PateVerdictTemplate
                                     mock-template)))
     (fact "Template section t-first missing"
-      (shared/build-verdict-schema :r 1 test-verdict)
+      (verdict-schemas/build-verdict-schema :r 1 test-verdict)
       => (throws AssertionError)
-      (provided (shared/verdict-template-schema :r)
+      (provided (template-schemas/verdict-template-schema :r)
                 => (sc/validate shared-schemas/PateVerdictTemplate
                                 (util/dissoc-in mock-template
                                                 [:dictionary :removed-sections :keymap :t-first]))))
     (fact "Template section t-third missing"
-      (shared/build-verdict-schema :r 1 test-verdict)
+      (verdict-schemas/build-verdict-schema :r 1 test-verdict)
       => (throws AssertionError)
-      (provided (shared/verdict-template-schema :r)
+      (provided (template-schemas/verdict-template-schema :r)
                 => (sc/validate shared-schemas/PateVerdictTemplate
                                 (util/dissoc-in mock-template
                                                 [:dictionary :removed-sections :keymap :t-third]))))
     (fact "Template dict t-two missing"
-      (shared/build-verdict-schema :r 1 test-verdict)
+      (verdict-schemas/build-verdict-schema :r 1 test-verdict)
       => (throws AssertionError)
-      (provided (shared/verdict-template-schema :r)
+      (provided (template-schemas/verdict-template-schema :r)
                 => (sc/validate shared-schemas/PateVerdictTemplate
                                 (util/dissoc-in mock-template
                                                 [:dictionary :t-two]))))))
@@ -419,8 +421,8 @@
      :inclusions (template-inclusions {:category :r
                                        :draft    m})}))
 (against-background
- [(shared/verdict-schema :r)          => test-verdict
-  (shared/verdict-template-schema :r) => mock-template]
+ [(verdict-schemas/verdict-schema :r)          => test-verdict
+  (template-schemas/verdict-template-schema :r) => mock-template]
  (facts "Inclusions"
    (fact "Every template section included"
      (inclusions :r (mocker {:t-first  false
@@ -506,8 +508,8 @@
                              board? (assoc :boardname "Gate is boarding"))}}))
 
 (against-background
- [(shared/verdict-schema "r") => test-verdict
-  (shared/verdict-template-schema :r) => mock-template]
+ [(verdict-schemas/verdict-schema "r") => test-verdict
+  (template-schemas/verdict-template-schema :r) => mock-template]
  (facts "Initialize mock verdict draft"
    (fact "default, no removed sections"
      (default-verdict-draft (templater [] :t-two "Hello"))
@@ -642,9 +644,9 @@
   (re-matches object-id-pattern v))
 
 (against-background
- [(shared/verdict-template-schema "r") => mini-verdict-template
-  (shared/verdict-template-schema :r) => mini-verdict-template
-  (shared/verdict-schema "r")          => mini-verdict]
+ [(template-schemas/verdict-template-schema "r") => mini-verdict-template
+  (template-schemas/verdict-template-schema :r) => mini-verdict-template
+  (verdict-schemas/verdict-schema "r")          => mini-verdict]
  (facts "Initialize verdict draft"
    (fact "Minis are valid"
      (sc/validate shared-schemas/PateVerdictTemplate

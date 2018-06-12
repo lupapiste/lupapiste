@@ -1,7 +1,6 @@
 (ns lupapalvelu.ui.pate.verdicts
   (:require [clojure.set :as set]
             [clojure.string :as ss]
-            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
