@@ -16,29 +16,28 @@ See [Robot Framework documentation](http://robotframework.org/robotframework/).
 5. Install Selenium (>= 3.8.0): `pip install selenium`
 6. Install Selenium Library (>= 3.0.0): `pip install robotframework-seleniumlibrary`
 7. Install [Robotframework-DebugLibrary](https://github.com/xyb/robotframework-debuglibrary): `pip install robotframework-debuglibrary`
-8. Download drivers and include them in PATH. On macOS you can use Homebrew.
-    1.  [Geckodriver >= 0.16.1](https://github.com/mozilla/geckodriver/releases/)
-    2.  [Chrome](https://sites.google.com/a/chromium.org/chromedriver/downloads)
-    3.  [IE](http://selenium-release.storage.googleapis.com/index.html)
+8. Download drivers and include them in PATH. On macOS you can use Homebrew. We run tests in Chrome nowadays.
+    1. [Chrome](https://sites.google.com/a/chromium.org/chromedriver/downloads)
+    2. [Geckodriver >= 0.16.1](https://github.com/mozilla/geckodriver/releases/)
+    3. [IE](http://selenium-release.storage.googleapis.com/index.html)
 
-Optional:
-
-1.  Install [RIDE](https://github.com/robotframework/ride)
-
-If you're using [Eclipse](http://www.eclipse.org/):
-
-1.  Install [RobotFramework-EclipseIDE plugin](https://github.com/NitorCreations/RobotFramework-EclipseIDE/wiki/Installation)
-2.  Set Eclipse to open *.robot files with Robot Framework Textfile Editor (Window -> Preferences, General -> Editors -> File Associations)
 
 ## Running the tests
+
+Currently we run tests mainly in Chrome.
 
 Go to [robot](../robot) directory on the project root
 
 ### Tests against a server running on http://localhost:8000/
 
-To run the main test set, execute `local.sh` or  `local.bat`.
-You can run a single suite or file from main set by executing `local-standalone.sh test\00_suite` or
-`local-standalone.bat test\00_suite\00_file.robot`
+~To run the main test set, execute `local.sh` or  `local.bat`.~ Running all tests is not recommended, as it will take a loooot of time.
+
+Instead run single tests in your local environment.
+
+You can run a single suite or file from main set by executing `./local-standalone-chrome.sh tests/22_foreman/03_foreman_history.robot`.
+It will open Chrome and run tests.
+
+You can also use `local-standalone.sh`, which takes browser as first argument. For example you can run headless Chrome like this: `local-standalone.sh headlesschrome test/my_test.robot`.
 
 To run the integration test set, execute `local-integration.sh` or  `local-integration.bat`.
 For running single files or suites there is the `standalone-int.bat`.
