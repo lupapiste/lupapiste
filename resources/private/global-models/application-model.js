@@ -499,7 +499,8 @@ LUPAPISTE.ApplicationModel = function() {
   self.nonApprovedDesigners = ko.observableArray([]);
 
   function checkForNonApprovedDesigners() {
-    var nonApproved = _(docgen.nonApprovedDocuments()).filter(function(docModel) {
+    if (lupapisteApp.models.applicationAuthModel.ok("approve-doc")) {
+      var nonApproved = _(docgen.nonApprovedDocuments()).filter(function(docModel) {
         return docModel.schema.info.subtype === "suunnittelija" && !docModel.docDisabled;
       })
       .filter(function(designerDoc) {
@@ -518,7 +519,8 @@ LUPAPISTE.ApplicationModel = function() {
         return title + headerDescription;
       })
       .value();
-    self.nonApprovedDesigners(nonApproved);
+      self.nonApprovedDesigners(nonApproved);
+    }
   }
 
   hub.subscribe("update-doc-success", checkForNonApprovedDesigners);
