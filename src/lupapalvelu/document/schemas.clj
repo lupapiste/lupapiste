@@ -62,7 +62,6 @@
                  :redraw-on-approval
                  :post-verdict-party
                  :addable-in-states
-                 :exclude-from-pdf
                  :editable-in-states
                  :accordion-fields
                  :blacklist
