@@ -1,9 +1,11 @@
-(ns lupapalvelu.ui.pate.path
+(ns lupapalvelu.pate.path
   "Various utilities for component state, path, schema and _meta
   handling."
+  (:refer-clojure :exclude [extend])
   (:require [clojure.string :as s]
             [lupapalvelu.pate.schema-util :as schema-util]
-            [lupapalvelu.ui.common :as common]
+            #?(:cljs [lupapalvelu.ui.common :as l10n]
+               :clj  [lupapalvelu.i18n :as l10n])
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
@@ -24,7 +26,7 @@
 (defn loc-extend
   "Extends loc-path based on the options. The options can include
   loc-prefix or id"
-  [loc-path {:keys [id loc-prefix dict]}]
+  [loc-path {:keys [id loc-prefix]}]
   (cond
     loc-prefix [loc-prefix]
     id         (extend loc-path id)
@@ -63,7 +65,7 @@
   (get-in @state* (extend path extra)))
 
 (defn react
-  "Like value but uses rum/reac for deref."
+  "Like value but uses rum/react for deref."
   [path state* & extra]
   (rum/react (state (extend path extra) state*)))
 
@@ -90,10 +92,10 @@
        (filter identity)
        (map name)
        (s/join ".")
-       common/loc))
+       l10n/loc))
 
-;; Component-aware localization: i18nkey(s), loc-prefix and dict
-;; override the loc-path.
+;; Component-aware localization: i18nkey, loc-prefix and dict override
+;; the loc-path.
 (defmethod loc :map
   [{:keys [i18nkey loc-path schema] :as arg} & extra]
   (loc (concat [(or i18nkey
@@ -136,8 +138,7 @@
   (->> [(:css schema)
         other-classes]
        flatten
-       (map util/split-kw-path)
-       flatten
+       (mapcat util/split-kw-path)
        (remove nil?)
        (map name)))
 

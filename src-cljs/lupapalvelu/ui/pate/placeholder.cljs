@@ -7,9 +7,9 @@
   collection of various components that are needed for the
   implmentation of :placeholder schemas (see shared.cljc)."
   (:require [clojure.string :as s]
+            [lupapalvelu.pate.path :as path]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
-            [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]

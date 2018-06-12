@@ -1,10 +1,10 @@
 (ns lupapalvelu.ui.pate.phrases
   (:require [clojure.set :as set]
             [clojure.string :as s]
+            [lupapalvelu.pate.path :as path]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
-            [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]
