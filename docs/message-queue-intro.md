@@ -14,12 +14,12 @@ Lupapiste currently uses [ActiveMQ Artemis](https://activemq.apache.org/artemis/
 
 > The overall objective for working toward feature parity between ActiveMQ 5.x and Artemis is for Artemis to eventually become ActiveMQ 6.x.
 
-Artemis itself is [protocol agnostic](https://activemq.apache.org/artemis/docs/latest/architecture.html) and doesn't actually know JMS, but JMS semantics are implemented as facede in client side.
+Artemis itself is [protocol agnostic](https://activemq.apache.org/artemis/docs/latest/architecture.html) and doesn't actually know JMS, but JMS semantics are implemented as facede in client side library.
 
 
 # Development
 
-Locally an embedded ActiveMQ Artemis broker is started, this can be controlled with `:embedded-broker` feature flag. See `artemis-server` namespace.
+Locally an embedded ActiveMQ Artemis broker is started in dev mode (default mode). See `artemis-server` namespace.
 
 Alternatively you can fire up local instance by [installing Artemis](https://activemq.apache.org/artemis/download.html), and then setting JMS properties. See example in [local.properties](../resources/local.properties).
 
@@ -132,7 +132,7 @@ So the client should have some kind of recovery for these situations.
 
 ## Message redelivery
 
-If broker's message delivery is unsuccessful (client-side exception for example), message is redelivered 10 times. If message can't be handled successfully, the broker will throw message to DLQ (Dead Letter Queue).
+If for some reason message deliveryn fails or message is rolled back, by default message is redelivered by the broker 10 times. If all redeliveries are unsuccessful, the broker will throw message to DLQ (Dead Letter Queue).
 
 From DLQ, messages can be rerouted to other queue using management console UI (manual retry for example)
 
@@ -140,6 +140,7 @@ Default setup does 10 redeliveries with delay of 0. Adding some redelivery delay
 
 More information about configuring from [Artemis docs](https://activemq.apache.org/artemis/docs/latest/undelivered-messages.html).
 
+See also the `lupapiste-ansible` repository for `broker.xml` configuration.
 
 # ActiveMQ Artemis server FAQ
 
@@ -150,5 +151,7 @@ On the contrary, also "auto-delete" feature is set to true by default. This mean
 
 ~~It seems it's not possible to retain dynamically created queues between server restarts. When server is restarted, client consumers don't receive messages anymore to queues they subscribed. 
 Instead an exception is raised on server side when consumer re-connects to it with message "Queue X does not exists".~~ This might be a bug in Artemis UPDATE: yes it's a bug: https://issues.apache.org/jira/browse/ARTEMIS-1818.
+
+This bug has been fixed in release 2.6.0 release of Artemis.
 
 Read more about config possibilities from [Artemis documentation](https://activemq.apache.org/artemis/docs/latest/address-model.html#automatic-addressqueue-management).
