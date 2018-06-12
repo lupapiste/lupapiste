@@ -405,6 +405,8 @@
           (assoc-in body path val)))
       {} schema-data)))
 
+(def db-schema-info-keys [:name :version :type :subtype :op])
+
 (defn make-document [application primary-operation-name created manual-schema-datas schema]
   (let [op-info (op/operations (keyword primary-operation-name))
         op-schema-name (:schema op-info)
@@ -414,7 +416,7 @@
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
         schema-name (get-in schema [:info :name])]
     {:id          (mongo/create-id)
-     :schema-info (select-keys (:info schema) [:name :version :type :subtype])
+     :schema-info (select-keys (:info schema) db-schema-info-keys)
      :created     created
      :data        (util/deep-merge
                    (tools/create-document-data schema tools/default-values)
