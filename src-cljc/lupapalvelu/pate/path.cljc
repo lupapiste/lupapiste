@@ -287,12 +287,7 @@
 (defn- good? [options good-condition bad-condition]
   (let [good (eval-state-condition options good-condition)
         bad  (eval-state-condition options bad-condition)]
-    (cond
-      (and (nil? good)
-           (nil? bad))   true
-      (or bad
-          (false? good)) false
-      :else              true)))
+    (not (or bad (false? good)))))
 
 (defn- climb-to-condition [options schema-key]
             (loop [{:keys [schema _parent]} options]
@@ -303,7 +298,9 @@
 (defn enabled?
   "Enable disable climbs schema tree until conditions are found. Thus,
   if parent is disabled, the children are also automatically
-  disabled."
+  disabled. Note that the conditions are are still resolved according
+  to the 'current' path. In other words, the relative paths for
+  ancestors do not resolve correctly."
   [options]
   (and (react-meta options :enabled?)
        (good? options
