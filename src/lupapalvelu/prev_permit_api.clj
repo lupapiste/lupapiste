@@ -50,7 +50,4 @@
                               :include-canceled-apps? false)]
     ;;Found an application of same organization that has a verdict with the given kuntalupatunnus -> Open it.
     (ok :id (:id app-with-verdict))
-    (prev-permit/fetch-prev-application! command)
-    ;; For development/testing purposes replace the previous line with the following to open a local Krysp message.
-    ;; (util/fetch-prev-local-application! command)
-    ))
+    (prev-permit/fetch-prev-application! command)))

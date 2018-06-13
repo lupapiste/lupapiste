@@ -95,7 +95,7 @@
 
 (defn sanitize-updates
   "Removes updates that would invalidate document. The updates are
-  transfroms and applied to the document before validation."
+  transforms and applied to the document before validation."
   [application document updates]
   (let [bad-paths (->> (doc-model/validate
                         application

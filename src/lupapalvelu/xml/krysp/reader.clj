@@ -11,6 +11,7 @@
             [sade.coordinate :as coordinate]
             [sade.core :refer [now def- fail]]
             [lupapalvelu.drawing :as drawing]
+            [lupapalvelu.conversion.util :as conv-util]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.property :as prop]
             [lupapalvelu.wfs :as wfs]
@@ -646,6 +647,36 @@
   (let [asiat (enlive/select xml-no-ns common/case-elem-selector)]
     (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) asiat)))
 
+(defn ->rakennelmatieto [xml-no-ns]
+  (-> xml-no-ns
+    (select1 [:toimenpidetieto :Toimenpide :rakennelmatieto])
+    cr/all-of))
+
+; (defn ->kuntalupatunnus [xml]
+;   (cr/all-of (select1 xml [:rakennusvalvontaAsiatieto :luvanTunnisteTiedot :kuntalupatunnus])))
+
+(defn ->viitelupatunnukset
+  "Takes a parsed XML document, returns a list of viitelupatunnus -ids (in 'permit-id'-format) found therein."
+  [xml]
+  (->> (select xml [:rakennusvalvontaAsiatieto :viitelupatieto])
+       (map (comp conv-util/normalize-permit-id #(get-in % [:LupaTunnus :kuntalupatunnus]) cr/all-of))))
+
+(defn is-foreman-application? [xml]
+  (let [permit-type (-> xml ->kuntalupatunnus (ss/split #"-") last)]
+    (= "TJO" permit-type)))
+
+(defn ->tyonjohtajat [xml]
+  (when (is-foreman-application? xml)
+    (as-> xml x
+      (get-asiat-with-kuntalupatunnus x (->kuntalupatunnus xml))
+      (first x)
+      (select x [:osapuolettieto :Osapuolet :tyonjohtajatieto :Tyonjohtaja])
+      (map cr/all-of x))))
+
+; (defn rakennelmatieto->kaupunkikuvatoimenpide [raktieto]
+;   (let [schema (schemas/get-schema 1 "kaupunkikuvatoimenpide")]
+;     schema))
+
 ;;
 ;; Information parsed from verdict xml message for application creation
 ;;
@@ -663,7 +694,6 @@
       (let [asia (first asiat-with-kuntalupatunnus)
             asioimiskieli (cr/all-of asia [:lisatiedot :Lisatiedot :asioimiskieli])
             asioimiskieli-code (case asioimiskieli
-                                 "suomi"  "fi"
                                  "ruotsi" "sv"
                                  "fi")
             asianTiedot (cr/all-of asia [:asianTiedot :Asiantiedot])

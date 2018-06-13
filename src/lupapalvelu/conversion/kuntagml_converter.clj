@@ -37,7 +37,7 @@
   ;;   - :history array for the application (kasittelynTilatieto / tilamuutos) (get-sorted-tilamuutos-entries)
   ;;
   ;;  Other things to note:
-  ;;    - linked permitIDs might be in funny order, check that it's normalised (util/normalize-permit-id)
+  ;;    - linked permitIDs might be in funny order, check that it's normalised ('lupapalvelu.conversion.util/normalize-permit-id')
   ;;    - we need to generate LP id for conversion cases (do not use do-create-application)
   ;;
   ;;  Types that need special handling: VAK (not own thing, but adds data to linked application)
@@ -103,15 +103,15 @@
           (info "Saved review updates")
           (infof "Reviews were not saved: %s" (:desc update-result))))
 
-
       (let [fetched-application (mongo/by-id :applications (:id created-application))]
         (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
         fetched-application))))
 
 (def supported-import-types #{:TJO :A :B :C :D :E :P :Z :AJ :AL :MAI :BJ :PI :BL :DJ :CL :PJ})
-(defn- validate-permit-type [type]
-  (when-not (contains? supported-import-types (keyword type))
-    (error-and-fail! (str "Unsupported import type " type) :error.unsupported-permit-type)))
+
+(defn- validate-permit-type [permittype]
+  (when-not (contains? supported-import-types (keyword permittype))
+    (error-and-fail! (str "Unsupported import type " permittype) :error.unsupported-permit-type)))
 
 (defn fetch-prev-local-application!
   "A variation of `lupapalvelu.prev-permit/fetch-prev-local-application!` that exists for conversion
