@@ -461,7 +461,7 @@
   (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto :tunnus])
       (get-text asia [:luvanTunnistetiedot :LupaTunnus :muuTunnustieto :tunnus])))
 
-(defn- ->kuntalupatunnus [asia]
+(defn ->kuntalupatunnus [asia]
   (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
       (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus])))
 
