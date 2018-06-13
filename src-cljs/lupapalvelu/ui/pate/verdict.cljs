@@ -120,8 +120,8 @@
                                               :verdict.submit)
                                   :class    (common/css :primary :pate-left-space)
                                   :icon     (if contract?
-                                              :lupicon-circle-pen
-                                              :lupicon-circle-section-sign)
+                                              :lupicon-undersign
+                                              :lupicon-document-section-sign)
                                   :wait?    state/verdict-wait?
                                   :enabled? (can-publish?)
                                   :on-click (fn []
@@ -185,7 +185,7 @@
                        :schema (dissoc schema :dictionary)
                        :dictionary dictionary
                        :references state/references)))
-     [:div.pate-spin [:i.lupicon-circle-section-sign]])]])
+     [:div.pate-spin [:i.lupicon-refresh]])]])
 
 (defn bootstrap-verdict []
   (let [[app-id verdict-id] (js/pageutil.getPagePath)]

@@ -141,8 +141,8 @@
 (defn tyonjohtaja->tj-document [party]
   (party->party-doc party "tyonjohtaja-v2"))
 
-(defn- invite-applicants [{:keys [lang user created application] :as command} applicants authorize-applicants]
-
+(defn invite-applicants [{:keys [lang user created application] :as command} applicants authorize-applicants]
+  ;; FIXME: refactor document updates out from here
   (let [applicants-with-no-info (remove get-applicant-type applicants)
         applicants (filter get-applicant-type applicants)]
 
@@ -222,7 +222,7 @@
         doc-updates (lupapalvelu.document.model/map2updates [] data)]
     (lupapalvelu.document.model/apply-updates doc doc-updates)))
 
-(defn- schema-datas [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen]} buildings]
+(defn schema-datas [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen]} buildings]
   (map
     (fn [{:keys [data]}]
       (remove empty? (conj (doc-model/map2updates [] (select-keys data building-fields))

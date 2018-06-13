@@ -50,10 +50,13 @@
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.organization :as org]
             [pandect.core :as pandect]
-            [lupapalvelu.xml.krysp.building-reader :as building-reader])
+            [lupapalvelu.xml.krysp.building-reader :as building-reader]
+            [monger.collection :as mc])
   (:import [org.xml.sax SAXParseException]
            [java.io ByteArrayOutputStream ByteArrayInputStream]
-           [java.net URL]))
+           [java.net URL]
+           [java.util Date]
+           [org.bson.types ObjectId]))
 
 
 (defn- older-than [timestamp] {$lt timestamp})
@@ -886,15 +889,16 @@
 (defn analyze-missing [& args]
   (mongo/connect!)
   (info "Starting analyze-missing job")
-  (let [ts 1527800400000]
+  (let [ts 1522540800000]
     (doseq [app (mongo/select :applications
-                              {:modified    {$gte ts}
-                               :attachments {$elemMatch {:latestVersion.created {$gte ts
-                                                                                 $lt 1528063200000}
-                                                         :latestVersion.onkaloFileId {$exists false}}}}
-                              [:attachments])
+                              {$or [{:modified {$gte ts}}
+                                    {:verdicts.timestamp {$gte ts}}
+                                    {:tasks.created {$gte ts}}]}
+                              [:attachments]
+                              {:_id 1})
             {version :latestVersion :as att} (->> (:attachments app)
-                                                  (filter :latestVersion))
+                                                  (filter  :latestVersion)
+                                                  (remove #(get-in % [:latestVersion :onkaloFileId])))
             :let [file (mongo/download (:fileId version))
                   different-original? (not= (:fileId version) (:originalFileId version))]]
       (when-not file
@@ -904,16 +908,22 @@
             (print-info (:id app) att version "fileId AND originalFileId missing"))
           (print-info (:id app) att version "fileId missing"))))))
 
-(defn convert-and-link-missing [& args]
+(defn convert-and-link-missing [& application-ids]
   (mongo/connect!)
   (info "Starting convert-and-link-missing job")
-  ;(sade.util/to-millis-from-local-datetime-string "2018-06-01T00:00")
-  ;=> 1527800400000
-  (let [ts 1527800400000]
+  ;(sade.util/to-millis-from-local-datetime-string "2018-05-30T00:00")
+  ;=> 1527638400000
+  (let [ts 1527638400000
+        query (if (seq application-ids)
+                {:_id {$in application-ids}}
+                {$or [{:attachments.latestVersion.created {$gte ts
+                                                           $lt 1528063200000}}
+                      {:attachments.latestVersion.modified {$gte ts
+                                                            $lt 1528063200000}}]})]
     (doseq [app (mongo/select :applications
-                              {:modified                          {$gte ts}
-                               :attachments.latestVersion.created {$gte ts}}
-                              [:attachments :organization])
+                              query
+                              [:attachments :organization]
+                              {:_id 1})
             {version :latestVersion :as att} (->> (:attachments app)
                                                   (filter :latestVersion))
             :let [file (mongo/download (:fileId version))]]
@@ -949,10 +959,10 @@
       ((fn [s] (str "{" s)))
       (json/parse-string true)))
 
-(defn graylog-request [action-to-check]
+(defn graylog-request [action-to-check & [offset]]
   (->> (http/get (str (env/value :graylog :host) "/api/search/universal/absolute?query=action%3A"
                       action-to-check
-                      "%20AND%20(source%3Aapp3%20OR%20source%3Aapp4)&from=2018-05-31T21%3A00%3A00.000Z&to=2018-06-3T22%3A00%3A00.000Z&limit=4000")
+                      "%20AND%20(source%3Aapp3%20OR%20source%3Aapp4)&from=2018-05-31T21%3A00%3A00.000Z&to=2018-06-3T22%3A00%3A00.000Z&limit=1000&offset=" (or offset 0))
                  {:basic-auth [(env/value :graylog :user) (env/value :graylog :password)]
                   :coerce :always
                   :as :json})
@@ -1037,51 +1047,75 @@
                                         :linked      true})
                 (infof "fileId %s uploaded and linked successfully" originalFileId)))))))))
 
-(defn replay-missing-rotates [& args]
+(defn replay-missing-rotates [& application-ids]
   (mongo/connect!)
   (info "Starting replay-missing-rotates job")
   (doseq [{:keys [data] :as logdata} (graylog-request "rotate-pdf")]
     (logging/with-logging-context {:applicationId (:id data)}
-      (let [{:keys [id attachmentId rotation]} data
-            application (mongo/by-id :applications id)
-            {:keys [versions] :as attachment} (att/get-attachment-info application attachmentId)
-            source-version (->> (reverse versions)
-                                (filter #(mongo/download (:fileId %)))
-                                first)
-            target-version (or (->> (reverse versions)
-                                    (take-while #(not= (:fileId source-version) (:fileId %)))
-                                    last)
-                               source-version)
-            {:keys [fileId filename contentType]} source-version]
-        (if-let [dl (mongo/download fileId)]
-          (files/with-temp-file temp-pdf
-            (info "Rotating file" fileId "from attachment" attachmentId "by" rotation
-                  ", target file id is" (:fileId target-version))
-            (with-open [content ((:content dl))]
-              (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation))
-            (when (= fileId (:fileId target-version))
-              (info "Deleting existing file" fileId)
-              (mongo/delete-file-by-id fileId))
-            (file-upload/save-file {:content  temp-pdf
-                                    :filename filename
-                                    :fileId   (:originalFileId target-version)
-                                    :size     (.length temp-pdf)}
-                                   {:application id
-                                    :linked      true})
-            (when-not (= (:fileId target-version) (:originalFileId target-version))
-              (let [conversion (conversion/archivability-conversion application
-                                                                    {:filename    filename
-                                                                     :contentType contentType
-                                                                     :content     temp-pdf})]
-                (if (:autoConversion conversion)
-                  (do
-                    (file-upload/save-file (merge (select-keys conversion [:content :filename])
-                                                  {:fileId (:fileId target-version)})
-                                           {:application (:id application) :linked true})
-                    (infof "fileId %s converted, uploaded and linked successfully" fileId))
-                  (warnf "file %s not converted: %s" fileId (pr-str conversion)))))
-            (info "Rotated file" (:fileId target-version) "uploaded"))
-          (error "No unrotated file found with file id" fileId))))))
+      (when (or (nil? application-ids)
+                (some #(= (:id data) %) application-ids))
+        (let [{:keys [id attachmentId rotation]} data
+              application (mongo/by-id :applications id)
+              {:keys [versions] :as attachment} (att/get-attachment-info application attachmentId)
+              source-version (or (->> (reverse versions)
+                                      (filter #(mongo/download (:fileId %)))
+                                      first)
+                                 (->> (reverse versions)
+                                      (filter #(mongo/download (:originalFileId %)))
+                                      first))
+              {:keys [fileId filename contentType originalFileId]} source-version
+              target-version (or (->> (reverse versions)
+                                      (take-while #(not= fileId (:fileId %)))
+                                      last)
+                                 (when-not (mongo/download fileId)
+                                   source-version))]
+          (if target-version
+            (if-let [dl (or (mongo/download fileId)
+                            (mongo/download originalFileId))]
+              (files/with-temp-file temp-pdf
+                (info "Rotating file" fileId "from attachment" attachmentId "by" rotation
+                      ", target file id is" (:fileId target-version))
+                (with-open [content ((:content dl))]
+                  (if (not= (:contentType dl) "application/pdf")
+                    (-> (conversion/archivability-conversion application
+                                                             {:filename    filename
+                                                              :contentType (:contentType dl)
+                                                              :content     content})
+                        :content
+                        (pdftk/rotate-pdf (.getAbsolutePath temp-pdf) rotation))
+                    (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)))
+                (when (= fileId (:fileId target-version))
+                  (info "Deleting existing file" fileId)
+                  (mongo/delete-file-by-id fileId))
+                (when-not (mongo/download (:originalFileId target-version))
+                  (file-upload/save-file {:content  temp-pdf
+                                          :filename filename
+                                          :fileId   (:originalFileId target-version)
+                                          :size     (.length temp-pdf)}
+                                         {:application id
+                                          :linked      true}))
+                (when-not (= (:fileId target-version) (:originalFileId target-version))
+                  (let [conversion (conversion/archivability-conversion application
+                                                                        {:filename    filename
+                                                                         :contentType contentType
+                                                                         :content     temp-pdf})]
+                    (if (:autoConversion conversion)
+                      (do
+                        (file-upload/save-file (merge (select-keys conversion [:content :filename])
+                                                      {:fileId (:fileId target-version)})
+                                               {:application (:id application) :linked true})
+                        (infof "fileId %s converted, uploaded and linked successfully" fileId))
+                      (do
+                        (file-upload/save-file {:content  temp-pdf
+                                                :filename filename
+                                                :fileId   (:fileId target-version)
+                                                :size     (.length temp-pdf)}
+                                               {:application id
+                                                :linked      true})
+                        (infof "fileId %s uploaded and linked successfully" fileId)))))
+                (info "Rotated file" (:fileId target-version) "uploaded"))
+              (error "No unrotated file found with file id" fileId))
+            (info "Latest version has a file, so this should be already fine.")))))))
 
 (defn fix-attachment-childrens
   "Generate new attachments for targets, which were initially created by create-attachment-from-children and later removed"
@@ -1199,21 +1233,26 @@
                 (warnf "file %s not converted: %s" fileId (pr-str conversion))))))
         (error (str (:status resp) " - unable to download " url ": " resp))))))
 
-(defn fetch-missing-backend-attachments [& args]
+(defn fetch-missing-backend-attachments [& application-ids]
   (mongo/connect!)
-  (let [ts 1527800400000
-        app-xml-cache (atom {})]
+  (let [ts 1527552000000
+        app-xml-cache (atom {})
+        query (if (seq application-ids)
+                {:_id {$in application-ids}}
+                {$or          [{:verdicts.timestamp {$gte ts}}
+                               {:tasks.created {$gte ts}}]
+                 :attachments {$elemMatch {:type.type-id {$in (concat ["paatos" "paatosote" "muu"] vru/task-attachment-types)}
+                                           :target.id    {$exists true}}}})]
+    (info "Starting from timestamp" ts)
+    (info "Running for application ids:" (or (seq application-ids) "all"))
     (doseq [app (mongo/select :applications
-                              {:modified                          {$gte ts}
-                               :attachments {$elemMatch {:latestVersion.created {$gte ts
-                                                                                 $lt 1528063200000}
-                                                         :type.type-id {$in (concat ["paatos" "paatosote" "muu"] vru/task-attachment-types)}
-                                                         :target.id {$exists true}}}}
+                              query
                               [:state :municipality
                                :address :permitType
                                :permitSubtype :organization
                                :primaryOperation :verdicts
-                               :attachments])
+                               :attachments :tasks]
+                              {:_id 1})
             {version :latestVersion target :target :as att} (->> (:attachments app)
                                                                  (filter :latestVersion)
                                                                  (filter :target))
@@ -1223,7 +1262,9 @@
         (when-not file
           (if (:urlHash target)
             (let [app-xml (or (get @app-xml-cache (:id app))
-                              (-> (swap! app-xml-cache assoc (:id app) (krysp-fetch/get-application-xml-by-application-id app))
+                              (-> (swap! app-xml-cache assoc (:id app)
+                                         (or (krysp-fetch/get-application-xml-by-application-id app)
+                                             (krysp-fetch/get-application-xml-by-backend-id app (some :kuntalupatunnus (:verdicts app)))))
                                   (get (:id app))))
                   organization (org/get-organization (:organization app))
                   xml-verdicts (verdict/get-verdicts-from-xml app organization app-xml)]
@@ -1271,11 +1312,9 @@
                       all-atts (->> (map :attachments review-tasks)
                                     flatten
                                     (remove nil?))
-                      {:keys [linkkiliitteeseen]} (->> (or (seq attachments)
-                                                           all-atts)
+                      {:keys [linkkiliitteeseen]} (->> attachments
                                                        (filter (fn [{{:keys [linkkiliitteeseen]} :liite}]
-                                                                 (= (pandect/sha1 (.toString (URL. (URL. "http://") linkkiliitteeseen)))
-                                                                    (:id att))))
+                                                                 (not (ss/blank? linkkiliitteeseen))))
                                                        first
                                                        :liite)]
                   (if (ss/blank? linkkiliitteeseen)
@@ -1298,9 +1337,11 @@
             (cond
               (= (:type target) "task")
               (let [_ (info "Generating PDF for task" (:id target))
-                    tasks-filter-fn (fn [task] (and (= "task-katselmus" (get-in task [:schema-info :name]))
+                    tasks-filter-fn (fn [task] (and (#{"task-katselmus" "task-katselmus-backend" "task-katselmus-ya"}
+                                                      (get-in task [:schema-info :name]))
                                                     (= "sent" (:state task))
-                                                    (= (:id target) (:id task))))
+                                                    (= (:id target) (:id task))
+                                                    (not= (:organization app) "297-R")))
                     user-fn (fn [_ task-attachment]
                               (get-in task-attachment [:latestVersion :user]))]
                 (fix-attachment-childrens [app] :tasks tasks-filter-fn user-fn))
@@ -1319,3 +1360,169 @@
 
               :else
               (error "Attachment does not have a target:" att))))))))
+
+(defn- move-older-chunk-to-target [file-id target-file-id]
+  (let [chunks (mongo/select :fs.chunks {:files_id file-id})]
+    (cond
+      (= (count chunks) 2)
+      (let [sorted-chunks (sort (fn [c1 c2]
+                                  (.compareTo (.getDate ^ObjectId (:id c1))
+                                              (.getDate ^ObjectId (:id c2))))
+                                chunks)
+            source-id (->> sorted-chunks
+                           first
+                           :id)]
+        (mongo/update-by-id :fs.chunks source-id {$set {:files_id target-file-id}})
+        (info "Chunk id" (str source-id) "updated to link to file id" target-file-id))
+
+      (= (count chunks) 0)
+      (error "No chunks exists for file id" file-id ", cannot update")
+
+      (= (count chunks) 1)
+      (info "Only one chunk exists for file id" file-id ", not updating")
+
+      (> (count chunks) 2)
+      (error "Cannot update chunk because there is more than 2 chunks for file id" file-id))))
+
+(defn fix-duplicate-gridfs-chunks [& application-ids]
+  (mongo/connect!)
+  (info "Running for application ids:" (or (seq application-ids) "all"))
+  (let [duplicate-files-query [{$match (if (seq application-ids)
+                                         {"metadata.application" {$in application-ids}}
+                                         {"uploadDate" {$gte (Date. 1527811200000)
+                                                       $lte (Date. 1528416000000)}})}
+                               {"$lookup" {"from" "fs.chunks"
+                                           "localField" "_id"
+                                           "foreignField" "files_id"
+                                           "as" "chunks"}}
+                               {$unwind {"path" "$chunks"}}
+                               {$match {"chunks.n" 0}}
+                               {"$sortByCount" "$chunks.files_id"}
+                               {$match {"count" {$gt 1}}}]
+        stamps (->> (graylog-request "stamp-attachments")
+                    (reduce (fn [acc {{attachment-ids :files} :data :as cmd}]
+                              (reduce (fn [acc2 attachment-id]
+                                        (update acc2 attachment-id conj cmd))
+                                      acc
+                                      attachment-ids))
+                            {})
+                    (map (fn [[id cmds]]
+                           [id [(last (sort-by :created cmds))]]))
+                    (into {}))
+        id-to-cmds (->> (graylog-request "rotate-pdf")
+                        (reduce (fn [acc {{attachment-id :attachmentId} :data :as cmd}]
+                                  (update acc attachment-id (fn [cmds]
+                                                              (->> (conj cmds cmd)
+                                                                   (sort-by :created)))))
+                                stamps))]
+    (doseq [{file-id :_id chunk-count :count} (mc/aggregate (mongo/get-db)
+                                                            "fs.files"
+                                                            duplicate-files-query)]
+      (let [file-data (mongo/by-id :fs.files file-id)
+            app-id (get-in file-data [:metadata :application])
+            application (mongo/by-id :applications app-id)]
+        (logging/with-logging-context {:applicationId app-id}
+          (doseq [{att-id :id latest-version :latestVersion versions :versions md :metadata} (:attachments application)
+                  :when (and (= file-id (:fileId latest-version))
+                             (not= (:tila md) "arkistoitu"))
+                  :let [att-cmds (get id-to-cmds att-id)]]
+            (info "Trying to fix file id" file-id "from attachment" att-id "with" chunk-count "duplicate chunks")
+            (cond
+              (and (get stamps att-id)
+                   (:stamped latest-version)
+                   (= 2 chunk-count)
+                   (= 2 (count versions))
+                   (= (-> versions first :user :username) "eraajo@lupapiste.fi"))
+              (let [first-version (first versions)]
+                (move-older-chunk-to-target file-id (:fileId first-version))
+                (move-older-chunk-to-target (:originalFileId latest-version) (:originalFileId first-version)))
+
+              att-cmds
+              (if-let [source-file-id (cond
+                                        (and (get stamps att-id)
+                                             (:stamped latest-version)
+                                             (= 1 (count (filter :stamped versions))))
+                                        (let [source (->> (reverse versions)
+                                                          second
+                                                          :originalFileId)]
+                                          (when (mongo/download source)
+                                            source))
+
+                                        (and (not (or (some :stamped versions)
+                                                      (= file-id (:originalFileId latest-version))))
+                                             (mongo/download (:originalFileId latest-version)))
+                                        (:originalFileId latest-version))]
+                (if (= 1 (mongo/count :fs.chunks {:files_id source-file-id
+                                                  :n 0}))
+                  (let [dl (mongo/download source-file-id)
+                        bos (ByteArrayOutputStream.)
+                        content-type (atom (:contentType dl))]
+                    (with-open [content ((:content dl))]
+                      (io/copy content bos))
+                    (doseq [cmd att-cmds]
+                      (if (= "rotate-pdf" (:action cmd))
+                        (let [{:keys [rotation]} (:data cmd)]
+                          (files/with-temp-file temp-pdf
+                            (info "Rotating file" source-file-id, "target file is" file-id)
+                            (with-open [content (ByteArrayInputStream. (.toByteArray bos))]
+                              (if (not= @content-type "application/pdf")
+                                (-> (conversion/archivability-conversion application
+                                                                         {:filename    (:filename latest-version)
+                                                                          :contentType (:contentType dl)
+                                                                          :content     content})
+                                    :content
+                                    (pdftk/rotate-pdf (.getAbsolutePath temp-pdf) rotation))
+                                (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)))
+                            (.reset bos)
+                            (io/copy temp-pdf bos)
+                            (reset! content-type "application/pdf")))
+                        (let [{{:keys [id stamp timestamp lang]} :data :keys [created user]} cmd
+                              command {:user user
+                                       :created created}]
+                          (if (and (string? id)
+                                   (map? stamp)
+                                   (string? lang))
+                            (let [prev-data (.toByteArray bos)]
+                              (.reset bos)
+                              (info "Stamping file" source-file-id, "target file is" file-id)
+                              (with-open [bis (ByteArrayInputStream. prev-data)]
+                                (-> (stamping/stamp-input-stream command timestamp application lang stamp att-id @content-type bis)
+                                    (io/copy bos)))
+                              (when-not (= file-id (:originalFileId latest-version))
+                                (with-open [bis (ByteArrayInputStream. (.toByteArray bos))]
+                                  (info "Uploading stamped file as original file id" (:originalFileId latest-version))
+                                  (mongo/delete-file-by-id (:originalFileId latest-version))
+                                  (file-upload/save-file {:content  bis
+                                                          :filename (:filename latest-version)
+                                                          :fileId   (:originalFileId latest-version)}
+                                                         {:application app-id
+                                                          :linked      true}))))
+                            (error "Invalid log data, can't fix stamp:" cmd)))))
+                    (with-open [bis (ByteArrayInputStream. (.toByteArray bos))]
+                      (let [conversion (conversion/archivability-conversion application
+                                                                            {:filename    (:filename latest-version)
+                                                                             :contentType @content-type
+                                                                             :content     bis})]
+                        (if (:autoConversion conversion)
+                          (do
+                            (mongo/delete-file-by-id file-id)
+                            (file-upload/save-file (merge (select-keys conversion [:content :filename])
+                                                          {:fileId file-id})
+                                                   {:application app-id
+                                                    :linked true})
+                            (infof "File id %s converted, uploaded and linked successfully" file-id))
+                          (with-open [bis2 (ByteArrayInputStream. (.toByteArray bos))]
+                            (mongo/delete-file-by-id file-id)
+                            (file-upload/save-file {:content  bis2
+                                                    :filename (:filename latest-version)
+                                                    :fileId   file-id}
+                                                   {:application app-id
+                                                    :linked      true})
+                            (infof "File id %s uploaded and linked successfully" file-id))))))
+                  (error "Cannot find original / source file " source-file-id " for attachment id" att-id "/ file id"
+                         file-id ". Number of chunks for source file:" (mongo/count :fs.chunks {:files_id source-file-id
+                                                                                                :n 0}))))
+
+              :else
+              (error "File id" file-id "has duplicate chunks but no rotate or stamping commands, skipping")))))))
+  (info "Done."))

@@ -28,7 +28,7 @@
         (normal-producer "normal producer default db") => nil
         (mongo/with-db test-db
           (normal-producer "normal producer with-db")) => nil)
-      (Thread/sleep 100)
+      (Thread/sleep 200)
       (fact "From normal DB"
         (mongo/select :testi) => (just (contains {:data "default db"})
                                        (contains {:data "normal producer default db"})

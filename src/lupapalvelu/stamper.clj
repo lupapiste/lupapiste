@@ -85,7 +85,7 @@
 
 (declare stamp-pdf stamp-image)
 
-(defn- stamp-stream [stamp content-type in out options]
+(defn stamp-stream [stamp content-type in out options]
   (cond
     (= content-type "application/pdf")      (do (stamp-pdf stamp in out options) nil)
     (ss/starts-with content-type "image/")  (do (stamp-image stamp content-type in out options) nil)

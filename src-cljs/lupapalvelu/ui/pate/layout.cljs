@@ -187,7 +187,7 @@
   [_ {:keys [schema state path] :as options}]
   (let [value (path/value path state)]
     [:span (when-not (s/blank? value)
-             (path/loc options value))]))
+             (pate-components/pate-select-item-text options value))]))
 
 (defn wrap-view-component [cell-type options wrap-label?]
   (pate-components/label-wrap-if-needed

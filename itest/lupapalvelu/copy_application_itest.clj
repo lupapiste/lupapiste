@@ -109,6 +109,14 @@
         (:id (:primaryOperation copy-app))
         =not=> (:id (:primaryOperation app)))
 
+      (facts "Operation documents"
+        (let [op-docs (filter #(get-in % [:schema-info :op]) (:documents copy-app))]
+          (count op-docs) => 1
+          (fact "have name"
+            (get-in (first op-docs) [:schema-info :name]) => "uusiRakennus")
+          (fact "has correct id"
+            (get-in (first op-docs) [:schema-info :op :id]) => (get-in copy-app [:primaryOperation :id]))))
+
       (fact "documents are copied, apart from ids"
         (walk-dissoc-keys (:documents copy-app) :id :created :allowedActions)
         => (just (walk-dissoc-keys (:documents app) :id :created  :allowedActions) :in-any-order))

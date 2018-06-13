@@ -28,7 +28,8 @@
                "replay-missing-stamping-ops" 'lupapalvelu.batchrun/replay-missing-stamping-ops
                "replay-missing-user-attachments" 'lupapalvelu.batchrun/replay-missing-user-attachments
                "fetch-missing-backend-attachments" 'lupapalvelu.batchrun/fetch-missing-backend-attachments
-               "replay-missing-rotates" 'lupapalvelu.batchrun/replay-missing-rotates})
+               "replay-missing-rotates" 'lupapalvelu.batchrun/replay-missing-rotates
+               "fix-duplicate-gridfs-chunks" 'lupapalvelu.batchrun/fix-duplicate-gridfs-chunks})
 
 (defn launch! [service args]
   (debugf "Loading namespace '%s'...\n" (namespace service))

@@ -7,7 +7,8 @@
 
 (def phrase-categories #{:paatosteksti :lupaehdot :naapurit
                          :muutoksenhaku :vaativuus :rakennusoikeus
-                         :kaava :toimenpide-julkipanoon :yleinen})
+                         :kaava :toimenpide-julkipanoon :yleinen
+                         :sopimus})
 
 (def path-type (sc/conditional
                 ;; Joined kw-path (e.g. :one.two.three)
@@ -311,7 +312,10 @@
           ;; order.
           (sc/optional-key :sort-by)      (sc/enum :value :text)
           ;; How the select is rendered? Select is the default.
-          (sc/optional-key :type)         (sc/enum :select :autocomplete)}))
+          (sc/optional-key :type)         (sc/enum :select :autocomplete)
+          ;; Item texts can have different loc-prefix in these cases
+          ;; the loc-prefix affects only the label.
+          (sc/optional-key :item-loc-prefix) sc/Keyword}))
 
 (defschema PateLocText
   "Localisation term shown as text."

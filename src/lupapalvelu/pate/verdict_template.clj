@@ -109,7 +109,9 @@
      data))
   ([org-id timestamp lang category]
    (new-verdict-template org-id timestamp lang category {}
-                         (i18n/localize lang :pate-verdict-template))))
+                         (i18n/localize lang (if (util/=as-kw category :contract)
+                                               :pate.contract.template
+                                               :pate-verdict-template)))))
 
 (defn verdict-template [{templates :verdict-templates} template-id]
   (util/find-by-id template-id (:templates templates)))
@@ -291,7 +293,7 @@
                           {$unset {mongo-path 1}}
                           {$set {mongo-path value}})
                         timestamp)))
-    processed))
+    (assoc processed :category category)))
 
 (defn- draft-for-publishing
   "Extracts template draft data for publishing. Keys with empty values
@@ -429,17 +431,15 @@
 
 (defn template-filled?
   "Template is filled when every required field has been filled."
-  [{:keys [org-id template template-id data]}]
-  (let [category (or (:category data)
-                     (:category template)
-                     (if (some? org-id) (:category (verdict-template (organization-templates org-id) template-id)))
-                     (str "r"))]
+  [{:keys [org-id template template-id data category]}]
+  (let [{t-cat  :category
+         t-data :draft} (or template
+                            (when (and org-id template-id)
+                              (verdict-template (organization-templates org-id)
+                                                template-id)))
+        category        (or category t-cat)]
     (schemas/required-filled? (shared/verdict-template-schema category)
-                              (or data
-                                  (:draft (or template
-                                              (verdict-template (organization-templates
-                                                                 org-id)
-                                                                template-id)))))))
+                              (or data t-data))))
 
 ;; Default operation verdict templates
 

@@ -410,7 +410,6 @@
 (def uusiRakennus
   {:schema-info {:name "uusiRakennus",
                  :version 1
-                 :removable true
                  :approvable true,
                  :op {:id "51b59c112438736b8f1b9d0d",
                       :name "kerrostalo-rivitalo",
