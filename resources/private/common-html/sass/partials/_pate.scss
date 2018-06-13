@@ -391,6 +391,9 @@ div.pate-phrases {
         min-width: 22px;
       }
     }
+    td.category {
+      white-space: nowrap;
+    }
     td.phrase {
       width: 100%;
       max-width: 0;

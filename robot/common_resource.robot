@@ -1614,6 +1614,11 @@ Test id empty
   Wait test id visible  ${id}
   Textfield Value Should Be  jquery=[data-test-id=${id}]  ${EMPTY}
 
+Textarea is empty
+  [Arguments]  ${test-id}
+  Wait test id visible  ${test-id}
+  Textarea Value Should Be  jquery=[data-test-id=${test-id}]  ${EMPTY}
+
 Test id disabled
   [Arguments]  ${id}
   Scroll to test id  ${id}

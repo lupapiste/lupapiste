@@ -193,3 +193,15 @@
   "Convenience wrapper for pageutil.openPage."
   [page & suffix]
   (js/pageutil.openPage (name page) (apply array (map name suffix))))
+
+(defn add-test-id
+  "Adds data-test-id attribute. The target can be either the attribute
+  map or the encompassing component. If test-id is nil the target is
+  returned unchanged."
+  [[x & xs :as target] test-id]
+  (cond
+    (nil? test-id)   target
+    (map? target)    (assoc target :data-test-id test-id)
+    (vector? target) (if (-> target second map?)
+                       (assoc-in target [1 :data-test-id] test-id)
+                       (vec (concat [x  {:data-test-id test-id}] xs)))))

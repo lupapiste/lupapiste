@@ -104,8 +104,7 @@
                            (callback value))))}
          (when (and callback (not immediate?))
            {:on-blur #(callback (.. % -target -value))})
-         (when test-id
-           {:data-test-id test-id})
+         (common/add-test-id {} test-id)
          (dissoc options :callback :required? :test-id :immediate? :class)))
 
 ;; Arguments Initial value, options
@@ -475,23 +474,26 @@
      shown (if the icon has been given). Can be either value or
      atom. Atom makes the most sense for the typical use cases.
 
-     [disabled?] See common/resolve-disabled
-     [enabled?]  See common/resolve-disabled
+     [disabled?] See `common/resolve-disabled`
+     [enabled?]  See `common/resolve-disabled`
 
      [class] Class definitions that are processed with `common/css`.
+
+     [test-id] Test id for the button.
 
    Any other options are passed to the :button
    tag (e.g, :class, :on-click). The only exception is :disabled,
    since it is overridden with :disabled?"
-  [{:keys [icon wait? class] :as options}]
+  [{:keys [icon wait? class test-id] :as options}]
   (let [waiting? (rum/react (common/atomize wait?))]
     [:button
-     (assoc (dissoc options
-                    :text :text-loc :icon :wait?
-                    :disabled? :enabled? :class)
-            :disabled (or (common/resolve-disabled options)
-                          waiting?)
-            :class (common/css class))
+     (-> (dissoc options
+                 :text :text-loc :icon :wait?
+                 :disabled? :enabled? :class :test-id)
+         (assoc :disabled (or (common/resolve-disabled options)
+                              waiting?)
+                :class (common/css class))
+         (common/add-test-id test-id))
      (when icon
        [:i {:class (common/css (if waiting?
                                  [:icon-spin :lupicon-refresh]
@@ -606,21 +608,23 @@
   selected* Atom that holds the selected :id. The default id is the
             first tab id.
 
-  tabs  Sequence of :id :text-loc (or :text, see common/resolve-text)
-        maps.
+  tabs Sequence of :id, :text-loc (or :text, see
+        `common/resolve-text`) and optional :test-id maps.
 
   When a tab is selected its id is swapped into selected*."
   [{:keys [selected* tabs]}]
   (let [selected (or (rum/react selected*) (-> tabs first :id))]
     [:div.pate-tabbar
      (let [divider [:div.pate-tab__divider {}]
-           buttons (for [{id :id :as tab} tabs
-                         :let             [text (common/resolve-text tab)]]
+           buttons (for [{:keys [id test-id]
+                          :as   tab} tabs
+                         :let      [text (common/resolve-text tab)
+                                    attr (common/add-test-id {} test-id)]]
                      (if (= id selected)
                        [:div.pate-tab.pate-tab--active
-                        {} text]
+                        attr text]
                        [:div.pate-tab
-                        {}
+                        attr
                         [:a {:on-click #(reset! selected* id)} text]]))]
        (map #(assoc-in % [1 :key] (common/unique-id "tabbar-"))
             (concat (interpose divider buttons)
