@@ -11,7 +11,8 @@
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.settings :as settings]
             [lupapalvelu.ui.pate.state :as state]
-            [rum.core :as rum]))
+            [rum.core :as rum]
+            [sade.shared-util :as util]))
 
 (defn updater
   ([{:keys [state info path] :as options} value]
@@ -27,6 +28,19 @@
   [& [template-id]]
   (reset! state/current-view {:view ::settings
                               :back template-id}))
+
+(defn- loc-text [loc-key & args]
+  (apply common/loc
+         (cons (if (util/=as-kw (rum/react state/current-category)
+                                :contract)
+                 (get {:pate.verdict-templates      :pate.contract-templates
+                       :pate-verdict-template       :pate.contract.template
+                       :pate.add-verdict-template   :pate.add-contract-template
+                       :pate.template-not-published :pate.contract.template.not-published
+                       :pate.edit-verdict-template :pate.contract.template.edit}
+                      (keyword loc-key) loc-key)
+                 loc-key)
+               args)))
 
 (rum/defc verdict-template-name < rum/reactive
   [{info* :info}]
@@ -45,9 +59,9 @@
   (let [published (path/react [:published] info*)]
     [:div [:span.row-text.row-text--margin
            (if published
-             (common/loc :pate.last-published
-                         (js/util.finnishDateAndTime published))
-             (common/loc :pate.template-not-published))]
+             (loc-text :pate.last-published
+                       (js/util.finnishDateAndTime published))
+             (loc-text :pate.template-not-published))]
      (components/icon-button
       {:disabled? (or (not (state/auth? :publish-verdict-template))
                       (> published
@@ -109,7 +123,7 @@
     [:div.row.row--tight
      [:div.col-1
       [:span.row-text.header
-       (common/loc "pate.edit-verdict-template")
+       (loc-text :pate.edit-verdict-template)
        (verdict-template-name options)]]
      [:div.col-1.col--right
       (verdict-template-publish options)]]
@@ -166,7 +180,7 @@
                               (:category %))
                           (rum/react state/template-list))]
     [:div.pate-template-list
-     [:h2 (common/loc "pate.verdict-templates")]
+     [:h2 (loc-text :pate.verdict-templates)]
      (category-select)
      (when (some :deleted templates)
        (components/toggle show-deleted
@@ -180,7 +194,7 @@
          [:table.pate-templates-table
           [:thead
            [:tr
-            [:th (common/loc "pate-verdict-template")]
+            [:th (loc-text :pate-verdict-template)]
             [:th (common/loc "pate-verdict-template.published")]
             [:th]]]
           [:tbody
@@ -208,7 +222,7 @@
      [:button.positive
       {:on-click #(service/new-template @state/current-category new-template)}
       [:i.lupicon-circle-plus]
-      [:span (common/loc :pate.add-verdict-template)]]]))
+      [:span (loc-text :pate.add-verdict-template)]]]))
 
 (rum/defc verdict-templates < rum/reactive
   []

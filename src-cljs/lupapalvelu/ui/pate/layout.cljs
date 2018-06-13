@@ -87,7 +87,8 @@
   (let [cell-type    (schema-type options)
         schema-value (cell-type schema)
         options      (path/schema-options options schema-value)]
-    (if (and (path/react-meta options :editing?)
+    (if (and (or (path/react-meta options :editing?)
+                 (:always-editing? schema-value))
              (not (:read-only? schema-value)))
       ((case cell-type
          :date-delta     pate-components/pate-date-delta
@@ -186,7 +187,7 @@
   [_ {:keys [schema state path] :as options}]
   (let [value (path/value path state)]
     [:span (when-not (s/blank? value)
-             (path/loc options value))]))
+             (pate-components/pate-select-item-text options value))]))
 
 (defn wrap-view-component [cell-type options wrap-label?]
   (pate-components/label-wrap-if-needed

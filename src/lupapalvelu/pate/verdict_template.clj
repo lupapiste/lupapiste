@@ -26,10 +26,17 @@
                      user-organizations)))
 
 (defn organization-categories [{scope :scope}]
-  (set (map (comp shared/permit-type->category :permitType) scope)))
+  (->> scope
+       (map (comp shared/permit-type->categories :permitType))
+       flatten
+       set))
 
 (defn operation->category [operation]
-  (shared/permit-type->category (ops/permit-type-of-operation operation)))
+  (or (shared/category-by-operation operation)
+      (-> operation
+          ops/permit-type-of-operation
+          shared/permit-type->categories
+          first)))
 
 (defn error-response [{:keys [failure errors]}]
   (if failure
@@ -102,7 +109,9 @@
      data))
   ([org-id timestamp lang category]
    (new-verdict-template org-id timestamp lang category {}
-                         (i18n/localize lang :pate-verdict-template))))
+                         (i18n/localize lang (if (util/=as-kw category :contract)
+                                               :pate.contract.template
+                                               :pate-verdict-template)))))
 
 (defn verdict-template [{templates :verdict-templates} template-id]
   (util/find-by-id template-id (:templates templates)))
@@ -158,8 +167,8 @@
               (fail! :error.verdict-template-name-missing))
             (when (and application
                        (util/not=as-kw (:category template)
-                                       (-> command :application :permitType
-                                           shared/permit-type->category)))
+                                       (-> command :application
+                                           shared/application->category)))
               (fail! :error.invalid-category))
             (when (and filled (or (not (template-filled? {:template template}))
                                   (not (settings-filled? {:org-id (:id organization)}
@@ -284,7 +293,7 @@
                           {$unset {mongo-path 1}}
                           {$set {mongo-path value}})
                         timestamp)))
-    processed))
+    (assoc processed :category category)))
 
 (defn- draft-for-publishing
   "Extracts template draft data for publishing. Keys with empty values
@@ -422,17 +431,15 @@
 
 (defn template-filled?
   "Template is filled when every required field has been filled."
-  [{:keys [org-id template template-id data]}]
-  (let [category (or (:category data)
-                     (:category template)
-                     (if (some? org-id) (:category (verdict-template (organization-templates org-id) template-id)))
-                     (str "r"))]
+  [{:keys [org-id template template-id data category]}]
+  (let [{t-cat  :category
+         t-data :draft} (or template
+                            (when (and org-id template-id)
+                              (verdict-template (organization-templates org-id)
+                                                template-id)))
+        category        (or category t-cat)]
     (schemas/required-filled? (shared/verdict-template-schema category)
-                              (or data
-                                  (:draft (or template
-                                              (verdict-template (organization-templates
-                                                                 org-id)
-                                                                template-id)))))))
+                              (or data t-data))))
 
 ;; Default operation verdict templates
 
@@ -459,8 +466,9 @@
 
 (defn application-verdict-templates [{:keys [operation-verdict-templates
                                              verdict-templates]}
-                                     {:keys [permitType primaryOperation]}]
-  (let [app-category  (shared/permit-type->category permitType)
+                                     {:keys [primaryOperation]
+                                      :as   application}]
+  (let [app-category  (shared/application->category application)
         app-operation (-> primaryOperation :name keyword)]
     (->> verdict-templates
          :templates

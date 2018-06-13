@@ -61,59 +61,68 @@
     (fact "Rakennustunnus" building1-id => "1234567892")
     (fact "Kayttotarkoitus" (:usage (first buildings)) => "011 yhden asunnon talot")
     (fact "Alkuhetki year as created" (:created (first buildings)) => "2013")
-    (let [building1  (dissoc (->rakennuksen-tiedot xml building1-id) :kiinttun)
-          omistajat1 (:rakennuksenOmistajat building1)]
+    (facts "->rakennuksentiedot"
+      (facts "building 1"
+        (let [building1 (dissoc (->rakennuksen-tiedot xml building1-id) :kiinttun)
+              omistajat1 (:rakennuksenOmistajat building1)]
 
-      (fact "Reader produces valid document (sans kiinttun)"
-        (model/validate {:data (tools/wrapped building1)} schema) =not=> model/has-errors?)
+        (fact "Reader produces valid document (sans kiinttun)"
+          (model/validate {:data (tools/wrapped building1)} schema) =not=> model/has-errors?)
 
-      (fact "Has 2 owners" (count omistajat1) => 2)
+        (facts "Owners"
+          (fact "Has 2 owners" (count omistajat1) => 2)
 
-      (let [owner1 (:0 omistajat1)
-            owner2 (:1 omistajat1)]
-        (get-in owner1 [:_selected]) => "henkilo"
-        (get-in owner1 [:henkilo :henkilotiedot :etunimi]) => "Antero"
-        (get-in owner1 [:henkilo :henkilotiedot :sukunimi]) => "Testaaja"
-        (get-in owner1 [:henkilo :henkilotiedot :turvakieltoKytkin]) => true
-        (get-in owner1 [:henkilo :osoite :katu]) => "Krysp-testin tie 1"
-        (get-in owner1 [:henkilo :osoite :postinumero]) => "06500"
-        (get-in owner1 [:henkilo :osoite :postitoimipaikannimi]) => "PORVOO"
+          (let [owner1 (:0 omistajat1)
+                owner2 (:1 omistajat1)]
+            (get-in owner1 [:_selected]) => "henkilo"
+            (get-in owner1 [:henkilo :henkilotiedot :etunimi]) => "Antero"
+            (get-in owner1 [:henkilo :henkilotiedot :sukunimi]) => "Testaaja"
+            (get-in owner1 [:henkilo :henkilotiedot :turvakieltoKytkin]) => true
+            (get-in owner1 [:henkilo :osoite :katu]) => "Krysp-testin tie 1"
+            (get-in owner1 [:henkilo :osoite :postinumero]) => "06500"
+            (get-in owner1 [:henkilo :osoite :postitoimipaikannimi]) => "PORVOO"
 
-        (get-in owner1 [:_selected]) => "henkilo"
-        (get-in owner2 [:henkilo :henkilotiedot :etunimi]) => "Pauliina"
-        (get-in owner2 [:henkilo :henkilotiedot :sukunimi]) => "Testaaja"
-        (get-in owner2 [:henkilo :osoite :katu]) => "Krysp-testin tie 1"
-        (get-in owner2 [:henkilo :osoite :postinumero]) => "06500"
-        (get-in owner2 [:henkilo :osoite :postitoimipaikannimi]) => "PORVOO"
-        (get-in owner2 [:henkilo :henkilotiedot :turvakieltoKytkin]) => nil))
+            (get-in owner1 [:_selected]) => "henkilo"
+            (get-in owner2 [:henkilo :henkilotiedot :etunimi]) => "Pauliina"
+            (get-in owner2 [:henkilo :henkilotiedot :sukunimi]) => "Testaaja"
+            (get-in owner2 [:henkilo :osoite :katu]) => "Krysp-testin tie 1"
+            (get-in owner2 [:henkilo :osoite :postinumero]) => "06500"
+            (get-in owner2 [:henkilo :osoite :postitoimipaikannimi]) => "PORVOO"
+            (get-in owner2 [:henkilo :henkilotiedot :turvakieltoKytkin]) => nil))
+        (fact "rakentajatyyppi" (get-in building1 [:kaytto :rakentajaTyyppi]) => "liiketaloudellinen")
+        (fact "energiatehokkuusluku" (get-in building1 [:luokitus :energiatehokkuusluku]) => truthy)
+        (fact "energiatehokkuusluvunYksikko" (get-in building1 [:luokitus :energiatehokkuusluvunYksikko]) => truthy)))
 
-    (let [building2  (dissoc (->rakennuksen-tiedot xml building2-id) :kiinttun)
-          omistajat2 (:rakennuksenOmistajat building2)]
+      (facts "building2"
+        (let [building2 (dissoc (->rakennuksen-tiedot xml building2-id) :kiinttun)
+              omistajat2 (:rakennuksenOmistajat building2)]
 
-      (fact "Reader produces valid document (sans kiinttun)"
-        (model/validate {:data (tools/wrapped building2)} schema) =not=> model/has-errors?)
+          (fact "Reader produces valid document (sans kiinttun)"
+            (model/validate {:data (tools/wrapped building2)} schema) =not=> model/has-errors?)
 
-      (fact "Has 2 owners" (count omistajat2) => 2)
+          (facts "Owners"
+            (fact "Has 2 owners" (count omistajat2) => 2)
 
-      (let [owner1 (:0 omistajat2)
-            owner2 (:1 omistajat2)]
-        (get-in owner1 [:_selected]) => "henkilo"
-        (get-in owner1 [:henkilo :henkilotiedot :sukunimi]) => "Testaaja"
-        (get-in owner1 [:omistajalaji]) => nil
-        (get-in owner1 [:muu-omistajalaji]) => ", wut?"
+            (let [owner1 (:0 omistajat2)
+                  owner2 (:1 omistajat2)]
+              (get-in owner1 [:_selected]) => "henkilo"
+              (get-in owner1 [:henkilo :henkilotiedot :sukunimi]) => "Testaaja"
+            (get-in owner1 [:omistajalaji]) => nil
+              (get-in owner1 [:muu-omistajalaji]) => ", wut?"
 
-        (get-in owner2 [:_selected]) => "yritys"
-        (get-in owner2 [:omistajalaji]) => "yksityinen yritys (osake-, avoin- tai kommandiittiyhti\u00f6, osuuskunta)"
-        (get-in owner2 [:muu-omistajalaji]) => nil
-        (get-in owner2 [:yritys :yhteyshenkilo :henkilotiedot :etunimi]) => "Paavo"
-        (get-in owner2 [:yritys :yhteyshenkilo :henkilotiedot :sukunimi]) => "Testaaja"
-        (get-in owner2 [:yritys :yhteyshenkilo :yhteystiedot :puhelin]) => "01"
-        (get-in owner2 [:yritys :yhteyshenkilo :yhteystiedot :email]) => "paavo@example.com"
-        (get-in owner2 [:yritys :yritysnimi]) => "Testaajan Putki Oyj"
-        (get-in owner2 [:yritys :liikeJaYhteisoTunnus]) => "123"
-        (get-in owner2 [:yritys :osoite :katu]) => "Krysp-testin tie 1\u20132 d\u2013e A 1"
-        (get-in owner2 [:yritys :osoite :postinumero]) => "06500"
-        (get-in owner2 [:yritys :osoite :postitoimipaikannimi]) => "PORVOO"))))
+              (get-in owner2 [:_selected]) => "yritys"
+              (get-in owner2 [:omistajalaji]) => "yksityinen yritys (osake-, avoin- tai kommandiittiyhti\u00f6, osuuskunta)"
+              (get-in owner2 [:muu-omistajalaji]) => nil
+              (get-in owner2 [:yritys :yhteyshenkilo :henkilotiedot :etunimi]) => "Paavo"
+              (get-in owner2 [:yritys :yhteyshenkilo :henkilotiedot :sukunimi]) => "Testaaja"
+              (get-in owner2 [:yritys :yhteyshenkilo :yhteystiedot :puhelin]) => "01"
+              (get-in owner2 [:yritys :yhteyshenkilo :yhteystiedot :email]) => "paavo@example.com"
+              (get-in owner2 [:yritys :yritysnimi]) => "Testaajan Putki Oyj"
+              (get-in owner2 [:yritys :liikeJaYhteisoTunnus]) => "123"
+              (get-in owner2 [:yritys :osoite :katu]) => "Krysp-testin tie 1\u20132 d\u2013e A 1"
+              (get-in owner2 [:yritys :osoite :postinumero]) => "06500"
+              (get-in owner2 [:yritys :osoite :postitoimipaikannimi]) => "PORVOO"))
+          (fact "rakentajatyyppi" (get-in building2 [:kaytto :rakentajaTyyppi]) => "muu"))))))
 
 
 (facts "KRYSP rakval 2.2.0 ->rakennuksen-tiedot"

@@ -15,6 +15,7 @@ Sonja creates applications
   Sonja logs in  False
   Create project application  submitted
 
+Create 5x foreman invites
   Repeat Keyword  5  Sonja invites foreman and goes back to application
 
 Foreman sets his information to several applications
@@ -95,14 +96,15 @@ Authority sees reduced foreman history
   Open foreman application  4
   Open tab  parties
   Open accordions  parties
-  Wait until  Foreman history should have text X times  Sipoo  3
+  Wait until  Element should be visible  xpath=//foreman-history
+  Foreman history should have text X times  Sipoo  3
   Foreman history should have text X times  Tavanomainen  2
-  Wait test id visible  tyonjohtaja-historia-otsikko
+  Element should be visible by test id  tyonjohtaja-historia-otsikko
 
 Sonja toggles show all of the history
   Toggle not selected  foreman-history-show-all
   Toggle toggle  foreman-history-show-all
-  Wait test id visible  tyonjohtaja-historia-otsikko-kaikki
+  Element should be visible by test id  tyonjohtaja-historia-otsikko-kaikki
   Wait until  Foreman history should have text X times  Sipoo  4
 
 Sonja opens foreman application 1
@@ -111,7 +113,7 @@ Sonja opens foreman application 1
   Open accordions  parties
 
 There is no reduced history for this application
-  Wait test id visible  tyonjohtaja-historia-otsikko-kaikki
+  Element should be visible by test id  tyonjohtaja-historia-otsikko-kaikki
   Wait until  Foreman history should have text X times  Sipoo  3
   No such test id  foreman-history-show-all-label
 

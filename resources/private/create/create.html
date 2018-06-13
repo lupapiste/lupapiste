@@ -165,6 +165,16 @@
 
           <span data-bind="ltext: 'newRequest.newApplicationWithPrevPermit'"></span>
         </button>
+        <button data-bind="click: convertApplication,
+                           css: {waiting: pending},
+                           feature: 'conversion-debug'"
+                type="submit"
+                data-test-id="" class="positive">
+          <i class="lupicon-search"></i>
+          <i class="wait spin lupicon-refresh"></i>
+
+          <span data-bind="text: 'Konvertoi'"></span>
+        </button>
       </form>
     </div>
 

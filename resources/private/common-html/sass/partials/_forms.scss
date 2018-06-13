@@ -322,9 +322,6 @@ input.form-input.inline {
   {
     border-bottom: none;
   }
-  table {
-    width: auto;
-  }
   .form-group {
     margin:$marginS;
   }
@@ -332,7 +329,7 @@ input.form-input.inline {
     display: block;
   }
   .form-input.checkbox, .form-input.radio {
-    margin: 0 $marginS 0 0;
+    margin: $marginL $marginS 0 0;
     display: inline-block;
   }
   .form-label-checkbox{
@@ -431,7 +428,7 @@ input.form-input.inline {
 .form-string-unit {
   display: table-cell;
   vertical-align: middle;
-  padding-left: 2px;
+  padding-bottom: 5px;
 }
 
 .form-input.tiny {
@@ -475,17 +472,21 @@ input.form-input.inline {
         vertical-align: text-top;
       }
       .form-input-and-unit {
-        display: inline-block;
+        //display: inline-block;
         margin-right: $marginM;
         input {
           width: $cols1;
         }
       }
+      .form-input.checkbox {
+        margin-top: 0;
+      }      
     }
   }
   .form-entry {
     min-width: 300px;
     min-height: 64px;
+    margin-bottom: $marginM;
 
     &.long {
       min-width: 480px;
@@ -539,10 +540,6 @@ input.form-input.inline {
   .huoneistot-table, .muutHankkeet-table {
     td, th {
       padding: $marginS;
-    }
-
-    td {
-      text-align: center;
     }
     tr:hover{
       background-color: white;

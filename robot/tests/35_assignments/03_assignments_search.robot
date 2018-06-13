@@ -34,6 +34,7 @@ Sonja has 'own assignments' filter as default
   Open assignments search
   Active search tab is  created
   Click by test id  toggle-advanced-filters
+  Wait until  Element should be visible by test id  recipient-filter-component
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
 
 Sonja sees two assignments
@@ -70,6 +71,7 @@ Ronja logs in and sees only her assignments
   Open assignments search
   Active search tab is  created
   Click by test id  toggle-advanced-filters
+  Wait until  Element should be visible by test id  recipient-filter-component
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
   Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  1
   Click by test id  search-tab-completed

@@ -103,3 +103,16 @@
                                                                   :third  true}}})
     => (just ["three" "four" "five"] :in-any-order)
     (provided (shared/verdict-template-schema :r) => test-template)))
+
+(facts "Operation->category"
+  (fact "R" (operation->category "pientalo") => :r)
+  (fact "YA" (operation->category "ya-katulupa-kaapelityot") => :ya)
+  (fact "P" (operation->category "poikkeamis") => :p)
+  (fact "YI" (operation->category "meluilmoitus") => :ymp)
+  (fact "YM" (operation->category "koeluontoinen-toiminta") => :ymp)
+  (fact "YL" (operation->category "pima") => :ymp)
+  (fact "MAL" (operation->category "maa-aineslupa") => :ymp)
+  (fact "VVVL" (operation->category "vvvl-vesijohdosta") => :ymp)
+  (fact "KT keyword" (operation->category :tonttijako) => :kt)
+  (fact "MM" (operation->category "asemakaava") => :kt)
+  (fact "Foreman" (operation->category "tyonjohtajan-nimeaminen-v2") => :tj))

@@ -51,26 +51,33 @@
     (fact "description is set according to the backend verdict"
           (-> bulletins first :bulletinOpDescription) => "Uudisrakennuksen ja talousrakennuksen 15 m2 rakentaminen. Yhden huoneiston erillistalo.")))
 
-(mongo/with-db (str "test_application-bulletins_" (now))
-  (mongo/connect!)
-  (fixture/apply-fixture "minimal")
-  (let [app (create-and-submit-local-application mikko :operation "kerrostalo-rivitalo"
+(facts "Bulletins ends-at correct"
+  (apply-remote-minimal)
+  (let [app (create-and-submit-application mikko :operation "kerrostalo-rivitalo"
                                                 :propertyId sipoo-property-id
                                                 :x 406898.625 :y 6684125.375
                                                 :address "Hitantine 109")
-        app-id (:id app)]
+        app-id (:id app)
+        check-resp (command sonja :check-for-verdict :id app-id)
+        verdict-app (query-application sonja app-id)]
+    (fact "verdict ok"
+      check-resp => ok?
+      (:state verdict-app) => "verdictGiven")
     (fact "Bulletin is shown on its final day"
-          (local-command sonja :check-for-verdict :id app-id) => ok?
+      (let [bulletins (datatables pena :application-bulletins :municipality sonja-muni :searchText "" :state "" :page 1 :sort "")
+            test-bulletin (first (:data bulletins))
+            versions (query sonja :bulletin-versions :bulletinId (:id test-bulletin))]
+        (count (:data bulletins)) => 1
 
-          (-> (bulletins-api/get-application-bulletins {:municipality sonja-muni :searchText "" :state "" :page 1 :sort ""} (now))
-              :data count)
-          => pos?
+        (fact "edit ends at"
+          (command sonja :save-verdict-given-bulletin
+                   :bulletinId (:id test-bulletin)
+                   :bulletinVersionId (get-in versions [:bulletin :versions 0 :id])
+                   :verdictGivenAt (:modified verdict-app)
+                   :appealPeriodEndsAt (c/to-long (t/today))
+                   :appealPeriodStartsAt (c/to-long (t/minus (t/today) (t/days 1)))
+                   :verdictGivenText "test timestamps logic") => ok?)
 
-          (mongo/update-n :application-bulletins {}
-                          {"$set"
-                           {:versions.0.appealPeriodStartsAt (c/to-long (t/minus (t/today) (t/days 1)))
-                            :versions.0.appealPeriodEndsAt (c/to-long (t/today))}}
-                          :multi true)
-
-          (let [bulletins (:data (bulletins-api/get-application-bulletins {:municipality sonja-muni :searchText "" :state "" :page 1 :sort ""} (now)))]
-            (count bulletins) => pos?))))
+        (let [bulletins (:data (datatables pena :application-bulletins :municipality sonja-muni :searchText "" :state "" :page 1 :sort ""))]
+          (fact "data is still visible"
+            (count bulletins) => pos?))))))

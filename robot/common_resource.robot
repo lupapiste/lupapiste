@@ -10,7 +10,7 @@ Library        DebugLibrary
 *** Variables ***
 
 ${SERVER}                       http://localhost:8000
-${WAIT_DELAY}                   12
+${WAIT_DELAY}                   10
 ${BROWSER}                      firefox
 ${DEFAULT_SPEED}                0
 ${OP_TREE_SPEED}                0.1
@@ -548,7 +548,7 @@ Clear autocomplete selections by test id
 
 Autocomplete selection is
   [Arguments]  ${container}  ${value}
-  Wait Until  Element should contain  xpath=//${container}//span[contains(@class, "autocomplete-selection")]/span[contains(@class, 'caption')]  ${value}
+  Element should contain  xpath=//${container}//span[contains(@class, "autocomplete-selection")]/span[contains(@class, 'caption')]  ${value}
 
 Autocomplete selection by test id is
   [Arguments]  ${tid}  ${value}
@@ -663,12 +663,12 @@ Input building identifier
 
 
 Document status is disabled
-  [Arguments]  ${docType}  ${xpathIdx}
+  [Arguments]  ${docType}  ${xpathIdx}=1
   Wait until  Element should be visible  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
   Wait until  Element text should be  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//button[@data-test-id='toggle-document-status']/span  Palauta aktiiviseksi
 
 Document status is enabled
-  [Arguments]  ${docType}  ${xpathIdx}
+  [Arguments]  ${docType}  ${xpathIdx}=1
   Wait until  Element should not be visible  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
   Wait until  Element text should be  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//button[@data-test-id='toggle-document-status']/span  Merkitse poistuneeksi
 

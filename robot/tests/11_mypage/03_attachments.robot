@@ -8,7 +8,6 @@ Variables      ../06_attachments/variables.py
 *** Test Cases ***
 
 Mikko uploads CV
-  [Tags]  firefox
   Mikko logs in
   Click Element  user-name
   Wait for Page to Load  Mikko  Intonen
@@ -16,10 +15,9 @@ Mikko uploads CV
   Select From List  attachmentType  osapuolet.cv
   Choose File      xpath=//input[@type='file']  ${TXT_TESTFILE_PATH}
   Click enabled by test id  userinfo-upload-ok
-  Wait Until Page Contains  ${TXT_TESTFILE_NAME}
+  Wait Until  Element should contain  xpath=//section[@id='mypage']//div[@data-test-id='filename']  ${TXT_TESTFILE_NAME}
 
 Mikko uploads attachment with invalid mime
-  [Tags]  firefox
   Element should be visible by test id  test-add-architect-attachment
   Click enabled by test id  test-add-architect-attachment
   Wait Until  Element should be visible  jquery=select[name=attachmentType]
@@ -30,7 +28,6 @@ Mikko uploads attachment with invalid mime
   Click by test id  userinfo-upload-cancel
 
 Mikko copies his attachments to application
-  [Tags]  firefox
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Omat-liitteet-${secs}
   Create application with state  ${appname}  753-416-25-30  kerrostalo-rivitalo  submitted
@@ -40,7 +37,6 @@ Mikko copies his attachments to application
   Wait Until  Element should be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME}')
 
 Copy own attachments button is not shown to non-architect
-  [Tags]  firefox
   Click Element  user-name
   Wait for Page to Load  Mikko  Intonen
   Wait until  Click Label  architect
@@ -112,8 +108,7 @@ Mikko can add his attachments in post verdict state
 Save User Data
   Click enabled by test id  save-my-userinfo
   Positive indicator should be visible
-  # Wait for indicator to clear to prevent misclicks
-  Sleep  2s
+  Positive indicator should not be visible
 
 Wait for Page to Load
   [Arguments]  ${firstName}  ${lastName}

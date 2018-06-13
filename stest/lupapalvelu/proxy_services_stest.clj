@@ -194,21 +194,30 @@
 
 (facts "plan-urls-by-point-proxy"
 
-  ;; TODO: Testaa "Liiteri"
+  (fact "Liiteri Vantaa"
+    (let [response (plan-urls-by-point-proxy {:params {:x "391489.5625" :y "6685643.5" :municipality "liiteri"}})
+          body (json/decode (:body response) true)]
+      (count body) => 1
+      (first body) => {:id "000810"
+                       :kaavanro "000810"
+                       :kunta "Vantaa"
+                       :kuntanro "92"
+                       :linkki "http://kartta.vantaa.fi/kaavamaaraykset/000810km.pdf"
+                       :type "liiteri-ak"}))
 
 
   (fact "Mikkeli"
     (let [response (plan-urls-by-point-proxy {:params {:x "533257.514" :y "6828489.823" :municipality "491"}})
           body (json/decode (:body response) true)]
-
-      (first body) => {:id "606"
+      (count body) => 2
+      (first body) => {:id "603"
                        :kaavalaji "RK"
                        :kaavanro "12021"
                        :kasitt_pvm "6/1/1984 12:00:00 AM"
                        :linkki "http://194.111.49.141/asemakaavapdf/12021.pdf"
                        :type "bentley"}
 
-      (second body) => {:id "610"
+      (second body) => {:id "607"
                         :kaavalaji "RK"
                         :kaavanro "12001"
                         :kasitt_pvm "5/31/1967 12:00:00 AM"

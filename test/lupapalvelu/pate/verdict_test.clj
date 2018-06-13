@@ -19,7 +19,7 @@
                    next-section insert-section
                    general-handler application-deviations
                    archive-info application-operation
-                   title-fn verdict-select-string
+                   title-fn verdict-string
                    verdict-section-string verdict-summary)
 
 (testable-privates lupapalvelu.pate.verdict-template
@@ -322,12 +322,7 @@
                      :dum                       {:date {}}
                      :removed-sections          {:keymap {:one   false
                                                           :two   false
-                                                          :three false}}
-                     :link-to-settings          {:link {:text-loc :pate.settings-link
-                                                        :click    :open-settings}}
-                     :link-to-settings-no-label {:link {:text-loc :pate.settings-link
-                                                        :label?   false
-                                                        :click    :open-settings}}}
+                                                          :three false}}}
         :sections   [{:id   :one
                       :grid {:columns 1
                              :rows    [[{:dict :foo}]]}}
@@ -1433,9 +1428,9 @@
     (title-fn " " fun) => ""
     (title-fn nil fun) => ""))
 
-(facts "verdict-select-string"
+(facts "verdict-string"
   (fact "legacy verdict-code"
-    (verdict-select-string "fi"
+    (verdict-string "fi"
                          {:legacy? true
                           :category "r"
                           :data {:verdict-code "8"}
@@ -1443,14 +1438,14 @@
                          :verdict-code)
     => "Ty\u00f6h\u00f6n liittyy ehto")
   (fact "modern verdict-code"
-    (verdict-select-string "en"
+    (verdict-string "en"
                            {:category "r"
                             :data {:verdict-code "hallintopakko"}
                             :template {:inclusions ["verdict-code"]}}
                            :verdict-code)
     => "Administrative enforcement/penalty proceedings discontinued.")
   (fact "verdict-type"
-    (verdict-select-string "fi"
+    (verdict-string "fi"
                            {:category "ya"
                             :data {:verdict-type "katulupa"}
                             :template {:inclusions ["verdict-type"]}}
@@ -1480,24 +1475,25 @@
     (fact "Draft"
       (verdict-summary "fi" section-strings verdict)
       => {:id           "v1"
+          :category     "r"
           :modified     12345
           :giver        "Foo Bar"
           :verdict-date 876543
-          :replaces     nil
           :title        "Luonnos"})
     (fact "Board draft"
       (verdict-summary "fi" section-strings
                        (assoc-in verdict [:template :giver] "lautakunta"))
       => {:id           "v1"
+          :category     "r"
           :modified     12345
           :giver        "Broad board abroad"
           :verdict-date 876543
-          :replaces     nil
           :title        "Luonnos"})
     (fact "Replacement draft"
       (verdict-summary "fi" section-strings
                        (assoc-in verdict [:replacement :replaces] "v2"))
       => {:id           "v1"
+          :category     "r"
           :modified     12345
           :giver        "Foo Bar"
           :verdict-date 876543
@@ -1507,11 +1503,11 @@
       (verdict-summary "fi" section-strings
                        (assoc verdict :published 121212))
       => {:id           "v1"
+          :category     "r"
           :modified     12345
           :published    121212
           :giver        "Foo Bar"
           :verdict-date 876543
-          :replaces     nil
           :title        "\u00a71 Ehdollinen"})
     (fact "Published, no section"
       (verdict-summary "fi" {}
@@ -1519,11 +1515,11 @@
                            (assoc :published 121212)
                            (assoc-in [:data :verdict-section] nil)))
       => {:id           "v1"
+          :category     "r"
           :modified     12345
           :published    121212
           :giver        "Foo Bar"
           :verdict-date 876543
-          :replaces     nil
           :title        "Ehdollinen"})
     (fact "Published replacement"
       (verdict-summary "fi" section-strings
@@ -1531,6 +1527,7 @@
                            (assoc :published 121212)
                            (assoc-in [:replacement :replaces] "v2")))
       => {:id           "v1"
+          :category     "r"
           :modified     12345
           :published    121212
           :giver        "Foo Bar"
@@ -1543,6 +1540,7 @@
                            (assoc :published 121212)
                            (assoc-in [:replacement :replaces] "v2")))
       => {:id           "v1"
+          :category     "r"
           :modified     12345
           :published    121212
           :giver        "Foo Bar"
@@ -1553,11 +1551,11 @@
       (verdict-summary "fi" section-strings
                        (assoc verdict :legacy? true))
       => {:id           "v1"
+          :category     "r"
           :legacy?      true
           :modified     12345
           :giver        "Foo Bar"
           :verdict-date 876543
-          :replaces     nil
           :title        "Luonnos"})
     (fact "Legacy published"
       (verdict-summary "fi" section-strings
@@ -1566,12 +1564,12 @@
                                   :published 676767)
                            (assoc-in [:data :verdict-code] "41")))
       => {:id           "v1"
+          :category     "r"
           :legacy?      true
           :modified     12345
           :published    676767
           :giver        "Foo Bar"
           :verdict-date 876543
-          :replaces     nil
           :title        "\u00a71 Ilmoitus merkitty tiedoksi"})
     (facts "YA verdict-type"
       (let [verdict (-> verdict
@@ -1582,20 +1580,20 @@
         (fact "Draft"
           (verdict-summary "fi" section-strings verdict)
           => {:id           "v1"
+              :category     "ya"
               :modified     12345
               :giver        "Foo Bar"
               :verdict-date 876543
-              :replaces     nil
               :title        "Luonnos"})
         (fact "Published"
           (verdict-summary "fi" section-strings
                            (assoc verdict :published 656565))
           => {:id           "v1"
+              :category     "ya"
               :modified     12345
               :published    656565
               :giver        "Foo Bar"
               :verdict-date 876543
-              :replaces     nil
               :title        "\u00a71 Sijoituslupa - Annettu lausunto"})
         (fact "Published replacement"
           (verdict-summary "fi" section-strings
@@ -1603,6 +1601,7 @@
                                   :published 656565
                                   :replacement {:replaces "v2"}))
           => {:id           "v1"
+              :category     "ya"
               :modified     12345
               :published    656565
               :giver        "Foo Bar"
@@ -1613,7 +1612,7 @@
 (defn make-verdict [& kvs]
   (let [{:keys [id code section modified published replaces]} (apply hash-map kvs)]
     {:id          id
-     :category     "r"
+     :category    "r"
      :data        {:verdict-code    code
                    :handler         "Foo Bar"
                    :verdict-section section
@@ -1634,7 +1633,8 @@
         v3 (make-verdict :id "v3" :code "asiakirjat palautettu" :section "33" :modified 30 :replaces "v2")
         v4 (make-verdict :id "v4" :code "ei-puollettu" :section "44" :published 25)]
     (verdict-list {:lang        "fi"
-                   :application {:pate-verdicts [v1 v2 v3 v4]}})
+                   :application {:pate-verdicts [v1 v2 v3 v4]
+                                 :permitType    "R"}})
     => (just [(contains {:id       "v3"
                          :modified 30
                          :title    "Luonnos (korvaava p\u00e4\u00e4t\u00f6s)"})

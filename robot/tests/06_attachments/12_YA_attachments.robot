@@ -9,7 +9,6 @@ Variables      variables.py
 *** Test Cases ***
 
 Mikko creates a kaivulupa
-  [Tags]  firefox
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  FOO_${secs}

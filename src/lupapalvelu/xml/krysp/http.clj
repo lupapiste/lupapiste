@@ -81,7 +81,7 @@
           (jms/commit session)
           (infof "KuntaGML (id: %s) consumed and acknowledged from queue successfully" message-id)
           (catch Exception e    ; this is most likely a slingshot exception from clj-http
-            (errorf "Error when sending consumed KuntaGML message to %s: %s. Message rollback initiated." url (.getMessage e))
+            (errorf "Error when sending consumed KuntaGML message (%s) to %s: %s. Message rollback initiated." message-id url (.getMessage e))
             (jms/rollback session)))))))
 
 (def kuntagml-queue "lupapiste.kuntagml.http")

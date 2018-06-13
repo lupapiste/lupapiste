@@ -11,8 +11,6 @@
 (defn apply-fixture [name]
   (if-let [fixture (@fixtures (keyword name))]
     (locking exec-lock
-      (info "ensure index for db:" mongo/*db-name*)
-      (mongo/ensure-indexes)
       (info "applying fixture:" name)
       ((:handler fixture)) [])
     (error "fixture not found:" name)))

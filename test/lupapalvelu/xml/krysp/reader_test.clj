@@ -7,6 +7,7 @@
             [sade.common-reader :as cr]
             [sade.strings :as ss]
             [sade.xml :as xml]
+            [lupapalvelu.tasks :as tasks]
             [lupapalvelu.xml.krysp.reader :refer :all]
             [lupapalvelu.xml.krysp.common-reader :refer [rakval-case-type property-equals property-in wfs-krysp-url case-elem-selector]]
             [lupapalvelu.xml.krysp.review-reader :as review-reader]
@@ -375,12 +376,10 @@
     (fact "validator does not find verdicts" (standard-verdicts-validator xml {}) => {:ok false, :text "info.no-verdicts-found-from-backend"})
     (fact "case has no verdicts" (-> cases last :paatokset count) => 0)))
 
-
-
 (facts "KRYSP verdict with reviews"
   (let [xml (-> "resources/krysp/dev/r-verdict-review.xml" slurp xml/parse)
         reviews (review-reader/xml->reviews xml)
-        katselmus-tasks (map (partial lupapalvelu.tasks/katselmus->task {} {} {}) reviews)
+        katselmus-tasks (map (partial tasks/katselmus->task {} {} {}) reviews)
         aloitus-review-task (nth katselmus-tasks 0)
         non-empty (complement clojure.string/blank?)]
     (fact "xml has 13 reviews" (count reviews) => 13)

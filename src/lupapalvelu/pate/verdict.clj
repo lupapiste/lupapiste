@@ -8,6 +8,7 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.company :as com]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.transformations :as transformations]
             [lupapalvelu.domain :as domain]
@@ -70,16 +71,6 @@
      (get-in data [:kuvaus :value]) ;; R
      (get-in data [:kayttotarkoitus :value]) ;; YA
      "")))
-
-(defn verdict-type
-  "YA verdicts come in different types. The initial value is extracted
-  from the primary operation name."
-  [{primary-op :primaryOperation}]
-  (let [regex (->> shared/ya-verdict-types
-                   (map name)
-                   (ss/join "|")
-                   re-pattern)]
-    (re-find regex (:name primary-op))))
 
 (defn dicts->kw-paths
   [dictionary]
@@ -390,7 +381,7 @@
   (-> initmap
       (init--dict-by-application :handler general-handler)
       init--verdict-dates
-      (init--dict-by-application :verdict-type verdict-type)
+      (init--dict-by-application :verdict-type shared/ya-verdict-type)
       (init--requirements-references :plans)
       (init--requirements-references :reviews)
       init--upload
@@ -398,6 +389,19 @@
       (init--dict-by-application :operation application-operation)
       (init--dict-by-application :address :address)
       init--permit-period))
+
+(defmethod initialize-verdict-draft :tj
+  [initmap]
+  (-> initmap
+      (init--dict-by-application :handler general-handler)
+      (init--dict-by-application :operation application-operation)
+      (init--dict-by-application :address :address)))
+
+(defmethod initialize-verdict-draft :contract
+  [initmap]
+  (-> initmap
+      (init--dict-by-application :handler general-handler)
+      (init--requirements-references :reviews)))
 
 (declare enrich-verdict)
 
@@ -433,7 +437,7 @@
   contain every schema dict."
   [{:keys [application organization created]
     :as   command}]
-  (let [category   (-> application :permitType shared/permit-type->category)
+  (let [category   (shared/application->category application)
         verdict-id (mongo/create-id)]
     (action/update-application command
                                {$push {:pate-verdicts
@@ -456,24 +460,27 @@
   (util/pcond-> (-> s ss/->plain-string ss/trim)
                 ss/not-blank? fun))
 
-(defn- verdict-select-string [lang {:keys [data] :as verdict} dict]
+(defn- verdict-string [lang {:keys [data] :as verdict} dict]
   (title-fn (dict data)
             (fn [value]
               (when-let [{:keys [reference-list
-                                 select]} (some-> (verdict-schema verdict)
-                                                  :dictionary
-                                                  dict)]
-                (i18n/localize lang
-                               (:loc-prefix (or reference-list
-                                                select))
-                               value)))))
+                                 select
+                                 text]} (some-> (verdict-schema verdict)
+                                                :dictionary
+                                                dict)]
+                (if text
+                  value
+                  (i18n/localize lang
+                                 (:loc-prefix (or reference-list
+                                                  select))
+                                 value))))))
 
 (defn- verdict-section-string [{data :data}]
   (title-fn (:verdict-section data) #(str "\u00a7" %)))
 
 (defn- verdict-summary [lang section-strings
                         {:keys [id data template replacement
-                                references
+                                references category
                                 published legacy? schema-version]
                          :as   verdict}]
   (let [replaces (:replaces replacement)
@@ -484,25 +491,42 @@
                                             (i18n/localize-and-fill lang
                                                                     :pate.replaces-verdict
                                                                     section)))))]
-    (assoc (select-keys verdict [:id :published :modified :legacy?])
-          :giver (if (util/=as-kw (:giver template) :lautakunta)
-                   (:boardname references)
-                   (:handler data))
-          :replaces replaces
-          :verdict-date (:verdict-date data)
-          :title (->> (if published
-                        [(get section-strings id)
-                         (util/pcond-> (verdict-select-string lang verdict :verdict-type)
-                          ss/not-blank? (str " -"))
-                         (verdict-select-string lang verdict :verdict-code)
-                         rep-string]
-                        [(i18n/localize lang :pate-verdict-draft)
-                         rep-string])
-                      (remove ss/blank?)
-                      (ss/join " ")))))
+    (-<>> (select-keys verdict [:id :published :modified :legacy? :category])
+          (assoc <>
+                 :giver (if (util/=as-kw (:giver template) :lautakunta)
+                          (:boardname references)
+                          (:handler data))
+                 :replaces replaces
+                 :verdict-date (:verdict-date data)
+                 :title (->> (cond
+                               (and (util/=as-kw category :contract) published)
+                               [(i18n/localize lang :pate.verdict-table.contract)]
 
-(defn verdict-list [{:keys [lang application]}]
-  (let [verdicts        (:pate-verdicts application)
+                               published
+                               [(get section-strings id)
+                                (util/pcond-> (verdict-string lang verdict :verdict-type)
+                                              ss/not-blank? (str " -"))
+                                (verdict-string lang verdict :verdict-code)
+                                rep-string]
+
+                               :else
+                               [(i18n/localize lang :pate-verdict-draft)
+                                rep-string])
+                             (remove ss/blank?)
+                             (ss/join " "))
+                 :signatures (some->> data :signatures vals
+                                      (map #(select-keys % [:name :date]))
+                                      (sort-by :date)
+                                      seq))
+          (remove (comp nil? second))
+          (into {}))))
+
+(defn verdict-list
+  [{:keys [lang application]}]
+  (let [category (shared/application->category application)
+        ;; There could be both contracts and verdicts.
+        verdicts        (filter #(util/=as-kw category (:category %))
+                                (:pate-verdicts application))
         section-strings (reduce (fn [acc v]
                                   (assoc acc (:id v) (verdict-section-string v)))
                                 {}
@@ -564,12 +588,15 @@
           (util/find-by-id version-id))))
 
 (defn- verdict-attachment-ids
-  "Ids of attachments, whose target is the given verdict."
+  "Ids of attachments, whose either target or source is the given
+  verdict."
   [{:keys [attachments]} verdict-id]
   (->> attachments
-       (filter (fn [{target :target}]
-                 (and (util/=as-kw (:type target) :verdict)
-                      (= (:id target) verdict-id))))
+       (filter (fn [{:keys [target source]}]
+                 (or (and (util/=as-kw (:type target) :verdict)
+                          (= (:id target) verdict-id))
+                     (and (util/=as-kw (:type source) :verdicts)
+                          (= (:id source) verdict-id)))))
        (map :id)))
 
 (defn delete-verdict [verdict-id {application :application :as command}]
@@ -869,7 +896,7 @@
           app-buildings))
 
 (defn command->category [{app :application}]
-  (shared/permit-type->category (:permitType app)))
+  (shared/application->category app))
 
 (defn statements
   "List of maps with given (timestamp), text (string) and
@@ -887,21 +914,29 @@
   "Augments verdict data, but MUST NOT update mongo (this is called from
   query actions, too).  If final? is truthy then the enrichment is
   part of publishing."
-  ([{:keys [application]} {:keys [data template] :as verdict} final?]
-   (let [inc-set  (->> template
-                       :inclusions
-                       (map keyword)
-                       set)
-         addons (merge
-                 (when (util/intersection-as-kw inc-set
-                                                buildings-inclusion-keys)
-                   {:buildings (merge-buildings (buildings application)
-                                                (:buildings data))})
-                 ;; Neighbors added if in the template
-                 (when (:neighbors inc-set)
-                   {:neighbor-states (neighbor-states application)})
-                 (when (:statements inc-set)
-                   {:statements (statements application final?)}))]
+  ([{:keys [application]} {:keys [data template category published]
+                           :as   verdict} final?]
+   (let [inc-set (->> template
+                      :inclusions
+                      (map keyword)
+                      set)
+         addons  (merge
+                  (when (seq (util/intersection-as-kw inc-set
+                                                      buildings-inclusion-keys))
+                    {:buildings (merge-buildings (buildings application)
+                                                 (:buildings data))})
+                  (when (:neighbors inc-set)
+                    {:neighbor-states (neighbor-states application)})
+                  (when (:statements inc-set)
+                    {:statements (statements application final?)})
+                  (when (and (util/=as-kw :contract category)
+                             final?
+                             (not published))
+                    ;; Verdict giver (handler) is the initial, implicit signer
+                    {:signatures
+                     {(keyword (mongo/create-id))
+                      {:name (:handler data)
+                       :date (:verdict-date data)}}}))]
      (assoc verdict :data (merge data addons))))
   ([command verdict]
    (enrich-verdict command verdict false)))
@@ -910,7 +945,8 @@
   (let [{:keys [data published template]
          :as   verdict} (command->verdict command)]
     {:verdict    (assoc (select-keys verdict [:id :modified :published
-                                              :schema-version :legacy?])
+                                              :category :schema-version
+                                              :legacy?])
                         :data (if published
                                 data
                                 (:data (enrich-verdict command
@@ -932,13 +968,15 @@
 (defn- insert-section
   "Section is generated only for non-board (lautakunta) non-legacy
   verdicts."
-  [org-id created {:keys [data template legacy?] :as verdict}]
+  [org-id created {:keys [data template legacy?
+                          category] :as verdict}]
   (let [{section :verdict-section} data
         {giver :giver}             template]
     (cond-> verdict
       (and (ss/blank? section)
            (util/not=as-kw giver :lautakunta)
-           (not legacy?))
+           (not legacy?)
+           (util/not=as-kw category :contract))
       (->
        (assoc-in [:data :verdict-section]
                  (next-section org-id
@@ -1022,12 +1060,14 @@
 
 (defn can-verdict-be-replaced?
   "Modern verdict can be replaced if its published and not already
-  replaced (or being replaced)."
+  replaced (or being replaced). Contracts cannot be replaced."
   [{:keys [pate-verdicts]} verdict-id]
   (when-let [{:keys [published legacy?
-                     replacement]} (util/find-by-id verdict-id pate-verdicts)]
+                     replacement category]} (util/find-by-id verdict-id
+                                                             pate-verdicts)]
     (and published
          (not legacy?)
+         (util/not=as-kw category :contract)
          (not (some-> replacement :replaced-by))
          (not (util/find-first #(= (get-in % [:replacement :replaces])
                                    verdict-id)
@@ -1119,9 +1159,13 @@
     (when-let [replace-verdict-id (get-in verdict [:replacement :replaces])]
       (replace-verdict command replace-verdict-id (:id verdict)))
 
-    (let [verdict-attachment-id (pdf/create-verdict-attachment command (assoc verdict :published created))]
+    (let [application (domain/get-application-no-access-checking (:id application))
+          verdict-attachment-id (pdf/create-verdict-attachment (assoc command
+                                                                      :application application)
+                                                               (assoc verdict :published created))]
       ;; KuntaGML (only for non-legacy verdicts)
       (when (and (not (:legacy? verdict))
+                 (util/not=as-kw (:category verdict) :contract)
                  (org/krysp-integration? @organization (:permitType application)))
         (let [application (domain/get-application-no-access-checking (:id application))]
           (krysp/verdict-as-kuntagml (assoc command :application application)
@@ -1167,3 +1211,56 @@
        (filter #(some? (:published %)))
        (sort-by :published)
        (last)))
+
+(defn user-can-sign? [{:keys [application user] :as command}]
+  (let [sigs  (some-> (command->verdict command)
+                      :data :signatures vals)
+        {com-id :id} (auth/auth-via-company application user)]
+    (not (util/find-first (fn [{:keys [user-id company-id]}]
+                            (or (= user-id (:id user))
+                                (and com-id
+                                     (= com-id company-id))))
+                          sigs))))
+
+(defn- add-signature
+  "Returns verdict with the user's signature added."
+  [{:keys [application user created]} verdict]
+  (let [person            (ss/trim (format "%s %s"
+                                           (:firstName user)
+                                           (:lastName user)))
+        {company-id :id} (auth/auth-via-company application
+                                                 user)]
+    (assoc-in verdict [:data :signatures (keyword (mongo/create-id))]
+              (cond-> {:user-id (:id user)
+                       :date created
+                       :name person}
+                company-id (assoc
+                            :company-id company-id
+                            ;; Get the up-to-date company name just in case
+                            :name (->> (com/find-company-by-id company-id)
+                                       :name
+                                       (format "%s, %s" person)))))))
+
+(defn sign-contract
+  "Sign the contract
+   - Update verdict data
+   - Generate new contract attachment version."
+  [{:keys [user created application] :as command}]
+  (let [verdict (add-signature command
+                               (command->verdict command))]
+
+    (verdict-update command
+                    (util/deep-merge
+                     {$set {:pate-verdicts.$.data (:data verdict)}}
+                     (when (util/not=as-kw (:state application)
+                                           :agreementSigned)
+                       (app-state/state-transition-update :agreementSigned
+                                                          created
+                                                          application
+                                                          user))))
+
+    (pdf/create-verdict-attachment-version
+     (assoc command
+            :application
+            (domain/get-application-no-access-checking (:id application)))
+     verdict)))

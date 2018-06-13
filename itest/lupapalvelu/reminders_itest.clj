@@ -246,7 +246,6 @@
                    :schema-info {:version 1,
                                  :order 63,
                                  :repeating false,
-                                 :removable false,
                                  :type "group",
                                  :name "tyoaika"},
                    :data {:tyoaika-alkaa-ms {:value (util/get-timestamp-from-now :day 1), :modified 1443177749608},

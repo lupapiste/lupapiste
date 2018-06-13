@@ -132,6 +132,34 @@
     [:textarea.grid-style-input
      (text-options text* options)]))
 
+(rum/defcs text-and-button < (initial-value-mixin ::text)
+  rum/reactive
+  "Text input with button.
+   Initial value can be atom for two-way binding (see the mixin).
+   Options [optional]:
+     [icon:] Button icon (default :lupicon-save)
+     [button-class:] Default :primary
+     callback: Callback function
+     [disabled?:] Is component disabled
+     [input-type:] Default text."
+  [{text* ::text} _ {:keys [icon button-class callback
+                            disabled? input-type]
+                     :as   options}]
+  [:span.text-and-button
+   (text-edit text* (merge {:disabled  disabled?
+                            :type      input-type
+                            :on-key-up #(when (and (not (s/blank? @text*))
+                                                   (= (.-keyCode %) 13))
+                                          (callback @text*))}
+                           (dissoc options
+                                   :icon :button-class :callback
+                                   :disabled? :input-type)))
+   [:button
+    {:class    (common/css (or button-class :primary))
+     :disabled (or disabled? (s/blank? (rum/react text*)))
+     :on-click #(callback @text*)}
+    [:i {:class (common/css (or icon :lupicon-save))}]]])
+
 (defn default-items-fn [items]
   (fn [term]
     (let [fuzzy (common/fuzzy-re term)]
@@ -450,17 +478,20 @@
      [disabled?] See common/resolve-disabled
      [enabled?]  See common/resolve-disabled
 
+     [class] Class definitions that are processed with `common/css`.
+
    Any other options are passed to the :button
    tag (e.g, :class, :on-click). The only exception is :disabled,
    since it is overridden with :disabled?"
-  [{:keys [icon wait?] :as options}]
+  [{:keys [icon wait? class] :as options}]
   (let [waiting? (rum/react (common/atomize wait?))]
     [:button
      (assoc (dissoc options
                     :text :text-loc :icon :wait?
-                    :disabled? :enabled?)
+                    :disabled? :enabled? :class)
             :disabled (or (common/resolve-disabled options)
-                          waiting?))
+                          waiting?)
+            :class (common/css class))
      (when icon
        [:i {:class (common/css (if waiting?
                                  [:icon-spin :lupicon-refresh]

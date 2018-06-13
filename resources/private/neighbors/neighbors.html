@@ -11,7 +11,9 @@
       </span>
 
       <div style="margin-top: 5px" >
+      <!-- ko if: permitType -->
       <h1 data-bind="lhtml: 'application.' + permitType() + '.neighbors'" class="help-adjacent-title"></h1>
+      <!-- /ko -->
       <span data-bind="component: {name: 'help-toggle', params: {show: true, lhtml: ['help.neighbors.map.p1', 'help.neighbors.map.p2']}}"></span>
       </div>
 
@@ -33,7 +35,7 @@
               <!-- ko if: nameOfDeceased -->
               <span data-bind="text: nameOfDeceased" class="owner-nameOfDeceased"></span>
               -<span data-bind="text: loc('neighbors.owner.type.kuolinpesa')"></span>
-              <br/>W
+              <br/>
               <!-- /ko -->
               <span data-bind="text: name" class="owner-name"></span>
               <span data-bind="text: address.street" class="owner-street"></span>

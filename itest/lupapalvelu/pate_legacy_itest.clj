@@ -1,42 +1,10 @@
 (ns lupapalvelu.pate-legacy-itest
   (:require [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.pate-itest-util :refer :all]
-            [midje.sweet :refer :all]
-            [sade.util :as util]))
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
+            [midje.sweet :refer :all]))
 
 (apply-remote-minimal)
-
-(defn edit-legacy-verdict [app-id verdict-id path value]
-  (let [result (command sonja :edit-pate-verdict :id app-id
-                        :verdict-id verdict-id
-                        :path (flatten [path])
-                        :value value)]
-    (fact {:midje/description (format "Edit verdict: %s -> %s" path value)}
-      result => no-errors?)
-    result))
-
-(defn fill-verdict [app-id verdict-id & kvs]
-  (doseq [[k v] (apply hash-map kvs)]
-    (edit-legacy-verdict app-id verdict-id k v)))
-
-(defn open-verdict [app-id verdict-id]
-  (query sonja :pate-verdict :id app-id :verdict-id verdict-id))
-
-(defn add-review [app-id verdict-id review-name review-type]
-  (facts {:midje/description (format "Add review: %s (%s)"
-                                     review-name (name review-type))}
-    (let [review-id (-> (edit-legacy-verdict app-id verdict-id
-                                             :add-review true)
-                        :changes flatten second)]
-      (fact "Add review name"
-        (edit-legacy-verdict app-id verdict-id
-                             [:reviews review-id :name] review-name)
-        => (contains {:filled false}))
-      (fact "Add review type"
-        (edit-legacy-verdict app-id verdict-id
-                             [:reviews review-id :type] review-type)
-        => (contains {:filled true})))))
-
 
 (fact "Create and submit R application"
   (let [{app-id :id} (create-and-submit-application pena
@@ -48,9 +16,9 @@
     (fact "New legacy verdict draft"
       (let [{:keys [verdict-id]}     (command sonja :new-legacy-verdict-draft
                                               :id app-id)
-            open                     (partial open-verdict app-id verdict-id)
+            open                     (partial open-verdict sonja app-id verdict-id)
             {:keys [verdict filled]} (open)
-            edit                     (partial edit-legacy-verdict app-id verdict-id)]
+            edit                     (partial edit-verdict sonja app-id verdict-id)]
         filled => false?
         verdict => (contains {:legacy?    true
                               :data       (contains {:handler "Sonja Sibbo"})
@@ -69,7 +37,7 @@
                                                     :in-any-order
                                                     :gaps-ok)})
         (fact "Fill verdict"
-          (fill-verdict app-id verdict-id
+          (fill-verdict sonja app-id verdict-id
                         :kuntalupatunnus "888-10-12"
                         :verdict-code "1" ;; Granted
                         :verdict-text "Lorem ipsum"
@@ -83,7 +51,7 @@
                                                              :anto            (timestamp "21.5.2018")
                                                              :lainvoimainen   (timestamp "30.5.2018")})})}))
 
-        (add-review app-id verdict-id "First review" :paikan-merkitseminen)
+        (add-legacy-review sonja app-id verdict-id "First review" :paikan-merkitseminen)
 
         (fact "Add condition"
           (let [condition-id (-> (edit :add-condition true) :changes flatten second)]
@@ -127,7 +95,7 @@
                                                                  :subtype "foreman"})
                                          :source      {:type "verdict" :id verdict-id}})]))
             (fact "Attachment has been created"
-              attachments => (just [(contains {:target           {:type "verdict" :id verdict-id}
+              attachments => (just [(contains {:source           {:type "verdicts" :id verdict-id}
                                                :type             {:type-id    "paatos"
                                                                   :type-group "paatoksenteko"}
                                                :applicationState "verdictGiven"})]))
@@ -194,26 +162,26 @@
                         (contains {:contents "Complaint"})])
               (check-file file-id true))))
         (fact "Fill and publish the first verdict"
-          (fill-verdict app-id vid1
+          (fill-verdict sonja app-id vid1
                         :kuntalupatunnus "888-10-13"
                         :verdict-code "2" ;; Admitted
                         :verdict-text "Quisque sed nibh"
                         :anto (timestamp "22.5.2018")
                         :lainvoimainen (timestamp "1.6.2018"))
-          (add-review app-id vid1 "Review One" :aloituskokous)
+          (add-legacy-review sonja app-id vid1 "Review One" :aloituskokous)
           (command sonja :publish-legacy-verdict :id app-id
                    :verdict-id vid1) => ok?)
         (fact "State is verdictGiven"
           (query-application sonja app-id)
           => (contains {:state "verdictGiven"}))
         (fact "Fill and publish the second verdict"
-          (fill-verdict app-id vid2
+          (fill-verdict sonja app-id vid2
                         :kuntalupatunnus "888-10-14"
                         :verdict-code "3" ;; Partially granted
                         :verdict-text "Quisque sed nibh"
                         :anto (timestamp "23.5.2018")
                         :lainvoimainen (timestamp "2.6.2018"))
-          (add-review app-id vid2 "Review Two" :aloituskokous)
+          (add-legacy-review sonja app-id vid2 "Review Two" :aloituskokous)
           (command sonja :publish-legacy-verdict :id app-id
                    :verdict-id vid2) => ok?)
         (fact "There are now two tasks and four attachments"
@@ -253,7 +221,7 @@
           (command sonja :approve-application :id app-id
                    :lang "fi") => ok?)
         (facts "Legacy publishing works"
-          (fill-verdict app-id vid3
+          (fill-verdict sonja app-id vid3
                         :kuntalupatunnus "888-10-15"
                         :verdict-code "4" ;; Upheld partially ...
                         :verdict-text "Vestibulum quis eros sit amet "

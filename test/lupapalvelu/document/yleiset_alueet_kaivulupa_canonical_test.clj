@@ -20,7 +20,6 @@
 (def- hankkeen-kuvaus {:id "52380c6894a74fc25bb4ba4a",
                                 :created 1379404904514,
                                 :schema-info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa",
-                                              :removable false,
                                               :repeating false,
                                               :version 1,
                                               :type "group",

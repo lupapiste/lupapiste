@@ -7,7 +7,8 @@
 
 (def phrase-categories #{:paatosteksti :lupaehdot :naapurit
                          :muutoksenhaku :vaativuus :rakennusoikeus
-                         :kaava :toimenpide-julkipanoon :yleinen})
+                         :kaava :toimenpide-julkipanoon :yleinen
+                         :sopimus})
 
 (def path-type (sc/conditional
                 ;; Joined kw-path (e.g. :one.two.three)
@@ -106,11 +107,13 @@
 (defschema PateComponent
   (merge PateBase
          {;; Show label? Default true
-          (sc/optional-key :label?)     sc/Bool
+          (sc/optional-key :label?)          sc/Bool
           ;; Read-only components cannot be edited and only rendered
-          ;; in the viewing mode.
-          (sc/optional-key :read-only?) sc/Bool
-          }))
+          ;; in the viewing mode. Overrides :always-editing?
+          (sc/optional-key :read-only?)      sc/Bool
+          ;; If true, the component is always rendered as the edit
+          ;; component regardless of the container mode.
+          (sc/optional-key :always-editing?) sc/Bool}))
 
 (defschema PateReferenceList
   "Component that builds schema from an external source. Each item is
@@ -309,7 +312,10 @@
           ;; order.
           (sc/optional-key :sort-by)      (sc/enum :value :text)
           ;; How the select is rendered? Select is the default.
-          (sc/optional-key :type)         (sc/enum :select :autocomplete)}))
+          (sc/optional-key :type)         (sc/enum :select :autocomplete)
+          ;; Item texts can have different loc-prefix in these cases
+          ;; the loc-prefix affects only the label.
+          (sc/optional-key :item-loc-prefix) sc/Keyword}))
 
 (defschema PateLocText
   "Localisation term shown as text."
@@ -370,7 +376,7 @@
   {:dictionary SchemaTypes})
 
 (defschema PateLayout
-  (merge PateBase PateVisible))
+  (merge PateEnabled PateCss PateVisible))
 
 (defschema PateMeta
   "Dynamic management. No UI counterpart. Not part of the saved data."
@@ -444,7 +450,8 @@
                        (sc/optional-key :repeating) sc/Keyword)}))
 
 (defschema PateSection
-  (merge PateLayout
+  (merge PateBase
+         PateVisible
          {:id   sc/Keyword ;; Also title localization key
           :grid PateGrid}))
 

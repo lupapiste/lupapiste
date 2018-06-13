@@ -298,6 +298,60 @@
                 entry--link-permits
                 entry--appeal))
 
+;; ----------------------------------
+;; Contract layout
+;; ----------------------------------
+
+(def entry--contract-text [{:loc    :empty
+                            :source {:dict :contract-text}
+                            :styles :pad-before}])
+
+(def entry--case [{:loc       :pdf.contract.case
+                   :loc-many :pdf.contract.cases
+                   :source   :operations
+                   :styles   :bold}
+                  {:path :text}])
+
+(def entry--contract-conditions
+  [{:loc      :pate.contract.condition
+    :loc-many :pate.contract.conditions
+    :source   :conditions
+    :styles   :pad-before}])
+
+(def entry--contract-giver
+  '([{:loc    :verdict.name.sijoitussopimus
+      :source {:dict :handler}
+      :styles :pad-before}]
+    [{:loc    :empty
+      :source :organization
+      :styles :pad-after}]))
+
+(def entry--contract-date
+  '([{:loc    :verdict.contract.date
+      :source {:dict :verdict-date}}]))
+
+(def entry--contract-signatures
+  '([{:loc      :pdf.signature
+      :loc-many :verdict.signatures
+      :source   :signatures
+      :styles   [:bold :pad-before]}
+     {:path :name}
+     {:path :date}]))
+
+(def contract-pdf-layout
+  (build-layout entry--application-id
+                entry--rakennuspaikka
+                (entry--applicant :applicant :pdf.applicants)
+                entry--case
+                entry--contract-text
+                entry--reviews
+                entry--contract-conditions
+                entry--contract-giver
+                entry--contract-date
+                entry--attachments
+                entry--contract-signatures))
+
+
 ;; --------------------------------
 ;; Layouts for legacy verdicts
 ;; --------------------------------
@@ -353,7 +407,32 @@
                      [{:loc    :pdf.lainvoimainen
                        :source {:dict :lainvoimainen}}]))
 
+(def entry--dates-tj '([{:loc    :pdf.anto
+                       :source {:dict :anto}}]
+                      [{:loc    :pdf.lainvoimainen
+                        :source {:dict :lainvoimainen}}]
+                      [{:loc    :pdf.muutoksenhaku
+                        :source {:dict :muutoksenhaku}}]))
 
+(def entry--tj (list [{:loc    :pdf.tj
+                       :source {:doc [:tyonjohtaja-v2 :kuntaRoolikoodi]}
+                       :styles [:bold :border-top]}]
+                     [{:loc      :empty
+                      :source   {:doc [:tyonjohtaja-v2 :henkilotiedot]}}
+                      {:path   :etunimi
+                       :styles [:nowrap :right]}
+                      {:path   :sukunimi
+                       :styles :nowrap}
+                      {:text  ""
+                       :width 100}]
+                     [{:loc    :empty
+                       :source {:doc [:tyonjohtaja-v2 :patevyys-tyonjohtaja.koulutusvalinta]}}]
+                     [{:loc    :empty
+                       :source {:doc [:tyonjohtaja-v2 :yhteystiedot.puhelin]}}]))
+
+(def entry--tj-vastattavat-tyot [{:loc    :pdf.tj.vastattavat
+                                  :source :tj-vastattavat-tyot
+                                  :styles :pad-before}])
 
 (def r-legacy-layout
   (build-layout legacy--application-id
@@ -374,9 +453,130 @@
                 legacy--verdict-giver
                 legacy--dates))
 
+(def tj-pdf-layout
+  (build-layout entry--application-id
+                entry--rakennuspaikka
+                entry--tj
+                entry--link-permits
+                entry--attachments
+                entry--tj-vastattavat-tyot
+                entry--verdict
+                (entry--verdict-giver :applications.authority)
+                entry--dates-tj
+                entry--appeal))
+
+(def ya-legacy-layout
+  (build-layout legacy--application-id
+                legacy--kuntalupatunnus
+                entry--rakennuspaikka
+                (entry--applicant :pdf.achiever :pdf.achievers)
+                entry--operation
+                entry--statements
+                entry--attachments
+                legacy--verdict-code
+                legacy--verdict-text
+                legacy--reviews
+                legacy--conditions
+                legacy--verdict-giver
+                legacy--dates))
+
+(def p-legacy-layout
+  (build-layout legacy--application-id
+                legacy--kuntalupatunnus
+                entry--rakennuspaikka
+                (entry--applicant :applicant :pdf.applicants)
+                entry--operation
+                entry--statements
+                entry--neighbors
+                entry--attachments
+                legacy--verdict-code
+                legacy--verdict-text
+                legacy--conditions
+                legacy--verdict-giver
+                legacy--dates))
+
+(def kt-legacy-layout
+  (build-layout legacy--application-id
+                legacy--kuntalupatunnus
+                entry--rakennuspaikka
+                (entry--applicant :applicant :pdf.applicants)
+                entry--operation
+                entry--statements
+                entry--neighbors
+                entry--attachments
+                (butlast legacy--verdict-code)
+                legacy--verdict-text
+                legacy--conditions
+                legacy--verdict-giver
+                legacy--dates))
+
+(def ymp-legacy-layout kt-legacy-layout)
+
+;; ----------------------------------
+;; Legacy contracts
+;; ----------------------------------
+
+#_(def legacy--contract-text [{:loc    :empty
+                            :source {:dict :contract-text}
+                            :styles :pad-before}])
+
+#_(def entry--case [{:loc       :pdf.contract.case
+                   :loc-many :pdf.contract.cases
+                   :source   :operations
+                   :styles   :bold}
+                  {:path :text}])
+
+(def legacy--contract-conditions
+  [{:loc      :pate.contract.condition
+    :loc-many :pate.contract.conditions
+    :source   {:dict :conditions}
+    :post-fn (repeating-texts-post-fn :name)
+    :styles   :pad-before}])
+
+#_(def legacy--contract-giver
+  '([{:loc    :verdict.name.sijoitussopimus
+      :source {:dict :handler}
+      :styles :pad-before}]
+    [{:loc    :empty
+      :source :organization
+      :styles :pad-after}]))
+
+#_(def legacy--contract-date
+  '([{:loc    :verdict.contract.date
+      :source {:dict :verdict-date}}]))
+
+#_(def legacy--contract-signatures
+  '([{:loc      :pdf.signature
+      :loc-many :verdict.signatures
+      :source   :signatures
+      :styles   [:bold :pad-before]}
+     {:path :name}
+     {:path :date}]))
+
+(def contract-legacy-layout
+  (build-layout entry--application-id
+                legacy--kuntalupatunnus
+                entry--rakennuspaikka
+                (entry--applicant :applicant :pdf.applicants)
+                entry--case
+                entry--contract-text
+                legacy--reviews
+                legacy--contract-conditions
+                entry--contract-giver
+                entry--contract-date
+                entry--attachments
+                entry--contract-signatures))
+
 (defn pdf-layout [{:keys [category legacy?]}]
   (case (util/kw-path (when legacy? :legacy) category)
-    :r  r-pdf-layout
-    :p  p-pdf-layout
-    :ya ya-pdf-layout
-    :legacy.r r-legacy-layout))
+    :r               r-pdf-layout
+    :p               p-pdf-layout
+    :ya              ya-pdf-layout
+    :tj              tj-pdf-layout
+    :contract        contract-pdf-layout
+    :legacy.r        r-legacy-layout
+    :legacy.ya       ya-legacy-layout
+    :legacy.p        p-legacy-layout
+    :legacy.kt       kt-legacy-layout
+    :legacy.ymp      ymp-legacy-layout
+    :legacy.contract contract-legacy-layout))

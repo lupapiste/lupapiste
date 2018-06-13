@@ -15,7 +15,7 @@
 
 (defschema PateCategory
   {:id       ssc/ObjectIdStr
-   :category (sc/enum "r" "p" "ya" "kt" "ymp")})
+   :category (sc/enum "r" "p" "ya" "kt" "ymp" "tj" "contract")})
 
 (defschema PateTerm
   {:fi       sc/Str
@@ -37,13 +37,13 @@
    :draft    sc/Any})
 
 (defschema PatePublishedSettings
-  {:verdict-code                [(apply sc/enum (map name (keys shared/verdict-code-map)))]
-   :date-deltas                 (->> shared/verdict-dates
-                                     (map (fn [k]
-                                            [k {:delta sc/Int
-                                                :unit  (sc/enum "days" "years")}]))
-                                     (into {}))
-   (sc/optional-key :foremen)   [(apply sc/enum (map name shared/foreman-codes))]
+  {(sc/optional-key :verdict-code) [(apply sc/enum (map name (keys shared/verdict-code-map)))]
+   (sc/optional-key :date-deltas)  (->> shared/verdict-dates
+                                        (map (fn [k]
+                                               [k {:delta sc/Int
+                                                   :unit  (sc/enum "days" "years")}]))
+                                        (into {}))
+   (sc/optional-key :foremen)      [(apply sc/enum (map name shared/foreman-codes))]
 
    ;; Boardname included only when the verdict giver is Lautakunta.
    (sc/optional-key :boardname) sc/Str})
@@ -69,7 +69,8 @@
   {:templates                  [PateSavedTemplate]
    (sc/optional-key :settings) {(sc/optional-key :r)  PateSavedSettings
                                 (sc/optional-key :p)  PateSavedSettings
-                                (sc/optional-key :ya) PateSavedSettings}})
+                                (sc/optional-key :ya) PateSavedSettings
+                                (sc/optional-key :tj) PateSavedSettings}})
 
 ;; Phrases
 

@@ -371,6 +371,20 @@
         })
         .call();
     };
+      self.convertApplication = function() {
+        var lupatunnus = _.trim((self.kuntalupatunnusFromPrevPermit() || "" )).split(/\s+/).join( " ");
+        ajax.command("convert-application", {kuntalupatunnus: lupatunnus})
+            .processing(self.processing)
+            .pending(self.pending)
+            .success(function(data) {
+              self.clear();
+              pageutil.openApplicationPage({id: data.id});
+            })
+            .error(function(d) {
+              notify.ajaxError(d);
+            })
+            .call();
+    };
   }
 
   var model = new CreateApplicationModel();
