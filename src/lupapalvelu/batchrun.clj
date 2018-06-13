@@ -1450,8 +1450,8 @@
                    (= 2 (count versions))
                    (= (-> versions first :user :username) "eraajo@lupapiste.fi"))
               (let [first-version (first versions)]
-                (move-older-chunk-to-target file-id (:fileId first-version))
-                (move-older-chunk-to-target (:originalFileId latest-version) (:originalFileId first-version)))
+                (move-older-chunk-to-target file-id (:fileId first-version) app-id first-version)
+                (move-older-chunk-to-target (:originalFileId latest-version) (:originalFileId first-version) app-id first-version))
 
               att-cmds
               (if-let [source-file-id (cond
