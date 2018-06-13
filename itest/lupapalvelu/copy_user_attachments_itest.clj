@@ -54,14 +54,16 @@
         (fact "No new attachments are present" (count attachments) => 6) ; 6th is tutkintotodistus
         (fact "Tutkintotodistus placeholder has Pena's version uploaded"
           (:id tutkintotodistus-attachment) => tutkintotodistus-id
-          (get-in tutkintotodistus-attachment [:latestVersion :user]) => (contains {:username "pena"})))
+          (get-in tutkintotodistus-attachment [:latestVersion :user]) => (contains {:username "pena"})
+          (fact "one version" (count (:versions tutkintotodistus-attachment)) => 1)))
 
       (fact "Copying again creates new tutkintotodistus, as there are no empty placeholders left"
         (command pena :copy-user-attachments-to-application :id application-id) => ok?
         (let [{:keys [attachments]} (query-application pena application-id)
               tutkintotodistus-attachments (filter #(= (:type %) tutkintotodistus-type) attachments)]
           (count attachments) => 7
-          (count tutkintotodistus-attachments) => 2))
+          (count tutkintotodistus-attachments) => 2
+          (fact "one version" (count (:versions (last tutkintotodistus-attachments))) => 1)))
 
       (fact "Copying once more does not result in new attachment, as previous upload resulted in known user-attachment-id"
         ; format for plain user attachment id is: (str application-id "." user-id "." attachment-id), it's existence is checked when copying user attachments to application
@@ -69,7 +71,9 @@
         (let [{:keys [attachments]} (query-application pena application-id)
               tutkintotodistus-attachments (filter #(= (:type %) tutkintotodistus-type) attachments)]
           (count attachments) => 7
-          (count tutkintotodistus-attachments) => 2))
+          (count tutkintotodistus-attachments) => 2
+          (fact "still one version" ; previously guard query in copy-user-attachments-to-application did not work correctly
+            (count (:versions (last tutkintotodistus-attachments))) => 1)))
 
       (fact "Not needed attachments are filled as 'needed'"
         (let [{:keys [attachments]} (query-application pena application-id)
