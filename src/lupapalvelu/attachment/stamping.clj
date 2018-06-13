@@ -14,7 +14,8 @@
             [lupapalvelu.building :as building]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment.conversion :as conversion]
-            [lupapalvelu.file-upload :as file-upload]))
+            [lupapalvelu.file-upload :as file-upload])
+  (:import [java.io ByteArrayOutputStream]))
 
 (defn status [job-id version timeout]
   (job/status job-id (util/->long version) (util/->long timeout)))
@@ -233,3 +234,36 @@
                       (error "Could not convert file id" (:fileId latestVersion) "to PDF/A"))))))
             (catch Throwable t
               (error t "Could not fix attachment" attachment))))))))
+
+(defn stamp-input-stream [command timestamp application lang stamp attachment-id content-type input-stream]
+  (let [parsed-timestamp (cond
+                           (number? timestamp) (long timestamp)
+                           (ss/blank? timestamp) (:created command)
+                           :else (util/->long timestamp))
+        stamp-timestamp (if (zero? parsed-timestamp) (:created command) parsed-timestamp)
+        attachment (att/get-attachment-info application attachment-id)
+        info-fields {:fields (:rows stamp) :buildings (building/building-ids application)}
+        context {:application   application
+                 :user          (:user command)
+                 :lang          lang
+                 :qr-code       (:qrCode stamp)
+                 :stamp-created stamp-timestamp
+                 :created       (:created command)
+                 :x-margin      (util/->long (get-in stamp [:position :x]))
+                 :y-margin      (util/->long (get-in stamp [:position :y]))
+                 :page          (keyword (:page stamp))
+                 :transparency  (util/->long (or (:background stamp) 0))
+                 :info-fields   info-fields}
+        stamp-without-buildings (make-stamp-without-buildings context (:info-fields context))
+        operation-specific-stamps (make-operation-specific-stamps context
+                                                                  info-fields
+                                                                  [(set (att-util/get-operation-ids attachment))])]
+    (let [op-ids (set (att-util/get-operation-ids attachment))
+          stamp (if (and (seq op-ids) (seq (:buildings info-fields)))
+                  (operation-specific-stamps op-ids)
+                  stamp-without-buildings)
+          options (select-keys context [:x-margin :y-margin :transparency :page])]
+      (with-open [is input-stream
+                  output (ByteArrayOutputStream.)]
+        (stamper/stamp-stream stamp content-type is output options)
+        (.toByteArray output)))))

@@ -50,10 +50,13 @@
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.organization :as org]
             [pandect.core :as pandect]
-            [lupapalvelu.xml.krysp.building-reader :as building-reader])
+            [lupapalvelu.xml.krysp.building-reader :as building-reader]
+            [monger.collection :as mc])
   (:import [org.xml.sax SAXParseException]
            [java.io ByteArrayOutputStream ByteArrayInputStream]
-           [java.net URL]))
+           [java.net URL]
+           [java.util Date]
+           [org.bson.types ObjectId]))
 
 
 (defn- older-than [timestamp] {$lt timestamp})
@@ -1357,3 +1360,169 @@
 
               :else
               (error "Attachment does not have a target:" att))))))))
+
+(defn- move-older-chunk-to-target [file-id target-file-id]
+  (let [chunks (mongo/select :fs.chunks {:files_id file-id})]
+    (cond
+      (= (count chunks) 2)
+      (let [sorted-chunks (sort (fn [c1 c2]
+                                  (.compareTo (.getDate ^ObjectId (:id c1))
+                                              (.getDate ^ObjectId (:id c2))))
+                                chunks)
+            source-id (->> sorted-chunks
+                           first
+                           :id)]
+        (mongo/update-by-id :fs.chunks source-id {$set {:files_id target-file-id}})
+        (info "Chunk id" (str source-id) "updated to link to file id" target-file-id))
+
+      (= (count chunks) 0)
+      (error "No chunks exists for file id" file-id ", cannot update")
+
+      (= (count chunks) 1)
+      (info "Only one chunk exists for file id" file-id ", not updating")
+
+      (> (count chunks) 2)
+      (error "Cannot update chunk because there is more than 2 chunks for file id" file-id))))
+
+(defn fix-duplicate-gridfs-chunks [& application-ids]
+  (mongo/connect!)
+  (info "Running for application ids:" (or (seq application-ids) "all"))
+  (let [duplicate-files-query [{$match (if (seq application-ids)
+                                         {"metadata.application" {$in application-ids}}
+                                         {"uploadDate" {$gte (Date. 1527811200000)
+                                                       $lte (Date. 1528416000000)}})}
+                               {"$lookup" {"from" "fs.chunks"
+                                           "localField" "_id"
+                                           "foreignField" "files_id"
+                                           "as" "chunks"}}
+                               {$unwind {"path" "$chunks"}}
+                               {$match {"chunks.n" 0}}
+                               {"$sortByCount" "$chunks.files_id"}
+                               {$match {"count" {$gt 1}}}]
+        stamps (->> (graylog-request "stamp-attachments")
+                    (reduce (fn [acc {{attachment-ids :files} :data :as cmd}]
+                              (reduce (fn [acc2 attachment-id]
+                                        (update acc2 attachment-id conj cmd))
+                                      acc
+                                      attachment-ids))
+                            {})
+                    (map (fn [[id cmds]]
+                           [id [(last (sort-by :created cmds))]]))
+                    (into {}))
+        id-to-cmds (->> (graylog-request "rotate-pdf")
+                        (reduce (fn [acc {{attachment-id :attachmentId} :data :as cmd}]
+                                  (update acc attachment-id (fn [cmds]
+                                                              (->> (conj cmds cmd)
+                                                                   (sort-by :created)))))
+                                stamps))]
+    (doseq [{file-id :_id chunk-count :count} (mc/aggregate (mongo/get-db)
+                                                            "fs.files"
+                                                            duplicate-files-query)]
+      (let [file-data (mongo/by-id :fs.files file-id)
+            app-id (get-in file-data [:metadata :application])
+            application (mongo/by-id :applications app-id)]
+        (logging/with-logging-context {:applicationId app-id}
+          (doseq [{att-id :id latest-version :latestVersion versions :versions md :metadata} (:attachments application)
+                  :when (and (= file-id (:fileId latest-version))
+                             (not= (:tila md) "arkistoitu"))
+                  :let [att-cmds (get id-to-cmds att-id)]]
+            (info "Trying to fix file id" file-id "from attachment" att-id "with" chunk-count "duplicate chunks")
+            (cond
+              (and (get stamps att-id)
+                   (:stamped latest-version)
+                   (= 2 chunk-count)
+                   (= 2 (count versions))
+                   (= (-> versions first :user :username) "eraajo@lupapiste.fi"))
+              (let [first-version (first versions)]
+                (move-older-chunk-to-target file-id (:fileId first-version))
+                (move-older-chunk-to-target (:originalFileId latest-version) (:originalFileId first-version)))
+
+              att-cmds
+              (if-let [source-file-id (cond
+                                        (and (get stamps att-id)
+                                             (:stamped latest-version)
+                                             (= 1 (count (filter :stamped versions))))
+                                        (let [source (->> (reverse versions)
+                                                          second
+                                                          :originalFileId)]
+                                          (when (mongo/download source)
+                                            source))
+
+                                        (and (not (or (some :stamped versions)
+                                                      (= file-id (:originalFileId latest-version))))
+                                             (mongo/download (:originalFileId latest-version)))
+                                        (:originalFileId latest-version))]
+                (if (= 1 (mongo/count :fs.chunks {:files_id source-file-id
+                                                  :n 0}))
+                  (let [dl (mongo/download source-file-id)
+                        bos (ByteArrayOutputStream.)
+                        content-type (atom (:contentType dl))]
+                    (with-open [content ((:content dl))]
+                      (io/copy content bos))
+                    (doseq [cmd att-cmds]
+                      (if (= "rotate-pdf" (:action cmd))
+                        (let [{:keys [rotation]} (:data cmd)]
+                          (files/with-temp-file temp-pdf
+                            (info "Rotating file" source-file-id, "target file is" file-id)
+                            (with-open [content (ByteArrayInputStream. (.toByteArray bos))]
+                              (if (not= @content-type "application/pdf")
+                                (-> (conversion/archivability-conversion application
+                                                                         {:filename    (:filename latest-version)
+                                                                          :contentType (:contentType dl)
+                                                                          :content     content})
+                                    :content
+                                    (pdftk/rotate-pdf (.getAbsolutePath temp-pdf) rotation))
+                                (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)))
+                            (.reset bos)
+                            (io/copy temp-pdf bos)
+                            (reset! content-type "application/pdf")))
+                        (let [{{:keys [id stamp timestamp lang]} :data :keys [created user]} cmd
+                              command {:user user
+                                       :created created}]
+                          (if (and (string? id)
+                                   (map? stamp)
+                                   (string? lang))
+                            (let [prev-data (.toByteArray bos)]
+                              (.reset bos)
+                              (info "Stamping file" source-file-id, "target file is" file-id)
+                              (with-open [bis (ByteArrayInputStream. prev-data)]
+                                (-> (stamping/stamp-input-stream command timestamp application lang stamp att-id @content-type bis)
+                                    (io/copy bos)))
+                              (when-not (= file-id (:originalFileId latest-version))
+                                (with-open [bis (ByteArrayInputStream. (.toByteArray bos))]
+                                  (info "Uploading stamped file as original file id" (:originalFileId latest-version))
+                                  (mongo/delete-file-by-id (:originalFileId latest-version))
+                                  (file-upload/save-file {:content  bis
+                                                          :filename (:filename latest-version)
+                                                          :fileId   (:originalFileId latest-version)}
+                                                         {:application app-id
+                                                          :linked      true}))))
+                            (error "Invalid log data, can't fix stamp:" cmd)))))
+                    (with-open [bis (ByteArrayInputStream. (.toByteArray bos))]
+                      (let [conversion (conversion/archivability-conversion application
+                                                                            {:filename    (:filename latest-version)
+                                                                             :contentType @content-type
+                                                                             :content     bis})]
+                        (if (:autoConversion conversion)
+                          (do
+                            (mongo/delete-file-by-id file-id)
+                            (file-upload/save-file (merge (select-keys conversion [:content :filename])
+                                                          {:fileId file-id})
+                                                   {:application app-id
+                                                    :linked true})
+                            (infof "File id %s converted, uploaded and linked successfully" file-id))
+                          (with-open [bis2 (ByteArrayInputStream. (.toByteArray bos))]
+                            (mongo/delete-file-by-id file-id)
+                            (file-upload/save-file {:content  bis2
+                                                    :filename (:filename latest-version)
+                                                    :fileId   file-id}
+                                                   {:application app-id
+                                                    :linked      true})
+                            (infof "File id %s uploaded and linked successfully" file-id))))))
+                  (error "Cannot find original / source file " source-file-id " for attachment id" att-id "/ file id"
+                         file-id ". Number of chunks for source file:" (mongo/count :fs.chunks {:files_id source-file-id
+                                                                                                :n 0}))))
+
+              :else
+              (error "File id" file-id "has duplicate chunks but no rotate or stamping commands, skipping")))))))
+  (info "Done."))
