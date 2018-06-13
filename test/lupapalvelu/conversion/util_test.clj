@@ -46,3 +46,17 @@
     (util/normalize-permit-id "17-0089-12-D") => "17-0089-12-D"
     (util/normalize-permit-id "98-0088-10-A") => "98-0088-10-A"
     (util/normalize-permit-id "75-0549-16-DJ") => "75-0549-16-DJ"))
+
+(fact "Permit ids can be destructured into their constituent parts"
+  (facts "Destructuring gives same results despite the input format "
+    (util/destructure-permit-id "12-0089-D 17") => (util/destructure-permit-id "17-0089-12-D")
+    (util/destructure-permit-id "98-0088-10-A") => (util/destructure-permit-id "10-0088-A 98"))
+  (facts "The results are a map with four keys"
+    (util/destructure-permit-id "75-0549-16-DJ") => {:kauposa "75" :no "0549" :tyyppi "DJ" :vuosi "16"}
+    (-> (util/destructure-permit-id "16-0549-DJ 75") keys count) => 4)
+  (facts "Destructuring invalid ids results in nil"
+    (util/destructure-permit-id "Hei äijät :D Mitä äijät :D Siistii nähä teit :D") => nil
+    (util/destructure-permit-id "75-0549-4242-A") => nil
+    (util/destructure-permit-id "75 0549-4242-A") => nil
+    (util/destructure-permit-id "751-0549-42-A") => nil))
+
