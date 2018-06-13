@@ -33,7 +33,3 @@
   Esimerkki: 12-0477-A 63 -> 63-0447-12-A"
   [id]
   (ss/join "-" ((juxt :kauposa :no :vuosi :tyyppi) (destructure-permit-id id))))
-
-;; Development helper, remove
-; (def testdata
-;   (lupapalvelu.xml.krysp.application-from-krysp/get-local-application-xml-by-filename (str "./src/lupapalvelu/conversion/test-data/" "18-0030-13-A.xml") "R"))

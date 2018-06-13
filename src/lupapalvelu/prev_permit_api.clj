@@ -19,7 +19,6 @@
         _             (assert (= 1 (count organizations)))
         command       (update-in command [:data] merge {:organizationId (first organizations)})
         existing-app  (domain/get-application-as {:verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}} user :include-canceled-apps? false)]
-
     (if existing-app
       (ok :id (:id existing-app) :text :already-existing-application)
       (let [result (prev-permit/fetch-prev-application! command)]
