@@ -3,12 +3,14 @@
             [clj-http.client :as http]
             [clj-time.coerce :as tc]
             [clj-time.format :as tf]
+            [dk.ative.docjure.spreadsheet :as spreadsheet]
             [sade.core :refer [now]]
             [sade.property :refer [to-human-readable-property-id]]
             [sade.strings :as str]
             [sade.util :as util :refer [fn->]]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.reports.excel :as excel])
+            [lupapalvelu.reports.excel :as excel]
+            [lupapalvelu.user :as user])
   (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)
            (org.apache.poi.xssf.usermodel XSSFWorkbook)
            (org.apache.poi.ss.usermodel CellType)
@@ -24,7 +26,7 @@
       tc/to-long
       util/to-local-date))
 
-
+(defn cents->euros [cents] (/ cents 100))
 
 (def transaction-id :transaction_id)
 (def created-timestamp (comp ->excel-time :created_at))
@@ -36,26 +38,32 @@
   (fn [{doc-type :document_type}]
     (let [[type-group type-id] (str/split doc-type #"\.")]
       (i18n/localize lang "attachmentType" type-group type-id))))
-(def document-price (comp #(/ % 100) :price_in_cents_without_vat))
+(def document-price (comp cents->euros :price_in_cents_without_vat))
 (def verdict-date (comp ->excel-date :paatospvm))
 
+(defn total-price-of-documents [data-rows]
+  (->> data-rows
+       (map :price_in_cents_without_vat)
+       (apply +)
+       cents->euros))
+
+(def billing-sheet-column-localization-keys
+  ["billing.transaction-id"
+   "billing.created-timestamp"
+   "billing.address"
+   "billing.property-id"
+   "billing.building-ids"
+   "billing.document-type"
+   "billing.document-description"
+   "billing.verdict-date"
+   "billing.document-price"])
 
 (defn ^OutputStream billing-entries-excel [organization start-date end-date data-rows lang]
-  ;; Create a spreadsheet and save it
-  (let [sheet-name         (str #_(i18n/localize lang "billing.sheet-name-prefix")
-                                " "
-                                (->excel-date start-date)
+  (let [sheet-name         (str (->excel-date start-date)
                                 " - "
                                 (->excel-date end-date))
-        header-row-content (map (partial i18n/localize lang) ["billing.transaction-id"
-                                                              "billing.created-timestamp"
-                                                              "billing.address"
-                                                              "billing.property-id"
-                                                              "billing.building-ids"
-                                                              "billing.document-type"
-                                                              "billing.document-description"
-                                                              "billing.verdict-date"
-                                                              "billing.document-price"])
+        header-row-content (map (partial i18n/localize lang)
+                                billing-sheet-column-localization-keys)
         row-fn (juxt transaction-id
                      created-timestamp
                      address
@@ -65,9 +73,12 @@
                      document-description
                      verdict-date
                      document-price)
-        wb (excel/create-workbook data-rows sheet-name header-row-content row-fn)
-        ; TODO lisää summarivi
-        ]
+        wb (excel/create-workbook data-rows sheet-name header-row-content row-fn)]
+    (excel/add-empty-row! sheet-name wb)
+    (excel/add-sum-row! sheet-name
+                        wb
+                        [(i18n/localize lang "billing.excel.sum")
+                         (total-price-of-documents data-rows)])
     (excel/xlsx-stream wb)))
 
 (defn get-billing-entries-from-docstore! [organization startTs endTs]
@@ -81,6 +92,6 @@
       vec))
 
 (defn billing-entries [user startTs endTs lang]
-  (let [organization "091-R" ; TODO userista
+  (let [organization "091-R" ; (usr/authority-admins-organization-id user)
         billing-entries (get-billing-entries-from-docstore! organization startTs endTs)]
     (billing-entries-excel organization startTs endTs billing-entries lang)))
