@@ -26,7 +26,7 @@
       tc/to-long
       util/to-local-date))
 
-(defn- cents->euros [cents] (/ cents 100))
+(defn cents->euros [cents] (/ cents 100))
 
 (def- transaction-id :transaction_id)
 (def- created-timestamp (comp ->excel-time :created_at))
@@ -90,8 +90,8 @@
   {:sheet-name (str (->excel-date start-date)
                     " - "
                     (->excel-date end-date))
-   :header (map (partial i18n/localize lang)
-                billing-sheet-column-localization-keys)
+   :header (mapv (partial i18n/localize lang)
+                 billing-sheet-column-localization-keys)
    :row-fn identity
    :data (concat (document-entry-rows data-rows lang)
                  separator-row
