@@ -1361,9 +1361,13 @@
               :else
               (error "Attachment does not have a target:" att))))))))
 
-(defn- move-older-chunk-to-target [file-id target-file-id]
+(defn- move-older-chunk-to-target [file-id target-file-id app-id {:keys [filename contentType]}]
   (let [chunks (mongo/select :fs.chunks {:files_id file-id})]
     (cond
+      (and (pos? (mongo/count :fs.files {:_id target-file-id}))
+           (pos? (mongo/count :fs.chunks {:files_id target-file-id})))
+      (error "Target file id" target-file-id "exists in fs.files and fs.chunks, cannot update")
+
       (= (count chunks) 2)
       (let [sorted-chunks (sort (fn [c1 c2]
                                   (.compareTo (.getDate ^ObjectId (:id c1))
@@ -1372,8 +1376,20 @@
             source-id (->> sorted-chunks
                            first
                            :id)]
-        (mongo/update-by-id :fs.chunks source-id {$set {:files_id target-file-id}})
-        (info "Chunk id" (str source-id) "updated to link to file id" target-file-id))
+        (if (pos? (mongo/count :fs.files {:_id target-file-id}))
+          (do (mongo/update-by-id :fs.chunks source-id {$set {:files_id target-file-id}})
+              (info "Chunk id" (str source-id) "updated to link to file id" target-file-id))
+          (if-let [data (->> (mongo/select-one :fs.chunks {:_id source-id})
+                             :data)]
+            ; fs.files structure won't exist for deleted files, so we must do a full re-upload
+            (let [data-sha (pandect/sha1 data)]
+              (with-open [bis (ByteArrayInputStream. data)]
+                (mongo/upload target-file-id filename contentType bis {:application app-id :linked true}))
+              (info "Chunk id" (str source-id) "re-uploaded as file id" target-file-id)
+              (with-open [content ((:content (mongo/download target-file-id)))]
+                (if (= data-sha (pandect/sha1 content))
+                  (mongo/remove :fs.chunks source-id)
+                  (error "SHA1 mismatch between chunk" (str source-id) "bytes and re-uploaded file id" target-file-id)))))))
 
       (= (count chunks) 0)
       (error "No chunks exists for file id" file-id ", cannot update")
@@ -1383,6 +1399,34 @@
 
       (> (count chunks) 2)
       (error "Cannot update chunk because there is more than 2 chunks for file id" file-id))))
+
+(defn- delete-duplicate-original-file-chunks [file-id app-id {:keys [filename contentType]}]
+  (let [chunk-groups (->> (mongo/select :fs.chunks {:files_id file-id})
+                          (group-by (fn [chunk] (.getDate ^ObjectId (:id chunk)))))
+        earliest-ts (first (sort (keys chunk-groups)))]
+    (cond
+      (empty? chunk-groups)
+      (error "No chunks exists for file id" file-id ", cannot fix")
+
+      (= 1 (count (keys chunk-groups)))
+      (error "Only one group of chunks exists for file id" file-id)
+
+      (not-every? #(= (count %)
+                      (count (first (vals chunk-groups))))
+                  (vals chunk-groups))
+      (error "Different number of chunks in timestamp groups for file id" file-id ", skipping")
+
+      :else
+      (let [bos (ByteArrayOutputStream.)]
+        (doseq [c (get chunk-groups earliest-ts)]
+          (io/copy (:data c) bos))
+        (if (< (.size bos) 1000)
+          (throw (Exception. "Data copy error with file id" file-id)))
+        (info "Deleting original file" file-id)
+        (mongo/delete-file-by-id file-id)
+        (with-open [in (ByteArrayInputStream. (.toByteArray bos))]
+          (mongo/upload file-id filename contentType in {:application app-id :linked true})
+          (info "File" file-id "re-uploaded"))))))
 
 (defn fix-duplicate-gridfs-chunks [& application-ids]
   (mongo/connect!)
@@ -1423,21 +1467,26 @@
             application (mongo/by-id :applications app-id)]
         (logging/with-logging-context {:applicationId app-id}
           (doseq [{att-id :id latest-version :latestVersion versions :versions md :metadata} (:attachments application)
-                  :when (and (= file-id (:fileId latest-version))
-                             (not= (:tila md) "arkistoitu"))
                   :let [att-cmds (get id-to-cmds att-id)]]
             (info "Trying to fix file id" file-id "from attachment" att-id "with" chunk-count "duplicate chunks")
             (cond
-              (and (get stamps att-id)
+              (and (= file-id (:fileId latest-version))
+                   (not= (:tila md) "arkistoitu")
+                   (get stamps att-id)
                    (:stamped latest-version)
                    (= 2 chunk-count)
                    (= 2 (count versions))
                    (= (-> versions first :user :username) "eraajo@lupapiste.fi"))
               (let [first-version (first versions)]
-                (move-older-chunk-to-target file-id (:fileId first-version))
-                (move-older-chunk-to-target (:originalFileId latest-version) (:originalFileId first-version)))
+                (move-older-chunk-to-target file-id (:fileId first-version) app-id first-version)
+                (move-older-chunk-to-target (:originalFileId latest-version) (:originalFileId first-version) app-id first-version))
 
-              att-cmds
+              (some #(= file-id (:originalFileId %)) versions)
+              (let [target-version (first (filter #(= file-id (:originalFileId %)) versions))]
+                (delete-duplicate-original-file-chunks file-id app-id target-version))
+
+              (and att-cmds
+                   (not= (:tila md) "arkistoitu"))
               (if-let [source-file-id (cond
                                         (and (get stamps att-id)
                                              (:stamped latest-version)
