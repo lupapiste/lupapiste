@@ -2,19 +2,14 @@
   (:require [cheshire.core :as json]
             [clj-http.client :as http]
             [clj-time.coerce :as tc]
-            [clj-time.format :as tf]
-            [dk.ative.docjure.spreadsheet :as spreadsheet]
             [sade.core :refer [def- now]]
             [sade.property :refer [to-human-readable-property-id]]
-            [sade.strings :as str]
-            [sade.util :as util :refer [fn->]]
+            [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.reports.excel :as excel]
             [lupapalvelu.user :as usr])
-  (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)
-           (org.apache.poi.xssf.usermodel XSSFWorkbook)
-           (org.apache.poi.ss.usermodel CellType)
-           (org.joda.time DateTime DateTimeZone)))
+  (:import (java.io OutputStream)))
 
 (defn- ->excel-time [timestamp-string]
   (-> timestamp-string
@@ -32,11 +27,11 @@
 (def- created-timestamp (comp ->excel-time :created_at))
 (def- address :address)
 (def- property-id (comp to-human-readable-property-id :property_id))
-(def- building-ids (comp (partial str/join ", ") :building_ids))
+(def- building-ids (comp (partial ss/join ", ") :building_ids))
 (def- document-description :description)
 (defn- document-type [lang]
   (fn [{doc-type :document_type}]
-    (let [[type-group type-id] (str/split doc-type #"\.")]
+    (let [[type-group type-id] (ss/split doc-type #"\.")]
       (i18n/localize lang "attachmentType" type-group type-id))))
 (def- document-price (comp cents->euros :price_in_cents_without_vat))
 (def- verdict-date (comp ->excel-date :paatospvm))
