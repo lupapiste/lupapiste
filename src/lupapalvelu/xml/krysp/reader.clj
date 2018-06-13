@@ -11,8 +11,9 @@
             [sade.coordinate :as coordinate]
             [sade.core :refer [now def- fail]]
             [lupapalvelu.drawing :as drawing]
-            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.schemas]
             [lupapalvelu.conversion.util :as conv-util]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.property :as prop]
             [lupapalvelu.wfs :as wfs]
@@ -653,6 +654,13 @@
     (select1 [:toimenpidetieto :Toimenpide :rakennelmatieto])
     cr/all-of))
 
+(defn rakennelmatieto->kaupunkikuvatoimenpide [raktieto]
+  {:kayttotarkoitus {:value ""}
+   :kokonaisala {:value ""}
+   :kuvaus {:value (get-in raktieto [:Rakennelma :kuvaus :kuvaus])}
+   :tunnus {:value (get-in raktieto [:Rakennelma :tunnus :kunnanSisainenPysyvaRakennusnumero])}
+   :valtakunnallinenNumero {:value (get-in raktieto [:Rakennelma :tunnus :kiinttun])}})
+
 (defn ->viitelupatunnukset
   "Takes a parsed XML document, returns a list of viitelupatunnus -ids (in 'permit-id'-format) found therein."
   [xml]
@@ -670,10 +678,6 @@
       (first x)
       (select x [:osapuolettieto :Osapuolet :tyonjohtajatieto :Tyonjohtaja])
       (map cr/all-of x))))
-
-(defn rakennelmatieto->kaupunkikuvatoimenpide [raktieto]
-  (let [schema (schemas/get-schema 1 "kaupunkikuvatoimenpide")]
-    schema))
 
 ;;
 ;; Information parsed from verdict xml message for application creation
