@@ -10,7 +10,7 @@
             [sade.util :as util :refer [fn->]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.reports.excel :as excel]
-            [lupapalvelu.user :as user])
+            [lupapalvelu.user :as usr])
   (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)
            (org.apache.poi.xssf.usermodel XSSFWorkbook)
            (org.apache.poi.ss.usermodel CellType)
@@ -87,9 +87,9 @@
     (total-price-of-documents data-rows)]])
 
 (defn billing-entries-sheet [organization start-date end-date data-rows lang]
-  {:sheet-name (str (->excel-date start-date)
+  {:sheet-name (str (util/to-local-date start-date)
                     " - "
-                    (->excel-date end-date))
+                    (util/to-local-date  end-date))
    :header (mapv (partial i18n/localize lang)
                  billing-sheet-column-localization-keys)
    :row-fn identity
@@ -114,6 +114,6 @@
       vec))
 
 (defn billing-entries [user startTs endTs lang]
-  (let [organization "091-R" ; (usr/authority-admins-organization-id user)
+  (let [organization (usr/authority-admins-organization-id user)
         billing-entries (get-billing-entries-from-docstore! organization startTs endTs)]
     (billing-entries-excel organization startTs endTs billing-entries lang)))

@@ -14,7 +14,7 @@
             [lupapalvelu.company :as com]))
 
 (defn excel-response [filename body]
-  (let [error-message "Exception while compiling open applications excel:"]
+  (let [error-message "Exception while compiling excel:"]
     (excel/excel-response filename body error-message)))
 
 (defraw open-applications-xlsx
@@ -138,7 +138,8 @@
 (defraw store-billing-report
   {:description "Excel report of documents sold in Lupapiste kauppa"
    :parameters [startTs endTs]
-   :input-validators [(partial action/numeric-parameters [:startTs :endTs])]
+   :input-validators [(partial action/numeric-parameters [:startTs :endTs])
+                      start-gt-end]
    :user-roles #{:authorityAdmin}}
   [{user :user {lang :lang} :data}]
   (let [resulting-file-name (str (i18n/localize lang "billing.excel.filename")
