@@ -47,6 +47,8 @@
        (apply +)
        cents->euros))
 
+(def total-amount-of-documents count)
+
 (def billing-sheet-column-localization-keys
   ["billing.transaction-id"
    "billing.created-timestamp"
@@ -75,9 +77,13 @@
                      document-price)
         wb (excel/create-workbook data-rows sheet-name header-row-content row-fn)]
     (excel/add-empty-row! sheet-name wb)
-    (excel/add-sum-row! sheet-name
-                        wb
+    (excel/add-sum-row! sheet-name wb
+                        [nil
+                         (i18n/localize lang "billing.excel.documents")
+                         (i18n/localize lang "billing.excel.sum-price")])
+    (excel/add-sum-row! sheet-name wb
                         [(i18n/localize lang "billing.excel.sum")
+                         (total-amount-of-documents data-rows)
                          (total-price-of-documents data-rows)])
     (excel/xlsx-stream wb)))
 
