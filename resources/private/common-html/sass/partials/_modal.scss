@@ -118,6 +118,11 @@
   width: auto;
 }
 
+.neighbor-status {
+  max-height: 1000px;
+  overflow: scroll;
+}
+
 .autosized.autosized--wider {
   min-width: 25em;
 }
