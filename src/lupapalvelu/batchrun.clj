@@ -1458,15 +1458,20 @@
                                   (update acc attachment-id (fn [cmds]
                                                               (->> (conj cmds cmd)
                                                                    (sort-by :created)))))
-                                stamps))]
-    (doseq [{file-id :_id chunk-count :count} (mc/aggregate (mongo/get-db)
-                                                            "fs.files"
-                                                            duplicate-files-query)]
+                                stamps))
+        mongo-result (vec (mc/aggregate (mongo/get-db)
+                                        "fs.files"
+                                        duplicate-files-query))]
+    (info (count mongo-result) "duplicate files found")
+    (doseq [{file-id :_id chunk-count :count} mongo-result]
       (let [file-data (mongo/by-id :fs.files file-id)
             app-id (get-in file-data [:metadata :application])
             application (mongo/by-id :applications app-id)]
         (logging/with-logging-context {:applicationId app-id}
           (doseq [{att-id :id latest-version :latestVersion versions :versions md :metadata} (:attachments application)
+                  :when (some #(or (= file-id (:fileId %))
+                                   (= file-id (:originalFileId %)))
+                              versions)
                   :let [att-cmds (get id-to-cmds att-id)]]
             (info "Trying to fix file id" file-id "from attachment" att-id "with" chunk-count "duplicate chunks")
             (cond
