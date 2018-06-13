@@ -196,7 +196,7 @@
       (fact "Contract settings consist only of reviews"
         (let [review-id (add-repeating-setting sipoo-ya :contract :reviews :add-review
                                                :fi "Foo suomeksi"
-                                               :sv "Foo på svenska"
+                                               :sv "Foo p\u00e5 svenska"
                                                :en "Foo in English"
                                                :type "aloituskatselmus")]
           (query sipoo-ya :verdict-template-settings :category "contract")
@@ -230,7 +230,7 @@
                     (let [review-id (-> references :reviews first :id)]
                       (-> references :reviews last)
                       => {:fi   "Foo suomeksi"
-                          :sv   "Foo på svenska"
+                          :sv   "Foo p\u00e5 svenska"
                           :en   "Foo in English"
                           :type "aloituskatselmus"
                           :id   review-id}
