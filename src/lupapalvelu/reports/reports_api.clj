@@ -8,6 +8,7 @@
             [lupapalvelu.action :as action :refer [defraw]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as usr]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.reports.applications :as app-reports]
             [lupapalvelu.reports.store-billing :as store-billing]
             [lupapalvelu.reports.excel :as excel]
@@ -140,7 +141,8 @@
    :parameters [startTs endTs]
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])
                       start-gt-end]
-   :user-roles #{:authorityAdmin}}
+   :user-roles #{:authorityAdmin}
+   :pre-checks [org/check-docstore-enabled]}
   [{user :user {lang :lang} :data}]
   (let [resulting-file-name (str (i18n/localize lang "billing.excel.filename")
                                  "_"

@@ -33,7 +33,7 @@
     "katselmukset_ja_tarkastukset.katselmuksen_tai_tarkastuksen_poytakirja"
     :building_ids []
     :created_at "2018-06-06T10:56:14.159Z"}
-   {:description "Päätös"
+   {:description "P\u00E4\u00E4t\u00F6s"
     :transaction_id "f7ede026-027f-4e1a-a302-eb3cb6257a80"
     :address "Merimiehenkatu 35"
     :property_id "09100501140023"
@@ -91,7 +91,7 @@
     :created_at "2018-06-07T13:01:31.032Z"}])
 
 (def header-row-in-finnish
-  ["Tilaustunnus" "Tilausaika" "Osoite" "Kiinteistötunnus" "Rakennustunnukset" "Dokumenttityyppi" "Dokumentin kuvaus" "Päätöspäivämäärä" "Hinta (\u20AC)"])
+  ["Tilaustunnus" "Tilausaika" "Osoite" "Kiinteist\u00F6tunnus" "Rakennustunnukset" "Dokumenttityyppi" "Dokumentin kuvaus" "P\u00E4\u00E4t\u00F6sp\u00E4iv\u00E4m\u00E4\u00E4r\u00E4" "Hinta (\u20AC)"])
 
 (defn documents-in-summary [sheet]
   (-> sheet :data last (nth 1)))
@@ -107,7 +107,7 @@
         :row-fn identity
         :data [[]
                [nil "Dokumentteja (kpl)" "Summa (\u20AC)"]
-               ["Yhteensä" 0 "0.00"]]})
+               ["Yhteens\u00E4" 0 "0.00"]]})
 
   (facts "One entry"
     (let [sheet (billing-entries-sheet "091-R" 0 10000000000 (take 1 docstore-response) :fi)]

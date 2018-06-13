@@ -16,10 +16,11 @@
             [lupapalvelu.geojson :as geo]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.integrations.messages :as messages]
-            [lupapalvelu.pate.schemas :refer [PateSavedVerdictTemplates Phrase]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.pate.schemas :refer [PateSavedVerdictTemplates Phrase]]
             [lupapalvelu.permissions :refer [defcontext] :as permissions]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.wfs :as wfs]
             [lupapiste-commons.archive-metadata-schema :as archive-schema]
             [lupapiste-commons.attachment-types :as attachment-types]
@@ -943,3 +944,17 @@
                        {$set {:docstore-info.documentRequest.enabled enabled
                               :docstore-info.documentRequest.instructions instructions
                               :docstore-info.documentRequest.email email}}))
+
+(defn check-docstore-enabled [{user :user}]
+  (when-not (-> user
+                roles/authority-admins-organization-id
+                get-docstore-info-for-organization!
+                :docStoreInUse)
+    (fail :error.docstore-not-enabled)))
+
+(defn check-docterminal-enabled [{user :user}]
+  (when-not (-> user
+                roles/authority-admins-organization-id
+                get-docstore-info-for-organization!
+                :docTerminalInUse)
+    (fail :error.docterminal-not-enabled)))
