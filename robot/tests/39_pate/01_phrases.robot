@@ -10,6 +10,7 @@ Resource       ../../common_resource.robot
 Sipoo admin logs in
   Sipoo logs in
   Go to page  pate-verdict-templates
+  #Kill dev-box
 
 There are no phrases
   Phrase count  0
@@ -93,6 +94,16 @@ Sort by phrase
   Sort by  phrase  down
   Check order  A  C  B
 
+Delete phrase
+  Click by test id  phrase-text-0
+  Click visible test id  delete-phrase
+  Confirm yes no dialog
+  Wait test id visible  add-phrase
+
+Order has not changed
+  Phrase count  2
+  Check order  C  B
+
 *** Keywords ***
 
 # Adds given text + space
@@ -123,10 +134,10 @@ Check phrase
   Test id text is  phrase-text-${index}  ${text}
 
 Check order
-  [Arguments]  ${tag1}  ${tag2}  ${tag3}
+  [Arguments]  ${tag1}  ${tag2}  ${tag3}=ignore
   Test id text is  phrase-tag-0  ${tag1}
   Test id text is  phrase-tag-1  ${tag2}
-  Test id text is  phrase-tag-2  ${tag3}
+  Run keyword unless  '${tag3}' == 'ignore'  Test id text is  phrase-tag-2  ${tag3}
 
 Column icon
   [Arguments]  ${column}  ${icon}
