@@ -655,11 +655,14 @@
     cr/all-of))
 
 (defn rakennelmatieto->kaupunkikuvatoimenpide [raktieto]
-  {:kayttotarkoitus {:value ""}
-   :kokonaisala {:value ""}
-   :kuvaus {:value (get-in raktieto [:Rakennelma :kuvaus :kuvaus])}
-   :tunnus {:value (get-in raktieto [:Rakennelma :tunnus :kunnanSisainenPysyvaRakennusnumero])}
-   :valtakunnallinenNumero {:value (get-in raktieto [:Rakennelma :tunnus :kiinttun])}})
+  (let [kaupunkikuvatoimenpide-ei-tunnusta {:kayttotarkoitus {:value ""}
+                                            :kokonaisala {:value ""}
+                                            :kuvaus {:value (get-in raktieto [:Rakennelma :kuvaus :kuvaus])}}
+        tunnus (get-in raktieto [:Rakennelma :tunnus :kunnanSisainenPysyvaRakennusnumero])]
+    (if (nil? tunnus)
+      kaupunkikuvatoimenpide-ei-tunnusta
+      (merge kaupunkikuvatoimenpide-ei-tunnusta {:tunnus {:value tunnus}
+                                                 :valtakunnallinenNumero {:value (get-in raktieto [:Rakennelma :tunnus :kiinttun])}}))))
 
 (defn ->viitelupatunnukset
   "Takes a parsed XML document, returns a list of viitelupatunnus -ids (in 'permit-id'-format) found therein."

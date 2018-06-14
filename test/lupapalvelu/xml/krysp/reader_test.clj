@@ -1,8 +1,7 @@
 (ns lupapalvelu.xml.krysp.reader-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [net.cgrand.enlive-html :as enlive]
-            [lupapalvelu.factlet :refer [fact* facts*]]
+            [net.cgrand.enlive-html :as enlive] [lupapalvelu.factlet :refer [fact* facts*]]
             [clj-time.coerce :as coerce]
             [sade.common-reader :as cr]
             [sade.strings :as ss]
@@ -740,3 +739,25 @@
                                 {:pvm "2016-09-10Z" :tila "rakennusty\u00f6t keskeytetty"}]])
          (cr/strip-xml-namespaces)
          (application-state)) => "lopullinen loppukatselmus tehty"))
+
+(fact "The reader function rakennelmatieto->kaupunkikuvatoimenpide produces documents as expected"
+  (let [rakennelmatieto {:Rakennelma {:alkuHetki "2013-01-10T00:00:00Z"
+                                      :kuvaus {:kuvaus "Katos"}
+                                      :sijaintitieto {:Sijainti {:piste {:Point {:pos "2.449317E7 6445909.0"}}}}
+                                      :tunnus {:aanestysalue nil
+                                               :jarjestysnumero "1"
+                                               :kiinttun "07201800869996"
+                                               :kunnanSisainenPysyvaRakennusnumero "05643"
+                                               :rakennuksenSelite "akt"
+                                               :rakennusnro "001"}
+                                      :yksilointitieto "0543154"}}]
+    (fact "A rakennelmatieto with tunnus results in a document of type 'kaupunkikuvatoimenpide'"
+      (rakennelmatieto->kaupunkikuvatoimenpide rakennelmatieto) => {:kayttotarkoitus {:value ""}
+                                                                    :kokonaisala {:value ""}
+                                                                    :kuvaus {:value "Katos"}
+                                                                    :tunnus {:value "05643"}
+                                                                    :valtakunnallinenNumero {:value "07201800869996"}})
+    (fact "A rakennelmatieto without tunnus results in a document of type 'kaupunkikuvatoimenpide-ei-tunnusta'"
+      (rakennelmatieto->kaupunkikuvatoimenpide (update-in rakennelmatieto [:Rakennelma] dissoc :tunnus)) => {:kayttotarkoitus {:value ""}
+                                                                                                             :kokonaisala {:value ""}
+                                                                                                             :kuvaus {:value "Katos"}})))
