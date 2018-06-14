@@ -8,7 +8,6 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.mongo :as mongo]
-            [monger.collection :as collection]
             [monger.operators :refer :all]
             [ring.util.io :as ring-io]
             [sade.strings :as ss]
@@ -403,7 +402,7 @@
                                    :permitType 1
                                    :nbrOfOperations {"$sum" [1 {"$size" {"$ifNull" ["$secondaryOperations", []]}}]}}}
                       {"$group" group-clause}])]
-    (collection/aggregate (mongo/get-db) "applications" aggregate)))
+    (mongo/aggregate "applications" aggregate)))
 
 (defn archiving-projects-per-month-query [month year]
   (->> (applications-per-month-query month year {:_id "$permitType"
