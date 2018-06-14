@@ -107,7 +107,7 @@
         :row-fn identity
         :data [[]
                [nil "Dokumentteja (kpl)" "Summa (\u20AC)"]
-               ["Yhteens\u00E4" 0 "0.00"]]})
+               ["Yhteens\u00E4" 0 0.0]]})
 
   (facts "One entry"
     (let [sheet (billing-entries-sheet "091-R" 0 10000000000 (take 1 docstore-response) :fi)]

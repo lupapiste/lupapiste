@@ -23,7 +23,7 @@
       util/to-local-date))
 
 (defn cents->euros [cents]
-  (format "%.2f" (/ (bigdec cents) 100)))
+  (Double/parseDouble (format "%.2f" (/ (bigdec cents) 100))))
 
 (def- transaction-id :transaction_id)
 (def- created-timestamp (comp ->excel-time :created_at))
