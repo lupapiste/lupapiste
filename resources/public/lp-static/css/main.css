@@ -29427,6 +29427,10 @@ div.pate-phrases table.pate-phrases-table th > div.like-btn i.icon-placeholder {
   min-width: 22px;
 }
 
+div.pate-phrases table.pate-phrases-table td.category {
+  white-space: nowrap;
+}
+
 div.pate-phrases table.pate-phrases-table td.phrase {
   width: 100%;
   max-width: 0;

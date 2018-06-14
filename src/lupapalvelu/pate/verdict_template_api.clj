@@ -4,7 +4,6 @@
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.pate.schemas :as schemas]
-            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]

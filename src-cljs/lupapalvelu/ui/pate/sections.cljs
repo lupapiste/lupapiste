@@ -1,10 +1,9 @@
 (ns lupapalvelu.ui.pate.sections
   (:require [clojure.string :as s]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.path :as path]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.pate.layout :as layout]
-            [lupapalvelu.ui.pate.path :as path]
             [rum.core :as rum]
             [sade.shared-util :as util]))
 

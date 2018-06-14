@@ -1,11 +1,11 @@
 (ns lupapalvelu.ui.pate.settings
   (:require [clojure.string :as s]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.path :as path]
+            [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.pate.components :as pate-components]
             [lupapalvelu.ui.pate.layout :as layout]
-            [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.sections :as sections]
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.state :as state]
@@ -45,7 +45,7 @@
                    (let [value (.. event -target -value)]
                      (callback value)
                      (reset! selection* value)))}
-     (->> shared/review-type-map
+     (->> helper/review-type-map
           keys
           (map (fn [k]
                  {:text (common/loc (str "pate.review-type." (name k)))

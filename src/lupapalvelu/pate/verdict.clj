@@ -18,11 +18,13 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.date :as date]
-            [lupapalvelu.pate.legacy :as legacy]
+            [lupapalvelu.pate.legacy-schemas :as legacy]
             [lupapalvelu.pate.pdf :as pdf]
+            [lupapalvelu.pate.schema-helper :as helper]
+            [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.schemas :as schemas]
-            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.tasks :as pate-tasks]
+            [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
@@ -115,7 +117,7 @@
                                 (map keyword)
                                 set)
         {:keys [dictionary
-                sections]} (shared/verdict-schema category)
+                sections]} (verdict-schemas/verdict-schema category)
         dic-sec            (schemas/dict-sections sections)
         removed-ver-secs   (->> sections
                                 (filter #(contains? removed-tem-secs
@@ -141,7 +143,7 @@
   keys. Resolves inclusions and initial values from the template."
   [{:keys [category published] :as template}]
   (let [{dic     :dictionary
-         version :version} (shared/verdict-schema category)
+         version :version} (verdict-schemas/verdict-schema category)
         {:keys [data
                 settings]} published
         incs               (inclusions category published)
@@ -232,7 +234,7 @@
                               included? (update-in [:draft :references :foremen] conj codename)
                               selected? (update-in [:draft :data :foremen] conj codename))))
                         initmap
-                        shared/foreman-codes)]
+                        helper/foreman-codes)]
     (resolve-requirement-inclusion updated :foremen)))
 
 (defn init--requirements-references
@@ -263,7 +265,7 @@
                (let [{:keys [verdict-dates]} (-> template :published :data)]
                  (cond-> (util/difference-as-kw incs
                                                 [:automatic-verdict-dates]
-                                                shared/verdict-dates)
+                                                helper/verdict-dates)
                    (seq verdict-dates)
                    (util/union-as-kw verdict-dates
                                      [:automatic-verdict-dates]))))))
@@ -381,7 +383,7 @@
   (-> initmap
       (init--dict-by-application :handler general-handler)
       init--verdict-dates
-      (init--dict-by-application :verdict-type shared/ya-verdict-type)
+      (init--dict-by-application :verdict-type schema-util/ya-verdict-type)
       (init--requirements-references :plans)
       (init--requirements-references :reviews)
       init--upload
@@ -437,7 +439,7 @@
   contain every schema dict."
   [{:keys [application organization created]
     :as   command}]
-  (let [category   (shared/application->category application)
+  (let [category   (schema-util/application->category application)
         verdict-id (mongo/create-id)]
     (action/update-application command
                                {$push {:pate-verdicts
@@ -523,7 +525,7 @@
 
 (defn verdict-list
   [{:keys [lang application]}]
-  (let [category (shared/application->category application)
+  (let [category (schema-util/application->category application)
         ;; There could be both contracts and verdicts.
         verdicts        (filter #(util/=as-kw category (:category %))
                                 (:pate-verdicts application))
@@ -693,10 +695,10 @@
         automatic?  (:automatic-verdict-dates verdict-data)]
     (when (and automatic? (integer? timestamp))
       (loop [dates      {}
-             [kw & kws] shared/verdict-dates
+             [kw & kws] helper/verdict-dates
              latest     timestamp]
         (if (nil? kw)
-          (select-keys dates (util/intersection-as-kw shared/verdict-dates
+          (select-keys dates (util/intersection-as-kw helper/verdict-dates
                                                       (:inclusions template)))
           (let [{:keys [delta unit]} (kw date-deltas)
                 result (date/parse-and-forward latest
@@ -751,7 +753,7 @@
 (defn- verdict-schema [{:keys [category schema-version legacy? template]}]
   (update (if legacy?
             (legacy/legacy-verdict-schema category)
-            (shared/verdict-schema category schema-version))
+            (verdict-schemas/verdict-schema category schema-version))
           :dictionary
           #(select-inclusions % (map keyword (:inclusions template)))))
 
@@ -896,7 +898,7 @@
           app-buildings))
 
 (defn command->category [{app :application}]
-  (shared/application->category app))
+  (schema-util/application->category app))
 
 (defn statements
   "List of maps with given (timestamp), text (string) and

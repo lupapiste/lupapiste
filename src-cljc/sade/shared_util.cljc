@@ -75,7 +75,8 @@
 (defn split-kw-path
   ":a.b.c -> [:a :b :c]"
   [kw]
-  (map keyword (s/split (name (or kw "")) #"\.")))
+  (when-not (nil? kw)
+    (map keyword (s/split (name (or kw "")) #"\."))))
 
 (defn indexed
   "Returns a lazy sequence of [index, item] pairs, where items come

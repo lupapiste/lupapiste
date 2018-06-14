@@ -7,8 +7,8 @@
             [clojure.set :as set]
             [lupapalvelu.action :refer [defquery defcommand defraw notify] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
+            [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.schemas :as schemas]
-            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pate.verdict :as verdict]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.roles :as roles]
@@ -58,7 +58,7 @@
                           (not verdict)
                           :error.verdict-not-found
 
-                          (util/not=as-kw (shared/application->category application)
+                          (util/not=as-kw (schema-util/application->category application)
                                           (:category verdict))
                           :error.invalid-category
 

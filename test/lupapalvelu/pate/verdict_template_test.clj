@@ -1,5 +1,5 @@
 (ns lupapalvelu.pate.verdict-template-test
-  (:require [lupapalvelu.pate.shared :as shared]
+  (:require [lupapalvelu.pate.verdict-template-schemas :as template-schemas]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict-template :refer :all]
             [midje.sweet :refer :all]
@@ -64,7 +64,7 @@
                                               :three "hello"}})
   => {:one   true
       :three "hello"}
-  (provided (shared/verdict-template-schema :r) => test-template)
+  (provided (template-schemas/verdict-template-schema :r) => test-template)
   (draft-for-publishing {:category :r :draft {:one              true
                                               :two              nil
                                               :three            ""
@@ -78,31 +78,31 @@
                          :second false}
       :four             [{:four-one false :four-two "Yeah"}
                          {:four-two "haeY"}]}
-  (provided (shared/verdict-template-schema :r) => test-template))
+  (provided (template-schemas/verdict-template-schema :r) => test-template))
 
 (facts "Template inclusions"
   (fact "Every section included"
     (template-inclusions {:category :r :draft {}})
     => (just ["one" "two" "three" "four" "five"] :in-any-order)
-    (provided (shared/verdict-template-schema :r) => test-template))
+    (provided (template-schemas/verdict-template-schema :r) => test-template))
   (fact "First section removed"
     (template-inclusions {:category :r :draft {:removed-sections {:first true}}})
     => (just ["one" "two" "three" "four" "five"] :in-any-order)
-    (provided (shared/verdict-template-schema :r) => test-template))
+    (provided (template-schemas/verdict-template-schema :r) => test-template))
   (fact "Second section removed"
     (template-inclusions {:category :r :draft {:removed-sections {:second true}}})
     => (just ["one" "three" "four" "five"] :in-any-order)
-    (provided (shared/verdict-template-schema :r) => test-template))
+    (provided (template-schemas/verdict-template-schema :r) => test-template))
   (fact "Third section removed"
     (template-inclusions {:category :r :draft {:removed-sections {:third true}}})
     => (just ["one" "two" "three" "four" "five"] :in-any-order)
-    (provided (shared/verdict-template-schema :r) => test-template))
+    (provided (template-schemas/verdict-template-schema :r) => test-template))
   (fact "Every section removed"
     (template-inclusions {:category :r :draft {:removed-sections {:first  true
                                                                   :second true
                                                                   :third  true}}})
     => (just ["three" "four" "five"] :in-any-order)
-    (provided (shared/verdict-template-schema :r) => test-template)))
+    (provided (template-schemas/verdict-template-schema :r) => test-template)))
 
 (facts "Operation->category"
   (fact "R" (operation->category "pientalo") => :r)
