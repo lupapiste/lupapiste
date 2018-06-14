@@ -18,13 +18,9 @@
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.organization :as org]
-            [schema.core :as sc]
-            [monger.collection :as collection]
             [clj-time.coerce :as tc]
             [clj-time.core :as t]
             [lupapalvelu.states :as states]
-            [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.application :as app]
             [lupapalvelu.application-bulletin-utils :as bulletin-utils]))
 
 (def bulletin-page-size 10)
@@ -65,7 +61,7 @@
         page (cond
                (string? page) (read-string page)
                :default page)
-        apps (collection/aggregate (mongo/get-db) "application-bulletins"
+        apps (mongo/aggregate "application-bulletins"
                [{"$match" (bulletins/versions-elemMatch now-ts officialAt-lowerLimit)}
                 {"$unwind" {:path "$versions"}}
                 {"$match" (bulletins/version-elemMatch now-ts officialAt-lowerLimit)}

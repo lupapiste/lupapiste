@@ -41,7 +41,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   };
 
-  self.sizeClasses = { "t": "form-input tiny", "s": "form-input short", "m": "form-input medium", "l": "form-input long", "xl": "form-input really-long"};
+  self.sizeClasses = { "t": "tiny", "s": "short", "m": "medium", "l": "long", "xl": "really-long"};
 
   // trigger stored events once
   self.triggerEvents = function() {
