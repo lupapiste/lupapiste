@@ -102,7 +102,9 @@
           (sc/optional-key :loc-prefix) keyword-or-string
           ;; Absolute localisation terms. Overrides loc-prefix, does not
           ;; affect children.
-          (sc/optional-key :i18nkey)    keyword-or-string}))
+          (sc/optional-key :i18nkey)    keyword-or-string
+          ;; Value of data-test-id attribute.
+          (sc/optional-key :test-id)    sc/Keyword}))
 
 (defschema PateComponent
   (merge PateBase

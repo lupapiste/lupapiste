@@ -150,7 +150,7 @@
 
 (defn set-category [category]
   (reset! state/current-category category)
-  (settings/fetch-settings category ))
+  (settings/fetch-settings category))
 
 (rum/defc category-select < rum/reactive
   []
@@ -220,10 +220,13 @@
                   :text-loc :pate.copy
                   :icon     :lupicon-copy})
                 (toggle-delete id deleted)]]])]]))
-     [:button.positive
-      {:on-click #(service/new-template @state/current-category new-template)}
-      [:i.lupicon-circle-plus]
-      [:span (loc-text :pate.add-verdict-template)]]]))
+     (components/icon-button {:icon     :lupicon-circle-plus
+                              :class    :positive
+                              :text     (loc-text :pate.add-verdict-template)
+                              :on-click #(service/new-template @state/current-category
+                                                               new-template)
+                              :enabled? (state/auth? :new-verdict-template)
+                              :test-id  :add-template})]))
 
 (rum/defc verdict-templates < rum/reactive
   []

@@ -333,13 +333,14 @@
      [clear?] if truthy, clear button is shown when proper (default
               false).
      [disabled?] Is component disabled? (false)
-     [required?] Is component required? (false)"
+     [required?] Is component required? (false)
+     [test-id] data-test-id attribute for the top-level div."
   [{selected* ::selected
     term*     ::term
     current*  ::current
     open?*    ::open?
     :as       local-state} _ {:keys [items clear? callback disabled?
-                                     required?]
+                                     required? test-id]
                                     :as options}]
   (let [{:keys [text-edit
                 menu-items
@@ -352,6 +353,7 @@
     (when-not open?
       (common/reset-if-needed! term* ""))
     [:div.pate-autocomplete
+     (common/add-test-id {} test-id)
      [:div.like-btn.ac--selected
       {:on-click (when-not disabled?
                    #(swap! open?* not))

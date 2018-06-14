@@ -27,7 +27,8 @@
 
 (rum/defcs phrase-category-select < rum/reactive
   (components/initial-value-mixin ::selected)
-  [{selected* ::selected} _ callback & [{:keys [include-empty? disabled?]}]]
+  [{selected* ::selected} _ callback & [{:keys [include-empty? disabled?
+                                                test-id]}]]
   (let [items (->> (if include-empty?
                      shared-schemas/phrase-categories
                      (non-empty-categories))
@@ -44,7 +45,7 @@
      (common/add-test-id {:value  @selected*
                           :disabled disabled?
                           :on-change #(select (.. % -target -value))}
-                         :select-phrase-category)
+                         (or test-id :select-phrase-category))
      (map (fn [{:keys [value text]}]
             [:option {:key value :value value} text])
           items)]))

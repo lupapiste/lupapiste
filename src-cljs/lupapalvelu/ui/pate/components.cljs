@@ -44,6 +44,16 @@
     (label-wrap options extra)
     component))
 
+(defn test-id [{:keys [path schema]} & extras]
+  (let [join-fn #(->> (flatten %)
+                      (map name)
+                      (remove s/blank?)
+                      (s/join "-"))]
+    (join-fn [(get schema :test-id path) extras])))
+
+(defn test-id-wrap [options target]
+  (common/add-test-id target (test-id options)))
+
 (rum/defc pate-multi-select < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
   [:div.pate-multi-select
@@ -200,7 +210,8 @@
             [:label (common/loc :phrase.add)]
             (phrases/phrase-category-select @category*
                                             set-category
-                                            {:disabled? disabled?})]]
+                                            {:disabled? disabled?
+                                             :test-id   (test-id options :category)})]]
           [:div.col-5
            [:div.col--vertical
             (common/empty-label)
@@ -216,43 +227,49 @@
                                                                   (str "\n" % "\n")
                                                                   (drop sel-end old-text))))))
               :disabled? disabled?
-              :clear?    true})]]
+              :clear?    true
+              :test-id (test-id options :autocomplete)})]]
           [:div.col-4.col--right
            [:div.col--vertical
             (common/empty-label)
             [:div.inner-margins
              [:button.primary.outline
-              {:on-click (fn []
-                           (update-text "")
-                           (reset! selected* ""))
-               :disabled disabled?}
+              (common/add-test-id {:on-click (fn []
+                                               (update-text "")
+                                               (reset! selected* ""))
+                                   :disabled disabled?}
+                                  (test-id options :clear))
               (common/loc :pate.clear)]
              [:button.primary.outline
-              {:disabled (let [phrase (rum/react selected*)]
-                           (or disabled?
-                               (s/blank? phrase)
-                               (not (re-find (re-pattern (goog.string/regExpEscape phrase))
-                                             (or (path/react path state) "")))))
-               :on-click (fn []
-                           (update-text (s/replace-first (path/value path state)
-                                                         @selected*
-                                                         @replaced*))
-                           (reset! selected* ""))}
+              (common/add-test-id {:disabled (let [phrase (rum/react selected*)]
+                                               (or disabled?
+                                                   (s/blank? phrase)
+                                                   (not (re-find (re-pattern (goog.string/regExpEscape phrase))
+                                                                 (or (path/react path state) "")))))
+                                   :on-click (fn []
+                                               (update-text (s/replace-first (path/value path state)
+                                                                             @selected*
+                                                                             @replaced*))
+                                               (reset! selected* ""))}
+                                  (test-id options :undo))
               (common/loc :phrase.undo)]]]]])
        [:div.row
         [:div.col-12.col--full
          (components/tabbar {:selected* tab*
-                             :tabs     [{:id       ::edit
-                                         :text-loc :pate.edit-tab}
-                                        {:id       ::preview
-                                         :text-loc :pdf.preview}]})
+                             :tabs      [{:id       ::edit
+                                          :text-loc :pate.edit-tab
+                                          :test-id (test-id options :edit-tab)}
+                                         {:id       ::preview
+                                          :text-loc :pdf.preview
+                                          :test-id (test-id options :preview-tab)}]})
          (if (= tab ::edit)
            [:div.phrase-edit
             {:ref ref-id}
             (components/textarea-edit (path/value path state)
                                       {:callback  update-text
                                        :disabled  disabled?
-                                       :required? required?})]
+                                       :required? required?
+                                       :test-id (test-id options :edit)})]
            [:div.phrase-edit
             (components/markup-span (path/value path state)
                                     :phrase-preview)])]]])))

@@ -4,13 +4,13 @@ Documentation   Adding and editing phrases
 Suite Setup     Apply pate-enabled fixture now
 Suite Teardown  Logout
 Resource       ../../common_resource.robot
+Resource       pate_resource.robot
 
 *** Test Cases ***
 
 Sipoo admin logs in
   Sipoo logs in
   Go to page  pate-verdict-templates
-  #Kill dev-box
 
 There are no phrases
   Phrase count  0
@@ -41,7 +41,7 @@ Tag or phrase cannot be blank
 Check markup
   Click link  jquery=[data-test-id=preview-phrase-tab] a
   Wait until  Element should not be visible  jquery=[data-test-id=preview-phrase-tab] a
-  Element text should be  jquery=span.markup.phrase-preview p strong  Hello world!
+  Wait until  Element text should be  jquery=span.markup.phrase-preview p strong  Hello world!
   Click link  jquery=[data-test-id=edit-phrase-tab] a
   Wait test id visible  edit-phrase
 
@@ -104,14 +104,61 @@ Order has not changed
   Phrase count  2
   Check order  C  B
 
+Create new verdict template
+  Click visible test id  add-template
+
+Categories are listed
+  Phrase categories  paatosteksti  paatosteksti  yleinen
+
+Select general phrase
+  Test id disabled  paatosteksti-undo
+  Fill test id  paatosteksti-edit  Hello
+  Select phrase category  paatosteksti  yleinen
+  Select phrase  paatosteksti  general
+  Test id text is  paatosteksti-autocomplete  B - _General information_
+  Phrase text is  paatosteksti  Hello\n_General information_
+
+Check phrase markup
+  Click visible test id  paatosteksti-preview-tab
+  Wait until  Element text should be  jquery=span.markup.phrase-preview p span.underline  General information
+  Test id disabled  paatosteksti-undo
+  Test id disabled  paatosteksti-clear
+  Click visible test id  paatosteksti-edit-tab
+
+Undo phrase
+  Click visible test id  paatosteksti-undo
+  Phrase text is  paatosteksti  Hello
+  Test id text is  paatosteksti-autocomplete  ${EMPTY}
+  Test id disabled  paatosteksti-undo
+
+Clear phrase text
+  Click visible test id  paatosteksti-clear
+  Wait until  Phrase text is  paatosteksti  ${EMPTY}
+
+Select verdict phrase
+  ${sel}=  Set variable  [data-test-id=paatosteksti-autocomplete] i.ac--clear
+  Element should not be visible  jquery=${sel}
+  Select phrase category  paatosteksti  paatosteksti
+  Select phrase  paatosteksti  verdict
+  Test id text is  paatosteksti-autocomplete  C - Some kind of verdict.
+  Phrase text is  paatosteksti  Some kind of verdict.
+  Test id enabled  paatosteksti-undo
+  Click element  jquery=${sel}
+  Test id text is  paatosteksti-autocomplete  ${EMPTY}
+  Test id disabled  paatosteksti-undo
+  Element should not be visible  jquery=${sel}
+  Phrase text is  paatosteksti  Some kind of verdict.
+
 *** Keywords ***
 
 # Adds given text + space
 Edit text
   [Arguments]  ${tid}  ${text}
   Fill test id  ${tid}  ${text}
-  # Key press needed for triggering the change with robot
+  # Key press needed for triggering the change with robot, so we add
+  # and remove space character
   Press key  jquery=[data-test-id=${tid}]  \\32
+  Press key  jquery=[data-test-id=${tid}]  \\8
 
 Phrase count
   [Arguments]  ${count}
