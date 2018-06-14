@@ -66,11 +66,11 @@
                                         :settings   PatePublishedTemplateSettings}}))
 
 (defschema PateSavedVerdictTemplates
-  {:templates                  [PateSavedTemplate]
-   (sc/optional-key :settings) {(sc/optional-key :r)  PateSavedSettings
-                                (sc/optional-key :p)  PateSavedSettings
-                                (sc/optional-key :ya) PateSavedSettings
-                                (sc/optional-key :tj) PateSavedSettings}})
+  {(sc/optional-key :templates) [PateSavedTemplate]
+   (sc/optional-key :settings)  {(sc/optional-key :r)  PateSavedSettings
+                                 (sc/optional-key :p)  PateSavedSettings
+                                 (sc/optional-key :ya) PateSavedSettings
+                                 (sc/optional-key :tj) PateSavedSettings}})
 
 ;; Phrases
 
