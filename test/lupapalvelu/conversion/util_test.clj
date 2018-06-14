@@ -55,7 +55,7 @@
     (util/destructure-permit-id "75-0549-16-DJ") => {:kauposa "75" :no "0549" :tyyppi "DJ" :vuosi "16"}
     (-> (util/destructure-permit-id "16-0549-DJ 75") keys count) => 4)
   (facts "Destructuring invalid ids results in nil"
-    (util/destructure-permit-id "Hei äijät :D Mitä äijät :D Siistii nähä teit :D") => nil
+    (util/destructure-permit-id "Hei \00e4ij\00e4t :D Mit\00e4 \00e4ij\00e4t :D Siistii n\00e4h\00e4 teit :D") => nil
     (util/destructure-permit-id "75-0549-4242-A") => nil
     (util/destructure-permit-id "75 0549-4242-A") => nil
     (util/destructure-permit-id "751-0549-42-A") => nil))
