@@ -1,7 +1,8 @@
 (ns lupapalvelu.xml.krysp.reader-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [net.cgrand.enlive-html :as enlive] [lupapalvelu.factlet :refer [fact* facts*]]
+            [net.cgrand.enlive-html :as enlive]
+            [lupapalvelu.factlet :refer [fact* facts*]]
             [clj-time.coerce :as coerce]
             [sade.common-reader :as cr]
             [sade.strings :as ss]
