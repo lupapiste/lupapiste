@@ -1411,10 +1411,13 @@
       (= 1 (count (keys chunk-groups)))
       (error "Only one group of chunks exists for file id" file-id)
 
-      (not-every? #(= (count %)
-                      (count (first (vals chunk-groups))))
-                  (vals chunk-groups))
-      (error "Different number of chunks in timestamp groups for file id" file-id ", skipping")
+      (let [chunks (get chunk-groups earliest-ts)
+            chunk-numbers (->> (map :n chunks)
+                               distinct
+                               sort)]
+        (or (not= 0 (first chunk-numbers))
+            (not= (dec (count chunks)) (last chunk-numbers))))
+      (error "Chunk ordinals do not match the actual number of chunks in first group for file id" file-id ", skipping")
 
       :else
       (let [bos (ByteArrayOutputStream.)]
@@ -1491,6 +1494,7 @@
                 (delete-duplicate-original-file-chunks file-id app-id target-version))
 
               (and att-cmds
+                   (= file-id (:fileId latest-version))
                    (not= (:tila md) "arkistoitu"))
               (if-let [source-file-id (cond
                                         (and (get stamps att-id)
@@ -1577,6 +1581,12 @@
                          file-id ". Number of chunks for source file:" (mongo/count :fs.chunks {:files_id source-file-id
                                                                                                 :n 0}))))
 
+              (= file-id (:fileId latest-version))
+              (error "File id" file-id "for latest version of attachment" att-id "has duplicate chunks but no rotate or stamping commands, skipping")
+
+              (some #(= file-id (:fileId %)) versions)
+              (error "File id" file-id "is the fileId for an earlier version in attachment" att-id)
+
               :else
-              (error "File id" file-id "has duplicate chunks but no rotate or stamping commands, skipping")))))))
+              (error "File id" file-id "does not match the attachment")))))))
   (info "Done."))
