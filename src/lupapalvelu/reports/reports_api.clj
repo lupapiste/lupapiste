@@ -8,12 +8,14 @@
             [lupapalvelu.action :as action :refer [defraw]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as usr]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.reports.applications :as app-reports]
+            [lupapalvelu.reports.store-billing :as store-billing]
             [lupapalvelu.reports.excel :as excel]
             [lupapalvelu.company :as com]))
 
 (defn excel-response [filename body]
-  (let [error-message "Exception while compiling open applications excel:"]
+  (let [error-message "Exception while compiling excel:"]
     (excel/excel-response filename body error-message)))
 
 (defraw open-applications-xlsx
@@ -133,3 +135,18 @@
                                  ".xlsx")]
     (excel-response resulting-file-name
                     (app-reports/digitized-attachments user startTs endTs lang))))
+
+(defraw store-billing-report
+  {:description "Excel report of documents sold in Lupapiste kauppa"
+   :parameters [startTs endTs]
+   :input-validators [(partial action/numeric-parameters [:startTs :endTs])
+                      start-gt-end]
+   :user-roles #{:authorityAdmin}
+   :pre-checks [org/check-docstore-enabled]}
+  [{user :user {lang :lang} :data}]
+  (let [resulting-file-name (str (i18n/localize lang "billing.excel.filename")
+                                 "_"
+                                 (util/to-xml-date (now))
+                                 ".xlsx")]
+    (excel-response resulting-file-name
+                    (store-billing/billing-entries user startTs endTs lang))))
