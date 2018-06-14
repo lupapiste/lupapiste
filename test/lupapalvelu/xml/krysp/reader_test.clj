@@ -4,10 +4,12 @@
             [net.cgrand.enlive-html :as enlive]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [clj-time.coerce :as coerce]
+            [sade.core :refer [def-]]
             [sade.common-reader :as cr]
             [sade.strings :as ss]
             [sade.xml :as xml]
             [lupapalvelu.tasks :as tasks]
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.krysp.reader :refer :all]
             [lupapalvelu.xml.krysp.common-reader :refer [rakval-case-type property-equals property-in wfs-krysp-url case-elem-selector]]
             [lupapalvelu.xml.krysp.review-reader :as review-reader]
@@ -762,3 +764,35 @@
       (rakennelmatieto->kaupunkikuvatoimenpide (update-in rakennelmatieto [:Rakennelma] dissoc :tunnus)) => {:kayttotarkoitus {:value ""}
                                                                                                              :kokonaisala {:value ""}
                                                                                                              :kuvaus {:value "Katos"}})))
+
+(def- verdict-a
+  (krysp-fetch/get-local-application-xml-by-filename "./dev-resources/krysp/verdict-r-2.1.6-type-A.xml" "R"))
+
+(def- verdict-tjo
+  (krysp-fetch/get-local-application-xml-by-filename "./dev-resources/krysp/verdict-r-2.1.6-type-TJO.xml" "R"))
+
+(fact "viitelupatunnus-id's can be extracted from messages"
+  (let [ids-a (->viitelupatunnukset verdict-a)
+        ids-tjo (->viitelupatunnukset verdict-tjo)]
+    (facts "the results are not empty"
+      (count ids-a) => pos?
+      (count ids-tjo) => pos?)
+    (facts "the ids are returned in the right format (with type code last)"
+      (letfn [(get-code [id]
+                (-> id (ss/split #"-") last))
+              (code-is-valid? [code]
+                (= code (apply str (filter #(Character/isLetter %) code))))
+              (every-code-is-valid? [idseq]
+                (->> idseq
+                     (map (comp code-is-valid? get-code))
+                     (every? true?)))]
+        (every-code-is-valid? ids-a) => true
+        (every-code-is-valid? ids-tjo) => true))))
+
+(facts "kuntalupatunnus ids can be extracted from XML"
+  (->kuntalupatunnus verdict-a) => "01-0001-12-A"
+  (->kuntalupatunnus verdict-tjo) => "01-0012-00-TJO")
+
+(facts "It can be deduced if the verdict is about a foreman or not"
+  (is-foreman-application? verdict-a) => false
+  (is-foreman-application? verdict-tjo) => true)
