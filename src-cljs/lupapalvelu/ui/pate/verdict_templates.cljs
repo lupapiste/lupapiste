@@ -106,15 +106,16 @@
 
 (defn with-back-button [component]
   [:div
-   [:button.ghost
-    {:on-click #(if-let [template-id (path/value :back state/current-view)]
-                  (do (when (state/auth? :update-and-open-verdict-template)
-                        (service/fetch-updated-template template-id
-                                                        update-settings-dependencies))
-                      (reset! state/current-view {:view ::template}))
-                  (reset-template nil))}
-    [:i.lupicon-chevron-left]
-    [:span (common/loc "back")]]
+   (components/icon-button {:class    :ghost
+                            :on-click #(if-let [template-id (path/value :back state/current-view)]
+                                         (do (when (state/auth? :update-and-open-verdict-template)
+                                               (service/fetch-updated-template template-id
+                                                                               update-settings-dependencies))
+                                             (reset! state/current-view {:view ::template}))
+                                         (reset-template nil))
+                            :icon     :lupicon-chevron-left
+                            :text-loc :back
+                            :test-id  :back})
    component])
 
 (defn verdict-template

@@ -15,6 +15,15 @@ Sipoo admin logs in
 There are no phrases
   Phrase count  0
 
+Phrase support is not visible on a new template
+  Click visible test id  add-template
+  Wait until  Phrase text is  paatosteksti  ${EMPTY}
+  No such test id  paatosteksti-category
+  No such test id  paatosteksti-autocomplete
+  No such test id  paatosteksti-clear
+  No such test id  paatosteksti-undo
+  Click visible test id  back
+
 Start adding new phrase
   Click visible test id  add-phrase
   Test id empty  phrase-tag
