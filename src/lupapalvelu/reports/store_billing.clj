@@ -3,6 +3,7 @@
             [clj-http.client :as http]
             [clj-time.coerce :as tc]
             [sade.core :refer [def- now]]
+            [sade.env :as env]
             [sade.property :refer [to-human-readable-property-id]]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -100,11 +101,12 @@
       excel/xlsx-stream))
 
 (defn get-billing-entries-from-docstore! [organization startTs endTs]
-  (-> (http/get "http://localhost:5000/api/billing/entries" ; TODO properties
+  (-> (http/get (env/value :store-billing :url)
                 {:query-params {:organization organization
                                 :startTimestampMillis startTs
                                 :endTimestampMillis endTs}
-                 :basic-auth "lupis:lupis"}) ; TODO properties
+                 :basic-auth [(env/value :store-billing :basic-auth :username)
+                              (env/value :store-billing :basic-auth :password)]})
       :body
       (json/parse-string true)
       vec))
