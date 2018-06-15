@@ -2,7 +2,7 @@
   :description "lupapalvelu"
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/data.codec "0.1.0"]
-                 [org.clojure/data.zip "0.1.1"] ; Note: 0.1.2 breaks lupapalvelu.wfs
+                 [org.clojure/data.zip "0.1.1"]             ; Note: 0.1.2 breaks lupapalvelu.wfs
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/tools.nrepl "0.2.13"]
                  [org.clojure/tools.reader "1.1.3.1"]
@@ -19,7 +19,7 @@
                  [metosin/ring-swagger-ui "2.2.5-0"]
 
                  ; Namespace finder library
-                 [bultitude "0.2.8"] ; noir requires 0.2.0
+                 [bultitude "0.2.8"]                        ; noir requires 0.2.0
                  [org.tcrawley/dynapath "1.0.0"]            ; bultitudes requires 0.2.3, but midje needs 1.0.0, should be compatible
 
                  ; MongoDB driver
@@ -70,7 +70,7 @@
                  [org.mnode.ical4j/ical4j "1.0.7" :exclusions [commons-logging]]
 
                  ; Apache Commons
-                 [commons-fileupload "1.3.3"] ; explicit requirement to catch version upgrades
+                 [commons-fileupload "1.3.3"]               ; explicit requirement to catch version upgrades
                  [org.apache.commons/commons-lang3 "3.5"]
                  [commons-io "2.5"]
                  [commons-codec "1.10"]
@@ -104,16 +104,16 @@
                  ; Image processing
                  [com.github.jai-imageio/jai-imageio-core "1.3.1"]
                  [com.github.jai-imageio/jai-imageio-jpeg2000 "1.3.0"]
-                 [com.google.zxing/javase "2.2"] ; QR codes
+                 [com.google.zxing/javase "2.2"]            ; QR codes
                  [com.twelvemonkeys.imageio/imageio-jpeg "3.2.1"]
 
                  ; MS Office document processing
                  [ontodev/excel "0.2.4" :exclusions [xml-apis org.apache.poi/poi-ooxml]]
                  [org.apache.poi/poi-ooxml "3.15"]
-                 [dk.ative/docjure "1.11.0"] ; this also depends on Apache POI v3.14
-                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.converter.docx.xwpf  "1.0.6"]
-                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.itext.extension  "1.0.6" :exclusions [com.lowagie/itext]]
-                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.document.docx  "1.0.6"]
+                 [dk.ative/docjure "1.11.0"]                ; this also depends on Apache POI v3.14
+                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.converter.docx.xwpf "1.0.6"]
+                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.itext.extension "1.0.6" :exclusions [com.lowagie/itext]]
+                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.document.docx "1.0.6"]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.template.freemarker "1.0.6" :exclusions [org.freemarker/freemarker]]
 
                  ; Apache pdfbox for PDF/A wrapper
