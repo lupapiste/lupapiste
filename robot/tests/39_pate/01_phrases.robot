@@ -22,7 +22,7 @@ Phrase support is not visible on a new template
   No such test id  paatosteksti-autocomplete
   No such test id  paatosteksti-clear
   No such test id  paatosteksti-undo
-  Click visible test id  back
+  Go back
 
 Start adding new phrase
   Click visible test id  add-phrase
@@ -166,8 +166,8 @@ Edit text
   Fill test id  ${tid}  ${text}
   # Key press needed for triggering the change with robot, so we add
   # and remove space character
-  Press key  jquery=[data-test-id=${tid}]  \\32
-  Press key  jquery=[data-test-id=${tid}]  \\8
+  Press key test id  ${tid}  \\32
+  Press key test id  ${tid}  \\8
 
 Phrase count
   [Arguments]  ${count}

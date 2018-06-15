@@ -50,15 +50,17 @@
             (service/set-template-name @(path/state [:id] info*)
                                        value
                                        (common/response->state info* :modified)))]
-    (components/pen-input {:value      (rum/react (path/state [:name] info*))
-                           :handler-fn handler-fn
-                           :disabled?  (not (state/auth? :set-verdict-template-name))})))
+    (components/pen-input {:value     (rum/react (path/state [:name] info*))
+                           :callback  handler-fn
+                           :disabled? (not (state/auth? :set-verdict-template-name))
+                           :test-id   :template-name})))
 
 
 (rum/defc verdict-template-publish < rum/reactive
   [{info* :info}]
   (let [published (path/react [:published] info*)]
     [:div [:span.row-text.row-text--margin
+           (common/add-test-id {} :template-state)
            (if published
              (loc-text :pate.last-published
                        (js/util.finnishDateAndTime published))
@@ -70,11 +72,12 @@
                               (path/react [:info :modified] state/settings-info)))
                       (false? (path/react :filled? info*))
                       (false? (path/react [:info :filled?] state/settings-info)))
-       :on-click #(service/publish-template (path/value [:id] info*)
-                                            (common/response->state info* :published))
-       :class :primary
-       :icon :lupicon-megaphone
-       :text-loc :pate.publish})]))
+       :on-click  #(service/publish-template (path/value [:id] info*)
+                                             (common/response->state info* :published))
+       :class     :primary
+       :icon      :lupicon-megaphone
+       :text-loc  :pate.publish
+       :test-id   :publish-template})]))
 
 
 (defn reset-template [{draft :draft :as template}]
@@ -131,8 +134,9 @@
       (verdict-template-publish options)]]
     [:div.row.row--tight
      [:div.col-1
-      (pate-components/required-fields-note options)
-      (pate-components/required-fields-note {:info (rum/cursor-in state/settings-info [:info])}
+      (pate-components/required-fields-note (assoc options :test-id :required-template))
+      (pate-components/required-fields-note {:info    (rum/cursor-in state/settings-info [:info])
+                                             :test-id :required-settings}
                                             (components/text-and-link {:text-loc :pate.settings-required-fields
                                                                        :click    #(open-settings (path/value :id info))}))]
      [:div.col-1.col--right
@@ -159,8 +163,9 @@
    [:div.row
     [:div.col-2.col--full
      [:select.dropdown
-      {:value     (rum/react state/current-category)
-       :on-change #(set-category (.. % -target -value))}
+      (common/add-test-id {:value     (rum/react state/current-category)
+                           :on-change #(set-category (.. % -target -value))}
+                          :category-select)
       (->> (rum/react state/categories)
            (map (fn [cid]
                   {:value cid
@@ -201,7 +206,7 @@
             [:th]]]
           [:tbody
            (for [{:keys [id name published deleted]} filtered]
-             [:tr {:key id}
+             [:tr (common/add-test-id {:key id} name)
               [:td (if deleted
                      name
                      [:a {:on-click #(open-template id)}

@@ -46,6 +46,7 @@
 
 (defn test-id [{:keys [path schema]} & extras]
   (let [join-fn #(->> (flatten %)
+                      (remove nil?)
                       (map name)
                       (remove s/blank?)
                       (s/join "-"))]
@@ -167,9 +168,10 @@
      (common/loc :pate.last-saved (js/util.finnishDateAndTime ts)))])
 
 (rum/defc required-fields-note < rum/reactive
-  ([{info* :info} note]
+  ([{info* :info test-id :test-id} note]
    (when (false? (path/react [:filled?] info*))
      [:div.pate-required-fields-note
+      (common/add-test-id {} test-id)
       note]))
   ([options]
    (required-fields-note options (common/loc :pate.required-fields))))
@@ -286,19 +288,19 @@
                 add remove]} schema
         text?                (-> text? false? not)
         button               (when (path/visible? options)
-                               [:button {:disabled (path/disabled? options)
-                                         :class    (path/css options)
-                                         :on-click (fn [_]
-                                                     (cond
-                                                       click
-                                                       (path/meta-value options click)
+                               (components/icon-button
+                                {:disabled? (path/disabled? options)
+                                 :class     (path/css options)
+                                 :on-click  (fn [_]
+                                              (cond
+                                                click
+                                                (path/meta-value options click)
 
-                                                       (or add remove)
-                                                       (path/meta-updated options true)))}
-                                (when icon
-                                  [:i {:class icon}])
-                                (when text?
-                                  [:span (path/loc options)])])]
+                                                (or add remove)
+                                                (path/meta-updated options true)))
+                                 :icon    icon
+                                 :text    (when text? (path/loc options))
+                                 :test-id (test-id options)}))]
     (if (show-label? schema wrap-label?)
       [:div.col--vertical
        (common/empty-label :pate-label)
@@ -318,7 +320,8 @@
                                              state
                                              dict)
                                  (path/loc options))
-                    :prefix    (:prefix schema)})
+                    :prefix    (:prefix schema)
+                    :test-id   (test-id options)})
     :wrap-label?  wrap-label?
     :empty-label? true}))
 
@@ -347,15 +350,16 @@
     component))
 
 (defn pate-attr
-  "Fills attribute map with :id, :key and :class. Also merges extras if
-  given."
+  "Fills attribute map with :id, :key, :class and :test-id. Also merges
+  extras if given."
   [{:keys [path] :as options} & extras]
   (let [id (path/id path)]
-    (apply merge (cons {:key   id
-                        :id    id
-                        :class (conj (path/css options)
-                                     (common/css-flags :warning
-                                                       (path/error? options)))}
+    (apply merge (cons (test-id-wrap options
+                                     {:key   id
+                                      :id    id
+                                      :class (conj (path/css options)
+                                                   (common/css-flags :warning
+                                                                     (path/error? options)))})
                        extras))))
 
 (defn- sort-by-schema

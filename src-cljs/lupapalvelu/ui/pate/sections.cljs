@@ -26,7 +26,8 @@
                         :callback  #(path/meta-updated (assoc options
                                                               :path path))
                         :disabled? (path/disabled? options)
-                        :negate?   true})))
+                        :negate?   true
+                        :test-id [:section (:id schema)]})))
 
 (declare section)
 (declare section-header)

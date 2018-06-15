@@ -1714,6 +1714,14 @@ Toggle not selected
   [Arguments]  ${tid}
   Checkbox wrapper not selected by test id  ${tid}
 
+Toggle disabled
+  [Arguments]  ${tid}
+  Test id disabled  ${tid}-input
+
+Toggle enabled
+  [Arguments]  ${tid}
+  Test id enabled  ${tid}-input
+
 Toggle toggle
   [Arguments]  ${tid}
   Wait until  Element should be visible  xpath=//label[@data-test-id='${tid}-label']
@@ -1745,6 +1753,10 @@ Test id autocomplete disabled
   [Arguments]  ${tid}
   jQuery should match X times  div[data-test-id='${tid}'] .autocomplete-selection-wrapper.disabled:visible  1
 
+
+Press key test id
+  [Arguments]  ${tid}  ${key}
+  Press key  jquery=[data-test-id=${tid}]  ${key}
 
 # Frontend error log
 

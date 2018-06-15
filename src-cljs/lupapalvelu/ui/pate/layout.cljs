@@ -243,45 +243,48 @@
 
 (rum/defc pate-grid < rum/reactive
   {:key-fn #(-> % :path path/id)}
-  [{:keys [schema path state] :as options}]
-  (letfn [(grid [{:keys [schema] :as options}]
-            [:div
-             {:class (path/css options
+  ([{:keys [schema path] :as options} extras]
+   (if-let [repeating (:repeating schema)]
+     [:div (map-indexed (fn [i k]
+                          (pate-grid (assoc options
+                                            :schema (dissoc schema :repeating)
+                                            :path (path/extend path repeating k))
+                                     (common/add-test-id {:data-repeating-id k }
+                                                         repeating (str i))))
+                        (repeating-keys options repeating))]
+     [:div
+      (merge {:class (path/css options
                                (str "pate-grid-" (:columns schema)))}
-             (map (fn [row-schema]
-                    (let [row-options (path/schema-options options row-schema)]
-                      ;; Row visibility
-                      (when (path/visible? row-options)
-                        [:div.row {:class (path/schema-css row-schema)}
-                         (map (fn [{:keys [col align] :as cell-schema}]
-                                (let [cell-options (path/schema-options row-options
-                                                                        cell-schema)]
-                                  ;; Cell visibility
-                                  (when (path/item-visible? cell-options)
-                                    [:div {:class (path/css cell-options
-                                                            (str "col-" (or col 1))
-                                                            (when align
-                                                              (str "col--" (name align))))}
-                                     (condp #(%1 %2) cell-schema
-                                       :dict
-                                       (instantiate (path/dict-options cell-options)
-                                                    true)
+             extras)
+      (map (fn [row-schema]
+             (let [row-options (path/schema-options options row-schema)]
+               ;; Row visibility
+               (when (path/visible? row-options)
+                 [:div.row {:class (path/schema-css row-schema)}
+                  (map (fn [{:keys [col align] :as cell-schema}]
+                         (let [cell-options (path/schema-options row-options
+                                                                 cell-schema)]
+                           ;; Cell visibility
+                           (when (path/item-visible? cell-options)
+                             [:div {:class (path/css cell-options
+                                                     (str "col-" (or col 1))
+                                                     (when align
+                                                       (str "col--" (name align))))}
+                              (condp #(%1 %2) cell-schema
+                                :dict
+                                (instantiate (path/dict-options cell-options)
+                                             true)
 
-                                       :list
-                                       :>> #(pate-list (path/schema-options cell-options %)
-                                                        true)
+                                :list
+                                :>> #(pate-list (path/schema-options cell-options %)
+                                                true)
 
-                                       :grid
-                                       :>> #(pate-grid (path/schema-options cell-options %))
+                                :grid
+                                :>> #(pate-grid (path/schema-options cell-options %))
 
-                                       nil)])))
+                                nil)])))
 
-                              (get row-schema :row row-schema))])))
-                  (-> schema :rows))])]
-    (if-let [repeating (:repeating schema)]
-      [:div (map (fn [k]
-                   (pate-grid (assoc options
-                                     :schema (dissoc schema :repeating)
-                                     :path (path/extend path repeating k))))
-                 (repeating-keys options repeating))]
-      (grid options))))
+                       (get row-schema :row row-schema))])))
+           (-> schema :rows))]))
+  ([options]
+   (pate-grid options nil)))

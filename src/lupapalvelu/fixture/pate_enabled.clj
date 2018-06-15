@@ -1,11 +1,8 @@
 (ns lupapalvelu.fixture.pate-enabled
   "Enable Pate in every minimal organization."
-  (:require [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.fixture.core :refer [deffixture]]
+  (:require [lupapalvelu.fixture.core :refer [deffixture]]
             [lupapalvelu.fixture.minimal :as minimal]
-            [sade.core :refer :all]
-            [schema.core :as sc]
-            [lupapalvelu.pate.schemas :as ps]))
+            [lupapalvelu.mongo :as mongo]))
 
 (deffixture "pate-enabled" {}
   (mongo/clear!)

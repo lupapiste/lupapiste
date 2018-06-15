@@ -31,3 +31,17 @@ Phrase text is
   [Arguments]  ${tid}  ${text}
   ${contents}=  Get text  jquery=[data-test-id=${tid}-edit]
   Should be equal  ${contents}  ${text}
+
+Go back
+  Click visible test id  back
+
+Pate fill test id
+  [Arguments]  ${tid}  ${text}
+  Fill test id  ${tid}  ${EMPTY}
+  Press key test id  ${tid}  ${text}
+
+Test id for
+  [Arguments]  ${repeating}  ${index}  ${dict}
+  Wait test id visible  ${repeating}-${index}
+  ${id}=  Get element attribute  jquery=[data-test-id=${repeating}-${index}]  data-repeating-id
+  [Return]  ${repeating}-${id}-${dict}
