@@ -133,6 +133,22 @@
                 </div>
               </div>
             </form>
+           <form action="/api/raw/store-billing-report" method="get">
+              <input type="hidden" name="__anti-forgery-token"data-bind="value: $.cookie('anti-csrf-token')">
+              <input type="hidden" name="lang" data-bind="value: loc.currentLanguage">
+              <input type="hidden" name="startTs" data-bind="value: reportsModel.storeBillingMonthStart">
+              <input type="hidden" name="endTs" data-bind="value: reportsModel.storeBillingToday">
+              <div class="labeled-input row">
+                <div class="labeled-input cell">
+                  <button type="submit"
+                          class="primary outline">
+                    <i class="lupicon-download"></i>
+                    <span data-bind="ltext: 'authorityAdmin.storeBillingReports.lastMonthButtonText'"></span>
+                  </button>
+                </div>
+
+              </div>
+            </form>
           </section>
         </section>
       </div>

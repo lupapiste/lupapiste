@@ -146,7 +146,11 @@
   [{user :user {lang :lang} :data}]
   (let [resulting-file-name (str (i18n/localize lang "billing.excel.filename")
                                  "_"
-                                 (util/to-xml-date (now))
+                                 (util/to-xml-date startTs)
+                                 "_-_"
+                                 (util/to-xml-date endTs)
+                                 "_"
+                                 (now)
                                  ".xlsx")]
     (excel-response resulting-file-name
                     (store-billing/billing-entries user startTs endTs lang))))
