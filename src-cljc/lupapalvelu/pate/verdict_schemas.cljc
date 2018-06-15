@@ -612,10 +612,24 @@
                                                                        {:col  2
                                                                         :align :right
                                                                         :dict :date}]}]}}]}]}}})
+
+(def versub-contract-reviews
+  (assoc-in (versub-requirements :reviews)
+            [:section :show?] :?.reviews))
+
 (def versub-contract-conditions
   (-> template-schemas/temsub-contract-conditions
       (assoc-in [:dictionary :conditions :template-dict]
-                :conditions)))
+                :conditions)
+      (update :section assoc
+              :show? :?.conditions
+              :template-section :conditions)
+      (assoc-in [:dictionary :conditions-title]
+                {:loc-text :pate.contract.conditions
+                 :css      :pate-label})
+      (assoc-in [:dictionary :conditions :repeating :condition :phrase-text :label?]
+                false)
+      (update-in [:section :grid :rows] #(cons [{:dict :conditions-title}] %))))
 
 (def versub-contract-attachments
   (-> versub-attachments
@@ -634,7 +648,7 @@
 
 (def contract-schema-1 (build-verdict-schema :contract 1
                                            versub-contract
-                                           (versub-requirements :reviews)
+                                           versub-contract-reviews
                                            versub-contract-conditions
                                            versub-contract-attachments
                                            versub-contract-upload))

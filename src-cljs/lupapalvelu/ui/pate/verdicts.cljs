@@ -179,8 +179,7 @@
                   (list [:tr {:key id}
                          [:td {:class (common/css-flags :replaced replaced?)}
                           [:a {:on-click #(open-verdict id)} title]]
-                         [:td (if published
-                                (js/util.finnishDate verdict-date))]
+                         [:td (js/util.finnishDate verdict-date)]
                          [:td giver]
                          [:td (if published
                                 (common/loc :pate.published-date (js/util.finnishDate published))
