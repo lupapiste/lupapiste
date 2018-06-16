@@ -280,7 +280,8 @@
   [{:keys [schema] :as options}]
   (components/text-and-link {:text-loc (:text-loc schema)
                              :click    #((path/meta-value options (:click schema))
-                                         options)}))
+                                         options)
+                             :test-id  (test-id options)}))
 
 (rum/defc pate-button < rum/reactive
   [{:keys [schema] :as options} & [wrap-label?]]

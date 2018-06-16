@@ -423,17 +423,20 @@
 
 (rum/defc text-and-link < rum/reactive
 "Renders text with included link
- Options (text and text-loc are mutually exclusive):
+ Options (text and text-loc are mutually exclusive) [optional]:
    text Text where link is in brackets: 'Press [me] for details'
    text-loc Localization key for text.
-   click Function to be called when the link is clicked"
-  [{:keys [click] :as options}]
+   click Function to be called when the link is clicked
+   [test-id] Test-id for the link element."
+  [{:keys [click test-id] :as options}]
   (let [regex          #"\[(.*)\]"
         text           (common/resolve-text options)
         link           (last (re-find regex text))
         ;; Split results include the link
         [before after] (remove #(= link %) (s/split text regex))]
-    [:span before [:a {:on-click click} link] after]))
+    [:span before
+     [:a (common/add-test-id {:on-click click} test-id) link]
+     after]))
 
 (rum/defc icon-button < rum/reactive
   "Button with optional icon and waiting support
