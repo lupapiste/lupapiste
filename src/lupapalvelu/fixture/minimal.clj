@@ -65,7 +65,7 @@
     :email "tampere-ya@example.com"
     :role "authority"
     :zip "10203"
-    :orgAuthz {:837-YA #{:authority :authorityAdmin}}
+    :orgAuthz {:837-YA #{:authorityAdmin}}
     :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereYAapikey"}}
 
    {:id "837-R"                                             ; tampere / tampere
@@ -80,7 +80,7 @@
     :email "tampere@example.com"
     :role "authority"
     :zip "10203"
-    :orgAuthz {:837-R #{:authority :authorityAdmin}}
+    :orgAuthz {:837-R #{:authorityAdmin}}
     :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereapikey"}}
 
    ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti:  veikko / veikko
@@ -145,7 +145,7 @@
     :email "kuopio-ya@example.com"
     :role "authority"
     :zip "10203"
-    :orgAuthz {:297-YA #{:authority :authorityAdmin}}
+    :orgAuthz {:297-YA #{:authorityAdmin}}
     :private {:password "$2a$10$YceveAiQXbeUs65B4FZ6lez/itf0UEXooHcZlygI2WnQGhF0dJ1jO"}}
 
    ;; Velho Viranomainen - Kuopio R viranomaien:  velho / velho
@@ -182,7 +182,7 @@
     :email "kuopio-r@kuopio.fi"
     :role "authority"
     :zip "10203"
-    :orgAuthz {:297-R #{:authority :authorityAdmin}}
+    :orgAuthz {:297-R #{:authorityAdmin}}
     :private {:password "$2a$10$YceveAiQXbeUs65B4FZ6lez/itf0UEXooHcZlygI2WnQGhF0dJ1jO"
               :apikey   "lhIqT1YwOMH8HuiCGcjBtGggfeRaxZL5OUNd3r4u"}}
 
@@ -193,7 +193,7 @@
     :email "admin@sipoo.fi"
     :enabled true
     :role "authority"
-    :orgAuthz {:753-R #{:authority :authorityAdmin}}
+    :orgAuthz {:753-R #{:authorityAdmin}}
     :firstName "Simo"
     :language "fi"
     :lastName "Suurvisiiri"
@@ -206,7 +206,7 @@
     :email "admin-ya@sipoo.fi"
     :enabled true
     :role "authority"
-    :orgAuthz {:753-YA #{:authority :authorityAdmin}}
+    :orgAuthz {:753-YA #{:authorityAdmin}}
     :firstName "Simo"
     :language "fi"
     :lastName "YA-Suurvisiiri"
@@ -339,7 +339,7 @@
     :enabled true
     :language "fi"
     :role "authority"
-    :orgAuthz {:564-YMP #{:authority :authorityAdmin}}
+    :orgAuthz {:564-YMP #{:authorityAdmin}}
     :firstName "Oulu Ymp"
     :lastName "Admin"
     :phone "121212"
@@ -388,7 +388,7 @@
     :email "admin@naantali.fi"
     :enabled true
     :role "authority"
-    :orgAuthz {:529-R #{:authority :authorityAdmin}}
+    :orgAuthz {:529-R #{:authorityAdmin}}
     :firstName "Admin"
     :language "fi"
     :lastName "Naantali"
@@ -430,7 +430,7 @@
     :enabled true
     :language "fi"
     :role "authority"
-    :orgAuthz {:186-R #{:authority :authorityAdmin}}
+    :orgAuthz {:186-R #{:authorityAdmin}}
     :firstName "Admin"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
     :username "admin@jarvenpaa.fi"
@@ -543,7 +543,7 @@
     :email "admin@hel.fi"
     :enabled true
     :role "authority"
-    :orgAuthz {:091-R #{:authority :authorityAdmin}}
+    :orgAuthz {:091-R #{:authorityAdmin}}
     :firstName "Heikki"
     :language "fi"
     :lastName "Helsinki"
