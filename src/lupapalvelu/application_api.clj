@@ -347,12 +347,14 @@
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
       (do
+        (app/submit command)
         (when (and (env/feature? :allu) (allu/allu-application? application))
+          ;; TODO: put into :on-success instead (?)
           ;; TODO: Save the returned contract id
           ;; TODO: Send errors to authority instead of applicant?
           ;; TODO: Resending in case ALLU is having problems?
           (allu/create-placement-contract! application))
-        (app/submit command)))))
+        (ok)))))
 
 (defcommand refresh-ktj
   {:parameters [:id]

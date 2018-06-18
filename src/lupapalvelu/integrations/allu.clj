@@ -3,6 +3,7 @@
             [clojure.walk :refer [postwalk]]
             [mount.core :refer [defstate]]
             [schema.core :as sc]
+            [schema-tools.core :refer [select-schema]]
             [cheshire.core :as json]
             [clj-time.core :as t]
             [clj-time.format :as tf]
@@ -15,6 +16,8 @@
             [lupapalvelu.document.tools :refer [doc-subtype]]
             [lupapalvelu.document.canonical-common :as doccc]
             [lupapalvelu.integrations.allu-schemas :refer [ValidPlacementApplication PlacementContract]]))
+
+;;; FIXME: use :schema-info :name instead of :subtype
 
 ;;;; # Constants
 
@@ -129,26 +132,35 @@
     (assoc-when res :customerReference (not-empty (-> payee-doc :data :laskuviite)))))
 
 ;; Putting it all together
-(sc/defn ^{:private true, :always-validate true} application->allu-placement-contract
-  :- PlacementContract [app :- ValidPlacementApplication]
-  (-> app flatten-values convert-value-flattened-app))
+(sc/defn ^{:private true, :always-validate true} application->allu-placement-contract :- PlacementContract [app]
+  (-> app (select-schema ValidPlacementApplication) flatten-values convert-value-flattened-app))
+
+;; TODO: unit test this
+(defn- placement-creation-request [allu-url allu-jwt app]
+  [(str allu-url "/placementcontracts")
+   {:headers      {:authorization (str "Bearer " allu-jwt)}
+    :content-type :json
+    :body         (json/encode (application->allu-placement-contract app))}])
 
 ;;;; # Should you use this?
 
-(defn- allu-organization? [dev-mode? org]
-  (if dev-mode?
-    (s/ends-with? org "-YA")
-    (= org "091-YA")))
+(def- allu-organization? #{"091-YA"})
 
-(def- allu-permit-subtypes #{"sijoituslupa" "sijoitussopimus"})
+(def- allu-permit-subtype? #{"sijoituslupa" "sijoitussopimus"})
 
-(defn allu-application?
-  ([app] (allu-application? (env/dev-mode?) app))
-  ([dev-mode? {:keys [permitSubtype organization]}]
-   (and (allu-organization? dev-mode? organization)
-        (contains? allu-permit-subtypes permitSubtype))))
+(defn allu-application? [{:keys [permitSubtype organization]}]
+  (boolean (and (allu-organization? organization)
+                (allu-permit-subtype? permitSubtype))))
 
 ;;;; # Effectful operations
+
+;; TODO: unit test this
+;; TODO: Propagate error descriptions from ALLU etc. when they provide documentation for those.
+(defn- handle-placement-contract-response [{:keys [status body]}]
+  (case status
+    (200 201) body
+    400 (fail! :error.allu.malformed-application :body body)
+    (fail! :error.allu.http :status status :body body)))
 
 (defprotocol ALLUPlacementContracts
   (create-contract! [self application]
@@ -158,22 +170,15 @@
     * :error.allu.malformed-application - Application is malformed according to ALLU.
     * :error.allu.http :status _ :body _ - An HTTP error. Probably due to a bug or connection issues."))
 
-(deftype RemoteALLU []
+(deftype ALLUService [http-post]
   ALLUPlacementContracts
   (create-contract! [_ app]
-    (let [endpoint (str (env/value :allu :url) "/placementcontracts")
-          request {:headers      {:authorization (str "Bearer " (env/value :allu :jwt))}
-                   :content-type :json
-                   :body         (json/encode (application->allu-placement-contract app))}
-          {:keys [status body]} (http/post endpoint request)]
-      ;; TODO: Propagate error descriptions from ALLU etc. when they provide documentation for those.
-      (case status
-        (200 201) body
-        400 (fail! :error.allu.malformed-application)
-        (fail! :error.allu.http :status status :body body)))))
+    ;; Essentially `placement-creation-request` wrapped into side effects (env reads, HTTP I/O, fail!).
+    (let [[endpoint request] (placement-creation-request (env/value :allu :url) (env/value :allu :jwt) app)]
+      (handle-placement-contract-response (http-post endpoint request)))))
 
 (defstate allu-instance
-  :start (->RemoteALLU))
+  :start (->ALLUService http/post))
 
 (defn create-placement-contract! [app]
   (create-contract! allu-instance app))

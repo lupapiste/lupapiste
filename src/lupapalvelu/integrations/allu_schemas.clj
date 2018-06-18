@@ -95,6 +95,8 @@
 
 (defschema TypedPlacementApplication
   {:id               sc/Str
+   :permitSubtype    sc/Str
+   :organization     sc/Str
    :propertyId       sc/Str
    :municipality     sc/Str
    :address          sc/Str
@@ -126,7 +128,7 @@
 
 (defschema ValidCompanyDoc
   {:yritysnimi           {:value NonBlankStr}
-   :liikeJaYhteisoTunnus FinnishY
+   :liikeJaYhteisoTunnus {:value FinnishY}
    :osoite               ValidAddress
    :yhteyshenkilo        {:henkilotiedot {:etunimi  {:value NonBlankStr}
                                           :sukunimi {:value NonBlankStr}}
@@ -142,7 +144,7 @@
   (assoc-in ValidCustomerDoc [:schema-info :subtype] (sc/eq :hakija)))
 
 (defschema ValidPaymentInfo
-  {:verkkolaskuTunnus {:value NonBlankStr}
+  {:verkkolaskuTunnus {:value sc/Str}
    :ovtTunnus         {:value FinnishOVTid}
    :valittajaTunnus   {:value NonBlankStr}})
 
@@ -158,10 +160,12 @@
 
 (defschema ValidPlacementApplication
   {:id               ApplicationId
+   :permitSubtype    NonBlankStr
+   :organization     NonBlankStr
    :propertyId       Kiinteistotunnus
    :municipality     MunicipalityCode
    :address          NonBlankStr
-   :primaryOperation {:name (apply sc/enum (keys doccc/ya-operation-type-to-schema-name-key))}
+   :primaryOperation {:name (apply sc/enum (map name (keys doccc/ya-operation-type-to-schema-name-key)))}
    :documents        [(sc/one ValidApplicantDoc "applicant")
                       (sc/one ValidDescriptionDoc "description")
                       (sc/one ValidPayeeDoc "payee")]

@@ -29,8 +29,8 @@
 
 (facts "allu-application?"
   (fact "Use ALLU integration for Helsinki YA sijoituslupa and sijoitussopimus."
-    (allu/allu-application? false {:organization "091-YA", :permitSubtype "sijoituslupa"}) => true
-    (allu/allu-application? false {:organization "091-YA", :permitSubtype "sijoitussopimus"}) => true)
+    (allu/allu-application? {:organization "091-YA", :permitSubtype "sijoituslupa"}) => true
+    (allu/allu-application? {:organization "091-YA", :permitSubtype "sijoitussopimus"}) => true)
 
   (fact "Do not use ALLU integration for anything else."
     (quick-check 10
@@ -39,8 +39,7 @@
                            :when (not (and (= organization "091-YA")
                                            (or (= permitSubtype "sijoituslupa")
                                                (= permitSubtype "sijoitussopimus"))))]
-                   (not (allu/allu-application? false {:organization  organization
-                                                       :permitSubtype permitSubtype}))))
+                   (not (allu/allu-application? {:organization  organization, :permitSubtype permitSubtype}))))
     => passing-quick-check))
 
 (facts "application->allu-placement-contract"
