@@ -6,6 +6,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.conversion.util :as conversion-util]
+            [lupapalvelu.document.model :as model]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
@@ -17,7 +18,6 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]))
-
 
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
@@ -74,12 +74,14 @@
         other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas))
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
 
-        structures (-> xml krysp-reader/->rakennelmatieto krysp-reader/rakennelmatieto->kaupunkikuvatoimenpide)
+        structures (-> xml krysp-reader/->rakennelmatieto conversion-util/rakennelmatieto->kaupunkikuvatoimenpide)
 
         created-application (-> created-application
-                                (update-in [:documents] concat other-building-docs new-parties)
+                                (update-in [:documents] concat other-building-docs new-parties structures)
                                 (update-in [:secondaryOperations] concat secondary-ops)
                                 (assoc :opened (:created command)))
+
+        validation-result (model/validate created-application structures)
 
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
