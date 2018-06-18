@@ -148,6 +148,7 @@ Language To
   Wait Until  Element Should Be Visible  css=div.language-menu
   Click Element  partial link=${lang}
   Wait Until  Element Should Contain  language-select  ${lang}
+  Kill dev-box
 
 Language Is
   [Arguments]  ${lang}
@@ -1733,12 +1734,19 @@ Select from test id
 
 Test id select is
   [Arguments]  ${id}  ${value}
-  List selection should be  jquery=select[data-test-id=${id}]  ${value}
+  Wait until  List selection should be  jquery=select[data-test-id=${id}]  ${value}
 
 Test id select text is
   [Arguments]  ${id}  ${text}
   ${label}=  Get Selected List Label  jquery=select[data-test-id=${id}]
   Should be true  '${label}' == '${text}'
+
+Test id select values are
+  [Arguments]  ${tid}  @{values}
+  Wait test id visible  ${tid}
+  @{vals}=  Get list items  jquery=[data-test-id=${tid}]  values=True
+  Should be true  @{vals} == @{values}
+
 
 jQuery should match X times
   [Arguments]  ${selector}  ${count}

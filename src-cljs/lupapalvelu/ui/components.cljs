@@ -367,9 +367,11 @@
      [disabled?] See common/resolve-disabled
      [enabled?]  See common/resolve-disabled
      [required?] If true, the select is highlighted if empty.
+     [test-id]   Data-test-id attribute value
 
    The rest of the options are passed to the underlying select."
-  [{selected* ::selected} _ {:keys    [items choose? callback required?]
+  [{selected* ::selected} _ {:keys    [items choose? callback required?
+                                       test-id]
                              sort-key :sort-by
                              :as      options}]
   (let [value   (rum/react selected*)
@@ -381,8 +383,9 @@
             (common/update-css (dissoc options
                                        :items :choose? :callback
                                        :disabled? :enabled? :required?
-                                       :sort-by)
-                               :required (and required? (s/blank? value))))
+                                       :sort-by :test-id)
+                               :required (and required? (s/blank? value)))
+            (common/add-test-id {} test-id))
      (cond->> items
        sort-key (sort-by sort-key
                          (if (= sort-key :text)

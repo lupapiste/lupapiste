@@ -75,26 +75,22 @@
                  (not (-> schema :sort? false? )) (sort-by :text))]
 
      (for [{:keys [value text]} items
-           :let                 [item-id (common/unique-id "multi")
+           :let                 [;;item-id (common/unique-id "multi")
                                  checked (util/includes-as-kw? (set (rum/react state)) value)]]
-       [:div.pate-checkbox-wrapper
-        {:key item-id}
-        [:input {:type    "checkbox"
-                 :id      item-id
-                 :disabled (path/disabled? options)
-                 :checked checked}]
-        [:label.pate-checkbox-label
-         {:for      item-id
-          :on-click (fn [_]
-                      (swap! state
-                             (fn [xs]
-                               ;; Sanitation on the client side.
-                               (util/intersection-as-kw (if checked
-                                                          (remove #(util/=as-kw value %) xs)
-                                                          (cons value xs))
-                                                        (map :value items))))
-                      (path/meta-updated options))}
-         text]]))])
+       (rum/with-key
+         (components/toggle checked {:disabled? (path/disabled? options)
+                                     :callback (fn [_]
+                                                 (swap! state
+                                                        (fn [xs]
+                                                          ;; Sanitation on the client side.
+                                                          (util/intersection-as-kw (if checked
+                                                                                     (remove #(util/=as-kw value %) xs)
+                                                                                     (cons value xs))
+                                                                                   (map :value items))))
+                                                 (path/meta-updated options))
+                                     :text text
+                                     :test-id value})
+         value)))])
 
 (defn- resolve-reference-list
   "List of :value, :text maps"
@@ -140,7 +136,8 @@
                    :sort-by   :text
                    :callback  (state-change-callback options)
                    :disabled? (path/disabled? options)
-                   :required? (path/required? options)})
+                   :required? (path/required? options)
+                   :test-id   (test-id options)})
     :wrap-label? wrap-label?}))
 
 (rum/defc multi-select-reference-list < rum/reactive
@@ -456,7 +453,8 @@
                                                        :text (pate-select-item-text options
                                                                                     item)}))
                                                (sort-by-schema schema))
-                               :required? (path/required? options)})
+                               :required? (path/required? options)
+                               :test-id (test-id options)})
         value        (path/react path state)
         allow-empty? (-> schema :allow-empty false? not)]
     (label-wrap-if-needed

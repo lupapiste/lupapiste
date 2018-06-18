@@ -22,7 +22,7 @@ Phrase support is not visible on a new template
   No such test id  paatosteksti-autocomplete
   No such test id  paatosteksti-clear
   No such test id  paatosteksti-undo
-  Go back
+  Click back
 
 Start adding new phrase
   Click visible test id  add-phrase

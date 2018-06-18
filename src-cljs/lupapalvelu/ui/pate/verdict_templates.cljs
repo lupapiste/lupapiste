@@ -135,10 +135,10 @@
     [:div.row.row--tight
      [:div.col-1
       (pate-components/required-fields-note (assoc options :test-id :required-template))
-      (pate-components/required-fields-note {:info    (rum/cursor-in state/settings-info [:info])
-                                             :test-id :required-settings}
+      (pate-components/required-fields-note {:info (rum/cursor-in state/settings-info [:info])}
                                             (components/text-and-link {:text-loc :pate.settings-required-fields
-                                                                       :click    #(open-settings (path/value :id info))}))]
+                                                                       :click    #(open-settings (path/value :id info))
+                                                                       :test-id  :required-settings}))]
      [:div.col-1.col--right
       (pate-components/last-saved options)]]]
    (sections/sections options :verdict-template)])
@@ -146,12 +146,13 @@
 (defn new-template [options]
   (reset-template options))
 
-(defn toggle-delete [id deleted]
+(defn toggle-delete [id deleted test-id]
   (components/icon-button
    {:class    [:primary :outline]
     :on-click #(service/toggle-delete-template id (not deleted) identity)
     :text-loc (if deleted :pate-restore :remove)
-    :icon (if deleted :lupicon-undo :lupicon-remove)}))
+    :icon (if deleted :lupicon-undo :lupicon-remove)
+    :test-id [(if deleted :restore :delete) test-id]}))
 
 (defn set-category [category]
   (reset! state/current-category category)
@@ -178,7 +179,8 @@
       {:icon     :lupicon-gear
        :class    :ghost
        :on-click #(open-settings)
-       :text-loc :auth-admin.organization.properties})]]])
+       :text-loc :auth-admin.organization.properties
+       :test-id  :open-settings})]]])
 
 (rum/defcs verdict-template-list < rum/reactive
   (rum/local false ::show-deleted)
@@ -205,27 +207,32 @@
             [:th (common/loc "pate-verdict-template.published")]
             [:th]]]
           [:tbody
-           (for [{:keys [id name published deleted]} filtered]
-             [:tr (common/add-test-id {:key id} name)
-              [:td (if deleted
-                     name
-                     [:a {:on-click #(open-template id)}
-                      name])]
-              [:td (js/util.finnishDate published)]
-              [:td
-               [:div.pate-buttons
-                (when-not deleted
-                  (components/icon-button
-                   {:class    [:primary :outline]
-                    :on-click #(open-template id)
-                    :text-loc :edit
-                    :icon     :lupicon-pen}))
-                (components/icon-button
-                 {:class    [:primary :outline]
-                  :on-click #(service/copy-template id reset-template)
-                  :text-loc :pate.copy
-                  :icon     :lupicon-copy})
-                (toggle-delete id deleted)]]])]]))
+           (map-indexed (fn [i {:keys [id name published deleted]}]
+                          (let [tid (str "template-" i)]
+                            [:tr {:key id}
+                             [:td (if deleted
+                                    name
+                                    [:a (common/add-test-id {:on-click #(open-template id)}
+                                                            :link tid)
+                                     name])]
+                             [:td (js/util.finnishDate published)]
+                             [:td
+                              [:div.pate-buttons
+                               (when-not deleted
+                                 (components/icon-button
+                                  {:class    [:primary :outline]
+                                   :on-click #(open-template id)
+                                   :text-loc :edit
+                                   :icon     :lupicon-pen
+                                   :test-id [:open tid]}))
+                               (components/icon-button
+                                {:class    [:primary :outline]
+                                 :on-click #(service/copy-template id reset-template)
+                                 :text-loc :pate.copy
+                                 :icon     :lupicon-copy
+                                 :test-id  [:copy tid]})
+                               (toggle-delete id deleted tid)]]]))
+                        filtered)]]))
      (components/icon-button {:icon     :lupicon-circle-plus
                               :class    :positive
                               :text     (loc-text :pate.add-verdict-template)

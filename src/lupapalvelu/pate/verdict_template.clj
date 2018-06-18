@@ -64,6 +64,7 @@
   repeating. Only the current language version of (plan/review) is
   copied."
   [lang s-rep t-rep]
+  (println "-------------- sync-repeatings:" lang)
   (reduce-kv (fn [acc k v]
                (assoc-in acc [k :text]
                          (get v
