@@ -432,7 +432,7 @@
                                                    op-schema-name (:schema-data op-info))
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
 
-        make (partial make-document application (:name op) created manual-schema-datas)
+        make (partial make-document (:name op) created manual-schema-datas)
 
         ;; TODO: :removable is deprecated (LPK-3107), no need for storing doc schema into mongo
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.

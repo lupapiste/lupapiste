@@ -26,7 +26,7 @@
     (util/destructure-permit-id "75 0549-4242-A") => nil
     (util/destructure-permit-id "751-0549-42-A") => nil))
 
-(fact "The reader function rakennelmatieto->kaupunkikuvatoimenpide produces documents as expected"
+#_(fact "The reader function rakennelmatieto->kaupunkikuvatoimenpide produces documents as expected"
   (let [rakennelmatieto {:Rakennelma {:alkuHetki "2013-01-10T00:00:00Z"
                                       :kuvaus {:kuvaus "Katos"}
                                       :sijaintitieto {:Sijainti {:piste {:Point {:pos "2.449317E7 6445909.0"}}}}
