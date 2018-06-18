@@ -1,5 +1,5 @@
 (ns lupapalvelu.notifications-test
-  (:require [lupapalvelu.notifications :refer [notify! create-app-model defemail]]
+  (:require [lupapalvelu.notifications :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.application-api]
@@ -7,9 +7,10 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.open-inforequest]
             [sade.dummy-email-server :as dummy]
-            [sade.env :as env]))
+            [sade.env :as env])
+  (:import (javax.mail.internet InternetAddress)))
 
-(testable-privates lupapalvelu.notifications get-email-subject get-application-link get-email-recipients-for-application)
+(testable-privates lupapalvelu.notifications get-email-subject get-email-recipients-for-application ->to)
 
 (facts "email titles"
   (facts "{{municipality}} is rendered to subject"
@@ -204,3 +205,27 @@
 
   (notify-invite! {:email "nano@nano.nano" :language nil})
   (last-notification-text {:contains ["suomi" "Svenska" "English"]})))
+
+(facts "To: field construction"
+  (letfn [(make-address [recipient]
+            (->> recipient
+                 (->to)
+                 (InternetAddress.)))]
+    (facts "tough cases"
+      (->to nil) => nil
+      (->to {}) => nil)
+    (fact "Only email"
+      (->to {:email "test@example.com"}) => "test@example.com"
+      (make-address {:email "test@example.com"}) => truthy)
+    (fact "normal case"
+      (->to {:email "test@example.com" :firstName "Foo" :lastName "Faa"}) => "Foo Faa <test@example.com>"
+      (make-address {:email "test@example.com" :firstName "Foo" :lastName "Faa"}) => truthy)
+    (fact "no lastname"
+      (->to {:email "test@example.com" :firstName "Foo" :lastName ""}) => "test@example.com"
+      (make-address {:email "test@example.com" :firstName "Foo" :lastName ""}) => truthy)
+    (facts "with comma"
+      (->to {:email "test@example.com" :firstName "Foo" :lastName ","}) => "Foo  <test@example.com>"
+      (make-address {:email "test@example.com" :firstName "Foo" :lastName ","}) => truthy)
+    (facts "'<>' is stripped"
+      (->to {:email "test@example.com" :firstName ">Foo<" :lastName "<Hannu>"}) => "Foo Hannu <test@example.com>"
+      (make-address {:email "test@example.com" :firstName ">Foo<" :lastName "<Hannu>"}) => truthy)))
