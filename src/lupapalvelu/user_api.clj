@@ -95,10 +95,11 @@
     (ok :users (map (comp usr/with-org-auth usr/non-private) users))))
 
 (defquery users-in-same-organizations
-  {:user-roles #{:authority}}
+  {:description "Returns all 'authority' orgAuthzers from my organization(s)."
+   :user-roles #{:authority}}
   [{user :user}]
   (if-let [organization-ids (seq (usr/organization-ids user))]
-    (let [query {$and [{:role "authority"}, (usr/org-authz-match organization-ids)]}
+    (let [query {$and [{:role "authority" :enabled true}, (usr/org-authz-match organization-ids "authority")]}
           users (usr/find-users query)]
       (ok :users (map usr/summary-for-search-filter users)))
     (ok :users [])))

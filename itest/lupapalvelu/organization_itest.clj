@@ -101,7 +101,11 @@
 
       (fact "naantali user sees other users in naantali & jarvenpaa (but not admin)"
         (map :username naantali-sees) =>
-        (contains ["rakennustarkastaja@naantali.fi" "lupasihteeri@naantali.fi" "rakennustarkastaja@jarvenpaa.fi" "lupasihteeri@jarvenpaa.fi" "olli" "digitoija@jarvenpaa.fi"] :in-any-order))
+        (contains ["rakennustarkastaja@naantali.fi"
+                   "lupasihteeri@naantali.fi"
+                   "rakennustarkastaja@jarvenpaa.fi"
+                   "lupasihteeri@jarvenpaa.fi"
+                   "olli"] :in-any-order))
 
       (fact "jarvenpaa just jarvenpaa users (incl. Mr. Naantali but not admin)"
         (map :username jarvenpaa-sees) =>
