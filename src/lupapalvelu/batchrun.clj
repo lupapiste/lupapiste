@@ -559,7 +559,8 @@
                                 :exception (.getName (class o))
                                 :message (get &throw-context :message "")
                                 :event (format "Unable to get reviews in chunks from %s backend: %s - %s"
-                                               (:id organization) (.getName (class o)) (get &throw-context :message ""))}))))
+                                               (:id organization) (.getName (class o)) (get &throw-context :message ""))})
+     (warn "Error in automatic review checking:" (get &throw-context :message "") "stack trace:" (ss/join " | " (.getStackTrace o))))))
 
 (defn- organization-applications-for-review-fetching
   [organization-id permit-type projection & application-ids]
