@@ -12,21 +12,19 @@
 
 (facts "sync-repeatings"
   (fact "Initially empty"
-    (sync-repeatings :fi nil nil) => {}
-    (sync-repeatings :fi {:id1 {:fi "suomi" :sv "svenska" :en "English"}} nil)
-    => {:id1 {:text "suomi"}})
+    (sync-repeatings nil nil) => {}
+    (sync-repeatings {:id1 {:fi "suomi" :sv "svenska" :en "English"}} nil)
+    => {:id1 {:text-fi "suomi" :text-sv "svenska" :text-en "English"}})
   (fact "New entry"
-    (sync-repeatings :fi
-                     {:id1 {:fi "suomi" :sv "svenska" :en "English"}
+    (sync-repeatings {:id1 {:fi "suomi" :sv "svenska" :en "English"}
                       :id2 {:fi "suomi2" :sv "svenska2" :en "English2"}}
-                     {:id1 {:text "svenska" :foo "hello"}})
-    => {:id1 {:text "suomi" :foo "hello"}
-        :id2 {:text "suomi2"}})
+                     {:id1 {:text-sv "svenska" :foo "hello"}})
+    => {:id1 {:text-fi "suomi" :text-sv "svenska" :text-en "English" :foo "hello"}
+        :id2 {:text-fi "suomi2" :text-sv "svenska2" :text-en "English2"}})
   (fact "Removed entry"
-    (sync-repeatings :en
-                     {:id2 {:fi "suomi2" :sv "svenska2" :en "English2"}}
-                     {:id1 {:text "svenska" :foo "hello"}})
-    => {:id2 {:text "English2"}}))
+    (sync-repeatings {:id2 {:fi "suomi2" :sv "svenska2" :en "English2"}}
+                     {:id1 {:text-fi "suomi" :text-sv "svenska" :text-en "English" :foo "hello"}})
+    => {:id2 {:text-fi "suomi2" :text-sv "svenska2" :text-en "English2"}}))
 
 
 (def test-template
