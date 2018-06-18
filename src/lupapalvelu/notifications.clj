@@ -5,7 +5,6 @@
             [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.email :as email]
             [lupapalvelu.i18n :refer [loc] :as i18n]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
@@ -35,7 +34,7 @@
     (str (env/value :host) "/app/" lang "/" (usr/applicationpage-for role) "#!" full-path)))
 
 (defn- ->to [{:keys [email firstName lastName]}]
-  (letfn [(sanit [s] (s/replace s #"[<>]"  ""))]
+  (letfn [(sanit [s] (s/replace s #"[<>,]"  ""))]
     (if (or (ss/blank? firstName) (ss/blank? lastName))
       email
       (str (sanit firstName) " " (sanit lastName) " <" (sanit email) ">"))))
