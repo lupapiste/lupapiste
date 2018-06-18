@@ -57,11 +57,11 @@ $language-padding: 20px;
   float: left;
   a {
     padding: {
-      left: $language-padding;
-      right: $language-padding;
-      top: 0;
-      bottom: 0;
-    }
+    left: $language-padding;
+    right: $language-padding;
+    top: 0;
+    bottom: 0;
+  }
   }
   a, span {
     vertical-align: middle;
@@ -77,6 +77,7 @@ $language-padding: 20px;
   display: block;
   clear: both;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .nav-wrapper {
@@ -89,11 +90,11 @@ $language-padding: 20px;
   min-width: $application-min-width;
   margin: 0 auto;
   position: relative;
-  box-sizing: border-box;
-  margin: {
-    left: auto;
-    right: auto;
-  }
+    box-sizing: border-box;
+    margin: {
+      left: auto;
+      right: auto;
+    }
 }
 
 nav {
@@ -103,8 +104,7 @@ nav {
   box-sizing: border-box;
   width: 100%;
   .nav-top {
-    @include nav-row($gray51);
-    height: $header-height + 2;
+    @include nav-row( $gray51);
   }
   .brand {
     position: relative;
@@ -123,9 +123,8 @@ nav {
     @include language-select;
   }
   .language-open {
-    @include language-select($link: white, $hover: $orange, $bg: $language-bg);
+    @include language-select( $link: white, $hover: $orange, $bg: $language-bg );
   }
-
   .header-menu {
     display: inline-block;
     position: absolute;
@@ -282,122 +281,4 @@ $notification-bottom: -60px;
       }
     }
     #logout-header-box { display: none; }
-}
-
-//
-// Role-selector:
-//   Sorry for the importants.
-//   This is why BEM is so important.
-//   Fuck these cascades.
-//
-
-.role-selector {
-}
-
-.role-selector-dropdown-toggle-button {
-  @include nav-link;
-  @include header-padding;
-
-  display: inline-flex !important;
-  flex-flow: row;
-  align-items: center;
-
-  height: 100% !important;
-  color: $orange;
-  text-decoration: none !important;
-
-  span {
-    line-height: 20px !important;
-  }
-
-  &:hover {
-    background-color: $language-bg !important;
-  }
-}
-
-.role-selector-user-icon {
-  padding-right: 5px;
-}
-
-.role-selector-user {
-  display: flex;
-  flex-flow: column;
-}
-
-.role-selector-user-name {
-  display: inline-block;
-}
-
-.role-selector-user-role {
-  display: inline-flex;
-  flex-flow: row;
-  font-size: 80%;
-}
-
-.role-selector-user-role-name {
-  display: inline-block;
-}
-
-.role-selector-user-role-sep {
-  padding: 0 5px 0 5px;
-}
-
-.role-selector-user-role-org {
-  display: inline-block;
-}
-
-.role-selector-open-indicator {
-  padding-left: 5px;
-}
-
-.role-selector-dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.role-selector-dropdown-content {
-  position: absolute;
-  background-color: white;
-  min-width: 320px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
-  right: 0;
-  margin-top: 1px;
-  padding-top: 12px
-}
-
-.role-selector-dropdown-item {
-  display: block !important;
-  padding: 0 12px 0 12px;
-  line-height: 32px !important;
-  color: black;
-}
-
-.role-selector-dropdown-role {
-  text-decoration: none !important;
-
-  &:hover {
-    background-color: rgb(243, 170, 74) !important; // TODO: what variable this color is?
-  }
-
-  span {
-    color: black !important;
-  }
-
-  .role-selector-dropdown-role-icon {
-    padding-right: 0.4rem;
-  }
-
-  &.role-selector-dropdown-role-disabled {
-    pointer-events: none;
-    cursor: pointer !important;
-
-    span {
-      color: #8a8a8a !important;
-    }
-  }
-}
-
-.role-selector-dropdown-organization {
-  color: #8a8a8a;
 }

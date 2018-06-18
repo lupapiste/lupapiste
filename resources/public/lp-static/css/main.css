@@ -1365,7 +1365,7 @@ nav .nav-top {
   display: block;
   clear: both;
   box-sizing: border-box;
-  height: 62px;
+  overflow: hidden;
 }
 
 nav .brand {
@@ -1582,6 +1582,7 @@ nav .header-menu .header-box a, nav .header-menu .header-box span {
   display: block;
   clear: both;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .nav-bottom .language-menu {
@@ -1894,6 +1895,7 @@ nav .julkipano-brand .nav-bottom ul li a span {
   display: block;
   clear: both;
   box-sizing: border-box;
+  overflow: hidden;
   padding-left: 12px;
   padding-top: 13px;
   padding-bottom: 12px;

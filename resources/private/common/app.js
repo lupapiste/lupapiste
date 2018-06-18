@@ -3,8 +3,8 @@ var LUPAPISTE = LUPAPISTE || {};
 (function($) {
   "use strict";
 
-  const startPageHref = window.location.href.replace(window.location.hash, "");
-  const mainWindow = !window.parent || window.parent === window;
+  var startPageHref = window.location.href.replace(window.location.hash, "");
+  var mainWindow = !window.parent || window.parent === window;
   if (mainWindow) {
     window.name = "lupapiste";
   }
@@ -20,8 +20,8 @@ var LUPAPISTE = LUPAPISTE || {};
    *                            Thus page visibility toggle responsibility for provided pageIds is in controlling component.
    * @param
    */
-  LUPAPISTE.App = function(params) {
-    const self = this;
+  LUPAPISTE.App = function (params) {
+    var self = this;
 
     self.defaultTitle = document.title;
 
@@ -51,15 +51,15 @@ var LUPAPISTE = LUPAPISTE || {};
     };
 
     /**
-     * Window unload event handler
-     */
-    self.unload = function() {
+    * Window unload event handler
+    */
+    self.unload = function () {
       trace("window.unload");
     };
 
-    self.openPage = function(path) {
-      let pageId   = path[0],
-          pagePath = path.splice(1, path.length - 1);
+    self.openPage = function (path) {
+      var pageId = path[0];
+      var pagePath = path.splice(1, path.length - 1);
 
       trace("pageId", pageId, "pagePath", pagePath);
 
@@ -68,7 +68,7 @@ var LUPAPISTE = LUPAPISTE || {};
         if (!_.includes(self.componentPages, pageId) || !self.currentPage) {
           $(".page").removeClass("visible");
 
-          let page$ = $("#" + pageId);
+          var page$ = $("#" + pageId);
           if (page$.length === 0) {
             pageId = self.startPage;
             pagePath = [];
@@ -89,41 +89,30 @@ var LUPAPISTE = LUPAPISTE || {};
         document.title = self.defaultTitle;
       }
 
-      hub.send("page-load", {
-        pageId: pageId,
-        pagePath: pagePath,
-        currentHash: "!/" + self.currentHash,
-        previousHash: "!/" + self.previousHash
-      });
+      hub.send("page-load", { pageId: pageId, pagePath: pagePath, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
 
       if (self.previousHash !== self.currentHash) {
-        const previousPageId = self.previousHash.split("/")[0];
-        hub.send("page-unload", {
-          pageId: previousPageId,
-          currentHash: "!/" + self.currentHash,
-          previousHash: "!/" + self.previousHash
-        });
+        var previousPageId = self.previousHash.split("/")[0];
+        hub.send("page-unload", { pageId: previousPageId, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
       }
     };
 
-    self.hashChanged = function() {
-      hub.send("scrollService::push", {
-        hash: "#!/" + self.currentHash,
-        followed: true,
-        override: true
-      });
+    self.hashChanged = function () {
+      hub.send("scrollService::push", {hash: "#!/" + self.currentHash,
+                                       followed: true,
+                                       override: true});
       self.previousHash = self.currentHash;
 
       self.currentHash = (location.hash || "").substr(3);
 
-      const q = self.currentHash.indexOf("?");
+      var q = self.currentHash.indexOf("?");
       if (q > -1) {
-        self.currentHash = self.currentHash.substring(0, q);
+        self.currentHash = self.currentHash.substring(0,q);
       }
 
       if (self.currentHash === "") {
         if (_.isFunction(window.location.replace)) {
-          const hasHash = _.endsWith(startPageHref, "#");
+          var hasHash = _.endsWith(startPageHref, "#");
           window.location.replace(startPageHref + (hasHash ? "!/" : "#!/") + self.startPage);
         } else {
           pageutil.openPage(self.startPage);
@@ -131,60 +120,59 @@ var LUPAPISTE = LUPAPISTE || {};
         return;
       }
 
-      const path = self.currentHash.split("/");
+      var path = self.currentHash.split("/");
 
       if (!self.allowAnonymous && self.session === undefined) {
         ajax.query("user")
-            .success(function(e) {
-              if (e.user) {
-                self.session = true;
-                hub.send("login", e);
-                self.hashChanged();
-              } else {
-                error("User query did not return user, response: ", e);
-                self.session = false;
-                hub.send("logout", e);
-              }
-            })
-            .error(function(e) {
+          .success(function (e) {
+            if (e.user) {
+              self.session = true;
+              hub.send("login", e);
+              self.hashChanged();
+            } else {
+              error("User query did not return user, response: ", e);
               self.session = false;
               hub.send("logout", e);
-            })
-            .call();
+            }
+          })
+          .error(function (e) {
+            self.session = false;
+            hub.send("logout", e);
+          })
+          .call();
         return;
       }
 
       self.openPage((self.allowAnonymous || self.session) ? path : ["login"]);
     };
 
-    self.connectionCheck = function() {
-      ajax.get("/api/alive")
-          .raw(false)
-          .success(function() {
-            hub.send("connection", {status: "online"});
-            setTimeout(self.connectionCheck, 10000);
-          })
-          .error(function(e) {
-            if (e.text === "error.unauthorized") {
-              hub.send("connection", {status: "session-dead"});
-            } else {
-              hub.send("connection", {status: "lockdown", text: e.text});
-            }
-            setTimeout(self.connectionCheck, 10000);
-          })
-          .fail(function() {
-            hub.send("connection", {status: "offline"});
-            setTimeout(self.connectionCheck, 2000);
-          })
-          .call();
+    self.connectionCheck = function () {
+      ajax.get("/api/alive").raw(false)
+        .success(function() {
+          hub.send("connection", {status: "online"});
+          setTimeout(self.connectionCheck, 10000);
+        })
+        .error(function(e) {
+          if (e.text === "error.unauthorized") {
+            hub.send("connection", {status: "session-dead"});
+          } else {
+            hub.send("connection", {status: "lockdown", text: e.text});
+          }
+          setTimeout(self.connectionCheck, 10000);
+        })
+        .fail(function() {
+          hub.send("connection", {status: "offline"});
+          setTimeout(self.connectionCheck, 2000);
+        })
+        .call();
     };
 
     self.getHashbangUrl = function() {
-      let href      = window.location.href,
-          hash      = window.location.hash,
-          separator = href.indexOf("?") >= 0 ? "&" : "?";
+      var href = window.location.href;
+      var hash = window.location.hash;
+      var separator = href.indexOf("?") >= 0 ? "&" : "?";
       if (hash && hash.length > 0) {
-        const withoutHash = href.substring(0, href.indexOf("#"));
+        var withoutHash = href.substring(0, href.indexOf("#"));
         return withoutHash + separator + "redirect-after-login=" + encodeURIComponent(hash.substring(1, hash.length));
       } else {
         // No hashbang. Go directly to front page.
@@ -197,9 +185,9 @@ var LUPAPISTE = LUPAPISTE || {};
       return false;
     };
 
-    let offline = false;
-    let wasLoggedIn = false;
-    let lockdown = false;
+    var offline = false;
+    var wasLoggedIn = false;
+    var lockdown = false;
 
     function unlock() {
       if (lockdown) {
@@ -210,11 +198,9 @@ var LUPAPISTE = LUPAPISTE || {};
       }
     }
 
-    hub.subscribe("login", function() {
-      wasLoggedIn = true;
-    });
+    hub.subscribe("login", function() { wasLoggedIn = true; });
 
-    hub.subscribe({eventType: "connection", status: "online"}, function() {
+    hub.subscribe({eventType: "connection", status: "online"}, function () {
       if (offline) {
         offline = false;
         pageutil.hideAjaxWait();
@@ -222,23 +208,23 @@ var LUPAPISTE = LUPAPISTE || {};
       unlock();
     });
 
-    hub.subscribe({eventType: "connection", status: "offline"}, function() {
+    hub.subscribe({eventType: "connection", status: "offline"}, function () {
       if (!offline) {
         offline = true;
         pageutil.showAjaxWait(loc("connection.offline"));
       }
     });
 
-    hub.subscribe({eventType: "connection", status: "session-dead"}, function() {
+    hub.subscribe({eventType: "connection", status: "session-dead"}, function () {
       if (wasLoggedIn) {
         LUPAPISTE.ModalDialog.showDynamicOk(loc("session-dead.title"), loc("session-dead.message"),
-          {title: loc("session-dead.logout"), fn: self.redirectToHashbang});
+            {title: loc("session-dead.logout"), fn: self.redirectToHashbang});
         hub.subscribe("dialog-close", self.redirectToHashbang, true);
       }
       unlock();
     });
 
-    hub.subscribe({eventType: "connection", status: "lockdown"}, function(e) {
+    hub.subscribe({eventType: "connection", status: "lockdown"}, function (e) {
       if (!lockdown && lupapisteApp.models.globalAuthModel) {
         lupapisteApp.models.globalAuthModel.refreshWithCallback({});
       }
@@ -248,12 +234,12 @@ var LUPAPISTE = LUPAPISTE || {};
 
     self.initSubscribtions = function() {
       hub.subscribe({eventType: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
-      hub.subscribe("logout", function() {
+      hub.subscribe("logout", function () {
         window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
       });
     };
 
-    const isAuthorizedToTosAndSearch = function() {
+    var isAuthorizedToTosAndSearch = function() {
       return lupapisteApp.models.globalAuthModel.ok("permanent-archive-enabled") &&
         lupapisteApp.models.globalAuthModel.ok("tos-operations-enabled");
     };
@@ -262,8 +248,8 @@ var LUPAPISTE = LUPAPISTE || {};
 
     self.showArchiveMenuOptions = ko.observable(false);
     self.showCalendarMenuOptions = ko.pureComputed(function() {
-      const isApplicant = lupapisteApp.models.currentUser.isApplicant();
-      const enabledInAuthModel = self.calendarsEnabledInAuthModel();
+      var isApplicant = lupapisteApp.models.currentUser.isApplicant();
+      var enabledInAuthModel = self.calendarsEnabledInAuthModel();
       return enabledInAuthModel || (isApplicant && features.enabled("ajanvaraus"));
     });
 
@@ -276,160 +262,10 @@ var LUPAPISTE = LUPAPISTE || {};
       self.calendarsEnabledInAuthModel(lupapisteApp.models.globalAuthModel.ok("calendars-enabled"));
     });
 
-    function RoleSelectorModel(models) {
-      const self = this;
-
-      self.visible = ko.observable(false);
-
-      self.toggle = function(_, e) {
-        e.preventDefault();
-        self.visible(!self.visible());
-      }
-
-      self.currentRole = models.currentUser.currentRole;
-      self.currentOrg = models.currentUser.currentOrg;
-
-      self.currentOrgName = ko.pureComputed(function() {
-        const orgNames = models.currentUser.availableOrgs();
-        return orgNames[self.currentOrg()];
-      });
-
-      /**
-       * Map of roles that are selectable, that is, roles that user can select in
-       * role selector component. Values do not matter, only the keys are used.
-       */
-
-      self.selectableRole = {
-        "authority": true,
-        "authorityAdmin": true
-      };
-
-      /**
-       * Computes list of roles available in role selector for current user.
-       */
-
-      self.availableRoles = ko.pureComputed(function() {
-        const allRoles = models.currentUser.availableRoles();
-        return _(allRoles)
-        // Strip roles to include only roles that can be selected in selector
-          .map(function(role) {
-            role.roles = _.filter(role.roles, function(role) {
-              return !!self.selectableRole[role];
-            });
-            return role;
-          })
-          // only entries that have selectable roles:
-          .filter(function(role) {
-            return !_.isEmpty(role.roles);
-          })
-          // sort by organization name:
-          .sortBy("orgName")
-          .value();
-      });
-
-      self.roleIcon = {
-        authority: "lupicon-building",
-        authorityAdmin: "lupicon-gear"
-      };
-
-      self.commonItems = [
-        {
-          type: "sep"
-        },
-        {
-          type: "item",
-          action: "ownPage",
-          text: loc("mypage.title"),
-          iconClass: "lupicon-user",
-          currentlySelected: false
-        },
-        {
-          type: "item",
-          action: "logout",
-          text: loc("logout"),
-          iconClass: "lupicon-log-out",
-          currentlySelected: false
-        }
-      ];
-
-      /**
-       * List of menuItems for role selector.
-       */
-
-      self.menuItems = ko.pureComputed(function() {
-        const currentRole  = self.currentRole(),
-              currentOrg   = self.currentOrg(),
-              menuItemsSeq = _.reduce(
-                self.availableRoles(),
-                function(acc, org) {
-                  return acc
-                    .concat([
-                      {
-                        type: "sep"
-                      },
-                      {
-                        type: "org",
-                        text: org.orgName
-                      }
-                    ])
-                    .concat(_.map(org.roles, function(role) {
-                        return {
-                          type: "item",
-                          text: loc(role),
-                          iconClass: self.roleIcon[role],
-                          action: "setRole",
-                          role: role,
-                          org: org.org,
-                          currentlySelected: (currentRole === role) && (currentOrg === org.org)
-                        };
-                      }));
-                },
-                _([]));
-        return menuItemsSeq
-          .drop(1) // Drop first separator
-          .concat(self.commonItems) // Add my-page and logout items
-          .value();
-      });
-
-      self.setRole = function(role, org) {
-        // FIXME
-        console.log("setRole", role, org);
-      };
-
-      self.executeAction = function(item) {
-        self.visible(false);
-        switch (item.action) {
-          case "setRole":
-            self.setRole(item.role, item.org);
-            break;
-          case "ownPage":
-            window.location.hash = "#!/mypage";
-            break;
-          case "logout":
-            window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
-            break;
-          default:
-            console.error("unknown menu action:", item.action);
-        }
-      };
-
-      self.actionFor = function(item) {
-        return self.executeAction.bind(self, item);
-      };
-
-      const cancel = self.visible.bind(self, false);
-      hub.subscribe("dialog-close", cancel);
-      $(document).on("click", cancel);
-      $(document).on("click", ".role-selector-dropdown-content", function(e) {
-        e.stopPropagation();
-      });
-
-    }
-
     /**
      * Complete the App initialization after DOM is loaded.
      */
-    self.domReady = function() {
+    self.domReady = function () {
       self.initSubscribtions();
 
       $(window)
@@ -444,9 +280,7 @@ var LUPAPISTE = LUPAPISTE || {};
         LUPAPISTE.ModalDialog.init();
       }
 
-      $(document.documentElement).keyup(function(event) {
-        hub.send("keyup", event);
-      });
+      $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
 
       function openStartPage() {
         if (self.logoPath) {
@@ -466,7 +300,7 @@ var LUPAPISTE = LUPAPISTE || {};
         }
       }
 
-      const model = {
+      var model = {
         currentLanguage: loc.getCurrentLanguage(),
         openStartPage: openStartPage,
         showUserMenu: self.showUserMenu,
@@ -474,19 +308,18 @@ var LUPAPISTE = LUPAPISTE || {};
         showCalendarMenuOptions: self.showCalendarMenuOptions,
         calendarMenubarVisible: self.calendarMenubarVisible,
         // TODO: sync with side-panel.js sidePanelPages
-        sidePanelPages: ["application", "attachment", "statement", "neighbors", "verdict"],
-        roleSelector: new RoleSelectorModel(self.models)
+        sidePanelPages: ["application","attachment","statement","neighbors","verdict"]
       };
 
       $("#app").applyBindings(lupapisteApp.models.rootVMO);
 
       if (LUPAPISTE.Screenmessage) {
-        LUPAPISTE.Screenmessage.refresh();
-        model.screenMessage = LUPAPISTE.Screenmessage;
+          LUPAPISTE.Screenmessage.refresh();
+          model.screenMessage = LUPAPISTE.Screenmessage;
       }
-      $(".brand").applyBindings(model);
-      $(".header-menu").applyBindings(model).css("visibility", "visible");
-      $("#sys-notification").applyBindings(model);
+      $(".brand").applyBindings( model );
+      $(".header-menu").applyBindings( model ).css( "visibility", "visible");
+      $("#sys-notification").applyBindings( model );
       $("footer").applyBindings(model).css("visibility", "visible");
     };
   };

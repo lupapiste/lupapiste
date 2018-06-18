@@ -1,57 +1,54 @@
 LUPAPISTE.CurrentUser = function() {
   "use strict";
 
-  const self = this;
+  var self = this;
 
-  const defaults = {
-    id: "",
-    email: "",
-    role: "",
-    oir: "",
-    organizations: [],
-    firstName: "",
-    lastName: "",
-    phone: "",
-    username: "",
-    language: "",
-    orgAuthz: undefined,
-    orgNames: undefined,
+  var defaults = {
+    id:             "",
+    email:          "",
+    role:           "",
+    oir:            "",
+    organizations:  [],
+    firstName:      "",
+    lastName:       "",
+    phone:          "",
+    username:       "",
+    language:       "",
+    orgAuthz:       undefined,
     company: {
-      id: undefined,
+      id:   undefined,
       role: undefined
     },
     notification: {
-      title: undefined,
-      titleI18nkey: undefined,
-      message: undefined,
+      title:          undefined,
+      titleI18nkey:   undefined,
+      message:        undefined,
       messageI18nkey: undefined
     },
-    defaultFilter: {id: "", foremanFilterId: "", companyFilterId: ""},
+    defaultFilter: {id: "", foremanFilterId: "",  companyFilterId: ""},
     applicationFilters: [],
     foremanFilters: [],
     companyApplicationFilters: []
   };
 
-  let fbPixel = null;
+  var fbPixel = null;
   if (LUPAPISTE.config.facebook && LUPAPISTE.config.facebook.url && analytics && analytics.isTrackingEnabled()) {
-    fbPixel = function() {
-      const fbUrl = LUPAPISTE.config.facebook.url;
+    fbPixel = function () {
+      var fbUrl = LUPAPISTE.config.facebook.url;
       return "<img height='1' width='1' style='display:none' src='" + fbUrl + "'/>";
     };
   }
 
   function constructor(user) {
-    if (!_.isEmpty(user) && !user.language && !user.virtual) {
+    if( !_.isEmpty(user) && !user.language && !user.virtual ) {
       user.language = loc.getCurrentLanguage();
       ajax.command("update-user", _.pick(user, ["firstName", "lastName", "language"]))
-          .success(function() {
-            hub.send("indicator", {
-              style: "primary",
-              message: "user.language.note",
-              sticky: true, html: true
-            });
-          })
-          .call();
+        .success(function() {
+          hub.send("indicator", {style: "primary",
+                                 message: "user.language.note",
+                                 sticky: true, html: true});
+        })
+        .call();
     }
     if (user.firstLogin) {
       hub.send("first-login", {user: user});
@@ -65,11 +62,9 @@ LUPAPISTE.CurrentUser = function() {
     if (_.isFunction(fbPixel)) {
       // send a bit to Facebook about firstLogin
       info("Triggering first login Facebook pixel");
-      hub.send("indicator", {
-        style: "hidden",
-        rawMessage: fbPixel(),
-        html: true
-      });
+      hub.send("indicator", {style: "hidden",
+                             rawMessage: fbPixel(),
+                             html: true});
     }
   });
 
@@ -81,104 +76,22 @@ LUPAPISTE.CurrentUser = function() {
   // Hash is cleared when returned to the application list. But the
   // we need to wrap it to the observable in order to trigger
   // isAuthority and isApplicant computeds.
-  const hash = ko.observable();
+  var hash = ko.observable();
 
-  $(window).on("hashchange", function() {
+  $(window).on( "hashchange", function() {
     // Null-safe regarding location
-    hash(_.get(window, "location.hash"));
-  });
+    hash( _.get( window, "location.hash" ));
+  } );
 
   function isOutsideAuthority() {
-    const app = lupapisteApp.models.application;
-    return self.role() === "authority" &&
-      app &&
-      _.includes(hash(), app.id()) &&
-      !_.get(self.orgAuthz(), app.organization());
+    var app = lupapisteApp.models.application;
+    return self.role() === "authority"
+      && app && _.includes( hash(), app.id())
+      && !_.get( self.orgAuthz(), app.organization());
   }
 
   self.isAuthorityAdmin = ko.pureComputed(function() {
-    if (self.role() !== "authority") return false;
-    return _(self.orgAuthz())
-      .values()
-      .some(function(orgRoles) {
-        return orgRoles().some(function(role) {
-          return role === "authorityAdmin";
-        });
-      })
-  });
-
-  self.currentRole = ko.pureComputed(function() {
-    // FIXME
-    return "authority";
-  });
-
-  self.currentOrg = ko.pureComputed(function() {
-    // FIXME
-    return "753-R";
-  });
-
-  /**
-   * A vector of roles available for current user. Each element in vector is an object
-   * with keys "role", "org" and "orgName"
-   *
-   * Example:
-   * <code>
-   *   [
-   *     {
-   *       org: "753-R",
-   *       roles: ["authority", "authorityAdmin"],
-   *       orgName: "Sipoon rakennusvalvonta"
-   *     },
-   *     {
-   *       org: "297-R",
-   *       roles: ["authority"],
-   *       orgName: "Kuopio rakennusvalvonta"
-   *     }
-   *   ]
-   * </code>
-   *
-   * If the user can't change role the value is [].
-   */
-
-  self.availableRoles = ko.pureComputed(function() {
-    // Currently, multiple roles are available only for authority users that have
-    // authRolez role for more than one municipality. Later this could
-    // be extended to other cases too.
-    if (self.role() !== "authority") return [];
-    const orgAuthz = ko.toJS(self.orgAuthz) || {},
-          orgNames = ko.toJS(self.orgNames) || {};
-    return _.map(
-      orgAuthz,
-      function(roles, org) {
-        return {
-          org: org,
-          roles: roles,
-          orgName: orgNames[org]
-        };
-      });
-  });
-
-  /**
-   * A map of organizations available to current user. Keys are organization ID's and
-   * values are human readable organization names.
-   */
-
-  self.availableOrgs = ko.pureComputed(function () {
-    return _.reduce(
-      ko.unwrap(self.orgNames),
-      function(acc, orgName, orgId) {
-        acc[orgId] = ko.unwrap(orgName);
-        return acc;
-      },
-      {});
-  });
-
-  /**
-   * A boolean value indicating if the user has multiple roles available.
-   */
-
-  self.hasMultipleRoles = ko.pureComputed(function() {
-    return self.availableRoles().length > 1;
+    return self.role() === "authorityAdmin";
   });
 
   self.isAuthority = ko.pureComputed(function() {
@@ -190,10 +103,9 @@ LUPAPISTE.CurrentUser = function() {
   });
 
   self.isArchivist = ko.pureComputed(function() {
-    const app      = lupapisteApp.models.application,
-          orgAuths = util.getIn(self.orgAuthz, [ko.unwrap(app.organization)]);
-    return self.role() === "authority" &&
-      app &&
+    var app = lupapisteApp.models.application;
+    var orgAuths = util.getIn(self.orgAuthz, [ko.unwrap(app.organization)]);
+    return self.role() === "authority" && app &&
       _.includes(orgAuths, "archivist");
   });
 
@@ -202,17 +114,16 @@ LUPAPISTE.CurrentUser = function() {
   });
 
   // Role in the context of the current application.
-  self.applicationRole = _.cond([
-    [self.isAuthority, _.constant("authority")],
-    [self.isApplicant, _.constant("applicant")],
-    [_.stubTrue, self.role]]);
+  self.applicationRole = _.cond( [[self.isAuthority, _.constant( "authority")],
+                                  [self.isApplicant, _.constant( "applicant")],
+                                  [_.stubTrue, self.role ]]);
 
   self.isCompanyUser = ko.pureComputed(function() {
     return !_.isEmpty(ko.unwrap(self.company.id()));
   });
 
   self.displayName = ko.pureComputed(function() {
-    let username = self.username() || "";
+    var username = self.username() || "";
     if (self.firstName() || self.lastName()) {
       username = self.firstName() + " " + self.lastName();
     }
@@ -225,7 +136,7 @@ LUPAPISTE.CurrentUser = function() {
   });
 
   function getNotificationFields(notification) {
-    if (notification.titleI18nkey() && notification.messageI18nkey()) {
+    if(notification.titleI18nkey() && notification.messageI18nkey()) {
       return {
         title: loc(notification.titleI18nkey()),
         msg: loc(notification.messageI18nkey())
@@ -242,24 +153,23 @@ LUPAPISTE.CurrentUser = function() {
 
   ko.computed(function() {
     if (self.showNotification()) {
-      const fields = getNotificationFields(self.notification);
-      hub.send("show-dialog", {
-        title: fields.title,
-        id: "user-notification-dialog",
-        size: "medium",
-        component: "ok-dialog",
-        closeOnClick: true,
-        componentParams: {text: fields.msg}
-      });
+      var fields = getNotificationFields(self.notification);
+      hub.send("show-dialog", {title: fields.title,
+                               id: "user-notification-dialog",
+                               size: "medium",
+                               component: "ok-dialog",
+                               closeOnClick: true,
+                               componentParams: {text: fields.msg}
+                              });
     }
   });
 
   hub.subscribe({eventType: "dialog-close", id: "user-notification-dialog"}, function() {
     ajax.command("remove-user-notification")
-        .complete(function() {
-          hub.send("reload-current-user");
-        })
-        .call();
+      .complete(function () {
+        hub.send("reload-current-user");
+      })
+      .call();
   });
 
   hub.subscribe("login", function(data) {
@@ -270,11 +180,11 @@ LUPAPISTE.CurrentUser = function() {
 
   hub.subscribe("reload-current-user", function() {
     ajax.query("user")
-        .success(function(res) {
-          if (res.user) {
-            constructor(res.user);
-          }
-        })
-        .call();
+      .success(function (res) {
+        if (res.user) {
+          constructor(res.user);
+        }
+      })
+      .call();
   });
 };

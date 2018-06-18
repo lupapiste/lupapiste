@@ -2,38 +2,36 @@
   "use strict";
 
   function Languages() {
-    const self = this;
-
+    var self = this;
     self.languages = loc.getSupportedLanguages();
     self.languageMenuVisible = ko.observable(false);
     self.currentLanguage = loc.getCurrentLanguage();
-    self.changeLanguage = function(lang) {
-      if (lang !== self.currentLanguage) {
-        hub.send("change-lang", {lang: lang});
+    self.changeLanguage = function( lang ) {
+      if( lang !== self.currentLanguage ) {
+        hub.send("change-lang", { lang: lang });
       }
-      self.languageMenuVisible(false);
+      self.languageMenuVisible( false );
     };
     self.toggleLanguageMenu = function() {
-      self.languageMenuVisible(!self.languageMenuVisible());
+      self.languageMenuVisible( !self.languageMenuVisible() );
     };
 
-    const cancel = _.partial(self.languageMenuVisible, false);
+    var cancel =   _.partial( self.languageMenuVisible, false);
 
     // We cancel (aka close the menu), on dialog-close event
     // that denotes user pressing esc key and clicks outside
     // of menu area.
-    hub.subscribe("dialog-close", cancel);
-    $(document).on("click", ".language-menu", function(e) {
+    hub.subscribe( "dialog-close", cancel);
+    $(document).on( "click", ".language-menu", function( e ) {
       e.stopPropagation();
     });
-    $(document).on("click", cancel);
+    $(document).on( "click", cancel );
   }
 
-  const langs = new Languages();
+  var langs = new Languages();
 
   $(function() {
-    $("#language-select").applyBindings(langs);
-    $(".language-menu").applyBindings(langs);
+    $( "#language-select").applyBindings( langs );
+    $( ".language-menu").applyBindings( langs );
   });
-
 })();

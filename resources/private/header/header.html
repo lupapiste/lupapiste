@@ -1,159 +1,110 @@
 <!DOCTYPE html>
 <html>
-  <head></head>
-  <body>
-    <nav style="visibility: hidden;">
-      <div class="nav-top">
+<head></head>
+<body>
+<nav style="visibility: hidden;">
+    <div class="nav-top">
         <div class="nav-box">
-          <div class="brand">
-            <a data-bind="click: $data.openStartPage" class="logo"></a>
-          </div>
-          <div id="language-select" data-bind="css: {'language-open': $root.languageMenuVisible,
-                                                     'language-closed': $root.languageMenuVisible() == false}">
-            <a data-test-id="language-link"
-               href="#"
-               data-bind="click: $root.toggleLanguageMenu, clickBubble: false">
-              <span data-bind="text: $root.currentLanguage"></span>
-              <span data-bind="css: {'lupicon-chevron-small-down': $root.languageMenuVisible() == false,
+            <div class="brand" >
+                <a data-bind="click: $data.openStartPage" class="logo"></a>
+            </div>
+            <div id="language-select" data-bind="css: {'language-open': $root.languageMenuVisible,
+                                                 'language-closed': $root.languageMenuVisible() == false}">
+                <a data-test-id="language-link"
+                   href="#" data-bind="click: $root.toggleLanguageMenu, clickBubble: false">
+                    <span data-bind="text: $root.currentLanguage"></span>
+                    <span data-bind="css: {'lupicon-chevron-small-down': $root.languageMenuVisible() == false,
                                      'lupicon-chevron-small-up': $root.languageMenuVisible}"></span>
-            </a>
-          </div>
-          <div class="header-menu" data-bind="if: $root.showUserMenu" data-test-id="user-nav-menu">
-            <div class="header-box">
-              <a href="#" data-bind="click: $data.openStartPage, attr: {title: loc('navigation')}">
-                <span class="lupicon-documents"></span>
-                <span class="narrow-hide" data-bind="ltext: 'navigation'"></span>
-              </a>
-            </div>
-            <div class="header-box"
-                 data-bind="visible: $root.showCalendarMenuOptions">
-              <!-- ko if: lupapisteApp.models.currentUser.isAuthorityAdmin -->
-              <a href="#!/organization-calendars" data-bind="attr: {'title': loc('Ajanvaraus')}">
-                <span class="lupicon-calendar"></span>
-                <span class="narrow-hide" data-bind="ltext: 'Ajanvaraus'"></span>
-              </a>
-              <!-- /ko -->
-              <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
-              <a href="#!/mycalendar" data-bind="attr: {'title': loc('Ajanvaraus')}">
-                <span class="lupicon-calendar"></span>
-                <span class="narrow-hide" data-bind="ltext: 'Ajanvaraus'"></span>
-              </a>
-              <!-- /ko -->
-              <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
-              <a href="#!/new-appointment" data-bind="attr: {'title': loc('Ajanvaraus')}">
-                <span class="lupicon-calendar"></span>
-                <span class="narrow-hide" data-bind="ltext: 'Ajanvaraus'"></span>
-              </a>
-              <!-- /ko -->
-            </div>
-            <div class="header-box" data-bind="visible: $root.showArchiveMenuOptions">
-              <a data-bind="attr: {href: loc('document.search.url'), title: loc('Dokumentit')}">
-                <span class="lupicon-archives"></span>
-                <span class="narrow-hide" data-bind="ltext: 'Dokumentit'"></span>
-              </a>
-            </div>
-            <div class="header-box" data-bind="visible: $root.showArchiveMenuOptions">
-              <a data-bind="attr: {href: loc('toj.url'), 'title': loc('Tiedonohjaus')}">
-                <span class="lupicon-tree-path"></span>
-                <span class="narrow-hide" data-bind="ltext: 'Tiedonohjaus'"></span>
-              </a>
-            </div>
-            <div class="header-box">
-              <a data-bind="attr: {href: loc( 'path.guide' ), title: loc('help')}" target="_blank">
-                <span class="lupicon-circle-question"></span>
-                <span class="narrow-hide" data-bind="ltext: 'help'"></span>
-              </a>
-            </div>
-
-            <!--
-              =============================
-              Role selector:
-              =============================
-            -->
-
-            <div class="header-box">
-
-              <a class="role-selector-dropdown-toggle-button"
-                 data-bind="click: $root.roleSelector.toggle,
-                            clickBubble: false">
-
-                <span class="lupicon-user role-selector-user-icon"></span>
-
-                <span class="narrow-hide role-selector-user">
-                  <span id="user-name"
-                        class="role-selector-user-name"
-                        data-bind="text: lupapisteApp.models.currentUser.displayName,
-                                   attr: {'data-test-role' : lupapisteApp.models.currentUser.role}">
-                  </span>
-                  <span class="role-selector-user-role">
-                    <span class="role-selector-user-role-name" data-bind="ltext: $root.roleSelector.currentRole"></span>
-                    <span class="role-selector-user-role-sep">-</span>
-                    <span class="role-selector-user-role-org" data-bind="text: $root.roleSelector.currentOrgName"></span>
-                  </span>
-                </span>
-
-                <span data-bind="css: {'lupicon-chevron-small-down': $root.roleSelector.visible() == false,
-                                       'lupicon-chevron-small-up': $root.roleSelector.visible}"
-                      class="role-selector-open-indicator">
-                </span>
-
-              </a>
-              <div class="role-selector-dropdown-content"
-                   data-bind="visible: $root.roleSelector.visible,
-                              foreach: $root.roleSelector.menuItems">
-                <!-- ko if: type === "item" -->
-                <a href="#"
-                   data-bind="click: $root.roleSelector.actionFor($data),
-                              css: {'role-selector-dropdown-role-disabled': currentlySelected}"
-                   class="role-selector-dropdown-item role-selector-dropdown-role">
-                  <span data-bind="css: iconClass" class="role-selector-dropdown-role-icon"></span>
-                  <span data-bind="text: text" class="role-selector-dropdown-role-text"></span>
                 </a>
-                <!-- /ko -->
-                <!-- ko if: type === "sep" -->
-                <hr class="role-selector-dropdown-item role-selector-dropdown-sep"/>
-                <!-- /ko -->
-                <!-- ko if: type === "org" -->
-                <span data-bind="text: text"
-                      class="role-selector-dropdown-item role-selector-dropdown-organization">
-                </span>
-                <!-- /ko -->
-              </div>
-
             </div>
-          </div>
-
+            <div class="header-menu" data-bind="if: $root.showUserMenu" data-test-id="user-nav-menu">
+                <div class="header-box">
+                    <a href="#" data-bind="click: $data.openStartPage, attr: {title: loc('navigation')}">
+                        <span class="lupicon-documents"></span>
+                        <span class="narrow-hide" data-bind="ltext: 'navigation'"></span>
+                    </a>
+                </div>
+                <div class="header-box"
+                     data-bind="visible: $root.showCalendarMenuOptions">
+                  <!-- ko if: lupapisteApp.models.currentUser.isAuthorityAdmin -->
+                    <a href="#!/organization-calendars" data-bind="attr: {'title': loc('Ajanvaraus')}">
+                      <span class="lupicon-calendar"></span>
+                      <span class="narrow-hide" data-bind="ltext: 'Ajanvaraus'"></span>
+                    </a>
+                  <!-- /ko -->
+                  <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
+                    <a href="#!/mycalendar" data-bind="attr: {'title': loc('Ajanvaraus')}">
+                      <span class="lupicon-calendar"></span>
+                      <span class="narrow-hide" data-bind="ltext: 'Ajanvaraus'"></span>
+                    </a>
+                  <!-- /ko -->
+                  <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
+                  <a href="#!/new-appointment" data-bind="attr: {'title': loc('Ajanvaraus')}">
+                    <span class="lupicon-calendar"></span>
+                    <span class="narrow-hide" data-bind="ltext: 'Ajanvaraus'"></span>
+                  </a>
+                  <!-- /ko -->
+                </div>
+                <div class="header-box" data-bind="visible: $root.showArchiveMenuOptions">
+                    <a data-bind="attr: {href: loc('document.search.url'), title: loc('Dokumentit')}">
+                        <span class="lupicon-archives"></span>
+                        <span class="narrow-hide" data-bind="ltext: 'Dokumentit'"></span>
+                    </a>
+                </div>
+                <div class="header-box" data-bind="visible: $root.showArchiveMenuOptions">
+                    <a data-bind="attr: {href: loc('toj.url'), 'title': loc('Tiedonohjaus')}">
+                        <span class="lupicon-tree-path"></span>
+                        <span class="narrow-hide" data-bind="ltext: 'Tiedonohjaus'"></span>
+                    </a>
+                </div>
+                <div class="header-box">
+                    <a data-bind="attr: {href: loc( 'path.guide' ), title: loc('help')}" target="_blank">
+                        <span class="lupicon-circle-question"></span>
+                        <span class="narrow-hide" data-bind="ltext: 'help'"></span>
+                    </a>
+                </div>
+                <div class="header-box">
+                    <a href="#!/mypage" data-bind="attr: {'title': loc('mypage.title')}">
+                        <span class="lupicon-user"></span>
+                        <span class="narrow-hide" id="user-name"
+                              data-bind="text: lupapisteApp.models.currentUser.displayName, attr: {'data-test-role' : lupapisteApp.models.currentUser.role}"></span>
+                    </a>
+                </div>
+                <div id="logout-header-box" class="header-box">
+                    <a data-bind="attr: {href: '/app/' + $root.currentLanguage + '/logout', 'title': loc('logout')}" >
+                        <span class="lupicon-log-out"></span>
+                        <span class="narrow-hide" data-bind="ltext: 'logout'"></span>
+                    </a>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="nav-bottom">
+    </div>
+    <div class="nav-bottom">
         <div class="nav-box">
           <div class="language-menu" style="display: none" data-bind="visible: $root.languageMenuVisible">
-            <ul data-bind="foreach: $root.languages">
-              <li>
-                <a href="#" data-bind="click: $root.changeLanguage,
-                                       text: $data.toUpperCase() + ' - ' + loc($data)">
-                </a>
-              </li>
-            </ul>
+              <ul data-bind="foreach: $root.languages">
+                  <li><a href="#" data-bind="click: $root.changeLanguage,
+                                             text: $data.toUpperCase() + ' - ' + loc( $data )"></a></li>
+              </ul>
           </div>
         </div>
-      </div>
-    </nav>
-    <div class="notification">
-      <div class="nav-notification" id="sys-notification" style="display: none"
-           data-bind="visible: $data.screenMessage && screenMessage.messages && screenMessage.messages().length > 0">
-        <div class="nav-box" data-bind="if: $data.screenMessage">
-          <div class="notification-info"><span class="lupicon-circle-info"></span></div>
-          <div class="notification-list">
-            <ul class="wrapper" data-bind="foreach: $data.screenMessage.messages">
-              <li data-bind="html: $data[loc.getCurrentLanguage()]" data-test-id="test-screenmessage"></li>
-            </ul>
-          </div>
-          <div class="notification-close">
-            <span class="lupicon-remove" data-bind="click: $root.screenMessage.hide"></span>
-          </div>
-        </div>
-      </div>
     </div>
-  </body>
+</nav>
+<div  class="notification">
+    <div  class="nav-notification" id="sys-notification" style="display: none"
+          data-bind="visible: $data.screenMessage && screenMessage.messages && screenMessage.messages().length > 0">
+        <div class="nav-box" data-bind="if: $data.screenMessage">
+            <div class="notification-info"><span class="lupicon-circle-info"></span></div>
+            <div  class="notification-list">
+                <ul class="wrapper" data-bind="foreach: $data.screenMessage.messages">
+                    <li data-bind="html: $data[loc.getCurrentLanguage()]" data-test-id="test-screenmessage"></li>
+                </ul>
+            </div>
+            <div class="notification-close">
+                <span class="lupicon-remove" data-bind="click: $root.screenMessage.hide"></span>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
 </html>
