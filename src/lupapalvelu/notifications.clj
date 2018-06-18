@@ -43,7 +43,7 @@
 (defn- send-mail-to-recipient! [recipient subject msg]
   {:pre [(map? recipient) (string? (:email recipient))]}
   (let [to (->to recipient)]
-    (if (env/value :email :dummy)
+    (if (env/value :email :dummy-server)
      (email/send-email-message to subject msg)
      (future*
        (if (email/send-email-message to subject msg)
