@@ -1236,11 +1236,11 @@
 
 (fact "Document request info"
   (fact "only authority admin can call"
-    (command sonja :set-document-request-info :enabled false :email "a@b.c" :instructions "Instructions")
+    (command sonja :set-document-request-info :enabled false :email "a@b.c" :instructions {:en "Instructions" :fi "Ohjeet" :sv "Anvisningar"})
     => (partial expected-failure? :error.unauthorized))
 
   (fact "email must be valid"
-    (command sipoo :set-document-request-info :enabled false :email "not-valid-email" :instructions "Instructions")
+    (command sipoo :set-document-request-info :enabled false :email "not-valid-email" :instructions {:en "Instructions" :fi "Ohjeet" :sv "Anvisningar"})
     => (partial expected-failure? :error.email))
 
   (fact "setting works"
