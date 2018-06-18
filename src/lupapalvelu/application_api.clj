@@ -288,7 +288,7 @@
                       (map (fn [e] {:email e, :role "authority"}) emails)))
    :model-fn (fn [{app :application :as command} conf recipient]
                (assoc (notifications/create-app-model command conf recipient)
-                 :applicants (if-let [applicants (:_applicantIndex app)]
+                 :applicants (if-let [applicants (not-empty (:_applicantIndex app))]
                                (reduce #(str %1 ", " %2) applicants)
                                #(i18n/localize % "not-known"))))})
 
