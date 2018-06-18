@@ -215,7 +215,8 @@
                                     [:a (common/add-test-id {:on-click #(open-template id)}
                                                             :link tid)
                                      name])]
-                             [:td (js/util.finnishDate published)]
+                             [:td (common/add-test-id {} :published tid)
+                              (js/util.finnishDate published)]
                              [:td
                               [:div.pate-buttons
                                (when-not deleted

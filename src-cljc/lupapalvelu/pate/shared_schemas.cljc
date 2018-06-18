@@ -191,7 +191,7 @@
   "Displays the referenced value. By default, :path is resolved as a
   regular path into the component state. However, if the path is
   prefixed with :*ref the resolution target (for the rest) is
-  references (like in PateEnabled for example)."
+  references (like in `PateEnabled` for example)."
   (merge PateComponent
          {:path path-type}))
 
@@ -273,7 +273,10 @@
           ;; By default the toggle text is determined by the
           ;; localisation mechanisms. However, in some cases dynamic
           ;; toggle text might be needed. :text-dict refers to a
-          ;; sibling dict that contains the the toggle text.
+          ;; sibling dicts that contain the the toggle text Note that
+          ;; there must be a corresponding dict for every supported
+          ;; language. For example, if :text-dict is :foo, the actual
+          ;; dicts are :foo-fi, :foo-sv and :foo-en.
           (sc/optional-key :text-dict) sc/Keyword}))
 
 (def pate-units
@@ -341,26 +344,35 @@
   ([schema-ref fun]
    {sc/Keyword
     (let [fun (or fun identity)]
-           (sc/conditional
-            :reference-list (fun (required {:reference-list PateReferenceList}))
-            :phrase-text    (fun (required {:phrase-text PatePhraseText}))
-            :loc-text       (fun PateLocText)
-            :date-delta     (fun (required {:date-delta PateDateDelta}))
-            :multi-select   (fun (required {:multi-select PateMultiSelect}))
-            :reference      (fun (required {:reference PateReference}))
-            :link           (fun {:link PateLink})
-            :button         (fun {:button PateButton})
-            :placeholder    (fun {:placeholder PatePlaceholder})
-            :keymap         (fun {:keymap KeyMap})
-            :attachments    (fun {:attachments PateAttachments})
-            :application-attachments (fun {:application-attachments PateComponent})
-            :toggle         (fun {:toggle PateToggle})
-            :text           (fun (required {:text PateText}))
-            :date           (fun (required {:date PateDate}))
-            :select         (fun (required {:select PateSelect}))
-            :repeating      (fun {:repeating (sc/recursive schema-ref)
-                                  ;; The value is a key in the repeating dictionary.
-                                  (sc/optional-key :sort-by) sc/Keyword})))})
+      (sc/conditional
+       :reference-list (fun (required {:reference-list PateReferenceList}))
+       :phrase-text    (fun (required {:phrase-text PatePhraseText}))
+       :loc-text       (fun PateLocText)
+       :date-delta     (fun (required {:date-delta PateDateDelta}))
+       :multi-select   (fun (required {:multi-select PateMultiSelect}))
+       :reference      (fun (required {:reference PateReference}))
+       :link           (fun {:link PateLink})
+       :button         (fun {:button PateButton})
+       :placeholder    (fun {:placeholder PatePlaceholder})
+       :keymap         (fun {:keymap KeyMap})
+       :attachments    (fun {:attachments PateAttachments})
+       :application-attachments (fun {:application-attachments PateComponent})
+       :toggle         (fun {:toggle PateToggle})
+       :text           (fun (required {:text PateText}))
+       :date           (fun (required {:date PateDate}))
+       :select         (fun (required {:select PateSelect}))
+       :repeating      (fun {:repeating (sc/recursive schema-ref)
+                             (sc/optional-key :sort-by)
+                             (sc/conditional
+                              ;; The value is a prefix for lang. The
+                              ;; actual sorting is done according to
+                              ;; value of prefix-lang. For example,
+                              ;; if :prefix is :text and current
+                              ;; language is English, then the items
+                              ;; are sorted by their :text-en dicts.
+                              :prefix {:prefix sc/Keyword}
+                              ;; The value is a key in the repeating dictionary.
+                              :else sc/Keyword)})))})
   ([schema-ref]
    (schema-types schema-ref nil)))
 

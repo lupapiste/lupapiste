@@ -131,11 +131,11 @@ Follow reviews link to settings
 
 Add three reviews and return
   Click visible test id  add-review
-  Fill review  0  K1  F1  P1  aloituskokous
+  Fill review  0  K1  S1  R1  aloituskokous
   Click visible test id  add-review
-  Fill review  1  K2  F2  P2  rakennekatselmus
+  Fill review  1  K2  S2  R2  rakennekatselmus
   Click visible test id  add-review
-  Fill review  2  K3  F3  P3  loppukatselmus
+  Fill review  2  K3  S3  R3  loppukatselmus
   Click back
 
 Reviews are available in the template
@@ -186,7 +186,6 @@ All the required fields are filled
 
 Reviews have changed
   Scroll to test id  section-conditions-label
-
   ${r1}=  Row test id  reviews  0
   Toggle not selected  ${r1}-included
   Toggle not selected  ${r1}-selected
@@ -263,6 +262,31 @@ Plans are listed in English
   Check initial plan  0  P1
   Check initial plan  1  P2
 
+Publish template
+  Test id text is  template-state  Verdict template has not yet been published.
+  Scroll and click test id  publish-template
+  Test id should contain  template-state  Last published
+  Test id disabled  publish-template
+  Click back
+
+Published date is shown on the template
+  ${today}=  Execute Javascript  return util.finnishDate( moment() );
+  Test id text is  published-template-0  ${today}
+  Test id text is  published-template-1  ${EMPTY}
+
+Change category
+  Select from test id  category-select  p
+  No templates
+  Click visible test id  open-settings
+  Wait test id visible  settings-missing
+  Click back
+  Click visible test id  add-template
+  Test id disabled  publish-template
+  Test id text is  template-state  Verdict template has not yet been published.
+  Test id text is  template-name-text  Verdict template
+  Wait test id visible  required-template
+  Wait test id visible  required-settings
+  [Teardown]  Logout
 
 
 *** Keywords ***

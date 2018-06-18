@@ -316,7 +316,7 @@
                     :text      (if-let [dict (:text-dict schema)]
                                  (path/react (butlast path)
                                              state
-                                             dict)
+                                             (common/prefix-lang dict))
                                  (path/loc options))
                     :prefix    (:prefix schema)
                     :test-id   (test-id options)})

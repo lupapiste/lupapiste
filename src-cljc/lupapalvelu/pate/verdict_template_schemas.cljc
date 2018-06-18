@@ -122,32 +122,34 @@
 
 (defn settings-dependencies [dict loc-prefix]
   (let [link-dict (-> (name dict) (str  "-link") keyword)]
-    {:dictionary {dict {:repeating {:included {:toggle {:label?    false
-                                                       :text-dict :text}}
-                                   :text     {:text {:read-only? true}}
-                                   :selected {:toggle {:enabled?  :-.included
-                                                       :label?  false
-                                                       :i18nkey :pate.available-in-verdict}}}
-                       :sort-by :text}
+    {:dictionary {dict      {:repeating {:included {:toggle {:label?    false
+                                                             :text-dict :text}}
+                                         :text-fi  {:text {:read-only? true}}
+                                         :text-sv  {:text {:read-only? true}}
+                                         :text-en  {:text {:read-only? true}}
+                                         :selected {:toggle {:enabled? :-.included
+                                                             :label?   false
+                                                             :i18nkey  :pate.available-in-verdict}}}
+                             :sort-by   {:prefix :text}}
                   link-dict (settings-link :label? false)}
-    :section    {:id         dict
-                 :loc-prefix loc-prefix
-                 :grid       {:columns 5
-                              :rows    [{:hide? dict
-                                         :css   :row--extra-tight
-                                         :row   [{:col  4
-                                                  :dict link-dict}]}
-                                        {:css :row--extra-tight
-                                         :row [{:col   4
-                                                :show? dict
-                                                :grid  {:columns   4
-                                                        :repeating dict
-                                                        :rows      [{:css :row--extra-tight
-                                                                     :row [{:col  2
-                                                                            :dict :included}
-                                                                           {:col  2
-                                                                            :dict :selected}]}]}}]}]}}
-    :removable? true}))
+     :section     {:id         dict
+                   :loc-prefix loc-prefix
+                   :grid       {:columns 5
+                                :rows    [{:hide? dict
+                                           :css   :row--extra-tight
+                                           :row   [{:col  4
+                                                    :dict link-dict}]}
+                                          {:css :row--extra-tight
+                                           :row [{:col   4
+                                                  :show? dict
+                                                  :grid  {:columns   4
+                                                          :repeating dict
+                                                          :rows      [{:css :row--extra-tight
+                                                                       :row [{:col  2
+                                                                              :dict :included}
+                                                                             {:col  2
+                                                                              :dict :selected}]}]}}]}]}}
+     :removable?  true}))
 
 (def temsub-reviews
   (settings-dependencies :reviews :pate-reviews))

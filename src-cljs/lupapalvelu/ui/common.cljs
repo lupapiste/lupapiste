@@ -215,3 +215,12 @@
       (vector? target)   (if (-> target second map?)
                            (assoc-in target [1 :data-test-id] test-id)
                            (vec (concat [x  {:data-test-id test-id}] xs))))))
+
+(defn prefix-lang
+  "Current language is appended to theiven keyword prefix:
+  :foo -> :foo-fi"
+  [prefix]
+  (when-not (s/blank? prefix)
+    (->> (map name [prefix (get-current-language)])
+         (s/join "-")
+         keyword)))

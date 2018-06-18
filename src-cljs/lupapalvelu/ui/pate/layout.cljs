@@ -230,8 +230,11 @@
   "The repeating keys (keys within the state that correspond to a
   repeating schema). Sorted by :sort-by if given within schema."
   [{:keys [dictionary path state] :as options} repeating]
-  (let [r-map    (path/react repeating state)
-        sort-key (get-in dictionary (path/extend path repeating :sort-by))]
+  (let [r-map  (path/react repeating state)
+        sorter (get-in dictionary (path/extend path repeating :sort-by))
+        sort-key (if-let [prefix (:prefix sorter)]
+                   (common/prefix-lang prefix)
+                   sorter)]
     (if sort-key
       (->> r-map
            (sort-by (fn [[_ m]]
