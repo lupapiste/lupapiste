@@ -14,7 +14,7 @@
             [sade.http :as http]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.document.tools :refer [doc-subtype]]
-            [lupapalvelu.document.canonical-common :as doccc]
+            [lupapalvelu.document.canonical-common :as canonical-common]
             [lupapalvelu.integrations.allu-schemas :refer [ValidPlacementApplication PlacementContract]]))
 
 ;;; FIXME: use :schema-info :name instead of :subtype
@@ -35,9 +35,9 @@
 
 (defn- application-kind [app]
   (let [operation (-> app :primaryOperation :name keyword)
-        kind (str (name (doccc/ya-operation-type-to-schema-name-key operation)) " / "
-                  (doccc/ya-operation-type-to-usage-description operation))]
-    (or (some->> (doccc/ya-operation-type-to-additional-usage-description operation)
+        kind (str (name (canonical-common/ya-operation-type-to-schema-name-key operation)) " / "
+                  (canonical-common/ya-operation-type-to-usage-description operation))]
+    (or (some->> (canonical-common/ya-operation-type-to-additional-usage-description operation)
                  (str kind " / "))
         kind)))
 
@@ -133,6 +133,7 @@
 
 ;; Putting it all together
 (sc/defn ^{:private true, :always-validate true} application->allu-placement-contract :- PlacementContract [app]
+  ;; Using `select-schema` because `app` will have a lot more data than the schema covers, not ideal.
   (-> app (select-schema ValidPlacementApplication) flatten-values convert-value-flattened-app))
 
 ;; TODO: unit test this
