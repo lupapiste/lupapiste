@@ -62,11 +62,11 @@
       :email (get-in applicant [:henkilo :sahkopostiosoite])
       :koulutusvalinta (get-in applicant [:koulutus])
       :valmistumisvuosi (get-in applicant [:valmistumisvuosi])
-      :kuntaRoolikoodi (get-in applicant [:suunnittelijaRoolikoodi])
+      :kuntaRoolikoodi (or (get-in applicant [:suunnittelijaRoolikoodi])
+                           (get-in applicant [:tyonjohtajaRooliKoodi]))
       (tools/default-values element))
-    (let [postiosoite (or
-                        (get-in applicant [:yritys :postiosoite])
-                        (get-in applicant [:yritys :postiosoitetieto :postiosoite]))]
+    (let [postiosoite (or (get-in applicant [:yritys :postiosoite])
+                          (get-in applicant [:yritys :postiosoitetieto :postiosoite]))]
       (case (keyword name)
         :_selected "yritys"
         :companyId nil
@@ -120,7 +120,6 @@
         unset-type     (if (contains? party :henkilo) :yritys :henkilo)]
     (assoc-in document [:data unset-type] (unset-type default-values))))
 
-
 (defn- suunnittelijaRoolikoodi->doc-schema [koodi]
   (cond
     (= koodi "p\u00e4\u00e4suunnittelija") "paasuunnittelija"
@@ -139,8 +138,11 @@
   (when-let [schema-name (suunnittelijaRoolikoodi->doc-schema (:suunnittelijaRoolikoodi party))]
     (party->party-doc party schema-name)))
 
-(defn- invite-applicants [{:keys [lang user created application] :as command} applicants authorize-applicants]
+(defn tyonjohtaja->tj-document [party]
+  (party->party-doc party "tyonjohtaja-v2"))
 
+(defn invite-applicants [{:keys [lang user created application] :as command} applicants authorize-applicants]
+  ;; FIXME: refactor document updates out from here
   (let [applicants-with-no-info (remove get-applicant-type applicants)
         applicants (filter get-applicant-type applicants)]
 
@@ -220,7 +222,7 @@
         doc-updates (lupapalvelu.document.model/map2updates [] data)]
     (lupapalvelu.document.model/apply-updates doc doc-updates)))
 
-(defn- schema-datas [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen]} buildings]
+(defn schema-datas [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen]} buildings]
   (map
     (fn [{:keys [data]}]
       (remove empty? (conj (doc-model/map2updates [] (select-keys data building-fields))
@@ -244,7 +246,6 @@
         new-parties (remove empty?
                             (concat (map suunnittelija->party-document (:suunnittelijat app-info))
                                     (map osapuoli->party-document (:muutOsapuolet app-info))))
-
         structure-descriptions (map :description buildings-and-structures)
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
@@ -293,7 +294,7 @@
     (-> x util/->double pos?)
     (-> y util/->double pos?)))
 
-(defn- get-location-info [{data :data :as command} app-info]
+(defn get-location-info [{data :data :as command} app-info]
   (when app-info
     (let [rakennuspaikka-exists? (and (:rakennuspaikka app-info)
                                       (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))
@@ -301,7 +302,7 @@
                                    rakennuspaikka-exists?                          (:rakennuspaikka app-info)
                                    (enough-location-info-from-parameters? command) (select-keys data [:x :y :address :propertyId]))]
       (when-not rakennuspaikka-exists?
-        (info "Prev permit application creation, rakennuspaikkatieto information incomplete:\n " (:rakennuspaikka app-info) "\n"))
+        (info "Prev permit application creation, rakennuspaikkatieto information incomplete:" (:rakennuspaikka app-info)))
       location-info)))
 
 (defn fetch-prev-application! [{{:keys [organizationId kuntalupatunnus authorizeApplicants]} :data :as command}]
@@ -331,7 +332,6 @@
                                           (if no-proper-applicants?
                                             (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
                                             (ok :id id))))))
-
 
 (def fix-prev-permit-counter (atom 0))
 

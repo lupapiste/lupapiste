@@ -89,4 +89,4 @@
     (get-muu-tunnus-data {:katselmuksenLaji "muu tarkastus"
                      :muuTunnustieto [{:MuuTunnus {:sovellus "RakApp12" :tunnus "998"}}
                                       {:MuuTunnus {:sovellus "RakApp" :tunnus "997"}}]
-                          :tarkastuksenTaiKatselmuksenNimi "K\u00E4ytt\u00F6\u00F6nottotarkastus"}) => {:muuTunnus "998" :muuTunnusSovellus "RakApp12"}))
+                     :tarkastuksenTaiKatselmuksenNimi "K\u00E4ytt\u00F6\u00F6nottotarkastus"}) => {:muuTunnus "998" :muuTunnusSovellus "RakApp12"}))

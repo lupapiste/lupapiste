@@ -215,7 +215,7 @@
                      :id      "legacy-id"
                      :data    {:conditions {:id1 {:name "First condition"}
                                             :id2 {:name "Second condition"}}
-                               :foremen {:id3 {:role "Vastaava työnjohtaja"}
+                               :foremen {:id3 {:role "Vastaava ty\u00f6njohtaja"}
                                          :id4 {:role "Some random foreman"}}}})
 
 (facts "Legacy conditions"
@@ -225,7 +225,7 @@
       (fact "Valid tasks"
         (->> tasks
              (map (partial tasks/task-doc-validation "task-lupamaarays"))
-             (filter seq))=> empty?)
+             (filter seq)) => empty?)
 
       tasks => (just [(contains {:schema-info {:name    "task-lupamaarays"
                                                :type    :task

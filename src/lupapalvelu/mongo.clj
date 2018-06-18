@@ -368,6 +368,9 @@
   ([collection query]
     (mc/count (get-db) collection (remove-null-chars query))))
 
+(defn aggregate [collection stages]
+  (mc/aggregate (get-db) (name collection) stages :cursor {}))
+
 (defn ^{:perfmon-exclude true} get-next-sequence-value [sequence-name]
   (:count (update-one-and-return :sequences {:_id (name sequence-name)} {$inc {:count 1}} :upsert true)))
 
@@ -492,6 +495,8 @@
   (ensure-index :assignments {:application.id 1, :recipient.id 1, :states.type 1})
   (ensure-index :assignments {:application.organization 1})
   (ensure-index :assignments {:status 1})
+  (ensure-index :application-bulletins {:versions.bulletinState 1})
+  (ensure-index :application-bulletins {:versions.municipality 1})
   (ensure-index :integration-messages {:application.id 1})
   (ensure-index :integration-messages {:created -1})
   (ensure-index :archive-api-usage {:logged -1})

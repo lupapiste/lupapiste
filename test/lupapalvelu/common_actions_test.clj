@@ -240,7 +240,7 @@
                            :ram-linked-attachments :attachment-groups :attachments :attachment :attachments-filters :attachments-tag-groups
                            :application-organization-archive-enabled
                            ;; pate
-                           :pate-verdicts :pate-verdict :pate-verdict-tab
+                           :pate-verdicts :pate-verdict :pate-verdict-tab :pate-contract-tab
                            ;; raw
                            :download-all-attachments :download-attachments
                            :pdf-export

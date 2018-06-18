@@ -1,13 +1,12 @@
 (ns lupapalvelu.ui.pate.verdicts
   (:require [clojure.set :as set]
             [clojure.string :as ss]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.path :as path]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.pate.components :as pate-components]
             [lupapalvelu.ui.pate.layout :as layout]
-            [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.phrases :as phrases]
             [lupapalvelu.ui.pate.sections :as sections]
             [lupapalvelu.ui.pate.service :as service]
@@ -17,12 +16,33 @@
 
 (defonce args (atom {}))
 
+(defn loc-key [k]
+  ;; Each value is [verdict-key contract-key]
+  (let [v (k {:title                [:application.tabVerdict :application.tabVerdict.sijoitussopimus]
+              :th-verdict           [:pate.verdict-table.verdict :pate.verdict-table.contract]
+              :th-date              [:pate.verdict-table.verdict-date :verdict.contract.date]
+              :th-giver             [:pate.verdict-table.verdict-giver :verdict.name.sijoitussopimus]
+              :add                  [:application.verdict.add :pate.contract.add]
+              :description          [:application.verdictDesc :pate.contract.description
+                                     :help.YA.verdictDesc.sijoitussopimus]
+              :confirm-delete       [:verdict.confirmdelete :pate.contract.confirm-delete]
+              :confirm-delete-draft [:pate.delete-verdict-draft
+                                     :pate.contract.confirm-delete-draft]
+              :no-templates         [:pate.no-verdict-templates :pate.no-contract-templates]
+              :template             [:pate-verdict-template :pate.contract.template]})]
+    (if (:contracts? @args)
+      (last v)
+      (first v))))
+
 (defn- can-delete? [verdict-id]
   (or (state/verdict-auth? verdict-id :delete-legacy-verdict)
       (state/verdict-auth? verdict-id :delete-pate-verdict)))
 
 (defn- can-replace? [verdict-id]
   (state/verdict-auth? verdict-id :replace-pate-verdict))
+
+(defn- can-sign? [verdict-id]
+  (state/react-verdict-auth? verdict-id :sign-pate-contract))
 
 (defn open-verdict [arg]
   (common/open-page :pate-verdict
@@ -35,7 +55,7 @@
   (let [templates (rum/react state/template-list)]
 
     (if (empty? templates)
-      [:div.pate-note (path/loc :pate.no-verdict-templates)]
+      [:div.pate-note (path/loc (loc-key :no-templates))]
       (let [items (map #(set/rename-keys % {:id :value :name :text})
                        templates)
             selected (rum/react template*)]
@@ -45,7 +65,7 @@
                                                (first items)))))
         [:div.pate-grid-6
          [:div.row
-          (layout/vertical {:label :pate-verdict-template
+          (layout/vertical {:label (loc-key :template)
                             :align :full}
                            (components/dropdown template*
                                                 {:items   items
@@ -56,11 +76,11 @@
                                                                    open-verdict
                                                                    @state/replacement-verdict)}
                             [:i.lupicon-circle-plus]
-                            [:span (common/loc :application.verdict.add)]])]]))))
+                            [:span (common/loc (loc-key :add))]])]]))))
 
 (rum/defc new-legacy-verdict []
   (components/icon-button {:icon     :lupicon-circle-plus
-                           :text-loc :application.verdict.add
+                           :text-loc (loc-key :add)
                            :class    [:positive]
                            :on-click #(service/new-legacy-verdict-draft @state/application-id
                                                                         open-verdict)}))
@@ -72,8 +92,8 @@
               :size            "medium"
               :component       "yes-no-dialog"
               :componentParams {:ltext (if (and legacy? published)
-                                         :verdict.confirmdelete
-                                         "pate.delete-verdict-draft")
+                                         (loc-key :confirm-delete)
+                                         (loc-key :confirm-delete-draft))
                                 :yesFn #(service/delete-verdict app-id verdict)}}))
 
 (defn- confirm-and-replace-verdict [verdict verdict-id]
@@ -87,34 +107,110 @@
                                           (reset! state/verdict-list [verdict])
                                           (reset! state/replacement-verdict verdict-id))}}))
 
+(rum/defcs verdict-signatures-row < rum/reactive
+  (rum/local ""    ::password)
+  (rum/local false ::signing?)
+  (rum/local false ::waiting?)
+  (rum/local nil   ::bad-password)
+  [{password*     ::password
+    signing?*     ::signing?
+    waiting?*     ::waiting?
+    bad-password* ::bad-password} app-id verdict-id signatures]
+  [:tr.verdict-signatures
+   [:td]
+   [:td {:colSpan 3}
+    [:div.pate-grid-3
+     [:div.row
+      [:div.col-1
+       [:div
+        [:div  [:strong (common/loc :verdict.signatures)]]
+        [:div.tabby
+         (map-indexed (fn [i {:keys [name date]}]
+                        [:div.tabby__row {:key i}
+                         [:div.tabby__cell.tabby--100 name]
+                         [:div.tabby__cell.cell--right (js/util.finnishDate date)]])
+                      signatures)]]]
+      (when (can-sign? verdict-id)
+        [:div.col-2.col--right {:key "col-2"}
+         (when @signing?*
+           [:div [:label (common/loc :signAttachment.verifyPassword)]
+            (components/text-and-button password*
+                                        (let [bad? (when (= @password* @bad-password*)
+                                                     :negative)]
+                                          {:input-type   :password
+                                           :disabled?    @waiting?*
+                                           :autoFocus    true
+                                           :class        (common/css-flags :warning bad?)
+                                           :button-class (when bad? :negative)
+                                           :icon         (if @waiting?*
+                                                           :icon-spin.lupicon-refresh
+                                                           :lupicon-circle-pen)
+                                           :callback     (fn [password]
+                                                           (reset! waiting?* true)
+                                                           (service/sign-contract app-id
+                                                                                  verdict-id
+                                                                                  password
+                                                                                  #(do
+                                                                                     (reset! waiting?* false)
+                                                                                     (reset! bad-password*
+                                                                                             password))))}))])])]]]
+   [:td (when (can-sign? verdict-id)
+          (let [click-fn (fn []
+                           (swap! signing?* not)
+                           (reset! password* "")
+                           (reset! waiting?* false)
+                           (reset! bad-password* nil))]
+            (if @signing?*
+              [:button.secondary.cancel-signing {:on-click click-fn}
+               (common/loc :cancel)]
+              (components/icon-button
+               {:on-click click-fn
+                :text-loc :verdict.sign
+                :class    :positive
+                :icon     :lupicon-circle-pen}))))]])
+
 (defn- verdict-table [headers verdicts app-id hide-actions]
   [:table.pate-verdicts-table
    [:thead [:tr (map (fn [header] [:th (common/loc header)]) headers)]]
    [:tbody (map (fn [{:keys [id title published modified
-                             verdict-date giver replaced?]
+                             verdict-date giver replaced?
+                             category signatures]
                       :as   verdict}]
-                  [:tr {:key id}
-                   [:td {:class (common/css-flags :replaced replaced?)}
-                    [:a {:on-click #(open-verdict id)} title]]
-                   [:td (if published
-                          (js/util.finnishDate verdict-date))]
-                   [:td giver]
-                   [:td (if published
-                          (common/loc :pate.published-date (js/util.finnishDate published))
-                          (common/loc :pate.last-saved (js/util.finnishDateAndTime modified)))]
-                   (if hide-actions
-                     [:td]
-                     [:td
-                      (when (can-delete? id)
-                            [:a
-                             {:on-click #(confirm-and-delete-verdict app-id id)}
-                             (common/loc (if published
-                                           :pate.verdict-table.remove-verdict
-                                           :pate.verdict-table.remove-draft))])
-                      (when (can-replace? id)
-                        [:a
-                         {:on-click #(confirm-and-replace-verdict verdict id)}
-                        (common/loc :pate.verdict-table.replace-verdict)])])])
+                  (list [:tr {:key id}
+                         [:td {:class (common/css-flags :replaced replaced?)}
+                          [:a {:on-click #(open-verdict id)} title]]
+                         [:td (js/util.finnishDate verdict-date)]
+                         [:td giver]
+                         [:td (if published
+                                (common/loc :pate.published-date (js/util.finnishDate published))
+                                (common/loc :pate.last-saved (js/util.finnishDateAndTime modified)))]
+                         (if hide-actions
+                           [:td]
+                           [:td
+                            (when (can-delete? id)
+                              (components/icon-button
+                               {:text-loc (cond
+                                            (and published
+                                                 (util/=as-kw :contract category))
+                                            :pate.contract.delete
+
+                                            published
+                                            :pate.verdict-table.remove-verdict
+
+                                            :else
+                                            :pate.verdict-table.remove-draft)
+                                :icon     :lupicon-remove
+                                :class    (common/css :secondary)
+                                :on-click #(confirm-and-delete-verdict app-id verdict)}))
+                            (when (can-replace? id)
+                              (components/icon-button
+                               {:text-loc :pate.verdict-table.replace-verdict
+                                :icon     :lupicon-refresh-section-sign
+                                :class    (common/css :secondary)
+                                :on-click #(confirm-and-replace-verdict verdict id)}))])]
+                        (when (seq signatures)
+                          (rum/with-key (verdict-signatures-row app-id id signatures)
+                            (str id "-signatures")))))
                 verdicts)]])
 
 (rum/defc verdict-list < rum/reactive
@@ -129,18 +225,18 @@
                       (service/fetch-verdict-list app-id))}
         [:i.lupicon-chevron-left]
         [:span (common/loc :back)]]]]
-     [:h2 (common/loc :application.tabVerdict)])
+     [:h2 (common/loc (loc-key :title))])
    (if (empty? verdicts)
      (when-not (state/auth? :new-pate-verdict-draft)
-       (common/loc-html :p :application.verdictDesc))
+       (common/loc-html :p (loc-key :description)))
      [:div
      (if replacement-verdict
        [:h3.table-title (common/loc :application.tabVerdict.replacement)])
-     (verdict-table [:pate.verdict-table.verdict
-                     :pate.verdict-table.verdict-date
-                     :pate.verdict-table.verdict-giver
-                     :pate.verdict-table.last-edit
-                     ""]
+      (verdict-table [(loc-key :th-verdict)
+                      (loc-key :th-date)
+                      (loc-key :th-giver)
+                      :pate.verdict-table.last-edit
+                      ""]
                     verdicts
                     app-id
                     replacement-verdict)])
@@ -173,9 +269,10 @@
     (rum/mount (verdicts)
                (.getElementById js/document (:dom-id @args)))))
 
-(defn ^:export start [domId _]
+(defn ^:export start [domId params]
   (when (common/feature? :pate)
     (swap! args assoc
+           :contracts? (common/oget params :contracts)
            :dom-id (name domId))
     (bootstrap-verdicts)
     (mount-component)))

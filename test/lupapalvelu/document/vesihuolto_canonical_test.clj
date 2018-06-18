@@ -14,8 +14,7 @@
                                 :approvable false,
                                 :op {:id "532bddd0da068d67611f92f0",
                                      :name "vvvl-vesijohdosta-ja-viemarista",
-                                     :created 1395383760912},
-                                :removable false}
+                                     :created 1395383760912}}
                   :data {:hankinta {:modified 1395388002250, :value "Kiinteist\u00f6n porakaivosta"},
                          :johdatus {:modified 1395388005092,
                                     :value "johdetaan paineellisena vesijohtoa pitkin rakennukseen"},
@@ -36,7 +35,6 @@
                   :created 1395383760912,
                   :schema-info {:approvable true,
                                 :name "vesihuolto-kiinteisto",
-                                :removable false,
                                 :repeating false,
                                 :version 1,
                                 :order 2}
@@ -67,7 +65,6 @@
                               :value "Labkon biokem 6 panospudistamo, josta k\u00e4siteltu j\u00e4tevesi johdetaan pois pohjaveden valuma-alueelta."}},
               :schema-info {:approvable false,
                             :name "jatevedet",
-                            :removable false,
                             :repeating false,
                             :version 1,
                             :order 5}})

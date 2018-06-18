@@ -3,7 +3,7 @@
   (:require [lupapalvelu.application :as app]
             [lupapalvelu.pate.pdf :as pdf]
             [lupapalvelu.pate.pdf-html :as html]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [midje.sweet :refer :all]))
 
 (fact "join-non-blanks"
@@ -96,7 +96,7 @@
     (html/doc-value app :foo :bar.baz.bam) => nil))
 
 (facts "dict-value"
-  (against-background (shared/verdict-schema :r nil)
+  (against-background (verdict-schemas/verdict-schema :r nil)
                       => {:dictionary {:ts   {:date {}}
                                        :txt  {:phrase-text {:category :yleinen}}
                                        :foo  {:text {}}
@@ -426,3 +426,33 @@
                                                        :aaa {:condition "Probably first."}}}}})
     => [[:div.markup '(([:p {} "Probably first." [:br]])
                        ([:p {} "Should be last." [:br]]))]]))
+
+(fact "tj-vastattavat-tyot"
+  (pdf/tj-vastattavat-tyot
+   {:documents [{:schema-info {:name "tyonjohtaja-v2"}
+                 :data        {:vastattavatTyotehtavat
+                               {:rakennuksenPurkaminen                  {:value false},
+                                :ivLaitoksenKorjausJaMuutostyo          {:value false},
+                                :uudisrakennustyoIlmanMaanrakennustoita {:value false},
+                                :maanrakennustyot                       {:value true},
+                                :uudisrakennustyoMaanrakennustoineen    {:value false},
+                                :ulkopuolinenKvvTyo                     {:value true, :modified 1527251435900},
+                                :rakennuksenMuutosJaKorjaustyo          {:value false},
+                                :linjasaneeraus                         {:value false},
+                                :ivLaitoksenAsennustyo                  {:value false},
+                                :muuMika                                {:value ""},
+                                :sisapuolinenKvvTyo                     {:value true, :modified 1527251434831}}}}]}
+   "fi")
+  => ["Maanrakennusty\u00f6t" "Ulkopuolinen KVV-ty\u00f6" "Sis\u00e4puolinen KVV-ty\u00f6"])
+
+(facts "resolve-cell"
+  (html/resolve-cell {:lang "fi"} "hello" nil)
+  => [:div.cell {} "hello"]
+  (html/resolve-cell {:lang "fi"} [:span [:strong.foo "hello"]] nil)
+  => [:div.cell {} [:span [:strong.foo "hello"]]]
+  (html/resolve-cell {:lang "fi"} "hello" {:text "undo" :loc-prefix :phrase
+                                           :width 50 :styles :not-supported})
+  => [:div.cell {:class '("cell--50")} "Kumoa fraasi"]
+  (html/resolve-cell {:lang "fi"} 123 {:width 80 :styles [:bold :right]
+                                       :unit :m2})
+  => [:div.cell {:class '("cell--80" :bold :right)} [:span 123 " m" [:sup 2]]])

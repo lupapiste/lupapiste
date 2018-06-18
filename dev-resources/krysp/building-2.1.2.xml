@@ -47,6 +47,8 @@
               <maakaasuKytkin>false</maakaasuKytkin>
               <kaapeliKytkin>false</kaapeliKytkin>
             </verkostoliittymat>
+            <energiatehokkuusluku>123</energiatehokkuusluku>
+            <energiatehokkuusluvunYksikko>kWh/m2</energiatehokkuusluvunYksikko>
             <paloluokka>P3</paloluokka>
             <lammitystapa>suora sähkö</lammitystapa>
             <lammonlahde>
@@ -93,6 +95,7 @@
               </valmisHuoneisto>
             </asuinhuoneistot>
           </rakennuksenTiedot>
+          <rakentajatyyppi>liiketaloudellinen</rakentajatyyppi>
           <omistaja>
             <henkilo xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
               <nimi>
@@ -189,6 +192,7 @@
               <vaestonsuoja>0</vaestonsuoja>
             </varusteet>
           </rakennuksenTiedot>
+          <rakentajatyyppi>muu</rakentajatyyppi>
           <omistaja>
             <kuntaRooliKoodi xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">Rakennuksen omistaja</kuntaRooliKoodi>
             <VRKrooliKoodi xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">rakennuksen omistaja</VRKrooliKoodi>

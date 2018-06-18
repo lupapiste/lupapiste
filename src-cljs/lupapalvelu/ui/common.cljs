@@ -6,13 +6,17 @@
             [clojure.string :as str]
             [goog.events :as googe]
             [goog.object :as googo]
-            [rum.core :as rum]))
+            [rum.core :as rum]
+            [sade.shared-util :as util]))
 
 (defn get-current-language []
   (.getCurrentLanguage js/loc))
 
 (defn loc [& args]
-  (apply js/loc (map name args)))
+  (->> (flatten args)
+       (remove nil?)
+       (map name)
+       (apply js/loc)))
 
 (defn loc-html [tag & args]
   [tag
@@ -83,9 +87,13 @@
   (boolean (js/features.enabled (name feature))))
 
 (defn css
-  "Convenience function for :class definitions."
+  "Convenience function for :class definitions. Supports keywords,
+  strings, vectors and kw-paths."
   [& classes]
-  (->> classes flatten (remove nil?) (map name)))
+  (->> classes flatten (remove nil?)
+       (map util/split-kw-path)
+       (apply concat)
+       (map name)))
 
 (defn css-flags
   "List of keys with truthy values.
@@ -188,3 +196,31 @@
   "Convenience wrapper for pageutil.openPage."
   [page & suffix]
   (js/pageutil.openPage (name page) (apply array (map name suffix))))
+
+(defn add-test-id
+  "Adds data-test-id attribute. The target can be either the attribute
+  map or the encompassing component. Extras parts are concatened with
+  -. If the test-id is nil (or false),  the target is returned
+  unchanged regardless of extras."
+  [[x & xs :as target] test-id & extras]
+  (let [test-id (when test-id
+                  (->> (cons test-id extras)
+                       flatten
+                       (remove nil?)
+                       (map name)
+                       (s/join "-")))]
+    (cond
+      (s/blank? test-id) target
+      (map? target)      (assoc target :data-test-id test-id)
+      (vector? target)   (if (-> target second map?)
+                           (assoc-in target [1 :data-test-id] test-id)
+                           (vec (concat [x  {:data-test-id test-id}] xs))))))
+
+(defn prefix-lang
+  "Current language is appended to theiven keyword prefix:
+  :foo -> :foo-fi"
+  [prefix]
+  (when-not (s/blank? prefix)
+    (->> (map name [prefix (get-current-language)])
+         (s/join "-")
+         keyword)))

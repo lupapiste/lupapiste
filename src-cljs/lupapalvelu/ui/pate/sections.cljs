@@ -1,12 +1,15 @@
 (ns lupapalvelu.ui.pate.sections
   (:require [clojure.string :as s]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.path :as path]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.pate.layout :as layout]
-            [lupapalvelu.ui.pate.path :as path]
-            [rum.core :as rum]))
+            [rum.core :as rum]
+            [sade.shared-util :as util]))
 
+(defn- contract? [{info :info}]
+  (util/=as-kw (path/value [:category] info)
+               :contract))
 
 (rum/defc remove-section-checkbox < rum/reactive
   [{:keys [state schema] :as options}]
@@ -17,11 +20,14 @@
                      (path/meta-updated (assoc options
                                                :path path)))]
     (components/toggle state*
-                       {:text-loc  :pate.template-removed
+                       {:text-loc  (if (contract? options)
+                                     :pate.contract.template.include
+                                     :pate.template-removed)
                         :callback  #(path/meta-updated (assoc options
                                                               :path path))
                         :disabled? (path/disabled? options)
-                        :negate?   true})))
+                        :negate?   true
+                        :test-id [:section (:id schema)]})))
 
 (declare section)
 (declare section-header)
@@ -61,7 +67,9 @@
                     (keyword (:id schema)))
        [:span
         (remove-section-checkbox options)]
-       [:span.row-text (common/loc :pate.always-in-verdict)])]]])
+       [:span.row-text (common/loc (if (contract? options)
+                                     :pate.contract.template.include-always
+                                     :pate.always-in-verdict))])]]])
 
 (rum/defc template-section-body < rum/reactive
   [{:keys [schema state] :as options} _]

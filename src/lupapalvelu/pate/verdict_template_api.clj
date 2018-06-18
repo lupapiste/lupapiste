@@ -4,7 +4,6 @@
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.pate.schemas :as schemas]
-            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
@@ -96,8 +95,8 @@
                       (template/verdict-template-check :editable)]}
   [{:keys [created] :as command}]
   (let [organization   (template/command->organization command)
-        {data :data
-         :as  updated} (template/save-draft-value organization
+        {:keys [data category]
+         :as   updated} (template/save-draft-value organization
                                                   template-id
                                                   created
                                                   path
@@ -105,7 +104,8 @@
     (if data
       (ok  (template/changes-response
             {:modified created
-             :filled   (template/template-filled? {:data data})}
+             :filled   (template/template-filled? {:category category
+                                                   :data     data})}
             updated))
       (template/error-response updated))))
 

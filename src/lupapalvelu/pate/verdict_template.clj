@@ -8,8 +8,11 @@
             [lupapalvelu.operations :as ops]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.date :as date]
+            [lupapalvelu.pate.schema-helper :as helper]
+            [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.schemas :as schemas]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.settings-schemas :as settings-schemas]
+            [lupapalvelu.pate.verdict-template-schemas :as template-schemas]
             [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
             [sade.core :refer :all]
@@ -26,10 +29,17 @@
                      user-organizations)))
 
 (defn organization-categories [{scope :scope}]
-  (set (map (comp shared/permit-type->category :permitType) scope)))
+  (->> scope
+       (map (comp schema-util/permit-type->categories :permitType))
+       flatten
+       set))
 
 (defn operation->category [operation]
-  (shared/permit-type->category (ops/permit-type-of-operation operation)))
+  (or (schema-util/category-by-operation operation)
+      (-> operation
+          ops/permit-type-of-operation
+          schema-util/permit-type->categories
+          first)))
 
 (defn error-response [{:keys [failure errors]}]
   (if failure
@@ -51,16 +61,22 @@
 
 (defn- sync-repeatings
   "Sync the template repeating (t-rep) according to settings
-  repeating. Only the current language version of (plan/review) is
-  copied."
-  [lang s-rep t-rep]
-  (reduce-kv (fn [acc k v]
-               (assoc-in acc [k :text]
-                         (get v
-                              (keyword lang)
-                              (i18n/localize lang :pate.no-name))))
-             (select-keys t-rep (keys s-rep))
-             s-rep))
+  repeating. Every language version of (plan/review) is copied."
+  [s-rep t-rep]
+  (letfn [(update-target [target source dict lang]
+            (assoc target
+                   (->> (map name [dict lang])
+                        (ss/join "-")
+                        keyword)
+                   (get source lang (i18n/localize lang :pate.no-name))))
+          (reduce-langs [target source dict]
+            (reduce #(update-target %1 source dict %2)
+                    target
+                    [:fi :sv :en]))]
+    (reduce-kv (fn [acc k v]
+                 (update acc k reduce-langs v :text))
+               (select-keys t-rep (keys s-rep))
+               s-rep)))
 
 (def template-settings-dependencies [:plans :reviews])
 
@@ -68,15 +84,14 @@
   "Reviews and plans information from setting is merged into the
   corresponding template repeatings. Copying is done when the template
   dictionary has :reviews or :plans. Returns the updated template."
-  [org-id lang {:keys [category draft] :as template}]
-  (let [{dic :dictionary} (shared/verdict-template-schema category)
+  [org-id {:keys [category draft] :as template}]
+  (let [{dic :dictionary} (template-schemas/verdict-template-schema category)
         {s-data :draft}   (settings (org/get-organization org-id
                                                           {:verdict-templates 1})
                                     category)]
     (reduce (fn [acc rep-dict]
-              (let [repeating-data (sync-repeatings lang
-                                          (rep-dict s-data)
-                                          (rep-dict draft))]
+              (let [repeating-data (sync-repeatings (rep-dict s-data)
+                                                    (rep-dict draft))]
                 (if (empty? repeating-data)
                   (util/dissoc-in acc [:draft rep-dict])
                   (assoc-in acc [:draft rep-dict] repeating-data))))
@@ -85,9 +100,9 @@
                                      (keys dic)))))
 
 (defn new-verdict-template
-  ([org-id timestamp lang category draft name]
+  ([org-id timestamp _ category draft name]
    (let [data (verdict-template-settings-dependencies
-               org-id lang
+               org-id
                {:id       (mongo/create-id)
                 :draft    draft
                 :name     name
@@ -102,7 +117,9 @@
      data))
   ([org-id timestamp lang category]
    (new-verdict-template org-id timestamp lang category {}
-                         (i18n/localize lang :pate-verdict-template))))
+                         (i18n/localize lang (if (util/=as-kw category :contract)
+                                               :pate.contract.template
+                                               :pate-verdict-template)))))
 
 (defn verdict-template [{templates :verdict-templates} template-id]
   (util/find-by-id template-id (:templates templates)))
@@ -158,8 +175,8 @@
               (fail! :error.verdict-template-name-missing))
             (when (and application
                        (util/not=as-kw (:category template)
-                                       (-> command :application :permitType
-                                           shared/permit-type->category)))
+                                       (-> command :application
+                                           schema-util/application->category)))
               (fail! :error.invalid-category))
             (when (and filled (or (not (template-filled? {:template template}))
                                   (not (settings-filled? {:org-id (:id organization)}
@@ -182,7 +199,6 @@
         {draft :draft :as data} (verdict-template-response-data organization template-id)
         {new-draft :draft
          :as       updated}     (verdict-template-settings-dependencies (:id organization)
-                                                                        lang
                                                                         data)
         updates                 (reduce (fn [acc dict]
                                           (let [new-dict-value (dict new-draft)]
@@ -227,8 +243,8 @@
   schema. Empty deltas are zeros. For board-verdicts the appeal
   date (muutoksenhaku) is different."
   [category draft board-verdict?]
-  (let [{dic :dictionary} (shared/settings-schema category)]
-    (cond-> (->> shared/verdict-dates
+  (let [{dic :dictionary} (settings-schemas/settings-schema category)]
+    (cond-> (->> helper/verdict-dates
                  (map (fn [k]
                         [k {:delta (-> draft k schemas/parse-int)
                             :unit (name (get-in dic [k :date-delta :unit] :days))}]))
@@ -269,7 +285,7 @@
          :as   template}  (verdict-template organization template-id)
         {:keys [path value op]
          :as   processed} (schemas/validate-and-process-value
-                           (shared/verdict-template-schema category)
+                           (template-schemas/verdict-template-schema category)
                            path
                            value
                            draft
@@ -284,7 +300,7 @@
                           {$unset {mongo-path 1}}
                           {$set {mongo-path value}})
                         timestamp)))
-    processed))
+    (assoc processed :category category)))
 
 (defn- draft-for-publishing
   "Extracts template draft data for publishing. Keys with empty values
@@ -293,7 +309,7 @@
   differently (e.g., foremen and reviews). Transforms :repeating in
   template draft from map of maps to sequence of maps."
   [{:keys [category draft]}]
-  (let [{:keys [dictionary]} (shared/verdict-template-schema category)
+  (let [{:keys [dictionary]} (template-schemas/verdict-template-schema category)
         good? (util/fn-> str ss/not-blank?)]
 
     (reduce (fn [acc dict]
@@ -316,7 +332,7 @@
   references in verdicts."
   [{:keys [category draft]}]
   (let [{:keys [dictionary
-                sections]}     (shared/verdict-template-schema category)
+                sections]}     (template-schemas/verdict-template-schema category)
         dict-secs              (schemas/dict-sections sections)
         always-included        (->> (filter :always-included? sections)
                                     (map :id)
@@ -392,7 +408,7 @@
 (defn save-settings-value [organization category timestamp path value]
   (let [settings-key      (settings-key category)
         {:keys [path value op]
-         :as   processed} (schemas/validate-and-process-value (shared/settings-schema category)
+         :as   processed} (schemas/validate-and-process-value (settings-schemas/settings-schema category)
                                                               path
                                                               value
                                                               (:draft (settings organization
@@ -414,7 +430,7 @@
 (defn settings-filled?
   "Settings are filled properly if every requireid field has been filled."
   [{org-id :org-id ready :settings data :data} category]
-  (schemas/required-filled? (shared/settings-schema category)
+  (schemas/required-filled? (settings-schemas/settings-schema category)
                             (or data
                                 (:draft (or ready
                                             (settings (organization-templates org-id)
@@ -422,17 +438,15 @@
 
 (defn template-filled?
   "Template is filled when every required field has been filled."
-  [{:keys [org-id template template-id data]}]
-  (let [category (or (:category data)
-                     (:category template)
-                     (if (some? org-id) (:category (verdict-template (organization-templates org-id) template-id)))
-                     (str "r"))]
-    (schemas/required-filled? (shared/verdict-template-schema category)
-                              (or data
-                                  (:draft (or template
-                                              (verdict-template (organization-templates
-                                                                 org-id)
-                                                                template-id)))))))
+  [{:keys [org-id template template-id data category]}]
+  (let [{t-cat  :category
+         t-data :draft} (or template
+                            (when (and org-id template-id)
+                              (verdict-template (organization-templates org-id)
+                                                template-id)))
+        category        (or category t-cat)]
+    (schemas/required-filled? (template-schemas/verdict-template-schema category)
+                              (or data t-data))))
 
 ;; Default operation verdict templates
 
@@ -459,8 +473,9 @@
 
 (defn application-verdict-templates [{:keys [operation-verdict-templates
                                              verdict-templates]}
-                                     {:keys [permitType primaryOperation]}]
-  (let [app-category  (shared/permit-type->category permitType)
+                                     {:keys [primaryOperation]
+                                      :as   application}]
+  (let [app-category  (schema-util/application->category application)
         app-operation (-> primaryOperation :name keyword)]
     (->> verdict-templates
          :templates

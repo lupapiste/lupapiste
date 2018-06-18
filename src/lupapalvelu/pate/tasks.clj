@@ -1,7 +1,7 @@
 (ns lupapalvelu.pate.tasks
   (:require [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.tasks :as tasks]
-            [lupapalvelu.pate.shared :as shared]
             [sade.util :as util]))
 
 (defn- new-task [verdict ts schema-name taskname & [taskdata]]
@@ -15,12 +15,12 @@
 (defn resolve-review-type [{:keys [category]} review-type]
   (let [rt (keyword review-type)]
     (if (util/=as-kw category :r)
-      ((or rt :ei-tiedossa) shared/review-type-map)
-      (rt shared/ya-review-type-map))))
+      ((or rt :ei-tiedossa) helper/review-type-map)
+      (rt helper/ya-review-type-map))))
 
 (defn- new-review-task [{:keys [category] :as verdict}
                         ts review-name review-type buildings]
-  (let [ya? (util/=as-kw category :ya)]
+  (let [ya? (util/includes-as-kw? [:ya :contract] category)]
     (new-task verdict ts
               (if ya?
                 "task-katselmus-ya"

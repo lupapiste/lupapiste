@@ -1,5 +1,5 @@
 (ns lupapalvelu.pate.verdict-template-test
-  (:require [lupapalvelu.pate.shared :as shared]
+  (:require [lupapalvelu.pate.verdict-template-schemas :as template-schemas]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict-template :refer :all]
             [midje.sweet :refer :all]
@@ -12,21 +12,19 @@
 
 (facts "sync-repeatings"
   (fact "Initially empty"
-    (sync-repeatings :fi nil nil) => {}
-    (sync-repeatings :fi {:id1 {:fi "suomi" :sv "svenska" :en "English"}} nil)
-    => {:id1 {:text "suomi"}})
+    (sync-repeatings nil nil) => {}
+    (sync-repeatings {:id1 {:fi "suomi" :sv "svenska" :en "English"}} nil)
+    => {:id1 {:text-fi "suomi" :text-sv "svenska" :text-en "English"}})
   (fact "New entry"
-    (sync-repeatings :fi
-                     {:id1 {:fi "suomi" :sv "svenska" :en "English"}
+    (sync-repeatings {:id1 {:fi "suomi" :sv "svenska" :en "English"}
                       :id2 {:fi "suomi2" :sv "svenska2" :en "English2"}}
-                     {:id1 {:text "svenska" :foo "hello"}})
-    => {:id1 {:text "suomi" :foo "hello"}
-        :id2 {:text "suomi2"}})
+                     {:id1 {:text-sv "svenska" :foo "hello"}})
+    => {:id1 {:text-fi "suomi" :text-sv "svenska" :text-en "English" :foo "hello"}
+        :id2 {:text-fi "suomi2" :text-sv "svenska2" :text-en "English2"}})
   (fact "Removed entry"
-    (sync-repeatings :en
-                     {:id2 {:fi "suomi2" :sv "svenska2" :en "English2"}}
-                     {:id1 {:text "svenska" :foo "hello"}})
-    => {:id2 {:text "English2"}}))
+    (sync-repeatings {:id2 {:fi "suomi2" :sv "svenska2" :en "English2"}}
+                     {:id1 {:text-fi "suomi" :text-sv "svenska" :text-en "English" :foo "hello"}})
+    => {:id2 {:text-fi "suomi2" :text-sv "svenska2" :text-en "English2"}}))
 
 
 (def test-template
@@ -64,7 +62,7 @@
                                               :three "hello"}})
   => {:one   true
       :three "hello"}
-  (provided (shared/verdict-template-schema :r) => test-template)
+  (provided (template-schemas/verdict-template-schema :r) => test-template)
   (draft-for-publishing {:category :r :draft {:one              true
                                               :two              nil
                                               :three            ""
@@ -78,28 +76,41 @@
                          :second false}
       :four             [{:four-one false :four-two "Yeah"}
                          {:four-two "haeY"}]}
-  (provided (shared/verdict-template-schema :r) => test-template))
+  (provided (template-schemas/verdict-template-schema :r) => test-template))
 
 (facts "Template inclusions"
   (fact "Every section included"
     (template-inclusions {:category :r :draft {}})
     => (just ["one" "two" "three" "four" "five"] :in-any-order)
-    (provided (shared/verdict-template-schema :r) => test-template))
+    (provided (template-schemas/verdict-template-schema :r) => test-template))
   (fact "First section removed"
     (template-inclusions {:category :r :draft {:removed-sections {:first true}}})
     => (just ["one" "two" "three" "four" "five"] :in-any-order)
-    (provided (shared/verdict-template-schema :r) => test-template))
+    (provided (template-schemas/verdict-template-schema :r) => test-template))
   (fact "Second section removed"
     (template-inclusions {:category :r :draft {:removed-sections {:second true}}})
     => (just ["one" "three" "four" "five"] :in-any-order)
-    (provided (shared/verdict-template-schema :r) => test-template))
+    (provided (template-schemas/verdict-template-schema :r) => test-template))
   (fact "Third section removed"
     (template-inclusions {:category :r :draft {:removed-sections {:third true}}})
     => (just ["one" "two" "three" "four" "five"] :in-any-order)
-    (provided (shared/verdict-template-schema :r) => test-template))
+    (provided (template-schemas/verdict-template-schema :r) => test-template))
   (fact "Every section removed"
     (template-inclusions {:category :r :draft {:removed-sections {:first  true
                                                                   :second true
                                                                   :third  true}}})
     => (just ["three" "four" "five"] :in-any-order)
-    (provided (shared/verdict-template-schema :r) => test-template)))
+    (provided (template-schemas/verdict-template-schema :r) => test-template)))
+
+(facts "Operation->category"
+  (fact "R" (operation->category "pientalo") => :r)
+  (fact "YA" (operation->category "ya-katulupa-kaapelityot") => :ya)
+  (fact "P" (operation->category "poikkeamis") => :p)
+  (fact "YI" (operation->category "meluilmoitus") => :ymp)
+  (fact "YM" (operation->category "koeluontoinen-toiminta") => :ymp)
+  (fact "YL" (operation->category "pima") => :ymp)
+  (fact "MAL" (operation->category "maa-aineslupa") => :ymp)
+  (fact "VVVL" (operation->category "vvvl-vesijohdosta") => :ymp)
+  (fact "KT keyword" (operation->category :tonttijako) => :kt)
+  (fact "MM" (operation->category "asemakaava") => :kt)
+  (fact "Foreman" (operation->category "tyonjohtajan-nimeaminen-v2") => :tj))

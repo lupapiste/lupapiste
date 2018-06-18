@@ -156,6 +156,7 @@ lupapisteApp.services.verdictAppealService = {};
 lupapisteApp.models = {};
 lupapisteApp.models.application = {};
 lupapisteApp.models.application.permitType = function() {};
+lupapisteApp.models.application.permitSubtype = function() {};
 lupapisteApp.models.application.userHasRole = function() {};
 lupapisteApp.models.currentUser = {};
 lupapisteApp.models.currentUser.firstName = function() {};

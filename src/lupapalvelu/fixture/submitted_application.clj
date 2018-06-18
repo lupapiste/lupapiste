@@ -63,7 +63,7 @@
 
                     :schema-version 1
                     :openInfoRequest false
-                    :_applicantIndex ["Solita Kaino"]
+                    :_applicantIndex ["Pena Panaani"]
                     :complementNeeded nil
                     :infoRequest false
                     :history [{:state "draft"

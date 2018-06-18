@@ -1164,19 +1164,11 @@
        org/allowed-docterminal-attachment-types
        (ok :attachment-types)))
 
-(defn- check-docterminal-enabled [{user :user}]
-  (when-not (-> user
-                usr/authority-admins-organization-id
-                org/get-docstore-info-for-organization!
-                :docTerminalInUse)
-    (fail :error.docterminal-not-enabled)))
-
-
 (defcommand set-docterminal-attachment-type
   {:description "Allows or disallows showing the given attachment type in
                  the archive document terminal application."
    :parameters [attachmentType enabled]
-   :pre-checks [check-docterminal-enabled]
+   :pre-checks [org/check-docterminal-enabled]
    :input-validators [(partial parameters-matching-schema [:attachmentType]
                                (sc/cond-pre (sc/enum "all")
                                             org/DocTerminalAttachmentType))
@@ -1188,18 +1180,11 @@
       (org/set-allowed-docterminal-attachment-type attachmentType enabled)))
 
 (defquery docterminal-enabled
-  {:pre-checks [check-docterminal-enabled]
+  {:pre-checks [org/check-docterminal-enabled]
    :user-roles #{:authorityAdmin}}
   [_])
 
-(defn- check-docstore-enabled [{user :user}]
-  (when-not (-> user
-                usr/authority-admins-organization-id
-                org/get-docstore-info-for-organization!
-                :docStoreInUse)
-    (fail :error.docstore-not-enabled)))
-
 (defquery docstore-enabled
-  {:pre-checks [check-docstore-enabled]
+  {:pre-checks [org/check-docstore-enabled]
    :user-roles #{:authorityAdmin}}
   [_])

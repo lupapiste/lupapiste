@@ -131,7 +131,7 @@
                                              feature: 'pate'"
                                   href="#" data-target="pate-verdict" data-test-id="pate-verdict-tab"
                                   class="link-btn">
-                                <span data-bind="ltext: 'application.tabVerdict'"></span>
+                                <span data-bind="ltext: 'application.tabVerdict' + $root.application.verdictPostfix()"></span>
                               </a>
                             </li>
 
@@ -223,7 +223,7 @@
                         <!-- /ko -->
 
                         <div class="operation-info">
-                            <!-- ko if: !$root.authorization.ok('link-permit-required') -->
+                            <!-- ko if: !$root.authorization.ok('link-permit-required') && permitType() -->
                             <div class="margins-m no-top" data-bind="if: $root.authorization.ok('add-operation')">
                               <div class="help-box">
                                 <p data-bind="lhtml: 'help.' + permitType() + '.AddOperations'"></p>
@@ -419,7 +419,13 @@
                     <!-- ko if: selectedTabName() === 'pate-verdict' && lupapisteApp.models.rootVMO.currentPage() === 'application' -->
                     <div id="application-pate-verdict-tab"
                          class="tab-content feature--no-border" data-bind="feature: 'pate'">
+                      <!-- ko if: $root.authorization.ok( 'pate-contract-tab') -->
+                      <cljs-pate_verdicts params="contracts: true"></cljs-pate_verdicts>
+                      <!-- /ko -->
+                      <!-- ko ifnot: $root.authorization.ok( 'pate-contract-tab') -->
                       <cljs-pate_verdicts></cljs-pate_verdicts>
+                      <!-- /ko -->
+
                     </div>
                     <!-- /ko -->
 
@@ -1153,7 +1159,7 @@
                     </div>
                 </div>
 
-                <div id="dialog-neighbor-status" class="window autosized">
+                <div id="dialog-neighbor-status" class="window autosized neighbor-status">
                     <div class="dialog-header">
                         <p data-bind="ltext: 'neighbors.status-dialog.title'"></p>
                         <p class="dialog-close close lupicon-remove"></p>

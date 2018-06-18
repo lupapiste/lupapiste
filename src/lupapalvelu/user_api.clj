@@ -783,7 +783,7 @@
                   (when-not (-> command :user :architect)
                     unauthorized))
                 user-attachments-exists]}
-  [{application :application user :user :as command}]
+  [{application :application user :user ts :created :as command}]
   (doseq [attachment (:attachments (mongo/by-id :users (:id user) {:attachments true}))]
     (let [application-id id
           user-id (:id user)
@@ -799,12 +799,13 @@
                             maybe-attachment-id)]
       (when (zero? (mongo/count :applications {:_id application-id
                                                :attachments {$elemMatch {:id attachment-id ; skip upload when user attachment as already been uploaded
-                                                                         :latestVersion.type attachment-type}}}))
+                                                                         :type.type-id (:type-id attachment-type)
+                                                                         :latestVersion.user.id (:id user)}}}))
         (att/upload-and-attach! command
                                 {:attachment-id attachment-id
                                  :attachment-type attachment-type
                                  :group {:groupType (get-in (att-type/attachment-type attachment-type) [:metadata :grouping])}
-                                 :created (now)
+                                 :created ts
                                  :required false
                                  :locked false}
                                 {:content ((:content attachment))

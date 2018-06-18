@@ -85,7 +85,8 @@
 (defn new-template [category callback]
   (common/command {:command "new-verdict-template"
                    :success (list-update-response callback)}
-                  :category category))
+                  :category category
+                  :lang (common/get-current-language)))
 
 (defn set-template-name [template-id name callback]
   (common/command {:command "set-verdict-template-name"
@@ -190,7 +191,10 @@
 
 (defn edit-verdict [app-id verdict-id path value callback]
   (common/command {:command "edit-pate-verdict"
-                   :success callback}
+                   :success (fn [response]
+                              (state/refresh-verdict-auths app-id
+                                                           {:verdict-id verdict-id})
+                              (callback response))}
                   :id app-id
                   :verdict-id verdict-id
                   :path path
@@ -201,11 +205,25 @@
                               :publish-legacy-verdict
                               :publish-pate-verdict)
                    :success (fn []
+                              (state/refresh-verdict-auths app-id
+                                                           {:verdict-id verdict-id})
                               (fetch-verdict-list app-id)
                               (open-verdict app-id verdict-id callback)
                               (js/repository.load app-id))}
                   :id app-id
                   :verdict-id verdict-id))
+
+(defn sign-contract [app-id verdict-id password error-callback]
+  (common/command {:command :sign-pate-contract
+                   :success (fn []
+                              (state/refresh-verdict-auths app-id
+                                                           {:verdict-id verdict-id})
+                              (fetch-verdict-list app-id)
+                              (js/repository.load app-id))
+                   :error   error-callback}
+                  :id app-id
+                  :verdict-id verdict-id
+                  :password password))
 
 ;; Attachments
 

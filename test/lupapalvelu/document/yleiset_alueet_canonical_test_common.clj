@@ -66,7 +66,6 @@
              :schema-info {:approvable true,
                            :subtype "hakija",
                            :name "hakija-ya",
-                           :removable false,
                            :repeating false,
                            :version 1,
                            :type "party",
@@ -81,7 +80,6 @@
                          :created 1372331179008,
                          :schema-info {:name "tyomaastaVastaava"
                                        :version 1
-                                       :removable true,
                                        :type "party",
                                        :order 61},
                          :data {:_selected {:modified 1372342063565, :value "yritys"},
@@ -101,7 +99,6 @@
 (def maksaja {:id "52380c6894a74fc25bb4ba49"
               :created "1379404904514"
               :schema-info {:name "yleiset-alueet-maksaja"
-                            :removable false
                             :repeating false
                             :version 1
                             :type "party"
@@ -118,7 +115,6 @@
               :schema-info {:order 63,
                             :type "group",
                             :version 1,
-                            :removable false,
                             :repeating false,
                             :name "tyoaika"},
               :data {:tyoaika-alkaa-ms {:modified 1379404916497, :value 1379500000000}

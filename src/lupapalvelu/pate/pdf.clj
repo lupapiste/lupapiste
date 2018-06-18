@@ -7,19 +7,20 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as app-meta]
             [lupapalvelu.attachment :as att]
-            [lupapalvelu.attachment.bind :as bind]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.date :as date]
-            [lupapalvelu.pate.legacy :as legacy]
+            [lupapalvelu.pate.legacy-schemas :as legacy]
             [lupapalvelu.pate.markup :as markup]
             [lupapalvelu.pate.pdf-html :as html]
             [lupapalvelu.pate.pdf-layouts :as layouts]
-            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.pdf.html-template :as html-pdf]
             [lupapalvelu.pdf.html-template-common :as common]
             [rum.core :as rum]
@@ -271,11 +272,36 @@
        (ss/join " ")))
 
 (defn link-permits
-  "Since link-permits resolutive is quite database intensive operation
-  it is only done for YA category."
+  "Since link-permits resolution is quite database intensive operation
+  it is only done for YA and TJ category."
   [{:keys [verdict application]}]
-  (when (util/=as-kw :ya (:category verdict))
+  (when (or (util/=as-kw :ya (:category verdict))
+            (util/=as-kw :tj (:category verdict)))
     (:linkPermitData (app-meta/enrich-with-link-permit-data application))))
+
+(defn tj-vastattavat-tyot [application lang]
+  (let [doc (foreman/get-foreman-document application)
+        vastattavat-data (tools/unwrapped (get-in doc [:data :vastattavatTyotehtavat]))
+        vastattavat-loc-keys (reduce (fn [m {:keys [name i18nkey]}]
+                                       (assoc m (keyword name) i18nkey))
+                                     {}
+                                     (get-in schemas/vastattavat-tyotehtavat-tyonjohtaja-v2 [0 :body]))]
+    (->> vastattavat-data
+         (reduce-kv (fn [result key val]
+                      (cond
+                        (and (= :muuMika (keyword key))
+                             (not (ss/blank? val))) (conj result val)
+                        (true? val) (conj result (i18n/localize lang (get vastattavat-loc-keys key)))
+                        :else result))
+                    []))))
+(defn signatures
+  "Signatures as a timestamp ordered list"
+  [{:keys [verdict]}]
+  (when (util/=as-kw :contract (:category verdict))
+    (->> verdict :data :signatures
+         vals
+         (sort-by :date)
+         (map #(update % :date date/finnish-date)))))
 
 (defn verdict-properties
   "Adds all kinds of different properties to the options. It is then up
@@ -330,7 +356,10 @@
                                                (html/dict-value options
                                                                 :end-date))
            :handler (handler options)
-           :link-permits (link-permits options))))
+           :link-permits (link-permits options)
+           :tj-vastattavat-tyot (tj-vastattavat-tyot application lang)
+           :signatures (signatures options))))
+
 
 (defn verdict-html
   [application verdict]
@@ -345,27 +374,64 @@
   "Creates PDF for the verdict and uploads it as an attachment. Returns
   the attachment-id."
   [{:keys [application created] :as command} verdict]
-  (let [pdf (html-pdf/html->pdf application
-                                "pate-verdict"
-                                (verdict-html application verdict))]
+  (let [pdf       (html-pdf/html->pdf application
+                                      "pate-verdict"
+                                      (verdict-html application verdict))
+        contract? (util/=as-kw (:category verdict) :contract)]
     (when-not (:ok pdf)
       (fail! :pate.pdf-verdict-error))
     (with-open [stream (:pdf-file-stream pdf)]
       (:id (att/upload-and-attach! command
-                               {:created         created
-                                :attachment-type {:type-group "paatoksenteko"
-                                                  :type-id    "paatos"}
-                                :target          {:type "verdict"
-                                                  :id   (:id verdict)}
-                                :locked          true
-                                :read-only       true
-                                :contents        (i18n/localize (html/language verdict)
-                                                                :pate-verdict)}
-                               {:filename (i18n/localize-and-fill (html/language verdict)
-                                                                  :pdf.filename
-                                                                  (:id application)
-                                                                  (util/to-local-datetime (:published verdict)))
-                                :content stream})))))
+                                   {:created         created
+                                    :attachment-type (-<>> (:permitType application)
+                                                          keyword
+                                                          att-type/get-all-attachment-types-for-permit-type
+                                                          (util/find-by-key :type-id :paatos)
+                                                          (select-keys <> [:type-group :type-id])
+                                                          (reduce-kv (fn [acc k v]
+                                                                       (assoc acc k (name v)))
+                                                                     {}))
+                                    :source          {:type "verdicts"
+                                                      :id   (:id verdict)}
+                                    :locked          true
+                                    :read-only       true
+                                    :contents        (i18n/localize (html/language verdict)
+                                                                    (if contract?
+                                                                      :pate.verdict-table.contract
+                                                                      :pate-verdict))}
+                                   {:filename (i18n/localize-and-fill (html/language verdict)
+                                                                      (if contract?
+                                                                        :pdf.contract.filename
+                                                                        :pdf.filename)
+                                                                      (:id application)
+                                                                      (util/to-local-datetime (:published verdict)))
+                                    :content  stream})))))
+
+(defn create-verdict-attachment-version
+  "Creates a verdict attachments as a new version to previously created
+  verdict attachment. Used when a contract is signed."
+  [{:keys [application created] :as command} verdict]
+  (let [pdf                 (html-pdf/html->pdf application
+                                                "pate-verdict"
+                                                (verdict-html application verdict))
+        contract?           (util/=as-kw (:category verdict) :contract)
+        {attachment-id :id} (util/find-first (fn [{source :source}]
+                                               (and (util/=as-kw (:type source) :verdicts)
+                                                    (= (:id source) (:id verdict))))
+                                             (:attachments application))]
+    (when-not (:ok pdf)
+      (fail! :pate.pdf-verdict-error))
+    (with-open [stream (:pdf-file-stream pdf)]
+      (att/upload-and-attach! command
+                              {:created       created
+                               :attachment-id attachment-id}
+                              {:filename (i18n/localize-and-fill (html/language verdict)
+                                                                 (if contract?
+                                                                   :pdf.contract.filename
+                                                                   :pdf.filename)
+                                                                 (:id application)
+                                                                 (util/to-local-datetime created))
+                               :content  stream}))))
 
 (defn create-verdict-preview
   "Creates draft version of the verdict

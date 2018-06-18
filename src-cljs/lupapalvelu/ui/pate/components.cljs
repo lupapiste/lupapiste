@@ -3,10 +3,9 @@
   layout.cljs for documentation on the component conventions."
   (:require [clojure.set :as set]
             [clojure.string :as s]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.path :as path]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
-            [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.phrases :as phrases]
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.state :as state]
@@ -45,6 +44,17 @@
     (label-wrap options extra)
     component))
 
+(defn test-id [{:keys [path schema]} & extras]
+  (let [join-fn #(->> (flatten %)
+                      (remove nil?)
+                      (map name)
+                      (remove s/blank?)
+                      (s/join "-"))]
+    (join-fn [(get schema :test-id path) extras])))
+
+(defn test-id-wrap [options target]
+  (common/add-test-id target (test-id options)))
+
 (rum/defc pate-multi-select < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
   [:div.pate-multi-select
@@ -65,26 +75,22 @@
                  (not (-> schema :sort? false? )) (sort-by :text))]
 
      (for [{:keys [value text]} items
-           :let                 [item-id (common/unique-id "multi")
+           :let                 [;;item-id (common/unique-id "multi")
                                  checked (util/includes-as-kw? (set (rum/react state)) value)]]
-       [:div.pate-checkbox-wrapper
-        {:key item-id}
-        [:input {:type    "checkbox"
-                 :id      item-id
-                 :disabled (path/disabled? options)
-                 :checked checked}]
-        [:label.pate-checkbox-label
-         {:for      item-id
-          :on-click (fn [_]
-                      (swap! state
-                             (fn [xs]
-                               ;; Sanitation on the client side.
-                               (util/intersection-as-kw (if checked
-                                                          (remove #(util/=as-kw value %) xs)
-                                                          (cons value xs))
-                                                        (map :value items))))
-                      (path/meta-updated options))}
-         text]]))])
+       (rum/with-key
+         (components/toggle checked {:disabled? (path/disabled? options)
+                                     :callback (fn [_]
+                                                 (swap! state
+                                                        (fn [xs]
+                                                          ;; Sanitation on the client side.
+                                                          (util/intersection-as-kw (if checked
+                                                                                     (remove #(util/=as-kw value %) xs)
+                                                                                     (cons value xs))
+                                                                                   (map :value items))))
+                                                 (path/meta-updated options))
+                                     :text text
+                                     :test-id value})
+         value)))])
 
 (defn- resolve-reference-list
   "List of :value, :text maps"
@@ -130,7 +136,8 @@
                    :sort-by   :text
                    :callback  (state-change-callback options)
                    :disabled? (path/disabled? options)
-                   :required? (path/required? options)})
+                   :required? (path/required? options)
+                   :test-id   (test-id options)})
     :wrap-label? wrap-label?}))
 
 (rum/defc multi-select-reference-list < rum/reactive
@@ -158,9 +165,10 @@
      (common/loc :pate.last-saved (js/util.finnishDateAndTime ts)))])
 
 (rum/defc required-fields-note < rum/reactive
-  ([{info* :info} note]
+  ([{info* :info test-id :test-id} note]
    (when (false? (path/react [:filled?] info*))
      [:div.pate-required-fields-note
+      (common/add-test-id {} test-id)
       note]))
   ([options]
    (required-fields-note options (common/loc :pate.required-fields))))
@@ -201,7 +209,8 @@
             [:label (common/loc :phrase.add)]
             (phrases/phrase-category-select @category*
                                             set-category
-                                            {:disabled? disabled?})]]
+                                            {:disabled? disabled?
+                                             :test-id   (test-id options :category)})]]
           [:div.col-5
            [:div.col--vertical
             (common/empty-label)
@@ -217,43 +226,49 @@
                                                                   (str "\n" % "\n")
                                                                   (drop sel-end old-text))))))
               :disabled? disabled?
-              :clear?    true})]]
+              :clear?    true
+              :test-id (test-id options :autocomplete)})]]
           [:div.col-4.col--right
            [:div.col--vertical
             (common/empty-label)
             [:div.inner-margins
              [:button.primary.outline
-              {:on-click (fn []
-                           (update-text "")
-                           (reset! selected* ""))
-               :disabled disabled?}
+              (common/add-test-id {:on-click (fn []
+                                               (update-text "")
+                                               (reset! selected* ""))
+                                   :disabled disabled?}
+                                  (test-id options :clear))
               (common/loc :pate.clear)]
              [:button.primary.outline
-              {:disabled (let [phrase (rum/react selected*)]
-                           (or disabled?
-                               (s/blank? phrase)
-                               (not (re-find (re-pattern (goog.string/regExpEscape phrase))
-                                             (or (path/react path state) "")))))
-               :on-click (fn []
-                           (update-text (s/replace-first (path/value path state)
-                                                         @selected*
-                                                         @replaced*))
-                           (reset! selected* ""))}
+              (common/add-test-id {:disabled (let [phrase (rum/react selected*)]
+                                               (or disabled?
+                                                   (s/blank? phrase)
+                                                   (not (re-find (re-pattern (goog.string/regExpEscape phrase))
+                                                                 (or (path/react path state) "")))))
+                                   :on-click (fn []
+                                               (update-text (s/replace-first (path/value path state)
+                                                                             @selected*
+                                                                             @replaced*))
+                                               (reset! selected* ""))}
+                                  (test-id options :undo))
               (common/loc :phrase.undo)]]]]])
        [:div.row
         [:div.col-12.col--full
          (components/tabbar {:selected* tab*
-                             :tabs     [{:id       ::edit
-                                         :text-loc :pate.edit-tab}
-                                        {:id       ::preview
-                                         :text-loc :pdf.preview}]})
+                             :tabs      [{:id       ::edit
+                                          :text-loc :pate.edit-tab
+                                          :test-id (test-id options :edit-tab)}
+                                         {:id       ::preview
+                                          :text-loc :pdf.preview
+                                          :test-id (test-id options :preview-tab)}]})
          (if (= tab ::edit)
            [:div.phrase-edit
             {:ref ref-id}
             (components/textarea-edit (path/value path state)
                                       {:callback  update-text
                                        :disabled  disabled?
-                                       :required? required?})]
+                                       :required? required?
+                                       :test-id (test-id options :edit)})]
            [:div.phrase-edit
             (components/markup-span (path/value path state)
                                     :phrase-preview)])]]])))
@@ -262,7 +277,8 @@
   [{:keys [schema] :as options}]
   (components/text-and-link {:text-loc (:text-loc schema)
                              :click    #((path/meta-value options (:click schema))
-                                         options)}))
+                                         options)
+                             :test-id  (test-id options)}))
 
 (rum/defc pate-button < rum/reactive
   [{:keys [schema] :as options} & [wrap-label?]]
@@ -270,19 +286,19 @@
                 add remove]} schema
         text?                (-> text? false? not)
         button               (when (path/visible? options)
-                               [:button {:disabled (path/disabled? options)
-                                         :class    (path/css options)
-                                         :on-click (fn [_]
-                                                     (cond
-                                                       click
-                                                       (path/meta-value options click)
+                               (components/icon-button
+                                {:disabled? (path/disabled? options)
+                                 :class     (path/css options)
+                                 :on-click  (fn [_]
+                                              (cond
+                                                click
+                                                (path/meta-value options click)
 
-                                                       (or add remove)
-                                                       (path/meta-updated options true)))}
-                                (when icon
-                                  [:i {:class icon}])
-                                (when text?
-                                  [:span (path/loc options)])])]
+                                                (or add remove)
+                                                (path/meta-updated options true)))
+                                 :icon    icon
+                                 :text    (when text? (path/loc options))
+                                 :test-id (test-id options)}))]
     (if (show-label? schema wrap-label?)
       [:div.col--vertical
        (common/empty-label :pate-label)
@@ -300,9 +316,10 @@
                     :text      (if-let [dict (:text-dict schema)]
                                  (path/react (butlast path)
                                              state
-                                             dict)
+                                             (common/prefix-lang dict))
                                  (path/loc options))
-                    :prefix    (:prefix schema)})
+                    :prefix    (:prefix schema)
+                    :test-id   (test-id options)})
     :wrap-label?  wrap-label?
     :empty-label? true}))
 
@@ -331,15 +348,16 @@
     component))
 
 (defn pate-attr
-  "Fills attribute map with :id, :key and :class. Also merges extras if
-  given."
+  "Fills attribute map with :id, :key, :class and :test-id. Also merges
+  extras if given."
   [{:keys [path] :as options} & extras]
   (let [id (path/id path)]
-    (apply merge (cons {:key   id
-                        :id    id
-                        :class (conj (path/css options)
-                                     (common/css-flags :warning
-                                                       (path/error? options)))}
+    (apply merge (cons (test-id-wrap options
+                                     {:key   id
+                                      :id    id
+                                      :class (conj (path/css options)
+                                                   (common/css-flags :warning
+                                                                     (path/error? options)))})
                        extras))))
 
 (defn- sort-by-schema
@@ -355,13 +373,13 @@
   "Update the options model state only on blur. Immediate update does
   not work reliably."
   [{:keys [schema state path] :as options} & [wrap-label?]]
-  (let [attr-fn              (partial pate-attr
-                                      options
-                                      {:callback  (state-change-callback options)
-                                       :disabled  (path/disabled? options)
-                                       :required? (path/required? options)})
+  (let [attr-fn               (partial pate-attr
+                                       options
+                                       {:callback  (state-change-callback options)
+                                        :required? (path/required? options)})
+        disabled?             (path/disabled? options)
         {:keys [items lines]} schema
-        value                (path/value path state)]
+        value                 (path/value path state)]
     (label-wrap-if-needed
      options
      {:component (sandwich schema
@@ -369,20 +387,23 @@
                              items
                              (components/combobox
                               value
-                              (attr-fn {:items (sort-by-schema {:sort-by :text}
-                                                               (map #(hash-map :text (path/loc %))
-                                                                    items))}))
+                              (attr-fn {:items     (sort-by-schema {:sort-by :text}
+                                                                   (map #(hash-map :text (path/loc %))
+                                                                        items))
+                                        :disabled? disabled?}))
 
                              lines
                              (components/textarea-edit
                               value
-                              (attr-fn {:class [:pate-textarea]
-                                        :rows lines}))
+                              (attr-fn {:class    [:pate-textarea]
+                                        :rows     lines
+                                        :disabled disabled?}))
 
                              :else
                              (components/text-edit
                               value
-                              (attr-fn {:type (:type schema)}))))
+                              (attr-fn {:type     (:type schema)
+                                        :disabled disabled?}))))
       :wrap-label? wrap-label?})))
 
 (defn pate-date-delta
@@ -412,6 +433,14 @@
                             :disabled (path/disabled? options)}))
     :wrap-label? wrap-label?}))
 
+(defn pate-select-item-text [options item]
+  (path/loc (if-let [item-loc (get-in options [:schema :item-loc-prefix])]
+              (assoc-in options
+                        [:schema :loc-prefix]
+                        item-loc)
+              options)
+            item))
+
 (rum/defc pate-select < rum/reactive
   [{:keys [path state schema] :as options} & [wrap-label?]]
   (let [attr-fn      (partial pate-attr
@@ -421,9 +450,11 @@
                                :items     (->> (:items schema)
                                                (map (fn [item]
                                                       {:value item
-                                                       :text  (path/loc options item)}))
+                                                       :text (pate-select-item-text options
+                                                                                    item)}))
                                                (sort-by-schema schema))
-                               :required? (path/required? options)})
+                               :required? (path/required? options)
+                               :test-id (test-id options)})
         value        (path/react path state)
         allow-empty? (-> schema :allow-empty false? not)]
     (label-wrap-if-needed

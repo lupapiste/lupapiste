@@ -111,7 +111,7 @@
 (def sipoo-general-handler-id "abba1111111111111111acdc")
 (def sipoo-kvv-handler-id     "abba1111111111111112acdc")
 (def jarvenpaa-general-handler-id "abba11111111111111111186")
-
+(def sipoo-ya-general-handler-id "abba1111111111111111b753")
 
 (defn server-address [] (env/server-address))
 

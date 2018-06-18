@@ -12,6 +12,7 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.authorization :as auth]
             [lupapiste-commons.attachment-types :as att-types]
+            [monger.operators :refer :all]
             [sade.schemas :as ssc]
             [sade.shared-schemas :as sssc]))
 
