@@ -39,7 +39,7 @@
   [id]
   (ss/join "-" ((juxt :kauposa :no :vuosi :tyyppi) (destructure-permit-id id))))
 
-(defn rakennelmatieto->kaupunkikuvatoimenpide [raktieto]
+#_(defn rakennelmatieto->kaupunkikuvatoimenpide [raktieto]
   (let [kaupunkikuvatoimenpide-ei-tunnusta {:kayttotarkoitus {:value ""}
                                             :kokonaisala {:value ""}
                                             :kuvaus {:value (get-in raktieto [:Rakennelma :kuvaus :kuvaus])}}
@@ -54,7 +54,7 @@
      :schema-info (:info schema)
      :data data}))
 
-;; For development purposes
+;; For development purposes, remove
 
 #_(def rak-sanomat
   (->> (list "40-0019-13-A.xml" "18-0483-13-PI.xml" "40-0049-13-P.xml" "68-1147-13-BL.xml" "85-0253-13-PI.xml")

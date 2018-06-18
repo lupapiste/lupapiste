@@ -74,14 +74,14 @@
         other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas))
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
 
-        structures (-> xml krysp-reader/->rakennelmatieto conversion-util/rakennelmatieto->kaupunkikuvatoimenpide)
+        ;; structures (-> xml krysp-reader/->rakennelmatieto conversion-util/rakennelmatieto->kaupunkikuvatoimenpide)
 
         created-application (-> created-application
-                                (update-in [:documents] concat other-building-docs new-parties structures)
+                                (update-in [:documents] concat other-building-docs new-parties)
                                 (update-in [:secondaryOperations] concat secondary-ops)
                                 (assoc :opened (:created command)))
 
-        validation-result (model/validate created-application structures)
+        ;; validation-result (model/validate created-application structures)
 
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
