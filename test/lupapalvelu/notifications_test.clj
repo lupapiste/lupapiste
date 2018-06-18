@@ -168,6 +168,15 @@
     (get-in msg [:body :plain]) => (contains "Alla on linkki")
     (get-in msg [:body :plain]) =not=> (contains "???")))
 
+(fact "organization-on-submit email empty :_applicantIndex"
+  (against-background [(lupapalvelu.organization/get-organization "Foo") => {:notifications {:submit-notification-emails ["foo-org@example.com"]}}])
+  (notify! :organization-on-submit {:application {:address          "Foostreet 1",
+                                                  :municipality     "753",
+                                                  :state            "submitted"
+                                                  :primaryOperation {:name "kerrostalo-rivitalo"}
+                                                  :organization     "Foo",
+                                                  :_applicantIndex  []}}) => nil) ; previously 'wrong number of args' exception for reduce
+
 
 (defemail :test {:recipients-fn :recipients
                  :model-fn      (constantly
