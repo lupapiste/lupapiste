@@ -12,7 +12,8 @@
             [lupapalvelu.verdict-api]
             [sade.core :refer [now fail]]
             [sade.env :as env]
-            [sade.dummy-email-server :as dummy-email-server]))
+            [sade.dummy-email-server :as dummy-email-server]
+            [sade.shared-util :as util]))
 
 (if-not (env/feature? :jms)
 (warnf "JMS not enabled for unit testing")
@@ -52,7 +53,6 @@
       (local-command sonja :approve-application :id application-id-sent :lang "fi") => ok?
       (local-command sonja :approve-application :id application-id-verdict-given :lang "fi") => ok?
       (give-local-verdict sonja application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
-      (Thread/sleep 100)                                    ; Wait for emails
 
       (let [emails (dummy-email-server/messages :reset true)
             application-submitted (query-application local-query sonja application-id-submitted) => truthy
@@ -66,6 +66,11 @@
 
       (fact "checking verdicts and sending emails to the authorities related to the applications"
         (fetch-verdicts {:jms? true :wait-ms 2000}) => nil?)
+      (loop [retries 5
+             state (:state (mongo/select-one :applications {:_id application-id-sent} [:state]))]
+        (when-not (or (zero? retries) (util/not=as-kw state :sent))
+          (Thread/sleep 1000)
+          (recur (dec retries) (:state (mongo/select-one :applications {:_id application-id-sent} [:state])))))
       (fact "Verifying the sent emails"
         (Thread/sleep 500) ; batchrun includes a parallel operation
         (let [emails (dummy-email-server/messages :reset true)]
