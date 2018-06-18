@@ -55,7 +55,8 @@
     attachments))
 
 (defn ^{:perfmon-exclude true} download
-  "Downloads file from Mongo GridFS or S3"
+  "Downloads file from Mongo GridFS or S3
+   When the backing system is S3, make sure to always close the content input stream even if you do not use it."
   ([file-id]
    (if (env/feature? :s3)
      (s3/download nil file-id)
@@ -130,20 +131,23 @@
 
 (defn ^{:perfmon-exclude true} download-bulletin-comment-file
   [bulletin-id file-id storage-system]
-  (if (and (env/feature? :s3) (= (keyword storage-system) :s3))
-    (s3/download bulletin-bucket (s3-id bulletin-id file-id))
-    (mongo/download-find {:_id file-id :metadata.bulletinId bulletin-id})))
+  (let [dl (if (and (env/feature? :s3) (= (keyword storage-system) :s3))
+             (s3/download bulletin-bucket (s3-id bulletin-id file-id))
+             (mongo/download-find {:_id file-id :metadata.bulletinId bulletin-id}))]
+    (-> (assoc dl :bulletin bulletin-id)
+        (dissoc :application))))
 
 ;; LINK
 
 (defn link-files-to-application [user-or-session-id app-id file-ids]
   {:pre [(seq file-ids) (not-any? ss/blank? (conj file-ids app-id))]}
   (if (env/feature? :s3)
-    (doseq [file-id file-ids]
-      (s3/move-file-object unlinked-bucket
-                           application-bucket
-                           (s3-id user-or-session-id file-id)
-                           (s3-id app-id file-id)))
+    (do (doseq [file-id file-ids]
+          (s3/move-file-object unlinked-bucket
+                               application-bucket
+                               (s3-id user-or-session-id file-id)
+                               (s3-id app-id file-id)))
+        (count file-ids))
     (mongo/update-by-query :fs.files
                            {$and [{:_id {$in file-ids}}
                                   {:metadata.application {$exists false}}
@@ -157,8 +161,9 @@
 (defn link-files-to-bulletin [session-id bulletin-id file-ids]
   {:pre [(seq file-ids) (not-any? ss/blank? (conj file-ids bulletin-id))]}
   (if (env/feature? :s3)
-    (doseq [file-id file-ids]
-      (s3/move-file-object unlinked-bucket bulletin-bucket (s3-id session-id file-id) (s3-id bulletin-id file-id)))
+    (do (doseq [file-id file-ids]
+          (s3/move-file-object unlinked-bucket bulletin-bucket (s3-id session-id file-id) (s3-id bulletin-id file-id)))
+        (count file-ids))
     (mongo/update-by-query :fs.files
                            {:_id {$in file-ids}
                             :metadata.sessionId session-id}
@@ -181,7 +186,7 @@
 (defn application-file-exists? [application-id file-id]
   (if (env/feature? :s3)
     (s3/object-exists? application-bucket (s3-id application-id file-id))
-    (seq (mongo/file-metadata {:id file-id}))))
+    (map? (mongo/file-metadata {:id file-id}))))
 
 ;; DELETE
 
@@ -199,12 +204,13 @@
   [user-or-session-id file-id]
   (if (env/feature? :s3)
     (s3/delete unlinked-bucket (s3-id user-or-session-id file-id))
-    (mongo/delete-file {:_id file-id
-                        $or [{:metadata.sessionId user-or-session-id}
-                             {:metadata.uploader-user-id user-or-session-id}]
-                        :metadata.application {$exists false}
-                        :metadata.bulletinId {$exists false}
-                        :linked false})))
+    (mongo/delete-file {$and [{:_id file-id}
+                              {$or [{:metadata.sessionId user-or-session-id}
+                                    {:metadata.uploader-user-id user-or-session-id}]}
+                              {:metadata.application {$exists false}}
+                              {:metadata.bulletinId {$exists false}}
+                              {$or [{:metadata.linked false}
+                                    {:metadata.linked {$exists false}}]}]})))
 
 (defn ^{:perfmon-exclude true} delete-user-attachment
   ([user-id file-id]
@@ -245,6 +251,7 @@
     (do
       (when-not @mongo/connection
         (mongo/connect!))
-      (mongo/delete-file {$and [{:metadata.linked {$exists true}}
-                                {:metadata.linked false}
+      (mongo/delete-file {$and [{$or [{:metadata.linked false}
+                                      {:metadata.linked {$exists false}}]}
+                                {:metadata.application {$exists false}}
                                 {:metadata.uploaded {$lt (ts-two-hours-ago)}}]}))))

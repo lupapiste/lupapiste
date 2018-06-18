@@ -160,7 +160,13 @@
           user-metadata (->> (.getUserMetadata metadata)
                              (into {})
                              (map (fn [[k v]]
-                                    [(keyword k) (codec/url-decode v)]))
+                                    [(case k
+                                       "sessionid" :sessionId
+                                       (keyword k))
+                                     (case k
+                                       "uploaded" (util/to-long v)
+                                       "linked" (= v "true")
+                                       (codec/url-decode v))]))
                              (into {}))]
       (util/assoc-when
         {:content     (fn [] (.getObjectContent object))
@@ -168,8 +174,7 @@
          :size        (.getContentLength metadata)
          :filename    (:filename user-metadata)
          :fileId      (last (str/split file-id #"/"))
-         :metadata    (-> (dissoc user-metadata :filename)
-                          (update :uploaded util/->int))}
+         :metadata    (dissoc user-metadata :filename)}
         :application application-id))
     (catch AmazonS3Exception ex
       (if (= 404 (.getStatusCode ex))
