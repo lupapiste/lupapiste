@@ -61,16 +61,22 @@
 
 (defn- sync-repeatings
   "Sync the template repeating (t-rep) according to settings
-  repeating. Only the current language version of (plan/review) is
-  copied."
-  [lang s-rep t-rep]
-  (reduce-kv (fn [acc k v]
-               (assoc-in acc [k :text]
-                         (get v
-                              (keyword lang)
-                              (i18n/localize lang :pate.no-name))))
-             (select-keys t-rep (keys s-rep))
-             s-rep))
+  repeating. Every language version of (plan/review) is copied."
+  [s-rep t-rep]
+  (letfn [(update-target [target source dict lang]
+            (assoc target
+                   (->> (map name [dict lang])
+                        (ss/join "-")
+                        keyword)
+                   (get source lang (i18n/localize lang :pate.no-name))))
+          (reduce-langs [target source dict]
+            (reduce #(update-target %1 source dict %2)
+                    target
+                    [:fi :sv :en]))]
+    (reduce-kv (fn [acc k v]
+                 (update acc k reduce-langs v :text))
+               (select-keys t-rep (keys s-rep))
+               s-rep)))
 
 (def template-settings-dependencies [:plans :reviews])
 
@@ -78,15 +84,14 @@
   "Reviews and plans information from setting is merged into the
   corresponding template repeatings. Copying is done when the template
   dictionary has :reviews or :plans. Returns the updated template."
-  [org-id lang {:keys [category draft] :as template}]
+  [org-id {:keys [category draft] :as template}]
   (let [{dic :dictionary} (template-schemas/verdict-template-schema category)
         {s-data :draft}   (settings (org/get-organization org-id
                                                           {:verdict-templates 1})
                                     category)]
     (reduce (fn [acc rep-dict]
-              (let [repeating-data (sync-repeatings lang
-                                          (rep-dict s-data)
-                                          (rep-dict draft))]
+              (let [repeating-data (sync-repeatings (rep-dict s-data)
+                                                    (rep-dict draft))]
                 (if (empty? repeating-data)
                   (util/dissoc-in acc [:draft rep-dict])
                   (assoc-in acc [:draft rep-dict] repeating-data))))
@@ -95,9 +100,9 @@
                                      (keys dic)))))
 
 (defn new-verdict-template
-  ([org-id timestamp lang category draft name]
+  ([org-id timestamp _ category draft name]
    (let [data (verdict-template-settings-dependencies
-               org-id lang
+               org-id
                {:id       (mongo/create-id)
                 :draft    draft
                 :name     name
@@ -194,7 +199,6 @@
         {draft :draft :as data} (verdict-template-response-data organization template-id)
         {new-draft :draft
          :as       updated}     (verdict-template-settings-dependencies (:id organization)
-                                                                        lang
                                                                         data)
         updates                 (reduce (fn [acc dict]
                                           (let [new-dict-value (dict new-draft)]

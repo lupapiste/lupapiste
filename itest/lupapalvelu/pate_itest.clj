@@ -553,7 +553,9 @@
         (fact "Update and open"
           (command sipoo :update-and-open-verdict-template
                    :template-id template-id)
-          => (contains {:draft {:reviews {(keyword review-id) {:text "Katselmus"}}}}))
+          => (contains {:draft {:reviews {(keyword review-id) {:text-fi "Katselmus"
+                                                               :text-sv "Syn"
+                                                               :text-en "Review"}}}}))
         (fact "Include review in verdict"
           (command sipoo :save-verdict-template-draft-value
                    :template-id template-id
@@ -563,7 +565,7 @@
         (fact "Review text is read-only"
           (some-> (command sipoo :save-verdict-template-draft-value
                            :template-id template-id
-                           :path [:reviews review-id :text]
+                           :path [:reviews review-id :text-fi]
                            :value "foo")
                   :errors
                   flatten
@@ -578,7 +580,9 @@
         (fact "Name updated in the template after update and open"
           (command sipoo :update-and-open-verdict-template
                    :template-id template-id)
-          => (contains {:draft {:reviews {(keyword review-id) {:text "sumlestaK"
+          => (contains {:draft {:reviews {(keyword review-id) {:text-fi "sumlestaK"
+                                                               :text-sv "Syn"
+                                                               :text-en "Review"
                                                                :included true}}}}))
         (fact "Remove review"
           (command sipoo :save-verdict-template-settings-value
@@ -589,9 +593,10 @@
           (let [plan-id (add-plan :fi "Suunnitelma" :sv "Plan" :en "Plan")]
             (fact "Update and open: no review, but a plan"
               (command sipoo :update-and-open-verdict-template
-                       :lang :sv
                        :template-id template-id)
-              => (contains {:draft (just {:plans {(keyword plan-id) {:text "Plan"}}})}))
+              => (contains {:draft (just {:plans {(keyword plan-id) {:text-fi "Suunnitelma"
+                                                                     :text-sv "Plan"
+                                                                     :text-en "Plan"}}})}))
             (fact "Remove plan"
               (command sipoo :save-verdict-template-settings-value
                        :category :r
