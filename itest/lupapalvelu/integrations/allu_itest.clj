@@ -13,8 +13,7 @@
             [sade.schema-generators :as ssg]
             [lupapalvelu.itest-util :as itu :refer [pena]]
 
-            [lupapalvelu.integrations.allu-schemas :refer [PlacementContract]]
-            [lupapalvelu.integrations.allu :as allu]))
+            [lupapalvelu.integrations.allu :as allu :refer [PlacementContract]]))
 
 ;;; FIXME: vary :operation
 

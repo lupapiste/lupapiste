@@ -15,8 +15,8 @@
             [sade.schema-generators :as sg]
             [lupapalvelu.test-util :refer [passing-quick-check]]
 
-            [lupapalvelu.integrations.allu :as allu]
-            [lupapalvelu.integrations.allu-schemas :refer [ValidPlacementApplication PlacementContract]]))
+            [lupapalvelu.integrations.allu :as allu :refer [PlacementContract]]
+            [lupapalvelu.integrations.allu-schemas :refer [ValidPlacementApplication]]))
 
 (testable-privates lupapalvelu.integrations.allu application->allu-placement-contract)
 
